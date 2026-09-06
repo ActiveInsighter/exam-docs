@@ -1,0 +1,196 @@
+name: Deploy Fumadocs to Cloudflare
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Deploy the validated static package to Cloudflare Workers Static Assets
+        required: true
+        default: true
+        type: boolean
+
+concurrency:
+  group: fumadocs-cloudflare-production-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-deploy:
+    name: Deploy Worker Static Assets
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Restore project dependency tree
+        id: node-modules-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node22-modules-v1-${{ hashFiles('package-lock.json') }}
+
+      - name: Restore npm download cache on dependency miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node22-npm-v1-${{ hashFiles('package-lock.json') }}
+
+      - name: Install project dependencies on cache miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: npm ci --no-audit --no-fund
+
+      - name: Refresh Fumadocs generated source
+        shell: bash
+        run: npm run postinstall
+
+      - name: Run static deployment tests
+        shell: bash
+        run: npm test -- tests/static-docs-build.test.ts tests/cloudflare-static-assets.test.ts
+
+      - name: Restore Next/Turbopack build cache
+        uses: actions/cache@v5
+        with:
+          path: .static-docs-stage/.next/cache
+          key: ${{ runner.os }}-cloudflare-static-docs-turbopack-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cloudflare-static-docs-turbopack-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-
+            ${{ runner.os }}-static-docs-turbopack-v4-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-
+            ${{ runner.os }}-static-docs-turbopack-v4-
+
+      - name: Build the shared static documentation package
+        shell: bash
+        run: npm run build:static-docs
+
+      - name: Prepare Cloudflare Static Assets metadata
+        shell: bash
+        run: npm run prepare:cloudflare-assets
+
+      - name: Validate Cloudflare asset package
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -s .static-docs/_redirects
+          test -s .static-docs/.assetsignore
+          test -s .static-docs/404.html
+          grep -F '/docs/*/index.txt /docs/:splat/__next._full.txt 200' .static-docs/_redirects
+          grep -F '/docs/*/__next.docs.txt /docs/__next.docs.txt 200' .static-docs/_redirects
+          grep -Fx 'edgeone.json' .static-docs/.assetsignore
+
+          file_count="$(find .static-docs -type f \
+            ! -name 'edgeone.json' \
+            ! -name '.assetsignore' \
+            ! -name '_redirects' \
+            | wc -l | tr -d ' ')"
+          largest_bytes="$(find .static-docs -type f \
+            ! -name 'edgeone.json' \
+            ! -name '.assetsignore' \
+            ! -name '_redirects' \
+            -printf '%s\n' \
+            | awk 'BEGIN { max = 0 } $1 > max { max = $1 } END { print max }')"
+
+          if (( file_count > 20000 )); then
+            echo "::error::Cloudflare Free Static Assets file limit exceeded: ${file_count}/20000."
+            exit 1
+          fi
+          if (( largest_bytes > 25 * 1024 * 1024 )); then
+            echo "::error::Cloudflare Static Assets 25 MiB single-file limit exceeded: ${largest_bytes} bytes."
+            exit 1
+          fi
+
+          package_bytes="$(du -sb .static-docs | awk '{print $1}')"
+          {
+            echo '## Cloudflare Workers Static Assets validation'
+            echo
+            echo "- Uploadable asset files: ${file_count}/20000"
+            echo "- Largest uploadable asset: $((largest_bytes / 1024 / 1024)) MiB / 25 MiB"
+            echo "- Local static package: $((package_bytes / 1024 / 1024)) MiB"
+            echo '- Worker JavaScript: none (assets-only deployment)'
+            echo '- RSC dedupe aliases: restored through two Cloudflare 200 proxy rules'
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Validate Wrangler configuration with a dry run
+        shell: bash
+        run: npx --yes wrangler@4.129.0 deploy --dry-run --config wrangler.jsonc --outdir .wrangler-dry-run
+
+      - name: Check Cloudflare deployment credentials
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true) }}
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          [[ -n "${CLOUDFLARE_API_TOKEN:-}" ]] || {
+            echo '::error::Missing GitHub Actions secret CLOUDFLARE_API_TOKEN.'
+            exit 1
+          }
+          [[ -n "${CLOUDFLARE_ACCOUNT_ID:-}" ]] || {
+            echo '::error::Missing GitHub Actions secret CLOUDFLARE_ACCOUNT_ID.'
+            exit 1
+          }
+
+      - name: Deploy to Cloudflare Workers Static Assets
+        id: cloudflare-deploy
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true) }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '4.129.0'
+          command: deploy --config wrangler.jsonc
+
+      - name: Verify Cloudflare deployment
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true) }}
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ steps.cloudflare-deploy.outputs.deployment-url }}
+        run: |
+          set -euo pipefail
+          [[ -n "${DEPLOYMENT_URL:-}" ]] || {
+            echo '::error::wrangler-action did not return a deployment URL.'
+            exit 1
+          }
+          base_url="${DEPLOYMENT_URL%/}"
+
+          wait_for_route() {
+            local path="$1"
+            local status=''
+            for attempt in $(seq 1 18); do
+              status="$(curl --silent --show-error --max-time 60 -L -o /dev/null -w '%{http_code}' "${base_url}${path}")"
+              echo "${path} attempt ${attempt}/18 -> ${status}"
+              if [[ "${status}" == '200' ]]; then
+                return 0
+              fi
+              sleep 5
+            done
+            echo "::error::Cloudflare route ${path} did not reach HTTP 200; last status ${status}."
+            return 1
+          }
+
+          wait_for_route '/'
+          for path in \
+            '/docs/' \
+            '/search-index.json' \
+            '/docs/math/knowledge/advanced-mathematics/01-limits-continuity/' \
+            '/docs/math/knowledge/advanced-mathematics/01-limits-continuity.md' \
+            '/docs/math/knowledge/advanced-mathematics/01-limits-continuity/index.txt' \
+            '/docs/math/knowledge/advanced-mathematics/01-limits-continuity/__next.docs.txt'; do
+            wait_for_route "${path}"
+          done
+          echo "- Cloudflare deployment: ${DEPLOYMENT_URL}" >> "${GITHUB_STEP_SUMMARY}"
