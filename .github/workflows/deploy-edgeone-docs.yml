@@ -325,10 +325,13 @@ jobs:
             return 1
           }
 
-          # New search routes may appear on the project deployment before the
-          # custom domain edge map has propagated. Wait for the stable manifest
-          # first, then validate its immutable router/core/body targets.
+          # The stable manifest can turn 200 before the newly hashed immutable
+          # router/core/body objects have reached every custom-domain edge.
+          # Wait for the exact new immutable paths before the one-shot probes.
           wait_for_production_path '/search-index.json' '200' 12 5
+          wait_for_production_path "${router_url}" '200' 18 5
+          wait_for_production_path "${core_url}" '200' 18 5
+          wait_for_production_path "${body_url}" '200' 18 5
 
           probe_dir="$(mktemp -d)"
           trap 'rm -rf -- "${probe_dir}"' EXIT
@@ -348,9 +351,6 @@ jobs:
           start_probe docs '/docs/' '200'
           start_probe math '/docs/math/knowledge/advanced-mathematics/01-limits-continuity/' '200'
           start_probe markdown '/docs/math/knowledge/advanced-mathematics/01-limits-continuity.md' '200'
-          start_probe search_router "${router_url}" '200'
-          start_probe search_core "${core_url}" '200'
-          start_probe search_body "${body_url}" '200'
           start_probe retired_upload '/api/blob/upload-url' '404'
           start_probe retired_ingest '/api/integrations/anyworkflow' '404'
           start_probe retired_download '/download/tasks/probe/1/probe/md' '404'
