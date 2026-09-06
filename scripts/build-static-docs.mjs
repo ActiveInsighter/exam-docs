@@ -143,14 +143,18 @@ function runNextBuild(stageRoot) {
     process.platform === 'win32' ? 'next.cmd' : 'next',
   );
 
-  return runProcess(nextCommand, ['build'], {
+  // Next 16 defaults production builds to Turbopack. The migrated Math/408
+  // route tree reproducibly stalls Turbopack on GitHub-hosted runners and the
+  // runner is then terminated with SIGTERM/143. Webpack is an officially
+  // supported production-build fallback and preserves the same static output.
+  return runProcess(nextCommand, ['build', '--webpack'], {
     cwd: stageRoot,
     env: {
       ...process.env,
       NEXT_TELEMETRY_DISABLED: '1',
       STATIC_DOCS_BUILD: '1',
     },
-    label: 'next_static_build',
+    label: 'next_static_build_webpack',
   });
 }
 
@@ -256,19 +260,15 @@ async function main() {
     const cacheState = (await exists(path.join(stageRoot, '.next', 'cache')))
       ? 'warm candidate'
       : 'cold';
-    console.log(`[static-docs] Turbopack cache state: ${cacheState}.`);
+    console.log(`[static-docs] Next build cache state: ${cacheState}.`);
 
     const prepareStartedAt = Date.now();
     await prepareStage(stageRoot);
     console.log(`[timing] prepare_static_stage=${formatSeconds(Date.now() - prepareStartedAt)}`);
     logRunnerResources();
 
-    // Next static rendering and search extraction are both CPU- and memory-heavy.
-    // Running them concurrently saves roughly one minute on a warm build, but it
-    // also doubles peak pressure on a GitHub-hosted runner. A runner shutdown
-    // terminates the whole deployment with exit code 143 before EdgeOne upload.
-    // Keep the two independent builds sequential so each process gets the full
-    // runner while retaining the same output and Turbopack cache behavior.
+    // Keep static rendering and search extraction sequential so each heavy
+    // process gets the full hosted runner and failures are isolated cleanly.
     const buildStartedAt = Date.now();
     const nextTiming = await runNextBuild(stageRoot);
     logRunnerResources();
