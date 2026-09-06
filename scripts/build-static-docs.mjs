@@ -1,4 +1,5 @@
 import { cp, mkdir, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { cpus, freemem, totalmem } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
@@ -239,6 +240,13 @@ async function summarizeOutput(outputRoot) {
   };
 }
 
+function logRunnerResources() {
+  console.log(
+    `[static-docs] Runner resources: ${cpus().length} logical CPUs; ` +
+      `${formatMiB(totalmem())} total memory; ${formatMiB(freemem())} free memory.`,
+  );
+}
+
 async function main() {
   const totalStartedAt = Date.now();
   const stageRoot = staticStageRoot;
@@ -253,22 +261,22 @@ async function main() {
     const prepareStartedAt = Date.now();
     await prepareStage(stageRoot);
     console.log(`[timing] prepare_static_stage=${formatSeconds(Date.now() - prepareStartedAt)}`);
+    logRunnerResources();
 
-    // Search extraction and Next static rendering are independent reads of the
-    // documentation corpus. Run them as separate OS processes on the same
-    // runner so they can use different cores without paying Actions artifact
-    // upload/download costs for the ~400 MiB static site.
-    const parallelStartedAt = Date.now();
-    const [nextTiming, searchTiming] = await Promise.all([
-      runNextBuild(stageRoot),
-      runSearchBuild(staticSearchRoot),
-    ]);
-    const parallelDurationMs = Date.now() - parallelStartedAt;
-    console.log(`[timing] parallel_build_wall=${formatSeconds(parallelDurationMs)}`);
+    // Next static rendering and search extraction are both CPU- and memory-heavy.
+    // Running them concurrently saves roughly one minute on a warm build, but it
+    // also doubles peak pressure on a GitHub-hosted runner. A runner shutdown
+    // terminates the whole deployment with exit code 143 before EdgeOne upload.
+    // Keep the two independent builds sequential so each process gets the full
+    // runner while retaining the same output and Turbopack cache behavior.
+    const buildStartedAt = Date.now();
+    const nextTiming = await runNextBuild(stageRoot);
+    logRunnerResources();
+    const searchTiming = await runSearchBuild(staticSearchRoot);
+    const buildDurationMs = Date.now() - buildStartedAt;
+    console.log(`[timing] sequential_build_wall=${formatSeconds(buildDurationMs)}`);
     console.log(
-      `[timing] parallel_overlap_saved=${formatSeconds(
-        Math.max(0, nextTiming.durationMs + searchTiming.durationMs - parallelDurationMs),
-      )}`,
+      `[timing] sequential_build_sum=${formatSeconds(nextTiming.durationMs + searchTiming.durationMs)}`,
     );
 
     const assembleStartedAt = Date.now();
