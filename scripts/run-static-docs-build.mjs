@@ -1,4 +1,4 @@
-const STATIC_BUILD_HEAP_MIB = 8192;
+const STATIC_BUILD_HEAP_MIB = 4096;
 
 const existingOptions = (process.env.NODE_OPTIONS ?? '')
   .replace(/--max[-_]old[-_]space[-_]size(?:=|\s+)\d+/g, '')

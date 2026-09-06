@@ -143,18 +143,18 @@ function runNextBuild(stageRoot) {
     process.platform === 'win32' ? 'next.cmd' : 'next',
   );
 
-  // Next 16 defaults production builds to Turbopack. The migrated Math/408
-  // route tree reproducibly stalls Turbopack on GitHub-hosted runners and the
-  // runner is then terminated with SIGTERM/143. Webpack is an officially
-  // supported production-build fallback and preserves the same static output.
-  return runProcess(nextCommand, ['build', '--webpack'], {
+  // Next 16 uses Turbopack by default. Fumadocs Dynamic Mode keeps document
+  // bodies out of the initial bundler graph and compiles them on demand during
+  // static generation, so retain Turbopack's incremental graph and filesystem
+  // cache instead of falling back to webpack.
+  return runProcess(nextCommand, ['build'], {
     cwd: stageRoot,
     env: {
       ...process.env,
       NEXT_TELEMETRY_DISABLED: '1',
       STATIC_DOCS_BUILD: '1',
     },
-    label: 'next_static_build_webpack',
+    label: 'next_static_build_turbopack',
   });
 }
 
@@ -267,8 +267,9 @@ async function main() {
     console.log(`[timing] prepare_static_stage=${formatSeconds(Date.now() - prepareStartedAt)}`);
     logRunnerResources();
 
-    // Keep static rendering and search extraction sequential so each heavy
-    // process gets the full hosted runner and failures are isolated cleanly.
+    // First isolate the Dynamic MDX + bounded SSG effect with sequential heavy
+    // processes. Once peak memory is proven safe, Next and ZBSearch can run in
+    // parallel again to recover end-to-end deployment latency.
     const buildStartedAt = Date.now();
     const nextTiming = await runNextBuild(stageRoot);
     logRunnerResources();

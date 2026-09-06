@@ -11,7 +11,10 @@ const isStaticDocsBuild = process.env.STATIC_DOCS_BUILD === '1';
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
-    async: true,
+    // Fumadocs Dynamic Mode compiles each document on demand instead of feeding
+    // every MD/MDX file into the bundler graph up front. This keeps Turbopack's
+    // production graph bounded as the documentation corpus grows.
+    dynamic: true,
     // The pure-static CDN build generates direct .md files itself, so avoid
     // generating duplicate processed Markdown during that build.
     postprocess: isStaticDocsBuild
@@ -53,11 +56,12 @@ export default defineConfig({
     ],
     // Do not make production builds depend on third-party image hosts.
     remarkImageOptions: { external: false },
-    // Silence KaTeX strict-mode compatibility warnings (for example CJK text
-    // accidentally placed inside $...$), while keeping real parse errors fatal.
-    // KaTeX's default throwOnError remains enabled.
+    // Benchmark KaTeX's HTML-only output on the isolated static-build branch.
+    // KaTeX defaults to htmlAndMathml, which duplicates each formula's visual
+    // HTML with an accessibility MathML tree. This experiment measures the
+    // deploy-size impact; it is not a production accessibility decision.
     rehypePlugins: (plugins) => [
-      [rehypeKatex, { strict: 'ignore' }],
+      [rehypeKatex, { strict: 'ignore', output: 'html' }],
       ...plugins,
     ],
   },

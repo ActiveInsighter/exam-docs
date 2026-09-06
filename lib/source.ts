@@ -1,4 +1,5 @@
-import { blog, docs } from 'collections/server';
+import { docs } from 'collections/dynamic';
+import { blog } from 'collections/server';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import { loader } from 'fumadocs-core/source';
 import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
