@@ -11,13 +11,17 @@ function readJson(path: string) {
 describe('study module metadata structure', () => {
   const rootMeta = readJson(join(docsRoot, 'meta.json'));
   const mathMeta = readJson(join(docsRoot, 'math', 'meta.json'));
-  const examMathMeta = readJson(join(docsRoot, 'math', 'exam-math', 'meta.json'));
+  const mathKnowledgeMeta = readJson(join(docsRoot, 'math', 'knowledge', 'meta.json'));
+  const mathProblemSolvingMeta = readJson(join(docsRoot, 'math', 'problem-solving', 'meta.json'));
+  const mathExamMeta = readJson(join(docsRoot, 'math', 'exam', 'meta.json'));
   const politicsMeta = readJson(join(docsRoot, 'politics', 'meta.json'));
   const examPoliticsMeta = readJson(join(docsRoot, 'politics', 'exam-politics', 'meta.json'));
   const coursesMeta = readJson(join(docsRoot, '408', 'meta.json'));
-  const exam408Meta = readJson(join(docsRoot, '408', 'exam-408', 'meta.json'));
+  const coursesKnowledgeMeta = readJson(join(docsRoot, '408', 'knowledge', 'meta.json'));
+  const coursesProblemSolvingMeta = readJson(join(docsRoot, '408', 'problem-solving', 'meta.json'));
+  const coursesExamMeta = readJson(join(docsRoot, '408', 'exam', 'meta.json'));
 
-  it('exposes exactly four root modules from the documentation root', () => {
+  it('exposes exactly four physical and sidebar root modules', () => {
     expect(rootMeta.pages).toEqual(['politics', 'english', 'math', '408']);
 
     const rootDirectories = readdirSync(docsRoot, { withFileTypes: true })
@@ -25,54 +29,49 @@ describe('study module metadata structure', () => {
       .map((entry) => entry.name)
       .sort();
 
-    expect(rootDirectories).toEqual(
-      ['408', 'english', 'math', 'math-question-types', 'politics'].sort(),
-    );
+    expect(rootDirectories).toEqual(['408', 'english', 'math', 'politics'].sort());
   });
 
-  it('groups the math subjects under the exam-math folder', () => {
+  it('uses the same three-way hierarchy for math', () => {
     expect(mathMeta.root).toBe(true);
-    expect(mathMeta.pages).toEqual([
+    expect(mathMeta.pages).toEqual(['index', 'knowledge', 'problem-solving', 'exam']);
+    expect(mathKnowledgeMeta.pages).toEqual([
       'index',
-      'exam-math',
+      'advanced-mathematics',
+      'linear-algebra',
+      'probability-statistics',
     ]);
-    expect(examMathMeta.title).toBe('考研数学');
-    expect(examMathMeta.pages).toEqual([
+    expect(mathProblemSolvingMeta.pages).toEqual([
       'index',
-      '../advanced-mathematics',
-      '../linear-algebra',
-      '../probability-statistics',
-      '../../math-question-types',
+      'advanced-mathematics',
+      'linear-algebra',
+      'probability-statistics',
     ]);
+    expect(mathExamMeta.pages).toEqual(['index']);
   });
 
-  it('groups politics and 408 subjects under their module folders', () => {
+  it('uses the same three-way hierarchy for 408', () => {
+    expect(coursesMeta.root).toBe(true);
+    expect(coursesMeta.pages).toEqual(['index', 'knowledge', 'problem-solving', 'exam']);
+    expect(coursesKnowledgeMeta.pages).toEqual([
+      'index',
+      'data-structures',
+      'computer-organization',
+      'operating-systems',
+      'computer-networks',
+    ]);
+    expect(coursesProblemSolvingMeta.pages).toEqual([
+      'index',
+      'data-structures',
+      'computer-organization',
+      'operating-systems',
+      'computer-networks',
+    ]);
+    expect(coursesExamMeta.pages).toEqual(['index']);
+  });
+
+  it('keeps the politics module unchanged', () => {
     expect(politicsMeta.pages).toEqual(['index', 'exam-politics']);
     expect(examPoliticsMeta.title).toBe('考研政治系统讲义');
-    expect(examPoliticsMeta.pages).toEqual([
-      'index',
-      '../marxism-principles',
-      '../mao-zedong-thought',
-      '../modern-chinese-history',
-      '../xi-jinping-thought',
-      '../ideology-morality-law',
-    ]);
-
-    expect(coursesMeta.pages).toEqual(['index', 'exam-408']);
-    expect(exam408Meta.title).toBe('408 计算机统考');
-    expect(exam408Meta.pages).toEqual([
-      'index',
-      '../data-structures',
-      '../computer-organization',
-      '../operating-systems',
-      '../computer-networks',
-      '../problem-solving-techniques',
-    ]);
-  });
-
-  it('keeps math-question-types itself as a normal nested folder, not another root module', () => {
-    const questionTypesMeta = readJson(join(docsRoot, 'math-question-types', 'meta.json'));
-    expect(questionTypesMeta.root).not.toBe(true);
-    expect(questionTypesMeta.title).toBe('数学真题题型总结');
   });
 });

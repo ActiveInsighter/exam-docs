@@ -12,13 +12,13 @@ export const source = loader({
   source: docs.toFumadocsSource(),
   plugins: ({ typedPlugin }) => [
     typedPlugin({
-      name: 'concise-math-question-type-sidebar',
+      name: 'concise-math-problem-solving-sidebar',
       transformPageTree: {
         file(node) {
           if (
             node.type === 'page' &&
             typeof node.url === 'string' &&
-            node.url.startsWith('/docs/math-question-types/') &&
+            node.url.startsWith('/docs/math/problem-solving/') &&
             typeof node.name === 'string'
           ) {
             node.name = node.name.replace(conciseMathModuleTitle, '模块$1：$2');
@@ -84,20 +84,13 @@ function assertStudyModuleTree() {
   const duplicated = pages
     .filter((page) => (memberships.get(page.url)?.length ?? 0) !== 1)
     .map((page) => `${page.url} => ${(memberships.get(page.url) ?? []).join(', ') || '(none)'}`);
-  const misplacedMathQuestionTypes = pages
-    .filter((page) => page.url === '/docs/math-question-types' || page.url.startsWith('/docs/math-question-types/'))
-    .filter((page) => memberships.get(page.url)?.[0] !== 'math')
-    .map((page) => page.url);
 
-  if (orphaned.length > 0 || duplicated.length > 0 || misplacedMathQuestionTypes.length > 0) {
+  if (orphaned.length > 0 || duplicated.length > 0) {
     throw new Error(
       [
         '[study-modules] Every documentation page must belong to exactly one study Root Folder.',
         orphaned.length > 0 ? `Orphaned pages: ${orphaned.join('; ')}` : '',
         duplicated.length > 0 ? `Invalid memberships: ${duplicated.join('; ')}` : '',
-        misplacedMathQuestionTypes.length > 0
-          ? `Math question-type pages outside math root: ${misplacedMathQuestionTypes.join('; ')}`
-          : '',
       ]
         .filter(Boolean)
         .join(' '),
