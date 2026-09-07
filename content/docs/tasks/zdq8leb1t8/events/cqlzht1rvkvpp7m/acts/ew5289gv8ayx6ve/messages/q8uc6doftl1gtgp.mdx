@@ -1,0 +1,1917 @@
+---
+title: "矩阵"
+description: "线性代数补充讲义：矩阵"
+---
+
+矩阵可以先理解成“一个按行、按列排列的数表”，但如果只把它看成数表，会错过矩阵最重要的意义。在线性代数里，矩阵真正重要，是因为它可以同时表示：
+
+* 一组数据；
+* 一组线性方程；
+* 一组向量；
+* 一个线性变换；
+* 从一个坐标系到另一个坐标系的规则；
+* 多个线性变换的复合。
+
+而“矩阵乘法为什么要那样定义”，最深刻的理解恰恰来自你问的两个视角：**行视角和列视角**。
+
+---
+
+# 一、矩阵到底是什么？
+
+例如
+
+$$
+A=
+\begin{bmatrix}
+1&2&3\\
+4&5&6
+\end{bmatrix}
+$$
+
+这是一个 $2\times 3$ 矩阵。
+
+它有 2 行、3 列。
+
+一般写成
+
+$$
+A=(a_{ij})_{m\times n}
+$$
+
+其中 $a_{ij}$ 表示：
+
+$$
+\text{第 }i\text{ 行，第 }j\text{ 列的元素}
+$$
+
+例如上面
+
+$$
+a_{23}=6
+$$
+
+因为 6 位于第 2 行、第 3 列。
+
+但这只是矩阵的“外观”。
+
+更重要的问题是：
+
+> 这一堆数为什么值得专门研究？
+
+答案是：
+
+> 因为大量复杂问题，本质上都可以归结为“多个量之间的线性关系”，而矩阵正是描述这些线性关系最自然的工具。
+
+---
+
+# 二、为什么要研究矩阵？
+
+先从一个非常普通的问题开始。
+
+假设有三个未知量
+
+$$
+x_1,x_2,x_3
+$$
+
+满足
+
+$$
+\begin{cases}
+x_1+2x_2+3x_3=7\\
+4x_1+5x_2+6x_3=8
+\end{cases}
+$$
+
+我们可以把系数单独提出来：
+
+$$
+\begin{bmatrix}
+1&2&3\\
+4&5&6
+\end{bmatrix}
+$$
+
+这就是矩阵。
+
+于是整个方程组可以压缩成
+
+$$
+A\mathbf{x}=\mathbf b
+$$
+
+其中
+
+$$
+A=
+\begin{bmatrix}
+1&2&3\\
+4&5&6
+\end{bmatrix},
+\qquad
+\mathbf x=
+\begin{bmatrix}
+x_1\\
+x_2\\
+x_3
+\end{bmatrix},
+\qquad
+\mathbf b=
+\begin{bmatrix}
+7\\
+8
+\end{bmatrix}
+$$
+
+这时矩阵已经不只是“数表”，而是在表示：
+
+> 输入 $x_1,x_2,x_3$，经过某种线性规则以后，得到两个输出。
+
+也就是说，
+
+$$
+\mathbb R^3\longrightarrow \mathbb R^2
+$$
+
+矩阵 $A$ 就代表这个变换。
+
+---
+
+# 三、矩阵最核心的理解：一个线性变换
+
+假设
+
+$$
+A=
+\begin{bmatrix}
+1&2\\
+3&4
+\end{bmatrix}
+$$
+
+输入向量
+
+$$
+\mathbf x=
+\begin{bmatrix}
+x\\
+y
+\end{bmatrix}
+$$
+
+那么
+
+$$
+A\mathbf x=
+\begin{bmatrix}
+1&2\\
+3&4
+\end{bmatrix}
+\begin{bmatrix}
+x\\
+y
+\end{bmatrix}
+=
+\begin{bmatrix}
+x+2y\\
+3x+4y
+\end{bmatrix}
+$$
+
+也就是说矩阵定义了一个函数：
+
+$$
+T(x,y)=(x+2y,\;3x+4y)
+$$
+
+所以你可以把矩阵理解成：
+
+> **一种特殊函数的编码方式。**
+
+这个函数满足线性性质：
+
+$$
+T(\mathbf x+\mathbf y)
+=
+T(\mathbf x)+T(\mathbf y)
+$$
+
+以及
+
+$$
+T(\lambda \mathbf x)
+=
+\lambda T(\mathbf x)
+$$
+
+这就是“线性变换”。
+
+所以线性代数里研究矩阵，本质上是在研究：
+
+> 线性变换如何表示、如何组合、如何求逆、如何改变坐标、如何分析其结构。
+
+---
+
+# 四、为什么矩阵有“行”和“列”？
+
+这是理解矩阵最关键的地方之一。
+
+对于
+
+$$
+A=
+\begin{bmatrix}
+1&2&3\\
+4&5&6
+\end{bmatrix}
+$$
+
+你既可以按行看：
+
+$$
+A=
+\begin{bmatrix}
+- & \mathbf r_1 & -\\
+- & \mathbf r_2 & -
+\end{bmatrix}
+$$
+
+其中
+
+$$
+\mathbf r_1=
+\begin{bmatrix}
+1&2&3
+\end{bmatrix}
+$$
+
+$$
+\mathbf r_2=
+\begin{bmatrix}
+4&5&6
+\end{bmatrix}
+$$
+
+也可以按列看：
+
+$$
+A=
+\begin{bmatrix}
+\mathbf c_1&
+\mathbf c_2&
+\mathbf c_3
+\end{bmatrix}
+$$
+
+其中
+
+$$
+\mathbf c_1=
+\begin{bmatrix}
+1\\
+4
+\end{bmatrix},
+\qquad
+\mathbf c_2=
+\begin{bmatrix}
+2\\
+5
+\end{bmatrix},
+\qquad
+\mathbf c_3=
+\begin{bmatrix}
+3\\
+6
+\end{bmatrix}
+$$
+
+这两种视角对应着两种完全不同但等价的理解。
+
+---
+
+# 五、列视角：矩阵的列表示“基向量被送到哪里”
+
+这是理解矩阵最重要的观点之一。
+
+假设
+
+$$
+A=
+\begin{bmatrix}
+1&2\\
+3&4
+\end{bmatrix}
+$$
+
+它的两列是
+
+$$
+\mathbf c_1=
+\begin{bmatrix}
+1\\
+3
+\end{bmatrix},
+\qquad
+\mathbf c_2=
+\begin{bmatrix}
+2\\
+4
+\end{bmatrix}
+$$
+
+对于
+
+$$
+\mathbf x=
+\begin{bmatrix}
+x\\
+y
+\end{bmatrix}
+$$
+
+有
+
+$$
+A\mathbf x
+=
+x
+\begin{bmatrix}
+1\\
+3
+\end{bmatrix}
++
+y
+\begin{bmatrix}
+2\\
+4
+\end{bmatrix}
+$$
+
+也就是
+
+$$
+A\mathbf x=x\mathbf c_1+y\mathbf c_2
+$$
+
+所以：
+
+> 矩阵乘向量，本质上就是用向量中的坐标，对矩阵的列做线性组合。
+
+这是列视角最核心的一句话。
+
+---
+
+# 六、为什么矩阵的列特别重要？
+
+因为标准基向量是
+
+$$
+\mathbf e_1=
+\begin{bmatrix}
+1\\
+0
+\end{bmatrix},
+\qquad
+\mathbf e_2=
+\begin{bmatrix}
+0\\
+1
+\end{bmatrix}
+$$
+
+任意向量都可以写成
+
+$$
+\mathbf x=x\mathbf e_1+y\mathbf e_2
+$$
+
+因为线性变换满足线性性，所以
+
+$$
+A\mathbf x
+=
+A(x\mathbf e_1+y\mathbf e_2)
+$$
+
+$$
+=
+xA\mathbf e_1+yA\mathbf e_2
+$$
+
+而
+
+$$
+A\mathbf e_1
+$$
+
+恰好就是矩阵 $A$ 的第一列，
+
+$$
+A\mathbf e_2
+$$
+
+恰好就是第二列。
+
+所以
+
+$$
+A=
+\begin{bmatrix}
+A\mathbf e_1&A\mathbf e_2
+\end{bmatrix}
+$$
+
+这意味着：
+
+> 矩阵的第 $j$ 列，就是第 $j$ 个标准基向量经过这个线性变换以后到达的位置。
+
+这是矩阵的几何本质。
+
+---
+
+# 七、举一个特别直观的例子
+
+考虑
+
+$$
+A=
+\begin{bmatrix}
+2&0\\
+0&3
+\end{bmatrix}
+$$
+
+第一列是
+
+$$
+\begin{bmatrix}
+2\\
+0
+\end{bmatrix}
+$$
+
+第二列是
+
+$$
+\begin{bmatrix}
+0\\
+3
+\end{bmatrix}
+$$
+
+因此
+
+$$
+\mathbf e_1
+=
+\begin{bmatrix}
+1\\
+0
+\end{bmatrix}
+$$
+
+被变成
+
+$$
+\begin{bmatrix}
+2\\
+0
+\end{bmatrix}
+$$
+
+而
+
+$$
+\mathbf e_2
+=
+\begin{bmatrix}
+0\\
+1
+\end{bmatrix}
+$$
+
+被变成
+
+$$
+\begin{bmatrix}
+0\\
+3
+\end{bmatrix}
+$$
+
+所以这个矩阵代表：
+
+* $x$ 方向放大 2 倍；
+* $y$ 方向放大 3 倍。
+
+即
+
+$$
+(x,y)\mapsto(2x,3y)
+$$
+
+从这个角度，你甚至可以说：
+
+> 一个 $2\times 2$ 矩阵，就是告诉你原来的两个坐标轴基向量应该变到哪里去。
+
+知道基向量去哪了，所有向量去哪也就知道了。
+
+---
+
+# 八、行视角：矩阵的每一行表示“一个测量规则”
+
+现在换一个视角。
+
+仍然考虑
+
+$$
+A=
+\begin{bmatrix}
+1&2\\
+3&4
+\end{bmatrix}
+$$
+
+以及
+
+$$
+\mathbf x=
+\begin{bmatrix}
+x\\
+y
+\end{bmatrix}
+$$
+
+那么
+
+$$
+A\mathbf x
+=
+\begin{bmatrix}
+x+2y\\
+3x+4y
+\end{bmatrix}
+$$
+
+第一项
+
+$$
+x+2y
+$$
+
+实际上是第一行
+
+$$
+\begin{bmatrix}
+1&2
+\end{bmatrix}
+$$
+
+和向量
+
+$$
+\begin{bmatrix}
+x\\
+y
+\end{bmatrix}
+$$
+
+的点积。
+
+第二项
+
+$$
+3x+4y
+$$
+
+是第二行和输入向量的点积。
+
+所以
+
+$$
+A\mathbf x=
+\begin{bmatrix}
+\mathbf r_1\cdot \mathbf x\\
+\mathbf r_2\cdot \mathbf x
+\end{bmatrix}
+$$
+
+因此行视角是：
+
+> 矩阵的每一行，都定义了一个对输入向量的“线性测量”。
+
+比如
+
+$$
+\mathbf r=
+\begin{bmatrix}
+1&2
+\end{bmatrix}
+$$
+
+作用在
+
+$$
+\mathbf x=
+\begin{bmatrix}
+x\\
+y
+\end{bmatrix}
+$$
+
+上，得到
+
+$$
+\mathbf r\mathbf x=x+2y
+$$
+
+相当于：
+
+> “我要按照 $1:2$ 的权重，把 $x,y$ 混合成一个数。”
+
+---
+
+# 九、行视角和列视角其实是在描述同一件事
+
+对于
+
+$$
+A=
+\begin{bmatrix}
+1&2\\
+3&4
+\end{bmatrix}
+$$
+
+$$
+\mathbf x=
+\begin{bmatrix}
+x\\
+y
+\end{bmatrix}
+$$
+
+### 从列看
+
+$$
+A\mathbf x
+=
+x
+\begin{bmatrix}
+1\\
+3
+\end{bmatrix}
++
+y
+\begin{bmatrix}
+2\\
+4
+\end{bmatrix}
+$$
+
+也就是：
+
+> 输入坐标决定如何组合矩阵的列。
+
+### 从行看
+
+$$
+A\mathbf x=
+\begin{bmatrix}
+1x+2y\\
+3x+4y
+\end{bmatrix}
+$$
+
+也就是：
+
+> 每一行和输入做点积，得到一个输出坐标。
+
+所以一个矩阵乘向量，可以同时看成：
+
+$$
+\boxed{\text{列的线性组合}}
+$$
+
+也可以看成
+
+$$
+\boxed{\text{行与向量逐个做点积}}
+$$
+
+二者完全等价。
+
+---
+
+# 十、矩阵乘法为什么定义成“行乘列”？
+
+现在来到核心。
+
+假设
+
+$$
+A_{m\times n}
+$$
+
+和
+
+$$
+B_{n\times p}
+$$
+
+那么
+
+$$
+AB
+$$
+
+是一个
+
+$$
+m\times p
+$$
+
+矩阵。
+
+大家最开始学的是：
+
+> 左矩阵的行乘右矩阵的列。
+
+即
+
+$$
+(AB)_{ij}
+=
+\sum_{k=1}^{n}a_{ik}b_{kj}
+$$
+
+但如果只是背这个公式，会觉得非常奇怪。
+
+为什么不能逐元素乘？
+
+为什么一定“行乘列”？
+
+真正原因是：
+
+> 矩阵乘法必须表示线性变换的复合。
+
+---
+
+# 十一、矩阵乘法本质上是“变换的复合”
+
+假设
+
+$$
+B:\mathbb R^p\to\mathbb R^n
+$$
+
+然后
+
+$$
+A:\mathbb R^n\to\mathbb R^m
+$$
+
+一个向量 $\mathbf x$ 先经过 $B$：
+
+$$
+\mathbf x
+\overset{B}{\longmapsto}
+B\mathbf x
+$$
+
+再经过 $A$：
+
+$$
+B\mathbf x
+\overset{A}{\longmapsto}
+A(B\mathbf x)
+$$
+
+我们希望存在一个矩阵直接完成整个过程：
+
+$$
+\mathbf x
+\longmapsto
+(AB)\mathbf x
+$$
+
+于是必须要求
+
+$$
+(AB)\mathbf x=A(B\mathbf x)
+$$
+
+所以
+
+$$
+AB
+$$
+
+表示：
+
+> 先做 $B$，再做 $A$。
+
+注意顺序是从右到左。
+
+---
+
+# 十二、用列视角理解矩阵乘法
+
+这是最重要的矩阵乘法视角之一。
+
+设
+
+$$
+B=
+\begin{bmatrix}
+\mathbf b_1&
+\mathbf b_2&
+\cdots&
+\mathbf b_p
+\end{bmatrix}
+$$
+
+那么
+
+$$
+AB
+=
+A
+\begin{bmatrix}
+\mathbf b_1&
+\mathbf b_2&
+\cdots&
+\mathbf b_p
+\end{bmatrix}
+$$
+
+等于
+
+$$
+AB=
+\begin{bmatrix}
+A\mathbf b_1&
+A\mathbf b_2&
+\cdots&
+A\mathbf b_p
+\end{bmatrix}
+$$
+
+也就是说：
+
+> $AB$ 的每一列，就是 $A$ 作用在 $B$ 的对应列上。
+
+公式是
+
+$$
+\operatorname{col}_j(AB)
+=
+A\operatorname{col}_j(B)
+$$
+
+所以你可以把 $AB$ 想成：
+
+> 把 $B$ 的每一列都送进变换 $A$。
+
+---
+
+# 十三、列视角还能得到另一个重要结论
+
+假设
+
+$$
+A=
+\begin{bmatrix}
+\mathbf a_1&
+\mathbf a_2&
+\cdots&
+\mathbf a_n
+\end{bmatrix}
+$$
+
+而 $B$ 的第 $j$ 列为
+
+$$
+\mathbf b_j=
+\begin{bmatrix}
+b_{1j}\\
+b_{2j}\\
+\vdots\\
+b_{nj}
+\end{bmatrix}
+$$
+
+那么
+
+$$
+A\mathbf b_j
+=
+b_{1j}\mathbf a_1
++
+b_{2j}\mathbf a_2
++
+\cdots+
+b_{nj}\mathbf a_n
+$$
+
+因此
+
+$$
+AB
+$$
+
+的每一列，都是 $A$ 的列向量的线性组合。
+
+所以：
+
+$$
+\boxed{
+AB\text{ 的列空间一定包含在 }A\text{ 的列空间中}
+}
+$$
+
+更准确地说：
+
+$$
+\operatorname{Col}(AB)
+\subseteq
+\operatorname{Col}(A)
+$$
+
+这个性质以后学秩的时候极其重要。
+
+---
+
+# 十四、从行视角理解矩阵乘法
+
+同样有
+
+$$
+AB
+$$
+
+我们也可以从 $A$ 的行出发。
+
+设 $A$ 的第 $i$ 行是
+
+$$
+\mathbf a_i^T
+$$
+
+那么
+
+$$
+AB
+$$
+
+的第 $i$ 行等于
+
+$$
+\mathbf a_i^T B
+$$
+
+也就是说：
+
+> $AB$ 的每一行，是 $B$ 的各行的线性组合。
+
+例如如果
+
+$$
+\mathbf a_i^T=
+\begin{bmatrix}
+a_{i1}&a_{i2}&\cdots&a_{in}
+\end{bmatrix}
+$$
+
+那么
+
+$$
+\operatorname{row}_i(AB)
+=
+a_{i1}\operatorname{row}_1(B)
++\cdots+
+a_{in}\operatorname{row}_n(B)
+$$
+
+因此
+
+$$
+\operatorname{Row}(AB)
+\subseteq
+\operatorname{Row}(B)
+$$
+
+这和刚才的列结论是对称的：
+
+$$
+\operatorname{Col}(AB)
+\subseteq
+\operatorname{Col}(A)
+$$
+
+$$
+\operatorname{Row}(AB)
+\subseteq
+\operatorname{Row}(B)
+$$
+
+---
+
+# 十五、“行乘列”究竟是什么意思？
+
+取
+
+$$
+A=
+\begin{bmatrix}
+1&2\\
+3&4
+\end{bmatrix},
+\qquad
+B=
+\begin{bmatrix}
+5&6\\
+7&8
+\end{bmatrix}
+$$
+
+那么
+
+$$
+AB=
+\begin{bmatrix}
+1&2\\
+3&4
+\end{bmatrix}
+\begin{bmatrix}
+5&6\\
+7&8
+\end{bmatrix}
+$$
+
+例如左上角元素：
+
+$$
+(AB)_{11}
+=
+\begin{bmatrix}
+1&2
+\end{bmatrix}
+\begin{bmatrix}
+5\\
+7
+\end{bmatrix}
+$$
+
+因此
+
+$$
+(AB)_{11}=1\cdot5+2\cdot7=19
+$$
+
+右上角：
+
+$$
+(AB)_{12}
+=
+\begin{bmatrix}
+1&2
+\end{bmatrix}
+\begin{bmatrix}
+6\\
+8
+\end{bmatrix}
+$$
+
+所以
+
+$$
+(AB)_{12}
+=
+1\cdot6+2\cdot8
+=
+22
+$$
+
+最终
+
+$$
+AB=
+\begin{bmatrix}
+19&22\\
+43&50
+\end{bmatrix}
+$$
+
+但这里不要把“行乘列”理解成一种人为规定的技巧。
+
+它实际上来自：
+
+$$
+(AB)_{ij}
+=
+\text{第 }i\text{ 个输出测量}
+$$
+
+作用在
+
+$$
+\text{第 }j\text{ 个变换后基向量}
+$$
+
+之上。
+
+---
+
+# 十六、一个特别适合深刻理解的三层图景
+
+以后看到
+
+$$
+A\mathbf x
+$$
+
+你可以同时从三个层面理解。
+
+## 第一层：计算层面
+
+就是
+
+$$
+A\mathbf x
+$$
+
+按行乘列计算。
+
+---
+
+## 第二层：列空间层面
+
+如果
+
+$$
+A=
+\begin{bmatrix}
+\mathbf a_1&\cdots&\mathbf a_n
+\end{bmatrix}
+$$
+
+那么
+
+$$
+A\mathbf x
+=
+x_1\mathbf a_1+\cdots+x_n\mathbf a_n
+$$
+
+所以：
+
+> 输入 $\mathbf x$ 提供权重，矩阵的列提供“材料”。
+
+---
+
+## 第三层：几何变换层面
+
+矩阵规定标准基
+
+$$
+\mathbf e_1,\ldots,\mathbf e_n
+$$
+
+分别被送到
+
+$$
+\mathbf a_1,\ldots,\mathbf a_n
+$$
+
+因为任意向量都是基向量的线性组合，所以整个空间如何变化也就完全确定了。
+
+这其实是最深层的理解。
+
+---
+
+# 十七、为什么 $m\times n$ 矩阵对应 $\mathbb R^n\to\mathbb R^m$？
+
+如果
+
+$$
+A_{m\times n}
+$$
+
+那么它有 $n$ 列。
+
+输入向量必须有 $n$ 个分量：
+
+$$
+\mathbf x\in\mathbb R^n
+$$
+
+因为要用这 $n$ 个数字作为权重去组合 $n$ 个列向量。
+
+而每个列向量都有 $m$ 个分量，因此输出有 $m$ 个分量：
+
+$$
+A\mathbf x\in\mathbb R^m
+$$
+
+所以
+
+$$
+A_{m\times n}
+:
+\mathbb R^n
+\to
+\mathbb R^m
+$$
+
+可以记成一句口诀：
+
+> **列数决定输入维度，行数决定输出维度。**
+
+---
+
+# 十八、为什么矩阵乘法要求“内维相等”？
+
+例如
+
+$$
+A_{m\times n}
+B_{n\times p}
+$$
+
+为什么中间两个 $n$ 必须一样？
+
+因为
+
+$$
+B:\mathbb R^p\to\mathbb R^n
+$$
+
+而
+
+$$
+A:\mathbb R^n\to\mathbb R^m
+$$
+
+$B$ 输出一个 $n$ 维向量，而 $A$ 恰好接受一个 $n$ 维向量。
+
+所以可以接起来：
+
+$$
+\mathbb R^p
+\overset{B}{\longrightarrow}
+\mathbb R^n
+\overset{A}{\longrightarrow}
+\mathbb R^m
+$$
+
+于是
+
+$$
+AB:\mathbb R^p\to\mathbb R^m
+$$
+
+因此
+
+$$
+(m\times n)(n\times p)
+=
+m\times p
+$$
+
+这并不是一个需要死背的尺寸规则，它来自“函数复合的输入输出必须匹配”。
+
+---
+
+# 十九、为什么一般 $AB\neq BA$？
+
+这也是矩阵乘法最容易困惑的地方。
+
+如果矩阵表示变换，那么
+
+$$
+AB
+$$
+
+表示：
+
+> 先 $B$，再 $A$。
+
+而
+
+$$
+BA
+$$
+
+表示：
+
+> 先 $A$，再 $B$。
+
+很多变换顺序不同，结果当然不同。
+
+例如：
+
+1. 先旋转；
+2. 再沿 $x$ 轴拉伸。
+
+和
+
+1. 先沿 $x$ 轴拉伸；
+2. 再旋转。
+
+一般结果完全不同。
+
+所以
+
+$$
+AB\neq BA
+$$
+
+其实非常自然。
+
+---
+
+# 二十、行和列还对应“方程”和“变量”
+
+对于线性方程组
+
+$$
+A\mathbf x=\mathbf b
+$$
+
+假设
+
+$$
+A=
+\begin{bmatrix}
+a_{11}&a_{12}&a_{13}\\
+a_{21}&a_{22}&a_{23}
+\end{bmatrix}
+$$
+
+那么：
+
+## 从行看
+
+每一行对应一个方程：
+
+$$
+a_{11}x_1+a_{12}x_2+a_{13}x_3=b_1
+$$
+
+$$
+a_{21}x_1+a_{22}x_2+a_{23}x_3=b_2
+$$
+
+所以：
+
+> 行 = 约束。
+
+---
+
+## 从列看
+
+设
+
+$$
+A=
+\begin{bmatrix}
+\mathbf a_1&
+\mathbf a_2&
+\mathbf a_3
+\end{bmatrix}
+$$
+
+那么方程可以写成
+
+$$
+x_1\mathbf a_1
++x_2\mathbf a_2
++x_3\mathbf a_3
+=
+\mathbf b
+$$
+
+于是问题变成：
+
+> 能不能用矩阵的列向量，通过某种线性组合得到 $\mathbf b$？
+
+所以：
+
+> 列 = 生成空间的方向。
+
+这就是为什么线性方程组、列空间、秩，本质上都是同一件事的不同表达。
+
+---
+
+# 二十一、一个非常重要的“行列双重视角”
+
+对于
+
+$$
+A\mathbf x=\mathbf b
+$$
+
+可以同时问两个问题。
+
+### 行视角
+
+$$
+\begin{cases}
+\mathbf r_1\cdot\mathbf x=b_1\\
+\mathbf r_2\cdot\mathbf x=b_2\\
+\vdots
+\end{cases}
+$$
+
+相当于：
+
+> 找一个 $\mathbf x$，同时满足所有线性约束。
+
+---
+
+### 列视角
+
+$$
+x_1\mathbf a_1
++\cdots+
+x_n\mathbf a_n
+=
+\mathbf b
+$$
+
+相当于：
+
+> 找一组系数，使矩阵的列向量线性组合成 $\mathbf b$。
+
+这两个问题看起来不同，实际上完全是同一个方程。
+
+---
+
+# 二十二、矩阵还可以看成“坐标系统之间的翻译器”
+
+假设有一组新基
+
+$$
+\mathbf v_1,\mathbf v_2
+$$
+
+把它们放进矩阵：
+
+$$
+P=
+\begin{bmatrix}
+\mathbf v_1&\mathbf v_2
+\end{bmatrix}
+$$
+
+如果一个向量在新基下坐标是
+
+$$
+\begin{bmatrix}
+c_1\\
+c_2
+\end{bmatrix}
+$$
+
+那么标准坐标就是
+
+$$
+P
+\begin{bmatrix}
+c_1\\
+c_2
+\end{bmatrix}
+=
+c_1\mathbf v_1+c_2\mathbf v_2
+$$
+
+所以矩阵可以负责：
+
+> 把一套坐标表示转换成另一套坐标表示。
+
+以后学相似矩阵
+
+$$
+B=P^{-1}AP
+$$
+
+其实本质就是：
+
+> 同一个线性变换，在不同坐标系下的不同矩阵表达。
+
+所以矩阵不是变换本身，严格来说：
+
+> **矩阵是线性变换在某组基下的坐标表示。**
+
+这个观点到了特征值、相似对角化时非常重要。
+
+---
+
+# 二十三、为什么矩阵在数学和现实里这么普遍？
+
+因为很多关系在局部、近似或者本质上都是线性的。
+
+例如：
+
+## 1. 图像
+
+一张灰度图可以表示为矩阵：
+
+$$
+A=
+\begin{bmatrix}
+0&128&255\\
+100&200&50\\
+\vdots
+\end{bmatrix}
+$$
+
+每个元素表示像素。
+
+---
+
+## 2. 神经网络
+
+一层神经网络经常有
+
+$$
+\mathbf y=W\mathbf x+\mathbf b
+$$
+
+其中 $W$ 就是权重矩阵。
+
+---
+
+## 3. 计算机图形学
+
+旋转、缩放、投影都可以由矩阵表示。
+
+比如二维旋转：
+
+$$
+R(\theta)
+=
+\begin{bmatrix}
+\cos\theta&-\sin\theta\\
+\sin\theta&\cos\theta
+\end{bmatrix}
+$$
+
+---
+
+## 4. 数据科学
+
+假设有 $m$ 个样本，每个样本有 $n$ 个特征：
+
+$$
+X_{m\times n}
+$$
+
+那么通常：
+
+* 一行 = 一个样本；
+* 一列 = 一个特征。
+
+---
+
+## 5. 微分方程
+
+很多系统最终可以写成
+
+$$
+\mathbf x'(t)=A\mathbf x(t)
+$$
+
+于是矩阵 $A$ 决定系统怎样演化。
+
+---
+
+## 6. 马尔可夫链
+
+状态转移可以写成
+
+$$
+\mathbf p_{n+1}=P\mathbf p_n
+$$
+
+矩阵 $P$ 描述状态之间如何转移。
+
+---
+
+# 二十四、再给你一个非常漂亮的矩阵乘法分解
+
+设
+
+$$
+A_{m\times n}
+$$
+
+和
+
+$$
+B_{n\times p}
+$$
+
+把 $A$ 按列写：
+
+$$
+A=
+\begin{bmatrix}
+\mathbf a_1&\cdots&\mathbf a_n
+\end{bmatrix}
+$$
+
+把 $B$ 按行写：
+
+$$
+B=
+\begin{bmatrix}
+\mathbf b_1^T\\
+\vdots\\
+\mathbf b_n^T
+\end{bmatrix}
+$$
+
+那么
+
+$$
+AB
+=
+\mathbf a_1\mathbf b_1^T
++
+\mathbf a_2\mathbf b_2^T
++
+\cdots+
+\mathbf a_n\mathbf b_n^T
+$$
+
+这里每一个
+
+$$
+\mathbf a_k\mathbf b_k^T
+$$
+
+都是一个秩 1 矩阵。
+
+比如
+
+$$
+\begin{bmatrix}
+1\\
+2
+\end{bmatrix}
+\begin{bmatrix}
+3&4
+\end{bmatrix}
+=
+\begin{bmatrix}
+3&4\\
+6&8
+\end{bmatrix}
+$$
+
+所以矩阵乘法还可以理解成：
+
+> 若干个“列向量 × 行向量”的外积叠加。
+
+这个视角以后在：
+
+* 秩；
+* 奇异值分解；
+* 低秩近似；
+* 机器学习；
+
+里极其重要。
+
+---
+
+# 二十五、把矩阵的四种理解统一起来
+
+你以后看到矩阵
+
+$$
+A
+$$
+
+最好脑子里同时存在下面四层理解。
+
+### 第一层：数表
+
+$$
+A=(a_{ij})
+$$
+
+这是最表面的。
+
+### 第二层：方程系数
+
+$$
+A\mathbf x=\mathbf b
+$$
+
+每一行代表一个方程。
+
+### 第三层：向量集合
+
+$$
+A=
+\begin{bmatrix}
+\mathbf a_1&\cdots&\mathbf a_n
+\end{bmatrix}
+$$
+
+每一列是一个向量。
+
+### 第四层：线性变换
+
+$$
+\mathbf x\mapsto A\mathbf x
+$$
+
+这是最深刻、最统一的理解。
+
+---
+
+# 二十六、最值得记住的“行列哲学”
+
+可以把整个矩阵思想压缩成几句话。
+
+## 行是什么？
+
+行是在“读取输入”。
+
+对于
+
+$$
+A\mathbf x
+$$
+
+每一行都和 $\mathbf x$ 做点积。
+
+所以：
+
+$$
+\boxed{\text{行 = 测量 / 约束 / 输出规则}}
+$$
+
+---
+
+## 列是什么？
+
+列是在“构造输出”。
+
+$$
+A\mathbf x
+=
+x_1\mathbf a_1+\cdots+x_n\mathbf a_n
+$$
+
+所以：
+
+$$
+\boxed{\text{列 = 方向 / 基向量的像 / 输出材料}}
+$$
+
+---
+
+## 矩阵乘向量是什么？
+
+$$
+\boxed{
+\text{输入坐标加权矩阵的列，生成新的向量}
+}
+$$
+
+同时也是
+
+$$
+\boxed{
+\text{矩阵各行分别测量输入，得到各个输出坐标}
+}
+$$
+
+---
+
+## 矩阵乘矩阵是什么？
+
+$$
+\boxed{
+AB=\text{先进行 }B\text{ 变换，再进行 }A\text{ 变换}
+}
+$$
+
+同时：
+
+$$
+\boxed{
+AB\text{ 的第 }j\text{ 列}=A\times B\text{ 的第 }j\text{ 列}
+}
+$$
+
+以及
+
+$$
+\boxed{
+AB\text{ 的第 }i\text{ 行}
+=
+A\text{ 的第 }i\text{ 行}\times B
+}
+$$
+
+---
+
+# 二十七、最后给你一个整体心智模型
+
+我建议以后不要把矩阵想成一张死板的数字表，而想成一个“机器”。
+
+假设
+
+$$
+A_{m\times n}
+$$
+
+那么：
+
+```text
+          输入 n 个坐标
+               │
+               ▼
+         ┌───────────┐
+         │   矩阵 A   │
+         │ 线性变换器 │
+         └───────────┘
+               │
+               ▼
+          输出 m 个坐标
+```
+
+从**列视角**看：
+
+```text
+输入坐标
+x₁, x₂, ..., xₙ
+     │
+     ▼
+给矩阵各列分配权重
+     │
+     ▼
+x₁a₁ + x₂a₂ + ... + xₙaₙ
+     │
+     ▼
+输出向量
+```
+
+从**行视角**看：
+
+```text
+输入向量 x
+   │
+   ├── 第1行与 x 点积 ──→ y₁
+   │
+   ├── 第2行与 x 点积 ──→ y₂
+   │
+   ├── ...
+   │
+   └── 第m行与 x 点积 ──→ yₘ
+```
+
+所以真正掌握矩阵以后，你看到
+
+$$
+A\mathbf x
+$$
+
+脑子里不应该只出现“行乘列”。
+
+而应该同时看到：
+
+$$
+\boxed{
+A\mathbf x
+=
+\text{列向量的线性组合}
+=
+\text{各行对输入的线性测量}
+=
+\text{一个线性变换作用于向量}
+}
+$$
+
+而看到
+
+$$
+AB
+$$
+
+则应该想到：
+
+$$
+\boxed{
+AB
+=
+\text{线性变换的复合}
+}
+$$
+
+这基本就是理解整个线性代数的入口。

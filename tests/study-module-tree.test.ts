@@ -22,14 +22,14 @@ describe('study module metadata structure', () => {
   const coursesExamMeta = readJson(join(docsRoot, '408', 'exam', 'meta.json'));
 
   it('exposes exactly four physical and sidebar root modules', () => {
-    expect(rootMeta.pages).toEqual(['politics', 'english', 'math', '408']);
+    expect(rootMeta.pages).toEqual(['politics', 'english', 'math', '408', 'tasks']);
 
     const rootDirectories = readdirSync(docsRoot, { withFileTypes: true })
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name)
       .sort();
 
-    expect(rootDirectories).toEqual(['408', 'english', 'math', 'politics'].sort());
+    expect(rootDirectories).toEqual(['408', 'english', 'math', 'politics', 'tasks'].sort());
   });
 
   it('uses the same three-way hierarchy for math', () => {
