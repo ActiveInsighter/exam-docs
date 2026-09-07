@@ -1,0 +1,70 @@
+name: Normalize math supplement heading levels
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/normalize-math-supplement-headings.yml'
+      - 'scripts/normalize-math-supplement-headings.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: normalize-math-supplement-headings
+  cancel-in-progress: true
+
+jobs:
+  normalize:
+    name: Normalize H2/H3 headings
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Normalize supplement headings
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/normalize-math-supplement-headings.mjs
+          node scripts/normalize-math-supplement-headings.mjs --check
+
+      - name: Commit normalized documents
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- content/docs/math/supplements; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add content/docs/math/supplements
+          git commit -m 'docs: normalize math supplement heading levels'
+          git push origin HEAD:main
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+
+      - name: Publish normalized version to Cloudflare and EdgeOne
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run deploy-cloudflare-worker-assets.yml --ref main
+          gh workflow run deploy-edgeone-docs.yml --ref main
