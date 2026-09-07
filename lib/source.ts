@@ -6,7 +6,7 @@ import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
 
 const conciseMathModuleTitle = /^(?:高等数学|线性代数|概率论与数理统计)\s*模块\s*(\d+)\s*[：:]\s*(.+)$/u;
 
-const EXPECTED_STUDY_ROOTS = ['politics', 'english', 'math', '408', 'tasks'] as const;
+const EXPECTED_STUDY_ROOTS = ['politics', 'english', 'math', '408'] as const;
 
 export const source = loader({
   baseUrl: '/docs',
