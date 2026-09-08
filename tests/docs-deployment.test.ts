@@ -78,7 +78,16 @@ describe('docs deployment footprint', () => {
       'utf8',
     );
 
-    expect(workflowSource).toMatch(/EDGEONE_CLI_VERSION: 1\.6\.31-3/u);
+    expect(workflowSource).toMatch(/EDGEONE_CLI_VERSION: 1\.6\.34/u);
+  });
+
+  it('includes EdgeOne deployment object details when platform processing fails', () => {
+    const workflowSource = readFileSync(
+      resolve(process.cwd(), '.github/workflows/deploy-edgeone-docs.yml'),
+      'utf8',
+    );
+
+    expect(workflowSource).toContain('details: ${JSON.stringify(e)}');
   });
 
   it('keeps EdgeOne direct-upload packages on the compact RSC layout', () => {
