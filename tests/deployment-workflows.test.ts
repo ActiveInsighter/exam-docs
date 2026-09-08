@@ -3,18 +3,25 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 describe('static deployment workflows', () => {
-  it('probes the Next 16 canonical shared RSC payload', async () => {
-    const workflowPaths = [
-      '.github/workflows/deploy-cloudflare-worker-assets.yml',
-      '.github/workflows/deploy-static-docs-preview.yml',
+  it('matches the RSC verification path to each deployment package layout', async () => {
+    const workflowExpectations = [
+      {
+        path: '.github/workflows/deploy-cloudflare-worker-assets.yml',
+        required: ["'/docs/intro/index.txt'", "'/docs/intro/__next.docs.txt'"],
+        forbidden: ["'/docs/__next.docs.txt'"],
+      },
+      {
+        path: '.github/workflows/deploy-static-docs-preview.yml',
+        required: ["'/docs/__next.docs.txt'"],
+        forbidden: ["'/docs/intro/index.txt'", "'/docs/intro/__next.docs.txt'"],
+      },
     ];
 
-    for (const workflowPath of workflowPaths) {
-      const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
+    for (const expectation of workflowExpectations) {
+      const workflow = await readFile(resolve(process.cwd(), expectation.path), 'utf8');
 
-      expect(workflow, workflowPath).toContain("'/docs/__next.docs.txt'");
-      expect(workflow, workflowPath).not.toContain("'/docs/intro/index.txt'");
-      expect(workflow, workflowPath).not.toContain("'/docs/intro/__next.docs.txt'");
+      for (const path of expectation.required) expect(workflow, expectation.path).toContain(path);
+      for (const path of expectation.forbidden) expect(workflow, expectation.path).not.toContain(path);
     }
   });
 });
