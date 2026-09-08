@@ -80,6 +80,15 @@ describe('docs deployment footprint', () => {
     expect(workflowSource).toMatch(/EDGEONE_CLI_VERSION: 1\.6\.31-3/u);
   });
 
+  it('keeps EdgeOne direct-upload packages on the compact RSC layout', () => {
+    const workflowSource = readFileSync(
+      resolve(process.cwd(), '.github/workflows/deploy-edgeone-docs.yml'),
+      'utf8',
+    );
+
+    expect(workflowSource).not.toContain('STATIC_DOCS_DISABLE_RSC_DEDUPE');
+  });
+
   it('disables the unused Next.js image optimizer for the docs app', () => {
     const nextConfigSource = readFileSync(
       resolve(process.cwd(), 'next.config.mjs'),

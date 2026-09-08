@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+// @ts-expect-error The URL helper is intentionally a Node.js ESM script.
+import { encodeHttpPath } from '../scripts/http-paths.mjs';
 // @ts-expect-error The deployment helper is intentionally a Node.js ESM script.
 import {
   buildCloudflareAssetsIgnore,
@@ -9,6 +11,12 @@ import {
 } from '../scripts/prepare-cloudflare-static-assets.mjs';
 
 describe('Cloudflare Workers Static Assets deployment', () => {
+  it('percent-encodes Unicode route segments for HTTP probes without encoding slashes', () => {
+    expect(encodeHttpPath('/docs/数学真题/01-845e1338/')).toBe(
+      '/docs/%E6%95%B0%E5%AD%A6%E7%9C%9F%E9%A2%98/01-845e1338/',
+    );
+  });
+
   it('uses an assets-only SSG configuration with canonical trailing-slash handling', () => {
     const config = JSON.parse(readFileSync(resolve('wrangler.jsonc'), 'utf8'));
 

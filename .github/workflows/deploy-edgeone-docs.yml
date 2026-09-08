@@ -13,8 +13,8 @@ permissions:
 env:
   EDGEONE_CLI_VERSION: 1.6.31-3
   EDGEONE_DOCS_PROJECT_NAME: exam-docs
-  # exam-docs is an EdgeOne Upload project, so CI deploys the prebuilt static
-  # package through the Makers ZIP-upload API.
+  # exam-docs is an EdgeOne Direct Upload project, so CI deploys the prebuilt
+  # static package through the Makers upload API.
   EDGEONE_DOCS_DEPLOYMENT_MODE: upload
   EDGEONE_DOCS_PUBLIC_URL: ${{ vars.EDGEONE_DOCS_PUBLIC_URL }}
 
@@ -150,8 +150,6 @@ jobs:
           echo '- EdgeOne folder upload: direct COS file upload (CLI auto-archive disabled)' >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Build docs and ZBSearch in parallel
-        env:
-          STATIC_DOCS_DISABLE_RSC_DEDUPE: '1'
         shell: bash
         run: |
           set -euo pipefail
@@ -269,7 +267,7 @@ jobs:
               -n "${EDGEONE_DOCS_PROJECT_NAME}" \
               -t "${EDGEONE_API_TOKEN}" \
               -e production \
-              --site global \
+              --area global \
               --json \
               2>&1 | tee edgeone-static-production.log; then
               break
@@ -339,13 +337,26 @@ jobs:
           done
 
           route_list="$(mktemp)"
+          encoded_route_list="$(mktemp)"
           route_failures="$(mktemp)"
-          trap 'rm -f -- "${route_list}" "${route_failures}"' EXIT
+          trap 'rm -f -- "${route_list}" "${encoded_route_list}" "${route_failures}"' EXIT
           find .static-docs/docs -type f -name index.html -print \
             | while IFS= read -r html_file; do
                 relative="/${html_file#.static-docs/}"
                 printf '%s\n' "${relative%/index.html}/"
               done > "${route_list}"
+          node --input-type=module - "${route_list}" "${encoded_route_list}" <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import { encodeHttpPath } from './scripts/http-paths.mjs';
+
+          const [inputPath, outputPath] = process.argv.slice(2);
+          const encoded = readFileSync(inputPath, 'utf8')
+            .split('\n')
+            .filter(Boolean)
+            .map(encodeHttpPath)
+            .join('\n');
+          writeFileSync(outputPath, `${encoded}\n`);
+          NODE
           doc_route_count="$(wc -l < "${route_list}" | tr -d ' ')"
           export deployment_base deployment_query route_failures
           if ! xargs -P 16 -n 1 bash -c '
@@ -355,7 +366,7 @@ jobs:
               printf "%s -> %s\n" "${path}" "${status}" >> "${route_failures}"
               exit 1
             fi
-          ' _ < "${route_list}"; then
+          ' _ < "${encoded_route_list}"; then
             echo '::error::One or more static documentation HTML routes failed.'
             sed -n '1,40p' "${route_failures}"
             exit 1
