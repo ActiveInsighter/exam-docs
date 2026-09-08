@@ -117,6 +117,7 @@ jobs:
         run: |
           set -euo pipefail
           edgeone_bin="${GITHUB_WORKSPACE}/.edgeone-cli/bin"
+          edgeone_cli_js="$(find "${GITHUB_WORKSPACE}/.edgeone-cli" -type f -path '*/edgeone/edgeone-dist/cli.js' -print -quit)"
           echo "${edgeone_bin}" >> "${GITHUB_PATH}"
           export PATH="${edgeone_bin}:${PATH}"
           [[ -x "${edgeone_bin}/edgeone" ]] || {
@@ -127,8 +128,26 @@ jobs:
             echo '::error::Missing GitHub Actions secret: EDGEONE_API_TOKEN'
             exit 1
           }
+          [[ -f "${edgeone_cli_js}" ]] || {
+            echo '::error::EdgeOne CLI bundle is missing.'
+            exit 1
+          }
+          node - "${edgeone_cli_js}" <<'NODE'
+          const fs = require('node:fs');
+
+          const file = process.argv[2];
+          const source = fs.readFileSync(file, 'utf8');
+          const needle = 'return await fLn(t,s,c,u,!0,e,t!=="./")}catch';
+          const replacement = 'return await fLn(t,s,c,u,!1,e,t!=="./")}catch';
+
+          if (!source.includes(needle)) {
+            throw new Error('Unexpected EdgeOne CLI bundle: folder-upload compression call was not found.');
+          }
+          fs.writeFileSync(file, source.replace(needle, replacement), 'utf8');
+          NODE
           edgeone --version
           echo "- EdgeOne CLI cache hit: ${{ steps.edgeone-cache.outputs.cache-hit }}" >> "${GITHUB_STEP_SUMMARY}"
+          echo '- EdgeOne folder upload: direct COS file upload (CLI auto-archive disabled)' >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Build docs and ZBSearch in parallel
         shell: bash
