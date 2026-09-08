@@ -13,6 +13,11 @@ permissions:
 env:
   EDGEONE_CLI_VERSION: 1.6.31-3
   EDGEONE_DOCS_PROJECT_NAME: exam-docs
+  # exam-docs was created in EdgeOne with the GitHub provider. GitHub-provider
+  # projects deploy from the connected repository and do not accept the
+  # makers ZIP-upload API. Set this to upload only for an EdgeOne Upload
+  # project.
+  EDGEONE_DOCS_DEPLOYMENT_MODE: github
   EDGEONE_DOCS_PUBLIC_URL: ${{ vars.EDGEONE_DOCS_PUBLIC_URL }}
 
 jobs:
@@ -91,6 +96,7 @@ jobs:
             ${{ runner.os }}-static-docs-turbopack-v3-
 
       - name: Restore EdgeOne CLI
+        if: env.EDGEONE_DOCS_DEPLOYMENT_MODE == 'upload'
         id: edgeone-cache
         uses: actions/cache@v5
         with:
@@ -98,7 +104,7 @@ jobs:
           key: ${{ runner.os }}-node22-edgeone-cli-v1-${{ env.EDGEONE_CLI_VERSION }}
 
       - name: Install EdgeOne CLI on cache miss
-        if: steps.edgeone-cache.outputs.cache-hit != 'true'
+        if: env.EDGEONE_DOCS_DEPLOYMENT_MODE == 'upload' && steps.edgeone-cache.outputs.cache-hit != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -108,6 +114,7 @@ jobs:
           echo "- EdgeOne CLI install: $(($(date +%s) - started))s (cache miss)" >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Configure deployment tooling
+        if: env.EDGEONE_DOCS_DEPLOYMENT_MODE == 'upload'
         shell: bash
         run: |
           set -euo pipefail
@@ -214,6 +221,7 @@ jobs:
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Package pure static deployment
+        if: env.EDGEONE_DOCS_DEPLOYMENT_MODE == 'upload'
         shell: bash
         run: |
           set -euo pipefail
@@ -227,6 +235,7 @@ jobs:
           echo "- Deployment ZIP: $((zip_bytes / 1024 / 1024)) MiB; packaging $((finished - started))s" >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Deploy prebuilt static site to EdgeOne
+        if: env.EDGEONE_DOCS_DEPLOYMENT_MODE == 'upload'
         id: deploy
         shell: bash
         run: |
@@ -275,6 +284,7 @@ jobs:
           echo "console_url=${console_url}" >> "${GITHUB_OUTPUT}"
 
       - name: Verify deployment and production propagation
+        if: env.EDGEONE_DOCS_DEPLOYMENT_MODE == 'upload'
         shell: bash
         run: |
           set -euo pipefail
@@ -367,6 +377,7 @@ jobs:
           echo "- Deployment + production propagation verification: $(($(date +%s) - started))s" >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Verify CDN compression and cache
+        if: env.EDGEONE_DOCS_DEPLOYMENT_MODE == 'upload'
         shell: bash
         run: |
           set -euo pipefail
@@ -402,6 +413,22 @@ jobs:
           verify_compressed search "${production_base}${body_url}${production_suffix}"
           echo "- CDN docs/search compression verification: $(($(date +%s) - started))s" >> "${GITHUB_STEP_SUMMARY}"
 
+      - name: Record GitHub-connected EdgeOne deployment
+        if: env.EDGEONE_DOCS_DEPLOYMENT_MODE == 'github'
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo '- Deployment mode: GitHub provider'
+            echo "- EdgeOne source: ${GITHUB_REPOSITORY}@${GITHUB_REF_NAME}"
+            echo '- EdgeOne deployment: delegated to the connected EdgeOne GitHub project'
+            if [[ -n "${EDGEONE_DOCS_PUBLIC_URL:-}" ]]; then
+              echo "- Public URL configured for post-deploy verification: ${EDGEONE_DOCS_PUBLIC_URL}"
+            else
+              echo '- Public URL verification: skipped; set repository variable EDGEONE_DOCS_PUBLIC_URL to enable it'
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"
+
       - name: Write deployment summary
         if: always()
         shell: bash
@@ -415,6 +442,7 @@ jobs:
             echo '- Runtime: static CDN only; Cloud Functions 0; Edge Functions 0'
             echo "- Job status: ${{ job.status }}"
             echo "- Commit: ${GITHUB_SHA}"
+            echo "- Deployment mode: ${EDGEONE_DOCS_DEPLOYMENT_MODE}"
             echo "- Pipeline wall time (first step → final verification): ${total_seconds}s"
             if [ -n "${{ steps.deploy.outputs.console_url }}" ]; then
               echo "- Console: ${{ steps.deploy.outputs.console_url }}"

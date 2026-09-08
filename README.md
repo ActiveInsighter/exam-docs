@@ -67,8 +67,10 @@ file at 25,000,000 bytes to stay below EdgeOne's single-file limit.
 
 ## Deployment
 
-Production documentation deployments run in GitHub Actions and are uploaded to
-Tencent EdgeOne Makers. The documentation package is a pure static CDN build:
+Production documentation deployments are connected to Tencent EdgeOne through
+the GitHub provider. A push to `main` starts EdgeOne's connected-project
+deployment; GitHub Actions builds and validates the same pure static package.
+The documentation package is:
 
 - HTML, JS, CSS, Markdown downloads, the search manifest, category routers, and
   ZBSearch indexes are static files;
@@ -77,9 +79,12 @@ Tencent EdgeOne Makers. The documentation package is a pure static CDN build:
 - Edge Functions: 0.
 
 The production EdgeOne project used by this repository is `exam-docs`. The
-isolated preview workflow uses `exam-docs-preview`.
+isolated preview workflow uses `exam-docs-preview`. The production workflow is
+set to `github` deployment mode because GitHub-provider projects do not accept
+the EdgeOne Makers ZIP-upload API. Use `upload` only with an EdgeOne Upload
+project.
 
-Required GitHub Actions secrets for EdgeOne production or preview deployment:
+Required GitHub Actions secret for the EdgeOne Upload-mode preview workflow:
 
 - `EDGEONE_API_TOKEN`
 
@@ -90,9 +95,8 @@ Required GitHub Actions secrets for Cloudflare deployment:
 
 Optional GitHub Actions variables:
 
-- `EDGEONE_DOCS_PUBLIC_URL` — the custom production URL to verify after an
-  EdgeOne deployment. If omitted, the workflow verifies the deployment URL
-  returned by EdgeOne instead.
+- `EDGEONE_DOCS_PUBLIC_URL` — the custom production URL associated with the
+  connected EdgeOne project. It is recorded for post-deploy verification.
 - `EDGEONE_PREVIEW_PROJECT_ID` — used only for optional preview failure
   diagnostics; it is not needed for a successful deployment.
 
