@@ -1,0 +1,1227 @@
+---
+sidebar_position: 2
+title: 第2章 进程与线程
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第2章 进程与线程
+
+## 2.1 进程与线程简介
+
+### 2.1.3 进程的内存映像
+
+1. **【竟成·模拟一-27】** 在进程的虚拟地址空间中，以下可能位于同一存储段的变量是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 全局变量、函数内的局部指针变量、指针指向的动态分配的变量 &emsp;&emsp; B. 全局常量、函数代码</div>
+<div className="choice-option-row">C. 函数内的局部非静态变量、全局指针变量 &emsp;&emsp; D. 函数参数、指针指向的静态变量</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 进程虚拟地址空间通常包括代码段、只读数据区、已初始化数据段、未初始化数据段、堆和栈等区域。全局常量通常存放在只读数据区，函数机器代码存放在代码段；在实际可执行文件和虚拟内存映射中，二者都可能被放入具有只读属性的同一装入段，因此 B 表述为“可能”时正确。A 中全局变量通常位于数据段或 BSS，局部指针变量位于栈，其动态分配对象位于堆，不在同一段。C 中局部非静态变量位于栈，全局指针变量位于数据段或 BSS。D 中函数参数通常位于栈或寄存器，而静态变量位于静态数据区，二者也不在同一存储段。
+
+</details>
+
+---
+
+### 2.1.4 进程的状态与转换
+
+2. **【王道·卷一-Q26】** 下列关于进程状态转换的说法中，错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 进程状态的转换和对资源的需求都会记录在进程控制块中，进程结束时进程控制块需要回收</div>
+<div className="choice-option-row">B. 信号量的signal()和wait()操作其实是对系统调用的封装，会导致进程在运行态、就绪态和阻塞态之间转换</div>
+<div className="choice-option-row">C. 当进行进程调度时，一个高优先级的进程抢占低优先级进程的CPU后，低优先级进程的状态转为就绪态</div>
+<div className="choice-option-row">D. 成功执行完创建原语后，进程的状态转为创建态</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 创建原语执行期间，操作系统为新进程申请 PCB、分配资源并建立初始运行环境；创建工作成功完成后，新进程应从创建态转入就绪态，等待处理机调度，而不是仍停留在创建态，因此 D 错误。A 正确，PCB 是进程存在及被操作系统管理的依据，其中保存进程状态、资源需求等信息，进程终止后需要回收。B 正确，wait 操作在资源不足时可使运行进程阻塞，signal 操作可能唤醒阻塞进程并使其转为就绪态；在用户程序中使用时通常需要借助操作系统提供的同步原语或系统服务。C 正确，在抢占式调度中，低优先级进程被高优先级进程抢占后并未等待某个事件，其状态应由运行态转为就绪态。
+
+</details>
+
+---
+
+3. **【王道·卷二-Q25】** 下列关于进程状态的说法中，正确的是（  ）。
+I. 进程主动让出CPU，可能会导致该进程由执行态变为就绪态
+II. 从阻塞态到就绪态的转换是由协作进程决定的
+III. 一次I/O操作的结束，将会导致一个进程由就绪态变为运行态
+IV. 一个运行的进程用完分配给它的时间片后，其状态变为阻塞态
+V. 在进程状态转换中，“就绪 $\displaystyle \twoheadrightarrow$ 阻塞”是不可能发生的
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II和III &emsp;&emsp; B. I、II和V &emsp;&emsp; C. I、II和IV &emsp;&emsp; D. I、II、III和V</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** I 正确。运行进程主动放弃处理机时，若它并未等待某个事件或资源，则会由运行态转入就绪态，等待下一次调度。II 正确，阻塞进程自身不能主动转为就绪态，必须由引起其阻塞的事件完成后，由操作系统在相关进程、设备中断或事件通知的触发下将其唤醒；题目将这种外部唤醒概括为由协作方决定。III 错误，I/O 操作完成通常使等待该 I/O 的进程由阻塞态转为就绪态，是否立即转为运行态还取决于调度程序。IV 错误，时间片用完表示进程仍具备继续执行的条件，只是暂时失去 CPU，因此应由运行态转为就绪态。V 正确，就绪进程尚未占有 CPU，不能执行产生阻塞的操作，所以不能直接由就绪态转为阻塞态，通常必须先被调度到运行态。
+
+</details>
+
+---
+
+4. **【王道·卷三-Q24】** 进程从运行态到等待（阻塞）态可能是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 运行进程执行了 $\displaystyle P$ 操作 &emsp;&emsp; B. 进程调度程序的调度</div>
+<div className="choice-option-row">C. 运行进程的时间片用完 &emsp;&emsp; D. 运行进程执行了 $\displaystyle V$ 操作</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 执行信号量的 P 操作时，若所申请的资源当前不可用，则进程会被插入相应信号量的等待队列，由运行态转为阻塞态，因此 A 正确。B 中调度程序重新分配 CPU，通常使被抢占或主动让出的进程由运行态转为就绪态。C 中时间片用完也只会使进程转为就绪态，因为它仍具备运行条件。V 操作用于释放资源并可能唤醒其他阻塞进程，执行 V 操作的当前进程本身一般不会因此阻塞，所以 D 错误。
+
+</details>
+
+---
+
+5. **【竟成·模拟五-27】** 当同时满足以下哪些条件时，进程就可以从就绪态切换到运行态（）。
+I. 当前CPU空闲 II. 新进程被创建 III. 进程请求I/O操作 IV. 该进程的优先级是就绪进程中最高的
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、III &emsp;&emsp; B. I、IV &emsp;&emsp; C. II、IV &emsp;&emsp; D. III、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 就绪态进程已经具备除 CPU 之外的全部运行条件。它要转为运行态，首先必须有可供分配的 CPU，即满足 I；其次，在题目给出的优先级调度条件下，该进程应当是就绪队列中优先级最高的进程，即满足 IV。II 只表示系统创建了新进程，新进程通常先进入就绪态，并不必然立即运行。III 是运行进程发起的操作，请求 I/O 后通常会由运行态转为阻塞态，与就绪态转运行态无关。
+
+</details>
+
+---
+
+### 2.1.5 进程控制
+
+6. **【王道·卷一-Q25】** 下列关于进程创建和进程撤销的说法中，错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 引起进程创建的主要事件有用户登录、作业调度、提供用户需要的服务、应用请求等</div>
+<div className="choice-option-row">B. 引起进程撤销的最主要的因素是进程的正常结束</div>
+<div className="choice-option-row">C. 在进程运行期间，可能出现某些错误迫使进程终止，包括越界错误、保护错、非法指令、算术运算错、I/O故障等</div>
+<div className="choice-option-row">D. 进程有可能受操作员或操作系统干预而终止运行，但是父进程不能终止子进程运行</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** D 错误。父进程通常可以通过操作系统提供的进程控制接口终止其子进程，例如子进程超出资源限制、任务已无继续执行的必要，或父进程自身即将终止时，都可能撤销子进程。A 正确，用户登录、作业调度、系统提供服务以及应用程序显式请求，都是典型的进程创建原因。B 正确，多数进程最终通过正常执行完毕而终止。C 正确，地址越界、保护错误、非法指令、除零等算术错误以及严重 I/O 故障，都可能使操作系统强制终止进程。
+
+</details>
+
+---
+
+7. **【竟成·模拟四-24】** 下列关于原语的说法，错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 原语具有不可分割性 &emsp;&emsp; B. 原语在管态下执行 &emsp;&emsp; C. P、V操作为原语操作 &emsp;&emsp; D. 原语由进程组成</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 原语是由若干条机器指令组成、用于完成某种特定系统功能的操作序列，其执行过程具有原子性，不能被分割或被其他并发活动干扰，因此 A 正确。原语涉及进程控制、同步和资源管理等关键操作，通常在内核态（管态）执行，B 正确。信号量的 P、V 操作必须不可分割地完成，否则多个进程并发修改信号量会造成竞态，因此属于典型原语，C 正确。D 错误，原语由指令组成，而不是由进程组成；进程是程序的一次执行过程，二者概念层次不同。
+
+</details>
+
+---
+
+8. **【竟成·模拟五-24】** 进程创建成功后首先会将进程控制块插入（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 创建队列 &emsp;&emsp; B. 就绪队列 &emsp;&emsp; C. 运行队列 &emsp;&emsp; D. 阻塞队列</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 进程创建原语完成 PCB 初始化、资源分配和运行环境建立后，新进程已经具备运行条件，但尚未获得 CPU，因此应进入就绪态，其 PCB 被插入就绪队列，故选 B。创建态只表示创建过程尚未完成，创建成功后不会继续停留在所谓“创建队列”。运行态只能有已被调度并获得 CPU 的进程。阻塞队列用于存放正在等待某个事件或资源的进程，新创建进程通常不存在这种等待条件。
+
+</details>
+
+---
+
+9. **【竟成·模拟六-24】** 下列操作中，会导致进程终止的有（）。
+I. C语言程序main函数执行return 0;
+II. 用户进程执行特权指令
+III. 执行系统调用
+IV. 时钟中断
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II &emsp;&emsp; B. I、III &emsp;&emsp; C. II、IV &emsp;&emsp; D. III、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** I 会导致进程正常终止。C 语言程序的 `main` 函数执行 `return 0;` 后，运行库最终会调用进程退出接口，由操作系统回收进程资源。II 通常会导致异常终止，用户态进程无权执行特权指令，硬件将产生保护性异常，操作系统一般据此终止非法进程。III 不一定导致终止，系统调用只是用户进程请求内核服务的正常途径，执行完成后通常返回用户态继续运行。IV 也不会必然终止进程，时钟中断主要用于计时和触发调度，当前进程可能被抢占并转为就绪态，但仍可在以后继续执行。
+
+</details>
+
+---
+
+### 2.1.6 进程的通信
+
+10. **【竟成·模拟二-25】** 下列说法正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 线程是资源分配的基本单位</div>
+<div className="choice-option-row">B. 管道的一端用于读、一端用于写，因此管道是单工通信</div>
+<div className="choice-option-row">C. 如果父进程比子进程先结束，则子进程拥有的资源将一直不会被释放</div>
+<div className="choice-option-row">D. 间接消息通信方式下，进程会借助消息邮箱完成收发操作</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** D 正确。间接消息传递不要求发送进程和接收进程直接以对方标识通信，而是把消息发送到共享的邮箱或端口，接收方再从该邮箱中取出消息。A 错误，进程是资源分配的基本单位，线程通常是处理机调度的基本单位，同一进程内的线程共享进程资源。B 错误，普通管道通常提供一个方向的数据传输，一条管道常被称为半双工通信机制；若要实现稳定的双向通信，一般需要建立两条管道，不能据此简单认定为严格意义上的单工通信。C 错误，父进程先结束后，子进程可能成为孤儿进程并由系统中的特定进程接管，其资源仍会在子进程终止时由操作系统回收，不会永久占用。
+
+</details>
+
+---
+
+### 2.1.7 线程和多线程模型
+
+11. **【王道·卷二-Q26】** 在下列描述中，哪个不是多线程系统的特长？（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 利用线程并行地执行矩阵乘法运算</div>
+<div className="choice-option-row">B. Web服务器利用线程请求HTTP服务</div>
+<div className="choice-option-row">C. 键盘驱动程序为每个正在运行的应用配备一个线程，用来响应相应的键盘输入</div>
+<div className="choice-option-row">D. 基于GUI的调试程序用不同线程处理用户的输入、计算、跟踪等操作</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** C 不是多线程系统的典型优势。键盘输入通常由统一的设备驱动和中断处理机制接收，再由操作系统根据当前焦点窗口、终端或输入队列将事件分发给相应应用，没有必要为每个正在运行的应用各配置一个专门的键盘驱动线程。A 可以把矩阵运算划分为多个相互独立的子任务，并在多核处理器上并行执行。B 中 Web 服务器可使用不同线程同时处理多个客户端的 HTTP 请求，提高吞吐量和响应能力。D 中 GUI 程序可用不同线程分别处理界面交互、后台计算和调试跟踪，避免某项任务阻塞整个应用。
+
+</details>
+
+---
+
+12. **【王道·卷四-Q25】** 在下列关于进程和线程的叙述中，正确的是（  ）。
+I. 一个进程可以包含多个线程，各个线程共享进程的逻辑地址空间
+II. 一个进程可以包含多个线程，各个线程共享栈空间
+III. 当一个多线程进程（采用一对一线程模型）中的某个线程被阻塞后，其他线程将继续工作
+IV. 当一个多线程进程中的某个线程被阻塞后，该阻塞线程将被撤销
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II、III &emsp;&emsp; B. I、III &emsp;&emsp; C. II、III &emsp;&emsp; D. II、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** I 正确，同一进程中的多个线程共享该进程的代码段、数据段、堆、打开文件等资源，因而处于同一个逻辑地址空间。II 错误，每个线程必须拥有独立的栈，用于保存自身的函数调用链、局部变量、返回地址和线程上下文；若共享同一栈，线程并发调用函数时会互相破坏现场。III 正确，在一对一模型中，每个用户线程都对应一个内核线程，某个线程因系统调用或 I/O 阻塞时，内核仍可调度同一进程中的其他内核线程运行。IV 错误，阻塞只表示线程暂时等待事件，并不意味着线程被撤销；事件完成后，该线程可被唤醒并继续执行。
+
+</details>
+
+---
+
+13. **【竟成·模拟四-25】** 多线程程序中被线程独享的资源有（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 打开的文件的文件描述符 &emsp;&emsp; B. 寄存器 &emsp;&emsp; C. 程序代码 &emsp;&emsp; D. 静态变量</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 每个线程都具有独立的运行现场，因此必须独享程序计数器、通用寄存器、栈指针等寄存器状态，线程切换时这些内容需要分别保存和恢复，故 B 正确。同一进程内的线程共享进程拥有的资源，包括程序代码、全局变量、静态变量、堆空间以及打开文件的文件描述符表，因此 A、C、D 均属于线程共享资源。需要特别注意：线程共享进程地址空间，但每个线程拥有独立的栈和寄存器上下文。
+
+</details>
+
+---
+
+14. **【竟成·模拟五-25】** 下列叙述正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 同一进程的各个线程共享同一片栈空间</div>
+<div className="choice-option-row">B. 同一进程下，切换用户级线程的开销比切换内核级线程的开销小</div>
+<div className="choice-option-row">C. 命名管道通信只能用于具有血缘关系的进程间通信</div>
+<div className="choice-option-row">D. 同一进程下，一个内核级线程的阻塞会导致其他内核级线程都阻塞</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 用户级线程的创建、撤销和切换通常由用户态线程库完成，无须陷入内核，也不必进行用户态与内核态切换，因此开销通常小于内核级线程切换，B 正确。A 错误，同一进程内的线程共享代码段、数据段和堆等资源，但每个线程必须拥有独立栈，以保存自己的局部变量、返回地址和函数调用关系。C 错误，命名管道在文件系统中具有名称，可用于无亲缘关系进程之间的通信；只能在有亲缘关系进程间方便使用的是匿名管道。D 错误，内核能够分别调度各个内核级线程，一个线程阻塞时，同一进程中的其他内核级线程仍可继续运行。
+
+</details>
+
+---
+
+15. **【竟成·模拟七-25】** 下列关于线程的描述中，正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 在一个进程中创建一个新线程比创建一个新进程所需的工作量多</div>
+<div className="choice-option-row">B. 进程间通信和同一进程中的线程间通信差不多</div>
+<div className="choice-option-row">C. 多处理机系统适合使用多线程技术</div>
+<div className="choice-option-row">D. 用户级线程的调度由操作系统完成</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 多处理机或多核系统可以把同一进程中的多个线程分配到不同处理器上并行执行，因此特别适合采用多线程技术，C 正确。A 错误，线程共享所属进程的大部分资源，创建线程通常只需建立线程控制信息和独立栈，工作量明显小于创建具有独立地址空间和资源集合的新进程。B 错误，进程拥有相互独立的地址空间，进程间通信通常需要管道、消息队列、共享内存等专门机制；同一进程中的线程共享地址空间，可直接读写共享变量，通信更方便，但需要同步互斥。D 错误，用户级线程对内核不可见，其调度由用户态线程库完成；内核级线程才由操作系统直接调度。
+
+</details>
+
+---
+
+## 2.2 CPU调度
+
+### 2.2.5 CPU调度算法
+
+16. **【王道·卷二-Q27】** 在时间片轮转调度算法中确定合理的时间片大小很重要，下列哪些因素应当被考虑在内？（  ）。
+I. 系统对响应时间的要求 II. 就绪队列中进程的数量
+III. 系统的处理能力 IV. 各个进程所需的运行时间
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II、III &emsp;&emsp; B. II、III、IV &emsp;&emsp; C. I、III、IV &emsp;&emsp; D. I、II、III、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 四项都应考虑。I：响应时间要求越高，时间片通常应越小，使各进程能更快获得 CPU。II：就绪进程越多，在相同时间片下，一个进程再次获得 CPU 前的等待时间越长，因此时间片大小需结合队列长度确定。III：处理器速度越快，在相同实际时间内可完成的工作越多，可以相应调整时间片。IV：时间片还应参考典型 CPU 执行区间或进程所需运行时间；若时间片过小，会频繁切换，增加开销；若过大，则会退化为近似先来先服务，交互响应变差。因此选 D。
+
+</details>
+
+---
+
+17. **【王道·卷三-Q26】** 下图为单处理器系统中各个进程运行时占用CPU的时间。当 $\displaystyle T_0 = 0\text{s}$ 时，进程 $\displaystyle A$、$\displaystyle D$ 被创建并进入就绪队列，调度程序首先为进程 $\displaystyle A$ 分配CPU；当 $\displaystyle T_1 = 3\text{s}$ 时，进程 $\displaystyle A$ 执行结束，同时进程 $\displaystyle D$ 被调度程序选中，不考虑调度开销；当 $\displaystyle T_2 = 3.5\text{s}$ 时，进程 $\displaystyle D$ 执行结束；当 $\displaystyle T_3 = 4\text{s}$ 时，进程 $\displaystyle B$ 被创建，并进入就绪队列开始执行；当 $\displaystyle T_4 = 6\text{s}$ 时，进程 $\displaystyle C$ 被创建并进入就绪队列，进程 $\displaystyle C$ 的优先级高于进程 $\displaystyle B$，系统是可抢占的，进程 $\displaystyle C$ 抢占进程 $\displaystyle B$ 的CPU；当 $\displaystyle T_5 = 8\text{s}$ 时，进程 $\displaystyle C$ 执行结束，调度程序重新调度进程 $\displaystyle B$；当 $\displaystyle T_6 = 10\text{s}$ 时，进程 $\displaystyle B$ 执行结束。
+![卷三_Q26_进程调度时间线](/img/questions/408-mock/wangdao-set-03-q26.png)
+下列说法中，正确的是（  ）。
+I. 在这段时间内，CPU的利用率是 $\displaystyle 95\%$
+II. 进程 $\displaystyle A$、$\displaystyle B$、$\displaystyle C$ 和 $\displaystyle D$ 的平均周转时间是3.625s
+III. 进程 $\displaystyle D$ 的等待时间最长
+IV. 进程 $\displaystyle A$、$\displaystyle B$、$\displaystyle C$ 和 $\displaystyle D$ 的平均带权周转时间是2.625s
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II &emsp;&emsp; B. II、III &emsp;&emsp; C. I、II、III &emsp;&emsp; D. I、II、III、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 在 $\displaystyle 0\sim 10\text{s}$ 内，CPU 仅在 $\displaystyle 3.5\sim 4\text{s}$ 空闲 $\displaystyle 0.5\text{s}$，因此忙碌时间为 $\displaystyle 9.5\text{s}$，利用率为
+
+$$
+\displaystyle
+\dfrac{9.5}{10}\times 100\%=95\%
+$$
+
+故 I 正确。各进程周转时间为：$\displaystyle A:3-0=3\text{s}$，$\displaystyle D:3.5-0=3.5\text{s}$，$\displaystyle B:10-4=6\text{s}$，$\displaystyle C:8-6=2\text{s}$。平均周转时间为
+
+$$
+\displaystyle
+\dfrac{3+3.5+6+2}{4}=3.625\text{s}
+$$
+
+故 II 正确。各进程等待时间分别为：$\displaystyle A=0$，$\displaystyle D=3\text{s}$，$\displaystyle B=2\text{s}$（被 $\displaystyle C$ 抢占期间等待），$\displaystyle C=0$，因此 $\displaystyle D$ 最长，III 正确。各进程实际运行时间分别为 $\displaystyle 3\text{s}$、$\displaystyle 0.5\text{s}$、$\displaystyle 4\text{s}$、$\displaystyle 2\text{s}$，带权周转时间依次为 $\displaystyle 1$、$\displaystyle 7$、$\displaystyle 1.5$、$\displaystyle 1$，平均值为
+
+$$
+\displaystyle
+\dfrac{1+7+1.5+1}{4}=2.625
+$$
+
+故 IV 正确，选 D。
+
+</details>
+
+---
+
+18. **【王道·卷四-Q26】** 在下列各种调度算法中，属于基于时间片的调度算法的是（  ）。
+I. 时间片轮转法 II. 多级反馈队列调度算法 III. 抢占式调度算法
+IV. FCFS(先来先服务)调度算法 V. 高响应比优先调度算法
+
+<div className="choice-options">
+<div className="choice-option-row">A. I和II &emsp;&emsp; B. I、II和IV &emsp;&emsp; C. I、III和IV &emsp;&emsp; D. I、II和III</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 时间片轮转算法显式为每个进程分配固定时间片，时间片用完后进程被放回就绪队列，因此 I 正确。多级反馈队列通常在各级队列中设置不同大小的时间片，进程用完本级时间片后降入下一级队列，因此 II 正确。III“抢占式调度算法”只是一类调度方式的总称，抢占可能由更高优先级进程到达等事件触发，并不一定以时间片为依据。FCFS 按到达先后运行，通常是非抢占式，不使用时间片。高响应比优先根据响应比选择作业，也不依赖时间片。因此仅 I、II 正确，选 A。
+
+</details>
+
+---
+
+19. **【王道·卷五-Q25】** 在关于优先级的如下论述中，错误的是（  ）。
+I. 计算型作业的优先级一定高于I/O型作业的优先级
+II. 短作业的优先级一定高于长作业的优先级
+III. 用户进程的优先级一定高于系统进程的优先级
+IV. 对资源要求多的作业的优先级一定高于对资源要求少的作业的优先级
+
+<div className="choice-options">
+<div className="choice-option-row">A. I和IV &emsp;&emsp; B. III和IV &emsp;&emsp; C. I、III和IV &emsp;&emsp; D. I、II、III和IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 四个说法都把某种调度倾向绝对化为“一定”，因而均错误。I：为了提高设备和 CPU 的并行度，系统往往会适当提高 I/O 型进程的优先级，而不是必然优先计算型作业。II：只有短作业优先等特定算法才偏向短作业，其他算法中短作业未必优先。III：系统进程承担内核服务或关键管理任务，其优先级通常不低于用户进程，更不能说用户进程一定更高。IV：资源需求多的作业可能加重系统负担，系统有时反而优先满足资源需求少、易于完成的作业。因此 I、II、III、IV 全部错误，选 D。
+
+</details>
+
+---
+
+20. **【王道·卷六-Q24】** 在单处理器系统中，5个进程同时被创建，CPU调度程序采用某种调度策略安排这些进程的并发执行。假设这五个进程单独占用CPU时的执行时间分别为2,4,6,8,10。当这五个并发进程全部执行完毕后，它们的最小平均等待时间是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 2 &emsp;&emsp; B. 8 &emsp;&emsp; C. 6 &emsp;&emsp; D. 10</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 所有进程同时到达时，要使平均等待时间最小，应采用短作业优先顺序，即按运行时间 $\displaystyle 2,4,6,8,10$ 依次执行。五个进程的等待时间分别为
+
+$$
+\displaystyle
+0,\quad 2,\quad 2+4=6,\quad 2+4+6=12,\quad 2+4+6+8=20
+$$
+
+因此平均等待时间为
+
+$$
+\displaystyle
+\dfrac{0+2+6+12+20}{5}=8
+$$
+
+故选 B。其他执行顺序会使较长作业提前占用 CPU，从而增大后续多个进程的累计等待时间。
+
+</details>
+
+---
+
+21. **【王道·卷八-Q32】** 在磁盘调度算法中，（  ）算法可能会随时改变磁头臂的运动方向。
+
+<div className="choice-options">
+<div className="choice-option-row">A. C-LOOK &emsp;&emsp; B. SCAN &emsp;&emsp; C. C-SCAN &emsp;&emsp; D. 最短寻道时间优先</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 最短寻道时间优先（SSTF）每次选择与当前磁头位置距离最近的请求，下一次所选请求可能位于当前磁头的任意一侧，因此磁头可能随时改变移动方向，D 正确。SCAN 算法像电梯一样沿一个方向服务请求，到达端点后才反向。C-SCAN 始终按单一方向扫描，到达一端后快速返回另一端再继续同向服务。C-LOOK 与 C-SCAN 类似，只移动到当前方向上最远的请求位置后便回到另一侧，不会因每个局部请求而随时反向。
+
+</details>
+
+---
+
+22. **【竟成·模拟二-26】** 在一个单处理器操作系统中，存在以下3个进程，其到达时间和运行时间如下表所示。使用多级反馈队列调度算法，队列设置如下表所示，则这三个进程的周转时间之和为（）。
+
+| 进程     | 到达时间   | 运行时间   |
+| -------- | ---------- | ---------- |
+| A        | 0          | 5          |
+| B        | 1          | 3          |
+| C        | 3          | 1          |
+| 队列级数 | 调度策略   | 时间片大小 |
+| ---      | ---        | ---        |
+| 1        | 先来先服务 | 1          |
+| 2        | 先来先服务 | 2          |
+| 3        | 时间片轮转 | 4          |
+
+<div className="choice-options">
+<div className="choice-option-row">A. 13 &emsp;&emsp; B. 14 &emsp;&emsp; C. 15 &emsp;&emsp; D. 16</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 新到达进程进入最高优先级队列；高优先级队列中的进程可抢占低优先级队列中的进程。调度过程如下：
+1. $\displaystyle 0\sim1$：A 在第 1 级队列运行 1 个时间单位，剩余 4，降到第 2 级队列。
+2. $\displaystyle 1\sim2$：B 到达并在第 1 级队列运行 1 个时间单位，剩余 2，降到第 2 级队列。
+3. $\displaystyle 2\sim3$：A 在第 2 级队列运行；$\displaystyle t=3$ 时 C 到达最高级队列并抢占 A。A 在本级时间片还剩 1 个时间单位。
+4. $\displaystyle 3\sim4$：C 运行 1 个时间单位后完成。
+5. $\displaystyle 4\sim5$：A 继续用完第 2 级队列剩余时间片，尚余 2，降到第 3 级队列。
+6. $\displaystyle 5\sim7$：B 在第 2 级队列运行 2 个时间单位后完成。
+7. $\displaystyle 7\sim9$：A 在第 3 级队列运行并完成。
+
+因而完成时刻分别为 $\displaystyle A=9$、$\displaystyle B=7$、$\displaystyle C=4$，周转时间分别为
+
+$$
+\displaystyle
+T_A=9-0=9,\qquad T_B=7-1=6,\qquad T_C=4-3=1
+$$
+
+周转时间之和为
+
+$$
+\displaystyle
+9+6+1=16
+$$
+
+故选 D。
+
+</details>
+
+---
+
+23. **【竟成·模拟三-24】** 在单CPU和两台I/O设备$\displaystyle I_1$、$\displaystyle I_2$的多道程序环境中，同时投入以下三个作业运行，三者的执行轨迹分别如下：
+Job1: $\displaystyle I_2$(30ms)，CPU(10ms)，$\displaystyle I_1$(30ms)，CPU(10ms)，$\displaystyle I_2$(10ms)
+Job2: $\displaystyle I_1$(20ms)，CPU(20ms)，$\displaystyle I_2$(40ms)，CPU(10ms)
+Job3: CPU(30ms)，$\displaystyle I_1$(30ms)
+其中，CPU使用抢占式优先级调度算法，$\displaystyle I_1$、$\displaystyle I_2$按照优先级分配但不可抢占，三个作业的优先级从高到低为Job1>Job2>Job3。不考虑调度和切换时间，则作业全部完成时，CPU利用率、Job1的等待时间、Job3的等待时间分别为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 80%，10ms，40ms &emsp;&emsp; B. 89%，0ms，40ms &emsp;&emsp; C. 80%，0ms，30ms &emsp;&emsp; D. 89%，10ms，30ms</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 按优先级和设备不可抢占规则绘制执行过程：
+1. $\displaystyle 0\sim20\text{ms}$：Job1 使用 $\displaystyle I_2$，Job2 使用 $\displaystyle I_1$，Job3 使用 CPU。
+2. $\displaystyle 20\sim30\text{ms}$：Job2 完成 $\displaystyle I_1$ 操作后抢占 Job3，使用 CPU；Job3 尚余 $\displaystyle 10\text{ms}$ 的 CPU 时间。
+3. $\displaystyle 30\sim40\text{ms}$：Job1 完成 $\displaystyle I_2$ 操作后，以最高优先级抢占 Job2，使用 CPU；Job2 尚余 $\displaystyle 10\text{ms}$ 的本次 CPU 时间。
+4. $\displaystyle 40\sim50\text{ms}$：Job1 转去使用 $\displaystyle I_1$，Job2 继续完成剩余 CPU 段，随后请求 $\displaystyle I_2$。
+5. $\displaystyle 50\sim60\text{ms}$：Job3 完成剩余 CPU 段，随后请求 $\displaystyle I_1$，但 $\displaystyle I_1$ 正被 Job1 使用。
+6. $\displaystyle 60\sim70\text{ms}$：没有作业处于 CPU 就绪状态，CPU 空闲。
+7. $\displaystyle 70\sim80\text{ms}$：Job1 完成 $\displaystyle I_1$ 操作后使用 CPU；Job3 同时开始使用 $\displaystyle I_1$。
+8. $\displaystyle 80\sim90\text{ms}$：Job1 请求 $\displaystyle I_2$，但 $\displaystyle I_2$ 仍被 Job2 使用，CPU 再次空闲。
+9. $\displaystyle 90\sim100\text{ms}$：Job2 使用 CPU，Job1 使用 $\displaystyle I_2$，Job3 继续使用 $\displaystyle I_1$，三者均在 $\displaystyle 100\text{ms}$ 时完成。
+
+CPU 总忙碌时间为各作业 CPU 时间之和：
+
+$$
+\displaystyle
+(10+10)+(20+10)+30=80\text{ms}
+$$
+
+从作业投入到全部完成共 $\displaystyle 100\text{ms}$，故 CPU 利用率为
+
+$$
+\displaystyle
+\dfrac{80}{100}\times100\%=80\%
+$$
+
+调度问题中的等待时间指进程在**就绪队列中等待 CPU**的时间，不包括因等待 I/O 设备而处于阻塞状态的时间。Job1 每次需要 CPU 时都立即获得 CPU，其等待时间为 $\displaystyle 0\text{ms}$；Job3 在 $\displaystyle 20\sim50\text{ms}$ 期间因被高优先级作业抢占而处于就绪队列，等待时间为 $\displaystyle 30\text{ms}$。因此选 C。
+
+</details>
+
+---
+
+24. **【竟成·模拟五-26】** 以下叙述中，正确的是（）。
+I. 时间片轮转算法会导致饥饿问题
+II. 高响应比优先算法可以满足短作业优先
+III. 短作业优先算法的平均等待时间和平均周转时间在可实现的经典调度算法中是最短的
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II &emsp;&emsp; B. I、III &emsp;&emsp; C. II、III &emsp;&emsp; D. I、II、III</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** I 错误。时间片轮转算法按就绪队列顺序为各进程轮流分配时间片，只要进程仍在就绪队列中，就能周期性地获得 CPU，通常不会发生某个进程长期得不到运行机会的饥饿现象。II 正确。高响应比优先算法使用
+
+$$
+\displaystyle
+R=\dfrac{等待时间+要求服务时间}{要求服务时间}
+=1+\dfrac{等待时间}{要求服务时间}
+$$
+
+作为选择依据。在等待时间相同的情况下，要求服务时间越短，响应比越高，因此兼顾了短作业优先；随着等待时间增加，长作业的响应比也会不断提高，可避免长期饥饿。III 正确。在已知作业运行时间的经典调度模型中，按运行时间由短到长安排作业，能够使平均等待时间和平均周转时间达到最小。因此正确的是 II、III，选 C。
+
+</details>
+
+---
+
+### 2.2.6 多处理机调度
+
+25. **【王道·卷四-Q23】** 在下列关于多处理机系统的说法中，错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 引入多处理机系统的原因之一是靠提高CPU时钟频率来提高系统性能的方法已接近极限</div>
+<div className="choice-option-row">B. 随着处理机数量的增加，系统的处理能力也相应增强，利用 $\displaystyle n$ 个处理机所获得的加速比是1个处理机的n倍</div>
+<div className="choice-option-row">C. 采用n个处理机的系统与采用n台独立的计算机相比，可以节省投资</div>
+<div className="choice-option-row">D. 多处理机系统与单处理机系统相比，可以大大提高系统的可靠性</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** B 错误。增加处理机数量通常能够提高系统处理能力，但实际加速比很难达到理想的 $\displaystyle n$ 倍。程序中往往存在不能并行执行的串行部分，同时还会产生任务划分、进程同步、通信、负载均衡和缓存一致性等额外开销。根据 Amdahl 定律，串行部分会限制并行系统的最大加速比。A 正确，单纯依靠提高主频会受到功耗、散热和器件物理极限的制约，多核和多处理机成为提升性能的重要途径。C 正确，多处理机系统可共享内存、外设和其他基础设施，通常比配置同等数量的完整独立计算机更节省成本。D 正确，在合理设计下，某个处理机发生故障后，其余处理机仍可继续承担部分任务，系统具有一定的容错能力和更高可靠性。
+
+</details>
+
+---
+
+## 2.3 同步与互斥
+
+### 2.3.1 同步与互斥的基本概念
+
+26. **【王道·卷二-Q28】** 对于下面的四条语句，（  ）是对应的前驱图。
+
+```
+S1:a=x+y;
+S2:b=z+1;
+S3:c=a-b;
+S4:w=c+1;
+```
+
+![卷二_Q28_前驱图选项](/img/questions/408-mock/wangdao-set-02-q28.png)
+
+<div className="choice-options">
+<div className="choice-option-row">A. 见图中 A &emsp;&emsp; B. 见图中 B &emsp;&emsp; C. 见图中 C &emsp;&emsp; D. 见图中 D</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 语句 S1 计算变量 $\displaystyle a$，语句 S2 计算变量 $\displaystyle b$。S3 的表达式 $\displaystyle c=a-b$ 同时需要 S1 产生的 $\displaystyle a$ 和 S2 产生的 $\displaystyle b$，因此必须满足两条前驱关系：
+
+$$
+\displaystyle
+S1\rightarrow S3,\qquad S2\rightarrow S3
+$$
+
+S4 的表达式 $\displaystyle w=c+1$ 需要 S3 产生的 $\displaystyle c$，故还有
+
+$$
+\displaystyle
+S3\rightarrow S4
+$$
+
+S1 与 S2 之间不存在数据依赖，可以并发执行。图 A 正好表示 S1、S2 共同指向 S3，再由 S3 指向 S4，因此选 A。B 将 S4 错误地放在 S3 之前；C、D 又错误地强制规定了本可并发执行的语句之间的先后次序。
+
+</details>
+
+---
+
+### 2.3.2 实现临界区互斥的基本方法
+
+27. **【王道·卷七-Q24】** 关于临界区问题的一个算法（假设只有进程 $\displaystyle P_0$ 和 $\displaystyle P_1$ 可能会进入该临界区）如下（i 为 0 或 1），该算法（  ）。
+
+```
+Repeat
+retry: if(turn!=-1) turn=i;
+if(turn!=i) goto retry;
+turn=-1;
+临界区
+turn=0;
+剩余区
+```
+
+<div className="choice-options">
+<div className="choice-option-row">A. 不能保证进程互斥进入临界区，且会出现“饥饿”</div>
+<div className="choice-option-row">B. 不能保证进程互斥进入临界区，但不会出现“饥饿”</div>
+<div className="choice-option-row">C. 保证进程互斥进入临界区，但会出现“饥饿”</div>
+<div className="choice-option-row">D. 保证进程互斥进入临界区，不会出现“饥饿”</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 该算法不能保证互斥。假设 $\displaystyle P_0$ 判断 `turn!=-1` 成立，但尚未执行 `turn=0` 就被切换出去；此时 $\displaystyle P_1$ 也判断条件成立，将 `turn` 置为 1，并通过后续检查进入临界区。在 $\displaystyle P_1$ 尚未退出临界区时，若 CPU 又切换回 $\displaystyle P_0$，则 $\displaystyle P_0$ 可以继续执行 `turn=0`，通过检查并进入临界区。这样两个进程可能同时位于临界区，互斥性被破坏。该算法的问题在于“检查并修改 `turn`”不是不可分割的原子操作。按本题算法的判定，由于两个进程都存在进入临界区的机会，不构成某一进程永久无法进入的饥饿情形，因此选 B。
+
+</details>
+
+---
+
+28. **【竟成·模拟一-26】** 下列关于进程同步机制的描述中，正确的是（）。
+I. 关中断同步方式通过屏蔽中断实现互斥，仅适用于单CPU系统
+II. 忙等待的同步方式会导致CPU资源浪费
+III. 信号量机制是操作系统提供的高级同步工具，可跨进程、跨CPU核心实现安全互斥与同步
+IV. 管程作为编程语言级同步机制，仅适用于单线程环境
+V. 硬件实现的Test-and-Set指令可在多CPU系统中实现原子性互斥
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II、III &emsp;&emsp; B. I、II、III、IV &emsp;&emsp; C. II、III、V &emsp;&emsp; D. I、II、III、V</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** I 正确。在单处理器系统中，进程关闭中断后不会被时钟中断等事件抢占，可保护临界区；在多处理器系统中，关闭当前 CPU 的中断并不能阻止其他 CPU 同时访问共享资源，因此不能单独依靠这种方法实现全局互斥。II 正确。自旋锁等忙等待机制会让等待进程持续占用 CPU 执行循环检查，造成处理机时间浪费。III 正确。信号量的 P、V 操作由操作系统保证原子性，可用于同一处理器或多处理器环境中的线程、进程同步与互斥。IV 错误，管程正是为并发环境设计的高级同步机制，通过条件变量和互斥进入规则协调多个线程或进程，并非只适用于单线程环境。V 正确，Test-and-Set 是硬件提供的原子读—改—写指令，可作为多处理器环境中实现自旋锁和互斥的基础。因此 I、II、III、V 正确，选 D。
+
+</details>
+
+---
+
+29. **【竟成·模拟四-27】** 进程P0和P1访问临界资源的伪代码实现如下，以下说法正确的是（）。
+
+```c
+bool flag[2] = {false, false};
+// P0进程：
+while(flag[1]);
+flag[0] = true;
+critical section;
+flag[0] = false;
+remainder section;
+// P1进程：
+while(flag[0]);
+flag[1] = true;
+critical section;
+flag[1] = false;
+remainder section;
+```
+
+<div className="choice-options">
+<div className="choice-option-row">A. 不能保证进程互斥进入临界区，且违背了忙则等待原则</div>
+<div className="choice-option-row">B. 不能保证进程互斥进入临界区，但是遵循忙则等待原则</div>
+<div className="choice-option-row">C. 能保证进程互斥进入临界区，但是违背了忙则等待原则</div>
+<div className="choice-option-row">D. 能保证进程互斥进入临界区，且遵循忙则等待原则</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 该算法把“检查对方标志”和“设置自己的标志”分成了两个非原子步骤。若 P0、P1 几乎同时执行，两者都可能先观察到对方的 `flag` 为 `false`，于是都通过 `while`；随后分别把自己的 `flag` 置为 `true`，并同时进入临界区，因此不能保证互斥。另一方面，若某进程已经把自己的 `flag` 置为 `true` 并进入临界区，则另一进程会在 `while` 中等待，体现了“临界资源忙时申请者等待”的忙则等待原则。故选 B。正确的软件互斥算法必须保证意愿标志的设置与冲突处理能够覆盖这种同时检查的竞争情形，例如 Peterson 算法还需引入 `turn` 变量。
+
+</details>
+
+---
+
+30. **【竟成·模拟六-25】** 两个线程使用以下算法处理对打印机设备的共享，可能出现的问题是（）。
+
+```c
+int turn = 1;
+void Thread1() {
+// 其他操作...
+while (turn != 1);
+// 操作打印机
+turn = 2;
+// 其他操作...
+}
+void Thread2() {
+// 其他操作...
+while (turn != 2);
+// 操作打印机
+turn = 1;
+// 其他操作...
+}
+```
+
+<div className="choice-options">
+<div className="choice-option-row">A. 两个线程都无法使用打印机，发生饥饿现象</div>
+<div className="choice-option-row">B. 两个线程同时使用打印机，打印出现错误</div>
+<div className="choice-option-row">C. 若线程1没有使用打印机，转而执行其他操作，则线程2也无法使用</div>
+<div className="choice-option-row">D. 不会发生错误，两线程正常使用打印机</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 该算法采用严格轮换方式：只有 `turn=1` 时线程 1 才能使用打印机，只有 `turn=2` 时线程 2 才能使用打印机。它能够避免两个线程同时进入临界区，但违背“空闲让进”原则。初始时 `turn=1`，若线程 1 此时不需要打印而一直执行其他操作，它就不会把 `turn` 改为 2；即使打印机处于空闲状态，线程 2 仍会永久停在 `while(turn != 2)` 处。因此可能出现 C 所述情况。A 错误，至少线程 1 初始能够进入；B 错误，严格轮换不会让二者同时使用打印机；D 忽略了这种不必要等待问题。
+
+</details>
+
+---
+
+### 2.3.4 信号量
+
+31. **【王道·卷六-Q25】** 有一个计数信号量 $\displaystyle S$，若干进程对 $\displaystyle S$ 进行28次 $\displaystyle P$ 操作和18次 $\displaystyle V$ 操作后，信号量 $\displaystyle S$ 的值为0，然后又对信号量 $\displaystyle S$ 进行3次 $\displaystyle V$ 操作，则此时有（  ）个进程等待在信号量 $\displaystyle S$ 的队列中。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 2 &emsp;&emsp; B. 0 &emsp;&emsp; C. 3 &emsp;&emsp; D. 7</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 记录型信号量的值小于 0 时，其绝对值表示在该信号量等待队列中的进程数；信号量值大于或等于 0 时，没有进程因该信号量而阻塞。题目已知完成 28 次 P 操作和 18 次 V 操作后 $\displaystyle S=0$，说明此时等待队列为空。再执行 3 次 V 操作后，信号量依次变为 1、2、3。由于每次 V 操作后 $\displaystyle S>0$，均无须唤醒等待进程，最终等待队列中仍有 0 个进程，故选 B。也可由净变化求得初值：
+
+$$
+\displaystyle
+S_0-28+18=0\quad\Rightarrow\quad S_0=10
+$$
+
+</details>
+
+---
+
+32. **【王道·卷八-Q24】** 对记录型信号量 $\displaystyle S$ 执行 $\displaystyle V$ 操作后，下列选项中错误的是（  ）。
+I. 当 $\displaystyle S.value \leq 0$ 时，唤醒一个阻塞队列进程
+II. 只有当 $\displaystyle S.value \leq 0$ 时，才唤醒一个阻塞队列进程
+III. 当 $\displaystyle S.value \leq 0$ 时，唤醒一个就绪队列进程
+IV. 当 $\displaystyle S.value > 0$ 时，系统不做额外操作
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、III &emsp;&emsp; B. I、IV &emsp;&emsp; C. I、II、III &emsp;&emsp; D. II、III</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D（按命题原意）
+
+**解析：** 记录型信号量的 V 操作通常为：先执行 $\displaystyle S.value++$，然后在 $\displaystyle S.value\leq0$ 时，从该信号量的**阻塞队列**中移出一个进程并将其唤醒，使其进入就绪态；若 $\displaystyle S.value>0$，则无须执行额外唤醒操作。因此 I、IV 正确，III 错误，因为就绪队列中的进程本来就已处于就绪态，真正被唤醒的是阻塞队列中的进程。
+
+当前题面中的 II 写成了“只有当 $\displaystyle S.value\leq0$ 时”，它与 I 基本等价，按字面理解应为正确陈述，此时只有 III 错误，而四个选项中没有对应答案。结合选项 D 可知，II 的比较符应为 $\displaystyle S.value<0$：若写成“只有当 $\displaystyle S.value<0$ 时才唤醒”，则该说法错误，因为执行 V 后恰好有 $\displaystyle S.value=0$ 时也需要唤醒一个阻塞进程。故按命题原意，错误的是 II、III，选 D；原题当前文本存在比较符转录错误。
+
+</details>
+
+---
+
+33. **【竟成·模拟七-24】** 某时刻，某计算机系统中共有10个进程和3台打印机，使用信号量管理打印机的互斥访问，则该信号量的取值范围是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. -10到3 &emsp;&emsp; B. -6到3 &emsp;&emsp; C. -7到3 &emsp;&emsp; D. -3到10</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 用一个计数信号量管理 3 台同类打印机时，信号量初值为 3。每执行一次 P 操作，信号量值减 1；若结果小于 0，则相应进程进入阻塞队列。系统共有 10 个进程，因此最极端情况下，10 个进程都已执行 P 操作，其中 3 个进程获得打印机，另外 7 个进程阻塞，此时
+
+$$
+\displaystyle
+S_{\min}=3-10=-7
+$$
+
+当 3 台打印机均空闲且没有进程等待时，信号量取得最大值
+
+$$
+\displaystyle
+S_{\max}=3
+$$
+
+因而信号量的取值范围为 $\displaystyle -7$ 到 $\displaystyle 3$，选 C。A 将最小值错误地写成进程总数的相反数，忽略了信号量的初值为 3；B、D 均不符合计数信号量的实际变化规律。
+
+</details>
+
+---
+
+### 2.3.5 经典同步问题
+
+34. **【王道·卷四-Q27】** 生产者进程和消费者进程的代码如下。生产者进程有一个局部变量nextProduced，以存储新产生的项；消费者进程有一个局部变量nextConsumed，以存储所要使用的项。
+
+```c
+while(1){ //producer
+/* produce an item in nextProduced */
+while((in + 1) % BUFFER_SIZE == out);
+/* do nothing */
+buffer[in] = nextProduced;
+in = (in+1) % BUFFER_SIZE;
+}
+while(1){ //Consumer
+while(in == out);
+/* do nothing */
+nextConsumed = buffer[out];
+out = (out+1) % BUFFER_SIZE;
+/* consume the item in nextConsumed */
+}
+```
+
+条件 $\displaystyle in == out$ 和 $\displaystyle (in + 1)\% BUFFER_SIZE == out$ 成立时，缓冲区中item的数量分别是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 0, BUFFER_SIZE &emsp;&emsp; B. 0, BUFFER_SIZE-1 &emsp;&emsp; C. BUFFER_SIZE-1, 0 &emsp;&emsp; D. BUFFER_SIZE, 0</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 该循环缓冲区采用“牺牲一个存储单元”的方法区分队空与队满。`in` 指向下一次生产者写入的位置，`out` 指向下一次消费者读出的位置。
+
+当
+
+$$
+\displaystyle
+in=out
+$$
+
+时，生产者和消费者指针重合，表示缓冲区为空，item 数量为 0。
+
+当
+
+$$
+\displaystyle
+(in+1)\bmod BUFFER\_SIZE=out
+$$
+
+时，`in` 再前进一步就会与 `out` 重合，表示缓冲区已满。由于必须保留一个空单元用于区分队空和队满，因此最多只能存放
+
+$$
+\displaystyle
+BUFFER\_SIZE-1
+$$
+
+个 item。故两种条件对应的数量分别为 0 和 $\displaystyle BUFFER\_SIZE-1$，选 B。A、D 错误地认为所有数组单元都可用于存放元素；C 将队空和队满的含义颠倒。
+
+</details>
+
+---
+
+35. **【王道·卷六-Q26】** 在某个十字路口，每个车道只允许一辆车通过，允许直行、左拐和右拐，如下图所示。若将各个方向的车视为进程，则需要对这些进程进行同步并保证尽可能多的车通过。这里的临界资源个数至少应该是（  ）个。
+![卷六_Q26_十字路口车流](/img/questions/408-mock/wangdao-set-06-q26.png)
+
+<div className="choice-options">
+<div className="choice-option-row">A. 1 &emsp;&emsp; B. 2 &emsp;&emsp; C. 4 &emsp;&emsp; D. 3</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 为保证安全，车辆轨迹相交的区域不能被两辆车同时占用；为提高并发度，又不能把整个路口简单地看作一个临界资源，否则任一时刻只能通过一辆车。可将十字路口中心划分为 4 个互不重叠的冲突区域，即 4 个象限，每个象限分别作为一个临界资源。
+
+不同方向和转向的车辆在进入路口前，申请其行驶路径将经过的一个或多个象限：右转通常只占用一个象限，直行占用两个象限，左转占用三个象限。轨迹不冲突的车辆可同时获得不同象限并并发通过，轨迹冲突的车辆则会因竞争同一象限而互斥。若少于 4 个临界资源，就无法独立表示路口的 4 个基本冲突区域，会不必要地降低并发度或无法准确排除冲突。因此至少需要 4 个临界资源，选 C。
+
+</details>
+
+---
+
+## 2.4 死锁
+
+### 2.4.1 死锁的概念
+
+36. **【王道·卷一-Q28】** 假定某系统中有3台设备 $\displaystyle R1$、4台设备 $\displaystyle R2$，它们被 $\displaystyle P_1$、$\displaystyle P_2$、$\displaystyle P_3$ 和 $\displaystyle P_4$ 四个进程互斥共享，且已知这四个进程均以下面所示的顺序使用现有设备：申请 $\displaystyle R1 \rightarrow$ 申请 $\displaystyle R2 \rightarrow$ 申请 $\displaystyle R1 \rightarrow$ 释放 $\displaystyle R1 \rightarrow$ 释放 $\displaystyle R2 \rightarrow$ 释放 $\displaystyle R1$。在系统运行过程中，是否可能产生死锁？（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 不会产生死锁</div>
+<div className="choice-option-row">B. 有可能产生死锁，因为 $\displaystyle R1$ 资源不足</div>
+<div className="choice-option-row">C. 有可能产生死锁，因为 $\displaystyle R2$ 资源不足</div>
+<div className="choice-option-row">D. 有可能其中的三个进程进入死锁状态，而另一个进程正常运行</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 每个进程要完成运行，最多需要先后占有 2 台 $\displaystyle R1$ 和 1 台 $\displaystyle R2$。系统可能出现如下状态：$\displaystyle P_1$、$\displaystyle P_2$、$\displaystyle P_3$ 各自先获得 1 台 $\displaystyle R1$，随后又各获得 1 台 $\displaystyle R2$，然后都申请第 2 台 $\displaystyle R1$。此时 3 台 $\displaystyle R1$ 已分别被这 3 个进程占有，且它们在获得新的 $\displaystyle R1$ 前都不会释放现有资源，因此三者相互等待，形成死锁。
+
+系统中尚有 1 台空闲的 $\displaystyle R2$，但死锁进程所缺少的是 $\displaystyle R1$，所以空闲的 $\displaystyle R2$ 无法解除死锁。第 4 个进程也会因得不到第 1 台 $\displaystyle R1$ 而阻塞，不能“正常运行”，故 D 不正确。死锁的根本原因是 $\displaystyle R1$ 数量不足，选 B。
+
+</details>
+
+---
+
+37. **【王道·卷七-Q26】** 设 $\displaystyle m$ 为同类资源数，$\displaystyle n$ 为系统中的并发进程数。当 $\displaystyle n$ 个进程共享 $\displaystyle m$ 个互斥资源时，每个进程的最大需求是 $\displaystyle w$，则在下列情况中，会出现系统死锁的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle m = 2, n = 1, w = 2$ &emsp;&emsp; B. $\displaystyle m = 2, n = 2, w = 1$</div>
+<div className="choice-option-row">C. $\displaystyle m = 4, n = 3, w = 2$ &emsp;&emsp; D. $\displaystyle m = 4, n = 2, w = 3$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 对于 $\displaystyle n$ 个进程共享同类资源、每个进程最多需要 $\displaystyle w$ 个资源的情形，只要系统资源数满足
+
+$$
+\displaystyle
+m\ge n(w-1)+1
+$$
+
+就至少能保证有一个进程获得其所需的最后一个资源并完成，完成后释放资源，使其他进程依次完成，从而不会发生死锁。
+
+分别判断：
+- A：所需安全下限为 $\displaystyle 1\times(2-1)+1=2$，现有 $\displaystyle m=2$，不会死锁。
+- B：每个进程最多只需 1 个资源，获得资源后无须继续等待，不会死锁。
+- C：所需安全下限为 $\displaystyle 3\times(2-1)+1=4$，现有 $\displaystyle m=4$，不会死锁。
+- D：所需安全下限为 $\displaystyle 2\times(3-1)+1=5$，但只有 4 个资源。可能出现两个进程各占有 2 个资源并同时等待第 3 个资源的情况，此时无空闲资源可分配，形成死锁。
+
+因此选 D。
+
+</details>
+
+---
+
+### 2.4.2 死锁预防
+
+38. **【王道·卷三-Q27】** 为了破坏“请求和保持”条件，提出了两种方法：第一种方法是在进程运行前，必须一次性地申请其在整个运行期间所需的全部资源；第二种方法是允许进程只获得运行初期所需的资源后便可开始运行，进程在运行期间再逐步释放已分配给自己且已使用完毕的全部资源后，才能请求新的资源。在关于这两种方法的说法中，错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 第一种方法简单、易行且安全，但是降低了资源的利用率</div>
+<div className="choice-option-row">B. 第二种方法能使进程更快地完成任务，提高设备的利用率</div>
+<div className="choice-option-row">C. 第一种方法发生饥饿的概率很大，第二种方法不会发生饥饿</div>
+<div className="choice-option-row">D. 第二种方法是对第一种方法的改进，减小了进程发生饥饿的概率</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 第一种方法要求进程在开始前一次性获得全部资源，能够彻底破坏“请求和保持”条件，实现简单且安全；但某些暂时不用的资源也会被长期占有，因此资源利用率较低，而且需要资源较多的进程可能长期无法同时获得全部资源，饥饿概率较大，A 正确。
+
+第二种方法允许进程先取得初期资源开始运行，使用完已有资源后先全部释放，再申请下一阶段资源。与第一种方法相比，它缩短了资源被无效占用的时间，有助于提高资源利用率并减小饥饿概率，因此 B、D 正确。但“减小饥饿概率”不等于“绝不会饥饿”；若某进程所需的新资源长期被其他进程占用，它仍可能长期等待。因此 C 的后半句错误，选 C。
+
+</details>
+
+---
+
+### 2.4.3 死锁避免
+
+39. **【王道·卷七-Q25】** 当利用银行家算法进行安全序列检查时，不需要的参数是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 系统资源总数 &emsp;&emsp; B. 满足系统安全的最少资源数 &emsp;&emsp; C. 用户最大需求数 &emsp;&emsp; D. 用户已占有的资源数</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 银行家算法进行安全性检查时，需要维护或计算以下数据：
+- 系统各类资源的总数，用于结合已分配资源求出当前可用资源数；
+- 每个进程对各类资源的最大需求量 `Max`；
+- 每个进程已经获得的资源量 `Allocation`；
+- 由前两者计算尚需资源量
+
+$$
+\displaystyle
+Need=Max-Allocation
+$$
+
+- 当前可用资源量 `Available`。
+
+安全性算法通过反复寻找满足 $\displaystyle Need_i\le Available$ 的进程，模拟其完成并释放资源，以判断是否存在安全序列。算法并不存在“满足系统安全的最少资源数”这一输入参数，因此选 B。
+
+</details>
+
+---
+
+40. **【竟成·模拟五-28】** 假设4个进程共享三类资源A、B、C，这些资源总数分别为10、6、7。$\displaystyle T_0$时刻的资源分配情况如下表所示，以下叙述正确的是（）。
+
+| 进程 | 已分配资源 | 资源最大需求 |
+| ---- | ---------- | ------------ |
+|      | A B C      | A B C        |
+| P1   | 1 1 1      | 2 2 2        |
+| P2   | 3 1 0      | 3 2 1        |
+| P3   | 2 2 1      | 4 5 2        |
+| P4   | 3 1 3      | 4 3 4        |
+
+<div className="choice-options">
+<div className="choice-option-row">A. 该时刻系统不安全 &emsp;&emsp; B. 该时刻系统安全，存在一条安全序列</div>
+<div className="choice-option-row">C. 该时刻系统安全，存在两条安全序列 &emsp;&emsp; D. 该时刻系统安全，存在四条安全序列</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** 无正确选项（按题面计算，系统安全且存在 8 条安全序列）
+
+**解析：** 各类资源的已分配总量为
+
+$$
+\displaystyle
+Allocation_{sum}=(9,5,5)
+$$
+
+因此初始可用资源为
+
+$$
+\displaystyle
+Available=(10,6,7)-(9,5,5)=(1,1,2)
+$$
+
+各进程尚需资源为
+
+$$
+\displaystyle
+\begin{aligned}
+Need_1&=(1,1,1)\\
+Need_2&=(0,1,1)\\
+Need_3&=(2,3,1)\\
+Need_4&=(1,2,1)
+\end{aligned}
+$$
+
+初始时只有 P1、P2 满足 $\displaystyle Need\le Available$。逐步枚举可得到 8 条安全序列：
+
+$$
+\displaystyle
+\begin{aligned}
+&P1,P2,P3,P4;\quad P1,P2,P4,P3;\\
+&P1,P4,P2,P3;\quad P1,P4,P3,P2;\\
+&P2,P1,P3,P4;\quad P2,P1,P4,P3;\\
+&P2,P4,P1,P3;\quad P2,P4,P3,P1。
+\end{aligned}
+$$
+
+因而系统处于安全状态，但安全序列共有 8 条，题目所给 B、C、D 的数量均不正确，A 也错误。该题的选项或数据应存在转录问题。
+
+</details>
+
+---
+
+### 2.4.4 死锁检测与解除
+
+41. **【王道·卷八-Q25】** 利用死锁定理简化得到下列进程资源图，则处于死锁状态的是（  ）。
+![卷八_Q25_进程资源图](/img/questions/408-mock/wangdao-set-08-q25.png)
+
+<div className="choice-options">
+<div className="choice-option-row">A. I &emsp;&emsp; B. II &emsp;&emsp; C. I和II &emsp;&emsp; D. 都不处于死锁状态</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 对资源分配图应用死锁检测思想：若某个进程当前的全部资源请求都能由可用资源满足，则可假定该进程完成并释放其已占有资源，再继续化简。
+
+在图 I 中，$\displaystyle R_2$ 有 3 个实例，其中只有 2 个已分配，尚有 1 个空闲实例。可先满足 P2 对 $\displaystyle R_2$ 的请求，使 P2 完成并释放其占有的 $\displaystyle R_1$、$\displaystyle R_2$；随后 P1 的请求也可得到满足。因此图 I 可以被完全化简，不存在死锁。
+
+在图 II 中：P1 等待由 P2 占有的 $\displaystyle R_1$；P2 等待由 P3 占有的 $\displaystyle R_4$；P3 等待 $\displaystyle R_2$，而 $\displaystyle R_2$ 的两个实例分别被 P1 和 P3 占有。虽然 $\displaystyle R_3$ 尚有可用实例，但 P3 还同时缺少 $\displaystyle R_2$，仍不能完成。此时没有任何进程的全部请求能够得到满足，资源图无法继续化简，P1、P2、P3 构成循环等待，处于死锁状态。因此只有图 II 死锁，选 B。
+
+</details>
+
+---
+
+42. **【竟成·模拟三-25】** 某一系统在某时刻的资源分配表和进程等待表如下表所示，每种资源都独一无二、无法共享且无法剥夺，则下列说法中正确的是（）。
+
+资源分配表
+
+| 进程 | 资源 |
+| ---- | ---- |
+| P1   | R1   |
+| P2   | R3   |
+| P3   | R2   |
+| P3   | R5   |
+| P4   | R4   |
+
+进程等待表
+
+| 进程 | 资源 |
+| ---- | ---- |
+| P1   | R2   |
+| P2   | R1   |
+| P3   | R3   |
+| P3   | R4   |
+| P4   | R5   |
+
+<div className="choice-options">
+<div className="choice-option-row">A. 系统中不存在死锁。 &emsp;&emsp; B. 系统中存在死锁，且终止任意一个进程都可以解除死锁。</div>
+<div className="choice-option-row">C. 系统中存在死锁，但终止任意一个进程不一定能解除死锁。 &emsp;&emsp; D. 无法判断系统中是否存在死锁。</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 根据资源分配与等待关系可得到：
+
+$$
+\displaystyle
+\begin{aligned}
+&P1\rightarrow R2\rightarrow P3\\
+&P3\rightarrow R3\rightarrow P2\\
+&P2\rightarrow R1\rightarrow P1
+\end{aligned}
+$$
+
+因而 P1、P2、P3 构成一个循环等待。此外还有
+
+$$
+\displaystyle
+P3\rightarrow R4\rightarrow P4\rightarrow R5\rightarrow P3
+$$
+
+因而 P3、P4 又构成另一个循环等待。每种资源都只有一个实例，所以资源分配图中存在环即可判定系统发生死锁。
+
+但终止任意一个进程并不一定能解除全部死锁。例如，终止 P1 只能破坏 P1—P2—P3 这一环，P3 与 P4 之间的环仍然存在；终止 P4 只能破坏 P3—P4 这一环，P1—P2—P3 的环仍然存在。只有选择能同时破坏两个环的进程，例如 P3，才可一次解除全部死锁。因此系统存在死锁，但终止任意一个进程不一定能解除死锁，选 C。
+
+</details>
+
+---
+
+## 2.5 本章疑难点
+
+43. **【竟成·模拟一-25】** 下列关于进程、线程与同步机制的描述中，错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 多线程进程中，某个线程执行信号量的P操作可能导致其他线程阻塞</div>
+<div className="choice-option-row">B. 管程的wait操作必须与signal成对出现，否则可能破坏条件变量的状态</div>
+<div className="choice-option-row">C. 同一进程的线程共享文件描述符表，但各自拥有独立的用户栈和寄存器</div>
+<div className="choice-option-row">D. 死锁的四个必要条件中，抢占式调度可破坏"不可剥夺条件"</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 管程中的条件变量用于等待某个条件成立。线程执行 `wait` 时，会释放管程的互斥访问权并进入相应条件变量的等待队列；其他线程执行 `signal` 时，若该条件变量上存在等待线程，则唤醒其中一个。`wait` 与 `signal` 并不要求在程序结构上严格成对出现，而且条件变量通常不保存“多余的唤醒次数”：没有线程等待时执行 `signal`，该信号通常直接失效，并不会因此“破坏条件变量的状态”。因此 B 错误。
+
+A 中，线程执行 P 操作会减少可用资源数；当资源不足时，执行 P 操作的线程会阻塞，也可能使随后申请该资源的其他线程阻塞，故其表述可以成立。C 正确，同一进程内的线程共享代码段、数据段、打开文件等进程级资源，但每个线程拥有独立的程序计数器、寄存器和用户栈。D 的表述不够严谨：严格来说，仅抢占 CPU 并不能剥夺进程已持有的其他资源；但若“抢占”泛指允许系统强制收回相关资源，则确实可以破坏死锁的不可剥夺条件。本题按单选题意，最明确的错误项为 B。
+
+</details>

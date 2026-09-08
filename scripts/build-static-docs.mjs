@@ -108,12 +108,13 @@ async function prepareStage(stageRoot) {
 
 function runProcess(command, args, { cwd, env, label }) {
   const startedAt = Date.now();
+  const useShell = process.platform === 'win32' && path.extname(command).toLowerCase() === '.cmd';
 
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       cwd,
       env,
-      shell: process.platform === 'win32',
+      shell: useShell,
       stdio: 'inherit',
     });
 

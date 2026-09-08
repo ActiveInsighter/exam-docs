@@ -1,10 +1,10 @@
-name: Deploy Fumadocs to EdgeOne
+name: Deploy exam-docs to EdgeOne
 
 on:
   workflow_dispatch:
 
 concurrency:
-  group: fumadocs-production-${{ github.ref }}
+  group: exam-docs-production-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -12,11 +12,12 @@ permissions:
 
 env:
   EDGEONE_CLI_VERSION: 1.6.31-3
-  EDGEONE_DOCS_PROJECT_NAME: ${{ vars.EDGEONE_DOCS_PROJECT_NAME }}
+  EDGEONE_DOCS_PROJECT_NAME: exam-docs
+  EDGEONE_DOCS_PUBLIC_URL: ${{ vars.EDGEONE_DOCS_PUBLIC_URL }}
 
 jobs:
   deploy:
-    name: Deploy pure static Fumadocs site
+    name: Deploy pure static exam-docs site
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
@@ -121,10 +122,6 @@ jobs:
             echo '::error::Missing GitHub Actions secret: EDGEONE_API_TOKEN'
             exit 1
           }
-          [[ -n "${EDGEONE_DOCS_PROJECT_NAME:-}" ]] || {
-            echo '::error::Missing GitHub Actions variable: EDGEONE_DOCS_PROJECT_NAME'
-            exit 1
-          }
           edgeone --version
           echo "- EdgeOne CLI cache hit: ${{ steps.edgeone-cache.outputs.cache-hit }}" >> "${GITHUB_STEP_SUMMARY}"
 
@@ -220,7 +217,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          zip_path="${RUNNER_TEMP}/fumadocs-static-production.zip"
+          zip_path="${RUNNER_TEMP}/exam-docs-static-production.zip"
           rm -f -- "${zip_path}"
           started="$(date +%s)"
           (cd .static-docs && zip -qr -6 "${zip_path}" .)
@@ -288,6 +285,14 @@ jobs:
           deployment_query="${deployment_url#*\?}"
           [[ "${deployment_query}" != "${deployment_url}" ]] || { echo '::error::Deployment URL is missing its access token.'; exit 1; }
 
+          if [[ -n "${EDGEONE_DOCS_PUBLIC_URL:-}" ]]; then
+            production_base="${EDGEONE_DOCS_PUBLIC_URL%/}"
+            production_suffix=''
+          else
+            production_base="${deployment_base}"
+            production_suffix="?${deployment_query}"
+          fi
+
           manifest='.static-docs/search-index.json'
           router_url="$(jq -r '.categories[0].router.url' "${manifest}")"
           router_path=".static-docs${router_url}"
@@ -302,7 +307,7 @@ jobs:
             [[ "${status}" == '200' ]]
           }
 
-          for path in '/' '/docs/' '/search-index.json' "${router_url}" "${core_url}" "${body_url}" '/docs/math/knowledge/advanced-mathematics/01-limits-continuity/' '/docs/math/knowledge/advanced-mathematics/01-limits-continuity.md'; do
+          for path in '/' '/docs/' '/search-index.json' "${router_url}" "${core_url}" "${body_url}" '/docs/intro/' '/docs/intro.md'; do
             verify_deployment_path "${path}"
           done
 
@@ -313,7 +318,7 @@ jobs:
             local delay="${4:-5}"
             local status=''
             for attempt in $(seq 1 "${attempts}"); do
-              status="$(curl --silent --show-error --max-time 60 -L -o /dev/null -w '%{http_code}' "https://fumadocs.any1.tech${path}")"
+            status="$(curl --silent --show-error --max-time 60 -L -o /dev/null -w '%{http_code}' "${production_base}${path}${production_suffix}")"
               echo "production ${path} attempt ${attempt}/${attempts} -> ${status}"
               if [[ "${status}" == "${expected}" ]]; then return 0; fi
               sleep "${delay}"
@@ -338,7 +343,7 @@ jobs:
             local path="$2"
             local expected="$3"
             (
-              status="$(curl --silent --show-error --max-time 60 -L -o /dev/null -w '%{http_code}' "https://fumadocs.any1.tech${path}")"
+              status="$(curl --silent --show-error --max-time 60 -L -o /dev/null -w '%{http_code}' "${production_base}${path}${production_suffix}")"
               printf '%s %s\n' "${status}" "${expected}" > "${probe_dir}/${name}.status"
             ) &
             pids+=("$!")
@@ -346,8 +351,8 @@ jobs:
 
           start_probe home '/' '200'
           start_probe docs '/docs/' '200'
-          start_probe math '/docs/math/knowledge/advanced-mathematics/01-limits-continuity/' '200'
-          start_probe markdown '/docs/math/knowledge/advanced-mathematics/01-limits-continuity.md' '200'
+          start_probe intro '/docs/intro/' '200'
+          start_probe markdown '/docs/intro.md' '200'
           start_probe retired_upload '/api/blob/upload-url' '404'
           start_probe retired_ingest '/api/integrations/anyworkflow' '404'
           start_probe retired_download '/download/tasks/probe/1/probe/md' '404'
@@ -393,8 +398,8 @@ jobs:
             return 1
           }
 
-          verify_compressed docs 'https://fumadocs.any1.tech/docs/408'
-          verify_compressed search "https://fumadocs.any1.tech${body_url}"
+          verify_compressed docs "${production_base}/docs/intro/${production_suffix}"
+          verify_compressed search "${production_base}${body_url}${production_suffix}"
           echo "- CDN docs/search compression verification: $(($(date +%s) - started))s" >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Write deployment summary
@@ -404,7 +409,7 @@ jobs:
           finished="$(date +%s)"
           total_seconds="$((finished - ${PIPELINE_STARTED_AT:-finished}))"
           {
-            echo '## EdgeOne Fumadocs pure-static deployment'
+            echo '## EdgeOne exam-docs pure-static deployment'
             echo
             echo "- Project: ${EDGEONE_DOCS_PROJECT_NAME}"
             echo '- Runtime: static CDN only; Cloud Functions 0; Edge Functions 0'

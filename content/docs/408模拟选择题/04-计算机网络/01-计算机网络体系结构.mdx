@@ -1,0 +1,919 @@
+---
+sidebar_position: 1
+title: 第1章 计算机网络体系结构
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第1章 计算机网络体系结构
+
+## 1.1 计算机网络概述
+
+### 1.1.1 计算机网络的概念
+
+1. **【王道·卷七-Q35】** 一个 $\displaystyle 2Mb/s$ 的网络，线路长度为1km，传输速度为 $\displaystyle 20m/ms$，分组大小为 $\displaystyle 100B$，应答帧大小可以忽略。若采用停止-等待协议，则实际数据率是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle 2Mb/s$ &emsp;&emsp; B. $\displaystyle 1Mb/s$ &emsp;&emsp; C. $\displaystyle 8kb/s$ &emsp;&emsp; D. $\displaystyle 16kb/s$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 数据帧长度为：
+
+$$
+\displaystyle
+L=100\mathrm{B}=800\mathrm{bit}
+$$
+
+数据帧的发送时延为：
+
+$$
+\displaystyle
+T_t=\dfrac{800}{2\times 10^6}\mathrm{s}=0.4\mathrm{ms}
+$$
+
+链路单向传播时延为：
+
+$$
+\displaystyle
+T_p=\dfrac{1000\mathrm{m}}{20\mathrm{m/ms}}=50\mathrm{ms}
+$$
+
+停止-等待协议中，发送方发完一个数据帧后，要等待确认帧返回。确认帧发送时延忽略，因此一个发送周期为：
+
+$$
+\displaystyle
+T=T_t+2T_p=0.4+2\times 50=100.4\mathrm{ms}
+$$
+
+实际数据率为：
+
+$$
+\displaystyle
+R=\dfrac{800\mathrm{bit}}{100.4\mathrm{ms}}\approx 7.97\mathrm{kb/s}\approx 8\mathrm{kb/s}
+$$
+
+因此选择 C。A 是链路的标称数据传输率，并非停止-等待协议下的实际数据率；B、D 均与计算结果不符。
+
+</details>
+
+---
+
+### 1.1.4 电路交换、报文交换与分组交换
+
+2. **【王道·卷一-Q33】** 假设要传输的报文共 $\displaystyle x$ 位，从源点到终点共经过 $\displaystyle k$ 段链路，每段链路的传播时延为 $\displaystyle d$ 秒，数据传输率为 $\displaystyle b$ b/s，各节点的排队等待时间忽略不计。当采用电路交换时，电路的建立时间为 $\displaystyle c$ 秒。当采用分组交换时，分组长度为 $\displaystyle p$ 位，每个分组所必须添加的首部都很短，每个分组都是等长的，对分组的发送时延的影响在本题中可不考虑。在满足（  ）条件时，分组交换的时延比电路交换的要小。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle (k - 1)p / b < c$ &emsp;&emsp; B. $\displaystyle kp / b < c$ &emsp;&emsp; C. $\displaystyle (k - 1)p / b < c + d$ &emsp;&emsp; D. $\displaystyle kp / b < c + d$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 电路交换先建立连接，再连续发送整个报文，其总时延为：
+
+$$
+\displaystyle
+T_c=c+\dfrac{x}{b}+kd
+$$
+
+分组交换采用存储转发。报文共需发送的总数据量仍为 $\displaystyle x$，因此源主机发送全部分组需要 $\displaystyle x/b$；最后一个分组还需在后续 $\displaystyle k-1$ 段链路上继续转发，每段增加一个分组发送时延 $\displaystyle p/b$。故总时延为：
+
+$$
+\displaystyle
+T_p=\dfrac{x}{b}+(k-1)\dfrac{p}{b}+kd
+$$
+
+要使分组交换时延更小，应满足：
+
+$$
+\displaystyle
+\begin{aligned}
+T_p&<T_c\\
+\dfrac{x}{b}+(k-1)\dfrac{p}{b}+kd&<c+\dfrac{x}{b}+kd\\
+(k-1)\dfrac{p}{b}&<c
+\end{aligned}
+$$
+
+因此选择 A。两种交换方式经历的总传播时延均为 $\displaystyle kd$，比较时会相互抵消，所以条件中不应出现 $\displaystyle d$。
+
+</details>
+
+---
+
+3. **【王道·卷一-Q38】** 在基于TCP/IP模型的分组交换网络中，每个分组都可能走不同的路径，所以在分组到达目的主机后应该重新排序；又由于不同类型的物理网络的MTU不同，因此一个分组在传输的过程中也可能需要分段，这些分段在到达目的主机后也必须重组。对于分组的排序和分段的重组，下列说法中正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 排序和重组工作都由网络层完成</div>
+<div className="choice-option-row">B. 排序和重组工作都由传输层完成</div>
+<div className="choice-option-row">C. 排序工作由网络层完成，而重组工作由传输层完成</div>
+<div className="choice-option-row">D. 排序工作由传输层完成，而重组工作由网络层完成</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** IP 网络层提供的是无连接、尽力而为的数据报服务，不保证各个 IP 数据报按序到达。若上层采用 TCP，则 TCP 根据字节序号在传输层完成乱序报文段的缓存和重新排序。
+
+IPv4 数据报在传输途中可能因链路 MTU 较小而被分片。分片属于 IP 数据报自身的处理，因此由目的主机的网络层根据标识、片偏移和 MF 标志完成重组，中间路由器不负责重组。
+
+因此，排序由传输层完成，分片重组由网络层完成，选择 D。A、B 将两项工作错误地归到同一层；C 正好颠倒了两者的职责。
+
+</details>
+
+---
+
+4. **【王道·卷二-Q33】** 在某分组交换网中，各设备的发送速率相同，通信两端要经过2段链路。设报文长度为 $\displaystyle 0.2MB$，分组的首部长度为 $\displaystyle 20B$，传播时延和节点排队时间均可忽略不计；假设各设备的发送速率为 $\displaystyle s$，分组的数据载荷长度为 $\displaystyle x$，分组数量恰好为整数个，为使总时延最小，分组的数据载荷长度应约为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 1024B &emsp;&emsp; B. 2048B &emsp;&emsp; C. 3072B &emsp;&emsp; D. 4096B</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 设报文长度为 $\displaystyle M$，每个分组的数据载荷为 $\displaystyle x$，首部长度为 $\displaystyle h=20\mathrm{B}$，则分组数量为：
+
+$$
+\displaystyle
+n=\dfrac{M}{x}
+$$
+
+每个分组总长度为 $\displaystyle x+h$。经过两段链路并采用存储转发时，所有分组流水发送的总发送时延为：
+
+$$
+\displaystyle
+T=\left(n+1\right)\dfrac{x+h}{s}
+=\left(\dfrac{M}{x}+1\right)\dfrac{x+h}{s}
+$$
+
+忽略与 $\displaystyle x$ 无关的常数项，只需最小化：
+
+$$
+\displaystyle
+f(x)=\dfrac{Mh}{x}+x
+$$
+
+根据均值不等式或令导数为零，有：
+
+$$
+\displaystyle
+x=\sqrt{Mh}
+$$
+
+按 $\displaystyle 0.2\mathrm{MB}=0.2\times 1024\times 1024\mathrm{B}$ 计算：
+
+$$
+\displaystyle
+x=\sqrt{0.2\times 1024\times 1024\times 20}\approx 2048\mathrm{B}
+$$
+
+因此选择 B。分组过小时，首部数量过多；分组过大时，最后一个分组在第二段链路上的流水尾部时延增大，二者需要折中。
+
+</details>
+
+---
+
+5. **【竟成·模拟三-35】** 要传输的数据长度一共X比特，传输路径由n段链路构成，每段链路的传播时延为D秒，数据传输速率为B(bps)，忽略链路的处理时延和排队时延。电路交换时，建立电路的时间为S秒；分组交换时，分组的长度为P比特（假设X是P的整数倍），要使分组传输的时延和电路交换的时延相等，则电路建立的时间S为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. nP/B &emsp;&emsp; B. (n-1)P/B &emsp;&emsp; C. nX/B &emsp;&emsp; D. (n-1)X/B</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 电路交换的总时延为：
+
+$$
+\displaystyle
+T_c=S+\dfrac{X}{B}+nD
+$$
+
+分组交换中，源主机发送全部分组需要 $\displaystyle X/B$，最后一个分组还要在后续 $\displaystyle n-1$ 段链路中继续存储转发，因此总时延为：
+
+$$
+\displaystyle
+T_p=\dfrac{X}{B}+(n-1)\dfrac{P}{B}+nD
+$$
+
+令二者相等：
+
+$$
+\displaystyle
+\begin{aligned}
+S+\dfrac{X}{B}+nD
+&=\dfrac{X}{B}+(n-1)\dfrac{P}{B}+nD\\
+S&=(n-1)\dfrac{P}{B}
+\end{aligned}
+$$
+
+因此选择 B。传播时延和发送整个报文的时间在等式两边均相同，最终只剩分组在后续链路上的流水转发开销。
+
+</details>
+
+---
+
+6. **【竟成·模拟四-34】** 下列有关数据报交换方式和虚电路交换方式的叙述中，错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 数据交换方式不保证分组的按序到达，虚电路交换方式的分组按序到达目的节点</div>
+<div className="choice-option-row">B. 数据交换方式的中间结点对每个分组都需要进行路由选择，虚电路交换方式只需要在建立虚电路时确认虚电路的路由</div>
+<div className="choice-option-row">C. 数据交换方式和虚电路交换方式的中间结点故障时都能重新选择路由进行传输</div>
+<div className="choice-option-row">D. 数据交换方式中的转发依据是目的IP地址，虚电路交换方式的转发依据是虚电路号</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 数据报交换中，每个分组独立携带完整目的地址，中间结点可分别为每个分组选择路由。因此某个中间结点或链路发生故障后，后续分组有可能改走其他路径。
+
+虚电路交换在通信前建立固定的逻辑路径，后续分组根据虚电路号沿既定路径转发。若该路径上的中间结点发生故障，原虚电路通常会失效，需要重新建立虚电路，不能直接保证在原虚电路上重新选路继续传输。因此 C 错误。
+
+A 正确：数据报可能乱序，虚电路中的分组通常沿同一路径按序到达。B 正确：数据报逐分组路由，虚电路主要在建立阶段确定路径。D 正确：数据报依据目的地址转发，虚电路依据虚电路标识转发。
+
+</details>
+
+---
+
+7. **【竟成·模拟六-35】** 主机甲和主机乙通过一条链路进行连接，链路中只有一个路由器进行连接，每段链路的传输速率均为10kbps，忽略所有的传播时延、分组头开销和分组拆装时间。主机甲采用10kb的分组大小向乙发送了一个大小为20kb的报文，花费了t秒。在t秒内，主机甲采用报文交换的方式能传输的报文大小为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 10kb &emsp;&emsp; B. 15kb &emsp;&emsp; C. 20kb &emsp;&emsp; D. 25kb</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 甲到乙之间有一个路由器，因此共经过两段链路。采用分组交换时，20kb 报文被拆成两个 10kb 分组。每个分组在一段链路上的发送时延为：
+
+$$
+\displaystyle
+\dfrac{10\mathrm{kb}}{10\mathrm{kb/s}}=1\mathrm{s}
+$$
+
+利用流水传输：第一个分组在第 $\displaystyle 2\mathrm{s}$ 到达乙，第二个分组在第 $\displaystyle 3\mathrm{s}$ 到达乙，因此：
+
+$$
+\displaystyle
+t=3\mathrm{s}
+$$
+
+若采用报文交换，设报文大小为 $\displaystyle L$。整个报文必须在路由器处完整接收后再发送，因此经过两段链路的总时延为：
+
+$$
+\displaystyle
+2\times \dfrac{L}{10\mathrm{kb/s}}=3\mathrm{s}
+$$
+
+解得：
+
+$$
+\displaystyle
+L=15\mathrm{kb}
+$$
+
+因此选择 B。报文交换不能像分组交换那样在不同链路上形成分组级流水。
+
+</details>
+
+---
+
+### 1.1.6 计算机网络的性能指标
+
+8. **【王道·卷一-Q34】** 某信道的长度为 $\displaystyle 1\mathrm{km}$，信道带宽为 $\displaystyle 160\mathrm{MHz}$，信号功率为 $\displaystyle 0.6W$，噪声功率为 $\displaystyle 0.0193W$，信号在该信道中的传播速率为 $\displaystyle 200000\mathrm{km/s}$。在该信道中，主机 $\displaystyle A$ 向 $\displaystyle B$ 连续传输一个 $\displaystyle 6000bit$ 的文件，则该链路上的比特数量的最大值是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle 500bit$ &emsp;&emsp; B. $\displaystyle 512bit$ &emsp;&emsp; C. $\displaystyle 1024bit$ &emsp;&emsp; D. $\displaystyle 4000bit$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 先用香农公式计算有噪声信道的极限数据传输率：
+
+$$
+\displaystyle
+C=W\log_2\left(1+\dfrac{S}{N}\right)
+$$
+
+其中：
+
+$$
+\displaystyle
+\dfrac{S}{N}=\dfrac{0.6}{0.0193}\approx 31.09
+$$
+
+因而：
+
+$$
+\displaystyle
+C\approx 160\times 10^6\times \log_2(32.09)\approx 8.0\times 10^8\mathrm{bit/s}
+$$
+
+单向传播时延为：
+
+$$
+\displaystyle
+T_p=\dfrac{1\mathrm{km}}{200000\mathrm{km/s}}=5\times 10^{-6}\mathrm{s}
+$$
+
+链路上同时存在的最大比特数，即带宽时延积：
+
+$$
+\displaystyle
+C T_p\approx 8.0\times 10^8\times 5\times 10^{-6}=4000\mathrm{bit}
+$$
+
+文件共有 6000bit，足以使链路被填满，因此最大在途比特数约为 4000bit，选择 D。
+
+</details>
+
+---
+
+9. **【王道·卷二-Q36】** 如下图所示，主机 $\displaystyle H1$ 通过 CSMA/CD 协议与主机 $\displaystyle H2$ 进行通信，主机 $\displaystyle H1$ 向主机 $\displaystyle H2$ 发送 $\displaystyle ARP$ 请求帧，数据帧的大小为 $\displaystyle 64B$（最小帧长），且不考虑以太网帧的前导码，信道的数据传输率为 $\displaystyle 100Mb/s$，信号传播速率为 $\displaystyle 200m/\mu s$，数据帧通过每个集线器时有 $\displaystyle 0.48\mu s$ 的延迟，则主机 $\displaystyle H1$ 和主机 $\displaystyle H2$ 理论上的最远距离为（  ）。
+![卷二_Q36_CSMACD以太网](/img/questions/408-mock/wangdao-set-02-q36.png)
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle 512m$ &emsp;&emsp; B. $\displaystyle 256m$ &emsp;&emsp; C. $\displaystyle 416m$ &emsp;&emsp; D. $\displaystyle 320m$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** CSMA/CD 要求发送方在发送最短帧的时间内仍能检测到最远端发生的冲突，因此必须满足：
+
+$$
+\displaystyle
+T_{\text{帧发送}}\geq T_{\text{往返传播}}
+$$
+
+最小帧长为 64B，其发送时延为：
+
+$$
+\displaystyle
+T_t=\dfrac{64\times 8}{100\times 10^6}\mathrm{s}=5.12\mu\mathrm{s}
+$$
+
+图中有两个集线器。信号往返时，每个集线器各经过两次，因此集线器总延迟为：
+
+$$
+\displaystyle
+T_h=2\times 2\times 0.48=1.92\mu\mathrm{s}
+$$
+
+设两主机间所有电缆的总长度为 $\displaystyle L$。电缆造成的往返传播时延为：
+
+$$
+\displaystyle
+T_p=\dfrac{2L}{200}=\dfrac{L}{100}\mu\mathrm{s}
+$$
+
+临界情况下：
+
+$$
+\displaystyle
+\begin{aligned}
+\dfrac{L}{100}+1.92&=5.12\\
+L&=320\mathrm{m}
+\end{aligned}
+$$
+
+因此选择 D。若忽略集线器延迟，会错误得到更大的距离。
+
+</details>
+
+---
+
+10. **【王道·卷三-Q33】** 假定从站点 $\displaystyle A$ 发送一个很短的分组到站点 $\displaystyle B$，站点 $\displaystyle B$ 收到后立即发送很短的应答分组给站点 $\displaystyle A$（双方的发送时延均可忽略不计），站点 $\displaystyle A$ 测量出往返时间 $\displaystyle RTT$，则（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 该 $\displaystyle RTT$ 的值就是站点 $\displaystyle A$ 和站点 $\displaystyle B$ 之间的传输媒体的往返传播时延</div>
+<div className="choice-option-row">B. 该 $\displaystyle RTT$ 的值有可能小于站点 $\displaystyle A$ 和站点 $\displaystyle B$ 之间的传输媒体的往返传播时延</div>
+<div className="choice-option-row">C. 该 $\displaystyle RTT$ 的值一定大于站点 $\displaystyle A$ 和站点 $\displaystyle B$ 之间的传输媒体的往返传播时延</div>
+<div className="choice-option-row">D. 该 $\displaystyle RTT$ 的值大于或等于站点 $\displaystyle A$ 和站点 $\displaystyle B$ 之间的传输媒体的往返传播时延</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 即使分组很短、双方发送时延可以忽略，测得的 RTT 仍可能包含：
+
+- 信号在传输媒体中的往返传播时延；
+- 中间结点的处理时延；
+- 可能存在的排队时延；
+- 目的站点生成应答时产生的极少量处理时间。
+
+因此：
+
+$$
+\displaystyle
+RTT\geq 2T_p
+$$
+
+当处理时延和排队时延均为零时，RTT 可以恰好等于往返传播时延；存在其他时延时，RTT 会更大。因此 D 正确。A 忽略了处理和排队等额外时延；B 不可能成立；C 中“一定大于”过强，因为理想情况下可以相等。
+
+</details>
+
+---
+
+11. **【王道·卷三-Q39】** 使用类似于TCP滑动窗口的可靠传输字节流的某种协议，数据传输率为 $\displaystyle 2.5Gb/s$。假定PDU的最大生存时间为51.2s，若要尽可能快地传输数据，则PDU首部中序号字段的长度至少应设计为（  ）（注：$\displaystyle G = 2^{30}$）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 64b &emsp;&emsp; B. 37b &emsp;&emsp; C. 34b &emsp;&emsp; D. 32b</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 该协议传输的是可靠字节流，因此序号按字节编号。为了防止序号在旧 PDU 尚未从网络中消失时发生循环复用，序号空间至少要覆盖一个 PDU 最大生存时间内可能发送的字节数。
+
+数据传输率为：
+
+$$
+\displaystyle
+2.5\mathrm{Gb/s}=2.5\times 2^{30}\mathrm{bit/s}
+$$
+
+在 51.2s 内最多发送的字节数为：
+
+$$
+\displaystyle
+\begin{aligned}
+N
+&=\dfrac{2.5\times 2^{30}\times 51.2}{8}\\
+&=16\times 2^{30}\\
+&=2^{34}\mathrm{B}
+\end{aligned}
+$$
+
+因此，序号字段至少需要 34 位，才能提供不少于 $\displaystyle 2^{34}$ 个不同序号，选择 C。32 位序号空间过小，会在最大生存时间内发生序号回绕；37 位和 64 位虽然足够，但不是最小长度。
+
+</details>
+
+---
+
+12. **【王道·卷四-Q35】** 一个信道的数据传输率为 $\displaystyle 4000b/s$，单向传播时延是 $\displaystyle 200ms$，确认帧的长度忽略不计。要使停止-等待协议有 $\displaystyle 50\%$ 以上的信道利用率，最小帧长应为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 200B &emsp;&emsp; B. 300B &emsp;&emsp; C. 100B &emsp;&emsp; D. 150B</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 设数据帧的发送时延为 $\displaystyle T_t$，单向传播时延为 $\displaystyle T_p=0.2\mathrm{s}$。确认帧发送时延忽略时，停止-等待协议的信道利用率为：
+
+$$
+\displaystyle
+U=\dfrac{T_t}{T_t+2T_p}
+$$
+
+要使利用率不低于 $\displaystyle 50\%$，应满足：
+
+$$
+\displaystyle
+\begin{aligned}
+\dfrac{T_t}{T_t+0.4}&\geq 0.5\\
+2T_t&\geq T_t+0.4\\
+T_t&\geq 0.4\mathrm{s}
+\end{aligned}
+$$
+
+因此最小帧长为：
+
+$$
+\displaystyle
+L=RT_t=4000\times 0.4=1600\mathrm{bit}=200\mathrm{B}
+$$
+
+当帧长为 200B 时，利用率恰好为 $\displaystyle 50\%$，符合“$\displaystyle 50\%$ 以上”的要求，因此选择 A。其余小于 200B 的选项均不能达到要求；300B 虽然可以，但不是最小帧长。
+
+</details>
+
+---
+
+13. **【王道·卷五-Q33】** 信道的信号状态数为4，信噪比为30dB时的极限数据传输率为 $\displaystyle 8kb/s$，则其带宽约为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 0.8kHz &emsp;&emsp; B. 2kHz &emsp;&emsp; C. 0.4kHz &emsp;&emsp; D. 1kHz</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 信道同时受到码元传输速率和信噪比的限制，需要分别考查奈奎斯特公式与香农公式。
+
+信号状态数为 $\displaystyle M=4$，由奈奎斯特公式：
+
+$$
+\displaystyle
+C_N=2W\log_2M=2W\log_24=4W
+$$
+
+信噪比为 30dB，对应的线性信噪比为：
+
+$$
+\displaystyle
+\dfrac{S}{N}=10^{30/10}=1000
+$$
+
+由香农公式：
+
+$$
+\displaystyle
+C_S=W\log_2\left(1+\dfrac{S}{N}\right)
+=W\log_2(1001)\approx 9.97W
+$$
+
+实际极限数据传输率由两者中较小者决定，即：
+
+$$
+\displaystyle
+C=\min(4W,9.97W)=4W
+$$
+
+已知 $\displaystyle C=8\mathrm{kb/s}$，所以：
+
+$$
+\displaystyle
+W=\dfrac{8\mathrm{kb/s}}{4}=2\mathrm{kHz}
+$$
+
+因此选择 B。若只使用香农公式，会忽略信号状态数只有 4 所造成的奈奎斯特限制。
+
+</details>
+
+---
+
+14. **【王道·卷五-Q35】** 主机 $\displaystyle A$ 和 $\displaystyle B$ 采用CSMA/CA协议进行通信，SIFS为 $\displaystyle 28\mu s$，DIFS为 $\displaystyle 120\mu s$，RTS、CTS、ACK的发送时延分别为 $\displaystyle 3\mu s$、$\displaystyle 2\mu s$、$\displaystyle 2\mu s$，忽略所有传播时延，主机 $\displaystyle A$ 要向主机 $\displaystyle B$ 发送 $\displaystyle 1000B$ 的数据，数据传输率为 $\displaystyle 50Mb/s$，$\displaystyle AP$ 收到RTS帧后，要向主机 $\displaystyle A$ 发送一个CTS帧，则在该CTS帧中，至少要将网络分配向量 $\displaystyle NAV$ 的值设置为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle 218\mu s$ &emsp;&emsp; B. $\displaystyle 248\mu s$ &emsp;&emsp; C. $\displaystyle 251\mu s$ &emsp;&emsp; D. $\displaystyle 371\mu s$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** CTS 帧中的持续时间字段应表示从 CTS 帧发送完毕后，到本次数据交换结束所需保留的剩余时间。此时 RTS 已经发送完成，CTS 自身的发送时间也不计入 CTS 中的 NAV 值。
+
+1000B 数据帧的发送时延为：
+
+$$
+\displaystyle
+T_{DATA}=\dfrac{1000\times 8}{50\times 10^6}\mathrm{s}=160\mu\mathrm{s}
+$$
+
+CTS 发送完成后，剩余交换过程依次为：
+
+```text
+SIFS → DATA → SIFS → ACK
+```
+
+因此 CTS 中至少应设置：
+
+$$
+\displaystyle
+\begin{aligned}
+NAV
+&=T_{SIFS}+T_{DATA}+T_{SIFS}+T_{ACK}\\
+&=28+160+28+2\\
+&=218\mu\mathrm{s}
+\end{aligned}
+$$
+
+所以选择 A。DIFS 用于竞争信道前的等待，不属于已预约交换过程的剩余时间；RTS 和 CTS 的发送时延也已经发生或正在发生，均不应再次计入 CTS 的 NAV。
+
+</details>
+
+---
+
+15. **【王道·卷六-Q33】** 一个传输数字信号的模拟信道的信号功率是 $\displaystyle 0.62W$，噪声功率是 $\displaystyle 0.02W$，频率范围是 $\displaystyle 3.5\sim 3.9\mathrm{MHz}$，则该信道的最高数据传输率是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle 1M/s$ &emsp;&emsp; B. $\displaystyle 2M/s$ &emsp;&emsp; C. $\displaystyle 4M/s$ &emsp;&emsp; D. $\displaystyle 8M/s$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 信道带宽为：
+
+$$
+\displaystyle
+W=3.9-3.5=0.4\mathrm{MHz}
+$$
+
+信噪比为：
+
+$$
+\displaystyle
+\dfrac{S}{N}=\dfrac{0.62}{0.02}=31
+$$
+
+根据香农公式，信道的极限数据传输率为：
+
+$$
+\displaystyle
+\begin{aligned}
+C
+&=W\log_2\left(1+\dfrac{S}{N}\right)\\
+&=0.4\times 10^6\times \log_2(32)\\
+&=0.4\times 10^6\times 5\\
+&=2\times 10^6\mathrm{bit/s}
+\end{aligned}
+$$
+
+即最高数据传输率为 $\displaystyle 2\mathrm{Mb/s}$，选择 B。A、C、D 均不符合香农公式的计算结果。
+
+</details>
+
+---
+
+16. **【王道·卷六-Q34】** 主机甲、乙间采用停止等待协议，发送帧长为 $\displaystyle 50B$ 的数据帧，确认帧采用捎带确认，数据传输率为 $\displaystyle 2kb/s$，RTT约为 $\displaystyle 200ms$，则最大信道利用率约为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle 50\%$ &emsp;&emsp; B. $\displaystyle 33\%$ &emsp;&emsp; C. $\displaystyle 60\%$ &emsp;&emsp; D. $\displaystyle 100\%$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 每个 50B 数据帧的发送时延为：
+
+$$
+\displaystyle
+T_t=\dfrac{50\times 8}{2000}\mathrm{s}=0.2\mathrm{s}=200\mathrm{ms}
+$$
+
+确认采用捎带确认，意味着返回的确认信息附加在反向发送的数据帧中。由于反向数据帧也是 50B，因此它同样需要 200ms 的发送时间，不能像独立短确认帧那样忽略。
+
+从甲开始发送一个数据帧，到甲收到乙捎带确认的数据帧并能继续发送，周期时间约为：
+
+$$
+\displaystyle
+T=T_t+RTT+T_t=200+200+200=600\mathrm{ms}
+$$
+
+对甲到乙这一方向而言，每个周期内有效发送数据的时间为 200ms，因此最大信道利用率为：
+
+$$
+\displaystyle
+U=\dfrac{200}{600}=\dfrac{1}{3}\approx 33\%
+$$
+
+所以选择 B。若把捎带确认误认为发送时延可忽略的短 ACK，才会错误得到 $\displaystyle 50\%$。
+
+</details>
+
+---
+
+## 1.2 计算机网络体系结构与参考模型
+
+### 1.2.1 计算机网络分层结构
+
+17. **【王道·卷四-Q33】** 在下列关于 TCP/IP 体系结构的各层使用的服务的说法中，正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 如果下层使用面向连接的服务，那么紧邻的上层必须使用相同性质的服务</div>
+<div className="choice-option-row">B. 如果下层使用无连接的服务，那么紧邻的上层必须使用相同性质的服务</div>
+<div className="choice-option-row">C. 在所有层上都有服务方式的选择问题</div>
+<div className="choice-option-row">D. 并非在所有层上都有服务方式的选择问题，有些层只提供一种服务</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 网络分层后，每一层向其上一层提供服务，但相邻层所采用的服务类型并不存在必须相同的约束。上层可以在下层服务的基础上，通过确认、重传、排序等机制形成性质不同的服务。
+
+因此，即使下层提供无连接服务，上层仍可在其基础上实现面向连接的服务；即使下层提供面向连接服务，上层也不必继续提供面向连接服务，A、B 均错误。
+
+此外，不是每一层都同时提供面向连接和无连接两种服务。例如 TCP/IP 体系结构中的网际层主要提供无连接、尽最大努力交付的 IP 数据报服务，并不存在任意选择两种服务的问题。因此 D 正确，C 错误。
+
+</details>
+
+---
+
+18. **【王道·卷七-Q33】** 正确描述网络体系结构中的分层概念的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 分层机制使得网络灵活且易于修改 &emsp;&emsp; B. 所有的网络体系结构都使用相同的层次名称和功能</div>
+<div className="choice-option-row">C. 把相关的网络功能组合在一层中 &emsp;&emsp; D. 定义各层的功能以及功能的具体实现</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A、C（原题选项设计有误，无唯一正确选项）
+
+**解析：** 分层的基本思想是将庞大、复杂的通信任务划分为若干相对独立的功能层，并把性质相近、联系紧密的功能组织在同一层中。因此 C 正确。
+
+各层之间通过明确的接口协作。只要层间接口保持不变，某一层内部协议或实现方式的修改通常不会影响其他层，从而提高网络体系结构的灵活性、可维护性和可扩展性，因此 A 也正确。
+
+不同网络体系结构的层数、层名和功能划分可能不同，例如 OSI 参考模型与 TCP/IP 参考模型并不完全相同，所以 B 错误。
+
+网络体系结构描述的是各层功能及协议等抽象规范，不规定功能的具体实现细节，所以 D 错误。
+
+综上，按当前题面 A、C 同时正确，题目作为单选题没有唯一答案。该题常见的规范版本会把“ A 和 C ”设置为一个组合选项。
+
+</details>
+
+---
+
+19. **【竟成·模拟七-33】** 在网络体系结构中，各层的PDU由SDU和PCI构成，OSI参考模型自下而上的第一层、第二层、第三层的SDU分别为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 比特流、数据帧、数据分组 &emsp;&emsp; B. 数据帧、数据分组、报文段</div>
+<div className="choice-option-row">C. 比特流、数据分组、报文段 &emsp;&emsp; D. 报文段、数据分组、数据帧</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 第 $\displaystyle n$ 层从第 $\displaystyle n+1$ 层接收的服务数据单元 SDU，本质上就是上一层交下来的 PDU。该层再为 SDU 添加本层协议控制信息 PCI，形成自己的 PDU：
+
+$$
+\displaystyle
+\mathrm{PDU}_n=\mathrm{SDU}_n+\mathrm{PCI}_n
+$$
+
+OSI 参考模型自下而上前三层依次是物理层、数据链路层、网络层：
+
+1. 物理层接收数据链路层的 PDU，因此其 SDU 是数据帧。
+2. 数据链路层接收网络层的 PDU，因此其 SDU 是数据分组。
+3. 网络层接收传输层的 PDU，因此其 SDU 是报文段。
+
+所以三者依次为“数据帧、数据分组、报文段”，选择 B。A、C 将物理层自身传送的比特流误当成了物理层 SDU；D 的层次顺序颠倒。
+
+</details>
+
+---
+
+### 1.2.2 计算机网络协议、服务、接口的概念
+
+20. **【王道·卷四-Q40】** HTTP服务器收到GET请求后执行相应的操作，这属于网络协议三要素中的（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 透明 &emsp;&emsp; B. 时序 &emsp;&emsp; C. 语义 &emsp;&emsp; D. 语法</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 网络协议的三要素是语法、语义和同步（时序）：
+
+- 语法规定报文的格式、字段排列和编码方式，即“数据怎样组织”。
+- 语义规定各字段表示什么，以及接收方收到相应信息后应执行什么操作，即“信息是什么意思、应如何处理”。
+- 时序规定通信事件的先后顺序、速度匹配和状态转换，即“什么时候发送、先做什么后做什么”。
+
+HTTP 服务器收到 GET 请求后，根据该请求的含义读取并返回指定资源，这描述的是收到某类协议报文后应采取的动作，属于语义，因此选择 C。
+
+A“透明”不是协议三要素；B 涉及通信顺序或时间关系；D 只涉及 GET 请求的报文格式，而不是执行的操作。
+
+</details>
+
+---
+
+21. **【竟成·模拟三-33】** 下列有关协议的要素的说法中，正确的是（）。
+I. 有关TCP报文的结构的说明，描述了协议要素中的语法
+II. 对于比特流的每一位的含义的解释，描述了协议要素中的语义
+III. 通信双方的通信顺序，描述了协议要素中的时序
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II &emsp;&emsp; B. I、III &emsp;&emsp; C. II、III &emsp;&emsp; D. I、II、III</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** I 正确。TCP 报文段中各字段的长度、排列顺序和编码格式属于报文结构规范，描述的是协议的语法。
+
+II 正确。解释各比特或各字段所代表的含义，以及接收方应据此采取的动作，属于协议的语义。
+
+III 正确。通信双方何时发送、何时应答、各事件按何种顺序发生，属于协议的时序。
+
+因此 I、II、III 均正确，选择 D。
+
+</details>
+
+---
+
+22. **【竟成·模拟四-33】** 下列有关网络体系结构概念的叙述中，错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 协议是不同结点对等实体之间通信的规则</div>
+<div className="choice-option-row">B. 面向连接的服务一定可靠</div>
+<div className="choice-option-row">C. 在网络分层体系结构中，第n层的实体是n-1层的用户，是n+1层的服务提供者</div>
+<div className="choice-option-row">D. 网络体系结构中，主要描述的是网络的层次、各层的功能、协议等，不关心协议的内部实现细节</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** A 正确。协议约束的是不同结点中同一层对等实体之间的通信，包括语法、语义和时序等规则。
+
+B 错误。面向连接只表示通信前需要建立连接、通信后释放连接，并不必然意味着可靠。可靠性还需要通过确认、序号、超时重传、差错检测等机制保证。因此“面向连接”和“可靠”是两个不同维度的概念。
+
+C 正确。第 $\displaystyle n$ 层使用第 $\displaystyle n-1$ 层提供的服务，因此它是第 $\displaystyle n-1$ 层的用户；同时第 $\displaystyle n$ 层又向第 $\displaystyle n+1$ 层提供服务，因此它是第 $\displaystyle n+1$ 层的服务提供者。
+
+D 正确。网络体系结构是抽象的功能与协议规范，不涉及各层功能的具体代码、电路或算法实现细节。
+
+</details>
+
+---
+
+### 1.2.3 OSI参考模型和TCP/IP模型
+
+23. **【竟成·模拟五-33】** 下列选项中，关于OSI参考模型和TCP/IP参考模型提供的服务，说法正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. OSI模型的网络层提供无连接服务和面向连接的服务，其传输层提供面向连接的服务</div>
+<div className="choice-option-row">B. TCP/IP模型的网络层提供无连接服务和面向连接的服务，其传输层只提供面向连接的服务</div>
+<div className="choice-option-row">C. OSI模型的网络层只提供无连接的服务，其传输层只提供面向连接的服务</div>
+<div className="choice-option-row">D. TCP/IP模型的网络层只提供无连接的服务，其传输层只提供面向连接的服务</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** OSI 参考模型的网络层既可提供面向连接的虚电路服务，也可提供无连接的数据报服务；其传输层主要提供面向连接的可靠传输服务，因此 A 正确。
+
+TCP/IP 参考模型的网际层以 IP 为核心，只提供无连接、尽最大努力交付的数据报服务；传输层则同时具有面向连接的 TCP 和无连接的 UDP。因此：
+
+- B 错在 TCP/IP 网际层不提供面向连接服务，且传输层并非只提供面向连接服务。
+- C 错在 OSI 网络层并非只提供无连接服务。
+- D 前半句正确，但后半句忽略了无连接的 UDP 服务。
+
+</details>
+
+---
+
+24. **【竟成·模拟六-33】** 下列有关TCP/IP参考模型和OSI模型说法中，正确的是（）。
+I. TCP/IP参考模型自下而上分别是物理层、数据链路层、网络层、传输层、应用层
+II. OSI参考模型自下而上分别是物理层、数据链路层、网络层、传输层、会话层、表示层、应用层
+III. TCP/IP参考模型将表示层和会话层合并到了应用层
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II &emsp;&emsp; B. I、III &emsp;&emsp; C. II、III &emsp;&emsp; D. I、II、III</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** I 错误。经典 TCP/IP 参考模型自下而上通常划分为网络接口层、网际层、传输层和应用层，共四层。题干所列的物理层、数据链路层、网络层、传输层、应用层属于教学中常用的五层协议体系结构，不是经典 TCP/IP 四层参考模型的严格表述。
+
+II 正确。OSI 参考模型自下而上依次为物理层、数据链路层、网络层、传输层、会话层、表示层和应用层，共七层。
+
+III 正确。TCP/IP 模型没有单独设置会话层和表示层，这两层的相关功能由应用层协议或应用程序负责实现，可理解为合并到了应用层。
+
+因此正确的是 II、III，选择 C。
+
+</details>

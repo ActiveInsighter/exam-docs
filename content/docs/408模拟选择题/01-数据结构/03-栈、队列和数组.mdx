@@ -1,0 +1,631 @@
+---
+sidebar_position: 3
+title: 第3章 栈、队列和数组
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第3章 栈、队列和数组
+
+## 3.1 栈
+
+### 3.1.1 栈的基本概念
+
+1. **【王道·卷六-Q02】** 假设栈的容量为3，入栈的序列为1,2,3,4,5，则出栈的序列可能为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 3,2,1,5,4 &emsp;&emsp; B. 1,5,4,3,2 &emsp;&emsp; C. 5,4,3,2,1 &emsp;&emsp; D. 4,3,2,1,5</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 对 A，可按如下操作实现：
+
+```text
+1入栈，2入栈，3入栈，3出栈，2出栈，1出栈，
+4入栈，5入栈，5出栈，4出栈
+```
+
+任意时刻栈中元素个数均不超过 3，因此 A 是可能的出栈序列。
+
+B 在输出 1 后，要紧接着输出 5，必须让 2、3、4、5 同时入栈，栈容量至少为 4；C 要首先输出 5，必须先将 1～5 全部入栈，容量至少为 5；D 要首先输出 4，必须先将 1～4 全部入栈，容量至少为 4。因此 B、C、D 均不可能。
+
+</details>
+
+---
+
+2. **【王道·卷七-Q03】** 6个元素以6,5,4,3,2,1的顺序进栈，下列不合法的出栈序列是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 5,4,3,6,1,2 &emsp;&emsp; B. 4,5,3,1,2,6 &emsp;&emsp; C. 3,4,6,5,2,1 &emsp;&emsp; D. 2,3,4,1,5,6</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 检验 C：为首先输出 3，需要依次将 6、5、4、3 入栈，再弹出 3；随后可以弹出 4。此时栈顶是 5，而序列要求下一个输出 6。由于 5 位于 6 的上方，不先弹出 5 就不可能弹出 6，因此 C 不合法。
+
+其余序列均可实现：A 可在每压入一个新元素后适时弹出，先得到 5、4、3，再弹出 6；B 可先压入到 4 并弹出 4、5，再继续操作；D 可先压入到 2 并依次弹出 2、3、4，再压入并弹出 1，最后弹出 5、6。它们均满足栈的后进先出规则。
+
+</details>
+
+---
+
+3. **【竟成·模拟三-02】** 下列关于栈的说法错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 可以使用两个队列实现一个后入先出的栈 &emsp;&emsp; B. 可以使用一个队列实现一个后入先出的栈</div>
+<div className="choice-option-row">C. 可以使用两个栈实现先入先出队列 &emsp;&emsp; D. 可以使用一个栈实现先入先出队列</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 两个队列可以通过在入栈或出栈时倒换元素实现栈；一个队列也可以在入队后通过循环移动前面的元素，使新元素位于队头，从而模拟后进先出，因此 A、B 正确。两个栈可采用“输入栈 + 输出栈”的方式实现队列，C 正确。
+
+在只允许使用一个普通栈及常数个辅助变量、且不借助递归调用或其他线性存储结构的标准模型下，无法长期保持先入先出的访问次序，因此 D 错误。若借助递归，递归调用栈实际上又提供了额外的栈空间，不能视为仅使用一个栈。
+
+</details>
+
+---
+
+4. **【竟成·模拟四-02】** 若栈的输入序列是：1,2,3,···,n，输出序列是：$\displaystyle p_1$,$\displaystyle p_2$,···,$\displaystyle p_n$。若存在k>1，使得$\displaystyle p_k$=n。则当i>k时，$\displaystyle p_i$是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. n-i+1 &emsp;&emsp; B. 不定 &emsp;&emsp; C. n-i+k &emsp;&emsp; D. n-i+k-1</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 当 $\displaystyle p_k=n$ 时，元素 $\displaystyle n$ 被弹出前，输入序列中的所有元素都已经入过栈。此后虽然不再有新元素入栈，但栈中剩余哪些元素，取决于前 $\displaystyle k-1$ 次出栈时已经弹出了哪些元素，因此后续各项的具体取值不能由 $\displaystyle n$、$\displaystyle i$、$\displaystyle k$ 唯一确定。
+
+例如取 $\displaystyle n=6$、$\displaystyle k=3$：
+
+```text
+3,2,6,5,4,1
+```
+
+是合法序列；
+
+```text
+2,1,6,5,4,3
+```
+
+也是合法序列。两者均有 $\displaystyle p_3=6$，但后续元素并不完全相同。因此只能确定后续元素将按当时栈内的顺序依次弹出，不能确定统一公式，选择 B。
+
+</details>
+
+---
+
+5. **【竟成·模拟五-02】** 一个栈的入栈序列为1,2,3,···,n，其出栈序列为$\displaystyle p_1$,$\displaystyle p_2$,$\displaystyle p_3$,···,$\displaystyle p_n$。若存在某个正整数k，使得$\displaystyle p_2$=k(k>3)，则$\displaystyle p_3$可能取值的个数是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. n-k+1 &emsp;&emsp; B. n-2 &emsp;&emsp; C. n-1 &emsp;&emsp; D. n-k+2</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 要使第二个出栈元素为 $\displaystyle k$，在弹出 $\displaystyle k$ 前必须已将 1～$\displaystyle k$ 入栈，并且第一个出栈元素只能来自 1～$\displaystyle k-1$。分情况讨论第三个出栈元素：
+
+1. 若第一个出栈元素不是 $\displaystyle k-1$，则弹出 $\displaystyle k$ 后栈顶仍为 $\displaystyle k-1$，所以 $\displaystyle p_3$ 可以是 $\displaystyle k-1$。
+2. 若第一个出栈元素正好是 $\displaystyle k-1$，则弹出 $\displaystyle k$ 后栈顶为 $\displaystyle k-2$，所以 $\displaystyle p_3$ 可以是 $\displaystyle k-2$。
+3. 弹出 $\displaystyle k$ 后，还可以继续将 $\displaystyle k+1,k+2,\ldots,s$ 入栈，再弹出 $\displaystyle s$。因此 $\displaystyle p_3$ 还可以取 $\displaystyle k+1,k+2,\ldots,n$，共 $\displaystyle n-k$ 个值。
+
+所以 $\displaystyle p_3$ 的可能取值集合为
+
+$$
+\displaystyle
+\{k-2,\ k-1,\ k+1,\ldots,n\}
+$$
+
+可能取值个数为
+
+$$
+\displaystyle
+2+(n-k)=n-k+2
+$$
+
+故选择 D。A 少计了一个较小值；B、C 没有考虑 $\displaystyle p_2=k$ 对可取值范围的限制。
+
+</details>
+
+---
+
+6. **【竟成·模拟六-02】** 下列关于栈的说法错误的是（）。
+I. 树的层序遍历必须使用栈
+II. 图的深度优先遍历可以使用栈来实现
+III. 图的广度优先遍历必须使用栈
+IV. 树的后序遍历非递归实现中，栈内的结点元素是当前遍历到的结点的祖先元素集合
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、III、IV &emsp;&emsp; B. II、IV &emsp;&emsp; C. I、III &emsp;&emsp; D. III、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 逐项判断如下：
+
+- I 错误。树的层序遍历按照“从上到下、从左到右”的顺序访问结点，需要使用队列保存下一层待访问结点，而不是栈。
+- II 正确。图的深度优先遍历本质上沿一条路径不断深入，可以使用递归实现，也可以显式使用栈实现。
+- III 错误。图的广度优先遍历需要按发现先后依次扩展顶点，因此应使用队列，而不是栈。
+- IV 正确。树的非递归后序遍历在深入子树时，需要用栈保存尚未完成访问的祖先结点，以便左右子树处理结束后回溯访问根结点。
+
+因此错误的是 I、III，选择 C。
+
+</details>
+
+---
+
+### 3.1.2 栈的顺序存储结构
+
+7. **【王道·卷五-Q02】** 现有一个共享栈 $\displaystyle S$，其低位是栈 $\displaystyle S1$，高位是栈 $\displaystyle S2$，低位栈的栈顶地址从低到高增长，高位栈的栈顶地址从高到低减小，要求该共享栈在一端非空时，栈指针指向当前元素的下一位置，则在下列说法中，（  ）是错误的。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 该共享栈降低了溢出的可能性，提高了空间利用率</div>
+<div className="choice-option-row">B. 当两端都非空且 $\displaystyle S1.top + 1 == S2.top$ 时，共享栈满</div>
+<div className="choice-option-row">C. $\displaystyle S1$ 的入栈操作是 $\displaystyle S[S1.top++] = x$，出栈操作是 $\displaystyle x = S[--S1.top]$</div>
+<div className="choice-option-row">D. $\displaystyle S2$ 的入栈操作是 $\displaystyle S[S2.top--] = x$，出栈操作是 $\displaystyle x = S[++S2.top]$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 两个栈分别从数组两端向中间增长，可以动态共享尚未使用的连续空间，只有两栈真正相遇时才发生上溢，因此 A 正确。
+
+题目规定栈顶指针指向当前栈顶元素沿增长方向的下一个空位置。对低位栈，入栈时先在 `S1.top` 所指位置存入元素，再令指针加 1；出栈时先令指针减 1，再读取元素，所以 C 正确。对高位栈，入栈时先在 `S2.top` 所指位置存入元素，再令指针减 1；出栈时先令指针加 1，再读取元素，所以 D 正确。
+
+当两栈之间已经没有空闲单元时，应满足
+
+$$
+\displaystyle
+S1.top=S2.top+1
+$$
+
+即 $\displaystyle S1.top-S2.top=1$。选项 B 的条件 $\displaystyle S1.top+1=S2.top$ 表示两指针之间仍有空闲位置，并非栈满，因此 B 错误。
+
+</details>
+
+---
+
+8. **【竟成·模拟四-01】** 数组A[n]被双栈共享空间，其中栈一的初始栈顶指针为top1=0，栈二的初始栈顶指针为top2=n-1。则双栈判满的条件为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. top1==top2 &emsp;&emsp; B. top1-top2==1 &emsp;&emsp; C. top2-top1==1 &emsp;&emsp; D. top1+top2==n</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 栈一从数组低地址向高地址增长，`top1` 指向其下一个可用单元；栈二从高地址向低地址增长，`top2` 指向其下一个可用单元。两栈之间没有剩余空间时，栈一的下一空位置恰好越过栈二的下一空位置，即
+
+$$
+\displaystyle
+top1=top2+1
+$$
+
+因而判满条件为 $\displaystyle top1-top2=1$，选择 B。A 表示两指针仍指向同一个可用单元，尚可再存入一个元素；C 的方向相反；D 与两栈实际占用情况没有固定对应关系。
+
+</details>
+
+---
+
+### 3.1.3 栈的链式存储结构
+
+9. **【王道·卷七-Q02】** 假设用不带头结点的单链表 $\displaystyle A$ 作为链式栈，其结点结构为 `| data | link |`，top是指向栈顶的指针。若要删除链式栈的栈顶结点，并将被删除结点的值保存到 $\displaystyle x$ 中，则应执行的操作是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle x = top\rightarrow data; top = top\rightarrow link;$</div>
+<div className="choice-option-row">B. $\displaystyle top = top\rightarrow link; x = top\rightarrow data;$</div>
+<div className="choice-option-row">C. $\displaystyle x = top; top = top\rightarrow link;$</div>
+<div className="choice-option-row">D. $\displaystyle x = top\rightarrow data;$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 链式栈的栈顶就是单链表的首结点。出栈时应先保存当前栈顶结点的数据域，再使 `top` 指向原栈顶的后继结点，因此核心操作为：
+
+```c
+x = top->data;
+top = top->link;
+```
+
+故 A 正确。完整实现时还应先用临时指针保存原栈顶结点并释放其空间。B 先移动 `top`，保存的是新栈顶的数据；C 将结点地址而非数据值赋给 $\displaystyle x$；D 只读取数据，没有删除栈顶结点。
+
+</details>
+
+---
+
+## 3.2 队列
+
+### 3.2.1 队列的基本概念
+
+10. **【竟成·模拟二-02】** 下列不属于队列基本操作的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 判断队列是否为空 &emsp;&emsp; B. 删除队尾元素 &emsp;&emsp; C. 队列初始化 &emsp;&emsp; D. 获取队头元素</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 队列是只允许在队尾插入、在队头删除的先进先出线性表。其基本操作通常包括初始化队列、判断队列是否为空、在队尾入队、从队头出队以及读取队头元素。因此 A、C、D 都属于队列的基本操作。
+
+删除队尾元素不符合普通队列“队头删除”的受限规则，属于双端队列等结构才可能提供的操作，故选择 B。
+
+</details>
+
+---
+
+### 3.2.2 队列的顺序存储结构
+
+11. **【王道·卷六-Q03】** 循环队列用数组 $\displaystyle A[0\dots m - 1]$ 存放其元素值，头尾指针分别为front和rear，front指向队头元素，rear指向队尾元素的下一个元素，其移动按数组下标增大的方向进行（$\displaystyle rear != m - 1$），则当前队列中的元素个数是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle (rear - front + m)\% m$ &emsp;&emsp; B. $\displaystyle (rear - front + 1)\% m$</div>
+<div className="choice-option-row">C. $\displaystyle rear - front - 1$ &emsp;&emsp; D. $\displaystyle rear - front$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 若 `rear` 位于 `front` 之后，则元素个数为 $\displaystyle rear-front$；若队列发生回绕，则元素个数为 $\displaystyle m-front+rear$。将两种情况统一，可得
+
+$$
+\displaystyle
+\text{队列长度}=(rear-front+m)\bmod m
+$$
+
+因此选择 A。B 多计算了一个元素；C、D 只适用于部分未回绕情形，不能统一处理循环队列。
+
+</details>
+
+---
+
+12. **【竟成·模拟四-03】** 若循环队列使用数组A[m]存放数据元素。已知头指针front指向队首元素，尾指针rear指向队尾元素后的空单元，则当前队列中元素的个数为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. (rear-front+m)%m &emsp;&emsp; B. rear-front+1 &emsp;&emsp; C. rear-front &emsp;&emsp; D. rear-front-1</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** `front` 指向队首元素，`rear` 指向队尾元素后的空单元。未发生回绕时，队列长度为 $\displaystyle rear-front$；发生回绕时，队列长度为 $\displaystyle m-front+rear$。统一写成
+
+$$
+\displaystyle
+(rear-front+m)\bmod m
+$$
+
+故 A 正确。其余各式均不能同时适用于 `rear` 位于 `front` 前后两种情况。
+
+</details>
+
+---
+
+### 3.2.3 队列的链式存储结构
+
+13. **【王道·卷三-Q02】** 假设链式队列 $\displaystyle Q$ 采用不带头结点的循环单链表存储，并且只设队尾指针rear，若队列中有 $\displaystyle n$ 个结点，则出队和进队操作的时间复杂度分别为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle O(1), O(1)$ &emsp;&emsp; B. $\displaystyle O(1), O(n)$ &emsp;&emsp; C. $\displaystyle O(n), O(1)$ &emsp;&emsp; D. $\displaystyle O(n), O(n)$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 在不带头结点的循环单链表中，只设队尾指针 `rear` 时，队头结点可由
+
+$$
+\displaystyle
+rear\rightarrow next
+$$
+
+直接得到。出队时删除 `rear->next` 所指的队头结点，只需修改常数个指针；进队时将新结点插入 `rear` 之后并更新 `rear`，同样只需修改常数个指针。因此出队和进队的时间复杂度均为 $\displaystyle O(1)$，选择 A。
+
+</details>
+
+---
+
+14. **【王道·卷八-Q01】** 假设有一个不带头结点的链式队列 $\displaystyle Q$，其队头指针和队尾指针分别为front和rear，新进队的元素结点为 $\displaystyle s$，则进队操作是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle Q.front = s; Q.front = Q.front\to link$ &emsp;&emsp; B. $\displaystyle s\to link = Q.front; Q.front = s$</div>
+<div className="choice-option-row">C. $\displaystyle s\to link = Q.rear; Q.rear = s$ &emsp;&emsp; D. $\displaystyle Q.rear\to link = s; s\to link = NULL; Q.rear = s$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 链式队列在队尾插入新结点。对于非空队列，应先让原队尾结点的 `link` 指向新结点，再令新结点的 `link` 为空，最后更新队尾指针：
+
+```c
+Q.rear->link = s;
+s->link = NULL;
+Q.rear = s;
+```
+
+因此 D 正确。A、B 修改的是队头指针，相当于在表头操作；C 让新结点指向原队尾，却没有把原队尾连接到新结点。若原队列为空，还需额外令 `Q.front = Q.rear = s`，但不影响本题对一般进队操作的判断。
+
+</details>
+
+---
+
+## 3.3 栈和队列的应用
+
+### 3.3.2 栈在表达式求值中的应用
+
+15. **【王道·卷五-Q03】** 在将中缀表达式转换为等价的后缀表达式的过程中，要利用堆栈保存运算符。对于中缀表达式 $\displaystyle A - (B + C / D) \times E$，当扫描读到操作数 $\displaystyle E$ 时，堆栈中保存的运算符依次是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. -× &emsp;&emsp; B. -(× &emsp;&emsp; C. -+ &emsp;&emsp; D. -(+</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 按从左到右的顺序扫描：
+
+1. 扫描到 `-` 时，将其压入运算符栈。
+2. 扫描到 `(`、`+`、`/` 时依次按规则入栈。
+3. 扫描到 `)` 时，将括号内的 `/`、`+` 依次弹出，并删除左括号 `(`。
+4. 随后扫描到 `×`，其优先级高于栈顶的 `-`，因此将 `×` 压栈。
+5. 扫描到操作数 $\displaystyle E$ 时，操作数直接输出，不改变运算符栈。
+
+此时栈内自栈底到栈顶依次为 `-`、`×`，故选择 A。B、D 错在右括号处理后左括号仍留在栈中；C 错在 `+` 已在遇到右括号时弹出。
+
+</details>
+
+---
+
+16. **【王道·卷八-Q02】** 栈初始为空，将中缀表达式 $\displaystyle a - (b\times c + d / e)$ 转化为等价的后缀表达式，运算符栈中元素最多时有（  ）个。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 2 &emsp;&emsp; B. 3 &emsp;&emsp; C. 4 &emsp;&emsp; D. 5</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 按照中缀表达式转后缀表达式的规则从左到右扫描：
+
+1. 扫描到减号 `-`，运算符栈为 `-`，栈深为 1。
+2. 扫描到左括号 `(`，压栈后为 `-、(`，栈深为 2。
+3. 扫描到乘号 `×`，其前面是左括号，因此直接压栈，栈内为 `-、(、×`，栈深为 3。
+4. 扫描到加号 `+` 时，先弹出优先级更高的乘号，再将加号压栈，栈深仍为 3。
+5. 扫描到除号 `/` 时，其优先级高于栈顶加号，直接压栈，此时栈内为 `-、(、+、/`，栈深达到 4。
+
+后续遇到右括号时会依次弹出 `/`、`+` 和 `(`，不会产生更大的栈深。因此运算符栈中元素最多为 4 个，选择 C。
+
+</details>
+
+---
+
+17. **【竟成·模拟二-03】** 若使用大小为3的操作数栈来求解表达式的数值，则下列表达式中会发生上溢的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. A-B*(C-D)+E &emsp;&emsp; B. (A-B)*C-D+E &emsp;&emsp; C. (A-B*C+E)-D &emsp;&emsp; D. (A-B)*(C-D)</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 使用操作数栈求值时，可先考查各表达式对应的后缀表达式在求值过程中的最大栈深。
+
+- A 的后缀表达式为 `A B C D - * - E +`。依次读入前四个操作数 `A、B、C、D` 时，栈中同时存在 4 个操作数，超过容量 3，因此发生上溢。
+- B 的后缀表达式为 `A B - C * D - E +`，最大栈深为 2。
+- C 的后缀表达式为 `A B C * - E + D -`，最大栈深为 3。
+- D 的后缀表达式为 `A B - C D - *`，最大栈深为 3。
+
+因此只有 A 会使大小为 3 的操作数栈上溢。
+
+</details>
+
+---
+
+## 3.4 数组和特殊矩阵
+
+### 3.4.3 特殊矩阵的压缩存储
+
+18. **【王道·卷八-Q03】** 对于一个有10个顶点的无向图，可用一个 $\displaystyle 10\times 10$ 阶对称矩阵 $\displaystyle A$ 来存储图中任意两个顶点之间的最短距离。矩阵元素 $\displaystyle a_{ij}(1\leqslant i,j\leqslant 10)$ 存储的是i号和 $\displaystyle j$ 号顶点之间的最短距离，现用一个一维数组 $\displaystyle B$ 来对矩阵 $\displaystyle A$ 进行压缩存储，$\displaystyle B[0]$ 存储的是 $\displaystyle A[1][1], B[1]$ 存储的是 $\displaystyle A[1][2]$，则 $\displaystyle B[35]$ 存储的是（  ）顶点之间的最短距离。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 4号和6号 &emsp;&emsp; B. 4号和7号 &emsp;&emsp; C. 6号和5号 &emsp;&emsp; D. 6号和7号</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 由 $\displaystyle B[0]=A[1][1]$、$\displaystyle B[1]=A[1][2]$ 可知，矩阵按上三角部分逐行压缩存储。
+
+各行在数组中的下标范围为：
+
+- 第 1 行存放 10 个元素，对应 $\displaystyle B[0]\sim B[9]$；
+- 第 2 行存放 9 个元素，对应 $\displaystyle B[10]\sim B[18]$；
+- 第 3 行存放 8 个元素，对应 $\displaystyle B[19]\sim B[26]$；
+- 第 4 行存放 7 个元素，对应 $\displaystyle B[27]\sim B[33]$；
+- 第 5 行从 $\displaystyle B[34]$ 开始，依次存放 $\displaystyle A[5][5],A[5][6],\ldots,A[5][10]$。
+
+因而
+
+$$
+\displaystyle
+B[35]=A[5][6]
+$$
+
+它表示 5 号与 6 号顶点之间的最短距离。对称矩阵中 $\displaystyle A[5][6]=A[6][5]$，故选择 C。
+
+</details>
+
+---
+
+19. **【竟成·模拟一-03】** 已知大小为10×10×10的三维数组A的前两维构成对称矩阵（即A[i][j][k]=A[j][i][k]），按列优先顺序存储且仅存储下三角部分，每个元素占用4个存储单元。若元素A[2][3][4]的存储地址是3000，则元素A[5][5][5]的存储地址是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 3292 &emsp;&emsp; B. 3296 &emsp;&emsp; C. 3300 &emsp;&emsp; D. 3304</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 数组下标按 0 开始计算。每个固定的第三维下标 $\displaystyle k$ 对应一个 $\displaystyle 10\times10$ 对称矩阵，只存储下三角部分，因此每层实际存储的元素个数为
+
+$$
+\displaystyle
+\dfrac{10\times(10+1)}{2}=55
+$$
+
+对下三角矩阵按列优先压缩存储，元素 $\displaystyle A[i][j]$（$\displaystyle i\geqslant j$）在一层内的相对下标为
+
+$$
+\displaystyle
+f(i,j)=\dfrac{j(2n-j+1)}{2}+i-j
+$$
+
+由于前两维对称，$\displaystyle A[2][3][4]=A[3][2][4]$。取 $\displaystyle n=10$，有
+
+$$
+\displaystyle
+f(3,2)=\dfrac{2(20-2+1)}{2}+3-2=20
+$$
+
+而
+
+$$
+\displaystyle
+f(5,5)=\dfrac{5(20-5+1)}{2}+5-5=40
+$$
+
+从第 4 层到第 5 层先跨过 55 个元素，层内又向后移动 $\displaystyle 40-20=20$ 个元素，因此总共相差
+
+$$
+\displaystyle
+55+20=75
+$$
+
+个元素。每个元素占 4 个存储单元，所以目标地址为
+
+$$
+\displaystyle
+3000+75\times4=3300
+$$
+
+故选择 C。
+
+</details>
+
+---
+
+20. **【竟成·模拟三-03】** 下三角矩阵A(n×n)按列优先顺序压缩在数组S[(n+1)×n/2]中，若非零元素$\displaystyle a_{ij}$(0≤i,j&lt;n)存放在S[k]中，则i,j,k的关系为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. k=i×n+j &emsp;&emsp; B. k=(2n-j+1)×j/2+i-j &emsp;&emsp; C. k=(i+1)×i/2+j &emsp;&emsp; D. k=(2n-j+1)×j/2+i</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 下三角矩阵按列优先存储时，第 $\displaystyle 0$ 列有 $\displaystyle n$ 个非零元素，第 $\displaystyle 1$ 列有 $\displaystyle n-1$ 个，依次类推。
+
+在第 $\displaystyle j$ 列之前共有
+
+$$
+\displaystyle
+n+(n-1)+\cdots+(n-j+1)
+=\dfrac{j(2n-j+1)}{2}
+$$
+
+个元素。在第 $\displaystyle j$ 列内部，元素 $\displaystyle a_{ij}$ 前面还有 $\displaystyle i-j$ 个元素，因此
+
+$$
+\displaystyle
+k=\dfrac{j(2n-j+1)}{2}+i-j
+$$
+
+与选项 B 相同。C 是下三角矩阵按行优先存储时的公式；D 少减了列内起始行号 $\displaystyle j$。
+
+</details>
+
+---
+
+### 3.4.4 稀疏矩阵
+
+21. **【王道·卷四-Q02】** 假设一个 $\displaystyle 1000\times 850$ 稀疏矩阵有1000个非零元素。每个整数占2B，每个矩阵元素占4B，则用三元组表存储该矩阵时所需的字节数是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 4000 &emsp;&emsp; B. 7000 &emsp;&emsp; C. 8000 &emsp;&emsp; D. 18000</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 三元组表对每个非零元素记录三项信息：行号、列号和元素值。
+
+- 行号是整数，占 $\displaystyle 2\text{B}$；
+- 列号是整数，占 $\displaystyle 2\text{B}$；
+- 元素值占 $\displaystyle 4\text{B}$。
+
+因此一个三元组占
+
+$$
+\displaystyle
+2+2+4=8\text{B}
+$$
+
+共有 1000 个非零元素，所需空间为
+
+$$
+\displaystyle
+1000\times8=8000\text{B}
+$$
+
+故选择 C。矩阵的总行数和总列数并不会使每个零元素也占用空间，这正是三元组压缩存储的意义。
+
+</details>

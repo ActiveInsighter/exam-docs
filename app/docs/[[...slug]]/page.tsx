@@ -47,7 +47,7 @@ export default async function Page({ params }: PageParameters) {
         />
         <ViewOptionsPopover
           markdownUrl={markdownUrl}
-          githubUrl={`https://github.com/ActiveInsighter/fumadocs-tecent/blob/main/content/docs/${page.path}`}
+          githubUrl={`https://github.com/ActiveInsighter/exam-docs/blob/main/content/docs/${page.path}`}
           className="docs-page-action"
         />
       </div>

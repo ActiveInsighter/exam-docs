@@ -79,13 +79,6 @@ const routerPromiseCache = new Map<string, Promise<CategoryRouter>>();
 const clientCache = new Map<string, ReturnType<typeof staticClient>>();
 const bloomBytesCache = new Map<string, Uint8Array>();
 
-const MODULE_CATEGORIES = {
-  politics: new Set(['politics']),
-  english: new Set(['english']),
-  math: new Set(['math', 'math-question-types']),
-  professional: new Set(['408']),
-} as const;
-
 function getStaticClient(url: string, limit: number) {
   const key = `${url}\u0000${limit}`;
   let client = clientCache.get(key);
@@ -239,14 +232,9 @@ function currentScope() {
     : urlScope(window.location.pathname);
 }
 
-function currentModuleCategories() {
-  const { category } = currentScope();
-  if (category === 'politics') return MODULE_CATEGORIES.politics;
-  if (category === 'english') return MODULE_CATEGORIES.english;
-  if (category === 'math' || category === 'math-question-types') {
-    return MODULE_CATEGORIES.math;
-  }
-  if (category === '408') return MODULE_CATEGORIES.professional;
+function currentModuleCategories(): Set<string> | null {
+  // Document roots are content-driven. Keep search global instead of filtering
+  // against a fixed list of roots that may not exist after new material is added.
   return null;
 }
 

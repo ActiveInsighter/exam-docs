@@ -1,0 +1,2164 @@
+---
+title: "8.1 矩估计与最大似然估计"
+sidebar_position: 1
+toc_min_heading_level: 2
+toc_max_heading_level: 4
+---
+
+# 8.1 矩估计与最大似然估计
+
+## 小题
+
+1. **【2021-3-5 分】** 设总体 $X$ 的概率分布为 $\displaystyle P\{X=1\}=\dfrac{1-\theta}{2}$，$\displaystyle P\{X=2\}=P\{X=3\}=\dfrac{1+\theta}{4}$，利用来自总体的样本值 $1,3,2,2,1,3,1,2$，可得 $\theta$ 的最大似然估计值为（  ）
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle \dfrac{1}{4}$ &emsp;&emsp; B. $\displaystyle \dfrac{3}{8}$ &emsp;&emsp; C. $\displaystyle \dfrac{1}{2}$ &emsp;&emsp; D. $\displaystyle \dfrac{5}{8}$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A，即 $\displaystyle \hat{\theta}=\dfrac{1}{4}$。
+
+**解析：** 样本中取值 $1,2,3$ 的次数分别为
+
+$$
+\displaystyle n_1=3,\qquad n_2=3,\qquad n_3=2.
+$$
+
+因此似然函数为
+
+$$
+\displaystyle L(\theta)=\left(\dfrac{1-\theta}{2}\right)^3
+\left(\dfrac{1+\theta}{4}\right)^5.
+$$
+
+取对数得
+
+$$
+\displaystyle \ell(\theta)=3\ln(1-\theta)+5\ln(1+\theta)-3\ln 2-5\ln 4.
+$$
+
+求导：
+
+$$
+\displaystyle \ell'(\theta)=-\dfrac{3}{1-\theta}+\dfrac{5}{1+\theta}.
+$$
+
+令 $\displaystyle \ell'(\theta)=0$，则
+
+$$
+\displaystyle 5(1-\theta)=3(1+\theta),
+$$
+
+从而
+
+$$
+\displaystyle \hat{\theta}=\dfrac{1}{4}.
+$$
+
+并且
+
+$$
+\displaystyle \ell''(\theta)=-\dfrac{3}{(1-\theta)^2}-\dfrac{5}{(1+\theta)^2}<0,
+$$
+
+故该驻点确为最大值点。其余选项均不满足似然方程。
+
+</details>
+
+---
+
+2. **【1991-4-5 分】** 设总体 $X$ 的概率密度为
+
+$$
+\displaystyle p(x,\lambda)=
+\begin{cases}
+\lambda a x^{a-1}e^{-\lambda x^a}, & x>0,\\
+0, & x\leq 0,
+\end{cases}
+$$
+
+其中 $\lambda>0$ 是未知参数，$a>0$ 是已知参数。试根据来自总体 $X$ 的简单随机样本 $X_1,X_2,\cdots,X_n$ 求 $\lambda$ 的最大似然估计量 $\hat{\lambda}$。
+
+<details>
+<summary>查看答案与解析</summary>
+
+<div className="exercise-label-row">
+<strong>答案：</strong>
+<div className="exercise-label-body">
+
+$$
+\displaystyle \hat{\lambda}=\dfrac{n}{\sum_{i=1}^{n}X_i^a}.
+$$
+
+</div>
+</div>
+
+**解析：** 当所有样本值均大于 $0$ 时，似然函数为
+
+$$
+\begin{aligned}
+\displaystyle L(\lambda)
+&=\prod_{i=1}^{n}\lambda aX_i^{a-1}e^{-\lambda X_i^a}\\
+&=\lambda^n a^n\prod_{i=1}^{n}X_i^{a-1}
+\exp\left(-\lambda\sum_{i=1}^{n}X_i^a\right).
+\end{aligned}
+$$
+
+对数似然函数为
+
+$$
+\displaystyle \ell(\lambda)=n\ln\lambda+n\ln a+(a-1)\sum_{i=1}^{n}\ln X_i
+-\lambda\sum_{i=1}^{n}X_i^a.
+$$
+
+求导并令其为零：
+
+$$
+\displaystyle \ell'(\lambda)=\dfrac{n}{\lambda}-\sum_{i=1}^{n}X_i^a=0,
+$$
+
+得到
+
+$$
+\displaystyle \hat{\lambda}=\dfrac{n}{\sum_{i=1}^{n}X_i^a}.
+$$
+
+又
+
+$$
+\displaystyle \ell''(\lambda)=-\dfrac{n}{\lambda^2}<0,
+$$
+
+故它是唯一的最大似然估计量。
+
+</details>
+
+---
+
+3. **【1997-1-5 分】** 设总体 $X$ 的概率密度为
+
+$$
+\displaystyle f(x)=
+\begin{cases}
+(\theta+1)x^\theta, & 0<x<1,\\
+0, & \text{其他},
+\end{cases}
+$$
+
+$\theta>-1$ 是未知参数，$X_1,X_2,\cdots,X_n$ 是来自总体 $X$ 的一个容量为 $n$ 的简单随机样本，分别用矩估计法和极大似然估计法求 $\theta$ 的估计量。
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** 矩估计量为
+
+$$
+\displaystyle \hat{\theta}_{\mathrm{M}}=\dfrac{2\bar X-1}{1-\bar X};
+$$
+
+最大似然估计量为
+
+$$
+\displaystyle \hat{\theta}_{\mathrm{ML}}=-\dfrac{n}{\sum_{i=1}^{n}\ln X_i}-1.
+$$
+
+**解析：** （1）矩估计法
+
+总体一阶原点矩为
+
+$$
+\begin{aligned}
+\displaystyle E(X)
+&=\int_0^1x(\theta+1)x^\theta\,dx\\
+&=(\theta+1)\int_0^1x^{\theta+1}\,dx\\
+&=\dfrac{\theta+1}{\theta+2}.
+\end{aligned}
+$$
+
+令总体一阶矩等于样本一阶矩：
+
+$$
+\displaystyle \dfrac{\theta+1}{\theta+2}=\bar X.
+$$
+
+解得
+
+$$
+\displaystyle \hat{\theta}_{\mathrm{M}}=\dfrac{2\bar X-1}{1-\bar X}.
+$$
+
+（2）最大似然估计法
+
+似然函数为
+
+$$
+\displaystyle L(\theta)=(\theta+1)^n\prod_{i=1}^{n}X_i^\theta,
+\qquad \theta>-1.
+$$
+
+对数似然函数为
+
+$$
+\displaystyle \ell(\theta)=n\ln(\theta+1)+\theta\sum_{i=1}^{n}\ln X_i.
+$$
+
+求导并令其为零：
+
+$$
+\displaystyle \ell'(\theta)=\dfrac{n}{\theta+1}+\sum_{i=1}^{n}\ln X_i=0.
+$$
+
+因此
+
+$$
+\displaystyle \hat{\theta}_{\mathrm{ML}}=-\dfrac{n}{\sum_{i=1}^{n}\ln X_i}-1.
+$$
+
+由于 $0<X_i<1$，故 $\displaystyle \sum_{i=1}^{n}\ln X_i<0$；同时
+
+$$
+\displaystyle \ell''(\theta)=-\dfrac{n}{(\theta+1)^2}<0,
+$$
+
+所以所得驻点为最大值点。
+
+</details>
+
+---
+
+4. **【2002-3-3 分】** 设总体 $X$ 的概率密度为
+
+$$
+\displaystyle f(x;\theta)=
+\begin{cases}
+e^{-(x-\theta)}, & x\geq\theta,\\
+0, & x<\theta,
+\end{cases}
+$$
+
+而 $X_1,X_2,\cdots,X_n$ 是来自总体 $X$ 的简单随机样本，则未知参数 $\theta$ 的矩估计量为多少？
+
+<details>
+<summary>查看答案与解析</summary>
+
+<div className="exercise-label-row">
+<strong>答案：</strong>
+<div className="exercise-label-body">
+
+$$
+\displaystyle \hat{\theta}_{\mathrm{M}}=\bar X-1.
+$$
+
+</div>
+</div>
+
+**解析：** 令 $Y=X-\theta$，则 $Y$ 服从参数为 $1$ 的指数分布，因此
+
+$$
+\displaystyle E(Y)=1.
+$$
+
+故
+
+$$
+\displaystyle E(X)=\theta+E(Y)=\theta+1.
+$$
+
+矩估计法令 $\displaystyle E(X)=\bar X$，于是
+
+$$
+\displaystyle \theta+1=\bar X,
+$$
+
+所以
+
+$$
+\displaystyle \hat{\theta}_{\mathrm{M}}=\bar X-1.
+$$
+
+</details>
+
+## 大题
+
+1. **【2002-1-7 分】** 设总体 $X$ 的概率分布为
+
+| $X$ | $0$ | $1$ | $2$ | $3$ |
+| --- | --- | --- | --- | --- |
+| $P$ | $\displaystyle \theta^2$ | $\displaystyle 2\theta(1-\theta)$ | $\displaystyle \theta^2$ | $\displaystyle 1-2\theta$ |
+
+其中 $\displaystyle \theta\left(0<\theta<\dfrac{1}{2}\right)$ 是未知参数，利用总体 $X$ 的如下样本值：$3,1,3,0,3,1,2,3$，求 $\theta$ 的矩估计值和最大似然估计值。
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** 矩估计值为
+
+$$
+\displaystyle \hat{\theta}_{\mathrm{M}}=\dfrac{1}{4};
+$$
+
+最大似然估计值为
+
+$$
+\displaystyle \hat{\theta}_{\mathrm{ML}}=\dfrac{7-\sqrt{13}}{12}.
+$$
+
+**解析：** （1）矩估计
+
+总体均值为
+
+$$
+\begin{aligned}
+\displaystyle E(X)
+&=0\cdot\theta^2+1\cdot2\theta(1-\theta)+2\theta^2+3(1-2\theta)\\
+&=3-4\theta.
+\end{aligned}
+$$
+
+样本均值为
+
+$$
+\displaystyle \bar x=\dfrac{3+1+3+0+3+1+2+3}{8}=2.
+$$
+
+令 $\displaystyle E(X)=\bar x$，得到
+
+$$
+\displaystyle 3-4\theta=2,
+$$
+
+故
+
+$$
+\displaystyle \hat{\theta}_{\mathrm{M}}=\dfrac{1}{4}.
+$$
+
+（2）最大似然估计
+
+样本中 $0,1,2,3$ 出现的次数分别为 $1,2,1,4$，故似然函数为
+
+$$
+\begin{aligned}
+\displaystyle L(\theta)
+&=(\theta^2)^1[2\theta(1-\theta)]^2(\theta^2)^1(1-2\theta)^4\\
+&=4\theta^6(1-\theta)^2(1-2\theta)^4,
+\qquad 0<\theta<\dfrac{1}{2}.
+\end{aligned}
+$$
+
+对数似然函数为
+
+$$
+\displaystyle \ell(\theta)=\ln4+6\ln\theta+2\ln(1-\theta)+4\ln(1-2\theta).
+$$
+
+求导并令其为零：
+
+$$
+\displaystyle \ell'(\theta)=\dfrac{6}{\theta}-\dfrac{2}{1-\theta}-\dfrac{8}{1-2\theta}=0.
+$$
+
+整理得
+
+$$
+\displaystyle 6(1-\theta)(1-2\theta)-2\theta(1-2\theta)-8\theta(1-\theta)=0,
+$$
+
+即
+
+$$
+\displaystyle 6-28\theta+24\theta^2=0,
+$$
+
+也就是
+
+$$
+\displaystyle 12\theta^2-14\theta+3=0.
+$$
+
+解得
+
+$$
+\displaystyle \theta=\dfrac{7\pm\sqrt{13}}{12}.
+$$
+
+由于参数范围为 $\displaystyle 0<\theta<\dfrac{1}{2}$，只有
+
+$$
+\displaystyle \hat{\theta}_{\mathrm{ML}}=\dfrac{7-\sqrt{13}}{12}
+$$
+
+符合要求。又似然函数在区间两端趋于 $0$，因此该内部驻点给出最大值。
+
+</details>
+
+---
+
+2. **【1999-1-6 分】** 设总体 $X$ 的概率密度为
+
+$$
+\displaystyle f(x)=
+\begin{cases}
+\dfrac{6x}{\theta^3}(\theta-x), & 0<x<\theta,\\
+0, & \text{其他},
+\end{cases}
+$$
+
+$X_1,X_2,\cdots,X_n$ 是取自总体 $X$ 的简单随机样本。
+
+（1）求 $\theta$ 的矩估计量 $\hat{\theta}$；
+
+（2）求 $\hat{\theta}$ 的方差 $D(\hat{\theta})$。
+
+<details>
+<summary>查看答案与解析</summary>
+
+<div className="exercise-label-row">
+<strong>答案：</strong>
+<div className="exercise-label-body">
+
+$$
+\displaystyle \hat{\theta}=2\bar X,
+\qquad
+D(\hat{\theta})=\dfrac{\theta^2}{5n}.
+$$
+
+</div>
+</div>
+
+**解析：** 先求总体的一阶矩：
+
+$$
+\begin{aligned}
+\displaystyle E(X)
+&=\int_0^\theta x\cdot\dfrac{6x}{\theta^3}(\theta-x)\,dx\\
+&=\dfrac{6}{\theta^3}\int_0^\theta(\theta x^2-x^3)\,dx\\
+&=\dfrac{6}{\theta^3}\left(\dfrac{\theta^4}{3}-\dfrac{\theta^4}{4}\right)\\
+&=\dfrac{\theta}{2}.
+\end{aligned}
+$$
+
+令 $\displaystyle E(X)=\bar X$，得到矩估计量
+
+$$
+\displaystyle \hat{\theta}=2\bar X.
+$$
+
+为求其方差，再计算二阶矩：
+
+$$
+\begin{aligned}
+\displaystyle E(X^2)
+&=\int_0^\theta x^2\cdot\dfrac{6x}{\theta^3}(\theta-x)\,dx\\
+&=\dfrac{6}{\theta^3}\int_0^\theta(\theta x^3-x^4)\,dx\\
+&=\dfrac{6}{\theta^3}\left(\dfrac{\theta^5}{4}-\dfrac{\theta^5}{5}\right)\\
+&=\dfrac{3\theta^2}{10}.
+\end{aligned}
+$$
+
+所以
+
+$$
+\displaystyle D(X)=E(X^2)-[E(X)]^2
+=\dfrac{3\theta^2}{10}-\dfrac{\theta^2}{4}
+=\dfrac{\theta^2}{20}.
+$$
+
+由于样本独立同分布，
+
+$$
+\displaystyle D(\bar X)=\dfrac{D(X)}{n}=\dfrac{\theta^2}{20n}.
+$$
+
+故
+
+$$
+\displaystyle D(\hat{\theta})=D(2\bar X)
+=4D(\bar X)=\dfrac{\theta^2}{5n}.
+$$
+
+</details>
+
+---
+
+3. **【2000-1-8 分】** 设某种元件的使用寿命 $X$ 的概率密度为
+
+$$
+\displaystyle f(x,\theta)=
+\begin{cases}
+2e^{-2(x-\theta)}, & x\geq\theta,\\
+0, & x<\theta,
+\end{cases}
+$$
+
+其中 $\theta>0$ 为未知参数，又设 $x_1,x_2,\cdots,x_n$ 是 $X$ 的一组样本观测值，求参数 $\theta$ 的最大似然估计值。
+
+<details>
+<summary>查看答案与解析</summary>
+
+<div className="exercise-label-row">
+<strong>答案：</strong>
+<div className="exercise-label-body">
+
+$$
+\displaystyle \hat{\theta}_{\mathrm{ML}}=x_{(1)}=\min\{x_1,x_2,\cdots,x_n\}.
+$$
+
+</div>
+</div>
+
+**解析：** 记 $\displaystyle x_{(1)}=\min\{x_1,x_2,\cdots,x_n\}$。似然函数为
+
+$$
+\begin{aligned}
+\displaystyle L(\theta)
+&=\prod_{i=1}^{n}2e^{-2(x_i-\theta)}I(\theta\leq x_i)\\
+&=2^n\exp\left(-2\sum_{i=1}^{n}x_i+2n\theta\right)
+I(0<\theta\leq x_{(1)}).
+\end{aligned}
+$$
+
+在可行区间 $\displaystyle 0<\theta\leq x_{(1)}$ 内，$L(\theta)$ 随 $\theta$ 单调增加，因此在右端点取得最大值，故
+
+$$
+\displaystyle \hat{\theta}_{\mathrm{ML}}=x_{(1)}.
+$$
+
+关键知识点是：当参数同时决定密度函数的支撑区间时，最大似然估计往往由样本极值给出，不能只对对数似然函数机械求导。
+
+</details>
+
+---
+
+4. **【2004-3-13 分】** 设随机变量 $X$ 的分布函数为
+
+$$
+\displaystyle F(x;\alpha,\beta)=
+\begin{cases}
+1-\left(\dfrac{\alpha}{x}\right)^\beta, & x>\alpha,\\
+0, & x\leq\alpha,
+\end{cases}
+$$
+
+其中参数 $\alpha>0$，$\beta>1$。设 $X_1,X_2,\cdots,X_n$ 为来自总体 $X$ 的简单随机样本。
+
+（1）当 $\alpha=1$ 时，求未知参数 $\beta$ 的矩估计量；
+
+（2）当 $\alpha=1$ 时，求未知参数 $\beta$ 的最大似然估计量；
+
+（3）当 $\beta=2$ 时，求未知参数 $\alpha$ 的最大似然估计量。
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** （1）
+
+$$
+\displaystyle \hat{\beta}_{\mathrm{M}}=\dfrac{\bar X}{\bar X-1};
+$$
+
+（2）
+
+$$
+\displaystyle \hat{\beta}_{\mathrm{ML}}
+=\dfrac{n}{\sum_{i=1}^{n}\ln X_i};
+$$
+
+（3）
+
+$$
+\displaystyle \hat{\alpha}_{\mathrm{ML}}
+=X_{(1)}=\min\{X_1,X_2,\cdots,X_n\}.
+$$
+
+**解析：** 由分布函数求导可得概率密度
+
+$$
+\displaystyle f(x;\alpha,\beta)=
+\begin{cases}
+\dfrac{\beta\alpha^\beta}{x^{\beta+1}}, & x>\alpha,\\
+0, & x\leq\alpha.
+\end{cases}
+$$
+
+（1）当 $\alpha=1$ 时，
+
+$$
+\begin{aligned}
+\displaystyle E(X)
+&=\int_1^{+\infty}x\cdot\dfrac{\beta}{x^{\beta+1}}\,dx\\
+&=\beta\int_1^{+\infty}x^{-\beta}\,dx\\
+&=\dfrac{\beta}{\beta-1}.
+\end{aligned}
+$$
+
+令 $\displaystyle E(X)=\bar X$，则
+
+$$
+\displaystyle \bar X=\dfrac{\beta}{\beta-1},
+$$
+
+解得
+
+$$
+\displaystyle \hat{\beta}_{\mathrm{M}}=\dfrac{\bar X}{\bar X-1}.
+$$
+
+（2）当 $\alpha=1$ 时，似然函数为
+
+$$
+\displaystyle L(\beta)=\beta^n\prod_{i=1}^{n}X_i^{-(\beta+1)},
+\qquad \beta>1.
+$$
+
+对数似然函数为
+
+$$
+\displaystyle \ell(\beta)=n\ln\beta-(\beta+1)\sum_{i=1}^{n}\ln X_i.
+$$
+
+令
+
+$$
+\displaystyle \ell'(\beta)=\dfrac{n}{\beta}-\sum_{i=1}^{n}\ln X_i=0,
+$$
+
+得到
+
+$$
+\displaystyle \hat{\beta}_{\mathrm{ML}}=\dfrac{n}{\sum_{i=1}^{n}\ln X_i}.
+$$
+
+并且
+
+$$
+\displaystyle \ell''(\beta)=-\dfrac{n}{\beta^2}<0,
+$$
+
+故这是极大值点。若严格要求参数空间 $\beta>1$，则应在参数空间内比较；通常真样本下所得值按题目标准写成上述形式。
+
+（3）当 $\beta=2$ 时，似然函数为
+
+$$
+\displaystyle L(\alpha)=2^n\alpha^{2n}\prod_{i=1}^{n}X_i^{-3}
+I(0<\alpha\leq X_{(1)}).
+$$
+
+在 $\displaystyle 0<\alpha\leq X_{(1)}$ 内，$L(\alpha)$ 随 $\alpha$ 单调增加，故
+
+$$
+\displaystyle \hat{\alpha}_{\mathrm{ML}}=X_{(1)}.
+$$
+
+</details>
+
+---
+
+5. **【2004-1-9 分】** 设总体 $X$ 的分布函数为
+
+$$
+\displaystyle F(x;\beta)=
+\begin{cases}
+1-\dfrac{1}{x^\beta}, & x>1,\\
+0, & x\leq1,
+\end{cases}
+$$
+
+其中 $\beta>1$。设 $X_1,X_2,\cdots,X_n$ 为来自总体 $X$ 的简单随机样本，求：
+
+（1）$\beta$ 的矩估计量；
+
+（2）$\beta$ 的最大似然估计量。
+
+<details>
+<summary>查看答案与解析</summary>
+
+<div className="exercise-label-row">
+<strong>答案：</strong>
+<div className="exercise-label-body">
+
+$$
+\displaystyle \hat{\beta}_{\mathrm{M}}=\dfrac{\bar X}{\bar X-1},
+\qquad
+\hat{\beta}_{\mathrm{ML}}=\dfrac{n}{\sum_{i=1}^{n}\ln X_i}.
+$$
+
+</div>
+</div>
+
+**解析：** 由分布函数可得概率密度
+
+$$
+\displaystyle f(x;\beta)=
+\begin{cases}
+\dfrac{\beta}{x^{\beta+1}}, & x>1,\\
+0, & x\leq1.
+\end{cases}
+$$
+
+（1）矩估计
+
+由于 $\beta>1$，总体均值存在，且
+
+$$
+\begin{aligned}
+\displaystyle E(X)
+&=\int_1^{+\infty}x\cdot\dfrac{\beta}{x^{\beta+1}}\,dx\\
+&=\beta\int_1^{+\infty}x^{-\beta}\,dx\\
+&=\dfrac{\beta}{\beta-1}.
+\end{aligned}
+$$
+
+令 $\displaystyle E(X)=\bar X$，解得
+
+$$
+\displaystyle \hat{\beta}_{\mathrm{M}}=\dfrac{\bar X}{\bar X-1}.
+$$
+
+（2）最大似然估计
+
+似然函数为
+
+$$
+\displaystyle L(\beta)=\prod_{i=1}^{n}\dfrac{\beta}{X_i^{\beta+1}}
+=\beta^n\prod_{i=1}^{n}X_i^{-(\beta+1)}.
+$$
+
+对数似然函数为
+
+$$
+\displaystyle \ell(\beta)=n\ln\beta-(\beta+1)\sum_{i=1}^{n}\ln X_i.
+$$
+
+求导并令其为零：
+
+$$
+\displaystyle \ell'(\beta)=\dfrac{n}{\beta}-\sum_{i=1}^{n}\ln X_i=0.
+$$
+
+所以
+
+$$
+\displaystyle \hat{\beta}_{\mathrm{ML}}=\dfrac{n}{\sum_{i=1}^{n}\ln X_i}.
+$$
+
+又 $\displaystyle \ell''(\beta)=-\dfrac{n}{\beta^2}<0$，故为最大值点。
+
+</details>
+
+---
+
+6. **【2006-3-13 分】** 设总体 $X$ 的概率密度为
+
+$$
+\displaystyle f(x;\theta)=
+\begin{cases}
+\theta, & 0<x<1,\\
+1-\theta, & 1\leq x<2,\\
+0, & \text{其他},
+\end{cases}
+$$
+
+$\theta\,(0<\theta<1)$ 是未知参数，$X_1,X_2,\cdots,X_n$ 为来自总体 $X$ 的简单随机样本，记 $N$ 为样本值 $x_1,x_2,\cdots,x_n$ 中小于 $1$ 的个数。
+
+（1）求 $\theta$ 的矩估计；
+
+（2）求 $\theta$ 的最大似然估计。
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** （1）$\theta$ 的矩估计量为
+
+$$
+\displaystyle \hat{\theta}_{\mathrm M}=\dfrac{3}{2}-\bar X.
+$$
+
+（2）$\theta$ 的最大似然估计量为
+
+$$
+\displaystyle \hat{\theta}_{\mathrm{ML}}=\dfrac{N}{n}.
+$$
+
+**解析：** （1）矩估计
+
+总体的一阶原点矩为
+
+$$
+\begin{aligned}
+\displaystyle E(X)
+&=\int_0^1x\theta\,dx+\int_1^2x(1-\theta)\,dx\\
+&=\dfrac{\theta}{2}+\dfrac{3}{2}(1-\theta)\\
+&=\dfrac{3}{2}-\theta.
+\end{aligned}
+$$
+
+令总体一阶矩等于样本一阶矩，即
+
+$$
+\displaystyle \bar X=\dfrac{3}{2}-\theta,
+$$
+
+解得
+
+$$
+\displaystyle \hat{\theta}_{\mathrm M}=\dfrac{3}{2}-\bar X.
+$$
+
+（2）最大似然估计
+
+样本中有 $N$ 个观测值落在区间 $(0,1)$，其余 $n-N$ 个观测值落在区间 $[1,2)$，故似然函数为
+
+$$
+\displaystyle L(\theta)=\theta^N(1-\theta)^{n-N},\qquad 0<\theta<1.
+$$
+
+对数似然函数为
+
+$$
+\displaystyle \ell(\theta)=N\ln\theta+(n-N)\ln(1-\theta).
+$$
+
+当 $0<N<n$ 时，求导得
+
+$$
+\displaystyle \ell'(\theta)=\dfrac{N}{\theta}-\dfrac{n-N}{1-\theta}.
+$$
+
+令 $\displaystyle \ell'(\theta)=0$，则
+
+$$
+\displaystyle N(1-\theta)=(n-N)\theta,
+$$
+
+从而
+
+$$
+\displaystyle \hat{\theta}_{\mathrm{ML}}=\dfrac{N}{n}.
+$$
+
+并且
+
+$$
+\displaystyle \ell''(\theta)=-\dfrac{N}{\theta^2}-\dfrac{n-N}{(1-\theta)^2}<0,
+$$
+
+故该驻点为唯一最大值点。若 $N=0$ 或 $N=n$，似然函数分别在边界 $\theta=0$ 或 $\theta=1$ 处取得上确界；通常将参数空间闭包纳入考虑后，估计量仍统一写为 $\displaystyle N/n$。
+
+</details>
+
+---
+
+7. **【2006-1-9 分】** 设总体 $X$ 的概率密度为
+
+$$
+\displaystyle f(x;\theta)=
+\begin{cases}
+\theta, & 0<x<1,\\
+1-\theta, & 1\leq x<2,\\
+0, & \text{其他},
+\end{cases}
+$$
+
+$\theta\,(0<\theta<1)$ 是未知参数，$X_1,X_2,\cdots,X_n$ 为来自总体 $X$ 的简单随机样本，记 $N$ 为样本值 $x_1,x_2,\cdots,x_n$ 中小于 $1$ 的个数。求 $\theta$ 的最大似然估计。
+
+<details>
+<summary>查看答案与解析</summary>
+
+<div className="exercise-label-row">
+<strong>答案：</strong>
+<div className="exercise-label-body">
+
+$$
+\displaystyle \hat{\theta}_{\mathrm{ML}}=\dfrac{N}{n}.
+$$
+
+</div>
+</div>
+
+**解析：** 对给定样本，落在 $(0,1)$ 内的 $N$ 个样本点各贡献因子 $\theta$，落在 $[1,2)$ 内的 $n-N$ 个样本点各贡献因子 $1-\theta$，故似然函数为
+
+$$
+\displaystyle L(\theta)=\theta^N(1-\theta)^{n-N},\qquad 0<\theta<1.
+$$
+
+取对数得
+
+$$
+\displaystyle \ell(\theta)=N\ln\theta+(n-N)\ln(1-\theta).
+$$
+
+当 $0<N<n$ 时，
+
+$$
+\displaystyle \ell'(\theta)=\dfrac{N}{\theta}-\dfrac{n-N}{1-\theta}.
+$$
+
+令 $\displaystyle \ell'(\theta)=0$，可得
+
+$$
+\displaystyle N(1-\theta)=(n-N)\theta,
+$$
+
+所以
+
+$$
+\displaystyle \hat{\theta}_{\mathrm{ML}}=\dfrac{N}{n}.
+$$
+
+又有
+
+$$
+\displaystyle \ell''(\theta)=-\dfrac{N}{\theta^2}-\dfrac{n-N}{(1-\theta)^2}<0,
+$$
+
+因此该点为极大值点。若 $N=0$ 或 $N=n$，最大值位于参数空间的相应边界，统一仍写成 $\displaystyle \hat\theta=N/n$。
+
+</details>
+
+---
+
+8. **【2009-1-11 分】** 设总体 $X$ 的概率密度为
+
+$$
+\displaystyle f(x)=
+\begin{cases}
+\lambda^2xe^{-\lambda x}, & x>0,\\
+0, & \text{其他},
+\end{cases}
+$$
+
+其中参数 $\lambda\,(\lambda>0)$ 未知，$X_1,X_2,\cdots,X_n$ 是来自总体 $X$ 的简单随机样本。
+
+（1）求参数 $\lambda$ 的矩估计量；
+
+（2）求参数 $\lambda$ 的最大似然估计量。
+
+<details>
+<summary>查看答案与解析</summary>
+
+<div className="exercise-label-row">
+<strong>答案：</strong>
+<div className="exercise-label-body">
+
+$$
+\displaystyle \hat{\lambda}_{\mathrm M}=\dfrac{2}{\bar X},
+\qquad
+\hat{\lambda}_{\mathrm{ML}}=\dfrac{2n}{\sum_{i=1}^{n}X_i}=\dfrac{2}{\bar X}.
+$$
+
+</div>
+</div>
+
+**解析：** 该分布是形状参数为 $2$、率参数为 $\lambda$ 的伽马分布。
+
+（1）矩估计
+
+先求总体均值：
+
+$$
+\begin{aligned}
+\displaystyle E(X)
+&=\int_0^{+\infty}x\lambda^2xe^{-\lambda x}\,dx\\
+&=\lambda^2\int_0^{+\infty}x^2e^{-\lambda x}\,dx.
+\end{aligned}
+$$
+
+利用
+
+$$
+\displaystyle \int_0^{+\infty}x^2e^{-\lambda x}\,dx=\dfrac{2}{\lambda^3},
+$$
+
+得到
+
+$$
+\displaystyle E(X)=\dfrac{2}{\lambda}.
+$$
+
+令 $\displaystyle E(X)=\bar X$，解得
+
+$$
+\displaystyle \hat{\lambda}_{\mathrm M}=\dfrac{2}{\bar X}.
+$$
+
+（2）最大似然估计
+
+当所有样本值均大于 $0$ 时，似然函数为
+
+$$
+\begin{aligned}
+\displaystyle L(\lambda)
+&=\prod_{i=1}^{n}\lambda^2X_i e^{-\lambda X_i}\\
+&=\lambda^{2n}\left(\prod_{i=1}^{n}X_i\right)
+\exp\left(-\lambda\sum_{i=1}^{n}X_i\right).
+\end{aligned}
+$$
+
+对数似然函数为
+
+$$
+\displaystyle \ell(\lambda)=2n\ln\lambda+\sum_{i=1}^{n}\ln X_i
+-\lambda\sum_{i=1}^{n}X_i.
+$$
+
+求导并令其为零：
+
+$$
+\displaystyle \ell'(\lambda)=\dfrac{2n}{\lambda}-\sum_{i=1}^{n}X_i=0.
+$$
+
+故
+
+$$
+\displaystyle \hat{\lambda}_{\mathrm{ML}}
+=\dfrac{2n}{\sum_{i=1}^{n}X_i}
+=\dfrac{2}{\bar X}.
+$$
+
+又
+
+$$
+\displaystyle \ell''(\lambda)=-\dfrac{2n}{\lambda^2}<0,
+$$
+
+所以所得驻点为唯一最大值点。本题中矩估计量与最大似然估计量相同。
+
+</details>
+
+---
+
+9. **【2011-1-11 分】** 设 $X_1,X_2,\cdots,X_n$ 为来自正态总体 $N(\mu_0,\sigma^2)$ 的简单随机样本，其中 $\mu_0$ 已知，$\sigma^2>0$ 未知。$\bar X$ 和 $S^2$ 分别表示样本均值和样本方差。
+
+（1）求参数 $\sigma^2$ 的最大似然估计量 $\hat{\sigma}^2$；
+
+（2）计算 $E(\hat{\sigma}^2)$ 和 $D(\hat{\sigma}^2)$。
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** （1）
+
+$$
+\displaystyle \hat{\sigma}^2
+=\dfrac{1}{n}\sum_{i=1}^{n}(X_i-\mu_0)^2
+=\dfrac{n-1}{n}S^2+(\bar X-\mu_0)^2.
+$$
+
+（2）
+
+$$
+\displaystyle E(\hat{\sigma}^2)=\sigma^2,
+\qquad
+D(\hat{\sigma}^2)=\dfrac{2\sigma^4}{n}.
+$$
+
+**解析：** （1）最大似然估计
+
+样本的似然函数为
+
+$$
+\displaystyle L(\sigma^2)
+=(2\pi\sigma^2)^{-\frac n2}
+\exp\left[-\dfrac{1}{2\sigma^2}
+\sum_{i=1}^{n}(X_i-\mu_0)^2\right].
+$$
+
+对数似然函数为
+
+$$
+\displaystyle \ell(\sigma^2)
+=-\dfrac n2\ln(2\pi)-\dfrac n2\ln\sigma^2
+-\dfrac{1}{2\sigma^2}\sum_{i=1}^{n}(X_i-\mu_0)^2.
+$$
+
+把 $\sigma^2$ 看作参数，求导得
+
+$$
+\displaystyle \dfrac{d\ell}{d(\sigma^2)}
+=-\dfrac{n}{2\sigma^2}
++\dfrac{1}{2(\sigma^2)^2}\sum_{i=1}^{n}(X_i-\mu_0)^2.
+$$
+
+令其等于零，得到
+
+$$
+\displaystyle \hat{\sigma}^2
+=\dfrac{1}{n}\sum_{i=1}^{n}(X_i-\mu_0)^2.
+$$
+
+又由恒等式
+
+$$
+\displaystyle \sum_{i=1}^{n}(X_i-\mu_0)^2
+=\sum_{i=1}^{n}(X_i-\bar X)^2+n(\bar X-\mu_0)^2,
+$$
+
+可写成
+
+$$
+\displaystyle \hat{\sigma}^2
+=\dfrac{n-1}{n}S^2+(\bar X-\mu_0)^2.
+$$
+
+（2）期望与方差
+
+由于
+
+$$
+\displaystyle \dfrac{1}{\sigma^2}\sum_{i=1}^{n}(X_i-\mu_0)^2\sim\chi^2(n),
+$$
+
+所以
+
+$$
+\displaystyle \dfrac{n\hat{\sigma}^2}{\sigma^2}\sim\chi^2(n).
+$$
+
+利用卡方分布的性质
+
+$$
+\displaystyle E[\chi^2(n)]=n,
+\qquad
+D[\chi^2(n)]=2n,
+$$
+
+得到
+
+$$
+\begin{aligned}
+\displaystyle E(\hat{\sigma}^2)
+&=\dfrac{\sigma^2}{n}\cdot n
+=\sigma^2,\\
+\displaystyle D(\hat{\sigma}^2)
+&=\dfrac{\sigma^4}{n^2}\cdot 2n
+=\dfrac{2\sigma^4}{n}.
+\end{aligned}
+$$
+
+因此，当总体均值已知时，$\displaystyle \hat{\sigma}^2$ 是 $\sigma^2$ 的无偏估计量。
+
+</details>
+
+---
+
+10. **【2012-1-11 分】** 设随机变量 $X$ 与 $Y$ 相互独立，且分别服从正态分布 $N(\mu,\sigma^2)$ 与 $N(\mu,2\sigma^2)$，其中 $\sigma$ 是未知参数且 $\sigma>0$。设 $Z=X-Y$。
+
+（1）求 $Z$ 的概率密度 $f(z,\sigma^2)$；
+
+（2）设 $Z_1,Z_2,\cdots,Z_n$ 为来自总体 $Z$ 的简单随机样本，求 $\sigma^2$ 的最大似然估计量 $\hat{\sigma}^2$；
+
+（3）证明 $\hat{\sigma}^2$ 为 $\sigma^2$ 的无偏估计量。
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** （1）
+
+$$
+\displaystyle f(z;\sigma^2)
+=\dfrac{1}{\sqrt{6\pi\sigma^2}}
+\exp\left(-\dfrac{z^2}{6\sigma^2}\right),
+\qquad -\infty<z<+\infty.
+$$
+
+（2）
+
+$$
+\displaystyle \hat{\sigma}^2
+=\dfrac{1}{3n}\sum_{i=1}^{n}Z_i^2.
+$$
+
+（3）
+
+$$
+\displaystyle E(\hat{\sigma}^2)=\sigma^2,
+$$
+
+故 $\hat{\sigma}^2$ 是 $\sigma^2$ 的无偏估计量。
+
+**解析：** （1）求 $Z$ 的分布
+
+由于 $X$ 与 $Y$ 相互独立，且
+
+$$
+\displaystyle X\sim N(\mu,\sigma^2),
+\qquad
+Y\sim N(\mu,2\sigma^2),
+$$
+
+所以正态随机变量的线性组合仍服从正态分布，并且
+
+$$
+\displaystyle E(Z)=E(X-Y)=\mu-\mu=0,
+$$
+
+$$
+\displaystyle D(Z)=D(X-Y)=D(X)+D(Y)=\sigma^2+2\sigma^2=3\sigma^2.
+$$
+
+因此
+
+$$
+\displaystyle Z\sim N(0,3\sigma^2),
+$$
+
+其概率密度为
+
+$$
+\displaystyle f(z;\sigma^2)
+=\dfrac{1}{\sqrt{2\pi\cdot3\sigma^2}}
+\exp\left(-\dfrac{z^2}{2\cdot3\sigma^2}\right)
+=\dfrac{1}{\sqrt{6\pi\sigma^2}}
+\exp\left(-\dfrac{z^2}{6\sigma^2}\right).
+$$
+
+（2）最大似然估计
+
+似然函数为
+
+$$
+\begin{aligned}
+\displaystyle L(\sigma^2)
+&=\prod_{i=1}^{n}\dfrac{1}{\sqrt{6\pi\sigma^2}}
+\exp\left(-\dfrac{Z_i^2}{6\sigma^2}\right)\\
+&=(6\pi\sigma^2)^{-\frac n2}
+\exp\left(-\dfrac{1}{6\sigma^2}\sum_{i=1}^{n}Z_i^2\right).
+\end{aligned}
+$$
+
+对数似然函数为
+
+$$
+\displaystyle \ell(\sigma^2)
+=-\dfrac n2\ln(6\pi)-\dfrac n2\ln\sigma^2
+-\dfrac{1}{6\sigma^2}\sum_{i=1}^{n}Z_i^2.
+$$
+
+求导得
+
+$$
+\displaystyle \dfrac{d\ell}{d(\sigma^2)}
+=-\dfrac{n}{2\sigma^2}
++\dfrac{1}{6(\sigma^2)^2}\sum_{i=1}^{n}Z_i^2.
+$$
+
+令其等于零，得到
+
+$$
+\displaystyle 3n\sigma^2=\sum_{i=1}^{n}Z_i^2,
+$$
+
+因此
+
+$$
+\displaystyle \hat{\sigma}^2
+=\dfrac{1}{3n}\sum_{i=1}^{n}Z_i^2.
+$$
+
+（3）无偏性
+
+因为 $\displaystyle Z_i\sim N(0,3\sigma^2)$，所以
+
+$$
+\displaystyle E(Z_i^2)=D(Z_i)+[E(Z_i)]^2=3\sigma^2.
+$$
+
+于是
+
+$$
+\begin{aligned}
+\displaystyle E(\hat{\sigma}^2)
+&=E\left(\dfrac{1}{3n}\sum_{i=1}^{n}Z_i^2\right)\\
+&=\dfrac{1}{3n}\sum_{i=1}^{n}E(Z_i^2)\\
+&=\dfrac{1}{3n}\cdot n\cdot3\sigma^2\\
+&=\sigma^2.
+\end{aligned}
+$$
+
+故 $\displaystyle \hat{\sigma}^2$ 是 $\sigma^2$ 的无偏估计量。
+
+</details>
+
+---
+
+11. **【2013-13-11 分】** 设总体 $X$ 的概率密度为
+
+$$
+\displaystyle f(x;\theta)=
+\begin{cases}
+\dfrac{\theta^2}{x^3}e^{-\frac{\theta}{x}}, & x>0,\\
+0, & \text{其他},
+\end{cases}
+$$
+
+其中 $\theta$ 为未知参数且大于零，$X_1,X_2,\cdots,X_n$ 为来自总体 $X$ 的简单随机样本。
+
+（1）求 $\theta$ 的矩估计量；
+
+（2）求 $\theta$ 的最大似然估计量。
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** （1）$\displaystyle \hat\theta_M=\bar X$。
+
+（2）$\displaystyle \hat\theta_L=\dfrac{2n}{\sum_{i=1}^{n}\frac{1}{X_i}}$。
+
+**解析：** （1）矩估计
+
+由数学期望的定义，
+
+$$
+\begin{aligned}
+\displaystyle E(X)
+&=\int_0^{+\infty}x\cdot\dfrac{\theta^2}{x^3}e^{-\frac{\theta}{x}}\,dx\\
+&=\theta^2\int_0^{+\infty}\dfrac{1}{x^2}e^{-\frac{\theta}{x}}\,dx.
+\end{aligned}
+$$
+
+令 $\displaystyle u=\dfrac{\theta}{x}$，则 $\displaystyle x=\dfrac{\theta}{u}$，$\displaystyle dx=-\dfrac{\theta}{u^2}du$，故
+
+$$
+\begin{aligned}
+\displaystyle E(X)
+&=\theta^2\int_{+\infty}^{0}\dfrac{u^2}{\theta^2}e^{-u}
+\left(-\dfrac{\theta}{u^2}\right)du\\
+&=\theta\int_0^{+\infty}e^{-u}\,du\\
+&=\theta.
+\end{aligned}
+$$
+
+用样本一阶原点矩 $\bar X$ 代替总体一阶原点矩，得到
+
+$$
+\displaystyle \hat\theta_M=\bar X.
+$$
+
+（2）最大似然估计
+
+似然函数为
+
+$$
+\begin{aligned}
+\displaystyle L(\theta)
+&=\prod_{i=1}^{n}\dfrac{\theta^2}{X_i^3}e^{-\frac{\theta}{X_i}}\\
+&=\theta^{2n}\left(\prod_{i=1}^{n}X_i^{-3}\right)
+\exp\left(-\theta\sum_{i=1}^{n}\dfrac{1}{X_i}\right),
+\qquad \theta>0.
+\end{aligned}
+$$
+
+对数似然函数为
+
+$$
+\displaystyle \ell(\theta)
+=2n\ln\theta-3\sum_{i=1}^{n}\ln X_i
+-\theta\sum_{i=1}^{n}\dfrac{1}{X_i}.
+$$
+
+求导得
+
+$$
+\displaystyle \ell'(\theta)
+=\dfrac{2n}{\theta}-\sum_{i=1}^{n}\dfrac{1}{X_i}.
+$$
+
+令 $\displaystyle \ell'(\theta)=0$，得到
+
+$$
+\displaystyle \hat\theta_L
+=\dfrac{2n}{\sum_{i=1}^{n}\frac{1}{X_i}}.
+$$
+
+又
+
+$$
+\displaystyle \ell''(\theta)=-\dfrac{2n}{\theta^2}<0,
+$$
+
+故该驻点为似然函数的唯一最大值点。
+
+</details>
+
+---
+
+12. **【2014-1-11 分】** 设总体 $X$ 的分布函数为
+
+$$
+\displaystyle F(x;\theta)=
+\begin{cases}
+1-e^{-\frac{x^2}{\theta}}, & x\geq 0,\\
+0, & x<0,
+\end{cases}
+$$
+
+其中 $\theta$ 为未知参数且大于零，$X_1,X_2,\cdots,X_n$ 为来自总体 $X$ 的简单随机样本。
+
+（1）求 $E(X)$ 与 $E(X^2)$；
+
+（2）求 $\theta$ 的极大似然估计量 $\hat\theta_n$；
+
+（3）是否存在常数 $a$，使得对任意的 $\varepsilon>0$，都有
+
+$$
+\displaystyle \lim_{n\to\infty}P\{|\hat\theta_n-a|\geq\varepsilon\}=0?
+$$
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** （1）$\displaystyle E(X)=\dfrac{\sqrt{\pi\theta}}{2}$，$\displaystyle E(X^2)=\theta$。
+
+（2）$\displaystyle \hat\theta_n=\dfrac{1}{n}\sum_{i=1}^{n}X_i^2$。
+
+（3）存在，且 $\displaystyle a=\theta$。
+
+**解析：** 由分布函数求导，得到总体 $X$ 的概率密度
+
+$$
+\displaystyle f(x;\theta)=
+\begin{cases}
+\dfrac{2x}{\theta}e^{-\frac{x^2}{\theta}}, & x>0,\\
+0, & x\leq0.
+\end{cases}
+$$
+
+（1）计算数字特征
+
+首先，
+
+$$
+\displaystyle E(X)
+=\int_0^{+\infty}x\cdot\dfrac{2x}{\theta}e^{-\frac{x^2}{\theta}}\,dx.
+$$
+
+令 $\displaystyle u=\dfrac{x^2}{\theta}$，则 $\displaystyle x=\sqrt{\theta u}$，$\displaystyle \dfrac{2x}{\theta}dx=du$，从而
+
+$$
+\begin{aligned}
+\displaystyle E(X)
+&=\sqrt\theta\int_0^{+\infty}u^{\frac12}e^{-u}\,du\\
+&=\sqrt\theta\,\Gamma\left(\dfrac32\right)\\
+&=\dfrac{\sqrt{\pi\theta}}{2}.
+\end{aligned}
+$$
+
+同理，
+
+$$
+\begin{aligned}
+\displaystyle E(X^2)
+&=\int_0^{+\infty}x^2\cdot\dfrac{2x}{\theta}e^{-\frac{x^2}{\theta}}\,dx\\
+&=\theta\int_0^{+\infty}u e^{-u}\,du\\
+&=\theta.
+\end{aligned}
+$$
+
+（2）最大似然估计
+
+似然函数为
+
+$$
+\begin{aligned}
+\displaystyle L(\theta)
+&=\prod_{i=1}^{n}\dfrac{2X_i}{\theta}e^{-\frac{X_i^2}{\theta}}\\
+&=2^n\left(\prod_{i=1}^{n}X_i\right)\theta^{-n}
+\exp\left(-\dfrac{1}{\theta}\sum_{i=1}^{n}X_i^2\right).
+\end{aligned}
+$$
+
+对数似然函数为
+
+$$
+\displaystyle \ell(\theta)
+=n\ln2+\sum_{i=1}^{n}\ln X_i-n\ln\theta
+-\dfrac{1}{\theta}\sum_{i=1}^{n}X_i^2.
+$$
+
+求导得
+
+$$
+\displaystyle \ell'(\theta)
+=-\dfrac{n}{\theta}
++\dfrac{1}{\theta^2}\sum_{i=1}^{n}X_i^2.
+$$
+
+令 $\displaystyle \ell'(\theta)=0$，得到
+
+$$
+\displaystyle \hat\theta_n=\dfrac{1}{n}\sum_{i=1}^{n}X_i^2.
+$$
+
+在该点有 $\displaystyle \ell''(\hat\theta_n)<0$，故它是最大似然估计量。
+
+（3）相合性
+
+由（1）知 $\displaystyle E(X_i^2)=\theta$。又令 $Y=X^2$，则
+
+$$
+\displaystyle P\{Y\leq y\}=1-e^{-\frac{y}{\theta}},
+\qquad y\geq0,
+$$
+
+所以 $Y=X^2$ 服从均值为 $\theta$ 的指数分布，因而
+
+$$
+\displaystyle D(X^2)=\theta^2.
+$$
+
+于是
+
+$$
+\displaystyle E(\hat\theta_n)=\theta,
+\qquad
+D(\hat\theta_n)=\dfrac{\theta^2}{n}.
+$$
+
+由切比雪夫不等式，任意 $\varepsilon>0$，有
+
+$$
+\displaystyle P\{|\hat\theta_n-\theta|\geq\varepsilon\}
+\leq\dfrac{D(\hat\theta_n)}{\varepsilon^2}
+=\dfrac{\theta^2}{n\varepsilon^2}\to0.
+$$
+
+因此存在常数 $a=\theta$，使题设极限成立，即 $\hat\theta_n$ 是 $\theta$ 的相合估计量。
+
+</details>
+
+---
+
+13. **【2015-13-11 分】** 设总体 $X$ 的概率密度为
+
+$$
+\displaystyle f(x;\theta)=
+\begin{cases}
+\dfrac{1}{1-\theta}, & \theta\leq x\leq1,\\
+0, & \text{其他},
+\end{cases}
+$$
+
+其中 $\theta$ 为未知参数，$X_1,X_2,\cdots,X_n$ 为来自该总体的简单随机样本。
+
+（1）求 $\theta$ 的矩估计量；
+
+（2）求 $\theta$ 的最大似然估计量。
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** （1）$\displaystyle \hat\theta_M=2\bar X-1$。
+
+（2）$\displaystyle \hat\theta_L=X_{(1)}=\min\{X_1,X_2,\cdots,X_n\}$。
+
+**解析：** （1）矩估计
+
+总体 $X$ 在区间 $[\theta,1]$ 上服从均匀分布，因此
+
+$$
+\displaystyle E(X)=\dfrac{\theta+1}{2}.
+$$
+
+令总体一阶原点矩等于样本一阶原点矩，得
+
+$$
+\displaystyle \bar X=\dfrac{\theta+1}{2},
+$$
+
+故
+
+$$
+\displaystyle \hat\theta_M=2\bar X-1.
+$$
+
+（2）最大似然估计
+
+记
+
+$$
+\displaystyle X_{(1)}=\min\{X_1,X_2,\cdots,X_n\}.
+$$
+
+似然函数为
+
+$$
+\displaystyle L(\theta)
+=(1-\theta)^{-n}I\{\theta\leq X_{(1)}\leq X_{(n)}\leq1\}.
+$$
+
+对固定样本观测值，在允许范围 $\theta\leq X_{(1)}$ 内，$1-\theta$ 随 $\theta$ 增大而减小，故 $(1-\theta)^{-n}$ 随 $\theta$ 增大而增大。因此似然函数在允许范围的最右端取得最大值，即
+
+$$
+\displaystyle \hat\theta_L=X_{(1)}.
+$$
+
+这里不能直接对对数似然函数求导而忽略示性函数，因为参数 $\theta$ 同时决定总体分布的取值区间。
+
+</details>
+
+---
+
+14. **【2017-13-11 分】** 某工程师为了解一台天平的精度，用该天平对一物体的质量做 $n$ 次测量，该物体的质量 $\mu$ 是已知的。设 $n$ 次测量结果 $X_1,X_2,\cdots,X_n$ 相互独立且均服从正态分布 $N(\mu,\sigma^2)$，该工程师记录的是 $n$ 次测量的绝对误差
+
+$$
+\displaystyle Z_i=|X_i-\mu|,
+\qquad i=1,2,\cdots,n.
+$$
+
+利用 $Z_1,Z_2,\cdots,Z_n$ 估计 $\sigma$。
+
+（Ⅰ）求 $Z_1$ 的概率密度；
+
+（Ⅱ）利用一阶矩求 $\sigma$ 的矩估计量；
+
+（Ⅲ）求 $\sigma$ 的最大似然估计量。
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** （Ⅰ）
+
+$$
+\displaystyle f_Z(z;\sigma)=
+\begin{cases}
+\dfrac{\sqrt{2}}{\sqrt\pi\,\sigma}e^{-\frac{z^2}{2\sigma^2}}, & z\geq0,\\
+0, & z<0.
+\end{cases}
+$$
+
+（Ⅱ）$\displaystyle \hat\sigma_M=\sqrt{\dfrac{\pi}{2}}\,\bar Z$。
+
+（Ⅲ）$\displaystyle \hat\sigma_L=\sqrt{\dfrac{1}{n}\sum_{i=1}^{n}Z_i^2}$。
+
+**解析：** （Ⅰ）求 $Z_1$ 的概率密度
+
+令 $Y=X_1-\mu$，则 $\displaystyle Y\sim N(0,\sigma^2)$，且 $Z_1=|Y|$。当 $z\geq0$ 时，
+
+$$
+\begin{aligned}
+\displaystyle F_{Z_1}(z)
+&=P\{|Y|\leq z\}\\
+&=P\{-z\leq Y\leq z\}\\
+&=2\Phi\left(\dfrac{z}{\sigma}\right)-1.
+\end{aligned}
+$$
+
+对 $z$ 求导，得到
+
+$$
+\displaystyle f_Z(z;\sigma)
+=\dfrac{2}{\sigma}\varphi\left(\dfrac{z}{\sigma}\right)
+=\dfrac{\sqrt2}{\sqrt\pi\,\sigma}e^{-\frac{z^2}{2\sigma^2}},
+\qquad z\geq0.
+$$
+
+因此 $Z_1$ 服从参数为 $\sigma$ 的半正态分布。
+
+（Ⅱ）矩估计
+
+由半正态分布的一阶矩，或直接计算，
+
+$$
+\begin{aligned}
+\displaystyle E(Z_1)
+&=\int_0^{+\infty}z\dfrac{\sqrt2}{\sqrt\pi\,\sigma}e^{-\frac{z^2}{2\sigma^2}}\,dz\\
+&=\sigma\sqrt{\dfrac{2}{\pi}}.
+\end{aligned}
+$$
+
+令 $\displaystyle E(Z_1)=\bar Z$，得到
+
+$$
+\displaystyle \hat\sigma_M
+=\sqrt{\dfrac{\pi}{2}}\,\bar Z,
+\qquad
+\bar Z=\dfrac{1}{n}\sum_{i=1}^{n}Z_i.
+$$
+
+（Ⅲ）最大似然估计
+
+似然函数为
+
+$$
+\begin{aligned}
+\displaystyle L(\sigma)
+&=\prod_{i=1}^{n}\dfrac{\sqrt2}{\sqrt\pi\,\sigma}e^{-\frac{Z_i^2}{2\sigma^2}}\\
+&=\left(\dfrac{\sqrt2}{\sqrt\pi}\right)^n
+\sigma^{-n}\exp\left(-\dfrac{1}{2\sigma^2}\sum_{i=1}^{n}Z_i^2\right),
+\qquad \sigma>0.
+\end{aligned}
+$$
+
+对数似然函数为
+
+$$
+\displaystyle \ell(\sigma)
+=n\ln\dfrac{\sqrt2}{\sqrt\pi}-n\ln\sigma
+-\dfrac{1}{2\sigma^2}\sum_{i=1}^{n}Z_i^2.
+$$
+
+求导得
+
+$$
+\displaystyle \ell'(\sigma)
+=-\dfrac{n}{\sigma}
++\dfrac{1}{\sigma^3}\sum_{i=1}^{n}Z_i^2.
+$$
+
+令 $\displaystyle \ell'(\sigma)=0$，得到
+
+$$
+\displaystyle \hat\sigma_L
+=\sqrt{\dfrac{1}{n}\sum_{i=1}^{n}Z_i^2}.
+$$
+
+该驻点使对数似然函数取得最大值，故为所求最大似然估计量。
+
+</details>
+
+---
+
+15. **【2018-13-11 分】** 设总体 $X$ 的概率密度为
+
+$$
+\displaystyle f(x;\sigma)=\dfrac{1}{2\sigma}e^{-\frac{|x|}{\sigma}},
+\qquad -\infty<x<+\infty,
+$$
+
+其中 $\sigma\in(0,+\infty)$ 为未知参数，$X_1,X_2,\cdots,X_n$ 为来自总体 $X$ 的简单随机样本。记 $\sigma$ 的最大似然估计量为 $\hat\sigma$。
+
+（Ⅰ）求 $\hat\sigma$；
+
+（Ⅱ）求 $E(\hat\sigma)$ 和 $D(\hat\sigma)$。
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** （Ⅰ）$\displaystyle \hat\sigma=\dfrac{1}{n}\sum_{i=1}^{n}|X_i|$。
+
+（Ⅱ）$\displaystyle E(\hat\sigma)=\sigma$，$\displaystyle D(\hat\sigma)=\dfrac{\sigma^2}{n}$。
+
+**解析：** （Ⅰ）最大似然估计
+
+似然函数为
+
+$$
+\begin{aligned}
+\displaystyle L(\sigma)
+&=\prod_{i=1}^{n}\dfrac{1}{2\sigma}e^{-\frac{|X_i|}{\sigma}}\\
+&=(2\sigma)^{-n}
+\exp\left(-\dfrac{1}{\sigma}\sum_{i=1}^{n}|X_i|\right),
+\qquad \sigma>0.
+\end{aligned}
+$$
+
+对数似然函数为
+
+$$
+\displaystyle \ell(\sigma)
+=-n\ln2-n\ln\sigma
+-\dfrac{1}{\sigma}\sum_{i=1}^{n}|X_i|.
+$$
+
+求导得
+
+$$
+\displaystyle \ell'(\sigma)
+=-\dfrac{n}{\sigma}
++\dfrac{1}{\sigma^2}\sum_{i=1}^{n}|X_i|.
+$$
+
+令 $\displaystyle \ell'(\sigma)=0$，得到
+
+$$
+\displaystyle \hat\sigma
+=\dfrac{1}{n}\sum_{i=1}^{n}|X_i|.
+$$
+
+又在该点有 $\displaystyle \ell''(\hat\sigma)<0$，故其为最大似然估计量。
+
+（Ⅱ）计算期望与方差
+
+令 $Y=|X|$。当 $y\geq0$ 时，$Y$ 的概率密度为
+
+$$
+\begin{aligned}
+\displaystyle f_Y(y)
+&=f_X(y)+f_X(-y)\\
+&=\dfrac{1}{\sigma}e^{-\frac{y}{\sigma}}.
+\end{aligned}
+$$
+
+因此 $Y=|X|$ 服从均值为 $\sigma$ 的指数分布，故
+
+$$
+\displaystyle E(|X|)=\sigma,
+\qquad
+D(|X|)=\sigma^2.
+$$
+
+由于 $|X_1|,|X_2|,\cdots,|X_n|$ 相互独立同分布，所以
+
+$$
+\begin{aligned}
+\displaystyle E(\hat\sigma)
+&=E\left(\dfrac{1}{n}\sum_{i=1}^{n}|X_i|\right)
+=\sigma,\\
+\displaystyle D(\hat\sigma)
+&=D\left(\dfrac{1}{n}\sum_{i=1}^{n}|X_i|\right)
+=\dfrac{1}{n^2}\sum_{i=1}^{n}D(|X_i|)
+=\dfrac{\sigma^2}{n}.
+\end{aligned}
+$$
+
+故 $\hat\sigma$ 还是 $\sigma$ 的无偏估计量。
+
+</details>
+
+---
+
+16. **【2019-13-11 分】** 设总体 $X$ 的概率密度为
+
+$$
+\displaystyle f(x;\sigma^2)=
+\begin{cases}
+A e^{-\frac{(x-\mu)^2}{2\sigma^2}}, & x\geq \mu,\\
+0, & x<\mu,
+\end{cases}
+$$
+
+其中 $\mu$ 是已知参数，$\sigma>0$ 是未知参数，$A$ 是常数，$X_1,X_2,\cdots,X_n$ 是来自总体 $X$ 的简单随机样本。
+
+（1）求 $A$ 的值；
+
+（2）求 $\sigma^2$ 的最大似然估计量。
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** （1）$\displaystyle A=\dfrac{2}{\sqrt{2\pi}\sigma}=\sqrt{\dfrac{2}{\pi}}\dfrac{1}{\sigma}$。
+
+（2）$\displaystyle \widehat{\sigma^2}=\dfrac{1}{n}\sum_{i=1}^{n}(X_i-\mu)^2$。
+
+**解析：** （1）由概率密度的归一性，
+
+$$
+\displaystyle \int_{-\infty}^{+\infty}f(x;\sigma^2)\,dx=1.
+$$
+
+因此
+
+$$
+\displaystyle A\int_{\mu}^{+\infty}e^{-\frac{(x-\mu)^2}{2\sigma^2}}\,dx=1.
+$$
+
+令 $\displaystyle u=\dfrac{x-\mu}{\sigma}$，则 $dx=\sigma\,du$，从而
+
+$$
+\begin{aligned}
+\displaystyle \int_{\mu}^{+\infty}e^{-\frac{(x-\mu)^2}{2\sigma^2}}\,dx
+&=\sigma\int_{0}^{+\infty}e^{-\frac{u^2}{2}}\,du\\
+&=\sigma\sqrt{\dfrac{\pi}{2}}.
+\end{aligned}
+$$
+
+故
+
+$$
+\displaystyle A\sigma\sqrt{\dfrac{\pi}{2}}=1,
+$$
+
+即
+
+$$
+\displaystyle A=\sqrt{\dfrac{2}{\pi}}\dfrac{1}{\sigma}
+=\dfrac{2}{\sqrt{2\pi}\sigma}.
+$$
+
+这说明 $X-\mu$ 服从参数为 $\sigma$ 的半正态分布。
+
+（2）由样本观测值必须满足 $x_i\geq\mu$，似然函数为
+
+$$
+\begin{aligned}
+\displaystyle L(\sigma^2)
+&=\prod_{i=1}^{n}
+\left[\sqrt{\dfrac{2}{\pi}}\dfrac{1}{\sigma}
+ e^{-\frac{(x_i-\mu)^2}{2\sigma^2}}\right]\\
+&=\left(\dfrac{2}{\pi}\right)^{\frac n2}
+(\sigma^2)^{-\frac n2}
+\exp\left[-\dfrac{1}{2\sigma^2}
+\sum_{i=1}^{n}(x_i-\mu)^2\right].
+\end{aligned}
+$$
+
+令 $\displaystyle \tau=\sigma^2$，则对数似然函数为
+
+$$
+\displaystyle \ell(\tau)
+=\dfrac n2\ln\dfrac{2}{\pi}
+-\dfrac n2\ln\tau
+-\dfrac{1}{2\tau}\sum_{i=1}^{n}(x_i-\mu)^2.
+$$
+
+求导得
+
+$$
+\displaystyle \ell'(\tau)
+=-\dfrac{n}{2\tau}
++\dfrac{1}{2\tau^2}\sum_{i=1}^{n}(x_i-\mu)^2.
+$$
+
+令 $\displaystyle \ell'(\tau)=0$，可得
+
+$$
+\displaystyle \hat\tau
+=\dfrac{1}{n}\sum_{i=1}^{n}(x_i-\mu)^2.
+$$
+
+且对数似然函数在该点取得最大值，故
+
+$$
+\displaystyle \widehat{\sigma^2}
+=\dfrac{1}{n}\sum_{i=1}^{n}(X_i-\mu)^2.
+$$
+
+</details>
+
+---
+
+17. **【2020-13-11 分】** 设某元件使用寿命 $T$ 的分布函数为
+
+$$
+\displaystyle F(t)=
+\begin{cases}
+1-e^{-\left(\frac{t}{\theta}\right)^m}, & t\geq0,\\
+0, & \text{其他},
+\end{cases}
+$$
+
+其中 $\theta,m$ 为参数且均大于零。
+
+（1）求概率 $P\{T>t\}$ 与 $P\{T>s+t\mid T>s\}$，其中 $s>0,t>0$；
+
+（2）设取 $n$ 个这样的元件做寿命试验，测得寿命 $t_1,t_2,\cdots,t_n$，其中 $m$ 已知，求 $\theta$ 的最大似然估计值。
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** （1）
+
+$$
+\displaystyle P\{T>t\}=e^{-\left(\frac{t}{\theta}\right)^m},
+$$
+
+$$
+\displaystyle P\{T>s+t\mid T>s\}
+=\exp\left[-\dfrac{(s+t)^m-s^m}{\theta^m}\right].
+$$
+
+（2）
+
+$$
+\displaystyle \hat\theta
+=\left(\dfrac{1}{n}\sum_{i=1}^{n}t_i^m\right)^{\frac1m}.
+$$
+
+**解析：** （1）当 $t>0$ 时，由生存函数与分布函数的关系，
+
+$$
+\begin{aligned}
+\displaystyle P\{T>t\}
+&=1-F(t)\\
+&=e^{-\left(\frac{t}{\theta}\right)^m}.
+\end{aligned}
+$$
+
+又因为事件 $\{T>s+t\}\subset\{T>s\}$，所以
+
+$$
+\begin{aligned}
+\displaystyle P\{T>s+t\mid T>s\}
+&=\dfrac{P\{T>s+t\}}{P\{T>s\}}\\
+&=\dfrac{e^{-\left(\frac{s+t}{\theta}\right)^m}}{e^{-\left(\frac{s}{\theta}\right)^m}}\\
+&=\exp\left[-\dfrac{(s+t)^m-s^m}{\theta^m}\right].
+\end{aligned}
+$$
+
+当 $m=1$ 时，上式化为 $\displaystyle e^{-t/\theta}$，与已经使用的时间 $s$ 无关，体现指数分布的无记忆性；当 $m\neq1$ 时，一般不具有无记忆性。
+
+（2）对分布函数求导，得到 $T$ 的概率密度
+
+$$
+\displaystyle f(t;\theta)
+=\dfrac{m}{\theta^m}t^{m-1}
+ e^{-\frac{t^m}{\theta^m}},
+\qquad t>0.
+$$
+
+样本的似然函数为
+
+$$
+\begin{aligned}
+\displaystyle L(\theta)
+&=\prod_{i=1}^{n}
+\left(\dfrac{m}{\theta^m}t_i^{m-1}
+ e^{-\frac{t_i^m}{\theta^m}}\right)\\
+&=m^n\left(\prod_{i=1}^{n}t_i^{m-1}\right)
+\theta^{-mn}
+\exp\left(-\dfrac{1}{\theta^m}\sum_{i=1}^{n}t_i^m\right).
+\end{aligned}
+$$
+
+对数似然函数为
+
+$$
+\displaystyle \ell(\theta)
+=n\ln m+(m-1)\sum_{i=1}^{n}\ln t_i
+-mn\ln\theta
+-\dfrac{1}{\theta^m}\sum_{i=1}^{n}t_i^m.
+$$
+
+求导得
+
+$$
+\displaystyle \ell'(\theta)
+=-\dfrac{mn}{\theta}
++\dfrac{m}{\theta^{m+1}}
+\sum_{i=1}^{n}t_i^m.
+$$
+
+令 $\displaystyle \ell'(\theta)=0$，得到
+
+$$
+\displaystyle n\theta^m=\sum_{i=1}^{n}t_i^m.
+$$
+
+因此
+
+$$
+\displaystyle \hat\theta
+=\left(\dfrac{1}{n}\sum_{i=1}^{n}t_i^m\right)^{\frac1m}.
+$$
+
+</details>
+
+---
+
+18. **【2022-13-12 分】** 设 $X_1,X_2,\cdots,X_n$ 是来自期望为 $\theta$ 的指数分布总体的简单随机样本，$Y_1,Y_2,\cdots,Y_m$ 是来自期望为 $2\theta$ 的指数分布总体的简单随机样本，且 $X_1,X_2,\cdots,X_n,Y_1,Y_2,\cdots,Y_m$ 相互独立，其中 $\theta>0$ 是未知参数。求 $\theta$ 的极大似然估计量 $\hat\theta$，并求 $D(\hat\theta)$。
+
+<details>
+<summary>查看答案与解析</summary>
+
+<div className="exercise-label-row">
+<strong>答案：</strong>
+<div className="exercise-label-body">
+
+$$
+\displaystyle \hat\theta
+=\dfrac{\sum_{i=1}^{n}X_i+\dfrac12\sum_{j=1}^{m}Y_j}{n+m},
+$$
+
+</div>
+</div>
+
+$$
+\displaystyle D(\hat\theta)=\dfrac{\theta^2}{n+m}.
+$$
+
+**解析：** 期望为 $\theta$ 的指数分布概率密度为
+
+$$
+\displaystyle f_X(x;\theta)
+=\dfrac{1}{\theta}e^{-\frac{x}{\theta}},
+\qquad x>0.
+$$
+
+期望为 $2\theta$ 的指数分布概率密度为
+
+$$
+\displaystyle f_Y(y;\theta)
+=\dfrac{1}{2\theta}e^{-\frac{y}{2\theta}},
+\qquad y>0.
+$$
+
+由两组样本相互独立，联合似然函数为
+
+$$
+\begin{aligned}
+\displaystyle L(\theta)
+&=\prod_{i=1}^{n}\dfrac{1}{\theta}e^{-\frac{x_i}{\theta}}
+\prod_{j=1}^{m}\dfrac{1}{2\theta}e^{-\frac{y_j}{2\theta}}\\
+&=2^{-m}\theta^{-(n+m)}
+\exp\left[-\dfrac{1}{\theta}
+\left(\sum_{i=1}^{n}x_i+\dfrac12\sum_{j=1}^{m}y_j\right)\right].
+\end{aligned}
+$$
+
+对数似然函数为
+
+$$
+\displaystyle \ell(\theta)
+=-m\ln2-(n+m)\ln\theta
+-\dfrac{1}{\theta}
+\left(\sum_{i=1}^{n}x_i+\dfrac12\sum_{j=1}^{m}y_j\right).
+$$
+
+求导得
+
+$$
+\displaystyle \ell'(\theta)
+=-\dfrac{n+m}{\theta}
++\dfrac{1}{\theta^2}
+\left(\sum_{i=1}^{n}x_i+\dfrac12\sum_{j=1}^{m}y_j\right).
+$$
+
+令 $\displaystyle \ell'(\theta)=0$，得到
+
+$$
+\displaystyle \hat\theta
+=\dfrac{\sum_{i=1}^{n}X_i+\dfrac12\sum_{j=1}^{m}Y_j}{n+m}.
+$$
+
+下面计算其方差。由于指数分布的方差等于其均值的平方，故
+
+$$
+\displaystyle D(X_i)=\theta^2,
+\qquad
+D(Y_j)=(2\theta)^2=4\theta^2.
+$$
+
+于是
+
+$$
+\displaystyle D\left(\dfrac12Y_j\right)
+=\dfrac14D(Y_j)=\theta^2.
+$$
+
+再利用所有随机变量相互独立，得
+
+$$
+\begin{aligned}
+\displaystyle D(\hat\theta)
+&=\dfrac{1}{(n+m)^2}
+D\left(\sum_{i=1}^{n}X_i+\dfrac12\sum_{j=1}^{m}Y_j\right)\\
+&=\dfrac{1}{(n+m)^2}
+\left(n\theta^2+m\theta^2\right)\\
+&=\dfrac{\theta^2}{n+m}.
+\end{aligned}
+$$
+
+此外，
+
+$$
+\displaystyle E(\hat\theta)
+=\dfrac{n\theta+\frac12m(2\theta)}{n+m}
+=\theta,
+$$
+
+故该最大似然估计量也是 $\theta$ 的无偏估计量。
+
+</details>

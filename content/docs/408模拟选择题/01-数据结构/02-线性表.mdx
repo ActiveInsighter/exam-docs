@@ -1,0 +1,188 @@
+---
+sidebar_position: 2
+title: 第2章 线性表
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第2章 线性表
+
+## 2.3 线性表的链式表示
+
+### 2.3.2 单链表上基本操作的实现
+
+1. **【王道·卷七-Q01】** 一个带头结点的单链表，头指针为 $\displaystyle L$，尾指针 $\displaystyle r$ 指向最后一个结点，要保证插入的先后顺序与对应结点在链中的顺序相反，则插入 $\displaystyle p$ 结点的操作为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle L\rightarrow next = p; p\rightarrow next = L\rightarrow next$</div>
+<div className="choice-option-row">B. $\displaystyle p\rightarrow next = L\rightarrow next; L\rightarrow next = p$</div>
+<div className="choice-option-row">C. $\displaystyle r\rightarrow next = p; r = p$</div>
+<div className="choice-option-row">D. $\displaystyle p\rightarrow next = r$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 要使结点在链中的顺序与插入顺序相反，应采用头插法，把新结点 $\displaystyle p$ 插入头结点 $\displaystyle L$ 之后。正确操作顺序为：先令 $\displaystyle p\rightarrow next$ 指向原来的第一个数据结点，再令 $\displaystyle L\rightarrow next$ 指向 $\displaystyle p$，即选项 B。A 先修改 $\displaystyle L\rightarrow next$，随后再令 $\displaystyle p\rightarrow next=L\rightarrow next$，会使 $\displaystyle p$ 指向自身；C 是尾插法，得到的链表顺序与插入顺序相同；D 只修改了一个指针，既没有将 $\displaystyle p$ 正确接入链表，也没有更新头结点或尾结点的链接关系。
+
+</details>
+
+---
+
+2. **【竟成·模拟五-03】** 已知表头元素为c的单链表在内存中的存储状态如下表所示，现将元素a从链表中删除，则元素c、e的链接地址依次为（）。
+
+| 地址  | 元素 | 链接地址 |
+| ----- | ---- | -------- |
+| 1000H | a    | 1010H    |
+| 1004H | b    | 100CH    |
+| 1008H | c    | 1000H    |
+| 100CH | d    | NULL     |
+| 1010H | e    | 1004H    |
+| 1014H |      |          |
+
+<div className="choice-options">
+<div className="choice-option-row">A. 1010H、1004H &emsp;&emsp; B. 1004H、1010H &emsp;&emsp; C. 1000H、1010H &emsp;&emsp; D. 1000H、100CH</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 由表中链接地址可还原链表的逻辑次序：
+
+```text
+c(1008H) → a(1000H) → e(1010H) → b(1004H) → d(100CH) → NULL
+```
+
+删除结点 `a` 时，应令其前驱结点 `c` 直接指向其后继结点 `e`，所以 `c` 的链接地址由 `1000H` 改为 `1010H`。结点 `e` 的后继仍为 `b`，其链接地址保持 `1004H` 不变。因此依次为 `1010H、1004H`，选择 A。B 交换了两者的链接地址；C、D 中 `c` 仍指向已删除结点 `a`，均不正确。
+
+</details>
+
+---
+
+### 2.3.3 双链表
+
+3. **【竟成·模拟七-02】** 已知一个带有表头结点的双向循环链表L，结点结构为`prev | data | next`，其中，prev和next分别是指向其直接前驱和直接后继结点的指针。现要添加一个结点（指针x指向该插入结点）到指针p所指的结点的前一位置，正确的语句序列是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. x->next = p; x->prev = p->prev; p->prev->next = x; p->prev = x;</div>
+<div className="choice-option-row">B. x->next = p; x->prev = p->prev; p->prev = x; p->prev->next = x;</div>
+<div className="choice-option-row">C. x->next = p; p->prev = x; x->prev = p->prev; p->prev->next = x;</div>
+<div className="choice-option-row">D. p->prev = x; x->next = p; x->prev = p->prev; p->prev->next = x;</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 设插入前 `p` 的前驱为 `q = p->prev`。插入后应形成链接关系 `q ⇄ x ⇄ p`，因此必须完成四次修改：
+
+```c
+x->next = p;
+x->prev = p->prev;
+p->prev->next = x;
+p->prev = x;
+```
+
+选项 A 的执行顺序在覆盖 `p->prev` 之前，先利用旧的前驱指针完成 `q->next=x`，因此正确。B 在执行 `p->prev=x` 后，`p->prev->next=x` 实际变成 `x->next=x`，破坏链表；C 先覆盖 `p->prev`，随后 `x->prev=p->prev` 会使 `x->prev=x`；D 同样过早覆盖 `p->prev`，无法再取得原前驱结点。
+
+</details>
+
+---
+
+### 2.3.5 静态链表
+
+4. **【王道·卷六-Q01】** 静态链表结点的类型定义如下，假设 $\displaystyle S$ 表示静态链表的数组。
+
+```c
+typedef struct node{
+DataType data;
+int link;
+} SListNode;
+```
+
+若逻辑上第 $\displaystyle k$ 个结点的下标是i，则逻辑上第 $\displaystyle k+1$ 个结点的数据是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle S[i + 1].data$ &emsp;&emsp; B. $\displaystyle S[k + 1].link.data$</div>
+<div className="choice-option-row">C. $\displaystyle S[S[i].link].data$ &emsp;&emsp; D. $\displaystyle S[S[k].link].data$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 静态链表利用数组下标代替指针。已知逻辑上第 $\displaystyle k$ 个结点位于数组下标 $\displaystyle i$，则 `S[i].link` 保存其直接后继结点的数组下标。因此第 $\displaystyle k+1$ 个结点为 `S[S[i].link]`，其数据域为 `S[S[i].link].data`，选择 C。A 错在静态链表的逻辑相邻结点不一定存放在连续下标中；B 的表达式本身不符合结构体访问规则；D 将逻辑序号 $\displaystyle k$ 错当成了数组下标。
+
+</details>
+
+---
+
+5. **【竟成·模拟一-02】** 某带头结点的静态链表初始状态如下表所示。next=-1时，表示当前结点是尾结点。静态链表头指针head下标为0，空闲链表头指针avail初始为9。删除当前静态链表中的第三个存储数据的元素、并将空闲位置采用头插法插入空闲链表后，各结点的next值更新的结果为（）。
+
+| 数组下标 | 0   | 1   | 2   | 3   | 4   | 5   | 6   | 7   | 8   | 9   |
+| -------- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| data     | A   | B   | C   | D   | E   | F   | G   | H   | I   |     |
+| next     | 1   | 3   | 5   | 7   | -1  | 6   | -1  | 8   | 2   |     |
+
+<div className="choice-options">
+<div className="choice-option-row">A. 1,3,5,7,-1,6,-1,9,2,4 &emsp;&emsp; B. 1,3,5,8,-1,6,-1,4,2,7</div>
+<div className="choice-option-row">C. 1,7,5,9,-1,6,-1,8,2,4 &emsp;&emsp; D. 1,3,5,7,-1,6,-1,2,9,4</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 从头结点下标 0 出发，原静态链表的数据结点下标依次为：
+
+```text
+0 → 1 → 3 → 7 → 8 → 2 → 5 → 6 → -1
+```
+
+因此第三个存储数据的结点是下标 7 的结点 `H`，其前驱为下标 3，后继为下标 8。删除时令 `next[3]=8`。
+
+空闲链表以 9 号位置作为头结点，原来 `next[9]=4`。将释放的 7 号位置采用头插法插入空闲链表，应执行：
+
+```text
+next[7] = next[9] = 4
+next[9] = 7
+```
+
+其余位置保持不变，更新后的 `next` 依次为：
+
+```text
+1,3,5,8,-1,6,-1,4,2,7
+```
+
+故选择 B。其余选项没有同时正确完成主链表的删除连接和空闲链表的头插连接。
+
+</details>
+
+---
+
+### 2.3.6 顺序表和链表的比较
+
+6. **【竟成·模拟三-01】** 下列操作可以在$\displaystyle O(1)$的时间复杂度内完成的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 删除单链表的k个元素 &emsp;&emsp; B. 在单链表的末尾添加一个元素</div>
+<div className="choice-option-row">C. 删除单向循环链表的头结点 &emsp;&emsp; D. 删除双向循环链表的头结点</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 双向循环链表能够通过头结点直接取得首个数据结点及尾结点。删除首个数据结点时，只需修改常数个前驱、后继指针，因此时间复杂度为 $\displaystyle O(1)$，D 正确。
+
+A 需要定位并逐个处理待删除结点，通常不能保证为 $\displaystyle O(1)$；B 若单链表没有额外的尾指针，需要从表头遍历到表尾，时间复杂度为 $\displaystyle O(n)$；C 在只给出头指针的单向循环链表中，删除头结点后还要找到尾结点并修改其 `next`，通常需要 $\displaystyle O(n)$。
+
+</details>

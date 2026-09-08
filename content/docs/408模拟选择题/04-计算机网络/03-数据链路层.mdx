@@ -1,0 +1,1078 @@
+---
+sidebar_position: 3
+title: 第3章 数据链路层
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第3章 数据链路层
+
+## 3.3 差错控制
+
+### 3.3.1 检错编码
+
+1. **【竟成·模拟二-34】** 下列关于检错码和纠错码的说法，错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 在线路误码率较低时，纠错码一般比检错码编码效率更高 &emsp;&emsp; B. 奇偶校验码属于检错码</div>
+<div className="choice-option-row">C. 海明码属于纠错码 &emsp;&emsp; D. 以太网使用的检错码不能保证发送的数据帧一定成功交付</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 在线路误码率较低时，发生差错的帧数量较少。此时采用“检错码 + 出错后重传”的方案，只需附加较少的校验信息，偶尔重传即可，通常比持续加入大量冗余位的纠错码更高效。因此 A 的说法错误。
+
+各选项分析如下：
+
+- B 项：奇偶校验码通过增加一个校验位判断收到的比特序列中 1 的个数是否符合约定，属于检错码。
+- C 项：典型海明码可以定位并纠正一位错误，属于纠错码。
+- D 项：以太网帧尾的 FCS 采用 CRC 检错，但以太网的数据链路层通常只丢弃检测出差错的帧，不负责确认与重传，因此不能保证帧一定成功交付。
+
+</details>
+
+---
+
+2. **【竟成·模拟六-36】** 下列有关数据链路层的差错控制的方法中，说法错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 采用循环冗余校验码的差错控制方法后，数据链路层向网络层提供了可靠的传输</div>
+<div className="choice-option-row">B. 奇偶校验码是一种检错编码，能检验奇数个比特出错的情况</div>
+<div className="choice-option-row">C. 海明码是一种纠错编码，既能够检测出差错，又能够纠正错误</div>
+<div className="choice-option-row">D. 使用海明码，信息位若为10位，则检验码的位数至少为4位</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** CRC 只能以很高概率检测传输差错，不能仅凭自身保证出错帧被恢复，更不能保证丢帧、重复帧等问题得到处理。只有将检错机制与确认、超时重传、序号等可靠传输机制结合，数据链路层才可能向上层提供可靠服务。因此 A 错误。
+
+各选项分析如下：
+
+- B 项：单个奇偶校验位能够检测任意奇数个比特发生翻转，但无法检测偶数个比特同时翻转，正确。
+- C 项：基本海明码的最小码距为 3，能够检测并纠正一位差错，正确。
+- D 项：设信息位数为 $\displaystyle m=10$，校验位数为 $\displaystyle r$。海明码要能够表示“无差错”以及所有可能的单比特错误位置，需满足：
+
+$$
+\displaystyle
+2^r\geq m+r+1
+$$
+
+当 $\displaystyle r=3$ 时，$\displaystyle 2^3=8<14$，不满足；当 $\displaystyle r=4$ 时，$\displaystyle 2^4=16\geq15$，因此至少需要 4 位校验位，D 正确。
+
+</details>
+
+---
+
+3. **【竟成·模拟七-36】** 主机要发送的字符序列为101110，双方约定的生成多项式$\displaystyle P(x)=x^3+1$，则发送方需要添加的FCS应为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 100 &emsp;&emsp; B. 11 &emsp;&emsp; C. 011 &emsp;&emsp; D. 0011</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 生成多项式为：
+
+$$
+\displaystyle
+P(x)=x^3+1
+$$
+
+对应的二进制除数为 $\displaystyle 1001$。其最高次数为 3，因此应在原始数据 $\displaystyle 101110$ 后补 3 个 0，得到：
+
+$$
+\displaystyle
+101110000
+$$
+
+用模 2 除法计算：
+
+```text
+101110000 ÷ 1001
+```
+
+所得 3 位余数为：
+
+$$
+\displaystyle
+011
+$$
+
+因此发送方添加的 FCS 为 011，选择 C。FCS 的位数必须等于生成多项式的最高次数，即 3 位，所以 B 的 2 位和 D 的 4 位首先可以排除；A 不是本次模 2 除法的余数。
+
+</details>
+
+---
+
+### 3.3.2 纠错编码
+
+4. **【竟成·模拟一-35】** 下列关于海明码的叙述中，正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 海明码的校验位必须位于二进制位的奇数位置</div>
+<div className="choice-option-row">B. 对于4位数据位，至少需要3位校验位才能实现纠错</div>
+<div className="choice-option-row">C. 海明码的编码过程中，每个校验位仅负责校验一个数据位</div>
+<div className="choice-option-row">D. 接收端检测到码距为3的海明码错误时，最多能纠正2位同时发生的错误</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 设数据位数为 $\displaystyle m=4$，校验位数为 $\displaystyle r$。要实现一位纠错，需要满足：
+
+$$
+\displaystyle
+2^r\geq m+r+1
+$$
+
+当 $\displaystyle r=2$ 时，$\displaystyle 2^2=4<7$，不满足；当 $\displaystyle r=3$ 时，$\displaystyle 2^3=8\geq8$，恰好满足。因此至少需要 3 位校验位，B 正确。
+
+其他选项分析如下：
+
+- A 项：海明码校验位通常放在序号为 $\displaystyle 1,2,4,8,\ldots$ 的位置，即 2 的整数次幂位置，并不是所有奇数位置。
+- C 项：每个校验位负责校验一组码位，多个校验组相互交叠，从而利用综合校验结果定位错误位置；并非只校验一个数据位。
+- D 项：最小码距为 3 的编码最多纠正：
+
+$$
+\displaystyle
+\left\lfloor\dfrac{3-1}{2}\right\rfloor=1
+$$
+
+位错误，不能纠正两位同时发生的错误。
+
+</details>
+
+---
+
+5. **【竟成·模拟三-37】** 主机收到的海明序列为101110100111011（序列从右向左编号，右边为最低位），有效数据为11位，经过检测后，发现出现了差错，错误的位置为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 第1位 &emsp;&emsp; B. 第2位 &emsp;&emsp; C. 第4位 &emsp;&emsp; D. 第8位</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 该海明码共有 15 位，其中校验位位于第 $\displaystyle 1,2,4,8$ 位。题目说明从右向左编号，因此最右端是第 1 位。采用偶校验，分别计算 4 个校验组的校验结果。
+
+- 第 1 位校验组覆盖编号二进制最低位为 1 的位置：$\displaystyle 1,3,5,7,9,11,13,15$，校验结果为 0。
+- 第 2 位校验组覆盖：$\displaystyle 2,3,6,7,10,11,14,15$，校验结果为 0。
+- 第 4 位校验组覆盖：$\displaystyle 4,5,6,7,12,13,14,15$，校验结果为 0。
+- 第 8 位校验组覆盖：$\displaystyle 8,9,10,11,12,13,14,15$，校验结果为 1。
+
+将校验结果按 $\displaystyle S_8S_4S_2S_1$ 排列，得到：
+
+$$
+\displaystyle
+1000_2=8
+$$
+
+因而错误发生在第 8 位，选择 D。A、B、C 分别对应综合校验结果为 $\displaystyle 0001$、$\displaystyle 0010$、$\displaystyle 0100$，均与实际校验结果不符。
+
+</details>
+
+---
+
+## 3.4 流量控制与可靠传输机制
+
+### 3.4.1 流量控制与滑动窗口机制
+
+6. **【王道·卷一-Q35】** 数据链路层采用SR协议传输数据，使用4bit给帧编号，接收窗口的尺寸取值为5，发送窗口的尺寸取最大值，发送窗口内的起始序号为0，数据帧的初始序号为0，假设发送方已发送了 $\displaystyle 0\sim 6$ 号数据帧，现已收到1，3，5号帧的确认，而0，2，4号数据帧依次超时，则此时发送方最多能发送的数据帧数量为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 8 &emsp;&emsp; B. 7 &emsp;&emsp; C. 5 &emsp;&emsp; D. 4</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 帧序号字段为 4 bit，因此序号空间大小为：
+
+$$
+\displaystyle
+2^4=16
+$$
+
+SR 协议为了避免新旧帧序号混淆，发送窗口与接收窗口之和应满足：
+
+$$
+\displaystyle
+W_T+W_R\leq 2^n
+$$
+
+已知接收窗口 $\displaystyle W_R=5$，发送窗口取最大值，因此：
+
+$$
+\displaystyle
+W_T=16-5=11
+$$
+
+发送窗口起始序号为 0，所以当前发送窗口覆盖的序号为：
+
+$$
+\displaystyle
+0,1,2,3,4,5,6,7,8,9,10
+$$
+
+发送方已经发送了 0～6 号帧，其中 1、3、5 号帧已确认；0、2、4 号帧超时后需要分别重传，但这些重传并不使发送窗口前移。由于 0 号帧尚未被确认，发送窗口的左边界仍停留在 0。
+
+因此，在当前发送窗口内尚未发送的新帧只有：
+
+$$
+\displaystyle
+7,8,9,10
+$$
+
+共 4 帧，故选择 D。
+
+A、B、C 均超过了当前窗口中尚未使用的 4 个序号位置。
+
+</details>
+
+---
+
+7. **【王道·卷二-Q35】** 主机 $\displaystyle A$、$\displaystyle B$ 之间建立了一条 TCP 连接，发送窗口的大小是3，序号范围是 $\displaystyle [0,15]$，传输媒介保证在接收方能够按序收到分组。在某个时刻，接收方期望收到的下一个序号是5，则发送窗口可能出现的序号组合有（  ）个。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 2 &emsp;&emsp; B. 3 &emsp;&emsp; C. 4 &emsp;&emsp; D. 5</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 接收方期望收到的下一个序号为 5，说明序号 0～4 的分组均已按序到达接收方。
+
+发送窗口大小为 3。由于确认报文在返回途中可能存在传播延迟，发送方掌握的确认状态可能落后于接收方，因此发送窗口左边界不一定已经移动到 5。
+
+但为了使接收方已经收到序号 4 的分组，发送方此前必须能够发送序号 4。窗口大小为 3，所以发送窗口左边界最小只能为 2；若左边界小于 2，则窗口中不包含序号 4。
+
+发送方可能已经收到不同程度的确认，因此发送窗口可能为：
+
+$$
+\displaystyle
+\begin{aligned}
+&[2,3,4] \\
+&[3,4,5] \\
+&[4,5,6] \\
+&[5,6,7]
+\end{aligned}
+$$
+
+共 4 种组合，故选择 C。
+
+发送窗口不可能从 6 或更大的序号开始，因为这意味着发送方已经确认序号 5 以前的数据，而接收方当前仍在等待序号 5。
+
+</details>
+
+---
+
+### 3.4.2 可靠传输机制
+
+8. **【竟成·模拟二-35】** 主机甲和主机乙在数据链路层采用停止-等待协议进行数据帧的发送，RTT为100ms，数据传输速率为20kbps，忽略确认帧的传输时延。主机甲的最大信道利用率约为33.3%，则数据帧的长度为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 125B &emsp;&emsp; B. 250B &emsp;&emsp; C. 1000B &emsp;&emsp; D. 2000B</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 停止-等待协议中，忽略确认帧的发送时延时，信道利用率为：
+
+$$
+\displaystyle
+U=\dfrac{T_f}{T_f+RTT}
+$$
+
+其中，$\displaystyle T_f$ 为数据帧发送时延。题目给出：
+
+$$
+\displaystyle
+U=33.3\%\approx\dfrac{1}{3},\qquad RTT=100\text{ ms}=0.1\text{ s}
+$$
+
+代入得：
+
+$$
+\displaystyle
+\dfrac{T_f}{T_f+0.1}=\dfrac{1}{3}
+$$
+
+解得：
+
+$$
+\displaystyle
+3T_f=T_f+0.1
+$$
+
+$$
+\displaystyle
+T_f=0.05\text{ s}
+$$
+
+数据传输速率为 $\displaystyle 20\text{ kbps}=20000\text{ bit/s}$，因此数据帧长度为：
+
+$$
+\displaystyle
+L=RT_f=20000\times0.05=1000\text{ bit}
+$$
+
+换算为字节：
+
+$$
+\displaystyle
+1000\div8=125\text{ B}
+$$
+
+因此选择 A。
+
+</details>
+
+---
+
+9. **【竟成·模拟三-36】** 假设主机甲和主机乙数据链路层采用GBN协议传输数据，数据传输速率为10kbps，数据帧和确认帧都是1000B，单向传播时延为700ms，帧序列的比特数为2。主机甲向主机乙发送数据，则甲的最大信道利用率为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 40% &emsp;&emsp; B. 60% &emsp;&emsp; C. 80% &emsp;&emsp; D. 100%</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 帧序号字段为 2 bit。在 GBN 协议中，发送窗口的最大值为：
+
+$$
+\displaystyle
+W_T=2^2-1=3
+$$
+
+数据帧和确认帧的长度均为：
+
+$$
+\displaystyle
+1000\text{ B}=8000\text{ bit}
+$$
+
+数据传输速率为 $\displaystyle 10\text{ kbps}=10000\text{ bit/s}$，所以数据帧和确认帧的发送时延均为：
+
+$$
+\displaystyle
+T_f=T_{ACK}=\dfrac{8000}{10000}=0.8\text{ s}
+$$
+
+单向传播时延为：
+
+$$
+\displaystyle
+T_p=0.7\text{ s}
+$$
+
+从发送一个数据帧开始，到该帧的确认完整返回发送方，所需时间为：
+
+$$
+\displaystyle
+T_f+T_p+T_{ACK}+T_p
+=0.8+0.7+0.8+0.7
+=3.0\text{ s}
+$$
+
+一个发送窗口最多连续发送 3 个数据帧，发送方实际发送数据的时间为：
+
+$$
+\displaystyle
+W_TT_f=3\times0.8=2.4\text{ s}
+$$
+
+因此最大信道利用率为：
+
+$$
+\displaystyle
+U=\dfrac{2.4}{3.0}=0.8=80\%
+$$
+
+故选择 C。
+
+由于窗口中的 3 个帧发送完毕后，最早的确认尚未完整返回，发送方仍会出现等待，因此利用率不能达到 100%。
+
+</details>
+
+---
+
+10. **【竟成·模拟七-35】** 主机的数据链路层采用GBN协议传输数据，并采用3bit给帧进行编号。从0时刻开始，主机开始发送数据，当主机发送了5号数据帧后，收到了3号数据帧的确认，在t时段内未收到任何确认帧且发送的帧未超时，在t时段内主机可发送的数据帧数为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 2 &emsp;&emsp; B. 3 &emsp;&emsp; C. 4 &emsp;&emsp; D. 5</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** GBN 协议采用 3 bit 帧序号，因此序号空间大小为：
+
+$$
+\displaystyle
+2^3=8
+$$
+
+GBN 发送窗口的最大值为：
+
+$$
+\displaystyle
+W_T=2^3-1=7
+$$
+
+主机已经发送了 0～5 号帧。收到 3 号帧的确认时，GBN 的累计确认表示 0～3 号帧均已正确收到，因此发送窗口左边界移动到 4。
+
+此时发送窗口覆盖 7 个序号：
+
+$$
+\displaystyle
+4,5,6,7,0,1,2
+$$
+
+其中 4、5 号帧已经发送但尚未被确认，因此窗口中仍可用于发送新数据帧的序号为：
+
+$$
+\displaystyle
+6,7,0,1,2
+$$
+
+共 5 帧。在 $\displaystyle t$ 时段内没有新的确认且已发送帧未超时，因此窗口不会继续前移，也不需要重传，最多可发送 5 个新数据帧，选择 D。
+
+</details>
+
+---
+
+## 3.5 介质访问控制
+
+### 3.5.1 信道划分介质访问控制
+
+11. **【竟成·模拟三-38】** 站点H1、H2、H3、H4、H5通过CDMA共享通信链路，H1~H4各自的码片序列为(1,-1,1,-1)、(1,1,-1,-1)、(1,1,1,1)、(1,-1,-1,1)。H5收到一个序列为(0,2,2,0,0,-2,-2,0,2,0,0,2)，解析得到的数据为011，则发送该数据的站点为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. H1 &emsp;&emsp; B. H2 &emsp;&emsp; C. H3 &emsp;&emsp; D. H4</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 每个站点的码片序列长度为 4，因此将 H5 收到的序列按每 4 个码片分为 3 组：
+
+$$
+\displaystyle
+\begin{aligned}
+R_1&=(0,2,2,0)\\
+R_2&=(0,-2,-2,0)\\
+R_3&=(2,0,0,2)
+\end{aligned}
+$$
+
+CDMA 解码时，将接收序列与某站点的码片序列做规格化内积。结果为 $\displaystyle 1$ 表示发送比特 1，为 $\displaystyle -1$ 表示发送比特 0，为 0 表示该站点未发送相应信号。
+
+H4 的码片序列为：
+
+$$
+\displaystyle
+C_4=(1,-1,-1,1)
+$$
+
+分别计算三组内积：
+
+$$
+\displaystyle
+\dfrac{R_1\cdot C_4}{4}
+=\dfrac{0\times1+2\times(-1)+2\times(-1)+0\times1}{4}
+=-1
+$$
+
+$$
+\displaystyle
+\dfrac{R_2\cdot C_4}{4}
+=\dfrac{0\times1+(-2)\times(-1)+(-2)\times(-1)+0\times1}{4}
+=1
+$$
+
+$$
+\displaystyle
+\dfrac{R_3\cdot C_4}{4}
+=\dfrac{2\times1+0\times(-1)+0\times(-1)+2\times1}{4}
+=1
+$$
+
+解码结果为 $\displaystyle (-1,1,1)$，对应数据比特 $\displaystyle 011$。因此发送该数据的站点是 H4，选择 D。
+
+H1、H2 与各接收分组的规格化内积均为 0；H3 的解码结果为 $\displaystyle 101$，均不符合题意。
+
+</details>
+
+---
+
+### 3.5.2 随机访问介质访问控制
+
+12. **【王道·卷三-Q35】** 假设一个以太网只有两个站点，它们同时发送数据，并且产生了碰撞，于是按截断二进制指数退避算法进行重传，则重传第二次才成功的概率是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 0.5 &emsp;&emsp; B. 0.375 &emsp;&emsp; C. 0.125 &emsp;&emsp; D. 0.325</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 两个站点第一次发送时已经发生碰撞。
+
+第一次重传前，碰撞次数 $\displaystyle k=1$，每个站点从集合 $\displaystyle \{0,1\}$ 中等概率选择一个退避时间。两个站点再次碰撞的条件是选择相同的退避值，其概率为：
+
+$$
+\displaystyle
+P_1=\dfrac{2}{2^2}=\dfrac{1}{2}
+$$
+
+第二次重传前，碰撞次数 $\displaystyle k=2$，每个站点从 $\displaystyle \{0,1,2,3\}$ 中等概率选择退避值。两个站点选择不同退避值时，第二次重传成功，其概率为：
+
+$$
+\displaystyle
+P_2=1-\dfrac{4}{4^2}=1-\dfrac14=\dfrac34
+$$
+
+因此，“第一次重传仍碰撞，第二次重传才成功”的概率为：
+
+$$
+\displaystyle
+P=P_1P_2=\dfrac12\times\dfrac34=\dfrac38=0.375
+$$
+
+故选择 B。A 只考虑了一次退避；C、D 均不符合联合概率计算结果。
+
+</details>
+
+---
+
+13. **【王道·卷六-Q35】** CSMA协议可利用多种监听算法来减小发生冲突的概率。在下面关于各种监听算法的描述中，错误的是（  ）。
+I. 非坚持型监听算法有利于缩短网络空闲时间
+II. 1-坚持型监听算法有利于减小冲突的概率
+III. $\displaystyle p-$ 坚持型监听算法无法缩短网络的空闲时间
+IV. 1-坚持型监听算法能够及时抢占信道
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II和III &emsp;&emsp; B. II和III &emsp;&emsp; C. I、II和IV &emsp;&emsp; D. II和IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 逐项判断如下。
+
+I 错误。非坚持 CSMA 在监听到信道忙时，不持续监听，而是等待一个随机时间后再监听。即使信道已经空闲，站点也可能仍在等待，因此可能造成额外的信道空闲时间，不能说它有利于缩短网络空闲时间。
+
+II 错误。1-坚持 CSMA 在信道空闲时立即发送。若多个站点都在等待信道，它们会在信道刚空闲时同时发送，反而容易发生冲突，因此不利于减小冲突概率。
+
+III 错误。$\displaystyle p$-坚持 CSMA 在划分时隙的信道中，监听到信道空闲后，以概率 $\displaystyle p$ 发送，以概率 $\displaystyle 1-p$ 推迟到下一时隙继续尝试。它在信道利用率和冲突概率之间进行折中，并非“无法缩短”网络空闲时间。
+
+IV 正确。1-坚持 CSMA 一旦检测到信道空闲就立即发送，能够及时抢占信道，但代价是竞争站点较多时冲突概率较高。
+
+因此错误的是 I、II、III，选择 A。
+
+</details>
+
+---
+
+14. **【竟成·模拟五-35】** 下列有关CSMA协议的描述中，错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 非坚持CSMA协议相较于1-坚持CSMA协议，发生冲突的可能性更低</div>
+<div className="choice-option-row">B. p-坚持CSMA协议只适用于划分时隙的信道</div>
+<div className="choice-option-row">C. 1-坚持CSMA协议、非坚持CSMA协议和p-坚持CSMA协议在当信道空闲时，都会立即发送数据</div>
+<div className="choice-option-row">D. p-坚持CSMA协议既能充分利用信道，又能有效减少冲突</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** A 正确。非坚持 CSMA 在发现信道忙时随机等待一段时间后再监听，使多个等待站点不易在信道刚空闲时同时发送，因此冲突概率通常低于 1-坚持 CSMA。
+
+B 正确。$\displaystyle p$-坚持 CSMA 的处理过程以时隙为单位：在信道空闲时，以概率 $\displaystyle p$ 在当前时隙发送，以概率 $\displaystyle 1-p$ 延迟一个时隙，因此它适用于划分时隙的信道。
+
+C 错误。1-坚持 CSMA 检测到信道空闲时立即发送；非坚持 CSMA 若本次监听到信道空闲也会发送；但 $\displaystyle p$-坚持 CSMA 并非必然立即发送，而是仅以概率 $\displaystyle p$ 发送，以概率 $\displaystyle 1-p$ 推迟到下一时隙。
+
+D 正确。$\displaystyle p$-坚持 CSMA 通过调整 $\displaystyle p$ 值，在及时利用空闲信道和避免多个站点同时发送之间取得折中，因此既可提高信道利用率，又能降低冲突概率。
+
+故选择 C。
+
+</details>
+
+---
+
+15. **【竟成·模拟六-37】** 下列关于随机访问介质访问控制方法的说法中，错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. CSMA/CD适用于有线网络，CSMA/CA适用于无线网络，都用于实现链路共享</div>
+<div className="choice-option-row">B. CSMA/CA对数据帧进行确认，而CSMA/CD不对数据帧进行确认</div>
+<div className="choice-option-row">C. CSMA/CA采用RTS/CTS机制对信道进行预约</div>
+<div className="choice-option-row">D. 当发生冲突时，CSMA/CD和CSMA/CA采用相同的二进制指数退避算法解决碰撞</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** A 正确。传统共享式以太网采用 CSMA/CD，通过载波监听和冲突检测共享有线信道；IEEE 802.11 无线局域网采用 CSMA/CA，通过冲突避免机制共享无线信道。
+
+B 正确。无线站点难以在发送过程中可靠检测碰撞，因此 CSMA/CA 使用确认帧判断数据帧是否成功到达；CSMA/CD 依靠发送方在发送过程中检测碰撞，MAC 层不采用逐帧确认机制。
+
+C 按教材常规表述可视为正确。CSMA/CA 可使用 RTS/CTS 机制预约信道，以缓解隐蔽站导致的碰撞。RTS/CTS 并非所有帧都必须采用，但属于 CSMA/CA 的典型辅助机制。
+
+D 错误。CSMA/CD 能在发送过程中检测碰撞，检测到碰撞后停止发送，再按截断二进制指数退避算法重传。CSMA/CA 无法直接检测碰撞，它在发送前进行随机退避，若发送后未收到 ACK，则推断帧可能丢失并扩大竞争窗口后重传。二者虽然都具有指数扩大退避窗口的思想，但触发条件、退避过程和计时规则并不相同，不能说采用“相同”的算法解决碰撞。
+
+因此选择 D。
+
+</details>
+
+---
+
+## 3.6 局域网
+
+### 3.6.2 以太网与IEEE 802.3
+
+16. **【王道·卷二-Q40】** 下列报文封装成帧后在以太网中传输，封装成IP数据报和MAC帧时，目的地址既使用广播IP地址又使用广播MAC地址的是（  ）。
+I. DHCP发现报文 II. ARP请求报文 III. HTTP请求报文 IV. IGMP报文
+
+<div className="choice-options">
+<div className="choice-option-row">A. I &emsp;&emsp; B. I、II &emsp;&emsp; C. II、III &emsp;&emsp; D. III、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** DHCP 客户端刚接入网络时通常还没有可用的 IP 地址，也不知道 DHCP 服务器的位置，因此 DHCP Discover 报文采用两层广播：
+
+- IP 数据报的目的地址为受限广播地址 `255.255.255.255`；
+- 以太网帧的目的 MAC 地址为广播地址 `FF-FF-FF-FF-FF-FF`。
+
+因此 I 符合题意。
+
+II 中，ARP 请求帧确实使用广播 MAC 地址，但 ARP 报文不是封装在 IP 数据报中的网络层报文，因而不存在“广播目的 IP 地址”这一说法。
+
+III 中，HTTP 请求通常发往具体服务器，目的 IP 地址和目的 MAC 地址均不是广播地址。
+
+IV 中，IGMP 报文使用组播 IP 地址，并映射为组播 MAC 地址，而不是广播地址。
+
+故选择 A。
+
+</details>
+
+---
+
+17. **【王道·卷四-Q37】** 一个长度为 $\displaystyle 3200\text{ bit}$ 的TCP报文段传输到IP层，加上 $\displaystyle 160\text{ bit}$ 的首部后成为IP数据报。下面的互联网由两个局域网通过路由器连接，但第二个局域网所能传输的最长数据帧中的数据部分只有 $\displaystyle 1200\text{ bit}$，因此数据报在路由器中必须进行分片，则第二个局域网要向其上层传输（  ）的数据（这里的“数据”是指局域网看见的数据）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle 3160\text{ bit}$ &emsp;&emsp; B. $\displaystyle 3840\text{ bit}$ &emsp;&emsp; C. $\displaystyle 4240\text{ bit}$ &emsp;&emsp; D. $\displaystyle 3200\text{ bit}$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 原 IP 数据报的数据部分是 TCP 报文段，共：
+
+$$
+\displaystyle
+3200\text{ bit}=400\text{ B}
+$$
+
+IP 首部长度为：
+
+$$
+\displaystyle
+160\text{ bit}=20\text{ B}
+$$
+
+第二个局域网帧的数据部分最多为：
+
+$$
+\displaystyle
+1200\text{ bit}=150\text{ B}
+$$
+
+因而每个 IP 分片的总长度不能超过 $\displaystyle 150\text{ B}$。除最后一个分片外，分片的数据长度还必须是 $\displaystyle 8\text{ B}$ 的整数倍，因此每个非末尾分片最多携带：
+
+$$
+\displaystyle
+\left\lfloor\dfrac{150-20}{8}\right\rfloor\times 8
+=16\times 8
+=128\text{ B}
+$$
+
+原数据部分 $\displaystyle 400\text{ B}$ 被分为：
+
+$$
+\displaystyle
+128+128+128+16=400\text{ B}
+$$
+
+共形成 4 个 IP 分片，每个分片都要添加一个 $\displaystyle 20\text{ B}$ 的 IP 首部。第二个局域网看到并向上层交付的数据总量为：
+
+$$
+\displaystyle
+400+4\times20=480\text{ B}=3840\text{ bit}
+$$
+
+故选择 B。需要注意，分片会复制 IP 首部，因此链路上传输的数据总量大于原 IP 数据报长度。
+
+</details>
+
+---
+
+18. **【王道·卷四-Q38】** 一个自治系统分配到的IP地址块为30.138.118.0/23，包括5个局域网，每个局域网的主机数量如下图所示，则在关于该自治系统的两种地址分配方案的说法中，正确的是（  ）。
+![卷四_Q38_AS地址分配](/img/questions/408-mock/wangdao-set-04-q38.png)
+
+|      | 第一组分配方案    | 第二组分配方案    |
+| ---- | ----------------- | ----------------- |
+| LAN1 | 30.138.119.192/29 | 30.138.118.192/27 |
+| LAN2 | 30.138.119.0/25   | 30.138.118.0/25   |
+| LAN3 | 30.138.118.0/24   | 30.138.119.0/24   |
+| LAN4 | 30.138.119.200/29 | 30.138.118.224/27 |
+| LAN5 | 30.138.119.128/26 | 30.138.118.128/27 |
+
+<div className="choice-options">
+<div className="choice-option-row">A. 第一组方案合理，第二组方案不合理 &emsp;&emsp; B. 第一组方案不合理，第二组方案合理</div>
+<div className="choice-option-row">C. 两组方案都合理 &emsp;&emsp; D. 两组方案都不合理</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 地址块 `30.138.118.0/23` 的范围为：
+
+```text
+30.138.118.0 ～ 30.138.119.255
+```
+
+图中各局域网的主机需求为：LAN2 有 91 台主机，LAN3 有 150 台主机，LAN4 有 3 台主机，LAN5 有 15 台主机；LAN1 是连接 3 台路由器的骨干局域网，至少需要 3 个可用地址。
+
+第一组方案的可用主机数分别为：
+
+- LAN1：`/29`，可用 $\displaystyle 2^3-2=6$ 个地址；
+- LAN2：`/25`，可用 $\displaystyle 2^7-2=126$ 个地址；
+- LAN3：`/24`，可用 $\displaystyle 2^8-2=254$ 个地址；
+- LAN4：`/29`，可用 6 个地址；
+- LAN5：`/26`，可用 $\displaystyle 2^6-2=62$ 个地址。
+
+各子网均满足主机数量要求，地址范围互不重叠，而且均位于给定的 `/23` 地址块内。
+
+第二组方案中，LAN2 的 `/25`、LAN3 的 `/24` 以及 LAN1、LAN4、LAN5 的 `/27` 也都能满足各自的地址需求；各网段边界合法、互不重叠，并且仍全部位于 `30.138.118.0/23` 内。
+
+因此两组分配方案都合理，选择 C。地址分配未必必须做到绝对节省，只要满足容量、边界、互斥和所属地址块等要求即可。
+
+</details>
+
+---
+
+19. **【王道·卷六-Q36】** ARP的作用是由IP地址求MAC地址，某结点响应其他结点的ARP请求是通过（  ）发送的。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 单播 &emsp;&emsp; B. 组播 &emsp;&emsp; C. 广播 &emsp;&emsp; D. 点播</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** ARP 请求方不知道目标结点的 MAC 地址，因此 ARP 请求必须使用广播方式发送，使同一广播域中的所有结点都能收到。
+
+目标结点收到请求后，可以从 ARP 请求报文中获得请求方的源 IP 地址和源 MAC 地址，因此其 ARP 响应可以直接发给请求方，目的 MAC 地址明确，采用单播发送。
+
+所以 ARP 的典型过程是“请求广播、响应单播”，选择 A。组播用于特定组成员通信；“点播”不是这里的标准传输方式术语。
+
+</details>
+
+---
+
+20. **【王道·卷八-Q33】** 在网络参考模型中，上层协议实体与下层协议实体之间的逻辑接口称为服务访问点(SAP)。在以太网帧中，（  ）属于数据链路层的服务访问点。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 类型字段 &emsp;&emsp; B. 目的地址字段 &emsp;&emsp; C. 协议字段 &emsp;&emsp; D. 端口号字段</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 数据链路层的服务访问点用于标识帧中承载的是哪一种网络层协议，使接收方能够把数据交给正确的上层协议实体。
+
+在以太网 II 帧中，类型字段具有这一作用。例如：
+
+- `0x0800` 表示 IPv4；
+- `0x0806` 表示 ARP；
+- `0x86DD` 表示 IPv6。
+
+因此类型字段可看作数据链路层面向网络层的 SAP，选择 A。
+
+B 的目的地址字段标识接收网卡；C 的协议字段位于 IP 首部，用于标识上层传输层协议；D 的端口号位于传输层，用于标识应用进程。
+
+</details>
+
+---
+
+### 3.6.3 IEEE 802.11无线局域网
+
+21. **【竟成·模拟一-36】** 下列关于IEEE 802.11无线局域网的协议机制的描述中，正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 无线MAC帧的帧首部必须包含SSID以标识接入的无线网络，而BSSID仅用于管理帧</div>
+<div className="choice-option-row">B. 站点与AP建立关联可通过主动扫描（发送探测请求帧）或被动扫描（监听信标帧）实现</div>
+<div className="choice-option-row">C. 802.11标准规定点协调功能PCF必须实现，分布协调功能DCF可以选择实现</div>
+<div className="choice-option-row">D. 802.11的MAC层中的DCF层通过RTS/CTS可以完全避免隐蔽站问题</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** B 正确。无线站点发现 AP 通常有两种扫描方式：
+
+- 主动扫描：站点发送 Probe Request（探测请求）帧，等待 AP 返回 Probe Response；
+- 被动扫描：站点监听 AP 周期性发送的 Beacon（信标）帧。
+
+扫描后，站点可进一步完成认证和关联。
+
+A 错误。SSID 用于标识无线网络，但并非所有无线数据帧首部都必须携带 SSID；BSSID 通常对应基本服务集中的 AP MAC 地址，在管理帧和数据帧地址字段中都可能发挥作用。
+
+C 错误。DCF 是 IEEE 802.11 的基本、必选协调功能；PCF 是可选的集中式协调功能，实际应用较少。
+
+D 错误。RTS/CTS 可以显著缓解隐蔽站问题，但不能保证完全消除所有碰撞，例如 RTS 帧本身仍可能发生碰撞。
+
+因此选择 B。
+
+</details>
+
+---
+
+22. **【竟成·模拟七-37】** 如下图所示，H1的MAC地址为01-23-45-67-89-0a，AP1的MAC地址为01-23-45-67-89-0b，AP2的MAC地址为01-23-45-67-89-0c，H2的MAC地址为01-23-45-67-89-0d，H1沿着图中链路发送一个封装访问Internet的IP分组的IEEE802.11数据帧给H2，则AP1发送的帧的地址1、地址2、地址3和地址4分别是（）。
+![第7套第37题图](/img/questions/408-mock/jingcheng-set-07-q37.png)
+
+<div className="choice-options">
+<div className="choice-option-row">A. 01-23-45-67-89-0c、01-23-45-67-89-0b、01-23-45-67-89-0d、01-23-45-67-89-0a</div>
+<div className="choice-option-row">B. 01-23-45-67-89-0a、01-23-45-67-89-0d、01-23-45-67-89-0b、01-23-45-67-89-0c</div>
+<div className="choice-option-row">C. 01-23-45-67-89-0a、01-23-45-67-89-0b、01-23-45-67-89-0c、01-23-45-67-89-0a</div>
+<div className="choice-option-row">D. 01-23-45-67-89-0d、01-23-45-67-89-0c、01-23-45-67-89-0b、01-23-45-67-89-0a</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** AP1 向 AP2 转发该帧时，数据帧从一个分布系统节点传向另一个分布系统节点，此时 `To DS=1`、`From DS=1`，使用 IEEE 802.11 的四地址格式。
+
+四个地址字段的含义为：
+
+- 地址 1：直接无线接收方 RA，即 AP2；
+- 地址 2：直接无线发送方 TA，即 AP1；
+- 地址 3：最终目的地址 DA，即 H2；
+- 地址 4：原始源地址 SA，即 H1。
+
+因此：
+
+```text
+地址1 = AP2 = 01-23-45-67-89-0c
+地址2 = AP1 = 01-23-45-67-89-0b
+地址3 = H2  = 01-23-45-67-89-0d
+地址4 = H1  = 01-23-45-67-89-0a
+```
+
+故选择 A。判断四地址帧时，应区分“当前一跳的收发设备”和“端到端的源、目的主机”。
+
+</details>
+
+---
+
+### 3.6.4 VLAN基本概念与基本原理
+
+23. **【王道·卷四-Q36】** 在下面关于VLAN的描述中，正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 一个VLAN是一个广播域 &emsp;&emsp; B. 一个VLAN是一个冲突域</div>
+<div className="choice-option-row">C. 一个VLAN必须连接同一台交换机 &emsp;&emsp; D. 不同VLAN之间不能通信</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** VLAN 通过逻辑划分交换网络，将一个物理局域网划分成多个相互隔离的广播域。因此，一个 VLAN 对应一个广播域，A 正确。
+
+B 错误。现代交换式以太网中，每个交换机端口通常构成一个独立冲突域，一个 VLAN 可以包含多个交换机端口，因此并不等同于一个冲突域。
+
+C 错误。借助中继链路和 IEEE 802.1Q 标签，同一个 VLAN 可以跨越多台交换机。
+
+D 错误。不同 VLAN 在数据链路层不能直接通信，但可通过路由器或三层交换机进行 VLAN 间路由，因此并非绝对不能通信。
+
+故选择 A。
+
+</details>
+
+---
+
+## 3.7 广域网
+
+### 3.7.2 点对点协议
+
+24. **【王道·卷三-Q36】** 在下列关于PPP（点对点协议）的说法中，错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 接收方每收到一个帧就进行CRC，检验错误就丢弃这个帧</div>
+<div className="choice-option-row">B. PPP支持多种网络层协议在同一条物理链路上运行</div>
+<div className="choice-option-row">C. PPP不对帧进行编号</div>
+<div className="choice-option-row">D. PPP有确认机制</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** A 正确。PPP 帧包含帧检验序列 FCS，接收方通过 CRC 检测差错；若检测到错误，则直接丢弃该帧。
+
+B 正确。PPP 通过协议字段区分其数据部分承载的网络层协议，因此可以支持 IPv4、IPv6 等多种网络层协议。
+
+C 正确。PPP 不设置帧序号，不提供滑动窗口、按序接收和重传控制。
+
+D 错误。PPP 只提供差错检测，不提供数据帧确认和重传机制，因此属于不可靠传输协议。链路建立阶段虽然存在 LCP、NCP 等控制报文交互，但不能据此认为 PPP 对普通数据帧提供确认机制。
+
+故选择 D。
+
+</details>
+
+---
+
+25. **【竟成·模拟四-35】** 下列有关PPP协议的说法中，错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. PPP协议是具有差错检测能力的数据链路层协议</div>
+<div className="choice-option-row">B. 在同步链路中，PPP协议采用字节填充法；在异步链路中，PPP协议采用零比特填充法</div>
+<div className="choice-option-row">C. PPP协议既支持多种网络层的协议，同时支持多种数据链路层的协议</div>
+<div className="choice-option-row">D. PPP协议提供有连接不可靠的服务</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B（按该题通常考查的填充方式；按选项 C 的字面表述，C 也存在错误，原题表述不严谨）
+
+**解析：** A 正确。PPP 位于数据链路层，帧尾设置 FCS，可利用 CRC 检测传输差错，但不负责确认和重传。
+
+B 错误，题目将两种填充方法写反。PPP 的透明传输规则是：
+
+- 在异步传输链路中采用字节填充法；
+- 在同步传输链路中采用零比特填充法。
+
+因此 B 是命题者最明显、通常预期选择的错误项。
+
+C 按字面同样不准确。PPP 能够通过协议字段支持多种网络层协议，也能运行在多种类型的物理链路上，但 PPP 本身就是一种数据链路层协议，不能表述为“支持多种数据链路层协议”。若原题本意是“支持多种类型的物理链路”，则该项才成立。
+
+D 可按教材常见表述视为正确。PPP 在传输数据前需要经过链路建立、配置和认证等阶段，因此具有连接建立过程；但它不提供数据帧确认与重传，属于不可靠服务。
+
+综上，按照单选题的常见命题意图应选 B；严格按当前题面判断，B、C 均有问题，应注意原题瑕疵。
+
+</details>
+
+---
+
+## 3.8 数据链路层设备
+
+### 3.8.2 以太网交换机
+
+26. **【王道·卷一-Q37】** 某网络的拓扑结构如下图所示，假设交换机当前已学习到了主机 $\displaystyle E$ 的MAC地址，主机 $\displaystyle A$ 向主机 $\displaystyle E$ 发送ARP请求报文，主机 $\displaystyle E$ 收到后，向主机 $\displaystyle A$ 发送ARP响应报文，则能收到ARP请求报文和ARP响应报文的主机数量分别是（  ）。
+![卷一_Q37_局域网拓扑结构](/img/questions/408-mock/wangdao-set-01-q37.png)
+
+<div className="choice-options">
+<div className="choice-option-row">A. 5,3 &emsp;&emsp; B. 5,1 &emsp;&emsp; C. 3,5 &emsp;&emsp; D. 1,1</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** ARP 请求帧的目的 MAC 地址是广播地址，因此会在当前广播域内扩散。
+
+主机 A 首先把 ARP 请求发送到集线器。集线器工作在物理层，会把收到的信号复制到除入端口外的所有端口，所以主机 B、C 和交换机都能收到该帧。交换机收到广播帧后，一方面根据帧的源 MAC 地址学习到“主机 A 位于连接集线器的端口”，另一方面将该广播帧从其余端口泛洪，因此主机 D、E、F 也能收到。
+
+除发送方 A 外，收到 ARP 请求报文的主机共有：
+
+$$
+\displaystyle
+B、C、D、E、F，共\ 5\ 台
+$$
+
+主机 E 返回的 ARP 响应是单播帧，目的 MAC 地址为 A。交换机此前已通过 ARP 请求学习到 A 所在端口，因此只把响应帧转发到连接集线器的端口。集线器不能识别目的地址，会将该帧复制给 A、B、C，所以能在物理上收到该响应帧的主机共有 3 台；其中只有 A 会向上交付，B、C 检查目的 MAC 地址后丢弃。
+
+因此，收到请求帧和响应帧的主机数量分别为 5 和 3，选择 A。
+
+</details>
+
+---
+
+27. **【王道·卷七-Q36】** 以太网交换机的自学习算法是指，它根据帧中的（  ）进行地址学习。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 源MAC地址 &emsp;&emsp; B. 目的MAC地址 &emsp;&emsp; C. 源MAC地址和目的MAC地址 &emsp;&emsp; D. 源IP地址</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 交换机收到一个以太网帧后，能够确定两项信息：
+
+1. 该帧从哪个端口进入；
+2. 该帧的源 MAC 地址是什么。
+
+因此，交换机会在转发表中记录“源 MAC 地址—入端口”的对应关系，并刷新该表项的老化计时器。例如，若源 MAC 地址为 M 的帧从端口 3 到达，则交换机可推断主机 M 可经端口 3 到达。
+
+交换机不能根据目的 MAC 地址学习其所在端口，因为目的主机并不一定就在该帧的入端口方向；目的 MAC 地址只用于查询转发表并决定转发、过滤或泛洪。
+
+IP 地址属于网络层信息，也不是普通二层交换机进行 MAC 地址自学习的依据。因此选择 A。
+
+</details>

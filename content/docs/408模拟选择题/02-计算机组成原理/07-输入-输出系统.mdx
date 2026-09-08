@@ -1,0 +1,291 @@
+---
+sidebar_position: 7
+title: 第7章 输入/输出系统
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第7章 输入/输出系统
+
+## 7.2 I/O接口
+
+### 7.2.1 I/O接口的功能
+
+1. **【竟成·模拟七-22】** 以下有关I/O接口的叙述中，错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. I/O接口就是像显卡或网卡之类的一种外设控制逻辑</div>
+<div className="choice-option-row">B. I/O接口中主机侧数据宽度与设备侧数据宽度不一定相同</div>
+<div className="choice-option-row">C. 采用统一编址时，根据指令类型可区分访问主存还是访问I/O端口</div>
+<div className="choice-option-row">D. 采用统一编址时，可利用主存的存储保护措施对I/O端口进行存储保护</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 统一编址又称存储器映射 I/O，I/O 端口与主存单元共同占用统一的地址空间，并使用相同的访存指令访问。CPU 根据地址所在的范围判断访问目标是主存还是 I/O 端口，而不是根据指令类型区分，因此 C 错误。
+
+- I/O 接口是连接主机总线与外设的控制逻辑，显卡、网卡等设备中包含相应接口与控制电路，A 正确。
+- 接口可以完成串并转换、数据缓冲和格式转换，因此主机侧与设备侧数据宽度不必相同，B 正确。
+- 统一编址后，I/O 端口位于存储地址空间中，可以借助页表权限、地址空间隔离等存储保护机制限制访问，D 正确。
+
+</details>
+
+---
+
+### 7.2.2 I/O接口的基本结构
+
+2. **【王道·卷一-Q21】** 主机和外设之间的正确连接通路是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. CPU和主存 - I/O总线 - I/O接口(外设控制器) - 通信总线(电缆) - 外设</div>
+<div className="choice-option-row">B. CPU和主存 - I/O接口(外设控制器) - I/O总线 - 通信总线(电缆) - 外设</div>
+<div className="choice-option-row">C. CPU和主存 - I/O总线 - 通信总线(电缆) - I/O接口(外设控制器) - 外设</div>
+<div className="choice-option-row">D. CPU和主存 - I/O接口(外设控制器) - 通信总线(电缆) - I/O总线 - 外设</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** I/O 接口位于主机与外设之间，负责地址译码、数据缓冲、控制命令传送、状态检测以及信号格式转换。正确的数据通路为：
+
+$$
+\displaystyle
+\text{CPU和主存}\rightarrow\text{I/O总线}\rightarrow\text{I/O接口}\rightarrow\text{通信总线}\rightarrow\text{外设}
+$$
+
+其中，I/O 总线属于主机内部总线，用于连接 CPU、主存与 I/O 接口；通信总线或电缆位于接口和外设之间。因此选择 A，其余选项均将接口、I/O 总线或通信总线的位置颠倒。
+
+</details>
+
+---
+
+### 7.2.4 I/O端口及其编址
+
+3. **【竟成·模拟二-21】** 下列关于I/O端口和I/O接口的说法错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 一个I/O端口对应一个地址</div>
+<div className="choice-option-row">B. 一个I/O接口可能对应多个地址</div>
+<div className="choice-option-row">C. 数据端口和命令端口都属于I/O端口</div>
+<div className="choice-option-row">D. 独立编址方式下CPU不需要设置专门的输入/输出指令访问I/O端口</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** I/O 端口是 I/O 接口中可由 CPU 访问的寄存器，如数据寄存器、状态寄存器和控制寄存器。通常每个可独立寻址的端口对应一个端口地址，而一个 I/O 接口可能包含多个端口，因此对应多个地址，A、B 正确。数据端口和命令端口均属于 I/O 端口，C 正确。
+
+独立编址方式为 I/O 端口设置独立于主存的地址空间，普通访存指令不能访问该空间，CPU 必须提供专门的输入、输出指令，如 `IN`、`OUT`。因此 D 错误。
+
+</details>
+
+---
+
+## 7.3 I/O方式
+
+### 7.3.2 程序中断方式
+
+4. **【王道·卷七-Q22】** 在下列关于各种 I/O 控制方式的说法中，错误的是（  ）。
+I. 在中断周期中，置“0”允许中断触发器是由关中断指令完成的
+II. 中断服务程序的最后一条指令是无条件转移指令
+III. CPU通过中断来控制DMA接口的传输工作
+IV. 程序中断和DMA方式都由硬件和软件结合来实现数据的传输
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II、IV &emsp;&emsp; B. III、IV &emsp;&emsp; C. I、II、III &emsp;&emsp; D. I、II、III、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** - I 错误。CPU 响应中断后，硬件执行中断隐指令，自动将中断允许标志置为 0，实现关中断；这不是由程序中的关中断指令完成的。
+- II 错误。中断服务程序最后应执行专用的中断返回指令，以恢复断点和程序状态，而不是普通的无条件转移指令。
+- III 错误。DMA 的数据传送由 DMA 控制器直接控制，CPU 只负责传送前的初始化，并在整批数据传输结束后通过中断获知结果，不能说 CPU 通过中断控制 DMA 的具体传输过程。
+- IV 正确。程序中断方式由硬件完成中断请求、响应等操作，由软件中断服务程序完成数据处理；DMA 方式由软件进行初始化和结束处理，由 DMA 硬件完成成批数据传送，二者均体现软硬件结合。
+
+因此错误的是 I、II、III，选择 C。
+
+</details>
+
+---
+
+5. **【竟成·模拟六-22】** 在采用中断方式进行打印控制时，在打印控制接口（打印适配器）和打印部件之间交换的信息不包括以下的（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 打印字符点阵信息 &emsp;&emsp; B. 打印控制信息 &emsp;&emsp; C. 打印机状态信息 &emsp;&emsp; D. 中断请求信号</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 打印控制接口与打印部件之间需要交换以下信息：
+
+- 打印字符或图形的点阵数据，用于形成实际输出内容；
+- 启动、走纸、复位等打印控制信息；
+- 缺纸、忙、就绪、故障等打印机状态信息。
+
+中断请求信号是打印控制接口在需要 CPU 处理时发往 CPU 的信号，传输方向是接口到主机，而不是接口与打印部件之间交换的信息。因此选择 D。
+
+</details>
+
+---
+
+### 7.3.3 DMA方式
+
+6. **【王道·卷三-Q15】** 现代计算机通常采用以存储器为中心的工作方式来提高系统性能，在下列 $\displaystyle I/O$ 控制方式中，（  ）可以实现以存储器为中心的工作方式。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 中断方式 &emsp;&emsp; B. 程序查询方式 &emsp;&emsp; C. DMA方式 &emsp;&emsp; D. 无条件查询方式</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** “以存储器为中心”要求外设能够在尽量少占用 CPU 的情况下，直接与主存交换成批数据。DMA（Direct Memory Access，直接存储器访问）方式由 DMA 控制器暂时取得系统总线控制权，使数据直接在 I/O 设备与主存之间传送，CPU 只负责传送前的初始化和传送结束后的处理，因此选择 C。
+
+- A：中断方式仍由 CPU 执行中断服务程序，通常以字或少量数据为单位在接口与主存之间搬运数据。
+- B：程序查询方式需要 CPU 不断查询设备状态并亲自完成数据传送，CPU 占用率高。
+- C：DMA 方式实现外设与主存之间的直接成批传送，符合以存储器为中心的思想。
+- D：无条件传送方式只适用于能够随时交换数据的简单设备，仍需 CPU 执行传送指令。
+
+</details>
+
+---
+
+7. **【王道·卷八-Q22】** DMA方式的接口电路中有程序中断部件，其作用包括（  ）。
+I. 实现数据传输 II. 向CPU提出总线使用权 III. 向CPU提出传输结束
+IV. 检查数据是否出错
+
+<div className="choice-options">
+<div className="choice-option-row">A. 仅III &emsp;&emsp; B. III和IV &emsp;&emsp; C. I、III和IV &emsp;&emsp; D. I和II</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** DMA 接口中的程序中断部件，主要在一批数据传送结束或传送过程中检测到错误时，向 CPU 发出中断请求。因此其作用包括：
+
+- III：通知 CPU 本次 DMA 传输已经结束；
+- IV：在检测到数据校验错误、设备故障等异常时请求 CPU 处理。
+
+I“实现数据传输”由 DMA 控制器中的地址寄存器、字计数器、数据缓冲寄存器及控制逻辑等完成，并非程序中断部件的职责。II“向 CPU 提出总线使用权”属于 DMA 请求与总线仲裁逻辑的功能，也不属于程序中断部件。因此选择 B。
+
+</details>
+
+---
+
+8. **【竟成·模拟一-22】** 某计算机的主频为1GHz，CPI为4。若该计算机中配置的磁盘每个磁道有16个512B的扇区。磁盘旋转一圈的时间是8.192ms，忽略寻道和旋转延迟。采用DMA方式传送数据，每次DMA传送块大小为500B，且DMA预处理和后处理的总开销为500个时钟周期，则CPU用于该磁盘输入/输出的时间占CPU总时间的百分比最大是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 0.05% &emsp;&emsp; B. 0.1% &emsp;&emsp; C. 0.15% &emsp;&emsp; D. 0.2%</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 每个磁道的数据量为：
+
+$$
+\displaystyle
+16\times 512\text{B}=8192\text{B}
+$$
+
+磁盘旋转一圈需要 $\displaystyle 8.192\text{ms}$，忽略寻道和旋转等待后，连续传输速率为：
+
+$$
+\displaystyle
+\dfrac{8192\text{B}}{8.192\times 10^{-3}\text{s}}
+=10^6\text{B/s}
+$$
+
+每次 DMA 传送 $\displaystyle 500\text{B}$，因此每秒需要进行的 DMA 传送次数为：
+
+$$
+\displaystyle
+\dfrac{10^6}{500}=2000\text{次/秒}
+$$
+
+每次 DMA 的预处理和后处理共占用 CPU $\displaystyle 500$ 个时钟周期，故每秒 CPU 为 DMA 管理所消耗的时钟周期数为：
+
+$$
+\displaystyle
+2000\times 500=10^6\text{个时钟周期}
+$$
+
+CPU 主频为 $\displaystyle 1\text{GHz}=10^9\text{Hz}$，所以 CPU 时间占比为：
+
+$$
+\displaystyle
+\dfrac{10^6}{10^9}\times 100\%=0.1\%
+$$
+
+因此选择 B。题目给出的 $\displaystyle \mathrm{CPI}=4$ 在此处无须使用，因为开销已经直接以“时钟周期数”给出；若给出的是指令条数，才需要乘以 CPI。
+
+</details>
+
+---
+
+9. **【竟成·模拟二-22】** 下列关于DMA说法正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. DMA读入数据需要经过CPU才可以到达内存 &emsp;&emsp; B. DMA请求是希望让CPU让出总线控制权</div>
+<div className="choice-option-row">C. DMA方式可用于键盘输入 &emsp;&emsp; D. DMA方式下数据传送由软硬件共同完成</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** DMA 控制器需要通过系统总线直接在外设与主存之间传送数据，而系统总线通常由 CPU 控制。因此，DMA 控制器发出 DMA 请求的实质，是请求 CPU 暂时让出总线控制权，选择 B。
+
+- A 错误。DMA 的核心特点正是数据不经过 CPU，而是由 DMA 控制器直接在 I/O 设备和主存之间传送。
+- B 正确。DMA 请求本质上是总线请求，CPU 在适当时机响应后让出总线。
+- C 错误。键盘属于低速、零散数据输入设备，通常采用程序中断方式；DMA 主要用于磁盘、网卡等高速设备的大批量数据传送。
+- D 错误。DMA 传送前的初始化和传送后的处理需要软件参与，但实际的数据搬运过程由 DMA 硬件完成。题目强调“数据传送”，不能笼统说由软硬件共同完成。
+
+</details>
+
+---
+
+10. **【竟成·模拟三-22】** 下列关于DMA控制器和CPU关系的叙述中，错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. DMA控制器向CPU请求的是总线使用权</div>
+<div className="choice-option-row">B. DMA控制器和CPU都要使用总线时，CPU优先级更高</div>
+<div className="choice-option-row">C. CPU可通过执行I/O指令来访问DMA控制器中的寄存器</div>
+<div className="choice-option-row">D. 周期挪用方式下，CPU在一个总线事务结束时，一旦发现有DMA请求，就立即释放总线</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** DMA 控制器和 CPU 都可能成为总线主设备。当 DMA 控制器需要传送数据时，会向 CPU 提出总线请求；CPU 在完成当前总线事务后交出总线控制权。在总线竞争中，通常 DMA 的优先级高于 CPU，以防高速外设因数据不能及时传送而发生丢失，因此 B 错误。
+
+- A 正确。DMA 请求的对象是系统总线的使用权，而不是 CPU 的运算资源。
+- B 错误。发生竞争时通常优先保证 DMA 传送，DMA 的总线优先级高于 CPU。
+- C 正确。CPU 需要通过 I/O 指令或存储器映射方式访问 DMA 控制器的地址寄存器、字计数器和控制/状态寄存器，以完成初始化和状态检查。
+- D 正确。周期挪用方式下，DMA 控制器只占用一个或若干存储周期；CPU 在当前总线事务完成后检测到 DMA 请求，便暂时释放总线，DMA 完成一次传送后再归还总线。
+
+---
+
+</details>

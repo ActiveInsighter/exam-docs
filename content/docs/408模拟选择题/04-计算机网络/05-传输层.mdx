@@ -1,0 +1,712 @@
+---
+sidebar_position: 5
+title: 第5章 传输层
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第5章 传输层
+
+## 5.2 UDP
+
+### 5.2.1 UDP数据报
+
+1. **【王道·卷五-Q38】** 一个用十六进制格式存储的UDP首部为CB84000D001C001C，则在下列关于该UDP首部的说法中，正确的是（  ）。
+I. 源端口号为52096 II. 目的端口号为13
+III. 该UDP数据报的数据载荷长度为28B IV. 该UDP数据报是客户端到服务器方向的
+
+<div className="choice-options">
+<div className="choice-option-row">A. II &emsp;&emsp; B. I、III &emsp;&emsp; C. II、IV &emsp;&emsp; D. II、III、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** UDP 首部固定为 8B，4 个字段各占 2B。将给出的首部按每 4 个十六进制数字分组：
+
+```text
+CB84 | 000D | 001C | 001C
+源端口 目的端口 长度   检验和
+```
+
+各字段解释如下：
+
+- 源端口号为 `0xCB84`，十进制值为：
+
+$$
+\displaystyle
+203\times 256+132=52100
+$$
+
+因此 I 错误。
+- 目的端口号为 `0x000D=13`，II 正确。端口 13 是 Daytime 等服务可使用的熟知端口。
+- 长度字段 `0x001C=28` 表示 UDP 首部与数据载荷的总长度，而不是仅指数据载荷。数据载荷长度为：
+
+$$
+\displaystyle
+28-8=20\text{B}
+$$
+
+因此 III 错误。
+- 源端口 52100 属于临时端口，目的端口 13 是服务器熟知端口，表明该报文通常由客户端发往服务器，IV 正确。
+
+因此正确的是 II、IV，选择 C。
+
+</details>
+
+---
+
+2. **【王道·卷六-Q38】** 在下列关于传输层的伪首部的理解中，正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 只有UDP数据报计算检验和时才需要伪首部，TCP不需要</div>
+<div className="choice-option-row">B. 伪首部指的是UDP数据报和TCP报文段的首部中的一个字段</div>
+<div className="choice-option-row">C. 源主机需要额外发送伪首部给目的主机</div>
+<div className="choice-option-row">D. 伪首部既不向下传输也不向上递交，仅用于计算传输层的检验和</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 伪首部并不是真正封装在 TCP 报文段或 UDP 数据报中的首部，而是计算传输层检验和时临时构造的一组信息，通常包括源 IP 地址、目的 IP 地址、协议号以及 TCP 或 UDP 长度。
+
+A 错误。TCP 和 UDP 在计算检验和时都要加入伪首部。
+
+B 错误。伪首部不是 TCP 或 UDP 首部中的实际字段，它只在检验和计算过程中临时参与运算。
+
+C 错误。伪首部不会作为数据的一部分在网络中传输。接收方可根据收到的 IP 首部和传输层报文自行构造相同的伪首部。
+
+D 正确。伪首部既不会向下交付给网络层进行传输，也不会向上交付给应用层，其唯一作用是让检验和能够同时检查部分网络层关键信息，降低报文被误投到错误主机或错误传输层协议的风险。
+
+因此选择 D。
+
+</details>
+
+---
+
+### 5.2.2 UDP检验
+
+3. **【王道·卷四-Q39】** 在下列关于UDP检验和的说法中，正确的是（  ）。
+I. 如果发送方决定不使用检验和，就将检验和的值全置为0
+II. 如果检验和的计算结果刚好为全0，就将它设置为全1
+III. 如果检验和的计算结果刚好为全1，就将它保持为全1
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II &emsp;&emsp; B. II、III &emsp;&emsp; C. I、III &emsp;&emsp; D. I、II、III</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 在 IPv4 的 UDP 中，检验和字段全 0 表示发送方未使用 UDP 检验和，因此 I 正确。IPv6 要求 UDP 检验和必须使用，通常不能以全 0 表示省略。
+
+UDP 检验和采用反码运算。发送方先对伪首部、UDP 首部和数据进行反码求和，再对结果按位取反。
+
+- 若最终计算出的检验和为全 0，为避免与“未使用检验和”的全 0 表示混淆，发送时应将其改为全 1，因此 II 正确。
+- 若计算结果本身为全 1，则直接将全 1 写入检验和字段，不需要修改，因此 III 正确。
+
+所以 I、II、III 均正确，选择 D。
+
+</details>
+
+---
+
+4. **【竟成·模拟一-40】** 下列关于校验和机制的描述中，正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. IP首部校验和覆盖整个数据报，而TCP/UDP校验和仅覆盖首部</div>
+<div className="choice-option-row">B. TCP校验和的计算与IP首部无关，而UDP校验和必须包含IP首部</div>
+<div className="choice-option-row">C. UDP校验和的计算需要依赖IP首部中的源IP地址、目的IP地址和协议字段</div>
+<div className="choice-option-row">D. IP校验和采用伪首部机制</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** C 正确。UDP 检验和的计算要使用伪首部，伪首部中的源 IP 地址、目的 IP 地址、协议号和 UDP 长度等信息来自网络层，因此 UDP 检验和依赖 IP 首部中的部分字段。注意，参与运算的是这些字段构成的伪首部，并不是把整个 IP 首部直接加入计算。
+
+A 错误。IPv4 首部检验和只覆盖 IPv4 首部，不覆盖数据部分；TCP 和 UDP 检验和则覆盖传输层首部、数据载荷以及伪首部。
+
+B 错误。TCP 和 UDP 都要利用伪首部计算检验和，因此二者都与源、目的 IP 地址等网络层信息有关。
+
+D 错误。伪首部机制用于 TCP 和 UDP 检验和。IPv4 首部检验和直接对 IPv4 首部本身进行计算，不使用伪首部；IPv6 则取消了 IP 首部检验和。
+
+因此选择 C。
+
+</details>
+
+---
+
+5. **【竟成·模拟二-38】** 下列关于UDP的叙述中，正确的是（）。
+I. TCP和UDP的端口号相互独立，可以存在于同一台主机
+II. 用户程序在传输层采用UDP协议时，传输的可靠性全部由应用层协议承担
+III. UDP计算校验和时使用的伪首部需要传输给应用层和网络层
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II &emsp;&emsp; B. I、III &emsp;&emsp; C. II、III &emsp;&emsp; D. I、II、III</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** I 正确。TCP 和 UDP 各自具有独立的端口号空间。例如，同一台主机上可同时存在 TCP 端口 53 和 UDP 端口 53，它们分别标识不同传输层协议中的进程端点，不会冲突。
+
+II 正确。UDP 本身不提供确认、超时重传、按序交付、流量控制和拥塞控制。若应用需要可靠传输，就必须由应用层自行实现确认、重传、编号、去重等机制，或改用 TCP 等可靠传输协议。
+
+III 错误。伪首部仅在发送端和接收端计算 UDP 检验和时临时构造，不属于实际 UDP 数据报，不会传输给网络层，也不会递交给应用层。
+
+因此正确的是 I、II，选择 A。
+
+</details>
+
+---
+
+## 5.3 TCP
+
+### 5.3.2 TCP报文段
+
+6. **【王道·卷一-Q40】** 下列关于HTTP的说法中，正确的是（  ）。
+I. 当用户点击某个包含1个文本文件和3张图片的网页时，如果HTTP使用持续连接，那么只需发送1个请求报文就能收到4个响应报文
+II. 可以使用同一个HTTP/1.1持续连接传输对x.com/1.html和x.com/2.html的请求和响应
+III. 当HTTP使用非持续连接时，一个TCP报文段也可装入两个不同的请求报文
+IV. 响应报文中的实体主体部分永远不会是空的
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II &emsp;&emsp; B. 仅II &emsp;&emsp; C. III、IV &emsp;&emsp; D. II、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** I 错误。网页中的 HTML 文本和每一张图片通常都是独立对象，客户端需要分别发送 HTTP 请求。持续连接只是允许多个请求和响应复用同一条 TCP 连接，并不意味着一个请求可以自动换回多个对象。该页面通常需要 4 个请求报文和 4 个响应报文。
+
+II 正确。`x.com/1.html` 和 `x.com/2.html` 属于同一主机。HTTP/1.1 默认采用持续连接，可以在同一条 TCP 连接上依次传输对这两个资源的请求和响应。
+
+III 错误。非持续 HTTP 通常为每个请求—响应过程建立一条独立 TCP 连接，一条连接完成一个对象的传输后关闭，因而不会在同一个非持续连接的 TCP 报文段中承载两个不同对象的请求报文。
+
+IV 错误。HTTP 响应报文的实体主体可能为空。例如，对 `HEAD` 请求的响应不携带实体主体；状态码 204、304 等响应也可以没有实体主体。
+
+因此仅 II 正确，选择 B。
+
+</details>
+
+---
+
+7. **【王道·卷二-Q39】** 不考虑接收双方的容量限制，在下列关于TCP报文段的长度的理解中，正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. TCP报文段的总长度有最小值，没有最大值</div>
+<div className="choice-option-row">B. TCP报文段的总长度最小可以是零，最大值没有上限</div>
+<div className="choice-option-row">C. TCP报文段的总长度最小不能是零，最大不能超过65515B</div>
+<div className="choice-option-row">D. TCP报文段的总长度最小可以是零，最大不能超过65515B</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** TCP 报文段至少要包含 TCP 首部。TCP 基本首部长度为 20B，即使不携带应用数据，仅发送 ACK、SYN 或 FIN 等控制报文段，其总长度也不能为 0，因此最小长度不能是零。
+
+TCP 报文段封装在 IP 数据报中。IPv4 总长度字段占 16 位，IPv4 数据报最大总长度为 65535B。在使用最小 20B IPv4 首部且不考虑其他扩展限制时，能够承载的 TCP 报文段最大长度为：
+
+$$
+\displaystyle
+65535-20=65515\text{B}
+$$
+
+因此 TCP 报文段总长度最小不能为 0，最大不能超过 65515B，选择 C。实际网络中还会受链路 MTU、TCP 最大报文段长度 MSS 等因素限制，通常远小于该理论上限。
+
+</details>
+
+---
+
+8. **【王道·卷七-Q39】** 下列关于TCP的端口号的说法中，正确的是（  ）。
+I. 一台主机可用的端口号数量不超过65536
+II. 一台主机上能同时存活的连接数量不超过65536
+III. 连接释放后，端口号可以再次使用
+IV. 一台主机可在一个端口建立多个TCP连接
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II &emsp;&emsp; B. II、III &emsp;&emsp; C. I、II、III、IV &emsp;&emsp; D. I、II、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** 原题无匹配选项，正确组合应为 I、III、IV
+
+**解析：** I 正确。TCP 端口号字段为 16 位，端口号范围为 0～65535，一共存在：
+
+$$
+\displaystyle
+2^{16}=65536
+$$
+
+个端口号，因此一台主机的 TCP 端口号种类不超过 65536。
+
+II 错误。TCP 连接由四元组唯一标识：
+
+```text
+（源IP地址，源端口号，目的IP地址，目的端口号）
+```
+
+同一个本地端口可以同时与多个不同的远程 IP 地址或远程端口建立连接。因此，一台主机同时存在的 TCP 连接数并不简单受限于 65536，还会受到地址数量、内核资源、文件描述符和内存等因素限制。
+
+III 正确。TCP 连接释放后，端口号可以再次使用。主动关闭一方通常会经历 TIME-WAIT 状态，在等待期结束后，相应四元组即可安全复用；采用端口复用机制时还可有更灵活的使用方式。
+
+IV 正确。例如 Web 服务器可在本地 TCP 端口 80 上同时服务多个客户端。虽然本地 IP 地址与本地端口相同，但各连接的远程 IP 地址或远程端口不同，因此四元组仍然不同。
+
+所以正确组合是 I、III、IV，但题目给出的 A～D 均不包含该组合，属于选项缺失或排版错误。不能为匹配选项而将 II 误判为正确。
+
+</details>
+
+---
+
+9. **【竟成·模拟四-39】** 下列有关TCP的首部字段的描述中，正确的是（）。
+I. 总长度、首部长度、片偏移的单位分别为1B、4B、8B
+II. RST字段为1，表示必须重新建立连接
+III. 首部信息为（SYN=1、ACK=0、seq=1001、ack=1001），表示主机想要收到对方的下一部分数据的首字节序号为1001
+
+<div className="choice-options">
+<div className="choice-option-row">A. II &emsp;&emsp; B. I、III &emsp;&emsp; C. II、III &emsp;&emsp; D. I、II、III</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** I 错误。总长度、首部长度和片偏移是 IPv4 首部中的字段，而不是 TCP 首部字段。它们的计量单位分别确实是 1B、4B 和 8B，但题目问的是“TCP 的首部字段”，因此将这些 IPv4 字段归入 TCP 首部是不正确的。TCP 首部中的“数据偏移”字段才用于表示 TCP 首部长度，单位为 4B。
+
+II 正确。RST 为复位标志。当收到不属于任何现有连接的报文段、连接出现严重错误或需要拒绝非法连接时，可发送 RST 报文段立即终止或拒绝连接。若双方还要继续通信，就必须重新建立 TCP 连接。
+
+III 错误。ACK=0 表示确认号字段无效，因此 `ack=1001` 不具有“期望收到下一字节序号”的含义。SYN=1、ACK=0 表明这是连接建立时的首次 SYN 报文；`seq=1001` 表示发送方选择的初始序号。对方若确认该 SYN，应返回的确认号通常为：
+
+$$
+\displaystyle
+1001+1=1002
+$$
+
+因为 SYN 标志本身要占用一个序号。
+
+因此仅 II 正确，选择 A。
+
+</details>
+
+---
+
+### 5.3.3 TCP连接管理
+
+10. **【王道·卷一-Q39】** TCP使用很多的计时器来实现相关的功能，TCP使用的计时器有（  ）。
+I. 重传计时器 II. 持续计时器 III. 保活计时器 IV. 时间等待计时器
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II、III &emsp;&emsp; B. I、II、IV &emsp;&emsp; C. I、III、IV &emsp;&emsp; D. I、II、III、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** TCP 为保证可靠传输、处理流量控制中的特殊情况以及维护连接状态，需要使用多种计时器。
+
+I 正确。**重传计时器**用于检测报文段是否可能丢失。发送方发送一个需要确认的报文段后启动重传计时器，若超时前未收到有效确认，则重传相应数据。
+
+II 正确。**持续计时器**用于防止零窗口死锁。当接收方通告窗口为 0 后，发送方定期发送零窗口探测报文，以便在接收窗口重新打开而窗口更新报文丢失时仍能恢复传输。
+
+III 正确。**保活计时器**用于检测长时间无数据交换的连接对端是否仍然存活，避免失效连接长期占用资源。
+
+IV 正确。**时间等待计时器**用于 TIME-WAIT 状态。主动关闭连接的一方通常等待两倍最长报文段寿命，即 $\displaystyle 2\mathrm{MSL}$，以保证旧报文段从网络中消失，并在最终 ACK 丢失时能够再次确认对方重传的 FIN。
+
+因此 I、II、III、IV 均正确，选择 D。
+
+</details>
+
+---
+
+11. **【王道·卷六-Q39】** TCP在连接关闭的过程中，为了避免旧TCP报文段对后续连接产生错误干扰而使用的状态是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. TIME-WAIT &emsp;&emsp; B. FIN-WAIT-2 &emsp;&emsp; C. FIN-WAIT-1 &emsp;&emsp; D. CLOSED</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 主动关闭 TCP 连接的一方在发送对对方 FIN 的最终确认后，不会立即进入 CLOSED，而是先进入 TIME-WAIT 状态，并保持 $\displaystyle 2\mathrm{MSL}$ 的时间。
+
+这样做有两个主要目的：
+
+1. 保证本连接中的迟到、重复报文段在网络中全部消失，避免它们被后续使用相同四元组的新连接误收。
+2. 若最终 ACK 丢失，被动关闭方会重传 FIN；主动关闭方仍处于 TIME-WAIT，因而能够再次发送 ACK。
+
+FIN-WAIT-1 和 FIN-WAIT-2 都是主动关闭过程中等待对方确认或 FIN 的中间状态，并不承担清除旧报文段的主要作用；CLOSED 表示连接已经不存在。
+
+因此选择 A。
+
+</details>
+
+---
+
+12. **【竟成·模拟一-38】** 假设主机H与服务器已建立一个TCP连接，最大段长MSS为1000B，往返时间RTT为10ms，最长报文段寿命MSL=30s，拥塞控制的初始阈值是8MSS，忽略TCP的传输时延。主机H以MSS段向主机乙发送一个大小为24000B的文件F，发送完成后H主动请求断开连接。该过程中服务器发送的确认报文段首部的窗口字段值为6000B。若从H开始发送文件F的时刻起，到服务器进入CLOSED状态为止，所需的时间至少是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 65ms &emsp;&emsp; B. 75ms &emsp;&emsp; C. 60.06s &emsp;&emsp; D. 60.07s</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 文件大小为 $\displaystyle 24000\mathrm{B}$，而 $\displaystyle \mathrm{MSS}=1000\mathrm{B}$，因此共需发送 24 个满长度报文段。接收方通告窗口为 $\displaystyle 6000\mathrm{B}=6\mathrm{MSS}$，所以实际发送窗口不能超过 6 个报文段。
+
+初始拥塞窗口按 $\displaystyle 1\mathrm{MSS}$ 计算，慢开始门限为 $\displaystyle 8\mathrm{MSS}$。忽略传输时延后，每经过一个 RTT，发送方可根据确认继续发送。各轮最多发送的数据段数为：
+
+```text
+t =  0 ms：发送 1 段，累计  1 段
+t = 10 ms：发送 2 段，累计  3 段
+t = 20 ms：发送 4 段，累计  7 段
+t = 30 ms：受接收窗口限制，发送 6 段，累计 13 段
+t = 40 ms：发送 6 段，累计 19 段
+t = 50 ms：发送剩余 5 段，累计 24 段
+```
+
+主机 H 在发送最后一批数据时，可在最后一个数据报文段中同时置 FIN，或紧接着发送 FIN，因此不必等待最后一批数据的确认后才开始释放连接。
+
+设单向传播时延为：
+
+$$
+\displaystyle
+\dfrac{\mathrm{RTT}}{2}=5\mathrm{ms}
+$$
+
+最后数据及 FIN 在 $\displaystyle 55\mathrm{ms}$ 到达服务器。服务器已无数据需要继续发送，可立即返回 ACK 和 FIN；它们在 $\displaystyle 60\mathrm{ms}$ 到达 H。H 随即发送最终 ACK，该 ACK 在 $\displaystyle 65\mathrm{ms}$ 到达服务器，此时服务器进入 CLOSED 状态。
+
+题目问的是**服务器**进入 CLOSED 的时间。被动关闭方不需要等待 $\displaystyle 2\mathrm{MSL}$；只有主动关闭方 H 要进入 TIME-WAIT。因此最短时间为 $\displaystyle 65\mathrm{ms}$，选择 A。
+
+</details>
+
+---
+
+13. **【竟成·模拟四-38】** 客户端H和服务器建立了TCP连接。当H发起连接释放报文时，服务器还有2MSS的一个图片文件还未传输。通信的往返时间RTT=100ms，最长报文段寿命为500ms，忽略主机的处理时间，服务器进入CLOSED状态后客户端H进入CLOSED还需要（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 500ms &emsp;&emsp; B. 100ms &emsp;&emsp; C. 900ms &emsp;&emsp; D. 950ms</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** H 是主动关闭方。服务器收到 H 的 FIN 后，先确认该 FIN，但由于服务器还有 $\displaystyle 2\mathrm{MSS}$ 数据未发送，因此服务器不能立即发送自己的 FIN，必须先完成剩余数据传输并得到确认。
+
+单向传播时延为：
+
+$$
+\displaystyle
+\dfrac{\mathrm{RTT}}{2}=50\mathrm{ms}
+$$
+
+在最短情况下，服务器进入 CLOSED 的时刻，是它收到 H 对服务器 FIN 的最终 ACK 时。H 在发送该最终 ACK 的同时已经进入 TIME-WAIT，而该 ACK 再经过 $\displaystyle 50\mathrm{ms}$ 才到达服务器。
+
+H 在 TIME-WAIT 状态中需要等待：
+
+$$
+\displaystyle
+2\mathrm{MSL}=2\times 500=1000\mathrm{ms}
+$$
+
+当服务器收到最终 ACK 并进入 CLOSED 时，H 已经在 TIME-WAIT 中经过了一个单向传播时延 $\displaystyle 50\mathrm{ms}$。因此，从服务器进入 CLOSED 到 H 进入 CLOSED 还需：
+
+$$
+\displaystyle
+1000-50=950\mathrm{ms}
+$$
+
+所以选择 D。
+
+</details>
+
+---
+
+14. **【竟成·模拟五-38】** 主机H与服务器S已经建立了TCP连接，当数据传输结束后，H发送了一个(FIN=1,ACK=1,seq=1000,ack=2000)的TCP报文，则当H的TCP状态由FIN_WAIT_2转化为TIME_WAIT时发出的TCP报文的seq字段为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 1000 &emsp;&emsp; B. 1001 &emsp;&emsp; C. 1002 &emsp;&emsp; D. 1003</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** H 发送的 FIN 报文段序号为 $\displaystyle 1000$。TCP 中 SYN 和 FIN 虽然通常不携带应用数据，但都要各占用一个序号，因此发送 FIN 后，H 的下一个可用序号为：
+
+$$
+\displaystyle
+1000+1=1001
+$$
+
+H 从 FIN-WAIT-2 转换到 TIME-WAIT，说明它收到了服务器 S 的 FIN，并向 S 发送最终 ACK。若此期间 H 未再发送其他数据，则该 ACK 报文段的 `seq` 字段使用当前下一个序号 $\displaystyle 1001$。
+
+因此选择 B。
+
+</details>
+
+---
+
+15. **【竟成·模拟六-39】** 主机H和服务器S在建立TCP连接时，S发送的一个TCP段为(SYN=1,ACK=1,seq=1000,ack=2000)，当主机H释放连接时，H发送的一个TCP段为(FIN=0,ACK=1,seq=5001,ack=6001)，则H收到的S发送的应用层数据的字节数为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 4998 &emsp;&emsp; B. 4999 &emsp;&emsp; C. 5000 &emsp;&emsp; D. 5001</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 服务器 S 在建立连接时发送 SYN，初始序号为 $\displaystyle 1000$。SYN 会占用一个序号，所以 S 发送的第一个应用层数据字节的序号为：
+
+$$
+\displaystyle
+1000+1=1001
+$$
+
+后续 H 发送的报文段中 `ack=6001`，表示 H 已正确收到 S 发送到序号 $\displaystyle 6000$ 为止的所有字节，并期望下一字节序号为 $\displaystyle 6001$。
+
+因此，H 已收到的应用层数据字节序号范围是 $\displaystyle 1001\sim 6000$，字节数为：
+
+$$
+\displaystyle
+6001-1001=5000
+$$
+
+所以选择 C。题干中该报文段的 `FIN=0` 不影响根据确认号计算已接收的数据量。
+
+</details>
+
+---
+
+### 5.3.4 TCP可靠传输
+
+16. **【王道·卷五-Q39】** 当使用TCP数据传输时，假设有一个确认报文段丢失了，则（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 一定会引起与该确认报文段对应的数据的重传</div>
+<div className="choice-option-row">B. 一定不会引起与该确认报文段对应的数据的重传</div>
+<div className="choice-option-row">C. 若这个确认报文段对应的数据段是本次传输的最后一个数据段，则一定会引起数据的重传</div>
+<div className="choice-option-row">D. 如果发送方还未重传数据就收到了对更低序号的确认，则一定不会引起数据的重传</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** TCP 采用累计确认。某个确认报文段丢失后，若发送方随后收到了确认号更大的 ACK，则较大的累计确认已经同时确认了此前的数据，因而不一定发生重传。因此 A 错误。
+
+反过来，若没有后续更大的累计确认到达，发送方的重传计时器可能超时，从而重传数据，所以 B 错误。
+
+若丢失的 ACK 对应本次传输的最后一个数据段，则本次传输中不会再产生用于覆盖该 ACK 的更大累计确认。在通常假设下，发送方最终会因重传计时器超时而重传最后一个数据段，因此 C 正确。
+
+D 错误。收到“更低序号”的确认并不能确认丢失 ACK 所对应的更高序号数据，因此不能保证避免重传。只有确认号不小于该数据末尾序号的累计 ACK 才能完成确认。
+
+所以选择 C。
+
+</details>
+
+---
+
+17. **【竟成·模拟一-39】** 下列关于TCP可靠传输机制的描述中，正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 接收方必须采用累计确认和捎带确认</div>
+<div className="choice-option-row">B. 对不按序到达的数据段，TCP规定必须立即丢弃</div>
+<div className="choice-option-row">C. 快重传机制通过冗余ACK触发，接收方收到失序报文段时需立即发送确认</div>
+<div className="choice-option-row">D. 捎带确认必须与数据段同时发送，否则无法实现累计确认</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** A 错误。TCP 通常采用累计确认，但捎带确认不是必须的。仅当接收方恰好有反向数据要发送时，才可以把 ACK 携带在数据报文段中；若没有反向数据，则应单独发送确认。
+
+B 错误。TCP 标准允许接收方缓存失序到达的报文段，也允许具体实现选择丢弃，协议并未规定必须立即丢弃。
+
+C 正确。收到失序报文段时，接收方通常立即发送重复 ACK，确认当前仍连续收到的最高字节位置。发送方连续收到若干重复 ACK 后，可在重传计时器超时前启动快重传，重传推测丢失的报文段。
+
+D 错误。捎带确认只是确认报文的一种发送方式，与累计确认是不同概念。ACK 完全可以单独发送，仍然能够使用累计确认。
+
+因此选择 C。
+
+</details>
+
+---
+
+### 5.3.6 TCP拥塞控制
+
+18. **【竟成·模拟二-39】** 主机甲和主机乙建立了一个TCP连接，且不支持快重传。MSS=1KB，RTT=2ms，主机甲初始慢开始门限为32kB。t时刻甲的慢开始门限再次变为32kB，从主机甲从第3次握手建立连接的时刻开始计算，整个过程直到第一次拥塞窗口达到慢开始门限前未发生拥塞（超时），则t至少为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 50ms &emsp;&emsp; B. 52ms &emsp;&emsp; C. 74ms &emsp;&emsp; D. 76ms</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 初始拥塞窗口按 $\displaystyle 1\mathrm{MSS}=1\mathrm{KB}$ 计算，初始慢开始门限为 $\displaystyle 32\mathrm{KB}$。慢开始阶段拥塞窗口每经过一个 RTT 近似翻倍：
+
+```text
+0 RTT：1KB
+1 RTT：2KB
+2 RTT：4KB
+3 RTT：8KB
+4 RTT：16KB
+5 RTT：32KB
+```
+
+因此经过 5 个 RTT，即 $\displaystyle 10\mathrm{ms}$ 后，拥塞窗口首次达到慢开始门限。随后进入拥塞避免阶段，拥塞窗口每个 RTT 增加约 $\displaystyle 1\mathrm{MSS}=1\mathrm{KB}$。
+
+若超时后慢开始门限“再次变为 $\displaystyle 32\mathrm{KB}$”，根据超时处理规则，超时前拥塞窗口至少应为：
+
+$$
+\displaystyle
+2\times 32=64\mathrm{KB}
+$$
+
+从 $\displaystyle 32\mathrm{KB}$ 线性增长到 $\displaystyle 64\mathrm{KB}$ 还需 32 个 RTT，因此在：
+
+$$
+\displaystyle
+(5+32)\times 2=74\mathrm{ms}
+$$
+
+时，拥塞窗口才达到 $\displaystyle 64\mathrm{KB}$，并可发送这一窗口的数据。由于不支持快重传，只能等重传计时器超时后才能判定拥塞。最短也要再经过一个 RTT，即：
+
+$$
+\displaystyle
+74+2=76\mathrm{ms}
+$$
+
+此时新的慢开始门限才能设置为 $\displaystyle 64/2=32\mathrm{KB}$。所以选择 D。
+
+</details>
+
+---
+
+19. **【竟成·模拟五-39】** 主机甲和主机乙建立了一个TCP连接，MSS=1KB，经过20个RTT后，主机甲第一次收到三个重复的ACK，且此时刻前未发生超时，此时的拥塞控制阈值与初始拥塞控制阈值相同，则初始的拥塞控制阈值为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 4KB &emsp;&emsp; B. 8KB &emsp;&emsp; C. 16KB &emsp;&emsp; D. 32KB</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 设初始慢开始门限为 $\displaystyle S\mathrm{KB}$。初始拥塞窗口为 $\displaystyle 1\mathrm{KB}$。在慢开始阶段，拥塞窗口按 $\displaystyle 1,2,4,8,\ldots$ 翻倍；达到门限后，进入拥塞避免阶段，每个 RTT 增加 $\displaystyle 1\mathrm{KB}$。
+
+收到三个重复 ACK 时，新的慢开始门限通常设置为当前拥塞窗口的一半。题目说明此时新门限与初始门限相同，因此发生拥塞时应有：
+
+$$
+\displaystyle
+\mathrm{cwnd}=2S
+$$
+
+逐项检验：
+
+- 若 $\displaystyle S=4$，2 个 RTT 达到 4KB，再线性增长 18 个 RTT，得到 22KB，一半不是 4KB。
+- 若 $\displaystyle S=8$，3 个 RTT 达到 8KB，再增长 17 个 RTT，得到 25KB，一半不是 8KB。
+- 若 $\displaystyle S=16$，4 个 RTT 达到 16KB，再增长 16 个 RTT，恰好得到 32KB，其一半为 16KB。
+- 若 $\displaystyle S=32$，5 个 RTT 达到 32KB，再增长 15 个 RTT，得到 47KB，一半不是 32KB。
+
+因而初始慢开始门限为 $\displaystyle 16\mathrm{KB}$，选择 C。
+
+</details>
+
+---
+
+20. **【竟成·模拟七-39】** 主机甲和主机乙已经建立了TCP连接。主机甲以MSS=1KB进行数据传输，主机乙对每个接收到的报文段发送确认。主机乙的初始接收窗口为30KB，主机乙只有当接收窗口满时才会将数据提交给应用层。初始的拥塞控制阈值为4KB，达到拥塞控制阈值后拥塞窗口大小按照传输轮次递增，在第6个RTT主机甲收到3个重复ACK（之前未发生拥塞）并且之后只重传了一个报文段。第7个RTT后，如果主机甲收到了对所有已发送报文段的确认，则甲的发送窗口为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 1KB &emsp;&emsp; B. 2KB &emsp;&emsp; C. 4KB &emsp;&emsp; D. 5KB</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 发送窗口由拥塞窗口和接收窗口共同限制：
+
+$$
+\displaystyle
+W_s=\min(\mathrm{cwnd},\mathrm{rwnd})
+$$
+
+初始 $\displaystyle \mathrm{cwnd}=1\mathrm{KB}$，慢开始门限为 $\displaystyle 4\mathrm{KB}$。前几个 RTT 的发送量依次为：
+
+```text
+第1个RTT：1KB
+第2个RTT：2KB
+第3个RTT：4KB
+第4个RTT：5KB
+第5个RTT：6KB
+第6个RTT：7KB
+```
+
+前 6 个 RTT 共发送：
+
+$$
+\displaystyle
+1+2+4+5+6+7=25\mathrm{KB}
+$$
+
+接收方尚未达到 $\displaystyle 30\mathrm{KB}$ 的满窗口条件，因此不会向应用层提交数据。第 7 个 RTT 后，接收方剩余接收窗口为：
+
+$$
+\displaystyle
+\mathrm{rwnd}=30-25=5\mathrm{KB}
+$$
+
+第 6 个 RTT 收到 3 个重复 ACK，说明触发快重传而非超时。发生拥塞时，新的慢开始门限取当前拥塞窗口的一半：
+
+$$
+\displaystyle
+\mathrm{ssthresh}=\dfrac{7}{2}\approx 4\mathrm{KB}
+$$
+
+重传报文段得到确认、退出快恢复后，拥塞窗口恢复为新的慢开始门限，即 $\displaystyle 4\mathrm{KB}$。因此：
+
+$$
+\displaystyle
+W_s=\min(4,5)=4\mathrm{KB}
+$$
+
+所以选择 C。
+
+</details>

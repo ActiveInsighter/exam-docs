@@ -1,0 +1,982 @@
+---
+sidebar_position: 3
+title: 第3章 内存管理
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第3章 内存管理
+
+## 3.1 内存管理概念
+
+### 3.1.1 内存管理的基本原理和要求
+
+1. **【王道·卷四-Q24】** 在下列关于内存管理的说法中，正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 不同进程对应的页表中可能包含内容相同的页表项</div>
+<div className="choice-option-row">B. 虚拟地址空间总是大于物理地址空间</div>
+<div className="choice-option-row">C. 在页式存储管理中，页面越小越有利于消除外部碎片，从而提高内存利用率</div>
+<div className="choice-option-row">D. 在段式存储管理中，分段大小可以不同，从而可以消除外部碎片，提高内存利用率</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 不同进程的页表项完全可能具有相同内容。例如，两个进程共享同一段只读代码时，它们的某些虚页可映射到同一个物理页框；即使不共享，也可能因页框号及控制位恰好相同而出现内容相同的页表项，因此 A 正确。
+
+B 错误，虚拟地址空间的大小由虚拟地址位数决定，物理地址空间由物理地址位数决定，二者不存在“虚拟空间总是更大”的必然关系。C 错误，分页本身就不存在外部碎片，减小页面主要有助于减小平均内部碎片，但会增大页表规模和管理开销。D 错误，分段的段长可变，内存中会形成大小不一的空闲区，因此仍会产生外部碎片，不能将其消除。
+
+</details>
+
+---
+
+2. **【王道·卷六-Q28】** 总体上说，按需调页（Demand-paging）是一种很好的虚拟内存管理策略。但是，有些程序设计技术并不适合这种环境。例如，（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 堆栈 &emsp;&emsp; B. 线性搜索 &emsp;&emsp; C. 向量运算 &emsp;&emsp; D. 二分搜索</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 请求分页依赖程序的局部性原理。堆栈操作通常集中在栈顶附近，具有很强的时间局部性和空间局部性；线性搜索和向量运算一般按连续地址访问数据，空间局部性较好，均较适合请求分页环境。
+
+二分搜索每次都跳到当前搜索区间的中点，连续两次访问的地址可能相距很远。当数据规模较大、跨越多个页面时，访问序列可能频繁跳转到不同页面，空间局部性较差，容易增加缺页次数。因此 D 最不适合。
+
+</details>
+
+---
+
+3. **【竟成·模拟一-28】** 下列关于内存管理方法的描述中，正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 动态分区分配中的最佳适应算法通过按地址排序空闲块来提高分配速度</div>
+<div className="choice-option-row">B. 伙伴算法在释放内存时立即合并相邻块以减少外部碎片</div>
+<div className="choice-option-row">C. 分页管理消除了外部碎片，但可能存在内部碎片</div>
+<div className="choice-option-row">D. 虚拟内存的页面置换算法中，FIFO算法不会出现Belady现象</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 分页管理把物理内存划分为大小相等的页框，任意空闲页框都可分配给进程的任意页面，因此不会产生外部碎片；但进程最后一页通常不能恰好装满一个页框，页框中未使用的部分形成内部碎片，所以 C 正确。
+
+A 错误，最佳适应算法通常按空闲分区大小递增组织空闲分区，以便尽快找到能满足请求的最小空闲块；按地址排序主要服务于首次适应算法。B 错误，伙伴算法只在相邻空闲块互为“伙伴”、大小相同且满足地址关系时才可递归合并，并非释放后将所有相邻空闲块都立即合并。D 错误，FIFO 页面置换算法可能出现分配页框数增加而缺页次数反而增加的 Belady 异常。
+
+</details>
+
+---
+
+4. **【竟成·模拟四-28】** 形成逻辑地址和物理地址的阶段分别为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 编译，装入 &emsp;&emsp; B. 编译，装入或程序运行时 &emsp;&emsp; C. 链接，装入 &emsp;&emsp; D. 链接，装入或程序运行时</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 编译阶段通常把各源程序模块翻译成目标模块，其中的地址多为模块内的相对地址。链接程序把多个目标模块及库模块连接成一个完整的装入模块，并完成外部符号解析和地址调整，从而形成程序统一的逻辑地址空间，所以逻辑地址主要在链接阶段形成。
+
+物理地址何时确定取决于重定位方式：采用静态重定位时，在程序装入内存时确定物理地址；采用动态重定位时，装入后仍保留逻辑地址，程序运行过程中由地址变换机构将其转换为物理地址。因此物理地址可在装入时或运行时形成，选 D。
+
+</details>
+
+---
+
+5. **【竟成·模拟六-28】** 把作业使用的逻辑地址变成内存中物理地址的过程称为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 挂载 &emsp;&emsp; B. 装入 &emsp;&emsp; C. 物理化 &emsp;&emsp; D. 重定位</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 程序编译、链接后使用的是逻辑地址。将逻辑地址转换为主存中的实际物理地址，这一地址变换过程称为重定位，也称地址映射。重定位可分为装入时完成的静态重定位和运行时由硬件地址变换机构完成的动态重定位。因此选 D。
+
+装入是把程序和数据调入内存的过程，可能包含静态重定位，但二者概念并不等同；挂载通常用于把文件系统接入目录树；“物理化”不是操作系统内存管理中的规范术语。
+
+</details>
+
+---
+
+### 3.1.2 连续分配管理方式
+
+6. **【王道·卷三-Q28】** 若存储单元的长度为 $\displaystyle n$，存放在该存储单元中的程序长度为 $\displaystyle m$，则剩下的长度为 $\displaystyle n-m$ 的空间称为该单元的内部碎片。在下面的存储分配方法中，哪种存在内部碎片？（  ）。
+I. 固定式分区 II. 动态分区 III. 页式管理 IV. 段式管理
+V. 段页式管理 VI. 请求段式管理
+
+<div className="choice-options">
+<div className="choice-option-row">A. I和II &emsp;&emsp; B. I、III和V &emsp;&emsp; C. IV、V和VI &emsp;&emsp; D. III和V</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 内部碎片是已经分配给进程、但进程实际没有使用的存储空间。
+
+- 固定分区的分区大小预先确定，作业小于所在分区时，分区内部的剩余空间不能再分配给其他作业，因此 I 存在内部碎片。
+- 动态分区按作业实际需要划分空间，主要产生分区之间的外部碎片，II 通常不计内部碎片。
+- 分页管理按固定大小的页框分配，进程最后一页往往不能装满，III 存在内部碎片。
+- 分段和请求分段按逻辑段的实际长度分配，主要产生外部碎片，IV、VI 不属于本题所述内部碎片。
+- 段页式管理中每个段再分页，仍可能在各段最后一页产生内部碎片，因此 V 存在内部碎片。
+
+故存在内部碎片的是 I、III、V，选 B。
+
+</details>
+
+---
+
+7. **【王道·卷四-Q28】** 某操作系统采用可变分区分配存储管理方法，操作系统占用低地址部分的 $\displaystyle 126KB$，用户区大小为 $\displaystyle 386KB$，且用户区的起始地址为 $\displaystyle 126KB$，用空闲分区表管理空闲分区。若分配时采用分配空闲区高地址部分的方案，且初始时用户区的 $\displaystyle 386KB$ 空间空闲，对申请序列：作业1申请80KB，作业2申请56KB，作业3申请120KB，作业1释放80KB，作业3释放120KB，作业4申请156KB，作业5申请81KB。若采用首次适应算法处理上述序列，则最小空闲块的大小为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 12KB &emsp;&emsp; B. 13KB &emsp;&emsp; C. 89KB &emsp;&emsp; D. 56KB</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 用户区地址范围为 $\displaystyle [126,512)KB$，分配时从所选空闲分区的高地址端切出空间。
+
+1. 作业1申请 $\displaystyle 80KB$：从高端分配，剩余空闲区为 $\displaystyle [126,432)$，大小 $\displaystyle 306KB$。
+2. 作业2申请 $\displaystyle 56KB$：剩余空闲区为 $\displaystyle [126,376)$，大小 $\displaystyle 250KB$。
+3. 作业3申请 $\displaystyle 120KB$：剩余空闲区为 $\displaystyle [126,256)$，大小 $\displaystyle 130KB$。
+4. 作业1释放：形成高地址空闲区 $\displaystyle [432,512)$，大小 $\displaystyle 80KB$。
+5. 作业3释放：其区域 $\displaystyle [256,376)$ 与低地址空闲区 $\displaystyle [126,256)$ 相邻，合并为 $\displaystyle [126,376)$，大小 $\displaystyle 250KB$。
+6. 作业4申请 $\displaystyle 156KB$：首次适应选中 $\displaystyle 250KB$ 空闲区，并从高端分配，留下 $\displaystyle 94KB$。
+7. 作业5申请 $\displaystyle 81KB$：再次从该 $\displaystyle 94KB$ 空闲区高端分配，留下 $\displaystyle 13KB$。
+
+最终另有一个 $\displaystyle 80KB$ 空闲区，因此最小空闲块为 $\displaystyle 13KB$，选 B。
+
+</details>
+
+---
+
+8. **【王道·卷六-Q27】** 某台计算机采用动态分区来分配内存，经过一段时间的运行后，内存中按地址从小到大存在100KB、450KB、250KB、200KB和600KB的空闲分区。分配指针现在指向地址起始点，继续运行还会有212KB、417KB、112KB和426KB的进程申请使用内存，则能够完全完成分配任务的算法是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 首次适应算法 &emsp;&emsp; B. 邻近适应算法 &emsp;&emsp; C. 最佳适应算法 &emsp;&emsp; D. 最坏适应算法</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 分别模拟各算法即可判断。
+
+**最佳适应算法**每次选择能够满足请求的最小空闲分区：
+
+$$
+\displaystyle
+\begin{aligned}
+212KB &: 选择250KB，剩余38KB；\\
+417KB &: 选择450KB，剩余33KB；\\
+112KB &: 选择200KB，剩余88KB；\\
+426KB &: 选择600KB，剩余174KB。
+\end{aligned}
+$$
+
+四个请求均可成功分配，因此最佳适应算法能够完成全部任务。
+
+首次适应算法在依次分配 $\displaystyle 212KB$、$\displaystyle 417KB$、$\displaystyle 112KB$ 后，没有能容纳 $\displaystyle 426KB$ 的空闲分区；邻近适应算法同样会因前面切割大分区而无法满足最后一个请求；最坏适应算法先后切割最大的 $\displaystyle 600KB$ 和 $\displaystyle 450KB$ 分区，也会导致最后的 $\displaystyle 426KB$ 请求无法满足。因此选 C。
+
+</details>
+
+---
+
+9. **【王道·卷七-Q27】** 支持程序存放在不连续内存中的存储管理方法有（  ）。
+I. 动态分区分配 II. 固定分区分配 III. 分页式分配 IV. 段页式分配 V. 分段式分配
+
+<div className="choice-options">
+<div className="choice-option-row">A. I和II &emsp;&emsp; B. III和IV &emsp;&emsp; C. III、IV和V &emsp;&emsp; D. I、III、IV和V</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 连续分配方式要求一个进程整体占用一块连续的物理内存。固定分区和动态分区都属于连续分配管理，因此 I、II 不支持同一程序分散存放在多个不连续区域中。
+
+分页式管理以页面为单位，把进程各页装入任意空闲页框；分段式管理允许各逻辑段分别装入不同的物理区域；段页式管理先分段、段内再分页，物理存放同样可以不连续。因此 III、IV、V 均支持程序存放在不连续内存中，选 C。
+
+</details>
+
+---
+
+10. **【竟成·模拟二-27】** 下列存储管理方式中，可实现紧凑技术的存储管理方式为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 动态重定位分区分配 &emsp;&emsp; B. 单一连续分配 &emsp;&emsp; C. 固定分区分配 &emsp;&emsp; D. 分页存储管理</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 紧凑是把内存中已分配的多个作业向一端移动，使原来分散的小空闲区合并成一个较大的连续空闲区。移动作业后，其物理地址会改变，因此系统必须能够在程序运行期间重新完成地址映射，也就是需要动态重定位的支持。
+
+动态重定位分区分配同时具备可变分区和运行时地址变换能力，可以在外部碎片较多时实施紧凑，故 A 正确。单一连续分配中只有一个用户作业区，没有通过移动多个分区进行紧凑的必要；固定分区的边界预先确定，不能靠移动作业改变分区结构；分页管理不存在外部碎片，页框本身也无须通过紧凑合并。
+
+</details>
+
+---
+
+11. **【竟成·模拟三-28】** 某计算机按字节编址，使用动态分区分配方式管理内存。当某一作业完成、系统回收其内存空间时，会造成空闲分区数减1的情况是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 既无上邻空闲分区，又无下邻空闲分区。 &emsp;&emsp; B. 虽无上邻空闲分区，但有下邻空闲分区。</div>
+<div className="choice-option-row">C. 虽有上邻空闲分区，但无下邻空闲分区。 &emsp;&emsp; D. 既有上邻空闲分区，又有下邻空闲分区。</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 设回收前空闲分区数为 $\displaystyle k$。
+
+- 若上下都不是空闲分区，回收区独立成为一个新空闲分区，数量变为 $\displaystyle k+1$。
+- 若只有上邻或只有下邻为空闲分区，回收区与该相邻空闲分区合并，空闲分区总数仍为 $\displaystyle k$。
+- 若上下邻均为空闲分区，原来存在两个独立空闲分区；回收后，三段空间合并为一个空闲分区，数量由两个变为一个，因此总数从 $\displaystyle k$ 变为 $\displaystyle k-1$。
+
+故会使空闲分区数减 1 的情况是上下邻均为空闲分区，选 D。
+
+</details>
+
+---
+
+### 3.1.3 基本分页存储管理
+
+12. **【王道·卷一-Q32】** 信息在外存空间中的排列也会影响存取等待时间。考虑几条逻辑记录 $\displaystyle A,B,C,\ldots,J$，它们被存放于磁盘上，每个磁盘存放10条记录，安排如表1所示。
+表1 每个磁盘存放10条记录
+
+| 物理块   | 1   | 2   | 3   | 4   | 5   | 6   | 7   | 8   | 9   | 10  |
+| -------- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 逻辑记录 | A   | B   | C   | D   | E   | F   | G   | H   | I   | J   |
+
+假定要经常顺序处理这些记录，磁道旋转用时为 $\displaystyle 20\mathrm{ms}/$ 转，处理程序读出每条记录后花 $\displaystyle 4\mathrm{ms}$ 进行处理。考虑对信息的分布进行优化，如表2所示。相比之前的信息分布，优化后的时间缩短了（  ）。
+表2 优化后磁盘存放的10条记录
+
+| 物理块   | 1   | 2   | 3   | 4   | 5   | 6   | 7   | 8   | 9   | 10  |
+| -------- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 逻辑记录 | A   | H   | E   | B   | I   | F   | C   | J   | G   | D   |
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle 60\mathrm{ms}$ &emsp;&emsp; B. $\displaystyle 104\mathrm{ms}$ &emsp;&emsp; C. $\displaystyle 144\mathrm{ms}$ &emsp;&emsp; D. $\displaystyle 204\mathrm{ms}$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 一条磁道有 10 个物理块，旋转一周用时 $\displaystyle 20\mathrm{ms}$，因此经过一个物理块的时间为
+
+$$
+\displaystyle
+\dfrac{20\mathrm{ms}}{10}=2\mathrm{ms}。
+$$
+
+读出一条记录需经过一个物理块，即用时 $\displaystyle 2\mathrm{ms}$；随后 CPU 处理该记录需 $\displaystyle 4\mathrm{ms}$。从开始读取一条记录到处理结束共经过 $\displaystyle 6\mathrm{ms}$，此时磁盘已转过 3 个物理块。
+
+原排列中相邻逻辑记录也位于相邻物理块。例如读取 A 后，磁盘在处理 A 的 $\displaystyle 4\mathrm{ms}$ 内又转过两个物理块，等到程序准备读取 B 时，B 所在的第 2 块已经错过，需要再等待 8 个物理块，即
+
+$$
+\displaystyle
+8\times 2\mathrm{ms}=16\mathrm{ms}。
+$$
+
+10 条记录之间共有 9 次这样的额外等待，因此原排列的总时间为
+
+$$
+\displaystyle
+10\times(2+4)+9\times16=204\mathrm{ms}。
+$$
+
+优化后的排列使相邻逻辑记录在旋转方向上相隔 3 个物理块。每读完并处理一条记录后，下一条逻辑记录恰好转到磁头下方，无须额外等待，总时间为
+
+$$
+\displaystyle
+10\times(2+4)=60\mathrm{ms}。
+$$
+
+因而缩短的时间为
+
+$$
+\displaystyle
+204-60=144\mathrm{ms}，
+$$
+
+选 C。
+
+</details>
+
+---
+
+13. **【王道·卷五-Q30】** 在UNIX系统中，一个盘块的大小为1KB，每个盘块号占4B，采用混合索引的文件分配方式。在FCB中，第 $\displaystyle 0\sim 9$ 个地址为直接地址，第10个地址为一次间接地址，第11个地址为二次间接地址，第12个地址为三次间接地址，一个文件的字节偏移量为420000，则在关于其物理地址的转化过程的描述中，正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 通过二次间接索引在第11个地址中得到一次间接地址，由此得到二次间接地址，再找到物理块号，其块内偏移量为160</div>
+<div className="choice-option-row">B. 通过二次间接索引在第11个地址中得到一次间接地址，由此得到二次间接地址，再找到物理块号，其块内偏移量为44</div>
+<div className="choice-option-row">C. 通过一次间接索引在第10个地址中得到物理块号，其块内偏移量为160</div>
+<div className="choice-option-row">D. 通过一次间接索引在第10个地址中得到物理块号，其块内偏移量为44</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 盘块大小为 $\displaystyle 1KB=1024B$，因此字节偏移量 420000 对应的文件逻辑块号和块内偏移量为
+
+$$
+\displaystyle
+\begin{aligned}
+420000&=410\times1024+160,\\
+\text{逻辑块号}&=410,\\
+\text{块内偏移量}&=160。
+\end{aligned}
+$$
+
+每个间接索引块可保存的盘块号数为
+
+$$
+\displaystyle
+\dfrac{1024}{4}=256。
+$$
+
+10 个直接地址覆盖逻辑块 $\displaystyle 0\sim 9$；一次间接地址再覆盖 256 个逻辑块，即 $\displaystyle 10\sim265$。逻辑块 410 已超过一次间接索引范围，因此必须使用第 11 个地址所指向的二次间接索引。查找时先由第 11 个地址找到一级索引块，再由其中的地址找到二级索引块，最后获得数据盘块号，块内偏移量为 160，故选 A。
+
+</details>
+
+---
+
+14. **【王道·卷八-Q28】** 某虚拟存储器的用户空间为1024个页面，每页 $\displaystyle 1KB$，主存为 $\displaystyle 64KB$。假设某时刻系统为用户的第0,1,2,3页分别分配的物理块为5,10,4,7，则虚拟地址 $\displaystyle 0x0046F$ 对应的物理地址是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle 0x126F$ &emsp;&emsp; B. $\displaystyle 0x166F$ &emsp;&emsp; C. $\displaystyle 0x246F$ &emsp;&emsp; D. $\displaystyle 0x1E6F$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** 题面无正确选项（按题面计算应为 $\displaystyle 0x286F$；若第 1 页映射的物理块号“10”系“9”之误，则选 C）
+
+**解析：** 页大小为 $\displaystyle 1KB=0x400B$。对虚拟地址 $\displaystyle 0x0046F$ 分解：
+
+$$
+\displaystyle
+\begin{aligned}
+\text{页号}&=\left\lfloor\dfrac{0x46F}{0x400}\right\rfloor=1,\\
+\text{页内偏移}&=0x46F-0x400=0x06F。
+\end{aligned}
+$$
+
+按题面，第 1 页映射到 10 号物理块，因此物理地址应为
+
+$$
+\displaystyle
+10\times0x400+0x06F=0x286F。
+$$
+
+四个选项均不等于 $\displaystyle 0x286F$，故题面与选项不一致。选项 C 的 $\displaystyle 0x246F$ 等于 9 号物理块的起始地址加偏移 $\displaystyle 0x06F$，因此若题面中的“10”应为“9”，则原题预期答案为 C。
+
+</details>
+
+---
+
+15. **【竟成·模拟三-26】** 某计算机系统可以由用户选择是否开启分页功能：若不开启，则视为使用单一连续分配方式管理内存；若开启，则视为使用分页方式管理内存，并且配备了TLB用于加速访存（TLB与内存同时查找）。假设TLB的查找时间为1ns，关闭分页功能时一次访存时间为100ns，若希望开启分页功能时平均访存时间不大于110ns，则TLB命中率必须达到（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 87.5% &emsp;&emsp; B. 88.9% &emsp;&emsp; C. 90% &emsp;&emsp; D. 90.9%</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 设 TLB 命中率为 $\displaystyle h$。TLB 命中时，先查 TLB 用时 $\displaystyle 1ns$，再访问目标内存用时 $\displaystyle 100ns$，总计 $\displaystyle 101ns$。
+
+TLB 与内存中的页表同时查找。未命中时，TLB 在 $\displaystyle 1ns$ 后得知失败，但页表查询仍继续，到 $\displaystyle 100ns$ 时取得页框号，随后再访问目标内存一次，因此未命中用时为
+
+$$
+\displaystyle
+100+100=200ns。
+$$
+
+平均访存时间满足
+
+$$
+\displaystyle
+\begin{aligned}
+101h+200(1-h)&\le110,\\
+200-99h&\le110,\\
+h&\ge\dfrac{90}{99}\approx90.9\%。
+\end{aligned}
+$$
+
+因此选 D。
+
+</details>
+
+---
+
+16. **【竟成·模拟五-29】** 采用二级页表的分页系统中，一级页表页表项中的内容是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 用于二级页表索引的页号 &emsp;&emsp; B. 对应二级页表所在的页框号</div>
+<div className="choice-option-row">C. 页目录号 &emsp;&emsp; D. 程序文件所在的页框号</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 二级页表把页表再分页。逻辑地址中的一级页号用于索引一级页表，查得的一级页表项必须指出相应二级页表当前存放在哪个物理页框中；随后再用二级页号索引该二级页表，取得目标页面的物理页框号。因此一级页表项的核心内容是对应二级页表所在的页框号，选 B。
+
+A 错误，二级页表索引号来自逻辑地址中的二级页号字段，并不是一级页表项保存的内容。C 只是一级索引字段的名称。D 所述程序文件盘块与运行时页表的物理页框映射不是同一概念。
+
+</details>
+
+---
+
+17. **【竟成·模拟七-26】** 某计算机系统按字节寻址，物理地址空间为1MB，虚拟地址空间由32个2KB的页组成。页表中只考虑访问位、修改位和状态位，则虚拟地址长度为（），页表总长度为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 20位，32B &emsp;&emsp; B. 20位，48B &emsp;&emsp; C. 16位，32B &emsp;&emsp; D. 16位，48B</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 虚拟地址空间大小为
+
+$$
+\displaystyle
+32\times2KB=2^5\times2^{11}B=2^{16}B，
+$$
+
+因此按字节编址时虚拟地址长度为 16 位。
+
+物理地址空间为 $\displaystyle 1MB=2^{20}B$，页大小为 $\displaystyle 2KB=2^{11}B$，所以物理页框数为
+
+$$
+\displaystyle
+2^{20-11}=2^9，
+$$
+
+页框号需要 9 位。每个页表项还需访问位、修改位和状态位各 1 位，因此页表项共
+
+$$
+\displaystyle
+9+3=12\text{ 位}。
+$$
+
+页表共有 32 项，总长度为
+
+$$
+\displaystyle
+32\times12=384\text{ 位}=48B。
+$$
+
+故选 D。
+
+</details>
+
+---
+
+### 3.1.4 基本分段存储管理
+
+18. **【王道·卷一-Q29】** 下列关于共享段的说法中，错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 在共享段表中，存在共享进程计数变量count，它记录有多少个进程正在共享该分段，只有当count值为0时，才由系统回收该段所占用的内存区</div>
+<div className="choice-option-row">B. 共享段表中有一个存取控制字段，可以为不同的进程赋予不同的存取权限</div>
+<div className="choice-option-row">C. 对于一个共享段，在不同的进程中有不同的段号</div>
+<div className="choice-option-row">D. 每个进程都拥有一张共享段表</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 共享段由操作系统统一管理，系统为所有共享段建立共享段表，其中记录共享段的段长、内存始址、共享计数和访问权限等信息。各进程自己的段表中设置相应表项，指向同一个共享段，而不是每个进程都各自拥有一张共享段表，因此 D 错误。
+
+A 正确，共享计数 $\displaystyle count$ 表示当前共享该段的进程数，只有计数降为 0 时才可回收其物理内存。B 正确，共享代码通常只读，而共享数据可能需要读写，系统可为不同进程设置相应访问权限。C 正确，段号属于进程自身逻辑地址空间中的编号，同一共享段在不同进程中可以对应不同段号。
+
+</details>
+
+---
+
+19. **【竟成·模拟六-26】** 某计算机系统采用分段方式管理内存，段表存储在寄存器中，只存储段基址，不存储段长。某时刻段表内容如下所示：
+
+| 段寄存器 | 段基址  |
+| -------- | ------- |
+| CS       | 0x00000 |
+| DS       | 0x07C00 |
+| SS       | 0x65000 |
+| ES       | 0x8B000 |
+
+则段内偏移0x1327（段基址在CS中）和0x1592（段基址在ES中）对应的物理地址分别为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 0x01327，0xB9592 &emsp;&emsp; B. 0x01327，0x09292 &emsp;&emsp; C. 0x66327，0xB9592 &emsp;&emsp; D. 0x66327，0x09292</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** 题面无正确选项（按题面计算应为 0x01327、0x8C592；若 ES 段基址“0x8B000”系“0xB8000”之误，则选 A）
+
+**解析：** 分段地址变换的基本关系为
+
+$$
+\displaystyle
+\text{物理地址}=\text{段基址}+\text{段内偏移}。
+$$
+
+对 CS 段：
+
+$$
+\displaystyle
+0x00000+0x1327=0x01327。
+$$
+
+对 ES 段：
+
+$$
+\displaystyle
+0x8B000+0x1592=0x8C592。
+$$
+
+因而按题面应得到 0x01327、0x8C592，但四个选项均不匹配。选项 A 的第二个地址满足
+
+$$
+\displaystyle
+0xB8000+0x1592=0xB9592，
+$$
+
+因此若题面 ES 的段基址应为 0xB8000，则原题预期答案为 A。B、D 的第二个地址与给定 ES 段基址也不相符，C 的第一个地址则错误地使用了 SS 附近的基址。
+
+</details>
+
+---
+
+## 3.2 虚拟内存管理
+
+### 3.2.2 请求分页管理方式
+
+20. **【王道·卷三-Q29】** 在请求分页系统中，因为进程在运行时经常发生页面换入换出的情况，所以一个明显的事实是，页面换入换出所付出的开销将对系统性能产生重大影响，于是就有了相应的页面缓冲算法，其核心思想是在内存中设置相应的链表缓冲区。在下列有关页面缓冲算法的说法中，错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 显著地降低了页面换入换出的频率，使磁盘 $\displaystyle I/O$ 次数大为减少</div>
+<div className="choice-option-row">B. 因为页面缓冲算法使得换入换出的开销大幅减小，所以能让系统采用一种比较简单的置换策略，如先进先出算法</div>
+<div className="choice-option-row">C. 系统可以设置空闲页面链表并修改页面链表，这两个链表都设置在外存中</div>
+<div className="choice-option-row">D. 空闲页面链表是系统掌握的空闲物理块，修改页面链表是由已修改页面形成的链表</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 页面缓冲算法在**内存中**设置空闲页面链表和修改页面链表，用于暂时保留被淘汰的页面，而不是把这两个链表设置在外存中，因此 C 错误。
+
+当一个未修改页面被淘汰时，可直接挂入空闲页面链表；当一个已修改页面被淘汰时，则先挂入修改页面链表，待系统成批写回外存。若进程不久后又访问刚被淘汰的页面，且该页仍在缓冲链表中，就可直接重新分配，无须立即从磁盘调入。因此，该算法可以降低实际页面换入、换出的频率和磁盘 $\displaystyle I/O$ 次数，A 正确。
+
+页面缓冲机制削弱了置换算法选择不佳所带来的影响，因此系统可配合 FIFO 等实现简单、开销较低的置换策略，B 正确。D 对两个链表的含义描述正确。
+
+</details>
+
+---
+
+21. **【王道·卷五-Q26】** 某指令系统允许一级间接寻址，采用请求分页的内存管理方式。若不考虑页面共享，则在一个进程分配页帧时，至少分配（  ）个页帧。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 1 &emsp;&emsp; B. 2 &emsp;&emsp; C. 3 &emsp;&emsp; D. 4</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 请求分页系统必须保证一条指令能够完整执行，否则可能出现执行一条指令时不断缺页、却始终无法完成的情况。
+
+本题需要考虑最不利情形：
+
+1. 一条指令可能跨越两个页面，因此取指令最多需要 2 个页帧；
+2. 一级间接寻址还需要访问一个存放间接地址的页面，需要 1 个页帧；
+3. 根据间接地址访问真正的操作数，该操作数可能位于另一个页面，还需要 1 个页帧。
+
+因此至少需要
+
+$$
+\displaystyle
+2+1+1=4
+$$
+
+个页帧，选 D。
+
+</details>
+
+---
+
+22. **【竟成·模拟六-27】** 某分页虚拟存储管理系统中，内存存取时间为1μs。在处理缺页中断时，若还有可用的空页框或被替换的页未被修改，则处理一个缺页中断需要1ms；若被替换的页已被修改，则处理一个缺页中断需要10ms。假设缺页中断处理结束后CPU已获取目的页框号，60%的替换页被修改过。为保证有效存取时间不超过3μs，可接受的最大缺页率是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 1/164 &emsp;&emsp; B. 1/64 &emsp;&emsp; C. 1/16400 &emsp;&emsp; D. 1/6400</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 未发生缺页时，一次分页地址访问通常需要先访问页表，再访问目标单元，共需
+
+$$
+\displaystyle
+1\mu s+1\mu s=2\mu s。
+$$
+
+缺页中断的平均处理时间为
+
+$$
+\displaystyle
+\begin{aligned}
+T_f
+&=40\%\times1ms+60\%\times10ms\\
+&=6.4ms=6400\mu s。
+\end{aligned}
+$$
+
+设缺页率为 $\displaystyle p$。缺页处理结束后 CPU 已取得目的页框号，随后只需访问目标内存。按选项所采用的近似计算，有效存取时间满足
+
+$$
+\displaystyle
+2+6400p\le3。
+$$
+
+因此
+
+$$
+\displaystyle
+p\le\dfrac{1}{6400}。
+$$
+
+故最大可接受缺页率为 $\displaystyle 1/6400$，选 D。缺页处理时间远大于普通访存时间，所以即使很小的缺页率也会显著降低系统性能。
+
+</details>
+
+---
+
+### 3.2.4 页面置换算法
+
+23. **【王道·卷二-Q29】** 如下程序在页式虚存系统中执行，程序代码位于虚空间0页中，$\displaystyle A$ 为 $\displaystyle 128 \times 128$ 的数组，在虚空间以行为主序存放，每页存放128个数组元素。工作集大小为2个页框（开始时程序代码已在内存中，占1个页框），用LRU算法，下面两个对 $\displaystyle A$ 初始化的程序引起的页故障数约为（  ）。
+程序1:
+
+```c
+for(j = 1; j <= 128; j++)
+for(i = 1; i <= 128; i++)
+A[i][j] = 0;
+```
+
+程序2:
+
+```c
+for(i = 1; i <= 128; i++)
+for(j = 1; j <= 128; j++)
+A[i][j] = 0;
+```
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle 128 \times 128, 128$ &emsp;&emsp; B. $\displaystyle 128, 128 \times 128$</div>
+<div className="choice-option-row">C. $\displaystyle 64, 64 \times 64$ &emsp;&emsp; D. $\displaystyle 64 \times 64, 64$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 工作集共有 2 个页框，其中程序代码固定占用 1 个页框，所以数组数据实际上只有 1 个可用页框。数组按行优先存放，且每页恰好存放 128 个元素，因此数组的每一行对应一个页面。
+
+程序 1 的访问顺序是按列扫描：
+
+$$
+\displaystyle
+A[1][1],A[2][1],\ldots,A[128][1],A[1][2],\ldots
+$$
+
+连续访问的元素属于不同的行，也就属于不同页面。由于数据区只有 1 个页框，几乎每次访问都要换页，故页故障数约为
+
+$$
+\displaystyle
+128\times128。
+$$
+
+程序 2 按行扫描。同一行的 128 个元素都在同一页面中，每访问一行只在首次访问时缺页一次，因此 128 行共约发生
+
+$$
+\displaystyle
+128
+$$
+
+次页故障，选 A。
+
+</details>
+
+---
+
+24. **【王道·卷四-Q29】** 系统为某个进程分配了3个页框，访问页号序列为5,4,3,2,4,3,1,4,3,2,1,5。采用 LRU 和 FIFO 算法的缺页次数分别为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 9和10 &emsp;&emsp; B. 6和6 &emsp;&emsp; C. 5和7 &emsp;&emsp; D. 8和10</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 页框数为 3，分别模拟两种算法。
+
+**LRU：**每次淘汰最近最久未使用的页面。
+
+| 访问页 | 页框状态 | 是否缺页  |
+| ------ | -------- | --------- |
+| 5      | 5        | 是        |
+| 4      | 5,4      | 是        |
+| 3      | 5,4,3    | 是        |
+| 2      | 2,4,3    | 是，淘汰5 |
+| 4      | 2,4,3    | 否        |
+| 3      | 2,4,3    | 否        |
+| 1      | 1,4,3    | 是，淘汰2 |
+| 4      | 1,4,3    | 否        |
+| 3      | 1,4,3    | 否        |
+| 2      | 2,4,3    | 是，淘汰1 |
+| 1      | 2,1,3    | 是，淘汰4 |
+| 5      | 2,1,5    | 是，淘汰3 |
+
+LRU 共缺页 8 次。
+
+**FIFO：**每次淘汰最早进入内存的页面。按顺序模拟可得，在访问 5、4、3、2、1、4、3、2、1、5 时发生缺页，共 10 次。
+
+因此 LRU 和 FIFO 的缺页次数分别为 8 和 10，选 D。
+
+</details>
+
+---
+
+25. **【王道·卷七-Q28】** 在一个请求分页系统中，当采用LRU页面置换算法时，假设一个作业的页面走向为1,3,2,1,1,3,5,1,3,2,1,5。当分配给该作业的物理块数分别为3和4时，在访问过程中发生的缺页率分别为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle 50\%$ 和 $\displaystyle 33\%$ &emsp;&emsp; B. $\displaystyle 25\%$ 和 $\displaystyle 100\%$ &emsp;&emsp; C. $\displaystyle 25\%$ 和 $\displaystyle 33\%$ &emsp;&emsp; D. $\displaystyle 50\%$ 和 $\displaystyle 75\%$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 页面访问序列共有 12 次。
+
+当分配 3 个物理块时，按 LRU 模拟，在访问页 1、3、2、5、2、5 时发生缺页，共 6 次，因此缺页率为
+
+$$
+\displaystyle
+\dfrac{6}{12}=50\%。
+$$
+
+当分配 4 个物理块时，序列中只出现页面 1、2、3、5 四种页面。每种页面第一次访问时缺页，之后均可驻留在内存中，因此共缺页 4 次，缺页率为
+
+$$
+\displaystyle
+\dfrac{4}{12}=\dfrac13\approx33\%。
+$$
+
+故选 A。
+
+</details>
+
+---
+
+26. **【竟成·模拟三-27】** 某请求分页内存管理系统采用固定分配局部替换策略。某进程某一时刻的页表如下所示：
+
+| 页号 | 页框号 | 装入时间 | 最近访问时间 | 访问位 | 修改位 |
+| ---- | ------ | -------- | ------------ | ------ | ------ |
+| 0    | 2      | 27       | 93           | 1      | 0      |
+| 1    | 3      | 22       | 92           | 1      | 1      |
+| 2    | 0      | 5        | 69           | 1      | 0      |
+| 3    | 1      | 34       | 39           | 0      | 0      |
+
+进程访问第4页时发生缺页，则使用FIFO、LRU和改进的CLOCK算法时，换出页面的页号分别应当为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 0，3，2 &emsp;&emsp; B. 1，2，2 &emsp;&emsp; C. 2，2，3 &emsp;&emsp; D. 1，3，3</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** 题面无正确选项（按表中数据应依次换出页面 2、3、3）
+
+**解析：** 三种算法分别判断如下。
+
+1. **FIFO** 淘汰最早装入内存的页面。各页装入时间中最小的是页面 2 的 5，因此应换出页面 2。
+2. **LRU** 淘汰最近最久未访问的页面。各页最近访问时间中最小的是页面 3 的 39，因此应换出页面 3。
+3. **改进型 CLOCK** 优先选择访问位为 0、修改位为 0 的页面。页面 3 的访问位和修改位均为 0，是最优淘汰对象，因此应换出页面 3。
+
+所以正确组合应为“2，3，3”，但四个选项中没有该组合。若仅按给定表格数据判断，原题选项存在错误。
+
+</details>
+
+---
+
+### 3.2.9 地址翻译的示例
+
+27. **【王道·卷八-Q27】** 在一台64位的计算机系统中，地址线宽为64位，实际使用的虚拟地址空间大小是 $\displaystyle 2^{48}$，若采用虚拟页式存储管理，每页的大小为 $\displaystyle 2^{13}$，即 $\displaystyle 8KB$，页表表项长为 $\displaystyle 8B$，采用多级页表进行管理，则多级页表的级次最小是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 3 &emsp;&emsp; B. 4 &emsp;&emsp; C. 5 &emsp;&emsp; D. 6</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 实际虚拟地址长度为 48 位，页大小为 $\displaystyle 2^{13}B$，因此页内偏移量占 13 位，虚拟页号占
+
+$$
+\displaystyle
+48-13=35
+$$
+
+位。
+
+一个页表页可容纳的页表项数为
+
+$$
+\displaystyle
+\dfrac{2^{13}B}{8B}=\dfrac{2^{13}}{2^3}=2^{10}。
+$$
+
+因而每一级页表最多索引 10 位虚拟页号。要覆盖 35 位虚拟页号，所需最少级数为
+
+$$
+\displaystyle
+\left\lceil\dfrac{35}{10}\right\rceil=4。
+$$
+
+故选 B。题目中的“64 位计算机”不意味着实际使用全部 64 位虚拟地址；应以题目给出的 $\displaystyle 2^{48}$ 虚拟地址空间为准。
+
+</details>
+
+---
+
+28. **【竟成·模拟四-29】** 某计算机的编址方式为按字节编址，采用二级页表分页存储方式，虚拟地址格式如下：
+
+| 页目录号（10位） | 页号（10位） | 页内偏移量（12位） |
+
+计算机在某指令周期先后访问虚拟地址0100000H、01112048H、01112333H，则该计算机在指令转换过程中共访问（）个二级页表。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 1 &emsp;&emsp; B. 2 &emsp;&emsp; C. 3 &emsp;&emsp; D. 4</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 页目录号是 32 位虚拟地址的最高 10 位，可通过将虚拟地址右移 22 位得到。
+
+对三个地址分别分解：
+
+$$
+\displaystyle
+\begin{aligned}
+0x00100000\div2^{22}&=0,\\
+0x01112048\div2^{22}&=4,\\
+0x01112333\div2^{22}&=4。
+\end{aligned}
+$$
+
+因此前一个地址的页目录号为 0，后两个地址的页目录号均为 4。不同页目录项分别指向不同的二级页表，所以这三个地址共涉及页目录号 0 和 4 对应的两张二级页表，选 B。
+
+</details>
+
+---
+
+29. **【竟成·模拟七-27】** 某分页存储管理系统中，逻辑地址长度为16位，物理地址长度为18位，每页的大小为2KB，部分页表如下表所示。则逻辑地址0x1234对应的物理地址为（）。
+
+| 页号 | 页框号 |
+| ---- | ------ |
+| 0    | 10     |
+| 1    | 6      |
+| 2    | 8      |
+| 3    | 5      |
+| ...  | ...    |
+
+<div className="choice-options">
+<div className="choice-option-row">A. 0x12334 &emsp;&emsp; B. 0x12234 &emsp;&emsp; C. 0x43210 &emsp;&emsp; D. 0x22234</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** 题面无正确选项（按题面计算应为 0x04234）
+
+**解析：** 页大小为
+
+$$
+\displaystyle
+2KB=2048B=0x800B，
+$$
+
+因而逻辑地址 $\displaystyle 0x1234$ 的页号和页内偏移为
+
+$$
+\displaystyle
+\begin{aligned}
+\text{页号}&=\left\lfloor\dfrac{0x1234}{0x800}\right\rfloor=2,\\
+\text{页内偏移}&=0x1234-2\times0x800=0x234。
+\end{aligned}
+$$
+
+查页表可知，逻辑页 2 映射到物理页框 8，因此物理地址为
+
+$$
+\displaystyle
+8\times0x800+0x234=0x4234。
+$$
+
+按 18 位物理地址补前导零可写为 $\displaystyle 0x04234$。四个选项均不等于该结果，因此题面选项存在错误。
+
+</details>

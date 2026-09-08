@@ -30,7 +30,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: static-docs-preview-${{ github.ref }}
+  group: exam-docs-preview-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -38,7 +38,8 @@ permissions:
 
 env:
   EDGEONE_CLI_VERSION: 1.6.31-3
-  EDGEONE_STATIC_DOCS_PROJECT_NAME: fumadocs-static-docs-preview
+  EDGEONE_STATIC_DOCS_PROJECT_NAME: exam-docs-preview
+  EDGEONE_PREVIEW_PROJECT_ID: ${{ vars.EDGEONE_PREVIEW_PROJECT_ID }}
 
 jobs:
   deploy:
@@ -289,10 +290,10 @@ jobs:
             "${router_url}" \
             "${core_url}" \
             "${body_url}" \
-            '/docs/math/knowledge/advanced-mathematics/01-limits-continuity/' \
-            '/docs/math/knowledge/advanced-mathematics/01-limits-continuity.md' \
-            '/docs/math/knowledge/advanced-mathematics/01-limits-continuity/index.txt' \
-            '/docs/math/knowledge/advanced-mathematics/01-limits-continuity/__next.docs.txt' \
+            '/docs/intro/' \
+            '/docs/intro.md' \
+            '/docs/intro/index.txt' \
+            '/docs/intro/__next.docs.txt' \
             | xargs -P 8 -I '{}' bash -c '
                 status="$(curl --silent --show-error --max-time 60 -L -o /dev/null -w "%{http_code}" "${base_url}$1?${preview_query}")"
                 echo "route $1 -> ${status}"
@@ -301,14 +302,14 @@ jobs:
 
           verify_tmp="$(mktemp -d)"
           curl --fail --silent --show-error --max-time 60 \
-            "${base_url}/docs/math/knowledge/advanced-mathematics/01-limits-continuity/index.txt?${preview_query}" \
+            "${base_url}/docs/intro/index.txt?${preview_query}" \
             -o "${verify_tmp}/rewritten-full.txt"
           cmp \
             "${verify_tmp}/rewritten-full.txt" \
-            '.static-docs/docs/math/knowledge/advanced-mathematics/01-limits-continuity/__next._full.txt'
+            '.static-docs/docs/intro/__next._full.txt'
 
           curl --fail --silent --show-error --max-time 60 \
-            "${base_url}/docs/math/knowledge/advanced-mathematics/01-limits-continuity/__next.docs.txt?${preview_query}" \
+            "${base_url}/docs/intro/__next.docs.txt?${preview_query}" \
             -o "${verify_tmp}/rewritten-docs.txt"
           cmp "${verify_tmp}/rewritten-docs.txt" '.static-docs/docs/__next.docs.txt'
           echo 'RSC rewrite payloads match the deduplicated local sources.'
@@ -318,10 +319,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          if [[ -z "${EDGEONE_PREVIEW_PROJECT_ID:-}" ]]; then
+            echo '::warning::EDGEONE_PREVIEW_PROJECT_ID is not configured; skipping EdgeOne deployment diagnostics.'
+            exit 0
+          fi
           api_tmp="$(mktemp -d)"
           response_file="${api_tmp}/describe.json"
           jq -cn \
-            --arg project_id "makers-vhp1u9ywp8a4" \
+            --arg project_id "${EDGEONE_PREVIEW_PROJECT_ID}" \
             '{
               Action: "DescribePagesDeployments",
               ProjectId: $project_id,

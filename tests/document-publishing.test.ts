@@ -808,6 +808,8 @@ describe('document publishing contracts', () => {
   it('does not require third-party blog images during the production build', () => {
     const sourceConfig = readFileSync(new URL('../source.config.ts', import.meta.url), 'utf8');
 
-    expect(sourceConfig).toMatch(/remarkImageOptions:\s*\{\s*external:\s*false\s*\}/u);
+    expect(sourceConfig).toMatch(
+      /remarkImageOptions:\s*\{[^}]*external:\s*false[^}]*\}/su,
+    );
   });
 });

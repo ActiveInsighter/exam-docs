@@ -4,36 +4,19 @@ import './surface-overrides.css';
 import './study-overrides.css';
 import { SearchProvider } from '@/components/search-provider';
 import type { Metadata } from 'next';
-import { Inter, Source_Serif_4 } from 'next/font/google';
 import type { ReactNode } from 'react';
-
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-});
-
-const sourceSerif4 = Source_Serif_4({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-source-serif',
-});
 
 export const metadata: Metadata = {
   title: {
     default: '考研学习',
     template: '%s | 考研学习',
   },
-  description: '按政治、英语、数学与专业课组织的考研学习知识库。',
+  description: '按数学、专业课与算法练习组织的考研学习知识库。',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html
-      lang="zh-CN"
-      className={`${inter.variable} ${sourceSerif4.variable}`}
-      suppressHydrationWarning
-    >
+    <html lang="zh-CN" suppressHydrationWarning>
       <body className="flex min-h-screen flex-col font-sans" suppressHydrationWarning>
         <SearchProvider>{children}</SearchProvider>
       </body>

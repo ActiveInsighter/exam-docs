@@ -76,23 +76,28 @@ Tencent EdgeOne Makers. The documentation package is a pure static CDN build:
 - Cloud Functions: 0;
 - Edge Functions: 0.
 
-The separate `fumadocs-upload` project still hosts the private Blob signer and
-download gateway functions used by the document publishing workflow.
+The production EdgeOne project used by this repository is `exam-docs`. The
+isolated preview workflow uses `exam-docs-preview`.
 
-Required GitHub Actions secrets:
+Required GitHub Actions secrets for EdgeOne production or preview deployment:
 
 - `EDGEONE_API_TOKEN`
-- `EDGEONE_INTERNAL_API_KEY`
-- `EDGEONE_DOWNLOAD_GATEWAY_SECRET`
-- `N8N_DOCUMENT_PUBLISH_SECRET`
-- `FUMADOCS_BLOB_UPLOAD_KEY`
 
-Required GitHub Actions variables:
+Required GitHub Actions secrets for Cloudflare deployment:
 
-- `EDGEONE_PROJECT_NAME` — the existing Upload-provider project for Blob
-  functions (`fumadocs-upload`);
-- `EDGEONE_DOCS_PROJECT_NAME` — the Upload-provider project for the pure static
-  documentation site (`fumadocs-docs`).
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+Optional GitHub Actions variables:
+
+- `EDGEONE_DOCS_PUBLIC_URL` — the custom production URL to verify after an
+  EdgeOne deployment. If omitted, the workflow verifies the deployment URL
+  returned by EdgeOne instead.
+- `EDGEONE_PREVIEW_PROJECT_ID` — used only for optional preview failure
+  diagnostics; it is not needed for a successful deployment.
+
+The old Blob publishing secrets and `fumadocs-upload` project variables are not
+used by the current static documentation deployment workflows.
 
 Do not commit any secret values. Runtime secrets are written to the relevant
 EdgeOne project by CI and are never exposed to the browser.

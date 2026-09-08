@@ -1,0 +1,571 @@
+---
+sidebar_position: 2
+title: 第2章 物理层
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第2章 物理层
+
+## 2.1 通信基础
+
+### 2.1.1 基本概念
+
+1. **【王道·卷三-Q34】** 下图为一段差分曼彻斯特编码的信号波形，其编码的比特流是（  ）。
+![卷三_Q34_差分曼彻斯特编码](/img/questions/408-mock/wangdao-set-03-q34.png)
+
+<div className="choice-options">
+<div className="choice-option-row">A. 0001101 &emsp;&emsp; B. 0001011 &emsp;&emsp; C. 1011110 &emsp;&emsp; D. 1001110</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 差分曼彻斯特编码的每个码元中间必定发生一次电平跳变，以便接收端提取时钟；码元开始处是否跳变则用于表示数据。按本题采用的约定：
+
+- 码元开始处发生跳变表示二进制 0；
+- 码元开始处不发生跳变表示二进制 1。
+
+从左到右观察 7 个码元边界：
+
+1. 第 1 个码元开始处有跳变，表示 0；
+2. 第 2 个码元开始处有跳变，表示 0；
+3. 第 3 个码元开始处有跳变，表示 0；
+4. 第 4 个码元开始处无跳变，表示 1；
+5. 第 5 个码元开始处有跳变，表示 0；
+6. 第 6 个码元开始处无跳变，表示 1；
+7. 第 7 个码元开始处无跳变，表示 1。
+
+因而编码的比特流为 0001011，选择 B。A 将第 6、7 位判反；C、D 则相当于采用了相反的起始跳变判定规则，且与本题波形不符。
+
+</details>
+
+---
+
+2. **【王道·卷四-Q34】** 在下列关于物理层功能的说法中，正确的是（  ）。
+I. 物理层需要考虑具体的传输媒体
+II. 物理层上传送数据的单位是比特
+III. 物理层不需要考虑哪些比特具体代表什么含义
+IV. 物理层需要确定连接电缆的插头应当有多少根引脚以及各引脚如何连接
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II、IV &emsp;&emsp; B. II、III、IV &emsp;&emsp; C. III、IV &emsp;&emsp; D. I、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** I 错误。物理层研究的是如何利用传输媒体传送原始比特流，并规定与传输媒体有关的接口特性，但具体传输媒体本身通常不属于物理层协议的组成部分。不能把“物理层需要在媒体上传输比特”理解成“具体媒体属于物理层”。
+
+II 正确。物理层的协议数据单元是比特，负责将 0、1 比特转换为相应的电信号、光信号或无线信号进行传输。
+
+III 正确。物理层只负责透明传送比特流，不解释这些比特所表示的帧、地址或应用数据含义。
+
+IV 正确。物理层需要规定机械特性、电气特性、功能特性和过程特性。插头的形状、引脚数量以及各引脚连接方式属于机械特性和功能特性的内容。
+
+因此正确的是 II、III、IV，选择 B。
+
+</details>
+
+---
+
+3. **【王道·卷八-Q35】** 数据链路层采用GBN协议传输数据，使用3比特给帧编号，发送方的发送窗口取最大值，不考虑流量控制，假设发送方发送的第一个帧的序号为0，且序号落入发送窗口内的所有帧都已发送出去。当计时器超时的时候，若发送方只收到了1、3号帧的确认，则发送方需要重发的帧的数量以及发送窗口内的最后一个序号分别是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 1, 2 &emsp;&emsp; B. 2, 0 &emsp;&emsp; C. 3, 2 &emsp;&emsp; D. 7, 0</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** GBN 协议使用 3 比特给帧编号，序号空间大小为：
+
+$$
+\displaystyle
+2^3=8
+$$
+
+GBN 的发送窗口最大值为：
+
+$$
+\displaystyle
+W_T=2^3-1=7
+$$
+
+因此初始发送窗口包含序号 0、1、2、3、4、5、6，题目说明这些帧均已发送。
+
+GBN 采用累计确认。发送方收到 3 号帧的确认，说明 0～3 号帧均已被正确接收；此前收到的 1 号确认已被 3 号确认覆盖。因此尚未确认的是 4、5、6 号帧。
+
+计时器超时时，GBN 从最早未确认帧开始，将其后所有已发送但未确认的帧全部重传，所以需重传 4、5、6 号帧，共 3 帧。
+
+窗口基序号滑动到 4 后，发送窗口依次包含：
+
+$$
+\displaystyle
+4,5,6,7,0,1,2
+$$
+
+窗口内最后一个序号为 2。因此选择 C。
+
+</details>
+
+---
+
+### 2.1.2 信道的极限容量
+
+4. **【王道·卷二-Q34】** 在下列关于香农定理和信噪比的说法中，正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 在实际的传输环境中，信噪比是可以做到任意大的</div>
+<div className="choice-option-row">B. 对于一定的信噪比，码元的传输率越小就越容易出现接收时的判决错误</div>
+<div className="choice-option-row">C. 如果减小信噪比，那么码元的传输率就可以提高而不至于使判决错误的概率增大</div>
+<div className="choice-option-row">D. 香农公式的意义在于，只要信息传输率低于信道的极限信息传输率，就一定可以找到某种办法来实现无差错的传输</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 香农公式给出的有噪声信道极限信息传输率为：
+
+$$
+\displaystyle
+C=W\log_2(1+S/N)
+$$
+
+其中，$\displaystyle W$ 为信道带宽，$\displaystyle S/N$ 为信噪比。
+
+A 错误。实际环境中噪声不可能完全消除，发送功率也不能无限增大，因此信噪比不可能任意大。
+
+B 错误。在其他条件相同的情况下，降低码元传输速率可使每个码元占用更长时间，接收端通常更容易判决，而不是更容易出错。
+
+C 错误。信噪比减小意味着噪声影响增强，信道容量下降。此时若反而提高码元传输率，判决错误概率通常会增大。
+
+D 正确。香农定理说明，当实际信息传输率低于信道容量时，理论上存在合适的编码方法，可使误码率任意小；教材通常将其概括为能够实现无差错传输。
+
+</details>
+
+---
+
+5. **【竟成·模拟一-34】** 某无噪声信道的带宽为1MHz，采用8种相位的PSK调制。若实际数据传输速率为该信道理论最大数据传输速率的50%，传输一个24KB的数据块，单向传播时延为20ms。忽略处理时延和确认时间，则总时延是（注：K=$\displaystyle 10^3$，M=$\displaystyle 10^6$）（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 28ms &emsp;&emsp; B. 84ms &emsp;&emsp; C. 86ms &emsp;&emsp; D. 148ms</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 无噪声理想低通信道采用奈奎斯特公式：
+
+$$
+\displaystyle
+C_{\max}=2W\log_2 M
+$$
+
+其中：
+
+$$
+\displaystyle
+W=1\mathrm{MHz}=10^6\mathrm{Hz},\qquad M=8
+$$
+
+因此理论最大数据传输速率为：
+
+$$
+\displaystyle
+C_{\max}=2\times10^6\times\log_2 8
+=2\times10^6\times3
+=6\mathrm{Mb/s}
+$$
+
+实际数据传输速率为理论最大值的 50%，即：
+
+$$
+\displaystyle
+R=3\mathrm{Mb/s}
+$$
+
+数据块大小为 24KB，题目规定 $\displaystyle K=10^3$，所以：
+
+$$
+\displaystyle
+L=24\times10^3\times8=192000\mathrm{bit}
+$$
+
+发送时延为：
+
+$$
+\displaystyle
+T_t=\dfrac{192000}{3\times10^6}\mathrm{s}
+=0.064\mathrm{s}=64\mathrm{ms}
+$$
+
+加上单向传播时延 20ms，总时延为：
+
+$$
+\displaystyle
+T=64+20=84\mathrm{ms}
+$$
+
+因此选择 B。A 忽略了大部分发送时延；C、D 均不符合发送时延与传播时延之和。
+
+</details>
+
+---
+
+6. **【竟成·模拟六-34】** 下列有关奈奎斯特定理和香农定理的说法中，错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 奈奎斯特定理适用于无噪声理想低通环境，香农定理适用于有噪声信道</div>
+<div className="choice-option-row">B. 奈奎斯特定理和香农定理都定义了理想状态下的最大数据传输速率</div>
+<div className="choice-option-row">C. 在有噪声的环境中，影响信道的最大传输速率的因素主要是信道带宽和信噪比</div>
+<div className="choice-option-row">D. 在无噪声理想低通环境中，影响信道的最大传输速率的因素主要是信道带宽和码元波形种类</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** A 正确。奈奎斯特定理讨论无噪声理想低通信道中的码元传输极限；香农定理则考虑信道中存在高斯白噪声时的信息传输容量。
+
+B 错误。奈奎斯特公式建立在无噪声理想低通条件下，而香农公式恰恰把噪声因素纳入模型。因此不能笼统地说两者都定义了“理想无噪声状态”下的最大数据传输速率。
+
+C 正确。香农公式为：
+
+$$
+\displaystyle
+C=W\log_2(1+S/N)
+$$
+
+可见有噪声信道的容量主要由带宽 $\displaystyle W$ 和信噪比 $\displaystyle S/N$ 决定。
+
+D 正确。奈奎斯特公式为：
+
+$$
+\displaystyle
+C=2W\log_2 M
+$$
+
+其中 $\displaystyle M$ 是码元可取的离散状态数，即码元波形种类数，所以无噪声理想低通信道的极限速率主要取决于信道带宽和码元状态数。
+
+</details>
+
+---
+
+7. **【竟成·模拟七-34】** 链路的带宽约为10kHz，信噪比为30dB，信号采用64个幅值的ASK调制，信道的极限码元传输速率约为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 16.67Baud &emsp;&emsp; B. 20Baud &emsp;&emsp; C. 16.67kBaud &emsp;&emsp; D. 20kBaud</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 信噪比为 30dB，先换算为普通比值：
+
+$$
+\displaystyle
+10\log_{10}(S/N)=30
+$$
+
+所以：
+
+$$
+\displaystyle
+S/N=10^3=1000
+$$
+
+根据香农公式，信道极限数据传输速率约为：
+
+$$
+\displaystyle
+\begin{aligned}
+C&=W\log_2(1+S/N)\\
+&=10\times10^3\log_2(1001)\\
+&\approx 10\times10^3\times9.97\\
+&\approx99.7\mathrm{kb/s}
+\end{aligned}
+$$
+
+64 个幅值表示每个码元携带：
+
+$$
+\displaystyle
+\log_2 64=6\mathrm{bit}
+$$
+
+因此由香农容量限制得到的最大码元传输速率约为：
+
+$$
+\displaystyle
+B=\dfrac{99.7\mathrm{kb/s}}{6\mathrm{bit/Baud}}
+\approx16.62\mathrm{kBaud}
+$$
+
+奈奎斯特定理给出的码元速率上限为：
+
+$$
+\displaystyle
+2W=20\mathrm{kBaud}
+$$
+
+实际极限应同时满足两种限制，因此取较小者，约为 $\displaystyle 16.67\mathrm{kBaud}$，选择 C。D 只考虑了奈奎斯特限制，没有考虑信噪比造成的香农容量约束；A、B 的单位数量级错误。
+
+</details>
+
+---
+
+### 2.1.3 编码与调制
+
+8. **【王道·卷五-Q34】** [题目有错误] 共有 $\displaystyle A,B,C,D$ 四个站点进行码分多址(CDMA)通信，$\displaystyle A,B,C,D$ 的码片序列分别是 $\displaystyle (- 1 - 1 - 1 + 1 + 1 - 1 + 1 + 1)$，$\displaystyle (- 1 - 1 + 1 - 1 + 1 + 1 + 1 - 1)$，$\displaystyle (- 1 + 1 - 1 - 1 + 1 + 1 - 1 - 1)$，若收到的码片序列是 $\displaystyle (- 1 + 1 - 3 + 1 - 1 - 3 + 1 + 1)$，则各个站点发送的数据是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 1,1,0,1 &emsp;&emsp; B. 1,0,无数据,1 &emsp;&emsp; C. 0,0,0,1 &emsp;&emsp; D. 1,0,0,1</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B（按命题意图；题面本身存在错误）
+
+**解析：** CDMA 解码时，将接收码片序列分别与各站点的码片序列作规格化内积。若结果为 $\displaystyle +1$，表示发送数据 1；若结果为 $\displaystyle -1$，表示发送数据 0；若结果为 0，表示该站点未发送数据。
+
+设接收序列为 $\displaystyle S$，则对站点 A：
+
+$$
+\displaystyle
+\dfrac{S\cdot A}{8}=1
+$$
+
+因而 A 发送数据 1。
+
+对站点 B：
+
+$$
+\displaystyle
+\dfrac{S\cdot B}{8}=-1
+$$
+
+因而 B 发送数据 0。
+
+对题面给出的站点 C 序列：
+
+$$
+\displaystyle
+\dfrac{S\cdot C}{8}=-\dfrac{1}{4}
+$$
+
+结果既不是 $\displaystyle +1$、$\displaystyle -1$，也不是 0。这说明题面所给码片序列并不满足标准 CDMA 所要求的两两正交条件，无法据此正常判断 C 的数据。
+
+此外，题目声称给出了 A、B、C、D 四个站点的码片序列，但实际只列出了三个序列，D 的码片序列缺失，因此也不能按照标准内积法独立解出 D。
+
+从选项和命题意图判断，预期结果应为 A 发送 1、B 发送 0、C 无数据、D 发送 1，即选择 B。但严格依据当前题面，题目没有完整且自洽的唯一解。
+
+</details>
+
+---
+
+9. **【竟成·模拟三-34】** 若采用编码方案1和编码方案2获得的结果均如下图所示，方案1对应的比特流为10100010，方案2对应的比特流为10010110，方案1和方案2的编码方案分别为（）。
+![第3套第34题图](/img/questions/408-mock/jingcheng-set-03-q34.png)
+
+<div className="choice-options">
+<div className="choice-option-row">A. NRZ、NRZI &emsp;&emsp; B. NRZI、NRZ &emsp;&emsp; C. RZ、NRZI &emsp;&emsp; D. NRZI、RZ</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 先按每个码元区间直接观察电平。图中 8 个码元的电平依次为：
+
+$$
+\displaystyle
+\text{高、低、低、高、低、高、高、低}
+$$
+
+若采用 NRZ 编码，并约定高电平表示 1、低电平表示 0，则得到：
+
+$$
+\displaystyle
+10010110
+$$
+
+这正好对应方案 2，因此方案 2 是 NRZ。
+
+再观察相邻码元边界是否发生电平跳变。按题目采用的 NRZI 规则，数据 0 使电平翻转，数据 1 保持电平不变。以图中初始高电平为基准，各码元依次得到：
+
+$$
+\displaystyle
+10100010
+$$
+
+这正好对应方案 1，因此方案 1 是 NRZI。
+
+所以方案 1、方案 2 分别为 NRZI、NRZ，选择 B。图中每个码元并非都在码元结束前回到零电平，因此 C、D 中的 RZ 不成立。
+
+</details>
+
+---
+
+10. **【竟成·模拟五-34】** 采用曼彻斯特编码和差分曼彻斯特编码（上一个码元的后半个码元为低电平）的编码波形图如下图所示，其表示的比特流分别为（）。
+![第5套第34题图](/img/questions/408-mock/jingcheng-set-05-q34.png)
+
+<div className="choice-options">
+<div className="choice-option-row">A. 10000001、01111110 &emsp;&emsp; B. 11000001、01111110</div>
+<div className="choice-option-row">C. 01111110、11000001 &emsp;&emsp; D. 01110001、11000001</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 对曼彻斯特编码，每个码元中点都发生跳变。本题采用的约定是：
+
+- 码元中点由低电平跳变到高电平表示 0；
+- 码元中点由高电平跳变到低电平表示 1。
+
+从左到右观察 8 个码元，中点跳变方向依次为：
+
+$$
+\displaystyle
+\text{低到高、高到低、高到低、高到低、高到低、高到低、高到低、低到高}
+$$
+
+因而曼彻斯特编码对应的比特流为：
+
+$$
+\displaystyle
+01111110
+$$
+
+对差分曼彻斯特编码，码元中点的跳变仅用于同步，码元开始处是否跳变表示数据。本题已知上一个码元的后半个码元为低电平，并采用：
+
+- 码元开始处有跳变表示 0；
+- 码元开始处无跳变表示 1。
+
+逐个判断 8 个码元开始处，结果为：
+
+$$
+\displaystyle
+11000001
+$$
+
+因此两种编码分别表示 01111110、11000001，选择 C。A、B 的差分曼彻斯特结果不符合码元起始边界的跳变情况；D 对曼彻斯特波形中间若干码元的跳变方向判断错误。
+
+</details>
+
+---
+
+## 2.3 物理层设备
+
+### 2.3.1 中继器
+
+11. **【王道·卷八-Q34】** 在数字信号传输中，当传输距离超过一定的长度时，传输介质中的数据就会衰减。如果需要比较长的传输距离，就需要安装（  ）设备。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 放大器 &emsp;&emsp; B. 中继器 &emsp;&emsp; C. 路由器 &emsp;&emsp; D. 交换机</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 数字信号在传输介质中传播时会因衰减、失真和噪声干扰而逐渐变差。中继器工作在物理层，其作用是接收已经衰减或失真的数字信号，对其进行整形、放大和再生，然后继续向下一段链路转发，从而延长数字信号的有效传输距离。
+
+各选项分析如下：
+
+- A 项：放大器通常用于模拟信号，只会把输入信号连同噪声一起放大，不能恢复数字信号原有的标准波形。
+- B 项：中继器能够对数字信号进行再生，适合延长数字链路的传输距离，正确。
+- C 项：路由器工作在网络层，主要根据网络层地址选择分组转发路径，不负责单纯的信号再生。
+- D 项：交换机通常工作在数据链路层，主要依据 MAC 地址转发帧，也不是本题所问的物理信号再生设备。
+
+</details>
+
+---
+
+12. **【王道·卷八-Q36】** 考虑建立一个CSMA/CD网络，电缆长度为1km，不使用中继器，传输率为1Gb/s，电缆中信号的传播速率是200000km/s，则该网络中的最小帧长是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 10000bit &emsp;&emsp; B. 1000bit &emsp;&emsp; C. 5000bit &emsp;&emsp; D. 20000bit</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** CSMA/CD 要求发送站在发送完整个最短帧之前，仍能检测到网络最远端产生的冲突。因此，最短帧的发送时延至少应等于信号在网络中的往返传播时延：
+
+$$
+\displaystyle
+T_{\min}=2\tau
+$$
+
+电缆长度为 $\displaystyle 1\text{ km}$，信号传播速率为 $\displaystyle 200000\text{ km/s}$，单向传播时延为：
+
+$$
+\displaystyle
+\tau=\dfrac{1\text{ km}}{200000\text{ km/s}}=5\times10^{-6}\text{ s}=5\,\mu\text{s}
+$$
+
+因而往返传播时延为：
+
+$$
+\displaystyle
+2\tau=10\,\mu\text{s}
+$$
+
+传输率为 $\displaystyle 1\text{ Gb/s}=10^9\text{ bit/s}$，最小帧长为：
+
+$$
+\displaystyle
+L_{\min}=10^9\times10\times10^{-6}=10000\text{ bit}
+$$
+
+因此选择 A。B、C 都小于检测最远端冲突所需的最小长度；D 虽然也能满足冲突检测要求，但它不是理论上的最小帧长。
+
+</details>
+
+---
+
+### 2.3.2 集线器
+
+13. **【竟成·模拟一-33】** 下列关于集线器的描述中，正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 集线器可连接不同速率的以太网段进行正常工作 &emsp;&emsp; B. 集线器连接的多个网段必须工作在半双工模式</div>
+<div className="choice-option-row">C. 集线器通过隔离冲突域减少广播风暴 &emsp;&emsp; D. 集线器能够识别MAC地址并过滤无效帧</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 集线器本质上是一个多端口中继器，工作在物理层。它收到某个端口传来的比特信号后，会将信号再生并转发到其他所有端口，不检查帧的内容，也不识别 MAC 地址。
+
+集线器连接的所有站点共享同一条逻辑信道，处于同一个冲突域中。为了使用 CSMA/CD 检测冲突，各端口必须采用半双工方式工作，不能同时发送和接收，因此 B 正确。
+
+各错误选项分析如下：
+
+- A 项：普通集线器各端口属于同一共享介质，通常必须采用相同速率；它不能像交换机那样在不同速率端口之间缓存和转换帧。
+- C 项：集线器不隔离冲突域，也不隔离广播域，反而使所有端口共同处于一个冲突域中。
+- D 项：识别 MAC 地址并有选择地转发帧是交换机或网桥的功能；集线器只处理物理比特信号。
+
+</details>

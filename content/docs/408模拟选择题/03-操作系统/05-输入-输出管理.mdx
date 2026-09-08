@@ -1,0 +1,669 @@
+---
+sidebar_position: 5
+title: 第5章 输入/输出管理
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第5章 输入/输出管理
+
+## 5.1 I/O管理概述
+
+### 5.1.2 I/O控制方式
+
+1. **【王道·卷六-Q31】** 在下列关于各种I/O控制方式的说法中，错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 程序直接控制I/O方式适用于结构简单、只需少量硬件的电路，不需要设备驱动程序来完成数据的传输工作</div>
+<div className="choice-option-row">B. 中断驱动I/O方式适用于具有中断机构的系统，用于处理中低速的I/O操作和随机事件</div>
+<div className="choice-option-row">C. DMA方式适用于具有DMA控制器的系统，用于高速外设的大批量数据传输</div>
+<div className="choice-option-row">D. 设备驱动程序和各种I/O控制方式之间密切相关</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 程序直接控制 I/O 又称轮询方式，CPU 需要不断查询设备状态并通过设备控制器寄存器传送数据。尽管其硬件结构简单，但操作系统仍需通过相应设备驱动程序封装设备相关的寄存器操作和控制流程，因此“不需要设备驱动程序”错误，A 为答案。
+
+B 正确。中断驱动方式可避免 CPU 持续轮询，适合中低速设备及异步、随机到达的事件。C 正确。DMA 控制器能够在设备与内存之间成批传送数据，适合高速外设。D 正确。驱动程序需要根据设备采用的程序查询、中断或 DMA 等控制方式组织具体 I/O 操作。
+
+</details>
+
+---
+
+2. **【竟成·模拟三-32】** 某计算机系统主频为500MHz，CPI为3。现为该计算机系统开发鼠标驱动程序，假设采用I/O中断方式，鼠标回报率为200Hz（即：鼠标每秒向计算机发送200次数据），开发目标是CPU用于鼠标I/O的时间低于CPU总时间的0.1%。为实现这一目标，中断响应和中断处理过程中执行的指令数不得超过（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 166 &emsp;&emsp; B. 333 &emsp;&emsp; C. 833 &emsp;&emsp; D. 1000</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** CPU 主频为 $\displaystyle 500MHz$，平均每条指令需要 $\displaystyle 3$ 个时钟周期，因此每秒可执行的指令数为：
+
+$$
+\displaystyle
+\dfrac{500\times 10^6}{3}\approx 1.6667\times 10^8
+$$
+
+鼠标 I/O 最多占用 CPU 总时间的 $\displaystyle 0.1\%=0.001$，因此每秒最多可用于鼠标中断处理的指令数约为：
+
+$$
+\displaystyle
+1.6667\times 10^8\times 0.001\approx 166666.7
+$$
+
+鼠标每秒产生 $\displaystyle 200$ 次中断，则每次中断响应和处理最多可执行：
+
+$$
+\displaystyle
+\dfrac{166666.7}{200}\approx 833.33
+$$
+
+指令数必须取不超过该值的整数，因此最多为 $\displaystyle 833$ 条，选 C。
+
+</details>
+
+---
+
+3. **【竟成·模拟六-32】** 下列关于DMA的描述中，正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. DMA是一种通过CPU来控制设备进行数据传输的技术</div>
+<div className="choice-option-row">B. DMA整个传输过程中不需要操作系统，完全由硬件来处理</div>
+<div className="choice-option-row">C. DMA整个传输过程中无需中断的参与</div>
+<div className="choice-option-row">D. DMA的使用需要特殊的硬件支持，不能在所有计算机上使用</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** DMA 需要 DMA 控制器或具备总线主控能力的设备控制器支持，由其在外设与主存之间直接成批传送数据，因此需要专门硬件，并非所有计算机或设备都天然支持，D 正确。
+
+A 错误。CPU 只负责初始化 DMA 参数并在传输完成后进行后续处理，数据传输过程主要由 DMA 控制器负责。B 错误。操作系统和设备驱动程序仍需申请缓冲区、设置 DMA 控制器、管理权限并处理完成事件。C 错误。DMA 通常在一批数据传输完成或发生异常时通过中断通知 CPU，只是避免了逐字节或逐字中断。
+
+</details>
+
+---
+
+### 5.1.4 应用程序I/O接口
+
+4. **【竟成·模拟四-32】** 下列关于输入输出应用程序接口的说法，错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 流设备接口用于控制字符设备的输入和输出 &emsp;&emsp; B. 块设备接口不支持随机访问</div>
+<div className="choice-option-row">C. 块设备接口可以将抽象命令映射为底层操作 &emsp;&emsp; D. 网络设备接口用于描述具体网络设备属性和操作</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 块设备以固定大小的数据块为单位进行读写，通常支持按块号定位，因而能够随机访问，B 的表述错误。
+
+A 正确。键盘、串口等字符设备常通过字符流或流设备接口顺序读写。C 正确。块设备接口将读块、写块等抽象请求映射到具体设备的底层操作。D 正确。网络设备接口用于向上层提供网络设备的属性、控制和数据收发等操作接口。
+
+</details>
+
+---
+
+## 5.2 设备独立性软件
+
+### 5.2.1 设备独立性软件
+
+5. **【王道·卷七-Q31】** 在下列关于设备独立性的论述中，正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 设备独立性是I/O设备具有独立执行I/O功能的一种特性</div>
+<div className="choice-option-row">B. 设备独立性是指用户程序独立于具体使用的物理设备的一种特性</div>
+<div className="choice-option-row">C. 设备独立性是指独立实现设备共享的一种特性</div>
+<div className="choice-option-row">D. 设备独立性是指设备驱动独立于具体使用的物理设备的一种特性</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 设备独立性也称设备无关性，是指用户程序使用逻辑设备名和统一 I/O 接口，而不依赖某个具体物理设备。系统可通过逻辑设备表、设备分配及驱动程序，将逻辑设备请求映射到实际物理设备，因此更换同类设备时通常无须修改用户程序，B 正确。
+
+A 描述的是设备能否独立工作，不是设备独立性的含义。C 将设备独立性误解为设备共享机制。D 错误，设备驱动程序恰恰与具体设备或设备控制器的硬件特性密切相关。
+
+</details>
+
+---
+
+### 5.2.2 高速缓存与缓冲区
+
+6. **【王道·卷二-Q32】** 下列关于磁盘高速缓存的说法中，错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 磁盘高速缓存是指在磁盘中设置的一个缓冲区，用于保存某些内存块的副本</div>
+<div className="choice-option-row">B. 当出现访问磁盘的请求时，先查看磁盘高速缓存，如果盘块内容已在磁盘高速缓存中，就省去了启动磁盘的操作</div>
+<div className="choice-option-row">C. 设计磁盘高速缓存时，需考虑如何将磁盘高速缓存中的数据传给请求进程</div>
+<div className="choice-option-row">D. 设计磁盘高速缓存时，需考虑采用什么样的置换策略以及已修改的盘块数据何时写回磁盘</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 磁盘高速缓存通常利用**内存中的一部分空间**，保存最近访问或可能再次访问的磁盘块副本，而不是在磁盘中设置缓冲区，更不是保存“内存块的副本”。因此 A 的描述将缓存的位置和数据副本关系都说反了，A 错误。
+
+B 正确。若所需盘块已在内存中的磁盘高速缓存中，可直接读取，无须再次启动磁盘。C 正确。命中缓存后，系统需要把缓存中的数据复制或映射给请求进程。D 正确。缓存容量有限，必须考虑置换算法；对于被修改的脏块，还要确定写回磁盘的时机。
+
+</details>
+
+---
+
+7. **【王道·卷三-Q32】** 提前读和延迟写是有效提高磁盘 I/O 速度的两种方法。在下列关于提前读和延迟写的说法中，错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 若用户对文件进行访问时采用的是随机访问方式，则不存在提前读</div>
+<div className="choice-option-row">B. 提前读是通过减少磁盘 I/O 次数来等价地提高磁盘 I/O 速度的</div>
+<div className="choice-option-row">C. 若用户对文件进行写操作时采用的是随机访问方式，则不存在延迟写</div>
+<div className="choice-option-row">D. 延迟写是通过在内存中设置一个空闲缓冲区队列来实现的</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 延迟写是指进程修改缓冲区中的数据后，系统不立即将其写回磁盘，而是先标记为延迟写或脏块，待缓冲区需要被重新分配、系统统一刷新或满足其他写回条件时再写盘。该技术与文件采用顺序写还是随机写没有必然冲突，因此“随机写时不存在延迟写”错误，选 C。
+
+A 正确。提前读主要利用顺序访问的局部性，预先读入后续相邻盘块；随机访问无法可靠预测下一访问位置，通常不能实施有效提前读。B 正确。提前读可在一次磁盘启动中顺带读入多个连续盘块，从而减少后续实际磁盘 I/O 次数。D 正确。传统实现中，延迟写缓冲区可先挂入空闲缓冲区队列，待其再次被选中使用时再完成必要的写回。
+
+</details>
+
+---
+
+8. **【王道·卷四-Q31】** 某操作系统采用双缓冲区传输磁盘上的数据。设一次将数据从磁盘传输到缓冲区的时间为 $\displaystyle T_1$，一次将缓冲区中的数据传输到用户区所用的时间可忽略不计，CPU处理一次数据的时间为 $\displaystyle T_2$，读入并处理该数据共重复 $\displaystyle n$ 次该过程，需要的总时间为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle n(T_1 + T_2)$ &emsp;&emsp; B. $\displaystyle nT_2 + T_1$ &emsp;&emsp; C. $\displaystyle nT_1 + T_2$ &emsp;&emsp; D. $\displaystyle (n - 1)\max(T_1, T_2) + T_1 + T_2$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 采用双缓冲后，磁盘向一个缓冲区输入第 $\displaystyle i+1$ 块数据的过程，可以与 CPU 处理第 $\displaystyle i$ 块数据的过程并行。
+
+第 1 块数据必须先由磁盘读入缓冲区，耗时 $\displaystyle T_1$；此后中间的 $\displaystyle n-1$ 个流水阶段，每阶段耗时由较慢的一方决定，即 $\displaystyle \max(T_1,T_2)$；最后一块数据读入后，还需由 CPU 处理，耗时 $\displaystyle T_2$。因此总时间为：
+
+$$
+\displaystyle
+T=T_1+(n-1)\max(T_1,T_2)+T_2
+$$
+
+故选 D。A 未考虑双缓冲产生的并行；B、C 只分别适用于某些特定大小关系，不能作为一般表达式。
+
+</details>
+
+---
+
+9. **【王道·卷六-Q32】** 磁盘将一块数据传输到缓冲区所用的时间为 $\displaystyle 80\mu s$，将缓冲区中的数据传输到用户区所用的时间为 $\displaystyle 40\mu s$，CPU处理一个块数据所用的时间为 $\displaystyle 30\mu s$。若需要连续处理多块数据，采用单缓冲区传输磁盘数据，则处理一块数据所用的平均时间约为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle 110\mu s$ &emsp;&emsp; B. $\displaystyle 150\mu s$ &emsp;&emsp; C. $\displaystyle 120\mu s$ &emsp;&emsp; D. $\displaystyle 70\mu s$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 设磁盘输入缓冲区的时间为 $\displaystyle T=80\mu s$，缓冲区向用户区传送数据的时间为 $\displaystyle M=40\mu s$，CPU 处理时间为 $\displaystyle C=30\mu s$。
+
+单缓冲中，磁盘输入下一块数据可与 CPU 处理上一块数据并行，但缓冲区向用户区传送数据时必须独占该缓冲区。因此稳定处理一块数据的平均时间为：
+
+$$
+\displaystyle
+\max(T,C)+M=\max(80,30)+40=120\mu s
+$$
+
+故选 C。A 漏加了缓冲区到用户区的传送时间；B 将三个阶段完全串行相加；D 不符合单缓冲的时序关系。
+
+</details>
+
+---
+
+10. **【竟成·模拟二-32】** 下列不属于缓冲池组成部分的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 空白缓冲队列 &emsp;&emsp; B. 输入队列 &emsp;&emsp; C. 输出队列 &emsp;&emsp; D. 循环缓冲</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 缓冲池通常将多个缓冲区按状态组织为三类队列：空缓冲队列、输入队列和输出队列，因此 A、B、C 都属于缓冲池的组成部分。
+
+循环缓冲是一种独立的多缓冲组织方式，它将若干缓冲区首尾相连形成环，并通过输入、输出指针进行管理，不是缓冲池内部的一类队列，故选 D。
+
+</details>
+
+---
+
+11. **【竟成·模拟六-31】** 某计算机系统采用双缓冲技术传送磁盘数据，假设磁盘将数据传送到缓冲区所用的时间为100ns，缓冲区中数据传送到用户区所用的时间为5ns，CPU处理数据所用的时间为90ns，则该系统从读取10个数据块开始到分析完成所需的全部时间是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 1000ns &emsp;&emsp; B. 1050ns &emsp;&emsp; C. 1095ns &emsp;&emsp; D. 1140ns</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 设磁盘输入时间为 $\displaystyle T=100ns$，缓冲区传送时间为 $\displaystyle M=5ns$，CPU 处理时间为 $\displaystyle C=90ns$。双缓冲中，磁盘输入一块数据可以与“上一块数据传送到用户区并由 CPU 处理”的过程并行，后者耗时：
+
+$$
+\displaystyle
+M+C=5+90=95ns
+$$
+
+因为 $\displaystyle T=100ns>95ns$，流水阶段的周期为 $\displaystyle 100ns$。处理 $\displaystyle 10$ 块数据的总时间为首块读入、其余 $\displaystyle 9$ 个流水周期以及最后一块的传送和处理：
+
+$$
+\displaystyle
+100+9\times100+95=1095ns
+$$
+
+故选 C。
+
+</details>
+
+---
+
+### 5.2.3 设备分配与回收
+
+12. **【竟成·模拟二-31】** 在设备分配与回收过程中，计算机需要访问的数据结构有：设备控制表DCT、控制器控制表COCT、通道控制表CHCT和系统设备表SDT，它们在设备分配流程中访问的先后顺序为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. DCT→COCT→CHCT→SDT &emsp;&emsp; B. SDT→DCT→COCT→CHCT</div>
+<div className="choice-option-row">C. SDT→COCT→CHCT→DCT &emsp;&emsp; D. DCT→COCT→SDT→CHCT</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 进程提出逻辑设备请求后，系统首先查询系统设备表 SDT，根据逻辑设备名或设备类型找到相应物理设备及其 DCT；随后检查设备控制表 DCT，完成设备层的分配；设备分配成功后，再沿硬件连接层次依次检查和分配其所属控制器 COCT 与通道 CHCT。
+
+因此访问顺序为：
+
+```text
+SDT → DCT → COCT → CHCT
+```
+
+故选 B。其余选项均未从全局设备信息开始，或打乱了“设备—控制器—通道”的从属关系。
+
+</details>
+
+---
+
+### 5.2.4 SPOOLing技术
+
+13. **【王道·卷三-Q31】** 在一台支持 SPOOLing 技术的打印机设备中，对管理输出数据的输出进程来说，错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 输出进程管理磁盘上的输出与打印机设备之间的直连通道 &emsp;&emsp; B. 输出进程在内核态下运行</div>
+<div className="choice-option-row">C. 输出进程与用户进程并发执行 &emsp;&emsp; D. 输出进程需要至少两种设备驱动程序的支持</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** SPOOLing 输出过程并不存在磁盘与打印机之间不经系统干预的“直连通道”。输出进程需要先通过磁盘驱动程序从输出井读取数据，经内存中的输出缓冲区，再通过打印机驱动程序送往打印机，因此 A 的描述错误。
+
+B 正确。输出进程属于操作系统管理的系统进程，其关键 I/O 操作在内核态完成。C 正确。后台输出进程可与提交打印请求的用户进程并发执行。D 正确。至少需要磁盘设备驱动程序和打印机设备驱动程序两类驱动的支持。
+
+</details>
+
+---
+
+14. **【王道·卷五-Q32】** 在下列关于虚拟设备的叙述中，正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 虚拟设备是指允许用户使用比系统中具有的物理设备更多的设备</div>
+<div className="choice-option-row">B. 虚拟设备是指允许用户以标准方式来使用物理设备</div>
+<div className="choice-option-row">C. 虚拟设备是指将一个物理设备变成多个对应的逻辑设备</div>
+<div className="choice-option-row">D. 虚拟设备是指允许用户程序不必全部装入内存就可使用系统中的设备</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 虚拟设备技术通过软件手段将一台物理独占设备改造为多台逻辑设备，使多个进程都感觉自己独占该设备。SPOOLing 将一台打印机虚拟成多台逻辑打印机就是典型实例，因此 C 正确。
+
+A 只描述了用户表面上可使用的设备数量增加，但没有揭示虚拟设备的本质，且虚拟出来的是逻辑设备而非新增物理设备。B 描述的是设备独立性或统一接口。D 描述的是虚拟存储器思想，与虚拟设备无关。
+
+</details>
+
+---
+
+15. **【竟成·模拟五-32】** SPOOLing技术属于（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 用户层I/O软件 &emsp;&emsp; B. 设备独立软件 &emsp;&emsp; C. 设备驱动程序 &emsp;&emsp; D. 中断处理程序</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** SPOOLing 通过输入井、输出井、输入/输出进程和缓冲区，将独占设备虚拟为可共享的逻辑设备。它向上层屏蔽具体设备的独占性和低速特征，属于设备独立性软件所实现的公共 I/O 管理功能，故选 B。
+
+A 错误，用户层 I/O 软件主要包括库函数和用户态 I/O 接口。C 错误，设备驱动程序负责把抽象 I/O 命令转换为具体设备操作。D 错误，中断处理程序只处理设备中断事件，不负责实现完整的假脱机机制。
+
+</details>
+
+---
+
+### 5.2.5 设备驱动程序接口
+
+16. **【王道·卷一-Q31】** 设备驱动程序主要是指由请求I/O的进程与设备控制器之间的一个通信和转化程序，下列有关设备驱动程序的特点，说法错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 设备驱动程序与设备控制器和I/O设备的硬件特性密切相关</div>
+<div className="choice-option-row">B. 设备驱动程序应允许可重入，即允许多个进程进行访问但不允许任何进程修改</div>
+<div className="choice-option-row">C. 设备驱动程序应允许系统调用</div>
+<div className="choice-option-row">D. 设备驱动程序的一部分须用汇编语言编写，目前许多设备驱动程序的基本部分已经固化在ROM中</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 系统调用是操作系统提供给用户程序的受控入口，用户进程通过系统调用请求内核服务；设备驱动程序本身运行在内核态，是系统调用服务过程可能进一步调用的内核模块，不能表述为“设备驱动程序应允许系统调用”，故 C 错误。
+
+A 正确。驱动程序需要直接控制设备控制器，并处理设备寄存器、命令格式及工作状态，因此与具体硬件特性密切相关。B 正确。驱动程序通常应设计为可重入代码，使多个进程能够并发调用同一驱动，但共享代码本身不能被任一进程修改。D 正确。驱动程序中直接操作硬件的底层部分可能使用汇编语言实现，部分基础功能也可能由设备固件或 ROM 提供。
+
+</details>
+
+---
+
+17. **【王道·卷五-Q31】** 主机 $\displaystyle A$ 上的应用1给局域网内的主机 $\displaystyle B$ 上的应用2发送信息，在下列过程中，需要用到设备驱动程序的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 操作系统将TCP报文段封装成IP数据报并放入内核空间</div>
+<div className="choice-option-row">B. 操作系统将内核空间中的IP数据报封装成数据链路层的数据帧</div>
+<div className="choice-option-row">C. 将封装好的数据帧送入网卡并发送</div>
+<div className="choice-option-row">D. 支持应用1的进程 $\displaystyle P$ 将想要发送的信息封装成TCP报文段并放入进程空间</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 设备驱动程序负责将上层提出的抽象 I/O 请求转换为具体设备能够执行的低层操作。将已经封装好的数据帧写入网卡缓冲区、设置网卡寄存器并启动发送，必须通过网卡驱动程序完成，因此选 C。
+
+A、B 分别属于网络层和数据链路层协议软件的封装处理，尚未直接控制物理网卡。D 属于应用程序及传输层协议处理，也不需要直接调用设备驱动程序。
+
+</details>
+
+---
+
+18. **【王道·卷八-Q30】** 设备驱动程序层是与硬件密切相关的I/O软件层，在下列关于设备驱动程序功能的说法中，错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 接收由与设备无关的软件发来的命令和参数，并将命令中的抽象要求转换为与设备相关的低层操作序列</div>
+<div className="choice-option-row">B. 检查用户I/O请求的合法性，了解I/O设备的工作状态，传递与I/O设备操作有关的参数，设置设备的工作方式</div>
+<div className="choice-option-row">C. 发出I/O命令，若设备空闲，则立即启动I/O设备，完成指定的I/O操作；若设备忙碌，则将请求者的请求块挂在设备队列上等待</div>
+<div className="choice-option-row">D. 具有统一的处理方式，和具体的I/O控制方式关系不大</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 设备驱动程序与具体设备及其 I/O 控制方式密切相关。采用程序查询、中断驱动、DMA 或通道控制时，驱动程序的启动方式、参数设置和完成处理均可能不同，因此不能认为其处理方式统一且与具体控制方式关系不大，D 错误。
+
+A 是驱动程序最核心的功能，即完成抽象命令到设备操作序列的转换。B 属于驱动程序对请求、设备状态和工作参数的检查与设置。C 描述了驱动程序启动设备或将请求加入设备等待队列的过程，均正确。
+
+</details>
+
+---
+
+## 5.3 磁盘和固态硬盘
+
+### 5.3.1 磁盘
+
+19. **【王道·卷四-Q32】** 某磁盘组共有80个柱面，每个柱面有12条磁道，每条磁道划分为16个扇区，现有一个8000条逻辑记录的文件，逻辑记录的大小与扇区大小相等，该文件按顺序结构存放在磁盘组上，柱面、磁道、扇区均从0开始编址，逻辑记录的编号从0开始，文件数据从0号柱面、0号磁道、0号扇区开始存放，则该文件的5687号逻辑记录应存放在（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 第29个柱面的第7个磁道的第6个扇区 &emsp;&emsp; B. 第30个柱面的第8个磁道的第7个扇区</div>
+<div className="choice-option-row">C. 第29个柱面的第7个磁道的第7个扇区 &emsp;&emsp; D. 第28个柱面的第7个磁道的第7个扇区</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 每个柱面可存放的记录数为：
+
+$$
+\displaystyle
+12\times16=192
+$$
+
+对逻辑记录号 $\displaystyle 5687$ 依次求柱面号、磁道号和扇区号：
+
+$$
+\displaystyle
+\begin{aligned}
+5687 &= 29\times192+119 \\
+119 &= 7\times16+7
+\end{aligned}
+$$
+
+因此柱面号为 $\displaystyle 29$，该柱面内的磁道号为 $\displaystyle 7$，磁道内的扇区号为 $\displaystyle 7$。题目规定均从 $\displaystyle 0$ 开始编号，故选 C。
+
+</details>
+
+---
+
+### 5.3.2 磁盘的管理
+
+20. **【竟成·模拟七-32】** 以下关于格式化的描述中，正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 低级格式化会将磁盘分成多个逻辑分区</div>
+<div className="choice-option-row">B. 低级格式化后，磁盘可以直接存储数据</div>
+<div className="choice-option-row">C. 高级格式化可以被用户随时执行，而不会破坏数据</div>
+<div className="choice-option-row">D. 高级格式化会为指定分区分配文件系统，并初始化其元数据结构</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 高级格式化又称逻辑格式化，其作用是在指定分区中建立文件系统，初始化引导块、空闲空间管理结构、根目录及文件控制信息等元数据，因此 D 正确。
+
+A 错误。低级格式化负责把磁盘表面划分为磁道和扇区，逻辑分区由分区操作完成。B 错误。低级格式化后通常还需分区和高级格式化，才能按文件系统方式存储文件。C 错误。高级格式化会重建文件系统元数据，通常会导致原有文件无法正常访问，不能在不破坏数据的前提下随时执行。
+
+</details>
+
+---
+
+### 5.3.3 磁盘调度算法
+
+21. **【王道·卷八-Q31】** 磁头当前位于第100道，正向磁道序号增加的方向移动。现有一个磁道访问请求序列55,58,39,18,90,160,150,38,184，则采用SCAN算法得到的磁道访问序列是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 55,58,39,18,90,160,150,38,184 &emsp;&emsp; B. 90,58,55,39,38,18,150,160,184</div>
+<div className="choice-option-row">C. 150,160,184,90,58,55,39,38,18 &emsp;&emsp; D. 150,160,184,18,38,39,55,58,90</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** SCAN 算法按当前移动方向依次服务沿途请求，到达该方向端部后再反向。磁头从 $\displaystyle 100$ 号磁道向编号增大的方向移动，因此先按升序访问所有大于 $\displaystyle 100$ 的请求：
+
+```text
+150 → 160 → 184
+```
+
+随后反向，按降序访问剩余请求：
+
+```text
+90 → 58 → 55 → 39 → 38 → 18
+```
+
+所以访问序列为 $\displaystyle 150,160,184,90,58,55,39,38,18$，故选 C。D 是循环扫描方向下可能出现的次序，不符合 SCAN 的反向服务规则。
+
+</details>
+
+---
+
+22. **【竟成·模拟一-32】** 某磁盘系统共有4096个磁盘块，块大小1KB，使用位示图管理空闲块。若采用CSCAN算法调度磁头请求，当前磁头位于100号柱面（共200个柱面），请求序列为50、150、10、180、30，磁头初始移动方向为增大。同时，系统使用成组链接法管理空闲块组，每组记录100个块。下列描述正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 位示图大小为512字节，CSCAN磁头移动距离为290</div>
+<div className="choice-option-row">B. 位示图大小为512字节，CSCAN移动距离为390</div>
+<div className="choice-option-row">C. 成组链接法需额外存储每组的链表指针，但减少了目录查询时间</div>
+<div className="choice-option-row">D. 成组链接法结合了空闲块组的批量分配与链式检索，优于单一链表</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 成组链接法将若干空闲块号集中记录成一组，并用组间链接将各组连接起来，既能一次取得或回收一批空闲块，又保留了链式扩展能力，相比逐块链接的空闲链表可显著减少访问空闲管理信息的次数，因此 D 正确。
+
+位示图大小确实为：
+
+$$
+\displaystyle
+\dfrac{4096}{8}=512\text{B}
+$$
+
+但按标准 CSCAN 算法，磁头向增大方向服务 $\displaystyle 150、180$，继续到末端 $\displaystyle 199$，再回到 $\displaystyle 0$，随后服务 $\displaystyle 10、30、50$，移动距离为：
+
+$$
+\displaystyle
+(199-100)+(199-0)+(50-0)=348
+$$
+
+因而 A、B 给出的移动距离均不正确。C 错误，成组链接法优化的是空闲盘块的分配与回收，与目录查询时间没有直接关系。
+
+</details>
+
+---
+
+23. **【竟成·模拟三-31】** 某磁盘共200个磁道，编号从0到199。现有一个磁盘请求序列为：142，82，197，90，108，当前磁头的位置为100，正在向磁道号增加的方向移动。则按照最短寻道时间优先算法(SSTF)和改进的扫描算法(SCAN)，处理完以上请求后，磁头扫过的磁道数分别为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 149，212 &emsp;&emsp; B. 149，216 &emsp;&emsp; C. 342，212 &emsp;&emsp; D. 342，216</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 先计算 SSTF。每次选择距当前磁头最近的请求，访问次序为：
+
+```text
+100 → 108 → 90 → 82 → 142 → 197
+```
+
+总移动量为：
+
+$$
+\displaystyle
+8+18+8+60+55=149
+$$
+
+题中的“改进的扫描算法”指 LOOK 算法，只移动到当前方向上最远的请求处便反向，不必到达物理端点。初始向磁道号增大的方向移动，访问次序为：
+
+```text
+100 → 108 → 142 → 197 → 90 → 82
+```
+
+总移动量为：
+
+$$
+\displaystyle
+8+34+55+107+8=212
+$$
+
+因此两种算法的移动量分别为 $\displaystyle 149$ 和 $\displaystyle 212$，选 A。
+
+</details>
+
+---
+
+### 5.3.4 固态硬盘
+
+24. **【王道·卷七-Q32】** 在下列关于固态硬盘(SSD)的说法中，正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 固态硬盘属于磁表面存储器</div>
+<div className="choice-option-row">B. 固态硬盘的闪存翻译层相当于磁盘中的磁盘控制器，起到地址转换的作用</div>
+<div className="choice-option-row">C. 固态硬盘的随机读时延远低于常规硬盘，但随机写时延和常规硬盘的相差不大</div>
+<div className="choice-option-row">D. 在对固态硬盘的某块写入信息时，不必按照块内页的顺序写入信息</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** SSD 中的闪存翻译层（FTL）负责把主机看到的逻辑块地址映射为闪存芯片中的物理页地址，并承担垃圾回收、磨损均衡等管理功能，其地址转换作用类似传统磁盘控制器，故 B 正确。
+
+A 错误。SSD 使用 Flash 半导体存储器，不属于磁表面存储器。C 错误。SSD 没有机械寻道和旋转等待，随机读写时延通常都显著低于机械硬盘，只是写操作还涉及擦除、垃圾回收等额外开销。D 错误。NAND Flash 通常以页为单位写入、以块为单位擦除，同一擦除块内的页写入还受到顺序等限制，不能任意改写已写页面。
+
+</details>
+
+---
+
+25. **【竟成·模拟七-31】** 下列关于固态硬盘（SSD）的说法中，错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 固态硬盘不受震动和物理冲击的影响，更适合移动设备使用</div>
+<div className="choice-option-row">B. 写入固态硬盘时，应优先选择较老的块，而保留较新的块备用</div>
+<div className="choice-option-row">C. 固态硬盘的数据存储于Flash芯片之中</div>
+<div className="choice-option-row">D. 机械硬盘使用的硬盘调度算法不一定适用于固态硬盘</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** SSD 的 Flash 块具有有限的擦写寿命，控制器通过磨损均衡使各块的擦写次数尽量接近。写入时不应持续优先选择已经使用较久、擦写次数较多的“较老块”，否则会加速这些块损坏，因此 B 错误。
+
+A 正确。SSD 无机械磁头和旋转盘片，抗震动、抗冲击能力通常强于机械硬盘，适合移动设备。C 正确，SSD 的核心存储介质是 Flash 芯片。D 正确，机械硬盘调度算法主要用于减少寻道和旋转延迟，而 SSD 没有机械寻道过程，因此这些算法未必适用或收益很小。
+
+---
+
+</details>

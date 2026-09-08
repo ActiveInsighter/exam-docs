@@ -1,0 +1,673 @@
+---
+sidebar_position: 4
+title: 第4章 指令系统
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第4章 指令系统
+
+## 4.1 指令系统
+
+### 4.1.2 指令的基本格式
+
+1. **【王道·卷三-Q20】** 某计算机采用微程序控制方式，微指令字长为24位，采用水平型编码控制的微指令格式；共有微命令30个，构成4个互斥类，各包含5个、8个、14个和3个微命令；外部条件共3个。则控制存储器的容量应该为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle 256\times 24bit$ &emsp;&emsp; B. $\displaystyle 30\times 24bit$ &emsp;&emsp; C. $\displaystyle 31\times 24bit$ &emsp;&emsp; D. $\displaystyle 24\times 24bit$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 互斥类采用字段直接编码时，每个字段除需要表示该类中的各条微命令外，还需要保留一种“本字段不发出微命令”的状态。因此 4 个控制字段所需位数分别为：
+
+$$
+\displaystyle
+\begin{aligned}
+\lceil\log_2(5+1)\rceil &=3 \\
+\lceil\log_2(8+1)\rceil &=4 \\
+\lceil\log_2(14+1)\rceil&=4 \\
+\lceil\log_2(3+1)\rceil &=2
+\end{aligned}
+$$
+
+操作控制字段共需：
+
+$$
+\displaystyle
+3+4+4+2=13\text{位}
+$$
+
+3 个外部条件各设置一个判别位，共占 3 位。于是微地址字段位数为：
+
+$$
+\displaystyle
+24-13-3=8\text{位}
+$$
+
+8 位微地址最多可寻址：
+
+$$
+\displaystyle
+2^8=256\text{条微指令}
+$$
+
+每条微指令长 24 位，因此控制存储器容量应为：
+
+$$
+\displaystyle
+256\times24bit
+$$
+
+因此选择 A。B、C 仅按微命令数量确定控制存储器字数，忽略了微地址字段；D 则将微指令字长错误地当作存储字数。
+
+</details>
+
+---
+
+2. **【王道·卷六-Q18】** 在下列关于定长指令字和变长指令字的说法中，错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 定长指令字的读取非常简单，每次可以按照确定的字节从指令存储器中读出</div>
+<div className="choice-option-row">B. 变长指令字每次可以按照最大的指令长度来读取</div>
+<div className="choice-option-row">C. 定长指令字和变长指令字都需要一个专门的PC增量器来进行PC自增的计算</div>
+<div className="choice-option-row">D. 从处理器设计的角度来看，定长指令字格式比变长指令字格式要好</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 定长指令字的长度固定，取指时每次读取确定数量的字节，下一条指令地址可直接按固定增量计算，因此取指、译码和流水线控制都较简单，A、D 正确。
+
+对于变长指令字，处理器可以一次读取一个按最大指令长度设计的取指块，再根据译码结果确定当前指令的实际长度，因此 B 所述可作为一种取指实现方式。
+
+C 的问题在于：定长指令的 PC 每次增加固定值，可使用固定增量的专用增量器；变长指令的 PC 增量取决于当前指令的实际长度，必须先识别指令长度，再完成可变增量计算，不能将二者都简单地描述为使用相同意义上的“专门 PC 增量器”进行固定自增。因此错误的是 C。
+
+</details>
+
+---
+
+3. **【王道·卷七-Q21】** 在下列关于微指令格式的描述中，错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 相对于直接控制法（不译法），字段直接编码法对控制存储器的利用率更高</div>
+<div className="choice-option-row">B. 相对于字段直接编码法，直接控制法（不译法）的执行速度更快</div>
+<div className="choice-option-row">C. 相对于断定法（下地址字段法），采用增量计数器法的微指令格式更短</div>
+<div className="choice-option-row">D. 相对于水平型微指令，垂直型微指令包含的微命令更多</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 直接控制法中，每个微命令通常对应一个控制位，几乎不需要译码，执行速度快，但微指令字较长，控制存储器利用率较低。字段直接编码法将互斥微命令编码在同一字段中，可缩短微指令字，提高控制存储器利用率，因此 A、B 正确。
+
+断定法需要在微指令中设置较完整的下地址字段；增量计数器法通常默认下一条微指令地址为当前地址加 1，仅在需要转移时修改微地址，因此可减少下地址信息所占位数，C 正确。
+
+水平型微指令一次可并行发出较多微命令，并行操作能力强；垂直型微指令更接近机器指令，编码程度高，一条微指令包含的微命令较少。因此 D 将两者特点说反，错误。
+
+</details>
+
+---
+
+4. **【王道·卷八-Q17】** 有一条双字长直接寻址的子程序调用CALL指令，其第一个字为操作码和寻址特征，第二个字为地址码 $\displaystyle 5000H$。假设 $\displaystyle PC$ 的当前值为 $\displaystyle 1000H, SP$ 的内容为 $\displaystyle 0100H$，栈顶内容为 $\displaystyle 1234H$，存储器按字编址，且进栈操作是先 $\displaystyle (SP) - 1\rightarrow SP$，后存入数据，则CALL指令执行后，SP及栈顶的内容分别为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 00FFH,1000H &emsp;&emsp; B. 0101H,1000H &emsp;&emsp; C. 00FEH,1002H &emsp;&emsp; D. 00FFH,1002H</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** CALL 指令需要将返回地址压入栈中，然后把目标地址装入 PC。
+
+该指令为双字长，且存储器按字编址。若取指前 $\displaystyle PC=1000H$，取完两个字后，PC 指向 CALL 指令之后的下一条指令：
+
+$$
+\displaystyle
+1000H+2=1002H
+$$
+
+因而压栈的返回地址为 $\displaystyle 1002H$。题目规定进栈时先将 SP 减 1，再存入数据：
+
+$$
+\displaystyle
+0100H-1=00FFH
+$$
+
+所以执行后：
+
+- $\displaystyle SP=00FFH$；
+- 新栈顶内容为 $\displaystyle 1002H$。
+
+因此选择 D。A 未考虑双字长指令使 PC 增加 2；B 的栈增长方向错误；C 将 SP 多减了 1。
+
+</details>
+
+---
+
+5. **【王道·卷八-Q19】** 某微机的指令格式如下所示：
+
+| 15     | 10  | 9   | 8   | 7   | 0   |
+| ------ | --- | --- | --- | --- | --- |
+| 操作码 | X   | D   |
+
+其中 $\displaystyle D$ 为位移量，$\displaystyle X$ 为寻址特征位。
+$\displaystyle X = 00$：直接寻址； $\displaystyle X = 01$：用变址寄存器 $\displaystyle X1$ 进行变址；
+$\displaystyle X = 10$：用变址寄存器 $\displaystyle X2$ 进行变址； $\displaystyle X = 11$：相对寻址。
+设 $\displaystyle (PC) = 1234H, (X1) = 0037H, (X2) = 1122H$，则指令 $\displaystyle 2222H$ 的有效地址是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 22H &emsp;&emsp; B. 1144H &emsp;&emsp; C. 1256H &emsp;&emsp; D. 0059H</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 将指令 $\displaystyle 2222H$ 写成二进制：
+
+$$
+\displaystyle
+2222H=0010\ 0010\ 0010\ 0010_2
+$$
+
+其中：
+
+- 第 $\displaystyle 9\sim8$ 位为寻址特征位 $\displaystyle X=10$，表示使用变址寄存器 $\displaystyle X2$；
+- 低 8 位位移量 $\displaystyle D=22H$。
+
+变址寻址的有效地址为：
+
+$$
+\displaystyle
+EA=(X2)+D=1122H+22H=1144H
+$$
+
+因此选择 B。A 只取了形式地址；C 错误地使用了 PC；D 错误地使用了 $\displaystyle X1$。
+
+</details>
+
+---
+
+6. **【竟成·模拟一-18】** 某32位计算机采用小端方式存储，指令格式为定长32位。add指令的格式及部分编码为：`011001 rs(4位) 00 rd(4位) imm(16位)`，add指令的功能是：R[rd]←R[rs]+imm。其中，R[x]表示通用寄存器x的内容，imm为补码表示的立即数。通用寄存器r1~r15的编号为1H~FH。则指令"add r1,r2,-259"（(r1)←(r2)+(-259)）在内存中存储的机器码是（用十六进制表示）（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 6481FEFDH &emsp;&emsp; B. FDFE8164H &emsp;&emsp; C. 6442FEFDH &emsp;&emsp; D. FDFE4264H</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 指令功能为 $\displaystyle R[rd]\leftarrow R[rs]+imm$，故：
+
+- 源寄存器 $\displaystyle rs=r2=0010_2$；
+- 目的寄存器 $\displaystyle rd=r1=0001_2$。
+
+$\displaystyle -259$ 的 16 位补码为：
+
+$$
+\displaystyle
+259=0103H,
+\qquad
+[-259]_{补}=10000H-0103H=FEFDH
+$$
+
+按指令字段拼接：
+
+```text
+011001 0010 00 0001 1111111011111101
+```
+
+分成十六进制数得到处理器中的 32 位指令字：
+
+$$
+\displaystyle
+6481FEFDH
+$$
+
+但计算机采用小端方式，低地址存放低有效字节。因此四个字节在内存中依次为：
+
+```text
+FD FE 81 64
+```
+
+按内存中的字节排列写成十六进制即 $\displaystyle FDFE8164H$，选择 B。A 是指令字本身的通常书写顺序，没有按小端字节次序排列；C、D 混淆了源、目的寄存器字段。
+
+</details>
+
+---
+
+### 4.1.4 扩展操作码指令格式
+
+7. **【竟成·模拟四-18】** 某计算机按字节编址，指令字长固定且只有两种指令格式：单地址指令和二地址指令。其中单地址指令260条，二地址指令12条，每个地址字段为6位，则指令字长至少应该是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 16 &emsp;&emsp; B. 17 &emsp;&emsp; C. 24 &emsp;&emsp; D. 27</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 设二地址指令的基本操作码为 $\displaystyle k$ 位。二地址指令含两个 6 位地址字段，因此指令字长为：
+
+$$
+\displaystyle
+L=k+6+6=k+12
+$$
+
+需要表示 12 条二地址指令，至少满足：
+
+$$
+\displaystyle
+2^k\ge 12
+$$
+
+先尝试 $\displaystyle k=4$，此时指令字长为 16 位。4 位操作码共有 16 种编码，12 条二地址指令占用 12 种，只剩 4 种可作为扩展操作码前缀。将一个 6 位地址字段扩展为操作码后，最多可表示的单地址指令数为：
+
+$$
+\displaystyle
+(16-12)\times2^6=4\times64=256
+$$
+
+但题目需要 260 条，不够。
+
+取 $\displaystyle k=5$ 时，指令字长为：
+
+$$
+\displaystyle
+L=5+12=17
+$$
+
+此时剩余基本操作码数量为 $\displaystyle 32-12=20$，可扩展出的单地址指令远多于 260 条。因此最小指令字长为 17 位，选择 B。
+
+</details>
+
+---
+
+## 4.2 寻址方式
+
+### 4.2.2 常见的数据寻址方式
+
+8. **【王道·卷四-Q17】** 在通用计算机指令系统的二地址指令中，操作数的物理位置可能安排在（  ）。
+I. 一个主存单元和缓冲存储器 II. 两个数据寄存器
+III. 一个主存单元和一个数据寄存器 IV. 一个数据寄存器和一个控制存储器
+V. 一个主存单元和一个外存单元
+
+<div className="choice-options">
+<div className="choice-option-row">A. II、III和IV &emsp;&emsp; B. II、III &emsp;&emsp; C. I、II和III &emsp;&emsp; D. I、II、III和V</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 机器指令能够直接指定并访问的操作数通常位于程序员可见的通用寄存器或主存中。因此二地址指令常见的操作数组合包括：
+
+- 寄存器—寄存器，即 II；
+- 主存—寄存器，即 III；
+- 某些指令系统也可能支持主存—主存，但本题组合中未列出。
+
+Cache（缓冲存储器）由硬件自动管理，对机器指令通常透明，不能作为指令显式指定的操作数位置，因此 I 错误。控制存储器用于存放微程序，不用于存放普通机器指令的操作数，IV 错误。外存不能由普通机器指令直接作为操作数访问，必须先通过 I/O 或操作系统调入主存，V 错误。
+
+因此只有 II、III 正确，选择 B。
+
+</details>
+
+---
+
+9. **【王道·卷五-Q18】** 在下列关于基址寻址和变址寻址的说法中，正确的是（  ）。
+I. 两者都扩大指令的寻址范围
+II. 变址寻址适合于编写循环程序
+III. 基址寻址适合于多道程序设计
+IV. 基址寄存器的内容由操作系统确定，在执行过程中可变
+V. 变址寄存器的内容由用户确定，在执行过程中不可变
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II和III &emsp;&emsp; B. I、II和V &emsp;&emsp; C. II和III &emsp;&emsp; D. II、III、IV和V</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 基址寻址和变址寻址的有效地址通常都由寄存器内容与指令中的形式地址相加得到：
+
+$$
+\displaystyle
+EA=(R)+A
+$$
+
+借助寄存器提供更多地址位，两者都能扩大指令的寻址范围，因此 I 正确。
+
+变址寻址中，形式地址通常给出数组或表的首地址，变址寄存器保存可不断变化的下标或偏移量，适合循环访问数组元素，II 正确。
+
+基址寻址中，基址寄存器通常由操作系统或装入程序设置，用来实现程序重定位和多道程序在不同主存区域中的装入，III 正确。对一个程序的一次连续执行而言，基址寄存器一般保持不变，并非由用户程序随意修改，因此 IV 错误。
+
+变址寄存器通常由用户程序设置，并在循环执行过程中不断改变，因此 V 错误。
+
+正确的是 I、II、III，选择 A。
+
+</details>
+
+---
+
+10. **【王道·卷七-Q17】** 设寄存器 $\displaystyle R$ 中的数值为600，地址为600和700的主存单元中存放的内容分别是700和800，则（  ）得到的操作数为600。
+I. 直接寻址600 II. 寄存器间接寻址R III. 立即寻址600 IV. 寄存器寻址R
+
+<div className="choice-options">
+<div className="choice-option-row">A. I &emsp;&emsp; B. II、III &emsp;&emsp; C. III、IV &emsp;&emsp; D. IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 已知：
+
+$$
+\displaystyle
+(R)=600,
+\qquad
+M[600]=700,
+\qquad
+M[700]=800
+$$
+
+分别判断：
+
+1. 直接寻址 600：形式地址就是有效地址，操作数为 $\displaystyle M[600]=700$，不是 600。
+2. 寄存器间接寻址 R：有效地址为 $\displaystyle (R)=600$，操作数仍为 $\displaystyle M[600]=700$，不是 600。
+3. 立即寻址 600：指令中的数值 600 本身就是操作数，正确。
+4. 寄存器寻址 R：操作数为寄存器内容 $\displaystyle (R)=600$，正确。
+
+因此 III、IV 能得到操作数 600，选择 C。
+
+</details>
+
+---
+
+11. **【竟成·模拟二-18】** 下列对于寻址方式的叙述正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 寄存器间接寻址方式的操作数存储在通用寄存器中</div>
+<div className="choice-option-row">B. 程序执行过程中指令寻址和数据寻址往往交替进行</div>
+<div className="choice-option-row">C. 堆栈寻址方式下数据的存储顺序是先进先出</div>
+<div className="choice-option-row">D. 变址寻址方式下有效地址EA存储在内存中</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** A 错误。寄存器间接寻址时，通用寄存器中保存的是操作数的主存地址，真正的操作数位于主存单元中：
+
+$$
+\displaystyle
+EA=(R),
+\qquad
+操作数=M[EA]
+$$
+
+B 正确。CPU 先通过指令寻址确定下一条要执行的指令，取出并译码后，又可能通过数据寻址取得操作数；程序执行过程中两类寻址通常反复、交替出现。
+
+C 错误。堆栈的基本特征是后进先出，而不是先进先出。
+
+D 错误。变址寻址的有效地址由变址寄存器与形式地址相加计算得到：
+
+$$
+\displaystyle
+EA=(IX)+A
+$$
+
+EA 是地址运算结果，并不是预先存放在某个内存单元中的数据。因此选择 B。
+
+</details>
+
+---
+
+12. **【竟成·模拟三-16】** 假定采用相对寻址方式的转移指令占两个字节，第一字节是操作码，第二字节是相对偏移量（用补码表示）。取指令时，每次CPU从存储器取出一个字节，并自动完成(PC)+1→PC。假设执行到某转移指令时（取指令前）PC的内容为200CH，该指令的转移目标地址为1FB0H，则该转移指令第二字节的内容应为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 5CH &emsp;&emsp; B. 5EH &emsp;&emsp; C. A2H &emsp;&emsp; D. A4H</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 相对寻址的有效转移地址通常按下式计算：
+
+$$
+\displaystyle
+\text{目标地址}=(PC)+\text{相对偏移量}
+$$
+
+该指令共占两个字节。取指前，$\displaystyle PC=200\mathrm{C}H$。每取出一个字节，PC 自动加 1，因此两个字节均取完后：
+
+$$
+\displaystyle
+PC=200\mathrm{E}H
+$$
+
+于是相对偏移量为：
+
+$$
+\displaystyle
+\begin{aligned}
+\text{偏移量}
+&=1\mathrm{FB}0H-200\mathrm{E}H\\
+&=-5\mathrm{E}H
+\end{aligned}
+$$
+
+第二字节只有 8 位，需要求 $\displaystyle -5\mathrm{E}H$ 的 8 位补码：
+
+$$
+\displaystyle
+100H-5EH=A2H
+$$
+
+因此第二字节应为 A2H，选择 C。
+
+</details>
+
+---
+
+## 4.3 程序的机器级代码表示
+
+### 4.3.1 常用汇编指令介绍
+
+13. **【竟成·模拟四-14】** 某机器有一个标志寄存器，其中有进位/借位标志CF、零标志ZF、符号标志SF和溢出标志OF，条件转移指令jl（有符号整数比较小于时转移）的转移条件是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. SF=1 &emsp;&emsp; B. SF⊕OF=1 &emsp;&emsp; C. SF⊕OF=1或者ZF=1 &emsp;&emsp; D. SF+OF=1</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 有符号整数比较通常先执行减法，例如判断 $\displaystyle a<b$ 时计算 $\displaystyle a-b$。若没有溢出，结果为负可由 $\displaystyle SF=1$ 判断；但发生有符号溢出时，结果符号位会失真，因此还必须结合溢出标志 OF。
+
+对于有符号“小于”条件，正确判据为：
+
+$$
+\displaystyle
+SF\oplus OF=1
+$$
+
+即 SF 与 OF 不相等时，说明被比较数小于另一个数。ZF 不参与严格“小于”的判断；若还要求“等于”，才需结合 ZF。因此选择 B。
+
+</details>
+
+---
+
+14. **【竟成·模拟七-18】** 假定编译器对C源程序中的变量和MIPS中寄存器进行了以下对应：变量f、g、h、i、j分别对应寄存器`$s0`、`$s1`、`$s2`、`$s3`、`$s4`，一条C语言赋值语句编译后生成如下代码序列。这条C语言赋值语句是（）。
+
+```
+and $s0, $s1, $s2
+sub $s1, $s3, $s4
+sub $s0, $s1, $s0
+```
+
+<div className="choice-options">
+<div className="choice-option-row">A. f = (i - j) - (g & h) &emsp;&emsp; B. f = (g & h) - (i - j)</div>
+<div className="choice-option-row">C. f = (i - j) - (g + h) &emsp;&emsp; D. f = (g + h) - (i - j)</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 按顺序分析三条指令：
+
+1. `and $s0, $s1, $s2`：
+
+$$
+\displaystyle
+f=g\mathbin{\&}h
+$$
+
+2. `sub $s1, $s3, $s4`：
+
+$$
+\displaystyle
+g=i-j
+$$
+
+3. `sub $s0, $s1, $s0`：
+
+$$
+\displaystyle
+f=g-f
+$$
+
+第三条指令使用的 $\displaystyle g$ 已被第二条改写为 $\displaystyle i-j$，而其中的 $\displaystyle f$ 是第一条得到的原始 $\displaystyle g\mathbin{\&}h$。因此最终结果为：
+
+$$
+\displaystyle
+f=(i-j)-(g\mathbin{\&}h)
+$$
+
+这里右侧的 $\displaystyle g$ 表示执行该代码序列前变量 $\displaystyle g$ 的原值。因此选择 A。
+
+</details>
+
+---
+
+### 4.3.4 过程调用的机器级表示
+
+15. **【竟成·模拟六-16】** 一条双字长直接寻址的CALL指令，其第一个字为操作码和寻址特征，第二个字为地址码4000H。假设PC当前值为2000H，SP（栈顶指针）的内容为0100H，栈顶内容为1234H，存储器按字编址，栈向低地址增长，进栈操作是先修改SP，后存入数据。则CALL指令执行后，SP及栈顶的内容分别为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 00FFH，4000H &emsp;&emsp; B. 0101H，2002H &emsp;&emsp; C. 00FEH，1234H &emsp;&emsp; D. 00FFH，2002H</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** CALL 指令需要完成两项主要操作：
+
+1. 将返回地址压入栈中；
+2. 将 PC 修改为被调用过程的入口地址 4000H。
+
+本机按字编址，CALL 为双字长指令。若执行前 $\displaystyle PC=2000H$，则取完两个字后，下一条顺序指令地址为：
+
+$$
+\displaystyle
+2000H+2=2002H
+$$
+
+因而压栈的返回地址应为 2002H，而不是目标地址 4000H。
+
+栈向低地址增长，且进栈时先修改 SP、后存入数据，所以：
+
+$$
+\displaystyle
+SP=0100H-1=00FFH
+$$
+
+随后将返回地址 2002H 写入新栈顶。因此执行后 SP 为 00FFH，栈顶内容为 2002H，选择 D。
+
+</details>
+
+---
+
+## 4.4 CISC和RISC的基本概念
+
+### 4.4.2 精简指令系统计算机 RISC
+
+16. **【王道·卷七-Q19】** 在下列几项中，不符合 RISC 指令系统特征的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 控制器多采用微程序方式，以期更快的设计速度 &emsp;&emsp; B. 指令格式简单，不同指令数量少</div>
+<div className="choice-option-row">C. 寻址方式少且简单 &emsp;&emsp; D. 所有指令的平均执行时间约为一个时钟周期</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** RISC 的核心思想是简化指令系统，使指令便于快速译码和流水执行，其典型特征包括：
+
+- 指令数量较少，指令格式规整；
+- 寻址方式少且简单；
+- 大多数指令在一个时钟周期内完成；
+- 通常采用硬布线控制器，以提高控制信号生成速度；
+- 大量使用通用寄存器，并强调编译优化。
+
+微程序控制器通常更适合指令复杂、控制步骤较多的 CISC。A 项所述不符合 RISC 特征，因此选择 A。
+
+</details>
+
+---
+
+### 4.4.3 CISC和RISC的比较
+
+17. **【竟成·模拟五-18】** 下列关于CISC和RISC的说法正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. CISC不使用指令流水线技术 &emsp;&emsp; B. RISC指令格式、寻址方式种类相对CISC更少</div>
+<div className="choice-option-row">C. CISC容易采用优化编译生成高效的目标代码程序 &emsp;&emsp; D. CISC普遍采用硬布线控制器</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** B 正确。RISC 强调精简和规整，其指令格式种类、指令数量和寻址方式通常都少于 CISC，更利于快速译码与流水线执行。
+
+A 错误。CISC 也可以使用指令流水线，只是因指令长度和执行周期不够规整，流水线设计通常比 RISC 更复杂。
+
+C 错误。RISC 的指令规则、寄存器数量多，更便于编译器进行优化；CISC 指令功能复杂、长度和执行时间变化较大，不一定更容易生成高效代码。
+
+D 错误。传统 CISC 常采用微程序控制器，以较低硬件复杂度实现大量复杂指令；RISC 才更倾向于硬布线控制。
+
+因此选择 B。
+
+</details>

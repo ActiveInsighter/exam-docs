@@ -1,0 +1,891 @@
+---
+sidebar_position: 4
+title: 第4章 文件管理
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第4章 文件管理
+
+## 4.1 文件系统基础
+
+### 4.1.2 文件系统结构
+
+1. **【竟成·模拟四-31】** 下列关于文件系统的说法，正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 文件系统可使用的容量大小一定等于其所在的磁盘空间大小</div>
+<div className="choice-option-row">B. 文件系统中单个文件的大小只受其所在磁盘空间大小的限制</div>
+<div className="choice-option-row">C. 一个文件系统只能将数据存放在一个磁盘上</div>
+<div className="choice-option-row">D. 文件系统可以管理的文件数量受限于该文件系统的文件控制块数量</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 文件系统通过文件控制块（FCB）或索引节点等数据结构记录并管理文件。每创建一个文件，通常都需要分配一个相应的文件控制块，因此文件系统能够管理的文件总数会受到可用文件控制块数量的限制，D 正确。
+
+A 错误。文件系统的可用容量通常小于其所在分区或存储设备的物理容量，因为超级块、空闲空间管理结构、日志、文件控制块区等元数据也会占用空间；此外，文件系统还可能只使用磁盘的一部分空间。
+
+B 错误。单个文件的最大长度不仅受磁盘剩余空间限制，还受文件系统格式、文件长度字段位数和文件物理结构中地址项数量等因素限制。例如，混合索引结构可寻址的数据块数量有限，即使磁盘尚有空间，文件也可能已经达到最大长度。
+
+C 错误。一个逻辑文件系统或卷可以建立在多个磁盘之上，例如通过磁盘阵列、逻辑卷管理等方式将多个物理磁盘组合为统一的存储空间。
+
+</details>
+
+---
+
+### 4.1.3 文件的逻辑结构
+
+2. **【竟成·模拟二-28】** 索引顺序文件需要将文件记录进行分组，下列关于文件分组，组间和组内关键字顺序的说法正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 分组组间关键字有序，组内关键字有序 &emsp;&emsp; B. 分组组间关键字有序，组内关键字可以无序</div>
+<div className="choice-option-row">C. 分组组间关键字可以无序，组内关键字有序 &emsp;&emsp; D. 分组组间关键字可以无序，组内关键字可以无序</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 索引顺序文件将记录划分为若干组，并为各组建立索引项。为了通过索引确定目标记录所在的组，各组之间必须按照关键字范围保持有序；但在已经确定目标组后，可以在组内进行顺序查找，因此组内记录不要求严格有序，可以无序。
+
+这种组织方式与分块查找的思想相同：先利用有序索引确定记录所在的块，再在块内查找。A 将组内也限定为有序，要求过强；C、D 允许组间无序，会使索引无法根据关键字快速确定目标组。
+
+</details>
+
+---
+
+## 4.2 目录与文件
+
+### 4.2.2 文件控制块和索引节点
+
+3. **【王道·卷六-Q29】** 在下面的选项中，不属于文件索引节点（inode）的特征的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 维护对应文件的逻辑结构</div>
+<div className="choice-option-row">B. 索引节点是实现文件共享的一种方式</div>
+<div className="choice-option-row">C. 内存索引节点和磁盘索引节点的内容并不完全相同</div>
+<div className="choice-option-row">D. 索引节点中存放文件的存取控制权限的相关信息</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 索引节点主要保存文件的属性信息以及文件数据块的物理地址信息，例如文件类型、访问权限、所有者、文件长度、时间信息和数据块指针等。文件的逻辑结构是用户或应用程序观察到的记录组织方式，并不是由 inode 负责维护的，因此 A 不属于索引节点的特征。
+
+B 正确。多个目录项可以保存同一个 inode 编号，从而使多个文件名指向同一个文件实体，这正是硬链接实现文件共享的基础。
+
+C 正确。磁盘 inode 保存需要持久化的文件属性；内存 inode 除包含磁盘 inode 的主要内容外，通常还增加引用计数、锁、状态标志等运行时管理信息，因此二者内容不完全相同。
+
+D 正确。文件的读、写、执行等存取控制权限通常保存在 inode 中。
+
+</details>
+
+---
+
+4. **【王道·卷七-Q30】** 在某个文件系统中，每个盘块的大小为512B，文件控制块占64B，其中文件名占6B。若索引节点编号占2B，对一个存放在磁盘上的256个目录项的目录，试比较引入索引节点前后，为了找到其中一个文件的FCB，平均启动磁盘的次数减少了（  ）次。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 4.5 &emsp;&emsp; B. 8.5 &emsp;&emsp; C. 13 &emsp;&emsp; D. 16.5</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 引入索引节点前，目录项中保存完整的 FCB，每个目录项占 64B。一个盘块可容纳
+
+$$
+\displaystyle
+\dfrac{512}{64}=8
+$$
+
+个目录项，因此 256 个目录项共占
+
+$$
+\displaystyle
+\dfrac{256}{8}=32
+$$
+
+个盘块。顺序检索且目标文件等概率出现时，平均需要读取
+
+$$
+\displaystyle
+\dfrac{1+32}{2}=16.5
+$$
+
+个盘块。
+
+引入索引节点后，目录项只需保存文件名和索引节点编号，每项大小为
+
+$$
+\displaystyle
+6B+2B=8B。
+$$
+
+一个盘块可容纳 64 个目录项，整个目录占 4 个盘块。平均检索目录需要
+
+$$
+\displaystyle
+\dfrac{1+4}{2}=2.5
+$$
+
+次磁盘访问，找到目录项后还需再访问 1 次磁盘读取对应 inode，因此平均共需
+
+$$
+\displaystyle
+2.5+1=3.5
+$$
+
+次。平均减少的磁盘启动次数为
+
+$$
+\displaystyle
+16.5-3.5=13，
+$$
+
+故选 C。
+
+</details>
+
+---
+
+5. **【竟成·模拟二-29】** 以下关于文件控制块（FCB）的描述中，正确的是（）。
+I. 文件控制块是操作系统创建的、用来控制和管理一个文件属性信息的数据结构
+II. 文件控制块是一个文件存在的唯一证明
+III. 文件控制块存储了文件访问控制信息
+IV. 文件被首次打开时，仅文件控制块的信息会被读入内存
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II、III &emsp;&emsp; B. I、II、IV &emsp;&emsp; C. I、III、IV &emsp;&emsp; D. I、II、III、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** I 正确。FCB 是操作系统为管理文件而建立的数据结构，其中记录文件名、文件长度、物理位置、所有者和时间信息等属性。
+
+II 正确。操作系统依靠 FCB 识别和管理文件，因此 FCB 是文件存在的标志；没有相应的 FCB，操作系统便无法将一组磁盘数据块识别为一个受管理的文件。
+
+III 正确。FCB 中通常包含文件的访问权限、所有者等访问控制信息，用于判断用户是否有权读、写或执行该文件。
+
+IV 错误。文件首次打开时，系统不仅需要将相关 FCB 或 inode 信息调入内存，还要在系统打开文件表、进程打开文件表等内存数据结构中建立表项，并维护文件偏移量、引用计数和访问方式等运行时信息。因此不能表述为“仅文件控制块的信息会被读入内存”。
+
+</details>
+
+---
+
+6. **【竟成·模拟三-30】** 某文件系统的一个磁盘块大小为512B，FCB的大小为64B，其中文件名占12B。此文件系统的第一版中，目录项包含FCB的全部内容。为加速目录访问，此文件系统的第二版引入了索引节点，索引节点编号长度为4B。现有一个存放在磁盘上，包含有256个文件的目录，则两版文件系统在此目录中检索一个文件平均各需访问磁盘（）次。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 32，9 &emsp;&emsp; B. 32，8 &emsp;&emsp; C. 16.5，5.5 &emsp;&emsp; D. 16.5，4.5</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 第一版中每个目录项就是完整 FCB，占 64B。每个 512B 磁盘块可存放
+
+$$
+\displaystyle
+\dfrac{512}{64}=8
+$$
+
+个目录项，256 个目录项占 32 个磁盘块。采用顺序检索时，平均访问磁盘块数为
+
+$$
+\displaystyle
+\dfrac{1+32}{2}=16.5。
+$$
+
+第二版中，目录项只含 12B 文件名和 4B inode 编号，每项占 16B。每个盘块可存放
+
+$$
+\displaystyle
+\dfrac{512}{16}=32
+$$
+
+个目录项，因此目录共占 8 个盘块。平均检索目录需要
+
+$$
+\displaystyle
+\dfrac{1+8}{2}=4.5
+$$
+
+次磁盘访问；找到目录项后，还需再访问 1 次磁盘读取 inode，所以平均共需
+
+$$
+\displaystyle
+4.5+1=5.5
+$$
+
+次。故两版分别为 16.5 次和 5.5 次，选 C。
+
+</details>
+
+---
+
+7. **【竟成·模拟四-30】** 设某文件系统中每个盘块占1KB，索引节点编号占4B，文件名也占4B。则对一个具有640个文件的目录而言，为了访问某个文件的索引节点平均需要启动（）次磁盘。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 3 &emsp;&emsp; B. 4 &emsp;&emsp; C. 5 &emsp;&emsp; D. 6</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 引入索引节点后，每个目录项由文件名和 inode 编号组成，大小为
+
+$$
+\displaystyle
+4B+4B=8B。
+$$
+
+一个 1KB 的盘块可存放
+
+$$
+\displaystyle
+\dfrac{1024}{8}=128
+$$
+
+个目录项。640 个文件对应的目录共占
+
+$$
+\displaystyle
+\dfrac{640}{128}=5
+$$
+
+个盘块。
+
+顺序检索且各文件被访问的概率相同时，查到目标目录项平均需要读取
+
+$$
+\displaystyle
+\dfrac{1+5}{2}=3
+$$
+
+个目录盘块。找到 inode 编号后，还需启动磁盘 1 次以读取相应的索引节点，因此平均启动次数为
+
+$$
+\displaystyle
+3+1=4。
+$$
+
+故选 B。
+
+</details>
+
+---
+
+### 4.2.3 目录结构
+
+8. **【竟成·模拟五-30】** 由于不同文件可能存在相同的名称，一般采用（）来保证按名存取的不冲突。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 混合索引方式 &emsp;&emsp; B. 多级目录结构 &emsp;&emsp; C. 多级页表 &emsp;&emsp; D. 重定位</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 多级目录结构将文件组织在不同目录中，文件的完整标识由路径名确定。即使不同目录中存在同名文件，只要其路径不同，就可以被唯一定位，因此能够避免按名存取时发生冲突，B 正确。
+
+A 的混合索引方式解决的是文件数据块的物理组织和大文件寻址问题；C 的多级页表用于虚拟地址到物理地址的转换；D 的重定位用于将逻辑地址转换或调整为实际内存地址，三者均不能解决文件重名问题。
+
+</details>
+
+---
+
+### 4.2.5 目录实现
+
+9. **【竟成·模拟一-30】** 某文件系统采用树形目录结构，目录项包含文件名、文件大小和指向文件数据块的指针。若系统使用哈希表加速由文件名到目录项的查找，即在每个目录中维护独立的哈希表，用于加速该目录下所有目录项的查找。并采用LRU算法管理内存中的文件缓存，下列描述错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 哈希表冲突处理方式会影响目录项查找的平均时间复杂度，最坏情况下对于规模为n的单层目录下的目录项查找时间复杂度为$\displaystyle O(n)$</div>
+<div className="choice-option-row">B. 若文件数据块采用链式存储，则存取效率低于顺序存储</div>
+<div className="choice-option-row">C. LRU算法通过维护一个双向链表和哈希表实现</div>
+<div className="choice-option-row">D. 在树形目录结构中，若某个目录的子目录过多，一定导致目录项的查找时间复杂度从$\displaystyle O(1)$退化到$\displaystyle O(n)$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** D 错误。某目录包含的子目录或目录项较多，并不必然使哈希查找从平均 $\displaystyle O(1)$ 退化为 $\displaystyle O(n)$。只要哈希函数、装载因子和冲突处理策略设计合理，并在需要时扩容，平均查找时间仍可保持在接近 $\displaystyle O(1)$。只有在大量关键字发生冲突等最坏情况下，才可能退化为 $\displaystyle O(n)$。
+
+A 正确。开放定址法、链地址法等冲突处理策略会影响哈希表性能；当大量目录项映射到同一位置时，最坏查找时间可达到 $\displaystyle O(n)$。
+
+B 正确。顺序分配的数据块物理相邻，支持高效的顺序访问和随机访问；链式分配需要沿块指针逐块查找，并且数据块可能分散在磁盘各处，通常会增加寻道和访问开销。
+
+C 正确。经典 LRU 缓存通常使用“哈希表 + 双向链表”实现：哈希表负责在平均 $\displaystyle O(1)$ 时间内定位缓存项，双向链表负责在 $\displaystyle O(1)$ 时间内调整最近使用次序和淘汰最久未使用项。
+
+</details>
+
+---
+
+### 4.2.6 文件的物理结构
+
+10. **【竟成·模拟一-29】** 某文件系统采用索引结点存放文件的属性和地址信息，其中包含10个直接地址项、1个一级间接项和1个二级间接项。磁盘块大小为2KB，每个地址项占4B。若采用混合索引分配方式，索引表内仅存储地址项，并采用顺序查找方式。对于某达到理论最大长度的文件，访问索引结点中直接地址项对应数据的概率为40%，访问一级间接项对应数据的概率为20%，访问二级间接项对应数据的概率为40%，对于不同层次内部对应的数据等概率进行访问，则该文件的长度以及访问该文件的平均访问索引表项数分别为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 20KB+512KB+512MB，256.5个索引表项 &emsp;&emsp; B. 20KB+513MB，256.5个索引表项</div>
+<div className="choice-option-row">C. 20KB+512KB+512MB，256个索引表项 &emsp;&emsp; D. 20KB+513MB，256个索引表项</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 每个索引块能够存放的地址项数为
+
+$$
+\displaystyle
+\dfrac{2KB}{4B}=\dfrac{2048}{4}=512。
+$$
+
+10 个直接地址项可寻址的数据量为
+
+$$
+\displaystyle
+10\times2KB=20KB。
+$$
+
+一级间接项通过一个索引块可寻址 512 个数据块，对应
+
+$$
+\displaystyle
+512\times2KB=1024KB=1MB。
+$$
+
+二级间接项可寻址
+
+$$
+\displaystyle
+512^2
+$$
+
+个数据块，对应
+
+$$
+\displaystyle
+512^2\times2KB=512MB。
+$$
+
+因此文件理论最大长度为
+
+$$
+\displaystyle
+20KB+1MB+512MB=20KB+513MB。
+$$
+
+对索引表采用顺序查找时，在一个含 512 个地址项的索引块中等概率查找一个地址项，平均检查
+
+$$
+\displaystyle
+\dfrac{1+512}{2}=256.5
+$$
+
+个表项。访问直接地址项对应的数据时不需要查找间接索引表；访问一级间接数据时平均检查 256.5 个索引表项；访问二级间接数据时需要在两级索引表中分别顺序查找，平均检查
+
+$$
+\displaystyle
+2\times256.5=513
+$$
+
+个表项。因此总体平均访问索引表项数为
+
+$$
+\displaystyle
+0.4\times0+0.2\times256.5+0.4\times513=256.5。
+$$
+
+故选 B。
+
+</details>
+
+---
+
+11. **【竟成·模拟二-30】** 某树形目录结构文件系统，采用混合索引的方式管理外存空间。该文件系统的每个目录项占128B，其中8B存放索引节点号，120B存放文件名。索引节点中含有13个地址项，其中直接地址项为10个，一级、二级、三级地址项各1个，磁盘块大小为8KB，一个磁盘块中可放置1024个地址。则该文件系统能创建的文件数量上限为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle 2^{64}$ &emsp;&emsp; B. $\displaystyle 2^{120}$ &emsp;&emsp; C. 10+1K+1M+1G &emsp;&emsp; D. 1024×(10+1K+1M+1G)</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 文件系统能够创建多少个不同文件，首先受“可用索引节点编号数量”的限制。每个目录项用 8B 存放索引节点号，因此索引节点号共有 64 位，理论上最多可表示
+
+$$
+\displaystyle
+2^{64}
+$$
+
+个不同编号，所以文件数量上限为 $\displaystyle 2^{64}$，选 A。
+
+120B 的文件名字段决定的是单个文件名可占用的空间，并不表示可创建 $\displaystyle 2^{120}$ 个文件。C、D 中的表达式反映的是混合索引结构能够寻址的数据块数量或文件最大长度，与整个文件系统可创建的文件总数不是同一概念。
+
+</details>
+
+---
+
+12. **【竟成·模拟三-29】** 某文件系统采用索引分配方法存储文件，磁盘块的大小为4KB，盘块号为32位，每个索引节点(inode)存储有10个地址索引，则该文件系统采用一级索引分配方法和二级索引分配方法时，最大的文件长度分别为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 40KB，40MB &emsp;&emsp; B. 40MB，40GB &emsp;&emsp; C. 40KB，160MB &emsp;&emsp; D. 40MB，160GB</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 盘块号为 32 位，即每个地址项占
+
+$$
+\displaystyle
+32\text{ bit}=4B。
+$$
+
+一个 4KB 索引块可存放的地址项数为
+
+$$
+\displaystyle
+\dfrac{4KB}{4B}=\dfrac{4096}{4}=1024。
+$$
+
+inode 中共有 10 个地址索引。
+
+采用一级索引分配时，每个地址索引指向一个一级索引块，每个一级索引块可指向 1024 个数据块，因此最大文件长度为
+
+$$
+\displaystyle
+10\times1024\times4KB=40MB。
+$$
+
+采用二级索引分配时，每个地址索引可经过两级索引寻址 $\displaystyle 1024^2$ 个数据块，因此最大文件长度为
+
+$$
+\displaystyle
+10\times1024^2\times4KB=40GB。
+$$
+
+故选 B。
+
+</details>
+
+---
+
+13. **【竟成·模拟六-29】** 某文件系统的inode中含有直接索引指针12个，一级、二级和三级索引指针各一个，磁盘块大小为4KB，每个索引指针占4B。若某文件的inode已在内存中，则读取该文件第9876字节和第543210字节时，各需读取磁盘（）次。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 0、1 &emsp;&emsp; B. 1、2 &emsp;&emsp; C. 1、3 &emsp;&emsp; D. 2、3</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 磁盘块大小为 4KB，即
+
+$$
+\displaystyle
+4KB=4096B。
+$$
+
+12 个直接索引指针可直接寻址文件的前
+
+$$
+\displaystyle
+12\times4096=49152B
+$$
+
+数据。
+
+第 9876 字节位于前 49152B 范围内，因此由直接索引指针定位。由于 inode 已在内存中，不需要再读 inode，但仍需从磁盘读取目标数据块，共需读取磁盘 1 次。
+
+第 543210 字节所在的数据块序号约为
+
+$$
+\displaystyle
+\left\lfloor\dfrac{543210-1}{4096}\right\rfloor=132。
+$$
+
+去掉前 12 个直接索引块后，该数据仍位于一级间接索引的寻址范围内。访问时需先读取一级间接索引块，再读取目标数据块，共需读取磁盘 2 次。
+
+因此两次访问分别需要 1 次和 2 次磁盘读取，选 B。
+
+</details>
+
+---
+
+14. **【竟成·模拟七-28】** 某文件系统使用FAT方式组织文件。若块大小为4KB，FAT表项长度为32位，其中用1位表示已占用，1位表示损坏，其余用于表示块号，则分区的最大长度为（），4GB大小分区的FAT表长度为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 8TB，4KB &emsp;&emsp; B. 4TB，4KB &emsp;&emsp; C. 8TB，4MB &emsp;&emsp; D. 4TB，4MB</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** FAT 表项共 32 位，其中 2 位分别表示“已占用”和“损坏”，剩余
+
+$$
+\displaystyle
+32-2=30
+$$
+
+位用于表示块号，因此理论上最多可编号 $\displaystyle 2^{30}$ 个磁盘块。每块大小为 4KB，即 $\displaystyle 2^{12}B$，所以分区最大长度为
+
+$$
+\displaystyle
+2^{30}\times2^{12}B=2^{42}B=4TB。
+$$
+
+对于 4GB 分区，磁盘块数为
+
+$$
+\displaystyle
+\dfrac{4GB}{4KB}=\dfrac{2^{32}}{2^{12}}=2^{20}。
+$$
+
+每个 FAT 表项占 32 位，即 4B，因此 FAT 表长度为
+
+$$
+\displaystyle
+2^{20}\times4B=2^{22}B=4MB。
+$$
+
+故选 D。
+
+</details>
+
+---
+
+### 4.2.7 文件的操作
+
+15. **【竟成·模拟七-30】** 下列关于文件操作的描述中，正确的是（）。
+I. 文件创建操作需要用户提供文件名和文件路径。
+II. 文件打开操作会将文件的FAT从磁盘中复制到内存中。
+III. 文件打开操作可能会失败。
+IV. 任何文件系统中，文件删除操作都会立即从磁盘上删除文件的内容。
+V. 链接操作能够创建网络中文件的硬链接。
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、III &emsp;&emsp; B. I、III、IV &emsp;&emsp; C. II、IV、V &emsp;&emsp; D. I、V</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** I 正确。创建文件时，系统至少需要根据文件名及其所在目录路径确定应在哪个目录中建立目录项。
+
+II 错误。打开文件时，系统通常根据路径找到文件的 FCB 或 inode，并在内存中的打开文件表中建立表项；不会因为打开某一个文件就把该文件系统的整个 FAT 从磁盘重新复制到内存中。
+
+III 正确。若文件不存在、路径错误、权限不足、打开文件表已满或设备故障，文件打开操作都可能失败。
+
+IV 错误。删除文件通常先删除目录项并回收 inode、数据块等资源标记，磁盘中的原有数据内容未必立即被物理擦除。
+
+V 错误。硬链接要求多个目录项指向同一文件系统中的同一个 inode，通常不能跨文件系统，更不能直接对网络中其他文件系统的文件建立硬链接。远程文件共享一般通过网络文件系统或符号链接等机制实现。
+
+因此只有 I、III 正确，选 A。
+
+</details>
+
+---
+
+### 4.2.8 文件共享
+
+16. **【王道·卷二-Q30】** 文件共享可以基于索引节点，也可以基于符号链。在下列关于这两种文件共享方式的说法中，正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 采用索引节点的文件共享方式，文件增加的部分不能被共享</div>
+<div className="choice-option-row">B. 在索引节点中，设置有链接计数值 count，表示本索引节点被打开的次数</div>
+<div className="choice-option-row">C. 符号链接能够用于链接世界上任何地方的计算机中的文件，只需提供该文件所在机器的网络地址以及该机器中的文件路径即可</div>
+<div className="choice-option-row">D. 采用符号链接时，所有共享该文件的用户都拥有指向其索引节点的指针</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** C 正确。符号链接中保存的是目标文件的路径信息。若系统支持网络文件访问，则路径还可以包含目标机器的网络地址和该机器中的文件路径，因此能够用于共享远程文件。
+
+A 错误。基于索引节点的硬链接使多个目录项共同指向同一个 inode，本质上访问的是同一个文件。文件内容增加或修改后，所有硬链接访问到的都是更新后的同一份内容。
+
+B 错误。inode 中的链接计数 $\displaystyle count$ 表示有多少个目录项（硬链接）指向该 inode，而不是文件当前被打开的次数。打开次数通常由内存中的打开文件表及引用计数记录。
+
+D 错误。符号链接文件中保存的是目标文件的路径名，而不是直接指向目标 inode 的指针；只有硬链接目录项才直接引用同一个 inode。
+
+</details>
+
+---
+
+17. **【王道·卷三-Q30】** 在下列选项中，属于符号链接和硬链接实现文件共享时所共有的问题的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 每次访问共享文件的开销很大</div>
+<div className="choice-option-row">B. 有可能出现空指针异常导致文件访问错误</div>
+<div className="choice-option-row">C. 要将一个目录中的所有文件都转储到磁带上时，可能对一个共享文件产生多份副本</div>
+<div className="choice-option-row">D. 以上说法均正确</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** C 是两种共享方式都可能面临的问题。同一文件可能通过多个目录项或多个路径出现在目录树中，若备份程序未识别这些共享关系，而是按目录逐项复制，就可能把同一共享文件转储多次，产生多份副本。
+
+A 不是共有问题。符号链接每次访问时通常需要再次解析目标路径，开销相对较大；硬链接直接通过目录项中的 inode 编号访问文件，通常没有这种额外的路径解析开销。
+
+B 主要是符号链接可能出现的问题。目标文件被删除或移动后，符号链接可能成为悬空链接；而硬链接只要链接计数仍大于 0，inode 和文件数据就不会被回收，不会因原文件名被删除而失效。
+
+因此选 C。
+
+</details>
+
+---
+
+18. **【竟成·模拟一-31】** UNIX文件系统中，某文件的绝对路径为/home/user/docs/report.txt，若当前目录为/home/user/project，report.txt的软链接文件link.txt位于该目录下。下列描述错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 通过路径./link.txt可正确读取目标文件内容</div>
+<div className="choice-option-row">B. 删除原文件report.txt会导致link.txt访问失败</div>
+<div className="choice-option-row">C. 若挂载远程NFS文件系统到/home/user/docs，原report.txt文件仍可继续访问</div>
+<div className="choice-option-row">D. link.txt的inode中记录的是目标文件的绝对路径</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** A 正确。当前目录为 `/home/user/project`，而 `link.txt` 就位于该目录下，因此 `./link.txt` 能定位到该符号链接；系统再根据链接中保存的目标路径访问 `report.txt`。
+
+B 正确。符号链接只保存目标文件的路径。删除原文件后，该路径不再对应有效文件，`link.txt` 将成为悬空链接，访问失败。
+
+C 错误。将远程 NFS 文件系统挂载到 `/home/user/docs` 后，原来该本地目录中的内容会被挂载点覆盖而暂时不可见。此时通过 `/home/user/docs/report.txt` 访问的是远程文件系统中的同名路径，而不能继续访问原来的本地 `report.txt`；只有卸载该 NFS 文件系统后，原目录内容才重新可见。
+
+D 正确。符号链接本身是一个独立文件，其 inode 指向的内容保存目标路径；本题目标采用绝对路径，因此链接内容记录 `/home/user/docs/report.txt`。
+
+</details>
+
+---
+
+## 4.3 文件系统
+
+### 4.3.1 文件系统布局
+
+19. **【王道·卷四-Q30】** 文件系统的全局信息第一次写入磁盘的时机发生在（  ）时。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 磁盘物理格式化 &emsp;&emsp; B. 磁盘分区 &emsp;&emsp; C. 磁盘逻辑格式化 &emsp;&emsp; D. 操作系统初始化</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 磁盘逻辑格式化也称创建文件系统。在这一阶段，系统会在分区中建立文件系统所需的管理结构，如引导块、超级块、空闲空间管理结构、根目录等。超级块等结构保存文件系统类型、容量、块大小、空闲块数量等全局信息，因此文件系统的全局信息是在逻辑格式化时首次写入磁盘的，选 C。
+
+A 的物理格式化主要将磁盘划分为扇区并写入扇区校验信息；B 的磁盘分区只是划分若干逻辑分区；D 的操作系统初始化发生在文件系统已经建立之后，均不是首次写入文件系统全局信息的时机。
+
+</details>
+
+---
+
+20. **【王道·卷七-Q29】** 在下列关于文件系统的说法中，正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 文件系统负责文件存储空间的管理，但不能实现文件名到物理地址的转换</div>
+<div className="choice-option-row">B. 在多级目录结构中，对文件的访问是通过路径名和用户目录名进行的</div>
+<div className="choice-option-row">C. 文件可以被划分成大小相等的若干物理块，且物理块大小可任意指定</div>
+<div className="choice-option-row">D. 逻辑记录是对文件进行存取操作的基本单位</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** D 正确。逻辑记录是从用户观点出发组织文件信息的基本单位，也是用户程序对有结构文件进行读写和处理的基本单位；磁盘块则是设备与文件系统进行数据传输和空间分配的物理单位。
+
+A 错误。文件系统不仅负责文件存储空间管理，还通过目录、FCB 或 inode 以及文件分配结构，实现从文件名到文件物理存储位置的映射。
+
+B 错误。多级目录结构中，文件通常由绝对路径名或相对于当前目录的相对路径名定位。“用户目录名”是两级目录结构中的概念，不是多级目录访问文件时必须与路径名并列提供的独立标识。
+
+C 错误。文件可被划分为大小相等的物理块，但物理块大小由磁盘结构和文件系统在格式化时统一规定，不能由用户或单个文件任意指定。
+
+</details>
+
+---
+
+21. **【王道·卷八-Q29】** 某文件系统物理结构采用三级索引分配方法，若每个磁盘块的大小为 $\displaystyle 1024B$，每个盘块索引号占用 $\displaystyle 4B$，则在该文件系统中，最大的文件长度约为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle 16GB$ &emsp;&emsp; B. $\displaystyle 32GB$ &emsp;&emsp; C. $\displaystyle 8GB$ &emsp;&emsp; D. 以上均不对</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 每个索引块能够存放的盘块索引号数量为：
+
+$$
+\displaystyle
+\dfrac{1024B}{4B}=256=2^8
+$$
+
+采用三级索引分配时，三级索引共可定位的数据块数为：
+
+$$
+\displaystyle
+256^3=2^{24}
+$$
+
+每个数据块大小为 $\displaystyle 1024B=2^{10}B$，因此最大文件长度为：
+
+$$
+\displaystyle
+2^{24}\times 2^{10}B=2^{34}B=16GB
+$$
+
+故选 A。B、C 与计算结果不符，D 也错误。
+
+</details>
+
+---
+
+### 4.3.2 文件存储空间管理
+
+22. **【王道·卷一-Q30】** 在现代操作系统中，文件分配表中引入了“簇”的概念，下列关于“簇”的说法中，错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 磁盘容量不断增大，因此不再以盘块而以簇为基本单位进行盘块分配，一簇应包含的扇区数量与磁盘容量大小直接相关</div>
+<div className="choice-option-row">B. 以簇为基本分配单位，可以减少FAT表的表项数，在相同的磁盘容量下，FAT表的表项数与簇的大小是成正比的</div>
+<div className="choice-option-row">C. 以簇为基本分配单位，可以使FAT表占用更少的存储空间</div>
+<div className="choice-option-row">D. 以簇为基本分配单位，可以减少访问FAT表的存取开销</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** FAT 中通常每个簇对应一个表项。设磁盘分区容量为 $\displaystyle S$，簇大小为 $\displaystyle C$，则 FAT 表项数近似为：
+
+$$
+\displaystyle
+N=\dfrac{S}{C}
+$$
+
+因而在磁盘容量相同的条件下，簇越大，FAT 表项数越少，二者成反比，而不是成正比，所以 B 错误。
+
+A 正确。随着磁盘容量增大，为控制 FAT 的规模，通常会适当增大每簇所包含的扇区数。C 正确，表项数减少可降低 FAT 的存储空间开销。D 正确，文件所占簇数减少后，沿 FAT 链查找时需要访问的表项通常也会减少。
+
+</details>
+
+---
+
+23. **【竟成·模拟六-30】** 某文件系统采用位示图（1024行，32列）表示空闲盘块情况。位示图的行、列以及盘块号都从0开始编号，则盘块号为4567的盘块位于位示图的第（）行，第（）列。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 22，142 &emsp;&emsp; B. 142，23 &emsp;&emsp; C. 23，143 &emsp;&emsp; D. 143，23</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 位示图每行有 $\displaystyle 32$ 位，盘块号从 $\displaystyle 0$ 开始。对盘块号 $\displaystyle 4567$ 作整除和取余：
+
+$$
+\displaystyle
+\begin{aligned}
+\text{行号} &= \left\lfloor\dfrac{4567}{32}\right\rfloor=142 \\
+\text{列号} &= 4567\bmod 32=23
+\end{aligned}
+$$
+
+因此该盘块位于第 $\displaystyle 142$ 行、第 $\displaystyle 23$ 列，选 B。其余选项均未正确使用“行号为整除结果、列号为余数”的映射关系。
+
+</details>
+
+---
+
+### 4.3.3 虚拟文件系统
+
+24. **【王道·卷三-Q25】** 在操作系统中，虚拟文件系统(VFS)的主要作用是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 提供物理存储设备的直接管理功能</div>
+<div className="choice-option-row">B. 为不同类型的文件系统（如EXT4、NTFS、FAT32）提供统一的抽象接口</div>
+<div className="choice-option-row">C. 仅用于加速文件读取和写入操作</div>
+<div className="choice-option-row">D. 替代具体文件系统，直接处理用户文件的存储和检索</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** VFS 位于系统调用接口与具体文件系统之间，通过定义统一的文件、目录、inode、超级块等抽象对象及操作接口，使应用程序可使用同一组系统调用访问 EXT4、NTFS、FAT32 等不同类型的文件系统，因此 B 正确。
+
+A 错误，物理设备的直接控制主要由设备驱动程序和块设备层负责。C 错误，VFS 的核心目标是统一抽象和接口兼容，而不是单纯加速 I/O。D 错误，VFS 不替代具体文件系统；具体的空间分配、目录组织和数据存取仍由相应文件系统实现。
+
+</details>
+
+---
+
+### 4.3.4 文件系统挂载
+
+25. **【竟成·模拟七-29】** 某Unix系统中，多个单独设备上的多个文件系统被挂载到一个统一的文件系统中。假设某光盘文件系统中包含一个路径名为/usr/bin/vim的文件，且光盘被挂载到/media/disk处，则整个文件系统中这个文件的路径名是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. /usr/bin/vim &emsp;&emsp; B. /media/vim &emsp;&emsp; C. /media/usr/bin/vim &emsp;&emsp; D. /media/disk/usr/bin/vim</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 挂载后，被挂载文件系统的根目录对应宿主目录树中的挂载点 `/media/disk`。光盘文件系统内部的路径 `/usr/bin/vim` 应接在该挂载点之后，因此统一目录树中的完整路径为：
+
+```text
+/media/disk/usr/bin/vim
+```
+
+故选 D。A 忽略了挂载点；B、C 均遗漏了路径中的部分目录层次。
+
+</details>

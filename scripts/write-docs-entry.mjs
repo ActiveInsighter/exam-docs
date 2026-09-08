@@ -3,7 +3,7 @@ import path from 'node:path';
 
 const outputRoot = path.resolve('.static-docs');
 const destination = path.join(outputRoot, 'docs', 'index.html');
-const target = '/docs/politics/';
+const target = '/docs/intro/';
 
 const html = `<!doctype html>
 <html lang="zh-CN">

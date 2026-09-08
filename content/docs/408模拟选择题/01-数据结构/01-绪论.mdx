@@ -1,0 +1,313 @@
+---
+sidebar_position: 1
+title: 第1章 绪论
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第1章 绪论
+
+## 1.2 算法和算法评价
+
+### 1.2.1 算法的基本概念
+
+1. **【王道·卷一-Q01】** 在下列选项中，不属于算法的主要特征的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 有穷性 &emsp;&emsp; B. 可行性 &emsp;&emsp; C. 确定性 &emsp;&emsp; D. 可读性</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 算法的基本特征通常包括有穷性、确定性、可行性以及输入和输出。可读性是评价算法或程序质量的重要指标，但不是算法成立所必需的基本特征。因此，A、B、C 均属于算法的主要特征，D 不属于。
+
+</details>
+
+---
+
+### 1.2.2 算法效率的度量
+
+2. **【王道·卷一-Q02】** 设 $\displaystyle n$ 是描述问题规模的正整数，则下列程序段的时间复杂度是（  ）。
+
+```c
+for(i=1;i<=n;i++){
+for(j=2*i;j<=n;j++){
+y += i*j;
+}
+}
+```
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle O(n)$ &emsp;&emsp; B. $\displaystyle O(n^{2})$ &emsp;&emsp; C. $\displaystyle O(n\log_{2}n)$ &emsp;&emsp; D. $\displaystyle O(\log_{2}n)$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 当 $\displaystyle 2i\le n$ 时，内层循环从 $\displaystyle j=2i$ 执行到 $\displaystyle j=n$，执行次数为 $\displaystyle n-2i+1$；当 $\displaystyle i>n/2$ 时，内层循环不执行。因此总执行次数为
+
+$$
+\displaystyle
+\begin{aligned}
+T(n)
+&=\sum_{i=1}^{\lfloor n/2\rfloor}(n-2i+1)\\
+&=\Theta(n^2)
+\end{aligned}
+$$
+
+故时间复杂度为 $\displaystyle O(n^2)$。A、C、D 均低估了内层语句的总执行次数。
+
+</details>
+
+---
+
+3. **【王道·卷二-Q01】** 设二叉树共有 $\displaystyle n$ 个结点，则下列程序段的时间复杂度是（  ）。
+
+```c
+int maxFunc(TreeNode* root){
+if (root == NULL) return 0;
+return max(maxFunc(root->left), maxFunc(root->right)) + 1;
+}
+```
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle O(\log_{2}n)$ &emsp;&emsp; B. $\displaystyle O(n)$ &emsp;&emsp; C. $\displaystyle O(n\log_{2}n)$ &emsp;&emsp; D. $\displaystyle O(2^{n})$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 函数对每个非空结点恰好访问一次，并在该结点处完成常数次比较和加法操作。设左右子树的结点数分别为 $\displaystyle n_L$ 和 $\displaystyle n_R$，则
+
+$$
+\displaystyle
+T(n)=T(n_L)+T(n_R)+O(1)
+$$
+
+将整棵树的所有结点累加后可得 $\displaystyle T(n)=\Theta(n)$。A 只考虑了平衡二叉树的递归深度，却忽略了所有结点都要被访问；C 多乘了一个对数因子；D 将递归调用误认为会对同一批结点反复展开，实际上每个结点只处理一次。
+
+</details>
+
+---
+
+4. **【王道·卷三-Q01】** 设 $\displaystyle n$ 是描述问题规模的正整数，则如下程序片段的时间复杂度是（  ）。
+
+```c
+i = 2;
+while (i < n / 3)
+i = i * 3;
+```
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle O(\log_{2}n)$ &emsp;&emsp; B. $\displaystyle O(n)$ &emsp;&emsp; C. $\displaystyle O(\sqrt[3]{n})$ &emsp;&emsp; D. $\displaystyle O(n^{3})$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 循环执行 $\displaystyle k$ 次后，变量 $\displaystyle i$ 的值为
+
+$$
+\displaystyle
+i=2\times 3^k
+$$
+
+循环终止时有 $\displaystyle 2\times 3^k\ge n/3$，因此
+
+$$
+\displaystyle
+k\ge \log_3\dfrac{n}{6}
+$$
+
+故循环次数为 $\displaystyle \Theta(\log n)$。对数的底数只影响常数因子，因此 $\displaystyle O(\log_3 n)=O(\log_2 n)$，选择 A。B、C、D 都是多项式量级，与变量按倍数增长的规律不符。
+
+</details>
+
+---
+
+5. **【王道·卷四-Q01】** 设 $\displaystyle n$ 是描述问题规模的正整数，则下列程序段的时间复杂度是（  ）。
+
+```c
+i = n * n;
+while (i != 1)
+i = i / 2;
+```
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle O(\log_{2}n)$ &emsp;&emsp; B. $\displaystyle O(n)$ &emsp;&emsp; C. $\displaystyle O(\sqrt{n})$ &emsp;&emsp; D. $\displaystyle O(n^{2})$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 变量 $\displaystyle i$ 初值为 $\displaystyle n^2$，每轮循环都通过整数除法缩小为原来的一半。执行 $\displaystyle k$ 次后，其数量级约为
+
+$$
+\displaystyle
+\dfrac{n^2}{2^k}
+$$
+
+当该值降至 1 时停止，因此
+
+$$
+\displaystyle
+2^k\approx n^2
+$$
+
+从而
+
+$$
+\displaystyle
+k=\Theta(\log_2 n^2)=\Theta(2\log_2 n)=\Theta(\log n)
+$$
+
+所以选择 A。B、C、D 都高估了循环次数。
+
+</details>
+
+---
+
+6. **【竟成·模拟一-01】** 下列C语言函数的时间复杂度是（）。
+
+```c
+int getK(int k) {
+int cnt = 0, left = 0;
+for (int right = 0; right < n; right++) {
+if (nums[right] == 1) cnt++;
+while (left <= right && cnt >= k) {
+if (nums[left] == 1) cnt--;
+left++;
+}
+}
+}
+```
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle O(\log_2 n)$ &emsp;&emsp; B. $\displaystyle O(n)$ &emsp;&emsp; C. $\displaystyle O(n\log_2 n)$ &emsp;&emsp; D. $\displaystyle O(n^2)$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 外层指针 `right` 从 0 增加到 $\displaystyle n-1$，共移动 $\displaystyle n$ 次。虽然内部存在 `while` 循环，但指针 `left` 在整个函数执行过程中只会单调递增，不会回退，因此其累计移动次数最多也是 $\displaystyle n$ 次。总操作次数至多与 $\displaystyle 2n$ 同阶，故时间复杂度为 $\displaystyle \Theta(n)$。D 将内外循环简单相乘，忽略了 `left` 的累计移动次数只有 $\displaystyle O(n)$；A、C 也不符合双指针滑动窗口的摊还分析结果。
+
+</details>
+
+---
+
+7. **【竟成·模拟二-01】** C语言函数f1、f2是求解斐波那契数的两种方式，则f1、f2的空间复杂度分别为（）。
+
+```c
+int f1(int n) {
+if (n == 1) return 1;
+if (n == 0) return 0;
+return f1(n - 1) + f1(n - 2);
+}
+int f2(int n) {
+int dp[n + 2], i;
+dp[0] = 0; dp[1] = 1;
+for (i = 2; i <= n; i++) {
+dp[i] = dp[i - 1] + dp[i - 2];
+}
+return dp[n];
+}
+```
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle O(n)$、$\displaystyle O(1)$ &emsp;&emsp; B. $\displaystyle O(2^n)$、$\displaystyle O(1)$ &emsp;&emsp; C. $\displaystyle O(n)$、$\displaystyle O(n)$ &emsp;&emsp; D. $\displaystyle O(2^n)$、$\displaystyle O(n)$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** `f1` 的递归调用总数虽然是指数级的，但空间复杂度取决于同一时刻递归栈的最大深度。沿着 `f1(n) → f1(n-1) → … → f1(0)`，最大递归深度为 $\displaystyle O(n)$，因此 `f1` 的空间复杂度是 $\displaystyle O(n)$。`f2` 定义了长度为 $\displaystyle n+2$ 的数组 `dp`，该数组占用 $\displaystyle O(n)$ 的辅助空间，因此 `f2` 的空间复杂度也是 $\displaystyle O(n)$。B、D 将 `f1` 的指数级时间复杂度误当成空间复杂度；A 忽略了 `f2` 中线性长度的数组。
+
+</details>
+
+---
+
+8. **【竟成·模拟五-01】** 下列程序段的时间复杂度可能是（）。
+
+```c
+int sum = 0;
+for (int i = 2; i <= n; i *= i)
+for (int j = 1; j <= i; j++)
+sum++;
+```
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle O(\log_2 n)$ &emsp;&emsp; B. $\displaystyle O(n)$ &emsp;&emsp; C. $\displaystyle O(n\log_2 n)$ &emsp;&emsp; D. $\displaystyle O(n^2)$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 外层循环中 $\displaystyle i$ 的取值依次为
+
+$$
+\displaystyle
+2,\ 4,\ 16,\ 256,\ldots
+$$
+
+即满足 $\displaystyle i_{t+1}=i_t^2$。外层循环次数虽然只有 $\displaystyle O(\log\log n)$，但第 $\displaystyle t$ 轮内层循环要执行 $\displaystyle i_t$ 次。由于该序列增长极快，所有较小项之和由最后一个不超过 $\displaystyle n$ 的项主导，因此
+
+$$
+\displaystyle
+2+4+16+\cdots+i_{\max}=O(i_{\max})=O(n)
+$$
+
+当 $\displaystyle n$ 恰好等于序列中的某一项时，总执行次数又可达到 $\displaystyle \Omega(n)$，故题目所给选项中应选线性量级的 B。A 只看到了外层循环，忽略了内层循环；C、D 虽也是更宽松的上界，但不是题目要求的最合适复杂度。
+
+</details>
+
+---
+
+9. **【竟成·模拟七-01】** 假设下列程序段的所有输入都是合法的，则下列程序段的空间复杂度是（）。
+
+```c
+int fun(int *arr, int m, int n) {
+if (m == n)
+return 1;
+else {
+int mid = (m + n) / 2;
+return fun(arr, m, mid) + fun(arr, mid + 1, n);
+}
+}
+```
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle O(\log_2 n)$ &emsp;&emsp; B. $\displaystyle O(n)$ &emsp;&emsp; C. $\displaystyle O(n\log_2 n)$ &emsp;&emsp; D. $\displaystyle O(2^n)$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 每次递归都把当前区间近似均分为两半，因此从长度为 $\displaystyle n-m+1$ 的区间递归到单个元素，递归深度为
+
+$$
+\displaystyle
+O\bigl(\log_2(n-m+1)\bigr)=O(\log_2 n)
+$$
+
+每一层递归只保存参数、局部变量 `mid` 和返回地址等常数空间。两个递归调用是先后完成的，不会让两棵递归子树的全部栈帧同时存在，因此最大辅助空间由递归深度决定，为 $\displaystyle O(\log_2 n)$。B 把总调用次数与最大栈深度混淆；C、D 均进一步高估了同时占用的空间。
+
+</details>

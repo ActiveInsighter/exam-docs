@@ -1,0 +1,916 @@
+---
+sidebar_position: 8
+title: 第8章 排序
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第8章 排序
+
+## 8.2 插入排序
+
+### 8.2.2 折半插入排序
+
+1. **【竟成·模拟五-10】** 下列关于直接插入排序和折半插入排序算法的叙述中，正确的有（）。
+I. 直接插入排序的平均时间复杂度为$\displaystyle O(n^2)$
+II. 折半插入排序的时间复杂度为$\displaystyle O(n\log_2 n)$
+III. 希尔排序是不稳定的排序算法
+IV. 折半插入排序算法每趟比较次数的数量级都是确定的，而直接插入排序每趟的比较次数不定
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II、III、IV &emsp;&emsp; B. I、III、IV &emsp;&emsp; C. I、II、IV &emsp;&emsp; D. II、III、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 逐项判断如下。
+
+- I 正确。直接插入排序平均情况下需要进行数量级为 $\displaystyle n^2$ 的比较和移动，因此平均时间复杂度为 $\displaystyle O(n^2)$。
+- II 错误。折半插入排序只能把查找插入位置的比较次数降为 $\displaystyle O(\log n)$，但每趟仍可能需要移动 $\displaystyle O(n)$ 个元素，总移动次数仍为 $\displaystyle O(n^2)$，所以总体时间复杂度仍为 $\displaystyle O(n^2)$。
+- III 正确。希尔排序中相同关键字可能因跨组移动而改变相对次序，因此是不稳定排序。
+- IV 正确。第 $\displaystyle i$ 趟折半查找插入位置时，比较次数的数量级固定为 $\displaystyle O(\log i)$，基本不受待排序序列初态影响；直接插入排序的比较次数则与待插入元素在有序子序列中的位置有关，因而每趟不定。
+
+因此正确的是 I、III、IV，选择 B。
+
+</details>
+
+---
+
+## 8.3 交换排序
+
+### 8.3.1 冒泡排序
+
+2. **【竟成·模拟六-11】** 双向起泡排序过程可以理解为双向进行的冒泡排序，其排序过程描述如下：每一趟按照冒泡排序的方法，找到序列最大值/最小值，并将其放在序列最右端/最左端。第一趟从左往右，将最大值放在序列最右端；第二趟从右往左，将最小值放在序列最左端。下一趟缩小范围重复此过程，直到可以判断序列有序为止。对数组[4,7,8,3,5,6,10,9,1,2]进行双向起泡排序，排序趟数为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 7 &emsp;&emsp; B. 6 &emsp;&emsp; C. 8 &emsp;&emsp; D. 9</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 按题意交替进行从左向右和从右向左的冒泡过程。
+
+初始序列为：
+
+```text
+4, 7, 8, 3, 5, 6, 10, 9, 1, 2
+```
+
+各趟结束后的序列如下。
+
+1. 第 1 趟从左向右，将最大值 10 移到最右端：
+
+```text
+4, 7, 3, 5, 6, 8, 9, 1, 2, 10
+```
+
+2. 第 2 趟从右向左，将最小值 1 移到最左端：
+
+```text
+1, 4, 7, 3, 5, 6, 8, 9, 2, 10
+```
+
+3. 第 3 趟从左向右，将当前最大值 9 放到右侧已确定区域之前：
+
+```text
+1, 4, 3, 5, 6, 7, 8, 2, 9, 10
+```
+
+4. 第 4 趟从右向左，将当前最小值 2 放到左侧已确定区域之后：
+
+```text
+1, 2, 4, 3, 5, 6, 7, 8, 9, 10
+```
+
+5. 第 5 趟从左向右，得到有序序列：
+
+```text
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+```
+
+6. 还需进行第 6 趟反向扫描，确认本趟未发生交换，才能判定整个序列已经有序。
+
+因此共进行 6 趟，故选 B。
+
+</details>
+
+---
+
+### 8.3.2 快速排序
+
+3. **【王道·卷一-Q11】** 对8个元素的线性表进行快速排序，在最好情况下，元素之间的比较次数为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 7 &emsp;&emsp; B. 8 &emsp;&emsp; C. 12 &emsp;&emsp; D. 13</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 快速排序最好情况下，每次划分都尽可能均匀。一次对含有 $\displaystyle n$ 个元素的子表进行划分，需要将枢轴与其余 $\displaystyle n-1$ 个元素进行比较。
+
+设最好情况下的比较次数为 $\displaystyle C(n)$。对 8 个元素，第一次划分后，除枢轴外的 7 个元素只能分成大小为 3 和 4 的两个子表，因此：
+
+$$
+\displaystyle
+C(8)=7+C(3)+C(4)
+$$
+
+其中：
+
+$$
+\displaystyle
+C(3)=2
+$$
+
+4 个元素最好可划分成大小为 1 和 2 的子表，所以：
+
+$$
+\displaystyle
+C(4)=3+C(1)+C(2)=3+0+1=4
+$$
+
+因此：
+
+$$
+\displaystyle
+C(8)=7+2+4=13
+$$
+
+故选 D。A、B 只考虑了首趟或少量比较；C 少计了某一层划分所需的比较次数。
+
+</details>
+
+---
+
+4. **【王道·卷五-Q01】** 在下列数据结构中，不适用于快速排序的是（  ）。
+I. 数组 II. 单链表 III. 静态链表 IV. 双链表
+
+<div className="choice-options">
+<div className="choice-option-row">A. II、IV &emsp;&emsp; B. II、III、IV &emsp;&emsp; C. I、II、IV &emsp;&emsp; D. 全部适用</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 经典快速排序的划分过程通常需要设置两个指针，从待排序区间两端向中间移动，并频繁访问区间中的任意位置。
+
+- 数组支持按下标随机访问，也容易设置左右边界，因此适用于快速排序。
+- 单链表只能沿后继方向顺序访问，无法高效地从右端向左扫描。
+- 静态链表虽然用数组保存结点，但逻辑次序由游标链接形成，本质上仍是链式存储，不便于按逻辑位置双向扫描。
+- 双链表虽然能双向移动，但不能按序号在 $\displaystyle O(1)$ 时间定位区间端点，交换和递归划分也不如顺序表方便，通常不采用经典快速排序。
+
+因此不适用的是 II、III、IV，故选 B。
+
+</details>
+
+---
+
+5. **【竟成·模拟三-10】** 快速排序以序列中第一个元素作为枢纽。对下列关键字序列用快速排序法进行排序时，速度最快的情形是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 21,25,5,17,9,23,30 &emsp;&emsp; B. 25,23,30,17,21,5,9</div>
+<div className="choice-option-row">C. 21,9,17,30,25,23,5 &emsp;&emsp; D. 5,9,17,21,23,25,30</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 快速排序的效率主要取决于每趟划分是否均衡，以及划分过程中指针扫描和交换的次数。
+
+四个序列中，A、C 的首元素均为 21。21 在全部 7 个元素中处于中间位置，第一次划分后都可将其余元素分成 3 个较小元素和 3 个较大元素，首趟划分较均衡。B 的首元素 25 偏大，D 的首元素 5 是最小元素，均会造成较不均衡的划分，尤其 D 对应接近最坏情况。
+
+采用常见的首元素枢轴、双向扫描划分方法时，C 首趟可较快得到：
+
+```text
+5, 9, 17, 21, 25, 23, 30
+```
+
+其左右子表的后续划分所需扫描和交换较少；相比之下，A 在首趟及后续子表划分中需要更多指针移动。因此 C 的实际划分代价最小，速度最快。
+
+D 已经递增有序，而每次都取首元素为枢轴，会使枢轴始终落在子表一端，时间复杂度退化为 $\displaystyle O(n^2)$，是最慢情形。故选 C。
+
+</details>
+
+---
+
+## 8.4 选择排序
+
+### 8.4.2 堆排序
+
+6. **【王道·卷二-Q11】** 堆排序分为两个阶段，其中一个阶段将给定的序列建成一个堆，第二个阶段逐次输出堆顶元素。设给定序列为&#123;48,62,35,77,55,14,35,98&#125;，若在堆排序的第一个阶段将该序列建成一个堆（大根堆），则交换元素的次数为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 5 &emsp;&emsp; B. 6 &emsp;&emsp; C. 7 &emsp;&emsp; D. 8</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 按顺序存储的完全二叉树，从最后一个非叶结点 $\displaystyle \lfloor n/2\rfloor=4$ 开始，依次向前进行向下调整。
+
+初始序列为：
+
+```text
+48, 62, 35, 77, 55, 14, 35, 98
+```
+
+调整过程如下。
+
+1. 调整下标 4 的结点 77：与孩子 98 交换，交换 1 次。
+2. 调整下标 3 的结点 35：其孩子为 14、35，不需交换。
+3. 调整下标 2 的结点 62：
+- 先与较大的孩子 98 交换；
+- 62 下沉后再与孩子 77 交换。
+
+共交换 2 次。
+4. 调整根结点 48：
+- 与较大的孩子 98 交换；
+- 48 下沉后与 77 交换；
+- 继续下沉后与 62 交换。
+
+共交换 3 次。
+
+总交换次数为：
+
+$$
+\displaystyle
+1+0+2+3=6
+$$
+
+最终大根堆可表示为：
+
+```text
+98, 77, 35, 62, 55, 14, 35, 48
+```
+
+故选 B。
+
+</details>
+
+---
+
+7. **【王道·卷三-Q10】** 对关键字序列&#123;23,17,72,60,25,8,68,71,52&#125;进行堆排序，输出两个最小关键字后的剩余堆是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. &#123;23,72,60,25,68,71,52&#125; &emsp;&emsp; B. &#123;23,25,52,60,71,72,68&#125;</div>
+<div className="choice-option-row">C. &#123;71,25,23,52,60,72,68&#125; &emsp;&emsp; D. &#123;23,25,68,52,60,72,71&#125;</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 题目要求依次输出最小关键字，因此应先建立小根堆。
+
+初始序列建成小根堆后为：
+
+```text
+8, 17, 23, 52, 25, 72, 68, 71, 60
+```
+
+第一次输出堆顶 8，将末尾元素 60 移至根并向下调整，得到：
+
+```text
+17, 25, 23, 52, 60, 72, 68, 71
+```
+
+第二次输出堆顶 17，将末尾元素 71 移至根并向下调整：
+
+- 71 与较小孩子 23 交换；
+- 71 继续与较小孩子 68 交换。
+
+得到剩余小根堆：
+
+```text
+23, 25, 68, 52, 60, 72, 71
+```
+
+与选项 D 一致，故选 D。其他选项均不满足小根堆中父结点关键字不大于孩子结点关键字的性质，或不是两次删除堆顶后的正确调整结果。
+
+</details>
+
+---
+
+8. **【王道·卷五-Q10】** 如果从下图的堆中删除值为11的结点，那么值为70的结点将出现在图中的（  ）位置。
+![卷五_Q10_堆删除](/img/questions/408-mock/wangdao-set-05-q10.png)
+
+<div className="choice-options">
+<div className="choice-option-row">A. A &emsp;&emsp; B. B &emsp;&emsp; C. C &emsp;&emsp; D. D</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 图中是一个小根堆，11 为堆顶。删除堆顶时，将堆的最后一个结点 70 移到根结点位置，并将堆的元素个数减 1，然后对 70 进行向下调整。
+
+调整过程如下：
+
+1. 根结点 70 的两个孩子为 25 和 20，应与较小的 20 交换。
+2. 70 下沉到原 20 的位置，其孩子为 33 和 37，应与较小的 33 交换。
+3. 70 继续下沉，其剩余孩子为 42，应再与 42 交换。
+
+因此 70 最终移动到原来 42 所在的位置，即图中的 C 位置，故选 C。
+
+A 位置最终仍位于左子树上；B 是结点 44 所在位置；D 是结点 37 所在位置，均不是 70 向下调整后的最终位置。
+
+</details>
+
+---
+
+9. **【竟成·模拟四-11】** 下列关于堆的性质，正确的是（）。
+I. 对于大根堆的每一个非根结点i来说，设其父结点是i.parent，关键字是i.key，那么对任意一个i有i.key≤i.parent.key
+II. 一棵二叉哈夫曼树同时也是一个堆
+III. 堆在维护时是按照从上往下的流程，每一步的调整一定需要两次结点的比较
+IV. 在n个元素中选择前k个最小的元素(n≫k)，可以通过大小为k的小根堆实现
+
+<div className="choice-options">
+<div className="choice-option-row">A. I &emsp;&emsp; B. I、II &emsp;&emsp; C. I、III &emsp;&emsp; D. III、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 逐项判断如下。
+
+- I 正确。大根堆满足任意父结点的关键字不小于其孩子结点，因此每个非根结点 $\displaystyle i$ 都满足：
+
+$$
+\displaystyle
+i.key\le i.parent.key
+$$
+
+- II 错误。二叉哈夫曼树的内部结点权值虽然等于两个孩子权值之和，通常大于孩子，但哈夫曼树不一定是完全二叉树；而堆必须首先是一棵完全二叉树，因此哈夫曼树不一定是堆。
+- III 错误。向下调整时，若结点只有一个孩子，则无须比较两个孩子；若已满足堆序，也可能提前结束，所以并非每一步一定进行两次结点比较。
+- IV 错误。从 $\displaystyle n$ 个元素中选出最小的 $\displaystyle k$ 个元素，通常维护一个大小为 $\displaystyle k$ 的大根堆，使堆顶保存当前 $\displaystyle k$ 个最小元素中的最大者。遇到更小元素时替换堆顶。若使用小根堆，则难以在 $\displaystyle O(\log k)$ 时间删除当前集合中的最大元素。
+
+因此只有 I 正确，故选 A。
+
+</details>
+
+---
+
+10. **【竟成·模拟五-11】** 关于堆排序，下述叙述正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 假设一个最大堆的所有元素都不同，那么该堆的最小元素一定位于最后一层的结点内</div>
+<div className="choice-option-row">B. 一个递增有序的数组一定是一个小根堆</div>
+<div className="choice-option-row">C. 值为(23,17,14,6,13,10,1,5,8,12)的数组是一个大根堆</div>
+<div className="choice-option-row">D. 用数组存储含有n个元素的堆时（数组从下标1开始存储），叶结点的下标范围是⌊n/2⌋~n</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 逐项分析如下。
+
+- A 错误。最大堆的最小元素必定位于叶结点，但完全二叉树的叶结点不一定全部位于最深一层；当最后一层未满时，倒数第二层也可能存在叶结点。因此不能断言最小元素一定位于最后一层。
+- B 正确。递增有序数组从下标 1 开始存储时，对任意父结点下标 $\displaystyle i$，其孩子下标为 $\displaystyle 2i$ 和 $\displaystyle 2i+1$，均大于 $\displaystyle i$。由于数组递增，父结点值必不大于孩子结点值，满足小根堆性质。
+- C 错误。数组中下标 4 的元素为 6，其孩子分别为下标 8 的 5 和下标 9 的 8。大根堆要求父结点不小于孩子，但 $\displaystyle 6<8$，因此不是大根堆。
+- D 错误。数组下标从 1 开始时，最后一个非叶结点下标为 $\displaystyle \lfloor n/2\rfloor$，叶结点下标范围应为：
+
+$$
+\displaystyle
+\lfloor n/2\rfloor+1,\ldots,n
+$$
+
+因此选 B。
+
+</details>
+
+---
+
+11. **【竟成·模拟六-08】** 下列数据结构中，从根结点到任意叶结点的路径都是有序的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. AVL &emsp;&emsp; B. 二叉查找树 &emsp;&emsp; C. 红黑树 &emsp;&emsp; D. 堆</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 堆具有明确的父子关键字大小关系。
+
+- 对大根堆，任意父结点关键字均不小于孩子结点，因此从根到叶的路径按关键字非递增。
+- 对小根堆，任意父结点关键字均不大于孩子结点，因此从根到叶的路径按关键字非递减。
+
+所以堆中从根到任意叶结点的路径必然有序。
+
+AVL 树和红黑树本质上都是二叉查找树，它们保证左子树关键字小于根、右子树关键字大于根，但一条从根到叶的路径可能交替经过左孩子和右孩子，关键字不一定整体单调。普通二叉查找树同理。因此选 D。
+
+</details>
+
+---
+
+## 8.5 归并排序、基数排序和计数排序
+
+### 8.5.1 归并排序
+
+12. **【竟成·模拟二-11】** 对采用单链表实现的线性表进行排序，要求只能通过调整链表指针的方式进行排序。则下列排序算法平均时间复杂度最低的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 冒泡排序 &emsp;&emsp; B. 归并排序 &emsp;&emsp; C. 快速排序 &emsp;&emsp; D. 插入排序</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 单链表只能顺序访问，且题目要求只能调整结点指针，不能通过交换结点中的数据完成排序。归并排序最适合这种存储结构。
+
+对单链表进行归并排序时，可以用快慢指针将链表分成两段，递归排序后再通过修改 `next` 指针合并两个有序链表。合并长度分别为 $\displaystyle m$ 和 $\displaystyle n$ 的两个有序链表只需 $\displaystyle O(m+n)$ 时间，因此整体时间复杂度为：
+
+$$
+\displaystyle
+O(n\log_2 n)
+$$
+
+且不需要顺序表那样的辅助数组。
+
+- 冒泡排序和插入排序的平均时间复杂度均为 $\displaystyle O(n^2)$。
+- 快速排序虽然在顺序表上的平均时间复杂度也是 $\displaystyle O(n\log_2 n)$，但其经典划分过程依赖从区间两端扫描，不适合只能单向访问的单链表；在链表上实现时也不如归并排序自然、稳定。
+
+因此选 B。
+
+</details>
+
+---
+
+## 8.6 各种内部排序算法的比较及应用
+
+### 8.6.1 内部排序算法的比较
+
+13. **【王道·卷二-Q10】** 假设在快速排序算法中总是选择待排序子序列中的最后一个元素作为基准，则这个算法的最坏情况出现在（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 待排序序列初始有序时 &emsp;&emsp; B. 待排序序列呈现中间小并逐次向两边增大的情况</div>
+<div className="choice-option-row">C. 待排序序列呈现中间大并逐次向两边减小的情况 &emsp;&emsp; D. 以上选项都不是</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 快速排序的性能取决于每次划分后两个子表是否均衡。若每次选取待排序子序列的最后一个元素作为枢轴，而原序列已经递增有序，则枢轴始终是当前子序列中的最大元素；若原序列递减有序，则枢轴始终是最小元素。
+
+此时每次划分只能确定一个元素的位置，两个子表的规模分别为 $\displaystyle n-1$ 和 $\displaystyle 0$，递归深度达到 $\displaystyle n$，比较次数为：
+
+$$
+\displaystyle
+(n-1)+(n-2)+\cdots+1=\dfrac{n(n-1)}{2}
+$$
+
+时间复杂度退化为 $\displaystyle O(n^2)$。选项 A 所述“初始有序”包含这种极端不均衡情形，故选 A。
+
+</details>
+
+---
+
+14. **【王道·卷四-Q10】** 对一组数据(84,47,15,21,25)排序，数据在排序过程中的变化如下：
+1) 84 47 15 21 25; 2) 25 47 15 21 84; 3) 21 25 15 47 84; 4) 15 21 25 47 84
+则所采用的排序方法是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 堆排序 &emsp;&emsp; B. 冒泡排序 &emsp;&emsp; C. 快速排序 &emsp;&emsp; D. 插入排序</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 初始序列本身已经满足大根堆性质：
+
+```text
+84
+/    \
+47      15
+/  \
+21   25
+```
+
+堆排序每趟将堆顶最大元素与当前无序区的最后一个元素交换，再对剩余无序区进行向下调整。
+
+- 第 1 趟先交换 84 和 25，得到 `25 47 15 21 84`；调整后无序区重新成为大根堆。
+- 第 2 趟交换当前堆顶 47 与无序区末尾元素，得到题中第 3 个状态。
+- 后续继续交换和调整，最终得到 `15 21 25 47 84`。
+
+题目列出的状态是各趟将堆顶元素放到最终位置后的关键状态，符合堆排序过程，故选 A。
+
+</details>
+
+---
+
+15. **【王道·卷六-Q11】** 已知待排序的 $\displaystyle n$ 个元素可分为 $\displaystyle n / k$ 组，每组包含 $\displaystyle k$ 个元素，任一组内的各元素均分别大于前一组内的所有元素且小于后一组内的所有元素，若采用基于比较的排序，其时间下界为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle O(n\log_{2}n)$ &emsp;&emsp; B. $\displaystyle O(n\log_{2}k)$ &emsp;&emsp; C. $\displaystyle O(k\log_{2}n)$ &emsp;&emsp; D. $\displaystyle O(k\log_{2}k)$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 各组之间的相对大小关系已经确定，因此无须比较不同组中的元素，只需分别将每组内部的 $\displaystyle k$ 个元素排好序。
+
+对一组 $\displaystyle k$ 个元素采用基于比较的排序，其时间下界为：
+
+$$
+\displaystyle
+\Omega(k\log_2 k)
+$$
+
+一共有 $\displaystyle n/k$ 组，所以总时间下界为：
+
+$$
+\displaystyle
+\dfrac{n}{k}\cdot\Omega(k\log_2 k)
+=\Omega(n\log_2 k)
+$$
+
+因此选 B。选项 A 忽略了组间次序已经确定这一条件；C、D 均未正确计入全部 $\displaystyle n/k$ 组的排序代价。
+
+</details>
+
+---
+
+16. **【王道·卷七-Q10】** 在下列排序方法中，时间性能与待排序记录的初始状态无关的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 插入排序和快速排序 &emsp;&emsp; B. 归并排序和快速排序</div>
+<div className="choice-option-row">C. 选择排序和归并排序 &emsp;&emsp; D. 插入排序和归并排序</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** - 简单选择排序无论初始序列如何，都要在剩余无序区中寻找最小元素，关键字比较次数恒为：
+
+$$
+\displaystyle
+\dfrac{n(n-1)}{2}
+$$
+
+- 归并排序按固定层次不断划分并归并，整体时间复杂度始终为 $\displaystyle O(n\log_2 n)$，受初始有序程度影响很小。
+- 插入排序在序列基本有序时接近 $\displaystyle O(n)$，逆序时为 $\displaystyle O(n^2)$，明显依赖初始状态。
+- 快速排序在划分均衡时为 $\displaystyle O(n\log_2 n)$，在枢轴反复落在一端时退化为 $\displaystyle O(n^2)$，也依赖初始状态和枢轴选择。
+
+因此选 C。
+
+</details>
+
+---
+
+17. **【王道·卷八-Q11】** 在最好情况下，时间复杂度可以达到线性时间的排序算法是（  ）。
+$\displaystyle ①$ 冒泡排序 $\displaystyle ②$ 堆排序 $\displaystyle ③$ 快速排序 $\displaystyle ④$ 归并排序 $\displaystyle ⑤$ 直接插入排序
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle ①$ &emsp;&emsp; B. $\displaystyle ①⑤$ &emsp;&emsp; C. $\displaystyle ④⑤$ &emsp;&emsp; D. $\displaystyle ②③$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 当序列已经有序时：
+
+- 使用“本趟是否发生交换”标志的冒泡排序只需扫描一趟即可结束，最好时间复杂度为 $\displaystyle O(n)$。
+- 直接插入排序中，每个元素只需与其前驱比较一次，无须移动大量元素，最好时间复杂度为 $\displaystyle O(n)$。
+- 堆排序的建堆和反复调整仍需 $\displaystyle O(n\log_2 n)$ 量级的工作。
+- 经典快速排序即使划分较均衡，最好时间复杂度也是 $\displaystyle O(n\log_2 n)$。
+- 归并排序无论初始状态如何，都要完成各层归并，时间复杂度为 $\displaystyle O(n\log_2 n)$。
+
+因此能在最好情况下达到线性时间的是 $\displaystyle ①⑤$，故选 B。
+
+</details>
+
+---
+
+18. **【竟成·模拟一-11】** 对初始关键字序列&#123;49,38,65,97,76,13,27&#125;进行排序，若堆排序采用大根堆且已完成初始建堆，快速排序每次以序列中第一个元素为枢纽，下列关于两趟排序后的结果描述正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 堆排序后：&#123;13,49,65,38,27,76,97&#125;。快速排序后：&#123;27,38,13,49,76,97,65&#125;</div>
+<div className="choice-option-row">B. 堆排序后：&#123;13,49,65,38,27,76,97&#125;。快速排序后：&#123;13,27,38,49,65,76,97&#125;</div>
+<div className="choice-option-row">C. 堆排序后：&#123;65,49,13,38,27,76,97&#125;。快速排序后：&#123;27,38,13,49,76,97,65&#125;</div>
+<div className="choice-option-row">D. 堆排序后：&#123;65,49,13,38,27,76,97&#125;。快速排序后：&#123;13,27,38,49,65,76,97&#125;</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 先分析堆排序。初始序列建成大根堆后为：
+
+```text
+97, 76, 65, 38, 49, 13, 27
+```
+
+第 1 趟将 97 与末尾 27 交换，并调整剩余 6 个元素，得到：
+
+```text
+76, 49, 65, 38, 27, 13, 97
+```
+
+第 2 趟将 76 与无序区末尾 13 交换并调整，得到：
+
+```text
+65, 49, 13, 38, 27, 76, 97
+```
+
+再分析快速排序。第 1 趟以 49 为枢轴进行划分，可得到：
+
+```text
+27, 38, 13, 49, 76, 97, 65
+```
+
+第 2 趟分别对枢轴两侧的子序列进行划分：左子序列整理为 `13,27,38`，右子序列整理为 `65,76,97`，于是得到：
+
+```text
+13, 27, 38, 49, 65, 76, 97
+```
+
+两种排序的结果均与 D 一致，故选 D。
+
+</details>
+
+---
+
+19. **【竟成·模拟三-11】** 对元素个数相同的不同初始序列进行排序，总的比较次数相同的算法有（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 选择排序 &emsp;&emsp; B. 基数排序和归并排序 &emsp;&emsp; C. 冒泡排序和快速排序 &emsp;&emsp; D. 堆排序和希尔排序</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 简单选择排序第 $\displaystyle i$ 趟都要在剩余 $\displaystyle n-i+1$ 个元素中寻找最小元素，因此比较次数始终为：
+
+$$
+\displaystyle
+(n-1)+(n-2)+\cdots+1=\dfrac{n(n-1)}{2}
+$$
+
+与初始序列的排列状态无关。
+
+- 冒泡排序若带提前结束机制，其比较趟数会受初始有序程度影响。
+- 快速排序的比较次数与枢轴划分是否均衡密切相关。
+- 归并排序在合并两个有序段时，比较次数会因某一段何时耗尽而变化。
+- 堆排序和希尔排序的比较次数也受元素分布及调整过程影响。
+- 基数排序不是基于关键字比较的排序，不能与归并排序共同作为本题的正确组合。
+
+因此选 A。
+
+</details>
+
+---
+
+20. **【竟成·模拟四-10】** 对于不同的初始序列，总的排序趟数会改变的算法有（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 冒泡排序和快速排序 &emsp;&emsp; B. 基数排序和归并排序 &emsp;&emsp; C. 插入排序 &emsp;&emsp; D. 堆排序</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** - 改进的冒泡排序可在某一趟未发生交换时提前结束，因此初始序列越接近有序，实际排序趟数可能越少。
+- 快速排序的递归划分结构取决于每次枢轴位置。划分均衡时递归层数较少，划分极不均衡时递归层数可达到 $\displaystyle n$，因此总划分趟数会随初始序列改变。
+- 基数排序的趟数由关键字的位数决定，与初始次序无关。
+- 归并排序的归并层数通常为 $\displaystyle \lceil\log_2 n\rceil$，与初始次序无关。
+- 直接插入排序固定进行 $\displaystyle n-1$ 趟插入。
+- 堆排序固定进行建堆及 $\displaystyle n-1$ 次输出堆顶的过程。
+
+因此选 A。
+
+</details>
+
+---
+
+21. **【竟成·模拟七-11】** 对各种内部排序方法来说（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 快速排序时间性能最佳 &emsp;&emsp; B. 基数排序和归并排序是稳定的排序方法</div>
+<div className="choice-option-row">C. 快速排序是一种选择排序 &emsp;&emsp; D. 堆排序所用的辅助空间较大</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 逐项判断如下。
+
+- A 错误。快速排序平均性能较好，但最坏时间复杂度为 $\displaystyle O(n^2)$，不能笼统地说其时间性能在所有情况下都最佳。
+- B 正确。归并时若关键字相等，优先取左侧有序段中的元素即可保持稳定性；基数排序在每一位上采用稳定的分配与收集过程，因此也是稳定排序。
+- C 错误。快速排序通过交换记录完成划分，属于交换排序，而不是选择排序。
+- D 错误。堆排序通常只需常数个辅助变量，辅助空间复杂度为 $\displaystyle O(1)$，并不大。
+
+因此选 B。
+
+</details>
+
+---
+
+## 8.7 外部排序
+
+### 8.7.3 多路平衡归并与败者树
+
+22. **【王道·卷三-Q11】** 6路归并的败者树的深度为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 3 &emsp;&emsp; B. 5 &emsp;&emsp; C. 6 &emsp;&emsp; D. 4</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 败者树本质上是一棵用于从 $\displaystyle k$ 个候选记录中反复选出最小记录的完全二叉比较树。对于 $\displaystyle k$ 路归并，从叶结点到根结点所需的比较层数为：
+
+$$
+\displaystyle
+\left\lceil \log_2 k \right\rceil
+$$
+
+当 $\displaystyle k=6$ 时：
+
+$$
+\displaystyle
+\left\lceil \log_2 6 \right\rceil=3
+$$
+
+因此 6 路归并的败者树深度为 3，选择 A。B、C、D 均未按二叉比较树的层数计算。
+
+</details>
+
+---
+
+23. **【王道·卷四-Q11】** 18个初始归并段进行5路平衡归并，需要增加（  ）个虚拟归并段。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 1 &emsp;&emsp; B. 2 &emsp;&emsp; C. 3 &emsp;&emsp; D. 4</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 为了构造严格的 $\displaystyle k$ 路最佳归并树，叶结点数 $\displaystyle n'$ 应满足：
+
+$$
+\displaystyle
+(n'-1)\bmod(k-1)=0
+$$
+
+本题中 $\displaystyle n=18$，$\displaystyle k=5$。设需增加 $\displaystyle d$ 个虚拟归并段，则：
+
+$$
+\displaystyle
+\begin{aligned}
+(18+d-1)\bmod 4&=0\\
+(17+d)\bmod 4&=0
+\end{aligned}
+$$
+
+因为 $\displaystyle 17\bmod 4=1$，所以最小的非负整数 $\displaystyle d=3$。增加 3 个虚拟归并段后，共有 21 个叶结点，满足：
+
+$$
+\displaystyle
+(21-1)\bmod 4=0
+$$
+
+因此选 C。
+
+</details>
+
+---
+
+24. **【王道·卷五-Q11】** 外部排序过程中的主要开销是I/O操作，因此可以采取一些措施来缩短I/O时间，则下列说法中正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 使用置换-选择排序是为了通过减小初始归并段的长度来减少元素之间的比较次数</div>
+<div className="choice-option-row">B. 使用败者树可以优化置换-选择排序来减少元素之间的比较次数</div>
+<div className="choice-option-row">C. 败者树是为了增大归并路数，败者树的路数越多，排序时间就越短</div>
+<div className="choice-option-row">D. 构建的最佳归并树和哈夫曼树一样，只有度为0和2的结点</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 逐项判断如下。
+
+- A 错误。置换-选择排序的主要目的恰恰是**增大**初始归并段的平均长度，从而减少初始归并段的数量和后续归并趟数，降低磁盘 I/O 次数。
+- B 正确。在置换-选择排序中，需要反复从内存工作区中选出满足条件的最小记录。若直接顺序查找，每次选择代价较大；利用败者树后，每输出一个记录，只需沿一条从叶到根的路径重新比较，比较次数约为 $\displaystyle O(\log_2 m)$，其中 $\displaystyle m$ 为工作区中的记录数。
+- C 错误。败者树可降低多路归并时选取最小记录的比较代价，从而为增加归并路数提供支持，但归并路数并非越多越好。路数增大还会增加输入缓冲区数量、内存需求及管理开销，不能保证总排序时间一定缩短。
+- D 错误。二路哈夫曼树只有度为 0 和 2 的结点；而 $\displaystyle k$ 路最佳归并树经过补充虚拟归并段后，非叶结点通常为度 $\displaystyle k$，并非仅有度 0 和 2 的结点。
+
+因此选 B。
+
+</details>
+
+---
+
+25. **【王道·卷七-Q11】** 若对29条记录只进行3趟多路平衡归并，则 $\displaystyle x$ 选取的归并路数至少是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 2 &emsp;&emsp; B. 3 &emsp;&emsp; C. 4 &emsp;&emsp; D. 5</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 若将每条记录视为一个初始归并段，进行 $\displaystyle x$ 路平衡归并，每完成一趟，归并段数量最多缩小为原来的 $\displaystyle 1/x$。经过 3 趟后能够归并的初始段数最多为：
+
+$$
+\displaystyle
+x^3
+$$
+
+要使 29 个初始段在 3 趟内归并为一个有序段，需要：
+
+$$
+\displaystyle
+x^3\ge 29
+$$
+
+检验各整数：
+
+$$
+\displaystyle
+3^3=27<29,\qquad 4^3=64\ge 29
+$$
+
+因此归并路数至少为 4，选择 C。
+
+</details>
+
+---
+
+### 8.7.4 置换-选择排序
+
+26. **【竟成·模拟七-10】** 下列关于选择-置换排序的说法正确的是（）。
+I. 创建初始段文件过程中，需要不断地在内存工作区中选择不小于旧的MINIMAX的最小值，此过程需利用败者树实现
+II. 选择新的MINIMAX记录时，为防止新加入的关键字值更小，每个叶结点都附加一个序号位。当进行关键字比较时，先比较序号，序号大的为胜者；序号相同的关键字值小的为胜者
+III. 选择-置换排序算法得到的初始归并段的长度并不受内存容量的限制，且获得的归并段的平均长度为内存工作区大小的两倍
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II &emsp;&emsp; B. II、III &emsp;&emsp; C. I、II、III &emsp;&emsp; D. I、II</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 三项均正确。
+
+- I 正确。置换-选择排序生成当前初始归并段时，每次应从内存工作区中选择关键字不小于上一输出记录 $\displaystyle \mathrm{MINIMAX}$ 的最小记录。利用败者树可以高效完成这种反复选择。
+- II 正确。为区分属于当前归并段和下一归并段的记录，可为叶结点附加序号位。按题目采用的比较约定，先比较序号，序号大的记录优先；序号相同时，再让关键字较小的记录获胜。这样即使新读入记录的关键字小于旧的 $\displaystyle \mathrm{MINIMAX}$，也不会被错误地输出到当前归并段。
+- III 正确。初始归并段的长度不再被内存工作区容量严格限制。对随机输入而言，置换-选择排序生成的初始归并段平均长度约为工作区容量的 2 倍；在特殊情况下，归并段还可能更长。例如输入本身有序时，一个归并段可包含全部记录。
+
+因此选择 C。需要注意，原题选项 A 与 D 的文字完全相同，应为题目选项排版重复，但不影响 C 为正确答案。
+
+---
+
+</details>

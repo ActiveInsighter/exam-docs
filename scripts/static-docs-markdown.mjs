@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { getShortDocSlugPath } from '../lib/doc-paths.mjs';
 
 /**
  * Static markdown generation for the CDN documentation package.
@@ -13,20 +14,12 @@ function normalizeSourcePath(relativePath) {
   return relativePath.replaceAll('\\', '/');
 }
 
-function stripExtension(relativePath) {
-  return relativePath.replace(/\.(md|mdx)$/i, '');
-}
-
-function collapseIndexSegment(relativePath) {
-  return relativePath.replace(/(^|\/)index$/i, '');
-}
-
 /**
  * Map a source path (relative to `content/docs`) to the page URL
  * following Fumadocs conventions (`index` files collapse to the folder).
  */
 export function getStaticDocsPageUrl(relativePath) {
-  const slug = collapseIndexSegment(stripExtension(normalizeSourcePath(relativePath)));
+  const slug = getShortDocSlugPath(relativePath);
 
   return `/docs${slug ? `/${slug}` : ''}`;
 }
@@ -37,7 +30,7 @@ export function getStaticDocsPageUrl(relativePath) {
  * `docs/math.md`.
  */
 export function getStaticMarkdownOutputPath(relativePath) {
-  const slug = collapseIndexSegment(stripExtension(normalizeSourcePath(relativePath)));
+  const slug = getShortDocSlugPath(relativePath);
 
   return `docs${slug ? `/${slug}` : ''}.md`;
 }
@@ -135,7 +128,7 @@ export async function renderStaticMarkdown(content, { title, url }) {
 export async function buildStaticMarkdownDocument(sourcePath, relativePath) {
   const content = await readFile(sourcePath, 'utf8');
   const { frontmatter } = splitFrontmatter(content);
-  const slug = collapseIndexSegment(stripExtension(normalizeSourcePath(relativePath)));
+  const slug = getShortDocSlugPath(relativePath);
   const fallbackTitle = slug.split('/').pop() || 'Untitled';
   const title = parseFrontmatterTitle(frontmatter) ?? fallbackTitle;
 

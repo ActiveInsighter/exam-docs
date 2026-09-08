@@ -1,0 +1,1218 @@
+---
+sidebar_position: 5
+title: 第5章 树与二叉树
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第5章 树与二叉树
+
+## 5.1 树的基本概念
+
+### 5.1.3 树的性质
+
+1. **【王道·卷六-Q05】** 一棵树共有 $\displaystyle n$ 个结点，其中所有分支结点的度均为 $\displaystyle k$，则该树中的叶结点数为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle n(k - 1) / k$ &emsp;&emsp; B. $\displaystyle n / k$ &emsp;&emsp; C. $\displaystyle (n + 1) / k$ &emsp;&emsp; D. $\displaystyle (nk - n + 1) / k$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 设分支结点数为 $\displaystyle n_k$，叶结点数为 $\displaystyle n_0$。由于每个分支结点的度均为 $\displaystyle k$，树中所有结点的度数之和为
+
+$$
+\displaystyle
+kn_k
+$$
+
+而一棵含有 $\displaystyle n$ 个结点的树共有 $\displaystyle n-1$ 条边，所以
+
+$$
+\displaystyle
+kn_k=n-1
+$$
+
+又有
+
+$$
+\displaystyle
+n=n_k+n_0
+$$
+
+因此
+
+$$
+\displaystyle
+\begin{aligned}
+n_0
+&=n-n_k\\
+&=n-\dfrac{n-1}{k}\\
+&=\dfrac{nk-n+1}{k}
+\end{aligned}
+$$
+
+故选择 D。A 忽略了树的边数为 $\displaystyle n-1$ 而不是 $\displaystyle n$；B、C 均不满足树的度数关系。
+
+</details>
+
+---
+
+2. **【竟成·模拟五-05】** 下列关于树的相关叙述中，正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 在二叉树的先序遍历序列中，若已知根节点，则可以唯一确定该树 &emsp;&emsp; B. 二叉树的结点数可以为0</div>
+<div className="choice-option-row">C. 高度为h的完全二叉树对应的森林所含树的个数一定是h &emsp;&emsp; D. 并查集的集合不是一种树结构</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 二叉树可以为空树，因此其结点数可以为 0，B 正确。
+
+- A 错误：仅知道先序遍历序列及根结点，无法区分各结点属于左子树还是右子树，不能唯一确定二叉树。通常需要先序序列和中序序列，或后序序列和中序序列，才能唯一确定一棵结点关键字互异的二叉树。
+- C 错误：将二叉树转换为森林后，森林中树的棵数由二叉树根结点沿右孩子链上的结点数决定，与完全二叉树的高度不存在必然相等关系。
+- D 错误：并查集通常采用双亲表示法存储，本质上是一组互不相交的树，即森林结构。
+
+</details>
+
+---
+
+## 5.2 二叉树的概念
+
+### 5.2.1 二叉树的定义及其主要特性
+
+3. **【王道·卷二-Q03】** 若一棵二叉树有100个结点，根结点为第1层，则第7层最多有（  ）个结点。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 37 &emsp;&emsp; B. 48 &emsp;&emsp; C. 49 &emsp;&emsp; D. 64</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 二叉树第 $\displaystyle i$ 层最多有 $\displaystyle 2^{i-1}$ 个结点，因此第 7 层的理论容量为
+
+$$
+\displaystyle
+2^{7-1}=64
+$$
+
+为了让第 7 层的结点尽可能多，应先使前 6 层全部排满。前 6 层最多共有
+
+$$
+\displaystyle
+1+2+4+8+16+32=2^6-1=63
+$$
+
+个结点。总结点数为 100，所以第 7 层最多还能放置
+
+$$
+\displaystyle
+100-63=37
+$$
+
+个结点，选择 A。虽然第 7 层自身最多可容纳 64 个结点，但题目总共只有 100 个结点。
+
+</details>
+
+---
+
+4. **【王道·卷二-Q04】** 已知一棵完全二叉树有64个叶结点，根结点的深度为1，则该树可能达到的最大深度为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 7 &emsp;&emsp; B. 8 &emsp;&emsp; C. 9 &emsp;&emsp; D. 10</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 设完全二叉树共有 $\displaystyle n$ 个结点。按从 1 开始的层序编号，编号为 $\displaystyle \lfloor n/2\rfloor+1$ 到 $\displaystyle n$ 的结点均为叶结点，因此叶结点数为
+
+$$
+\displaystyle
+n-\left\lfloor\dfrac n2\right\rfloor
+=\left\lceil\dfrac n2\right\rceil
+$$
+
+已知叶结点数为 64，则可能有
+
+$$
+\displaystyle
+n=127\quad\text{或}\quad n=128
+$$
+
+完全二叉树的深度为
+
+$$
+\displaystyle
+\left\lfloor\log_2 n\right\rfloor+1
+$$
+
+当 $\displaystyle n=127$ 时深度为 7；当 $\displaystyle n=128$ 时深度为 8。因此可能达到的最大深度为 8，选择 B。
+
+</details>
+
+---
+
+5. **【王道·卷二-Q05】** 下列关于二叉树的说法中，错误的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 若二叉排序树的一个结点有两个孩子，则它的中序后继结点没有左孩子，它的中序前驱结点没有右孩子</div>
+<div className="choice-option-row">B. 若二叉排序树的一个结点 $\displaystyle x$ 的右子树为空，且 $\displaystyle x$ 有一个中序后继 $\displaystyle y$，则 $\displaystyle y$ 一定是 $\displaystyle x$ 的祖先，且其左孩子也是 $\displaystyle x$ 的祖先（$\displaystyle x$ 可视为自身的祖先）</div>
+<div className="choice-option-row">C. 在中序线索树中，从最左边的结点开始不断地查找后继结点，不一定能遍历完树中的所有结点</div>
+<div className="choice-option-row">D. 若 $\displaystyle x$ 是二叉排序树的叶结点，$\displaystyle y$ 是其父结点，则 $\displaystyle y$ 的值要么是树中大于 $\displaystyle x$ 的值的最小关键字，要么是树中小于 $\displaystyle x$ 的值的最大关键字</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 中序线索二叉树已利用空指针建立了指向中序前驱或后继的线索。从中序序列的第一个结点，即最左结点出发，反复寻找中序后继，可以依次访问中序序列中的全部结点，因此 C 的说法错误。
+
+- A 正确：有两个孩子的结点，其中序后继是右子树中最左的结点，所以没有左孩子；中序前驱是左子树中最右的结点，所以没有右孩子。
+- B 正确：当 $\displaystyle x$ 无右子树时，它的中序后继是从 $\displaystyle x$ 向上寻找的第一个满足“$\displaystyle x$ 位于其左子树中”的祖先 $\displaystyle y$。因此 $\displaystyle y$ 是 $\displaystyle x$ 的祖先，且 $\displaystyle y$ 的左孩子位于通往 $\displaystyle x$ 的路径上，也是 $\displaystyle x$ 的祖先；若左孩子就是 $\displaystyle x$，按题意仍成立。
+- D 正确：若 $\displaystyle x$ 是 $\displaystyle y$ 的左孩子，则 $\displaystyle y$ 是 $\displaystyle x$ 的中序后继，即大于 $\displaystyle x$ 的最小关键字；若 $\displaystyle x$ 是右孩子，则 $\displaystyle y$ 是其中序前驱，即小于 $\displaystyle x$ 的最大关键字。
+
+</details>
+
+---
+
+6. **【王道·卷四-Q03】** 下列二叉树中，（  ）的所有非叶结点的度均为2。
+I. 完全二叉树 II. 满二叉树 III. 平衡二叉树 IV. 哈夫曼树 V. 二叉排序树
+
+<div className="choice-options">
+<div className="choice-option-row">A. II和IV &emsp;&emsp; B. I和III &emsp;&emsp; C. II、IV和V &emsp;&emsp; D. II、III和IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 满二叉树的每个非叶结点都有左、右两个孩子，因此其度均为 2；二叉哈夫曼树在构造时，每次选取两棵树合并为一棵新树，新增的非叶结点必有两个孩子，因此也不存在度为 1 的结点。故 II、IV 正确，选择 A。
+
+- 完全二叉树的倒数第二层可能存在只有左孩子的结点，故 I 不一定成立。
+- 平衡二叉树只要求任一结点左右子树高度差不超过 1，允许结点只有一个孩子，故 III 不成立。
+- 二叉排序树只规定关键字的大小关系，不限制结点的度，故 V 不成立。
+
+</details>
+
+---
+
+7. **【王道·卷五-Q04】** 对一棵完全二叉树的所有结点按层次自上向下、同一层次自左向右进行编号，根结点的编号为0，则判断结点 $\displaystyle p$ 和 $\displaystyle q$ 在同一层次的条件是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle \lfloor\log_{2}(p + 1)\rfloor = \lfloor\log_{2}(q + 1)\rfloor$</div>
+<div className="choice-option-row">B. $\displaystyle \lfloor\log_{2}p\rfloor = \lfloor\log_{2}q\rfloor$</div>
+<div className="choice-option-row">C. $\displaystyle \lceil\log_{2}p\rceil = \lceil\log_{2}q\rceil$</div>
+<div className="choice-option-row">D. $\displaystyle p / 2 = q / 2$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 根结点编号为 0 时，第 $\displaystyle k$ 层（根所在层记为第 0 层）的编号范围为
+
+$$
+\displaystyle
+2^k-1\le p\le 2^{k+1}-2
+$$
+
+两边同时加 1，可得
+
+$$
+\displaystyle
+2^k\le p+1<2^{k+1}
+$$
+
+因而结点 $\displaystyle p$ 所在层次为
+
+$$
+\displaystyle
+\left\lfloor\log_2(p+1)\right\rfloor
+$$
+
+所以 $\displaystyle p$ 和 $\displaystyle q$ 位于同一层的充要条件是
+
+$$
+\displaystyle
+\left\lfloor\log_2(p+1)\right\rfloor
+=
+\left\lfloor\log_2(q+1)\right\rfloor
+$$
+
+选择 A。B、C 对编号为 0 的根结点不适用；D 只能在某些情况下判断两个结点是否具有相同双亲，不能判断是否位于同一层。
+
+</details>
+
+---
+
+8. **【王道·卷五-Q05】** 给定结点数 $\displaystyle n$，在下面的二叉树中，叶结点数不能确定的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 满二叉树 &emsp;&emsp; B. 完全二叉树 &emsp;&emsp; C. 哈夫曼树 &emsp;&emsp; D. 二叉排序树</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 二叉排序树只要求任一结点满足“左子树关键字小于该结点、右子树关键字大于该结点”，其具体形态由关键字插入顺序决定。即使结点总数相同，也可能形成单支树或较为平衡的树，叶结点数并不固定，因此选择 D。
+
+- 满二叉树的结构由结点总数唯一确定，叶结点数可以确定。
+- 完全二叉树中，叶结点数为 $\displaystyle \lceil n/2\rceil$，可以确定。
+- 二叉哈夫曼树中不存在度为 1 的结点。设叶结点数为 $\displaystyle n_0$，度为 2 的结点数为 $\displaystyle n_2$，则 $\displaystyle n_0=n_2+1$，又有 $\displaystyle n=n_0+n_2$，故 $\displaystyle n_0=(n+1)/2$，可以确定。
+
+</details>
+
+---
+
+9. **【王道·卷六-Q10】** 从二叉树的任一点出发到根的路径上，所经过的结点序列必按其关键字降序排列的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 排序二叉树 &emsp;&emsp; B. 大顶堆 &emsp;&emsp; C. 小顶堆 &emsp;&emsp; D. 平衡二叉树</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 小顶堆要求任一非根结点的关键字均不小于其双亲结点的关键字，即沿着从根到某个结点的路径，关键字按非递减顺序排列。反过来，从任一点向根结点移动时，关键字便按非递增，即题目所说的降序排列，因此选择 C。
+
+大顶堆恰好相反，从任一点到根的关键字按升序排列。二叉排序树只规定左子树、根和右子树之间的大小关系，沿任意到根路径不一定单调；平衡二叉树仅限制高度差，也不保证关键字顺序。
+
+</details>
+
+---
+
+10. **【竟成·模拟三-05】** 每个结点的度都是0或2的二叉树称正则二叉树，n个结点的正则二叉树中有（）个叶结点。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle \lceil \log_2 n\rceil$ &emsp;&emsp; B. (n-1)/2 &emsp;&emsp; C. $\displaystyle \lceil \log_2 (n+1)\rceil$ &emsp;&emsp; D. (n+1)/2</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 设度为 0 的结点数，即叶结点数为 $\displaystyle n_0$，度为 2 的结点数为 $\displaystyle n_2$。正则二叉树不存在度为 1 的结点，因此总结点数满足
+
+$$
+\displaystyle
+n=n_0+n_2
+$$
+
+二叉树中边数等于总结点数减 1；另一方面，每个度为 2 的结点向下引出两条边，所以
+
+$$
+\displaystyle
+2n_2=n-1
+$$
+
+也可利用二叉树的性质 $\displaystyle n_0=n_2+1$。联立可得
+
+$$
+\displaystyle
+\begin{aligned}
+n_0+n_2&=n\\
+n_0&=n_2+1
+\end{aligned}
+$$
+
+从而
+
+$$
+\displaystyle
+n_0=\dfrac{n+1}{2}
+$$
+
+故选择 D。B 给出的是度为 2 的结点数，而不是叶结点数；A、C 与正则二叉树的结点度数关系无关。
+
+</details>
+
+---
+
+### 5.2.2 二叉树的存储结构
+
+11. **【王道·卷三-Q03】** 已知 $\displaystyle A[1\dots N]$ 是一棵顺序存储的完全二叉树，9号结点和11号结点共同的祖先是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 4 &emsp;&emsp; B. 6 &emsp;&emsp; C. 2 &emsp;&emsp; D. 8</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 完全二叉树采用从 1 开始的顺序编号时，编号为 $\displaystyle i$ 的结点的双亲编号为
+
+$$
+\displaystyle
+\left\lfloor\dfrac{i}{2}\right\rfloor
+$$
+
+9 号结点向上追溯的祖先为
+
+$$
+\displaystyle
+9\rightarrow 4\rightarrow 2\rightarrow 1
+$$
+
+11 号结点向上追溯的祖先为
+
+$$
+\displaystyle
+11\rightarrow 5\rightarrow 2\rightarrow 1
+$$
+
+二者最近的共同祖先是 2 号结点，故选择 C。4 只是 9 号结点的祖先，6、8 均不是二者的共同祖先。
+
+</details>
+
+---
+
+12. **【王道·卷三-Q04】** 在二叉树的顺序存储中，每个结点的存储位置与其双亲、左右孩子结点的位置都存在一个简单映射关系，因此可与三叉链表对应。若某二叉树共有 $\displaystyle n$ 个结点，采用三叉链表存储时，每个结点的数据域占用 $\displaystyle d$ 字节，每个指针域占用 $\displaystyle 4B$，采用顺序存储，且最后一个结点的下标为 $\displaystyle k$（起始下标为1），那么当（  ）时采用顺序存储更节省空间。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle d < 12n / (k - n)$ &emsp;&emsp; B. $\displaystyle d > 12n / (k - n)$</div>
+<div className="choice-option-row">C. $\displaystyle d < 12n / (k + n)$ &emsp;&emsp; D. $\displaystyle d > 12n / (k + n)$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 三叉链表的每个结点包含一个数据域和三个指针域，因此每个结点占用
+
+$$
+\displaystyle
+d+3\times 4=d+12
+$$
+
+字节。共有 $\displaystyle n$ 个结点时，三叉链表总空间为
+
+$$
+\displaystyle
+n(d+12)
+$$
+
+顺序存储时，为保留结点编号之间的映射关系，数组至少要开到下标 $\displaystyle k$，即需要 $\displaystyle k$ 个数据单元，总空间为
+
+$$
+\displaystyle
+kd
+$$
+
+顺序存储更节省空间的条件是
+
+$$
+\displaystyle
+kd<n(d+12)
+$$
+
+整理得
+
+$$
+\displaystyle
+\begin{aligned}
+kd&<nd+12n\\
+d(k-n)&<12n\\
+d&<\dfrac{12n}{k-n}
+\end{aligned}
+$$
+
+因此选择 A。式中的 $\displaystyle k-n$ 反映了顺序存储中因树形不完全而产生的空位置数量。
+
+</details>
+
+---
+
+13. **【王道·卷八-Q05】** 在一棵二叉树中，度为0的结点数为 $\displaystyle k$，度为1的结点数为 $\displaystyle m$，则该二叉树采用二叉链表存储时，指向孩子结点的指针数量是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. k &emsp;&emsp; B. m &emsp;&emsp; C. $\displaystyle 2k + m - 2$ &emsp;&emsp; D. $\displaystyle 2k + m$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 设度为 2 的结点数为 $\displaystyle n_2$。二叉树具有性质
+
+$$
+\displaystyle
+n_0=n_2+1
+$$
+
+已知 $\displaystyle n_0=k$，所以
+
+$$
+\displaystyle
+n_2=k-1
+$$
+
+二叉链表中“指向孩子结点的指针”是非空的孩子指针。度为 1 的结点贡献 1 个非空孩子指针，度为 2 的结点贡献 2 个，因此非空孩子指针总数为
+
+$$
+\displaystyle
+m+2n_2=m+2(k-1)=2k+m-2
+$$
+
+故选择 C。该数量也等于二叉树的边数 $\displaystyle n-1$。D 是所有结点总数的相关表达式，不是非空孩子指针数；A、B 只统计了部分结点。
+
+</details>
+
+---
+
+## 5.3 二叉树的遍历和线索二叉树
+
+### 5.3.1 二叉树的遍历
+
+14. **【王道·卷一-Q03】** 在有6个结点的二叉树中，结点编号为1，2，3，4，5，6，其中叶结点的编号为2，5，6。该二叉树的先序遍历结果为1，4，3，2，5，6，则遍历结果1，4，6，3，5，2可能采用的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 先序遍历算法 &emsp;&emsp; B. 中序遍历算法 &emsp;&emsp; C. 后序遍历算法 &emsp;&emsp; D. 层次遍历算法</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 可以构造出满足条件的二叉树：根结点为 1，其左、右孩子分别为 4 和 6；结点 4 的左、右孩子分别为 3 和 5；结点 3 只有一个孩子 2。其结构可表示为
+
+```text
+1
+/ \
+4   6
+/ \
+3   5
+/
+2
+```
+
+该树的叶结点恰为 2、5、6。先序遍历为
+
+```text
+1,4,3,2,5,6
+```
+
+按层次遍历时，依次访问根结点、第二层、第三层和第四层，得到
+
+```text
+1,4,6,3,5,2
+```
+
+与题目给出的序列一致，因此选择 D。该序列显然不同于已知的先序序列；中序遍历和后序遍历都不会首先连续访问根结点 1、其左孩子 4、其右孩子 6。
+
+</details>
+
+---
+
+15. **【王道·卷二-Q02】** 已知某二叉树共有5个结点，其先序遍历和中序遍历的序列都是“ooops”，则这样的二叉树共有（  ）种不同的形状。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 1 &emsp;&emsp; B. 3 &emsp;&emsp; C. 5 &emsp;&emsp; D. 6</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 由于结点关键字存在重复，先序序列和中序序列不能唯一确定二叉树。先序序列的第一个字符必为根结点，即根为字符 `o`。在中序序列 `ooops` 中，根可以对应前三个 `o` 中的任意一个位置。
+
+按根在中序序列中的位置分类递归计数：
+
+1. 根取中序序列第 1 个 `o`，左子树为空，右子树的先序和中序均为 `oops`，可形成 3 种形状。
+2. 根取中序序列第 2 个 `o`，左子树为单结点 `o`，右子树的先序和中序均为 `ops`，可形成 1 种形状。
+3. 根取中序序列第 3 个 `o`，左子树的先序和中序均为 `oo`，右子树的先序和中序均为 `ps`。左子树只有 1 种满足方式，右子树也只有 1 种，因此形成 1 种形状。
+
+总数为
+
+$$
+\displaystyle
+3+1+1=5
+$$
+
+故选择 C。若所有结点关键字互不相同，则先序和中序能够唯一确定二叉树；本题的多解正是由重复关键字 `o` 引起的。
+
+</details>
+
+---
+
+16. **【王道·卷七-Q05】** 前序遍历和中序遍历结果相同的二叉树为（  ）。
+I. 只有根结点的二叉树 II. 根结点无右孩子的二叉树
+III. 所有结点只有左子树的二叉树 IV. 所有结点只有右子树的二叉树
+
+<div className="choice-options">
+<div className="choice-option-row">A. 仅有I &emsp;&emsp; B. I、II和IV &emsp;&emsp; C. I和III &emsp;&emsp; D. I和IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 前序遍历顺序为“根、左、右”，中序遍历顺序为“左、根、右”。要使二者完全相同，每个结点都不能存在非空左子树，否则中序遍历会先访问左子树，而前序遍历会先访问根结点。因此，整棵树中的所有结点只能有右子树，或者整棵树只有一个根结点。
+
+- I 正确：单结点树的前序和中序均只有根结点。
+- II 错误：根结点无右孩子并不意味着没有左孩子；只要存在左孩子，前序和中序就不同。
+- III 错误：所有结点只有左子树时，前序序列从根向下，而中序序列从最深的左叶结点向上，二者顺序相反。
+- IV 正确：所有结点只有右子树时，前序和中序都按从根到右下方的顺序访问。
+
+因此选择 D。
+
+</details>
+
+---
+
+17. **【竟成·模拟四-04】** 下列关于二叉树的遍历的叙述中，正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 若二叉树的先序遍历序列是ABCD，则其中序遍历序列可以是DABC</div>
+<div className="choice-option-row">B. 若二叉树的先序遍历序列的最后一个结点和中序序列的最后一个结点是同一个结点，则该结点应是二叉树最右边的叶结点</div>
+<div className="choice-option-row">C. 若二叉树的先序遍历序列和后序遍历序列相反，则该二叉树为空或只有一个结点</div>
+<div className="choice-option-row">D. 若需要删除一棵二叉树，一般使用先序遍历框架（根结点、左子树、右子树）进行递归地删除</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 中序遍历的最后一个结点是整棵树中最右侧的结点，该结点一定没有右孩子。若它同时还是先序遍历的最后一个结点，则它也不能有左孩子；否则先序遍历在访问该结点后还要继续访问其左子树。因此，该结点必为二叉树最右边的叶结点，B 正确。
+
+- A 错误：先序序列为 `ABCD` 时根结点为 `A`。若中序序列为 `DABC`，则 `A` 的左子树只含 `D`，因此先序访问根 `A` 后应先访问 `D`，不可能接着访问 `B`。
+- C 错误：当前序序列与后序序列互为逆序时，二叉树也可能是一棵所有结点均只有一个孩子的单支树，并非只能为空树或单结点树。
+- D 错误：删除整棵二叉树时必须先删除左右子树，再释放根结点，因此一般采用后序遍历框架，而不是先序遍历框架。
+
+</details>
+
+---
+
+18. **【竟成·模拟六-01】** 设二叉树共有n个结点，下列程序段的时间复杂度是（）。
+
+```c
+int maxFunc(TreeNode* root) {
+if (root == NULL) return 0;
+return max(maxFunc(root->left), maxFunc(root->right)) + 1;
+}
+```
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle O(\log_2 n)$ &emsp;&emsp; B. $\displaystyle O(n)$ &emsp;&emsp; C. $\displaystyle O(n\log_2 n)$ &emsp;&emsp; D. $\displaystyle O(2^n)$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 该函数递归计算二叉树高度。对于每个非空结点，函数只执行常数次操作：判断是否为空、递归访问左右孩子、比较两个子树高度并加 1。
+
+在整个递归过程中，每个结点恰好被访问一次，空指针也只产生与结点数同阶的调用次数。因此总时间满足
+
+$$
+\displaystyle
+T(n)=T(n_L)+T(n_R)+O(1)
+$$
+
+其中 $\displaystyle n_L+n_R=n-1$。将所有结点的工作量相加，得到
+
+$$
+\displaystyle
+T(n)=O(n)
+$$
+
+故选择 B。即使二叉树是平衡的，递归深度为 $\displaystyle O(\log n)$，也仍需遍历全部 $\displaystyle n$ 个结点；$\displaystyle O(\log n)$ 描述的是递归栈空间而不是运行时间。
+
+</details>
+
+---
+
+19. **【竟成·模拟七-03】** 下列关于二叉树的遍历的叙述中，正确的是（）。
+I. 存在一棵二叉树的叶结点在先序、中序、后序遍历序列中相对位置可能不同
+II. 要交换二叉树的所有分支结点的左右子树的位置，利用中序遍历框架解决最合适
+III. 含有4个结点的二叉树最多有14种形态
+IV. 一棵非空的二叉树的前序序列和中序序列正好相反，则该二叉树一定是只有一个叶结点
+
+<div className="choice-options">
+<div className="choice-option-row">A. III、IV &emsp;&emsp; B. II、III、IV &emsp;&emsp; C. II、III &emsp;&emsp; D. IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 逐项判断如下。
+
+- I 错误：无论采用先序、中序还是后序遍历，各叶结点之间的相对次序始终保持从左到右不变。三种遍历只是根结点相对于左右子树的访问时机不同，不会改变叶结点的左右相对顺序。
+- II 错误：交换左右子树时，若在中序递归过程中直接交换指针，容易使刚交换过去的子树被重复访问或使另一棵子树被遗漏。通常采用先序或后序框架更自然，先递归处理子树再交换，或先交换再递归处理交换后的左右子树。
+- III 正确：含有 $\displaystyle n$ 个结点的不同二叉树形态数为第 $\displaystyle n$ 个卡特兰数
+
+$$
+\displaystyle
+C_n=\dfrac{1}{n+1}\binom{2n}{n}
+$$
+
+当 $\displaystyle n=4$ 时
+
+$$
+\displaystyle
+C_4=\dfrac{1}{5}\binom{8}{4}=14
+$$
+
+- IV 正确：若前序序列与中序序列正好相反，则每个结点都只能有左孩子，不能有右孩子，否则两序列不能保持完全逆序。因此该树是一棵左单支树，只有最下方的一个结点是叶结点。
+
+所以正确的是 III、IV，选择 A。
+
+</details>
+
+---
+
+### 5.3.2 线索二叉树
+
+20. **【竟成·模拟四-05】** 二叉树在线索化后，仍不能有效求解的问题是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 先序线索二叉树中求先后继 &emsp;&emsp; B. 中序线索二叉树中求中序后继</div>
+<div className="choice-option-row">C. 中序线索二叉树中求中序前驱 &emsp;&emsp; D. 后序线索二叉树中求后序后继</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 线索二叉树利用原本为空的孩子指针记录某种遍历次序下的前驱或后继，但能否方便地求解，还取决于目标结点与其前驱、后继之间的结构关系。
+
+- 先序遍历顺序为“根、左、右”。若结点有左孩子，则先序后继为左孩子；否则若有右孩子，则后继为右孩子；若两者都没有，则可沿线索寻找后继。因此，先序线索二叉树能够有效求先序后继，A 可求。
+- 中序线索二叉树中，前驱与后继都能借助左右线索及孩子指针有效求得，B、C 均可求。
+- 后序遍历顺序为“左、右、根”。某结点的后序后继可能是其双亲，也可能位于双亲的右子树中。若结点结构中没有双亲指针，仅靠后序线索通常无法有效确定该后继。因此 D 不能有效求解。
+
+与此相对，后序线索二叉树较容易求后序前驱，而先序线索二叉树较难求先序前驱。
+
+</details>
+
+---
+
+## 5.4 树、森林
+
+### 5.4.1 树的存储结构
+
+21. **【王道·卷四-Q04】** 右图是一棵双亲表示法存储的树。在以下说法中，错误的是（  ）。
+![卷四_Q04_双亲表示法树](/img/questions/408-mock/wangdao-set-04-q04.png)
+
+<div className="choice-options">
+<div className="choice-option-row">A. 这种存储结构用一组连续的空间来存储每个结点 &emsp;&emsp; B. 该树的结点共有4层</div>
+<div className="choice-option-row">C. 该树共有5个叶结点 &emsp;&emsp; D. 该树转换为二叉树后共有8层</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 根据双亲域可还原树的层次关系：
+
+```text
+R
+├─ A
+│  ├─ D
+│  └─ E
+├─ B
+└─ C
+└─ F
+├─ G
+├─ H
+└─ K
+```
+
+- A 正确：双亲表示法通常用顺序表存放各结点，每个结点附加一个记录其双亲下标的域，因此结点存放在一组连续空间中。
+- B 正确：第 1 层为根结点 R，第 2 层为 A、B、C，第 3 层为 D、E、F，第 4 层为 G、H、K，共 4 层。
+- C 错误：叶结点为 B、D、E、G、H、K，共 6 个，而不是 5 个。
+- D 正确：转换为“左孩子—右兄弟”二叉树后，最长路径为
+
+```text
+R → A → B → C → F → G → H → K
+```
+
+共经过 8 个结点，因此转换后的二叉树共有 8 层。
+
+</details>
+
+---
+
+22. **【竟成·模拟六-04】** 采用双亲表示法描述一棵树，则具有n个结点的树至少需要（）个指向双亲的指针。
+
+<div className="choice-options">
+<div className="choice-option-row">A. n &emsp;&emsp; B. n-2 &emsp;&emsp; C. n-1 &emsp;&emsp; D. 2n</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 一棵含有非空树中，除根结点外，每个结点都有且仅有一个双亲。因此，若共有 $\displaystyle n$ 个结点，则需要记录双亲关系的非根结点共有
+
+$$
+\displaystyle
+n-1
+$$
+
+个，即至少需要 $\displaystyle n-1$ 个指向双亲的指针，选择 C。根结点没有双亲，其双亲域可置为空或用特殊值表示，不形成有效的双亲指针。A 将根结点也计入了有效双亲指针；B 少计一个；D 则对应每个结点设置两个指针的情形，并非双亲表示法的最低需求。
+
+</details>
+
+---
+
+### 5.4.2 树、森林与二叉树的转换
+
+23. **【王道·卷一-Q04】** 当有7个结点的树转换为二叉树后，总共可能有（  ）种不同的形态。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 132 &emsp;&emsp; B. 154 &emsp;&emsp; C. 429 &emsp;&emsp; D. 无法确定</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 树转换成二叉树时采用“左孩子—右兄弟”表示法。由一棵树转换得到的二叉树，其根结点一定没有右孩子。因此，含 $\displaystyle n$ 个结点的树的不同形态数，等于含 $\displaystyle n-1$ 个结点的普通二叉树形态数，即第 $\displaystyle n-1$ 个卡特兰数：
+
+$$
+\displaystyle
+C_{n-1}=\dfrac{1}{n}\binom{2n-2}{n-1}
+$$
+
+当 $\displaystyle n=7$ 时，
+
+$$
+\displaystyle
+C_6=\dfrac{1}{7}\binom{12}{6}=132
+$$
+
+因此选择 A。429 是 $\displaystyle C_7$，对应 8 个结点的树或 7 个结点的普通二叉树形态数，不符合本题。
+
+</details>
+
+---
+
+24. **【王道·卷三-Q05】** 设结点 $\displaystyle x$ 是树 $\displaystyle T$ 中的一个非根结点，树 $\displaystyle T$ 的孩子从左往右计数，$\displaystyle B$ 是 $\displaystyle T$ 所对应的二叉树，在二叉树 $\displaystyle B$ 中 $\displaystyle x$ 是其双亲的右孩子，则下列说法中正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 在树 $\displaystyle T$ 中 $\displaystyle x$ 是其双亲的第一个子女 &emsp;&emsp; B. 在树 $\displaystyle T$ 中 $\displaystyle x$ 一定有右兄弟</div>
+<div className="choice-option-row">C. 在树 $\displaystyle T$ 中 $\displaystyle x$ 一定是叶结点 &emsp;&emsp; D. 在树 $\displaystyle T$ 中 $\displaystyle x$ 一定有左兄弟</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 在树与二叉树的“左孩子—右兄弟”转换中：
+
+- 二叉树中的左孩子指针，指向原树中该结点的第一个孩子；
+- 二叉树中的右孩子指针，指向原树中该结点的下一个右兄弟。
+
+题目指出 $\displaystyle x$ 是其双亲的右孩子，这说明 $\displaystyle x$ 在原树中是该二叉树双亲结点的右兄弟。因此，$\displaystyle x$ 前面至少存在一个兄弟结点，即它一定有左兄弟，D 正确。
+
+A 错误：第一个孩子在转换后的二叉树中应表现为双亲的左孩子。B 错误：$\displaystyle x$ 可能是最后一个兄弟，不一定还有右兄弟。C 错误：是否为叶结点取决于 $\displaystyle x$ 是否有孩子，与其是不是某结点的右兄弟无关。
+
+</details>
+
+---
+
+25. **【竟成·模拟七-04】** 设森林F中有3棵树，第一、第二、第三棵树的结点个数分别为$\displaystyle M_1$、$\displaystyle M_2$和$\displaystyle M_3$。将森林F转化成对应的二叉树T，若以第一棵树的根结点作为T的根结点，则T的根结点的右子树上的结点个数是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle M_1$ &emsp;&emsp; B. $\displaystyle M_2+M_2$ &emsp;&emsp; C. $\displaystyle M_3$ &emsp;&emsp; D. $\displaystyle M_2+M_3$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 森林转换为二叉树时，各棵树的根结点按兄弟关系依次通过右指针连接。第一棵树的根结点成为二叉树 $\displaystyle T$ 的根，其右孩子是第二棵树的根；第二棵树根的右孩子又是第三棵树的根。
+
+因此，$\displaystyle T$ 的根结点的右子树包含第二棵树和第三棵树转换后的全部结点，结点总数为
+
+$$
+\displaystyle
+M_2+M_3
+$$
+
+故选择 D。第一棵树除根外的结点位于 $\displaystyle T$ 根结点的左子树中，不计入右子树。
+
+</details>
+
+---
+
+## 5.5 树与二叉树的应用
+
+### 5.5.1 哈夫曼树和哈夫曼编码
+
+26. **【王道·卷一-Q05】** 在一次哈夫曼编码的过程中，若要求编码的长度小于或等于4，假设现已对两个字符编码为0和10，则最多还可对（  ）个字符进行编码。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 3 &emsp;&emsp; B. 4 &emsp;&emsp; C. 5 &emsp;&emsp; D. 6</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 哈夫曼编码是前缀编码，任何字符的编码都不能是另一字符编码的前缀。已有编码 `0` 后，所有以 `0` 开头的编码均不能再使用；已有编码 `10` 后，`10` 的所有后继编码也不能再使用。
+
+剩余可用的编码空间均位于前缀 `11` 下。为使新增字符数最多，应将其扩展到允许的最大长度 4，可得到
+
+```text
+1100、1101、1110、1111
+```
+
+共 4 个编码，因此选择 B。也可用 Kraft 不等式说明：已有编码占用
+
+$$
+\displaystyle
+2^{-1}+2^{-2}=\dfrac{3}{4}
+$$
+
+剩余容量为 $\displaystyle 1/4$。长度为 4 的每个编码占用 $\displaystyle 1/16$，所以最多还能容纳
+
+$$
+\displaystyle
+\dfrac{1/4}{1/16}=4
+$$
+
+个字符。
+
+</details>
+
+---
+
+27. **【王道·卷四-Q05】** 在度为 $\displaystyle m$ 的哈夫曼树中，叶结点数为 $\displaystyle n$，则非叶结点数为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle n - 1$ &emsp;&emsp; B. $\displaystyle \lfloor n / m\rfloor -1$ &emsp;&emsp; C. $\displaystyle (n - 1) / (m - 1)$ &emsp;&emsp; D. $\displaystyle (n - 1) / (m - 1) - 1$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 度为 $\displaystyle m$ 的哈夫曼树是一棵严格的 $\displaystyle m$ 叉树，每个非叶结点都有 $\displaystyle m$ 个孩子。设非叶结点数为 $\displaystyle I$，叶结点数为 $\displaystyle n$。
+
+一方面，树的边数为结点总数减 1：
+
+$$
+\displaystyle
+E=I+n-1
+$$
+
+另一方面，每个非叶结点引出 $\displaystyle m$ 条边，所以
+
+$$
+\displaystyle
+E=mI
+$$
+
+联立可得
+
+$$
+\displaystyle
+\begin{aligned}
+mI&=I+n-1\\
+(m-1)I&=n-1\\
+I&=\dfrac{n-1}{m-1}
+\end{aligned}
+$$
+
+因此选择 C。对于二叉哈夫曼树，令 $\displaystyle m=2$，便得到非叶结点数为 $\displaystyle n-1$。
+
+</details>
+
+---
+
+28. **【王道·卷六-Q06】** 在下列关于哈夫曼树的说法中，正确的是（  ）。
+I. 哈夫曼树是排序二叉树 II. 哈夫曼树是完全二叉树
+III. 哈夫曼树的叶结点数 = 非叶结点数 + 1
+IV. 哈夫曼树上层结点的值一定大于或等于下层结点的值
+
+<div className="choice-options">
+<div className="choice-option-row">A. III、IV &emsp;&emsp; B. I、II、IV &emsp;&emsp; C. III &emsp;&emsp; D. I、II、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 逐项判断如下。
+
+- I 错误：哈夫曼树的构造目标是使带权路径长度最小，不要求满足左子树关键字小于根、右子树关键字大于根，因此不是二叉排序树。
+- II 错误：哈夫曼树是严格二叉树，即非叶结点的度均为 2，但其形态不一定满足完全二叉树的层次排列要求。
+- III 正确：二叉哈夫曼树中不存在度为 1 的结点。由二叉树性质 $\displaystyle n_0=n_2+1$，可知叶结点数等于非叶结点数加 1。
+- IV 正确：哈夫曼树的非叶结点权值等于其两个孩子权值之和，因此双亲权值一定大于或等于任一孩子的权值。沿根到叶的方向，结点权值不会增大。
+
+所以正确的是 III、IV，选择 A。
+
+</details>
+
+---
+
+29. **【竟成·模拟一-05】** 已知字符集&#123;a,b,c,d,e&#125;，若各字符出现的次数分别为5,3,13,12,9。进行哈夫曼编码时，生成的哈夫曼树采用顺序存储方式保存在数组R中，用-1表示结点不存在。哈夫曼树中左子树分支表示编码0，右子树分支表示编码1。数组R=[42,17,25,9,8,12,13,-1,-1,3,5]，则编码序列011011111000011010的译码结果为（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. aacdca &emsp;&emsp; B. aacdeab &emsp;&emsp; C. bacbcba &emsp;&emsp; D. bacedcb</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 数组 $\displaystyle R$ 按完全二叉树的顺序存储规则表示哈夫曼树。由各结点权值可还原结构：
+
+```text
+42
+/      \
+17        25
+/  \      /  \
+9    8    12  13
+/ \
+3   5
+```
+
+根据字符频次 $\displaystyle a=5$、$\displaystyle b=3$、$\displaystyle c=13$、$\displaystyle d=12$、$\displaystyle e=9$，并规定左分支为 0、右分支为 1，可得编码：
+
+```text
+e：00
+b：010
+a：011
+d：10
+c：11
+```
+
+对编码串从左到右按前缀编码逐段译码：
+
+```text
+011 | 011 | 11 | 10 | 00 | 011 | 010
+a  |  a  | c  | d  | e  |  a  |  b
+```
+
+因此译码结果为 `aacdeab`，选择 B。其他选项均不能按照上述前缀编码完整分割并对应到给定字符序列。
+
+</details>
+
+---
+
+30. **【竟成·模拟三-04】** 下列关于二叉哈夫曼树和哈夫曼编码的叙述中，正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 一个数据文件由8位固定长度的字符组成，字符集内所有的256个字符出现的频率大致相同，最高的频率低于最低频率的2倍，那么此时哈夫曼编码比8位固定长度编码更有效</div>
+<div className="choice-option-row">B. 哈夫曼树中度为1的结点数等于度为2和度为0的结点数之差</div>
+<div className="choice-option-row">C. 哈夫曼树的结点总数不能是偶数</div>
+<div className="choice-option-row">D. 若从二叉树的任一点出发，到根结点的路径上所经结点的序列按其关键字有序，则该二叉树一定不是一棵哈夫曼树</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 二叉哈夫曼树是一棵严格二叉树，即每个非叶结点的度均为 2，不存在度为 1 的结点。设叶结点数为 $\displaystyle n_0$，度为 2 的结点数为 $\displaystyle n_2$，则
+
+$$
+\displaystyle
+n_0=n_2+1
+$$
+
+因而结点总数为
+
+$$
+\displaystyle
+\begin{aligned}
+n&=n_0+n_2\\
+&=(n_2+1)+n_2\\
+&=2n_2+1
+\end{aligned}
+$$
+
+结点总数一定为奇数，因此不可能是偶数，C 正确。
+
+- A 错误：字符数恰为 $\displaystyle 256=2^8$，且各字符频率十分接近时，最优哈夫曼树通常接近满二叉树，各字符编码长度均为 8 左右，平均码长不一定小于固定的 8 位编码，不能断言哈夫曼编码更有效。
+- B 错误：任意二叉树均满足 $\displaystyle n_0=n_2+1$，所以 $\displaystyle n_0-n_2=1$。而二叉哈夫曼树中度为 1 的结点数为 0，并不等于 1。
+- D 错误：哈夫曼树的双亲权值等于两个孩子权值之和，因此从任一结点向根移动时，权值通常单调不减，路径上的权值序列完全可能有序，不能据此排除哈夫曼树。
+
+</details>
+
+---
+
+31. **【竟成·模拟五-04】** 下列关于哈夫曼树的说法正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 一组权值构造的哈夫曼树可能不唯一，带权路径长度可能不唯一</div>
+<div className="choice-option-row">B. 一组权值构造的哈夫曼树可能不唯一，高度唯一</div>
+<div className="choice-option-row">C. 一组权值构造的哈夫曼树可能不唯一，高度可能不唯一</div>
+<div className="choice-option-row">D. 一组权值构造的哈夫曼树唯一，高度唯一</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 当待合并权值中存在相同权值时，每次选择哪两个最小权值结点可能有多种方案；此外，左右子树也可以交换。因此，同一组权值对应的哈夫曼树形态可能不唯一。
+
+但所有合法构造所得哈夫曼树都具有最小带权路径长度，所以最小带权路径长度的数值是确定的，不会因为形态不同而改变。与此同时，不同的最优构造可能产生不同的树高，因此高度也可能不唯一。
+
+例如，对某些包含重复权值的集合，不同的同权结点合并顺序会改变叶结点在各层的分布，但仍保持相同的最小带权路径长度。故选择 C。A 错在带权路径长度的最优值是唯一确定的；B 错在高度不一定唯一；D 错在哈夫曼树形态不一定唯一。
+
+</details>
+
+---
+
+### 5.5.2 并查集
+
+32. **【王道·卷七-Q06】** 在以下算法中，需要用到并查集的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. Floyd算法 &emsp;&emsp; B. Kruskal算法 &emsp;&emsp; C. Prim算法 &emsp;&emsp; D. Dijkstra算法</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** Kruskal 算法按照边权从小到大的顺序考察边。每次准备加入一条边 $\displaystyle (u,v)$ 时，需要迅速判断顶点 $\displaystyle u$ 与 $\displaystyle v$ 是否已经属于同一个连通分量：
+
+- 若属于同一集合，加入该边会形成环，应舍弃；
+- 若属于不同集合，可加入该边，并将两个集合合并。
+
+并查集恰好高效支持“查找所属集合”和“合并两个集合”两类操作，因此 Kruskal 算法通常使用并查集进行环路判断，选择 B。
+
+Floyd 算法使用动态规划求各顶点对最短路径；Prim 算法通过维护顶点到当前生成树的最小边权扩展生成树；Dijkstra 算法通过维护单源最短距离选择顶点，三者均不以并查集作为核心数据结构。
+
+</details>
+
+---
+
+33. **【竟成·模拟一-06】** 并查集的秩指树的高度。并查集按“秩”优化指将秩较小的树合并到秩较大的树中，从而尽量保持树的平衡性。并查集按秩优化的Union函数C语言实现如下。在以下代码中，rank[x]指结点x的秩。若某个并查集有元素0~5，初始时各个元素的秩均为1，依次执行下列操作Union(0,1)，Union(2,3)，Union(1,3)，Union(3,4)后，元素4的根结点是（）。
+
+```c
+void Union(int x, int y) {
+x = find(x); y = find(y);
+if (x == y) return;
+if (rank[x] < rank[y]) {
+parent[x] = y;
+} else {
+parent[y] = x;
+if (rank[x] == rank[y]) {
+rank[x]++;
+}
+}
+}
+```
+
+<div className="choice-options">
+<div className="choice-option-row">A. 0 &emsp;&emsp; B. 1 &emsp;&emsp; C. 3 &emsp;&emsp; D. 4</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 按照代码逐次执行合并操作。
+
+1. 执行 `Union(0,1)`：0 和 1 的秩均为 1，进入 `else` 分支，令 `parent[1]=0`，并将 `rank[0]` 增加为 2。此时集合为 $\displaystyle \{0,1\}$，根为 0。
+2. 执行 `Union(2,3)`：2 和 3 的秩均为 1，令 `parent[3]=2`，并将 `rank[2]` 增加为 2。此时集合为 $\displaystyle \{2,3\}$，根为 2。
+3. 执行 `Union(1,3)`：`find(1)=0`，`find(3)=2`。根 0 和根 2 的秩均为 2，因此令 `parent[2]=0`，并将 `rank[0]` 增加为 3。于是 $\displaystyle \{0,1,2,3\}$ 的根为 0。
+4. 执行 `Union(3,4)`：`find(3)=0`，而 4 自成一棵秩为 1 的树。因为 $\displaystyle rank[0]>rank[4]$，令 `parent[4]=0`。
+
+因此元素 4 的根结点为 0，选择 A。
+
+</details>
+
+---
+
+34. **【竟成·模拟二-04】** 下列关于并查集的说法正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 如果同时使用路径压缩算法和Union优化算法，在含有n个元素的并查集上进行m次查询和合并操作，其时间复杂度是 $\displaystyle O(m\log_2 n)$</div>
+<div className="choice-option-row">B. 并查集不能处理是否存在环路的问题</div>
+<div className="choice-option-row">C. 并查集可以用来验证树的边数加一等于结点数这个规律</div>
+<div className="choice-option-row">D. 并查集可以用来计算两个结点间的最短路径长度</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 并查集可用于维护图中各顶点所属的连通分量。处理无向图的边时，若一条边的两个端点已经属于同一集合，则加入该边会形成环；若属于不同集合，则可合并两个集合。因此，并查集可以辅助判断图是否连通、是否存在环，并可据此验证树的相关性质：含 $\displaystyle n$ 个结点的无环连通图恰有 $\displaystyle n-1$ 条边，即边数加一等于结点数，C 正确。
+
+- A 错误：同时采用路径压缩和按秩合并后，$\displaystyle m$ 次操作的总时间复杂度为 $\displaystyle O(m\alpha(n))$，其中 $\displaystyle \alpha(n)$ 是增长极慢的反阿克曼函数，通常近似看作常数，而不是通常所说的 $\displaystyle O(m\log_2 n)$。
+- B 错误：并查集是检测无向图是否成环的常用工具。
+- D 错误：并查集只能判断两个结点是否处于同一连通分量，不能记录路径长度，不能直接求最短路径。
+
+</details>
+
+---
+
+35. **【竟成·模拟三-09】** 在含有6个元素的并查集中，按序列&#123;0,1&#125;,&#123;0,2&#125;,&#123;3,5&#125;,&#123;4,3&#125;,&#123;5,4&#125;来进行查找合并的操作，最终形成的并查集内，（）这两个元素不在同一集合内。
+
+<div className="choice-options">
+<div className="choice-option-row">A. &#123;1,2&#125; &emsp;&emsp; B. &#123;4,5&#125; &emsp;&emsp; C. &#123;0,5&#125; &emsp;&emsp; D. &#123;5,3&#125;</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 依次合并各元素对：
+
+- 合并 $\displaystyle \{0,1\}$ 后，0 和 1 属于同一集合；
+- 再合并 $\displaystyle \{0,2\}$ 后，形成集合 $\displaystyle \{0,1,2\}$；
+- 合并 $\displaystyle \{3,5\}$ 后，3 和 5 属于同一集合；
+- 再合并 $\displaystyle \{4,3\}$ 后，形成集合 $\displaystyle \{3,4,5\}$；
+- 最后合并 $\displaystyle \{5,4\}$ 时，两者已经处于同一集合，集合不再变化。
+
+最终共有两个集合：
+
+$$
+\displaystyle
+\{0,1,2\},\qquad \{3,4,5\}
+$$
+
+A 中 1、2 同属第一个集合；B 中 4、5 同属第二个集合；D 中 5、3 同属第二个集合；只有 C 中 0 和 5 分属不同集合，因此选择 C。
+
+</details>

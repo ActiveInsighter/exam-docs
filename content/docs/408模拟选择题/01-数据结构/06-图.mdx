@@ -1,0 +1,871 @@
+---
+sidebar_position: 6
+title: 第6章 图
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第6章 图
+
+## 6.1 图的基本概念
+
+### 6.1.1 图的定义
+
+1. **【竟成·模拟三-06】** 下列关于图的叙述中，正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 若有向图G有两个不同的强连通分量C和C'，设顶点u,v∈C，顶点u',v'∈C'，若存在一条从u到u'的路径u→u'，则可能存在一条从v'到v的路径v'→v</div>
+<div className="choice-option-row">B. 若在图G中加入一条新边，若该边的两个顶点都处于同一个连通分量，则可能会增加G的连通分量的个数</div>
+<div className="choice-option-row">C. 若在图G中加入一条新边，若该边的两个顶点A和A'分别处于不同的连通分量，并且A和A'之间原先没有路径，则添加后可能会增加G的连通分量的个数</div>
+<div className="choice-option-row">D. 若在有向图G中加入一条新边，若该边的两个顶点A和A'分别处于不同的强连通分量，并且A和A'之间原先有一条路径，则添加后可能会减少G的强连通分量的个数</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 将有向图的每个强连通分量缩成一个顶点后，所得分量图一定是有向无环图。若不同强连通分量 $\displaystyle C_1$ 与 $\displaystyle C_2$ 之间原来已经存在从 $\displaystyle C_1$ 到 $\displaystyle C_2$ 的路径，此时加入一条从 $\displaystyle C_2$ 返回 $\displaystyle C_1$ 的边，就会形成有向环，使路径上的若干强连通分量合并为一个更大的强连通分量，从而使强连通分量数减少。因此 D 正确。
+
+- A 错误：若已经存在从 $\displaystyle C$ 到 $\displaystyle C'$ 的路径，同时又存在从 $\displaystyle C'$ 到 $\displaystyle C$ 的路径，则两个分量中的顶点相互可达，$\displaystyle C$ 与 $\displaystyle C'$ 应属于同一强连通分量，与“不同分量”矛盾。
+- B 错误：在同一连通分量内部增加边，不会破坏原有连通关系，连通分量数不可能增加。
+- C 错误：在两个不同连通分量之间增加一条边，会将这两个分量连接起来，使连通分量数减少 1，而不是增加。
+
+</details>
+
+---
+
+## 6.2 图的存储及基本操作
+
+### 6.2.1 邻接矩阵法
+
+2. **【王道·卷一-Q06】** 对有 $\displaystyle n$ 个顶点的强连通图，若采用邻接矩阵存储，则其邻接矩阵中至少有（  ）个非零元素。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle n - 1$ &emsp;&emsp; B. $\displaystyle n$ &emsp;&emsp; C. $\displaystyle 2n - 2$ &emsp;&emsp; D. $\displaystyle 2n$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 强连通有向图要求任意两个顶点之间都相互可达。要使边数最少，可以让 $\displaystyle n$ 个顶点构成一个有向环：
+
+$$
+\displaystyle
+v_1\to v_2\to\cdots\to v_n\to v_1
+$$
+
+该图仅有 $\displaystyle n$ 条有向边，但从任意顶点沿环均可到达其他所有顶点，因此是强连通图。
+
+另一方面，强连通图中每个顶点的出度至少为 1，否则该顶点无法到达其他顶点，所以总边数至少为 $\displaystyle n$。邻接矩阵中每条有向边对应一个非零元素，因此至少有 $\displaystyle n$ 个非零元素，选择 B。
+
+</details>
+
+---
+
+3. **【王道·卷二-Q06】** 有向图的邻接矩阵 $\displaystyle A$ 如下所示，在下列说法中，错误的是（  ）。
+
+$$
+\displaystyle
+A=\begin{bmatrix}
+0&1&0&0&0\\
+0&0&0&1&0\\
+0&0&0&1&0\\
+0&0&0&0&1\\
+1&0&0&0&0
+\end{bmatrix}
+$$
+
+I. 图中没有环
+II. 该图的强连通分量的数量为2
+III. 拓扑序列存在
+
+<div className="choice-options">
+<div className="choice-option-row">A. I &emsp;&emsp; B. I、III &emsp;&emsp; C. II、III &emsp;&emsp; D. I、II、III</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 由邻接矩阵可读出有向边：
+
+$$
+\displaystyle
+1\to2,\quad 2\to4,\quad 3\to4,\quad 4\to5,\quad 5\to1
+$$
+
+其中存在有向环
+
+$$
+\displaystyle
+1\to2\to4\to5\to1
+$$
+
+因此 I“图中没有环”错误。由于存在有向环，该图不是有向无环图，所以不存在拓扑序列，III 错误。
+
+顶点 1、2、4、5 之间相互可达，构成一个强连通分量；顶点 3 可以到达该分量，但该分量中的顶点无法返回 3，因此顶点 3 单独构成另一个强连通分量。强连通分量总数为 2，II 正确。
+
+综上，错误的是 I、III，选择 B。
+
+</details>
+
+---
+
+4. **【王道·卷四-Q06】** 对于有向图，其邻接矩阵表示相比邻接表表示更容易进行的操作是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 求一个顶点指向的邻接点 &emsp;&emsp; B. 求一个顶点的度 &emsp;&emsp; C. 深度优先遍历 &emsp;&emsp; D. 广度优先遍历</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 有向图采用邻接矩阵存储时，顶点 $\displaystyle v_i$ 的出度等于第 $\displaystyle i$ 行非零元素的个数，入度等于第 $\displaystyle i$ 列非零元素的个数，因此扫描一行和一列即可求得该顶点的度，时间复杂度为 $\displaystyle O(n)$。
+
+若采用普通邻接表，某顶点的出度可由其边链表直接求得，但求入度需要扫描所有顶点的边链表，时间复杂度为 $\displaystyle O(n+e)$。因此，对于求有向图中一个顶点的总度，邻接矩阵更直接，选择 B。
+
+A 错误：邻接表可直接沿该顶点的边链表访问所有出邻接点，通常比扫描邻接矩阵的一整行更高效。C、D 错误：对稀疏图进行深度优先遍历和广度优先遍历时，邻接表的时间复杂度为 $\displaystyle O(n+e)$，通常优于邻接矩阵的 $\displaystyle O(n^2)$。
+
+</details>
+
+---
+
+### 6.2.2 邻接表法
+
+5. **【王道·卷三-Q07】** 已知一个有向图的邻接表存储结构如右图所示，根据有向图的深度优先遍历算法，从顶点1出发，所得到的顶点序列是（  ）。
+![卷三_Q07_邻接表](/img/questions/408-mock/wangdao-set-03-q07.png)
+
+<div className="choice-options">
+<div className="choice-option-row">A. 1,2,3,5,4 &emsp;&emsp; B. 1,2,3,4,5 &emsp;&emsp; C. 1,3,4,5,2 &emsp;&emsp; D. 1,4,3,5,2</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 按图中各顶点邻接链表的先后次序进行深度优先遍历。
+
+顶点 1 的邻接点依次为 3、2、4，因此从 1 首先访问 3；顶点 3 的邻接点依次为 4、5，所以接着访问 4。顶点 4 没有未访问的邻接点，回溯到 3，再访问 5；顶点 5 的邻接点依次为 2、4，其中 4 已访问，因此访问 2。顶点 2 没有邻接点，随后逐层回溯，剩余邻接点均已访问。
+
+因此遍历序列为：
+
+$$
+\displaystyle
+1,3,4,5,2
+$$
+
+选择 C。深度优先遍历的具体序列不仅取决于图的结构，还取决于邻接表中邻接点的排列顺序。
+
+</details>
+
+---
+
+6. **【竟成·模拟五-07】** 下列关于邻接表和邻接矩阵的叙述中，正确的是（）。
+I. 若邻接表中有奇数个边结点，则对应的图一定是有奇数个结点
+II. 若邻接表中有奇数个边结点，则对应的图一定是无向图
+III. 拥有拓扑序列的图的邻接矩阵必然是一个三角矩阵
+IV. 设有向图有n个顶点和e条边，那么由邻接表求一个顶点的入度的算法的时间复杂度是 $\displaystyle O(n+e)$
+
+<div className="choice-options">
+<div className="choice-option-row">A. 若邻接表中有奇数个边结点，则对应的图一定是有奇数个结点</div>
+<div className="choice-option-row">B. 若邻接表中有奇数个边结点，则对应的图一定是无向图</div>
+<div className="choice-option-row">C. 拥有拓扑序列的图的邻接矩阵必然是一个三角矩阵</div>
+<div className="choice-option-row">D. 设有向图有n个顶点和e条边，那么由邻接表求一个顶点的入度的算法的时间复杂度是 $\displaystyle O(n+e)$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 在有向图的普通邻接表中，每条有向边只对应一个边结点。要计算某个顶点的入度，需要扫描所有顶点的邻接链表，统计该顶点作为弧头出现的次数。扫描顶点表与全部边结点的时间复杂度为：
+
+$$
+\displaystyle
+O(n+e)
+$$
+
+因此 IV 正确，选择 D。
+
+- I 错误：邻接表中边结点数的奇偶性与顶点数的奇偶性没有必然关系。
+- II 错误：无向图的每条边通常在两个端点的邻接链表中各出现一次，因此边结点总数为 $\displaystyle 2e$，一定是偶数。边结点数为奇数时反而不可能是按常规邻接表存储的无向图。
+- III 错误：有拓扑序列只能说明该图是有向无环图。仅当按照某个拓扑序列重新排列顶点编号后，其邻接矩阵才可化为上三角矩阵；在原有任意编号下不一定是三角矩阵。
+
+</details>
+
+---
+
+7. **【竟成·模拟六-05】** 下列关于邻接表和邻接矩阵的叙述中，错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 求有向图的结点的入度必须遍历整个邻接表</div>
+<div className="choice-option-row">B. 在有向图的邻接表中，某个顶点v在链表中出现的次数等于该顶点的入度</div>
+<div className="choice-option-row">C. 若邻接矩阵中的主对角线以下的元素为0，则该图必定存在一个拓扑排序序列</div>
+<div className="choice-option-row">D. 因为有向无环图具有拓扑序列，所以它的邻接矩阵必定是上三角矩阵或下三角矩阵</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 有向无环图一定存在拓扑序列，但其邻接矩阵是否呈三角形取决于顶点的编号顺序。只有将各顶点按照某个拓扑序列重新编号后，所有边才都由序列中较前的顶点指向较后的顶点，此时邻接矩阵可成为上三角矩阵。因此，不能由“存在拓扑序列”直接推出原邻接矩阵必为上三角或下三角矩阵，D 错误。
+
+- A 正确：在未额外保存入度的普通邻接表中，求某顶点入度需要扫描所有边结点。
+- B 正确：顶点 $\displaystyle v$ 每作为某条弧的弧头出现一次，其入度就增加 1，所以它在各邻接链表边结点中出现的次数等于其入度。
+- C 正确：若主对角线以下全为 0，则边只能由编号较小的顶点指向编号较大的顶点，不可能沿有向边回到编号更小的顶点，因而不存在有向环，编号从小到大就是一个拓扑序列。
+
+</details>
+
+---
+
+## 6.3 图的遍历
+
+### 6.3.1 广度优先搜索
+
+8. **【王道·卷八-Q06】** 如右图所示，若从顶点 $\displaystyle A$ 出发进行遍历，则下列序列中既不是深度优先遍历又不是广度优先遍历的序列为（  ）。
+![卷八_Q06_无向图遍历](/img/questions/408-mock/wangdao-set-08-q06.png)
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle A,B,C,E,F,D$ &emsp;&emsp; B. $\displaystyle A,B,E,C,D,F$ &emsp;&emsp; C. $\displaystyle A,E,D,F,C,B$ &emsp;&emsp; D. $\displaystyle A,E,D,C,B,F$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 由图可知，顶点 $\displaystyle A$ 的直接邻接点为 $\displaystyle B,C,E$，其他主要边为 $\displaystyle C-F$、$\displaystyle E-D$、$\displaystyle E-F$、$\displaystyle D-F$。
+
+对广度优先遍历而言，从 $\displaystyle A$ 出发后必须先访问距离 $\displaystyle A$ 为 1 的三个顶点 $\displaystyle B,C,E$，之后才能访问距离为 2 的 $\displaystyle D,F$。因此 A、B 都可通过选择不同的邻接点扫描次序得到；D 在尚未访问 $\displaystyle B,C$ 时就访问了 $\displaystyle D$，不可能是 BFS 序列。
+
+对深度优先遍历而言，C 可沿路径
+
+$$
+\displaystyle
+A\to E\to D\to F\to C
+$$
+
+深入访问，再回溯访问 $\displaystyle B$，所以 C 可以是 DFS 序列。对于 D，访问到 $\displaystyle A,E,D$ 后，顶点 $\displaystyle D$ 尚有未访问邻接点 $\displaystyle F$，深度优先遍历必须先访问 $\displaystyle F$，不可能直接回到 $\displaystyle A$ 再访问 $\displaystyle C$。
+
+因此 D 既不是 DFS 序列，也不是 BFS 序列。
+
+</details>
+
+---
+
+9. **【王道·卷八-Q07】** 在下列关于连通图的BFS和DFS生成树的高度的说法中，正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. BFS生成树的高度小于DFS生成树的高度 &emsp;&emsp; B. BFS生成树的高度小于或等于DFS生成树的高度</div>
+<div className="choice-option-row">C. BFS生成树的高度大于DFS生成树的高度 &emsp;&emsp; D. BFS生成树的高度大于或等于DFS生成树的高度</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 从同一个根顶点出发，BFS 按照到根的最短路径长度逐层访问顶点，因此在 BFS 生成树中，每个顶点的深度都等于它在原图中到根顶点的最短距离。于是 BFS 生成树的高度是以该根为起点的最大最短距离，是所有以该顶点为根的生成树所能达到的最小高度。
+
+DFS 会沿一条路径尽可能深入，其生成树中某些顶点到根的树路径可能不是原图中的最短路径，所以 DFS 生成树的高度不会小于 BFS 生成树的高度，即：
+
+$$
+\displaystyle
+h_{\mathrm{BFS}}\le h_{\mathrm{DFS}}
+$$
+
+两者可能相等，例如原图本身就是一条链或某些树形结构；因此不能使用严格小于，选择 B。
+
+</details>
+
+---
+
+### 6.3.3 图的遍历与图的连通性
+
+10. **【王道·卷一-Q07】** 下列关于有向图 $\displaystyle G$ 的强连通分量特性的叙述中，正确的是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 假设图 $\displaystyle G$ 中有两个不同的强连通分量 $\displaystyle C$ 和 $\displaystyle C^{\prime}$，顶点 $\displaystyle \{u,v\} \in C$，顶点 $\displaystyle \{u^{\prime},v^{\prime}\} \in C^{\prime}$，若存在一条从 $\displaystyle u$ 到 $\displaystyle u^{\prime}$ 的路径，则可能存在一条从 $\displaystyle v^{\prime}$ 到 $\displaystyle v$ 的路径</div>
+<div className="choice-option-row">B. 在图 $\displaystyle G$ 中加入一条新的有向边，若该边的两个顶点都处于同一个强连通分量中，则可能会增加图 $\displaystyle G$ 的强连通分量数量</div>
+<div className="choice-option-row">C. 在图 $\displaystyle G$ 中加入一条新的有向边，若该边的两个顶点 $\displaystyle A$ 和 $\displaystyle A^{\prime}$ 分别处于不同的强连通分量中，且 $\displaystyle A$ 和 $\displaystyle A^{\prime}$ 之间原先没有路径，则添加后可能会增加图 $\displaystyle G$ 的强连通分量数量</div>
+<div className="choice-option-row">D. 在图 $\displaystyle G$ 中加入一条新的有向边，若该边的两个顶点 $\displaystyle A$ 和 $\displaystyle A^{\prime}$ 分别处于不同的强连通分量中，且 $\displaystyle A$ 和 $\displaystyle A^{\prime}$ 之间原先有一条路径，则添加后可能会减少图 $\displaystyle G$ 的强连通分量数量</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 将每个强连通分量缩成一个顶点后，得到的分量图一定是有向无环图。若不同强连通分量之间原来已有一条从 $\displaystyle A$ 所在分量到 $\displaystyle A'$ 所在分量的路径，再加入一条反向返回边，就可能形成有向环，使环上的多个强连通分量合并，从而减少强连通分量的数量。因此 D 正确。
+
+- A 错误：若从 $\displaystyle C$ 可达 $\displaystyle C'$，同时从 $\displaystyle C'$ 又可达 $\displaystyle C$，则两分量中的任意顶点都相互可达，它们本应属于同一个强连通分量。
+- B 错误：在同一强连通分量内部加边不会破坏原有的相互可达关系，强连通分量数不会增加。
+- C 错误：增加有向边只能增加可达关系，不可能把已有强连通分量拆开，因此强连通分量数不可能增加。
+
+</details>
+
+---
+
+11. **【王道·卷三-Q06】** 若 $\displaystyle G$ 是一个有36条边的非连通简单无向图，则图 $\displaystyle G$ 的顶点数至少是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 11 &emsp;&emsp; B. 10 &emsp;&emsp; C. 9 &emsp;&emsp; D. 8</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 要在顶点数固定且图保持非连通的条件下容纳尽可能多的边，应让其中 $\displaystyle n-1$ 个顶点构成完全图，剩余 1 个顶点孤立。此时非连通简单无向图的最大边数为：
+
+$$
+\displaystyle
+\binom{n-1}{2}=\dfrac{(n-1)(n-2)}{2}
+$$
+
+题目要求边数至少能达到 36，因此：
+
+$$
+\displaystyle
+\dfrac{(n-1)(n-2)}{2}\ge 36
+$$
+
+当 $\displaystyle n=9$ 时，最大边数为
+
+$$
+\displaystyle
+\binom{8}{2}=28<36
+$$
+
+当 $\displaystyle n=10$ 时，可由 9 个顶点构成完全图 $\displaystyle K_9$，另有 1 个孤立顶点，边数恰为
+
+$$
+\displaystyle
+\binom{9}{2}=36
+$$
+
+因此顶点数至少为 10，选择 B。
+
+</details>
+
+---
+
+12. **【王道·卷六-Q07】** 在下列几种算法中，（  ）可以用于求无向图的连通分量。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 广度优先遍历 &emsp;&emsp; B. 拓扑排序 &emsp;&emsp; C. 求最短路径 &emsp;&emsp; D. 求关键路径</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 对无向图中任意一个尚未访问的顶点执行一次 BFS，可以访问到与该顶点连通的全部顶点，这些顶点恰好组成一个连通分量。随后继续从另一个未访问顶点启动 BFS，每启动一次就得到一个新的连通分量，直到所有顶点均被访问。
+
+因此，遍历整个图时 BFS 的启动次数就是连通分量数，选择 A。DFS 同样可以完成该任务，但不在选项中。拓扑排序和关键路径只适用于有向无环图；最短路径算法的主要目标是计算距离，并非求连通分量的标准方法。
+
+</details>
+
+---
+
+13. **【竟成·模拟七-07】** 下列关于图的说法错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 强连通的有向图的任何顶点到其他所有顶点都有弧</div>
+<div className="choice-option-row">B. 有向完全图一定是强连通有向图</div>
+<div className="choice-option-row">C. DFS生成树的高度一般不小于BFS生成树的高度</div>
+<div className="choice-option-row">D. 当各边上的权值相同时，BFS算法可用来解决单源最短路径问题</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 强连通只要求任意两个顶点之间都存在有向路径，并不要求任意两个不同顶点之间都有直接的弧。例如，一个由所有顶点组成的有向环就是强连通图，但每个顶点通常只直接指向下一个顶点。因此 A 错误。
+
+- B 正确：有向完全图中任意两个不同顶点之间都存在双向弧，显然任意两点相互可达，因此一定强连通。
+- C 正确：BFS 生成树按最短距离分层，其高度是以起点为根的生成树可能达到的最小高度；DFS 生成树高度一般不小于它。
+- D 正确：当所有边权相等时，路径总权值与经过的边数成正比，BFS 按边数由少到多访问顶点，可以求单源最短路径。
+
+</details>
+
+---
+
+## 6.4 图的应用
+
+### 6.4.1 最小生成树
+
+14. **【王道·卷五-Q06】** 使用Kruskal算法求解最小生成树时，为了设计高效的算法，数据结构方面可以（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 利用最小堆存储边 &emsp;&emsp; B. 利用栈存储结点 &emsp;&emsp; C. 利用二维数组存储结点 &emsp;&emsp; D. 利用并查集存储边</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** Kruskal 算法需要反复从尚未处理的边中选择权值最小的边。若用最小堆存储全部边，则每次可在 $\displaystyle O(\log e)$ 时间内删除并取得当前最小边，从而高效完成按边权递增的处理过程，因此 A 正确。
+
+Kruskal 算法还常用并查集判断一条候选边的两个端点是否已处于同一连通分量，但并查集存储和维护的是顶点所属的集合，而不是“存储边”，所以 D 的表述错误。栈和二维数组都不能高效支持反复取得最小权边这一核心操作。
+
+</details>
+
+---
+
+15. **【王道·卷五-Q07】** 相比邻接矩阵，下列算法使用邻接表效率更高的是（  ）。
+I. 拓扑排序 II. 广度优先搜索 III. 深度优先搜索 IV. 普里姆算法
+
+<div className="choice-options">
+<div className="choice-option-row">A. II、III &emsp;&emsp; B. I、II &emsp;&emsp; C. I、II、III、IV &emsp;&emsp; D. II</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 邻接矩阵无论图中实际有多少条边，通常都需要按顶点数规模扫描矩阵；邻接表只保存实际存在的边，在稀疏图中可以避免大量无效检查。
+
+- 拓扑排序：采用邻接表时，每个顶点和每条边至多处理一次，时间复杂度为 $\displaystyle O(n+e)$；采用邻接矩阵时通常为 $\displaystyle O(n^2)$。
+- 广度优先搜索与深度优先搜索：邻接表的时间复杂度均为 $\displaystyle O(n+e)$，邻接矩阵为 $\displaystyle O(n^2)$。
+- Prim 算法：邻接矩阵的常见实现为 $\displaystyle O(n^2)$；邻接表结合最小堆时可达到 $\displaystyle O(e\log n)$，对稀疏图通常更高效。
+
+因此 I、II、III、IV 均符合，选择 C。需要注意，若图非常稠密，邻接矩阵实现的 Prim 算法也可能具有较好的实际效率，但题目比较的是邻接表在适用场景中的效率优势。
+
+</details>
+
+---
+
+16. **【竟成·模拟一-07】** 对下图(a)使用Prim算法求最小生成树，对下图(b)使用Kruskal算法求最小生成树。若分别以结点a和结点f作为所得最小生成树的根结点，则这两个最小生成树（忽略权值）构成的森林对应的二叉树不可能是（）。
+![第1套第7题图](/img/questions/408-mock/jingcheng-set-01-q07.png)
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 先分别求两幅图的最小生成树。
+
+对图 (a) 从结点 $\displaystyle a$ 开始执行 Prim 算法，可选出的边为：
+
+$$
+\displaystyle
+(a,c),(a,e),(c,d),(d,b)
+$$
+
+对应的根树以 $\displaystyle a$ 为根，其结构为：$\displaystyle a$ 的孩子是 $\displaystyle c,e$，$\displaystyle c$ 的孩子是 $\displaystyle d$，$\displaystyle d$ 的孩子是 $\displaystyle b$。其中孩子之间的先后次序可以互换，但父子关系不能改变。
+
+对图 (b) 执行 Kruskal 算法，按边权从小到大选边：先选 $\displaystyle (f,k)$，再选 $\displaystyle (f,h)$，权值为 8 的 $\displaystyle (k,h)$ 会形成环而舍弃，随后选 $\displaystyle (k,g)$。因此最小生成树的边为：
+
+$$
+\displaystyle
+(f,k),(f,h),(k,g)
+$$
+
+以 $\displaystyle f$ 为根时，$\displaystyle f$ 的孩子是 $\displaystyle k,h$，$\displaystyle k$ 的孩子是 $\displaystyle g$。
+
+将森林转换为二叉树时采用“左孩子—右兄弟”规则：左指针指向第一个孩子，右指针指向下一个兄弟。A、B、D 均可通过调整森林中树的排列次序及同层孩子次序得到。C 所对应的第一棵根树中，结点 $\displaystyle c$ 的孩子关系被表示成含有 $\displaystyle b,d$，与图 (a) 的最小生成树中 $\displaystyle c\to d\to b$ 的父子链不一致，因此不可能得到 C。
+
+</details>
+
+---
+
+17. **【竟成·模拟二-05】** 下列关于最小生成树的叙述中，错误的是（）。
+I. 无向连通图中任何一个边数最少且连通所有顶点的子图都是该图的生成树
+II. 不同的求最小生成树的方式得到的结果都是相同的
+III. 在图G的最小生成树G'中，某条边的权值有可能会大于某条未入选边的权值
+IV. 生成树就是最小生成树
+
+<div className="choice-options">
+<div className="choice-option-row">A. IV &emsp;&emsp; B. II、III、IV &emsp;&emsp; C. II、IV &emsp;&emsp; D. II</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 逐项判断如下。
+
+- I 正确。含有 $\displaystyle n$ 个顶点的无向连通图中，连通全部顶点所需的最少边数为 $\displaystyle n-1$。边数为 $\displaystyle n-1$ 且连通的生成子图不含环，因此就是生成树。
+- II 错误。当图中存在相同权值的边时，最小生成树可能不唯一，不同算法或不同的选边次序可能得到结构不同但总权值相同的最小生成树。
+- III 正确。某条未入选边只需在其对应环或割中不优于相关替代边，并不要求它大于最小生成树中的每一条边。因此，最小生成树中某条必选的较大权值边，完全可能大于另一处某条未入选的较小权值边。
+- IV 错误。生成树只要求连通所有顶点且无环；最小生成树还要求所有生成树中边权总和最小。
+
+因此错误的是 II、IV，选择 C。
+
+</details>
+
+---
+
+18. **【竟成·模拟七-08】** 下列关于最小生成树的叙述中，错误的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 设(u,v)是连通图G中的权重最小的边，那么(u,v)是G的某棵最小生成树中的一条边</div>
+<div className="choice-option-row">B. 设e是连通图G=(V,E)的某条环路上权重最大的边，那么图G中存在一棵不包含边e的最小生成树</div>
+<div className="choice-option-row">C. 若图的所有边的权重有正有负，则任一连接所有结点且总权重最小的一个边集合必然形成一棵树</div>
+<div className="choice-option-row">D. 若T是图G的一棵最小生成树，如果减小了T中的一条边的权重，那么T仍然是G的一棵最小生成树</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** C 错误。若允许在“连接所有结点的边集合”中保留环，而图中又存在负权边，则在已经连通的基础上继续加入某些负权边，可能使总权值进一步减小。此时总权值最小的连通边集合可能包含环，不一定是一棵树。最小生成树的定义本身要求选出的子图是树，而不能简单地将“任意最小权连通边集”等同于最小生成树。
+
+- A 正确。取包含该最小权边的一个割，根据割性质，该边可出现在某棵最小生成树中；若存在并列最小边，也至少能构造一棵包含它的最小生成树。
+- B 正确。根据环性质，环上权重最大的边可以从某棵最小生成树中排除；若最大权边不唯一，则至少存在一棵最小生成树不含指定的这条最大权边。
+- D 正确。设原最小生成树为 $\displaystyle T$，降低 $\displaystyle T$ 中一条边的权值只会使 $\displaystyle T$ 的总权值下降。任何其他生成树若也含该边，则下降量相同；若不含该边，则权值不变。因此不会出现其他生成树反而比 $\displaystyle T$ 更优的情况。
+
+</details>
+
+---
+
+### 6.4.2 最短路径
+
+19. **【王道·卷四-Q07】** Dijkstra算法（  ）求图中从某顶点到其余顶点的最短路径。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 按长度递减的顺序 &emsp;&emsp; B. 按长度递增的顺序 &emsp;&emsp; C. 通过深度优先遍历 &emsp;&emsp; D. 通过广度优先遍历</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** Dijkstra 算法维护源点到各顶点的当前最短距离估计值。每一轮从尚未确定最短距离的顶点中，选择距离源点最近的顶点，将其最短距离正式确定，再利用该顶点对其他顶点进行松弛。
+
+因此，各顶点的最短路径长度是按照非递减顺序依次确定的，即按长度递增的顺序求出，选择 B。Dijkstra 算法并不是简单的 DFS 或 BFS；只有在所有边权相同时，BFS 才能直接求单源最短路径。
+
+</details>
+
+---
+
+20. **【竟成·模拟二-06】** 下列关于最短路径的叙述中，错误的是（）。
+I. 在Floyd算法求解各顶点间的最短路径时，每个表示两点间路径的$\displaystyle \mathrm{path}^{k-1}$[i,j]的非无穷元素的集合一定是$\displaystyle \mathrm{path}^k$[i,j]的非无穷元素集合的子集
+II. Floyd算法不能处理有负权回路的图
+III. Floyd算法不能处理负权图
+
+<div className="choice-options">
+<div className="choice-option-row">A. II、III &emsp;&emsp; B. I、III &emsp;&emsp; C. I、II、III &emsp;&emsp; D. I、II</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** I、III 错误，II 正确。
+
+- I 错误。Floyd 算法在允许新增中间顶点 $\displaystyle k$ 后，原来的最短路径可能被一条完全不同的新路径替代。新路径上的顶点或边集合不必包含旧路径上的顶点或边集合，因此具体最短路径集合并不存在必然的包含关系。应注意，若讨论的是距离矩阵，则 $\displaystyle dist^{(k)}[i][j]$ 不会大于 $\displaystyle dist^{(k-1)}[i][j]$；但这不等于两条具体路径的组成元素具有子集关系。
+- II 正确。存在可达负权回路时，可以反复经过该回路使路径长度无限减小，有限的最短路径不再存在，因此 Floyd 算法不能给出正常的最短路径结果。实际可通过最终出现 $\displaystyle dist[i][i]<0$ 来检测负权回路。
+- III 错误。Floyd 算法可以处理含负权边的图，只要不存在负权回路。
+
+因此错误的是 I、III，选择 B。
+
+</details>
+
+---
+
+21. **【竟成·模拟三-07】** 用Floyd算法求下图的最短路径，得到的dist矩阵结果是（）。
+![第3套第7题图](/img/questions/408-mock/jingcheng-set-03-q07.png)
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 图中各有向边的权值均为 1，可读出有向边：
+
+$$
+\displaystyle
+4\to1,\quad 2\to4,\quad 2\to3,\quad 3\to2,\quad 4\to3
+$$
+
+分别计算各顶点到其他顶点的最短距离：
+
+- 从 1 出发不能到达其他顶点，因此第一行为 $\displaystyle (0,\infty,\infty,\infty)$。
+- 从 2 出发：$\displaystyle 2\to4\to1$ 长度为 2，$\displaystyle 2\to3$ 长度为 1，$\displaystyle 2\to4$ 长度为 1。
+- 从 3 出发：$\displaystyle 3\to2\to4\to1$ 长度为 3，$\displaystyle 3\to2$ 长度为 1，$\displaystyle 3\to2\to4$ 长度为 2。
+- 从 4 出发：$\displaystyle 4\to1$ 长度为 1，$\displaystyle 4\to3\to2$ 长度为 2，$\displaystyle 4\to3$ 长度为 1。
+
+因此最终距离矩阵为：
+
+$$
+\displaystyle
+\begin{bmatrix}
+0 & \infty & \infty & \infty\\
+2 & 0 & 1 & 1\\
+3 & 1 & 0 & 2\\
+1 & 2 & 1 & 0
+\end{bmatrix}
+$$
+
+与选项 D 相同。
+
+</details>
+
+---
+
+### 6.4.4 拓扑排序
+
+22. **【竟成·模拟四-06】** 下列有关拓扑排序的说法，正确的是（）。
+I. 不是所有的AOV图都只有一个拓扑排序。
+II. 若一个有向图无环，则它一定有唯一的拓扑序列。
+III. 在拓扑序列中，任意两个相继结点$\displaystyle V_i$和$\displaystyle V_j$都存在从$\displaystyle V_i$到$\displaystyle V_j$的路径。
+IV. 即使有向无环图拓扑序列唯一，也不能唯一确定该图。
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II、IV &emsp;&emsp; B. I、III、IV &emsp;&emsp; C. I、II、III、IV &emsp;&emsp; D. I、IV</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 逐项判断如下。
+
+- I 正确。一个 AOV 网可能同时存在多个入度为 0 的顶点，选择它们的先后次序不同，就可能得到多个拓扑序列。
+- II 错误。有向无环图一定存在拓扑序列，但不一定唯一。
+- III 错误。拓扑序列中相邻的两个顶点只表示它们在该线性序列中的位置相邻，不保证二者之间存在边或路径。
+- IV 正确。即使拓扑序列唯一，也只能确定所有顶点必须满足的先后关系，不能确定图中究竟存在多少条边。例如，在保持同一唯一拓扑次序的前提下，可以增加某些不改变偏序关系的传递边，得到不同的有向无环图。
+
+因此正确的是 I、IV，选择 D。
+
+</details>
+
+---
+
+23. **【竟成·模拟五-06】** 下列关于拓扑排序的叙述正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 一个有向无环图的拓扑序列一定是唯一的</div>
+<div className="choice-option-row">B. 有向连通图G拓扑序列中，若顶点$\displaystyle V_i$在顶点$\displaystyle V_j$之前，则存在弧&lt;$\displaystyle V_i$,$\displaystyle V_j$></div>
+<div className="choice-option-row">C. 有向连通图G拓扑序列中，若顶点$\displaystyle V_i$在顶点$\displaystyle V_j$之前，则不存在$\displaystyle V_i$到$\displaystyle V_j$的路径</div>
+<div className="choice-option-row">D. 有向连通图G拓扑序列中，若顶点$\displaystyle V_i$在顶点$\displaystyle V_j$之前，则不存在$\displaystyle V_j$到$\displaystyle V_i$的路径</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 在一个合法的拓扑序列中，若存在从 $\displaystyle V_j$ 到 $\displaystyle V_i$ 的路径，则路径上的每一条边都要求 $\displaystyle V_j$ 排在 $\displaystyle V_i$ 之前，这与题设中 $\displaystyle V_i$ 排在 $\displaystyle V_j$ 之前矛盾。因此不存在从 $\displaystyle V_j$ 到 $\displaystyle V_i$ 的路径，D 正确。
+
+- A 错误。有向无环图的拓扑序列可能有多个。
+- B 错误。$\displaystyle V_i$ 排在 $\displaystyle V_j$ 之前并不意味着二者之间一定有直接弧。
+- C 错误。$\displaystyle V_i$ 排在 $\displaystyle V_j$ 之前时，可能存在从 $\displaystyle V_i$ 到 $\displaystyle V_j$ 的路径，也可能不存在；拓扑序列只禁止逆向路径。
+
+</details>
+
+---
+
+24. **【竟成·模拟七-09】** 给定如下图所示的有向图，该图的拓扑排序有序序列的个数是（）。
+![第7套第9题图](/img/questions/408-mock/jingcheng-set-07-q09.png)
+
+<div className="choice-options">
+<div className="choice-option-row">A. 5 &emsp;&emsp; B. 6 &emsp;&emsp; C. 7 &emsp;&emsp; D. 8</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 由图可读出主要先后约束：
+
+$$
+\displaystyle
+P\to0,\quad P\to E,\quad P\to S,
+$$
+
+$$
+\displaystyle
+0\to R,\quad 0\to V,\quad 0\to S,
+$$
+
+$$
+\displaystyle
+R\to Y,\quad Y\to V,\quad V\to W,\quad W\to E
+$$
+
+因为 $\displaystyle P$ 是唯一的初始入度为 0 的顶点，所以第一个顶点只能是 $\displaystyle P$；随后只有顶点 0 的入度变为 0，因此第二个顶点只能是 0。此后形成固定链：
+
+$$
+\displaystyle
+R\to Y\to V\to W\to E
+$$
+
+顶点 $\displaystyle S$ 在 $\displaystyle P$ 和 0 均已出现后即可插入该链的任意位置。链中共有 5 个顶点，因此 $\displaystyle S$ 可放在链前、任意两个相邻顶点之间或链后，共有：
+
+$$
+\displaystyle
+5+1=6
+$$
+
+个位置。因此拓扑序列共有 6 个，选择 B。
+
+</details>
+
+---
+
+### 6.4.5 关键路径
+
+25. **【王道·卷二-Q07】** 在下面的AOE网中，时间余量最大的活动的时间余量是（  ）。
+![卷二_Q07_AOE网](/img/questions/408-mock/wangdao-set-02-q07.png)
+
+<div className="choice-options">
+<div className="choice-option-row">A. 5 &emsp;&emsp; B. 6 &emsp;&emsp; C. 3 &emsp;&emsp; D. 4</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 先计算各事件的最早发生时间和最迟发生时间。
+
+设源点事件为 A，汇点事件为 F。按拓扑顺序计算最早发生时间：
+
+$$
+\displaystyle
+\begin{aligned}
+ve(A)&=0,\\
+ve(B)&=0+5=5,\\
+ve(C)&=0+5=5,\\
+ve(D)&=\max\{0+7,\,5+1\}=7,\\
+ve(E)&=5+5=10,\\
+ve(F)&=\max\{5+2,\,7+4,\,10+3\}=13.
+\end{aligned}
+$$
+
+再逆拓扑计算各事件的最迟发生时间：
+
+$$
+\displaystyle
+\begin{aligned}
+vl(F)&=13,\\
+vl(B)&=13-2=11,\\
+vl(D)&=13-4=9,\\
+vl(E)&=13-3=10,\\
+vl(C)&=\min\{9-1,\,10-5\}=5,\\
+vl(A)&=\min\{11-5,\,5-5,\,9-7\}=0.
+\end{aligned}
+$$
+
+活动 $\displaystyle \langle u,v\rangle$ 的时间余量为：
+
+$$
+\displaystyle
+d=vl(v)-w(u,v)-ve(u)
+$$
+
+各活动的时间余量分别为：
+
+| 活动         |      时间余量 |
+| ------------ | ------------: |
+| $\displaystyle a:A\to B$ |  $\displaystyle 11-5-0=6$ |
+| $\displaystyle b:A\to C$ |   $\displaystyle 5-5-0=0$ |
+| $\displaystyle c:A\to D$ |   $\displaystyle 9-7-0=2$ |
+| $\displaystyle d:C\to D$ |   $\displaystyle 9-1-5=3$ |
+| $\displaystyle e:C\to E$ |  $\displaystyle 10-5-5=0$ |
+| $\displaystyle f:E\to F$ | $\displaystyle 13-3-10=0$ |
+| $\displaystyle g:B\to F$ |  $\displaystyle 13-2-5=6$ |
+| $\displaystyle h:D\to F$ |  $\displaystyle 13-4-7=2$ |
+
+最大时间余量为 $\displaystyle 6$，故选 B。
+
+</details>
+
+---
+
+26. **【竟成·模拟四-09】** 下列关于关键路径的叙述中，正确的是（）。
+I. 在AOE网中，关键路径上某个活动的时间缩短，整个工程的时间也必定缩短
+II. 在AOE网中，关键路径上活动的时间延长多少，整个工程的时间也就延长多少
+III. 缩短非关键路径上的活动的时间可能会影响工程的总体时间
+
+<div className="choice-options">
+<div className="choice-option-row">A. I、II、III &emsp;&emsp; B. II、III &emsp;&emsp; C. III &emsp;&emsp; D. II</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 逐项判断如下。
+
+- I 错误。若 AOE 网中存在多条关键路径，缩短其中一条关键路径上的某个活动后，其他未被缩短的关键路径仍决定工程总工期，因此工程时间不一定缩短。即使只有一条关键路径，缩短量超过该活动所在路径与次长路径之间的差值后，工程工期也不会继续按相同幅度缩短。
+- II 正确。关键路径长度就是工程的最短完成时间。关键路径上某个活动延长 $\displaystyle x$ 个时间单位后，至少有一条原关键路径的长度增加为原工期加 $\displaystyle x$，而其他路径长度均不会超过该新长度，因此整个工程时间也延长 $\displaystyle x$。
+- III 错误。非关键路径的长度小于关键路径长度。单纯缩短非关键路径上的活动，只会使该路径更短，不会改变原关键路径的长度，因此不能缩短工程总工期。
+
+因此只有 II 正确，选择 D。
+
+</details>
+
+---
+
+27. **【竟成·模拟六-06】** 下图的关键路径长度是（）。
+![第6套第6题图](/img/questions/408-mock/jingcheng-set-06-q06.png)
+
+<div className="choice-options">
+<div className="choice-option-row">A. 16 &emsp;&emsp; B. 15 &emsp;&emsp; C. 18 &emsp;&emsp; D. 20</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** A
+
+**解析：** 关键路径长度等于从源点到汇点的最长路径长度。按拓扑顺序计算各事件的最早发生时间。
+
+图中左下方结点应为 $\displaystyle V_5$，中间右侧结点为 $\displaystyle V_6$。计算如下：
+
+$$
+\displaystyle
+\begin{aligned}
+ve(V_1)&=0,\\
+ve(V_2)&=0+2=2,\\
+ve(V_3)&=\max\{0+5,\,2+2\}=5,\\
+ve(V_4)&=2+3=5,\\
+ve(V_5)&=\max\{0+5,\,5+1\}=6,\\
+ve(V_6)&=\max\{5+3,\,5+2\}=8,\\
+ve(V_7)&=\max\{6+6,\,8+3\}=12,\\
+ve(V_8)&=8+4=12,\\
+ve(V_9)&=\max\{12+4,\,12+2\}=16.
+\end{aligned}
+$$
+
+因而汇点 $\displaystyle V_9$ 的最早发生时间为 $\displaystyle 16$，即关键路径长度为 $\displaystyle 16$。例如最长路径可取：
+
+$$
+\displaystyle
+V_1\to V_3\to V_5\to V_7\to V_9
+$$
+
+其长度为：
+
+$$
+\displaystyle
+5+1+6+4=16
+$$
+
+故选 A。
+
+</details>

@@ -1,0 +1,179 @@
+---
+sidebar_position: 4
+title: 第4章 串
+---
+
+{/* 此文件由 scripts/convert-408-mock-exercises.mjs 自动生成，请勿直接修改。 */}
+
+# 第4章 串
+
+## 4.2 串的模式匹配
+
+### 4.2.2 串的模式匹配算法——KMP算法
+
+1. **【王道·卷六-Q04】** 在使用KMP算法进行模式匹配的过程中，如果某趟匹配失败，i指示主串中失配的位置，j指示模式串中失配的位置，若 $\displaystyle k = next[j], k^{\prime} = next[i]$，则下一趟匹配比较时，模式串的第（  ）位与主串中的第i位对齐。
+
+<div className="choice-options">
+<div className="choice-option-row">A. $\displaystyle j + 1$ &emsp;&emsp; B. $\displaystyle k$ &emsp;&emsp; C. $\displaystyle k^{\prime}$ &emsp;&emsp; D. $\displaystyle j - 1$</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** KMP 算法发生失配时，主串指针 $\displaystyle i$ 不回退，模式串指针由 $\displaystyle j$ 调整为
+
+$$
+\displaystyle
+j=next[j]=k
+$$
+
+因此下一趟比较时，模式串的第 $\displaystyle k$ 位与主串中当前失配位置的第 $\displaystyle i$ 位对齐，选择 B。
+
+$\displaystyle next$ 数组是根据模式串自身的前缀和后缀关系得到的，与主串下标 $\displaystyle i$ 无关，所以 $\displaystyle next[i]$ 在这里没有意义；A、D 也不能利用已经匹配成功的前后缀信息。
+
+</details>
+
+---
+
+2. **【王道·卷七-Q04】** 串'acaba'的next数组值为（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 01234 &emsp;&emsp; B. 01212 &emsp;&emsp; C. 01121 &emsp;&emsp; D. 01230</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 采用题目所用的 1 起始下标约定，令 $\displaystyle next[1]=0$，并根据当前位置之前子串的最长相等真前缀和真后缀确定其余值。
+
+- $\displaystyle next[1]=0$；
+- $\displaystyle next[2]=1$，这是约定的初始值；
+- 求 $\displaystyle next[3]$ 时考查子串 `ac`，不存在非空的相等真前缀和真后缀，因此为 1；
+- 求 $\displaystyle next[4]$ 时考查子串 `aca`，最长相等真前缀和真后缀均为 `a`，长度为 1，因此 $\displaystyle next[4]=2$；
+- 求 $\displaystyle next[5]$ 时考查子串 `acab`，不存在非空的相等真前缀和真后缀，因此为 1。
+
+所以 next 数组为
+
+$$
+\displaystyle
+0,1,1,2,1
+$$
+
+即 `01121`，选择 C。
+
+</details>
+
+---
+
+### 4.2.3 KMP算法的进一步优化
+
+3. **【王道·卷八-Q04】** 已知字符串 $\displaystyle S$ 为"aabaabcabc"，模式串 $\displaystyle T$ 为"aaabc"。使用nextval优化后的KMP算法进行匹配，匹配到 $\displaystyle i = 2$ 且 $\displaystyle j = 2$ 时，失配 $\displaystyle (S[i]\neq T[j])$。则下次开始匹配时，i和 $\displaystyle j$ 分别是（  ）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 2和2 &emsp;&emsp; B. 2和1 &emsp;&emsp; C. 3和0 &emsp;&emsp; D. 3和2</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** C
+
+**解析：** 模式串 $\displaystyle T=\text{"aaabc"}$ 的前 3 个字符均为 `a`。当 $\displaystyle i=2,j=2$ 时，主串字符为 `b`，模式串字符为 `a`，发生失配。若按普通 next 数组逐级回退，还会重复拿同一个主串字符 `b` 与前面的 `a` 比较；nextval 的作用正是跳过这种必然再次失配的比较。
+
+对该位置有
+
+$$
+\displaystyle
+nextval[2]=-1
+$$
+
+失配后先令 $\displaystyle j=-1$，随后按照 KMP 主循环的规则，在 $\displaystyle j=-1$ 时同时执行 $\displaystyle i++$ 和 $\displaystyle j++$，于是下一次真正开始字符比较时
+
+$$
+\displaystyle
+i=3,\qquad j=0
+$$
+
+因此选择 C。
+
+</details>
+
+---
+
+4. **【竟成·模拟一-08】** 已知模式串为"ababac"，主串为"cbabababac"。在KMP算法匹配过程中，第一次出现"失配"时，i=j=0。则下列描述正确的是（）。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 当主串第1个字符'c'与模式串第1个字符'a'发生失配时，模式串指针应移动到next[0]的位置，主串指针不变</div>
+<div className="choice-option-row">B. 模式串"ababac"的nextval数组为[-1,0,0,1,2,3]</div>
+<div className="choice-option-row">C. 当主串第8个字符'b'与模式串第6个字符'c'失配后，下次开始匹配时，主串指针i=7，模式串指针j=-1</div>
+<div className="choice-option-row">D. 整个匹配过程中，字符比较的总次数为11次</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** D
+
+**解析：** 模式串 `ababac` 的普通 next 数组为 `[-1,0,0,1,2,3]`，而优化后的 nextval 数组为
+
+$$
+\displaystyle
+[-1,0,-1,0,-1,3]
+$$
+
+因此 B 把普通 next 数组误当成了 nextval 数组。
+
+按 nextval 进行匹配并统计字符比较次数：
+
+1. 主串第 1 个字符 `c` 与模式串第 1 个字符 `a` 比较，失配，累计 1 次；随后有效状态变为 $\displaystyle i=1,j=0$。
+2. 主串第 2 个字符 `b` 与模式串第 1 个字符 `a` 比较，失配，累计 2 次；随后变为 $\displaystyle i=2,j=0$。
+3. 主串第 3～7 个字符 `ababa` 与模式串前 5 个字符 `ababa` 依次匹配，共增加 5 次，累计 7 次。
+4. 主串第 8 个字符 `b` 与模式串第 6 个字符 `c` 失配，累计 8 次。此时 $\displaystyle j=nextval[5]=3$，而不是 $\displaystyle -1$，所以 C 错误。
+5. 保持主串指针不变，主串第 8 个字符 `b` 再与模式串第 4 个字符 `b` 比较，随后第 9 个字符 `a`、第 10 个字符 `c` 继续匹配，共增加 3 次。
+
+因而总比较次数为
+
+$$
+\displaystyle
+8+3=11
+$$
+
+D 正确。A 只描述了将 $\displaystyle j$ 暂时置为 $\displaystyle next[0]=-1$ 的中间状态；下一次真正进行字符比较前，算法还会令主串指针前移并将 $\displaystyle j$ 恢复为 0，因此不能说主串指针始终不变。
+
+</details>
+
+---
+
+5. **【竟成·模拟六-03】** 已知字符串S为"abaacaadaafa"，模式串P为"aada"。采用KMP算法结合nextval数组进行匹配，匹配成功时共进行（）次比较。
+
+<div className="choice-options">
+<div className="choice-option-row">A. 11 &emsp;&emsp; B. 12 &emsp;&emsp; C. 13 &emsp;&emsp; D. 14</div>
+</div>
+
+<details>
+<summary>查看答案与解析</summary>
+
+**答案：** B
+
+**解析：** 模式串为 `aada`。采用从 1 开始编号的 KMP 约定，其 nextval 数组为
+
+$$
+\displaystyle
+nextval=[0,0,2,0]
+$$
+
+按题目所采用的算法判定口径，匹配过程如下：
+
+1. 主串第 1 个字符 `a` 与模式串第 1 个字符 `a` 匹配。
+2. 主串第 2 个字符 `b` 与模式串第 2 个字符 `a` 失配，模式串指针回退到 0；随后主串指针前移。
+3. 从主串第 3 个字符开始，`a`、`a` 分别与模式串前两个 `a` 匹配。
+4. 主串第 5 个字符 `c` 与模式串第 3 个字符 `d` 失配，模式串指针退到第 2 个字符；`c` 再与 `a` 失配，模式串指针再次退到 0，随后主串指针前移。
+5. 从主串第 6 个字符开始，子串 `aada` 与模式串完整匹配。
+
+整个过程中，按 KMP 主循环中的比较判定次数统计，共进行 12 次比较，因此选择 B。nextval 的作用是跳过模式串中必然会再次失配的位置，避免无意义的重复回退。
+
+</details>

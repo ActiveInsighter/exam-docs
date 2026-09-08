@@ -1,0 +1,444 @@
+---
+id: 006-spiral-matrix-ii
+title: 006_螺旋矩阵II
+sidebar_label: 006_螺旋矩阵II
+sidebar_position: 6
+description: LeetCode 59 螺旋矩阵 II，讲解按圈模拟、边界收缩和循环不变量。
+tags:
+  - 数组
+  - 矩阵
+  - 模拟
+  - LeetCode
+---
+
+
+# 螺旋矩阵 II
+
+[力扣题目链接](https://leetcode.cn/problems/spiral-matrix-ii/)
+
+给定一个正整数 `n`，生成一个包含 `1` 到 `n^2` 所有元素，且元素按顺时针顺序螺旋排列的 `n x n` 正方形矩阵。
+
+## 题目描述
+
+示例：
+
+```text
+输入：n = 3
+输出：
+[
+  [1, 2, 3],
+  [8, 9, 4],
+  [7, 6, 5]
+]
+```
+
+本题不难在算法思想上理解，但非常考验边界处理。很多模拟题写乱，往往不是因为思路错了，而是因为每一条边的遍历规则不统一。
+
+## 核心思想：按圈模拟
+
+顺时针填充矩阵，可以一圈一圈地完成。每一圈分成四条边：
+
+1. 从左到右填充上边；
+2. 从上到下填充右边；
+3. 从右到左填充下边；
+4. 从下到上填充左边。
+
+填完外圈后，起点向右下角移动一格，继续填下一圈。
+
+:::info[配图 TODO]
+这里建议补一张图：用四种颜色标出一圈的四条边，并标注“左闭右开”的遍历规则。拐角元素交给下一条边处理，避免重复填充。
+:::
+
+## 循环不变量：统一边界规则
+
+本题最重要的原则是：**每条边都按同一种开闭区间规则处理**。
+
+这里采用“左闭右开”的思想：每条边都填当前边的起点，不填当前边的终点，把拐角位置留给下一条边。
+
+例如一圈的四条边可以理解为：
+
+| 边 | 方向 | 遍历规则 |
+| :--- | :--- | :--- |
+| 上边 | 左到右 | 填左端，不填右上角 |
+| 右边 | 上到下 | 填右上角，不填右下角 |
+| 下边 | 右到左 | 填右下角，不填左下角 |
+| 左边 | 下到上 | 填左下角，不填左上角 |
+
+这样每个拐角只会被填一次，代码也更容易保持一致。
+
+## 变量设计
+
+| 变量 | 含义 |
+| :--- | :--- |
+| `res` | 答案矩阵 |
+| `startX` | 当前圈左上角的行下标 |
+| `startY` | 当前圈左上角的列下标 |
+| `loop` | 需要完整填充的圈数，等于 `n / 2` |
+| `mid` | 当 `n` 为奇数时，中心点下标 |
+| `offset` | 控制当前圈右边界和下边界收缩的位置 |
+| `count` | 当前要填入的数字 |
+
+当 `n` 是奇数时，中间还剩一个格子没有被任何完整圈覆盖，需要单独填充。
+
+## 推荐写法：按圈填充
+
+```cpp title="按圈模拟：统一左闭右开" {13-31}
+class Solution {
+public:
+    vector<vector<int>> generateMatrix(int n) {
+        vector<vector<int>> res(n, vector<int>(n, 0));
+
+        int startX = 0;
+        int startY = 0;
+        int loop = n / 2;
+        int mid = n / 2;
+        int offset = 1;
+        int count = 1;
+
+        while (loop--) {
+            int row = startX;
+            int col = startY;
+
+            for (; col < n - offset; col++) {
+                res[row][col] = count++;
+            }
+
+            for (; row < n - offset; row++) {
+                res[row][col] = count++;
+            }
+
+            for (; col > startY; col--) {
+                res[row][col] = count++;
+            }
+
+            for (; row > startX; row--) {
+                res[row][col] = count++;
+            }
+
+            startX++;
+            startY++;
+            offset++;
+        }
+
+        if (n % 2 == 1) {
+            res[mid][mid] = count;
+        }
+
+        return res;
+    }
+};
+```
+
+复杂度分析：
+
+| 指标 | 复杂度 | 说明 |
+| :--- | :--- | :--- |
+| 时间复杂度 | $O(n^2)$ | 每个格子恰好填一次 |
+| 空间复杂度 | $O(1)$ | 除返回矩阵外，只使用常数变量 |
+
+:::note[关于空间复杂度]
+如果不把返回结果 `res` 计入额外空间，空间复杂度是 $O(1)$；如果把输出矩阵也算作空间占用，则是 $O(n^2)$。
+:::
+
+## 手动模拟
+
+以 `n = 3` 为例：
+
+```text
+初始矩阵：
+0 0 0
+0 0 0
+0 0 0
+```
+
+第一圈依次填：
+
+```text
+上边：1 2
+右边：3 4
+下边：5 6
+左边：7 8
+```
+
+得到：
+
+```text
+1 2 3
+8 0 4
+7 6 5
+```
+
+因为 `n = 3` 是奇数，最后单独填中心点：
+
+```text
+1 2 3
+8 9 4
+7 6 5
+```
+
+## 另一种写法：四个边界
+
+除了按圈写法，也可以维护四个边界：`top`、`bottom`、`left`、`right`。
+
+每填完一条边，就收缩对应边界：
+
+```cpp title="四边界写法"
+class Solution {
+public:
+    vector<vector<int>> generateMatrix(int n) {
+        vector<vector<int>> matrix(n, vector<int>(n, 0));
+
+        int top = 0;
+        int bottom = n - 1;
+        int left = 0;
+        int right = n - 1;
+        int num = 1;
+
+        while (top <= bottom && left <= right) {
+            for (int col = left; col <= right; col++) {
+                matrix[top][col] = num++;
+            }
+            top++;
+
+            for (int row = top; row <= bottom; row++) {
+                matrix[row][right] = num++;
+            }
+            right--;
+
+            for (int col = right; col >= left; col--) {
+                matrix[bottom][col] = num++;
+            }
+            bottom--;
+
+            for (int row = bottom; row >= top; row--) {
+                matrix[row][left] = num++;
+            }
+            left++;
+        }
+
+        return matrix;
+    }
+};
+```
+
+这类写法更直观，但要特别注意边界收缩后是否还有效。对于本题的正方形矩阵来说，上面的代码可以正常工作。
+
+## 易错点
+
+1. 四条边的开闭规则要统一，不要一会儿左闭右开，一会儿左闭右闭。
+2. `n` 为奇数时，中心点要单独处理。
+3. `offset` 控制每一圈的右边界和下边界，进入下一圈后要更新。
+4. 行列变量不要混淆：通常 `row` 表示行，`col` 表示列。
+5. 这道题是模拟题，关键是写出稳定的边界规则，而不是堆很多临时判断。
+
+## 代码模板
+
+<Tabs items={["C++","Java","Python","JavaScript","TypeScript"]}>
+<Tab>
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> generateMatrix(int n) {
+        vector<vector<int>> res(n, vector<int>(n, 0));
+
+        int startX = 0;
+        int startY = 0;
+        int loop = n / 2;
+        int mid = n / 2;
+        int offset = 1;
+        int count = 1;
+
+        while (loop--) {
+            int row = startX;
+            int col = startY;
+
+            for (; col < n - offset; col++) res[row][col] = count++;
+            for (; row < n - offset; row++) res[row][col] = count++;
+            for (; col > startY; col--) res[row][col] = count++;
+            for (; row > startX; row--) res[row][col] = count++;
+
+            startX++;
+            startY++;
+            offset++;
+        }
+
+        if (n % 2 == 1) {
+            res[mid][mid] = count;
+        }
+
+        return res;
+    }
+};
+```
+
+</Tab>
+<Tab>
+
+```java
+class Solution {
+    public int[][] generateMatrix(int n) {
+        int[][] res = new int[n][n];
+
+        int startX = 0;
+        int startY = 0;
+        int loop = n / 2;
+        int mid = n / 2;
+        int offset = 1;
+        int count = 1;
+
+        while (loop-- > 0) {
+            int row = startX;
+            int col = startY;
+
+            for (; col < n - offset; col++) res[row][col] = count++;
+            for (; row < n - offset; row++) res[row][col] = count++;
+            for (; col > startY; col--) res[row][col] = count++;
+            for (; row > startX; row--) res[row][col] = count++;
+
+            startX++;
+            startY++;
+            offset++;
+        }
+
+        if (n % 2 == 1) {
+            res[mid][mid] = count;
+        }
+
+        return res;
+    }
+}
+```
+
+</Tab>
+<Tab>
+
+```python
+class Solution:
+    def generateMatrix(self, n: int) -> List[List[int]]:
+        res = [[0] * n for _ in range(n)]
+
+        start_x, start_y = 0, 0
+        loop = n // 2
+        mid = n // 2
+        count = 1
+
+        for offset in range(1, loop + 1):
+            row, col = start_x, start_y
+
+            while col < n - offset:
+                res[row][col] = count
+                count += 1
+                col += 1
+
+            while row < n - offset:
+                res[row][col] = count
+                count += 1
+                row += 1
+
+            while col > start_y:
+                res[row][col] = count
+                count += 1
+                col -= 1
+
+            while row > start_x:
+                res[row][col] = count
+                count += 1
+                row -= 1
+
+            start_x += 1
+            start_y += 1
+
+        if n % 2 == 1:
+            res[mid][mid] = count
+
+        return res
+```
+
+</Tab>
+<Tab>
+
+```javascript
+var generateMatrix = function(n) {
+    const res = new Array(n).fill(0).map(() => new Array(n).fill(0));
+
+    let startX = 0;
+    let startY = 0;
+    let loop = Math.floor(n / 2);
+    let mid = Math.floor(n / 2);
+    let offset = 1;
+    let count = 1;
+
+    while (loop--) {
+        let row = startX;
+        let col = startY;
+
+        for (; col < n - offset; col++) res[row][col] = count++;
+        for (; row < n - offset; row++) res[row][col] = count++;
+        for (; col > startY; col--) res[row][col] = count++;
+        for (; row > startX; row--) res[row][col] = count++;
+
+        startX++;
+        startY++;
+        offset++;
+    }
+
+    if (n % 2 === 1) {
+        res[mid][mid] = count;
+    }
+
+    return res;
+};
+```
+
+</Tab>
+<Tab>
+
+```typescript
+function generateMatrix(n: number): number[][] {
+    const res: number[][] = new Array(n)
+        .fill(0)
+        .map(() => new Array(n).fill(0));
+
+    let startX = 0;
+    let startY = 0;
+    let loop = Math.floor(n / 2);
+    const mid = Math.floor(n / 2);
+    let offset = 1;
+    let count = 1;
+
+    while (loop--) {
+        let row = startX;
+        let col = startY;
+
+        for (; col < n - offset; col++) res[row][col] = count++;
+        for (; row < n - offset; row++) res[row][col] = count++;
+        for (; col > startY; col--) res[row][col] = count++;
+        for (; row > startX; row--) res[row][col] = count++;
+
+        startX++;
+        startY++;
+        offset++;
+    }
+
+    if (n % 2 === 1) {
+        res[mid][mid] = count;
+    }
+
+    return res;
+}
+```
+
+</Tab>
+</Tabs>
+
+## 相关题目
+
+- [54. 螺旋矩阵](https://leetcode.cn/problems/spiral-matrix/)
+- [剑指 Offer 29. 顺时针打印矩阵](https://leetcode.cn/problems/shun-shi-zhen-da-yin-ju-zhen-lcof/)
+
+## 总结
+
+螺旋矩阵 II 是典型的模拟题。它的难点不在算法本身，而在边界一致性。
+
+写这类题时，先确定循环不变量：每条边到底是左闭右开、左开右闭，还是全闭区间。只要每一圈都坚持同一套规则，代码就会稳定很多，也更不容易出现重复填充或漏填。

@@ -54,8 +54,11 @@ export default defineConfig({
       remarkMath,
       remarkMdxMermaid,
     ],
-    // Do not make production builds depend on third-party image hosts.
-    remarkImageOptions: { external: false },
+    // Do not make production builds depend on third-party image hosts. Some
+    // imported documents refer to image assets that are not in this checkout
+    // yet; preserve those Markdown image nodes so adding the assets later is
+    // enough to make them render, instead of failing the whole build now.
+    remarkImageOptions: { external: false, onError: 'ignore' },
     // Benchmark KaTeX's HTML-only output on the isolated static-build branch.
     // KaTeX defaults to htmlAndMathml, which duplicates each formula's visual
     // HTML with an accessibility MathML tree. This experiment measures the
