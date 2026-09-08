@@ -1,0 +1,667 @@
+---
+title: "第 2 章 物理层"
+---
+
+# 第 2 章 物理层
+
+
+## 2.1 通信基础
+
+<ExamQuestion>
+
+1. 【2009】在无噪声情况下, 若某通信链路的带宽为 3kHz, 采用 4 个相位, 每个相位具有 4 种振幅的 QAM 调制技术, 则该通信链路的最大数据传输速率是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 12kbps</ExamOption>
+<ExamOption>B. 24kbps</ExamOption>
+<ExamOption>C. 48kbps</ExamOption>
+<ExamOption>D. 96kbps</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+4 个相位与每个相位的 4 种振幅组合后，共有
+
+$\displaystyle M=4\times 4=16$
+
+种码元状态。无噪声信道的最高数据传输速率由奈奎斯特定理给出：
+
+$\displaystyle C=2B\log_2 M$
+
+代入 $\displaystyle B=3\text{kHz}$、$\displaystyle M=16$，得
+
+$\displaystyle C=2\times 3\times 10^3\times \log_2 16=24\times 10^3\text{bit/s}=24\text{kbps}$。
+
+因此选择 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2010】在下图所示的采用“存储 - 转发”方式的分组交换网络中, 所有链路的数据传输速率为100Mbps, 分组大小为 1000B, 其中分组头大小为 20B。若主机 H1 向主机 H2 发送一个大小为 980000B 的文件, 则在不考虑分组拆装时间和传播延迟的情况下, 从 H1 发送开始到 H2 接收完为止, 需要的时间至少是（ ）。
+
+![第 2 章 物理层 2.1 第2题：网络拓扑图，见原 PDF 第7页附近](/img/questions/408/computer-network-2-1-q2.png)
+
+<ExamChoices>
+<ExamOption>A. 80ms</ExamOption>
+<ExamOption>B. 80.08ms</ExamOption>
+<ExamOption>C. 80.16ms</ExamOption>
+<ExamOption>D. 80.24ms</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+每个分组总长度为 $\displaystyle 1000\text{B}$，其中首部为 $\displaystyle 20\text{B}$，故每个分组可承载的数据为
+
+$\displaystyle 1000-20=980\text{B}$。
+
+文件需要划分为
+
+$\displaystyle N=\dfrac{980000}{980}=1000$
+
+个分组。每个分组在一条链路上的发送时延为
+
+$\displaystyle t=\dfrac{1000\times 8}{100\times 10^6}\text{s}=0.08\text{ms}$。
+
+H1 到 H2 的最短路径包含 3 段链路。采用存储转发和流水传输时，1000 个分组通过 3 段等速链路的总时间为
+
+$\displaystyle T=(N+3-1)t=(1000+2)\times 0.08\text{ms}=80.16\text{ms}$。
+
+因此选择 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2011】假设某通信链路的数据传输速率为 2400bps, 采用四相位调制, 则该通信链路的波特率是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 600 波特</ExamOption>
+<ExamOption>B. 1200 波特</ExamOption>
+<ExamOption>C. 4800 波特</ExamOption>
+<ExamOption>D. 9600 波特</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+四相位调制共有 $\displaystyle M=4$ 种码元状态，每个码元可携带
+
+$\displaystyle \log_2 4=2$
+
+比特。数据传输速率、波特率和每码元比特数之间满足
+
+$\displaystyle R_b=R_B\log_2 M$。
+
+因此波特率为
+
+$\displaystyle R_B=\dfrac{2400}{2}=1200\text{Baud}$。
+
+因此选择 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2013】下图为 10BaseT 网卡接收到的信号波形, 则该网卡收到的比特串是（ ）。
+
+![第 2 章 物理层 2.1 第4题：信号波形/编码图，见原 PDF 第8页附近](/img/questions/408/computer-network-2-1-q4.png)
+
+<ExamChoices>
+<ExamOption>A. 00110110</ExamOption>
+<ExamOption>B. 10101101</ExamOption>
+<ExamOption>C. 01010010</ExamOption>
+<ExamOption>D. 11000101</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+10BaseT 采用曼彻斯特编码。每个比特周期的中点必发生一次电平跳变；按照 IEEE 802.3 的表示规则：
+
+- 中点由高电平跳变到低电平表示比特 1；
+- 中点由低电平跳变到高电平表示比特 0。
+
+从左到右逐个观察 8 个比特周期中点的跳变方向，可得
+
+$\displaystyle 0\ 0\ 1\ 1\ 0\ 1\ 1\ 0$，
+
+即比特串为 $\displaystyle 00110110$。因此选择 A。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2013】主机甲通过 1 个路由器 (存储转发方式) 与主机乙互连, 两段链路的数据传输速率均为 10Mbps, 主机甲分别采用报文交换和分组大小为 10kb 的分组交换向主机乙发送 1 个大小为 8Mb （$\displaystyle 1M=10^6$） 的报文。若忽略链路传播延迟、分组头开销和分组拆装时间, 则两种交换方式完成该报文传输所需的总时间分别为（ ）。
+
+<ExamChoices>
+<ExamOption>A. 800ms,1600ms</ExamOption>
+<ExamOption>B. 801ms,1600ms</ExamOption>
+<ExamOption>C. 1600ms,800ms</ExamOption>
+<ExamOption>D. 1600ms,801ms</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+报文长度为 $\displaystyle 8\text{Mb}$，每段链路速率为 $\displaystyle 10\text{Mbps}$。
+
+采用报文交换时，路由器必须接收完整报文后才能转发。一段链路的发送时间为
+
+$\displaystyle \dfrac{8\text{Mb}}{10\text{Mbps}}=0.8\text{s}$。
+
+两段链路共需
+
+$\displaystyle 2\times 0.8=1.6\text{s}=1600\text{ms}$。
+
+采用分组交换时，每个分组大小为 $\displaystyle 10\text{kb}$，分组数为
+
+$\displaystyle N=\dfrac{8\times 10^6}{10\times 10^3}=800$。
+
+每个分组在一段链路上的发送时延为
+
+$\displaystyle t=\dfrac{10\text{kb}}{10\text{Mbps}}=1\text{ms}$。
+
+两段链路进行流水传输，总时间为
+
+$\displaystyle T=(N+2-1)t=801\text{ms}$。
+
+故两种方式所需时间分别为 $\displaystyle 1600\text{ms}$ 和 $\displaystyle 801\text{ms}$，选择 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2014】下列因素中, 不会影响信道数据传输速率的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 信噪比</ExamOption>
+<ExamOption>B. 频率带宽</ExamOption>
+<ExamOption>C. 调制速率</ExamOption>
+<ExamOption>D. 信号传播速度</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+信道的最高数据传输速率受信道带宽、信噪比以及所采用的码元状态数或调制方式等因素影响。信号传播速度决定的是信号从发送端传播到接收端所需的传播时延，不决定单位时间内可传输的数据量。
+
+因此不会影响信道数据传输速率的是信号传播速度，选择 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2015】使用两种编码方案对比特流 01100111 进行编码的结果如下图所示, 编码 1 和编码 2 分别是（ ）。
+
+![第 2 章 物理层 2.1 第7题：信号波形/编码图，见原 PDF 第9页附近](/img/questions/408/computer-network-2-1-q7.png)
+
+<ExamChoices>
+<ExamOption>A. NRZ 和曼彻斯特编码</ExamOption>
+<ExamOption>B. NRZ 和差分曼彻斯特编码</ExamOption>
+<ExamOption>C. NRZI 和曼彻斯特编码</ExamOption>
+<ExamOption>D. NRZI 和差分曼彻斯特编码</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+编码 1 中，每个比特周期内电平保持不变，低电平对应 0、高电平对应 1，波形与比特流 $\displaystyle 01100111$ 的高低电平直接对应，因此编码 1 是 NRZ 编码。
+
+编码 2 中，每个比特周期的中点都发生电平跳变，符合曼彻斯特编码的特征。因此编码 2 是曼彻斯特编码。
+
+故选择 A。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+8. 【2016】如下图, 若连接 R2 和 R3 链路的频率带宽为 8kHz, 信噪比为 30dB, 该链路实际数据传输速率约为理论最大数据传输速率的 50%, 则该链路的实际数据传输速率约是（ ）。
+
+![第 2 章 物理层 2.1 第8题：图表，见原 PDF 第9页附近](/img/questions/408/computer-network-2-1-q8.png)
+
+<ExamChoices>
+<ExamOption>A. 8kbps</ExamOption>
+<ExamOption>B. 20kbps</ExamOption>
+<ExamOption>C. 40kbps</ExamOption>
+<ExamOption>D. 80kbps</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+由信噪比的分贝表示可得
+
+$\displaystyle 30=10\log_{10}\dfrac{S}{N}$，
+
+所以
+
+$\displaystyle \dfrac{S}{N}=10^3=1000$。
+
+根据信息论中的香农公式，理论最大数据传输速率为
+
+$\displaystyle C=B\log_2\left(1+\dfrac{S}{N}\right)$。
+
+代入 $\displaystyle B=8\text{kHz}$，得
+
+$\displaystyle C=8\times 10^3\log_2(1001)\approx 8\times 10^3\times 10=80\text{kbps}$。
+
+实际速率约为理论值的 $\displaystyle 50\%$，故
+
+$\displaystyle C_{\text{实际}}\approx 80\times 50\%=40\text{kbps}$。
+
+因此选择 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+9. 【2017】若信道在无噪声情况下的极限数据传输速率不小于信噪比为 30dB 条件下的极限数据传输速率, 则信号状态数至少是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 4</ExamOption>
+<ExamOption>B. 8</ExamOption>
+<ExamOption>C. 16</ExamOption>
+<ExamOption>D. 32</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+无噪声信道的奈奎斯特极限为
+
+$\displaystyle C_N=2B\log_2 M$。
+
+信噪比为 $\displaystyle 30\text{dB}$ 时，
+
+$\displaystyle \dfrac{S}{N}=10^{30/10}=1000$，
+
+香农极限为
+
+$\displaystyle C_S=B\log_2(1+1000)=B\log_2 1001$。
+
+题目要求 $\displaystyle C_N\ge C_S$，即
+
+$\displaystyle 2B\log_2 M\ge B\log_2 1001$。
+
+约去 $\displaystyle B$，得
+
+$\displaystyle \log_2 M\ge \dfrac{1}{2}\log_2 1001\approx 4.98$。
+
+因此
+
+$\displaystyle M\ge 2^{4.98}$，
+
+信号状态数至少取 32，选择 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+10. 【2020】下列关于虚电路网络的叙述中,错误的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 可以确保数据分组传输顺序</ExamOption>
+<ExamOption>B. 需要为每条虚电路预分配带宽</ExamOption>
+<ExamOption>C. 建立虚电路时需要进行路由选择</ExamOption>
+<ExamOption>D. 依据虚电路号 (VCID) 进行数据分组转发</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+虚电路网络在传输数据前先建立一条逻辑连接，建立过程中需要进行路由选择。之后同一虚电路的分组沿相同路径传输，交换结点依据虚电路号 VCID 转发，因此通常能够保持分组的发送顺序。
+
+虚电路只要求建立逻辑连接，并不必然要求预先为每条虚电路分配固定带宽。是否预留带宽取决于具体网络是否提供资源预留或服务质量保证。
+
+因此错误的是 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+11. 【2021】下图为一段差分曼彻斯特编码信号波形, 则其编码的二进制位串是（ ）。
+
+![第 2 章 物理层 2.1 第11题：信号波形/编码图，见原 PDF 第10页附近](/img/questions/408/computer-network-2-1-q11.png)
+
+<ExamChoices>
+<ExamOption>A. 10111001</ExamOption>
+<ExamOption>B. 11010001</ExamOption>
+<ExamOption>C. 00101110</ExamOption>
+<ExamOption>D. 10110110</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+差分曼彻斯特编码在每个码元中点都发生跳变，用于同步；码元开始处是否跳变用来表示数据。按本题所采用的规则，码元开始处发生跳变表示 0，不发生跳变表示 1。
+
+根据题图，从第 2 个码元开始逐位判断，可得到后 7 位为
+
+$$
+0111001.
+$$
+
+第 1 位需要结合题图给出的初始电平关系判断，最终完整位串为
+
+$$
+10111001.
+$$
+
+因此选择 A。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+12. 【2022】在一条带宽为 200kHz 的无噪声信道上, 若采用 4 个幅值的 ASK 调制, 则该信道的最大数据传输速率是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 200kbps</ExamOption>
+<ExamOption>B. 400kbps</ExamOption>
+<ExamOption>C. 800kbps</ExamOption>
+<ExamOption>D. 1600kbps</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+4 个幅值表示每个码元有 $\displaystyle M=4$ 种状态，每个码元携带
+
+$\displaystyle \log_2 4=2$
+
+比特。无噪声信道的最高数据传输速率为
+
+$\displaystyle C=2B\log_2 M$。
+
+代入 $\displaystyle B=200\text{kHz}$，得
+
+$\displaystyle C=2\times 200\times 10^3\times 2=800\times 10^3\text{bit/s}=800\text{kbps}$。
+
+因此选择 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+13. 【2023】在下图所示的分组交换网络中, 主机 H1 和 H2 通过路由器互连,2 段链路的带宽均为100Mbps, 时延带宽积 (即单向传播时延 $\displaystyle \times$ 带宽) 均为 1000b。若 H1 向 H2 发送 1 个大小为 1MB 的文件, 分组长度为 1000B, 则从 H1 开始发送时刻起到 H2 收到文件全部数据时刻止, 所需的时间至少是 （注：$\displaystyle M=10^6$）（ ）。
+
+![第 2 章 物理层 2.1 第13题：网络拓扑图，见原 PDF 第11页附近](/img/questions/408/computer-network-2-1-q13.png)
+
+<ExamChoices>
+<ExamOption>A. 80.02ms</ExamOption>
+<ExamOption>B. 80.08ms</ExamOption>
+<ExamOption>C. 80.09ms</ExamOption>
+<ExamOption>D. 80.10ms</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+文件大小为 $\displaystyle 1\text{MB}=10^6\text{B}$，分组长度为 $\displaystyle 1000\text{B}$，所以分组数为
+
+$\displaystyle N=\dfrac{10^6}{1000}=1000$。
+
+每个分组在一段链路上的发送时延为
+
+$\displaystyle t_s=\dfrac{1000\times 8}{100\times 10^6}\text{s}=0.08\text{ms}$。
+
+每段链路的单向传播时延为
+
+$\displaystyle t_p=\dfrac{\text{时延带宽积}}{\text{带宽}}=\dfrac{1000}{100\times 10^6}\text{s}=0.01\text{ms}$。
+
+两段链路采用存储转发和流水传输。忽略路由器处理与排队时延，总时间为
+
+$\displaystyle T=(N+2-1)t_s+2t_p$，
+
+即
+
+$\displaystyle T=1001\times 0.08+2\times 0.01=80.10\text{ms}$。
+
+因此选择 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+14. 【2023】某无噪声理想信道带宽为 4MHz, 采用 QAM 调制, 若该信道的最大数据传输率是 48Mbps,则该信道采用的 QAM 调制方案是（ ）。
+
+<ExamChoices>
+<ExamOption>A. QAM - 16</ExamOption>
+<ExamOption>B. QAM - 32</ExamOption>
+<ExamOption>C. QAM - 64</ExamOption>
+<ExamOption>D. QAM - 128</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+根据奈奎斯特定理，
+
+$\displaystyle C=2B\log_2 M$。
+
+代入 $\displaystyle C=48\text{Mbps}$、$\displaystyle B=4\text{MHz}$，得
+
+$\displaystyle 48\times 10^6=2\times 4\times 10^6\log_2 M$，
+
+所以
+
+$\displaystyle \log_2 M=6$，
+
+从而
+
+$\displaystyle M=2^6=64$。
+
+因此采用 QAM-64，选择 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+15. 【2024】某分组交换网络及每段链路的带宽如下图所示, 则 H1 到 H2 的最大吞吐量约为（ ）。
+
+![第 2 章 物理层 2.1 第15题：网络拓扑图，见原 PDF 第12页附近](/img/questions/408/computer-network-2-1-q15.png)
+
+<ExamChoices>
+<ExamOption>A. 1Mb/s</ExamOption>
+<ExamOption>B. 10Mb/s</ExamOption>
+<ExamOption>C. 100Mb/s</ExamOption>
+<ExamOption>D. 1000Mb/s</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+H1 接入左侧路由器的链路带宽为 $\displaystyle 10\text{Mb/s}$，右侧路由器接入 H2 的链路带宽也为 $\displaystyle 10\text{Mb/s}$。中间虽然存在三条可并行使用的路径，其总带宽远大于 $\displaystyle 10\text{Mb/s}$，但端到端吞吐量仍受源端接入链路和目的端接入链路限制。
+
+因此最大吞吐量为
+
+$\displaystyle \min\{10,1000+1+100,10\}\text{Mb/s}=10\text{Mb/s}$。
+
+选择 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+16. 【2024】在下列二进制数字调制方法中, 需要 2 个不同频率载波的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. ASK</ExamOption>
+<ExamOption>B. PSK</ExamOption>
+<ExamOption>C. FSK</ExamOption>
+<ExamOption>D. DPSK</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+二进制频移键控 FSK 用两个不同频率的载波分别表示二进制 0 和 1。ASK 改变载波幅度，PSK 改变载波相位，DPSK 通过相邻码元的相位差表示数据，均不要求使用两个不同的载波频率。
+
+因此选择 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 2.2 传输介质
+
+<ExamQuestion>
+
+1. 【2012】在物理层接口特性中, 用于描述完成每种功能的事件发生顺序的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 机械特性</ExamOption>
+<ExamOption>B. 功能特性</ExamOption>
+<ExamOption>C. 过程特性</ExamOption>
+<ExamOption>D. 电气特性</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+物理层接口通常从以下四个方面规定：
+
+- 机械特性：接口的形状、尺寸、引脚数目及排列方式；
+- 电气特性：电压范围、阻抗、传输速率和距离等；
+- 功能特性：各引脚或线路承担的功能；
+- 过程特性：完成各项功能时有关事件的发生顺序。
+
+题目问的是事件发生顺序，因此属于过程特性，选择 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2018】下列选项中, 不属于物理层接口规范定义范畴的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 接口形状</ExamOption>
+<ExamOption>B. 引脚功能</ExamOption>
+<ExamOption>C. 物理地址</ExamOption>
+<ExamOption>D. 信号电平</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+接口形状属于机械特性，引脚功能属于功能特性，信号电平属于电气特性，均由物理层接口规范定义。
+
+物理地址通常指 MAC 地址，属于数据链路层的地址概念，不属于物理层接口规范。因此选择 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2019】100BaseT 快速以太网使用的导向传输介质是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 双绞线</ExamOption>
+<ExamOption>B. 单模光纤</ExamOption>
+<ExamOption>C. 多模光纤</ExamOption>
+<ExamOption>D. 同轴电缆</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+100BaseT 中的字母 T 表示 Twisted Pair，即双绞线。100BaseT 是以双绞线为传输介质、速率为 $\displaystyle 100\text{Mb/s}$ 的快速以太网标准。
+
+因此选择 A。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>

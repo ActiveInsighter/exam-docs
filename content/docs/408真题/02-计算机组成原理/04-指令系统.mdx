@@ -1,0 +1,939 @@
+---
+title: "第 4 章 指令系统"
+---
+
+# 第 4 章 指令系统
+
+
+## 4.1 指令格式
+
+<ExamQuestion>
+
+1. 【2017】某计算机按字节编址, 指令字长固定且只有两种指令格式。其中三地址指令29 条, 二地 址指令107 条, 每个地址字段为6 位, 则指令字长至少应该是（ ）
+
+<ExamChoices>
+<ExamOption>A. 24 位</ExamOption>
+<ExamOption>B. 26 位</ExamOption>
+<ExamOption>C. 28 位</ExamOption>
+<ExamOption>D. 32 位</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+三地址指令含有 $\displaystyle 3\times 6=18$ 位地址码。若暂不考虑按字节存放，29 条三地址指令至少需要 5 位基本操作码，因为 $\displaystyle 2^4<29\le 2^5$。5 位操作码共有 32 种编码，三地址指令占用 29 种，剩余 3 种可作为扩展操作码前缀；每个前缀再利用少一个地址字段的 6 位进行扩展，可形成 $\displaystyle 3\times 2^6=192$ 条二地址指令，足以容纳 107 条二地址指令。因此理论上的最短位数为 $\displaystyle 5+3\times 6=23$ 位。计算机按字节编址，定长指令通常按整字节存放，故至少需要 24 位，选 A。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2022】下列选项中, 属于指令集体系结构(ISA) 规定的内容是（ ）。
+I. 指令字格式和指令类型
+II. CPU 的时钟周期
+III. 通用寄存器的个数和位数
+IV. 加法器的进位方式
+
+<ExamChoices>
+<ExamOption>A. 仅I、II</ExamOption>
+<ExamOption>B. 仅I、III</ExamOption>
+<ExamOption>C. 仅II、IV</ExamOption>
+<ExamOption>D. 仅I、III、IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+指令集体系结构 ISA 是软件能够直接看到并依赖的机器接口，规定指令字格式、指令类型、寻址方式、通用寄存器的数量和位数等。CPU 时钟周期和加法器的进位方式属于具体微体系结构或硬件实现细节，不属于 ISA 的规定内容。因此只有 I、III 正确。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2022】设计某指令系统时, 假设采用16 位定长指令字格式, 操作码使用扩展编码方式, 地址码 为6 位,包含零地址、一地址和二地址3 种格式的指令。若二地址指令有12 条,一地址指令有254 条, 则零地址指令的条数最多为（ ）。
+
+<ExamChoices>
+<ExamOption>A. 0</ExamOption>
+<ExamOption>B. 2</ExamOption>
+<ExamOption>C. 64</ExamOption>
+<ExamOption>D. 128</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+16 位指令中，二地址指令含两个 6 位地址码，基本操作码为 $\displaystyle 16-2\times 6=4$ 位，共有 16 种编码。12 条二地址指令占用 12 种，还剩 4 种编码可扩展为一地址指令，因此一地址指令最多有 $\displaystyle 4\times 2^6=256$ 条。已有 254 条一地址指令，剩余 2 个一地址扩展码可继续扩展为零地址指令，所以零地址指令最多为
+
+$\displaystyle 2\times 2^6=128$ 条。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 4.2 数据的对齐和大/小端存放方式
+
+<ExamQuestion>
+
+1. 【2012】某计算机存储器按字节编址,采用小端方式存放数据。假定编译器规定int 型和short 型 长度分别为32 位和16 位, 并且数据按边界对齐存储。某C 语言程序段如下:
+
+```c
+struct {
+    int a;
+    char b;
+    short c;
+} record;
+record.a = 273;
+```
+   若record 变量的首地址为0xC008,则地址0xC008 中内容及record.c 的地址分别为（ ）。
+
+<ExamChoices>
+<ExamOption>A. 0x00、0xC00D</ExamOption>
+<ExamOption>B. 0x00、0xC00E</ExamOption>
+<ExamOption>C. 0x11、0xC00D</ExamOption>
+<ExamOption>D. 0x11、0xC00E</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+$\displaystyle 273=00000111\text{H}$。小端方式将最低有效字节存放在低地址，因此 `record.a` 的最低地址 0xC008 中存放 0x11。结构体按边界对齐：`a` 占 0xC008～0xC00B，`b` 位于 0xC00C；为了使 2 字节的 `short c` 从偶地址开始，0xC00D 为填充字节，故 `c` 的地址为 0xC00E。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2016】某计算机字长为32 位, 按字节编址, 采用小端(Little Endian) 方式存放数据。假定有一 个double 型变量,其机器数表示为1122 3344 5566 7788H,存放在0000 8040H 开始的连续存储单元 中, 则存储单元0000 8046H 中存放的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 22H</ExamOption>
+<ExamOption>B. 33H</ExamOption>
+<ExamOption>C. 66H</ExamOption>
+<ExamOption>D. 77H</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+机器数为 1122334455667788H。小端存放时，从低地址到高地址依次为
+
+`88H 77H 66H 55H 44H 33H 22H 11H`。
+
+因此地址 00008046H（相对首地址偏移 6）中存放 22H。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2018】某32 位计算机按字节编址, 采用小端(LittleEndian) 方式。若语句`int i = 0;`对应指令的机器代码为“C745FC00000000”, 则语句`int i = -64;`对应指令的机器代码是（ ）。
+
+<ExamChoices>
+<ExamOption>A. C745FCC0FFFFFF</ExamOption>
+<ExamOption>B. C745FC0CFFFFFF</ExamOption>
+<ExamOption>C. C745FCFFFFFFC0</ExamOption>
+<ExamOption>D. C745FCFFFFFF0C</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+$\displaystyle -64$ 的 32 位补码为 FFFFFFC0H。小端机器按低字节在前存放立即数，因此 4 个立即数字节依次为 `C0 FF FF FF`。保留原指令的前三个字节 `C7 45 FC`，机器代码为 `C7 45 FC C0 FF FF FF`，即 A。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2020】在按字节编址, 采用小端方式的32 位计算机中, 按边界对齐方式为以下C 语言结构型变 量a 分配存储空间:
+
+```c
+struct record {
+    short x1;
+    int x2;
+} a;
+```
+   若a 的首地址为2020 FE00H,a 的成员变量x2的机器数为1234 0000H, 则其中34H 所在存储单元的 地址是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 2020FE03H</ExamOption>
+<ExamOption>B. 2020FE04H</ExamOption>
+<ExamOption>C. 2020FE05H</ExamOption>
+<ExamOption>D. 2020FE06H</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+`short x1` 占偏移 0～1；为使 4 字节的 `int x2` 按 4 字节边界对齐，偏移 2～3 为填充，故 `x2` 从 2020FE04H 开始。机器数 12340000H 按小端存放时，字节序列为 `00 00 34 12`，所以 34H 位于 2020FE06H。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 4.3 指令寻址与数据寻址
+
+<ExamQuestion>
+
+1. 【2009】某机器字长为16 位, 主存按字节编址, 转移指令采用相对寻址, 由两个字节组成, 第一个 字节为操作码字段,第二个字节为相对位移量字段。假定取指令时,每取一个字节PC 自动加1。若某转移指令所在主存地址为2000H, 相对位移量字段的内容为06H, 则该转移指令成功转移后的目标 地址是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 2006H</ExamOption>
+<ExamOption>B. 2007H</ExamOption>
+<ExamOption>C. 2008H</ExamOption>
+<ExamOption>D. 2009H</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+该指令占 2 字节，取完指令后 PC 已由 2000H 增加到 2002H。相对位移 06H 为正数，因此转移目标地址为
+
+$\displaystyle \text{2002H}+\text{0006H}=\text{2008H}$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2011】偏移寻址通过将某个寄存器内容与一个形式地址相加而生成有效地址。下列寻址方式 中,不属于偏移寻址方式的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 间接寻址</ExamOption>
+<ExamOption>B. 基址寻址</ExamOption>
+<ExamOption>C. 相对寻址</ExamOption>
+<ExamOption>D. 变址寻址</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+偏移寻址的共同特征是将某个寄存器的内容与形式地址相加，典型形式包括基址寻址、变址寻址和相对寻址。间接寻址是根据形式地址先访问存储器，再由所取出的地址寻找操作数，不属于偏移寻址。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2013】假设变址寄存器R 的内容为1000H, 指令中的形式地址为2000H; 地址1000H 中的内容 为2000H, 地址2000H 中的内容为3000H, 地址3000H 中的内容为4000H, 则变址寻址方式下访问到 的操作数是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 1000H</ExamOption>
+<ExamOption>B. 2000H</ExamOption>
+<ExamOption>C. 3000H</ExamOption>
+<ExamOption>D. 4000H</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+变址寻址的有效地址为
+
+$\displaystyle \text{EA}=(R)+D=\text{1000H}+\text{2000H}=\text{3000H}$。
+
+地址 3000H 中的内容为 4000H，因此实际访问到的操作数是 4000H。地址 1000H 和 2000H 中的内容与本次变址寻址的计算无关。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2014】某计算机有16 个通用寄存器,采用32 位定长指令字,操作码字段(含寻址方式位) 为8 位, Store 指令的源操作数和目的操作数分别采用寄存器直接寻址和基址寻址方式。若基址寄存器可使 用任一通用寄存器, 且偏移量用补码表示, 则Store 指令中偏移量的取值范围是（ ）。
+
+<ExamChoices>
+<ExamOption>A. - 32768 ∼+32767</ExamOption>
+<ExamOption>B. - 32767 ∼+32768</ExamOption>
+<ExamOption>C. - 65536 ∼+65535</ExamOption>
+<ExamOption>D. - 65535 ∼+65536</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+16 个通用寄存器的编号需要 4 位。Store 指令还要给出源寄存器和基址寄存器，共占 $\displaystyle 4+4=8$ 位；操作码及寻址方式字段占 8 位。因此 32 位指令中偏移量字段为
+
+$\displaystyle 32-8-4-4=16$ 位。
+
+16 位补码的表示范围是 $\displaystyle -2^{15}\sim 2^{15}-1$，即 $\displaystyle -32768\sim +32767$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2016】某指令格式如下所示。其中M 为寻址方式, I 为变址寄存器编号, D 为形式地址。若采用先变址后间址的寻址方式, 则操作数的有效地址是（ ）。
+
+| OP | M | I | D |
+| --- | --- | --- | --- |
+
+<ExamChoices>
+<ExamOption>A. $I + D$</ExamOption>
+<ExamOption>B. $(I) + D$</ExamOption>
+<ExamOption>C. $((I) + D)$</ExamOption>
+<ExamOption>D. $((I)) + D$</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+“先变址”先计算中间地址 $\displaystyle A=(I)+D$；“后间址”再以该中间地址访问主存，取出其中保存的有效地址。因此
+
+$\displaystyle \text{EA}=M[(I)+D]$，
+
+按题目括号记法写为 $\displaystyle ((I)+D)$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2017】下列寻址方式中, 最适合按下标顺序访问一维数组元素的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 相对寻址</ExamOption>
+<ExamOption>B. 寄存器寻址</ExamOption>
+<ExamOption>C. 直接寻址</ExamOption>
+<ExamOption>D. 变址寻址</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+数组首地址在程序运行过程中通常保持不变，下标随循环递增。变址寻址可用形式地址保存数组首地址、用变址寄存器保存由下标形成的偏移量，特别适合按下标顺序访问数组元素。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2018】按字节编址的计算机中, 某double 型数组A 的首地址为2000H, 使用变址寻址和循环结 构访问数组A,保存数组下标的变址寄存器初值为0,每次循环取一个数组元素,其偏移地址为变址值 乘以sizeof (double),取完后变址寄存器内容自动加1。若某次循环所取元素的地址为2100H,则进入 该次循环时变址寄存器的内容是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 25</ExamOption>
+<ExamOption>B. 32</ExamOption>
+<ExamOption>C. 64</ExamOption>
+<ExamOption>D. 100</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+所访问元素相对数组首地址的字节偏移为
+
+$\displaystyle \text{2100H}-\text{2000H}=\text{100H}=256$ 字节。
+
+`double` 占 8 字节，所以数组下标为
+
+$\displaystyle \dfrac{256}{8}=32$。
+
+进入该次循环时变址寄存器尚未自动加 1，故其内容为 32。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+8. 【2019】某计算机采用大端方式,按字节编址。某指令中操作数的机器数为1234FF00H,该操作 数采用基址寻址方式, 形式地址(用补码表示) 为FF12H, 基址寄存器的内容为F0000000H, 则该操 作数的LSB(最低有效字节) 所在的地址是（ ）。
+
+<ExamChoices>
+<ExamOption>A. F000FF12H</ExamOption>
+<ExamOption>B. F000FF15H</ExamOption>
+<ExamOption>C. EFFFFF12H</ExamOption>
+<ExamOption>D. EFFFFF15H</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+FF12H 作为 16 位补码，符号扩展后为 FFFFFF12H。有效地址为
+
+$\displaystyle \text{EA}=\text{F0000000H}+\text{FFFFFF12H}=\text{EFFFFF12H}$。
+
+32 位操作数采用大端方式存放，LSB 位于最高地址，即 $\displaystyle \text{EA}+3=\text{EFFFFF15H}$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+9. 【2020】某计算机采用16 位定长指令字格式,操作码位数和寻址方式位数固定,指令系统有48 条 指令, 支持直接、间接、立即、相对4 种寻址方式。单地址指令中, 直接寻址方式的可寻址范围是（ ）
+
+<ExamChoices>
+<ExamOption>A. 0 ∼255</ExamOption>
+<ExamOption>B. 0 ∼1023</ExamOption>
+<ExamOption>C. - 128 ∼127</ExamOption>
+<ExamOption>D. - 512 ∼511</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+48 条指令至少需要 6 位操作码，因为 $\displaystyle 2^5<48\le 2^6$；4 种寻址方式需要 2 位寻址方式码。16 位单地址指令中剩余地址码位数为
+
+$\displaystyle 16-6-2=8$ 位。
+
+直接寻址把地址码作为无符号主存地址，所以可寻址范围为 $\displaystyle 0\sim 2^8-1=0\sim 255$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+10. 【2010】(11 分) 某计算机字长为16 位, 主存地址空间大小为128KB, 按字编址。采用单字长指 令格式,指令各字段定义如下表所示。
+
+
+| 位段 | 15~12 | 11~9 | 8~6 | 5~3 | 2~0 |
+| --- | --- | --- | --- | --- | --- |
+| 字段 | OP | Ms | Rs | Md | Rd |
+| 含义 | 操作码 | 源操作数寻址方式 | 源寄存器 | 目的操作数寻址方式 | 目的寄存器 |
+
+其中，`Ms` 与 `Rs` 共同表示源操作数，`Md` 与 `Rd` 共同表示目的操作数。
+
+   转移指令采用相对寻址方式, 相对偏移量用补码表示, 寻址方式定义如下表所示。
+
+
+| Ms/Md | 寻址方式 | 助记符 | 含义 |
+| --- | --- | --- | --- |
+| 000B | 寄存器直接 | Rn | 操作数 = (Rn) |
+| 001B | 寄存器间接 | (Rn) | 操作数 = ((Rn)) |
+| 010B | 寄存器间接、自增 | (Rn)+ | 操作数 = ((Rn))，(Rn)+1→Rn |
+| 011B | 相对 | D(Rn) | 转移目标地址 = (PC)+(Rn) |
+
+注：`(X)` 表示存储器地址 `X` 或寄存器 `X` 的内容。
+
+   请回答下列问题:
+   (1) 该指令系统最多可有多少条指令？该计算机最多有多少个通用寄存器？存储器地址寄存器 (MAR) 和存储器数据寄存器(MDR) 至少各需要多少位？
+   (2) 转移指令的目标地址范围是多少？
+   (3) 若操作码0010B 表示加法操作(助记符为add), 寄存器R4 和R5 的编号分别为100B 和101B, R4 的内容为1234H,R5 的内容为5678H, 地址1234H 中的内容为5678H, 地址5678H 中的内容为 1234H, 则汇编语言为“add (R4),(R5)+” (逗号前为源操作数, 逗号后为目的操作数) 对应的机器码是什么(用十六进制表示)? 该指令执行后,哪些寄存器和存储单元中的内容会改变? 改变后的内容是什么?
+
+<ExamSolution>
+
+<ExamAnswer>
+（1）最多 16 条指令；最多 8 个通用寄存器；MAR 至少 16 位，MDR 至少 16 位。
+
+（2）相对位移范围为 $\displaystyle -32768\sim +32767$ 个字地址，最终目标可覆盖 0000H～FFFFH。  
+（3）机器码为 2315H；执行后 R5=5679H，存储单元 M[5678H]=68ACH。
+</ExamAnswer>
+
+<ExamExplanation>
+（1）OP 字段为 4 位，故最多定义 $\displaystyle 2^4=16$ 条指令。寄存器编号字段为 3 位，最多有 $\displaystyle 2^3=8$ 个通用寄存器。主存容量为 128KB，按 16 位字编址，共有
+
+$\displaystyle \dfrac{128\text{KB}}{2\text{B}}=64\text{K}=2^{16}$
+
+个字地址，因此 MAR 至少 16 位；每次读写一个 16 位字，因此 MDR 至少 16 位。
+
+（2）相对位移量由 16 位寄存器给出并按补码解释，其范围为 $\displaystyle -2^{15}\sim 2^{15}-1$ 个字地址，即相对当前基准 PC 的 $\displaystyle -32768\sim +32767$。加法结果送入 16 位 MAR，故从地址编码能力看，目标地址最终可以是 0000H～FFFFH 中的任一字地址。
+
+（3）各字段为：
+
+- OP=`0010`；
+- 源操作数 `(R4)`：Ms=`001`，Rs=`100`；
+- 目的操作数 `(R5)+`：Md=`010`，Rd=`101`。
+
+拼接得
+
+`0010 001 100 010 101` $\displaystyle =\text{2315H}$。
+
+源操作数为 $\displaystyle M[\text{1234H}]=\text{5678H}$，目的操作数原值为 $\displaystyle M[\text{5678H}]=\text{1234H}$，相加得到
+
+$\displaystyle \text{5678H}+\text{1234H}=\text{68ACH}$。
+
+结果写回原目的地址 5678H；由于目的采用寄存器间接、自增寻址，且主存按字编址，R5 在访问后加 1。因此可见状态的主要变化为
+
+$\displaystyle R5:\text{5678H}\to\text{5679H}$，
+
+$\displaystyle M[\text{5678H}]:\text{1234H}\to\text{68ACH}$。
+
+R4 保持 1234H 不变；PC 顺序指向下一条指令。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+11. 【2013】某计算机采用16 位定长指令字格式,其CPU 中有一个标志寄存器,其中包含进位/ 借位 标志CF、零标志ZF 和符号标志NF。假定为该机设计了条件转移指令, 其格式如下:
+
+
+| 位段 | 15~11 | 10 | 9 | 8 | 7~0 |
+| --- | --- | --- | --- | --- | --- |
+| 字段 | 00000 | C | Z | N | OFFSET |
+
+   其中, 00000 为操作码OP;C、Z 和N 分别为CF、ZF 和NF 的对应检测位, 某检测位为1 时表示需检 测对应标志位, 需检测的标志位中只要有一个为1 就转移, 否则不转移。例如, 若C = 1,Z = 0, N = 1, 则需检测CF 和NF 的值, 当CF = 1 或NF = 1 时发生转移;OFFSET 是相对偏移量, 用补码表示。转 移执行时, 转移目标地址为(PC) + 2 + 2 × OFFSET；顺序执行时, 下条指令地址为(PC) + 2。 请回答下列问题:
+
+
+| 位段 | 15~11 | 10 | 9 | 8 | 7~0 |
+| --- | --- | --- | --- | --- | --- |
+| 内容 | 00000 | 0 | 1 | 1 | 11100011 |
+
+   (1) 该计算机存储器按字节编址还是按字编址？该条件转移指令向后(反向) 最多可跳转多少条指令?
+   (2) 某条件转移指令的地址为200CH, 指令内容如上表所示, 若该指令执行时CF = 0,ZF = 0,NF = 1, 则该指令执行后PC 的值是多少? 若该指令执行时CF = 1,ZF = 0,NF = 0, 则该指令执行后PC 的值 又是多少？请给出计算过程。
+   (3) 实现“无符号数比较小于等于时转移”功能的指令中, C、Z 和N 应各是什么？
+   (4) 以下是该指令对应的数据通路示意图, 要求给出图中部件①∼③的名称或功能说明。
+
+<img src="/img/questions/408/computer-organization-p055-03.png" alt="第55页第3个图、表或代码块" />
+
+<ExamSolution>
+
+<ExamAnswer>
+（1）按字节编址；向后最多到当前指令之前第 127 条指令。
+
+（2）第一种情况下 PC=1FD4H；第二种情况下 PC=200EH。  
+（3）C=1，Z=1，N=0。  
+（4）①指令寄存器 IR；②左移一位；③加法器。
+</ExamAnswer>
+
+<ExamExplanation>
+（1）指令长度为 16 位，即 2 字节，而顺序执行时 PC 增加 2，因此主存按字节编址。OFFSET 为 8 位补码，最小值为 $\displaystyle -128$。它相对于下一条指令地址计算，取 OFFSET=$\displaystyle -128$ 时，目标为
+
+$\displaystyle (PC)+2-256=(PC)-254$，
+
+即当前指令之前第 127 条指令；等价地说，它相对“下一条指令”最多反向 128 个指令位置。
+
+（2）指令中的检测位为 C=0、Z=1、N=1，OFFSET=`11100011`B=E3H=$\displaystyle -29$。
+
+当 CF=0、ZF=0、NF=1 时，NF 被检测且为 1，发生转移：
+
+$\displaystyle PC=\text{200CH}+2+2\times(-29)=\text{200EH}-\text{3AH}=\text{1FD4H}$。
+
+当 CF=1、ZF=0、NF=0 时，C 检测位为 0，所以 CF 被忽略；需要检测的 ZF、NF 都为 0，不转移，故
+
+$\displaystyle PC=\text{200CH}+2=\text{200EH}$。
+
+（3）无符号数“小于等于”成立的条件是发生借位或结果为零，即 $\displaystyle CF=1$ 或 $\displaystyle ZF=1$。因此设置 C=1、Z=1、N=0。
+
+（4）①保存当前指令各字段，是指令寄存器 IR；②将符号扩展后的 OFFSET 左移 1 位，实现乘 2；③将 $\displaystyle PC+2$ 与 $\displaystyle 2\times OFFSET$ 相加，生成转移目标地址，因此是加法器。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+12. 【2021】假定计算机M 字长为16 位, 按字节编址, 连接CPU 和主存的系统总线中地址线为20 位、数据线为8 位, 采用16 位定长指令字, 指令格式及其说明如下表所示。
+
+
+| 格式 | 15~10（6 位） | 9~8（2 位） | 7~6（2 位） | 5~4（2 位） | 3~0（4 位） | 指令功能或指令类型说明 |
+| --- | --- | --- | --- | --- | --- | --- |
+| R 型 | 000000 | rs | rt | rd | op1 | `R[rd] ← R[rs] op1 R[rt]` |
+| I 型 | op2 | rs | rt | imm 的高 2 位 | imm 的低 4 位 | 含 ALU 运算、条件转移和访存操作 3 类指令 |
+| J 型 | op3 | target 的高 2 位 | target | target | target 的低 4 位 | PC 的低 10 位 ← target |
+
+其中，I 型指令的 `imm` 共 6 位，J 型指令的 `target` 共 10 位。
+
+   其中, op1~op3 为操作码, rs, rt 和rd 为通用寄存器编号, R[r] 表示寄存器r 的内容, imm 为立即数, target 为转移目标的形式地址。请回答下列问题:
+   (1)ALU 的宽度是多少位? 可寻址主存空间大小为多少字节? 指令寄存器、主存地址寄存器(MAR) 和 主存数据寄存器(MDR) 分别应有多少位？
+   (2)R 型格式最多可定义多少种操作？I 型和J 型格式总共最多可定义多少种操作？通用寄存器最多 有多少个？
+   (3) 假定op1 为0010 和0011 时, 分别表示带符号整数减法和带符号整数乘法指令, 则指令01B2H 的 功能是什么(参考上述指令功能说明的格式进行描述)? 若1, 2, 3 号通用寄存器当前内容分别为 B052H, 0008H, 0020H,则分别执行指令01B2H 和01B3H 后, 3 号通用寄存器内容各是什么？各自结 果是否溢出？
+   (4) 若采用I 型格式的访存指令中imm(偏移量) 为带符号整数, 则地址计算时应对imm 进行零扩展还 是符号扩展?
+   (5) 无条件转移指令可以采用上述哪种指令格式？
+
+<ExamSolution>
+
+<ExamAnswer>
+（1）ALU 16 位；可寻址主存空间为 $\displaystyle 2^{20}$B=1MB；IR、MAR、MDR 分别为 16 位、20 位、8 位。
+
+（2）R 型最多 16 种操作；I 型和 J 型合计最多 63 种操作；最多 4 个通用寄存器。  
+（3）01B2H：$\displaystyle R[3]\leftarrow R[1]-R[2]$，结果 B04AH，不溢出；01B3H：$\displaystyle R[3]\leftarrow R[1]\times R[2]$，低 16 位为 8290H，溢出。  
+（4）符号扩展。  
+（5）J 型。
+</ExamAnswer>
+
+<ExamExplanation>
+（1）机器字长为 16 位，所以 ALU 宽度为 16 位。20 根地址线且按字节编址，可寻址空间为
+
+$\displaystyle 2^{20}\text{B}=1\text{MB}$。
+
+定长指令为 16 位，故 IR 为 16 位；MAR 要保存 20 位地址；系统数据线宽度为 8 位，主存一次总线传送 1 字节，所以 MDR 至少为 8 位。
+
+（2）R 型的 op1 为 4 位，最多定义 $\displaystyle 2^4=16$ 种操作。R 型占用 6 位主操作码 `000000`，其余 $\displaystyle 2^6-1=63$ 个主操作码可分配给 I 型和 J 型，因此二者合计最多定义 63 种操作。寄存器编号字段均为 2 位，故最多有 $\displaystyle 2^2=4$ 个通用寄存器。
+
+（3）01B2H 的二进制为
+
+`000000 01 10 11 0010`，
+
+所以 rs=1、rt=2、rd=3、op1=0010，功能为
+
+$\displaystyle R[3]\leftarrow R[1]-R[2]$。
+
+执行结果为
+
+$\displaystyle \text{B052H}-\text{0008H}=\text{B04AH}$。
+
+B052H 表示的带符号整数为 $\displaystyle -20398$，减 8 得 $\displaystyle -20406$，仍在 16 位补码范围内，所以不溢出。
+
+01B3H 只把 op1 改为 0011，功能为
+
+$\displaystyle R[3]\leftarrow R[1]\times R[2]$。
+
+$\displaystyle -20398\times 8=-163184$，超出 16 位带符号整数范围；其低 16 位为 8290H，因此 R3=8290H，并发生溢出。
+
+（4）imm 是补码表示的带符号偏移量，必须进行符号扩展，才能保持其数值不变。
+
+（5）J 型指令直接提供 10 位转移目标形式地址，适合实现无条件转移。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 4.4 CISC 和RISC 的基本概念
+
+<ExamQuestion>
+
+1. 【2009】下列关于RISC 的叙述中,错误的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. RISC 普遍采用微程序控制器</ExamOption>
+<ExamOption>B. RISC 大多数指令在一个时钟周期内完成</ExamOption>
+<ExamOption>C. RISC 的内部通用寄存器数量相对CISC 多</ExamOption>
+<ExamOption>D. RISC 的指令数、寻址方式和指令格式种类相对CISC 少</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+RISC 通常采用硬布线控制器，以获得较短的控制路径和较高的指令执行速度；“普遍采用微程序控制器”更符合传统 CISC 的常见实现特征。其余三项均是 RISC 的典型特点：多数简单指令可在较少周期内完成，通用寄存器较多，指令数、寻址方式和指令格式种类较少。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 4.5 高级语言和机器级代码之间的对应
+
+<ExamQuestion>
+
+1. 【2017】在按字节编址的计算机M 上, $f_1$的部分源程序(阴影部分) 与对应的机器级代码(包括指令的虚拟地址) 如下所示。将$f_1$中的int都改成float, 可得到计算$f(n)$的另一个函数$f_2$。
+
+
+```text
+int f1(unsigned n)
+1   00401020    55        push ebp
+    ...         ...       ...
+    for (unsigned i = 0; i <= n-1; i++)
+    ...         ...       ...
+20  0040105E    39 4D F4  cmp dword ptr[ebp-0Ch], ecx
+    ...         ...       ...
+        {power *= 2;
+    ...         ...       ...
+23  00401066    D1 E2     shl edx, 1
+    ...         ...       ...
+    return sum;
+    ...         ...       ...
+35  0040107F    C3        ret
+```
+
+   其中, 机器级代码行包括行号、虚拟地址、机器指令和汇编指令。请回答下列问题:
+   (1) 计算机M 是RISC 还是CISC? 为什么？
+   (2)$f_1$的机器指令代码共占多少字节? 要求给出计算过程。
+   (3) 第20 条指令cmp 通过$i$减$n-1$实现对$i$和$n-1$的比较。执行$f_1(0)$过程中, 当$i=0$时, cmp 指令执行后, 进/借位标志CF的内容是什么? 要求给出计算过程。
+   (4) 第23 条指令shl通过左移操作实现了`power * 2`运算, 在$f_2$中能否也用shl指令实现`power * 2`? 为什么?
+
+<ExamSolution>
+
+<ExamAnswer>
+（1）CISC。
+
+（2）96 字节。  
+（3）CF=1。  
+（4）不能直接用 `shl` 实现。
+</ExamAnswer>
+
+<ExamExplanation>
+（1）机器指令长度不统一，例如 `push` 为 1 字节、`cmp` 为 3 字节、`shl` 为 2 字节，并支持存储器操作数等较复杂形式，具有典型的 CISC 特征。
+
+（2）第一条指令从 00401020H 开始，最后一条 `ret` 位于 0040107FH 且长度为 1 字节，因此代码末地址的下一字节为 00401080H。总长度为
+
+$\displaystyle \text{00401080H}-\text{00401020H}=\text{60H}=96$ 字节。
+
+（3）`n` 为 `unsigned` 类型。当 $\displaystyle n=0$ 时，$\displaystyle n-1$ 发生模 $\displaystyle 2^{32}$ 运算，结果为 FFFFFFFFH。`cmp` 实质计算
+
+$\displaystyle 0-\text{FFFFFFFFH}=1$。
+
+按无符号数比较，0 小于 FFFFFFFFH，减法需要借位，因此 CF=1。
+
+（4）`shl` 对整个二进制机器码做逻辑左移，适合实现整数乘 2。float 采用 IEEE 754 编码，符号位、阶码和尾数字段具有不同含义，整体左移并不等价于浮点数乘 2，且对零、非规格化数、无穷大和 NaN 等情况更不成立。因此应使用浮点乘法或相应浮点运算指令，不能直接用该 `shl` 指令替代。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2019】已知$f(n)=n!=n\times(n-1)\times(n-2)\times\cdots\times2\times1$，计算$f(n)$的C 语言函数$f_1$的源程序(阴影部分)及其在32 位计算机M 上的部分机器级代码如下:
+
+
+```text
+int f1(int n) {
+1   00401000    55              push ebp
+    ...         ...             ...
+    if (n > 1)
+11  00401018    83 7D 08 01     cmp dword ptr[ebp+8], 1
+12  0040101C    7E 17           jle f1+35h (00401035)
+        return n * f1(n-1);
+13  0040101E    8B 45 08        mov eax, dword ptr[ebp+8]
+14  00401021    83 E8 01        sub eax, 1
+15  00401024    50              push eax
+16  00401025    E8 D6 FF FF FF  call f1(00401000)
+    ...         ...             ...
+19  00401030    0F AF C1        imul eax, ecx
+20  00401033    EB 05           jmp f1+3Ah (0040103a)
+    else return 1;
+21  00401035    B8 01 00 00 00  mov eax, 1
+}
+    ...         ...             ...
+26  00401040    3B EC           cmp ebp, esp
+    ...         ...             ...
+30  0040104A    C3              ret
+```
+
+   其中, 机器级代码行包括行号、虚拟地址、机器指令和汇编指令, 计算机M 按字节编址, int 型数据 占32 位。请回答下列问题:
+   (1) 计算$f(10)$需要调用函数$f_1$多少次？执行哪条指令会递归调用$f_1$？
+   (2) 上述代码中, 哪条指令是条件转移指令? 哪几条指令一定会使程序跳转执行？
+   (3) 根据第16 行的call 指令,第17 行指令的虚拟地址应是多少? 已知第16 行的call 指令采用相对寻 址方式,该指令中的偏移量应是多少(给出计算过程)? 已知第16 行的call 指令的后4 字节为偏移量, M 是采用大端方式还是采用小端方式?
+   (4)$f(13)=6227020800$，但$f_1(13)$的返回值为1932053504, 为什么两者不相等? 要使$f_1(13)$能返回正确的结果, 应如何修改$f_1$的源程序?
+   (5) 第19 行的imul 指令(带符号整数乘) 的功能是R eax ←R eax × R ecx, 当乘法器输出的高、低 32 位乘积之间满足什么条件时, 溢出标志OF = 1? 要使CPU 在发生溢出时转异常处理, 编译器应在 imul 指令后应加一条什么指令?
+
+<ExamSolution>
+
+<ExamAnswer>
+（1）共调用 10 次；第 16 行 `call` 指令递归调用。
+
+（2）条件转移为第 12 行 `jle`；一定改变控制流的有第 16 行 `call`、第 20 行 `jmp` 和第 30 行 `ret`。  
+（3）第 17 行地址为 0040102AH；偏移量为 FFFFFFD6H；采用小端方式。  
+（4）32 位 `int` 溢出；应把返回值及乘法中间结果改为 64 位整数。  
+（5）高 32 位不是低 32 位符号扩展时 OF=1；随后加一条溢出自陷指令。
+</ExamAnswer>
+
+<ExamExplanation>
+（1）递归参数依次为 10、9、…、1，因此包括初次调用在内，共调用 $\displaystyle 10$ 次。第 16 行 `call f1` 执行递归调用。
+
+（2）第 12 行 `jle` 根据条件码决定是否转移，是条件转移指令。第 16 行 `call` 必须跳到被调函数入口，第 20 行 `jmp` 是无条件转移，第 30 行 `ret` 必须跳回返回地址，这三条执行时都一定改变程序控制流。
+
+（3）第 16 行 `call` 从 00401025H 开始，长度为 5 字节，故下一条指令地址为
+
+$\displaystyle \text{00401025H}+5=\text{0040102AH}$。
+
+相对位移以 `call` 后一条指令地址为基准：
+
+$\displaystyle \text{offset}=\text{00401000H}-\text{0040102AH}=-\text{2AH}=\text{FFFFFFD6H}$。
+
+机器码中的 4 个偏移字节依次为 `D6 FF FF FF`，低有效字节在低地址，因此 M 采用小端方式。
+
+（4）$\displaystyle 13!=6227020800>2^{31}-1$，超出 32 位有符号 `int` 的表示范围。低 32 位为 1932053504，因而返回值与数学值不同。可将函数返回类型和递归乘法中间结果改为 64 位类型，例如 `long long f1(int n)`，并确保乘法按 `long long` 进行。
+
+（5）设完整 64 位乘积的高、低 32 位分别为 H、L。若乘积能用 32 位补码表示，则 H 必须等于 L 的符号扩展：当 L 的最高位为 0 时 H 应全为 0；当 L 的最高位为 1 时 H 应全为 1。只要不满足该条件，就有 OF=1。编译器应在 `imul` 后加入一条溢出自陷指令，使 CPU 检查 OF；当 OF=1 时自动转入溢出异常处理程序。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2023】(9 分)2023 年408 考试第43 题中C 程序段在计算机M 上的部分机器级代码如下, 每个机 器级代码行中依次包含指令序号、虚拟地址、机器指令和汇编指令。
+
+
+```text
+for (i = 0; i < 24; i++)
+1   00401072    C7 45 F8 00 00 00 00      mov [ebp-8], 0
+2   00401079    EB 09                       jmp 00401084h
+3   0040107B    8B 55 F8                    mov eax, [ebp-8]
+    ......      ......                      ......
+7   00401088    7D 32                       jge 004010BCh
+
+for (j = 0; j < 64; j++)
+8   0040108A    C7 45 FC 00 00 00 00      mov [ebp-4], 0
+    ......      ......                      ......
+
+    a[i][j] = 10;
+    ......      ......                      ......
+19  004010AE    C7 84 82 00 20 42 00 0A 00 00 00
+                                         mov [ecx+edx*4+00422000h], 0Ah
+20  ......      ......                      ......
+```
+
+   请回答下列问题。
+   (1) 第20 条指令的虚拟地址是多少？
+   (2) 已知第2 条jmp 和第7 条jge 都是跳转指令, 其操作码分别是EBH 和7DH, 跳转目标地址分别为 00401084H 和004010BCH,这两条指令分别采用什么寻址方式? 请给出第2 条指令jmp 的跳转目标地 址计算过程。
+   (3) 已知第19 条mov 指令的功能是“a[i][j] ← 10”, 其中ecx 和edx 为寄存器名,00422000H 是数组a 的首地址, 指令中源操作数采用什么寻址方式? 已知edx 中存放的是变量j,ecx 中存放的是什么? 根 据该指令的机器码判断计算机M 采用的是大端还是小端方式?
+   (4) 第1 次执行第19 条指令时, 取指令过程中是否会发生缺页异常？为什么？
+
+<ExamSolution>
+
+<ExamAnswer>
+（1）004010B9H。
+
+（2）两条指令均采用相对寻址；第 2 条目标地址为 0040107BH+09H=00401084H。  
+（3）源操作数采用立即寻址；ecx 中存放 $\displaystyle i\times 256$；M 采用小端方式。  
+（4）不会发生取指缺页异常。
+</ExamAnswer>
+
+<ExamExplanation>
+（1）第 19 条指令的机器码共有 11 字节：
+
+`C7 84 82 00 20 42 00 0A 00 00 00`。
+
+因此第 20 条指令地址为
+
+$\displaystyle \text{004010AEH}+\text{0BH}=\text{004010B9H}$。
+
+（2）`jmp` 和 `jge` 的目标都由“下一条指令地址 + 有符号位移量”得到，均采用相对寻址。第 2 条 `jmp` 长 2 字节，下一条指令地址为 0040107BH，位移量为 09H，因此
+
+$\displaystyle \text{0040107BH}+\text{09H}=\text{00401084H}$。
+
+（3）第 19 条指令把常数 0AH 直接写入内存，故源操作数采用立即寻址。二维数组 `a[24][64]` 按行优先存放，每个 `int` 占 4 字节，元素地址为
+
+$$
+\text{base}+(i\times 64+j)\times 4
+=\text{base}+i\times 256+j\times 4
+$$
+
+机器指令中的地址表达式是 `00422000H + ecx + edx*4`，已知 edx=j，所以 ecx 中应存放 $\displaystyle i\times 256$，即第 i 行相对首地址的字节偏移。
+
+位移 00422000H 在机器码中按 `00 20 42 00` 排列，立即数 0000000AH 按 `0A 00 00 00` 排列，均是低字节在前，故 M 为小端方式。
+
+（4）不会。第 1 条指令地址 00401072H 和第 19 条指令地址 004010AEH 位于同一个 4KB 页面 00401000H～00401FFFH。程序能执行到第 19 条，说明该代码页在此前取第 1 条等指令时已经调入主存，所以第一次取第 19 条指令时不会再因该页缺失而发生缺页异常。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2024】(10 分) 对于题43 中的计算机M,C 语言程序P 中包含的语句“sum += a[i]”在M 中对应 的指令序列S 如下:
+
+```asm
+slli r4, r2, 2     // R[4] = R[2] << 2
+add r4, r3, r4     // R[4] = R[3] + R[4]
+lw r5, 0(r4)       // R[5] = M[R[4] + 0]
+add r1, r1, r5     // R[1] = R[1] + R[5]
+```
+   已知变量i、sum 和数组a 都为int 型, 通用寄存器r1 ∼r5 的编号为01H ∼05H。请回答下列问题:
+   (1) 根据指令序列S 中每条指令的功能, 写出存放数组a 的首地址、变量i 和sum 的通用寄存器编 号。(3 分)
+   (2) 已知M 为小端方式计算机, 采用页式存储管理方式, 页大小为4KB。若执行到指令序列S 中第1 条指令时, i = 5 且r1 和r3 的内容分别为00001332H 和0013DFF0H, 从地址0013DFF0H 开始的存储 单元内容如下表所示, 则执行`sum += a[i];`语句后, $a[i]$的地址、$a[i]$和sum的机器数分别是什么(用十六进制表示)? $a[i]$所在页的页号是多少? 在此次执行中, 数组a 至少存放在几页中?(5 分)
+
+
+| 地址 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 0013 DFF0 | FF | FF | FF | 7C | 70 | FE | FF | FF |
+| 0013 DFF8 | 00 | 00 | 00 | 0C | 3C | 02 | 01 | FF |
+| 0013 E000 | F0 | F1 | 00 | 00 | DC | EC | FF | FF |
+| 0013 E008 | FF | FF | 01 | 02 | 00 | 00 | 01 | 02 |
+
+   (3) 指令“slli r4, r2, 2”的机器码是什么(用十六进制表示)? 若数组a 改为short 类型,则指令序列S 中 slli 指令的汇编形式应是什么?(2 分)
+
+<ExamSolution>
+
+<ExamAnswer>
+（1）数组首地址在 r3，变量 i 在 r2，变量 sum 在 r1。
+
+（2）$\displaystyle a[i]$ 地址为 0013E004H，机器数为 FFFFECDCH；sum 变为 0000000EH；页号为 0013EH；数组至少跨 2 页。  
+（3）机器码为 00212213H；改为 `short` 后是 `slli r4, r2, 1`。
+</ExamAnswer>
+
+<ExamExplanation>
+（1）第一条指令用 r2 计算下标的字节偏移，所以 r2 保存 i；第二条将 r3 与偏移相加，所以 r3 保存数组 a 的首地址；最后一条把 r5 加到 r1 并写回 r1，所以 r1 保存 sum。
+
+（2）`int` 占 4 字节，$\displaystyle i=5$ 时偏移量为 $\displaystyle 5\times 4=20=\text{14H}$，因此
+
+$\displaystyle \operatorname{addr}(a[5])=\text{0013DFF0H}+\text{14H}=\text{0013E004H}$。
+
+从表中取地址 0013E004H～0013E007H 的字节为 `DC EC FF FF`。小端解释得到
+
+$\displaystyle a[5]=\text{FFFFECDCH}$。
+
+原 sum 为 00001332H，因此 32 位加法结果为
+
+$\displaystyle \text{00001332H}+\text{FFFFECDCH}=\text{0000000EH}$。
+
+页大小为 4KB=$\displaystyle 2^{12}$B，故页号为
+
+$\displaystyle \text{0013E004H}\gg 12=\text{0013EH}$。
+
+数组从 0013DFF0H 开始，前 16 字节位于页 0013DH，而 $a[5]$ 已位于页 0013EH，所以此次可确定数组至少跨越 2 页。
+
+（3）`slli` 的字段依次为
+
+`0000000 00010 00010 010 00100 0010011`，
+
+其中 shamt=2、rs1=r2、rd=r4。拼接后得到 32 位机器码
+
+$\displaystyle \text{00212213H}$。
+
+若数组元素改为 `short`，每个元素占 2 字节，下标只需乘 2，即左移 1 位，所以指令改为 `slli r4, r2, 1`。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>

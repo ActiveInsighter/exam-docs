@@ -1,0 +1,920 @@
+---
+title: "第 2 章 线性表"
+---
+
+# 第 2 章 线性表
+
+
+## 2.1 线性表的顺序存储
+
+<ExamQuestion>
+
+1. 【2010】设将 $\displaystyle n(n>1)$ 个整数存放到一维数组 R 中。试设计一个在时间和空间两方面都尽可能高效的算法。将 R 中保存的序列循环左移 $\displaystyle p(0<p<n)$ 个位置，即将 R 中的数据由 $\displaystyle X_0,X_1,\cdots,X_{n-1}$ 变换为 $\displaystyle X_p,X_{p+1},\cdots,X_{n-1},X_0,X_1,\cdots,X_{p-1}$。要求：
+
+(1) 给出算法的基本设计思想；
+
+(2) 根据设计思想，采用 C 或 C++ 或 Java 语言描述算法，关键之处给出注释；
+
+(3) 说明你所设计算法的时间复杂度和空间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>依次逆置数组的前 $\displaystyle p$ 个元素、后 $\displaystyle n-p$ 个元素以及整个数组。</ExamAnswer>
+
+<ExamExplanation>
+设原序列为
+
+$\displaystyle A=X_0X_1\cdots X_{p-1}$，$\displaystyle B=X_pX_{p+1}\cdots X_{n-1}$，
+
+则循环左移后的序列应为 $\displaystyle BA$。记字符串或序列的逆序为上标 $\displaystyle R$，则
+
+$\displaystyle (A^RB^R)^R=BA$。
+
+因此可按如下三步完成：
+
+1. 逆置区间 $\displaystyle R[0\ldots p-1]$；
+2. 逆置区间 $\displaystyle R[p\ldots n-1]$；
+3. 逆置整个区间 $\displaystyle R[0\ldots n-1]$。
+
+```c
+#include <stdio.h>
+
+/* 逆置 R[left...right] */
+void Reverse(int R[], int left, int right) {
+    while (left < right) {
+        int temp = R[left];
+        R[left] = R[right];
+        R[right] = temp;
+        ++left;
+        --right;
+    }
+}
+
+/* 将长度为 n 的数组 R 循环左移 p 位 */
+void LeftShift(int R[], int n, int p) {
+    Reverse(R, 0, p - 1);      // 逆置前 p 个元素
+    Reverse(R, p, n - 1);      // 逆置后 n-p 个元素
+    Reverse(R, 0, n - 1);      // 整体逆置
+}
+```
+
+三个逆置过程总共只对数组进行常数次线性扫描，因此时间复杂度为
+
+$\displaystyle O(n)$。
+
+算法只使用了常数个辅助变量，因此空间复杂度为
+
+$\displaystyle O(1)$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2011】一个长度为 $\displaystyle L(L\ge 1)$ 的升序序列 S，处在第 $\displaystyle \lceil L/2\rceil$ 个位置的数称为 S 的中位数。例如，若序列 $\displaystyle S_1=11,13,15,17,19$，则 $\displaystyle S_1$ 的中位数是 15。两个序列的中位数是含它们所有元素的升序序列的中位数。例如，若 $\displaystyle S_2=2,4,6,8,20$，则 $\displaystyle S_1$ 和 $\displaystyle S_2$ 的中位数是 11。现有两个等长的升序序列 A 和 B，试设计一个在时间和空间两方面都尽可能高效的算法，找出两个序列 A 和 B 的中位数。要求：
+
+(1) 给出算法的基本设计思想；
+
+(2) 根据设计思想，采用 C 或 C++ 或 Java 语言描述算法，关键处给出注释；
+
+(3) 说明你所设计算法的时间复杂度和空间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>同时对两个有序序列进行二分，每次比较各自中位数，舍弃不可能包含总体中位数的等量元素，直至两个候选区间都只剩一个元素，较小者即为所求中位数。</ExamAnswer>
+
+<ExamExplanation>
+设当前两个候选子序列长度相等，分别为 $\displaystyle A[s_1\ldots d_1]$ 与 $\displaystyle B[s_2\ldots d_2]$，中位数下标分别为
+
+$\displaystyle m_1=\left\lfloor\dfrac{s_1+d_1}{2}\right\rfloor$，
+
+$\displaystyle m_2=\left\lfloor\dfrac{s_2+d_2}{2}\right\rfloor$。
+
+比较 $\displaystyle A[m_1]$ 与 $\displaystyle B[m_2]$：
+
+- 若二者相等，则该值就是两个序列的中位数；
+- 若 $\displaystyle A[m_1]<B[m_2]$，则总体中位数不可能位于 A 的较小一半，也不可能位于 B 的较大一半，应舍弃这两部分；
+- 若 $\displaystyle A[m_1]>B[m_2]$，则进行对称处理。
+
+舍弃时必须保证两个剩余子序列仍然等长。长度为奇数和偶数时，端点保留方式略有不同。
+
+```c
+/* A、B 均为长度为 n 的升序数组，返回合并后第 n 小的元素 */
+int MedianOfTwoSortedArrays(const int A[], const int B[], int n) {
+    int s1 = 0, d1 = n - 1;
+    int s2 = 0, d2 = n - 1;
+
+    while (s1 < d1) {
+        int m1 = (s1 + d1) / 2;
+        int m2 = (s2 + d2) / 2;
+        int len = d1 - s1 + 1;
+
+        if (A[m1] == B[m2])
+            return A[m1];
+
+        if (A[m1] < B[m2]) {
+            if (len % 2 == 0) {
+                /* 偶数长度：舍弃 A[s1...m1] 和 B[m2+1...d2] */
+                s1 = m1 + 1;
+                d2 = m2;
+            } else {
+                /* 奇数长度：保留两个中位数位置 */
+                s1 = m1;
+                d2 = m2;
+            }
+        } else {
+            if (len % 2 == 0) {
+                /* 偶数长度：舍弃 A[m1+1...d1] 和 B[s2...m2] */
+                d1 = m1;
+                s2 = m2 + 1;
+            } else {
+                /* 奇数长度：保留两个中位数位置 */
+                d1 = m1;
+                s2 = m2;
+            }
+        }
+    }
+
+    /* 两个候选区间均只剩一个元素，总体中位数是二者较小值 */
+    return A[s1] < B[s2] ? A[s1] : B[s2];
+}
+```
+
+每轮都将候选区间长度约缩小为原来的一半，因此时间复杂度为
+
+$\displaystyle O(\log n)$。
+
+算法只使用常数个下标变量，因此空间复杂度为
+
+$\displaystyle O(1)$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2013】已知一个整数序列 $\displaystyle A=a_0,a_1,a_2,\cdots,a_{n-1}$，其中 $\displaystyle 0\le a_i<n\ (0\le i<n)$。若存在 $\displaystyle a_{p_1}=a_{p_2}=\cdots=a_{p_m}=x$ 且 $\displaystyle m>n/2$、$\displaystyle 0\le p_k<n$、$\displaystyle 1\le k\le m$，则称 $\displaystyle x$ 为 A 的主元素。例如 $\displaystyle A=0,5,5,3,5,7,5,5$，则 5 为主元素；又如 $\displaystyle A=0,5,5,3,5,1,5,7$，则 A 中没有主元素。假设 A 中的 $\displaystyle n$ 个元素保存在一个一维数组中，请设计一个尽可能高效的算法，找出 A 的主元素。若存在主元素，则输出该元素；否则输出 $\displaystyle -1$。要求：
+
+(1) 给出算法的基本设计思想；
+
+(2) 根据设计思想，采用 C 或 C++ 或 Java 语言描述算法，关键之处给出注释；
+
+(3) 说明你所设计算法的时间复杂度和空间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>使用 Boyer-Moore 多数投票算法先筛选候选主元素，再扫描一次数组验证其出现次数。</ExamAnswer>
+
+<ExamExplanation>
+主元素出现次数大于其他所有元素出现次数之和。若不断删除两个值不同的元素，则主元素若存在，最后一定会成为剩余候选值。
+
+第一趟扫描维护候选值 $\displaystyle candidate$ 和计数器 $\displaystyle count$：
+
+- 当 $\displaystyle count=0$ 时，把当前元素设为新候选值；
+- 当前元素等于候选值时，$\displaystyle count$ 加 1；
+- 否则 $\displaystyle count$ 减 1，相当于删除一对不同元素。
+
+第一趟得到的值只是候选值，还需第二趟统计其真实出现次数，判断是否大于 $\displaystyle n/2$。
+
+```c
+int Majority(const int A[], int n) {
+    int candidate = A[0];
+    int count = 1;
+
+    /* 第一趟：筛选候选主元素 */
+    for (int i = 1; i < n; ++i) {
+        if (count == 0) {
+            candidate = A[i];
+            count = 1;
+        } else if (A[i] == candidate) {
+            ++count;
+        } else {
+            --count;
+        }
+    }
+
+    /* 第二趟：验证候选值是否确为主元素 */
+    count = 0;
+    for (int i = 0; i < n; ++i) {
+        if (A[i] == candidate)
+            ++count;
+    }
+
+    return count > n / 2 ? candidate : -1;
+}
+```
+
+两趟扫描数组，时间复杂度为
+
+$\displaystyle O(n)$。
+
+只使用常数个辅助变量，空间复杂度为
+
+$\displaystyle O(1)$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2018】给定一个含 $\displaystyle n(n\ge 1)$ 个整数的数组，请设计一个在时间上尽可能高效的算法，找出数组中未出现的最小正整数。例如，数组 $\displaystyle \{-5,3,2,3\}$ 中未出现的最小正整数是 1；数组 $\displaystyle \{1,2,3\}$ 中未出现的最小正整数是 4。要求：
+
+(1) 给出算法的基本设计思想；
+
+(2) 根据设计思想，采用 C 或 C++ 语言描述算法，关键之处给出注释；
+
+(3) 说明你所设计算法的时间复杂度和空间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>利用原数组本身作为散列表，把值 $\displaystyle x\in[1,n]$ 放到下标 $\displaystyle x-1$ 的位置；完成后第一个不满足 $\displaystyle A[i]=i+1$ 的位置对应的正整数就是答案。</ExamAnswer>
+
+<ExamExplanation>
+长度为 $\displaystyle n$ 的数组中，未出现的最小正整数只可能位于
+
+$\displaystyle 1,2,\cdots,n,n+1$
+
+之中。大于 $\displaystyle n$ 的数、非正数都不会影响答案。
+
+遍历数组时，只要当前值 $\displaystyle A[i]$ 属于 $\displaystyle [1,n]$，且目标位置 $\displaystyle A[i]-1$ 上还不是该值，就将它交换到正确位置。每次交换至少把一个合法正整数放到最终位置，因此总交换次数不超过 $\displaystyle n$。
+
+```c
+void Swap(int *x, int *y) {
+    int temp = *x;
+    *x = *y;
+    *y = temp;
+}
+
+int MinMissingPositive(int A[], int n) {
+    for (int i = 0; i < n; ++i) {
+        /* 将 1...n 范围内的数放到对应下标处；第二个条件防止重复值死循环 */
+        while (A[i] >= 1 && A[i] <= n && A[A[i] - 1] != A[i]) {
+            Swap(&A[i], &A[A[i] - 1]);
+        }
+    }
+
+    for (int i = 0; i < n; ++i) {
+        if (A[i] != i + 1)
+            return i + 1;
+    }
+
+    return n + 1;
+}
+```
+
+每个元素至多被交换到正确位置一次量级，故时间复杂度为
+
+$\displaystyle O(n)$。
+
+算法原地处理，只使用常数个辅助变量，空间复杂度为
+
+$\displaystyle O(1)$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2020】定义三元组 $\displaystyle (a,b,c)$（$\displaystyle a,b,c$ 均为整数）的距离
+
+$\displaystyle D=|a-b|+|b-c|+|c-a|$。
+
+给定 3 个非空整数集合 $\displaystyle S_1,S_2,S_3$，按升序分别存储在 3 个数组中。请设计一个尽可能高效的算法，计算并输出所有可能的三元组 $\displaystyle (a,b,c)$（$\displaystyle a\in S_1,b\in S_2,c\in S_3$）中的最小距离。例如 $\displaystyle S_1=\{-1,0,9\}$，$\displaystyle S_2=\{-25,-10,10,11\}$，$\displaystyle S_3=\{2,9,17,30,41\}$，则最小距离为 2，相应的三元组为 $\displaystyle (9,10,9)$。要求：
+
+(1) 给出算法的基本设计思想；
+
+(2) 根据设计思想，采用 C 或 C++ 语言描述算法，关键之处给出注释。
+
+<ExamSolution>
+
+<ExamAnswer>分别用三个指针扫描三个升序数组。每次计算当前三元组的距离，并将指向当前最小元素的指针后移，直到任一数组扫描结束。</ExamAnswer>
+
+<ExamExplanation>
+设三个数排序后为 $\displaystyle x\le y\le z$，则
+
+$\displaystyle |x-y|+|y-z|+|z-x|=(y-x)+(z-y)+(z-x)=2(z-x)$。
+
+因此只需最小化当前三个数中的极差
+
+$\displaystyle \max(a,b,c)-\min(a,b,c)$。
+
+若当前最小值为 $\displaystyle a$，而保持 $\displaystyle a$ 不变、只增大另外两个数组中的元素，则极差不可能减小。要得到更优解，必须将当前最小值所在数组的指针后移。对另外两种情况同理。
+
+```c
+#include <limits.h>
+
+long long Min3(long long x, long long y, long long z) {
+    long long m = x < y ? x : y;
+    return m < z ? m : z;
+}
+
+long long Max3(long long x, long long y, long long z) {
+    long long m = x > y ? x : y;
+    return m > z ? m : z;
+}
+
+long long MinDistance(const int S1[], int n1,
+                      const int S2[], int n2,
+                      const int S3[], int n3) {
+    int i = 0, j = 0, k = 0;
+    long long best = LLONG_MAX;
+
+    while (i < n1 && j < n2 && k < n3) {
+        long long a = S1[i];
+        long long b = S2[j];
+        long long c = S3[k];
+        long long minValue = Min3(a, b, c);
+        long long maxValue = Max3(a, b, c);
+        long long distance = 2 * (maxValue - minValue);
+
+        if (distance < best)
+            best = distance;
+        if (best == 0)
+            break;                  // 距离不可能小于 0
+
+        /* 只有增大当前最小值，才可能缩小极差 */
+        if (minValue == a)
+            ++i;
+        else if (minValue == b)
+            ++j;
+        else
+            ++k;
+    }
+
+    return best;
+}
+```
+
+三个指针都只向后移动，故时间复杂度为
+
+$\displaystyle O(n_1+n_2+n_3)$。
+
+算法只使用常数个辅助变量，空间复杂度为
+
+$\displaystyle O(1)$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 2.2 线性表的链式存储
+
+<ExamQuestion>
+
+1. 【2013】已知两个长度分别为 $\displaystyle m$ 和 $\displaystyle n$ 的升序链表，若将它们合并为一个长度为 $\displaystyle m+n$ 的降序链表，则最坏情况下的时间复杂度是（ ）。
+
+<ExamChoices>
+<ExamOption>A. $\displaystyle O(n)$</ExamOption>
+<ExamOption>B. $\displaystyle O(mn)$</ExamOption>
+<ExamOption>C. $\displaystyle O(\min(m,n))$</ExamOption>
+<ExamOption>D. $\displaystyle O(\max(m,n))$</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+合并时需要依次比较两个升序链表当前结点，将较小结点摘下并采用头插法插入结果链表。两个链表中的每个结点至多访问一次，故时间复杂度为
+
+$\displaystyle O(m+n)$。
+
+由于 $\displaystyle m,n$ 均为正数，存在
+
+$\displaystyle \max(m,n)\le m+n\le 2\max(m,n)$，
+
+所以
+
+$\displaystyle O(m+n)=O(\max(m,n))$。
+
+故选 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2016】已知表头元素为 c 的单链表在内存中的存储状态如下表所示。现将 f 存放于 1014H 处并插入到单链表中，若 f 在逻辑上位于 a 和 e 之间，则 a、e、f 的“链接地址”依次是（ ）。
+
+| 地址  | 元素 | 链接地址 |
+| ----- | ---- | -------- |
+| 1000H | a    | 1010H    |
+| 1004H | b    | 100CH    |
+| 1008H | c    | 1000H    |
+| 100CH | d    | NULL     |
+| 1010H | e    | 1004H    |
+| 1014H |      |          |
+
+<ExamChoices>
+<ExamOption>A. 1010H，1014H，1004H</ExamOption>
+<ExamOption>B. 1010H，1004H，1014H</ExamOption>
+<ExamOption>C. 1014H，1010H，1004H</ExamOption>
+<ExamOption>D. 1014H，1004H，1010H</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+原链表逻辑次序为
+
+$\displaystyle c\to a\to e\to b\to d$。
+
+将地址为 1014H 的结点 f 插入 a 与 e 之间后，局部次序应变为
+
+$\displaystyle a\to f\to e$。
+
+因此：
+
+- a 的链接地址由 1010H 改为 1014H；
+- e 的链接地址仍为 1004H；
+- f 的链接地址应为 e 的地址 1010H。
+
+故依次为 1014H、1004H、1010H，选 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2016】已知一个带有表头结点的双向循环链表 L，结点结构为 `|prev|data|next|`，其中，prev 和 next 分别是指向其直接前驱和直接后继结点的指针。现要删除指针 p 所指的结点，正确的语句序列是（ ）。
+
+<ExamChoices>
+<ExamOption>A. `p->next->prev=p->prev; p->prev->next=p->prev; free(p);`</ExamOption>
+<ExamOption>B. `p->next->prev=p->next; p->prev->next=p->next; free(p);`</ExamOption>
+<ExamOption>C. `p->next->prev=p->next; p->prev->next=p->prev; free(p);`</ExamOption>
+<ExamOption>D. `p->next->prev=p->prev; p->prev->next=p->next; free(p);`</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+删除结点 p 后，应让 p 的直接后继结点的前驱指针指向 p 的直接前驱，即
+
+```c
+p->next->prev = p->prev;
+```
+
+同时让 p 的直接前驱结点的后继指针指向 p 的直接后继，即
+
+```c
+p->prev->next = p->next;
+```
+
+最后释放 p，故选 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2021】已知头指针 h 指向一个带头结点的非空单循环链表，结点结构为 `|data|next|`。其中 next 是指向直接后继结点的指针，p 是尾指针，q 是临时指针。现要删除该链表的第一个元素，正确的语句序列是（ ）。
+
+<ExamChoices>
+<ExamOption>A. `h->next=h->next->next; q=h->next; free(q);`</ExamOption>
+<ExamOption>B. `q=h->next; h->next=h->next->next; free(q);`</ExamOption>
+<ExamOption>C. `q=h->next; h->next=q->next; if(p!=q) p=h; free(q);`</ExamOption>
+<ExamOption>D. `q=h->next; h->next=q->next; if(p==q) p=h; free(q);`</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+先令 q 指向首元结点，再让头结点跨过 q 指向 q 的后继：
+
+```c
+q = h->next;
+h->next = q->next;
+```
+
+若链表原来只有一个数据结点，则首元结点 q 同时也是尾结点 p。删除后链表为空，尾指针应改为指向头结点 h，即
+
+```c
+if (p == q)
+    p = h;
+```
+
+最后释放 q。故选 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2023】现有非空双向链表 L，其结点结构为 `|prev|data|next|`，prev 是指向直接前驱结点的指针，next 是指向后继结点的指针。若要在 L 中指针 p 所指向的结点（非尾结点）之后插入指针 s 指向的新结点，则在执行了语句序列 `s->next=p->next; p->next=s;` 后，下列语句序列中还需要执行的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. `s->next->prev=p; s->prev=p;`</ExamOption>
+<ExamOption>B. `p->next->prev=s; s->prev=p;`</ExamOption>
+<ExamOption>C. `s->prev=s->next->prev; s->next->prev=s;`</ExamOption>
+<ExamOption>D. `p->next->prev=s->prev; s->next->prev=p;`</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+执行
+
+```c
+s->next = p->next;
+p->next = s;
+```
+
+后，s 的 next 已指向原来 p 的后继结点，但 s 的 prev 尚未设置，原后继结点的 prev 也仍指向 p。
+
+此时可先利用原后继结点尚未改变的 prev 找到 p：
+
+```c
+s->prev = s->next->prev;
+```
+
+再令原后继结点的 prev 指向 s：
+
+```c
+s->next->prev = s;
+```
+
+故选 C。
+
+B 中的 `p->next` 已经是 s，因此 `p->next->prev=s` 实际会错误地令 `s->prev=s`。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2024】已知带头结点的非空单链表 L 的头指针为 h，结点结构为 `|data|next|`，其中 next 是指向直接后继结点的指针。现有指针 p 和 q，若 p 指向 L 中非首且非尾的任意一个结点，则执行语句序列 `q=p->next; p->next=q->next; q->next=h->next; h->next=q;` 的结果是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 在 p 所指结点后插入 q 所指结点</ExamOption>
+<ExamOption>B. 在 q 所指结点后插入 p 所指结点</ExamOption>
+<ExamOption>C. 将 p 所指结点移动到 L 的头结点之后</ExamOption>
+<ExamOption>D. 将 q 所指结点移动到 L 的头结点之后</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+语句
+
+```c
+q = p->next;
+p->next = q->next;
+```
+
+先令 q 指向 p 的原直接后继，并将 q 从原位置摘下。
+
+随后
+
+```c
+q->next = h->next;
+h->next = q;
+```
+
+把 q 插入头结点 h 之后。因此执行结果是将 q 所指结点移动到链表首部，故选 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2009】已知一个带有表头结点的单链表，结点结构为 `|data|link|`。假设该链表只给出了头指针 list。在不改变链表的前提下，请设计一个尽可能高效的算法，查找链表中倒数第 $\displaystyle k$ 个位置上的结点（$\displaystyle k$ 为正整数）。若查找成功，算法输出该结点的 data 域的值，并返回 1；否则，只返回 0。要求：
+
+(1) 描述算法的基本设计思想；
+
+(2) 描述算法的详细实现步骤；
+
+(3) 根据设计思想和实现步骤，采用程序设计语言描述算法（使用 C 或 C++ 或 Java 语言实现），关键之处请给出简要注释。
+
+<ExamSolution>
+
+<ExamAnswer>使用快慢两个指针。快指针先向后移动 $\displaystyle k$ 个结点，再让快、慢指针同步后移；当快指针到达链尾时，慢指针恰好指向倒数第 $\displaystyle k$ 个结点。</ExamAnswer>
+
+<ExamExplanation>
+设链表长度为 $\displaystyle n$。快指针先走 $\displaystyle k$ 步后，快慢指针之间相隔 $\displaystyle k$ 个结点。之后二者同步移动。当快指针移动到 NULL 时，慢指针共移动了 $\displaystyle n-k$ 步，正好指向第 $\displaystyle n-k+1$ 个结点，即倒数第 $\displaystyle k$ 个结点。
+
+若快指针在尚未走满 $\displaystyle k$ 步时已经到达 NULL，说明 $\displaystyle k>n$，查找失败。
+
+```c
+#include <stdio.h>
+
+typedef struct LNode {
+    int data;
+    struct LNode *link;
+} LNode;
+
+int SearchKthFromEnd(LNode *list, int k) {
+    if (list == NULL || k <= 0)
+        return 0;
+
+    LNode *fast = list->link;   // 指向首元结点
+    LNode *slow = list->link;
+
+    /* 快指针先走 k 步 */
+    for (int i = 0; i < k; ++i) {
+        if (fast == NULL)
+            return 0;          // 链表长度小于 k
+        fast = fast->link;
+    }
+
+    /* 两个指针同步后移 */
+    while (fast != NULL) {
+        fast = fast->link;
+        slow = slow->link;
+    }
+
+    printf("%d\n", slow->data);
+    return 1;
+}
+```
+
+链表只需扫描一次，时间复杂度为
+
+$\displaystyle O(n)$。
+
+只使用两个工作指针，空间复杂度为
+
+$\displaystyle O(1)$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+8. 【2012】假定采用带头结点的单链表保存单词，当两个单词有相同的后缀时，则可共享相同的后缀存储空间，例如，“loading”和“being”的存储映像如下图所示。
+
+![](/img/questions/408/data-structure-p014-01.svg)
+
+设 str1 和 str2 分别指向两个单词所在单链表的头结点，链表结点结构为 `|data|next|`。请设计一个时间上尽可能高效的算法，找出由 str1 和 str2 所指向两个链表共同后缀的起始位置（如图中字符 i 所在结点的位置 p）。要求：
+
+(1) 给出算法的基本设计思想；
+
+(2) 根据设计思想，采用 C 或 C++ 语言描述算法，关键之处给出注释；
+
+(3) 说明你所设计算法的时间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>先分别求两个链表的长度，使较长链表的工作指针先前进长度差个结点，再让两个工作指针同步后移；二者第一次指向同一物理结点的位置就是公共后缀的起始位置。</ExamAnswer>
+
+<ExamExplanation>
+若两个单链表共享后缀，则从公共后缀起始结点开始，后面的结点地址完全相同。设两个链表长度分别为 $\displaystyle m$、$\displaystyle n$。先让较长链表的指针前进 $\displaystyle |m-n|$ 步，使两个指针到各自链尾的剩余距离相同，再同步前进。它们首次相等时所指结点即为公共后缀的首结点；若同时到达 NULL 仍未相等，则无公共后缀。
+
+```c
+typedef struct LNode {
+    char data;
+    struct LNode *next;
+} LNode;
+
+LNode *CommonSuffixStart(LNode *str1, LNode *str2) {
+    int len1 = 0, len2 = 0;
+    LNode *p = str1->next;
+    LNode *q = str2->next;
+
+    /* 计算两个链表的长度，不计头结点 */
+    for (LNode *t = p; t != NULL; t = t->next)
+        ++len1;
+    for (LNode *t = q; t != NULL; t = t->next)
+        ++len2;
+
+    /* 较长链表先走长度差步 */
+    while (len1 > len2) {
+        p = p->next;
+        --len1;
+    }
+    while (len2 > len1) {
+        q = q->next;
+        --len2;
+    }
+
+    /* 同步前进，比较的是结点地址而不是 data 值 */
+    while (p != q) {
+        p = p->next;
+        q = q->next;
+    }
+
+    return p;   // 返回公共后缀首结点；无公共后缀时返回 NULL
+}
+```
+
+求长度和同步扫描均为线性过程，时间复杂度为
+
+$\displaystyle O(m+n)$。
+
+空间复杂度为
+
+$\displaystyle O(1)$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+9. 【2015】用单链表保存 $\displaystyle m$ 个整数，结点的结构为 `|data|link|`，且 $\displaystyle |data|\le n$（$\displaystyle n$ 为正整数）。现要求设计一个时间复杂度尽可能高效的算法，对于链表中 data 的绝对值相等的结点，仅保留第一次出现的结点而删除其余绝对值相等的结点。例如，若给定的单链表 HEAD 如下：
+
+![](/img/questions/408/data-structure-p015-01.svg)
+
+则删除结点后的 HEAD 为：
+
+![](/img/questions/408/data-structure-p015-02.svg)
+
+要求：
+
+(1) 给出算法的基本设计思想；
+
+(2) 使用 C 或 C++ 语言，给出单链表结点的数据类型定义；
+
+(3) 根据设计思想，采用 C 或 C++ 语言描述算法，关键之处给出注释；
+
+(4) 说明你所设计算法的时间复杂度和空间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>建立长度为 $\displaystyle n+1$ 的布尔辅助数组，记录绝对值 $\displaystyle 0,1,\cdots,n$ 是否已经出现。顺序扫描链表，第一次出现时保留并标记，之后再次出现同一绝对值时删除该结点。</ExamAnswer>
+
+<ExamExplanation>
+题干中的约束应为 $\displaystyle |data|\le n$，这样所有可能的绝对值都位于 $\displaystyle [0,n]$，可以直接用数组下标进行标记。
+
+设辅助数组 $\displaystyle seen[k]$ 表示绝对值 k 是否已经出现。使用 pre 指向当前结点的前驱，p 指向当前结点：
+
+- 若 $\displaystyle seen[|p\to data|]=0$，说明首次出现，标记后令 pre、p 同时后移；
+- 否则令 pre 跨过 p，并释放 p。
+
+```c
+#include <stdbool.h>
+#include <stdlib.h>
+
+typedef struct LNode {
+    int data;
+    struct LNode *link;
+} LNode;
+
+void DeleteAbsDuplicate(LNode *HEAD, int n) {
+    bool *seen = (bool *)calloc(n + 1, sizeof(bool));
+    if (seen == NULL)
+        return;
+
+    LNode *pre = HEAD;
+    LNode *p = HEAD->link;
+
+    while (p != NULL) {
+        int value = abs(p->data);
+
+        if (!seen[value]) {
+            seen[value] = true;     // 第一次出现，保留
+            pre = p;
+            p = p->link;
+        } else {
+            /* 绝对值已经出现，删除当前结点 */
+            pre->link = p->link;
+            free(p);
+            p = pre->link;
+        }
+    }
+
+    free(seen);
+}
+```
+
+初始化辅助数组需要 $\displaystyle O(n)$ 时间，扫描链表需要 $\displaystyle O(m)$ 时间，因此总时间复杂度为
+
+$\displaystyle O(m+n)$。
+
+辅助数组占用 $\displaystyle n+1$ 个布尔单元，空间复杂度为
+
+$\displaystyle O(n)$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+10. 【2019】设线性表 $\displaystyle L=(a_1,a_2,a_3,\cdots,a_{n-2},a_{n-1},a_n)$ 采用带头结点的单链表保存，链表中结点定义如下：
+
+```c
+typedef struct node {
+    int data;
+    struct node *next;
+} NODE;
+```
+
+请设计一个空间复杂度为 $\displaystyle O(1)$ 且时间上尽可能高效的算法，重新排列 L 中的各结点，得到线性表
+
+$\displaystyle L=(a_1,a_n,a_2,a_{n-1},a_3,a_{n-2},\cdots)$。
+
+要求：
+
+(1) 给出算法的基本设计思想；
+
+(2) 根据设计思想，采用 C 或 C++ 语言描述算法，关键之处给出注释；
+
+(3) 说明你所设计的算法的时间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>先用快慢指针找到链表中点并将链表分成前后两段；再原地逆置后半段；最后将前半段与逆置后的后半段交替合并。</ExamAnswer>
+
+<ExamExplanation>
+目标序列依次取原链表的首元素、尾元素、次首元素、次尾元素。因此可分三步：
+
+1. 找到中点，使前半段包含 $\displaystyle \lceil n/2\rceil$ 个结点，后半段包含 $\displaystyle \lfloor n/2\rfloor$ 个结点；
+2. 原地逆置后半段，将其顺序变为 $\displaystyle a_n,a_{n-1},a_{n-2},\cdots$；
+3. 从两个子链表中交替取结点进行连接。
+
+```c
+typedef struct node {
+    int data;
+    struct node *next;
+} NODE;
+
+void Rearrange(NODE *L) {
+    if (L == NULL || L->next == NULL || L->next->next == NULL)
+        return;
+
+    /* 第一步：用快慢指针找到前半段最后一个结点 */
+    NODE *slow = L->next;
+    NODE *fast = L->next;
+
+    while (fast->next != NULL && fast->next->next != NULL) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+
+    NODE *second = slow->next;
+    slow->next = NULL;             // 将链表分成两段
+
+    /* 第二步：原地逆置后半段 */
+    NODE *prev = NULL;
+    NODE *cur = second;
+    while (cur != NULL) {
+        NODE *next = cur->next;
+        cur->next = prev;
+        prev = cur;
+        cur = next;
+    }
+
+    /* 第三步：交替合并前半段和逆置后的后半段 */
+    NODE *p = L->next;
+    NODE *q = prev;
+
+    while (q != NULL) {
+        NODE *pNext = p->next;
+        NODE *qNext = q->next;
+
+        p->next = q;
+        q->next = pNext;
+
+        p = pNext;
+        q = qNext;
+    }
+}
+```
+
+寻找中点、逆置后半段和交替合并均只需线性扫描，故总时间复杂度为
+
+$\displaystyle O(n)$。
+
+整个过程只使用常数个指针变量，空间复杂度为
+
+$\displaystyle O(1)$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>

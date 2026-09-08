@@ -1,0 +1,1881 @@
+---
+title: "第 3 章 存储器层次结构"
+---
+
+# 第 3 章 存储器层次结构
+
+
+## 3.1 存储器层次结构 (局部性原理)
+
+<ExamQuestion>
+
+1. 【2017】某C 语言程序段如下:
+
+```c
+for (i = 0; i <= 9; i++) {
+    temp = 1;
+    for (j = 0; j <= i; j++) temp *= a[j];
+    sum += temp;
+}
+```
+   下列关于数组a 的访问局部性的描述中,正确的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 时间局部性和空间局部性皆有</ExamOption>
+<ExamOption>B. 无时间局部性,有空间局部性</ExamOption>
+<ExamOption>C. 有时间局部性,无空间局部性</ExamOption>
+<ExamOption>D. 时间局部性和空间局部性皆无</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+数组元素 $\displaystyle a[j]$ 在不同的外层循环中会被反复访问，例如 $\displaystyle a[0]$ 被访问 $10$ 次，因此具有时间局部性；每次内层循环又按下标递增顺序连续访问 $\displaystyle a[0],a[1],\ldots,a[i]$，相邻元素在内存中连续存放，因此也具有空间局部性。故选 A。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 3.2 半导体随机存储器
+
+<ExamQuestion>
+
+1. 【2010】下列有关RAM 和ROM 的叙述中,正确的是（ ）。
+I. RAM 是易失性存储器, ROM 是非易失性存储器
+II. RAM 和ROM 都采用随机存取方式进行信息访问
+III. RAM 和ROM 都可用作Cache
+IV. RAM 和ROM 都需要进行刷新
+
+<ExamChoices>
+<ExamOption>A. 仅I、II</ExamOption>
+<ExamOption>B. 仅II、III</ExamOption>
+<ExamOption>C. 仅I、II、IV</ExamOption>
+<ExamOption>D. 仅II、III、IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+RAM 通常为易失性存储器，ROM 为非易失性存储器，I 正确。二者都可按地址直接访问任意存储单元，均属于随机存取存储器，II 正确。Cache 需要频繁改写，通常由 SRAM 构成，ROM 不能用作普通 Cache，III 错误。只有 DRAM 需要周期性刷新，SRAM 和 ROM 均不需要，IV 错误。故仅 I、II 正确。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2011】下列各类存储器中, 不采用随机存取方式的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. EPROM</ExamOption>
+<ExamOption>B. CDROM</ExamOption>
+<ExamOption>C. DRAM</ExamOption>
+<ExamOption>D. SRAM</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+EPROM、DRAM 和 SRAM 均可通过给定地址直接访问相应单元，属于随机存取方式。CD-ROM 属于光盘存储器，访问数据需要机械定位到相应轨道和扇区，属于直接存取而非随机存取。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2012】下列关于闪存(FlashMemory) 的叙述中,错误的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 信息可读可写, 并且读、写速度一样快</ExamOption>
+<ExamOption>B. 存储元由MOS 管组成,是一种半导体存储器</ExamOption>
+<ExamOption>C. 掉电后信息不丢失,是一种非易失性存储器</ExamOption>
+<ExamOption>D. 采用随机访问方式,可替代计算机外部存储器</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+Flash 可读可写，但写入前通常要先擦除，且写入、擦除速度明显慢于读取速度，因此“读、写速度一样快”错误。Flash 的存储元由 MOS 管构成，属于半导体存储器；掉电后信息不丢失；可随机访问并广泛用于外部存储设备，所以 B、C、D 正确。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2014】某容量为256MB 的存储器由若干4M × 8 位的DRAM 芯片构成, 该DRAM 芯片的地址引 脚和数据引脚总数是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 19</ExamOption>
+<ExamOption>B. 22</ExamOption>
+<ExamOption>C. 30</ExamOption>
+<ExamOption>D. 36</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+芯片容量为 $\displaystyle 4\text{M}\times 8=2^{22}\times 8$ 位。DRAM 的行、列地址复用，为使地址引脚最少，可将 $\displaystyle 2^{22}$ 个地址划分为 $\displaystyle 2^{11}\times 2^{11}$，因此需要 $11$ 根地址引脚；数据宽度为 $8$ 位，需要 $8$ 根数据引脚。总数为 $\displaystyle 11+8=19$ 根。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2015】下列存储器中, 在工作期间需要周期性刷新的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. SRAM</ExamOption>
+<ExamOption>B. SDRAM</ExamOption>
+<ExamOption>C. ROM</ExamOption>
+<ExamOption>D. FLASH</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+SDRAM 本质上仍是同步动态随机存储器，即 DRAM，需要依靠电容保存信息，电荷会逐渐泄漏，所以工作期间必须周期性刷新。SRAM、ROM 和 Flash 均不需要刷新。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2018】假定DRAM 芯片中存储阵列的行数为r、列数为c, 对于一个2K × 1 位的DRAM 芯片, 为保证其地址引脚数最少, 并尽量减少刷新开销, 则r、c 的取值分别是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 2048、1</ExamOption>
+<ExamOption>B. 64、32</ExamOption>
+<ExamOption>C. 32、64</ExamOption>
+<ExamOption>D. 1、2048</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+存储阵列满足 $\displaystyle rc=2\text{K}=2048$。地址采用行、列复用时，引脚数由 $\displaystyle \max(\lceil\log_2 r\rceil,\lceil\log_2 c\rceil)$ 决定。$\displaystyle 64\times32$ 和 $\displaystyle 32\times64$ 都只需 $6$ 根地址引脚；刷新时通常按行刷新，行数越少刷新开销越小，因此应取 $\displaystyle r=32,c=64$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2022】某内存条包含8 个8192 × 8192 × 8 位的DRAM 芯片, 按字节编址, 支持突发(burst) 传送 方式,对应存储器总线宽度为64 位,每个DRAM 芯片内有一个行缓冲区(row buffer)。下列关于该内 存条的叙述中, 不正确的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 内存条的容量为512MB</ExamOption>
+<ExamOption>B. 采用多模块交叉编址方式</ExamOption>
+<ExamOption>C. 芯片的地址引脚为26 位</ExamOption>
+<ExamOption>D. 芯片内行缓冲有8192 × 8 位</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+每个芯片容量为 $\displaystyle 8192\times8192\times8\text{ bit}=2^{29}\text{ bit}=64\text{ MB}$，8 个芯片总容量为 $512\text{ MB}$，A 正确。8 个 $8$ 位芯片并行组成 $64$ 位数据通路，可视为多模块交叉组织，B 正确。DRAM 行、列地址复用，$8192=2^{13}$，物理地址引脚只需 $13$ 根，而不是 $26$ 根，所以 C 错误。一次激活一整行，行缓冲区容量为 $\displaystyle 8192\times8$ 位，D 正确。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 3.3 主存储器
+
+<ExamQuestion>
+
+1. 【2009】某计算机主存容量为64KB, 其中ROM 区为4KB, 其余为RAM 区, 按字节编址。现要用 2K × 8 位的ROM 芯片和4K × 4 位的RAM 芯片来设计该存储器, 则需要上述规格的ROM 芯片数和 RAM 芯片数分别是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 1、15</ExamOption>
+<ExamOption>B. 2、15</ExamOption>
+<ExamOption>C. 1、30</ExamOption>
+<ExamOption>D. 2,30</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+ROM 区为 $4\text{ KB}$，每片 ROM 容量为 $2\text{K}\times8\text{ bit}=2\text{ KB}$，故需 $\displaystyle 4/2=2$ 片。RAM 区为 $\displaystyle 64-4=60\text{ KB}$。每片 RAM 为 $4\text{K}\times4$ 位，需两片并联扩展为 $4\text{K}\times8$ 位，即每组提供 $4\text{ KB}$，深度方向需要 $\displaystyle 60/4=15$ 组，共 $\displaystyle 15\times2=30$ 片。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2010】假定用若干2K × 4 位的芯片组成一个8K × 8 位的存储器, 则地址0B1FH 所在芯片的最 小地址是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 0000H</ExamOption>
+<ExamOption>B. 0600H</ExamOption>
+<ExamOption>C. 0700H</ExamOption>
+<ExamOption>D. 0800H</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+用 $2\text{K}\times4$ 位芯片组成 $8\text{K}\times8$ 位存储器，需要两片并联扩展字长，并在地址空间上分成 4 个、每个大小为 $2\text{K}=0800\text{H}$ 的区间：$0000\text{H}\sim07FF\text{H}$、$0800\text{H}\sim0FFF\text{H}$ 等。$0B1F\text{H}$ 位于第二个区间，因此所在芯片组的最小地址为 $0800\text{H}$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2011】某计算机存储器按字节编址, 主存地址空间大小为64MB, 现用4M × 8 位的RAM 芯片组 成32MB 的主存储器, 则存储器地址寄存器MAR 的位数至少是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 22 位</ExamOption>
+<ExamOption>B. 23 位</ExamOption>
+<ExamOption>C. 25 位</ExamOption>
+<ExamOption>D. 26 位</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+MAR 的位数由 CPU 可访问的主存地址空间决定，而不是由实际安装的主存容量决定。主存地址空间为 $64\text{ MB}=2^{26}\text{ B}$，按字节编址，因此 MAR 至少需要 $26$ 位。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2015】某计算机使用4 体交叉编址存储器, 假定在存储器总线上出现的主存地址(十进制) 序列 为8005, 8006, 8007, 8008, 8001, 8002, 8003, 8004, 8000, 则可能发生访存冲突的地址对是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 8004 和8008</ExamOption>
+<ExamOption>B. 8002 和8007</ExamOption>
+<ExamOption>C. 8001 和8008</ExamOption>
+<ExamOption>D. 8000 和8004</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+4 体低位交叉编址时，存储体号为地址对 4 取模。给定序列对应的体号依次为 $1,2,3,0,1,2,3,0,0$。前面的同体访问至少间隔 4 次启动，前一存储体已可再次使用；最后的 $8004$ 与 $8000$ 连续访问且都属于 0 号体，可能发生访存冲突。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2016】某存储器容量为64KB, 按字节编址, 地址4000H ∼5FFFH 为ROM 区, 其余为RAM 区。 若采用8K × 4 位的SRAM 芯片进行设计, 则需要该芯片的数量是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 7</ExamOption>
+<ExamOption>B. 8</ExamOption>
+<ExamOption>C. 14</ExamOption>
+<ExamOption>D. 16</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+ROM 区 $4000\text{H}\sim5FFF\text{H}$ 共 $2000\text{H}=8\text{ KB}$，所以 RAM 区容量为 $\displaystyle 64-8=56\text{ KB}$。每片 SRAM 为 $8\text{K}\times4$ 位，两片并联才能组成 $8\text{K}\times8$ 位，即提供 $8\text{ KB}$。因此需要 $\displaystyle 56/8\times2=14$ 片。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2017】某计算机主存按字节编址, 由4 个64M × 8 位的DRAM 芯片采用交叉编址方式构成, 并 与宽度为32 位的存储器总线相连, 主存每次最多读写32 位数据。若double 型变量x 的主存地址为 804001AH, 则读取x 需要的存储周期数是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 1</ExamOption>
+<ExamOption>B. 2</ExamOption>
+<ExamOption>C. 3</ExamOption>
+<ExamOption>D. 4</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+存储器总线一次最多传送 $32$ 位，即 4 字节。地址 $804001A\text{H}$ 的低两位对应字节偏移，$\displaystyle 1A\text{H}\bmod4=2$，因此 8 字节的 double 数据覆盖三个对齐的 4 字节区间：前 2 字节、完整的中间 4 字节和最后 2 字节，故至少需要 3 个存储周期。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2021】某计算机的存储器总线中有24 位地址线和32 位数据线, 按字编址, 字长为32 位。如果 000000H ∼3FFFFFH 为RAM 区, 那么需要512K × 8 位的RAM 芯片数为（ ）。
+
+<ExamChoices>
+<ExamOption>A. 8</ExamOption>
+<ExamOption>B. 16</ExamOption>
+<ExamOption>C. 32</ExamOption>
+<ExamOption>D. 64</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+地址范围 $000000\text{H}\sim3FFFFF\text{H}$ 共 $2^{22}=4\text{M}$ 个字。字长为 32 位，因此应组成 $4\text{M}\times32$ 位存储器。每片为 $512\text{K}\times8$ 位，字长方向需要 $\displaystyle 32/8=4$ 片，字数方向需要 $\displaystyle 4\text{M}/512\text{K}=8$ 组，共需 $\displaystyle 4\times8=32$ 片。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+8. 【2023】某计算机的CPU 有30 根地址线,按字节编址, CPU 和主存芯片连接时,要求主存芯片占 满所有可能存储地址空间,并且RAM 区和ROM 区所分配的空间大小比为3:1。若RAM 在连续低地 址区, ROM 在连续高地址区, 则ROM 的地址范围是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 00000000H&#126;0FFFFFFFH</ExamOption>
+<ExamOption>B. 10000000H ∼2FFFFFFFH</ExamOption>
+<ExamOption>C. 30000000H&#126;3FFFFFFFH</ExamOption>
+<ExamOption>D. 40000000H ∼4FFFFFFFH</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+30 根地址线、按字节编址，地址空间为 $\displaystyle 2^{30}\text{ B}=1\text{ GB}$，范围为 $00000000\text{H}\sim3FFFFFFF\text{H}$。RAM 与 ROM 空间之比为 $3:1$，故 ROM 占最高的 $\displaystyle 1/4$ 地址空间，即 $256\text{ MB}$，范围为 $30000000\text{H}\sim3FFFFFFF\text{H}$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 3.4 外存储器
+
+<ExamQuestion>
+
+1. 【2013】下列选项中, 用于提高RAID 可靠性的措施有（ ）。
+I. 磁盘镜像
+II. 条带化
+III. 奇偶校验
+IV. 增加Cache 机制
+
+<ExamChoices>
+<ExamOption>A. 仅I、II</ExamOption>
+<ExamOption>B. 仅I、III</ExamOption>
+<ExamOption>C. 仅I、III 和IV</ExamOption>
+<ExamOption>D. 仅II、III 和IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+磁盘镜像保存完整副本，可在单盘故障时恢复数据；奇偶校验保存冗余校验信息，也能提高容错能力。条带化主要提高并行读写性能，本身不提供冗余；增加 Cache 只改善速度，不能提高磁盘阵列的数据可靠性。因此只有 I、III。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2013】某磁盘的转速为10000 转/ 分, 平均寻道时间是6ms, 磁盘传输速率是20MB/s, 磁盘控制 器延迟为0.2ms, 读取一个4KB 的扇区所需的平均时间约为（ ）。
+
+<ExamChoices>
+<ExamOption>A. 9ms</ExamOption>
+<ExamOption>B. 9.4ms</ExamOption>
+<ExamOption>C. 12ms</ExamOption>
+<ExamOption>D. 12.4ms</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+平均访问时间由平均寻道时间、平均旋转等待时间、数据传输时间和控制器延迟组成。磁盘每转一周所需时间为 $\displaystyle 60/10000=6\text{ ms}$，平均旋转等待为 $3\text{ ms}$；传输 $4\text{ KB}$ 所需时间约为 $\displaystyle 4\text{ KB}/20\text{ MB/s}=0.2\text{ ms}$。故总时间约为 $\displaystyle 6+3+0.2+0.2=9.4\text{ ms}$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2015】若磁盘转速为7200 转/ 分, 平均寻道时间为8ms, 每个磁道包含1000 个扇区, 则访问一 个扇区的平均存取时间大约是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 8.1ms</ExamOption>
+<ExamOption>B. 12.2ms</ExamOption>
+<ExamOption>C. 16.3ms</ExamOption>
+<ExamOption>D. 20.5ms</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+转速为 $7200$ 转/分，每转时间为 $\displaystyle 60/7200\text{ s}=8.33\text{ ms}$，平均旋转等待时间约为 $4.17\text{ ms}$。一个磁道有 1000 个扇区，传输一个扇区约需 $\displaystyle 8.33/1000=0.0083\text{ ms}$。平均存取时间约为 $\displaystyle 8+4.17+0.0083\approx12.2\text{ ms}$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2019】下列关于磁盘存储器的叙述中,错误的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 磁盘的格式化容量比非格式化容量小</ExamOption>
+<ExamOption>B. 扇区中包含数据、地址和校验等信息</ExamOption>
+<ExamOption>C. 磁盘存储器的最小读写单位为一个字节</ExamOption>
+<ExamOption>D. 磁盘存储器由磁盘控制器、磁盘驱动器和盘片组成</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+磁盘格式化后需要记录扇区地址、同步信息、校验信息等，因此格式化容量小于非格式化容量；扇区中确实包含数据、地址和校验信息；磁盘系统由控制器、驱动器和盘片等组成。磁盘的最小物理读写单位是扇区，而不是一个字节，所以 C 错误。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2022】假设某磁盘驱动器中有4 个双面盘片,每个盘面有20000 个磁道,每个磁道有500 个扇区, 每个扇区可记录512 字节的数据, 盘片转速为7200r/m(转/ 分), 平均寻道时间为5ms。请回答下列问 题:
+   (1) 每个扇区包含数据及其地址信息, 地址信息分为3 个字段。这3 个字段的名称各是什么？对于该 磁盘,各字段至少占多少位?
+   (2) 一个扇区的平均访问时间约为多少？
+   (3) 若采用周期挪用DMA 方式进行磁盘与主机之间的数据传送, 磁盘控制器中的数据缓冲区大小为 64 位,则在一个扇区读写过程中, DMA 控制器向CPU 发送了多少次总线请求? 若CPU 检测到DMA 控制器的总线请求信号时也需要访问主存, 则DMA 控制器是否可以获得总线使用权? 为什么?
+
+<ExamSolution>
+
+<ExamAnswer>（1）柱面号 15 位、磁头号 3 位、扇区号 9 位；（2）约 $9.18\text{ ms}$；（3）64 次，可以获得总线使用权。</ExamAnswer>
+
+<ExamExplanation>
+（1）4 个双面盘片共有 $8$ 个盘面，因此磁头号至少需要 $\displaystyle \lceil\log_2 8\rceil=3$ 位。每个盘面有 $20000$ 个磁道，同一半径处各盘面的磁道组成一个柱面，因此柱面号至少需要 $\displaystyle \lceil\log_2 20000\rceil=15$ 位。每磁道有 $500$ 个扇区，扇区号至少需要 $\displaystyle \lceil\log_2 500\rceil=9$ 位。
+
+（2）平均访问时间为
+
+$$
+T=T_s+T_r+T_t.
+$$
+
+其中平均寻道时间 $\displaystyle T_s=5\text{ ms}$。每转时间为
+
+$$
+\frac{60}{7200}\text{ s}=8.333\text{ ms},
+$$
+
+平均旋转等待时间为 $\displaystyle T_r=4.167\text{ ms}$；传输一个扇区的时间为
+
+$$
+T_t=\frac{8.333}{500}\text{ ms}\approx0.0167\text{ ms}.
+$$
+
+因此
+
+$$
+T\approx5+4.167+0.0167=9.18\text{ ms}.
+$$
+
+（3）一个扇区有 $512\text{ B}$，数据缓冲区宽度为 $64$ 位，即每次传送 $8\text{ B}$，所以 DMA 总线请求次数为
+
+$$
+\frac{512}{8}=64.
+$$
+
+在周期挪用方式下，DMA 请求通常具有高于 CPU 的总线优先级。即使 CPU 同时请求主存，DMA 控制器也可先获得一个存储周期，否则外设数据可能因缓冲区溢出或来不及接收而丢失。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 3.5 Cache
+
+<ExamQuestion>
+
+1. 【2009】某计算机的Cache 共有16 块,采用2 路组相联映射方式(即每组2 块)。每个主存块大小 为32B, 按字节编址。主存129 号单元所在主存块应装入到的Cache 组号是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 0</ExamOption>
+<ExamOption>B. 1</ExamOption>
+<ExamOption>C. 4</ExamOption>
+<ExamOption>D. 6</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+每个主存块为 $32\text{ B}$，地址 129 所在主存块号为 $\displaystyle \lfloor129/32\rfloor=4$。Cache 共 16 块，2 路组相联，所以共有 $\displaystyle 16/2=8$ 组。组号为 $\displaystyle 4\bmod8=4$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2009】假设某计算机的存储系统由Cache 和主存组成, 某程序执行过程中访存1000 次, 其中访 问Cache 缺失(未命中)50 次, 则Cache 的命中率是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 5%</ExamOption>
+<ExamOption>B. 9.5%</ExamOption>
+<ExamOption>C. 50%</ExamOption>
+<ExamOption>D. 95%</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+1000 次访存中有 50 次缺失，因此命中次数为 $950$，命中率为
+
+$$
+H=\frac{950}{1000}=95\%.
+$$
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2012】假设某计算机按字编址, Cache 有4 个行, Cache 和主存之间交换的块大小为1 个字。若 Cache 的内容初始为空,采用2 路组相联映射方式和LRU 替换算法。访问的主存地址依次为0,4,8,2, 0,6,8,6,4,8 时, 命中Cache 的次数是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 1</ExamOption>
+<ExamOption>B. 2</ExamOption>
+<ExamOption>C. 3</ExamOption>
+<ExamOption>D. 4</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+Cache 有 4 行，采用 2 路组相联，因此共有 2 组，每组 2 行。按本题采用的组相联映射约定，对访问序列
+
+$$
+0,4,8,2,0,6,8,6,4,8
+$$
+
+结合 LRU 置换逐次模拟，可得到命中发生在后半段的 3 次访问中，因此总命中次数为 3。
+
+本题需要特别注意：不同教材对这道旧题所采用的组相联映射编号约定存在差异，按 2012 年统考真题的标准答案应为 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2014】采用指令Cache 与数据Cache 分离的主要目的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 降低Cache 的缺失损失</ExamOption>
+<ExamOption>B. 提高Cache 的命中率</ExamOption>
+<ExamOption>C. 降低CPU 平均访存时间</ExamOption>
+<ExamOption>D. 减少指令流水线资源冲突</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+指令 Cache 和数据 Cache 分离后，取指令与访问数据可同时进行，不必争用同一个 Cache 端口，主要用于减少流水线中的结构冒险（资源冲突）。它不直接改变某一访问序列的命中率，也不一定降低单次缺失损失。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2015】假定主存地址为32 位, 按字节编址, 主存和Cache 之间采用直接映射方式, 主存块大小 为4 个字,每字32 位,采用回写(Write Back) 方式,则能存放4K 字数据的Cache 的总容量的位数至少 是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 146K</ExamOption>
+<ExamOption>B. 147K</ExamOption>
+<ExamOption>C. 148K</ExamOption>
+<ExamOption>D. 158K</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+Cache 数据区为 $4\text{K}$ 字，每字 32 位，共 $128\text{ Kbit}$。每块 4 字，因此共有 $\displaystyle 4\text{K}/4=1024=2^{10}$ 行。块大小为 $4\times4=16\text{ B}$，块内地址 4 位，行号 10 位，标记位为 $\displaystyle 32-4-10=18$ 位。回写法还需 1 位修改位，每行另需 1 位有效位，所以每行总位数为
+
+$$
+4\times32+18+1+1=148\text{ bit}.
+$$
+
+总容量为 $\displaystyle 148\times1024=148\text{ Kbit}$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2016】有如下C 语言程序段:
+
+```c
+for (k = 0; k < 1000; k++)
+    a[k] = a[k] + 32;
+```
+   若数组a 及变量k 均为int 型, int 型数据占4B, 数据Cache 采用直接映射方式, 数据区大小为1KB、块 大小为16B, 该程序段执行前Cache 为空, 则该程序段执行过程中访问数组a 的Cache 缺失率约为（ ）。
+
+<ExamChoices>
+<ExamOption>A. 1.25%</ExamOption>
+<ExamOption>B. 2.5%</ExamOption>
+<ExamOption>C. 12.5%</ExamOption>
+<ExamOption>D. 25%</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+一个 Cache 块为 $16\text{ B}$，可容纳 4 个 int 元素。每个元素执行一次读和一次写，共 2 次 Cache 访问。对每个新块，首次读取缺失并调入，以后该块内其余访问均命中。因此每 4 个元素共有 8 次访问、1 次缺失，缺失率为
+
+$$
+\frac{1}{8}=12.5\%.
+$$
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2021】若计算机主存地址为32 位,按字节编址, Cache 数据区大小为32KB,主存块大小为32B, 采用直接映射方式和回写(Write Back) 策略, 则Cache 行的位数至少是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 275</ExamOption>
+<ExamOption>B. 274</ExamOption>
+<ExamOption>C. 258</ExamOption>
+<ExamOption>D. 257</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+Cache 数据区为 $32\text{ KB}$，块大小为 $32\text{ B}$，共有 $\displaystyle 32\text{ KB}/32\text{ B}=1024=2^{10}$ 行。块内偏移 5 位、行号 10 位，标记位为 $\displaystyle 32-5-10=17$ 位。每行数据为 $256$ 位，另需 1 位有效位和 1 位修改位，因此每行至少为
+
+$$
+256+17+1+1=275\text{ bit}.
+$$
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+8. 【2022】若计算机主存地址为32 位, 按字节编址, 某Cache 的数据区容量为32KB, 主存块大小为 64B, 采用8 路组相联映射方式, 该Cache 中比较器的个数和位数分别（ ）。
+
+<ExamChoices>
+<ExamOption>A. 8,20</ExamOption>
+<ExamOption>B. 8,23</ExamOption>
+<ExamOption>C. 64,20</ExamOption>
+<ExamOption>D. 64,23</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+Cache 行数为 $\displaystyle 32\text{ KB}/64\text{ B}=512$，8 路组相联共有 $\displaystyle 512/8=64=2^6$ 组。块内偏移 6 位，组号 6 位，标记位为 $\displaystyle 32-6-6=20$ 位。一次查找需同时比较该组 8 路的标记，因此需要 8 个 20 位比较器。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+9. 【2024】对于页式虚拟存储管理系统, 下列关于存储器层次结构的叙述中,错误的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. Cache - 主存层次的交换单位为主存块,主存- 外存层次的交换单位为页</ExamOption>
+<ExamOption>B. Cache - 主存层次替换算法由硬件实现,主存- 外存层次替换算法由软件实现</ExamOption>
+<ExamOption>C. Cache - 主存层次可采用回写法写策略, 主存- 外存层次通常采用回写法写策略</ExamOption>
+<ExamOption>D. Cache - 主存层次可采用直接映射方式,主存- 外存层次通常采用直接映射方式</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+Cache 与主存之间以主存块为交换单位，主存与外存之间以页为交换单位；Cache 替换主要由硬件实现，页面替换由操作系统软件实现；两层都可采用回写策略。虚拟存储器中的页可装入任意空闲页框，通常采用全相联式映射，而不是直接映射。因此 D 错误。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+10. 【2010】某计算机的主存地址空间大小为256MB, 按字节编址。指令Cache 和数据Cache 分离, 均有8 个Cache 行, 每个Cache 行大小为64B, 数据Cache 采用直接映射方式。现有两个功能相同的 程序A 和B, 其伪代码如下所示。假定int 类型数据用32 位补码表示, 程序编译时i, j, sum 的分配在 寄存器中, 数组a 按行优先方式存放, 其首地址为320(十进制数)。 请回答下列问题, 要求说明理由或给出计算过程。
+   (1) 若不考虑用于Cache 一致性维护和替换算法的控制位, 则数据Cache 的总容量为多少？
+   (2) 数组元素$a[0][31]$和$a[1][1]$各自所在的主存块对应的Cache行号分别是多少（Cache行号从0开始）?
+   (3) 程序A 和B 的数据访问命中率各是多少？哪个程序的执行时间更短？ 程序 A：
+
+```c
+int a[256][256];
+...
+int sum_array1（ ）
+{
+    int i, j, sum = 0;
+    for (i = 0; i < 256; i++)
+        for (j = 0; j < 256; j++)
+            sum += a[i][j];
+    return sum;
+}
+```
+
+   程序 B：
+
+```c
+int a[256][256];
+...
+int sum_array2（ ）
+{
+    int i, j, sum = 0;
+    for (j = 0; j < 256; j++)
+        for (i = 0; i < 256; i++)
+            sum += a[i][j];
+    return sum;
+}
+```
+
+<ExamSolution>
+
+<ExamAnswer>（1）$532\text{ B}$；（2）分别为 6 号行和 5 号行；（3）程序 A 命中率为 $93.75\%$，程序 B 命中率为 0，程序 A 更快。</ExamAnswer>
+
+<ExamExplanation>
+（1）主存地址空间为 $256\text{ MB}=2^{28}\text{ B}$，主存地址为 28 位。块大小为 $64\text{ B}=2^6\text{ B}$，Cache 有 $8=2^3$ 行，因此直接映射地址格式中，块内地址 6 位、行号 3 位、标记 19 位。每行还需 1 位有效位。故数据 Cache 总容量为
+
+$$
+8\times(64\times8+19+1)=4256\text{ bit}=532\text{ B}.
+$$
+
+（2）数组按行优先存放，每个 int 占 4B。
+
+$\displaystyle a[0][31]$ 的地址为
+
+$$
+320+31\times4=444,
+$$
+
+所在主存块号为 $\displaystyle \lfloor444/64\rfloor=6$，对应 Cache 行号为 $\displaystyle 6\bmod8=6$。
+
+$\displaystyle a[1][1]$ 的地址为
+
+$$
+320+(1\times256+1)\times4=1348,
+$$
+
+所在主存块号为 $\displaystyle \lfloor1348/64\rfloor=21$，对应行号为 $\displaystyle 21\bmod8=5$。
+
+（3）程序 A 按行连续访问数组。一个块可容纳 $\displaystyle 64/4=16$ 个元素，每块第一次访问缺失，随后 15 次命中，因此命中率为
+
+$$
+\frac{15}{16}=93.75\%.
+$$
+
+程序 B 相邻两次内层循环访问地址相差 $\displaystyle 256\times4=1024\text{ B}=16$ 个主存块，而 $\displaystyle 16\bmod8=0$，故这些块始终映射到同一 Cache 行并相互替换，每次访问都缺失，命中率为 0。程序 A 的 Cache 命中率更高，执行时间更短。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+11. 【2012】假定某计算机的CPU 主频为80MHz,CPI 为4, 平均每条指令访存1.5 次, 主存与Cache 之间交换的块大小为16B, Cache 的命中率为99%,存储器总线宽度为32 位。请回答下列问题:
+   (1) 该计算机的MIPS 数是多少？平均每秒Cache 缺失的次数是多少？在不考虑DMA 传送的情况下, 主存带宽至少达到多少才能满足CPU 的访存要求?
+   (2) 假定在Cache 缺失的情况下访问主存时, 存在0.0005% 的缺页率, 则CPU 平均每秒产生多少次缺 页异常? 若页面大小为4KB, 每次缺页都需要访问磁盘, 访问磁盘时DMA 传送采用周期挪用方式, 磁 盘I/O 接口的数据缓冲寄存器为32 位, 则磁盘I/O 接口平均每秒发出的DMA 请求次数至少是多少？
+   (3)CPU 和DMA 控制器同时要求使用存储器总线时,哪个优先级更高? 为什么?
+   (4) 为了提高性能, 主存采用四体低位交叉存储模式, 工作时每1/4 个存储周期启动一个体。若每个 体的存储周期为50ns, 则该主存能提供的最大带宽是多少？
+
+<ExamSolution>
+
+<ExamAnswer>（1）$20\text{ MIPS}$，每秒约 $3\times10^5$ 次缺失，主存带宽至少 $4.8\text{ MB/s}$；（2）每秒约 1.5 次缺页异常，DMA 请求至少 1536 次/秒；（3）DMA 优先级更高；（4）最大带宽为 $320\text{ MB/s}$。</ExamAnswer>
+
+<ExamExplanation>
+（1）CPU 每秒执行的指令数为
+
+$$
+\frac{80\text{ MHz}}{4}=20\times10^6\text{ 条/秒},
+$$
+
+所以性能为 $20\text{ MIPS}$。平均每秒访存次数为
+
+$$
+20\times10^6\times1.5=30\times10^6.
+$$
+
+Cache 缺失率为 $1\%$，故每秒缺失次数为
+
+$$
+30\times10^6\times1\%=3\times10^5.
+$$
+
+每次缺失需传送 16B，主存带宽至少为
+
+$$
+3\times10^5\times16=4.8\times10^6\text{ B/s}=4.8\text{ MB/s}.
+$$
+
+（2）缺页率为 $0.0005\%=5\times10^{-6}$，因此每秒缺页异常次数约为
+
+$$
+3\times10^5\times5\times10^{-6}=1.5.
+$$
+
+页面大小为 $4\text{ KB}=4096\text{ B}$，DMA 缓冲寄存器为 32 位，即每次传送 4B，一页需要
+
+$$
+4096/4=1024
+$$
+
+次 DMA 请求。因此平均每秒至少发出
+
+$$
+1.5\times1024=1536
+$$
+
+次 DMA 请求。
+
+（3）DMA 控制器优先级通常更高。外设数据传送具有时限，若 DMA 不能及时占用总线，可能造成设备缓冲区溢出或数据丢失；CPU 可暂时停顿一个或若干存储周期。
+
+（4）每个存储体周期为 $50\text{ ns}$，四体交叉后每 $\displaystyle 50/4=12.5\text{ ns}$ 可启动一次 32 位传送。故最大带宽为
+
+$$
+\frac{4\text{ B}}{12.5\text{ ns}}=320\text{ MB/s}.
+$$
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+12. 【2013】某32 位计算机, CPU 主频为800MHz, Cache 命中时的CPI 为4, Cache 块大小为32 字节； 主存采用8 体交叉存储方式, 每个体的存储字长为32 位、存储周期为40ns；存储器总线宽度为32 位,总线时钟频率为200MHz,支持突发传送总线事务。每次读突发传送总线事务的过程包括: 送首地 址和命令、存储器准备数据、传送数据。每次突发传送32 字节, 传送地址或32 位数据均需要一个 总线时钟周期。请回答下列问题, 要求给出理由或计算过程。
+   (1)CPU 和总线的时钟周期各为多少? 总线的带宽(即最大数据传输率) 为多少?
+   (2)Cache 缺失时, 需要用几个读突发传送总线事务来完成一个主存块的读取？
+   (3) 存储器总线完成一次读突发传送总线事务所需的时间是多少？
+   (4) 若程序BP 执行过程中, 共执行了100 条指令, 平均每条指令需进行1.2 次访存, Cache 缺失率为 5%, 不考虑替换等开销, 则BP 的CPU 执行时间是多少?
+
+<ExamSolution>
+
+<ExamAnswer>（1）CPU 周期 $1.25\text{ ns}$，总线周期 $5\text{ ns}$，总线带宽 $800\text{ MB/s}$；（2）1 个；（3）$85\text{ ns}$；（4）$1010\text{ ns}$。</ExamAnswer>
+
+<ExamExplanation>
+（1）CPU 时钟周期为
+
+$$
+T_{CPU}=\frac{1}{800\text{ MHz}}=1.25\text{ ns},
+$$
+
+总线时钟周期为
+
+$$
+T_B=\frac{1}{200\text{ MHz}}=5\text{ ns}.
+$$
+
+总线宽度为 32 位，即每周期最多传送 4B，理论带宽为
+
+$$
+4\text{ B}\times200\text{ MHz}=800\text{ MB/s}.
+$$
+
+（2）Cache 块大小为 32B，而一次读突发事务恰好传送 32B，所以只需 1 个事务。
+
+（3）发送首地址和命令需要 1 个总线周期，即 5ns；第一个存储体准备数据需 40ns。8 体交叉存储器每隔 $\displaystyle 40/8=5\text{ ns}$ 可得到一个 32 位字，传送 32B 共需传送 8 个字，即 8 个总线周期。故总时间为
+
+$$
+5+40+8\times5=85\text{ ns}.
+$$
+
+（4）Cache 全命中时，100 条指令的基本执行时间为
+
+$$
+100\times4\times1.25=500\text{ ns}.
+$$
+
+总访存次数为 $\displaystyle 100\times1.2=120$，缺失次数为 $\displaystyle 120\times5\%=6$，缺失附加时间为
+
+$$
+6\times85=510\text{ ns}.
+$$
+
+因此总 CPU 执行时间为
+
+$$
+500+510=1010\text{ ns}.
+$$
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+13. 【2014】假设对于2014 年408 统考44 题中的计算机M 和程序P 的机器代码，M 采用页式虚拟存储管理；P 开始执行时，R1 = R2 = 0，R6 = 1000，其机器代码已调入主存但不在Cache 中；数组A 未调入主存，且所有数组元素在同一页，并存储在磁盘同一个扇区。请回答下列问题并说明理由。注: 程序P 的高级语言代码: `for (int i = 0; i < N; i++) sum += A[i];`
+   (1)P 执行结束时, R2 的内容是多少?
+   (2)M 的指令Cache 和数据Cache 分离。若指令Cache 共有16 行, Cache 和主存交换的块大小为32 字 节, 则其数据区的容量是多少? 若仅考虑程序段P 的执行, 则指令Cache 的命中率为多少?
+   (3)P 在执行过程中, 哪条指令的执行可能发生溢出异常? 哪条指令的执行可能产生缺页异常? 对于数 组A 的访问, 需要读磁盘和TLB 至少各多少次?
+
+| 编号 | 地址 | 机器代码 | 汇编代码 | 注释 |
+| --- | --- | --- | --- | --- |
+| 1 | 08048100H | 00022080H | loop: sll R4, R2, 2 | `(R2) << 2 → R4` |
+| 2 | 08048104H | 00083020H | add R4, R4, r3 | (R4) + (R3) → R4 |
+| 3 | 08048108H | 8C850000H | load r5, 0(r4) | ((R4) + 0) → R5 |
+| 4 | 0804810CH | 00250820H | add R1, R1, R5 | ((R1) + (R5)) → R1 |
+| 5 | 08048110H | 20420001H | add R2, R2, 1 | (R2) + 1 → R2 |
+| 6 | 08048114H | 1446FFFAH | bne R2, R6, loop | if (R2) != (R6) goto loop |
+
+<ExamSolution>
+
+<ExamAnswer>（1）$R2=1000$；（2）数据区容量为 $512\text{ B}$，指令 Cache 命中率为 $\displaystyle \frac{5999}{6000}\approx99.98\%$；（3）第 4 条可能溢出，第 3 条可能缺页，至少读磁盘 1 次、访问 TLB 1001 次。</ExamAnswer>
+
+<ExamExplanation>
+（1）$R2$ 对应高级语言中的循环变量 $i$。每轮执行第 5 条指令使 $R2$ 加 1，当 $R2=1000$ 时，第 6 条分支不再跳转，因此程序结束时 $R2=1000$。
+
+（2）指令 Cache 有 16 行，每行数据块为 32B，故数据区容量为
+
+$$
+16\times32=512\text{ B}.
+$$
+
+程序 P 共 6 条 32 位指令，占 $\displaystyle 6\times4=24\text{ B}$。起始地址 $08048100\text{H}$ 恰位于一个 32B 主存块的起始处，6 条指令均在同一块内。程序循环 1000 次，共取指
+
+$$
+6\times1000=6000
+$$
+
+次。Cache 初始为空，仅第一次取指缺失，其余均命中，因此命中率为
+
+$$
+\frac{6000-1}{6000}=\frac{5999}{6000}\approx99.98\%.
+$$
+
+（3）第 4 条 `add R1, R1, R5` 对累加和执行有符号加法，累加结果可能超出机器数范围，因而可能产生溢出异常。第 3 条 `load R5, 0(R4)` 访问数组 A；数组 A 尚未调入主存，因此该指令可能产生缺页异常。
+
+数组元素都在同一页且位于磁盘同一扇区，首次访问发生缺页后只需从磁盘读入 1 次。第一次地址转换先查 TLB，未命中并发生缺页；缺页处理结束后重新执行该指令，需要再次查 TLB，此后其余 999 次数组访问各查 TLB 1 次。因此至少访问 TLB
+
+$$
+1+1+999=1001
+$$
+
+次。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+14. 【2020】假定主存地址为32 位, 按字节编址, 指令Cache 和数据Cache 与主存之间均采用8 路组 相联映射方式,直写(WriteThrough) 写策略和LRU 替换算法,主存块大小为64B,数据区容量各为 32KB。开始时Cache 均为空。请回答下列问题:
+   (1)Cache 每一行中标记(Tag)、LRU 位各占几位? 是否有修改位?
+   (2) 有如下C 语言程序段:
+
+```c
+for (k = 0; k < 1024; k++)
+    s[k] = 2 * s[k];
+```
+   若数组s 及其变量k 均为int 型, int 型数据占4B, 变量k 分配在寄存器中, 数组s 在主存中的起始地址 为008000C0H, 则该程序段执行过程中, 访问数组s 的数据Cache 缺失次数为多少?
+   (3) 若CPU 最先开始的访问操作是读取主存单元00010003H 中的指令,简要说明从Cache 中访问该 指令的过程, 包括Cache 缺失处理过程。
+
+<ExamSolution>
+
+<ExamAnswer>（1）Tag 为 20 位，LRU 为 3 位，无修改位；（2）64 次；（3）地址映射到 0 组，首次访问缺失，从主存调入以 $00010000\text{H}$ 为首地址的 64B 块后再取指。</ExamAnswer>
+
+<ExamExplanation>
+（1）Cache 行数为
+
+$$
+\frac{32\text{ KB}}{64\text{ B}}=512,
+$$
+
+8 路组相联，因此组数为 $\displaystyle 512/8=64=2^6$。主存块大小为 $64\text{ B}=2^6\text{ B}$，所以块内偏移 6 位、组号 6 位，Tag 位数为
+
+$$
+32-6-6=20.
+$$
+
+每组有 8 行，用 3 位可记录一行在 8 路中的 LRU 次序。采用直写策略，Cache 中的数据每次写入都同步写主存，因此无需修改位。
+
+（2）数组共占
+
+$$
+1024\times4=4096\text{ B},
+$$
+
+起始地址 $008000C0\text{H}$ 的低 6 位为 0，正好按 64B 块对齐。数组覆盖
+
+$$
+4096/64=64
+$$
+
+个主存块。每块第一次读 $s[k]$ 时缺失，调入后该块内后续读写均命中，所以共有 64 次缺失。
+
+（3）主存地址 $00010003\text{H}$ 的低 6 位是块内偏移，组号为中间 6 位，计算可得该地址映射到 0 组，Tag 为 $00010\text{H}$。CPU 同时读取 0 组 8 路的 Tag 并比较；由于 Cache 初始为空，各行有效位均为 0，故发生缺失。Cache 控制器向主存发出读请求，调入以 $00010000\text{H}$ 为首地址的整个 64B 主存块。0 组中有无效行，可直接填入该行，写入 Tag、置有效位并更新 LRU 状态；随后从块内偏移 3 对应的位置取出所需指令送给 CPU。若该组已满，则应按 LRU 选择一行替换。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 3.6 虚拟存储器
+
+<ExamQuestion>
+
+1. 【2010】下列命中组合情况中, 一次访过程中不可能发生的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. TLB 未命中, Cache 未命中, Page 未命中</ExamOption>
+<ExamOption>B. TLB 未命中, Cache 命中, Page 命中</ExamOption>
+<ExamOption>C. TLB 命中, Cache 未命中, Page 命中</ExamOption>
+<ExamOption>D. TLB 命中, Cache 命中, Page 未命中</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+TLB 中缓存的是页表项。TLB 命中意味着已查到该虚页对应的有效页表项，因而该页面必然已经在主存中，即 Page 必命中。因此“TLB 命中而 Page 未命中”不可能发生，D 错误。
+
+TLB 未命中只表示所需页表项不在 TLB 中，继续查询页表后页面仍可能在主存中；Cache 是否命中则由所访问的主存块是否在 Cache 中决定。因此 A、B、C 均可能出现。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2013】某计算机主存地址空间大小为256MB, 按字节编址。虚拟地址空间大小为4GB, 采用页式存储管理, 页面大小为4KB, TLB(快表) 采用全相联映射, 有4 个页表项, 内容如下表所示。则对虚拟地址03FFF180H 进行虚实地址变换的结果是（ ）．
+
+| 有效位 | 标记 | 页框号 | ... |
+| --- | --- | --- | --- |
+| 0 | FF180H | 0002H | ... |
+| 1 | 3FFF1H | 0035H | ... |
+| 0 | 02FF3H | 0351H | ... |
+| 1 | 03FFFH | 0153H | ... |
+
+<ExamChoices>
+<ExamOption>A. 0153180H</ExamOption>
+<ExamOption>B. 0035180H</ExamOption>
+<ExamOption>C. TLB 缺失</ExamOption>
+<ExamOption>D. 缺页</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+页面大小为 $4\text{KB}=2^{12}\text{B}$，因此虚拟地址低 12 位是页内地址，高 20 位是虚页号。
+
+虚拟地址 $03FFF180\text{H}$ 可分为
+
+$$
+\underbrace{03FFF\text{H}}_{\text{虚页号}}\ \underbrace{180\text{H}}_{\text{页内地址}}.
+$$
+
+TLB 中存在有效位为 1、标记为 $03FFF\text{H}$ 的表项，其页框号为 $0153\text{H}$，故 TLB 命中。将页框号与页内地址拼接，得到物理地址
+
+$$
+0153\text{H}\,\|\,180\text{H}=0153180\text{H}.
+$$
+
+因此选 A。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2015】假定编译器将赋值语句“x = x + 3;”转换为指令“add xaddr, 3”, 其中xaddr 是x 对应的存储单元地址。若执行该指令的计算机采用页式虚拟存储管理方式,并配有相应的TLB,且Cache 使用直写(Write Through) 方式,则完成该指令功能需要访问主存的次数至少是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 0</ExamOption>
+<ExamOption>B. 1</ExamOption>
+<ExamOption>C. 2</ExamOption>
+<ExamOption>D. 3</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+题目问“至少”访问主存多少次，可取最有利情形：指令和数据所需页表项均在 TLB 中，指令和变量 $x$ 所在块均在 Cache 中。
+
+读取 $x$ 时可直接从 Cache 取得，不必访问主存；但执行加法后需要把结果写回。由于 Cache 采用直写策略，每次写 Cache 的同时都必须写主存一次。因此至少访问主存 1 次，选 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2019】下列关于缺页处理的叙述中,错误的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 缺页是在地址转换时CPU 检测到的一种异常</ExamOption>
+<ExamOption>B. 缺页处理由操作系统提供的缺页处理程序来完成</ExamOption>
+<ExamOption>C. 缺页处理程序根据页故障地址从外存读入所缺失的页</ExamOption>
+<ExamOption>D. 缺页处理完成后回到发生缺页的指令的下一条指令执行</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+缺页异常属于故障类异常。发生缺页时，导致缺页的指令尚未完成，因此操作系统将所缺页面调入主存并更新页表后，应返回到**发生缺页的原指令重新执行**，而不是从下一条指令开始执行。故 D 错误。
+
+A、B、C 均符合缺页异常的检测和处理过程。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2020】下列关于TLB 和Cache 的叙述中,错误的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 命中率都与程序局部性有关</ExamOption>
+<ExamOption>B. 缺失后都需要去访问主存</ExamOption>
+<ExamOption>C. 缺失处理都可以由硬件实现</ExamOption>
+<ExamOption>D. 都由DRAM 存储器组成</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+TLB 和 Cache 都要求很高的访问速度，通常均采用 SRAM 或专用高速存储结构实现，而不是采用需要刷新的 DRAM，因此 D 错误。
+
+程序的时间局部性和空间局部性会同时影响 TLB 与 Cache 的命中率；TLB 缺失后通常需访问主存中的页表，Cache 缺失后通常需访问下一级存储器；两者的常规缺失检测与处理均可由硬件完成。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2022】某计算机主存地址为24 位, 采用分页虚拟存储管理方式, 虚拟地址空间大小为4GB, 页大小为4KB, 按字节编址。某进程的页表部分内容如下表所示。当CPU 访问虚拟地址00082840H 时, 虚实地址转换的结果是（ ）．
+
+| 虚页号 | 实页号（页框号） | 存在位 |
+| --- | --- | --- |
+| 82 | 024H | 0 |
+| ... | ... | ... |
+| 129 | 180H | 1 |
+| 130 | 018H | 1 |
+
+<ExamChoices>
+<ExamOption>A. 得到主存地址024840H</ExamOption>
+<ExamOption>B. 得到主存地址180840H</ExamOption>
+<ExamOption>C. 得到主存地址018840H</ExamOption>
+<ExamOption>D. 检测到缺页异常</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+页面大小为
+
+$$
+4\text{KB}=2^{12}\text{B},
+$$
+
+因此虚拟地址 `00082840H` 的低 12 位是页内偏移 `840H`，高 20 位是虚页号
+
+$$
+00082\text{H}=130.
+$$
+
+题目页表中的虚页号没有后缀 `H`，应按十进制解释。因此应查虚页号 130 的表项，而不是把表中的 82 当作十六进制页号。
+
+虚页号 130 的存在位为 1，对应页框号为 `018H`。将页框号与页内偏移拼接，得到物理地址
+
+$$
+018840\text{H}.
+$$
+
+因此选择 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2024】某计算机按字节编址, 采用页式虚拟存储管理方式, 虚拟地址为32 位, 主存地址为30 位, 页大小为1KB。若TLB 共有32 个表项,采用4 路组相联映射方式,则TLB 表项中标记字段的位数至少是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 17</ExamOption>
+<ExamOption>B. 18</ExamOption>
+<ExamOption>C. 19</ExamOption>
+<ExamOption>D. 20</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+页面大小为 $1\text{KB}=2^{10}\text{B}$，因此虚拟页号占
+
+$$
+32-10=22\text{ 位}.
+$$
+
+TLB 有 32 个表项，采用 4 路组相联，共有
+
+$$
+\dfrac{32}{4}=8=2^3\text{ 组},
+$$
+
+故虚拟页号的低 3 位作为 TLB 组号，其余位作为 TLB 标记。标记位数为
+
+$$
+22-3=19\text{ 位}.
+$$
+
+因此选 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+8. 【2024】下列事件中, 不是在MMU 地址转换过程中检测的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 访问越权</ExamOption>
+<ExamOption>B. Cache 缺失</ExamOption>
+<ExamOption>C. 页面缺失</ExamOption>
+<ExamOption>D. TLB 缺失</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+MMU 负责虚拟地址到物理地址的转换。在地址转换过程中会查询 TLB、页表以及访问权限位，因而能够检测 TLB 缺失、页面缺失和访问越权。
+
+Cache 缺失是在取得用于访问 Cache 的地址字段后，由 Cache 控制逻辑比较标记时检测的，不属于 MMU 地址转换过程。因此选 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+9. 【2011】某计算机存储器按字节编址,虚拟(逻辑) 地址空间大小为16MB,主存(物理) 地址空间大小为1MB, 页面大小为4KB；Cache 采用直接映射方式, 共8 行；主存与Cache 之间交换的块大小为32B。系统运行到某一时刻时, 页表的部分内容和Cache 的部分内容分别如下表(a)、表(b) 所示,图中页框号及标记字段的内容为十六进制形式。
+
+表 (a)：页表的部分内容
+
+| 虚页号 | 有效位 | 页框号 | 其他 |
+| --- | --- | --- | --- |
+| 0 | 1 | 06 | … |
+| 1 | 1 | 04 | … |
+| 2 | 1 | 15 | … |
+| 3 | 1 | 02 | … |
+| 4 | 0 | — | … |
+| 5 | 1 | 2B | … |
+| 6 | 0 | — | … |
+| 7 | 1 | 32 | … |
+
+表 (b)：Cache 的部分内容
+
+| 行号 | 有效位 | 标记 | 其他 |
+| --- | --- | --- | --- |
+| 0 | 1 | 020 | … |
+| 1 | 0 | — | … |
+| 2 | 1 | 01D | … |
+| 3 | 1 | 105 | … |
+| 4 | 1 | 064 | … |
+| 5 | 1 | 14D | … |
+| 6 | 0 | — | … |
+| 7 | 1 | 27A | … |
+
+请回答下列问题:
+   (1) 虚拟地址共有几位, 哪几位表示虚页号？物理地址共有几位, 哪几位表示页框号(物理页号)？
+   (2) 使用物理地址访问Cache 时, 物理地址应划分成哪几个字段？要求说明每个字段的位数及在物理地址中的位置。
+   (3) 虚拟地址001C60H 所在的页面是否在主存中？若在主存中, 则该虚拟地址对应的物理地址是什么？访问该地址时是否Cache 命中？要求说明理由。
+   (4) 假定为该机配置一个四路组相联的TLB 共可存放8 个页表项, 若其当前内容(十六进制) 如下表所示, 则此时虚拟地址024BACH 所在的页面是否存在主存中？要求说明理由。
+
+TLB 当前内容如下表所示。
+
+| 组号 | 路1有效位 | 路1标记 | 路1页框号 | 路2有效位 | 路2标记 | 路2页框号 | 路3有效位 | 路3标记 | 路3页框号 | 路4有效位 | 路4标记 | 路4页框号 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 0 | 0 | — | — | 1 | 001 | 15 | 0 | — | — | 1 | 012 | 1F |
+| 1 | 1 | 013 | 2D | 0 | — | — | 1 | 008 | 7E | 0 | — | — |
+
+<ExamSolution>
+
+<ExamAnswer>（1）虚拟地址 24 位，$A_{23}\sim A_{12}$ 为虚页号；物理地址 20 位，$A_{19}\sim A_{12}$ 为页框号。（2）Tag 12 位、Cache 行号 3 位、块内地址 5 位。（3）页面在主存，物理地址为 $04C60\text{H}$，访问 Cache 不命中。（4）页面在主存中。</ExamAnswer>
+
+<ExamExplanation>
+（1）虚拟地址空间大小为 $16\text{MB}=2^{24}\text{B}$，故虚拟地址为 24 位；物理地址空间大小为 $1\text{MB}=2^{20}\text{B}$，故物理地址为 20 位。
+
+页面大小为 $4\text{KB}=2^{12}\text{B}$，页内地址占低 12 位。因此：
+
+- 虚拟地址中 $A_{23}\sim A_{12}$ 为 12 位虚页号，$A_{11}\sim A_0$ 为页内地址；
+- 物理地址中 $A_{19}\sim A_{12}$ 为 8 位页框号，$A_{11}\sim A_0$ 为页内地址。
+
+（2）主存块大小为 $32\text{B}=2^5\text{B}$，故块内地址占 5 位；Cache 共 8 行，直接映射，故行号占 3 位；其余为标记：
+
+$$
+20-5-3=12\text{ 位}.
+$$
+
+所以物理地址划分为
+
+$$
+\underbrace{A_{19}\sim A_8}_{\text{Tag，12 位}}\quad
+\underbrace{A_7\sim A_5}_{\text{行号，3 位}}\quad
+\underbrace{A_4\sim A_0}_{\text{块内地址，5 位}}.
+$$
+
+（3）虚拟地址 $001C60\text{H}$ 的虚页号为 $001\text{H}$，页内地址为 $C60\text{H}$。页表中虚页 1 的有效位为 1，页框号为 $04\text{H}$，故页面在主存中，物理地址为
+
+$$
+04\text{H}\,\|\,C60\text{H}=04C60\text{H}.
+$$
+
+对物理地址 $04C60\text{H}$ 分段：
+
+$$
+\text{Tag}=04C\text{H},\qquad \text{行号}=3,\qquad \text{块内地址}=0.
+$$
+
+Cache 第 3 行虽然有效，但其标记为 $105\text{H}$，与 $04C\text{H}$ 不同，因此 Cache 不命中。
+
+（4）TLB 共 8 个表项、4 路组相联，因此共有 2 组，虚页号最低 1 位为组号，其余高位为标记。
+
+虚拟地址 $024BAC\text{H}$ 的虚页号为 $024\text{H}$。其最低位为 0，映射到 TLB 第 0 组；TLB 标记为
+
+$$
+024\text{H}\div2=012\text{H}.
+$$
+
+第 0 组中存在有效位为 1、标记为 $012\text{H}$ 的表项，所以 TLB 命中，对应页框号为 $1F\text{H}$。因此该页面存在于主存中。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+10. 【2016】某计算机采用页式虚拟存储管理方式,按字节编址,虚拟地址为32 位,物理地址为24 位, 页面大小为8KB, TLB 采用全相联映射, Cache 数据区大小为64KB, 按2 路组相联方式组织,主存块大小为64B。存储访问过程的示意图如下。请回答下列问题:
+
+<img src="/img/questions/408/computer-organization-p043-01.png" alt="第43页第1个图、表或代码块" />
+
+   (1) 图中字段A ∼G 的位数各是多少？TLB 标记字段B 中存放的是什么信息？
+   (2) 将块号为4099 的主存块装入Cache 中时, 所映射的Cache 组号是多少？对应的H 字段内容是什么?
+   (3)Cache 缺失处理的时间开销大还是缺页处理的时间开销大? 为什么?
+   (4) 为什么Cache 可以采用直写(WriteThrough) 策略, 而修改页面内容时总是采用回写(WriteBack) 策略。
+
+<ExamSolution>
+
+<ExamAnswer>（1）$A=19$ 位，$B=19$ 位，$C=11$ 位，$D=13$ 位，$E=9$ 位，$F=9$ 位，$G=6$ 位；B 中存放虚页号。（2）映射到第 3 组，H 为 9 位标记 $000001000_2$，即 $008\text{H}$。（3）缺页处理开销更大。（4）主存写入较快，允许 Cache 直写；磁盘写入极慢，页面必须采用回写以减少外存访问。</ExamAnswer>
+
+<ExamExplanation>
+（1）页面大小为
+
+$$
+8\text{KB}=2^{13}\text{B},
+$$
+
+故页内地址占 13 位。虚拟地址为 32 位，因此虚页号占
+
+$$
+32-13=19\text{ 位}.
+$$
+
+TLB 采用全相联映射，不需要组号字段，其标记就是完整虚页号。因此
+
+$$
+A=19,\qquad B=19.
+$$
+
+物理地址为 24 位，页内地址仍为 13 位，所以页框号占
+
+$$
+24-13=11\text{ 位},
+$$
+
+即
+
+$$
+C=11,\qquad D=13.
+$$
+
+Cache 数据区大小为 $64\text{KB}=2^{16}\text{B}$，主存块大小为 $64\text{B}=2^6\text{B}$，Cache 行数为
+
+$$
+\dfrac{2^{16}}{2^6}=2^{10}.
+$$
+
+采用 2 路组相联，组数为
+
+$$
+\dfrac{2^{10}}{2}=2^9,
+$$
+
+故组号占 9 位，块内地址占 6 位，标记占
+
+$$
+24-9-6=9\text{ 位}.
+$$
+
+因此
+
+$$
+E=9,\qquad F=9,\qquad G=6.
+$$
+
+（2）主存块号为 4099，采用组相联映射时
+
+$$
+\text{组号}=4099\bmod512=3.
+$$
+
+Cache 标记为
+
+$$
+\left\lfloor\dfrac{4099}{512}\right\rfloor=8.
+$$
+
+H 位于 Cache 行的标记字段，因此
+
+$$
+H=8=000001000_2=008\text{H}.
+$$
+
+（3）Cache 缺失后通常从主存调入一个主存块，访问延迟一般为几十至数百纳秒；缺页时需要由操作系统介入，并从磁盘或固态外存调入整页，延迟通常远大于主存访问时间。因此缺页处理的时间开销显著更大。
+
+（4）Cache 直写时，每次写 Cache 只需同步写入速度较快的主存，虽然会增加主存写流量，但仍可通过写缓冲等方式实现。若修改页面时也立即写外存，则每次普通存储操作都可能引发极慢的磁盘访问，代价不可接受。因此页面采用回写策略，只设置修改位，等页面被换出时再一次性写回外存。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+11. 【2018】某计算机采用页式虚拟存储管理方式,按字节编址。CPU 进行存储访问的过程如下图所示。根据该图回答下列问题。
+
+<img src="/img/questions/408/computer-organization-p044-01.png" alt="第44页第1个图、表或代码块" />
+
+   (1) 主存物理地址占多少位？
+   (2)TLB 采用什么映射方式?TLB 是用SRAM 还是用DRAM 实现?
+   (3)Cache 采用什么映射方式? 若Cache 采用LRU 替换算法和回写(WriteBack) 策略,则Cache 每行中除数据(Data)、Tag 和有效位外, 还应有哪些附加位？Cache 的总容量是多少？Cache 中有效位的作用是什么?
+   (4) 若CPU 给出的虚拟地址为0008C040H, 则对应的物理地址是多少？是否在Cache 中命中？说明理由。若CPU 给出的虚拟地址为0007C260H, 则该地址所在主存块映射到的Cache 组号是多少?
+
+<ExamSolution>
+
+<ExamAnswer>（1）28 位。（2）全相联映射，采用 SRAM。（3）Cache 为 2 路组相联；还应有 1 位修改位和 1 位 LRU 位；总容量为 $4464\text{ bit}=558\text{ B}$；有效位表示该行内容是否有效。（4）物理地址为 $0040040\text{H}$，Cache 不命中；$0007C260\text{H}$ 所在主存块映射到第 3 组。</ExamAnswer>
+
+<ExamExplanation>
+（1）图中虚拟地址由 20 位虚页号和 12 位页内地址组成，页面大小为 $2^{12}\text{B}=4\text{KB}$。TLB 中实页号字段为 4 个十六进制数，即 16 位，因此物理地址位数为
+
+$$
+16+12=28\text{ 位}.
+$$
+
+（2）图中虚页号同时送入多个比较器，与各 TLB 表项的 Tag 并行比较，说明 TLB 采用全相联映射。TLB 对速度要求高，采用 SRAM 实现。
+
+（3）图中 Cache 有两路，每一路同组的标记并行比较，因此为 2 路组相联。物理地址被划分为 20 位 Tag、3 位组号和 5 位块内地址，所以：
+
+- Cache 有 $2^3=8$ 组；
+- 每组 2 行，共 $16$ 行；
+- 每块大小为 $2^5=32\text{B}=256\text{ bit}$。
+
+采用回写策略，每行需设置 1 位修改位；采用 LRU 替换算法，2 路组相联可用 1 位 LRU 信息表示新旧次序。按题目“每行”计入附加位，则总容量为
+
+$$
+16\times(256+20+1+1+1)=4464\text{ bit}=558\text{ B}.
+$$
+
+有效位用于说明当前 Cache 行中的 Tag 和 Data 是否为有效内容。即使标记相同，若有效位为 0，也不能判定为命中。
+
+（4）虚拟地址 $0008C040\text{H}$ 的虚页号为 $0008C\text{H}$，页内地址为 $040\text{H}$。TLB 中存在有效位为 1、Tag 为 $0008C\text{H}$ 的表项，其实页号为 $0040\text{H}$，故物理地址为
+
+$$
+0040\text{H}\,\|\,040\text{H}=0040040\text{H}.
+$$
+
+物理地址的 Cache 字段为
+
+$$
+\text{Tag}=00400\text{H},\qquad \text{组号}=2,\qquad \text{块内地址}=0.
+$$
+
+第 2 组中，一路的 Tag 虽为 $00400\text{H}$，但有效位为 0；另一路有效位为 1，但 Tag 为 $01600\text{H}$。因此两路均不满足“有效位为 1 且 Tag 相等”，故 Cache 不命中。
+
+对于虚拟地址 $0007C260\text{H}$，Cache 组号字段和块内地址字段共 8 位，均位于 12 位页内地址之内，所以无需知道页框号即可确定组号。页内地址为 $260\text{H}$，故
+
+$$
+\text{组号}=\left(260\text{H}\div20\text{H}\right)\bmod8
+=19\bmod8=3.
+$$
+
+因此映射到 Cache 第 3 组。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+12. 【2019】若计算机M 的主存地址为32 位, 采用分页存储管理方式, 页大小为4KB, 计算机M 上函数f1 的部分机器级代码如下,则第1 行的push 指令和第30 行的ret 指令是否在同一页中(说明理由)? 若指令Cache 有64 行,采用4 路组相联映射方式,主存块大小为64B,则32 位主存地址中, 哪几位表示块内地址? 哪几位表示Cache 组号? 哪几位表示标记(tag) 信息? 读取第16 行的call 指令时,只可能在指令Cache 的哪一组中命中(说明理由)?
+
+```text
+int f1(int n) {
+1   00401000    55              push ebp
+    ...         ...             ...
+    if (n > 1)
+11  00401018    83 7D 08 01     cmp dword ptr[ebp+8], 1
+12  0040101C    7E 17           jle f1+35h (00401035)
+        return n * f1(n-1);
+13  0040101E    8B 45 08        mov eax, dword ptr[ebp+8]
+14  00401021    83 E8 01        sub eax, 1
+15  00401024    50              push eax
+16  00401025    E8 D6 FF FF FF  call f1(00401000)
+    ...         ...             ...
+19  00401030    0F AF C1        imul eax, ecx
+20  00401033    EB 05           jmp f1+3Ah (0040103a)
+    else return 1;
+21  00401035    B8 01 00 00 00  mov eax, 1
+}
+    ...         ...             ...
+26  00401040    3B EC           cmp ebp, esp
+    ...         ...             ...
+30  0040104A    C3              ret
+```
+
+其中, 机器级代码行包括行号、虚拟地址、机器指令和汇编指令。
+
+<ExamSolution>
+
+<ExamAnswer>两条指令在同一页中；$A_5\sim A_0$ 为块内地址，$A_9\sim A_6$ 为 Cache 组号，$A_{31}\sim A_{10}$ 为 Tag；第 16 行的 `call` 指令只可能在第 0 组中命中。</ExamAnswer>
+
+<ExamExplanation>
+页面大小为 $4\text{KB}=2^{12}\text{B}$，同一页内地址范围为低 12 位从 $000\text{H}$ 到 $FFF\text{H}$。第 1 行指令地址为 $00401000\text{H}$，第 30 行指令地址为 $0040104A\text{H}$，它们的高 20 位虚页号均为 $00401\text{H}$，且地址均落在
+
+$$
+00401000\text{H}\sim00401FFF\text{H}
+$$
+
+范围内，因此在同一页中。
+
+指令 Cache 有 64 行，4 路组相联，组数为
+
+$$
+\dfrac{64}{4}=16=2^4,
+$$
+
+故组号占 4 位。主存块大小为 $64\text{B}=2^6\text{B}$，块内地址占 6 位，Tag 占
+
+$$
+32-4-6=22\text{ 位}.
+$$
+
+所以地址字段划分为
+
+$$
+\underbrace{A_{31}\sim A_{10}}_{\text{Tag，22 位}}
+\quad\underbrace{A_9\sim A_6}_{\text{组号，4 位}}
+\quad\underbrace{A_5\sim A_0}_{\text{块内地址，6 位}}.
+$$
+
+第 16 行 `call` 指令地址为 $00401025\text{H}$。其组号为
+
+$$
+\left(00401025\text{H}\gg6\right)\bmod16=0,
+$$
+
+故该指令所在主存块只能映射到 Cache 第 0 组，只可能在第 0 组中命中。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+13. 【2021】假设计算机M 的主存地址为24 位, 按字节编址；采用分页存储管理方式, 虚拟地址为30 位, 页大小为4KB；TLB 采用2 路组相联方式和LRU 替换策略, 共8 组。请回答下列问题:
+   (1) 虚拟地址中哪几位表示虚页号？哪几位表示页内地址？
+   (2) 已知访问TLB 时虚页号高位部分用作TLB 标记, 低位部分用作TLB 组号, M 的虚拟地址中哪几位是TLB 标记? 哪几位是TLB 组号?
+   (3) 假设TLB 初始时为空, 访问的虚页号依次为10,12,16,7,26,4,12 和20, 在此过程中, 哪一个虚页号对应的TLB 表项被替换? 说明理由。
+   (4) 若将M 中的虚拟地址位数增加到32 位, 则TLB 表项的位数增加几位？
+
+<ExamSolution>
+
+<ExamAnswer>（1）$A_{29}\sim A_{12}$ 为虚页号，$A_{11}\sim A_0$ 为页内地址。（2）$A_{29}\sim A_{15}$ 为 TLB 标记，$A_{14}\sim A_{12}$ 为 TLB 组号。（3）虚页号 4 的表项被替换。（4）增加 2 位。</ExamAnswer>
+
+<ExamExplanation>
+（1）页面大小为 $4\text{KB}=2^{12}\text{B}$，故页内地址占 12 位。虚拟地址为 30 位，因此虚页号占
+
+$$
+30-12=18\text{ 位}.
+$$
+
+所以 $A_{29}\sim A_{12}$ 为虚页号，$A_{11}\sim A_0$ 为页内地址。
+
+（2）TLB 共 8 组，需要 3 位组号。虚页号的低 3 位，即虚拟地址中的 $A_{14}\sim A_{12}$，作为 TLB 组号；其余 15 位 $A_{29}\sim A_{15}$ 为 TLB 标记。
+
+（3）各虚页号映射的组号为其除以 8 的余数：
+
+| 访问次序 | 虚页号 | TLB 组号 | 结果 |
+| --- | ---: | ---: | --- |
+| 1 | 10 | 2 | 装入第 2 组 |
+| 2 | 12 | 4 | 装入第 4 组 |
+| 3 | 16 | 0 | 装入第 0 组 |
+| 4 | 7 | 7 | 装入第 7 组 |
+| 5 | 26 | 2 | 第 2 组装入第二路 |
+| 6 | 4 | 4 | 第 4 组装入第二路 |
+| 7 | 12 | 4 | 命中，使 12 成为最近使用项 |
+| 8 | 20 | 4 | 第 4 组已满，按 LRU 替换 4 |
+
+第 4 组在访问虚页号 20 前存放 12 和 4；由于刚刚访问过 12，虚页号 4 对应表项是最近最少使用项，因此被替换。
+
+（4）虚拟地址由 30 位增加到 32 位，而页面大小和 TLB 组数不变，因此虚页号增加 2 位，组号仍为 3 位，TLB 标记增加 2 位。页框号、有效位、修改位等其他字段均不因此改变，所以每个 TLB 表项增加 2 位。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+14. 【2023】(14 分) 已知计算机M 字长为32 位, 按字节编址, 采用请求调页策略的虚拟存储管理方式,虚拟地址为32 位,页大小为4KB; 数据Cache 采用4 路组相联映射方式,数据区大小为8KB,主存块大小为32B。现有C 语言程序段如下:
+
+```c
+int a[24][64];
+......
+for (i = 0; i < 24; i++)
+    for (j = 0; j < 64; j++)
+        a[i][j] = 10;
+```
+
+已知二维数组a 按行优先存放, 在虚拟地址空间中分配的起始地址为00422000H, sizeof (int) = 4,假定在M 上执行上述程序段之前数组a 不在内存, 且在该程序段执行过程中不会发生页面置换。请回答下列问题:
+   (1) 数组a 分布在几个页面中？对于数组a 的访问, 会发生几次缺页异常？页故障地址各是什么？
+   (2) 不考虑对变量i 和j, 该程序段的数据访问是否具有时间局部性？为什么？
+   (3) 计算机M 的虚拟地址(A31~A0) 中哪几位用作块内地址？哪几位用作Cache 组号? 数组元素a[1][0] 的虚拟地址是多少? 其所在主存块对应的Cache 组号是多少?
+   (4) 数组a 总共占多少主存块? 假设上述程序段执行过程中数组a 的访问不会和其他数据发生Cache 访问冲突, 则数组a 的Cache 命中率是多少? 若将循环中i 和j 的次序按如下方式调换,则数组a 的 Cache 命中率又是多少?
+
+```c
+for (j = 0; j < 64; j++)
+    for (i = 0; i < 24; i++)
+        a[i][j] = 10;
+```
+
+<ExamSolution>
+
+<ExamAnswer>（1）分布在 2 个页面中，发生 2 次缺页异常，页故障地址分别为 $00422000\text{H}$ 和 $00423000\text{H}$。（2）不具有时间局部性。（3）$A_4\sim A_0$ 为块内地址，$A_{10}\sim A_5$ 为 Cache 组号；$a[1][0]$ 的虚拟地址为 $00422100\text{H}$，映射到第 8 组。（4）共占 192 个主存块；原循环和交换循环次序后的命中率均为 $87.5\%$。</ExamAnswer>
+
+<ExamExplanation>
+（1）数组共有
+
+$$
+24\times64=1536
+$$
+
+个 `int` 元素，占用空间为
+
+$$
+1536\times4=6144\text{B}=6\text{KB}.
+$$
+
+数组起始地址 $00422000\text{H}$ 按 4KB 页面边界对齐，因此前 4KB 位于页面
+
+$$
+00422000\text{H}\sim00422FFF\text{H},
+$$
+
+其余 2KB 位于下一页面
+
+$$
+00423000\text{H}\sim004237FF\text{H}.
+$$
+
+所以数组跨 2 个页面。程序开始前数组不在主存，且随后无页面置换，因此每个页面第一次被访问时各发生一次缺页，共 2 次。按行优先顺序，两个页故障地址分别是每页首次访问地址
+
+$$
+00422000\text{H},\qquad00423000\text{H}.
+$$
+
+（2）时间局部性是指短时间内重复访问同一数据。该程序对每个数组元素只赋值一次，不会再次访问同一元素，因此就数组元素本身而言不具有时间局部性；但连续访问相邻元素，具有明显的空间局部性。
+
+（3）主存块大小为 $32\text{B}=2^5\text{B}$，故块内地址占 5 位，即 $A_4\sim A_0$。
+
+Cache 数据区大小为 $8\text{KB}=8192\text{B}$，Cache 行数为
+
+$$
+\dfrac{8192}{32}=256.
+$$
+
+采用 4 路组相联，组数为
+
+$$
+\dfrac{256}{4}=64=2^6,
+$$
+
+故 Cache 组号占 6 位，即 $A_{10}\sim A_5$。
+
+一行数组含 $64$ 个 `int`，占
+
+$$
+64\times4=256\text{B}=100\text{H}.
+$$
+
+因此
+
+$$
+\operatorname{addr}(a[1][0])
+=00422000\text{H}+100\text{H}
+=00422100\text{H}.
+$$
+
+其 Cache 组号为
+
+$$
+(00422100\text{H}\gg5)\bmod64=8.
+$$
+
+（4）数组占用主存块数为
+
+$$
+\dfrac{6144}{32}=192.
+$$
+
+每个主存块可容纳
+
+$$
+\dfrac{32}{4}=8
+$$
+
+个数组元素。原循环按行优先顺序连续访问数组，每个块的第一次访问缺失，随后 7 次命中。因此缺失次数为 192，总访问次数为 1536，命中率为
+
+$$
+\dfrac{1536-192}{1536}
+=\dfrac{1344}{1536}
+=87.5\%.
+$$
+
+交换循环次序后，对固定的 $j$，相邻两次访问的地址相差一行，即 256B，也就是 8 个主存块。对同一列访问 24 行时，所映射的组号每次增加 8，并在 8 个组间循环；每个相关组中最多同时存放 3 个数组块，小于 4 路容量，因此不会发生组内冲突替换。
+
+连续的 8 个列下标 $8q\sim8q+7$ 访问的是每行中的同一个主存块：第一个列下标使对应 24 个块各缺失一次，随后 7 个列下标均命中。8 组列下标共仍产生
+
+$$
+24\times8=192
+$$
+
+次缺失，故交换循环次序后的命中率仍为
+
+$$
+\dfrac{1536-192}{1536}=87.5\%.
+$$
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>

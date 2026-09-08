@@ -1,0 +1,800 @@
+---
+title: "第 5 章 输入 / 输出 (I/O) 管理"
+---
+
+# 第 5 章 输入 / 输出 (I/O) 管理
+
+
+## 5.1 I/O 管理基础
+
+<ExamQuestion>
+
+1. 【2010】本地用户通过键盘登录系统时, 首先获得键盘输入信息的程序（ ）。
+
+<ExamChoices>
+<ExamOption>A. 命令解释程序</ExamOption>
+<ExamOption>B. 中断处理程序</ExamOption>
+<ExamOption>C. 系统调用服务程序</ExamOption>
+<ExamOption>D. 用户登录程序</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+键盘属于中断驱动型设备。用户按键后，键盘控制器向 CPU 发出中断请求，CPU 响应中断后首先执行键盘中断处理程序，由它从设备控制器的寄存器中取得扫描码并进行初步处理。之后，输入信息才会被送往终端驱动、登录程序或命令解释程序。因此首先获得键盘输入信息的是中断处理程序。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2011】用户程序发出磁盘 I/O 请求后, 系统的正确处理流程是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 用户程序 → 系统调用处理程序 → 中断处理程序 → 设备驱动程序</ExamOption>
+<ExamOption>B. 用户程序 → 系统调用处理程序 → 设备驱动程序 → 中断处理程序</ExamOption>
+<ExamOption>C. 用户程序 → 设备驱动程序 → 系统调用处理程序 → 中断处理程序</ExamOption>
+<ExamOption>D. 用户程序 → 设备驱动程序 → 中断处理程序 → 系统调用处理程序</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+用户程序不能直接执行磁盘 I/O，必须通过系统调用进入内核。系统调用处理程序检查参数并把请求交给设备驱动程序；驱动程序设置设备控制器并启动 I/O；设备完成后产生中断，再由中断处理程序进行结束处理。因此流程为：
+
+$$
+\text{用户程序}\to\text{系统调用处理程序}\to\text{设备驱动程序}\to\text{中断处理程序}.
+$$
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2012】操作系统的 I/O 子系统通常由四个层次组成,每一层明确定义了与邻近层次的接口。其合理的层次组织排列顺序是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 用户级 I/O 软件、设备无关软件、设备驱动程序、中断处理程序</ExamOption>
+<ExamOption>B. 用户级 I/O 软件、设备无关软件、中断处理程序、设备驱动程序</ExamOption>
+<ExamOption>C. 用户级 I/O 软件、设备驱动程序、设备无关软件、中断处理程序</ExamOption>
+<ExamOption>D. 用户级 I/O 软件、中断处理程序、设备无关软件、设备驱动程序</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+I/O 软件自上而下通常分为四层：
+
+$$
+\text{用户级 I/O 软件}\to\text{设备无关软件}\to\text{设备驱动程序}\to\text{中断处理程序}.
+$$
+
+越靠上越接近用户和统一接口，越靠下越接近具体设备及硬件中断。故选 A。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2013】用户程序发出磁盘 I/O 请求后, 系统的处理流程是: 用户程序 → 系统调用处理程序 → 设备驱动程序 → 中断处理程序。其中, 计算数据所在磁盘的柱面号、磁头号、扇区号的程序是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 用户程序</ExamOption>
+<ExamOption>B. 系统调用处理程序</ExamOption>
+<ExamOption>C. 设备驱动程序</ExamOption>
+<ExamOption>D. 中断处理程序</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+把文件中的逻辑块号或线性块号换算成具体设备所需的柱面号、磁头号和扇区号，必须了解磁盘的具体结构和控制方式，属于设备驱动程序的职责。系统调用处理程序只负责通用参数检查和请求分派，中断处理程序负责设备完成后的响应。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2017】系统将数据从磁盘读到内存的过程包括以下操作: ① DMA 控制器发出中断请求；②初始化 DMA 控制器并启动磁盘；③从磁盘传输一块数据到内存缓冲区；④执行“DMA 结束”中断服务程序。正确的执行顺序是（ ）。
+
+<ExamChoices>
+<ExamOption>A. ③ → ① → ② → ④</ExamOption>
+<ExamOption>B. ② → ③ → ① → ④</ExamOption>
+<ExamOption>C. ② → ① → ③ → ④</ExamOption>
+<ExamOption>D. ① → ② → ④ → ③</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+DMA 传输的顺序为：
+
+1. CPU 初始化 DMA 控制器并启动磁盘，即②；
+2. DMA 控制器直接在磁盘与内存缓冲区之间传输一块数据，即③；
+3. 传输完成后 DMA 控制器向 CPU 发出中断请求，即①；
+4. CPU 执行“DMA 结束”中断服务程序，即④。
+
+所以顺序是②→③→①→④。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2020】下列与中断相关的操作中,由操作系统完成的是（ ）。 I. 保存被中断程序的中断点 II. 提供中断服务 III. 初始化中断向量表 IV. 保存中断屏蔽字
+
+<ExamChoices>
+<ExamOption>A. 仅 I、 II</ExamOption>
+<ExamOption>B. 仅 I、 II、 IV</ExamOption>
+<ExamOption>C. 仅 III、 IV</ExamOption>
+<ExamOption>D. 仅 II、 III、 IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+I中“保存被中断程序的中断点”通常由硬件在中断响应阶段自动完成，例如保存程序计数器。II提供中断服务、III在系统初始化时建立或初始化中断向量表、IV由中断服务程序保存中断屏蔽字，均由操作系统完成。因此正确的是II、III、IV。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2023】下列因素中, 设备分配需要考虑的是（ ）。 I. 设备类型 II. 设备的访问权限 III. 设备的占用状态 IV. 逻辑设备与物理设备的映射关系
+
+<ExamChoices>
+<ExamOption>A. I、 II</ExamOption>
+<ExamOption>B. II、 III</ExamOption>
+<ExamOption>C. III、 IV</ExamOption>
+<ExamOption>D. I、 II、III、IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+设备分配时需要综合考虑：设备类型决定其是独占、共享还是虚拟设备；访问权限决定进程是否有权使用；占用状态决定设备当前能否分配；设备独立性还要求维护逻辑设备与物理设备的映射关系。因此四项都需要考虑。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 5.2 设备独立软件
+
+<ExamQuestion>
+
+1. 【2009】程序员利用系统调用打开 I/O 设备时, 通常使用的设备标识是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 逻辑设备名</ExamOption>
+<ExamOption>B. 物理设备名</ExamOption>
+<ExamOption>C. 主设备号</ExamOption>
+<ExamOption>D. 从设备号</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+具备设备独立性时，用户程序面向逻辑设备编程，只使用逻辑设备名。操作系统依据逻辑设备表把逻辑设备名映射到具体物理设备，从而使应用程序不必依赖设备的物理编号。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2011】某文件占 10 个磁盘块,现要把该文件磁盘块逐个读入主存缓冲区,并送用户区进行分析。 假设一个缓冲区与一个磁盘块大小相同, 把一个磁盘块读入缓冲区的时间为 100μs, 将缓冲区的数据传送到用户区的时间是 50μs,CPU 对一块数据进行分析的时间为 50μs。在单缓冲区和双缓冲区结构下, 读入并分析完该文件的时间分别是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 1500μs,1000μs</ExamOption>
+<ExamOption>B. 1550μs,1100μs</ExamOption>
+<ExamOption>C. 1550μs,1550μs</ExamOption>
+<ExamOption>D. 2000μs,2000μs</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+设读盘时间为 $T=100\,\mu s$，缓冲区到用户区的传送时间为 $M=50\,\mu s$，分析时间为 $C=50\,\mu s$。
+
+单缓冲时，第一块完成需要 $T+M+C=200\,\mu s$。以后每块在分析前一块的同时可读入，但缓冲区向用户区复制时不能继续占用同一缓冲区，因此每增加一块需要 $T+M=150\,\mu s$：
+
+$$
+200+9\times150=1550\,\mu s.
+$$
+
+双缓冲时，设备可向另一个缓冲区读入下一块，读盘与“传送并分析”均为 $100\,\mu s$，形成流水。读完 10 块用 $10\times100=1000\,\mu s$，最后一块还需传送和分析 $100\,\mu s$：
+
+$$
+1000+100=1100\,\mu s.
+$$
+
+故选 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2013】设系统缓冲区和用户工作区均采用单缓冲, 从外设读入 1 个数据块到系统缓冲区的时间为 100, 从系统缓冲区读入 1 个数据块到用户工作区的时间为 5, 对用户工作区中的 1 个数据块进行分析的时间为 90(如下图所示)。进程从外设读入并分析 2 个数据块的最短时间是（ ）
+
+```text
+外设 --100--> 系统缓冲区 --5--> 用户工作区
+                              └-- 90（分析）
+```
+
+<ExamChoices>
+<ExamOption>A. 200</ExamOption>
+<ExamOption>B. 295</ExamOption>
+<ExamOption>C. 300</ExamOption>
+<ExamOption>D. 390</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+第 1 块从外设进入系统缓冲区再送入用户工作区，共需
+
+$$
+100+5=105.
+$$
+
+随后分析第 1 块需要 $90$，与此同时可读入第 2 块。第 2 块从外设到用户工作区需要 $100+5=105$，比分析时间更长，因此这一流水阶段需 $105$。最后再分析第 2 块需 $90$。总时间为
+
+$$
+105+105+90=300.
+$$
+
+故选 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2015】在系统内存中设置磁盘缓冲区的主要目的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 减少磁盘 I/O 次数</ExamOption>
+<ExamOption>B. 减少平均寻道时间</ExamOption>
+<ExamOption>C. 提高磁盘数据可靠性</ExamOption>
+<ExamOption>D. 实现设备无关性</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+磁盘缓冲区可以缓存已读入的数据、合并或延迟写请求，并提高对重复访问数据的命中率，从而减少实际访问磁盘的次数。它不能消除磁头的机械运动，因而不能直接减少平均寻道时间；数据可靠性和设备无关性也不是设置磁盘缓冲区的主要目的。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2016】下列关于 SPOOLing 技术的叙述中,错误的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 需要外存的支持</ExamOption>
+<ExamOption>B. 需要多道程序设计技术的支持</ExamOption>
+<ExamOption>C. 可以让多个作业共享一台独占设备</ExamOption>
+<ExamOption>D. 由用户作业控制设备与输入 / 输出井之间的数据传送</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+SPOOLing 以外存上的输入井、输出井为基础，并依赖多道程序设计，使多个作业能够共享原本的独占设备。设备与输入井、输出井之间的数据传送由操作系统的预输入程序和缓输出程序控制，而不是由用户作业直接控制。因此 D 错误。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2020】对于具备设备独立性的系统下列叙述中错误的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 可以使用文件名访问物理设备</ExamOption>
+<ExamOption>B. 用户程序使用逻辑设备名访问物理设备</ExamOption>
+<ExamOption>C. 需要建立逻辑设备与物理设备之间的映射关系</ExamOption>
+<ExamOption>D. 更换物理设备后必须修改访问该设备的应用程序</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+设备独立性要求用户程序通过逻辑设备名访问设备，并由操作系统建立逻辑设备与物理设备的映射。在类 UNIX 系统中设备还可作为特殊文件访问。更换同类物理设备时只需修改映射或驱动程序，不应修改应用程序，所以 D 错误。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2022】下列关于驱动程序的叙述中, 不正确的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 驱动程序与 I/O 控制方式无关</ExamOption>
+<ExamOption>B. 初始化设备是由驱动程序控制完成的</ExamOption>
+<ExamOption>C. 进程在执行驱动程序时可能进入阻塞态</ExamOption>
+<ExamOption>D. 读 / 写设备的操作是由驱动程序控制完成的</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+设备驱动程序直接控制具体设备，必须按照设备采用的程序查询、中断或 DMA 等 I/O 控制方式组织操作，因此不可能与 I/O 控制方式无关。驱动程序负责设备初始化和读写控制；进程等待设备完成时也可能被阻塞。因此不正确的是 A。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 5.3 外存管理
+
+<ExamQuestion>
+
+1. 【2009】假设磁头当前位于第 105 道, 正在向磁道序号增加的方向移动。现有一个磁道访问请求序列为 35, 45, 12, 68, 110, 180, 170, 195,采用 SCAN 调度 (电梯调度) 算法得到的磁道访问序列是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 110,170,180,195,68,45,35,12</ExamOption>
+<ExamOption>B. 110,68,45,35,12,170,180,195</ExamOption>
+<ExamOption>C. 110,170,180,195,12,35,45,68</ExamOption>
+<ExamOption>D. 12, 35, 45, 68, 110, 170, 180, 195</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+SCAN 算法按当前方向依次处理请求。磁头位于 105 号磁道并向磁道号增大的方向移动，因此先处理大于 105 的请求：
+
+$$
+110,170,180,195.
+$$
+
+到达该方向的末端后反向，再按递减顺序处理其余请求：
+
+$$
+68,45,35,12.
+$$
+
+故访问序列为 $110,170,180,195,68,45,35,12$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2012】下列选项中, 不能改善磁盘设备 I/O 性能的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 重排 I/O 请求次序</ExamOption>
+<ExamOption>B. 在一个磁盘上设置多个分区</ExamOption>
+<ExamOption>C. 预读和滞后写</ExamOption>
+<ExamOption>D. 优化文件物理块的分布</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+重排 I/O 请求可减少寻道距离；预读和滞后写可利用局部性并减少同步等待；优化文件物理块分布可减少离散访问。仅在同一磁盘上划分多个分区并不会提高磁盘本身的机械访问速度，也不必然减少寻道，因此不能改善 I/O 性能。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2015】某硬盘有 200 个磁道 (最外侧磁道号为 0),磁道访问请求序列为:130, 42, 180, 15, 199,当前磁头位于第 58 号磁道并从外侧向内侧移动。按照 SCAN 调度方法处理完上述请求后, 磁头移过的磁道数是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 208</ExamOption>
+<ExamOption>B. 287</ExamOption>
+<ExamOption>C. 325</ExamOption>
+<ExamOption>D. 38</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+最外侧磁道号为 0，因此“从外侧向内侧移动”表示磁道号增大。SCAN 先从 58 号移动到最内侧的 199 号，途中依次处理 130、180、199；随后反向处理 42、15。总移动量为
+
+$$
+(199-58)+(199-15)=141+184=325.
+$$
+
+故选 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2017】下列选项中, 磁盘逻辑格式化程序所做的工作是（ ）。
+
+I. 对磁盘进行分区 II. 建立文件系统的根目录 III. 确定磁盘扇区校验码所占位数 IV. 对保存空闲磁盘块信息的数据结构进行初始化
+
+<ExamChoices>
+<ExamOption>A. 仅 II</ExamOption>
+<ExamOption>B. 仅 II、 IV</ExamOption>
+<ExamOption>C. 仅 III、 IV</ExamOption>
+<ExamOption>D. 仅 I、 II、 IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+逻辑格式化是在已划分的分区上建立文件系统，主要工作包括建立文件系统的管理结构、创建根目录以及初始化空闲空间管理结构。因此II、IV正确。磁盘分区属于分区操作，扇区及校验信息的确定属于物理格式化。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2018】系统总是访问磁盘的某个磁道而不响应对其他磁道的访问请求, 这种现象称为磁臂黏着。下列磁盘调度算法中, 不会导致磁臂粘着的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 先来先服务 (FCFS)</ExamOption>
+<ExamOption>B. 最短寻道时间优先 (SSTF)</ExamOption>
+<ExamOption>C. 扫描算法 (SCAN)</ExamOption>
+<ExamOption>D. 循环扫描算法 (CSCAN)</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+磁臂黏着的根源是调度算法过度偏向当前磁头附近或某一方向上的新请求，使远处请求长期得不到服务。FCFS 严格按照请求到达次序处理，与请求所在磁道位置无关，不会因局部请求不断到来而长期忽略旧请求。SSTF、SCAN 和 CSCAN 都按位置或方向选择请求，可能出现磁臂黏着。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2021】某系统中磁盘的磁道数为 200(0~199), 磁头当前在 184 号磁道上。用户进程提出的磁盘访问请求对应的磁道号依改为 184, 187, 176, 182, 199。若采用最短寻道时间优先调度算法 (SSTF) 完成磁盘访问, 则磁头移动的距离 (磁道数) 是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 37</ExamOption>
+<ExamOption>B. 38</ExamOption>
+<ExamOption>C. 41</ExamOption>
+<ExamOption>D. 42</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+SSTF 每次选择距离当前磁头最近的请求：
+
+- 当前在 184，先服务 184，移动 $0$；
+- 距离最近的是 182，移动 $2$；
+- 从 182 到 187，移动 $5$；
+- 从 187 到 176，移动 $11$；
+- 从 176 到 199，移动 $23$。
+
+总移动距离为
+
+$$
+0+2+5+11+23=41.
+$$
+
+故选 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2022】下列选项中, 需要在操作系统进行初始化过程中创建的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 中断向量表</ExamOption>
+<ExamOption>B. 文件系统的根目录</ExamOption>
+<ExamOption>C. 硬盘分区表</ExamOption>
+<ExamOption>D. 文件系统的索引结点表</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+中断向量表是系统处理中断所必需的内核数据结构，应在操作系统初始化阶段建立或初始化。文件系统根目录和索引结点表通常在逻辑格式化时建立，硬盘分区表在磁盘分区时建立。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+8. 【2024】某磁盘的磁道数为 400(磁道号为 0~399), 采用循环扫描算法 (CSCAN) 进行磁盘调度,完成对 200 号磁道的请求后,磁头向磁道号减小的方向移动。若还有 7 个磁盘请求,对应的磁道号分别为:300,120,110,0,160,210,399, 则完成上述磁盘访问请求后磁头移动的距离是（ ）
+
+<ExamChoices>
+<ExamOption>A. 599</ExamOption>
+<ExamOption>B. 619</ExamOption>
+<ExamOption>C. 788</ExamOption>
+<ExamOption>D. 799</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+CSCAN 当前从 200 号磁道向磁道号减小方向移动，因此先依次访问
+
+$$
+160,120,110,0.
+$$
+
+到达 0 后回到另一端 399，再继续向减小方向访问
+
+$$
+300,210.
+$$
+
+磁头总移动距离为
+
+$$
+(200-0)+(399-0)+(399-210)=200+399+189=788.
+$$
+
+故选 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+9. 【2010】假设计算机系统采用 CSCAN (循环扫描) 磁盘调度策略, 使用 2KB 的内存空间记录 16384 个磁盘块的空闲状态。
+   (1) 请说明在上述条件下如何进行磁盘块空闲状态的管理。
+   (2) 设某单面磁盘旋转速度为 6000r/min, 每个磁道有 100 个扇区, 相邻磁道间的平均移动时间为 1ms。若在某时刻, 磁头位于 100 号磁道处, 并沿着磁道号增大的方向移动 (如下图所示), 磁道号请求队列为 50,90,30,120, 对请求队列中的每个磁道需读取 1 个随机分布的扇区, 则读完这 4 个扇区点共需要多少时间？要求给出计算过程。
+
+![5.3 外存管理第 9 题磁盘调度示意图](/img/questions/408/operating-system-5-3-q9.png)
+
+   (3) 如果将磁盘替换为随机访问的 Flash 半导体存储器 (如 U 盘、 SSD 等), 是否有比 CSCAN 更高效的磁盘调度策略？若有, 给出磁盘调度策略的名称并说明理由；若无, 说明理由。
+
+<ExamSolution>
+
+<ExamAnswer>
+（1）采用位图法管理空闲磁盘块。
+
+
+（2）读完 4 个扇区共需 $190.4\,\mathrm{ms}$。
+
+（3）有，可采用先来先服务（FCFS）算法。
+</ExamAnswer>
+
+<ExamExplanation>
+（1）$2\,\mathrm{KB}=2048\,\mathrm{B}=16384\,\mathrm{bit}$，正好可以为 16384 个磁盘块各设置 1 位。约定某一位为 0 表示空闲、为 1 表示已分配（也可反向约定），位号与磁盘块号一一对应。
+
+（2）磁头当前位于 100 号磁道并向磁道号增大的方向移动。按 CSCAN，访问次序为
+
+$$
+120\to30\to50\to90.
+$$
+
+磁头移动的磁道数为
+
+$$
+(120-100)+(120-30)+(50-30)+(90-50)=170.
+$$
+
+相邻磁道平均移动时间为 $1\,\mathrm{ms}$，故寻道时间为
+
+$$
+T_s=170\,\mathrm{ms}.
+$$
+
+磁盘转速为 $6000\,\mathrm{r/min}=100\,\mathrm{r/s}$，转一周需
+
+$$
+T_r=\dfrac{1}{100}\,\mathrm{s}=10\,\mathrm{ms}.
+$$
+
+随机扇区的平均旋转延迟为半周，即 $5\,\mathrm{ms}$，4 次共
+
+$$
+T_l=4\times5=20\,\mathrm{ms}.
+$$
+
+每个磁道有 100 个扇区，读取一个扇区的传输时间为
+
+$$
+T_t=\dfrac{10}{100}=0.1\,\mathrm{ms},
+$$
+
+4 个扇区共 $0.4\,\mathrm{ms}$。因此总时间为
+
+$$
+T=170+20+0.4=190.4\,\mathrm{ms}.
+$$
+
+（3）Flash 存储器没有磁头、磁道、旋转等待等机械部件，随机访问不同地址的时间基本相同。CSCAN 为减少机械寻道而重排请求，在 Flash 上没有相应收益，反而增加调度开销和等待时间。因此采用简单、公平且开销小的 FCFS 更合适。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+10. 【2019】某计算机系统中的磁盘有 300 个柱面, 每个柱面有 10 个磁道, 每个磁道有 200 个扇区, 扇区大小为 512B。文件系统的每个簇包含 2 个扇区。请回答下列问题:
+   (1) 磁盘的容量是多少？
+   (2) 假设磁头在 85 号柱面上, 此时有 4 个磁盘访问请求, 簇号分别为:100260,60005,101660 和 110560。若采用最短寻道时间优先 (SSTF) 调度算法,则系统访问簇的先后次序是什么?
+   (3) 第 100530 簇在磁盘上的物理地址是什么？将簇号转换成磁盘物理地址的过程是由 I/O 系统的什么程序完成的?
+
+<ExamSolution>
+
+<ExamAnswer>
+（1）磁盘容量为 $307200000\,\mathrm{B}=300000\,\mathrm{KB}$。
+
+
+（2）访问次序为：$100260\to101660\to110560\to60005$。
+
+（3）第 100530 簇位于 100 号柱面、5 号磁头（磁道），起始扇区号为 60，占用 60、61 号扇区；转换由设备驱动程序完成。
+</ExamAnswer>
+
+<ExamExplanation>
+（1）磁盘总容量为
+
+$$
+300\times10\times200\times512=307200000\,\mathrm{B}.
+$$
+
+按 $1\,\mathrm{KB}=1024\,\mathrm{B}$，有
+
+$$
+\dfrac{307200000}{1024}=300000\,\mathrm{KB}.
+$$
+
+（2）每个簇含 2 个扇区，因此每个磁道含
+
+$$
+\dfrac{200}{2}=100
+$$
+
+个簇，每个柱面含
+
+$$
+10\times100=1000
+$$
+
+个簇。各簇号对应的柱面号为
+
+$$
+\begin{aligned}
+100260&\to100,\\
+60005&\to60,\\
+101660&\to101,\\
+110560&\to110.
+\end{aligned}
+$$
+
+磁头初始在 85 号柱面。SSTF 依次选择最近柱面：先到 100，再到 101，再到 110，最后到 60。因此访问次序为
+
+$$
+100260\to101660\to110560\to60005.
+$$
+
+（3）将簇号分解：
+
+$$
+100530=100\times1000+5\times100+30.
+$$
+
+故柱面号为 100，柱面内磁头号（磁道号）为 5，磁道内簇序号为 30。每簇占 2 个扇区，所以起始扇区号为
+
+$$
+30\times2=60,
+$$
+
+该簇占用 60、61 号扇区。把逻辑簇号换算为柱面号、磁头号和扇区号需要了解具体设备结构，由设备驱动程序完成。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+11. 【2021】某计算机用硬盘作为启动盘,硬盘第一个扇区存放主引导记录,其中包含磁盘引导程序和分区表。磁盘引导程序用于选择要引导哪个分区的操作系统, 分区表记录硬盘上各分区的位置等描述信息。硬盘被划分成若干个分区, 每个分区的第一个扇区存放分区引导程序, 用于引导该分区中的操作系统。系统采用多阶段引导方式,除了执行磁盘引导程序和分区引导程序外,还需要执行 ROM 中的引导程序。请回答下列问题:
+   (1) 系统启动过程中操作系统的初始化程序、分区引导程序、 ROM 中的引导程序、磁盘引导程序的执行顺序是什么?
+   (2) 把硬盘制作为启动盘时, 需要完成操作系统的安装、磁盘的物理格式化、逻辑格式化、对磁盘进行分区,执行这 4 个操作的正确顺序是什么?
+   (3) 磁盘扇区的划分和文件系统根目录的建立分别是在第 (2) 问的哪个操作中完成的？
+
+<ExamSolution>
+
+<ExamAnswer>
+（1）ROM 中的引导程序 → 磁盘引导程序 → 分区引导程序 → 操作系统初始化程序。
+
+
+（2）磁盘物理格式化 → 对磁盘进行分区 → 逻辑格式化 → 安装操作系统。
+
+（3）磁盘扇区的划分在物理格式化时完成；文件系统根目录的建立在逻辑格式化时完成。
+</ExamAnswer>
+
+<ExamExplanation>
+（1）开机后 CPU 首先执行固化在 ROM 中的引导程序。ROM 程序读取硬盘第一个扇区中的主引导记录并执行磁盘引导程序；磁盘引导程序根据分区表选择活动分区，加载该分区首扇区中的分区引导程序；分区引导程序再装入操作系统内核，最后执行操作系统初始化程序。
+
+（2）必须先通过物理格式化形成磁道和扇区等低级结构，再建立分区表并划分分区；随后在分区上进行逻辑格式化、建立文件系统，最后才能把操作系统文件安装到该文件系统中。
+
+（3）物理格式化负责划分磁道和扇区并写入必要的控制信息；逻辑格式化负责建立文件系统的元数据结构，包括根目录和空闲空间管理结构。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>

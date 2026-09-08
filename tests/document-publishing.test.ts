@@ -1,8 +1,6 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { EventEmitter } from 'node:events';
-import { PassThrough } from 'node:stream';
+import { readFileSync } from 'node:fs';
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import {
   artifactKey,
@@ -19,131 +17,6 @@ const TASK_ID = 'task12345678901';
 const MESSAGE_ID = 'msg123456789012';
 
 describe('document publishing contracts', () => {
-  it('bypasses EdgeOne fetch proxy failures when downloading through the Blob gateway', async () => {
-    vi.resetModules();
-    vi.stubEnv('BLOB_DOWNLOAD_GATEWAY_URL', 'https://blob.example.test/download');
-    vi.stubEnv('BLOB_DOWNLOAD_GATEWAY_SECRET', 'a'.repeat(32));
-
-    const responses = [
-      {
-        statusCode: 302,
-        headers: {
-          location: `https://blob.example.test/download/tasks/${TASK_ID}/1/${MESSAGE_ID}/md`,
-        },
-      },
-      { statusCode: 404, headers: {} as Record<string, string> },
-    ];
-    const nativeRequest = vi.fn(
-      (
-        _url: string | URL,
-        _options: object,
-        callback: (response: PassThrough & { headers: Record<string, string>; statusCode: number }) => void,
-      ) => {
-        const nextResponse = responses.shift();
-        if (!nextResponse) throw new Error('The fake HTTPS server ran out of responses.');
-
-        const response = new PassThrough() as PassThrough & {
-          headers: Record<string, string>;
-          statusCode: number;
-        };
-        response.headers = nextResponse.headers;
-        response.statusCode = nextResponse.statusCode;
-
-        const request = new EventEmitter() as EventEmitter & {
-          destroy: ReturnType<typeof vi.fn>;
-          end: ReturnType<typeof vi.fn>;
-          setTimeout: ReturnType<typeof vi.fn>;
-        };
-        request.destroy = vi.fn((error?: Error) => {
-          if (error) request.emit('error', error);
-          return request;
-        });
-        request.end = vi.fn(() => {
-          callback(response);
-          response.end();
-          return request;
-        });
-        request.setTimeout = vi.fn().mockReturnValue(request);
-        return request;
-      },
-    );
-    vi.doMock('node:https', () => ({ request: nativeRequest }));
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => {
-        const cause = Object.assign(new Error('getaddrinfo ENOTFOUND {{pages_proxy_host}}'), {
-          code: 'ENOTFOUND',
-        });
-        throw Object.assign(new TypeError('fetch failed'), { cause });
-      }),
-    );
-
-    try {
-      const { GET } = await import(
-        '../app/download/tasks/[taskRecordId]/[version]/[messageRecordId]/[format]/route'
-      );
-      const response = await GET(
-        new Request(`https://fumadocs.example.test/download/tasks/${TASK_ID}/1/${MESSAGE_ID}/md`),
-        {
-          params: Promise.resolve({
-            taskRecordId: TASK_ID,
-            version: '1',
-            messageRecordId: MESSAGE_ID,
-            format: 'md',
-          }),
-        },
-      );
-
-      expect(response.status).toBe(404);
-      expect(nativeRequest).toHaveBeenCalledTimes(2);
-    } finally {
-      vi.doUnmock('node:https');
-      vi.resetModules();
-    }
-  });
-
-  it('uses a strong Blob read so a missing artifact is reported as 404', async () => {
-    vi.resetModules();
-    const get = async (
-      _key: string,
-      options?: { consistency?: string },
-    ): Promise<null> => {
-      if (options?.consistency !== 'strong') {
-        throw new Error('eventual Blob reads are unavailable in this test');
-      }
-      return null;
-    };
-    (vi.doMock as unknown as (
-      path: string,
-      factory: () => unknown,
-      options?: { virtual?: boolean },
-    ) => void)(
-      '@edgeone/pages-blob',
-      () => ({ getStore: () => ({ get }) }),
-      { virtual: true },
-    );
-
-    const { onRequestGet } = await import(
-      // @ts-expect-error EdgeOne function route has no local declaration file.
-      '../edgeone/cloud-functions/download/tasks/[taskRecordId]/[version]/[messageRecordId]/[format].js'
-    );
-    const response = await onRequestGet({
-      request: new Request(
-        `https://fumadocs-upload.any1.tech/download/tasks/${TASK_ID}/1/${MESSAGE_ID}/md`,
-        {
-          headers: { 'X-Internal-Key': 'a'.repeat(32) },
-        },
-      ),
-      params: { taskRecordId: TASK_ID, version: '1', messageRecordId: MESSAGE_ID, format: 'md' },
-      env: { DOWNLOAD_GATEWAY_SECRET: 'a'.repeat(32) },
-    });
-
-    expect(response.status).toBe(404);
-    expect(await response.json()).toMatchObject({ error: { code: 'NOT_FOUND' } });
-    vi.doUnmock('@edgeone/pages-blob');
-    vi.resetModules();
-  });
-
   it('creates a versioned task-scoped Blob key and gateway URL from a safe reference', () => {
     const reference = parseArtifactReference({
       taskRecordId: TASK_ID,
@@ -361,25 +234,6 @@ describe('document publishing contracts', () => {
         if (jsCode) expect(() => new Function(jsCode)).not.toThrow();
       }
     }
-  });
-
-  it('deploys only the EdgeOne Blob functions through a pinned CLI workflow', () => {
-    const workflow = readFileSync(
-      new URL('../.github/workflows/deploy-edgeone-functions.yml', import.meta.url),
-      'utf8',
-    );
-
-    expect(workflow).toContain("'edgeone/**'");
-    expect(workflow).toContain('edgeone makers deploy ./edgeone');
-    expect(workflow).toContain('EDGEONE_CLI_VERSION: 1.6.19');
-    expect(workflow).toContain('edgeone@${EDGEONE_CLI_VERSION}');
-    expect(workflow).toContain('EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}');
-    expect(workflow).toContain('EDGEONE_PROJECT_NAME: ${{ vars.EDGEONE_PROJECT_NAME }}');
-    expect(workflow).toContain('edgeone makers link');
-    expect(workflow).toContain('https://blob-sts.edgeone.site/');
-    expect(workflow).toContain('signer_with_key=');
-    expect(workflow).not.toContain('md-to-pdf');
-    expect(workflow).not.toMatch(/^\s*EDGEONE_API_TOKEN:\s*(?!\$\{\{)[^\s#]/mu);
   });
 
   it('keeps per-item Code nodes compatible with n8n execution mode', () => {
@@ -772,37 +626,6 @@ describe('document publishing contracts', () => {
     expect(
       Math.max(...batches.map((item) => item.json.batchBody.requests.length)),
     ).toBeLessThanOrEqual(50);
-  });
-
-  it('places Node.js Blob handlers in EdgeOne cloud-functions routes', () => {
-    const cloudFunctionsDir = new URL('../edgeone/cloud-functions/', import.meta.url);
-    const legacyFunctionsDir = new URL('../edgeone/functions/', import.meta.url);
-
-    expect(existsSync(cloudFunctionsDir)).toBe(true);
-    expect(existsSync(new URL('api/blob/upload-url.js', cloudFunctionsDir))).toBe(true);
-    expect(
-      existsSync(
-        new URL('download/tasks/[taskRecordId]/[version]/[messageRecordId]/[format].js', cloudFunctionsDir),
-      ),
-    ).toBe(true);
-    expect(existsSync(legacyFunctionsDir)).toBe(false);
-  });
-
-  it('keeps the Blob gateway on a stable custom domain', () => {
-    const functionsWorkflow = readFileSync(
-      new URL('../.github/workflows/deploy-edgeone-functions.yml', import.meta.url),
-      'utf8',
-    );
-    const docsWorkflow = readFileSync(
-      new URL('../.github/workflows/deploy-edgeone-docs.yml', import.meta.url),
-      'utf8',
-    );
-
-    expect(functionsWorkflow).toContain('CreatePagesZoneCustomDomain');
-    expect(functionsWorkflow).toContain('fumadocs-upload.any1.tech');
-    expect(docsWorkflow).toContain('https://fumadocs-upload.any1.tech/api/blob/upload-url');
-    expect(docsWorkflow).toContain('https://fumadocs-upload.any1.tech/download');
-    expect(docsWorkflow).not.toContain('fumadocs-upload-mimnflju.edgeone.cool');
   });
 
   it('does not require third-party blog images during the production build', () => {

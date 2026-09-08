@@ -294,8 +294,7 @@ jobs:
             "${body_url}" \
             '/docs/intro/' \
             '/docs/intro.md' \
-            '/docs/intro/index.txt' \
-            '/docs/intro/__next.docs.txt' \
+            '/docs/__next.docs.txt' \
             | xargs -P 8 -I '{}' bash -c '
                 status="$(curl --silent --show-error --max-time 60 -L -o /dev/null -w "%{http_code}" "${base_url}$1?${preview_query}")"
                 echo "route $1 -> ${status}"
@@ -304,17 +303,10 @@ jobs:
 
           verify_tmp="$(mktemp -d)"
           curl --fail --silent --show-error --max-time 60 \
-            "${base_url}/docs/intro/index.txt?${preview_query}" \
-            -o "${verify_tmp}/full.txt"
-          cmp \
-            "${verify_tmp}/full.txt" \
-            '.static-docs/docs/intro/__next._full.txt'
-
-          curl --fail --silent --show-error --max-time 60 \
-            "${base_url}/docs/intro/__next.docs.txt?${preview_query}" \
+            "${base_url}/docs/__next.docs.txt?${preview_query}" \
             -o "${verify_tmp}/docs.txt"
-          cmp "${verify_tmp}/docs.txt" '.static-docs/docs/intro/__next.docs.txt'
-          echo 'RSC payloads match the original per-page local sources.'
+          cmp "${verify_tmp}/docs.txt" '.static-docs/docs/__next.docs.txt'
+          echo 'The canonical shared RSC payload matches the local static source.'
 
       - name: Diagnose EdgeOne deployment status
         if: ${{ failure() && steps.deploy.outcome == 'success' }}
