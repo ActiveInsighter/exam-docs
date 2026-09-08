@@ -218,19 +218,17 @@ jobs:
             echo "- Artifact validation: $(($(date +%s) - started))s"
           } >> "${GITHUB_STEP_SUMMARY}"
 
-      - name: Package pure static deployment
+      - name: Prepare pure static deployment
         if: env.EDGEONE_DOCS_DEPLOYMENT_MODE == 'upload'
         shell: bash
         run: |
           set -euo pipefail
-          zip_path="${RUNNER_TEMP}/exam-docs-static-production.zip"
-          rm -f -- "${zip_path}"
           started="$(date +%s)"
-          (cd .static-docs && zip -qr -6 "${zip_path}" .)
+          test -f .static-docs/index.html
           finished="$(date +%s)"
-          zip_bytes="$(stat -c '%s' "${zip_path}")"
-          echo "STATIC_DEPLOY_ZIP=${zip_path}" >> "${GITHUB_ENV}"
-          echo "- Deployment ZIP: $((zip_bytes / 1024 / 1024)) MiB; packaging $((finished - started))s" >> "${GITHUB_STEP_SUMMARY}"
+          package_bytes="$(du -sb .static-docs | awk '{print $1}')"
+          file_count="$(find .static-docs -type f | wc -l | tr -d ' ')"
+          echo "- Direct folder upload: ${file_count} files, $((package_bytes / 1024 / 1024)) MiB; packaging $((finished - started))s" >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Deploy prebuilt static site to EdgeOne
         if: env.EDGEONE_DOCS_DEPLOYMENT_MODE == 'upload'
@@ -246,7 +244,7 @@ jobs:
             : > edgeone-static-production.log
             echo "EdgeOne deployment attempt ${attempt}/${max_attempts}"
 
-            if edgeone makers deploy "${STATIC_DEPLOY_ZIP}" \
+            if edgeone makers deploy .static-docs \
               -n "${EDGEONE_DOCS_PROJECT_NAME}" \
               -t "${EDGEONE_API_TOKEN}" \
               -e production \
