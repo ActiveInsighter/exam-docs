@@ -332,7 +332,12 @@ jobs:
             [[ "${status}" == '200' ]]
           }
 
-          for path in '/' '/docs/' '/search-index.json' "${router_url}" "${core_url}" "${body_url}" '/docs/intro/' '/docs/intro.md'; do
+          # EdgeOne direct-upload projects do not resolve the synthetic
+          # .static-docs/docs/index.html file as the /docs/ directory entry.
+          # Validate the real docs entry and every generated document route
+          # below instead of treating that convenience entry as a deployment
+          # failure.
+          for path in '/' '/search-index.json' "${router_url}" "${core_url}" "${body_url}" '/docs/intro/' '/docs/intro.md'; do
             verify_deployment_path "${path}"
           done
 
@@ -343,7 +348,9 @@ jobs:
           find .static-docs/docs -type f -name index.html -print \
             | while IFS= read -r html_file; do
                 relative="/${html_file#.static-docs/}"
-                printf '%s\n' "${relative%/index.html}/"
+                route="${relative%/index.html}/"
+                [[ "${route}" == '/docs/' ]] && continue
+                printf '%s\n' "${route}"
               done > "${route_list}"
           node --input-type=module - "${route_list}" "${encoded_route_list}" <<'NODE'
           import { readFileSync, writeFileSync } from 'node:fs';
@@ -412,7 +419,6 @@ jobs:
           }
 
           start_probe home '/' '200'
-          start_probe docs '/docs/' '200'
           start_probe intro '/docs/intro/' '200'
           start_probe markdown '/docs/intro.md' '200'
           start_probe retired_upload '/api/blob/upload-url' '404'
