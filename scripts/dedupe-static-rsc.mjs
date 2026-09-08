@@ -59,6 +59,11 @@ if (!(await exists(docsRoot))) {
   throw new Error(`Static docs root does not exist: ${docsRoot}`);
 }
 
+if (process.env.STATIC_DOCS_DISABLE_RSC_DEDUPE === '1') {
+  await writeFile(edgeOneConfigPath, `${JSON.stringify({ rewrites: [] }, null, 2)}\n`, 'utf8');
+  console.log('[rsc-dedupe] Disabled for this build; retaining all original RSC files.');
+} else {
+
 const initialFiles = await walk(docsRoot);
 const indexAliases = initialFiles.filter((filePath) => path.basename(filePath) === 'index.txt');
 if (indexAliases.length === 0) {
@@ -129,3 +134,4 @@ console.log(
 );
 console.log(`[rsc-dedupe] Total static RSC reduction: ${formatMiB(removedBytes)}.`);
 console.log('[rsc-dedupe] Wrote EdgeOne rewrites for both removed alias families.');
+}

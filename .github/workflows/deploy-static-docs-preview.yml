@@ -138,6 +138,8 @@ jobs:
           echo "- EdgeOne CLI cache hit: ${{ steps.edgeone-cache.outputs.cache-hit }}" >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Build the pure static documentation package
+        env:
+          STATIC_DOCS_DISABLE_RSC_DEDUPE: '1'
         shell: bash
         run: |
           set -euo pipefail
@@ -303,16 +305,16 @@ jobs:
           verify_tmp="$(mktemp -d)"
           curl --fail --silent --show-error --max-time 60 \
             "${base_url}/docs/intro/index.txt?${preview_query}" \
-            -o "${verify_tmp}/rewritten-full.txt"
+            -o "${verify_tmp}/full.txt"
           cmp \
-            "${verify_tmp}/rewritten-full.txt" \
+            "${verify_tmp}/full.txt" \
             '.static-docs/docs/intro/__next._full.txt'
 
           curl --fail --silent --show-error --max-time 60 \
             "${base_url}/docs/intro/__next.docs.txt?${preview_query}" \
-            -o "${verify_tmp}/rewritten-docs.txt"
-          cmp "${verify_tmp}/rewritten-docs.txt" '.static-docs/docs/__next.docs.txt'
-          echo 'RSC rewrite payloads match the deduplicated local sources.'
+            -o "${verify_tmp}/docs.txt"
+          cmp "${verify_tmp}/docs.txt" '.static-docs/docs/intro/__next.docs.txt'
+          echo 'RSC payloads match the original per-page local sources.'
 
       - name: Diagnose EdgeOne deployment status
         if: ${{ failure() && steps.deploy.outcome == 'success' }}

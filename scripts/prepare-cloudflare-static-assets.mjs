@@ -9,8 +9,8 @@ function countSplats(value) {
 }
 
 export function buildCloudflareRedirects(rewrites) {
-  if (!Array.isArray(rewrites) || rewrites.length === 0) {
-    throw new Error('Expected at least one EdgeOne rewrite to translate for Cloudflare.');
+  if (!Array.isArray(rewrites)) {
+    throw new Error('Expected an EdgeOne rewrite array to translate for Cloudflare.');
   }
   if (rewrites.length > CLOUDFLARE_DYNAMIC_REDIRECT_LIMIT) {
     throw new Error(
@@ -65,7 +65,7 @@ export async function prepareCloudflareStaticAssets(outputRoot = path.resolve('.
   ]);
 
   console.log(`[cloudflare-assets] Wrote ${redirectsPath}.`);
-  console.log('[cloudflare-assets] Reused guarded RSC dedupe rewrites as Cloudflare Static Assets 200 proxies.');
+  console.log('[cloudflare-assets] Prepared Cloudflare Static Assets metadata from the EdgeOne route config.');
   console.log('[cloudflare-assets] Confirmed 404.html for not_found_handling=404-page.');
 }
 

@@ -73,6 +73,8 @@ jobs:
             ${{ runner.os }}-static-docs-turbopack-v4-
 
       - name: Build the shared static documentation package
+        env:
+          STATIC_DOCS_DISABLE_RSC_DEDUPE: '1'
         shell: bash
         run: npm run build:static-docs
 
@@ -88,8 +90,6 @@ jobs:
           test -s .static-docs/_redirects
           test -s .static-docs/.assetsignore
           test -s .static-docs/404.html
-          grep -F '/docs/*/index.txt /docs/:splat/__next._full.txt 200' .static-docs/_redirects
-          grep -F '/docs/*/__next.docs.txt /docs/__next.docs.txt 200' .static-docs/_redirects
           grep -Fx 'edgeone.json' .static-docs/.assetsignore
 
           file_count="$(find .static-docs -type f \
@@ -121,7 +121,7 @@ jobs:
             echo "- Largest uploadable asset: $((largest_bytes / 1024 / 1024)) MiB / 25 MiB"
             echo "- Local static package: $((package_bytes / 1024 / 1024)) MiB"
             echo '- Worker JavaScript: none (assets-only deployment)'
-            echo '- RSC dedupe aliases: restored through two Cloudflare 200 proxy rules'
+            echo '- RSC files: original per-page files retained for route compatibility'
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Validate Wrangler configuration with a dry run
@@ -193,4 +193,28 @@ jobs:
             '/docs/intro/__next.docs.txt'; do
             wait_for_route "${path}"
           done
+
+          route_list="$(mktemp)"
+          route_failures="$(mktemp)"
+          trap 'rm -f -- "${route_list}" "${route_failures}"' EXIT
+          find .static-docs/docs -type f -name index.html -print \
+            | while IFS= read -r html_file; do
+                relative="/${html_file#.static-docs/}"
+                printf '%s\n' "${relative%/index.html}/"
+              done > "${route_list}"
+          doc_route_count="$(wc -l < "${route_list}" | tr -d ' ')"
+          export base_url route_failures
+          if ! xargs -P 16 -n 1 bash -c '
+            path="$1"
+            status="$(curl --silent --show-error --max-time 60 -L -o /dev/null -w "%{http_code}" "${base_url}${path}")"
+            if [[ "${status}" != "200" ]]; then
+              printf "%s -> %s\n" "${path}" "${status}" >> "${route_failures}"
+              exit 1
+            fi
+          ' _ < "${route_list}"; then
+            echo '::error::One or more static documentation HTML routes failed.'
+            sed -n '1,40p' "${route_failures}"
+            exit 1
+          fi
+          echo "Full static documentation route verification: ${doc_route_count} routes -> 200"
           echo "- Cloudflare deployment: ${DEPLOYMENT_URL}" >> "${GITHUB_STEP_SUMMARY}"

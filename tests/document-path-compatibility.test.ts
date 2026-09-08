@@ -25,6 +25,6 @@ describe('documentation route paths', () => {
 
   it('keeps short source paths readable', () => {
     expect(getShortDocSlugPath('intro.mdx')).toBe('intro');
-    expect(getShortDocSlugPath('数学真题/index.mdx')).toBe(encodeURI('数学真题'));
+    expect(getShortDocSlugPath('数学真题/index.mdx')).toBe('数学真题');
   });
 });
