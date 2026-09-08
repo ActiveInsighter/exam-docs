@@ -150,6 +150,11 @@ jobs:
           echo '- EdgeOne folder upload: direct COS file upload (CLI auto-archive disabled)' >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Build docs and ZBSearch in parallel
+        env:
+          # Keep every Next/Fumadocs RSC alias while validating the route fix.
+          # The previous global rewrite removed index.txt aliases and could
+          # hide failures for deep or Unicode document routes.
+          STATIC_DOCS_DISABLE_RSC_DEDUPE: '1'
         shell: bash
         run: |
           set -euo pipefail
