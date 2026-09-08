@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 env:
-  EDGEONE_CLI_VERSION: 1.6.31-3
+  EDGEONE_CLI_VERSION: 1.6.34
   EDGEONE_DOCS_PROJECT_NAME: exam-docs
   # exam-docs is an EdgeOne Direct Upload project, so CI deploys the prebuilt
   # static package through the Makers upload API.
@@ -137,13 +137,23 @@ jobs:
 
           const file = process.argv[2];
           const source = fs.readFileSync(file, 'utf8');
-          const needle = 'return await fLn(t,s,c,u,!0,e,t!=="./")}catch';
-          const replacement = 'return await fLn(t,s,c,u,!1,e,t!=="./")}catch';
+          const compressionNeedle = 'return await k1i(e,s,c,u,!0,t,e!=="./")}catch';
+          const compressionReplacement = 'return await k1i(e,s,c,u,!1,t,e!=="./")}catch';
+          const statusNeedle = 'throw new Error(`Deployment failed with status: ${e.Status}`)';
+          const statusReplacement =
+            'throw new Error(`Deployment failed with status: ${e.Status}; details: ${JSON.stringify(e)}`)';
 
-          if (!source.includes(needle)) {
+          if (!source.includes(compressionNeedle)) {
             throw new Error('Unexpected EdgeOne CLI bundle: folder-upload compression call was not found.');
           }
-          fs.writeFileSync(file, source.replace(needle, replacement), 'utf8');
+          if (!source.includes(statusNeedle)) {
+            throw new Error('Unexpected EdgeOne CLI bundle: deployment status error was not found.');
+          }
+          fs.writeFileSync(
+            file,
+            source.replace(compressionNeedle, compressionReplacement).replace(statusNeedle, statusReplacement),
+            'utf8',
+          );
           NODE
           edgeone --version
           echo "- EdgeOne CLI cache hit: ${{ steps.edgeone-cache.outputs.cache-hit }}" >> "${GITHUB_STEP_SUMMARY}"
