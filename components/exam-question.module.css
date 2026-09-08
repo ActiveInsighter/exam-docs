@@ -1,40 +1,106 @@
 .root {
   min-width: 0;
+  container-type: inline-size;
 }
 
 .question {
   min-width: 0;
 }
 
+.question > :first-child {
+  margin-block-start: 0 !important;
+}
+
+.question > :last-child {
+  margin-block-end: 0 !important;
+}
+
+.root + :global(hr) {
+  margin-block: 0.75rem;
+}
+
+.choiceOptions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 0.35rem 2rem;
+  margin-block: 0.35rem 0;
+  line-height: 1.6;
+}
+
+.choiceOption {
+  min-width: 0;
+  text-align: start;
+}
+
+.choiceOption > :first-child {
+  margin-block-start: 0 !important;
+}
+
+.choiceOption > :last-child {
+  margin-block-end: 0 !important;
+}
+
+@container (min-width: 36rem) {
+  .choiceOptions[data-choice-density='compact'] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .choiceOptions[data-choice-density='regular'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 48rem) {
+  .choiceOptions[data-choice-density='long'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;
-  margin-block: 0.35rem 0.15rem;
+  min-height: 1.5rem;
+  margin-block: 0.35rem 0;
+  border-block-end: 0;
+  background-image: radial-gradient(
+    circle,
+    color-mix(in oklch, var(--muted-foreground) 42%, var(--background)) 0.05rem,
+    transparent 0.06rem
+  );
+  background-position: 0 100%;
+  background-repeat: repeat-x;
+  background-size: 0.5rem 0.125rem;
+  padding-block-end: 0.25rem;
+}
+
+.triggerWrap {
+  position: relative;
+  display: inline-flex;
 }
 
 .trigger {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  min-height: 2.25rem;
-  border: 1px solid var(--border);
-  border-radius: 0.65rem;
-  background: var(--docs-action-background);
-  padding: 0.4rem 0.7rem 0.4rem 0.8rem;
+  min-height: 1.5rem;
+  border: 0;
+  border-radius: 0.2rem;
+  background: transparent;
+  padding: 0.1rem 0.12rem;
   color: var(--foreground);
   font: inherit;
   font-size: 0.875rem;
   font-weight: 500;
-  line-height: 1;
+  line-height: 1.25;
   cursor: pointer;
   transition:
-    background-color 120ms ease,
-    border-color 120ms ease,
+    color 140ms ease,
     transform 120ms ease;
 }
 
-.trigger:hover {
-  background: var(--docs-action-hover);
+.trigger:hover,
+.trigger:focus-visible {
+  color: var(--primary);
 }
 
 .trigger:active {
@@ -44,13 +110,89 @@
 .trigger:focus-visible,
 .closeButton:focus-visible {
   outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
-.triggerIcon {
-  width: 1rem;
-  height: 1rem;
-  flex: none;
+.answerPreview {
+  position: absolute;
+  z-index: 2;
+  bottom: calc(100% + 0.5rem);
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 5rem;
+  max-width: min(24rem, calc(100vw - 1.5rem));
+  border: 1px solid var(--border);
+  border-radius: 0.45rem;
+  background: var(--popover);
+  padding: 0.5rem 0.65rem;
+  color: var(--popover-foreground);
+  box-shadow:
+    0 12px 30px rgb(0 0 0 / 12%),
+    0 2px 8px rgb(0 0 0 / 8%);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  overflow: visible;
+  transform: translateY(0.25rem);
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease,
+    visibility 0s linear 140ms;
+}
+
+.answerPreview::after {
+  position: absolute;
+  bottom: -0.3rem;
+  right: 1rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-inline-end: 1px solid var(--border);
+  border-block-end: 1px solid var(--border);
+  background: var(--popover);
+  content: '';
+  transform: rotate(45deg);
+}
+
+.trigger:hover + .answerPreview,
+.trigger:focus-visible + .answerPreview {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: none;
+  transform: translateY(0);
+  transition-delay: 0s;
+}
+
+.triggerWrap.previewSuppressed .answerPreview {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(0.25rem);
+}
+
+.answerPreviewValue {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  color: var(--popover-foreground);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.answerPreviewValue :global(p) {
+  margin: 0;
+}
+
+.answerPreviewValue :global(.katex-display) {
+  max-width: 100%;
+  margin: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .dialog {
@@ -59,20 +201,31 @@
   max-width: none;
   max-height: none;
   margin: auto;
-  padding: 0;
-  overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 1rem;
   background: var(--background);
+  padding: 0;
+  overflow: hidden;
   color: var(--foreground);
   box-shadow:
     0 24px 70px rgb(0 0 0 / 24%),
     0 4px 18px rgb(0 0 0 / 10%);
+  opacity: 0;
+  transform: translateY(0.5rem) scale(0.985);
+  animation: dialog-enter 160ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.dialogClosing {
+  animation: dialog-exit 160ms cubic-bezier(0.4, 0, 1, 1) both;
 }
 
 .dialog::backdrop {
-  background: rgb(0 0 0 / 42%);
-  backdrop-filter: blur(2px);
+  background: rgb(0 0 0 / 0%);
+  animation: backdrop-enter 160ms ease-out both;
+}
+
+.dialogClosing::backdrop {
+  animation: backdrop-exit 160ms ease-in both;
 }
 
 .dialogShell {
@@ -89,8 +242,8 @@
   justify-content: space-between;
   min-height: 3.75rem;
   border-block-end: 1px solid var(--border);
-  padding-inline: 1.25rem 0.8rem;
   background: var(--background);
+  padding-inline: 1.25rem 0.8rem;
 }
 
 .dialogTitle {
@@ -111,6 +264,9 @@
   background: transparent;
   color: var(--muted-foreground);
   cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
 }
 
 .closeButton:hover {
@@ -130,24 +286,72 @@
 }
 
 .pane {
+  --pane-background: var(--background);
+
   min-width: 0;
+  padding: 1.35rem 1.65rem 2rem;
   overflow: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
-  padding: 1.35rem 1.65rem 2rem;
+  scrollbar-color: color-mix(
+      in oklch,
+      var(--foreground) 24%,
+      var(--pane-background)
+    ) var(--pane-background);
+  scrollbar-width: thin;
+}
+
+.pane::-webkit-scrollbar,
+.dialogBody::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--pane-background, var(--background));
+}
+
+.pane::-webkit-scrollbar-track,
+.dialogBody::-webkit-scrollbar-track {
+  background: var(--pane-background, var(--background));
+}
+
+.pane::-webkit-scrollbar-thumb,
+.dialogBody::-webkit-scrollbar-thumb {
+  border: 2px solid var(--pane-background, var(--background));
+  border-radius: 999px;
+  background-color: color-mix(
+    in oklch,
+    var(--foreground) 24%,
+    var(--pane-background, var(--background))
+  );
 }
 
 .questionPane {
+  --pane-background: color-mix(in oklch, var(--foreground) 2.5%, var(--background));
+
+  container-type: inline-size;
   border-inline-end: 1px solid var(--border);
-  background: color-mix(in oklch, var(--foreground) 2.5%, var(--background));
+  background: var(--pane-background);
 }
 
 .solutionPane {
-  background: var(--background);
+  background: var(--pane-background);
+}
+
+.solutionContent {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.solutionSection {
+  min-width: 0;
+}
+
+.solutionSection + .solutionSection {
+  border-block-start: 1px solid var(--border);
+  padding-block-start: 1.25rem;
 }
 
 .paneLabel {
-  margin-block-end: 1rem;
+  margin-block-end: 0.75rem;
   color: var(--muted-foreground);
   font-size: 0.75rem;
   font-weight: 600;
@@ -166,16 +370,75 @@
   margin-block-end: 0 !important;
 }
 
+.answerValue {
+  color: var(--foreground);
+  font-size: 1.12rem;
+  font-weight: 650;
+  line-height: 1.55;
+}
+
+.answerValue > :first-child {
+  margin-block-start: 0 !important;
+}
+
+.answerValue > :last-child {
+  margin-block-end: 0 !important;
+}
+
 .dialog :global(.katex-display) {
   max-width: 100%;
+  padding-block: 0.15rem;
   overflow-x: auto;
   overflow-y: hidden;
-  padding-block: 0.15rem;
+}
+
+@keyframes dialog-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dialog-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(0.35rem) scale(0.985);
+  }
+}
+
+@keyframes backdrop-enter {
+  from {
+    background: rgb(0 0 0 / 0%);
+  }
+
+  to {
+    background: rgb(0 0 0 / 42%);
+  }
+}
+
+@keyframes backdrop-exit {
+  from {
+    background: rgb(0 0 0 / 42%);
+  }
+
+  to {
+    background: rgb(0 0 0 / 0%);
+  }
 }
 
 @media (max-width: 48rem) {
   .actions {
-    justify-content: flex-start;
+    justify-content: flex-end;
   }
 
   .dialog {
@@ -194,6 +457,9 @@
     display: block;
     overflow-y: auto;
     overscroll-behavior: contain;
+    scrollbar-color: color-mix(in oklch, var(--foreground) 24%, var(--background))
+      var(--background);
+    scrollbar-width: thin;
   }
 
   .pane {
@@ -206,13 +472,25 @@
     border-block-end: 1px solid var(--border);
   }
 
-  .paneLabel {
-    margin-block-end: 0.75rem;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .trigger {
+  .trigger,
+  .closeButton,
+  .answerPreview {
     transition: none;
+  }
+
+  .dialog,
+  .dialog.dialogClosing {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .dialog::backdrop,
+  .dialog.dialogClosing::backdrop {
+    background: rgb(0 0 0 / 42%);
+    animation: none;
   }
 }

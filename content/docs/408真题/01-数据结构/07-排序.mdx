@@ -1,0 +1,1351 @@
+---
+title: "第 7 章 排序"
+---
+
+# 第 7 章 排序
+
+
+## 7.1 插入类排序
+
+<ExamQuestion>
+
+1. 【2012】对同一待排序序列，分别进行折半插入排序和直接插入排序，两者之间可能的不同之处是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 排序总趟数</ExamOption>
+<ExamOption>B. 元素的移动次数</ExamOption>
+<ExamOption>C. 使用辅助空间的数量</ExamOption>
+<ExamOption>D. 元素之间的比较次数</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+折半插入排序与直接插入排序的区别仅在于**寻找插入位置的方法不同**。
+
+- 两者都需要进行 $\displaystyle n-1$ 趟插入，排序总趟数相同；
+- 找到插入位置后，元素后移的范围相同，因此移动次数相同；
+- 两者都只需要常数个辅助单元，空间复杂度均为 $\displaystyle O(1)$；
+- 折半插入排序利用折半查找确定插入位置，比较次数约为 $\displaystyle O(n\log n)$，而直接插入排序最坏情况下的比较次数为 $\displaystyle O(n^2)$。
+
+因此可能不同的是元素之间的比较次数。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2014】用希尔排序方法对一个数据序列进行排序时，若第1趟排序结果为 `{9、1、4、13、7、8、20、23、15}`，则该趟排序采用的增量（间隔）可能是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 2</ExamOption>
+<ExamOption>B. 3</ExamOption>
+<ExamOption>C. 4</ExamOption>
+<ExamOption>D. 5</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+希尔排序完成某一增量 $\displaystyle d$ 的一趟排序后，各个相距 $\displaystyle d$ 的子序列都应当有序。
+
+当 $\displaystyle d=3$ 时，各组分别为：
+
+- 下标 $\displaystyle 1,4,7$：$\displaystyle 9,13,20$，有序；
+- 下标 $\displaystyle 2,5,8$：$\displaystyle 1,7,23$，有序；
+- 下标 $\displaystyle 3,6,9$：$\displaystyle 4,8,15$，有序。
+
+因此该趟采用的增量可能是 $\displaystyle 3$。
+
+其余增量均可找到组内逆序，例如 $\displaystyle d=2$ 时子序列 $\displaystyle 9,4,7,20,15$ 并非有序。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2015】希尔排序的组内排序采用的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 直接插入排序</ExamOption>
+<ExamOption>B. 折半插入排序</ExamOption>
+<ExamOption>C. 快速排序</ExamOption>
+<ExamOption>D. 归并排序</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+希尔排序先按照某个增量 $\displaystyle d$ 将待排序序列划分为若干子序列，然后分别对每个子序列进行直接插入排序。随着增量逐渐缩小，最终在 $\displaystyle d=1$ 时对整个序列进行一次直接插入排序。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2018】对初始数据序列(8,3,9,11,2,1,4,7,5,10,6)进行希尔排序。若第一趟排序结果为(1,3,7,5,2,6,4,9,11,10,8)，第二趟排序结果为(1,2,6,4,3,7,5,8,11,10,9)，则两趟排序采用的增量（间隔）依次是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 3,1</ExamOption>
+<ExamOption>B. 3,2</ExamOption>
+<ExamOption>C. 5,2</ExamOption>
+<ExamOption>D. 5,3</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+第一趟若取增量 $\displaystyle d=5$，各组为：
+
+- $\displaystyle (8,1,6)\rightarrow(1,6,8)$；
+- $\displaystyle (3,4)\rightarrow(3,4)$；
+- $\displaystyle (9,7)\rightarrow(7,9)$；
+- $\displaystyle (11,5)\rightarrow(5,11)$；
+- $\displaystyle (2,10)\rightarrow(2,10)$。
+
+回填后得到
+
+$\displaystyle (1,3,7,5,2,6,4,9,11,10,8)$，与题目一致。
+
+第二趟在上述序列上取增量 $\displaystyle d=3$：
+
+- $\displaystyle (1,5,4,10)\rightarrow(1,4,5,10)$；
+- $\displaystyle (3,2,9,8)\rightarrow(2,3,8,9)$；
+- $\displaystyle (7,6,11)\rightarrow(6,7,11)$。
+
+回填后得到
+
+$\displaystyle (1,2,6,4,3,7,5,8,11,10,9)$。
+
+故两趟增量依次为 $\displaystyle 5,3$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 7.2 交换类排序
+
+<ExamQuestion>
+
+1. 【2010】采用递归方式对顺序表进行快速排序。下列关于递归次数的叙述中，正确的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 递归次数与初始数据的排列次序无关</ExamOption>
+<ExamOption>B. 每次划分后，先处理较长的分区可以减少递归次数</ExamOption>
+<ExamOption>C. 每次划分后，先处理较短的分区可以减少递归次数</ExamOption>
+<ExamOption>D. 递归次数与每次划分后得到的分区的处理顺序无关</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+快速排序每次划分后，对左右两个子区间分别递归。递归调用次数由每次划分产生的子区间结构决定，与先递归处理左区间还是右区间无关。
+
+初始序列的排列次序会影响枢轴最终位置，从而影响递归树的形态和递归深度，因此A错误。先处理较长或较短分区只会改变递归执行顺序，在普通递归实现中不会改变递归调用总次数，因此B、C错误。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2011】为实现快速排序算法，待排序序列宜采用的存储方式是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 顺序存储</ExamOption>
+<ExamOption>B. 散列存储</ExamOption>
+<ExamOption>C. 链式存储</ExamOption>
+<ExamOption>D. 索引存储</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+快速排序的划分过程需要从区间两端向中间扫描，并频繁交换元素。顺序存储支持按下标随机访问，能够在 $\displaystyle O(1)$ 时间内访问任意位置的元素，最适合实现快速排序。
+
+链式存储不便于从区间尾部向前扫描，也不能按下标随机访问，因此不适合快速排序。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2014】下列选项中，不可能是快速排序第2趟排序结果的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 2,3,5,4,6,7,9</ExamOption>
+<ExamOption>B. 2,7,5,6,4,3,9</ExamOption>
+<ExamOption>C. 3,2,5,4,7,6,9</ExamOption>
+<ExamOption>D. 4,2,3,5,7,6,9</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+快速排序一次划分后，枢轴元素会到达最终位置，即枢轴左侧元素都不大于枢轴，右侧元素都不小于枢轴。第二趟还会对第一趟产生的子区间继续划分，因此结果中应能找到符合相应划分层次的枢轴位置。
+
+对C：$\displaystyle 3,2,5,4,7,6,9$ 中只有 $\displaystyle 9$ 满足“左边全部小于它、右边全部大于它”，可以作为第一趟枢轴。但若第一趟枢轴为 $\displaystyle 9$，第二趟必须对其左侧的六个元素完成一次划分，而序列 $\displaystyle 3,2,5,4,7,6$ 中不存在任何一个已经到达最终位置的枢轴，因此不可能是第二趟结果。
+
+其余选项均可构造相应的两趟划分过程。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2019】排序过程中，对尚未确定最终位置的所有元素进行一遍处理称为一“趟”。下列序列中，不可能是快速排序第二趟结果的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 5,2,16,12,28,60,32,72</ExamOption>
+<ExamOption>B. 2,16,5,28,12,60,32,72</ExamOption>
+<ExamOption>C. 2,12,16,5,28,32,72,60</ExamOption>
+<ExamOption>D. 5,2,12,28,16,32,72,60</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+D中可作为第一趟枢轴的候选位置只有关键字 $\displaystyle 12$ 或 $\displaystyle 32$：
+
+- 若第一趟枢轴为 $\displaystyle 12$，则第二趟应继续划分左侧子序列 $\displaystyle (5,2)$。两个元素经过一次划分后应成为 $\displaystyle (2,5)$，不可能仍为 $\displaystyle (5,2)$；
+- 若第一趟枢轴为 $\displaystyle 32$，则第二趟应继续划分右侧子序列 $\displaystyle (72,60)$。两个元素经过一次划分后应成为 $\displaystyle (60,72)$，不可能仍为 $\displaystyle (72,60)$。
+
+因此D不可能是快速排序第二趟的结果。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2023】使用快速排序算法对数据进行升序排序，若经过一次划分后得到的数据序列是68,11,70,23,80,77,48,81,93,88，则该次划分的枢轴是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 11</ExamOption>
+<ExamOption>B. 70</ExamOption>
+<ExamOption>C. 80</ExamOption>
+<ExamOption>D. 81</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+一次划分结束后，枢轴左侧的所有元素都应小于等于枢轴，右侧所有元素都应大于等于枢轴。
+
+关键字 $\displaystyle 81$ 左侧为
+
+$\displaystyle 68,11,70,23,80,77,48$，均小于 $\displaystyle 81$；
+
+右侧为
+
+$\displaystyle 93,88$，均大于 $\displaystyle 81$。
+
+因此枢轴为 $\displaystyle 81$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2024】使用快速排序算法对含 $\displaystyle n(n\ge3)$ 个元素的数组M进行排序，若第一趟排序将M中除枢轴外的 $\displaystyle n-1$ 个元素划分为均不为空的P和Q两块，则下列叙述中，正确的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. P与Q块间有序</ExamOption>
+<ExamOption>B. P与Q均块内有序</ExamOption>
+<ExamOption>C. P和Q的元素个数大致相等</ExamOption>
+<ExamOption>D. P和Q中均不存在相等的元素</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+一次划分后，P中的元素均不大于枢轴，Q中的元素均不小于枢轴，因此P中的任一元素都不会大于Q中的任一元素，P与Q之间已经具有整体上的有序关系。
+
+但P、Q各自内部通常仍然无序；两块大小不一定接近；若原序列存在重复关键字，P或Q中仍可能出现相等元素。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2016】已知由 $\displaystyle n(n\ge2)$ 个正整数构成的集合 $\displaystyle A=\{a_k\mid 0\le k<n\}$，将其划分为两个不相交的子集 $\displaystyle A_1$ 和 $\displaystyle A_2$，元素个数分别是 $\displaystyle n_1$ 和 $\displaystyle n_2$，$\displaystyle A_1$ 和 $\displaystyle A_2$ 中元素之和分别为 $\displaystyle S_1$ 和 $\displaystyle S_2$。设计一个尽可能高效的划分算法，满足 $\displaystyle |n_1-n_2|$ 最小且 $\displaystyle |S_1-S_2|$ 最大。要求：
+
+(1) 给出算法的基本设计思想；  
+(2) 根据设计思想，采用C或C++语言描述算法，关键之处给出注释；  
+(3) 说明你所设计算法的时间复杂度和空间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>令 $\displaystyle k=\lfloor n/2\rfloor$。将集合中较小的 $\displaystyle k$ 个元素划入 $\displaystyle A_1$，其余较大的 $\displaystyle n-k$ 个元素划入 $\displaystyle A_2$。</ExamAnswer>
+
+<ExamExplanation>
+（1）基本设计思想
+
+要使 $\displaystyle |n_1-n_2|$ 最小：
+
+- 当 $\displaystyle n$ 为偶数时，两组元素数均为 $\displaystyle \dfrac n2$；
+- 当 $\displaystyle n$ 为奇数时，两组元素数分别为 $\displaystyle \lfloor n/2\rfloor$ 和 $\displaystyle \lceil n/2\rceil$。
+
+在元素个数已经确定的条件下，要使两组元素和之差最大，应把较小的一半放入一组，把较大的一半放入另一组。
+
+由于所有元素均为正整数，当 $\displaystyle n$ 为奇数时，应让元素较多的一组取得较大的 $\displaystyle \lceil n/2\rceil$ 个元素，这样可以进一步增大两组元素和之差。
+
+不必将全部元素完全排序，只需利用快速选择算法，使数组中下标 $\displaystyle 0\sim k-1$ 的元素为较小的 $\displaystyle k$ 个元素，其余为较大的 $\displaystyle n-k$ 个元素。
+
+（2）C语言描述
+
+```c
+#include <stdlib.h>
+
+static void swap(int *x, int *y) {
+    int t = *x;
+    *x = *y;
+    *y = t;
+}
+
+/* 随机化Lomuto划分，返回枢轴最终下标 */
+static int partition(int a[], int left, int right) {
+    int r = left + rand() % (right - left + 1);
+    swap(&a[r], &a[right]);
+
+    int pivot = a[right];
+    int i = left;
+    for (int j = left; j < right; ++j) {
+        if (a[j] < pivot) {
+            swap(&a[i], &a[j]);
+            ++i;
+        }
+    }
+    swap(&a[i], &a[right]);
+    return i;
+}
+
+/* 使下标k处为按非降序排列后应处于该位置的元素 */
+static void quickSelect(int a[], int left, int right, int k) {
+    while (left < right) {
+        int p = partition(a, left, right);
+        if (p == k)
+            return;
+        if (p < k)
+            left = p + 1;
+        else
+            right = p - 1;
+    }
+}
+
+/* 划分后：a[0..k-1]属于A1，a[k..n-1]属于A2 */
+void divideSet(int a[], int n, long long *S1, long long *S2) {
+    int k = n / 2;               // A1取较小的floor(n/2)个元素
+    quickSelect(a, 0, n - 1, k);
+
+    *S1 = 0;
+    *S2 = 0;
+    for (int i = 0; i < k; ++i)
+        *S1 += a[i];
+    for (int i = k; i < n; ++i)
+        *S2 += a[i];
+}
+```
+
+若有相同关键字，快速选择得到的两个区域中可能任取若干相同元素，但不会影响两组元素个数和最大和差。
+
+（3）复杂度
+
+采用随机化快速选择：
+
+- 期望时间复杂度为 $\displaystyle O(n)$；
+- 最坏时间复杂度为 $\displaystyle O(n^2)$；
+- 上述迭代实现的辅助空间复杂度为 $\displaystyle O(1)$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 7.3 选择类排序
+
+<ExamQuestion>
+
+1. 【2009】已知关键字序列(5,8,12,19,28,20,15,22)是小根堆（最小堆），插入关键字3，调整后得到的小根堆是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 3,5,12,8,28,20,15,22,19</ExamOption>
+<ExamOption>B. 3,5,12,19,20,15,22,8,28</ExamOption>
+<ExamOption>C. 3,8,12,5,20,15,22,28,19</ExamOption>
+<ExamOption>D. 3,12,5,8,28,20,15,22,19</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+先将关键字 $\displaystyle 3$ 插入堆尾，得到
+
+$\displaystyle (5,8,12,19,28,20,15,22,3)$。
+
+随后向上调整：
+
+- $\displaystyle 3<19$，交换；
+- $\displaystyle 3<8$，交换；
+- $\displaystyle 3<5$，交换。
+
+最终得到
+
+$\displaystyle (3,5,12,8,28,20,15,22,19)$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2011】已知序列(25,13,10,12,9)是大根堆，在序列尾部插入新元素18，将其再调整为大根堆，调整过程中元素之间进行的比较次数是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 1</ExamOption>
+<ExamOption>B. 2</ExamOption>
+<ExamOption>C. 4</ExamOption>
+<ExamOption>D. 5</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+将 $\displaystyle 18$ 插入堆尾后，其下标为 $\displaystyle 6$，父结点是下标 $\displaystyle 3$ 的元素 $\displaystyle 10$：
+
+1. 比较 $\displaystyle 18$ 与 $\displaystyle 10$，交换；
+2. $\displaystyle 18$ 上移到下标 $\displaystyle 3$，再与根结点 $\displaystyle 25$ 比较，因 $\displaystyle 18<25$，停止。
+
+共进行 $\displaystyle 2$ 次关键字比较。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2015】已知小根堆为(8,15,10,21,34,16,12)，删除关键字8之后需重建堆，在此过程中，关键字之间的比较次数是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 1</ExamOption>
+<ExamOption>B. 2</ExamOption>
+<ExamOption>C. 3</ExamOption>
+<ExamOption>D. 4</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+删除堆顶 $8$ 后，将末尾元素 $12$ 移到堆顶，得到
+
+$$
+(12,15,10,21,34,16).
+$$
+
+随后向下调整：
+
+1. 比较根的两个孩子 $15$ 和 $10$，第 1 次比较，较小者为 $10$；
+2. 比较 $12$ 和 $10$，第 2 次比较，交换二者；
+3. 此时 $12$ 移到原来 $10$ 的位置，该位置还有孩子 $16$，还要比较 $12$ 和 $16$，第 3 次比较。由于 $12<16$，无需继续交换。
+
+因此重建小根堆共进行 3 次关键字比较，选择 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2018】在将数据序列(6,1,5,9,8,4,7)建成大根堆时，正确的序列变化过程是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 6,1,7,9,8,4,5 → 6,9,7,1,8,4,5 → 9,6,7,1,8,4,5 → 9,8,7,1,6,4,5</ExamOption>
+<ExamOption>B. 6,9,5,1,8,4,7 → 6,9,7,1,8,4,5 → 9,6,7,1,8,4,5 → 9,8,7,1,6,4,5</ExamOption>
+<ExamOption>C. 6,9,5,1,8,4,7 → 9,6,5,1,8,4,7 → 9,6,7,1,8,4,5 → 9,8,7,1,6,4,5</ExamOption>
+<ExamOption>D. 6,1,7,9,8,4,5 → 7,1,6,9,8,4,5 → 7,9,6,1,8,4,5 → 9,7,6,1,8,4,5 → 9,8,6,1,7,4,5</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+按完全二叉树中最后一个非叶结点开始，从后向前调整：
+
+- 调整下标 $\displaystyle 3$ 的元素 $\displaystyle 5$，其孩子为 $\displaystyle 4,7$，交换 $\displaystyle 5$ 与 $\displaystyle 7$：
+  $\displaystyle (6,1,7,9,8,4,5)$；
+- 调整下标 $\displaystyle 2$ 的元素 $\displaystyle 1$，其孩子为 $\displaystyle 9,8$，交换 $\displaystyle 1$ 与 $\displaystyle 9$：
+  $\displaystyle (6,9,7,1,8,4,5)$；
+- 调整根结点 $\displaystyle 6$，先与较大的孩子 $\displaystyle 9$ 交换，再与孩子 $\displaystyle 8$ 交换：
+  $\displaystyle (9,8,7,1,6,4,5)$。
+
+与A的变化过程一致。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2020】以下关于大根堆（至少含2个元素）的叙述中正确的是（ ）。
+
+I. 可以将堆看成一棵完全二叉树  
+II. 可以采用顺序存储方式保存堆  
+III. 可以将堆看成一棵二叉排序树  
+IV. 堆中的次大值一定在根的下一层
+
+<ExamChoices>
+<ExamOption>A. I,II</ExamOption>
+<ExamOption>B. II,III</ExamOption>
+<ExamOption>C. I,II,IV</ExamOption>
+<ExamOption>D. I,III,IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+- I正确：堆在逻辑结构上是一棵完全二叉树；
+- II正确：完全二叉树适合采用顺序存储；
+- III错误：大根堆只要求父结点不小于孩子，并不满足二叉排序树的左小右大关系；
+- IV正确：除根外任意结点都不大于其父结点，因此全堆的次大值必为根的两个孩子之一，即位于根的下一层。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2021】将关键字6,9,1,5,8,4,7依次插入初始为空的大根堆H，得到的H是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 9,8,7,6,5,4,1</ExamOption>
+<ExamOption>B. 9,8,7,5,6,1,4</ExamOption>
+<ExamOption>C. 9,8,7,5,6,4,1</ExamOption>
+<ExamOption>D. 9,6,7,5,8,4,1</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+依次插入并向上调整：
+
+- 插入 $\displaystyle 6$：$\displaystyle (6)$；
+- 插入 $\displaystyle 9$：$\displaystyle (9,6)$；
+- 插入 $\displaystyle 1$：$\displaystyle (9,6,1)$；
+- 插入 $\displaystyle 5$：$\displaystyle (9,6,1,5)$；
+- 插入 $\displaystyle 8$：$\displaystyle (9,8,1,5,6)$；
+- 插入 $\displaystyle 4$：$\displaystyle (9,8,4,5,6,1)$；
+- 插入 $\displaystyle 7$：$\displaystyle (9,8,7,5,6,1,4)$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2024】已知关键字序列28,22,20,19,8,12,15,5是大根堆（最大堆），对该堆进行两次删除操作后，得到的新堆是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 20,19,15,12,8,5</ExamOption>
+<ExamOption>B. 20,19,15,5,8,12</ExamOption>
+<ExamOption>C. 20,19,12,15,8,5</ExamOption>
+<ExamOption>D. 20,19,8,12,15,5</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+第一次删除堆顶 $\displaystyle 28$：
+
+- 用末尾元素 $\displaystyle 5$ 替换根；
+- 向下调整后得到
+  $\displaystyle (22,19,20,5,8,12,15)$。
+
+第二次删除堆顶 $\displaystyle 22$：
+
+- 用末尾元素 $\displaystyle 15$ 替换根；
+- 在孩子 $\displaystyle 19,20$ 中选择较大者 $\displaystyle 20$，交换；
+- 得到
+  $\displaystyle (20,19,15,5,8,12)$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+8. 【2022】现有 $\displaystyle n(n>100000)$ 个数保存在一维数组M中，需要查找M中最小的10个数。请回答下列问题：
+
+(1) 设计一个完成上述查找任务的算法，要求平均情况下的比较次数尽可能少，简述其算法思想（不需要程序实现）。  
+(2) 说明你所设计的算法平均情况下的时间复杂度和空间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>采用基于快速排序划分思想的快速选择算法，寻找第10小的元素。</ExamAnswer>
+
+<ExamExplanation>
+（1）算法思想
+
+对数组执行一次随机化划分，设枢轴最终位置为 $\displaystyle p$：
+
+- 若 $\displaystyle p=9$，则下标 $\displaystyle 0\sim9$ 的10个元素就是最小的10个元素，算法结束；
+- 若 $\displaystyle p>9$，则只需在左子区间继续划分；
+- 若 $\displaystyle p<9$，则只需在右子区间继续寻找第10小元素。
+
+不断缩小待处理区间，直到枢轴位于下标 $\displaystyle 9$。此时前10个元素不一定有序，但它们构成原数组中最小的10个数。若还要求这10个数按序输出，可再对这10个数排序，该部分代价为常数数量级。
+
+（2）复杂度
+
+采用随机枢轴时：
+
+- 平均时间复杂度为 $\displaystyle O(n)$；
+- 使用原数组原地划分，迭代实现的辅助空间复杂度为 $\displaystyle O(1)$。
+
+最坏情况下时间复杂度为 $\displaystyle O(n^2)$，但随机化后其出现概率很低。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 7.4 二路归并排序和基数排序
+
+<ExamQuestion>
+
+1. 【2013】对给定的关键字序列 `{110,119,007,911,114,120,122}` 进行基数排序，则第2趟分配收集后得到的关键字序列是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 007,110,119,114,911,120,122</ExamOption>
+<ExamOption>B. 007,110,119,114,911,122,120</ExamOption>
+<ExamOption>C. 007,110,911,114,119,120,122</ExamOption>
+<ExamOption>D. 110,120,911,122,114,007,119</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+采用最低位优先的基数排序。
+
+第一趟按个位分配并稳定收集：
+
+$\displaystyle (110,120,911,122,114,007,119)$。
+
+第二趟按十位分配：
+
+- 十位为0：$\displaystyle 007$；
+- 十位为1：$\displaystyle 110,911,114,119$；
+- 十位为2：$\displaystyle 120,122$。
+
+稳定收集后得到
+
+$\displaystyle (007,110,911,114,119,120,122)$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2017】在内部排序中，若选择了归并排序而没有选择插入排序，则可能的理由是（ ）。
+
+I. 归并排序的程序代码更短  
+II. 归并排序的占用空间更少  
+III. 归并排序的运行效率更高
+
+<ExamChoices>
+<ExamOption>A. 仅II</ExamOption>
+<ExamOption>B. 仅III</ExamOption>
+<ExamOption>C. 仅I、II</ExamOption>
+<ExamOption>D. 仅I、III</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+- 归并排序的程序通常不比插入排序短，I错误；
+- 归并排序需要 $\displaystyle O(n)$ 的辅助空间，而插入排序只需 $\displaystyle O(1)$，II错误；
+- 归并排序时间复杂度稳定为 $\displaystyle O(n\log n)$，当数据规模较大时通常比 $\displaystyle O(n^2)$ 的插入排序更高效，III正确。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2021】设数组S=(93,946,372,9,146,151,301,485,236,327,43,892)，采用最低位优先（LSD）基数排序将S排列成升序序列，第一趟分配收集后，在元素372之前、之后相邻的元素是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 43,892</ExamOption>
+<ExamOption>B. 236,301</ExamOption>
+<ExamOption>C. 301,892</ExamOption>
+<ExamOption>D. 485,301</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+第一趟按个位数字稳定分配：
+
+- 个位1：$\displaystyle 151,301$；
+- 个位2：$\displaystyle 372,892$；
+- 个位3：$\displaystyle 93,43$；
+- 个位5：$\displaystyle 485$；
+- 个位6：$\displaystyle 946,146,236$；
+- 个位7：$\displaystyle 327$；
+- 个位9：$\displaystyle 9$。
+
+收集后序列为
+
+$\displaystyle (151,301,372,892,93,43,485,946,146,236,327,9)$。
+
+因此 $\displaystyle 372$ 前面的元素是 $\displaystyle 301$，后面的元素是 $\displaystyle 892$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2022】使用二路归并排序对含n个元素的数组M进行排序时，二路归并操作的功能是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 将两个有序表合并为一个新的有序表</ExamOption>
+<ExamOption>B. 将M划分为两部分，两部分的元素个数大致相等</ExamOption>
+<ExamOption>C. 将M划分为n个部分，每个部分中仅含有一个元素</ExamOption>
+<ExamOption>D. 将M划分为两部分，一部分元素的值均小于另一部分元素的值</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+二路归并操作的输入是两个已经有序的子表，通过依次比较两个子表的当前最小元素，将它们合并成一个新的有序表。
+
+B、C描述的是归并排序的分解过程，D描述的是快速排序一次划分后的性质。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2024】现有由关键字组成的3个有序序列：`{3,5}`、`{7,9}`、`{6}`，若按从左至右的次序选择有序序列进行二路归并排序，则关键字之间的总比较次数是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 3</ExamOption>
+<ExamOption>B. 4</ExamOption>
+<ExamOption>C. 5</ExamOption>
+<ExamOption>D. 6</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+先归并前两个有序序列：
+
+$\displaystyle \{3,5\}$ 与 $\displaystyle \{7,9\}$ 归并时比较
+
+$\displaystyle 3$ 与 $\displaystyle 7$、$\displaystyle 5$ 与 $\displaystyle 7$，共 $\displaystyle 2$ 次，得到 $\displaystyle \{3,5,7,9\}$。
+
+再与 $\displaystyle \{6\}$ 归并：
+
+依次比较 $\displaystyle 3$ 与 $\displaystyle 6$、$\displaystyle 5$ 与 $\displaystyle 6$、$\displaystyle 7$ 与 $\displaystyle 6$，共 $\displaystyle 3$ 次。
+
+总比较次数为
+
+$\displaystyle 2+3=5$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 7.5 各种内部排序算法总结
+
+<ExamQuestion>
+
+1. 【2009】若数据元素序列(11,12,13,7,8,9,23,4,5)是采用下列排序方法之一得到的第二趟排序后的结果，则该排序算法只能是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 冒泡排序</ExamOption>
+<ExamOption>B. 插入排序</ExamOption>
+<ExamOption>C. 选择排序</ExamOption>
+<ExamOption>D. 二路归并排序</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+第二趟直接插入排序结束后，前3个元素应当有序。题中前3个元素为
+
+$\displaystyle (11,12,13)$，满足该特征。
+
+- 若为冒泡排序，第二趟结束后末尾两个元素应已处于最终位置，但末尾为 $\displaystyle 4,5$，而前面还有 $\displaystyle 23$，不可能；
+- 若为简单选择排序，前两个元素应是全序列中最小的两个元素，但 $\displaystyle 4,5$ 仍在末尾；
+- 若为二路归并排序，第二趟后长度为4的各归并段应有序，而前4个元素 $\displaystyle 11,12,13,7$ 并非有序。
+
+因此只能是直接插入排序。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2010】对一组数据(2,12,16,88,5,10)进行排序，若前三趟排序结果如下。第一趟排序结果：2,12,16,5,10,88；第二趟排序结果：2,12,5,10,16,88；第三趟排序结果：2,5,10,12,16,88。则采用的方法可能是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 冒泡排序</ExamOption>
+<ExamOption>B. 希尔排序</ExamOption>
+<ExamOption>C. 归并排序</ExamOption>
+<ExamOption>D. 基数排序</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+升序冒泡排序每一趟把当前未排序部分的最大元素交换到末尾：
+
+- 第1趟将 $\displaystyle 88$ 移到最后；
+- 第2趟将 $\displaystyle 16$ 移到倒数第2位；
+- 第3趟将 $\displaystyle 12$ 移到倒数第3位。
+
+与题中三趟结果完全一致，因此可能采用的是冒泡排序。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2012】在排序过程中，对尚未最终确认最终位置的所有元素进行一遍处理称为一趟排序。下列排序方法中，每一趟排序结束都至少能够确定一个元素的最终位置的方法是（ ）。
+
+I. 简单选择排序  
+II. 希尔排序  
+III. 快速排序  
+IV. 堆排序  
+V. 二路归并排序
+
+<ExamChoices>
+<ExamOption>A. 仅I、III、IV</ExamOption>
+<ExamOption>B. 仅I、III、V</ExamOption>
+<ExamOption>C. 仅II、III、IV</ExamOption>
+<ExamOption>D. 仅III、IV、V</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+- 简单选择排序每趟选出一个最小或最大元素并放到最终位置；
+- 快速排序每次划分至少使枢轴到达最终位置；
+- 堆排序每趟将堆顶元素放到当前有序区的最终位置；
+- 希尔排序的一趟只能改善整体有序程度，不能保证某个元素到达最终位置；
+- 二路归并排序中间各趟只是形成更长的有序段，也不能保证其中某个元素已处于全局最终位置。
+
+因此为I、III、IV。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2015】下列排序算法中，元素的移动次数与关键字的初始排列次序无关的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 直接插入排序</ExamOption>
+<ExamOption>B. 冒泡排序</ExamOption>
+<ExamOption>C. 基数排序</ExamOption>
+<ExamOption>D. 快速排序</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+基数排序在每一趟都要将全部 $\displaystyle n$ 个记录进行分配和收集，若关键字有 $\displaystyle d$ 位，则记录移动次数主要由 $\displaystyle n$ 和 $\displaystyle d$ 决定，与初始排列次序无关。
+
+直接插入排序、冒泡排序和快速排序的交换或移动次数都会受到初始逆序程度和枢轴划分情况的影响。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2017】下列排序方法中，若将顺序存储更换为链式存储，则算法的时间效率会降低的是（ ）。
+
+I. 插入排序  
+II. 选择排序  
+III. 冒泡排序  
+IV. 希尔排序  
+V. 堆排序
+
+<ExamChoices>
+<ExamOption>A. 仅I、II</ExamOption>
+<ExamOption>B. 仅II、III</ExamOption>
+<ExamOption>C. 仅III、IV</ExamOption>
+<ExamOption>D. 仅IV、V</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+希尔排序需要按照增量访问相距较远的元素，堆排序需要利用下标快速定位结点的父结点和孩子结点。顺序存储均可在 $\displaystyle O(1)$ 时间内完成这些定位，而链式存储通常需要顺链查找，会显著降低效率。
+
+插入排序、选择排序和冒泡排序都可以通过顺序扫描链表完成，改用链式存储不会改变其主要时间复杂度数量级。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2019】选择一个排序算法时，除算法的时空效率外，下列因素中，还需要考虑的是（ ）。
+
+I. 数据的规模  
+II. 数据的存储方式  
+III. 算法的稳定性  
+IV. 数据的初始状态
+
+<ExamChoices>
+<ExamOption>A. 仅III</ExamOption>
+<ExamOption>B. 仅I、II</ExamOption>
+<ExamOption>C. 仅II、III、IV</ExamOption>
+<ExamOption>D. I、II、III、IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+排序算法的选择需要综合考虑：
+
+- 数据规模会影响选择 $\displaystyle O(n^2)$ 还是 $\displaystyle O(n\log n)$ 算法；
+- 顺序存储或链式存储会影响算法是否便于实现；
+- 某些应用要求具有稳定性；
+- 初始序列是否基本有序会显著影响插入排序、快速排序等算法的实际效率。
+
+因此四项都需要考虑。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2020】对大部分元素已有序的数组进行排序时，直接插入排序比简单选择排序效率更高，其原因是（ ）。
+
+I. 直接插入排序过程中元素之间的比较次数更少  
+II. 直接插入排序过程中所需要的辅助空间更少  
+III. 直接插入排序过程中元素的移动次数更少
+
+<ExamChoices>
+<ExamOption>A. I</ExamOption>
+<ExamOption>B. III</ExamOption>
+<ExamOption>C. I,II</ExamOption>
+<ExamOption>D. I,II,III</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+直接插入排序的比较次数与序列的初始有序程度有关。当大部分元素已有序时，每个元素通常只需与前面少量元素比较即可完成插入，比较次数接近 $\displaystyle O(n)$。
+
+简单选择排序无论初始序列是否有序，都要进行约 $\displaystyle \dfrac{n(n-1)}2$ 次比较。
+
+两者辅助空间复杂度均为 $\displaystyle O(1)$，II错误。直接插入排序的移动次数虽然通常会减少，但不一定必然少于简单选择排序，例如仅有一个很小元素位于末尾时，插入排序会发生大量后移，III不能作为必然原因。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+8. 【2022】对数据进行排序时，若采用直接插入排序而不是快速排序，则可能的原因是（ ）。
+
+I. 大部分元素已有序  
+II. 待排序的元素数量很少  
+III. 要求空间复杂度为 $\displaystyle O(1)$  
+IV. 要求排序算法是稳定的
+
+<ExamChoices>
+<ExamOption>A. 仅I、II</ExamOption>
+<ExamOption>B. 仅III、IV</ExamOption>
+<ExamOption>C. 仅I、II、IV</ExamOption>
+<ExamOption>D. I、II、III、IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+- 大部分元素已有序时，直接插入排序可接近 $\displaystyle O(n)$；
+- 数据量很小时，直接插入排序常数开销小；
+- 直接插入排序只需 $\displaystyle O(1)$ 辅助空间，而递归快速排序通常需要栈空间；
+- 直接插入排序稳定，普通快速排序不稳定。
+
+因此四项都可能成为选择直接插入排序的原因。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+9. 【2023】下列排序算法中，不稳定的是（ ）。
+
+I. 希尔排序  
+II. 归并排序  
+III. 快速排序  
+IV. 堆排序  
+V. 基数排序
+
+<ExamChoices>
+<ExamOption>A. I、II</ExamOption>
+<ExamOption>B. II、V</ExamOption>
+<ExamOption>C. I、III、IV</ExamOption>
+<ExamOption>D. III、IV、V</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+- 希尔排序会使相同关键字跨组移动，不稳定；
+- 快速排序的划分交换可能改变相同关键字的相对次序，不稳定；
+- 堆排序的建堆和调整可能改变相同关键字的相对次序，不稳定；
+- 二路归并排序在关键字相等时优先取左表元素，可以稳定；
+- LSD基数排序各趟使用稳定分配和收集，也可以稳定。
+
+故不稳定的是I、III、IV。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+10. 【2021】已知某排序算法如下：
+
+```c
+void cmpCountSort(int a[], int b[], int n) {
+    int i, j, *count;
+
+    count = (int *)malloc(sizeof(int) * n);
+
+    for (i = 0; i < n; i++) count[i] = 0;
+
+    for (i = 0; i < n - 1; i++)
+        for (j = i + 1; j < n; j++)
+            if (a[i] < a[j]) count[j]++;
+            else count[i]++;
+
+    for (i = 0; i < n; i++) b[count[i]] = a[i];
+
+    free(count);
+}
+```
+
+请回答下列问题：
+
+(1) 若有 `int a[] = {25, -10, 25, 10, 11, 19}, b[6]`，则调用 `cmpCountSort(a, b, 6)` 后数组b中的内容是什么？  
+(2) 若a中含有n个元素，则算法执行过程中，元素之间的比较次数是多少？  
+(3) 该算法是稳定的吗？若是，则阐述理由；否则，修改为稳定排序算法。
+
+<ExamSolution>
+
+<ExamAnswer>
+(1) `b = {-10, 10, 11, 19, 25, 25}`。  
+(2) 比较次数为 $\displaystyle \dfrac{n(n-1)}2$。  
+(3) 原算法不稳定。将判断条件改为 `if (a[i] <= a[j]) count[j]++; else count[i]++;` 后可实现稳定排序。
+</ExamAnswer>
+
+<ExamExplanation>
+`count[i]` 统计元素 `a[i]` 在最终升序序列中应处的位置。对于任意一对元素，较大者的计数增加1。
+
+对输入中的两个 $\displaystyle 25$ 标记为 $\displaystyle 25_a$ 和 $\displaystyle 25_b$，其中 $\displaystyle 25_a$ 在前。原程序比较这两个相等元素时，条件 `a[i] < a[j]` 为假，因此令前面的 $\displaystyle 25_a$ 的计数增加，最终两个相等元素的顺序变为
+
+$\displaystyle 25_b,25_a$，故算法不稳定。虽然只观察数值时数组仍为
+
+`{-10, 10, 11, 19, 25, 25}`，但两个相等记录的相对次序已经改变。
+
+双重循环对每一对元素恰比较一次，因此比较次数为
+
+$\displaystyle \binom n2=\dfrac{n(n-1)}2$。
+
+稳定版本的核心代码为：
+
+```c
+for (i = 0; i < n - 1; ++i) {
+    for (j = i + 1; j < n; ++j) {
+        if (a[i] <= a[j])
+            count[j]++;   // 相等时让后出现的元素排在后面
+        else
+            count[i]++;
+    }
+}
+```
+
+当 `a[i] == a[j]` 且 `i < j` 时，增加后者的计数，使原来靠前的相等元素仍排在前面，从而保证稳定性。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 7.6 外部排序
+
+<ExamQuestion>
+
+1. 【2016】对 10 TB 的数据文件进行排序，应使用的方法是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 希尔排序</ExamOption>
+<ExamOption>B. 堆排序</ExamOption>
+<ExamOption>C. 快速排序</ExamOption>
+<ExamOption>D. 归并排序</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+10 TB 的数据文件通常无法一次全部装入内存，必须借助外存进行外部排序。外部排序的基本方法是先在内存中生成若干有序归并段，再通过多路归并得到最终有序文件，因此应采用归并排序，选 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2019】设外存上有120个初始归并段，进行12路归并时，为实现最佳归并，需要补充的虚段个数是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 1</ExamOption>
+<ExamOption>B. 2</ExamOption>
+<ExamOption>C. 3</ExamOption>
+<ExamOption>D. 4</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+进行 $\displaystyle k$ 路最佳归并时，初始归并段总数 $\displaystyle r'$ 应满足
+
+$\displaystyle (r'-1)\bmod(k-1)=0$。
+
+本题 $\displaystyle r=120$，$\displaystyle k=12$，因此需要补充虚段数 $\displaystyle d$，使
+
+$\displaystyle (120+d-1)\bmod 11=0$。
+
+因为
+
+$\displaystyle 119\bmod11=9$，
+
+故补充 $\displaystyle 2$ 个虚段后
+
+$\displaystyle 121\bmod11=0$。
+
+因此需要补充 $\displaystyle 2$ 个虚段。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2024】在外排序中，利用败者树对初始为升序的归并段进行多路归并，败者树中记录“冠军”的结点保存的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 最大关键字</ExamOption>
+<ExamOption>B. 最小关键字</ExamOption>
+<ExamOption>C. 最大关键字所在的归并段号</ExamOption>
+<ExamOption>D. 最小关键字所在的归并段号</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+对升序归并段进行多路归并时，每次应选择各归并段当前记录中关键字最小的记录输出。
+
+败者树内部结点通常保存比赛中的“败者”归并段号，而专门记录“冠军”的结点保存当前最小关键字所在的归并段号。这样可以根据段号直接找到应输出的记录，并在该归并段读入下一个记录后重新调整败者树。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2023】（10分）对含有 $\displaystyle n(n>0)$ 个记录的文件进行外部排序，采用置换-选择排序生成初始归并段时需要使用一个工作区，工作区中能保存m个记录，请回答下列问题：
+
+(1) 若文件中有19个记录，其关键字依次是51,94,37,92,14,63,15,99,48,56,23,60,31,17,43,8,90,166,100。当m=4时，可生成几个初始归并段？每个归并段各是什么？  
+(2) 对任意 $\displaystyle n\gg m>0$，生成的第一个初始归并段的长度最大值和最小值分别是多少？
+
+<ExamSolution>
+
+<ExamAnswer>
+(1) 共生成3个初始归并段：
+
+- $\displaystyle R_1=(37,51,63,92,94,99)$；
+- $\displaystyle R_2=(14,15,23,31,48,56,60,90,166)$；
+- $\displaystyle R_3=(8,17,43,100)$。
+
+(2) 第一个初始归并段长度的最大值为 $\displaystyle n$，最小值为 $\displaystyle m$。
+</ExamAnswer>
+
+<ExamExplanation>
+工作区容量为4，初始装入
+
+$\displaystyle 51,94,37,92$，建立小根堆。
+
+生成第1个归并段
+
+依次输出当前最小关键字。新读入关键字若不小于刚输出的关键字，则仍属于当前归并段；否则冻结到下一归并段。
+
+- 输出 $\displaystyle 37$，读入 $\displaystyle 14<37$，冻结 $\displaystyle 14$；
+- 输出 $\displaystyle 51$，读入 $\displaystyle 63\ge51$，$\displaystyle 63$ 留在当前段；
+- 输出 $\displaystyle 63$，读入 $\displaystyle 15<63$，冻结 $\displaystyle 15$；
+- 输出 $\displaystyle 92$，读入 $\displaystyle 99\ge92$，$\displaystyle 99$ 留在当前段；
+- 输出 $\displaystyle 94$，读入 $\displaystyle 48<94$，冻结 $\displaystyle 48$；
+- 输出 $\displaystyle 99$，读入 $\displaystyle 56<99$，冻结 $\displaystyle 56$。
+
+当前可用记录耗尽，得到
+
+$\displaystyle R_1=(37,51,63,92,94,99)$。
+
+生成第2个归并段
+
+被冻结的 $\displaystyle 14,15,48,56$ 重新启用：
+
+- 输出 $\displaystyle 14$，读入 $\displaystyle 23$；
+- 输出 $\displaystyle 15$，读入 $\displaystyle 60$；
+- 输出 $\displaystyle 23$，读入 $\displaystyle 31$；
+- 输出 $\displaystyle 31$，读入 $\displaystyle 17<31$，冻结；
+- 输出 $\displaystyle 48$，读入 $\displaystyle 43<48$，冻结；
+- 输出 $\displaystyle 56$，读入 $\displaystyle 8<56$，冻结；
+- 输出 $\displaystyle 60$，读入 $\displaystyle 90$；
+- 输出 $\displaystyle 90$，读入 $\displaystyle 166$；
+- 输出 $\displaystyle 166$，读入 $\displaystyle 100<166$，冻结。
+
+得到
+
+$\displaystyle R_2=(14,15,23,31,48,56,60,90,166)$。
+
+生成第3个归并段
+
+剩余冻结记录为
+
+$\displaystyle 17,43,8,100$，按小根堆依次输出，得到
+
+$\displaystyle R_3=(8,17,43,100)$。
+
+对于任意 $\displaystyle n\gg m>0$：
+
+- 若后续读入的记录始终不小于刚输出的记录，则所有记录都可以进入第一个归并段，其长度最大为 $\displaystyle n$；
+- 若每次新读入记录都小于刚输出记录，则初始工作区中的 $\displaystyle m$ 个记录输出后当前段结束，因此长度最小为 $\displaystyle m$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+

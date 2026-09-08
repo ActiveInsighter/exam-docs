@@ -1,0 +1,1418 @@
+---
+title: "第 6 章 查找"
+---
+
+# 第 6 章 查找
+
+
+## 6.1 顺序查找、折半查找与分块查找
+
+<ExamQuestion>
+
+1. 【2010】已知一个长度为16 的顺序表L, 其元素按关键字有序排列。若采用折半查找法查找一个L 中不存在的元素，则关键字的比较次数最多的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 4</ExamOption>
+<ExamOption>B. 5</ExamOption>
+<ExamOption>C. 6</ExamOption>
+<ExamOption>D. 7</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+长度为 16 的有序表进行折半查找时，判定树的最大层数为
+
+$$
+\left\lfloor \log_2 16\right\rfloor+1=5.
+$$
+
+查找一个不存在的关键字时，最坏情况下需要沿最长路径比较 5 次，因此选 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2015】下列选项中不能构成折半查找中关键字比较序列的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 500,200,450,180</ExamOption>
+<ExamOption>B. 500, 450, 200, 180</ExamOption>
+<ExamOption>C. 180,500,200,450</ExamOption>
+<ExamOption>D. 180,200,500,450</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+折半查找过程中，后续比较关键字必须始终落在前面比较所确定的取值区间内。
+
+对 A：比较到 500 后目标应小于 500；比较到 200 后目标应大于 200；比较到 450 后目标应小于 450；再比较 180 时，180 已不在区间 $\displaystyle (200,450)$ 内，因此该序列不可能出现。
+
+其余序列均可满足逐步缩小的区间约束。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2016】在有 $n(n>1000)$ 个元素的升序数组 A 中查找关键字 $x$。查找算法的伪代码如下所示:
+
+```c
+k = 0;
+while (k < n and A[k] < x) k = k + 3;
+if (k < n and A[k] == x) 查找成功;
+else if (k - 1 < n and A[k - 1] == x) 查找成功;
+else if (k - 2 < n and A[k - 2] == x) 查找成功;
+else 查找失败;
+```
+
+本算法与折半查找算法相比, 有可能具有更少比较次数的情形是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 当x 不在数组中</ExamOption>
+<ExamOption>B. 当x 接近数组开头处</ExamOption>
+<ExamOption>C. 当x 接近数组结尾处</ExamOption>
+<ExamOption>D. 当x 位于数组中间位置</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+该算法每隔 3 个元素进行一次探测，定位后再检查前两个位置。当 $x$ 接近数组开头时，只需很少的比较即可完成查找；而折半查找的比较次数约为 $\displaystyle \lceil\log_2 n\rceil$。
+
+当 $x$ 不存在、位于中间或接近结尾时，该算法通常需要进行大量顺序式探测，不会比折半查找更有优势。因此选 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2017】以下二叉树中, 可能成为折半查找判定树(不含外部结点) 的是（ ）。
+
+![](/img/questions/408/data-structure-p062-01.svg)
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+折半查找判定树由“取当前查找区间的中间元素”递归生成，因此任一结点的左、右子树所含结点数之差不超过 1；对偶数长度区间，取中点的规则还应保持一致。
+
+选项 A 的各级子树均满足上述递归划分关系，可以由统一的中点取法生成；其余选项在某些等长子区间上出现了不一致的偏向，不能由同一种折半查找规则生成。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2023】对含有600 个元素的有序顺序表进行折半查找, 关键字间的比较次数最多是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 9</ExamOption>
+<ExamOption>B. 10</ExamOption>
+<ExamOption>C. 30</ExamOption>
+<ExamOption>D. 300</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+折半查找的最大关键字比较次数为
+
+$$
+\left\lfloor\log_2 600\right\rfloor+1=9+1=10.
+$$
+
+因此选 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2024】下列数据结构中, 不适合直接使用折半查找的是（ ）。
+I. 有序链表 II. 无序数组 III. 有序静态链表 IV. 无序静态链表
+
+<ExamChoices>
+<ExamOption>A. 仅I, III</ExamOption>
+<ExamOption>B. 仅II, IV</ExamOption>
+<ExamOption>C. 仅II, III, IV</ExamOption>
+<ExamOption>D. I, II, III, IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+直接使用折半查找需要同时满足两个基本条件：
+
+1. 关键字有序；
+2. 能够按下标随机访问中间元素。
+
+有序链表和有序静态链表虽然有序，但不能直接随机访问中间结点；无序数组和无序静态链表又不满足有序条件。因此 I、II、III、IV 均不适合直接使用折半查找，选 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2013】设包含4 个数据元素的集合 S = `{"do","for","repeat","while"}`，各元素的查找概率依次为:p1 = 0.35,p2 = 0.15,p3 = 0.15,p4 = 0.35。将S 保存在一个长度为4 的顺序表中，采用折半查找法,查找成功时的平均查找长度为2.2。请回答下列问题:
+(1) 若采用顺序存储结构保存S, 且要求平均查找长度更短，则元素应如何排列？应使用何种查找方法? 查找成功时的平均查找长度是多少?
+(2) 若采用链式存储结构保存S, 且要求平均查找长度更短，则元素应如何排列？应使用何种查找方法? 查找成功时的平均查找长度是多少?
+
+<ExamSolution>
+
+<ExamAnswer>
+（1）例如按 `do，while，for，repeat` 排列，采用顺序查找，成功时平均查找长度为 $\displaystyle 2.1$。
+
+
+（2）例如按 `do，while，for，repeat` 排列，采用顺序查找，成功时平均查找长度为 $\displaystyle 2.1$。
+</ExamAnswer>
+
+<ExamExplanation>
+要使顺序查找的平均查找长度最小，应按查找概率从大到小排列元素。概率分别为
+
+$$
+0.35,\quad 0.35,\quad 0.15,\quad 0.15.
+$$
+
+其中 `do`、`while` 的次序可以互换，`for`、`repeat` 的次序也可以互换。取一种排列 `do，while，for，repeat`，则
+
+$$
+\operatorname{ASL}_{\text{成功}}
+=0.35\times1+0.35\times2+0.15\times3+0.15\times4
+=2.1.
+$$
+
+顺序存储结构和链式存储结构均可按此概率顺序进行顺序查找；链式存储结构不能直接进行折半查找。该结果小于题设折半查找的 $\displaystyle 2.2$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 6.2 二叉搜索树、平衡二叉树和红黑树
+
+<ExamQuestion>
+
+1. 【2011】对于下列关键字序列, 不可能构成某二叉排序树中一条查找路径的序列是（ ）．
+
+<ExamChoices>
+<ExamOption>A. 95,22,91,24,94,71</ExamOption>
+<ExamOption>B. 92,20,91,34,88,35</ExamOption>
+<ExamOption>C. 21,89,77,29,36,38</ExamOption>
+<ExamOption>D. 12,25,71,68,33,34</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+把待查关键字记为 $k$。对序列 A：
+
+- 比较 95 后有 $\displaystyle k<95$；
+- 比较 22 后有 $\displaystyle 22<k<95$；
+- 比较 91 后有 $\displaystyle 22<k<91$；
+- 比较 24 后有 $\displaystyle 24<k<91$。
+
+下一次比较的关键字 94 不在当前允许区间 $\displaystyle (24,91)$ 内，因此 A 不可能是一条二叉排序树查找路径。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2013】在任意一棵非空二叉排序树T1 中，则除某结点v 之后形成二叉排序树T2, 再将v 插入T2 形成二叉排序树T3。下列关于T1与T3的叙述中, 正确的是（ ）。
+I. 若v 是T1的叶结点，则T1与T3不同 II. 若v 是T1的叶结点，则T1与T3相同
+III. 若v 不是T1的叶结点，则T1与T3不同 IV. 若v 不是T1的叶结点，则T1与T3相同
+
+<ExamChoices>
+<ExamOption>A. 仅I、III</ExamOption>
+<ExamOption>B. 仅I、IV</ExamOption>
+<ExamOption>C. 仅II、III</ExamOption>
+<ExamOption>D. 仅II、IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+若 $v$ 是叶结点，删除它不会改变其他结点的结构；重新插入 $v$ 时仍沿原查找路径回到原位置，所以 $T_1$ 与 $T_3$ 相同，II 正确。
+
+若 $v$ 不是叶结点，删除时其孩子或前驱、后继结点会顶替其位置；重新插入的 $v$ 从叶位置进入，不能恢复原来的结点连接关系，所以 $T_1$ 与 $T_3$ 不同，III 正确。
+
+因此选 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2018】已知二叉排序树如右图所示, 元素之间应满足的大小关系是（ ）．
+
+![](/img/questions/408/data-structure-p064-01.svg)
+
+<ExamChoices>
+<ExamOption>A. $x_1<x_2<x_5$</ExamOption>
+<ExamOption>B. $x_1<x_4<x_5$</ExamOption>
+<ExamOption>C. $x_3<x_5<x_4$</ExamOption>
+<ExamOption>D. $x_4<x_3<x_5$</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+由图中路径可知：$x_2$ 是 $x_1$ 的右孩子，$x_3$ 是 $x_2$ 的左孩子，$x_4$ 是 $x_3$ 的右孩子，$x_5$ 是 $x_4$ 的左孩子。
+
+根据二叉排序树性质可得
+
+$$
+x_1<x_3<x_5<x_4<x_2.
+$$
+
+故必有 $\displaystyle x_3<x_5<x_4$，选 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2020】下列给定的关键字输入序列中, 不能生成如右图所示二叉排序树的是（ ）．
+
+![](/img/questions/408/data-structure-p064-02.svg)
+
+<ExamChoices>
+<ExamOption>A. 4,5,2,1,3</ExamOption>
+<ExamOption>B. 4,5,1,2,3</ExamOption>
+<ExamOption>C. 4,2,5,3,1</ExamOption>
+<ExamOption>D. 4,2,1,3,5</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+目标树的结构为：根结点 4，左子树根为 2，其左右孩子分别为 1、3，右孩子为 5。
+
+序列 B 插入过程为：4 为根；5 成为右孩子；1 成为左孩子；2 成为 1 的右孩子；3 又成为 2 的右孩子。所得左子树是一条右斜链，不能生成题图所示结构。
+
+其余三个序列均可生成题图中的二叉排序树。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2009】下列二叉排序树中, 满足平衡二叉树定义的是（ ）。
+
+![](/img/questions/408/data-structure-p065-01.svg)
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+平衡二叉树要求任一结点的左、右子树高度差的绝对值不超过 1。
+
+- A 为三结点单支链，根结点高度差为 2；
+- B 中根结点两侧等高，两个非叶结点的高度差均为 1；
+- C、D 均存在左右子树高度差大于 1 的结点。
+
+因此选 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2010】在右图所示的平衡二叉树中,插入关键字48 后得到一棵新平衡二叉树。在新平衡二叉树中, 关键字37 所在结点的左、右子结点中保存的关键字分别是（ ）。
+
+![](/img/questions/408/data-structure-p065-02.svg)
+
+<ExamChoices>
+<ExamOption>A. 13,48</ExamOption>
+<ExamOption>B. 24,48</ExamOption>
+<ExamOption>C. 24,53</ExamOption>
+<ExamOption>D. 24,90</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+插入 48 后，它成为 37 的右孩子。此时结点 24 的右子树过高，且其右孩子 53 左偏，属于 RL 型失衡。
+
+先对 53 右旋，再对 24 左旋，得到的新树根为 37，其左孩子为 24，右孩子为 53；48 成为 53 的左孩子。因此关键字 37 所在结点的左、右孩子分别为 24、53，选 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2012】若平衡二叉树的高度为6, 且所有非叶结点的平衡因子均为1，则该平衡二叉树的结点总数为（ ）。
+
+<ExamChoices>
+<ExamOption>A. 12</ExamOption>
+<ExamOption>B. 20</ExamOption>
+<ExamOption>C. 32</ExamOption>
+<ExamOption>D. 33</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+设满足条件、高度为 $h$ 的平衡二叉树结点数为 $N_h$。所有非叶结点的平衡因子均为 1，故其左右子树高度分别为 $h-1$ 和 $h-2$，于是
+
+$$
+N_h=1+N_{h-1}+N_{h-2},\qquad N_0=0,\quad N_1=1.
+$$
+
+依次得到
+
+$$
+N_2=2,\quad N_3=4,\quad N_4=7,\quad N_5=12,\quad N_6=20.
+$$
+
+因此选 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+8. 【2013】若将关键字1,2,3,4,5,6,7 依次插入初始为空的平衡二叉树T 中，则T 中平衡因子为0 的分支结点的个数是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 0</ExamOption>
+<ExamOption>B. 1</ExamOption>
+<ExamOption>C. 2</ExamOption>
+<ExamOption>D. 3</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+依次插入 1～7 并进行 AVL 调整后，得到完全平衡的二叉树：根为 4，第二层为 2、6，第三层为 1、3、5、7。
+
+分支结点为 4、2、6，三者的左右子树均等高，平衡因子均为 0。因此共有 3 个，选 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+9. 【2015】现有一棵无重复关键字的平衡二叉树(AVL 树), 对其进行中序遍历可得到一个降序序列。下列关于该平衡二叉树的叙述中, 正确的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 根结点的度一定为2</ExamOption>
+<ExamOption>B. 树中最小元素一定是叶结点</ExamOption>
+<ExamOption>C. 最后插入的元素一定是叶结点</ExamOption>
+<ExamOption>D. 树中最大元素一定是无左子树</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+中序遍历得到降序序列，说明该树采用“左子树关键字大于根、右子树关键字小于根”的次序。
+
+最大关键字不可能再有左孩子，否则其左子树中还应存在更大的关键字。因此最大元素所在结点一定无左子树，D 正确。
+
+根结点不一定为 2 度结点；最小元素可能有左孩子；最后插入的结点经旋转后也不一定仍为叶结点。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+10. 【2019】在任意一棵非空平衡二叉树(AVL 树)$T_1$ 中, 删除某结点v 之后形成平衡二叉树T2, 再将 v 插入T2形成平衡二叉树T3。下列关于T1与T3的叙述中, 正确的是（ ）。
+I. 若v 是T1的叶结点，则T1与T3可能不相同 II. 若v 不是T1的叶结点，则T1与T3一定不相同
+III. 若v 不是T1的叶结点，则T1与T3一定相同
+
+<ExamChoices>
+<ExamOption>A. 仅I</ExamOption>
+<ExamOption>B. 仅II</ExamOption>
+<ExamOption>C. 仅I、II</ExamOption>
+<ExamOption>D. 仅I、III</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+I 正确。删除叶结点可能引起祖先失衡和旋转，而重新插入该叶结点时未必能逆转这些旋转。例如原树为根 2、左孩子 1、右孩子 3，且 3 的右孩子为 4；删除叶结点 1 后会左旋成以 3 为根的树，再插入 1 后仍以 3 为根，所以前后树可能不同。
+
+II 错误、III 也错误。非叶结点删除后再插入，有时能够恢复原树，有时不能。例如 AVL 树根为 2、左右孩子为 1、3，删除根 2 后再插入 2，经 LR 调整可恢复原树；而只有根 2 和右孩子 3 的 AVL 树，删除 2 后再插入 2 得到根 3、左孩子 2，与原树不同。
+
+因此只有 I 正确，选 A。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+11. 【2021】给定平衡二叉树如右图所示, 插入关键字23 后, 根中的关键字是（ ）。
+
+![](/img/questions/408/data-structure-p067-01.svg)
+
+<ExamChoices>
+<ExamOption>A. 16</ExamOption>
+<ExamOption>B. 20</ExamOption>
+<ExamOption>C. 23</ExamOption>
+<ExamOption>D. 25</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+23 的插入路径为
+
+$$
+20\rightarrow30\rightarrow25,
+$$
+
+因此 23 成为 25 的左孩子。结点 20 出现“右子树的左侧插入”造成的 RL 型失衡。
+
+先对 30 右旋，再对 20 左旋，调整后根结点为 25，故选 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+12. 【2024】一棵二叉搜索树如右图所示, 图中K1、K2、K3 分别是对应结点中保存的关键字。子树T 的任一结点中保存的关键字X 满足的是（ ）。
+
+![](/img/questions/408/data-structure-p067-02.svg)
+
+<ExamChoices>
+<ExamOption>A. $X<K_1$</ExamOption>
+<ExamOption>B. $X>K_2$</ExamOption>
+<ExamOption>C. $K_1<X<K_3$</ExamOption>
+<ExamOption>D. $K_3<X<K_2$</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+子树 $T$ 位于结点 $K_3$ 的右子树中，所以其中任一关键字 $X$ 满足 $\displaystyle X>K_3$；同时 $T$ 位于结点 $K_2$ 的左子树中，所以 $\displaystyle X<K_2$。
+
+故
+
+$$
+K_3<X<K_2,
+$$
+
+选 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+13. 【2022】已知非空二叉树T 的结点值均为正整数，采用顺序存储方式保存, 数据结构定义如下:
+
+```c
+typedef struct {                         // MAX_SIZE为已定义常量
+    int SqBiTNode[MAX_SIZE];             // 保存二叉树结点值的数组
+    int ElemNum;                         // 实际占用的数组元素个数
+} SqBiTree;
+```
+
+T 中不存在的结点在数组SqBiTNode 中用-1 表示。例如,对于下图所示的两棵非空二叉树T1 和T2:
+
+![](/img/questions/408/data-structure-p068-02.svg)
+
+$T_1$ 的存储结果如下:
+
+| 字段         | 值                                     |
+| ------------ | -------------------------------------- |
+| T1.SqBiTNode | 40, 25, 60, -1, 30, -1, 80, -1, -1, 27 |
+| T1.ElemNum   | 10                                     |
+
+$T_2$ 的存储结果如下:
+
+| 字段         | 值                                         |
+| ------------ | ------------------------------------------ |
+| T2.SqBiTNode | 40, 50, 60, -1, 30, -1, -1, -1, -1, -1, 35 |
+| T2.ElemNum   | 11                                         |
+
+请设计一个尽可能高效的算法, 判定一棵采用这种方式存储的二叉树是否为二叉搜索树，若是，则返回true, 否则, 返回false。要求:
+(1) 给出算法的基本设计思想。
+(2) 根据设计思想，采用C 或C++ 语言描述算法，关键之处给出注释。
+
+<ExamSolution>
+
+<ExamAnswer>见下述算法。</ExamAnswer>
+
+<ExamExplanation>
+**基本设计思想**
+
+从根结点开始递归检查。对每个结点同时维护其关键字允许出现的开区间 $\displaystyle (\text{low},\text{high})$：
+
+- 根结点允许在 $\displaystyle (-\infty,+\infty)$ 内；
+- 访问左孩子时，把上界改为当前结点关键字；
+- 访问右孩子时，把下界改为当前结点关键字；
+- 若某非空结点关键字不在允许区间内，则不是二叉搜索树；
+- 下标越界或数组元素为 `-1` 时，该子树为空，检查通过。
+
+这样不需要建立链式二叉树，也不需要重复扫描子树。
+
+```c
+#include <stdbool.h>
+#include <limits.h>
+
+static bool CheckBST(const SqBiTree *T, int i,
+                     long long low, long long high) {
+    if (i >= T->ElemNum)               // 下标已超出有效存储范围
+        return true;
+
+    int x = T->SqBiTNode[i];
+    if (x == -1)                       // 空结点
+        return true;
+
+    if ((long long)x <= low || (long long)x >= high)
+        return false;                  // 违反祖先结点共同限定的范围
+
+    return CheckBST(T, 2 * i + 1, low, x) &&
+           CheckBST(T, 2 * i + 2, x, high);
+}
+
+bool IsBST(SqBiTree T) {
+    return CheckBST(&T, 0, LLONG_MIN, LLONG_MAX);
+}
+```
+
+设实际非空结点数为 $n$，每个非空结点至多检查一次，时间复杂度为 $\displaystyle O(n)$；递归辅助空间为 $\displaystyle O(h)$，其中 $h$ 为树高。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 6.3 B、B+ 树基础
+
+<ExamQuestion>
+
+1. 【2009】以下叙述中, 不符合m 阶B 树定义要求的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 根结点最多有m 棵子树</ExamOption>
+<ExamOption>B. 所有叶结点都在同一层上</ExamOption>
+<ExamOption>C. 各结点内关键字均升序或降序排列</ExamOption>
+<ExamOption>D. 叶结点之间通过指针链接</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+m 阶 B 树中，根结点最多有 $m$ 棵子树；所有叶结点位于同一层；结点内部关键字有序。
+
+“叶结点之间通过指针链接”是 B+ 树叶层的典型特征，不是 B 树定义的要求，因此选 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2012】已知一棵3 阶B 树,如下图所示。删除关键字78 得到一棵新B 树,其中最右叶结点中的关键字是（ ）。
+
+![](/img/questions/408/data-structure-p069-01.svg)
+
+<ExamChoices>
+<ExamOption>A. 60</ExamOption>
+<ExamOption>B. 60,62</ExamOption>
+<ExamOption>C. 62,65</ExamOption>
+<ExamOption>D. 65</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+删除叶结点中的 78 后，该叶结点下溢。其左兄弟结点含有 60、62，关键字数多于最少关键字数，可以向其借关键字。
+
+调整时把父结点中的 65 下移到最右叶结点，把左兄弟中的最大关键字 62 上移替代父结点中的 65。于是最右叶结点只含关键字 65，选 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2013】在一棵高度为2 的5 阶B 树中,所含关键字的个数最少是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 5</ExamOption>
+<ExamOption>B. 7</ExamOption>
+<ExamOption>C. 8</ExamOption>
+<ExamOption>D. 14</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+5 阶 B 树中，除根外的非叶结点至少有
+
+$$
+\left\lceil\frac{5}{2}\right\rceil=3
+$$
+
+棵子树，即至少含 2 个关键字。高度为 2 时，根至少有 2 棵子树、含 1 个关键字，第二层两个叶结点各至少含 2 个关键字。
+
+故最少关键字数为
+
+$$
+1+2\times2=5,
+$$
+
+选 A。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2014】在一棵具有15 个关键字的4 阶B 树中,含关键字的结点个数最多是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 5</ExamOption>
+<ExamOption>B. 6</ExamOption>
+<ExamOption>C. 10</ExamOption>
+<ExamOption>D. 15</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+4 阶 B 树的非根结点至少含
+
+$$
+\left\lceil\frac{4}{2}\right\rceil-1=1
+$$
+
+个关键字，根结点也可只含 1 个关键字。因此，为使含关键字的结点数最多，应尽量使每个结点只含 1 个关键字。
+
+15 个关键字可以构成每个结点均含 1 个关键字的满二叉形 B 树，共 15 个结点，所以最大值为 15，选 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2016】B+树不同于B 树的特点之一是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 能支持顺序查找</ExamOption>
+<ExamOption>B. 结点中含有关键字</ExamOption>
+<ExamOption>C. 根结点至少有两个分支</ExamOption>
+<ExamOption>D. 所有叶结点都在同一层上</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+B+ 树的所有数据关键字集中在叶结点中，叶结点按关键字顺序通过链指针相连，因此特别适合顺序查找和范围查找。
+
+B 树与 B+ 树的结点都含关键字，根结点分支数要求和所有叶结点同层也不是二者的本质区别。因此选 A。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2017】下列应用中, 适合使用B+树的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 编译器中的词法分析</ExamOption>
+<ExamOption>B. 关系数据库系统中的索引</ExamOption>
+<ExamOption>C. 网络中的路由表快速查找</ExamOption>
+<ExamOption>D. 操作系统的磁盘空闲块管理</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+关系数据库索引需要支持磁盘环境下的高效随机查找、顺序访问和范围查询。B+ 树分支多、树高低，且叶结点按顺序链接，是数据库索引的典型数据结构，因此选 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2018】高度为5 的3 阶B 树含有的关键字个数至少是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 15</ExamOption>
+<ExamOption>B. 31</ExamOption>
+<ExamOption>C. 62</ExamOption>
+<ExamOption>D. 242</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+3 阶 B 树中，每个非根结点至少有 2 棵子树、至少含 1 个关键字；根至少有 2 棵子树、含 1 个关键字。
+
+高度为 5 时，各层最少结点数依次为
+
+$$
+1,2,4,8,16.
+$$
+
+每个结点至少含 1 个关键字，因此关键字总数至少为
+
+$$
+1+2+4+8+16=31,
+$$
+
+选 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+8. 【2020】依次将关键字5, 6, 9, 13, 8, 2, 12, 15 插入初始为空的4 阶B 树后, 根结点中包含的关键字是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 8</ExamOption>
+<ExamOption>B. 6,9</ExamOption>
+<ExamOption>C. 8,13</ExamOption>
+<ExamOption>D. 9,12</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+4 阶 B 树每个结点最多含 3 个关键字。
+
+- 插入 5、6、9 后根为 `[5,6,9]`；插入 13 后溢出，分裂并将 6 提升，得到根 `[6]`；
+- 插入 8、2 后，左右叶结点分别为 `[2,5]`、`[8,9,13]`；
+- 插入 12 后右叶结点溢出，分裂并将 9 提升到根，根变为 `[6,9]`；
+- 插入 15 后不再引起根结点变化。
+
+因此根结点包含 6、9，选 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+9. 【2021】在一棵高度为3、阶数为3 的B 树中,根为第1 层,若第2 层中有4 个关键字，则该树的结点个数最多是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 11</ExamOption>
+<ExamOption>B. 10</ExamOption>
+<ExamOption>C. 9</ExamOption>
+<ExamOption>D. 8</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+为使整棵树结点数最多，应使第 2 层结点数尽可能多。3 阶 B 树的根最多有 3 个孩子，因此第 2 层最多有 3 个结点。
+
+第 2 层共含 4 个关键字。每个内部结点的孩子数等于其关键字数加 1，所以第 3 层结点总数最多为
+
+$$
+4+3=7.
+$$
+
+全树最多结点数为
+
+$$
+1+3+7=11,
+$$
+
+选 A。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+10. 【2022】在下图所示的5 阶B 树T 中, 删除关键字260 之后需要进行必要的调整, 得到新的B 树 $T_1$。下列选项中, 不可能是 $T_1$ 根结点中关键字序列的是（ ）。
+
+![](/img/questions/408/data-structure-p072-01.svg)
+
+<ExamChoices>
+<ExamOption>A. 60,90,280</ExamOption>
+<ExamOption>B. 60,90,350</ExamOption>
+<ExamOption>C. 60,85,110,350</ExamOption>
+<ExamOption>D. 60,90,110,350</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+删除根中的内部关键字 260 时，可以用前驱 110 或后继 280 替换，再对发生下溢的叶结点进行借关键字或合并：
+
+- 用后继 280 替换并与右兄弟合并，可得到根 `[60,90,280]`；
+- 用后继 280 替换并与左兄弟合并，可得到根 `[60,90,350]`；
+- 用前驱 110 替换，再从含 `[70,80,85]` 的左兄弟借关键字，可得到根 `[60,85,110,350]`。
+
+若根为 `[60,90,110,350]`，则删除前驱 110 后对应叶结点只剩 `[100]`，仍低于 5 阶 B 树非根结点至少 2 个关键字的要求，尚未完成必要调整。因此 D 不可能是最终根关键字序列。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+11. 【2023】下列非空B 树的叙述中,正确的是（ ）。
+I. 插入操作可能增加树的高度 II. 删除操作一定会导致叶结点的变化
+III. 查找某关键字总是要查找到叶结点 IV. 插入的新关键字最终位于叶结点中
+
+<ExamChoices>
+<ExamOption>A. 仅I</ExamOption>
+<ExamOption>B. I、II</ExamOption>
+<ExamOption>C. III、IV</ExamOption>
+<ExamOption>D. I、II、IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+I 正确：根结点分裂时，插入操作会使树高增加。
+
+II 正确：若删除叶结点关键字，叶结点直接变化；若删除内部关键字，也要最终用前驱或后继叶结点中的关键字替换并从叶结点删除，因此叶结点会发生变化。
+
+III 错误：关键字可能在内部结点中被找到，无须继续到叶结点。
+
+IV 错误：新关键字先插入叶结点，但分裂时它可能被提升到内部结点。
+
+故正确的是 I、II，选 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 6.4 散列(Hash) 表
+
+<ExamQuestion>
+
+1. 【2011】为提高散列(Hash) 表的查找效率, 可以采取的正确措施是（ ）。
+I. 增大装填(载) 因子 II. 设计冲突(碰撞) 少的散列函数
+III. 处理冲突(碰撞) 时避免产生聚集(堆积) 现象
+
+<ExamChoices>
+<ExamOption>A. 仅I</ExamOption>
+<ExamOption>B. 仅II</ExamOption>
+<ExamOption>C. 仅I、II</ExamOption>
+<ExamOption>D. 仅II、III</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+提高散列表查找效率应尽量减少冲突及冲突后的聚集：
+
+- 增大装填因子会使表更拥挤，冲突增多，I 错误；
+- 设计冲突少、分布均匀的散列函数可以提高效率，II 正确；
+- 冲突处理时避免聚集可以缩短探测序列，III 正确。
+
+因此选 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2014】用哈希(散列) 方法处理冲突(碰撞) 时可能出现堆积(聚集) 现象, 下列选项中, 会受堆积现象直接影响的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 存储效率</ExamOption>
+<ExamOption>B. 散列函数</ExamOption>
+<ExamOption>C. 装填(装载) 因子</ExamOption>
+<ExamOption>D. 平均查找长度</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+堆积现象会使多个关键字形成较长的连续占用区，查找时需要进行更多次探测，因此直接增大的是平均查找长度。
+
+它不改变散列函数本身，也不直接改变装填因子或已分配的存储空间，故选 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2018】现有长度为7、初始为空的散列表HT, 散列函数为 $\displaystyle H(k)=k\bmod 7$, 用线性探测再散列法解决冲突。将关键字22, 43, 15 依次插入HT 后, 查找成功的平均查找长度是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 1.5</ExamOption>
+<ExamOption>B. 1.6</ExamOption>
+<ExamOption>C. 2</ExamOption>
+<ExamOption>D. 3</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+散列地址均为
+
+$$
+22\bmod7=43\bmod7=15\bmod7=1.
+$$
+
+采用线性探测后，三个关键字依次存入地址 1、2、3，成功查找比较次数分别为 1、2、3。
+
+因此
+
+$$
+\operatorname{ASL}_{\text{成功}}=\frac{1+2+3}{3}=2,
+$$
+
+选 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2019】现有长度为11 且初始为空的散列表HT, 散列函数为 $\displaystyle H(\mathrm{key})=\mathrm{key}\bmod 7$，采用线性探查 (线性探测再散列) 法解决冲突将关键字序列(87,40,30,6,11,22,98,20) 依次插入到HT 后, HT 查找失败的平均查找长度是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 4</ExamOption>
+<ExamOption>B. 5.25</ExamOption>
+<ExamOption>C. 6</ExamOption>
+<ExamOption>D. 6.29</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+插入后散列表地址 0～7 连续被占用，地址 8 为空：
+
+| 地址 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 关键字 | 98 | 22 | 30 | 87 | 11 | 40 | 6 | 20 | 空 | 空 | 空 |
+
+散列函数的初始地址只可能是 0～6。由这 7 个地址开始进行失败查找，直到遇到地址 8 的空单元，探测次数依次为
+
+$$
+9,8,7,6,5,4,3.
+$$
+
+故
+
+$$
+\operatorname{ASL}_{\text{失败}}
+=\frac{9+8+7+6+5+4+3}{7}=6,
+$$
+
+选 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2022】下列因素中, 影响散列(哈希) 方法平均查找长度的是（ ）。
+I. 装填因子 II. 散列函数 III. 冲突解决策略
+
+<ExamChoices>
+<ExamOption>A. 仅I、II</ExamOption>
+<ExamOption>B. 仅I、III</ExamOption>
+<ExamOption>C. 仅II、III</ExamOption>
+<ExamOption>D. I、II、III</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+散列查找的平均查找长度与以下因素均有关：
+
+- 装填因子越大，通常冲突越多；
+- 散列函数决定关键字分布是否均匀；
+- 冲突解决策略决定发生冲突后的探测代价。
+
+因此 I、II、III 均影响平均查找长度，选 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2023】现有长度为5, 初始为空的散列表HT, 散列函数为 $\displaystyle H(k)=(k+4)\bmod 5$, 用线性探查再散列法解决冲突。若将关键字序列2022, 12, 25 依次插入HT 中,然后删除关键字25，则HT 中查找失败的平均查找长度为（ ）。
+
+<ExamChoices>
+<ExamOption>A. 1</ExamOption>
+<ExamOption>B. 1.6</ExamOption>
+<ExamOption>C. 1.8</ExamOption>
+<ExamOption>D. 2.2</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+散列函数为 $\displaystyle H(k)=(k+4)\bmod5$。插入后：2022 在地址 1，12 经一次线性探测存入地址 2，25 存入地址 4。
+
+删除 25 时，地址 4 应保留“已删除”标记，不能直接作为从未使用的空单元，否则可能截断其他关键字的探测链。失败查找从地址 0～4 开始时，探测次数分别为
+
+$$
+1,3,2,1,2.
+$$
+
+因此
+
+$$
+\operatorname{ASL}_{\text{失败}}
+=\frac{1+3+2+1+2}{5}=1.8,
+$$
+
+选 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2010】将关键字序列(7,8,30,11,18,9,14) 散列存储到散列表中。散列表的存储空间是一个下标从0 开始的一维数组, 散列函数为 $\displaystyle H(\mathrm{key})=(3\mathrm{key})\bmod 7$, 处理冲突采用线性探测再散列法,要求装填(载) 因子为0.7。请回答下列问题。
+(1) 请画出所构造的散列表。
+(2) 分别计算等概率情况下查找成功和查找不成功的平均查找长度。
+
+<ExamSolution>
+
+<ExamAnswer>
+（1）散列表如下。
+
+
+| 地址 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 关键字 | 7 | 14 | 空 | 8 | 空 | 11 | 30 | 18 | 9 | 空 |
+
+（2）等概率时，查找成功的平均查找长度为 $\displaystyle \frac{12}{7}$，查找不成功的平均查找长度为 $\displaystyle \frac{18}{7}$。
+</ExamAnswer>
+
+<ExamExplanation>
+共有 7 个关键字，要求装填因子为 $\displaystyle 0.7$，故散列表长度为
+
+$$
+m=\frac{7}{0.7}=10.
+$$
+
+初始散列地址为 $\displaystyle H(k)=(3k)\bmod7$，冲突后按表长 10 线性探测。各关键字插入位置及成功查找长度为：
+
+| 关键字 | 初始地址 | 最终地址 | 成功比较次数 |
+|---:|---:|---:|---:|
+| 7 | 0 | 0 | 1 |
+| 8 | 3 | 3 | 1 |
+| 30 | 6 | 6 | 1 |
+| 11 | 5 | 5 | 1 |
+| 18 | 5 | 7 | 3 |
+| 9 | 6 | 8 | 3 |
+| 14 | 0 | 1 | 2 |
+
+所以
+
+$$
+\operatorname{ASL}_{\text{成功}}
+=\frac{1+1+1+1+3+3+2}{7}=\frac{12}{7}.
+$$
+
+初始散列地址只可能为 0～6。从这 7 个地址开始失败查找，直到遇到第一个空单元，探测次数依次为
+
+$$
+3,2,1,2,1,5,4.
+$$
+
+故
+
+$$
+\operatorname{ASL}_{\text{失败}}
+=\frac{3+2+1+2+1+5+4}{7}=\frac{18}{7}.
+$$
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+8. 【2024】(10 分) 将关键字序列20,3,11,18,9,14,7 依次存储到初始为空、长度为11 的散列表HT 中, 散列函数为 $\displaystyle H(\mathrm{key})=(3\mathrm{key})\bmod 11$，由 $H(\mathrm{key})$ 计算出的初始散列地址为 $H_0$。发生冲突时，探查地址序列为 $H_1,H_2,H_3,\ldots$，其中 $\displaystyle H_k=(H_0+k^2)\bmod 11$，$k=1,2,3,\ldots$。请回答下列问题:
+(1) 画出所构造的HT, 并计算HT 的装填因子。(6 分)
+(2) 给出在HT 中查找关键字14 的关键字比较序列。(2 分)
+(3) 在HT 中查找关键字8, 确认查找失败时的散列地址是多少?(2 分)。
+
+<ExamSolution>
+
+<ExamAnswer>
+（1）构造的散列表为
+
+
+| 地址 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 关键字 | 11 | 空 | 14 | 7 | 空 | 20 | 9 | 空 | 空 | 3 | 18 |
+
+装填因子为 $\displaystyle \alpha=\frac{7}{11}$。
+
+（2）查找关键字 14 的关键字比较序列为 `3，18，14`。
+
+（3）查找关键字 8 时，确认失败的散列地址为 7。
+</ExamAnswer>
+
+<ExamExplanation>
+散列函数为
+
+$$
+H_0=(3\times\text{key})\bmod11,
+$$
+
+发生冲突时使用
+
+$$
+H_k=(H_0+k^2)\bmod11.
+$$
+
+依次插入：
+
+- 20：$\displaystyle H_0=5$，存入 5；
+- 3：$\displaystyle H_0=9$，存入 9；
+- 11：$\displaystyle H_0=0$，存入 0；
+- 18：$\displaystyle H_0=10$，存入 10；
+- 9：初始地址 5 冲突，$\displaystyle H_1=6$，存入 6；
+- 14：地址 9、10 冲突，$\displaystyle H_2=(9+4)\bmod11=2$，存入 2；
+- 7：地址 10、0 冲突，$\displaystyle H_2=(10+4)\bmod11=3$，存入 3。
+
+查找 14 时依次检查地址 9、10、2，对应比较关键字 3、18、14。
+
+对关键字 8，有 $\displaystyle H_0=2$，依次探查地址
+
+$$
+2,3,6,0,7.
+$$
+
+地址 7 为空，因此在地址 7 确认查找失败。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 6.5 字符串匹配模式
+
+<ExamQuestion>
+
+1. 【2015】已知字符串s 为“abaabaabacacaabaabcc”, 模式串t 为“abaabc”。采用KMP算法进行匹配, 第一次出现“失配” (s[i] ≠t[ j]) 时, i = j = 5，则下次开始匹配时, i 和j 的值是（ ）。
+
+<ExamChoices>
+<ExamOption>A. i = 1,j = 0</ExamOption>
+<ExamOption>B. i = 5,j = 0</ExamOption>
+<ExamOption>C. i = 5,j = 2</ExamOption>
+<ExamOption>D. i = 6,j = 2</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+采用 0 开始下标。第一次失配时 $\displaystyle i=j=5$，说明模式串前 5 个字符 `abaab` 已匹配成功。
+
+`abaab` 的最长相等真前缀和真后缀为 `ab`，长度为 2。因此主串下标 $i$ 不回退，模式串下标回退到 $\displaystyle j=2$，即下一次从 $\displaystyle i=5,j=2$ 开始比较，选 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2019】设主串T = "abaabaabcabaabc", 模式串S = "abaabc"，采用KMP算法进行模式匹配,到匹配成功时为止, 在匹配过程中进行的单个字符间的比较次数是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 9</ExamOption>
+<ExamOption>B. 10</ExamOption>
+<ExamOption>C. 12</ExamOption>
+<ExamOption>D. 15</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+逐次比较如下：
+
+- 前 5 个字符 `abaab` 匹配，共比较 5 次；
+- 主串第 5 个字符 `a` 与模式串第 5 个字符 `c` 失配，第 6 次比较；
+- 模式串回退到下标 2，主串下标不回退，随后比较 `aabc`，再比较 4 次即成功。
+
+总比较次数为
+
+$$
+5+1+4=10,
+$$
+
+故选 B。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2024】KMP算法使用修正后的next 数组进行模式匹配, 模式串S = “aabaab”, 当主串中某个字符与S 中某字符失配时, S 将向右滑动的最长距离是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 5</ExamOption>
+<ExamOption>B. 4</ExamOption>
+<ExamOption>C. 3</ExamOption>
+<ExamOption>D. 2</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+按 0 开始下标，模式串 `aabaab` 的修正后 `nextval` 数组可写为
+
+$$
+(-1,-1,1,-1,-1,1).
+$$
+
+在下标 $j$ 处失配时，模式串右移距离为 $\displaystyle j-\operatorname{nextval}[j]$。各位置可能的移动距离中，最大值出现在 $\displaystyle j=4$：
+
+$$
+4-(-1)=5.
+$$
+
+因此最长可向右滑动 5 个字符，选 A。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>

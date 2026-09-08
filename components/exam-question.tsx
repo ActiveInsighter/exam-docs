@@ -5,7 +5,14 @@ import {
   type ReactNode,
 } from 'react';
 import { ExamSolutionDialog } from './exam-solution-dialog';
+import {
+  ExamAnswer,
+  ExamExplanation,
+  splitExamSolution,
+} from './exam-question-parts';
 import styles from './exam-question.module.css';
+
+export { ExamAnswer, ExamExplanation } from './exam-question-parts';
 
 type ExamSolutionProps = {
   children: ReactNode;
@@ -47,7 +54,8 @@ function isExamSolution(
  * 1. Question written as normal MDX...
  *
  * <ExamSolution>
- * Answer and explanation written as normal MDX...
+ *   <ExamAnswer>A</ExamAnswer>
+ *   <ExamExplanation>Explanation written as normal MDX...</ExamExplanation>
  * </ExamSolution>
  *
  * </ExamQuestion>
@@ -67,12 +75,15 @@ export function ExamQuestion({
     return <section className={styles.root}>{children}</section>;
   }
 
+  const { answer, explanation } = splitExamSolution(solution.props.children);
+
   return (
     <section className={styles.root}>
       <div className={styles.question}>{question}</div>
       <ExamSolutionDialog
         question={question}
-        solution={solution.props.children}
+        answer={answer}
+        explanation={explanation}
         buttonLabel={buttonLabel}
         dialogTitle={dialogTitle}
       />

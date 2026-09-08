@@ -1,0 +1,599 @@
+---
+title: "第 1 章 操作系统概述"
+---
+
+# 第 1 章 操作系统概述
+
+
+## 1.1 操作系统的发展历程
+
+<ExamQuestion>
+
+1. 【2009】单处理机系统中, 可并行的是（ ）。 I. 进程与进程 II. 处理机与设备 III. 处理机与通道 IV. 设备与设备
+
+<ExamChoices>
+<ExamOption>A. 仅 I、 II 和 III</ExamOption>
+<ExamOption>B. 仅 I、 II 和 IV</ExamOption>
+<ExamOption>C. 仅 I、 III 和 IV</ExamOption>
+<ExamOption>D. II、III、IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+单处理机在任一时刻只能执行一个进程，因此进程与进程只能并发，不能真正并行。CPU 与设备、CPU 与通道以及不同设备之间具有相对独立的硬件部件，可以并行工作。故 II、III、IV 正确。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2016】下列关于批处理系统的叙述中, 正确的是（ ）。 I. 批处理系统允许多个用户与计算机直接交互 II. 批处理系统分为单道批处理系统和多道批处理系统 III. 中断技术使得多道批处理系统的 I/O 设备可与 CPU 并行工作
+
+<ExamChoices>
+<ExamOption>A. 仅 II、 III</ExamOption>
+<ExamOption>B. 仅 II</ExamOption>
+<ExamOption>C. 仅 I、 II</ExamOption>
+<ExamOption>D. I、 III</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+批处理系统通常由作业成批提交，不允许用户在作业运行过程中与计算机直接交互，故 I 错误。批处理系统包括单道批处理和多道批处理，II 正确；中断技术使 CPU 在设备完成 I/O 后再处理，从而可实现 CPU 与 I/O 设备并行工作，III 正确。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2017】与单道程序系统相比, 多道程序系统的优点是（ ）。 I. CPU 利用率高 II. 系统开销小 III. 系统吞吐量大 IV. I/O 设备利用率高
+
+<ExamChoices>
+<ExamOption>A. 仅 I、 III</ExamOption>
+<ExamOption>B. 仅 I、 IV</ExamOption>
+<ExamOption>C. 仅 II、 III</ExamOption>
+<ExamOption>D. I、 III、 IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+多道程序把多个作业同时放入内存，当一个作业等待 I/O 时切换到其他作业运行，因此可提高 CPU 利用率和 I/O 设备利用率，并增大系统吞吐量。由于调度、切换和资源管理更复杂，系统开销并不小，故 II 错误。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2018】下列关于多任务操作系统的叙述中, 正确的是（ ）。 I. 具有并发和并行的特点 II. 需要实现对共享资源的保护 III. 需要运行在多 CPU 的硬件平台上
+
+<ExamChoices>
+<ExamOption>A. 仅 I</ExamOption>
+<ExamOption>B. 仅 II</ExamOption>
+<ExamOption>C. 仅 I、 II</ExamOption>
+<ExamOption>D. I、 II、 III</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+多任务操作系统能够使多个任务在宏观上同时推进，具有并发执行的特点；在具备多处理器或多核硬件时，也可以实现真正的并行执行，因此 I 正确。
+
+多个任务可能同时访问共享资源，操作系统必须提供互斥、同步等机制对共享资源进行保护，因此 II 正确。
+
+多任务操作系统并不要求一定运行在多 CPU 平台上，单 CPU 也能通过分时调度实现多任务，因此 III 错误。
+
+所以 I、II 正确，选择 C。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2022】下列关于多道程序系统的叙述中, 不正确的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 支持进程的并发执行</ExamOption>
+<ExamOption>B. 不必支持虚拟存储管理</ExamOption>
+<ExamOption>C. 需要实现对共享资源的管理</ExamOption>
+<ExamOption>D. 进程数越多 CPU 利用率越高</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+多道程序系统支持进程并发，并需要管理共享资源；它可以采用连续分配等方式，不一定支持虚拟存储。增加进程数在一定范围内可提高 CPU 利用率，但过多进程会造成频繁切换和资源竞争，CPU 利用率不一定继续提高。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 1.2 操作系统的运行环境
+
+<ExamQuestion>
+
+1. 【2010】下列选项中, 操作系统提供给应用程序的接口是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 系统调用</ExamOption>
+<ExamOption>B. 中断</ExamOption>
+<ExamOption>C. 库函数</ExamOption>
+<ExamOption>D. 原语</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+系统调用是操作系统内核向应用程序提供服务的接口。中断是事件处理机制，库函数是程序库提供的接口，原语是内核中不可被中断的基本操作。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2011】下列选项中, 在用户态执行的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 命令解释程序</ExamOption>
+<ExamOption>B. 缺页处理程序</ExamOption>
+<ExamOption>C. 进程调度程序</ExamOption>
+<ExamOption>D. 时钟中断处理程序</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+命令解释程序通常作为普通用户进程运行在用户态。缺页处理、进程调度和时钟中断处理都涉及内核资源管理，需要在内核态执行。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2012】下列选项中, 不可能在用户态发生的事件是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 系统调用</ExamOption>
+<ExamOption>B. 外部中断</ExamOption>
+<ExamOption>C. 进程切换</ExamOption>
+<ExamOption>D. 缺页</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+系统调用、外部中断和缺页都可能在用户程序运行期间发生，并使 CPU 转入内核态。进程切换由内核中的调度与切换程序完成，不可能在用户态执行。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2012】中断处理和子程序调用都需要压栈以保护现场, 中断处理一定会保存而子程序调用不需要保存其内容的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 程序计数器</ExamOption>
+<ExamOption>B. 程序状态字寄存器</ExamOption>
+<ExamOption>C. 通用数据寄存器</ExamOption>
+<ExamOption>D. 通用地址寄存器</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+子程序调用和中断都需要保存返回地址，因此程序计数器都要保存。中断发生后还必须保存并恢复程序状态字，以恢复中断前的处理机状态，而普通子程序调用通常不需要保存程序状态字。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 【2013】下列选项中, 会导致用户进程从用户态切换到内核态的操作是（ ）。 I. 整数除以零 II. sin（ ） 函数调用 III. read 系统调用
+
+<ExamChoices>
+<ExamOption>A. 仅 I、 II</ExamOption>
+<ExamOption>B. 仅 I、 III</ExamOption>
+<ExamOption>C. 仅 II、 III</ExamOption>
+<ExamOption>D. I、 II 和 III</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+整数除以零会产生异常，使 CPU 进入内核态；read 是系统调用，也会通过陷入机制进入内核态。sin() 通常是普通数学库函数，在用户态完成，不必进入内核态。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 【2014】下列指令中, 不能在用户态执行的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. trap 指令</ExamOption>
+<ExamOption>B. 跳转指令</ExamOption>
+<ExamOption>C. 压栈指令</ExamOption>
+<ExamOption>D. 关中断指令</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+关中断指令会改变处理机中断允许状态，直接影响整个系统，属于特权指令，只能在内核态执行。trap、跳转和压栈指令均可在用户态使用。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 【2015】处理外部中断时, 应该由操作系统保存的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 程序计数器 (PC) 的内容</ExamOption>
+<ExamOption>B. 通用寄存器的内容</ExamOption>
+<ExamOption>C. 快表 (TLB) 中的内容</ExamOption>
+<ExamOption>D. Cache 中的内容</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+外部中断发生时，硬件通常自动保存断点和程序状态字；进入中断处理程序后，操作系统还要保存可能被处理程序修改的通用寄存器。TLB 和 Cache 不需要在每次中断时整体保存。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+8. 【2015】假定下列指令已装入指令寄存器,则执行时不可能导致 CPU 从用户态变为内核态 (系统态) 的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. DIV R0, R1; R0 / R1 → R0</ExamOption>
+<ExamOption>B. INT n; 产生软中断</ExamOption>
+<ExamOption>C. NOT R0; 寄存器 R0 的内容取非</ExamOption>
+<ExamOption>D. MOV R0, addr; 把地址 addr 处的内存数据放入寄存器 R0 中</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+NOT 只对通用寄存器内容取反，不访问受保护资源，也不会产生系统调用或访存异常，因此不可能导致用户态转为内核态。DIV 可能除零，INT 主动产生软中断，MOV 访存可能发生缺页或保护异常。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+9. 【2017】执行系统调用的过程包括如下主要操作:I. 返回用户态 II. 执行陷入 (trap) 指令 III. 传递系统调用参数 IV. 执行相应的服务程序正确的执行顺序是（ ）。
+
+<ExamChoices>
+<ExamOption>A. II → III → I → IV</ExamOption>
+<ExamOption>B. II → IV → III → I</ExamOption>
+<ExamOption>C. III → II → IV → I</ExamOption>
+<ExamOption>D. III → IV → II → I</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+用户程序先把系统调用号和参数准备好，即传递参数；随后执行 trap 指令进入内核态；内核执行相应服务程序；最后恢复现场并返回用户态。因此顺序为 III → II → IV → I。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+10. 【2019】下列关于系统调用的叙述中,正确的是（ ）。 I. 在执行系统调用服务程序的过程中, CPU 处于内核态 II. 操作系统通过提供系统调用避免用户程序直接访问外设 III. 不同的操作系统为应用程序提供了统一的系统调用接口 IV. 系统调用是操作系统内核为应用程序提供服务的接口
+
+<ExamChoices>
+<ExamOption>A. 仅 I、 IV</ExamOption>
+<ExamOption>B. 仅 II、 III</ExamOption>
+<ExamOption>C. 仅 I、 II 和 IV</ExamOption>
+<ExamOption>D. I、 III 和 IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+系统调用服务程序在内核态执行，I 正确；系统调用使用户程序通过受控接口访问外设，II 正确；不同操作系统的系统调用接口并不统一，III 错误；系统调用是内核向应用程序提供服务的接口，IV 正确。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+11. 【2021】下列指令中, 只能在内核态执行的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. trap 指令</ExamOption>
+<ExamOption>B. I/O 指令</ExamOption>
+<ExamOption>C. 数据传送指令</ExamOption>
+<ExamOption>D. 设置断点指令</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+I/O 指令直接控制外部设备，属于特权指令，只能在内核态执行。trap 指令必须允许用户程序执行，否则无法主动发起系统调用；数据传送和设置断点指令也不必然是特权指令。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+12. 【2021】下列选项中, 通过系统调用完成的操作是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 页置换</ExamOption>
+<ExamOption>B. 进程调度</ExamOption>
+<ExamOption>C. 创建新进程</ExamOption>
+<ExamOption>D. 生成随机整数</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+创建新进程需要操作系统分配进程控制块、地址空间等资源，必须通过系统调用完成。页置换和进程调度是内核内部机制；生成随机整数通常可由用户态库函数完成。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+13. 【2022】下列关于 CPU 模式的叙述中, 正确的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. CPU 处于用户态时只能执行特权指令</ExamOption>
+<ExamOption>B. CPU 处于内核态时只能执行特权指令</ExamOption>
+<ExamOption>C. CPU 处于用户态时只能执行非特权指令</ExamOption>
+<ExamOption>D. CPU 处于内核态时只能执行非特权指令</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+用户态只能执行非特权指令；若执行特权指令会触发异常。内核态既能执行特权指令，也能执行非特权指令，因此 B、D 都不正确。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+14. 【2022】执行系统调用的过程涉及下列操作, 其中由操作系统完成的是（ ）。 I. 保存断点和程序状态字 II. 保存通用寄存器的内容 III. 执行系统调用服务例程 IV. 将 CPU 模式改为内核态
+
+<ExamChoices>
+<ExamOption>A. 仅 I、 III</ExamOption>
+<ExamOption>B. 仅 II、 III</ExamOption>
+<ExamOption>C. 仅 II、 IV</ExamOption>
+<ExamOption>D. 仅 II、 III、 IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>B</ExamAnswer>
+
+<ExamExplanation>
+执行系统调用时，保存断点和程序状态字、把 CPU 模式改为内核态通常由硬件自动完成；操作系统负责继续保存通用寄存器并执行系统调用服务例程。因此由操作系统完成的是 II、III。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+15. 【2023】下列操作完成时, 导致 CPU 从内核态转为用户态的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 阻塞进程</ExamOption>
+<ExamOption>B. 执行 CPU 调度</ExamOption>
+<ExamOption>C. 唤醒进程</ExamOption>
+<ExamOption>D. 执行系统调用</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+阻塞进程、CPU 调度和唤醒进程本身都属于操作系统内核中的管理操作，执行这些操作时 CPU 仍处于内核态。
+
+用户程序执行系统调用时先由用户态进入内核态，内核服务例程执行完成后，通过系统调用返回恢复用户程序现场，CPU 随之从内核态转回用户态。
+
+因此，在“操作完成时”会导致 CPU 从内核态转为用户态的是执行系统调用，选择 D。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 1.3 操作系统结构
+
+<ExamQuestion>
+
+1. 【2023】与宏内核操作系统相比, 下列特征中, 微内核操作系统具有的是（ ）。 I. 较好的性能 II. 较高的可靠性 III. 较高的安全性 IV. 较强的可扩展性
+
+<ExamChoices>
+<ExamOption>A. II, IV</ExamOption>
+<ExamOption>B. I, II, III</ExamOption>
+<ExamOption>C. I, III, IV</ExamOption>
+<ExamOption>D. II, III, IV</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+微内核只把最基本的机制保留在内核中，其他服务运行在用户态。服务隔离使其可靠性和安全性较高，也便于增加或替换系统服务，扩展性较强；但用户态服务与内核间通信和上下文切换较多，性能通常不如宏内核。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 【2023】在操作系统内核中, 中断向量表适合采用的数据结构是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 数组</ExamOption>
+<ExamOption>B. 队列</ExamOption>
+<ExamOption>C. 单向链表</ExamOption>
+<ExamOption>D. 双向链表</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+中断类型号可直接作为下标定位对应的中断向量，要求随机访问速度快，因此最适合采用数组。队列和链表都需要顺序查找，定位效率较低。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 【2024】下面关于中断、异常和系统调用的叙述中,错误的是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 中断或异常发生时, CPU 处于内核态</ExamOption>
+<ExamOption>B. 每个系统调用都有对应的内核服务例程</ExamOption>
+<ExamOption>C. 中断处理程序开始执行时, CPU 处于内核态</ExamOption>
+<ExamOption>D. 系统添加新类型设备时,需注册相应的中断服务例程</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+中断或异常可以在 CPU 正处于用户态或内核态时发生；只有进入相应处理程序后，CPU 才处于内核态。因此 A 的说法错误。每个系统调用对应内核服务例程，中断处理程序在内核态执行，新增设备通常也要注册相应的中断服务例程。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 【2024】键盘中断服务例程执行结束时, 所输入数据的存放位置是（ ）。
+
+<ExamChoices>
+<ExamOption>A. 用户缓冲区</ExamOption>
+<ExamOption>B. CPU 中的通用寄存器</ExamOption>
+<ExamOption>C. 内核缓冲区</ExamOption>
+<ExamOption>D. 键盘控制器的数据寄存器</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+键盘控制器产生中断后，中断服务例程从设备数据寄存器读取输入数据，并先放入操作系统管理的内核缓冲区。之后用户进程再通过系统调用把数据复制到用户缓冲区。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 1.4 操作系统引导
+
+<ExamQuestion>
+
+1. 【2013】计算机开机后, 操作系统最终被加载到（ ）。
+
+<ExamChoices>
+<ExamOption>A. BIOS</ExamOption>
+<ExamOption>B. ROM</ExamOption>
+<ExamOption>C. EPROM</ExamOption>
+<ExamOption>D. RAM</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>D</ExamAnswer>
+
+<ExamExplanation>
+BIOS、ROM 或 EPROM 中通常只保存固件和引导程序。引导程序把操作系统内核从外存装入主存，CPU 才能直接取指执行，因此操作系统最终被加载到 RAM。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>

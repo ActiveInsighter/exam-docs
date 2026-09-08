@@ -23,13 +23,14 @@ describe('docs deployment footprint', () => {
     }
   });
 
-  it('prunes prerendered files duplicated inside the EdgeOne SSR bundle', () => {
+  it('deploys the docs package through EdgeOne direct upload', () => {
     const workflowSource = readFileSync(
       resolve(process.cwd(), '.github/workflows/deploy-edgeone-docs.yml'),
       'utf8',
     );
 
-    expect(workflowSource).toMatch(/node scripts\/prune-edgeone-prerendered\.mjs/u);
+    expect(workflowSource).toContain('edgeone makers deploy "${GITHUB_WORKSPACE}/.static-docs"');
+    expect(workflowSource).toContain('EDGEONE_DOCS_DEPLOYMENT_MODE: upload');
   });
 
   it('loads formula-heavy document bodies lazily for the server bundle', () => {
@@ -39,7 +40,7 @@ describe('docs deployment footprint', () => {
       'utf8',
     );
 
-    expect(sourceConfig).toMatch(/docs:\s*\{[\s\S]*?async:\s*true/u);
+    expect(sourceConfig).toMatch(/docs:\s*\{[\s\S]*?dynamic:\s*true/u);
     expect(pageSource).toMatch(/const data = await page\.data\.load\(\);/u);
     expect(pageSource).toMatch(/const MDX = data\.body;/u);
   });
@@ -141,8 +142,8 @@ describe('docs deployment footprint', () => {
     );
 
     expect(workflowSource).toContain('Accept-Encoding: br, gzip');
-    expect(workflowSource).toContain('Content-Encoding');
-    expect(workflowSource).toContain('EO-Cache-Status');
-    expect(workflowSource).toContain('static_docs_warmup_status');
+    expect(workflowSource).toContain('tolower($1)=="content-encoding"');
+    expect(workflowSource).toContain('tolower($1)=="eo-cache-status"');
+    expect(workflowSource).toContain('wait_for_production_path');
   });
 });
