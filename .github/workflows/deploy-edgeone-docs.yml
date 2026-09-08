@@ -13,11 +13,9 @@ permissions:
 env:
   EDGEONE_CLI_VERSION: 1.6.31-3
   EDGEONE_DOCS_PROJECT_NAME: exam-docs
-  # exam-docs was created in EdgeOne with the GitHub provider. GitHub-provider
-  # projects deploy from the connected repository and do not accept the
-  # makers ZIP-upload API. Set this to upload only for an EdgeOne Upload
-  # project.
-  EDGEONE_DOCS_DEPLOYMENT_MODE: github
+  # exam-docs is an EdgeOne Upload project, so CI deploys the prebuilt static
+  # package through the Makers ZIP-upload API.
+  EDGEONE_DOCS_DEPLOYMENT_MODE: upload
   EDGEONE_DOCS_PUBLIC_URL: ${{ vars.EDGEONE_DOCS_PUBLIC_URL }}
 
 jobs:
@@ -382,6 +380,18 @@ jobs:
         run: |
           set -euo pipefail
           started="$(date +%s)"
+          deployment_url="${{ steps.deploy.outputs.deployment_url }}"
+          [[ -n "${deployment_url}" ]] || { echo '::error::No deployment URL captured.'; exit 1; }
+          deployment_base="${deployment_url%%\?*}"
+          deployment_query="${deployment_url#*\?}"
+          [[ "${deployment_query}" != "${deployment_url}" ]] || { echo '::error::Deployment URL is missing its access token.'; exit 1; }
+          if [[ -n "${EDGEONE_DOCS_PUBLIC_URL:-}" ]]; then
+            production_base="${EDGEONE_DOCS_PUBLIC_URL%/}"
+            production_suffix=''
+          else
+            production_base="${deployment_base}"
+            production_suffix="?${deployment_query}"
+          fi
           manifest='.static-docs/search-index.json'
           router_url="$(jq -r '.categories[0].router.url' "${manifest}")"
           router_path=".static-docs${router_url}"
