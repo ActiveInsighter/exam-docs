@@ -1,0 +1,80 @@
+name: Benchmark exam-docs static build
+
+on:
+  push:
+    branches:
+      - codex/static-build-parallel-search
+
+concurrency:
+  group: exam-docs-static-build-benchmark-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    name: Benchmark static package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Restore project dependency tree
+        id: node-modules-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node22-modules-v1-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies on cache miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Refresh Fumadocs generated source
+        run: npm run postinstall
+
+      - name: Restore comparable Next/Turbopack cache
+        uses: actions/cache@v5
+        with:
+          path: .static-docs-stage/.next/cache
+          key: ${{ runner.os }}-parallel-search-benchmark-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-parallel-search-benchmark-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-
+            ${{ runner.os }}-cloudflare-static-docs-turbopack-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-
+            ${{ runner.os }}-static-docs-turbopack-v4-
+
+      - name: Build benchmark static package
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v npm run build:static-docs
+
+      - name: Validate benchmark output
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s .static-docs/docs/intro/index.html
+          test -s .static-docs/docs/intro/__next._full.txt
+          test -s .static-docs/search-index.json
+          doc_routes="$(find .static-docs/docs -type f -name index.html | wc -l | tr -d ' ')"
+          files="$(find .static-docs -type f | wc -l | tr -d ' ')"
+          bytes="$(du -sb .static-docs | awk '{print $1}')"
+          echo "Benchmark docs routes: ${doc_routes}"
+          echo "Benchmark files: ${files}"
+          echo "Benchmark bytes: ${bytes}"
+          if [[ "${doc_routes}" != '531' ]]; then
+            echo "::error::Expected 531 documentation routes, got ${doc_routes}."
+            exit 1
+          fi
+
+      - name: Wrangler package dry run
+        run: npm run prepare:cloudflare-assets && npx --yes wrangler@4.129.0 deploy --dry-run --config wrangler.jsonc --outdir .wrangler-benchmark
