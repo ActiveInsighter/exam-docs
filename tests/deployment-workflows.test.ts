@@ -26,18 +26,40 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('shard: [0, 1, 2, 3]');
     expect(workflow).toContain('Verify shared chunks are identical');
     expect(workflow).toContain('Merge static outputs with conflict checks');
-    expect(workflow).toContain("test \"${doc_routes}\" = '531'");
-    expect(workflow).toContain("test \"${markdown}\" = '530'");
+    expect(workflow).toContain('test "${doc_routes}" = \'531\'');
+    expect(workflow).toContain('test "${markdown}" = \'530\'');
     expect(workflow).toContain('tests/static-doc-shards.test.ts');
     expect(workflow).toContain('tests/static-build-id.test.ts');
+    expect(workflow).toContain('tests/search-determinism.test.ts');
   });
 
-  it('never deploys benchmark branches to production', async () => {
+  it('restores reusable shard caches without creating a cache for every workflow-only commit', async () => {
+    const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
+    const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
+
+    expect(workflow).toContain('-static-shard-${{ matrix.shard }}-v4-${{ hashFiles(');
+    expect(workflow).toContain('-static-shard-${{ matrix.shard }}-v4-');
+    expect(workflow).toContain('-static-shard-${{ matrix.shard }}-v3-');
+    expect(workflow).not.toContain('-static-shard-${{ matrix.shard }}-v4-${{ github.sha }}');
+  });
+
+  it('reuses the same pinned Wrangler install for dry-run and production deploy', async () => {
+    const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
+    const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
+
+    const pinnedWranglerCommands = workflow.match(/npx --yes wrangler@4\.129\.0/g) ?? [];
+    expect(pinnedWranglerCommands).toHaveLength(2);
+    expect(workflow).not.toContain('cloudflare/wrangler-action@v3');
+    expect(workflow).toContain('deployment-url=${deployment_url}');
+  });
+
+  it('never deploys non-main branches to production', async () => {
     const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
     const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
 
     expect(workflow).toContain("github.ref == 'refs/heads/main'");
     expect(workflow).toContain('Deploy to Cloudflare Workers Static Assets');
     expect(workflow).toContain('Full static documentation route verification');
+    expect(workflow).not.toContain('codex/production-static-shards-v2');
   });
 });
