@@ -1,0 +1,99 @@
+name: Benchmark static output determinism
+
+on:
+  push:
+    branches:
+      - codex/static-output-determinism
+
+concurrency:
+  group: exam-docs-output-determinism-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    name: Compare two identical builds
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Restore project dependency tree
+        id: node-modules-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node22-modules-v1-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies on cache miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Refresh Fumadocs generated source
+        run: npm run postinstall
+
+      - name: Restore production-equivalent Next/Turbopack cache
+        uses: actions/cache@v5
+        with:
+          path: .static-docs-stage/.next/cache
+          key: ${{ runner.os }}-output-determinism-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cloudflare-static-docs-turbopack-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-
+            ${{ runner.os }}-static-docs-turbopack-v4-
+
+      - name: Build first static package
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'first_build_wall=%e max_rss_kib=%M' npm run build:static-docs
+          find .static-docs -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/manifest-a.txt
+          du -sb .static-docs
+
+      - name: Build second identical static package
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'second_build_wall=%e max_rss_kib=%M' npm run build:static-docs
+          find .static-docs -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/manifest-b.txt
+          du -sb .static-docs
+
+      - name: Compare output hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          def read_manifest(path):
+              out = {}
+              for line in Path(path).read_text().splitlines():
+                  digest, file_path = line.split('  ', 1)
+                  out[file_path] = digest
+              return out
+
+          a = read_manifest('/tmp/manifest-a.txt')
+          b = read_manifest('/tmp/manifest-b.txt')
+          all_paths = sorted(set(a) | set(b))
+          changed = [p for p in all_paths if a.get(p) != b.get(p)]
+          added = [p for p in all_paths if p not in a]
+          removed = [p for p in all_paths if p not in b]
+          print(f'first_files={len(a)} second_files={len(b)}')
+          print(f'changed_or_missing={len(changed)} added={len(added)} removed={len(removed)}')
+          for p in changed[:120]:
+              print(f'CHANGED {p}')
+          if changed:
+              Path('/tmp/changed-paths.txt').write_text('\n'.join(changed) + '\n')
+          PY
+
+      - name: Prepare and dry-run final package
+        run: npm run prepare:cloudflare-assets && npx --yes wrangler@4.129.0 deploy --dry-run --config wrangler.jsonc --outdir .wrangler-determinism
