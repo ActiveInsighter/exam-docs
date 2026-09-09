@@ -6,8 +6,16 @@ import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { z } from 'zod';
 import { remarkExamHeadings } from './lib/remark-exam-headings';
+import { preloadStaticShiki } from './lib/static-shiki-preload';
 
 const isStaticDocsBuild = process.env.STATIC_DOCS_BUILD === '1';
+const staticShikiReady = isStaticDocsBuild ? preloadStaticShiki() : Promise.resolve([]);
+
+function rehypeAwaitStaticShiki() {
+  return async () => {
+    await staticShikiReady;
+  };
+}
 
 export const docs = defineDocs({
   dir: 'content/docs',
@@ -68,6 +76,10 @@ export default defineConfig({
     // deploy-size impact; it is not a production accessibility decision.
     rehypePlugins: (plugins) => [
       [rehypeKatex, { strict: 'ignore', output: 'html' }],
+      // Fumadocs' default Shiki highlighter lazily loads grammars. Prime every
+      // language used by this static corpus before the default rehype-code
+      // transformer runs so parallel page rendering cannot race grammar setup.
+      ...(isStaticDocsBuild ? [rehypeAwaitStaticShiki] : []),
       ...plugins,
     ],
   },
