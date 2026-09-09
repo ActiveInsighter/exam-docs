@@ -1,0 +1,106 @@
+name: Benchmark weighted shards with dedicated search
+
+on:
+  push:
+    branches:
+      - codex/weighted-shards-search-runner
+
+permissions:
+  contents: read
+
+concurrency:
+  group: exam-docs-weighted-search-benchmark
+  cancel-in-progress: true
+
+jobs:
+  search:
+    name: Dedicated search
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - name: Restore project dependency tree
+        id: node-modules-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node22-modules-v1-${{ hashFiles('package-lock.json') }}
+      - name: Install dependencies on cache miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+      - run: npm run postinstall
+      - name: Build search assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/static-search-output
+          mkdir -p /tmp/static-search-output
+          /usr/bin/time -v node scripts/build-search-index.mjs /tmp/static-search-output/search-index.json
+          test -s /tmp/static-search-output/search-index.json
+          test -d /tmp/static-search-output/search
+          echo "search_files=$(find /tmp/static-search-output -type f | wc -l | tr -d ' ')"
+          echo "search_bytes=$(du -sb /tmp/static-search-output | awk '{print $1}')"
+
+  shard:
+    name: Weighted no-search shard ${{ matrix.shard }} of 4
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      STATIC_DOCS_SHARD_COUNT: '4'
+      STATIC_DOCS_SHARD_INDEX: ${{ matrix.shard }}
+      STATIC_DOCS_SKIP_SEARCH_BUILD: '1'
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - name: Restore project dependency tree
+        id: node-modules-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node22-modules-v1-${{ hashFiles('package-lock.json') }}
+      - name: Install dependencies on cache miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+      - run: npm run postinstall
+      - name: Restore weighted-search Next/Turbopack cache
+        uses: actions/cache@v5
+        with:
+          path: .static-docs-stage/.next/cache
+          key: ${{ runner.os }}-weighted-search-shard-${{ matrix.shard }}-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json', 'app/**', 'components/**', 'lib/**', 'scripts/**', 'content/docs/**') }}
+          restore-keys: |
+            ${{ runner.os }}-weighted-search-shard-${{ matrix.shard }}-v1-
+            ${{ runner.os }}-weighted-static-shard-${{ matrix.shard }}-v1-
+            ${{ runner.os }}-static-shard-${{ matrix.shard }}-v4-
+      - name: Build weighted shard without search contention
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v npm run build:static-docs
+      - name: Validate shard
+        shell: bash
+        run: |
+          set -euo pipefail
+          routes="$(find .static-docs/docs -type f -name index.html | wc -l | tr -d ' ')"
+          markdown="$(find .static-docs/docs -type f -name '*.md' | wc -l | tr -d ' ')"
+          test ! -e .static-docs/search-index.json
+          test ! -e .static-docs/search
+          if [[ "${STATIC_DOCS_SHARD_INDEX}" == '0' ]]; then
+            test "${markdown}" = '530'
+          else
+            test "${markdown}" = '0'
+          fi
+          echo "weighted_no_search_shard=${STATIC_DOCS_SHARD_INDEX}/4 routes=${routes} markdown=${markdown} bytes=$(du -sb .static-docs | awk '{print $1}')"
+          test "${routes}" -gt 100
+          test "${routes}" -lt 170
