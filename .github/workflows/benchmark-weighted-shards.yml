@@ -1,0 +1,89 @@
+name: Benchmark weighted static shards
+
+on:
+  push:
+    branches:
+      - codex/weighted-static-shards
+
+permissions:
+  contents: read
+
+concurrency:
+  group: exam-docs-weighted-static-shards
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Validate weighted sharding
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - name: Restore project dependency tree
+        id: node-modules-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node22-modules-v1-${{ hashFiles('package-lock.json') }}
+      - name: Install dependencies on cache miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+      - run: npm run postinstall
+      - name: Run shard tests
+        run: npm test -- tests/static-doc-shards.test.ts tests/static-build-id.test.ts
+
+  shard:
+    name: Weighted shard ${{ matrix.shard }} of 4
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      STATIC_DOCS_SHARD_COUNT: '4'
+      STATIC_DOCS_SHARD_INDEX: ${{ matrix.shard }}
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - name: Restore project dependency tree
+        id: node-modules-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node22-modules-v1-${{ hashFiles('package-lock.json') }}
+      - name: Install dependencies on cache miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+      - run: npm run postinstall
+      - name: Restore weighted Next/Turbopack cache
+        uses: actions/cache@v5
+        with:
+          path: .static-docs-stage/.next/cache
+          key: ${{ runner.os }}-weighted-static-shard-${{ matrix.shard }}-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json', 'app/**', 'components/**', 'lib/**', 'scripts/**', 'content/docs/**') }}
+          restore-keys: |
+            ${{ runner.os }}-weighted-static-shard-${{ matrix.shard }}-v1-
+            ${{ runner.os }}-static-shard-${{ matrix.shard }}-v4-
+      - name: Build weighted static shard
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v npm run build:static-docs
+      - name: Report weighted shard
+        shell: bash
+        run: |
+          set -euo pipefail
+          routes="$(find .static-docs/docs -type f -name index.html | wc -l | tr -d ' ')"
+          files="$(find .static-docs -type f | wc -l | tr -d ' ')"
+          bytes="$(du -sb .static-docs | awk '{print $1}')"
+          echo "weighted_shard=${STATIC_DOCS_SHARD_INDEX}/4 routes=${routes} files=${files} bytes=${bytes}"
+          test "${routes}" -gt 100
+          test "${routes}" -lt 170
