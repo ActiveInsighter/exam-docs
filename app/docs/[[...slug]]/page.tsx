@@ -27,16 +27,18 @@ function routeKey(param: { slug?: string[] }) {
 
 export function generateStaticParams() {
   // Fumadocs sources can surface the same final slug more than once when
-  // multiple source records normalize to one route. Next de-duplicates those
-  // internally in a monolithic build, but index-based sharding could assign
-  // duplicate params to different runners. De-duplicate by the final URL first
-  // so every rendered route has exactly one shard owner.
+  // multiple source records normalize to one route. Also, source enumeration
+  // order is not a cross-runner contract. De-duplicate by the final route and
+  // sort by that stable key before assigning shards so every URL has exactly
+  // one deterministic owner on every runner.
   const unique = new Map<string, { slug?: string[] }>();
   for (const param of source.generateParams()) {
     const key = routeKey(param);
     if (!unique.has(key)) unique.set(key, param);
   }
-  const params = Array.from(unique.values());
+  const params = Array.from(unique.entries())
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([, param]) => param);
   const shardCount = Number.parseInt(process.env.STATIC_DOCS_SHARD_COUNT ?? '1', 10);
   const shardIndex = Number.parseInt(process.env.STATIC_DOCS_SHARD_INDEX ?? '0', 10);
 
