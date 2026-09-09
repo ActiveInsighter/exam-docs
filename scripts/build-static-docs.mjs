@@ -3,6 +3,7 @@ import { cpus, freemem, totalmem } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
+import { computeStaticBuildId } from './static-build-id.mjs';
 import { shouldIncludeInStaticDocsProject } from './static-docs-config.mjs';
 import {
   buildStaticMarkdownDocument,
@@ -44,6 +45,18 @@ function formatSeconds(ms) {
 
 function formatMiB(bytes) {
   return `${(bytes / 1024 / 1024).toFixed(2)} MiB`;
+}
+
+function getShardCoordinates() {
+  const shardCount = Number.parseInt(process.env.STATIC_DOCS_SHARD_COUNT ?? '1', 10);
+  const shardIndex = Number.parseInt(process.env.STATIC_DOCS_SHARD_INDEX ?? '0', 10);
+  if (!Number.isInteger(shardCount) || shardCount < 1) {
+    throw new Error(`Invalid static docs shard count: ${shardCount}.`);
+  }
+  if (!Number.isInteger(shardIndex) || shardIndex < 0 || shardIndex >= shardCount) {
+    throw new Error(`Invalid static docs shard ${shardIndex}/${shardCount}.`);
+  }
+  return { shardCount, shardIndex };
 }
 
 async function copyProjectEntry(stageRoot, relativePath) {
@@ -136,7 +149,7 @@ function runProcess(command, args, { cwd, env, label }) {
   });
 }
 
-function runNextBuild(stageRoot) {
+function runNextBuild(stageRoot, buildId) {
   const nextCommand = path.join(
     projectRoot,
     'node_modules',
@@ -144,16 +157,13 @@ function runNextBuild(stageRoot) {
     process.platform === 'win32' ? 'next.cmd' : 'next',
   );
 
-  // Next 16 uses Turbopack by default. Fumadocs Dynamic Mode keeps document
-  // bodies out of the initial bundler graph and compiles them on demand during
-  // static generation, so retain Turbopack's incremental graph and filesystem
-  // cache instead of falling back to webpack.
   return runProcess(nextCommand, ['build'], {
     cwd: stageRoot,
     env: {
       ...process.env,
       NEXT_TELEMETRY_DISABLED: '1',
       STATIC_DOCS_BUILD: '1',
+      STATIC_DOCS_BUILD_ID: buildId,
     },
     label: 'next_static_build_turbopack',
   });
@@ -255,6 +265,14 @@ function logRunnerResources() {
 async function main() {
   const totalStartedAt = Date.now();
   const stageRoot = staticStageRoot;
+  const { shardCount, shardIndex } = getShardCoordinates();
+  const ownsGlobalAssets = shardCount === 1 || shardIndex === 0;
+  const buildId = process.env.STATIC_DOCS_BUILD_ID || (await computeStaticBuildId(projectRoot));
+
+  console.log(
+    `[static-docs] Shard ${shardIndex}/${shardCount}; global search/markdown owner: ${ownsGlobalAssets ? 'yes' : 'no'}.`,
+  );
+  console.log(`[static-docs] Shared build id: ${buildId}.`);
 
   try {
     await cleanStagePreservingBuildCache(stageRoot);
@@ -268,27 +286,34 @@ async function main() {
     console.log(`[timing] prepare_static_stage=${formatSeconds(Date.now() - prepareStartedAt)}`);
     logRunnerResources();
 
-    // First isolate the Dynamic MDX + bounded SSG effect with sequential heavy
-    // processes. Once peak memory is proven safe, Next and ZBSearch can run in
-    // parallel again to recover end-to-end deployment latency.
+    // Search is independent from the Next export. Shard 0 overlaps it with SSG;
+    // the other shards skip global work entirely because their payload contains
+    // only uniquely-owned rendered documentation routes.
     const buildStartedAt = Date.now();
-    const nextTiming = await runNextBuild(stageRoot);
-    logRunnerResources();
-    const searchTiming = await runSearchBuild(staticSearchRoot);
+    const nextPromise = runNextBuild(stageRoot, buildId);
+    const searchPromise = ownsGlobalAssets ? runSearchBuild(staticSearchRoot) : Promise.resolve(null);
+    const [nextTiming, searchTiming] = await Promise.all([nextPromise, searchPromise]);
     const buildDurationMs = Date.now() - buildStartedAt;
-    console.log(`[timing] sequential_build_wall=${formatSeconds(buildDurationMs)}`);
-    console.log(
-      `[timing] sequential_build_sum=${formatSeconds(nextTiming.durationMs + searchTiming.durationMs)}`,
-    );
+    logRunnerResources();
+    console.log(`[timing] parallel_build_wall=${formatSeconds(buildDurationMs)}`);
+    if (searchTiming) {
+      console.log(
+        `[timing] parallel_build_sum=${formatSeconds(nextTiming.durationMs + searchTiming.durationMs)}`,
+      );
+    } else {
+      console.log('[timing] global_search_skipped=1');
+    }
 
     const assembleStartedAt = Date.now();
     await rm(staticOutputRoot, { recursive: true, force: true });
     await cp(path.join(stageRoot, 'out'), staticOutputRoot, { recursive: true });
-    await copyDirectoryContents(staticSearchRoot, staticOutputRoot);
+    if (ownsGlobalAssets) await copyDirectoryContents(staticSearchRoot, staticOutputRoot);
     console.log(`[timing] assemble_static_and_search=${formatSeconds(Date.now() - assembleStartedAt)}`);
 
     const markdownStartedAt = Date.now();
-    const markdownCount = await generateStaticMarkdownRoutes(staticOutputRoot);
+    const markdownCount = ownsGlobalAssets
+      ? await generateStaticMarkdownRoutes(staticOutputRoot)
+      : 0;
     console.log(`[timing] direct_markdown_build=${formatSeconds(Date.now() - markdownStartedAt)}`);
 
     const summaryStartedAt = Date.now();
