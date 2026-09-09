@@ -3,20 +3,23 @@ import { join } from 'node:path';
 import { getHighlighter } from 'fumadocs-core/highlight';
 
 const STATIC_CONTENT_ROOTS = ['content/docs', 'content/blog'] as const;
-const FENCE_LANGUAGE_PATTERN = /^(?:```|~~~)\s*([A-Za-z0-9_+.#-]+)/gm;
+// Horizontal whitespace only: `\s` would cross the newline after a closing
+// fence and mistake the next Markdown token (for example `##`) for a language.
+const FENCE_LANGUAGE_PATTERN = /^(?:```|~~~)[ \t]*([A-Za-z0-9_+.#-]+)/gm;
 
 const LANGUAGE_ALIASES: Readonly<Record<string, string>> = {
+  'c#': 'csharp',
+  'c++': 'cpp',
   cjs: 'javascript',
   js: 'javascript',
-  jsx: 'jsx',
   mjs: 'javascript',
   py: 'python',
   sh: 'bash',
   shell: 'bash',
   ts: 'typescript',
-  tsx: 'tsx',
-  'c++': 'cpp',
 };
+
+type HighlighterOptions = NonNullable<Parameters<typeof getHighlighter>[1]>;
 
 export function extractCodeFenceLanguages(markdown: string): string[] {
   const languages = new Set<string>();
@@ -74,7 +77,10 @@ export function preloadStaticShiki(): Promise<readonly string[]> {
 
   const languages = collectStaticCodeFenceLanguages();
   preloadPromise = getHighlighter('js', {
-    langs: languages,
+    // The scanner emits Shiki fence names at runtime. Fumadocs' highlighter
+    // filters unknown names against its bundled-language registry before load;
+    // keeping this boundary local avoids making Shiki a direct app dependency.
+    langs: languages as HighlighterOptions['langs'],
     themes: ['github-light', 'github-dark'],
   }).then(() => {
     console.log(
