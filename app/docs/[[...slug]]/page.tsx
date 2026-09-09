@@ -22,7 +22,16 @@ type PageParameters = {
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return source.generateParams();
+  const params = source.generateParams();
+  const shardCount = Number.parseInt(process.env.STATIC_DOCS_SHARD_COUNT ?? '1', 10);
+  const shardIndex = Number.parseInt(process.env.STATIC_DOCS_SHARD_INDEX ?? '0', 10);
+
+  if (!Number.isInteger(shardCount) || shardCount <= 1) return params;
+  if (!Number.isInteger(shardIndex) || shardIndex < 0 || shardIndex >= shardCount) {
+    throw new Error(`Invalid static docs shard ${shardIndex}/${shardCount}.`);
+  }
+
+  return params.filter((_, index) => index % shardCount === shardIndex);
 }
 
 export default async function Page({ params }: PageParameters) {
