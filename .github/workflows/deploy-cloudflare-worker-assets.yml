@@ -60,7 +60,7 @@ jobs:
 
       - name: Run static deployment tests
         shell: bash
-        run: npm test -- tests/static-docs-build.test.ts tests/cloudflare-static-assets.test.ts
+        run: npm test -- tests/static-docs-build.test.ts tests/cloudflare-static-assets.test.ts tests/dedupe-static-rsc.test.ts tests/deployment-workflows.test.ts
 
       - name: Restore Next/Turbopack build cache
         uses: actions/cache@v5
@@ -73,8 +73,6 @@ jobs:
             ${{ runner.os }}-static-docs-turbopack-v4-
 
       - name: Build the shared static documentation package
-        env:
-          STATIC_DOCS_DISABLE_RSC_DEDUPE: '1'
         shell: bash
         run: npm run build:static-docs
 
@@ -90,6 +88,8 @@ jobs:
           test -s .static-docs/_redirects
           test -s .static-docs/.assetsignore
           test -s .static-docs/404.html
+          grep -F '/docs/*/index.txt /docs/:splat/__next._full.txt 200' .static-docs/_redirects
+          grep -F '/docs/*/__next.docs.txt /docs/__next.docs.txt 200' .static-docs/_redirects
           grep -Fx 'edgeone.json' .static-docs/.assetsignore
 
           file_count="$(find .static-docs -type f \
@@ -121,7 +121,7 @@ jobs:
             echo "- Largest uploadable asset: $((largest_bytes / 1024 / 1024)) MiB / 25 MiB"
             echo "- Local static package: $((package_bytes / 1024 / 1024)) MiB"
             echo '- Worker JavaScript: none (assets-only deployment)'
-            echo '- RSC files: original per-page files retained for route compatibility'
+            echo '- RSC aliases: deduplicated locally and restored through two guarded Cloudflare 200 rewrites'
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Validate Wrangler configuration with a dry run
