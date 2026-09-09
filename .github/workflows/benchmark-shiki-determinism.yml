@@ -1,0 +1,102 @@
+name: Benchmark static Shiki determinism
+
+on:
+  push:
+    branches:
+      - codex/deterministic-shiki-preload
+
+concurrency:
+  group: exam-docs-shiki-determinism-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  compare-shard:
+    name: Compare shard ${{ matrix.shard }} twice
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      STATIC_DOCS_SHARD_COUNT: '4'
+      STATIC_DOCS_SHARD_INDEX: ${{ matrix.shard }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Restore project dependency tree
+        id: node-modules-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node22-modules-v1-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies on cache miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Refresh Fumadocs generated source
+        run: npm run postinstall
+
+      - name: Run Shiki preload regression test
+        if: matrix.shard == 0
+        run: npm test -- tests/static-shiki-preload.test.ts
+
+      - name: Restore existing static cache for build A
+        uses: actions/cache@v5
+        with:
+          path: .static-docs-stage/.next/cache
+          key: ${{ runner.os }}-shiki-benchmark-${{ matrix.shard }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-static-shard-${{ matrix.shard }}-v4-
+            ${{ runner.os }}-static-shard-${{ matrix.shard }}-v3-
+            ${{ runner.os }}-static-shard-${{ matrix.shard }}-v2-
+
+      - name: Build A and hash the complete shard
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'build_a_wall=%e max_rss_kib=%M' \
+            npm run build:static-docs 2>&1 | tee /tmp/build-a.log
+          grep -q '\[static-docs\] Preloaded .* Shiki language grammar' /tmp/build-a.log
+          (
+            cd .static-docs
+            find . -type f -print0 | sort -z | xargs -0 sha256sum
+          ) > /tmp/shard-a.sha256
+          echo "build_a_files=$(wc -l < /tmp/shard-a.sha256 | tr -d ' ')"
+
+      - name: Remove all generated state before build B
+        shell: bash
+        run: rm -rf .static-docs .static-docs-stage
+
+      - name: Build B cold and hash the complete shard
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'build_b_wall=%e max_rss_kib=%M' \
+            npm run build:static-docs 2>&1 | tee /tmp/build-b.log
+          grep -q '\[static-docs\] Preloaded .* Shiki language grammar' /tmp/build-b.log
+          (
+            cd .static-docs
+            find . -type f -print0 | sort -z | xargs -0 sha256sum
+          ) > /tmp/shard-b.sha256
+          echo "build_b_files=$(wc -l < /tmp/shard-b.sha256 | tr -d ' ')"
+
+      - name: Require byte-identical shard outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          diff -u /tmp/shard-a.sha256 /tmp/shard-b.sha256
+          files="$(wc -l < /tmp/shard-a.sha256 | tr -d ' ')"
+          echo "Byte-identical static shard ${STATIC_DOCS_SHARD_INDEX}/4: ${files} files."
