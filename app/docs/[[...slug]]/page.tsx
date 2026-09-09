@@ -4,6 +4,8 @@ import { source } from '@/lib/source';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
+import { statSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   DocsBody,
   DocsDescription,
@@ -22,10 +24,26 @@ type PageParameters = {
 
 export const dynamicParams = false;
 
+function getStaticDocBuildWeight(param: { slug?: string[] }) {
+  const page = source.getPage(param.slug);
+  if (!page) return 1;
+
+  try {
+    return statSync(resolve(process.cwd(), 'content/docs', page.path)).size;
+  } catch {
+    return 1;
+  }
+}
+
 export function generateStaticParams() {
   const shardCount = Number.parseInt(process.env.STATIC_DOCS_SHARD_COUNT ?? '1', 10);
   const shardIndex = Number.parseInt(process.env.STATIC_DOCS_SHARD_INDEX ?? '0', 10);
-  return shardStaticDocParams(source.generateParams(), shardCount, shardIndex);
+  return shardStaticDocParams(
+    source.generateParams(),
+    shardCount,
+    shardIndex,
+    getStaticDocBuildWeight,
+  );
 }
 
 export default async function Page({ params }: PageParameters) {
