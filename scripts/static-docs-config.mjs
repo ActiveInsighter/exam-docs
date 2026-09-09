@@ -8,6 +8,11 @@ export function getStaticDocsConfig() {
   return {
     output: 'export',
     trailingSlash: true,
+
+    // All independently generated shards must agree on the same build id so
+    // their RSC payloads and shared _next/static manifests can be merged safely.
+    generateBuildId: () => 'exam-docs-static-v1',
+
     images: {
       unoptimized: true,
     },
