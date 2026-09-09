@@ -17,6 +17,17 @@ function compressionSizes(json) {
   };
 }
 
+function sumDescriptorSizes(shards) {
+  return shards.reduce(
+    (total, shard) => ({
+      bytes: total.bytes + shard.bytes,
+      gzipBytes: total.gzipBytes + shard.gzipBytes,
+      brotliBytes: total.brotliBytes + shard.brotliBytes,
+    }),
+    { bytes: 0, gzipBytes: 0, brotliBytes: 0 },
+  );
+}
+
 export function canonicalizeZBSearchDatabase(rawJson) {
   const database = JSON.parse(rawJson);
   const ids = database?.internalDocumentIDStore?.internalIdToId;
@@ -81,6 +92,9 @@ export async function canonicalizeZBSearchManifest({ manifestFile }) {
     });
     rewritten += 1;
   }
+
+  Object.assign(manifest.core, sumDescriptorSizes(manifest.core.shards));
+  Object.assign(manifest.body, sumDescriptorSizes(manifest.body.shards));
 
   await writeFile(manifestFile, JSON.stringify(manifest));
   return { rewritten };
