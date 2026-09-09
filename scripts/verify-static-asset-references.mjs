@@ -3,7 +3,10 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const TEXT_EXTENSIONS = new Set(['.html', '.txt', '.css', '.js', '.json']);
-const STATIC_REFERENCE_RE = /\/_next\/static\/[A-Za-z0-9._~!$&'()*+,;=:@%\/-]+/g;
+// Next-generated asset names are ASCII and never require quote/parenthesis delimiters.
+// Excluding those delimiters prevents CSS url(...) closing punctuation from being
+// mistaken for part of the asset path.
+const STATIC_REFERENCE_RE = /\/_next\/static\/[A-Za-z0-9._~!$&*+,;=:@%\/-]+/g;
 
 async function collectFiles(root, current = root, output = []) {
   for (const entry of await readdir(current, { withFileTypes: true })) {
