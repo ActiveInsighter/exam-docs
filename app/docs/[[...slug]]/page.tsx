@@ -1,4 +1,5 @@
 import { getMDXComponents } from '@/components/mdx';
+import { shardStaticDocParams } from '@/lib/static-doc-shards';
 import { source } from '@/lib/source';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -22,7 +23,9 @@ type PageParameters = {
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return source.generateParams();
+  const shardCount = Number.parseInt(process.env.STATIC_DOCS_SHARD_COUNT ?? '1', 10);
+  const shardIndex = Number.parseInt(process.env.STATIC_DOCS_SHARD_INDEX ?? '0', 10);
+  return shardStaticDocParams(source.generateParams(), shardCount, shardIndex);
 }
 
 export default async function Page({ params }: PageParameters) {

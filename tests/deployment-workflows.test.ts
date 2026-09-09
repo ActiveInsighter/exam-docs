@@ -17,4 +17,27 @@ describe('static deployment workflows', () => {
     );
     expect(workflow).not.toContain('STATIC_DOCS_DISABLE_RSC_DEDUPE');
   });
+
+  it('requires deterministic four-way static generation before deployment', async () => {
+    const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
+    const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
+
+    expect(workflow).toContain("STATIC_DOCS_SHARD_COUNT: '4'");
+    expect(workflow).toContain('shard: [0, 1, 2, 3]');
+    expect(workflow).toContain('Verify shared chunks are identical');
+    expect(workflow).toContain('Merge static outputs with conflict checks');
+    expect(workflow).toContain("test \"${doc_routes}\" = '531'");
+    expect(workflow).toContain("test \"${markdown}\" = '530'");
+    expect(workflow).toContain('tests/static-doc-shards.test.ts');
+    expect(workflow).toContain('tests/static-build-id.test.ts');
+  });
+
+  it('never deploys benchmark branches to production', async () => {
+    const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
+    const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
+
+    expect(workflow).toContain("github.ref == 'refs/heads/main'");
+    expect(workflow).toContain('Deploy to Cloudflare Workers Static Assets');
+    expect(workflow).toContain('Full static documentation route verification');
+  });
 });

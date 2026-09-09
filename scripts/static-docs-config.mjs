@@ -8,6 +8,9 @@ export function getStaticDocsConfig() {
   return {
     output: 'export',
     trailingSlash: true,
+    // The build runner computes a content-aware static-shell fingerprint and
+    // passes it to every shard. The fallback is only for ad-hoc manual builds.
+    generateBuildId: () => process.env.STATIC_DOCS_BUILD_ID ?? 'exam-docs-static-local',
     images: {
       unoptimized: true,
     },
