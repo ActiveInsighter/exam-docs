@@ -53,8 +53,9 @@ jobs:
         uses: actions/cache@v5
         with:
           path: .static-docs-stage/.next/cache
-          key: ${{ runner.os }}-static-shard-${{ matrix.shard }}-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-${{ github.sha }}
+          key: ${{ runner.os }}-static-shard-${{ matrix.shard }}-v2-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-${{ github.sha }}
           restore-keys: |
+            ${{ runner.os }}-static-shard-${{ matrix.shard }}-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-
             ${{ runner.os }}-cloudflare-static-docs-turbopack-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-
             ${{ runner.os }}-static-docs-turbopack-v4-
 
@@ -76,3 +77,154 @@ jobs:
             echo "::error::Unexpected route count ${routes} for shard ${STATIC_DOCS_SHARD_INDEX}."
             exit 1
           fi
+
+      - name: Prepare merge payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload="/tmp/static-shard-${STATIC_DOCS_SHARD_INDEX}.tar.zst"
+          manifest="/tmp/static-chunks-${STATIC_DOCS_SHARD_INDEX}.sha256"
+
+          find .static-docs/_next/static -type f -print0 \
+            | sort -z \
+            | xargs -0 sha256sum \
+            | sed 's#  .static-docs/#  #' > "${manifest}"
+
+          if [[ "${STATIC_DOCS_SHARD_INDEX}" == '0' ]]; then
+            # Keep one complete copy of shared generated assets and all direct
+            # Markdown/search files, but reconstruct public/ from checkout in
+            # the merge job to avoid moving ~78 MiB of images through artifacts.
+            tar --zstd -cf "${payload}" \
+              --exclude='.static-docs/img' \
+              .static-docs
+          else
+            # Other shards contribute only their unique rendered doc routes.
+            # The docs entry point, canonical __next.docs.txt, and .md files are
+            # already provided by shard 0 and would only duplicate payload.
+            tar --zstd -cf "${payload}" \
+              --exclude='.static-docs/docs/index.html' \
+              --exclude='.static-docs/docs/__next.docs.txt' \
+              --exclude='*.md' \
+              .static-docs/docs
+          fi
+
+          ls -lh "${payload}" "${manifest}"
+
+      - name: Upload shard payload
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-shard-${{ matrix.shard }}
+          path: |
+            /tmp/static-shard-${{ matrix.shard }}.tar.zst
+            /tmp/static-chunks-${{ matrix.shard }}.sha256
+          compression-level: 0
+          retention-days: 1
+
+  merge:
+    name: Merge and validate four shards
+    needs: shard
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Download shard payloads
+        uses: actions/download-artifact@v4
+        with:
+          pattern: static-shard-*
+          path: /tmp/static-shards
+
+      - name: Verify shared chunks are identical
+        shell: bash
+        run: |
+          set -euo pipefail
+          reference="/tmp/static-shards/static-shard-0/static-chunks-0.sha256"
+          for shard in 1 2 3; do
+            diff -u "${reference}" "/tmp/static-shards/static-shard-${shard}/static-chunks-${shard}.sha256"
+          done
+          echo 'All four shards produced identical _next/static chunk sets.'
+
+      - name: Merge static outputs with conflict checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .static-docs /tmp/shard-extract
+          mkdir -p .static-docs /tmp/shard-extract
+
+          tar --zstd -xf /tmp/static-shards/static-shard-0/static-shard-0.tar.zst
+          mv .static-docs .static-docs-base
+          mv .static-docs-base .static-docs
+
+          # Restore public assets intentionally omitted from the transfer.
+          cp -a public/. .static-docs/
+
+          for shard in 1 2 3; do
+            rm -rf /tmp/shard-extract/*
+            tar --zstd -xf "/tmp/static-shards/static-shard-${shard}/static-shard-${shard}.tar.zst" \
+              -C /tmp/shard-extract
+            SHARD_ROOT="/tmp/shard-extract/.static-docs" TARGET_ROOT="${PWD}/.static-docs" python - <<'PY'
+          from pathlib import Path
+          import hashlib
+          import os
+          import shutil
+
+          source = Path(os.environ['SHARD_ROOT'])
+          target = Path(os.environ['TARGET_ROOT'])
+          conflicts = []
+          copied = 0
+          identical = 0
+
+          def digest(path: Path):
+              h = hashlib.sha256()
+              with path.open('rb') as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b''):
+                      h.update(chunk)
+              return h.digest()
+
+          for src in source.rglob('*'):
+              if not src.is_file():
+                  continue
+              rel = src.relative_to(source)
+              dst = target / rel
+              if dst.exists():
+                  if digest(src) != digest(dst):
+                      conflicts.append(str(rel))
+                  else:
+                      identical += 1
+                  continue
+              dst.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copy2(src, dst)
+              copied += 1
+
+          print(f'copied={copied} identical={identical} conflicts={len(conflicts)}')
+          if conflicts:
+              print('\n'.join(conflicts[:50]))
+              raise SystemExit('Shard merge produced conflicting files.')
+          PY
+          done
+
+      - name: Validate merged package
+        shell: bash
+        run: |
+          set -euo pipefail
+          doc_routes="$(find .static-docs/docs -type f -name index.html | wc -l | tr -d ' ')"
+          files="$(find .static-docs -type f | wc -l | tr -d ' ')"
+          bytes="$(du -sb .static-docs | awk '{print $1}')"
+          markdown="$(find .static-docs/docs -type f -name '*.md' | wc -l | tr -d ' ')"
+          echo "merged_routes=${doc_routes} files=${files} markdown=${markdown} bytes=${bytes}"
+          test "${doc_routes}" = '531'
+          test "${markdown}" = '530'
+          test -s .static-docs/docs/intro/index.html
+          test -s .static-docs/docs/intro/__next._full.txt
+          test -s .static-docs/search-index.json
+
+      - name: Prepare Cloudflare metadata and dry run
+        run: npm run prepare:cloudflare-assets && npx --yes wrangler@4.129.0 deploy --dry-run --config wrangler.jsonc --outdir .wrangler-sharded
