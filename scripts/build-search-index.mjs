@@ -8,6 +8,11 @@ function formatMiB(bytes) {
 }
 
 async function main() {
+  if (process.env.STATIC_DOCS_SKIP_SEARCH_BUILD === '1') {
+    console.log('[search] Skipped in static shard; dedicated search job owns search assets.');
+    return;
+  }
+
   const outputFile = path.resolve(process.argv[2] ?? 'public/search-index.json');
   const index = await buildZBSearchIndex({ outputFile });
   const deterministic = await canonicalizeZBSearchManifest({ manifestFile: outputFile });
