@@ -52,63 +52,85 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
-          import hashlib, json, re
+          from collections import defaultdict
+          import json, re
 
           roots = [Path('/tmp/search-a'), Path('/tmp/search-b')]
-          def files(root):
-              return {p.relative_to(root).as_posix(): p for p in root.rglob('*') if p.is_file()}
-          a, b = map(files, roots)
-          print(f'files_a={len(a)} files_b={len(b)}')
 
-          def logical_name(name):
-              return re.sub(r'-[0-9a-f]{12}\.json$', '.json', name)
+          def load(root, url):
+              return json.loads((root / url.lstrip('/')).read_text())
 
-          def grouped(mapping):
-              out = {}
-              for rel, p in mapping.items():
-                  key = logical_name(rel)
-                  if key in out:
-                      raise SystemExit(f'duplicate logical search output: {key}')
-                  out[key] = p
-              return out
+          def normalize_url(value):
+              if not isinstance(value, str):
+                  return value
+              return re.sub(r'-[0-9a-f]{12}(?=\.json$)', '-<digest>', value)
 
-          ga, gb = grouped(a), grouped(b)
-          print(f'logical_a={len(ga)} logical_b={len(gb)}')
-          print('logical_only_a=', sorted(set(ga)-set(gb))[:20])
-          print('logical_only_b=', sorted(set(gb)-set(ga))[:20])
+          def normalize(value):
+              if isinstance(value, dict):
+                  return {k: normalize(v) for k, v in sorted(value.items())}
+              if isinstance(value, list):
+                  return [normalize(v) for v in value]
+              return normalize_url(value)
 
-          raw_changed = 0
-          semantic_changed = 0
-          canonical_changed = 0
-          for key in sorted(set(ga) & set(gb)):
-              pa, pb = ga[key], gb[key]
+          manifests = [json.loads((root / 'search-index.json').read_text()) for root in roots]
+          print('manifest_equal_raw=', manifests[0] == manifests[1])
+          print('manifest_equal_without_digests=', normalize(manifests[0]) == normalize(manifests[1]))
+
+          categories = []
+          by_id = [{c['id']: c for c in manifest['categories']} for manifest in manifests]
+          if set(by_id[0]) != set(by_id[1]):
+              raise SystemExit(f'category sets differ: {set(by_id[0]) ^ set(by_id[1])}')
+
+          pairs = []
+          router_semantic_changes = 0
+          for category in sorted(by_id[0]):
+              ca, cb = by_id[0][category], by_id[1][category]
+              ra, rb = load(roots[0], ca['router']['url']), load(roots[1], cb['router']['url'])
+              if normalize(ra) != normalize(rb):
+                  router_semantic_changes += 1
+
+              for kind in ('core', 'body'):
+                  ga, gb = defaultdict(list), defaultdict(list)
+                  for shard in ra[kind]:
+                      ga[(shard['group'], shard['records'])].append(shard)
+                  for shard in rb[kind]:
+                      gb[(shard['group'], shard['records'])].append(shard)
+                  if set(ga) != set(gb):
+                      raise SystemExit(f'{category}/{kind} descriptor groups differ')
+                  for key in sorted(ga):
+                      la = sorted(ga[key], key=lambda item: normalize_url(item['url']))
+                      lb = sorted(gb[key], key=lambda item: normalize_url(item['url']))
+                      if len(la) != len(lb):
+                          raise SystemExit(f'{category}/{kind}/{key} shard counts differ')
+                      for index, (sa, sb) in enumerate(zip(la, lb)):
+                          pairs.append((f'{category}/{kind}/{key}/{index}', sa['url'], sb['url']))
+
+          raw_changed = semantic_changed = canonical_changed = 0
+          for label, ua, ub in pairs:
+              pa = roots[0] / ua.lstrip('/')
+              pb = roots[1] / ub.lstrip('/')
               ba, bb = pa.read_bytes(), pb.read_bytes()
               if ba != bb:
                   raw_changed += 1
-              try:
-                  ja, jb = json.loads(ba), json.loads(bb)
-              except Exception:
-                  continue
+              ja, jb = json.loads(ba), json.loads(bb)
               if ja != jb:
                   semantic_changed += 1
-                  if semantic_changed <= 5:
-                      print(f'SEMANTIC_CHANGED {key}')
-                      # Show compact top-level diagnostics without dumping the index.
+                  if semantic_changed <= 8:
+                      print(f'SEMANTIC_CHANGED {label}')
                       if isinstance(ja, dict) and isinstance(jb, dict):
-                          print(' keys_a=', sorted(ja.keys()))
-                          print(' keys_b=', sorted(jb.keys()))
-                          for k in sorted(set(ja) & set(jb)):
-                              if ja[k] != jb[k]:
-                                  va, vb = ja[k], jb[k]
-                                  print(f' first_top_level_diff={k} type_a={type(va).__name__} type_b={type(vb).__name__}')
-                                  sa, sb = repr(va)[:1200], repr(vb)[:1200]
-                                  print('  a=', sa)
-                                  print('  b=', sb)
+                          print(' keys=', sorted(set(ja) | set(jb)))
+                          for key in sorted(set(ja) & set(jb)):
+                              if ja[key] != jb[key]:
+                                  print(' first_top_level_diff=', key)
+                                  print('  a=', repr(ja[key])[:1200])
+                                  print('  b=', repr(jb[key])[:1200])
                                   break
-              ca = json.dumps(ja, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()
-              cb = json.dumps(jb, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()
+              ca = json.dumps(ja, ensure_ascii=False, sort_keys=True, separators=(',', ':'))
+              cb = json.dumps(jb, ensure_ascii=False, sort_keys=True, separators=(',', ':'))
               if ca != cb:
                   canonical_changed += 1
 
+          print(f'paired_search_shards={len(pairs)}')
+          print(f'router_semantic_changes_without_digests={router_semantic_changes}')
           print(f'raw_changed={raw_changed} semantic_changed={semantic_changed} canonical_changed={canonical_changed}')
           PY
