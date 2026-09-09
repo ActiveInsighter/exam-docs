@@ -1,0 +1,114 @@
+name: Benchmark search output determinism
+
+on:
+  push:
+    branches:
+      - codex/search-output-determinism
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    name: Compare two search builds
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Restore project dependency tree
+        id: node-modules-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node22-modules-v1-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies on cache miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Refresh Fumadocs generated source
+        run: npm run postinstall
+
+      - name: Build search twice
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/search-a /tmp/search-b
+          mkdir -p /tmp/search-a /tmp/search-b
+          /usr/bin/time -f 'search_a_wall=%e max_rss_kib=%M' node scripts/build-search-index.mjs /tmp/search-a/search-index.json
+          /usr/bin/time -f 'search_b_wall=%e max_rss_kib=%M' node scripts/build-search-index.mjs /tmp/search-b/search-index.json
+
+      - name: Compare search output semantically
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json, re
+
+          roots = [Path('/tmp/search-a'), Path('/tmp/search-b')]
+          def files(root):
+              return {p.relative_to(root).as_posix(): p for p in root.rglob('*') if p.is_file()}
+          a, b = map(files, roots)
+          print(f'files_a={len(a)} files_b={len(b)}')
+
+          def logical_name(name):
+              return re.sub(r'-[0-9a-f]{12}\.json$', '.json', name)
+
+          def grouped(mapping):
+              out = {}
+              for rel, p in mapping.items():
+                  key = logical_name(rel)
+                  if key in out:
+                      raise SystemExit(f'duplicate logical search output: {key}')
+                  out[key] = p
+              return out
+
+          ga, gb = grouped(a), grouped(b)
+          print(f'logical_a={len(ga)} logical_b={len(gb)}')
+          print('logical_only_a=', sorted(set(ga)-set(gb))[:20])
+          print('logical_only_b=', sorted(set(gb)-set(ga))[:20])
+
+          raw_changed = 0
+          semantic_changed = 0
+          canonical_changed = 0
+          for key in sorted(set(ga) & set(gb)):
+              pa, pb = ga[key], gb[key]
+              ba, bb = pa.read_bytes(), pb.read_bytes()
+              if ba != bb:
+                  raw_changed += 1
+              try:
+                  ja, jb = json.loads(ba), json.loads(bb)
+              except Exception:
+                  continue
+              if ja != jb:
+                  semantic_changed += 1
+                  if semantic_changed <= 5:
+                      print(f'SEMANTIC_CHANGED {key}')
+                      # Show compact top-level diagnostics without dumping the index.
+                      if isinstance(ja, dict) and isinstance(jb, dict):
+                          print(' keys_a=', sorted(ja.keys()))
+                          print(' keys_b=', sorted(jb.keys()))
+                          for k in sorted(set(ja) & set(jb)):
+                              if ja[k] != jb[k]:
+                                  va, vb = ja[k], jb[k]
+                                  print(f' first_top_level_diff={k} type_a={type(va).__name__} type_b={type(vb).__name__}')
+                                  sa, sb = repr(va)[:1200], repr(vb)[:1200]
+                                  print('  a=', sa)
+                                  print('  b=', sb)
+                                  break
+              ca = json.dumps(ja, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()
+              cb = json.dumps(jb, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()
+              if ca != cb:
+                  canonical_changed += 1
+
+          print(f'raw_changed={raw_changed} semantic_changed={semantic_changed} canonical_changed={canonical_changed}')
+          PY
