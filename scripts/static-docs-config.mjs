@@ -16,11 +16,11 @@ export function getStaticDocsConfig() {
       // filesystem caching is supported by Next 16 but remains experimental.
       turbopackFileSystemCacheForBuild: true,
 
-      // The GitHub runner exposes four logical CPUs and the latest production
-      // build kept more than 14 GiB of memory free during static generation.
-      // Use the available CPU budget instead of the earlier conservative cap.
+      // Keep the conservative per-worker concurrency. A production A/B run on
+      // the same 536-page corpus showed maxConcurrency=4 did not improve wall
+      // time (288.94s vs 286.92s), so retain the lower-contention setting.
       staticGenerationRetryCount: 1,
-      staticGenerationMaxConcurrency: 4,
+      staticGenerationMaxConcurrency: 2,
       staticGenerationMinPagesPerWorker: 50,
     },
   };
