@@ -1,0 +1,97 @@
+name: Benchmark canonical search determinism
+
+on:
+  push:
+    branches:
+      - codex/search-deterministic-assets
+
+concurrency:
+  group: exam-docs-search-determinism-v2-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  determinism:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Restore project dependency tree
+        id: node-modules-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node22-modules-v1-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies on cache miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Refresh Fumadocs generated source
+        run: npm run postinstall
+
+      - name: Run deterministic serialization test
+        run: npm test -- tests/search-determinism.test.ts
+
+      - name: Build search output twice
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/search-a /tmp/search-b
+          mkdir -p /tmp/search-a /tmp/search-b
+          /usr/bin/time -f 'search_a_wall=%e max_rss_kib=%M' node scripts/build-search-index.mjs /tmp/search-a/search-index.json
+          /usr/bin/time -f 'search_b_wall=%e max_rss_kib=%M' node scripts/build-search-index.mjs /tmp/search-b/search-index.json
+
+      - name: Require byte-identical search trees
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd /tmp/search-a
+            find . -type f -print0 | sort -z | xargs -0 sha256sum
+          ) > /tmp/search-a.sha256
+          (
+            cd /tmp/search-b
+            find . -type f -print0 | sort -z | xargs -0 sha256sum
+          ) > /tmp/search-b.sha256
+          diff -u /tmp/search-a.sha256 /tmp/search-b.sha256
+          files="$(wc -l < /tmp/search-a.sha256 | tr -d ' ')"
+          echo "Byte-identical search tree: ${files} files."
+          test "${files}" = '45'
+
+      - name: Load and query canonicalized ZBSearch shard
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { readFile } from 'node:fs/promises';
+          import path from 'node:path';
+          import { create, load, search } from 'zbsearch';
+
+          const root = '/tmp/search-a';
+          const manifest = JSON.parse(await readFile(path.join(root, 'search-index.json'), 'utf8'));
+          const category = manifest.categories.find((item) => item.id === '408') ?? manifest.categories[0];
+          const router = JSON.parse(await readFile(path.join(root, category.router.url.replace(/^\//, '')), 'utf8'));
+          const descriptor = router.core[0];
+          const raw = JSON.parse(await readFile(path.join(root, descriptor.url.replace(/^\//, '')), 'utf8'));
+          const db = create({ schema: { _: 'string' } });
+          load(db, raw);
+          const firstDocument = Object.values(raw.docs?.docs ?? {})[0];
+          if (!firstDocument?.title) throw new Error('Canonicalized shard did not contain a searchable document.');
+          const query = String(firstDocument.title).split(/\s+/)[0];
+          const result = await search(db, { term: query, limit: 5 });
+          if (!Array.isArray(result.hits) || result.hits.length === 0) {
+            throw new Error(`Canonicalized ZBSearch shard returned no hits for ${query}.`);
+          }
+          console.log(`Canonicalized search smoke test: ${result.hits.length} hit(s) for ${query}.`);
+          NODE
