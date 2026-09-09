@@ -342,6 +342,7 @@ jobs:
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Validate Wrangler configuration with a dry run
+        if: ${{ github.ref != 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && inputs.deploy != true) }}
         run: npx --yes wrangler@4.129.0 deploy --dry-run --config wrangler.jsonc --outdir .wrangler-dry-run
 
       - name: Check Cloudflare deployment credentials
