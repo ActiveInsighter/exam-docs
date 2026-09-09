@@ -1,5 +1,4 @@
-import { docs } from 'collections/dynamic';
-import { blog } from 'collections/server';
+import { blog, docs } from 'collections/server';
 import { loader } from 'fumadocs-core/source';
 import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
 import { getShortDocSlugs } from './doc-paths.mjs';
