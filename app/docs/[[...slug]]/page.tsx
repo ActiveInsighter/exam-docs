@@ -36,7 +36,7 @@ export default async function Page({ params }: PageParameters) {
 
   return (
     <DocsPage toc={data.toc} full={page.data.full}>
-      <DocsTitle className="font-medium">{page.data.title}</DocsTitle>
+      <DocsTitle className="docs-page-title font-medium">{page.data.title}</DocsTitle>
       <DocsDescription className="mb-1 font-normal">
         {page.data.description}
       </DocsDescription>
