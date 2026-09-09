@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - codex/static-chunk-union
+      - codex/search-runner-production
   workflow_dispatch:
     inputs:
       deploy:
@@ -68,6 +68,65 @@ jobs:
           tests/static-build-id.test.ts
           tests/search-determinism.test.ts
           tests/static-asset-references.test.ts
+          tests/search-runner-separation.test.ts
+
+  search:
+    name: Build search assets
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Restore project dependency tree
+        id: node-modules-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node22-modules-v1-${{ hashFiles('package-lock.json') }}
+
+      - name: Restore npm download cache on dependency miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node22-npm-v1-${{ hashFiles('package-lock.json') }}
+
+      - name: Install project dependencies on cache miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Refresh Fumadocs generated source
+        run: npm run postinstall
+
+      - name: Build search index
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/static-search-output
+          mkdir -p /tmp/static-search-output
+          /usr/bin/time -v node scripts/build-search-index.mjs /tmp/static-search-output/search-index.json
+          test -s /tmp/static-search-output/search-index.json
+          test -d /tmp/static-search-output/search
+          files="$(find /tmp/static-search-output -type f | wc -l | tr -d ' ')"
+          bytes="$(du -sb /tmp/static-search-output | awk '{print $1}')"
+          echo "search_files=${files} search_bytes=${bytes}"
+
+      - name: Upload search assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-search-assets
+          path: /tmp/static-search-output
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 1
 
   build-shard:
     name: Static shard ${{ matrix.shard }} of 4
@@ -80,6 +139,7 @@ jobs:
     env:
       STATIC_DOCS_SHARD_COUNT: '4'
       STATIC_DOCS_SHARD_INDEX: ${{ matrix.shard }}
+      STATIC_DOCS_SKIP_SEARCH_BUILD: '1'
 
     steps:
       - name: Checkout repository
@@ -125,7 +185,7 @@ jobs:
             ${{ runner.os }}-cloudflare-static-docs-turbopack-v1-
             ${{ runner.os }}-static-docs-turbopack-v4-
 
-      - name: Build static shard
+      - name: Build static shard without search contention
         shell: bash
         run: |
           set -euo pipefail
@@ -138,19 +198,18 @@ jobs:
           routes="$(find .static-docs/docs -type f -name index.html | wc -l | tr -d ' ')"
           files="$(find .static-docs -type f | wc -l | tr -d ' ')"
           bytes="$(du -sb .static-docs | awk '{print $1}')"
-          echo "shard=${STATIC_DOCS_SHARD_INDEX}/4 routes=${routes} files=${files} bytes=${bytes}"
+          markdown="$(find .static-docs/docs -type f -name '*.md' | wc -l | tr -d ' ')"
+          echo "shard=${STATIC_DOCS_SHARD_INDEX}/4 routes=${routes} files=${files} markdown=${markdown} bytes=${bytes}"
           if (( routes < 125 || routes > 140 )); then
             echo "::error::Unexpected route count ${routes} for shard ${STATIC_DOCS_SHARD_INDEX}."
             exit 1
           fi
           test -d .static-docs/_next/static
+          test ! -e .static-docs/search-index.json
+          test ! -e .static-docs/search
           if [[ "${STATIC_DOCS_SHARD_INDEX}" == '0' ]]; then
-            test -s .static-docs/search-index.json
-            markdown="$(find .static-docs/docs -type f -name '*.md' | wc -l | tr -d ' ')"
             test "${markdown}" = '530'
           else
-            test ! -e .static-docs/search-index.json
-            markdown="$(find .static-docs/docs -type f -name '*.md' | wc -l | tr -d ' ')"
             test "${markdown}" = '0'
           fi
 
@@ -188,12 +247,13 @@ jobs:
           path: |
             /tmp/static-shard-${{ matrix.shard }}.tar.zst
             /tmp/static-chunks-${{ matrix.shard }}.sha256
+          if-no-files-found: error
           compression-level: 0
           retention-days: 1
 
   deploy:
     name: Merge and deploy Worker Static Assets
-    needs: [validate, build-shard]
+    needs: [validate, search, build-shard]
     runs-on: ubuntu-24.04
     timeout-minutes: 20
 
@@ -212,6 +272,12 @@ jobs:
         with:
           pattern: static-shard-*
           path: /tmp/static-shards
+
+      - name: Download search assets
+        uses: actions/download-artifact@v4
+        with:
+          name: static-search-assets
+          path: /tmp/static-search-output
 
       - name: Verify overlapping shared chunks are identical
         shell: bash
@@ -306,6 +372,12 @@ jobs:
           PY
           done
 
+          test -s /tmp/static-search-output/search-index.json
+          test -d /tmp/static-search-output/search
+          test ! -e .static-docs/search-index.json
+          test ! -e .static-docs/search
+          cp -a /tmp/static-search-output/. .static-docs/
+
       - name: Validate merged package
         shell: bash
         run: |
@@ -322,6 +394,7 @@ jobs:
           test -s .static-docs/docs/__next.docs.txt
           test ! -e .static-docs/docs/intro/__next.docs.txt
           test -s .static-docs/search-index.json
+          test -d .static-docs/search
           test -s .static-docs/404.html
           node scripts/verify-static-asset-references.mjs .static-docs
 
@@ -368,7 +441,7 @@ jobs:
             echo "- Uploadable asset files: ${file_count}/20000"
             echo "- Largest uploadable asset: $((largest_bytes / 1024 / 1024)) MiB / 25 MiB"
             echo "- Local static package: $((package_bytes / 1024 / 1024)) MiB"
-            echo '- Static generation: 4 deterministic URL shards'
+            echo '- Static generation: 4 deterministic URL shards + dedicated search runner'
             echo '- Worker JavaScript: none (assets-only deployment)'
             echo '- RSC aliases: deduplicated locally and restored through two guarded Cloudflare 200 rewrites'
           } >> "${GITHUB_STEP_SUMMARY}"
