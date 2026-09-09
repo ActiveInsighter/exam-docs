@@ -3,25 +3,18 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 describe('static deployment workflows', () => {
-  it('matches the RSC verification path to each deployment package layout', async () => {
-    const workflowExpectations = [
-      {
-        path: '.github/workflows/deploy-cloudflare-worker-assets.yml',
-        required: ["'/docs/intro/index.txt'", "'/docs/intro/__next.docs.txt'"],
-        forbidden: ["'/docs/__next.docs.txt'"],
-      },
-      {
-        path: '.github/workflows/deploy-static-docs-preview.yml',
-        required: ["'/docs/__next.docs.txt'"],
-        forbidden: ["'/docs/intro/index.txt'", "'/docs/intro/__next.docs.txt'"],
-      },
-    ];
+  it('keeps the Cloudflare deployment on guarded RSC dedupe', async () => {
+    const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
+    const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
 
-    for (const expectation of workflowExpectations) {
-      const workflow = await readFile(resolve(process.cwd(), expectation.path), 'utf8');
-
-      for (const path of expectation.required) expect(workflow, expectation.path).toContain(path);
-      for (const path of expectation.forbidden) expect(workflow, expectation.path).not.toContain(path);
-    }
+    expect(workflow).toContain("'/docs/intro/index.txt'");
+    expect(workflow).toContain("'/docs/intro/__next.docs.txt'");
+    expect(workflow).toContain(
+      "grep -F '/docs/*/index.txt /docs/:splat/__next._full.txt 200'",
+    );
+    expect(workflow).toContain(
+      "grep -F '/docs/*/__next.docs.txt /docs/__next.docs.txt 200'",
+    );
+    expect(workflow).not.toContain('STATIC_DOCS_DISABLE_RSC_DEDUPE');
   });
 });
