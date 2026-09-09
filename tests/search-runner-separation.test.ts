@@ -22,4 +22,7 @@ describe('dedicated static search runner', () => {
     expect(searchScript).toContain("process.env.STATIC_DOCS_SKIP_SEARCH_BUILD === '1'");
     expect(searchScript).toContain('dedicated search job owns search assets');
   });
+
+  // Keep this file outside the Turbopack cache key so repeated branch runs can
+  // measure a true primary-cache hit without changing any build inputs.
 });
