@@ -2,7 +2,10 @@ import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-const TEXT_EXTENSIONS = new Set(['.html', '.txt', '.css', '.js', '.json']);
+// Browser-facing Next asset references originate from exported HTML/RSC payloads
+// and from CSS (for fonts/media). Scanning generated JavaScript would also match
+// runtime constants such as `/_next/static/immutable`, which are not asset URLs.
+const TEXT_EXTENSIONS = new Set(['.html', '.txt', '.css']);
 // Next-generated asset names are ASCII and never require quote/parenthesis delimiters.
 // Excluding those delimiters prevents CSS url(...) closing punctuation from being
 // mistaken for part of the asset path.
@@ -61,7 +64,7 @@ async function main() {
   const root = process.argv[2] ?? '.static-docs';
   const result = await findMissingStaticAssetReferences(root);
   console.log(
-    `[static-assets] Scanned ${result.scannedFiles} text files; ` +
+    `[static-assets] Scanned ${result.scannedFiles} browser-facing text files; ` +
       `${result.uniqueReferences} unique /_next/static references.`,
   );
 
@@ -74,7 +77,7 @@ async function main() {
     throw new Error(`${result.missing.length} static asset reference(s) are missing.`);
   }
 
-  console.log('[static-assets] Every referenced /_next/static asset exists.');
+  console.log('[static-assets] Every browser-facing /_next/static reference exists.');
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
