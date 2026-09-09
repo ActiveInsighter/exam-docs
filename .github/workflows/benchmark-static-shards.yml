@@ -1,0 +1,78 @@
+name: Benchmark static generation shards
+
+on:
+  push:
+    branches:
+      - codex/static-build-shards-benchmark
+
+concurrency:
+  group: exam-docs-static-shards-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  shard:
+    name: Static shard ${{ matrix.shard }} of 4
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      STATIC_DOCS_SHARD_COUNT: '4'
+      STATIC_DOCS_SHARD_INDEX: ${{ matrix.shard }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Restore project dependency tree
+        id: node-modules-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node22-modules-v1-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies on cache miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Refresh Fumadocs generated source
+        run: npm run postinstall
+
+      - name: Restore production-equivalent Next/Turbopack cache
+        uses: actions/cache@v5
+        with:
+          path: .static-docs-stage/.next/cache
+          key: ${{ runner.os }}-static-shard-${{ matrix.shard }}-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cloudflare-static-docs-turbopack-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-
+            ${{ runner.os }}-static-docs-turbopack-v4-
+
+      - name: Build static shard
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v npm run build:static-docs
+
+      - name: Report shard output
+        shell: bash
+        run: |
+          set -euo pipefail
+          routes="$(find .static-docs/docs -type f -name index.html | wc -l | tr -d ' ')"
+          files="$(find .static-docs -type f | wc -l | tr -d ' ')"
+          bytes="$(du -sb .static-docs | awk '{print $1}')"
+          echo "shard=${STATIC_DOCS_SHARD_INDEX}/4 routes=${routes} files=${files} bytes=${bytes}"
+          if (( routes < 125 || routes > 140 )); then
+            echo "::error::Unexpected route count ${routes} for shard ${STATIC_DOCS_SHARD_INDEX}."
+            exit 1
+          fi
