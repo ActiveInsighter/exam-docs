@@ -5,6 +5,7 @@ import lastModified from 'fumadocs-mdx/plugins/last-modified';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { z } from 'zod';
+import { remarkExamHeadings } from './lib/remark-exam-headings';
 
 const isStaticDocsBuild = process.env.STATIC_DOCS_BUILD === '1';
 
@@ -42,9 +43,11 @@ export const blog = defineCollections({
 export default defineConfig({
   plugins: [lastModified()],
   mdxOptions: {
-    // The pure-static CDN build does not consume Fumadocs' generated structure
-    // index, so skip that traversal there.
+    // Strip heading semantics from question/solution content before
+    // remarkStructure sees the tree, so exercise-internal headings never leak
+    // into the page TOC or create unstable sidebar jump targets.
     remarkPlugins: (plugins) => [
+      remarkExamHeadings,
       ...(isStaticDocsBuild
         ? plugins.filter((plugin) => {
             const entry = Array.isArray(plugin) ? plugin[0] : plugin;
