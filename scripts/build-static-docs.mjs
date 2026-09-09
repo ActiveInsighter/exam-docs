@@ -268,17 +268,19 @@ async function main() {
     console.log(`[timing] prepare_static_stage=${formatSeconds(Date.now() - prepareStartedAt)}`);
     logRunnerResources();
 
-    // First isolate the Dynamic MDX + bounded SSG effect with sequential heavy
-    // processes. Once peak memory is proven safe, Next and ZBSearch can run in
-    // parallel again to recover end-to-end deployment latency.
+    // Next's long SSG phase leaves substantial CPU/memory headroom at points,
+    // while ZBSearch is an independent read-only build over content/docs. Run
+    // them together and measure the real wall-time tradeoff on the CI runner.
     const buildStartedAt = Date.now();
-    const nextTiming = await runNextBuild(stageRoot);
-    logRunnerResources();
-    const searchTiming = await runSearchBuild(staticSearchRoot);
+    const [nextTiming, searchTiming] = await Promise.all([
+      runNextBuild(stageRoot),
+      runSearchBuild(staticSearchRoot),
+    ]);
     const buildDurationMs = Date.now() - buildStartedAt;
-    console.log(`[timing] sequential_build_wall=${formatSeconds(buildDurationMs)}`);
+    logRunnerResources();
+    console.log(`[timing] parallel_build_wall=${formatSeconds(buildDurationMs)}`);
     console.log(
-      `[timing] sequential_build_sum=${formatSeconds(nextTiming.durationMs + searchTiming.durationMs)}`,
+      `[timing] parallel_build_sum=${formatSeconds(nextTiming.durationMs + searchTiming.durationMs)}`,
     );
 
     const assembleStartedAt = Date.now();
