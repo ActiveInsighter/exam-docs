@@ -10,6 +10,7 @@ import {
   useState,
 } from 'react';
 import styles from './exam-question.module.css';
+import triggerStyles from './exam-solution-trigger.module.css';
 
 const CLOSE_ANIMATION_MS = 160;
 
@@ -141,7 +142,7 @@ export function ExamSolutionDialog({
           <button
             ref={triggerRef}
             type="button"
-            className={styles.trigger}
+            className={`${styles.trigger} ${triggerStyles.trigger}`}
             aria-controls={dialogId}
             aria-describedby={answerIsAvailable ? answerId : undefined}
             aria-expanded={dialogState === 'open'}
@@ -154,11 +155,11 @@ export function ExamSolutionDialog({
             <span>{buttonLabel}</span>
           </button>
 
-           {answerIsAvailable ? (
-             <div id={answerId} role="tooltip" className={styles.answerPreview}>
-               <div className={styles.answerPreviewValue}>{answer}</div>
-             </div>
-           ) : null}
+          {answerIsAvailable ? (
+            <div id={answerId} role="tooltip" className={styles.answerPreview}>
+              <div className={styles.answerPreviewValue}>{answer}</div>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -182,9 +183,9 @@ export function ExamSolutionDialog({
         >
           <div className={styles.dialogShell}>
             <header className={styles.dialogHeader}>
-              <h2 id={titleId} className={styles.dialogTitle}>
+              <div id={titleId} className={styles.dialogTitle}>
                 {dialogTitle}
-              </h2>
+              </div>
               <button
                 ref={closeButtonRef}
                 type="button"
