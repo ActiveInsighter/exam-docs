@@ -144,10 +144,6 @@ function runNextBuild(stageRoot) {
     process.platform === 'win32' ? 'next.cmd' : 'next',
   );
 
-  // Next 16 uses Turbopack by default. Fumadocs Dynamic Mode keeps document
-  // bodies out of the initial bundler graph and compiles them on demand during
-  // static generation, so retain Turbopack's incremental graph and filesystem
-  // cache instead of falling back to webpack.
   return runProcess(nextCommand, ['build'], {
     cwd: stageRoot,
     env: {
@@ -268,17 +264,19 @@ async function main() {
     console.log(`[timing] prepare_static_stage=${formatSeconds(Date.now() - prepareStartedAt)}`);
     logRunnerResources();
 
-    // First isolate the Dynamic MDX + bounded SSG effect with sequential heavy
-    // processes. Once peak memory is proven safe, Next and ZBSearch can run in
-    // parallel again to recover end-to-end deployment latency.
+    // ZBSearch is independent from the Next static export. Running both at the
+    // same time raised the individual search cost but reduced measured package
+    // wall time by about 19s on the standard 4-core GitHub runner.
     const buildStartedAt = Date.now();
-    const nextTiming = await runNextBuild(stageRoot);
-    logRunnerResources();
-    const searchTiming = await runSearchBuild(staticSearchRoot);
+    const [nextTiming, searchTiming] = await Promise.all([
+      runNextBuild(stageRoot),
+      runSearchBuild(staticSearchRoot),
+    ]);
     const buildDurationMs = Date.now() - buildStartedAt;
-    console.log(`[timing] sequential_build_wall=${formatSeconds(buildDurationMs)}`);
+    logRunnerResources();
+    console.log(`[timing] parallel_build_wall=${formatSeconds(buildDurationMs)}`);
     console.log(
-      `[timing] sequential_build_sum=${formatSeconds(nextTiming.durationMs + searchTiming.durationMs)}`,
+      `[timing] parallel_build_sum=${formatSeconds(nextTiming.durationMs + searchTiming.durationMs)}`,
     );
 
     const assembleStartedAt = Date.now();
