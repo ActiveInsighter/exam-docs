@@ -21,8 +21,22 @@ type PageParameters = {
 
 export const dynamicParams = false;
 
+function routeKey(param: { slug?: string[] }) {
+  return (param.slug ?? []).join('/');
+}
+
 export function generateStaticParams() {
-  const params = source.generateParams();
+  // Fumadocs sources can surface the same final slug more than once when
+  // multiple source records normalize to one route. Next de-duplicates those
+  // internally in a monolithic build, but index-based sharding could assign
+  // duplicate params to different runners. De-duplicate by the final URL first
+  // so every rendered route has exactly one shard owner.
+  const unique = new Map<string, { slug?: string[] }>();
+  for (const param of source.generateParams()) {
+    const key = routeKey(param);
+    if (!unique.has(key)) unique.set(key, param);
+  }
+  const params = Array.from(unique.values());
   const shardCount = Number.parseInt(process.env.STATIC_DOCS_SHARD_COUNT ?? '1', 10);
   const shardIndex = Number.parseInt(process.env.STATIC_DOCS_SHARD_INDEX ?? '0', 10);
 
