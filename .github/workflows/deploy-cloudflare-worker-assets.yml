@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - codex/static-chunk-union
   workflow_dispatch:
     inputs:
       deploy:
@@ -66,6 +67,7 @@ jobs:
           tests/static-doc-shards.test.ts
           tests/static-build-id.test.ts
           tests/search-determinism.test.ts
+          tests/static-asset-references.test.ts
 
   build-shard:
     name: Static shard ${{ matrix.shard }} of 4
@@ -173,7 +175,8 @@ jobs:
               --exclude='.static-docs/docs/index.html' \
               --exclude='.static-docs/docs/__next.docs.txt' \
               --exclude='*.md' \
-              .static-docs/docs
+              .static-docs/docs \
+              .static-docs/_next/static
           fi
 
           ls -lh "${payload}" "${manifest}"
@@ -210,15 +213,43 @@ jobs:
           pattern: static-shard-*
           path: /tmp/static-shards
 
-      - name: Verify shared chunks are identical
+      - name: Verify overlapping shared chunks are identical
         shell: bash
         run: |
           set -euo pipefail
-          reference="/tmp/static-shards/static-shard-0/static-chunks-0.sha256"
-          for shard in 1 2 3; do
-            diff -u "${reference}" "/tmp/static-shards/static-shard-${shard}/static-chunks-${shard}.sha256"
-          done
-          echo 'All four shards produced identical _next/static chunk sets.'
+          python - <<'PY'
+          from pathlib import Path
+
+          roots = Path('/tmp/static-shards')
+          seen = {}
+          owners = {}
+          conflicts = []
+          all_paths = set()
+          intersections = None
+
+          for shard in range(4):
+              manifest = roots / f'static-shard-{shard}' / f'static-chunks-{shard}.sha256'
+              current = set()
+              for line in manifest.read_text().splitlines():
+                  digest, rel = line.split('  ', 1)
+                  current.add(rel)
+                  all_paths.add(rel)
+                  if rel in seen and seen[rel] != digest:
+                      conflicts.append((rel, owners[rel], shard, seen[rel], digest))
+                  else:
+                      seen.setdefault(rel, digest)
+                      owners.setdefault(rel, shard)
+              intersections = current if intersections is None else intersections & current
+
+          print(
+              f'static_chunk_union={len(all_paths)} common_to_all={len(intersections or set())} '
+              f'variant_paths={len(all_paths - (intersections or set()))}'
+          )
+          if conflicts:
+              for rel, first, second, left, right in conflicts[:50]:
+                  print(f'CONFLICT {rel}: shard {first}={left} shard {second}={right}')
+              raise SystemExit('Two shards emitted different bytes at the same _next/static path.')
+          PY
 
       - name: Merge static outputs with conflict checks
         shell: bash
@@ -292,6 +323,7 @@ jobs:
           test ! -e .static-docs/docs/intro/__next.docs.txt
           test -s .static-docs/search-index.json
           test -s .static-docs/404.html
+          node scripts/verify-static-asset-references.mjs .static-docs
 
       - name: Prepare Cloudflare Static Assets metadata
         run: npm run prepare:cloudflare-assets
