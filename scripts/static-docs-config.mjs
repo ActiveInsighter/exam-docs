@@ -16,12 +16,11 @@ export function getStaticDocsConfig() {
       // filesystem caching is supported by Next 16 but remains experimental.
       turbopackFileSystemCacheForBuild: true,
 
-      // Keep page generation memory bounded. The runner has four logical CPUs;
-      // two concurrent static pages leaves headroom for MDX compilation/GC while
-      // retaining useful parallelism. Raise this only after measuring the
-      // Dynamic MDX build's peak memory.
+      // The GitHub runner exposes four logical CPUs and the latest production
+      // build kept more than 14 GiB of memory free during static generation.
+      // Use the available CPU budget instead of the earlier conservative cap.
       staticGenerationRetryCount: 1,
-      staticGenerationMaxConcurrency: 2,
+      staticGenerationMaxConcurrency: 4,
       staticGenerationMinPagesPerWorker: 50,
     },
   };
