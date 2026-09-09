@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - codex/production-static-shards-v2
   workflow_dispatch:
     inputs:
       deploy:
@@ -20,10 +21,10 @@ permissions:
   contents: read
 
 jobs:
-  validate-and-deploy:
-    name: Deploy Worker Static Assets
+  validate:
+    name: Validate static deployment
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
@@ -51,33 +52,246 @@ jobs:
 
       - name: Install project dependencies on cache miss
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        shell: bash
         run: npm ci --no-audit --no-fund
 
       - name: Refresh Fumadocs generated source
-        shell: bash
         run: npm run postinstall
 
       - name: Run static deployment tests
-        shell: bash
-        run: npm test -- tests/static-docs-build.test.ts tests/cloudflare-static-assets.test.ts tests/dedupe-static-rsc.test.ts tests/deployment-workflows.test.ts
+        run: >-
+          npm test --
+          tests/static-docs-build.test.ts
+          tests/cloudflare-static-assets.test.ts
+          tests/dedupe-static-rsc.test.ts
+          tests/deployment-workflows.test.ts
+          tests/static-doc-shards.test.ts
+          tests/static-build-id.test.ts
 
-      - name: Restore Next/Turbopack build cache
+  build-shard:
+    name: Static shard ${{ matrix.shard }} of 4
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      STATIC_DOCS_SHARD_COUNT: '4'
+      STATIC_DOCS_SHARD_INDEX: ${{ matrix.shard }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Restore project dependency tree
+        id: node-modules-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node22-modules-v1-${{ hashFiles('package-lock.json') }}
+
+      - name: Restore npm download cache on dependency miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node22-npm-v1-${{ hashFiles('package-lock.json') }}
+
+      - name: Install project dependencies on cache miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Refresh Fumadocs generated source
+        run: npm run postinstall
+
+      - name: Restore shard Next/Turbopack cache
         uses: actions/cache@v5
         with:
           path: .static-docs-stage/.next/cache
-          key: ${{ runner.os }}-cloudflare-static-docs-turbopack-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-${{ github.sha }}
+          key: ${{ runner.os }}-static-shard-${{ matrix.shard }}-v3-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-${{ github.sha }}
           restore-keys: |
+            ${{ runner.os }}-static-shard-${{ matrix.shard }}-v2-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-
+            ${{ runner.os }}-static-shard-${{ matrix.shard }}-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-
             ${{ runner.os }}-cloudflare-static-docs-turbopack-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-
-            ${{ runner.os }}-static-docs-turbopack-v4-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-
             ${{ runner.os }}-static-docs-turbopack-v4-
 
-      - name: Build the shared static documentation package
+      - name: Build static shard
         shell: bash
-        run: npm run build:static-docs
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v npm run build:static-docs
+
+      - name: Validate shard output
+        shell: bash
+        run: |
+          set -euo pipefail
+          routes="$(find .static-docs/docs -type f -name index.html | wc -l | tr -d ' ')"
+          files="$(find .static-docs -type f | wc -l | tr -d ' ')"
+          bytes="$(du -sb .static-docs | awk '{print $1}')"
+          echo "shard=${STATIC_DOCS_SHARD_INDEX}/4 routes=${routes} files=${files} bytes=${bytes}"
+          if (( routes < 125 || routes > 140 )); then
+            echo "::error::Unexpected route count ${routes} for shard ${STATIC_DOCS_SHARD_INDEX}."
+            exit 1
+          fi
+          test -d .static-docs/_next/static
+          if [[ "${STATIC_DOCS_SHARD_INDEX}" == '0' ]]; then
+            test -s .static-docs/search-index.json
+            markdown="$(find .static-docs/docs -type f -name '*.md' | wc -l | tr -d ' ')"
+            test "${markdown}" = '530'
+          else
+            test ! -e .static-docs/search-index.json
+            markdown="$(find .static-docs/docs -type f -name '*.md' | wc -l | tr -d ' ')"
+            test "${markdown}" = '0'
+          fi
+
+      - name: Prepare merge payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload="/tmp/static-shard-${STATIC_DOCS_SHARD_INDEX}.tar.zst"
+          manifest="/tmp/static-chunks-${STATIC_DOCS_SHARD_INDEX}.sha256"
+
+          find .static-docs/_next/static -type f -print0 \
+            | sort -z \
+            | xargs -0 sha256sum \
+            | sed 's#  .static-docs/#  #' > "${manifest}"
+
+          if [[ "${STATIC_DOCS_SHARD_INDEX}" == '0' ]]; then
+            tar --zstd -cf "${payload}" \
+              --exclude='.static-docs/img' \
+              .static-docs
+          else
+            tar --zstd -cf "${payload}" \
+              --exclude='.static-docs/docs/index.html' \
+              --exclude='.static-docs/docs/__next.docs.txt' \
+              --exclude='*.md' \
+              .static-docs/docs
+          fi
+
+          ls -lh "${payload}" "${manifest}"
+
+      - name: Upload shard payload
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-shard-${{ matrix.shard }}
+          path: |
+            /tmp/static-shard-${{ matrix.shard }}.tar.zst
+            /tmp/static-chunks-${{ matrix.shard }}.sha256
+          compression-level: 0
+          retention-days: 1
+
+  deploy:
+    name: Merge and deploy Worker Static Assets
+    needs: build-shard
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Download shard payloads
+        uses: actions/download-artifact@v4
+        with:
+          pattern: static-shard-*
+          path: /tmp/static-shards
+
+      - name: Verify shared chunks are identical
+        shell: bash
+        run: |
+          set -euo pipefail
+          reference="/tmp/static-shards/static-shard-0/static-chunks-0.sha256"
+          for shard in 1 2 3; do
+            diff -u "${reference}" "/tmp/static-shards/static-shard-${shard}/static-chunks-${shard}.sha256"
+          done
+          echo 'All four shards produced identical _next/static chunk sets.'
+
+      - name: Merge static outputs with conflict checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .static-docs /tmp/shard-extract
+          mkdir -p /tmp/shard-extract
+
+          tar --zstd -xf /tmp/static-shards/static-shard-0/static-shard-0.tar.zst
+          cp -a public/. .static-docs/
+
+          for shard in 1 2 3; do
+            rm -rf /tmp/shard-extract/*
+            tar --zstd -xf "/tmp/static-shards/static-shard-${shard}/static-shard-${shard}.tar.zst" \
+              -C /tmp/shard-extract
+            SHARD_ROOT="/tmp/shard-extract/.static-docs" TARGET_ROOT="${PWD}/.static-docs" python - <<'PY'
+          from pathlib import Path
+          import hashlib
+          import os
+          import shutil
+
+          source = Path(os.environ['SHARD_ROOT'])
+          target = Path(os.environ['TARGET_ROOT'])
+          conflicts = []
+          copied = 0
+          identical = 0
+
+          def digest(path: Path):
+              h = hashlib.sha256()
+              with path.open('rb') as f:
+                  for chunk in iter(lambda: f.read(1024 * 1024), b''):
+                      h.update(chunk)
+              return h.digest()
+
+          for src in source.rglob('*'):
+              if not src.is_file():
+                  continue
+              rel = src.relative_to(source)
+              dst = target / rel
+              if dst.exists():
+                  if digest(src) != digest(dst):
+                      conflicts.append(str(rel))
+                  else:
+                      identical += 1
+                  continue
+              dst.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copy2(src, dst)
+              copied += 1
+
+          print(f'copied={copied} identical={identical} conflicts={len(conflicts)}')
+          if conflicts:
+              print('\n'.join(conflicts[:50]))
+              raise SystemExit('Shard merge produced conflicting files.')
+          PY
+          done
+
+      - name: Validate merged package
+        shell: bash
+        run: |
+          set -euo pipefail
+          doc_routes="$(find .static-docs/docs -type f -name index.html | wc -l | tr -d ' ')"
+          markdown="$(find .static-docs/docs -type f -name '*.md' | wc -l | tr -d ' ')"
+          files="$(find .static-docs -type f | wc -l | tr -d ' ')"
+          bytes="$(du -sb .static-docs | awk '{print $1}')"
+          echo "merged_routes=${doc_routes} files=${files} markdown=${markdown} bytes=${bytes}"
+          test "${doc_routes}" = '531'
+          test "${markdown}" = '530'
+          test -s .static-docs/docs/intro/index.html
+          test -s .static-docs/docs/intro/__next._full.txt
+          test -s .static-docs/docs/intro/__next.docs.txt
+          test -s .static-docs/search-index.json
+          test -s .static-docs/404.html
 
       - name: Prepare Cloudflare Static Assets metadata
-        shell: bash
         run: npm run prepare:cloudflare-assets
 
       - name: Validate Cloudflare asset package
@@ -120,16 +334,16 @@ jobs:
             echo "- Uploadable asset files: ${file_count}/20000"
             echo "- Largest uploadable asset: $((largest_bytes / 1024 / 1024)) MiB / 25 MiB"
             echo "- Local static package: $((package_bytes / 1024 / 1024)) MiB"
+            echo '- Static generation: 4 deterministic URL shards'
             echo '- Worker JavaScript: none (assets-only deployment)'
             echo '- RSC aliases: deduplicated locally and restored through two guarded Cloudflare 200 rewrites'
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Validate Wrangler configuration with a dry run
-        shell: bash
         run: npx --yes wrangler@4.129.0 deploy --dry-run --config wrangler.jsonc --outdir .wrangler-dry-run
 
       - name: Check Cloudflare deployment credentials
-        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true) }}
+        if: ${{ github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true)) }}
         shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -147,7 +361,7 @@ jobs:
 
       - name: Deploy to Cloudflare Workers Static Assets
         id: cloudflare-deploy
-        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true) }}
+        if: ${{ github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true)) }}
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -156,7 +370,7 @@ jobs:
           command: deploy --config wrangler.jsonc
 
       - name: Verify Cloudflare deployment
-        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true) }}
+        if: ${{ github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true)) }}
         shell: bash
         env:
           DEPLOYMENT_URL: ${{ steps.cloudflare-deploy.outputs.deployment-url }}
