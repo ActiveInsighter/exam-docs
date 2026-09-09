@@ -53,17 +53,11 @@ jobs:
         if: matrix.shard == 0
         run: npm test -- tests/static-shiki-preload.test.ts
 
-      - name: Restore existing static cache for build A
-        uses: actions/cache@v5
-        with:
-          path: .static-docs-stage/.next/cache
-          key: ${{ runner.os }}-shiki-benchmark-${{ matrix.shard }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-static-shard-${{ matrix.shard }}-v4-
-            ${{ runner.os }}-static-shard-${{ matrix.shard }}-v3-
-            ${{ runner.os }}-static-shard-${{ matrix.shard }}-v2-
+      - name: Remove all generated state before cold build A
+        shell: bash
+        run: rm -rf .static-docs .static-docs-stage
 
-      - name: Build A and hash the complete shard
+      - name: Build A cold and hash the complete shard
         shell: bash
         run: |
           set -euo pipefail
@@ -76,7 +70,7 @@ jobs:
           ) > /tmp/shard-a.sha256
           echo "build_a_files=$(wc -l < /tmp/shard-a.sha256 | tr -d ' ')"
 
-      - name: Remove all generated state before build B
+      - name: Remove all generated state before cold build B
         shell: bash
         run: rm -rf .static-docs .static-docs-stage
 
