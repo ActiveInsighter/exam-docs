@@ -437,8 +437,13 @@ function formatMiB(bytes) {
   return `${(bytes / 1024 / 1024).toFixed(2)} MiB`;
 }
 
-async function exportSimpleIndex(records) {
-  const server = initSimpleSearch({ indexes: records });
+async function exportSimpleIndex(records, instanceId) {
+  // ZBSearch/Orama otherwise chooses a fresh database instance id for every
+  // build. That id becomes the prefix of every internal document id and makes
+  // all serialized search shards change even when their records are identical.
+  // Keep the id tied to the logical shard identity so content-addressed search
+  // files are reproducible and Cloudflare can reuse unchanged assets.
+  const server = initSimpleSearch({ indexes: records, id: instanceId });
   return JSON.stringify(await server.export());
 }
 
@@ -521,7 +526,8 @@ async function writeRoutedShard({
   searchDirectory,
   depth = 0,
 }) {
-  const json = await exportSimpleIndex(records);
+  const instanceId = `exam-docs-search:${kind}:${category}:${group}:${key}`;
+  const json = await exportSimpleIndex(records, instanceId);
   const sizes = compressionSizes(json);
 
   if (sizes.bytes > ZBSEARCH_SOFT_MAX_BYTES && records.length > 1) {
@@ -751,11 +757,7 @@ async function main() {
   console.log(`[zbsearch] Total Brotli estimate: ${formatMiB(result.brotliBytes)}.`);
 }
 
-const isDirectRun = process.argv[1]
-  ? path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
-  : false;
-
-if (isDirectRun) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   main().catch((error) => {
     console.error('[zbsearch] Failed to build search index.', error);
     process.exitCode = 1;
