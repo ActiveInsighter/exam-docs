@@ -72,13 +72,17 @@ export function ExamQuestion({
   // Fail soft while a document is being migrated: if the solution slot is
   // missing, keep the original MDX visible instead of dropping any content.
   if (!solution) {
-    return <section className={styles.root}>{children}</section>;
+    return (
+      <section className={styles.root} data-exam-question="">
+        {children}
+      </section>
+    );
   }
 
   const { answer, explanation } = splitExamSolution(solution.props.children);
 
   return (
-    <section className={styles.root}>
+    <section className={styles.root} data-exam-question="">
       <div className={styles.question}>{question}</div>
       <ExamSolutionDialog
         question={question}
