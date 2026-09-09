@@ -8,6 +8,13 @@ export function getStaticDocsConfig() {
   return {
     output: 'export',
     trailingSlash: true,
+
+    // A static export is deployed atomically, so it does not need a fresh
+    // random Next build id on every CI run. Keeping the id stable prevents an
+    // otherwise identical build from rewriting every HTML/RSC payload merely
+    // because the build-id URL segment changed.
+    generateBuildId: () => 'exam-docs-static-v1',
+
     images: {
       unoptimized: true,
     },
