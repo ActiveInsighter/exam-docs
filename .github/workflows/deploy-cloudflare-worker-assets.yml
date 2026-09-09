@@ -69,7 +69,6 @@ jobs:
 
   build-shard:
     name: Static shard ${{ matrix.shard }} of 4
-    needs: validate
     strategy:
       fail-fast: false
       matrix:
@@ -189,7 +188,7 @@ jobs:
 
   deploy:
     name: Merge and deploy Worker Static Assets
-    needs: build-shard
+    needs: [validate, build-shard]
     runs-on: ubuntu-24.04
     timeout-minutes: 20
 
@@ -287,7 +286,8 @@ jobs:
           test "${markdown}" = '530'
           test -s .static-docs/docs/intro/index.html
           test -s .static-docs/docs/intro/__next._full.txt
-          test -s .static-docs/docs/intro/__next.docs.txt
+          test -s .static-docs/docs/__next.docs.txt
+          test ! -e .static-docs/docs/intro/__next.docs.txt
           test -s .static-docs/search-index.json
           test -s .static-docs/404.html
 
