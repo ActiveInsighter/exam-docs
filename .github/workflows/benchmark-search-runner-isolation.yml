@@ -1,0 +1,76 @@
+name: Benchmark search runner isolation
+
+on:
+  push:
+    branches:
+      - codex/search-runner-ab
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    name: shard0 ${{ matrix.mode }}
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [with-search, next-only]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      STATIC_DOCS_SHARD_COUNT: '4'
+      STATIC_DOCS_SHARD_INDEX: '0'
+      STATIC_DOCS_BUILD_ID: exam-docs-static-dd179ba4d4b081f0
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Restore project dependency tree
+        id: node-modules-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node22-modules-v1-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies on cache miss
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Refresh Fumadocs generated source
+        run: npm run postinstall
+
+      - name: Restore production shard 0 Next/Turbopack cache
+        uses: actions/cache@v5
+        with:
+          path: .static-docs-stage/.next/cache
+          key: ${{ runner.os }}-static-shard-0-v4-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json', 'app/**', 'components/**', 'lib/**', 'scripts/**', 'content/docs/**') }}
+          restore-keys: |
+            ${{ runner.os }}-static-shard-0-v4-
+            ${{ runner.os }}-static-shard-0-v3-
+
+      - name: Replace search build with no-op for CPU isolation
+        if: matrix.mode == 'next-only'
+        shell: bash
+        run: |
+          cat > scripts/build-search-index.mjs <<'NODE'
+          import { mkdir, writeFile } from 'node:fs/promises';
+          import path from 'node:path';
+          const outputPath = process.argv[2];
+          await mkdir(path.dirname(outputPath), { recursive: true });
+          await writeFile(outputPath, '{"benchmark":true}\n');
+          NODE
+
+      - name: Build shard 0
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'benchmark_wall=%e max_rss_kib=%M' \
+            npm run build:static-docs 2>&1 | tee /tmp/build.log
+          grep -E '\[timing\] (next_static_build_turbopack|zbsearch_build|parallel_build_wall|static_package_total)=' /tmp/build.log || true
