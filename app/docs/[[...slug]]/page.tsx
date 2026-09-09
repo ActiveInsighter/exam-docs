@@ -30,7 +30,7 @@ export default async function Page({ params }: PageParameters) {
   const page = source.getPage(slug);
   if (!page) notFound();
 
-  const data = await page.data.load();
+  const data = page.data;
   const MDX = data.body;
   const markdownUrl = `${page.url}.md`;
 
