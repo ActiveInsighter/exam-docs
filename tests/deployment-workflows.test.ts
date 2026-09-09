@@ -43,16 +43,17 @@ describe('static deployment workflows', () => {
     expect(workflow).not.toContain('-static-shard-${{ matrix.shard }}-v4-${{ github.sha }}');
   });
 
-  it('reuses the pinned Wrangler npx install and avoids a redundant production dry-run', async () => {
+  it('pins Wrangler and avoids a redundant production dry-run', async () => {
     const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
     const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
 
     const pinnedWranglerCommands = workflow.match(/npx --yes wrangler@4\.129\.0/g) ?? [];
     expect(pinnedWranglerCommands).toHaveLength(2);
     expect(workflow).not.toContain('cloudflare/wrangler-action@v3');
-    expect(workflow).toContain('path: ~/.npm/_npx');
-    expect(workflow).toContain('node22-wrangler-npx-v1-4.129.0');
+    expect(workflow).not.toContain('node22-wrangler-npx');
+    expect(workflow).not.toContain('path: ~/.npm/_npx');
     expect(workflow).toContain("github.ref != 'refs/heads/main'");
+    expect(workflow).toContain('inputs.deploy != true');
     expect(workflow).toContain('deployment-url=${deployment_url}');
   });
 
