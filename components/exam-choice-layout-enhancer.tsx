@@ -19,6 +19,22 @@ function parsePixelValue(value: string): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function measureOptionWidth(option: HTMLElement): number {
+  let width = Math.max(option.getBoundingClientRect().width, option.scrollWidth);
+
+  // Display math can own its horizontal scroller, so its overflow does not
+  // always propagate to the option's scrollWidth. Read that surface directly.
+  for (const displayMath of option.querySelectorAll<HTMLElement>('.katex-display')) {
+    width = Math.max(
+      width,
+      displayMath.getBoundingClientRect().width,
+      displayMath.scrollWidth,
+    );
+  }
+
+  return width;
+}
+
 function measureChoiceGroups(groups: readonly HTMLElement[]) {
   const connectedGroups = groups.filter((group) => group.isConnected);
   const measuredWidths = new Map<HTMLElement, number>();
@@ -40,9 +56,7 @@ function measureChoiceGroups(groups: readonly HTMLElement[]) {
       const options = Array.from(
         group.querySelectorAll<HTMLElement>(OPTION_SELECTOR),
       );
-      const optionWidths = options.map((option) =>
-        Math.max(option.getBoundingClientRect().width, option.scrollWidth),
-      );
+      const optionWidths = options.map(measureOptionWidth);
       const columnGap = parsePixelValue(getComputedStyle(group).columnGap);
 
       measurements.push({
@@ -183,7 +197,7 @@ export function ExamChoiceLayoutEnhancer() {
       subtree: true,
     });
 
-    if ('fonts' in document) {
+    if ('fonts' in document && document.fonts.status === 'loading') {
       void document.fonts.ready.then(() => {
         if (cancelled) return;
         for (const group of trackedGroups) scheduleMeasure(group);
