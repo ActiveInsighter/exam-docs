@@ -99,10 +99,14 @@ function collectChoiceGroups(node: Node): HTMLElement[] {
   return groups;
 }
 
+function getOwningChoiceGroup(node: Node): HTMLElement | null {
+  const element = node instanceof Element ? node : node.parentElement;
+  return element?.closest<HTMLElement>(GROUP_SELECTOR) ?? null;
+}
+
 export function ExamChoiceLayoutEnhancer() {
   useLayoutEffect(() => {
     let frame = 0;
-    let cancelled = false;
     const trackedGroups = new Set<HTMLElement>();
     const pendingGroups = new Set<HTMLElement>();
     const widthCache = new WeakMap<HTMLElement, number>();
@@ -177,8 +181,12 @@ export function ExamChoiceLayoutEnhancer() {
     const mutationObserver = new MutationObserver((records) => {
       const removed = new Set<HTMLElement>();
       const added = new Set<HTMLElement>();
+      const changed = new Set<HTMLElement>();
 
       for (const record of records) {
+        const owner = getOwningChoiceGroup(record.target);
+        if (owner !== null) changed.add(owner);
+
         for (const node of record.removedNodes) {
           for (const group of collectChoiceGroups(node)) removed.add(group);
         }
@@ -190,25 +198,26 @@ export function ExamChoiceLayoutEnhancer() {
       // Process removals first so a DOM move can immediately register again.
       for (const group of removed) unregisterGroup(group);
       for (const group of added) registerGroup(group, true);
+      for (const group of changed) scheduleMeasure(group);
     });
 
     mutationObserver.observe(document.body, {
       childList: true,
+      characterData: true,
       subtree: true,
     });
 
-    if ('fonts' in document && document.fonts.status === 'loading') {
-      void document.fonts.ready.then(() => {
-        if (cancelled) return;
-        for (const group of trackedGroups) scheduleMeasure(group);
-      });
-    }
+    const fontSet = 'fonts' in document ? document.fonts : null;
+    const handleFontsLoaded = () => {
+      for (const group of trackedGroups) scheduleMeasure(group);
+    };
+    fontSet?.addEventListener('loadingdone', handleFontsLoaded);
 
     return () => {
-      cancelled = true;
       if (frame !== 0) cancelAnimationFrame(frame);
       resizeObserver?.disconnect();
       mutationObserver.disconnect();
+      fontSet?.removeEventListener('loadingdone', handleFontsLoaded);
       trackedGroups.clear();
       pendingGroups.clear();
     };
