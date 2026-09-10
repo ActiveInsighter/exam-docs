@@ -1,7 +1,25 @@
+import { readdir, readFile } from 'node:fs/promises';
+import { extname, join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 // @ts-expect-error The repair script is an executable ESM module without declarations.
-import { repairMisplacedExamChoices } from '../scripts/repair-misplaced-exam-choices.mjs';
+import {
+  EXAM_DOCUMENT_ROOTS,
+  repairMisplacedExamChoices,
+} from '../scripts/repair-misplaced-exam-choices.mjs';
+
+async function collectDocumentFiles(root: string): Promise<string[]> {
+  const entries = await readdir(root, { withFileTypes: true });
+  const files: string[] = [];
+
+  for (const entry of entries) {
+    const path = join(root, entry.name);
+    if (entry.isDirectory()) files.push(...await collectDocumentFiles(path));
+    else if (entry.isFile() && ['.md', '.mdx'].includes(extname(entry.name))) files.push(path);
+  }
+
+  return files;
+}
 
 describe('repairMisplacedExamChoices', () => {
   it('moves an inline A-D choice row out of the explanation', () => {
@@ -114,5 +132,21 @@ A. first  B. second  C. third  D. fourth
 
     expect(result.stats.repairedGroups).toBe(0);
     expect(result.source).toBe(source);
+  });
+
+  it('keeps every migrated exam document free of hidden trailing choices', async () => {
+    const root = resolve(process.cwd(), 'content', 'docs');
+    const offenders: string[] = [];
+
+    for (const documentRoot of EXAM_DOCUMENT_ROOTS) {
+      const files = await collectDocumentFiles(join(root, documentRoot));
+      for (const file of files) {
+        const source = await readFile(file, 'utf8');
+        const result = repairMisplacedExamChoices(source);
+        if (result.stats.repairedGroups > 0) offenders.push(file);
+      }
+    }
+
+    expect(offenders).toEqual([]);
   });
 });
