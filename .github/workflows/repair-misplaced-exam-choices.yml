@@ -1,0 +1,53 @@
+name: Repair misplaced exam choices
+
+on:
+  push:
+    branches:
+      - fix/restore-misplaced-exam-choices
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Repair misplaced choices
+        run: node scripts/repair-misplaced-exam-choices.mjs --write
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Verify repair is idempotent
+        run: node scripts/repair-misplaced-exam-choices.mjs --check
+
+      - name: Check patch whitespace
+        run: git diff --check
+
+      - name: Commit repaired documents
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No document repairs needed."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/docs
+          git commit -m "fix: restore misplaced exam choices"
+          git push
