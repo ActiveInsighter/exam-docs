@@ -1,0 +1,69 @@
+name: Migrate legacy exam choices
+
+on:
+  push:
+    branches:
+      - codex/migrate-legacy-exam-choices
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout migration branch
+        uses: actions/checkout@v6
+        with:
+          ref: codex/migrate-legacy-exam-choices
+          fetch-depth: 1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Migrate legacy choice markup
+        run: node scripts/migrate-legacy-exam-choices.mjs --write | tee /tmp/legacy-choice-migration.log
+
+      - name: Verify migration is complete
+        run: |
+          set -euo pipefail
+          node scripts/migrate-legacy-exam-choices.mjs --check
+          git diff --check
+
+      - name: Validate all MDX sources
+        run: npm run postinstall
+
+      - name: Run choice layout regression tests
+        run: npm test -- tests/exam-choices.test.ts
+
+      - name: Commit migrated content
+        run: |
+          set -euo pipefail
+          git add content/docs
+          if git diff --cached --quiet; then
+            echo 'No legacy choice markup required migration.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Normalize legacy exam choice markup'
+          git push origin HEAD:codex/migrate-legacy-exam-choices
+
+      - name: Summarize migration
+        if: always()
+        run: |
+          {
+            echo '## Legacy exam choice migration'
+            echo
+            if [[ -f /tmp/legacy-choice-migration.log ]]; then
+              sed -n '1,220p' /tmp/legacy-choice-migration.log
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
