@@ -1,0 +1,36 @@
+/*
+ * Progressive enhancement for exam choices. The CSS-module density rules stay
+ * as the no-JS/server fallback; measured data-choice-layout wins after the
+ * shared client enhancer has read the real rendered option widths.
+ */
+
+/* Keep the server/no-JS fallback conservative for genuinely long choices. */
+[data-exam-choice-group][data-choice-density='long']:not([data-choice-layout]) {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+[data-exam-choice-group][data-choice-layout='1'] {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+[data-exam-choice-group][data-choice-layout='2'] {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+[data-exam-choice-group][data-choice-layout='4'] {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+/*
+ * This state exists only during a synchronous measurement pass. Preventing
+ * soft wrapping exposes each option's intrinsic rendered width (including
+ * KaTeX) without needing to try multiple visible grid layouts.
+ */
+[data-exam-choice-group][data-choice-measuring='true']
+  > [data-exam-choice-option] {
+  inline-size: max-content !important;
+  max-inline-size: none !important;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}

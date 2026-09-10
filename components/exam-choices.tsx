@@ -69,8 +69,9 @@ function hasComplexMath(node: ReactNode): boolean {
 }
 
 /**
- * Chooses a layout density from the longest option. The actual column count
- * remains a CSS/container-query decision so it follows the rendered width.
+ * Chooses a conservative server-rendered fallback from option content. The
+ * client enhancer replaces this with a real rendered-width decision when JS
+ * is available, while the fallback keeps the page readable without JS.
  */
 export function getChoiceDensity(options: ReactNode[]): ChoiceDensity {
   const longestOption = options.reduce<number>(
@@ -102,6 +103,7 @@ export function ExamChoices({ children }: ExamOptionProps) {
     <div
       className={styles.choiceOptions}
       data-choice-density={density}
+      data-exam-choice-group=""
       role="list"
     >
       {options.map((option, index) => {
@@ -110,6 +112,7 @@ export function ExamChoices({ children }: ExamOptionProps) {
         return (
           <div
             className={styles.choiceOption}
+            data-exam-choice-option=""
             key={isExamOption(option) ? (option.key ?? index) : index}
             role="listitem"
           >
