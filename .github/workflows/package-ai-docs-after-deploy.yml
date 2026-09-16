@@ -1,0 +1,112 @@
+name: Package AI-readable docs after deployment
+
+on:
+  workflow_run:
+    workflows:
+      - Deploy exam-docs to Cloudflare
+    types:
+      - completed
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  package-ai-docs:
+    name: Package deployed documentation source for AI
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Confirm the source run actually deployed Cloudflare assets
+        id: deployment
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const runId = context.payload.workflow_run.id;
+            const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId,
+              per_page: 100,
+            });
+
+            const deployJob = jobs.find(
+              (job) => job.name === 'Merge and deploy Worker Static Assets',
+            );
+            const verification = deployJob?.steps?.find(
+              (step) => step.name === 'Verify Cloudflare deployment',
+            );
+            const deployed = verification?.conclusion === 'success';
+
+            core.setOutput('deployed', deployed ? 'true' : 'false');
+            if (!deployed) {
+              core.notice(
+                'The source workflow completed successfully but did not perform a verified production deployment; no AI archive will be uploaded.',
+              );
+            }
+
+      - name: Checkout the exact deployed commit
+        if: steps.deployment.outputs.deployed == 'true'
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+
+      - name: Set up Node.js
+        if: steps.deployment.outputs.deployed == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Build AI-readable documentation archive
+        if: steps.deployment.outputs.deployed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="${RUNNER_TEMP}/exam-docs-ai"
+          node scripts/package-ai-docs.mjs "${output}"
+          test -s "${output}/_AI_README.md"
+          test -s "${output}/_manifest.json"
+          test -d "${output}/content/docs"
+
+          document_count="$(node -e "const m=require('${output}/_manifest.json'); process.stdout.write(String(m.documentCount))")"
+          asset_count="$(node -e "const m=require('${output}/_manifest.json'); process.stdout.write(String(m.referencedAssetCount))")"
+          source_file_count="$(node -e "const m=require('${output}/_manifest.json'); process.stdout.write(String(m.sourceTreeFileCount))")"
+
+          {
+            echo "document_count=${document_count}"
+            echo "asset_count=${asset_count}"
+            echo "source_file_count=${source_file_count}"
+          } >> "${GITHUB_ENV}"
+
+      - name: Upload AI-readable docs ZIP
+        if: steps.deployment.outputs.deployed == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: ai-docs-${{ github.event.workflow_run.head_sha }}
+          path: ${{ runner.temp }}/exam-docs-ai
+          if-no-files-found: error
+          include-hidden-files: true
+          compression-level: 6
+          retention-days: 30
+
+      - name: Write archive summary
+        if: steps.deployment.outputs.deployed == 'true'
+        shell: bash
+        run: |
+          {
+            echo '## AI-readable documentation archive'
+            echo
+            echo "- Deployed commit: \`${{ github.event.workflow_run.head_sha }}\`"
+            echo "- Documents: \`${document_count}\`"
+            echo "- Documentation source-tree files: \`${source_file_count}\`"
+            echo "- Referenced local assets copied outside the docs tree: \`${asset_count}\`"
+            echo '- Layout: original `content/docs/` hierarchy plus referenced files at their repository paths'
+            echo '- Download format: GitHub artifact ZIP, compatible with Windows archive tools'
+            echo '- Retention: `30 days`'
+          } >> "${GITHUB_STEP_SUMMARY}"
