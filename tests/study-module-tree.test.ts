@@ -38,16 +38,15 @@ describe('documentation source structure', () => {
     }
   }, 30_000);
 
-  it('keeps the native Fumadocs module switcher active across imported collections', () => {
+  it('keeps module navigation centralized instead of hardcoding route matching in the layout', () => {
     const layout = readFileSync(
       join(process.cwd(), 'app', 'docs', 'layout.tsx'),
       'utf8',
     );
 
-    expect(layout).toContain('tabs={getModuleTabs()}');
-    expect(layout).toContain("'/docs/张宇1000题'");
-    expect(layout).toContain("'/docs/408真题'");
-    expect(layout).toContain("'/docs/algorithm'");
+    expect(layout).toContain("from '@/lib/study-modules'");
+    expect(layout).toContain('tabs={moduleTabs}');
+    expect(layout).not.toContain('routePrefixes');
   });
 
   it('keeps politics exam years as direct documents without year subfolders', () => {
