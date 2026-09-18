@@ -37,4 +37,37 @@ describe('documentation source structure', () => {
       expect(content).not.toMatch(/@theme\/(?:Tabs|TabItem)|<TabItem\b/u);
     }
   }, 30_000);
+
+  it('keeps the native Fumadocs module switcher active across imported collections', () => {
+    const layout = readFileSync(
+      join(process.cwd(), 'app', 'docs', 'layout.tsx'),
+      'utf8',
+    );
+
+    expect(layout).toContain('tabs={getModuleTabs()}');
+    expect(layout).toContain("'/docs/张宇1000题'");
+    expect(layout).toContain("'/docs/408真题'");
+    expect(layout).toContain("'/docs/algorithm'");
+  });
+
+  it('keeps politics exam years as direct documents without year subfolders', () => {
+    const politicsRoot = join(docsRoot, '政治');
+    const entries = readdirSync(politicsRoot, { withFileTypes: true });
+    const expectedYears = Array.from(
+      { length: 17 },
+      (_, index) => String(2010 + index),
+    );
+    const yearPages = entries
+      .filter((entry) => entry.isFile() && /^\d{4}\.mdx$/u.test(entry.name))
+      .map((entry) => entry.name.replace(/\.mdx$/u, ''))
+      .sort();
+
+    expect(yearPages).toEqual(expectedYears);
+    expect(
+      entries.filter(
+        (entry) => entry.isDirectory() && /^\d{4}$/u.test(entry.name),
+      ),
+    ).toHaveLength(0);
+  });
+
 });
