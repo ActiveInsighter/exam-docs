@@ -67,19 +67,32 @@ describe('exam answer preview styling', () => {
     expect(questionPaneRule).toMatch(/container-type:\s*inline-size/);
   });
 
-  it('uses a full-width dotted divider without underlining the trigger text', () => {
+  it('does not draw a divider between a question and its answer control', () => {
     const actionsRule = getRule('actions');
     const triggerRule = getRule('trigger');
+    const questionDividerRule = stylesheet.match(
+      /\.root\s*\+\s*:global\(hr\)\s*\{([\s\S]*?)\n\}/,
+    )?.[1];
 
     expect(actionsRule).toMatch(/border-block-end:\s*0/);
-    expect(actionsRule).toMatch(/background-image:\s*radial-gradient\(\s*circle/);
-    expect(actionsRule).toMatch(/background-repeat:\s*repeat-x/);
-    expect(actionsRule).toMatch(/background-size:\s*0\.5rem 0\.125rem/);
-    expect(actionsRule).toMatch(
-      /color-mix\(in oklch, var\(--muted-foreground\) 42%, var\(--background\)\)/,
-    );
+    expect(actionsRule).not.toContain('background-image');
+    expect(actionsRule).not.toContain('background-position');
+    expect(actionsRule).not.toContain('background-repeat');
+    expect(actionsRule).not.toContain('background-size');
+    expect(questionDividerRule).toMatch(/display:\s*none/);
     expect(triggerRule).not.toMatch(/text-decoration-/);
     expect(solutionDialogSource).not.toContain('styles.triggerIcon');
+  });
+
+  it('keeps answer content at normal weight in both answer surfaces', () => {
+    const answerPreviewRule = getRule('answerPreviewValue');
+    const answerRule = getRule('answerValue');
+
+    expect(answerPreviewRule).toMatch(/font-weight:\s*400/);
+    expect(answerRule).toMatch(/font-weight:\s*400/);
+    expect(stylesheet).toMatch(
+      /\.answerPreviewValue\s*:global\(strong\),[\s\S]*?\.answerValue\s*:global\(b\)\s*\{[\s\S]*?font-weight:\s*400/,
+    );
   });
 
   it('slightly increases the choice option line spacing', () => {

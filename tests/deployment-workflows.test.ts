@@ -31,8 +31,8 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('Merge static outputs with conflict checks');
     expect(workflow).toContain('node scripts/verify-static-asset-references.mjs .static-docs');
     expect(workflow).toContain('tests/static-asset-references.test.ts');
-    expect(workflow).toContain('test "${doc_routes}" = \'531\'');
-    expect(workflow).toContain('test "${markdown}" = \'530\'');
+    expect(workflow).toContain('test "${doc_routes}" = \'553\'');
+    expect(workflow).toContain('test "${markdown}" = \'552\'');
     expect(workflow).toContain('tests/static-doc-shards.test.ts');
     expect(workflow).toContain('tests/static-build-id.test.ts');
     expect(workflow).toContain('tests/search-determinism.test.ts');
@@ -47,8 +47,8 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('name: static-search');
     expect(workflow).toContain('Merge dedicated search assets');
     expect(workflow).toContain('needs: [validate, search, build-shard]');
-    expect(workflow).toContain('test "${search_files}" = \'45\'');
-    expect(workflow).toContain('test "${search_files}" = \'44\'');
+    expect(workflow).toContain('test "${search_files}" = \'77\'');
+    expect(workflow).toContain('test "${search_files}" = \'76\'');
   });
 
   it('restores reusable weighted shard caches without creating a cache for every workflow-only commit', async () => {

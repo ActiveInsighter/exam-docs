@@ -21,12 +21,11 @@ const encouragements = [
 ] as const;
 
 const modules = [
-  { name: '数学真题', href: '/docs/数学真题' },
-  { name: '张宇1000题', href: '/docs/张宇1000题' },
-  { name: '李正元练习题', href: '/docs/李正元练习题' },
-  { name: '408模拟选择题', href: '/docs/408模拟选择题' },
-  { name: '408真题', href: '/docs/408真题' },
-  { name: '算法', href: '/docs/algorithm' },
+  { name: '数学', href: '/docs/数学' },
+  { name: '408', href: '/docs/408' },
+  { name: '政治', href: '/docs/政治' },
+  { name: '英语', href: '/docs/英语' },
+  { name: '编程', href: '/docs/编程' },
 ] as const;
 
 type Remaining = {

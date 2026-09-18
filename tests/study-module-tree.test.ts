@@ -4,12 +4,11 @@ import { describe, expect, it } from 'vitest';
 
 const docsRoot = join(process.cwd(), 'content', 'docs');
 const expectedRootPages = [
-  '408模拟选择题',
-  '408真题',
-  'algorithm',
-  '张宇1000题',
-  '数学真题',
-  '李正元练习题',
+  '数学',
+  '408',
+  '政治',
+  '英语',
+  '编程',
 ].sort();
 
 function walkFiles(directory: string): string[] {
@@ -25,7 +24,7 @@ describe('documentation source structure', () => {
       pages?: string[];
     };
 
-    expect(rootMeta.pages?.slice().sort()).toEqual(expectedRootPages.concat('intro').sort());
+    expect(rootMeta.pages?.slice().sort()).toEqual(expectedRootPages);
   });
 
   it('gives every Markdown page a title and no longer imports Docusaurus-only components', () => {
@@ -37,5 +36,5 @@ describe('documentation source structure', () => {
       expect(frontmatter).toContain('title:');
       expect(content).not.toMatch(/@theme\/(?:Tabs|TabItem)|<TabItem\b/u);
     }
-  });
+  }, 30_000);
 });

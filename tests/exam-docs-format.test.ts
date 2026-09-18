@@ -112,4 +112,19 @@ describe('exam document formats', () => {
 
     expect(invalidLocations).toEqual([]);
   });
+
+  it('uses normal TeX commands without forced display styling', async () => {
+    const docsRoot = resolve(process.cwd(), 'content', 'docs');
+    const mdxFiles = await collectMdxFiles(docsRoot);
+    const invalidFiles: string[] = [];
+
+    for (const file of mdxFiles) {
+      const source = await readFile(file, 'utf8');
+      if (/\\(?:dfrac|displaystyle)/u.test(source)) {
+        invalidFiles.push(relative(process.cwd(), file));
+      }
+    }
+
+    expect(invalidFiles).toEqual([]);
+  });
 });
