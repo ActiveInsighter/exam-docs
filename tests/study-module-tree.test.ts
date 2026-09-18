@@ -3,13 +3,17 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const docsRoot = join(process.cwd(), 'content', 'docs');
-const expectedRootPages = [
-  '数学',
-  '408',
-  '政治',
-  '英语',
-  '编程',
-].sort();
+const expectedRootPages = ['math', '408', 'politics', 'english', 'programming'];
+const expectedModuleChildren: Record<string, string[]> = {
+  math: ['index', 'past-exams', 'zhangyu-1000', 'lizhengyuan'],
+  '408': ['index', 'mock', 'past-exams'],
+  politics: [
+    'index',
+    ...Array.from({ length: 17 }, (_, index) => String(2010 + index)),
+  ],
+  english: ['index'],
+  programming: ['index', 'algorithm'],
+};
 
 function walkFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -19,12 +23,45 @@ function walkFiles(directory: string): string[] {
 }
 
 describe('documentation source structure', () => {
-  it('declares every imported top-level collection in the Fumadocs root metadata', () => {
+  it('uses only ASCII module roots so Fumadocs can resolve the active root from pathname', () => {
     const rootMeta = JSON.parse(readFileSync(join(docsRoot, 'meta.json'), 'utf8')) as {
       pages?: string[];
     };
+    const rootDirectories = readdirSync(docsRoot, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name);
 
-    expect(rootMeta.pages?.slice().sort()).toEqual(expectedRootPages);
+    expect(rootMeta.pages).toEqual(expectedRootPages);
+    expect(rootDirectories.slice().sort()).toEqual(expectedRootPages.slice().sort());
+    expect(rootDirectories.every((name) => /^[\x00-\x7F]+$/u.test(name))).toBe(true);
+  });
+
+  it('physically nests every collection inside its module root with no cross-root references', () => {
+    for (const [moduleName, pages] of Object.entries(expectedModuleChildren)) {
+      const meta = JSON.parse(
+        readFileSync(join(docsRoot, moduleName, 'meta.json'), 'utf8'),
+      ) as { root?: boolean; pages?: string[] };
+
+      expect(meta.root).toBe(true);
+      expect(meta.pages).toEqual(pages);
+      expect(meta.pages?.some((page) => page.includes('..'))).toBe(false);
+    }
+
+    expect(readdirSync(join(docsRoot, 'math'))).toEqual(
+      expect.arrayContaining(['past-exams', 'zhangyu-1000', 'lizhengyuan']),
+    );
+    expect(readdirSync(join(docsRoot, '408'))).toEqual(
+      expect.arrayContaining(['mock', 'past-exams']),
+    );
+    expect(readdirSync(join(docsRoot, 'programming'))).toContain('algorithm');
+  });
+
+  it('uses native Fumadocs root tabs instead of a custom tab routing layer', () => {
+    const layout = readFileSync(join(process.cwd(), 'app', 'docs', 'layout.tsx'), 'utf8');
+
+    expect(layout).not.toContain('study-modules');
+    expect(layout).not.toMatch(/\btabs\s*=/u);
+    expect(layout).toContain('tree={source.getPageTree()}');
   });
 
   it('gives every Markdown page a title and no longer imports Docusaurus-only components', () => {
@@ -38,24 +75,10 @@ describe('documentation source structure', () => {
     }
   }, 30_000);
 
-  it('keeps module navigation centralized instead of hardcoding route matching in the layout', () => {
-    const layout = readFileSync(
-      join(process.cwd(), 'app', 'docs', 'layout.tsx'),
-      'utf8',
-    );
-
-    expect(layout).toContain("from '@/lib/study-modules'");
-    expect(layout).toContain('tabs={moduleTabs}');
-    expect(layout).not.toContain('routePrefixes');
-  });
-
   it('keeps politics exam years as direct documents without year subfolders', () => {
-    const politicsRoot = join(docsRoot, '政治');
+    const politicsRoot = join(docsRoot, 'politics');
     const entries = readdirSync(politicsRoot, { withFileTypes: true });
-    const expectedYears = Array.from(
-      { length: 17 },
-      (_, index) => String(2010 + index),
-    );
+    const expectedYears = Array.from({ length: 17 }, (_, index) => String(2010 + index));
     const yearPages = entries
       .filter((entry) => entry.isFile() && /^\d{4}\.mdx$/u.test(entry.name))
       .map((entry) => entry.name.replace(/\.mdx$/u, ''))
@@ -63,10 +86,7 @@ describe('documentation source structure', () => {
 
     expect(yearPages).toEqual(expectedYears);
     expect(
-      entries.filter(
-        (entry) => entry.isDirectory() && /^\d{4}$/u.test(entry.name),
-      ),
+      entries.filter((entry) => entry.isDirectory() && /^\d{4}$/u.test(entry.name)),
     ).toHaveLength(0);
   });
-
 });

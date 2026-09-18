@@ -21,11 +21,11 @@ const encouragements = [
 ] as const;
 
 const modules = [
-  { name: '数学', href: '/docs/数学' },
+  { name: '数学', href: '/docs/math' },
   { name: '408', href: '/docs/408' },
-  { name: '政治', href: '/docs/政治' },
-  { name: '英语', href: '/docs/英语' },
-  { name: '编程', href: '/docs/编程' },
+  { name: '政治', href: '/docs/politics' },
+  { name: '英语', href: '/docs/english' },
+  { name: '编程', href: '/docs/programming' },
 ] as const;
 
 type Remaining = {

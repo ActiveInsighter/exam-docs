@@ -1,66 +1,41 @@
+import { readdirSync } from 'node:fs';
+import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { getShortDocSlugPath } from '../scripts/doc-paths.mjs';
 
-import {
-  createStudyModuleTabs,
-  getRouteMatchVariants,
-  STUDY_MODULES,
-} from '../lib/study-modules';
+const docsRoot = join(process.cwd(), 'content', 'docs');
+
+function walkFiles(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const filePath = join(directory, entry.name);
+    return entry.isDirectory() ? walkFiles(filePath) : [filePath];
+  });
+}
 
 describe('study module route matching', () => {
-  it('keeps raw and percent-encoded Unicode pathnames equivalent', () => {
-    const variants = getRouteMatchVariants('/docs/数学真题/01-高数');
+  it('generates ASCII-only routes for every documentation page', () => {
+    const routes = walkFiles(docsRoot)
+      .filter((filePath) => /\.(md|mdx)$/u.test(filePath))
+      .map((filePath) => getShortDocSlugPath(relative(docsRoot, filePath)));
 
-    expect(variants.has('/docs/数学真题/01-高数')).toBe(true);
-    expect(
-      variants.has(
-        '/docs/%E6%95%B0%E5%AD%A6%E7%9C%9F%E9%A2%98/01-%E9%AB%98%E6%95%B0',
-      ),
-    ).toBe(true);
+    expect(routes.every((route) => /^[\x00-\x7F]*$/u.test(route))).toBe(true);
   });
 
-  it('activates every Chinese module from encoded browser pathnames', () => {
-    const tabs = createStudyModuleTabs([
-      '/docs/数学',
-      '/docs/数学真题/01-test',
-      '/docs/408',
-      '/docs/408真题/2010',
-      '/docs/政治',
-      '/docs/政治/2010',
-      '/docs/英语',
-      '/docs/编程',
-      '/docs/algorithm/array',
-    ]);
-
-    const byTitle = new Map(tabs.map((tab) => [tab.title, tab]));
-
-    expect(
-      byTitle
-        .get('数学')
-        ?.urls.has('/docs/%E6%95%B0%E5%AD%A6%E7%9C%9F%E9%A2%98/01-test'),
-    ).toBe(true);
-    expect(
-      byTitle
-        .get('408')
-        ?.urls.has('/docs/408%E7%9C%9F%E9%A2%98/2010'),
-    ).toBe(true);
-    expect(
-      byTitle
-        .get('政治')
-        ?.urls.has('/docs/%E6%94%BF%E6%B2%BB/2010'),
-    ).toBe(true);
-    expect(
-      byTitle.get('英语')?.urls.has('/docs/%E8%8B%B1%E8%AF%AD'),
-    ).toBe(true);
-    expect(byTitle.get('编程')?.urls.has('/docs/algorithm/array')).toBe(true);
+  it('keeps module and collection entry routes readable and nested', () => {
+    expect(getShortDocSlugPath('math/index.mdx')).toBe('math');
+    expect(getShortDocSlugPath('math/past-exams/index.md')).toBe('math/past-exams');
+    expect(getShortDocSlugPath('408/mock/index.md')).toBe('408/mock');
+    expect(getShortDocSlugPath('408/past-exams/index.md')).toBe('408/past-exams');
+    expect(getShortDocSlugPath('politics/2010.mdx')).toBe('politics/2010');
+    expect(getShortDocSlugPath('programming/algorithm/index.md')).toBe(
+      'programming/algorithm',
+    );
   });
 
-  it('defines exactly one navigation entry per study module', () => {
-    expect(STUDY_MODULES.map((module) => module.title)).toEqual([
-      '数学',
-      '408',
-      '政治',
-      '英语',
-      '编程',
-    ]);
+  it('compacts an unsafe first segment instead of exposing a Unicode root URL', () => {
+    const slug = getShortDocSlugPath('数学/index.mdx');
+
+    expect(slug).toMatch(/^s-[0-9a-f]{8}$/u);
+    expect(slug).not.toContain('数学');
   });
 });

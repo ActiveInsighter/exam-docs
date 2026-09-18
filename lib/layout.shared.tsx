@@ -16,7 +16,7 @@ export const linkItems: LinkItemType[] = [
   {
     type: 'main',
     text: '学习',
-    url: '/docs/数学',
+    url: '/docs/math',
   },
   {
     type: 'main',
