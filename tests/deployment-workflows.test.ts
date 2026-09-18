@@ -47,8 +47,10 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('name: static-search');
     expect(workflow).toContain('Merge dedicated search assets');
     expect(workflow).toContain('needs: [validate, search, build-shard]');
-    expect(workflow).toContain('test "${search_files}" = \'77\'');
-    expect(workflow).toContain('test "${search_files}" = \'76\'');
+    expect(workflow).toContain('validated_search_assets=');
+    expect(workflow).toContain('manifest.pages !== 552');
+    expect(workflow).toContain('Search manifest is missing module categories.');
+    expect(workflow).not.toContain('test "${search_files}" =');
   });
 
   it('restores reusable weighted shard caches without creating a cache for every workflow-only commit', async () => {
