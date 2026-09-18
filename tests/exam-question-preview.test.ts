@@ -67,7 +67,7 @@ describe('exam answer preview styling', () => {
     expect(questionPaneRule).toMatch(/container-type:\s*inline-size/);
   });
 
-  it('does not draw a divider between a question and its answer control', () => {
+  it('preserves the dotted divider below the answer control', () => {
     const actionsRule = getRule('actions');
     const triggerRule = getRule('trigger');
     const questionDividerRule = stylesheet.match(
@@ -75,10 +75,10 @@ describe('exam answer preview styling', () => {
     )?.[1];
 
     expect(actionsRule).toMatch(/border-block-end:\s*0/);
-    expect(actionsRule).not.toContain('background-image');
-    expect(actionsRule).not.toContain('background-position');
-    expect(actionsRule).not.toContain('background-repeat');
-    expect(actionsRule).not.toContain('background-size');
+    expect(actionsRule).toMatch(/background-image:\s*radial-gradient/);
+    expect(actionsRule).toMatch(/background-position:\s*0 100%/);
+    expect(actionsRule).toMatch(/background-repeat:\s*repeat-x/);
+    expect(actionsRule).toMatch(/background-size:\s*0\.5rem 0\.125rem/);
     expect(questionDividerRule).toMatch(/display:\s*none/);
     expect(triggerRule).not.toMatch(/text-decoration-/);
     expect(solutionDialogSource).not.toContain('styles.triggerIcon');
