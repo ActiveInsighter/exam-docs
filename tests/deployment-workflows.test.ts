@@ -25,6 +25,7 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain("STATIC_DOCS_SHARD_COUNT: '4'");
     expect(workflow).toContain('shard: [0, 1, 2, 3]');
     expect(workflow).toContain('Weighted static shard');
+    expect(workflow).toContain('routes > 145');
     expect(workflow).toContain('Verify overlapping shared chunks are identical');
     expect(workflow).toContain('.static-docs/_next/static');
     expect(workflow).toContain('Two shards emitted different bytes at the same _next/static path.');
