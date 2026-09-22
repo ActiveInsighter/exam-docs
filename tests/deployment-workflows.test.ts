@@ -32,7 +32,7 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('Merge static outputs with conflict checks');
     expect(workflow).toContain('node scripts/verify-static-asset-references.mjs .static-docs');
     expect(workflow).toContain('tests/static-asset-references.test.ts');
-    expect(workflow).toContain('test "${doc_routes}" = \'571\'');
+    expect(workflow).toContain('test "${doc_routes}" = \'563\'');
     expect(workflow).toContain('test "${markdown}" = \'562\'');
     expect(workflow).toContain('tests/static-doc-shards.test.ts');
     expect(workflow).toContain('tests/static-build-id.test.ts');
