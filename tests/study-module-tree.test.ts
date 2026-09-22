@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 const docsRoot = join(process.cwd(), 'content', 'docs');
 const expectedRootPages = ['math', '408', 'politics', 'english', 'programming'];
 const expectedModuleChildren: Record<string, string[]> = {
-  math: ['index', 'past-exams', 'zhangyu-1000', 'lizhengyuan'],
+  math: ['index', 'past-exams', 'exam', 'zhangyu-1000', 'lizhengyuan'],
   '408': ['index', 'mock', 'past-exams'],
   politics: [
     'index',
@@ -48,7 +48,7 @@ describe('documentation source structure', () => {
     }
 
     expect(readdirSync(join(docsRoot, 'math'))).toEqual(
-      expect.arrayContaining(['past-exams', 'zhangyu-1000', 'lizhengyuan']),
+      expect.arrayContaining(['past-exams', 'exam', 'zhangyu-1000', 'lizhengyuan']),
     );
     expect(readdirSync(join(docsRoot, '408'))).toEqual(
       expect.arrayContaining(['mock', 'past-exams']),
