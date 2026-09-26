@@ -6,6 +6,7 @@ import { encodeHttpPath } from '../scripts/http-paths.mjs';
 // @ts-expect-error The deployment helper is intentionally a Node.js ESM script.
 import {
   buildCloudflareAssetsIgnore,
+  buildCloudflareHeaders,
   buildCloudflareRedirects,
   CLOUDFLARE_DYNAMIC_REDIRECT_LIMIT,
 } from '../scripts/prepare-cloudflare-static-assets.mjs';
@@ -68,6 +69,13 @@ describe('Cloudflare Workers Static Assets deployment', () => {
         { source: '/docs/*', destination: 'https://example.com/:splat' },
       ]),
     ).toThrow(/stay on-site/);
+  });
+
+  it('forces direct Markdown responses to UTF-8', () => {
+    const headers = buildCloudflareHeaders();
+
+    expect(headers).toContain('/*.md');
+    expect(headers).toContain('Content-Type: text/markdown; charset=utf-8');
   });
 
   it('excludes EdgeOne deployment metadata from Cloudflare asset upload', () => {
