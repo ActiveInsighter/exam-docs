@@ -41,6 +41,15 @@ export function buildCloudflareRedirects(rewrites) {
   return `${lines.join('\n')}\n`;
 }
 
+export function buildCloudflareHeaders() {
+  return [
+    '# Explicit UTF-8 charset for direct Markdown views served by Workers Static Assets.',
+    '/*.md',
+    '  Content-Type: text/markdown; charset=utf-8',
+    '',
+  ].join('\n');
+}
+
 export function buildCloudflareAssetsIgnore() {
   return [
     '# EdgeOne deployment metadata is not a public Cloudflare asset.',
@@ -53,6 +62,7 @@ export async function prepareCloudflareStaticAssets(outputRoot = path.resolve('.
   const edgeOneConfigPath = path.join(outputRoot, 'edgeone.json');
   const redirectsPath = path.join(outputRoot, '_redirects');
   const assetsIgnorePath = path.join(outputRoot, '.assetsignore');
+  const headersPath = path.join(outputRoot, '_headers');
   const notFoundPath = path.join(outputRoot, '404.html');
 
   const edgeOneConfig = JSON.parse(await readFile(edgeOneConfigPath, 'utf8'));
@@ -62,9 +72,11 @@ export async function prepareCloudflareStaticAssets(outputRoot = path.resolve('.
   await Promise.all([
     writeFile(redirectsPath, redirects, 'utf8'),
     writeFile(assetsIgnorePath, buildCloudflareAssetsIgnore(), 'utf8'),
+    writeFile(headersPath, buildCloudflareHeaders(), 'utf8'),
   ]);
 
   console.log(`[cloudflare-assets] Wrote ${redirectsPath}.`);
+  console.log(`[cloudflare-assets] Wrote ${headersPath} with UTF-8 Markdown Content-Type.`);
   console.log('[cloudflare-assets] Prepared Cloudflare Static Assets metadata from the EdgeOne route config.');
   console.log('[cloudflare-assets] Confirmed 404.html for not_found_handling=404-page.');
 }
