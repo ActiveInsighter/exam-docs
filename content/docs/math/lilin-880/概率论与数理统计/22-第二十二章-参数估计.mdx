@@ -1,0 +1,1097 @@
+---
+title: "第二十二章 参数估计"
+description: "李林 880 数一：参数估计题目与解析整理"
+---
+
+# 第二十二章 参数估计
+
+## 本章方法速记
+
+- **矩估计**：先写总体矩关于未知参数的方程，再用对应样本矩替换；若低阶矩不含待估参数，就换用更高阶矩。
+- **最大似然估计**：先写似然函数与参数可行域，再求极值；当参数进入支持集边界时，不能只机械求导，要检查样本最大值/最小值等次序统计量。
+- **无偏性**看 $E\widehat\theta=\theta$；两个无偏估计量比较有效性时，只需比较方差，方差更小者更有效。
+- **一致性**常通过切比雪夫不等式、依概率收敛或次序统计量分布证明。
+- **置信区间**先构造分布不含未知参数的枢轴量，再由概率不等式反解参数；若目标参数是原参数的单调函数，可对区间端点作同向单调变换。
+
+## 基础题
+
+### 一、填空题
+
+<ExamQuestion>
+
+1. 设总体 $X$ 与 $Y$ 均服从 $N(\mu,\sigma^2)$，从总体 $X$ 与 $Y$ 中抽取容量均为 $n$ 的两组相互独立的简单随机样本，其样本方差分别为 $S_X^2$ 与 $S_Y^2$。若 $Z=aS_X^2+bS_Y^2$ 是 $\sigma^2$ 的无偏估计，当 $DZ$ 达到最小时，$a=$________，$b=$________。
+
+<ExamSolution>
+
+<ExamAnswer>$\frac{1}{2}, \frac{1}{2}$</ExamAnswer>
+
+<ExamExplanation>
+由已知, $X \sim N(\mu, \sigma^2)$, 则 $ES_X^2 = \sigma^2, ES_Y^2 = \sigma^2$.
+依题设, $EZ = E(aS_X^2 + bS_Y^2) = aES_X^2 + bES_Y^2 = a\sigma^2 + b\sigma^2 = \sigma^2$, 则 $a + b = 1$.
+又 $DZ = a^2 DS_X^2 + b^2 DS_Y^2 = (a^2 + b^2) DS_X^2$, 要使 $DZ$ 达到最小, 即 $a^2 + b^2$ 在条件 $a + b = 1$ 下达到最小.
+令 $f(a, b) = a^2 + b^2, g(a) = f(a, 1 - a) = a^2 + (1 - a)^2$, 由 $g' = 2a - 2(1 - a) = 0$, 得 $a = \frac{1}{2}$, 从而 $b = \frac{1}{2}$.
+
+**技巧总结：** 两个独立无偏估计量方差相同时，线性组合在系数和为 $1$ 的约束下，以等权平均方差最小；本题本质上是最小化 $a^2+b^2$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 设 $X_1,X_2,\cdots,X_n(n>1)$ 为来自总体 $X\sim N(\mu,\sigma^2)$ 的简单随机样本，其中 $\mu$ 已知，$\sigma>0$，若 $\hat{\sigma}=k\sum_{i=1}^n |X_i-\mu|$ 是 $\sigma$ 的无偏估计，则 $k=$________。
+
+<ExamSolution>
+
+<ExamAnswer>$\frac{1}{n} \sqrt{\frac{\pi}{2}}$</ExamAnswer>
+
+<ExamExplanation>
+由已知, $X_i \sim N(\mu, \sigma^2)$, 故 $X_i - \mu \sim N(0, \sigma^2)$, 则
+$$
+\begin{aligned}
+E \mid X_i - \mu \mid &= \int_{-\infty}^{+\infty} \mid x \mid \cdot \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{1}{2}\left(\frac{x}{\sigma}\right)^2} dx \\
+&= \frac{2}{\sqrt{2\pi}\sigma} \int_0^{+\infty} x e^{-\frac{1}{2}\left(\frac{x}{\sigma}\right)^2} dx \\
+&= \sqrt{\frac{2}{\pi}} \left[ -\sigma e^{-\frac{1}{2}\left(\frac{x}{\sigma}\right)^2} \right]_0^{+\infty} = \sqrt{\frac{2}{\pi}} \sigma,
+\end{aligned}
+$$
+故 $E\hat{\sigma} = k \sum_{i=1}^n E \mid X_i - \mu \mid = k \cdot n \sqrt{\frac{2}{\pi}} \sigma = \sigma$, 解得 $k = \frac{1}{n} \sqrt{\frac{\pi}{2}}$.
+
+**知识点补充：** 若 $Z\sim N(0,1)$，则 $E|Z|=\sqrt{2/\pi}$，因此 $E|X_i-\mu|=\sigma\sqrt{2/\pi}$。这是正态总体绝对离差估计中常用结论。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 设总体服从 $N(\mu,8)$，$X_1$，$X_2$，$\cdots$，$X_{36}$ 是来自总体 $X$ 的简单随机样本，$\overline{X}=\frac{1}{36}\sum_{i=1}^{36} X_i$，若以 $(\overline{X}-1,\overline{X}+1)$ 作为 $\mu$ 的置信区间，$\Phi(x)$ 为 $N(0,1)$ 的分布函数，则置信度为________。
+
+<ExamSolution>
+
+<ExamAnswer>$2\Phi\left(\frac{3}{2}\sqrt{2}\right) - 1$</ExamAnswer>
+
+<ExamExplanation>
+依题设, 令 $U = \frac{\overline{X} - \mu}{\frac{\sigma}{\sqrt{n}}}$, 则 $U \sim N(0, 1)$. 置信区间为 $1 - \alpha$ 的置信区间为
+$$
+\left( \overline{X} - \frac{\sigma}{\sqrt{n}} u_{\frac{\alpha}{2}}, \overline{X} + \frac{\sigma}{\sqrt{n}} u_{\frac{\alpha}{2}} \right),
+$$
+其中 $u_{\frac{\alpha}{2}}$ 满足 $P\left\{ \mid U \mid < u_{\frac{\alpha}{2}} \right\} = 1 - \alpha$, 即 $1 - \alpha = 2\Phi\left( u_{\frac{\alpha}{2}} \right) - 1$.
+此题置信区间长度为 2, 故
+$$
+2 \frac{\sigma}{\sqrt{n}} u_{\frac{\alpha}{2}} = 2,
+$$
+即 $2 \cdot \frac{\sqrt{8}}{\sqrt{36}} u_{\frac{\alpha}{2}} = 2, u_{\frac{\alpha}{2}} = \frac{3\sqrt{2}}{2}$. 于是 $1 - \alpha = 2\Phi\left(\frac{3}{2}\sqrt{2}\right) - 1$.
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+### 二、解答题
+
+<ExamQuestion>
+
+1. 设总体 $X$ 的概率分布为
+
+| $X$ | 1 | 2 | 3 |
+| :---: | :---: | :---: | :---: |
+| $p$ | $\theta^2$ | $2\theta(1-\theta)$ | $(1-\theta)^2$ |
+
+已知容量为 3 的样本值为 $x_1=1, x_2=2, x_3=1$，求 $\theta$ 的矩估计值和最大似然估计值。
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+$EX = \theta^2 + 2 \cdot 2\theta(1 - \theta) + 3(1 - \theta)^2 = -2\theta + 3$,
+得 $\theta = \frac{3 - EX}{2}$, $\theta$ 的矩估计值 $\widehat{\theta} = \frac{3 - \overline{x}}{2}$. 又
+$$
+\overline{x} = \frac{x_1 + x_2 + x_3}{3} = \frac{1 + 2 + 1}{3} = \frac{4}{3},
+$$
+
+所以 $\widehat{\theta} = \frac{5}{6}$。
+似然函数为 $L(\theta) = \theta^2 \cdot 2\theta(1-\theta) \cdot \theta^2 = 2\theta^5(1-\theta)$，
+$$\ln L(\theta) = \ln 2 + 5\ln\theta + \ln(1-\theta)$$。
+令 $\frac{\mathrm{d}\ln L(\theta)}{\mathrm{d}\theta} = \frac{5}{\theta} - \frac{1}{1-\theta} = 0$，解得 $\theta$ 的最大似然估计值为 $\widehat{\theta} = \frac{5}{6}$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 设总体 $X$ 的概率密度为 $$f(x;\lambda)=\begin{cases} -\lambda^x\ln\lambda, & x\ge0, \\ 0, & x<0 \end{cases} \quad (0<\lambda<1)$$，$(X_1,X_2,\cdots,X_n)$ 为总体 $X$ 的简单随机样本，求 $\lambda$ 的矩估计量。
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+$$
+\begin{aligned}
+EX &= \int_{-\infty}^{+\infty} x \cdot f(x; \lambda)\mathrm{d}x = -\int_{0}^{+\infty} x \cdot \lambda^x \ln \lambda \mathrm{d}x \\
+&= -\int_{0}^{+\infty} x \mathrm{d}(\lambda^x) = -x\lambda^x \Big|_0^{+\infty} + \int_{0}^{+\infty} \lambda^x \mathrm{d}x \\
+&= \frac{\lambda^x}{\ln \lambda} \Big|_0^{+\infty} = -\frac{1}{\ln \lambda},
+\end{aligned}
+$$
+即 $EX = -\frac{1}{\ln \lambda}$，解得 $\lambda = \mathrm{e}^{-\frac{1}{EX}}$，故 $\lambda$ 的矩估计量为 $\widehat{\lambda} = \mathrm{e}^{-\frac{1}{\overline{X}}}$，其中 $\overline{X} = \frac{1}{n} \sum_{i=1}^n X_i$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. 设总体 $X$ 的概率密度为 $$f(x;\theta)=\begin{cases} \sqrt{\theta}\cdot x^{\sqrt{\theta}-1}, & 0\le x\le1, \\ 0, & \text{其他}, \end{cases}$$ 其中 $\theta>0$ 为未知参数，$(x_1,x_2,\cdots,x_n)$ 为 $X$ 的简单随机样本。求：
+
+(I) $\theta$ 的矩估计值；
+
+(II) $\theta$ 的最大似然估计值．
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+(I) 由
+$$
+EX = \int_{-\infty}^{+\infty} x \cdot f(x; \theta)\mathrm{d}x = \int_{0}^{1} x \cdot \sqrt{\theta} \cdot x^{\sqrt{\theta}-1}\mathrm{d}x = \int_{0}^{1} \sqrt{\theta} x^{\sqrt{\theta}}\mathrm{d}x = \frac{\sqrt{\theta}}{\sqrt{\theta} + 1},
+$$
+解得 $\theta = \left(\frac{EX}{1-EX}\right)^2$，故 $\theta$ 的矩估计值为 $\widehat{\theta} = \left(\frac{\overline{X}}{1-\overline{X}}\right)^2$。
+
+(II) 似然函数为 $L(\theta) = \prod_{i=1}^n \sqrt{\theta} x_i^{\sqrt{\theta}-1} = \theta^{\frac{n}{2}} \left(\prod_{i=1}^n x_i\right)^{\sqrt{\theta}-1}$，取对数，得
+$$\ln L(\theta) = \frac{n}{2}\ln\theta + (\sqrt{\theta}-1)\sum_{i=1}^n \ln x_i$$。
+令
+$$\frac{\mathrm{d}\ln L(\theta)}{\mathrm{d}\theta} = \frac{n}{2\theta} + \frac{1}{2\sqrt{\theta}}\sum_{i=1}^n \ln x_i = 0,$$
+得 $\theta$ 的最大似然估计值为
+$$\widehat{\theta} = \frac{n^2}{\left(\sum\limits_{i=1}^n \ln x_i\right)^2}$$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. 设 $X_1, X_2, \cdots, X_n$ 是来自总体 $X$ 的简单随机样本，$X$ 的概率密度为
+$$f(x) = \frac{1}{2\theta} \mathrm{e}^{-\frac{|x|}{\theta}}, -\infty < x < +\infty, \theta > 0.$$
+求参数 $\theta$ 的矩估计量 $\hat{\theta}$ 及 $E(\hat{\theta}^2)$。
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+由于
+$$EX = \int_{-\infty}^{+\infty} x f(x)\mathrm{d}x = \int_{-\infty}^{+\infty} x \cdot \frac{1}{2\theta}\mathrm{e}^{-\frac{|x|}{\theta}}\mathrm{d}x = 0,$$
+$$
+\begin{aligned}
+E(X^2) &= \int_{-\infty}^{+\infty} x^2 f(x)\mathrm{d}x = \int_{-\infty}^{+\infty} x^2 \cdot \frac{1}{2\theta}\mathrm{e}^{-\frac{|x|}{\theta}}\mathrm{d}x \\
+&= \int_{0}^{+\infty} x^2 \cdot \frac{1}{\theta}\mathrm{e}^{-\frac{x}{\theta}}\mathrm{d}x \quad \left(\text{令 } \frac{x}{\theta} = t\right) \\
+&= \int_{0}^{+\infty} (\theta t)^2 \frac{1}{\theta}\mathrm{e}^{-t} \theta \mathrm{d}t = \theta^2 \int_{0}^{+\infty} t^2 \mathrm{e}^{-t}\mathrm{d}t \\
+&= \theta^2 \Gamma(3) = \theta^2 \cdot 2! = 2\theta^2,
+\end{aligned}
+$$
+故 $\theta$ 的矩估计量 $\widehat{\theta} = \sqrt{\frac{1}{2n}\sum_{i=1}^n X_i^2}$。又由 $\theta^2 = \frac{1}{2n}\sum_{i=1}^n X_i^2$，得
+$$E(\widehat{\theta}^2) = \frac{1}{2n}\sum_{i=1}^n E(X_i^2) = \frac{1}{2n}\sum_{i=1}^n \left[\int_{-\infty}^{+\infty} x^2 f(x)\mathrm{d}x\right] = \theta^2$$。
+
+**易错点：** 这里一阶原点矩 $EX=0$ 与 $\theta$ 无关，所以不能用一阶矩估计 $\theta$；应改用二阶矩 $E(X^2)=2\theta^2$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. 设总体 $X$ 的概率密度为 $f(x;\theta) = \begin{cases} \frac{1}{\theta}, & 0 \leqslant x \leqslant \theta, \\ 0, & \text{其他}, \end{cases}$ 其中 $\theta > 0$ 为未知参数，$(X_1, X_2, \cdots, X_n)$ 为 $X$ 的简单随机样本。求：
+(I) $\theta$ 的最大似然估计量 $\hat{\theta}$；
+(II) $E\hat{\theta}$ 和 $D\hat{\theta}$。
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+(I) 由已知，似然函数为
+$$
+L(\theta) = \begin{cases}
+\frac{1}{\theta^n}, & 0 \leqslant x_1, x_2, \cdots, x_n \leqslant \theta, \\
+0, & \text{其他.}
+\end{cases}
+$$
+要使 $L(\theta)$ 最大，$\theta$ 应尽量小，但 $0 \leqslant x_1, x_2, \cdots, x_n \leqslant \theta$，即 $\theta$ 应大于或等于 $x_1, x_2, \cdots, x_n$ 中的每一个，故 $\theta$ 的最大似然估计量为 $\widehat{\theta} = \max\{X_1, X_2, \cdots, X_n\}$。
+
+(II) $\widehat{\theta}$ 的概率密度为
+$$
+f(x) = \begin{cases}
+n\left(\frac{x}{\theta}\right)^{n-1} \cdot \frac{1}{\theta} = \frac{n}{\theta^n} x^{n-1}, & 0 \leqslant x \leqslant \theta, \\
+0, & \text{其他.}
+\end{cases}
+$$
+
+故
+$$E\widehat{\theta} = \int_{0}^{\theta} x \cdot \frac{n}{\theta^n} x^{n-1} dx = \frac{n}{n+1}\theta,$$
+$$E(\widehat{\theta}^2) = \int_{0}^{\theta} x^2 \cdot \frac{n}{\theta^n} x^{n-1} dx = \frac{n}{n+2}\theta^2,$$
+所以
+$$D\widehat{\theta} = E(\widehat{\theta}^2) - (E\widehat{\theta})^2 = \frac{n\theta^2}{(n+2)(n+1)^2}.$$
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. 某射手进行独立重复射击，每次击中目标的概率为 $p > 0$，设他在第 $X$ 次射击时首次击中目标，以 $X$ 为总体，$(X_1, X_2, \cdots, X_n)$ 为 $X$ 的简单随机样本。求：
+(I) $X$ 的概率分布；
+(II) 参数 $p$ 的矩估计量和最大似然估计量.
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+(I) 由已知, $X$ 服从几何分布, 故其分布律为
+$$P\{X = k\} = p(1-p)^{k-1}, k = 1, 2, \cdots.$$
+(II)
+$$EX = \sum_{k=1}^{\infty} kp(1-p)^{k-1} = \frac{1}{p},$$
+即 $p = \frac{1}{EX}$, 故 $\widehat p = \frac{1}{\overline{X}}$ 为矩估计量。
+
+设 $(x_1, x_2, \cdots, x_n)$ 为 $(X_1, X_2, \cdots, X_n)$ 的样本值, 则似然函数为
+$$L(p) = \prod_{k=1}^n p(1-p)^{x_k-1} = p^n(1-p)^{\sum_{k=1}^n x_k - n},$$
+
+取对数, 得
+$$\ln L(p) = n\ln p + \left(\sum_{k=1}^n x_k - n\right)\ln(1-p),$$
+由
+$$\frac{\mathrm{d}\ln L(p)}{\mathrm{d}p} = \frac{n}{p} - \frac{1}{1-p}\left(\sum_{k=1}^n x_k - n\right) = 0,$$
+解得 $p$ 的最大似然估计量为 $\widehat p = \frac{1}{\overline{X}}$。
+
+**知识点与技巧：** 几何分布的期望和方差分别为 $EX = \frac{1}{p}, DX = \frac{1-p}{p^2} (0 < p < 1)$, 应牢记。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. 设 $(X_1, X_2, \cdots, X_{10})$ 为总体 $X \sim N(0, \sigma^2)$ 的简单随机样本，$\sigma > 0$ 为未知参数.
+(I) 求 $\sigma^2$ 的最大似然估计量 $\hat{\sigma}^2$；
+(II) 若记 $U = \sum_{i=1}^6 X_i, V = \sum_{i=5}^{10} X_i$，利用最大似然估计量 $\hat{\sigma}^2$，求相关系数 $\rho_{UV}$.
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+(I) 由已知, $X$ 的概率密度为
+$$f(x) = \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{x^2}{2\sigma^2}}, -\infty < x < +\infty,$$
+
+似然函数为
+$$L(\sigma^2) = \prod_{i=1}^{10} \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{x_i^2}{2\sigma^2}} = (2\pi\sigma^2)^{-\frac{10}{2}} \cdot e^{-\frac{1}{2\sigma^2} \sum_{i=1}^{10} x_i^2},$$
+
+取对数, 得
+$$\ln L(\sigma^2) = -\frac{10}{2}\ln(2\pi\sigma^2) - \frac{1}{2\sigma^2}\sum_{i=1}^{10} x_i^2,$$
+
+令 $\frac{\mathrm{d}}{\mathrm{d}\sigma^2}\ln L(\sigma^2) = 0$, 得 $-\frac{10}{2\sigma^2} + \frac{1}{2\sigma^4}\sum_{i=1}^{10} x_i^2 = 0$, 故 $\sigma^2$ 的最大似然估计量为 $\hat{\sigma}^2 = \frac{1}{10}\sum_{i=1}^{10} X_i^2$。
+
+(II) 由 (I) 知, $X \sim N(0, \sigma^2)$, 则
+$$EU = E\left(\sum_{i=1}^6 X_i\right) = 0, EV = E\left(\sum_{i=5}^{10} X_i\right) = 0,$$
+$$DU = D\left(\sum_{i=1}^6 X_i\right) = 6\widehat{\sigma^2}, DV = D\left(\sum_{i=5}^{10} X_i\right) = 6\widehat{\sigma^2}.$$
+又 $\operatorname{Cov}(U, V) = \operatorname{Cov}\left(\sum_{i=1}^6 X_i, \sum_{j=5}^{10} X_j\right) = \sum_{i=1}^6 \sum_{j=5}^{10} \operatorname{Cov}(X_i, X_j) = \mathrm{DX}_5 + \mathrm{DX}_6 = 2\widehat{\sigma^2}$,
+其中, 当 $i \neq j$ 时, $\operatorname{Cov}(X_i, X_j) = 0$; 当 $i = j$ 时, $\operatorname{Cov}(X_i, X_j) = \mathrm{DX}_i = \hat{\sigma}^2$, 故
+$$\rho_{UV} = \frac{\operatorname{Cov}(U, V)}{\sqrt{\mathrm{DU}}\sqrt{\mathrm{DV}}} = \frac{2\widehat{\sigma^2}}{6\widehat{\sigma^2}} = \frac{1}{3}.$$
+
+**技巧总结：** $U$ 与 $V$ 只在 $X_5,X_6$ 两项上重叠，因此协方差只来自这两个公共项。由于相关系数中 $\sigma^2$ 会约掉，最终结果与未知方差本身无关。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+8. 设总体 $X$ 的概率密度为 $f(x) = \begin{cases} \frac{1}{\sqrt{2\pi}x} \mathrm{e}^{-\frac{(\ln x - \mu)^2}{2}}, & x > 0, \\ 0, & x \leqslant 0, \end{cases}$ $(X_1, X_2, \cdots, X_n)$ 为总体 $X$ 的简单随机样本。
+(I) 求 $\mu$ 的最大似然估计量 $\hat{\mu}$；
+(II) 记 $Y = \ln X$，求 $Y$ 的分布函数和 $E\hat{\mu}$.
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+(I) 似然函数为
+
+$$L(\mu) = \begin{cases} \prod_{i=1}^n \frac{1}{\sqrt{2\pi}x_i} \mathrm{e}^{-\frac{1}{2}(\ln x_i - \mu)^2}, & x_i > 0, \\ 0, & \text{其他}, \end{cases}$$
+
+取对数,得
+$$\ln L(\mu) = \ln \left(\frac{1}{\sqrt{2\pi}}\right)^n + \ln \frac{1}{\prod_{i=1}^n x_i} - \frac{1}{2}\sum_{i=1}^n (\ln x_i - \mu)^2.$$
+
+令 $\frac{\mathrm{d}}{\mathrm{d}\mu} \ln L(\mu) = \sum_{i=1}^n (\ln x_i - \mu) = 0$, 得 $\mu$ 的最大似然估计量为 $\hat{\mu} = \frac{1}{n}\sum_{i=1}^n \ln X_i.$
+
+(II) $F_Y(x) = P\{Y \leqslant x\} = P\{\ln X \leqslant x\} = P\{X \leqslant \mathrm{e}^x\}$
+$$= \int_0^{\mathrm{e}^x} \frac{1}{\sqrt{2\pi}t} \mathrm{e}^{-\frac{1}{2}(\ln t - \mu)^2} \, \mathrm{d}t \overset{\ln t = u}{=} \int_{-\infty}^x \frac{1}{\sqrt{2\pi}} \mathrm{e}^{-\frac{1}{2}(u - \mu)^2} \, \mathrm{d}u,$$
+
+故 $Y = \ln X$ 服从正态分布 $N(\mu, 1)$, 所以 $E(\ln X) = \mu$, 故
+$$E\hat{\mu} = E\left(\frac{1}{n}\sum_{i=1}^n \ln X_i\right) = \frac{1}{n}\sum_{i=1}^n E(\ln X_i) = \mu.$$
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+9. 设 $X_1, X_2, \cdots, X_n$ 为来自总体 $X$ 的简单随机样本，$EX = \mu, DX = \sigma^2$，若 $\hat{\theta} = k \sum_{i=1}^{n-1} (X_{i+1} - X_i)^2$ 为 $\sigma^2$ 的无偏估计量，求 $k$ 的值.
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+由已知, $E\widehat{\theta} = \sigma^2$, 由于
+$$E\left[k\sum_{i=1}^{n-1}(X_{i+1}-X_i)^2\right] = k\sum_{i=1}^{n-1} E(X_{i+1}-X_i)^2$$
+$$= k\sum_{i=1}^{n-1} \{D(X_{i+1}-X_i) + [E(X_{i+1}-X_i)]^2\}$$
+$$= k\sum_{i=1}^{n-1} (DX_{i+1} + DX_i) = 2(n-1)k\sigma^2 = \sigma^2,$$
+
+故 $k = \frac{1}{2(n-1)}.$
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+10. 设总体 $X$ 的概率密度为
+$$
+f(x;\theta)=\begin{cases}
+\dfrac{3x^2}{\theta^3}, & 0\leqslant x\leqslant\theta, \\
+0, & \text{其他},
+\end{cases}
+$$
+$\theta>0$ 为未知参数，$(X_1,X_2,\cdots,X_n)$ 为 $X$ 的简单随机样本，$\overline{X}=\dfrac{1}{n}\sum\limits_{i=1}^{n}X_i$, $Y_n=\max\{X_1,X_2,\cdots,X_n\}$, 证明：$\dfrac{3n+1}{3n}Y_n$ 与 $\dfrac{4}{3}\overline{X}$ 都是 $\theta$ 的无偏估计量。
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+依题意,得
+$$EX = \int_{-\infty}^{+\infty} x f(x; \theta) \, \mathrm{d}x = \int_0^\theta x \cdot \frac{3x^2}{\theta^3} \, \mathrm{d}x = \frac{3}{4}\theta,$$
+$$E\left(\frac{4}{3}\overline{X}\right) = \frac{4}{3}E\overline{X} = \frac{4}{3}EX = \frac{4}{3} \cdot \frac{3}{4}\theta = \theta,$$
+所以 $\frac{4}{3}\overline{X}$ 是 $\theta$ 的无偏估计量.
+
+又 $X$ 的分布函数为
+$$F(x) = \int_{-\infty}^x f(t) \, \mathrm{d}t = \begin{cases} 0, & x \leqslant 0, \\ \frac{x^3}{\theta^3}, & 0 < x < \theta, \\ 1, & x \geqslant \theta, \end{cases}$$
+
+$Y_n = \max\{X_1, X_2, \cdots, X_n\}$ 的分布函数 $F_{Y_n}(x)$ 为
+$$F_{Y_n}(x) = P\{\max\{X_1, X_2, \cdots, X_n\} \leqslant x\}$$
+$$= P\{X_1 \leqslant x, X_2 \leqslant x, \cdots, X_n \leqslant x\}$$
+$$= P\{X_1 \leqslant x\} P\{X_2 \leqslant x\} \cdots P\{X_n \leqslant x\}$$
+$$= [F(x)]^n,$$
+
+故 $Y_n$ 的概率密度为
+$$f_{Y_n}(x) = F'_{Y_n}(x) = \begin{cases} n\left(\frac{x^3}{\theta^3}\right)^{n-1} \cdot \frac{3}{\theta^3} \cdot x^2 = \frac{3nx^{3n-1}}{\theta^{3n}}, & 0 \leqslant x \leqslant \theta, \\ 0, & \text{其他}, \end{cases}$$
+
+所以
+$$E(Y_n) = \int_{-\infty}^{+\infty} x f_{Y_n}(x) \, \mathrm{d}x = \int_0^\theta x \cdot \frac{3nx^{3n-1}}{\theta^{3n}} \, \mathrm{d}x = \frac{3n}{3n+1}\theta,$$
+
+故 $E\left(\frac{3n+1}{3n} Y_n\right) = \frac{3n+1}{3n} \cdot \frac{3n}{3n+1} \theta = \theta$, 即 $\frac{3n+1}{3n} Y_n$ 也是 $\theta$ 的无偏估计量.
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+11. 设总体 $X$ 在 $\left[\theta-\dfrac{1}{2}, \theta+\dfrac{1}{2}\right]$ 上服从均匀分布，$\theta$ 为未知参数，$(X_1,X_2,\cdots,X_n)$ 为总体 $X$ 的样本，求 $\theta$ 的矩估计量 $\widehat{\theta}_1$ 和最大似然估计量 $\widehat{\theta}_2$。
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+(I) 先写出 $X$ 的概率密度
+$$f(x;\theta) = \begin{cases} 1, & \theta - \frac{1}{2} \leqslant x \leqslant \theta + \frac{1}{2}, \\ 0, & \text{其他}, \end{cases} \text{则}$$
+$$EX = \int_{-\infty}^{+\infty} x \cdot f(x;\theta) dx = \int_{\theta-\frac{1}{2}}^{\theta+\frac{1}{2}} x dx = \theta,$$
+故 $\widehat{\theta}_1 = \overline{X}$ 为矩估计量。
+
+(II) 似然函数
+$$L(\theta) = \prod_{i=1}^{n} f(x_i;\theta) = \begin{cases} 1, & \theta - \frac{1}{2} \leqslant x_i \leqslant \theta + \frac{1}{2}, \\ 0, & \text{其他}, \end{cases}$$
+$L(\theta)$ 是常数函数, 仅取 $0, 1$, 所以只要满足 $\theta - \frac{1}{2} \leqslant x_i \leqslant \theta + \frac{1}{2}$ 的任何 $\theta$ 都使 $L(\theta)$ 取到最大值 $1$, 由此得
+$$\theta - \frac{1}{2} \leqslant \min_{1 \leqslant i \leqslant n} \{x_i\}, \quad \theta + \frac{1}{2} \geqslant \max_{1 \leqslant i \leqslant n} \{x_i\}.$$
+所以 $\max_{1 \leqslant i \leqslant n} \{x_i\} - \frac{1}{2} \leqslant \theta \leqslant \min_{1 \leqslant i \leqslant n} \{x_i\} + \frac{1}{2}$, 因此满足 $\max_{1 \leqslant i \leqslant n} \{x_i\} - \frac{1}{2} \leqslant g(x_1, x_2, \cdots, x_n) \leqslant \min_{1 \leqslant i \leqslant n} \{x_i\} + \frac{1}{2}$ 的任何统计量 $g(X_1, X_2, \cdots, X_n)$ 都是 $\theta$ 的最大似然估计量, 如取 $\widehat{\theta}_2 = \min_{1 \leqslant i \leqslant n} \{X_i\} + \frac{1}{2}$ 或 $\widehat{\theta}_2 = \max_{1 \leqslant i \leqslant n} \{X_i\} - \frac{1}{2}$。
+
+> **知识点与技巧：**由此题知, 最大似然估计并不唯一。
+
+**技巧总结：** 当似然函数在一段参数区间内恒为同一最大值时，最大似然估计可以不唯一；只要所取统计量始终落在可行区间内即可。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+12. 设总体 $X$ 服从参数为 $\lambda$ 的泊松分布，$(X_1,X_2,\cdots,X_n)$ 是总体 $X$ 的样本，$\overline{X}$ 是样本均值，$S^2$ 是样本方差。
+
+$(I)$ 对任意实数 $C$，证明：统计量 $T=C\overline{X}+(1-C)S^2$ 是参数 $\lambda$ 的无偏估计；
+
+$(II)$ 求概率 $P\{X\ge 1\}$ 的最大似然估计量。
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+(I) 注意到对任何总体 $X, \overline{X}$ 和 $S^2$ 是总体 $X$ 的期望和方差的无偏估计量。
+由 $X$ 服从泊松分布, 故 $EX = E(S^2) = \lambda$, 于是
+$$E[C\overline{X} + (1-C)S^2] = CE\overline{X} + (1-C)E(S^2) = C\lambda + (1-C)\lambda = \lambda,$$
+即 $T$ 是 $\lambda$ 的无偏估计量。
+
+(II) 解 先求 $\lambda$ 的最大似然估计量。泊松分布的概率密度为
+$$P(x;\lambda) = \frac{\lambda^x}{x!} e^{-\lambda} \quad (x = 0, 1, 2, \cdots),$$
+似然函数
+$$L(\lambda) = \prod_{i=1}^{n} \frac{\lambda^{x_i}}{x_i!} e^{-\lambda} = \left( \prod_{i=1}^{n} \frac{1}{x_i!} \right) \lambda^{n\overline{x}} \cdot e^{-n\lambda},$$
+取对数, 得
+$$\ln L(\lambda) = \ln \left( \prod_{i=1}^{n} \frac{1}{x_i!} \right) + n\overline{X}\ln\lambda - n\lambda,$$
+对 $\lambda$ 求导, 有
+$$\frac{d\ln L(\lambda)}{d\lambda} = \frac{n\overline{X}}{\lambda} - n = 0 \implies \widehat{\lambda} = \overline{X}$$
+为 $\lambda$ 的最大似然估计量。由于 $P\{X \ge 1\} = 1 - P\{X = 0\} = 1 - e^{-\lambda}$ 是 $\lambda$ 的单调函数, 根据最大似然估计量的不变性, 得 $1 - e^{-\overline{X}}$ 为 $P\{X \ge 1\}$ 的最大似然估计量。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+13. 设总体 $X\sim U(0,\theta) \, (\theta>0)$, $(X_1,X_2,\cdots,X_n)$ 为 $X$ 的简单随机样本，$X_{(n)}=\max\{X_1,X_2,\cdots,X_n\}$。
+
+$(I)$ 证明：$\widehat{\theta}_1=2\overline{X}, \widehat{\theta}_2=\dfrac{n+1}{n}X_{(n)}$ 是 $\theta$ 的无偏估计；
+
+$(II)$ 当 $n\ge 2$ 时，$\widehat{\theta}_1$ 和 $\widehat{\theta}_2$ 哪一个有效？
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+(I) 由已知, 得 $X$ 的概率密度为
+$$f_0(x) = \begin{cases} \frac{1}{\theta}, & 0 < x < \theta, \\ 0, & \text{其他}, \end{cases}$$
+$$f_{X_{(n)}}(x) = F'_{X_{(n)}}(x) = \begin{cases} \frac{n x^{n-1}}{\theta^n}, & 0 < x < \theta, \\ 0, & \text{其他}, \end{cases}$$
+所以
+$$E(2\overline{X}) = E\left(\frac{2}{n} \sum_{i=1}^{n} X_i\right) = \frac{2}{n} \cdot n \cdot \frac{\theta}{2} = \theta,$$
+$$E\left(\frac{n+1}{n} X_{(n)}\right) = \frac{n+1}{n} \int_0^\theta \frac{n x^n}{\theta^n} dx = \frac{n+1}{n} \cdot \frac{n}{n+1} \theta = \theta,$$
+故 $\widehat{\theta}_1, \widehat{\theta}_2$ 是 $\theta$ 的无偏估计。
+
+(II) 解
+$$D\widehat{\theta}_1 = D(2\overline{X}) = \frac{4}{n} \cdot \frac{\theta^2}{12} = \frac{\theta^2}{3n},$$
+
+$$E(X_{(n)}^2) = \int_0^\theta \frac{nx^{n+1}}{\theta^n} dx = \frac{n}{n+2}\theta^2,$$
+$$D\widehat{\theta}_2 = \left(\frac{n+1}{n}\right)^2 \{E(X_{(n)}^2) - [EX_{(n)}]^2\} = \frac{\theta^2}{n(n+2)}.$$
+当 $n \ge 2$ 时，$D\widehat{\theta}_2 < D\widehat{\theta}_1$，故 $\widehat{\theta}_2$ 比 $\widehat{\theta}_1$ 有效。
+
+**知识点与技巧：** $X_{(n)} = \max\{X_1, X_2, \cdots, X_n\}$ 的分布函数
+$$F_{X_{(n)}}(x) = \begin{cases} \frac{x^n}{\theta^n}, & 0 < x < \theta, \\ 0, & \text{其他.} \end{cases}$$
+
+**有效性判断：** 比较两个无偏估计量时只需比较方差。这里
+$$
+D\widehat\theta_2=\frac{\theta^2}{n(n+2)}<\frac{\theta^2}{3n}=D\widehat\theta_1\qquad(n\ge2),
+$$
+故基于最大次序统计量的无偏估计更有效。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+14. 设二维随机变量 $(X,Y)$ 的概率密度为
+$$
+f(x,y)=\begin{cases}
+\dfrac{2}{\theta^2}\mathrm{e}^{-\dfrac{2x+y}{\theta}}, & x>0,y>0, \\
+0, & \text{其他},
+\end{cases}
+$$
+其中 $\theta>0$。
+
+$(I)$ 求 $X$ 与 $Y$ 的边缘概率密度 $f_X(x)$ 与 $f_Y(y)$；
+
+$(II)$ 求 $E[\min(X,Y)]$；
+
+$(III)$ 若 $X_1,X_2,\cdots,X_n$ 与 $Y_1,Y_2,\cdots,Y_m$ 分别为来自总体 $X$ 与 $Y$ 的简单随机样本，求 $\theta$ 的最大似然估计量 $\widehat{\theta}$，并判断其是否为 $\theta$ 的无偏估计量。
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+(I) 当 $x \leqslant 0$ 时，$f_X(x) = 0$；
+当 $x > 0$ 时，
+$$f_X(x) = \int_{-\infty}^{+\infty} f(x,y)dy = \int_0^{+\infty} \frac{2}{\theta^2} e^{-\frac{2x+y}{\theta}} dy = \frac{2}{\theta^2} e^{-\frac{2x}{\theta}} \int_0^{+\infty} e^{-\frac{y}{\theta}} dy$$
+$$= \frac{2}{\theta^2} e^{-\frac{2x}{\theta}} \left(-\theta e^{-\frac{y}{\theta}}\right)\Big|_0^{+\infty} = \frac{2}{\theta} e^{-\frac{2x}{\theta}},$$
+故
+$$f_X(x) = \begin{cases} \frac{2}{\theta} e^{-\frac{2x}{\theta}}, & x > 0, \\ 0, & x \leqslant 0. \end{cases}$$
+同理可求得
+$$f_Y(y) = \int_{-\infty}^{+\infty} f(x,y)dx = \begin{cases} \frac{1}{\theta} e^{-\frac{1}{\theta}y}, & y > 0, \\ 0, & y \leqslant 0. \end{cases}$$
+
+(II) 由 (I) 知，$f_X(x) \cdot f_Y(y) = f(x,y)$，故 $X$ 与 $Y$ 相互独立，且 $X$ 服从参数为 $\frac{2}{\theta}$ 的指数分布，$Y$ 服从参数为 $\frac{1}{\theta}$ 的指数分布。记 $Z = \min(X,Y)$，则 $Z$ 的分布函数为
+$$F_Z(z) = P\{\min(X,Y) \leqslant z\} = 1 - P\{\min(X,Y) > z\}$$
+$$= 1 - P\{X > z, Y > z\} = 1 - P\{X > z\} \cdot P\{Y > z\}$$
+$$= 1 - [1 - P\{X \leqslant z\}] [1 - P\{Y \leqslant z\}]$$
+$$= 1 - [1 - F_X(z)][1 - F_Y(z)]$$
+$$= \begin{cases} 1 - e^{-\frac{3}{\theta}z}, & z > 0, \\ 0, & z \leqslant 0, \end{cases}$$
+即 $Z = \min(X,Y)$ 服从参数为 $\frac{3}{\theta}$ 的指数分布，故
+$$E[\min(X,Y)] = \frac{1}{\frac{3}{\theta}} = \frac{\theta}{3}.$$
+
+(III) $\theta$ 的似然函数为
+$$L(\theta) = \begin{cases} \left(\frac{2}{\theta}\right)^n e^{-\frac{2}{\theta} \sum\limits_{i=1}^n x_i} \cdot \left(\frac{1}{\theta}\right)^m e^{-\frac{1}{\theta} \sum\limits_{i=1}^m y_i}, & x_i > 0, y_i > 0, \\ 0, & \text{其他.} \end{cases}$$
+$$= \begin{cases} \frac{2^n}{\theta^{n+m}} e^{-\left(\frac{2}{\theta}\sum\limits_{i=1}^n x_i + \frac{1}{\theta}\sum\limits_{i=1}^m y_i\right)}, & x_i > 0, y_i > 0, \\ 0, & \text{其他.} \end{cases}$$
+取对数，得
+$$\ln L(\theta) = n\ln 2 - (n+m)\ln \theta - \left(\frac{2}{\theta}\sum_{i=1}^n x_i + \frac{1}{\theta}\sum_{i=1}^m y_i\right).$$
+
+令 $\displaystyle\frac{\mathrm{d}}{\mathrm{d}\theta}\ln L(\theta)=-\frac{n+m}{\theta}+\frac{2}{\theta^{2}}\sum_{i=1}^{n}x_{i}+\frac{1}{\theta^{2}}\sum_{i=1}^{m}y_{i}=0$，解得 $\displaystyle\theta=\frac{2\sum\limits_{i=1}^{n}x_{i}+\sum\limits_{i=1}^{m}y_{i}}{n+m}$，故 $\theta$ 的最大似然估计量为
+
+$$\widehat{\theta}=\frac{2\sum\limits_{i=1}^{n}X_{i}+\sum\limits_{i=1}^{m}Y_{i}}{n+m}$$
+
+又 $\displaystyle EX=\frac{\theta}{2}, EY=\theta$，故
+
+$$E\widehat{\theta}=\frac{1}{n+m}\left(2\sum_{i=1}^{n}EX_{i}+\sum_{i=1}^{m}EY_{i}\right)=\frac{1}{n+m}\left(2\cdot\frac{\theta}{2}\cdot n+\theta\cdot m\right)=\theta,$$
+
+因此 $\widehat{\theta}$ 是 $\theta$ 的无偏估计量。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+15. 设随机变量 $X$ 的概率密度为 $f(x)=\dfrac{1}{2}\mathrm{e}^{-|x-\mu|}, -\infty<x<+\infty$, $\mu$ 为未知参数，由样本值：$1028, 968, 1007$, 求 $\mu$ 的矩估计值和最大似然估计值。
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+$$EX=\int_{-\infty}^{+\infty}x\cdot\frac{1}{2}\mathrm{e}^{-|x-\mu|}\mathrm{d}x\overset{t=x-\mu}{=}\int_{-\infty}^{+\infty}(t+\mu)\frac{1}{2}\mathrm{e}^{-|t|}\mathrm{d}t$$
+$$=\int_{-\infty}^{+\infty}t\cdot\frac{1}{2}\mathrm{e}^{-|t|}\mathrm{d}t+\mu\int_{-\infty}^{+\infty}\frac{1}{2}\mathrm{e}^{-|t|}\mathrm{d}t=\mu\int_{0}^{+\infty}\mathrm{e}^{-t}\mathrm{d}t=\mu,$$
+
+故 $\mu$ 的矩估计值为
+$$\hat{\mu}=\overline{x}=\frac{1}{3}(1\ 028+968+1\ 007)=1\ 001.$$
+
+似然函数为 $\displaystyle L(\mu)=\left(\frac{1}{2}\right)^{3}\mathrm{e}^{-\sum\limits_{i=1}^{3}|x_{i}-\mu|}$. 取对数，得 $\displaystyle\ln L(\mu)=-3\ln 2-\sum_{i=1}^{3}|x_{i}-\mu|$. 要使 $\ln L(\mu)$ 最大，只要 $\displaystyle\sum_{i=1}^{3}|x_{i}-\mu|$ 最小。
+
+记 $\displaystyle m=\sum_{i=1}^{3}|x_{i}-\mu|=|1\ 028-\mu|+|968-\mu|+|1\ 007-\mu|$.
+当 $\mu\leqslant968$ 时，
+$$m=(1\ 028-\mu)+(968-\mu)+(1\ 007-\mu)=3(1\ 001-\mu)\geqslant3(1\ 001-968)=99;$$
+当 $\mu\geqslant1\ 028$ 时，
+$$m=(\mu-1\ 028)+(\mu-968)+(\mu-1\ 007)=3(\mu-1\ 001)\geqslant3(1\ 028-1\ 001)=81;$$
+当 $968<\mu<1\ 028$ 时，$m=(1\ 028-\mu)+(\mu-968)+|1\ 007-\mu|=60+|1\ 007-\mu|$,
+故当 $\mu=1\ 007$ 时，$m$ 最小，取值为 $60$, 所以 $\mu$ 的最大似然估计值为 $\hat{\mu}=1\ 007$.
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+16. 设总体 $X$ 的概率密度为 $f(x;\lambda_1,\lambda_2)=\frac{1}{\lambda_2}\mathrm{e}^{-\frac{x-\lambda_1}{\lambda_2}}, -\infty<\lambda_1<x<+\infty, \lambda_2>0$, $(X_1,X_2,\cdots,X_n)$ 为 $X$ 的简单随机样本。
+($I$) 当 $\lambda_1$ 已知时, 求 $\lambda_2$ 的矩估计量和最大似然估计量;
+($II$) 求 $\lambda_1,\lambda_2$ 的矩估计量和最大似然估计量.
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+(I) 当 $\lambda_{1}$ 已知时，
+$$\begin{aligned}
+EX&=\int_{-\infty}^{+\infty}x\cdot f(x;\lambda_{1},\lambda_{2})\mathrm{d}x=\int_{\lambda_{1}}^{+\infty}x\cdot\frac{1}{\lambda_{2}}\mathrm{e}^{-\frac{x-\lambda_{1}}{\lambda_{2}}}\mathrm{d}x \\
+&\overset{x=\lambda_{1}+\lambda_{2}y}{=}\int_{0}^{+\infty}(\lambda_{2}y+\lambda_{1})\mathrm{e}^{-y}\mathrm{d}y=\lambda_{1}+\lambda_{2},
+\end{aligned}$$
+用 $\overline{X}$ 替换 $EX$, 得 $\lambda_{2}$ 的矩估计量为 $\widehat{\lambda}_{2}=\overline{X}-\lambda_{1}$.
+关于 $\lambda_{2}$ 的似然函数为
+$$L(\lambda_{2})=\prod_{i=1}^{n}\frac{1}{\lambda_{2}}\mathrm{e}^{-\frac{x_{i}-\lambda_{1}}{\lambda_{2}}}=\frac{1}{\lambda_{2}^{n}}\mathrm{e}^{-\frac{1}{\lambda_{2}}\sum\limits_{i=1}^{n}(x_{i}-\lambda_{1})},\quad\lambda_{1}\leqslant x_{1},x_{2},\cdots,x_{n},$$
+由
+$$\frac{\mathrm{d}\ln L(\lambda_{2})}{\mathrm{d}\lambda_{2}}=-\frac{n}{\lambda_{2}}+\frac{1}{\lambda_{2}^{2}}\sum_{i=1}^{n}(x_{i}-\lambda_{1})=0,$$
+解得 $\displaystyle\widehat{\lambda}_{2}=\frac{1}{n}\sum_{i=1}^{n}(X_{i}-\lambda_{1})$ 是 $\lambda_{2}$ 的最大似然估计量。
+
+(II) $\displaystyle EX=\lambda_{1}+\lambda_{2}$,
+$$\begin{aligned}
+E(X^{2})&=\int_{-\infty}^{+\infty}x^{2}\cdot f(x;\lambda_{1},\lambda_{2})\mathrm{d}x=\int_{\lambda_{1}}^{+\infty}x^{2}\cdot\frac{1}{\lambda_{2}}\mathrm{e}^{-\frac{x-\lambda_{1}}{\lambda_{2}}}\mathrm{d}x \\
+&\overset{x=\lambda_{1}+\lambda_{2}y}{=}\int_{0}^{+\infty}(\lambda_{2}y+\lambda_{1})^{2}\mathrm{e}^{-y}\mathrm{d}y
+\end{aligned}$$
+
+$=2\lambda_2^2+2\lambda_1\lambda_2+\lambda_1^2$,
+
+则 $DX=E(X^2)-(EX)^2=\lambda_2^2$.
+
+令 $EX=\overline{X}$, $DX=\frac{n-1}{n}S^2\left(S^2=\frac{1}{n-1}\sum\limits_{i=1}^n(X_i-\overline{X})^2\text{为样本方差}\right)$,
+
+故 $\begin{cases} \lambda_1+\lambda_2=\overline{X}, \\ \lambda_2^2=\dfrac{n-1}{n}S^2, \end{cases}$ 所以 $\lambda_1,\lambda_2$ 的矩估计量分别为 $\widehat{\lambda}_1=\overline{X}-\sqrt{\dfrac{n-1}{n}}S, \widehat{\lambda}_2=\sqrt{\dfrac{n-1}{n}}S$.
+
+关于 $\lambda_1,\lambda_2$ 的似然函数为
+
+$$L(\lambda_1,\lambda_2)=\frac{1}{\lambda_2^n}\mathrm{e}^{-\frac{1}{\lambda_2}\sum\limits_{i=1}^n(x_i-\lambda_1)}, \lambda_1\leqslant x_1,x_2,\cdots,x_n,$$
+
+对其取对数,求偏导,得
+
+$$\begin{cases} \dfrac{\partial\ln L(\lambda_1,\lambda_2)}{\partial\lambda_1} = \dfrac{n}{\lambda_2} = 0, &(1) \\ \dfrac{\partial\ln L(\lambda_1,\lambda_2)}{\partial\lambda_2} = -\dfrac{n}{\lambda_2}+\dfrac{1}{\lambda_2^2}\sum\limits_{i=1}^n(x_i-\lambda_1)=0. &(2) \end{cases}$$
+
+由 (2) 式得 $\lambda_2 = \overline{x}-\lambda_1$。(1) 式无解,用最大似然估计原理求 $\lambda_1,\lambda_2$ 的最大似然估计量。
+
+由 $L(\lambda_1,\lambda_2)$ 的表达式知,当 $\widehat{\lambda}_1$ 使 $L(\lambda_1,\lambda_2)>0$ 且使 $\sum\limits_{i=1}^n(x_i-\lambda_1)$ 达到最小时,才能使 $L(\lambda_1,\lambda_2)$ 达到最大。
+
+当 $x_i\geqslant\lambda_1(i=1,2,\cdots,n)$,即 $\min\{X_1,X_2,\cdots,X_n\}\geqslant\lambda_1$ 时,有 $L(\lambda_1,\lambda_2)>0$,若使 $\sum\limits_{i=1}^n(x_i-\lambda_1)$ 在 $\widehat{\lambda}_1$ 处达到最小,应取 $\widehat{\lambda}_1 = \min\{X_1,X_2,\cdots,X_n\}$,故当 $\widehat{\lambda}_1 = \min\{X_1,X_2,\cdots,X_n\}$ 时,有 $L(\lambda_1,\lambda_2)\leqslant L(\widehat{\lambda}_1,\lambda_2)$。
+
+当 $\lambda_1=\widehat{\lambda}_1$ 时,由 (2) 式知 $\widehat{\lambda}_2=\overline{x}-\widehat{\lambda}_1$,由于 $\begin{cases} \left.\dfrac{\partial\ln L(\widehat{\lambda}_1,\lambda_2)}{\partial\lambda_2}\right|_{\lambda_2=\widehat{\lambda}_2} = 0, \\ \left.\dfrac{\partial^2\ln L(\widehat{\lambda}_1,\lambda_2)}{\partial\lambda_2^2}\right|_{\lambda_2=\widehat{\lambda}_2} < 0, \end{cases}$ 故 $L(\widehat{\lambda}_1,\lambda_2)$ 在 $\lambda_2=\widehat{\lambda}_2$ 处达到最大,
+
+故有 $L(\widehat{\lambda}_1,\lambda_2)\leqslant L(\widehat{\lambda}_1,\widehat{\lambda}_2)$,从而知 $\lambda_1,\lambda_2$ 的最大似然估计量分别为
+
+$$\widehat{\lambda}_1 = \min\{X_1,X_2,\cdots,X_n\}, \widehat{\lambda}_2 = \overline{X}-\min\{X_1,X_2,\cdots,X_n\}.$$
+
+**易错点：** 关于 $\lambda_1$ 的似然函数没有内部驻点，必须结合支持集 $\lambda_1\le X_{(1)}$ 判断边界。因而先把 $\lambda_1$ 推到允许的最大边界 $X_{(1)}$，再对 $\lambda_2$ 优化。若严格按题面写成 $x>\lambda_1$，则该边界给出似然上确界；考研题通常按边界估计 $\widehat\lambda_1=X_{(1)}$ 处理。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+17. 设 $T$ 是连续型随机变量, $P\{T\leqslant a\}=\theta, P\{T>b\}=\theta$, 其中 $\theta\in\left(0,\frac{1}{2}\right), a<b$. 令
+$$X=\begin{cases}-1,& T\leqslant a,\\ 1,& T>a,\end{cases}\quad Y=\begin{cases}-1,& T\leqslant b,\\ 1,& T>b.\end{cases}$$
+($I$) 求 $(X,Y)$ 的概率分布及 $Z=X+Y$ 的概率分布;
+($II$) 若 $\theta$ 为未知参数, 利用总体 $Z$ 的样本值 $-2,0,0,0,2,2$, 求 $\theta$ 的矩估计值与最大似然估计值.
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+(I) 由 $P\{T>b\}=\theta$,知 $P\{T\leqslant b\}=1-\theta$,
+$P\{X=-1,Y=-1\}=P\{T\leqslant a,T\leqslant b\}=P\{T\leqslant a\}=\theta$,
+$P\{X=-1,Y=1\}=P\{T\leqslant a,T>b\}=0$,
+$P\{X=1,Y=-1\}=P\{T>a,T\leqslant b\}=P\{a<T\leqslant b\}=1-2\theta$,
+$P\{X=1,Y=1\}=1-\theta-0-(1-2\theta)=\theta$.
+故 $(X,Y)$ 的概率分布为
+
+| $Y \backslash X$ | $-1$ | $1$ |
+| :---: | :---: | :---: |
+| $-1$ | $\theta$ | $1-2\theta$ |
+| $1$ | $0$ | $\theta$ |
+
+$Z = X + Y$ 的取值为 $-2, 0, 2$, 且
+$P\{Z = -2\} = P\{X + Y = -2\} = P\{X = -1, Y = -1\} = \theta$,
+$P\{Z = 0\} = P\{X + Y = 0\} = P\{X = -1, Y = 1\} + P\{X = 1, Y = -1\}$
+$= 1 - 2\theta + 0 = 1 - 2\theta$,
+$P\{Z = 2\} = 1 - \theta - (1 - 2\theta) = \theta$,
+故 $Z$ 的概率分布为
+
+| $Z$ | $-2$ | $0$ | $2$ |
+| :---: | :---: | :---: | :---: |
+| $P$ | $\theta$ | $1-2\theta$ | $\theta$ |
+
+$(\mathrm{II})\text{由}(\mathrm{I})\text{知}, EZ = 0, \text{且 } E(Z^2) = (-2)^2\cdot\theta + 0^2\cdot(1-2\theta) + 2^2\cdot\theta = 8\theta, \text{故}$
+$$8\theta = \frac{1}{6}\sum_{i=1}^{6} Z_i^2 = \frac{(-2)^2 + 0^2 + 0^2 + 0^2 + 2^2 + 2^2}{6} = 2,$$
+$\text{得 }\theta\text{ 的矩估计值为 } \widehat{\theta} = \frac{1}{4}.$
+
+似然函数为
+$$L(\theta) = \theta \cdot (1-2\theta)^3 \cdot \theta^2 = \theta^3(1-2\theta)^3,$$
+两边取对数, 得
+$$\ln L(\theta) = 3\ln\theta + 3\ln(1-2\theta).$$
+令
+$$\frac{\mathrm{d}}{\mathrm{d}\theta}\ln L(\theta) = \frac{3}{\theta} - \frac{6}{1-2\theta} = \frac{3-12\theta}{\theta(1-2\theta)} = 0,$$
+$\text{得 }\theta\text{ 的最大似然估计值为 } \widehat{\theta} = \frac{1}{4}.$
+
+**知识点与技巧：** $(\mathrm{II})$ 中, 由于一阶矩 $EZ = 0$, 用二阶矩 $E(Z^2)$ 计算 $\theta$ 的矩估计值.
+
+**校对说明：** 原解析表格把 $P\{X=-1,Y=1\}=0$ 与 $P\{X=1,Y=-1\}=1-2\theta$ 的位置写反；上表已按前面的事件关系修正。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+18. 设二维随机变量 $(X,Y)$ 的概率密度为 $f(x,y)=\frac{1}{2\pi\sigma^2}\mathrm{e}^{-\frac{x^2+y^2}{2\sigma^2}}, (x,y)\in\mathbb{R}^2, \sigma>0$. 记 $Z=X^2+Y^2$.
+($I$) 求 $Z$ 的概率密度 $f_Z(z)$;
+($II$) 若 $Z_1,Z_2,\cdots,Z_n$ 为来自总体 $Z$ 的简单随机样本, 求 $\sigma^2$ 的最大似然估计量 $\widehat{\sigma}^2$, 并证明 $\widehat{\sigma}^2$ 是 $\sigma^2$ 的无偏估计量.
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+$(\mathrm{I})$ 先求 $Z$ 的分布函数 $F_Z(z)$.
+当 $z \leqslant 0$ 时, $F_Z(z) = 0$;
+当 $z > 0$ 时, $F_Z(z) = P\{Z \leqslant z\} = P\{X^2 + Y^2 \leqslant z\}$
+$$\begin{aligned}
+&= \iint_{x^2+y^2 \leqslant z} \frac{1}{2\pi\sigma^2} \mathrm{e}^{-\frac{x^2+y^2}{2\sigma^2}} \mathrm{d}x\mathrm{d}y = \int_0^{2\pi} \mathrm{d}\theta \int_0^{\sqrt{z}} \frac{1}{2\pi\sigma^2} \mathrm{e}^{-\frac{r^2}{2\sigma^2}} \cdot r\mathrm{d}r \\
+&= \int_0^{\sqrt{z}} \frac{r}{\sigma^2} \mathrm{e}^{-\frac{r^2}{2\sigma^2}} \mathrm{d}r.
+\end{aligned}$$
+故
+$$f_Z(z) = F'_Z(z) = \begin{cases}
+\frac{1}{2\sigma^2} \mathrm{e}^{-\frac{z}{2\sigma^2}}, & z > 0, \\
+0, & z \leqslant 0,
+\end{cases}$$
+$\text{即 } Z \text{ 服从参数为 } \frac{1}{2\sigma^2} \text{ 的指数分布.}$
+
+$(\mathrm{II})$ 似然函数为
+$$L(\sigma^2) = \prod_{i=1}^n f(z_i; \sigma^2) = \prod_{i=1}^n \frac{1}{2\sigma^2} \mathrm{e}^{-\frac{z_i}{2\sigma^2}}.$$
+上式两边取对数, 得
+$$\ln L(\sigma^2) = -n\ln(2\sigma^2) - \frac{\sum_{i=1}^n z_i}{2\sigma^2}.$$
+令
+$$\frac{\mathrm{d}}{\mathrm{d}(\sigma^2)} \ln L(\sigma^2) = -\frac{n}{\sigma^2} + \frac{1}{2}\frac{\sum_{i=1}^n z_i}{(\sigma^2)^2} = 0,$$
+$\sigma^2 = \frac{1}{2n}\sum_{i=1}^n z_i$, 故 $\widehat{\sigma^2} = \frac{1}{2n}\sum_{i=1}^n Z_i$ 为 $\sigma^2$ 的最大似然估计量.
+
+由 $(\mathrm{I})$ 知, $Z$ 服从参数为 $\frac{1}{2\sigma^2}$ 的指数分布, 从而
+$$EZ = \frac{1}{\frac{1}{2\sigma^2}} = 2\sigma^2,$$
+$$E(\widehat{\sigma^2}) = E\left(\frac{1}{2n}\sum_{i=1}^n Z_i\right) = \frac{1}{2n}\sum_{i=1}^n 2\sigma^2 = \frac{1}{2n} \cdot 2\sigma^2 \cdot n = \sigma^2,$$
+$\text{所以, } \widehat{\sigma^2} \text{ 是 } \sigma^2 \text{ 的无偏估计量.}$
+
+**知识点与技巧：** 由
+$$f(x,y)=\frac{1}{2\pi\sigma^2}\mathrm{e}^{-\frac{x^2+y^2}{2\sigma^2}}=\frac{1}{2\pi\sigma\cdot\sigma\cdot\sqrt{1-0^2}}\mathrm{e}^{-\frac{1}{2(1-0^2)}\left[\frac{(x-0)^2}{\sigma^2}-2\times 0\times\frac{(x-0)(y-0)}{\sigma\cdot\sigma}+\frac{(y-0)^2}{\sigma^2}\right]},$$
+知 $(X,Y)\sim N(0,0;\sigma^2,\sigma^2;0)$, $\rho_{XY}=0$, 从而 $X$ 与 $Y$ 相互独立, $X^2$ 与 $Y^2$ 也相互独立, $X\sim N(0,\sigma^2)$, $Y\sim N(0,\sigma^2)$, 且 $\left(\frac{X-0}{\sigma}\right)^2\sim\chi^2(1)$, $\left(\frac{Y-0}{\sigma}\right)^2\sim\chi^2(1)$。
+
+所以,
+$$\frac{1}{\sigma^2}(X^2+Y^2)\sim\chi^2(2).$$
+
+**技巧总结：** 也可直接识别
+$$
+\frac{X^2+Y^2}{\sigma^2}\sim\chi^2(2),
+$$
+而 $\chi^2(2)$ 等价于参数为 $1/2$ 的指数分布，从而立即得到 $Z=X^2+Y^2$ 的密度。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+19. 设随机变量 $X$ 与 $Y$ 相互独立, $X\sim N(0,\sigma^2)(\sigma>0)$, $Y$ 的分布律为 $P\{Y=-1\}=P\{Y=1\}=\frac{1}{2}$, 记 $Z=XY, Z_1,Z_2,\cdots,Z_n$ 为来自总体 $Z$ 的简单随机样本。
+($I$) 求 $Z$ 的概率密度 $f_Z(z)$;
+($II$) 求 $\sigma^2$ 的最大似然估计量 $\widehat{\sigma^2}$;
+($III$) 若 $U=\sum_{i=1}^n a_i Z_i$, 其中 $a_i\ge 0, \sum_{i=1}^n a_i = 1$, 求 $DU$ 的最小值.
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+$(\mathrm{I})$ $Z$ 的分布函数为
+$$F_Z(z)=P\{XY\leqslant z\}=P\{XY\leqslant z,Y=-1\}+P\{XY\leqslant z,Y=1\}$$
+$$=P\{Y=-1\}P\{X\geqslant-z\}+P\{Y=1\}P\{X\leqslant z\}$$
+$$=\frac{1}{2}(1-P\{X<-z\})+\frac{1}{2}P\{X\leqslant z\}$$
+$$=\frac{1}{2}\left[1-\Phi\left(-\frac{z}{\sigma}\right)\right]+\frac{1}{2}\Phi\left(\frac{z}{\sigma}\right)=\Phi\left(\frac{z}{\sigma}\right),$$
+其中 $\Phi(x)$ 为 $N(0,1)$ 的分布函数, 故
+$$f_Z(z)=F'_Z(z)=\frac{1}{\sqrt{2\pi}\sigma}\mathrm{e}^{-\frac{z^2}{2\sigma^2}},\quad z\in(-\infty,+\infty).$$
+
+$(\mathrm{II})$ 似然函数为
+$$L(\sigma^2)=\prod_{i=1}^n f_Z(z_i)=(2\pi)^{-\frac{n}{2}}\cdot(\sigma^2)^{-\frac{n}{2}}\cdot\mathrm{e}^{-\frac{z_1^2+z_2^2+\cdots+z_n^2}{2\sigma^2}},$$
+两边取对数, 得
+$$\ln L(\sigma^2)=-\frac{n}{2}\ln(2\pi)-\frac{n}{2}\ln\sigma^2-\frac{z_1^2+z_2^2+\cdots+z_n^2}{2\sigma^2},$$
+令 $\frac{\mathrm{d}}{\mathrm{d}(\sigma^2)}\ln L(\sigma^2)=-\frac{n}{2\sigma^2}+\frac{z_1^2+z_2^2+\cdots+z_n^2}{2(\sigma^2)^2}=0$, 解得 $\sigma^2=\frac{1}{n}\sum_{i=1}^n z_i^2$, 故 $\sigma^2$ 的最大似然估计量为
+$$\widehat{\sigma^2}=\frac{1}{n}\sum_{i=1}^n Z_i^2.$$
+
+$(\mathrm{III})$ 由 $Z_1,Z_2,\cdots,Z_n$ 相互独立, 且均服从 $N(0,\sigma^2)$, 知
+$$\mathrm{DU}=a_1^2\mathrm{D}Z_1+a_2^2\mathrm{D}Z_2+\cdots+a_n^2\mathrm{D}Z_n=\sigma^2\sum_{i=1}^n a_i^2.$$
+应用拉格朗日乘数法, 令 $F=\sigma^2\sum_{i=1}^n a_i^2-\lambda\left(\sum_{i=1}^n a_i-1\right)$, 则
+$$\begin{cases}
+\dfrac{\partial F}{\partial a_i}=2a_i\sigma^2-\lambda=0, \\
+\dfrac{\partial F}{\partial \lambda}=-\left(\sum_{i=1}^n a_i-1\right)=0,
+\end{cases}$$
+解得 $a_i=\frac{\lambda}{2\sigma^2}$, 代入 $\sum_{i=1}^n a_i=1$, 有
+$$\sum_{i=1}^n a_i=\sum_{i=1}^n \frac{\lambda}{2\sigma^2}=\frac{\lambda}{2\sigma^2}\cdot n=1,$$
+故 $\lambda=\frac{2\sigma^2}{n}$, 所以 $a_i=\frac{\lambda}{2\sigma^2}=\frac{\frac{2\sigma^2}{n}}{2\sigma^2}=\frac{1}{n}$。
+于是 $\mathrm{DU}$ 的最小值为
+
+$$\sigma^2 \sum_{i=1}^n a_i^2 = \sigma^2 \sum_{i=1}^n \left(\frac{1}{n}\right)^2 = \sigma^2 \cdot \left(\frac{1}{n}\right)^2 \cdot n = \frac{\sigma^2}{n}$$
+
+**技巧总结：** 乘以独立的随机符号 $Y\in\{-1,1\}$ 不改变中心正态分布，因此 $Z=XY\sim N(0,\sigma^2)$。线性组合方差最小时，权重应平均分配 $a_i=1/n$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+20. 设 $0.50, 1.25, 0.80, 2.00$ 为来自总体 $X$ 的简单随机样本值, $Y=\ln X$ 服从正态分布 $N(\mu,1)$, 已知 $\Phi(1.96)=0.975$. 求:
+($I$) $EX$;
+($II$) $\mu$ 的置信度为 $0.95$ 的置信区间;
+($III$) $EX$ 的置信度为 $0.95$ 的置信区间.
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+(I) 由已知, $Y$ 的概率密度为 $f(y) = \frac{1}{\sqrt{2\pi}} e^{-\frac{(y-\mu)^2}{2}} (-\infty < y < +\infty)$. 故
+$$EX = E(e^Y) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{+\infty} e^y \cdot e^{-\frac{(y-\mu)^2}{2}} dy$$
+$$t = y - \mu \quad \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{+\infty} e^{t+\mu} \cdot e^{-\frac{1}{2}t^2} dt$$
+$$= e^{\mu+\frac{1}{2}} \int_{-\infty}^{+\infty} \frac{1}{\sqrt{2\pi}} e^{-\frac{1}{2}(t-1)^2} dt = e^{\mu+\frac{1}{2}} \cdot 1 = e^{\mu+\frac{1}{2}}.$$
+
+(II) 当置信度 $1-\alpha = 0.95$, 即 $\alpha = 0.05$, 标准正态分布的分位数 $\mu_{1-\frac{\alpha}{2}} = \mu_{0.975} = 1.96$. 由 $\overline{Y} \sim N\left(\mu, \frac{1}{4}\right)$, 得 $P\left\{\overline{Y} - 1.96 \times \frac{1}{\sqrt{4}} < \mu < \overline{Y} + 1.96 \times \frac{1}{\sqrt{4}}\right\} = 0.95$. 又
+$$\bar{y} = \frac{1}{4}(\ln 0.5 + \ln 1.25 + \ln 0.8 + \ln 2) = \frac{1}{4}\ln 1 = 0,$$
+故 $\mu$ 的置信度为 $0.95$ 的置信区间为 $\left(\bar{y} - 1.96 \times \frac{1}{\sqrt{4}}, \bar{y} + 1.96 \times \frac{1}{\sqrt{4}}\right) = (-0.98, 0.98)$.
+
+(III) 由 $e^x$ 严格单调增加, 知 $EX = e^{\mu+\frac{1}{2}}$ 的 $0.95$ 置信区间为 $\left(e^{\bar{y}-0.98+\frac{1}{2}}, e^{\bar{y}+0.98+\frac{1}{2}}\right) = (e^{-0.48}, e^{1.48})$.
+
+> **知识点与技巧：**将 $x_i$ 的样本值变形为 $y_i = \ln x_i$, 利用 $\overline{Y}$ 的分布求出 $EX = E(e^Y)$ 以及 $\mu$ 的置信区间, 而 $EX$ 是 $\mu$ 的单值函数, 从而求出 $EX$ 的置信区间.
+
+**知识点补充：** 若 $Y=\ln X\sim N(\mu,1)$，则 $X$ 为对数正态变量，$EX=\mathrm e^{\mu+1/2}$。由于该函数关于 $\mu$ 严格递增，可将 $\mu$ 的置信区间端点直接作单调变换得到 $EX$ 的置信区间。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+21. 设总体 $X \sim U(0,\theta)$，$\theta > 0$，$X_1, X_2, \cdots, X_n$ 为来自总体 $X$ 的简单随机样本，若 $\theta$ 的最大似然估计量为 $\hat{\theta}$。
+
+$(I)$ 求 $E\hat{\theta}$ 和 $D\hat{\theta}$；
+
+$(II)$ 证明：对任意 $\varepsilon > 0$，有 $\lim_{n \to \infty} P\{|\hat{\theta}-\theta| \ge \varepsilon\} = 0$；
+
+$(III)$ 若以 $(\hat{\theta}, a\hat{\theta}) (a > 0)$ 作为 $\theta$ 的置信区间，置信度为 $0.95$，求 $a$ 的值。
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+(I) 由已知, 可得 $X$ 的概率密度为
+$$f(x; \theta) = \begin{cases} \frac{1}{\theta}, & 0 < x < \theta, \\ 0, & \text{其他.} \end{cases}$$
+似然函数为
+$$L(\theta) = \prod_{i=1}^n f(x_i; \theta) = \begin{cases} \frac{1}{\theta^n}, & 0 < x_1, x_2, \cdots, x_n < \theta, \\ 0, & \text{其他.} \end{cases}$$
+由于 $L(\theta)$ 关于 $\theta$ 单调减少, 而 $\theta > x_1, x_2, \cdots, x_n$, 故当 $\theta = \max\{x_1, x_2, \cdots, x_n\}$ 时, $L(\theta)$ 达到最大.
+$\theta$ 的最大似然估计量为 $\widehat{\theta} = \max\{X_1, X_2, \cdots, X_n\}$.
+故 $\widehat{\theta}$ 的分布函数为
+$$F_{\widehat{\theta}}(x) = P\{\max\{X_1, X_2, \cdots, X_n\} \leqslant x\} = \prod_{i=1}^n P\{X_i \leqslant x\} = [F(x)]^n,$$
+其中, $F(x)$ 为 $X$ 的分布函数.
+于是 $\widehat{\theta}$ 的概率密度为
+$$f_{\widehat{\theta}}(x) = F'_{\widehat{\theta}}(x) = \begin{cases} \frac{nx^{n-1}}{\theta^n}, & 0 < x < \theta, \\ 0, & \text{其他.} \end{cases}$$
+所以,
+$$E\widehat{\theta} = \int_0^\theta x \cdot \frac{nx^{n-1}}{\theta^n} dx = \frac{n\theta}{n+1},$$
+$$E(\widehat{\theta}^2) = \int_0^\theta x^2 \cdot \frac{nx^{n-1}}{\theta^n} dx = \frac{n\theta^2}{n+2},$$
+故
+$$D\widehat{\theta} = E(\widehat{\theta}^2) - (E\widehat{\theta})^2 = \frac{n\theta^2}{n+2} - \left(\frac{n\theta}{n+1}\right)^2 = \frac{n\theta^2}{(n+2)(n+1)^2}.$$
+
+(II) 应用切比雪夫不等式, 有
+$$
+\begin{aligned}
+P\{|\widehat{\theta}-\theta|\geqslant\varepsilon\} &= P\left\{\left|\widehat{\theta}-\frac{n\theta}{n+1}-\frac{\theta}{n+1}\right|\geqslant\varepsilon\right\} \\
+&\leqslant P\left\{\left|\widehat{\theta}-\frac{n\theta}{n+1}\right|+\frac{\theta}{n+1}\geqslant\varepsilon\right\} \\
+&= P\left\{|\widehat{\theta}-E(\widehat{\theta})|\geqslant\varepsilon-\frac{\theta}{n+1}\right\} \\
+&\leqslant \frac{D(\widehat{\theta})}{\left(\varepsilon-\dfrac{\theta}{n+1}\right)^2} = \frac{n\theta^2}{(n+2)(n+1)^2\left(\varepsilon-\dfrac{\theta}{n+1}\right)^2},
+\end{aligned}
+$$
+故 $\lim\limits_{n\to\infty}P\{|\widehat{\theta}-\theta|\geqslant\varepsilon\}=0$.
+
+(III) 用置信区间的定义求 $a$.
+因为
+$$P\{\widehat{\theta}<\theta<a\widehat{\theta}\} = P\left\{\frac{\theta}{a}<\widehat{\theta}<\theta\right\}=0.95,$$
+故
+$$P\left\{\frac{\theta}{a}<\widehat{\theta}<\theta\right\} = \int_{\frac{\theta}{a}}^{\theta} \frac{nx^{n-1}}{\theta^n}\mathrm{d}x = 1 - \frac{1}{a^n} = 0.95.$$
+从而 $a = \frac{1}{\sqrt[n]{0.05}}$, 即 $a = \sqrt[n]{20}$.
+
+**知识点与技巧：** ① 切比雪夫不等式: 设 $EX$ 与 $DX$ 均存在, 则
+$$P\{|X-EX|\geqslant\varepsilon\}\leqslant\frac{DX}{\varepsilon^2} (\varepsilon>0).$$
+② $\lim\limits_{n\to\infty}P\{|\widehat{\theta}-\theta|\geqslant\varepsilon\}=0$, 意味着 $\widehat{\theta}$ 是 $\theta$ 的一致估计量.
+
+**技巧总结：** 对 $U(0,\theta)$，最大似然估计由样本最大值决定；它有偏但一致。构造形如 $(\widehat\theta,a\widehat\theta)$ 的置信区间时，直接利用最大次序统计量的分布即可。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 拓展题
+
+### 解答题
+
+<ExamQuestion>
+
+1. 设相互独立的随机变量 $X_1, X_2, \cdots, X_n$ 均服从 $N(\mu, \sigma^2)$，$Y_i = |X_i-\mu| (i = 1, 2, \cdots, n)$，$Y = \frac{1}{n}\sum_{i=1}^n Y_i$。
+
+$(I)$ 求 $Y_1$ 的概率密度；
+
+$(II)$ 利用一阶矩求 $\sigma$ 的矩估计量；
+
+$(III)$ 求 $EY$ 和 $DY$。
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+(I) 用定义法求 $f_{Y_1}(y)$.
+当 $y\ge 0$ 时,
+$$
+\begin{aligned}
+F_{Y_1}(y) &= P\{Y_1\leqslant y\} = P\{|X_1-\mu|\leqslant y\} \\
+&= P\{-y\leqslant X_1-\mu\leqslant y\} = P\left\{-\frac{y}{\sigma}\leqslant\frac{X_1-\mu}{\sigma}\leqslant\frac{y}{\sigma}\right\} \\
+&= \Phi\left(\frac{y}{\sigma}\right)-\Phi\left(-\frac{y}{\sigma}\right)=2\Phi\left(\frac{y}{\sigma}\right)-1;
+\end{aligned}
+$$
+当 $y<0$ 时, $F_{Y_1}(y)=0$, 故 $f_{Y_1}(y)=F'_{Y_1}(y)=\begin{cases}\dfrac{2}{\sigma}\varphi\left(\dfrac{y}{\sigma}\right), & y\ge 0, \\ 0, & y<0.\end{cases}$
+
+其中, $\Phi(x)$ 为 $N(0, 1)$ 的分布函数, $\varphi(x)=\frac{1}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}, -\infty<x<+\infty$.
+
+(II)
+$$
+\begin{aligned}
+EY_1 &= \int_{-\infty}^{+\infty} yf_{Y_1}(y)\mathrm{d}y = \int_0^{+\infty} \frac{2y}{\sigma}\varphi\left(\frac{y}{\sigma}\right)\mathrm{d}y \\
+&= 2\sigma \int_0^{+\infty} \frac{y}{\sigma}\varphi\left(\frac{y}{\sigma}\right)\mathrm{d}\left(\frac{y}{\sigma}\right) \\
+&\overset{\frac{y}{\sigma}=t}{=} 2\sigma \int_0^{+\infty} t\varphi(t)\mathrm{d}t = 2\sigma \int_0^{+\infty} t\cdot\frac{1}{\sqrt{2\pi}}\cdot e^{-\frac{t^2}{2}}\mathrm{d}t \\
+&= \frac{2\sigma}{\sqrt{2\pi}} \int_0^{+\infty} e^{-\frac{t^2}{2}}\mathrm{d}\left(\frac{t^2}{2}\right) = \sqrt{\frac{2}{\pi}}\sigma,
+\end{aligned}
+$$
+
+故 $\sigma = \sqrt{\frac{\pi}{2}} \cdot EY_1$，所以 $\sigma$ 的矩估计量为 $\hat{\sigma} = \sqrt{\frac{\pi}{2}}\ \overline{Y}$，其中 $\overline{Y} = \frac{1}{n} \sum_{i=1}^{n} Y_i = \overline{Y}$。
+
+$(\text{III})$ 记 $Z_i = X_i - \mu \sim N(0, \sigma^2)$，则 $EZ_i = 0, DZ_i = \sigma^2$，故
+$$
+\begin{aligned}
+E(|X_i - \mu|) &= E(|Z_i|) = EY_i = \sqrt{\frac{2}{\pi}}\sigma, \\
+D(|X_i - \mu|) &= D(|Z_i|) = E(|Z_i|^2) - (E|Z_i|)^2 \\
+&= E(Z_i^2) - \left(\sqrt{\frac{2}{\pi}}\sigma\right)^2 \\
+&= DZ_i + (EZ_i)^2 - \left(\sqrt{\frac{2}{\pi}}\sigma\right)^2 \\
+&= \sigma^2 - \left(\sqrt{\frac{2}{\pi}}\sigma\right)^2 = \left(1 - \frac{2}{\pi}\right)\sigma^2,
+\end{aligned}
+$$
+
+所以
+$$
+EY = E\left(\frac{1}{n}\sum_{i=1}^{n} |X_i - \mu|\right) = \frac{1}{n}\sum_{i=1}^{n} E(|Z_i|) = E(|Z_i|) = \sqrt{\frac{2}{\pi}}\sigma.
+$$
+
+又 $X_1, X_2, \dots, X_n$ 相互独立，故 $DY = D\left(\frac{1}{n}\sum_{i=1}^{n} |X_i - \mu|\right) = \frac{1}{n^2}\sum_{i=1}^{n} DY_i = \frac{\sigma^2}{n}\left(1 - \frac{2}{\pi}\right)$。
+
+**知识点与技巧：** 此题中的 $(\text{I}), (\text{II})$ 是 2017 年考题，这是一个结论：设 $X_1, X_2, \dots, X_n$ 相互独立，且均服从 $N(\mu, \sigma^2)$，$Y = \frac{1}{n}\sum_{i=1}^{n} |X_i - \mu|$，则 $EY = \sqrt{\frac{2}{\pi}}\sigma, DY = \frac{\sigma^2}{n}\left(1 - \frac{2}{\pi}\right)$。
+
+**结论速记：** 若 $X\sim N(\mu,\sigma^2)$，则 $|X-\mu|$ 服从半正态分布，
+$$
+E|X-\mu|=\sigma\sqrt{\frac2\pi},\qquad
+D|X-\mu|=\sigma^2\left(1-\frac2\pi\right).
+$$
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. 设总体 $X$ 的概率密度为 $f(x;\theta) = \begin{cases} 2\mathrm{e}^{-2(x-\theta)}, & x > \theta, \\ 0, & x \le \theta, \end{cases}$ 其中 $\theta (\theta > 0)$ 为未知参数，$(X_1, X_2, \cdots, X_n)$ 为来自总体 $X$ 的简单随机样本。
+
+$(I)$ 求 $\theta$ 的矩估计量 $\hat{\theta}_1$ 与最大似然估计量 $\hat{\theta}_2$；
+
+$(II)$ 问 $\hat{\theta}_1$ 和 $\hat{\theta}_2$ 是否为 $\theta$ 的无偏估计量？
+
+$(III)$ 将 $\hat{\theta}_1, \hat{\theta}_2$ 修正为 $\hat{\theta}_3, \hat{\theta}_4$，使 $\hat{\theta}_3, \hat{\theta}_4$ 为 $\theta$ 的无偏估计，并比较 $\hat{\theta}_3, \hat{\theta}_4$ 的有效性。
+
+<ExamSolution>
+
+<ExamAnswer>见解析</ExamAnswer>
+
+<ExamExplanation>
+$(\text{I}) EX = \int_{-\infty}^{+\infty} x \cdot f(x; \theta) dx$
+$$
+\begin{aligned}
+&= \int_{\theta}^{+\infty} x \cdot 2e^{-2(x-\theta)} dx \xlongequal{x-\theta=t} 2 \int_{0}^{+\infty} (t+\theta)e^{-2t} dt \\
+&= \int_{0}^{+\infty} 2te^{-2t} dt + \theta \int_{0}^{+\infty} 2e^{-2t} dt \\
+&= \left. \frac{1}{2} \int_{0}^{+\infty} (2t)^{2-1} e^{-2t} d(2t) - \theta \cdot e^{-2t} \right|_0^{+\infty} \\
+&= \frac{1}{2} \cdot \Gamma(2) + \theta = \frac{1}{2} \times 1 + \theta = \frac{1}{2} + \theta,
+\end{aligned}
+$$
+
+故 $\theta$ 的矩估计量为 $\widehat{\theta}_1 = \overline{X} - \frac{1}{2}$。
+
+似然函数为 $L(\theta) = \prod_{i=1}^{n} f(x_i; \theta) = \begin{cases} 2^n e^{-2 \sum\limits_{i=1}^{n} (x_i - \theta)}, & x_i > \theta (i = 1, 2, \dots, n), \\ 0, & \text{其他}。 \end{cases}$
+
+当 $x_i > \theta$ 时，$L(\theta) > 0$，取对数，得 $\ln L(\theta) = n\ln 2 - 2 \sum_{i=1}^{n} (x_i - \theta)$，因为 $\frac{d\ln L(\theta)}{d\theta} = 2n > 0$，所以 $L(\theta)$ 单调增加。由于 $\theta$ 满足 $\theta < x_i (i = 1, 2, \dots, n)$，所以 $\theta$ 取 $x_1, x_2, \dots, x_n$ 中的最小值，$L(\theta)$ 取得最大值，故 $\theta$ 的最大似然估计量为 $\widehat{\theta}_2 = \min\{X_1, X_2, \dots, X_n\}$。
+
+$(\text{II})$ 由 $(\text{I})$ 知，$\widehat{\theta}_1 = \overline{X} - \frac{1}{2}$，则 $E(\widehat{\theta}_1) = E(\overline{X}) - \frac{1}{2} = \frac{1}{2} + \theta - \frac{1}{2} = \theta$，故 $\widehat{\theta}_1$ 是 $\theta$ 的无偏估计量。
+
+可求得 $\widehat{\theta}_2 = \min\{X_1, X_2, \dots, X_n\}$ 的概率密度为
+$$
+f(x) = \begin{cases} 2ne^{-2n(x-\theta)}, & x > \theta, \\ 0, & \text{其他}, \end{cases}
+$$
+故
+$$
+E\widehat{\theta}_2 = \int_{-\infty}^{+\infty} x \cdot f(x) dx = \int_{\theta}^{+\infty} x \cdot 2ne^{-2n(x-\theta)} dx
+$$
+
+$$\xlongequal{x-\theta=u} \int_{0}^{+\infty} (u + \theta) \cdot 2n e^{-2nu} \, du = \frac{1}{2n} + \theta \neq \theta,$$
+
+所以 $\widehat{\theta}_2$ 不是 $\theta$ 的无偏估计量.
+
+(III) 由 (II) 知 $E\widehat{\theta}_1 = \theta$, 故取 $\widehat{\theta}_3 = \widehat{\theta}_1 = \overline{X} - \frac{1}{2}$.
+
+$E\widehat{\theta}_2 = \frac{1}{2n} + \theta$, 取 $\widehat{\theta}_4 = \widehat{\theta}_2 - \frac{1}{2n}$, 则 $E\widehat{\theta}_4 = E\widehat{\theta}_2 - \frac{1}{2n} = \theta$.
+
+这样选取得到 $\theta$ 的两个无偏估计量 $\widehat{\theta}_3$ 和 $\widehat{\theta}_4$.
+
+下面比较 $D\widehat{\theta}_3$ 与 $D\widehat{\theta}_4$.
+
+$$D\widehat{\theta}_3 = D\left(\overline{X} - \frac{1}{2}\right) = D\overline{X} = \frac{DX}{n},$$
+
+$$E(X^2) = \int_{-\infty}^{+\infty} x^2 \cdot f(x; \theta) \, dx = \int_{\theta}^{+\infty} x^2 \cdot 2e^{-2(x-\theta)} \, dx$$
+
+$$\xlongequal{x-\theta=t} \int_{0}^{+\infty} (t + \theta)^2 \cdot 2e^{-2t} \, dt$$
+
+$$= \int_{0}^{+\infty} t^2 \cdot 2e^{-2t} \, dt + 2\theta \int_{0}^{+\infty} t \cdot 2e^{-2t} \, dt + \theta^2 \int_{0}^{+\infty} 2e^{-2t} \, dt$$
+
+$$= \frac{1}{2} + \theta + \theta^2,$$
+
+故
+
+$$DX = E(X^2) - (EX)^2 = \frac{1}{2} + \theta + \theta^2 - \left(\frac{1}{2} + \theta\right)^2 = \frac{1}{4}.$$
+
+所以 $D\widehat{\theta}_3 = \frac{1}{4n}$.
+
+$$D\widehat{\theta}_4 = D\left(\widehat{\theta}_2 - \frac{1}{2n}\right) = D\widehat{\theta}_2,$$
+
+又 $D\widehat{\theta}_2 = E(\widehat{\theta}_2^2) - [E(\widehat{\theta}_2)]^2$, 而
+
+$$E(\widehat{\theta}_2^2) = \int_{-\infty}^{+\infty} x^2 \cdot f(x) \, dx = \int_{\theta}^{+\infty} x^2 \cdot 2ne^{-2n(x-\theta)} \, dx$$
+
+$$\xlongequal{x-\theta=t} \int_{0}^{+\infty} (t + \theta)^2 \cdot 2ne^{-2nt} \, dt$$
+
+$$= \int_{0}^{+\infty} t^2 \cdot 2ne^{-2nt} \, dt + 2\theta \int_{0}^{+\infty} t \cdot 2ne^{-2nt} \, dt + \theta^2 \int_{0}^{+\infty} 2ne^{-2nt} \, dt$$
+
+$$= \frac{2}{(2n)^2} + \frac{2\theta}{2n} + \theta^2 = \frac{1}{2n^2} + \frac{\theta}{n} + \theta^2,$$
+
+故
+
+$$D\widehat{\theta}_2 = \frac{1}{2n^2} + \frac{\theta}{n} + \theta^2 - \left(\frac{1}{2n} + \theta\right)^2 = \frac{1}{4n^2}.$$
+
+显然 $D\widehat{\theta}_2 = \frac{1}{4n^2} < \frac{1}{4n} = D\widehat{\theta}_3 \, (n > 1)$, 所以 $\widehat{\theta}_4$ 比 $\widehat{\theta}_3$ 有效.
+
+**知识点与技巧：** 题中计算用到 $\Gamma(\alpha) = \int_{0}^{+\infty} x^{\alpha-1} e^{-x} \, dx \, (\alpha > 0)$.
+$\Gamma(\alpha + 1) = \alpha\Gamma(\alpha)$, $\Gamma(n + 1) = n!$, $\Gamma\left(\frac{1}{2}\right) = \sqrt{\pi}$, $\Gamma(1) = 1$.
+$\Gamma$ 函数在考试中常用到.
+
+**技巧总结：** 对“平移指数分布”，最大似然估计通常由样本最小值控制；经过偏差修正后，基于最小次序统计量的估计方差为 $1/(4n^2)$，明显小于基于样本均值的 $1/(4n)$。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>

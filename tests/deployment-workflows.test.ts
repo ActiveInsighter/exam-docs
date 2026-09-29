@@ -66,7 +66,7 @@ describe('static deployment workflows', () => {
     expect(workflow).not.toContain('-weighted-search-shard-${{ matrix.shard }}-v1-${{ github.sha }}');
   });
 
-  it('pins Wrangler and avoids a redundant production dry-run', async () => {
+  it('pins Wrangler and dry-runs only manual dispatches with deployment disabled', async () => {
     const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
     const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
 
@@ -75,16 +75,18 @@ describe('static deployment workflows', () => {
     expect(workflow).not.toContain('cloudflare/wrangler-action@v3');
     expect(workflow).not.toContain('node22-wrangler-npx');
     expect(workflow).not.toContain('path: ~/.npm/_npx');
-    expect(workflow).toContain("github.ref != 'refs/heads/main'");
+    expect(workflow).toContain("github.event_name == 'workflow_dispatch' && inputs.deploy != true");
     expect(workflow).toContain('inputs.deploy != true');
     expect(workflow).toContain('deployment-url=${deployment_url}');
   });
 
-  it('never deploys non-main branches to production', async () => {
+  it('routes main to production and Li Lin rebuild branches to an isolated preview Worker', async () => {
     const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
     const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
 
     expect(workflow).toContain("github.ref == 'refs/heads/main'");
+    expect(workflow).toContain('codex/lilin-880-rebuild-*');
+    expect(workflow).toContain('wrangler_args+=(--name exam-docs-preview)');
     expect(workflow).toContain('Deploy to Cloudflare Workers Static Assets');
     expect(workflow).toContain('Full static documentation route verification');
     expect(workflow).not.toContain('codex/production-static-shards-v2');
