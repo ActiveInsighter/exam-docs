@@ -25,15 +25,15 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain("STATIC_DOCS_SHARD_COUNT: '4'");
     expect(workflow).toContain('shard: [0, 1, 2, 3]');
     expect(workflow).toContain('Weighted static shard');
-    expect(workflow).toContain('routes > 155');
+    expect(workflow).toContain('routes > 170');
     expect(workflow).toContain('Verify overlapping shared chunks are identical');
     expect(workflow).toContain('.static-docs/_next/static');
     expect(workflow).toContain('Two shards emitted different bytes at the same _next/static path.');
     expect(workflow).toContain('Merge static outputs with conflict checks');
     expect(workflow).toContain('node scripts/verify-static-asset-references.mjs .static-docs');
     expect(workflow).toContain('tests/static-asset-references.test.ts');
-    expect(workflow).toContain('test "${doc_routes}" = \'587\'');
-    expect(workflow).toContain('test "${markdown}" = \'586\'');
+    expect(workflow).toContain('test "${doc_routes}" = \'645\'');
+    expect(workflow).toContain('test "${markdown}" = \'644\'');
     expect(workflow).toContain('tests/static-doc-shards.test.ts');
     expect(workflow).toContain('tests/static-build-id.test.ts');
     expect(workflow).toContain('tests/search-determinism.test.ts');
@@ -49,7 +49,7 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('Merge dedicated search assets');
     expect(workflow).toContain('needs: [validate, search, build-shard]');
     expect(workflow).toContain('validated_search_assets=');
-    expect(workflow).toContain('manifest.pages !== 586');
+    expect(workflow).toContain('manifest.pages !== 644');
     expect(workflow).toContain('Search manifest is missing module categories.');
     expect(workflow).not.toContain('test "${search_files}" =');
   });
