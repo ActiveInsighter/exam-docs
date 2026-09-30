@@ -5,7 +5,6 @@ description: "李林精讲精练880题·高等数学第三章题目与解析"
 
 # 第三章 一元函数积分学及其应用
 
-> 题干与原始解法以提供的《880高数做题本》与《880数一解析》为基准；明显识别/排版错误已结合原题 PDF 与解题逻辑校正。章末“知识点与技巧总结”为整理时补充。
 
 ## 基础题
 
@@ -207,12 +206,23 @@ $$F(x) = \begin{cases} \frac{1}{3}x^3 + x + C, & x \leqslant 0, \\ \sin x + C, &
 <ExamAnswer>C</ExamAnswer>
 
 <ExamExplanation>
-**解析：** 记 $a_n = \sum_{k=1}^n \int_k^{k+1} \frac{\mathrm{d}x}{x\sqrt{x-1}}$, 则 $a_n = \int_1^{n+1} \frac{\mathrm{d}x}{x\sqrt{x-1}}$。
-故
-$$\lim_{n \to \infty} a_n = \int_1^{+\infty} \frac{\mathrm{d}x}{x\sqrt{x-1}} = \int_1^2 \frac{\mathrm{d}x}{x\sqrt{x-1}} + \int_2^{+\infty} \frac{\mathrm{d}x}{x\sqrt{x-1}} \stackrel{\text{记}}{=} I_1 + I_2.$$
-$$I_1 = \int_1^2 \frac{\mathrm{d}x}{x\sqrt{x-1}} \overset{\sqrt{x-1}=t}{x=t^2+1} \int_0^1 \frac{2t}{t(t^2+1)}\mathrm{d}t = \left. 2\arctan t \right|_0^1 = \frac{\pi}{2},$$
-$$I_2 = \int_2^{+\infty} \frac{\mathrm{d}x}{x\sqrt{x-1}} \overset{\sqrt{x-1}=t}{x=t^2+1} \int_1^{+\infty} \frac{2t}{t(t^2+1)}\mathrm{d}t = \left. 2\arctan t \right|_1^{+\infty} = \frac{\pi}{2},$$
-故 $\lim_{n \to \infty} a_n = I_1 + I_2 = \frac{\pi}{2} + \frac{\pi}{2} = \pi$。选项 C 正确。
+**解析：** 先利用积分区间的首尾相接性：
+$$
+\sum_{k=1}^{n}\int_k^{k+1}\frac{\mathrm{d}x}{x\sqrt{x-1}}
+=\int_1^{n+1}\frac{\mathrm{d}x}{x\sqrt{x-1}}.
+$$
+因此
+$$
+\lim_{n\to\infty}\sum_{k=1}^{n}\int_k^{k+1}\frac{\mathrm{d}x}{x\sqrt{x-1}}
+=\int_1^{+\infty}\frac{\mathrm{d}x}{x\sqrt{x-1}}.
+$$
+令 $t=\sqrt{x-1}$，则 $x=t^2+1$，$\mathrm{d}x=2t\,\mathrm{d}t$，于是
+$$
+\int_1^{+\infty}\frac{\mathrm{d}x}{x\sqrt{x-1}}
+=2\int_0^{+\infty}\frac{\mathrm{d}t}{1+t^2}
+=2\arctan t\Big|_0^{+\infty}=\pi.
+$$
+故选 C。
 </ExamExplanation>
 
 </ExamSolution>
@@ -288,14 +298,29 @@ $$\int_0^b f(x)\mathrm{d}x > \int_0^{\frac{a+b}{2}} f(x)\mathrm{d}x > \int_0^a f
 <ExamAnswer>A</ExamAnswer>
 
 <ExamExplanation>
-**解析：**
-$$I_1 = \int_0^\pi \frac{x\sin^2 x}{1+\mathrm{e}^{\cos^2 x}}\mathrm{d}x \quad x = \frac{\pi}{2}-t \quad -\int_{\frac{\pi}{2}}^{-\frac{\pi}{2}} \frac{\left(\frac{\pi}{2}-t\right)\cos^2 t}{1+\mathrm{e}^{\sin^2 t}}\mathrm{d}t$$
-$$= -\frac{\pi}{2}\int_{\frac{\pi}{2}}^{-\frac{\pi}{2}} \frac{\cos^2 t}{1+\mathrm{e}^{\sin^2 t}}\mathrm{d}t + \int_{-\frac{\pi}{2}}^{\frac{\pi}{2}} \frac{t\cos^2 t}{1+\mathrm{e}^{\sin^2 t}}\mathrm{d}t$$
-$$= \pi \int_0^{\frac{\pi}{2}} \frac{\cos^2 t}{1+\mathrm{e}^{\sin^2 t}}\mathrm{d}t \quad (\text{利用被积函数的奇偶性}),$$
-
-$$I_2 = \int_0^\pi \frac{\sin^2 x}{1 + e^{\cos^2 x}} \mathrm{d}x \xlongequal{x = \frac{\pi}{2} - t} \int_{-\frac{\pi}{2}}^{\frac{\pi}{2}} \frac{\cos^2 t}{1 + e^{\sin^2 t}} \mathrm{d}t = 2 \int_0^{\frac{\pi}{2}} \frac{\cos^2 t}{1 + e^{\sin^2 t}} \mathrm{d}t,$$
-
-即 $I_1 = \pi I_3, I_2 = 2 I_3, I_3 > 0$，故 $I_1 > I_2 > I_3$。选项 A 正确。
+**解析：** 记
+$$
+g(x)=\frac{\sin^2x}{1+\mathrm{e}^{\cos^2x}}.
+$$
+因为 $g(\pi-x)=g(x)$，由区间对称性可得
+$$
+I_1=\int_0^\pi xg(x)\,\mathrm{d}x
+=\frac{\pi}{2}\int_0^\pi g(x)\,\mathrm{d}x
+=\frac{\pi}{2}I_2.
+$$
+又
+$$
+I_2=2\int_0^{\frac{\pi}{2}}\frac{\sin^2x}{1+\mathrm{e}^{\cos^2x}}\,\mathrm{d}x.
+$$
+令 $t=\frac{\pi}{2}-x$，则
+$$
+I_2=2\int_0^{\frac{\pi}{2}}\frac{\cos^2t}{1+\mathrm{e}^{\sin^2t}}\,\mathrm{d}t=2I_3.
+$$
+因此 $I_1=\pi I_3$，$I_2=2I_3$。由于 $I_3>0$ 且 $\pi>2>1$，所以
+$$
+I_1>I_2>I_3.
+$$
+故选 A。
 </ExamExplanation>
 
 </ExamSolution>
@@ -374,12 +399,12 @@ $$
 
 13. 设函数 $y = f(x)$ 由
 
-```math
+$$
 \begin{cases}
 x = \int_0^t 2\mathrm{e}^{-u^2}\mathrm{d}u, \\
 y = \int_0^t \sin(t-u)\mathrm{d}u
 \end{cases}
-```
+$$
 确定，则当 $x \to 0$ 时，$f(x)$ 是 $x^2$ 的（ ）。
 
 <ExamChoices>
@@ -396,33 +421,33 @@ y = \int_0^t \sin(t-u)\mathrm{d}u
 <ExamExplanation>
 **解析：**
 
-```math
-y = \int_0^t \sin(t - u) \mathrm{d}u \xlongequal{t - u = s} \int_0^t \sin s \, \mathrm{d}s
-```
+$$
+y = \int_0^t \sin(t - u) \mathrm{d}u \overset{t - u = s}{=} \int_0^t \sin s \, \mathrm{d}s
+$$
 
-```math
+$$
 \frac{\mathrm{d}y}{\mathrm{d}x} = \frac{y_t'}{x_t'} = \frac{\sin t}{2e^{-t^2}} = \frac{1}{2} e^{t^2} \sin t
-```
+$$
 
-```math
+$$
 \frac{\mathrm{d}^2 y}{\mathrm{d}x^2} = \frac{\left(\frac{1}{2} e^{t^2} \sin t\right)'_t}{x_t'} = \frac{1}{4} e^{2t^2} (2t \sin t + \cos t)
-```
+$$
 
 由 $x = \int_0^t 2e^{-u^2} \mathrm{d}u = 0$ 及 $2e^{-t^2} > 0$，知 $t = 0, y = 0$，即 $f(0) = 0$，故
 
-```math
+$$
 \left. \frac{\mathrm{d}y}{\mathrm{d}x} \right|_{x=0} = \left. \frac{\mathrm{d}y}{\mathrm{d}x} \right|_{t=0} = 0, \quad \left. \frac{\mathrm{d}^2 y}{\mathrm{d}x^2} \right|_{x=0} = \left. \frac{\mathrm{d}^2 y}{\mathrm{d}x^2} \right|_{t=0} = \frac{1}{4}
-```
+$$
 
 则由泰勒公式，有
 
-```math
+$$
 \begin{aligned}
 f(x) &= f(0) + f'(0)x + \frac{f''(0)}{2!} x^2 + o(x^2) \\
 &= 0 + 0 + \frac{\frac{1}{4}}{2} x^2 + o(x^2) \\
-&= 0 + 0 + \frac{1}{4} x^2 + o(x^2).
+&= \frac{1}{8}x^2 + o(x^2).
 \end{aligned}
-```
+$$
 
 故当 $x \to 0$ 时，$f(x)$ 与 $x^2$ 是同阶但不等价的无穷小。选项 C 正确。
 </ExamExplanation>
@@ -606,17 +631,17 @@ $$f(x) = \begin{cases} -\frac{x^2}{2} + x + C_1, & -2 < x < 0, \\ 1, & x = 0, \\
 
 <ExamExplanation>
 **解析：** 依题意得
-```math
+$$
 \begin{aligned}
 \lim_{x \to 0} \frac{F(x)}{x^4} &= \lim_{x \to 0} \frac{xf(x^2)}{4x^3} = \lim_{x \to 0} \frac{f(x^2)}{4x^2} \\
 &= \frac{1}{4} \lim_{x \to 0} \frac{f(x^2) - f(0)}{x^2 - 0} = \frac{1}{4}f'(0) = \frac{1}{4}.
 \end{aligned}
-```
+$$
 
 **注：** 错误做法:
-```math
+$$
 \lim_{x \to 0} \frac{f(x^2)}{4x^2} \underset{\text{法则}}{\overset{\text{洛必达}}{=}} \lim_{x \to 0} \frac{2xf'(x^2)}{8x} = \frac{1}{4}
-```
+$$
 由于没有 $f'(x)$ 连续的条件, 故 $\lim_{x \to 0} f'(x)$ 未必存在.
 </ExamExplanation>
 
@@ -663,7 +688,7 @@ $$f(x) = \frac{\sqrt{2}}{2}(x^2+1).$$
 
 <ExamExplanation>
 **解析：** 由
-$$\int_x^{x+f(x)} g(t-x)\mathrm{d}t \xlongequal{t-x=u} \int_0^{f(x)} g(u)\mathrm{d}u,$$
+$$\int_x^{x+f(x)} g(t-x)\mathrm{d}t \overset{t-x=u}{=} \int_0^{f(x)} g(u)\mathrm{d}u,$$
 得
 $$\int_0^{f(x)} g(u)\mathrm{d}u = x^2\ln(1+x).$$
 上式两边同时对 $x$ 求导, 得
@@ -731,11 +756,11 @@ $$\lim_{x\to +\infty} \frac{\int_0^x |\sin t|\mathrm{d}t}{x} = \frac{2}{\pi}.$$
 
 <ExamExplanation>
 **解析：**
-```math
+$$
 \int_1^{+\infty} \frac{\mathrm{d}x}{x(a+x^3)} = \frac{1}{a}\int_1^{+\infty} \left( \frac{1}{x} - \frac{x^2}{a+x^3} \right)\mathrm{d}x
-```
+$$
 
-```math
+$$
 \begin{aligned}
 &= \frac{1}{a} \left[ \int_{1}^{+\infty} \frac{1}{x} \, \mathrm{d}x - \frac{1}{3} \int_{1}^{+\infty} \frac{d(a + x^3)}{a + x^3} \right] \\
 &= \frac{1}{a} \left[ \ln x - \frac{1}{3} \ln(a + x^3) \right] \Big|_{1}^{+\infty} \\
@@ -743,7 +768,7 @@ $$\lim_{x\to +\infty} \frac{\int_0^x |\sin t|\mathrm{d}t}{x} = \frac{2}{\pi}.$$
 &= \frac{1}{3a} \left( \lim_{x \to +\infty} \ln \frac{x^3}{a + x^3} - \ln \frac{1}{a + 1} \right) \\
 &= \frac{1}{3a} \ln(a + 1) = \frac{1}{3} \ln 2,
 \end{aligned}
-```
+$$
 
 故 $a = 1$.
 </ExamExplanation>
@@ -781,13 +806,13 @@ $$\lim_{x\to +\infty} \frac{\int_0^x |\sin t|\mathrm{d}t}{x} = \frac{2}{\pi}.$$
 <ExamExplanation>
 **解析：** 由 $f(x) = \int_{0}^{a-x} e^{t(2a-t)} \, \mathrm{d}t \, (a > 0)$, 当 $x \in [0, a]$ 时, $f(x) \geqslant 0$, $f(a) = 0$, $f(0) > 0$. 故所求面积为
 
-```math
+$$
 \begin{aligned}
 S &= \int_{0}^{a} f(x) \, \mathrm{d}x = \int_{0}^{a} \left[ \int_{0}^{a-x} e^{t(2a-t)} \, \mathrm{d}t \right] \mathrm{d}x \\
 &= x \int_{0}^{a-x} e^{t(2a-t)} \, \mathrm{d}t \Big|_{0}^{a} - \int_{0}^{a} x \left[ \int_{0}^{a-x} e^{t(2a-t)} \, \mathrm{d}t \right]' \mathrm{d}x \\
 &= \int_{0}^{a} x e^{a^2 - x^2} \, \mathrm{d}x = -\frac{1}{2} \int_{0}^{a} e^{a^2 - x^2} \, d(a^2 - x^2) = -\frac{1}{2} e^{a^2 - x^2} \Big|_{0}^{a} = \frac{1}{2}(e^{a^2} - 1).
 \end{aligned}
-```
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -825,12 +850,12 @@ S &= \int_{0}^{a} f(x) \, \mathrm{d}x = \int_{0}^{a} \left[ \int_{0}^{a-x} e^{t(
 <ExamExplanation>
 **解析：**
 
-```math
+$$
 \begin{aligned}
 S &= \int_{0}^{3\pi} \sqrt{r^2 + {r'}^2} \, d\theta = \int_{0}^{3\pi} \sqrt{a^2 \sin^6 \frac{\theta}{3} + a^2 \sin^4 \frac{\theta}{3} \cos^2 \frac{\theta}{3}} \, d\theta \\
 &= a \int_{0}^{3\pi} \sin^2 \frac{\theta}{3} \, d\theta \overset{t = \frac{\theta}{3}}{=} 3a \int_{0}^{\pi} \sin^2 t \, \mathrm{d}t = \frac{3\pi a}{2}.
 \end{aligned}
-```
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -904,12 +929,12 @@ $$= -\frac{1}{4n}e^{-\frac{4}{n}} - \frac{1}{16}e^{-4x}\Big|_{\frac{1}{n}}^{+\in
 
 <ExamExplanation>
 **解析：** 依题设, 所求路程为
-$$s = \int_{0}^{+\infty} \sqrt{t}e^{-\sqrt{t}} \mathrm{d}t \xlongequal{\sqrt{t} = u} \int_{0}^{+\infty} u e^{-u} \cdot 2u \mathrm{d}u = -2\int_{0}^{+\infty} u^2 d(e^{-u})$$
+$$s = \int_{0}^{+\infty} \sqrt{t}e^{-\sqrt{t}} \mathrm{d}t \overset{\sqrt{t} = u}{=} \int_{0}^{+\infty} u e^{-u} \cdot 2u \mathrm{d}u = -2\int_{0}^{+\infty} u^2 d(e^{-u})$$
 $$= -2\left(u^2 e^{-u}\Big|_0^{+\infty} - \int_{0}^{+\infty} 2u e^{-u} \mathrm{d}u\right) = -4\int_{0}^{+\infty} ud(e^{-u})$$
 $$= -4\left(u e^{-u}\Big|_0^{+\infty} - \int_{0}^{+\infty} e^{-u} \mathrm{d}u\right) = -4e^{-u}\Big|_0^{+\infty} = 4(\text{m}),$$
 
 所求平均速度为
-$$\bar{v} = \frac{1}{4-0} \int_{0}^{4} \sqrt{t}e^{-\sqrt{t}} \mathrm{d}t \xlongequal{-\sqrt{t} = u} -\frac{1}{2}\int_{2}^{0} u^2 e^{u} \mathrm{d}u = \frac{1}{2}\int_{-2}^{0} u^2 d(e^u)$$
+$$\bar{v} = \frac{1}{4-0} \int_{0}^{4} \sqrt{t}e^{-\sqrt{t}} \mathrm{d}t \overset{-\sqrt{t} = u}{=} -\frac{1}{2}\int_{2}^{0} u^2 e^{u} \mathrm{d}u = \frac{1}{2}\int_{-2}^{0} u^2 d(e^u)$$
 $$= \frac{1}{2}\left(u^2 e^u\Big|_{-2}^{0} - 2\int_{-2}^{0} u e^u \mathrm{d}u\right)$$
 $$= \frac{1}{2}\left[-4e^{-2} - 2\int_{-2}^{0} ud(e^u)\right]$$
 $$= -2e^{-2} - \left(u e^u\Big|_{-2}^{0} - \int_{-2}^{0} e^u \mathrm{d}u\right)$$
@@ -1009,42 +1034,48 @@ $$= 2[\ln\sqrt{x} - \ln(1+\sqrt{x})] + C = 2\ln\frac{\sqrt{x}}{1+\sqrt{x}} + C.$
 (II)
 $$\int \frac{x\mathrm{e}^x}{\sqrt{\mathrm{e}^x-1}}\mathrm{d}x = 2\int x\,\mathrm{d}(\sqrt{\mathrm{e}^x-1}) = 2\left(x\sqrt{\mathrm{e}^x-1} - \int \sqrt{\mathrm{e}^x-1}\,\mathrm{d}x\right)$$
 
-$= 2x\sqrt{\text{e}^x - 1} - 2\int\sqrt{\text{e}^x - 1}\text{d}x,$
+$= 2x\sqrt{\mathrm{e}^x - 1} - 2\int\sqrt{\mathrm{e}^x - 1}\mathrm{d}x,$
 
-令 $\sqrt{\text{e}^x - 1} = t$, 则 $x = \ln(1 + t^2)$, $\text{d}x = \frac{2t}{1 + t^2}\text{d}t$, 故
-$$\int\sqrt{\text{e}^x - 1}\text{d}x = \int\frac{2t^2}{1 + t^2}\text{d}t = 2\int\frac{t^2 + 1 - 1}{1 + t^2}\text{d}t$$
-$$= 2t - 2\int\frac{\text{d}t}{1 + t^2} = 2t - 2\arctan t + C,$$
+令 $\sqrt{\mathrm{e}^x - 1} = t$, 则 $x = \ln(1 + t^2)$, $\mathrm{d}x = \frac{2t}{1 + t^2}\mathrm{d}t$, 故
+$$\int\sqrt{\mathrm{e}^x - 1}\mathrm{d}x = \int\frac{2t^2}{1 + t^2}\mathrm{d}t = 2\int\frac{t^2 + 1 - 1}{1 + t^2}\mathrm{d}t$$
+$$= 2t - 2\int\frac{\mathrm{d}t}{1 + t^2} = 2t - 2\arctan t + C,$$
 
-所以原式 $= 2x\sqrt{\text{e}^x - 1} - 4\sqrt{\text{e}^x - 1} + 4\arctan\sqrt{\text{e}^x - 1} + C$.
+所以原式 $= 2x\sqrt{\mathrm{e}^x - 1} - 4\sqrt{\mathrm{e}^x - 1} + 4\arctan\sqrt{\mathrm{e}^x - 1} + C$.
 
-(III) 令 $x = \tan t, t \in \left(-\frac{\pi}{2}, \frac{\pi}{2}\right)$, 则 $\text{d}x = \sec^2 t\text{d}t$, 故
-$$I = \int\frac{x^3}{\sqrt{1 + x^2}}\text{d}x = \int\frac{\tan^3 t \cdot \sec^2 t}{\sec t}\text{d}t$$
-$$= \int\tan^2 t\text{d}(\sec t) = \int(\sec^2 t - 1)\text{d}(\sec t)$$
+(III) 令 $x = \tan t, t \in \left(-\frac{\pi}{2}, \frac{\pi}{2}\right)$, 则 $\mathrm{d}x = \sec^2 t\mathrm{d}t$, 故
+$$I = \int\frac{x^3}{\sqrt{1 + x^2}}\mathrm{d}x = \int\frac{\tan^3 t \cdot \sec^2 t}{\sec t}\mathrm{d}t$$
+$$= \int\tan^2 t\mathrm{d}(\sec t) = \int(\sec^2 t - 1)\mathrm{d}(\sec t)$$
 $$= \frac{1}{3}\sec^3 t - \sec t + C.$$
 
 如图 3-3 所示, $\sec t = \sqrt{1 + x^2}$, 于是
 $$\text{原式} = \frac{1}{3}(1 + x^2)^{\frac{3}{2}} - (1 + x^2)^{\frac{1}{2}} + C.$$
 
 **注：** 此题也可凑微分。
-$$\int\frac{x^3}{\sqrt{1 + x^2}}\text{d}x = \int\frac{x^2 \cdot \text{d}(1 + x^2)}{2\sqrt{1 + x^2}} = \int(x^2 + 1 - 1)\text{d}(\sqrt{1 + x^2})$$
-$$= \int(\sqrt{x^2 + 1})^2\text{d}(\sqrt{1 + x^2}) - \int\text{d}(\sqrt{1 + x^2})$$
+$$\int\frac{x^3}{\sqrt{1 + x^2}}\mathrm{d}x = \int\frac{x^2 \cdot \mathrm{d}(1 + x^2)}{2\sqrt{1 + x^2}} = \int(x^2 + 1 - 1)\mathrm{d}(\sqrt{1 + x^2})$$
+$$= \int(\sqrt{x^2 + 1})^2\mathrm{d}(\sqrt{1 + x^2}) - \int\mathrm{d}(\sqrt{1 + x^2})$$
 $$= \frac{1}{3}(1 + x^2)^{\frac{3}{2}} - (1 + x^2)^{\frac{1}{2}} + C.$$
 
-(IV) 令 $\tan t = x$, 则 $\text{d}x = \sec^2 t\text{d}t$, 故
-$$I = \int\frac{\text{d}x}{(2x^2 + 1)\sqrt{1 + x^2}} = \int\frac{\text{d}t}{(2\tan^2 t + 1)\cos t}$$
-$$= \int\frac{\cos t\text{d}t}{2\sin^2 t + \cos^2 t} = \int\frac{\text{d}(\sin t)}{1 + \sin^2 t} = \arctan(\sin t) + C.$$
+(IV) 令 $\tan t = x$, 则 $\mathrm{d}x = \sec^2 t\mathrm{d}t$, 故
+$$I = \int\frac{\mathrm{d}x}{(2x^2 + 1)\sqrt{1 + x^2}} = \int\frac{\mathrm{d}t}{(2\tan^2 t + 1)\cos t}$$
+$$= \int\frac{\cos t\mathrm{d}t}{2\sin^2 t + \cos^2 t} = \int\frac{\mathrm{d}(\sin t)}{1 + \sin^2 t} = \arctan(\sin t) + C.$$
 
 又 $\sin t = \frac{x}{\sqrt{1 + x^2}}$, 故 $I = \arctan\frac{x}{\sqrt{1 + x^2}} + C$.
 
 (V)
-$$\int\frac{\arctan\sqrt{x - 1}}{x\sqrt{x - 1}}\text{d}x = 2\int\frac{\arctan\sqrt{x - 1}}{x}\text{d}(\sqrt{x - 1})$$
-$$= 2\int\frac{\arctan\sqrt{x - 1}}{1 + (\sqrt{x - 1})^2}\text{d}(\sqrt{x - 1})$$
-$$= 2\int\arctan\sqrt{x - 1}\text{d}(\arctan\sqrt{x - 1})$$
+$$\int\frac{\arctan\sqrt{x - 1}}{x\sqrt{x - 1}}\mathrm{d}x = 2\int\frac{\arctan\sqrt{x - 1}}{x}\mathrm{d}(\sqrt{x - 1})$$
+$$= 2\int\frac{\arctan\sqrt{x - 1}}{1 + (\sqrt{x - 1})^2}\mathrm{d}(\sqrt{x - 1})$$
+$$= 2\int\arctan\sqrt{x - 1}\mathrm{d}(\arctan\sqrt{x - 1})$$
 $$= (\arctan\sqrt{x - 1})^2 + C.$$
 
 (VI)
-$$\int\frac{x}{\sqrt{1 - x}\sqrt{x}}\text{d}x = \int\frac{\sqrt{x}}{\sqrt{1 - x}\sqrt{x}}\text{d}x = \frac{2}{3}\int\frac{\text{d}\left(x^{\frac{3}{2}}\right)}{\sqrt{1 - x^{\frac{3}{2}}}} = -\frac{2}{3}\int\frac{\text{d}\left(1 - x^{\frac{3}{2}}\right)}{\sqrt{1 - x^{\frac{3}{2}}}}$$
-$$= -\frac{2}{3} \cdot 2\sqrt{1 - x^{\frac{3}{2}}} = -\frac{4}{3}\sqrt{1 - x}\sqrt{x} + C.$$
+$$
+\begin{aligned}
+\int\sqrt{\frac{x}{1-x\sqrt{x}}}\,\mathrm{d}x
+&=\int\frac{x^{\frac12}}{\sqrt{1-x^{\frac32}}}\,\mathrm{d}x \\
+&=-\frac{2}{3}\int\frac{\mathrm{d}\left(1-x^{\frac32}\right)}{\sqrt{1-x^{\frac32}}} \\
+&=-\frac{4}{3}\sqrt{1-x^{\frac32}}+C.
+\end{aligned}
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -1073,112 +1104,112 @@ $(VI) \int \frac{\mathrm{d}x}{a^2 \sin^2 x + b^2 \cos^2 x} (a^2+b^2>0)$.
 
 <ExamExplanation>
 **解析：** (I)
-```math
+$$
 \begin{aligned}
 \int \frac{1}{\sin^2 x \cos^4 x} \mathrm{d}x &= \int \frac{(\sin^2 x + \cos^2 x)^2}{\sin^2 x \cos^4 x} \mathrm{d}x \\
 &= \int \left( \frac{\sin^2 x}{\cos^4 x} + \frac{2}{\cos^2 x} + \frac{1}{\sin^2 x} \right) \mathrm{d}x \\
 &= \int \tan^2 x \mathrm{d}(\tan x) + 2\tan x - \cot x \\
 &= \frac{1}{3}\tan^3 x + 2\tan x - \cot x + C.
 \end{aligned}
-```
+$$
 
 **注：** 求解三角有理式积分首先考虑利用恒等变形、三角公式, 一般的方法是利用万能代换. 此题也可以分子分母同乘以 $\cos^2 x$, 得
-```math
+$$
 \begin{aligned}
 \int \frac{1}{\sin^2 x \cos^4 x} \mathrm{d}x &= \int \frac{1}{\tan^2 x \cos^6 x} \mathrm{d}x = \int \frac{\sec^4 x}{\tan^2 x} \mathrm{d}(\tan x) \\
 &= \int \frac{\tan^4 x + 2\tan^2 x + 1}{\tan^2 x} \mathrm{d}(\tan x) \\
 &= \frac{1}{3}\tan^3 x + 2\tan x - \cot x + C.
 \end{aligned}
-```
+$$
 
 (II) 分子、分母同时乘以 $(1 - \sin x)$, 再凑微分.
-```math
+$$
 \begin{aligned}
 \int \frac{1}{1 + \sin x} \mathrm{d}x &= \int \frac{1 - \sin x}{\cos^2 x} \mathrm{d}x = \int \frac{1}{\cos^2 x} \mathrm{d}x + \int \frac{1}{\cos^2 x} \mathrm{d}(\cos x) \\
 &= \tan x - \frac{1}{\cos x} + C.
 \end{aligned}
-```
+$$
 
 **注：** 利用三角公式.
-```math
+$$
 \begin{aligned}
 \int \frac{1}{1 + \sin x} \mathrm{d}x &= \int \frac{1}{1 + 2\sin\frac{x}{2}\cos\frac{x}{2}} \mathrm{d}x = \int \frac{\mathrm{d}x}{\left(\sin\frac{x}{2} + \cos\frac{x}{2}\right)^2} \\
 &= \int \frac{\sec^2\frac{x}{2}}{\left(1 + \tan\frac{x}{2}\right)^2} \mathrm{d}x = 2\int \frac{\mathrm{d}\left(\tan\frac{x}{2}\right)}{\left(1 + \tan\frac{x}{2}\right)^2} = -\frac{2}{1 + \tan\frac{x}{2}} + C.
 \end{aligned}
-```
+$$
 
 (III)
-```math
+$$
 \begin{aligned}
 \int \frac{\sin x}{\sin x + \cos x} \mathrm{d}x &= \frac{1}{2}\int \frac{(\sin x + \cos x) + (\sin x - \cos x)}{\sin x + \cos x} \mathrm{d}x \\
 &= \frac{1}{2}\int \mathrm{d}x - \frac{1}{2}\int \frac{\mathrm{d}(\sin x + \cos x)}{\sin x + \cos x} \\
 &= \frac{1}{2}x - \frac{1}{2}\ln|\sin x + \cos x| + C.
 \end{aligned}
-```
+$$
 
 **注：** 这里利用了
-```math
+$$
 f(x) = \frac{f(x) + f(-x)}{2} + \frac{f(x) - f(-x)}{2},
-```
+$$
 即 $f(x)$ 可以表示成一个偶函数与一个奇函数之和.
 
 (IV) 考虑拆项凑微分. 令
-```math
+$$
 3\sin x + \cos x = A(\sin x + 2\cos x) + B(\cos x - 2\sin x),
-```
+$$
 比较两边系数, 可得 $A = 1, B = -1$, 故
 
-```math
+$$
 \int \frac{3\sin x + \cos x}{\sin x + 2\cos x}\mathrm{d}x = \int \frac{(\sin x + 2\cos x) - (\cos x - 2\sin x)}{\sin x + 2\cos x}\mathrm{d}x
-```
-```math
+$$
+$$
 = \int \mathrm{d}x - \int \frac{\mathrm{d}(\sin x + 2\cos x)}{\sin x + 2\cos x}
-```
-```math
+$$
+$$
 = x - \ln|\sin x + 2\cos x| + C.
-```
+$$
 
 (V) 用万能代换, 令 $\tan\frac{x}{2} = t$, 则
-```math
+$$
 \sin x = \frac{2t}{1 + t^2}, \quad \cos x = \frac{1 - t^2}{1 + t^2}, \quad \mathrm{d}x = \frac{2}{1 + t^2}\mathrm{d}t,
-```
+$$
 故
-```math
+$$
 \int \frac{\mathrm{d}x}{\sin 2x + 2\sin x} = \int \frac{\mathrm{d}x}{2\sin x\cos x + 2\sin x}
-```
-```math
+$$
+$$
 = \int \frac{\frac{2}{1 + t^2}}{2 \cdot \frac{2t}{1 + t^2} \cdot \frac{1 - t^2}{1 + t^2} + 2 \cdot \frac{2t}{1 + t^2}}\mathrm{d}t
-```
-```math
+$$
+$$
 = \frac{1}{4}\int \frac{1 + t^2}{t}\mathrm{d}t = \frac{1}{4}\int \frac{1}{t}\mathrm{d}t + \frac{1}{4}\int t\mathrm{d}t
-```
-```math
+$$
+$$
 = \frac{1}{4}\ln|t| + \frac{1}{8}t^2 + C
-```
-```math
+$$
+$$
 = \frac{1}{4}\ln\left|\tan\frac{x}{2}\right| + \frac{1}{8}\tan^2\frac{x}{2} + C.
-```
+$$
 
 (VI) 当 $a = 0, b \neq 0$ 时,
-```math
+$$
 \int \frac{\mathrm{d}x}{a^2\sin^2 x + b^2\cos^2 x} = \int \frac{\mathrm{d}x}{b^2\cos^2 x} = \frac{1}{b^2}\tan x + C;
-```
+$$
 
 当 $a \neq 0, b = 0$ 时,
-```math
+$$
 \int \frac{\mathrm{d}x}{a^2\sin^2 x + b^2\cos^2 x} = \int \frac{\mathrm{d}x}{a^2\sin^2 x} = -\frac{1}{a^2}\cot x + C;
-```
+$$
 
 当 $a \neq 0$ 且 $b \neq 0$ 时,
-```math
+$$
 \int \frac{\mathrm{d}x}{a^2\sin^2 x + b^2\cos^2 x} = \int \frac{\mathrm{d}x}{b^2\cos^2 x\left(1 + \frac{a^2}{b^2}\tan^2 x\right)}
-```
-```math
+$$
+$$
 = \int \frac{1}{ab} \frac{1}{1 + \left(\frac{a}{b}\tan x\right)^2}\mathrm{d}\left(\frac{a}{b}\tan x\right)
-```
-```math
+$$
+$$
 = \frac{1}{ab}\arctan\left(\frac{a}{b}\tan x\right) + C.
-```
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -1207,90 +1238,90 @@ $(VI) \int \mathrm{e}^{2x}(1+\tan x)^2 \mathrm{d}x$.
 
 <ExamExplanation>
 **解析：** (I) 用分部积分法.
-```math
+$$
 \int \arctan\sqrt{x}\,\mathrm{d}x = x\arctan\sqrt{x} - \int x \cdot \frac{1}{1 + x} \cdot \frac{1}{2\sqrt{x}}\mathrm{d}x
-```
-```math
+$$
+$$
 = x\arctan\sqrt{x} - \frac{1}{2}\int \frac{x + 1 - 1}{\sqrt{x}(1 + x)}\mathrm{d}x
-```
-```math
+$$
+$$
 = x\arctan\sqrt{x} - \int \frac{1}{2\sqrt{x}}\mathrm{d}x + \int \frac{\mathrm{d}(\sqrt{x})}{1 + (\sqrt{x})^2}
-```
-```math
+$$
+$$
 = x\arctan\sqrt{x} - \sqrt{x} + \arctan\sqrt{x} + C.
-```
+$$
 
 (II)
-```math
+$$
 \int \frac{\ln x}{(1 - x)^2}\mathrm{d}x = -\int \ln x\,\mathrm{d}\left(\frac{1}{x - 1}\right) = -\frac{\ln x}{x - 1} + \int \frac{1}{x - 1} \cdot \frac{1}{x}\mathrm{d}x
-```
-```math
+$$
+$$
 = -\frac{\ln x}{x - 1} + \int \left(\frac{1}{x - 1} - \frac{1}{x}\right)\mathrm{d}x
-```
+$$
 
-```math
+$$
 = -\frac{\ln x}{x-1} + \ln|x-1| - \ln x + C.
-```
+$$
 
 $(\text{III})\quad \int \frac{x^2 e^x}{(x+2)^2}\mathrm{d}x = -\int x^2 e^x \mathrm{d}\left(\frac{1}{x+2}\right) = -x^2 e^x \cdot \frac{1}{x+2} + \int \frac{1}{x+2}\mathrm{d}(x^2 e^x)$
-```math
+$$
 = -\frac{x^2 e^x}{x+2} + \int \frac{x^2 e^x + 2xe^x}{x+2}\mathrm{d}x = -\frac{x^2 e^x}{x+2} + \int xe^x \mathrm{d}x
-```
-```math
+$$
+$$
 = -\frac{x^2 e^x}{x+2} + xe^x - \int e^x \mathrm{d}x = -\frac{x^2 e^x}{x+2} + xe^x - e^x + C.
-```
+$$
 
 $(\text{IV})\quad$令 $\ln x = t$，则 $x = e^t$，$\mathrm{d}x = e^t \mathrm{d}t$。
-```math
+$$
 \int \sin(\ln x)\mathrm{d}x = \int \sin t \cdot e^t \mathrm{d}t = \int \sin t \mathrm{d}(e^t)
-```
-```math
+$$
+$$
 = e^t \sin t - \int e^t \cos t \mathrm{d}t = e^t \sin t - \int \cos t \mathrm{d}(e^t)
-```
-```math
+$$
+$$
 = e^t \sin t - \left(e^t \cos t + \int e^t \sin t \mathrm{d}t\right),
-```
+$$
 
 设 $I = \int e^t \sin t \mathrm{d}t$，则 $I = e^t \sin t - e^t \cos t - I$，即
-```math
+$$
 I = \frac{1}{2}(e^t \sin t - e^t \cos t) + C = \frac{1}{2}x[\sin(\ln x) - \cos(\ln x)] + C.
-```
+$$
 
 $(\text{V})\quad$令 $\sqrt{\frac{1-x}{1+x}} = t$，则 $x = \frac{1-t^2}{1+t^2}$，$\mathrm{d}x = -\frac{4t}{(1+t^2)^2}\mathrm{d}t$，故
-```math
+$$
 I = \int \frac{1}{x^2}\sqrt{\frac{1-x}{1+x}}\mathrm{d}x = -\int \frac{4t^2}{(1-t^2)^2}\mathrm{d}t
-```
-```math
+$$
+$$
 = -2\int t \mathrm{d}\left(\frac{1}{1-t^2}\right) = -\frac{2t}{1-t^2} + 2\int \frac{1}{1-t^2}\mathrm{d}t
-```
-```math
+$$
+$$
 = -\frac{2t}{1-t^2} + \ln\left|\frac{1+t}{1-t}\right| + C
-```
-```math
+$$
+$$
 = -\frac{\sqrt{1-x^2}}{x} + \ln\left|\frac{\sqrt{1+x} + \sqrt{1-x}}{\sqrt{1+x} - \sqrt{1-x}}\right| + C.
-```
+$$
 
 **注：** 此题也可利用倒代换，令 $x = \frac{1}{t}$，则 $\mathrm{d}x = -\frac{1}{t^2}\mathrm{d}t$，故
-```math
+$$
 \int \frac{1}{x^2}\sqrt{\frac{1-x}{1+x}}\mathrm{d}x = -\int \sqrt{\frac{t-1}{t+1}}\mathrm{d}t,
-```
+$$
 再令 $\sqrt{\frac{t-1}{t+1}} = u$，去根号继续求解即可。
 
 $(\text{VI})\quad I = \int e^{2x}(1+\tan x)^2 \mathrm{d}x = \int e^{2x}(1+2\tan x+\tan^2 x)\mathrm{d}x$
-```math
+$$
 = \int e^{2x}\sec^2 x \mathrm{d}x + 2\int e^{2x}\tan x \mathrm{d}x = \int e^{2x}\mathrm{d}(\tan x) + 2\int e^{2x}\tan x \mathrm{d}x
-```
-```math
+$$
+$$
 = e^{2x}\tan x - 2\int e^{2x}\tan x \mathrm{d}x + 2\int e^{2x}\tan x \mathrm{d}x = e^{2x}\tan x + C.
-```
+$$
 
 **注：** 此题通过分部积分法消去 $2\int e^{2x}\tan x \mathrm{d}x$，这类问题一般也可凑微分。
-```math
+$$
 \int e^{2x}\sec^2 x \mathrm{d}x + 2\int e^{2x}\tan x \mathrm{d}x = \int (e^{2x}\sec^2 x + 2e^{2x}\tan x)\mathrm{d}x
-```
-```math
+$$
+$$
 = \int \mathrm{d}(e^{2x}\tan x) = e^{2x}\tan x + C.
-```
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -1344,13 +1375,13 @@ $(II) \int_{0}^{\pi} (\mathrm{e}^{-\cos x} - \mathrm{e}^{\cos x}) \mathrm{d}x$.
 <ExamExplanation>
 **解析：** (I)
 $$\int_{0}^{2} (x - 1)^2 \sqrt{2x - x^2} \, \mathrm{d}x = \int_{0}^{2} (x - 1)^2 \sqrt{1 - (x - 1)^2} \, \mathrm{d}x$$
-$$\xlongequal{x - 1 = t} \int_{-1}^{1} t^2 \sqrt{1 - t^2} \, \mathrm{d}t = 2 \int_{0}^{1} t^2 \sqrt{1 - t^2} \, \mathrm{d}t$$
-$$\xlongequal{t = \sin u} 2 \int_{0}^{\frac{\pi}{2}} \cos^2 u \sin^2 u \, \mathrm{d}u = 2 \int_{0}^{\frac{\pi}{2}} (1 - \sin^2 u) \sin^2 u \, \mathrm{d}u$$
+$$\overset{x - 1 = t}{=} \int_{-1}^{1} t^2 \sqrt{1 - t^2} \, \mathrm{d}t = 2 \int_{0}^{1} t^2 \sqrt{1 - t^2} \, \mathrm{d}t$$
+$$\overset{t = \sin u}{=} 2 \int_{0}^{\frac{\pi}{2}} \cos^2 u \sin^2 u \, \mathrm{d}u = 2 \int_{0}^{\frac{\pi}{2}} (1 - \sin^2 u) \sin^2 u \, \mathrm{d}u$$
 $$= 2 \times \frac{1}{2} \times \frac{\pi}{2} - 2 \int_{0}^{\frac{\pi}{2}} \sin^4 u \, \mathrm{d}u = \frac{\pi}{2} - 2 \times \frac{3}{4} \times \frac{1}{2} \times \frac{\pi}{2}$$
 $$= \frac{\pi}{8}.$$
 
 $(\text{II})$
-$$\int_{0}^{\pi} (e^{-\cos x} - e^{\cos x}) \mathrm{d}x \xlongequal{x = \frac{\pi}{2} + t} \int_{-\frac{\pi}{2}}^{\frac{\pi}{2}} (e^{\sin t} - e^{-\sin t}) \mathrm{d}t = 0.$$
+$$\int_{0}^{\pi} (e^{-\cos x} - e^{\cos x}) \mathrm{d}x \overset{x = \frac{\pi}{2} + t}{=} \int_{-\frac{\pi}{2}}^{\frac{\pi}{2}} (e^{\sin t} - e^{-\sin t}) \mathrm{d}t = 0.$$
 
 **注：** $e^{\sin t} - e^{-\sin t}$ 是奇函数.
 </ExamExplanation>
@@ -1431,9 +1462,9 @@ $$= \begin{cases} \dfrac{(n - 1)!!}{n!!} \cdot \frac{\pi^2}{2}, & n \text{为正
 
 故 (Ⅲ) 可利用结论求解, 即 $\int_{0}^{\pi} t \sin t \, \mathrm{d}t = \frac{\pi}{2} \int_{0}^{\pi} \sin t \, \mathrm{d}t = \pi.$
 
-(Ⅳ) $\int_{0}^{1} \sqrt{2x - x^2} \, \mathrm{d}x = \int_{0}^{1} \sqrt{1 - (x - 1)^2} \, \mathrm{d}x \xlongequal{x - 1 = t} \int_{-1}^{0} \sqrt{1 - t^2} \, \mathrm{d}t = \frac{1}{4}\pi,$
+(Ⅳ) $\int_{0}^{1} \sqrt{2x - x^2} \, \mathrm{d}x = \int_{0}^{1} \sqrt{1 - (x - 1)^2} \, \mathrm{d}x \overset{x - 1 = t}{=} \int_{-1}^{0} \sqrt{1 - t^2} \, \mathrm{d}t = \frac{1}{4}\pi,$
 
-$$\int_{0}^{1} \sqrt{(1 - x^2)^3} \, \mathrm{d}x \xlongequal{x = \sin t} \int_{0}^{\frac{\pi}{2}} \cos^4 t \, \mathrm{d}t = \frac{3}{4} \times \frac{1}{2} \times \frac{\pi}{2} = \frac{3\pi}{16},$$
+$$\int_{0}^{1} \sqrt{(1 - x^2)^3} \, \mathrm{d}x \overset{x = \sin t}{=} \int_{0}^{\frac{\pi}{2}} \cos^4 t \, \mathrm{d}t = \frac{3}{4} \times \frac{1}{2} \times \frac{\pi}{2} = \frac{3\pi}{16},$$
 
 故原积分 $= \frac{\pi}{4} + \frac{3\pi}{16} = \frac{7\pi}{16}.$
 </ExamExplanation>
@@ -1445,7 +1476,7 @@ $$\int_{0}^{1} \sqrt{(1 - x^2)^3} \, \mathrm{d}x \xlongequal{x = \sin t} \int_{0
 <ExamQuestion>
 
 9. 求下列积分：
-$(I)\int_{1}^{+\infty}\frac{\mathrm{d}x}{\mathrm{e}^{x}+1+\mathrm{e}^{3-x}}$; \quad $(II)\int_{\frac{1}{2}}^{\frac{3}{2}}\frac{\mathrm{d}x}{\sqrt{|x-x^2|}}$.
+$(I)\int_{1}^{+\infty}\frac{\mathrm{d}x}{\mathrm{e}^{x+1}+\mathrm{e}^{3-x}}$; \quad $(II)\int_{\frac{1}{2}}^{\frac{3}{2}}\frac{\mathrm{d}x}{\sqrt{|x-x^2|}}$.
 
 <ExamSolution>
 
@@ -1453,7 +1484,7 @@ $(I)\int_{1}^{+\infty}\frac{\mathrm{d}x}{\mathrm{e}^{x}+1+\mathrm{e}^{3-x}}$; \q
 
 <ExamExplanation>
 **解析：** (I) 令 $x - 1 = t$, 则
-$$\int_{1}^{+\infty} \frac{\mathrm{d}x}{e^{x+1} + e^{3-x}} = \int_{1}^{+\infty} \frac{\mathrm{d}x}{e^2(e^{x-1} + e^{1-x})} = \frac{1}{e^2} \int_{0}^{+\infty} \frac{\mathrm{d}t}{e^t + e^{-t}}$$
+$$\int_{1}^{+\infty} \frac{\mathrm{d}x}{\mathrm{e}^{x+1}+\mathrm{e}^{3-x}} = \int_{1}^{+\infty} \frac{\mathrm{d}x}{\mathrm{e}^2(\mathrm{e}^{x-1}+\mathrm{e}^{1-x})} = \frac{1}{e^2} \int_{0}^{+\infty} \frac{\mathrm{d}t}{e^t + e^{-t}}$$
 
 $$ = \frac{1}{\mathrm{e}^2} \int_0^{+\infty} \frac{\mathrm{e}^t}{1+\mathrm{e}^{2t}} \mathrm{d}t = \frac{1}{\mathrm{e}^2} \arctan \mathrm{e}^t \Big|_0^{+\infty} $$
 $$ = \frac{1}{\mathrm{e}^2} \left(\frac{\pi}{2} - \frac{\pi}{4}\right) = \frac{\pi}{4\mathrm{e}^2}. $$
@@ -1942,43 +1973,43 @@ $$\int_0^a x f(x) \, \mathrm{d}x > \frac{2}{3} a \int_0^a f(x) \, \mathrm{d}x.$$
 <ExamExplanation>
 **解析：** 依题意, 只需判别被积函数的正、负即可, 考虑到 $\sin x$ 在 $[0, \pi]$ 与 $[-\pi, 0]$ 上分别非负和非正, 有
 
-```math
+$$
 \int_{-\pi}^{\pi} f(x) \sin x \, \mathrm{d}x = \int_0^{\pi} f(x) \sin x \, \mathrm{d}x + \int_{-\pi}^0 f(x) \sin x \, \mathrm{d}x.
-```
+$$
 
 而
 
 
-```math
+$$
 \begin{aligned}
 \int_{-\pi}^0 f(x) \sin x \, \mathrm{d}x &\overset{x = -u}{=} \int_{\pi}^0 f(-u) \sin(-u) (-\mathrm{d}u) \\
 &= -\int_0^{\pi} f(-u) \sin u \, \mathrm{d}u = -\int_0^{\pi} f(-x) \sin x \, \mathrm{d}x,
 \end{aligned}
-```
+$$
 故
 
-```math
+$$
 \int_{-\pi}^{\pi} f(x) \sin x \, \mathrm{d}x = \int_0^{\pi} [f(x) - f(-x)] \sin x \, \mathrm{d}x.
-```
+$$
 由 $f'(x) < 0$, 知 $f(x)$ 单调减少, 故当 $x \in [0, \pi]$ 时, 有 $f(x) \leqslant f(-x)$, 于是
 
-```math
+$$
 \int_{-\pi}^{\pi} f(x) \sin x \, \mathrm{d}x = \int_0^{\pi} [f(x) - f(-x)] \sin x \, \mathrm{d}x < 0,
-```
+$$
 故 ① 正确.
 又
 
-```math
+$$
 \begin{aligned}
 \int_{-\pi}^{\pi} f(x) \cos x \, \mathrm{d}x &= \int_{-\pi}^{\pi} f(x) \, \mathrm{d}(\sin x) = \left. f(x) \sin x \right|_{-\pi}^{\pi} - \int_{-\pi}^{\pi} f'(x) \sin x \, \mathrm{d}x \\
 &= -\int_{-\pi}^{\pi} f'(x) \sin x \, \mathrm{d}x,
 \end{aligned}
-```
+$$
 且由 $f''(x) > 0$, 知 $f'(x)$ 单调增加, 从而 $-f'(x)$ 单调减少. 由 ① 正确, 知
 
-```math
+$$
 \int_{-\pi}^{\pi} f(x) \cos x \, \mathrm{d}x = -\int_{-\pi}^{\pi} f'(x) \sin x \, \mathrm{d}x < 0,
-```
+$$
 故 ④ 正确, 从而选项 D 正确.
 
 **注：** 作为选择题, 可用取特殊值法, 如对 ①② 取 $f(x) = -x$, 对于 ①④ 取 $f(x) = \mathrm{e}^x$.
@@ -2088,7 +2119,7 @@ $$\lim_{x \to 0} \frac{g(x)}{x^2} = \lim_{x \to 0} \frac{g'(x)}{2x} = \lim_{x \t
 <ExamAnswer>B</ExamAnswer>
 
 <ExamExplanation>
-**解析：**由 $\int_1^{\frac{1}{x}} \frac{\ln t}{1+t} \, \mathrm{d}t \xlongequal{\frac{1}{t}=u} \int_1^x \frac{\ln u}{u(1+u)} \, \mathrm{d}u = \int_1^x \frac{\ln t}{t} \, \mathrm{d}t - \int_1^x \frac{\ln t}{1+t} \, \mathrm{d}t$, 知
+**解析：**由 $\int_1^{\frac{1}{x}} \frac{\ln t}{1+t} \, \mathrm{d}t \overset{\frac{1}{t}=u}{=} \int_1^x \frac{\ln u}{u(1+u)} \, \mathrm{d}u = \int_1^x \frac{\ln t}{t} \, \mathrm{d}t - \int_1^x \frac{\ln t}{1+t} \, \mathrm{d}t$, 知
 $$\int_1^{\frac{1}{x}} \frac{\ln t}{1+t} \, \mathrm{d}t + \int_1^x \frac{\ln t}{1+t} \, \mathrm{d}t = \int_1^x \frac{\ln t}{t} \, \mathrm{d}t = \int_1^x \ln t \, \mathrm{d}(\ln t) = \left. \frac{1}{2} \ln^2 t \right|_1^x = \frac{1}{2} \ln^2 x, \quad x > 0.$$
 记 $g(x) = \frac{1}{2} \ln^2 x$, 则由 $g'(x) = \frac{\ln x}{x} = 0$, 得 $x = 1$.
 因当 $0 < x < 1$ 时, $g'(x) < 0$; 当 $x > 1$ 时, $g'(x) > 0$, 故 $g(1) = 0$ 为 $g(x)$ 的极小值.
@@ -2118,7 +2149,7 @@ $$\int_1^{\frac{1}{x}} \frac{\ln t}{1+t} \, \mathrm{d}t + \int_1^x \frac{\ln t}{
 <ExamExplanation>
 **解析：**当 $p \leqslant 0$ 时, $\lim_{x \to +\infty} \frac{\ln(1+x)}{x^p} = +\infty$, 故 $\int_0^{+\infty} \frac{\ln(1+x)}{x^p} \, \mathrm{d}x$ 发散.
 当 $p > 0$ 时,
-$$\int_0^{+\infty} \frac{\ln(1+x)}{x^p} \, \mathrm{d}x = \int_0^1 \frac{\ln(1+x)}{x^p} \, \mathrm{d}x + \int_1^{+\infty} \frac{\ln(1+x)}{x^p} \, \mathrm{d}x \xlongequal{\text{记}} I_1 + I_2.$$
+$$\int_0^{+\infty} \frac{\ln(1+x)}{x^p} \, \mathrm{d}x = \int_0^1 \frac{\ln(1+x)}{x^p} \, \mathrm{d}x + \int_1^{+\infty} \frac{\ln(1+x)}{x^p} \, \mathrm{d}x \overset{\text{记}}{=} I_1 + I_2.$$
 对于 $I_1$: 当 $x \to 0$ 时, $\frac{\ln(1+x)}{x^p}$ 与 $\frac{1}{x^{p-1}}$ 是等价无穷小, 故当 $p-1 \geqslant 1$ 时, $I_1$ 发散; 当 $p-1 < 1$ 时, $I_1$ 收敛. 故当 $0 < p < 2$ 时, $I_1$ 收敛.
 对于 $I_2$: 当 $p > 1$ 时, 总存在 $\delta > 0$, 使得 $p - \delta > 1$. 由于
 $$\lim_{x \to +\infty} x^{p-\delta} \cdot \frac{\ln(1+x)}{x^p} = \lim_{x \to +\infty} \frac{\ln(1+x)}{x^\delta} = 0,$$
@@ -2349,28 +2380,28 @@ $$= 2 \left| \cos \frac{\theta}{2} \right| \mathrm{d}\theta,$$
 <ExamExplanation>
 **解析：** 曲线 $\theta = \frac{1}{2} \left(r + \frac{1}{r}\right)$ 的参数方程为
 
-```math
+$$
 \begin{cases}
 x = r\cos\left[\frac{1}{2}\left(r+\frac{1}{r}\right)\right], \\
 y = r\sin\left[\frac{1}{2}\left(r+\frac{1}{r}\right)\right].
 \end{cases}
-```
+$$
 
 所求弧长为
 
-```math
+$$
 s = \int_{1}^{3} \sqrt{x'^2(r)+y'^2(r)}\,\mathrm{d}r = \int_{1}^{3} \sqrt{1+\frac{1}{4}r^2\left(1-\frac{1}{r^2}\right)^2}\,\mathrm{d}r
-```
+$$
 
 
-```math
+$$
 = \int_{1}^{3} \sqrt{\frac{1}{4}r^2+\frac{1}{2}+\frac{1}{4r^2}}\,\mathrm{d}r = \int_{1}^{3} \sqrt{\left(\frac{r}{2}+\frac{1}{2r}\right)^2}\,\mathrm{d}r
-```
+$$
 
 
-```math
+$$
 = \int_{1}^{3} \left(\frac{r}{2}+\frac{1}{2r}\right)\,\mathrm{d}r = 2 + \frac{1}{2}\ln 3.
-```
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -2465,26 +2496,26 @@ $$= \frac{1}{2}\int_{0}^{1} f(2x)\,\mathrm{d}x - \frac{1}{2}f(2) \stackrel{2x=t}
 <ExamExplanation>
 **解析：**
 
-```math
+$$
 F(x) = \lim_{t\to\infty} t^2 \left[f\left(2x+\frac{1}{t}\right) - f(2x)\right]\sin\frac{x}{t}
-```
+$$
 
 
-```math
+$$
 = \lim_{t \to 0} \frac{x \sin \frac{x}{t}}{\frac{x}{t}} \cdot \frac{f\left(2x+\frac{1}{t}\right)-f(2x)}{\frac{1}{t}} = xf'(2x).
-```
+$$
 
 由已知, 有 $\int f(x)\mathrm{d}x = \ln(1+x)+C$, 故 $f(x) = \frac{1}{1+x}$.
 
 所求平均值为
 
-```math
+$$
 \begin{aligned}
 \frac{1}{1-0}\int_0^1 F(x)\mathrm{d}x &= \int_0^1 xf'(2x)\mathrm{d}x = \frac{x}{2}f(2x)\Big|_0^1 - \frac{1}{2}\int_0^1 f(2x)\mathrm{d}x \\
 &= \frac{1}{2}f(2) - \frac{1}{4}\int_0^2 f(t)\mathrm{d}t \\
 &= \frac{1}{6} - \frac{1}{4}\ln(1+t)\Big|_0^2 = \frac{1}{6} - \frac{1}{4}\ln 3.
 \end{aligned}
-```
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -2502,19 +2533,19 @@ F(x) = \lim_{t\to\infty} t^2 \left[f\left(2x+\frac{1}{t}\right) - f(2x)\right]\s
 <ExamExplanation>
 **解析：**
 
-```math
+$$
 I = \int_0^{+\infty} \frac{\sin^2 x}{x^2}\mathrm{d}x = -\int_0^{+\infty} \sin^2 x d\left(\frac{1}{x}\right)
-```
+$$
 
 
-```math
+$$
 = -\left. \frac{\sin^2 x}{x} \right|_0^{+\infty} + \int_0^{+\infty} \frac{2\sin x \cos x}{x}\mathrm{d}x
-```
+$$
 
 
-```math
+$$
 = \int_0^{+\infty} \frac{\sin 2x}{x}\mathrm{d}x \overset{2x=t}{=} \int_0^{+\infty} \frac{\sin t}{t}\mathrm{d}t = \frac{\pi}{2}.
-```
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -2532,34 +2563,34 @@ I = \int_0^{+\infty} \frac{\sin^2 x}{x^2}\mathrm{d}x = -\int_0^{+\infty} \sin^2 
 <ExamExplanation>
 **解析：** 因为
 
-```math
+$$
 \begin{aligned}
 \int_1^{+\infty} \frac{1}{\sqrt{x}}\ln\frac{x+1}{x}\mathrm{d}x &= \lim_{b\to+\infty} \int_1^b \frac{1}{\sqrt{x}}\ln\frac{x+1}{x}\mathrm{d}x \\
 &= \lim_{b\to+\infty} \left[ \int_1^b \frac{1}{\sqrt{x}}\ln(x+1)\mathrm{d}x - \int_1^b \frac{1}{\sqrt{x}}\ln x \mathrm{d}x \right],
 \end{aligned}
-```
+$$
 又
 
-```math
+$$
 \begin{aligned}
 \int_1^b \frac{1}{\sqrt{x}}\ln(x+1)\mathrm{d}x &= 2\sqrt{x}\ln(x+1)\Big|_1^b - 2\int_1^b \frac{\sqrt{x}}{x+1}\mathrm{d}x \\
 &= 2\sqrt{b}\ln(b+1) - 2\ln 2 - (4\sqrt{b} - 4\arctan\sqrt{b} - 4 + \pi),
 \end{aligned}
-```
+$$
 
 
-```math
+$$
 \begin{aligned}
 \int_1^b \frac{1}{\sqrt{x}}\ln x \mathrm{d}x &= 2\sqrt{x}\ln x\Big|_1^b - 2\int_1^b \frac{\sqrt{x}}{x}\mathrm{d}x = 2\sqrt{b}\ln b - 4\sqrt{b} + 4,
 \end{aligned}
-```
+$$
 故
 
-```math
+$$
 \begin{aligned}
 \int_1^{+\infty} \frac{1}{\sqrt{x}}\ln\frac{x+1}{x}\mathrm{d}x &= \lim_{b\to+\infty} \left( 2\sqrt{b}\ln\frac{b+1}{b} + 4\arctan\sqrt{b} - 2\ln 2 - \pi \right) = \pi - 2\ln 2.
 \end{aligned}
-```
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -2577,28 +2608,28 @@ I = \int_0^{+\infty} \frac{\sin^2 x}{x^2}\mathrm{d}x = -\int_0^{+\infty} \sin^2 
 <ExamExplanation>
 **解析：** 记
 
-```math
+$$
 a_n = \sum_{k=1}^n \frac{k}{2n^2+k}, \quad b_n = \sum_{k=1}^n \ln\left(\frac{n+k}{n}\right)^{\frac{1}{n}},
-```
+$$
 因
 
-```math
+$$
 \frac{1}{2n^2+n} \cdot \frac{n(n+1)}{2} \leqslant a_n \leqslant \frac{1}{2n^2+1} \cdot \frac{n(n+1)}{2},
-```
+$$
 
 
-```math
+$$
 \lim_{n\to\infty} \frac{1}{2n^2+n} \cdot \frac{n(n+1)}{2} = \frac{1}{4}, \quad \lim_{n\to\infty} \frac{1}{2n^2+1} \cdot \frac{n(n+1)}{2} = \frac{1}{4},
-```
+$$
 由夹逼准则, 知 $\lim_{n\to\infty} a_n = \frac{1}{4}$.
 又
 
-```math
+$$
 \begin{aligned}
 \lim_{n\to\infty} b_n &= \lim_{n\to\infty} \frac{1}{n}\sum_{k=1}^n \ln\left(1+\frac{k}{n}\right) = \int_0^1 \ln(1+x)\mathrm{d}x \\
 &= x\ln(1+x)\Big|_0^1 - \int_0^1 \frac{x}{1+x}\mathrm{d}x
 \end{aligned}
-```
+$$
 
 $= 2\ln 2 - 1$,
 
@@ -2620,19 +2651,19 @@ $= 2\ln 2 - 1$,
 <ExamExplanation>
 **解析：** 由 $\lim_{x\to +\infty} x^2 \cdot \frac{e^{-x}}{x} = \lim_{x\to +\infty} \frac{x}{e^x} = 0$, 知 $\int_a^{+\infty} \frac{e^{-t}}{t} \mathrm{d}t$ 收敛 $(a > 0)$, 从而
 
-```math
+$$
 \int_a^{+\infty} \frac{e^{-t}}{t} \mathrm{d}t = C \quad (\text{常数}),
-```
+$$
 故
 
-```math
+$$
 \lim_{x\to 0^+} \frac{\int_a^{+\infty} \frac{e^{-t}}{t} \mathrm{d}t}{\ln \frac{1}{x}} = 0.
-```
+$$
 
 
-```math
+$$
 \lim_{x\to 0^+} \frac{1}{\ln \frac{1}{x}} \int_x^{+\infty} \frac{e^{-t}}{t} \mathrm{d}t = \lim_{x\to 0^+} \frac{\int_x^{+\infty} \frac{e^{-t}}{t} \mathrm{d}t}{\ln \frac{1}{x}} = \lim_{x\to 0^+} \frac{\int_x^{a} \frac{e^{-t}}{t} \mathrm{d}t + \int_a^{+\infty} \frac{e^{-t}}{t} \mathrm{d}t}{\ln \frac{1}{x}} = \lim_{x\to 0^+} \frac{\int_x^{a} \frac{e^{-t}}{t} \mathrm{d}t}{\ln \frac{1}{x}} \overset{\text{洛必达}\atop\text{法则}}{=} \lim_{x\to 0^+} \frac{-\frac{e^{-x}}{x}}{-\frac{1}{x}} = 1.
-```
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -2650,23 +2681,23 @@ $= 2\ln 2 - 1$,
 <ExamExplanation>
 **解析：** $x = 1$ 是奇点.
 
-```math
+$$
 \begin{aligned}
 \int_1^2 \left[ \frac{1}{x\ln^2 x} - \frac{1}{(x-1)^2} \right] \mathrm{d}x &= \left( -\frac{1}{\ln x} + \frac{1}{x-1} \right)\Big|_1^2 \\
 &= \left( -\frac{1}{\ln 2} + 1 \right) - \lim_{x\to 1^+} \left( -\frac{1}{\ln x} + \frac{1}{x-1} \right) \\
 &= 1 - \frac{1}{\ln 2} - \lim_{x\to 1^+} \frac{\ln x - (x-1)}{(x-1)\ln x},
 \end{aligned}
-```
+$$
 而
 
-```math
+$$
 \lim_{x\to 1^+} \frac{\ln x - (x-1)}{(x-1)\ln x} = \lim_{x\to 1^+} \frac{\frac{1}{x} - 1}{\ln x + \frac{x-1}{x}} = \lim_{x\to 1^+} \frac{-\frac{1}{x^2}}{\frac{1}{x} + \frac{1}{x^2}} = -\frac{1}{2},
-```
+$$
 故
 
-```math
+$$
 \text{原积分} = 1 - \frac{1}{\ln 2} + \frac{1}{2} = \frac{3}{2} - \frac{1}{\ln 2}.
-```
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -2682,7 +2713,7 @@ $= 2\ln 2 - 1$,
 <ExamAnswer>$y = -x + 1$</ExamAnswer>
 
 <ExamExplanation>
-**解析：** 由 $\int_0^x f(t-x) \mathrm{d}t \xlongequal{t-x=u} \int_{-x}^0 f(u) \mathrm{d}u$, 得
+**解析：** 由 $\int_0^x f(t-x) \mathrm{d}t \overset{t-x=u}{=} \int_{-x}^0 f(u) \mathrm{d}u$, 得
 $$\int_{-x}^0 f(u) \mathrm{d}u = x + \frac{1}{2} x^2 + \ln|1-x|.$$
 上式两边对 $x$ 求导, 得
 $$f(-x) = 1 + x + \frac{-1}{1-x} = \frac{-x^2}{1-x},$$
@@ -2706,29 +2737,29 @@ $$f(-x) = 1 + x + \frac{-1}{1-x} = \frac{-x^2}{1-x},$$
 <ExamExplanation>
 **解析：** 依题设, 知 $\frac{dy}{\mathrm{d}x} = \frac{1}{x\sqrt{x^2 - 1}}$, 故
 
-```math
+$$
 y = \int \frac{\mathrm{d}x}{x\sqrt{x^2 - 1}} = -\int \frac{\mathrm{d}x}{x^2 \sqrt{1 - \frac{1}{x^2}}} = \int \frac{d\left(\frac{1}{x}\right)}{\sqrt{1 - \left(\frac{1}{x}\right)^2}}
-```
+$$
 
 
-```math
+$$
 = \arcsin \frac{1}{x} + C \quad (x < -1).
-```
+$$
 
 由 $y(-2) = 0$, 得 $C = \frac{\pi}{6}$, 故所求曲线方程为 $y = \arcsin \frac{1}{x} + \frac{\pi}{6} \quad (x < -1)$.
 
 **注：** $\frac{1}{x\sqrt{x^2-1}}$ 的定义域为 $(-\infty, -1) \cup (1, +\infty)$, 由于曲线通过点 $(-2, 0)$, 表明 $x \in (-\infty, -1)$, 所以如下解法是错误的:
 
-```math
+$$
 y = \int \frac{\mathrm{d}x}{x\sqrt{x^2-1}} = -\int \frac{\mathrm{d}\left(\frac{1}{x}\right)}{\sqrt{1-\left(\frac{1}{x}\right)^2}} = \arccos \frac{1}{x} + C.
-```
+$$
 
 由 $y(-2) = 0$, 得 $C = -\frac{2}{3}\pi$, 故 $y = \arccos \frac{1}{x} - \frac{2}{3}\pi$.
 事实上,
 
-```math
+$$
 y = \begin{cases} \arcsin \frac{1}{x} + \frac{\pi}{6}, & x < -1, \\ \arccos \frac{1}{x} + C, & x > 1. \end{cases}
-```
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -2746,18 +2777,18 @@ y = \begin{cases} \arcsin \frac{1}{x} + \frac{\pi}{6}, & x < -1, \\ \arccos \fra
 <ExamExplanation>
 **解析：**
 
-```math
+$$
 f(t) = \lim_{n \to \infty} \sum_{i=1}^{n} \frac{t-1}{[n + (t-1)i] \sqrt{\frac{t-1}{n}i}} = \lim_{n \to \infty} \sum_{i=1}^{n} \frac{t-1}{n\left(1 + \frac{t-1}{n}i\right) \sqrt{1 + \frac{t-1}{n}i - 1}}
-```
+$$
 
 
-```math
+$$
 = \lim_{n \to \infty} \sum_{i=1}^{n} \frac{\frac{t-1}{n}}{\left(1 + \frac{t-1}{n}i\right) \sqrt{1 + \frac{t-1}{n}i - 1}} = \int_{1}^{t} \frac{\mathrm{d}x}{x\sqrt{x-1}},
-```
+$$
 
 故
 
-```math
+$$
 \begin{aligned}
 \lim_{t \to +\infty} f(t) &= \lim_{t \to +\infty} \int_{1}^{t} \frac{\mathrm{d}x}{x\sqrt{x-1}} = \int_{1}^{+\infty} \frac{\mathrm{d}x}{x\sqrt{x-1}} = \int_{1}^{2} \frac{\mathrm{d}x}{x\sqrt{x-1}} + \int_{2}^{+\infty} \frac{\mathrm{d}x}{x\sqrt{x-1}} \\
 &= \lim_{\varepsilon \to 0^+} \int_{1+\varepsilon}^{2} \frac{2\mathrm{d}(\sqrt{x-1})}{1 + (\sqrt{x-1})^2} + \lim_{b \to +\infty} \int_{2}^{b} \frac{2\mathrm{d}(\sqrt{x-1})}{1 + (\sqrt{x-1})^2} \\
@@ -2765,7 +2796,7 @@ f(t) = \lim_{n \to \infty} \sum_{i=1}^{n} \frac{t-1}{[n + (t-1)i] \sqrt{\frac{t-
 &= \lim_{\varepsilon \to 0^+} \left(\frac{\pi}{2} - 2\arctan \sqrt{\varepsilon}\right) + \lim_{b \to +\infty} 2\arctan \sqrt{b-1} - \frac{\pi}{2} \\
 &= \frac{\pi}{2} - 0 + \pi - \frac{\pi}{2} = \pi.
 \end{aligned}
-```
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -2786,21 +2817,21 @@ f(t) = \lim_{n \to \infty} \sum_{i=1}^{n} \frac{t-1}{[n + (t-1)i] \sqrt{\frac{t-
 
 <ExamExplanation>
 **解析：** ( I )
-```math
+$$
 \begin{aligned}
 I &= \int_{0}^{1} x^2 \frac{1}{\sqrt{1+x^4}} \mathrm{d}x = \int_{0}^{1} \frac{1}{\sqrt{1+x^4}} \mathrm{d}\left(\frac{x^3}{3}\right) \\
 &= \left. \frac{1}{3} x^3 \frac{1}{\sqrt{1+x^4}} \right|_{0}^{1} - \frac{1}{3} \int_{0}^{1} \frac{x^3 \mathrm{d}x}{\sqrt{1+x^4}} \\
 &= -\frac{1}{6} (1+x^4)^{\frac{1}{2}} \Bigg|_{0}^{1} = \frac{1}{6} (1 - \sqrt{2}).
 \end{aligned}
-```
+$$
 
 ( II )
-```math
+$$
 \begin{aligned}
 I &= \int_{0}^{1} x f(x) \mathrm{d}x = \frac{1}{2} \int_{0}^{1} f(x) \mathrm{d}(x^2) = \left. \frac{1}{2} x^2 f(x) \right|_{0}^{1} - \frac{1}{2} \int_{0}^{1} x^2 f'(x) \mathrm{d}x \\
 &= -\int_{0}^{1} x^3 \mathrm{e}^{-x^4} \mathrm{d}x = \left. \frac{1}{4} \mathrm{e}^{-x^4} \right|_{0}^{1} = \frac{1}{4} (\mathrm{e}^{-1} - 1),
 \end{aligned}
-```
+$$
 
 这里 $f(1) = 0$。
 
@@ -2928,7 +2959,7 @@ $$= \frac{\pi}{8} + \frac{1}{4} \ln[1 + (x - 1)^4] \Big|_{0}^{1} = \frac{\pi}{8}
 
 <ExamExplanation>
 **解析：** 当 $x \to 0$ 时, $\sqrt{1 + 2x^3} - 1 \sim \frac{1}{2} \cdot 2x^3 = x^3$, 又
-$$\frac{1}{2} \int_{0}^{x^2} x \sqrt{4 - x^2 u^2} \, \mathrm{d}u \xlongequal{xu = t} \frac{1}{2} \int_{0}^{2x} \sqrt{4 - t^2} \, \mathrm{d}t,$$
+$$\frac{1}{2}\int_{0}^{2}x\sqrt{4-x^2u^2}\,\mathrm{d}u \overset{xu = t}{=} \frac{1}{2} \int_{0}^{2x} \sqrt{4 - t^2} \, \mathrm{d}t,$$
 所以
 $$\text{原式} = \lim_{x \to 0} \frac{\displaystyle \frac{1}{2} \int_{0}^{2x} \sqrt{4 - t^2} \, \mathrm{d}t - 2x}{x^3} = \lim_{x \to 0} \frac{\displaystyle \frac{1}{2} \sqrt{4 - 4x^2} \cdot 2 - 2}{3x^2}$$
 $$= \lim_{x \to 0} \frac{2(\sqrt{1 - x^2} - 1)}{3x^2} = \lim_{x \to 0} \frac{2 \cdot \frac{1}{2}(-x^2)}{3x^2} = -\frac{1}{3}.$$
@@ -2947,7 +2978,7 @@ $$= \lim_{x \to 0} \frac{2(\sqrt{1 - x^2} - 1)}{3x^2} = \lim_{x \to 0} \frac{2 \
 <ExamAnswer>见解析</ExamAnswer>
 
 <ExamExplanation>
-**解析：** $\int_{0}^{x} t f(t^2 - x^2) \, \mathrm{d}t = \frac{1}{2} \int_{0}^{x} f(t^2 - x^2) \, \mathrm{d}(t^2 - x^2) \xlongequal{u = t^2 - x^2} \frac{1}{2} \int_{-x^2}^{0} f(u) \, \mathrm{d}u,$
+**解析：** $\int_{0}^{x} t f(t^2 - x^2) \, \mathrm{d}t = \frac{1}{2} \int_{0}^{x} f(t^2 - x^2) \, \mathrm{d}(t^2 - x^2) \overset{u = t^2 - x^2}{=} \frac{1}{2} \int_{-x^2}^{0} f(u) \, \mathrm{d}u,$
 
 即 $-\frac{1}{2} \int_{0}^{-x^2} f(u) \, \mathrm{d}u = \frac{x^2}{1 + x^2} - \frac{1}{2} \ln(1 + x^2).$
 
@@ -3000,25 +3031,25 @@ $$f(x) = \int (1 - \ln x) \, \mathrm{d}x = x - \int \ln x \, \mathrm{d}x = 2x - 
 
 <ExamExplanation>
 **解析：**
-```math
-\quad \int_{0}^{2x} \left| 1 - \frac{t}{x} \right| \sin t \, \mathrm{d}t \xlongequal{\quad \frac{t}{x} = u \quad} x \int_{0}^{2} |1 - u| \sin(xu) \, \mathrm{d}u.
-```
-```math
+$$
+\quad \int_{0}^{2x} \left| 1 - \frac{t}{x} \right| \sin t \, \mathrm{d}t \overset{\quad \frac{t}{x} = u \quad}{=} x \int_{0}^{2} |1 - u| \sin(xu) \, \mathrm{d}u.
+$$
+$$
 \text{原式} = \lim_{x \to 0} \frac{x \int_{0}^{2} |1 - u| \sin(xu) \, \mathrm{d}u}{x^2}
-```
-```math
+$$
+$$
 = \lim_{x \to 0} \frac{1}{x} \left[ \int_{0}^{1} (1 - u)\sin(xu) \, \mathrm{d}u + \int_{1}^{2} (u - 1)\sin(xu) \, \mathrm{d}u \right].
-```
+$$
 再利用分部积分法, 可得
-```math
+$$
 \text{原式} = \lim_{x \to 0} \frac{1}{x} \left( \frac{1 - \cos 2x}{x} + \frac{\sin 2x - 2\sin x}{x^2} \right)
-```
-```math
+$$
+$$
 = \lim_{x \to 0} \left( \frac{1 - \cos 2x}{x^2} + \frac{\sin 2x - 2\sin x}{x^3} \right)
-```
-```math
+$$
+$$
 = \lim_{x \to 0} \frac{\frac{1}{2} \cdot (2x)^2}{x^2} + \lim_{x \to 0} \frac{2(\cos x - 1)\sin x}{x^3} = 2 - 1 = 1.
-```
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -3036,23 +3067,23 @@ $$f(x) = \int (1 - \ln x) \, \mathrm{d}x = x - \int \ln x \, \mathrm{d}x = 2x - 
 <ExamExplanation>
 **解析：** 由 $e^{x - 2y} - x^2y = 1$, 知当 $x = 0$ 时, $y = 0$, 即 $f(0) = 0$.
 等式 $e^{x - 2y} - x^2y = 1$ 两边对 $x$ 求导, 有
-```math
+$$
 e^{x - 2y}(1 - 2y') - 2xy - x^2y' = 0.
-```
+$$
 将 $x = 0, y = 0$ 代入上式, 得 $f'(0) = y'(0) = \frac{1}{2}$.
-又 $\int_{0}^{1} f(t\sqrt{x - 1}) \, \mathrm{d}t \xlongequal{\quad t\sqrt{x - 1} = u \quad} \frac{1}{\sqrt{x - 1}} \int_{0}^{\sqrt{x - 1}} f(u) \, \mathrm{d}u$, 故
-```math
+又 $\int_{0}^{1} f(t\sqrt{x - 1}) \, \mathrm{d}t \overset{\quad t\sqrt{x - 1} = u \quad}{=} \frac{1}{\sqrt{x - 1}} \int_{0}^{\sqrt{x - 1}} f(u) \, \mathrm{d}u$, 故
+$$
 \lim_{x \to 1^+} \frac{\sin(x - 1)}{\sqrt{(x - 1)^3}} \int_{0}^{1} f(t\sqrt{x - 1}) \, \mathrm{d}t = \lim_{x \to 1^+} \frac{\sin(x - 1)}{(x - 1)^2} \int_{0}^{\sqrt{x - 1}} f(u) \, \mathrm{d}u
-```
-```math
+$$
+$$
 = \lim_{x \to 1^+} \frac{\sin(x - 1)}{x - 1} \cdot \frac{\int_{0}^{\sqrt{x - 1}} f(u) \, \mathrm{d}u}{x - 1}
-```
-```math
+$$
+$$
 = \lim_{x \to 1^+} \frac{\int_{0}^{\sqrt{x - 1}} f(u) \, \mathrm{d}u}{x - 1} = \lim_{x \to 1^+} \frac{f(\sqrt{x - 1})}{2\sqrt{x - 1}}
-```
-```math
+$$
+$$
 = \frac{1}{2} \lim_{x \to 1^+} \frac{f(\sqrt{x - 1}) - f(0)}{\sqrt{x - 1} - 0} = \frac{1}{2} f'(0) = \frac{1}{4}.
-```
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -3069,13 +3100,13 @@ e^{x - 2y}(1 - 2y') - 2xy - x^2y' = 0.
 
 <ExamExplanation>
 **解析：**
-```math
-\quad \int_{0}^{x} f(t - x) \, \mathrm{d}t \xlongequal{\quad t - x = u \quad} \int_{-x}^{0} f(u) \, \mathrm{d}u.
-```
+$$
+\quad \int_{0}^{x} f(t - x) \, \mathrm{d}t \overset{\quad t - x = u \quad}{=} \int_{-x}^{0} f(u) \, \mathrm{d}u.
+$$
 由已知, 有 $e^x - \frac{x^2}{2} = 1 + \int_{-x}^{0} f(u) \, \mathrm{d}u$. 两边同时对 $x$ 求导, 得 $-e^x - x = f(-x)$, 于是
-```math
+$$
 f(x) = x - e^x, \quad x \in (-\infty, +\infty).
-```
+$$
 由 $f'(x) = 1 - e^x = 0$, 解得 $x = 0$. 当 $x > 0$ 时, $f'(x) < 0$; 当 $x < 0$ 时, $f'(x) > 0$, $f(0) = -1$ 为极大值.
 又 $\lim_{x \to -\infty} f(x) = -\infty, \lim_{x \to +\infty} f(x) = -\infty$, 故在 $(-\infty, +\infty)$ 内 $f(x)$ 的最大值为 $f(0) = -1$, 没有最小值.
 </ExamExplanation>
@@ -3097,19 +3128,19 @@ f(x) = x - e^x, \quad x \in (-\infty, +\infty).
 根据定积分的性质, 得 $0 \le \int_{0}^{1} \frac{x^n}{1 + x} \, \mathrm{d}x \le \int_{0}^{1} x^n \, \mathrm{d}x = \frac{1}{n + 1}$, 故 $\lim_{n \to \infty} \int_{0}^{1} \frac{x^n}{1 + x} \, \mathrm{d}x = 0$.
 
 $\text{证法2}\quad$ 利用推广的积分中值定理, 有
-```math
+$$
 \int_{0}^{1} \frac{x^n}{1 + x} \, \mathrm{d}x = \frac{1}{1 + \xi} \int_{0}^{1} x^n \, \mathrm{d}x = \frac{1}{(1 + \xi)(n + 1)} \quad (0 < \xi < 1),
-```
+$$
 
 故
-```math
+$$
 \lim_{n\to\infty}\int_{0}^{1}\frac{x^n}{1+x}\mathrm{d}x=\lim_{n\to\infty}\frac{1}{(1+\xi)(1+n)}=0.
-```
+$$
 
 **注：** 推广的积分中值定理：设 $f(x)$ 在 $[a,b]$ 上连续，$g(x)$ 在 $[a,b]$ 上可积且不变号，则至少存在一点 $\xi\in(a,b)$，使得
-```math
+$$
 \int_{a}^{b}f(x)g(x)\mathrm{d}x=f(\xi)\int_{a}^{b}g(x)\mathrm{d}x.
-```
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -3168,7 +3199,7 @@ $(II)$ 计算 $\int_{-\frac{\pi}{4}}^{\frac{\pi}{4}} \frac{\mathrm{d}x}{(1+\math
 
 <ExamExplanation>
 **证明：** $(\mathrm{I})\int_{-a}^{a}\frac{f(x)}{1+g(x)}\mathrm{d}x=\int_{-a}^{0}\frac{f(x)}{1+g(x)}\mathrm{d}x+\int_{0}^{a}\frac{f(x)}{1+g(x)}\mathrm{d}x.$
-又 $\int_{-a}^{0}\frac{f(x)}{1+g(x)}\mathrm{d}x\xlongequal{x=-t}\int_{a}^{0}\frac{f(-t)}{1+g(-t)}\mathrm{d}(-t)=\int_{0}^{a}\frac{f(-x)}{1+g(-x)}\mathrm{d}x.$
+又 $\int_{-a}^{0}\frac{f(x)}{1+g(x)}\mathrm{d}x\overset{x=-t}{=}\int_{a}^{0}\frac{f(-t)}{1+g(-t)}\mathrm{d}(-t)=\int_{0}^{a}\frac{f(-x)}{1+g(-x)}\mathrm{d}x.$
 由 $g(x)\cdot g(-x)=1, f(-x)=f(x)$，有
 $$\int_{-a}^{a}\frac{f(x)}{1+g(x)}\mathrm{d}x=\int_{0}^{a}\left[\frac{f(-x)}{1+g(-x)}+\frac{f(x)}{1+g(x)}\right]\mathrm{d}x$$
 $$=\int_{0}^{a}\frac{f(x)[1+g(x)]+f(x)[1+g(-x)]}{[1+g(-x)][1+g(x)]}\mathrm{d}x$$
@@ -3195,18 +3226,18 @@ $$\int_{-\frac{\pi}{4}}^{\frac{\pi}{4}}\frac{\mathrm{d}x}{(1+\mathrm{e}^x)\cos^2
 <ExamExplanation>
 **解析：** 由于 $\int_{0}^{+\infty}f(x)\mathrm{d}x$ 收敛，记 $\int_{0}^{+\infty}f(x)\mathrm{d}x=A$ ($A$ 为常数)。
 对已知等式两端分别积分，得
-```math
+$$
 A=\int_{0}^{+\infty}f(x)\mathrm{d}x=\int_{0}^{+\infty}\frac{1}{1+x^2}\mathrm{d}x-A\int_{0}^{+\infty}\frac{\mathrm{e}^{-x}}{1+\mathrm{e}^x}\mathrm{d}x,
-```
+$$
 
 其中 $\int_0^{+\infty} \frac{\mathrm{d}x}{1+x^2} = \arctan x \Big|_0^{+\infty} = \frac{\pi}{2}$. 又
 
-```math
+$$
 \begin{aligned}
 \int_0^{+\infty} \frac{e^{-x}}{1+e^x} \mathrm{d}x &= \int_0^{+\infty} \frac{\mathrm{d}x}{e^x(1+e^x)} = \int_0^{+\infty} \left(\frac{1}{e^x} - \frac{1}{e^x+1}\right)\mathrm{d}x \\
 &= -e^{-x} \Big|_0^{+\infty} - \int_0^{+\infty} \frac{e^{-x}}{1+e^x} \mathrm{d}x = 1 + \ln(1+e^{-x}) \Big|_0^{+\infty} = 1 - \ln 2,
 \end{aligned}
-```
+$$
 
 故 $A = \frac{\pi}{2} - (1 - \ln 2)A$，解得 $A = \int_0^{+\infty} f(x)\mathrm{d}x = \frac{\pi}{2(2-\ln 2)}$.
 </ExamExplanation>
@@ -3452,7 +3483,7 @@ $$ \begin{cases} a\sqrt{x_0} = \ln\sqrt{x_0}, \\ \frac{a}{2\sqrt{x_0}} = \frac{1
 (II)
 $$ \begin{aligned} V &= \int_0^{e^2} \pi \left( \frac{\sqrt{x}}{e} \right)^2 \mathrm{d}x - \int_1^{e^2} \pi (\ln\sqrt{x})^2 \mathrm{d}x \\ &= \frac{\pi}{e^2} \int_0^{e^2} x \mathrm{d}x - \frac{\pi}{4} \int_1^{e^2} (\ln x)^2 \mathrm{d}x. \end{aligned} $$
 
-$$= \frac{\pi}{2}\mathrm{e}^2 - \frac{\pi}{4}[x(\ln x)^2 - 2x\ln x + 2x]\bigg|_1^2 = \frac{\pi}{2}\mathrm{e}^2 - \frac{\pi}{2}(\mathrm{e}^2 - 1) = \frac{\pi}{2}.$$
+$$= \frac{\pi}{2}\mathrm{e}^2 - \frac{\pi}{4}[x(\ln x)^2 - 2x\ln x + 2x]\bigg|_1^{\mathrm{e}^2} = \frac{\pi}{2}\mathrm{e}^2 - \frac{\pi}{2}(\mathrm{e}^2 - 1) = \frac{\pi}{2}.$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -3469,12 +3500,12 @@ $$= \frac{\pi}{2}\mathrm{e}^2 - \frac{\pi}{4}[x(\ln x)^2 - 2x\ln x + 2x]\bigg|_1
 
 <ExamExplanation>
 **解析：**
-$$\int_0^2 x\sqrt{12-x^2u^2}\,\mathrm{d}u \xlongequal{xu=t} \int_0^{2x}\sqrt{12-t^2}\,\mathrm{d}t,$$
+$$\int_0^2 x\sqrt{12-x^2u^2}\,\mathrm{d}u \overset{xu=t}{=} \int_0^{2x}\sqrt{12-t^2}\,\mathrm{d}t,$$
 故 $4y = \int_0^{2x}\sqrt{12-t^2}\,\mathrm{d}t$. 两边对 $x$ 同时求导,得
 $$y' = \frac{1}{4}\sqrt{12-4x^2}\cdot 2 = \sqrt{3-x^2}.$$
 曲线的全长为
 $$s = \int_0^{\sqrt{3}}\sqrt{1+y'^2}\,\mathrm{d}x = \int_0^{\sqrt{3}}\sqrt{4-x^2}\,\mathrm{d}x$$
-$$x = 2\sin t \xlongequal{\quad} \int_0^{\frac{\pi}{3}}\sqrt{4-4\sin^2 t}\cdot 2\cos t\,\mathrm{d}t$$
+$$x = 2\sin t \overset{\quad}{=} \int_0^{\frac{\pi}{3}}\sqrt{4-4\sin^2 t}\cdot 2\cos t\,\mathrm{d}t$$
 $$= 4\int_0^{\frac{\pi}{3}}\cos^2 t\,\mathrm{d}t = 2\left(t+\frac{1}{2}\sin 2t\right)\bigg|_0^{\frac{\pi}{3}}$$
 $$= 2\times\left(\frac{\pi}{3}+\frac{1}{2}\times\frac{\sqrt{3}}{2}\right) = \frac{2\pi}{3}+\frac{\sqrt{3}}{2}.$$
 </ExamExplanation>
@@ -3520,15 +3551,15 @@ $$V = 2\pi\int_0^1 \sqrt{1-y^2}\,\mathrm{d}y + 2\pi\int_0^1 (1-y)^2\mathrm{d}(1-
 <ExamExplanation>
 **解析：** 先求 $f(x) = \mathrm{e}^{-x}\sqrt{\sin x}\ (x \ge 0)$ 的定义域.
 由 $\sin x \ge 0$, 知 $x \in [2k\pi, (2k+1)\pi]\ (k = 0, 1, 2, \cdots)$, 如图 3-13 所示. 则所求体积为
-```math
-V = \sum_{k=0}^\infty \pi\int_{2k\pi}^{(2k+1)\pi} \mathrm{e}^{-2x}\sin x\,\mathrm{d}x \xlongequal{x = t + 2k\pi} \sum_{k=0}^\infty \pi\int_0^\pi \mathrm{e}^{-2(2k\pi+t)}\sin t\,\mathrm{d}t
-```
-```math
+$$
+V = \sum_{k=0}^\infty \pi\int_{2k\pi}^{(2k+1)\pi} \mathrm{e}^{-2x}\sin x\,\mathrm{d}x \overset{x = t + 2k\pi}{=} \sum_{k=0}^\infty \pi\int_0^\pi \mathrm{e}^{-2(2k\pi+t)}\sin t\,\mathrm{d}t
+$$
+$$
 = \sum_{k=0}^\infty \pi\mathrm{e}^{-4k\pi}\int_0^\pi \mathrm{e}^{-2t}\sin t\,\mathrm{d}t = \frac{\pi(1+\mathrm{e}^{-2\pi})}{5}\cdot\sum_{k=0}^\infty \mathrm{e}^{-4k\pi} \quad \text{(等比级数求和)}
-```
-```math
+$$
+$$
 = \frac{\pi(1+\mathrm{e}^{-2\pi})}{5}\cdot\frac{1}{1-\mathrm{e}^{-4\pi}} = \frac{\pi}{5(1-\mathrm{e}^{-2\pi})}.
-```
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -3548,51 +3579,51 @@ $(II)$ $D$ 绕直线 $y = 2a$ 旋转一周所得旋转体的体积。
 <ExamExplanation>
 **解析：** (I) 如图 3-14 所示,
 
-```math
+$$
 V_x = \pi \int_0^{2\pi a} y^2 \mathrm{d}x = \pi \int_0^{2\pi} a^2(1 - \cos t)^2 \cdot a(1 - \cos t) \mathrm{d}t
-```
+$$
 
 
-```math
+$$
 = \pi a^3 \int_0^{2\pi} (1 - \cos t)^3 \mathrm{d}t = 8\pi a^3 \int_0^{2\pi} \sin^6 \frac{t}{2} \mathrm{d}t
-```
+$$
 
 
-```math
+$$
 = 32\pi a^3 \int_0^{\frac{\pi}{2}} \sin^6 u \mathrm{d}u = 5\pi^2 a^3,
-```
+$$
 
 
-```math
+$$
 V_y = 2\pi \int_0^{2\pi a} x y \mathrm{d}x = 2\pi \int_0^{2\pi} a^3(t - \sin t)(1 - \cos t)^2 \mathrm{d}t
-```
+$$
 
 
-```math
+$$
 = 2\pi a^3 \int_0^{2\pi} (t - 2t\cos t + t\cos^2 t - \sin t + 2\sin t\cos t - \sin t\cos^2 t)\mathrm{d}t = 6\pi^3 a^3.
-```
+$$
 
 
 $(\text{II}) \quad V_{y = 2a} = \pi(2a)^2 \cdot 2\pi a - \int_0^{2\pi a} \pi(2a - y)^2 \mathrm{d}x$
 
-```math
+$$
 = 8\pi^2 a^3 - \pi \int_0^{2\pi} [2a - a(1 - \cos t)]^2 \cdot a(1 - \cos t)\mathrm{d}t
-```
+$$
 
 
-```math
+$$
 = 8\pi^2 a^3 - \pi a^3 \int_0^{2\pi} (1 + \cos t)^2(1 - \cos t)\mathrm{d}t
-```
+$$
 
 
-```math
+$$
 = 8\pi^2 a^3 - \pi a^3 \int_0^{2\pi} \sin^2 t(1 + \cos t)\mathrm{d}t
-```
+$$
 
 
-```math
+$$
 = 8\pi^2 a^3 - \pi^2 a^3 = 7\pi^2 a^3.
-```
+$$
 
 </ExamExplanation>
 
@@ -3611,36 +3642,36 @@ $(\text{II}) \quad V_{y = 2a} = \pi(2a)^2 \cdot 2\pi a - \int_0^{2\pi a} \pi(2a 
 <ExamExplanation>
 **解析：** $(x - 2)^2 + y^2 = 1$ 的参数方程为
 
-```math
+$$
 \begin{cases}
 x = 2 + \cos t, \\
 y = \sin t,
 \end{cases} \quad 0 \leqslant t \leqslant 2\pi.
-```
+$$
 
 
 所求表面积为
 
-```math
+$$
 S = 2\pi \int_0^{2\pi} x(t) \sqrt{{x'}^2(t) + {y'}^2(t)} \mathrm{d}t
-```
+$$
 
 
-```math
+$$
 = 2\pi \int_0^{2\pi} (2 + \cos t) \sqrt{(-\sin t)^2 + \cos^2 t} \mathrm{d}t
-```
+$$
 
 
-```math
+$$
 = 2\pi \int_0^{2\pi} (2 + \cos t)\mathrm{d}t = 8\pi^2.
-```
+$$
 
 
 **注：** 此题不宜用直角坐标下的公式求解. 公式如下：
 
-```math
+$$
 S_{\text{侧}} = \int_c^d 2\pi\varphi(y)\sqrt{1 + {\varphi'}^2(y)}\mathrm{d}y.
-```
+$$
 
 </ExamExplanation>
 
@@ -3727,52 +3758,52 @@ $(II)$ 求极限 $\lim_{n \to \infty} \sum_{k=1}^n \frac{2k\pi^2}{a_n} \sin \fra
 $(I)$ 由旋转体的柱壳法，
 
 
-```math
+$$
 a_n=2\pi\int_0^{n\pi}x|\sin x|\,\mathrm{d}x.
-```
+$$
 
 
 作代换 $x=n\pi-t$，并利用 $|\sin(n\pi-t)|=|\sin t|$，得
 
 
-```math
+$$
 a_n=2n\pi^2\int_0^{n\pi}|\sin t|\,\mathrm{d}t-a_n.
-```
+$$
 
 
 而
 
 
-```math
+$$
 \int_0^{n\pi}|\sin t|\,\mathrm{d}t=2n,
-```
+$$
 
 
 故
 
 
-```math
+$$
 a_n=2n^2\pi^2.
-```
+$$
 
 
 $(II)$ 因而
 
 
-```math
+$$
 \sum_{k=1}^n\frac{2k\pi^2}{a_n}\sin\frac{k\pi}{2n}
 =\sum_{k=1}^n\frac{k}{n^2}\sin\frac{k\pi}{2n}.
-```
+$$
 
 
 将其视为区间 $[0,\frac\pi2]$ 上的积分和，得
 
 
-```math
+$$
 \lim_{n\to\infty}\sum_{k=1}^n\frac{k}{n^2}\sin\frac{k\pi}{2n}
 =\frac4{\pi^2}\int_0^{\frac\pi2}x\sin x\,\mathrm{d}x
 =\frac4{\pi^2}.
-```
+$$
 
 
 **技巧：** “求和极限 + $k/n$”优先识别黎曼和。
@@ -3794,34 +3825,34 @@ $(II)$ 因而
 **解析：** 建立竖直坐标轴，设球的最低点为 $y=0$，则球面截面满足
 
 
-```math
+$$
 x^2+(y-R)^2=R^2.
-```
+$$
 
 
 取高度 $[y,y+\mathrm{d}y]$ 的薄片，其截面积为
 
 
-```math
+$$
 \pi x^2=\pi\bigl[R^2-(y-R)^2\bigr].
-```
+$$
 
 
 球在水中移动时，因球与水等密度，重力与浮力抵消；薄片离开水面后还需上升 $2R-y$。故功的微元为
 
 
-```math
+$$
 \mathrm{d}W=\rho g(2R-y)\pi\bigl[R^2-(y-R)^2\bigr]\,\mathrm{d}y.
-```
+$$
 
 
 于是
 
 
-```math
+$$
 W=\rho g\pi\int_0^{2R}(2R-y)\bigl[R^2-(y-R)^2\bigr]\,\mathrm{d}y
 =\frac43\pi\rho gR^4.
-```
+$$
 
 
 **知识点：** 变力做功题的核心是“力的微元 × 位移”，若存在浮力要先判断合力。
@@ -3847,48 +3878,47 @@ W=\rho g\pi\int_0^{2R}(2R-y)\bigl[R^2-(y-R)^2\bigr]\,\mathrm{d}y
 图 $(a)$ 中三角形在深度 $x$ 处的半宽为
 
 
-```math
+$$
 y=\frac{b(h-x)}{h},
-```
+$$
 
 
 故压力微元
 
 
-```math
+$$
 \mathrm{d}P_1=\rho gx\cdot 2y\,\mathrm{d}x
 =\frac{2\rho gb}{h}x(h-x)\,\mathrm{d}x,
-```
+$$
 
 
 从而
 
 
-```math
+$$
 P_1=\frac13\rho gbh^2.
-```
+$$
 
 
 图 $(b)$ 中深度 $x$ 处半宽为 $y=\frac{bx}{h}$，于是
 
 
-```math
+$$
 \mathrm{d}P_2=\frac{2\rho gb}{h}x^2\,\mathrm{d}x,
-```
+$$
 
 
-
-```math
+$$
 P_2=\frac23\rho gbh^2.
-```
+$$
 
 
 所以
 
 
-```math
+$$
 \frac{P_2}{P_1}=2.
-```
+$$
 
 
 **技巧：** 液体侧压力统一用“压强 $\rho gx$ × 水平条带面积”建立微元。
@@ -4027,14 +4057,29 @@ $(II)$ 当质点 $C$ 沿 $y$ 轴正向移向无穷远处时, 求克服吸引力�
 杆 AB 的线密度为 $\frac{m}{l}$，位于 $[x, x+\mathrm{d}x]$ 上微元的质量为 $\frac{m}{l}\mathrm{d}x$。它与质点 C 的引力在 $y$ 轴方向的分力为
 $$\mathrm{d}F = G\frac{1\cdot m\mathrm{d}x}{l(x^2+a^2)}\cdot\frac{a}{\sqrt{x^2+a^2}},$$
 故引力为
-$$F = \frac{Gma}{l}\int_{-\frac{l}{2}}^{\frac{l}{2}} \frac{\mathrm{d}x}{(x^2+a^2)^{\frac{3}{2}}} \xlongequal{x=a\tan t} \frac{2Gma}{l}\int_0^{\arctan\frac{l}{2a}} \frac{a\sec^2 t}{a^3\sec^3 t}\mathrm{d}t$$
+$$F = \frac{Gma}{l}\int_{-\frac{l}{2}}^{\frac{l}{2}} \frac{\mathrm{d}x}{(x^2+a^2)^{\frac{3}{2}}} \overset{x=a\tan t}{=} \frac{2Gma}{l}\int_0^{\arctan\frac{l}{2a}} \frac{a\sec^2 t}{a^3\sec^3 t}\mathrm{d}t$$
 $$= \frac{2Gm}{al}\sin\left(\arctan\frac{l}{2a}\right) = \frac{2Gm}{a\sqrt{4a^2+l^2}}, \text{其中 } G \text{ 为引力常数.}$$
 
-(II) 由 (I) 知，当质点 $C$ 位于 $(0,y)$ 处时，引力的大小为 $\frac{2Gm}{y\sqrt{4y^2+l^2}}$，故
-$$W = \int_a^{+\infty} \frac{2Gm}{y\sqrt{4y^2+l^2}}\mathrm{d}y$$
-$$\frac{l}{y} = x \quad 2Gm\int_{\frac{l}{a}}^0 \frac{-\frac{l}{x^2}\mathrm{d}x}{\frac{l}{x}\sqrt{4\frac{l^2}{x^2}+l^2}} = 2Gm\int_0^{\frac{l}{a}} \frac{\mathrm{d}x}{\sqrt{4+x^2}}$$
-
-$$=\left.\frac{2Gm}{l}\ln(x+\sqrt{4+x^2})\right|_0^{\frac{l}{a}}=\frac{2Gm}{l}\ln\frac{\sqrt{4a^2+l^2}+l}{2a}.$$
+(II) 由 (I) 知，当质点 $C$ 位于 $(0,y)$ 处时，引力大小为
+$$
+F(y)=\frac{2Gm}{y\sqrt{4y^2+l^2}}.
+$$
+因此克服引力所做的功为
+$$
+W=\int_a^{+\infty}\frac{2Gm}{y\sqrt{4y^2+l^2}}\,\mathrm{d}y.
+$$
+令 $x=\frac{l}{y}$，则 $\mathrm{d}y=-\frac{l}{x^2}\,\mathrm{d}x$，从而
+$$
+W=\frac{2Gm}{l}\int_0^{\frac{l}{a}}\frac{\mathrm{d}x}{\sqrt{4+x^2}}.
+$$
+于是
+$$
+\begin{aligned}
+W
+&=\frac{2Gm}{l}\ln\left(x+\sqrt{4+x^2}\right)\Big|_0^{\frac{l}{a}} \\
+&=\frac{2Gm}{l}\ln\frac{\sqrt{4a^2+l^2}+l}{2a}.
+\end{aligned}
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -4114,23 +4159,51 @@ $(III)$ 问抽出全部液体需做多少功？
 <ExamAnswer>见解析</ExamAnswer>
 
 <ExamExplanation>
-**解析：** (I)
-$$V=4\cdot 2\int_{-1}^y 2\sqrt{1-y^2}\mathrm{d}y\xlongequal{y=\sin t} 16\int_{-\frac{\pi}{2}}^{\arcsin y}\cos^2 t\mathrm{d}t$$
-$$=8\arcsin y+8y\sqrt{1-y^2}+4\pi.$$
+**解析：**
 
-(II) 由于 $\frac{\mathrm{d}V}{\mathrm{d}t}=\frac{\mathrm{d}V}{\mathrm{d}y}\cdot\frac{\mathrm{d}y}{\mathrm{d}t}=16\sqrt{1-y^2}\cdot\frac{\mathrm{d}y}{\mathrm{d}t}$，故
-$$\left.\frac{\mathrm{d}y}{\mathrm{d}t}\right|_{y=0}=\left.\frac{1}{16\sqrt{1-y^2}}\cdot\frac{\mathrm{d}V}{\mathrm{d}t}\right|_{y=0}=\frac{1}{16}\times 0.16=0.01(\mathrm{m/min}).$$
-
-(III)
-
+(I) 在高度 $s$ 处，椭圆截面的水平宽度为
+$$
+2x=4\sqrt{1-s^2}.
+$$
+容器长为 $4\,\mathrm{m}$，因此当液面高度为 $y$ 时，液体体积为
 $$
 \begin{aligned}
-W &= 4\rho g \int_{-1}^{1} 4\sqrt{1 - y^2} \cdot (1 - y) \, \mathrm{d}y \\
-&= 4\rho g \left( \int_{-1}^{1} 4\sqrt{1 - y^2} \, \mathrm{d}y - \int_{-1}^{1} 4\sqrt{1 - y^2} \cdot y \, \mathrm{d}y \right) \\
-&= 4\rho g \int_{-1}^{1} 4\sqrt{1 - y^2} \, \mathrm{d}y - 0 = 8\rho g \pi (\text{J}).
+V(y)
+&=16\int_{-1}^{y}\sqrt{1-s^2}\,\mathrm{d}s \\
+&=8\arcsin y+8y\sqrt{1-y^2}+4\pi,
 \end{aligned}
 $$
+其中 $-1\le y\le1$。
 
+(II) 由
+$$
+\frac{\mathrm{d}V}{\mathrm{d}y}=16\sqrt{1-y^2}
+$$
+以及抽液时 $\frac{\mathrm{d}V}{\mathrm{d}t}=-0.16\,\mathrm{m}^3/\mathrm{min}$，有
+$$
+\frac{\mathrm{d}V}{\mathrm{d}t}
+=\frac{\mathrm{d}V}{\mathrm{d}y}\frac{\mathrm{d}y}{\mathrm{d}t}.
+$$
+当 $y=0$ 时，
+$$
+\left.\frac{\mathrm{d}y}{\mathrm{d}t}\right|_{y=0}
+=\frac{-0.16}{16}=-0.01\,\mathrm{m}/\mathrm{min}.
+$$
+因此液面沿 $y$ 轴的速度为 $-0.01\,\mathrm{m}/\mathrm{min}$，即液面下降速率为 $0.01\,\mathrm{m}/\mathrm{min}$。
+
+(III) 高度为 $s$、厚度为 $\mathrm{d}s$ 的薄层体积为
+$$
+\mathrm{d}V=16\sqrt{1-s^2}\,\mathrm{d}s,
+$$
+抽到容器顶部所需提升的距离为 $1-s$。故抽出全部液体所做的功为
+$$
+\begin{aligned}
+W
+&=16\rho g\int_{-1}^{1}\sqrt{1-s^2}(1-s)\,\mathrm{d}s \\
+&=16\rho g\int_{-1}^{1}\sqrt{1-s^2}\,\mathrm{d}s \\
+&=8\pi\rho g\ \mathrm{J}.
+\end{aligned}
+$$
 </ExamExplanation>
 
 </ExamSolution>
@@ -4181,72 +4254,71 @@ $(II)$ 记 $M = \max_{x \in [a,b]} |f''(x)|$，证明：$\left|\int_a^b f(x)\mat
 <ExamExplanation>
 **证明：** (I) $\int_a^b (x - a)(x - b)f''(x) \, \mathrm{d}x = \int_a^b (x - a)(x - b) \, \mathrm{d}f'(x)$
 
-```math
+$$
 = (x - a)(x - b)f'(x) \Big|_a^b - \int_a^b (2x - a - b)f'(x) \, \mathrm{d}x
-```
+$$
 
 
-```math
+$$
 = \int_a^b (a + b - 2x)f'(x) \, \mathrm{d}x = \int_a^b (a + b - 2x) \, \mathrm{d}f(x)
-```
+$$
 
 
-```math
+$$
 = (a + b - 2x)f(x) \Big|_a^b + 2\int_a^b f(x) \, \mathrm{d}x
-```
+$$
 
 
-```math
+$$
 = (a - b)[f(a) + f(b)] + 2\int_a^b f(x) \, \mathrm{d}x.
-```
+$$
 
 
 故
 
-```math
+$$
 \int_a^b f(x) \, \mathrm{d}x = \frac{1}{2}(b - a)[f(a) + f(b)] + \frac{1}{2}\int_a^b (x - a)(x - b)f''(x) \, \mathrm{d}x.
-```
+$$
 
 
 (II) 证法1 由 (I) 有
 
-```math
+$$
 \left| \int_a^b f(x) \, \mathrm{d}x - \frac{1}{2}(b - a)[f(a) + f(b)] \right| = \left| \frac{1}{2}\int_a^b (x - a)(x - b)f''(x) \, \mathrm{d}x \right|
-```
+$$
 
 
-```math
+$$
 \le \frac{1}{2}\int_a^b |x - a| \, |x - b| \, |f''(x)| \, \mathrm{d}x
-```
+$$
 
 
-```math
+$$
 \le \frac{M}{2}\int_a^b (x - a)(b - x) \, \mathrm{d}x = \frac{M}{4}\int_a^b (b - x) \, \mathrm{d}(x - a)^2
-```
+$$
 
 
-```math
+$$
 = \frac{M}{4} \left[ (b - x)(x - a)^2 \Big|_a^b + \int_a^b (x - a)^2 \, \mathrm{d}x \right]
-```
+$$
 
 
-```math
+$$
 = \frac{M}{4} \cdot \frac{1}{3} (x - a)^3 \Big|_a^b = \frac{M}{4} \cdot \frac{1}{3} (b - a)^3 = \frac{(b - a)^3}{12} M.
-```
+$$
 
 
 证法2 应用泰勒公式证明.
 将 $f(u)$ 在 $x \in (a,b)$ 处展开,再代入端点 $u = a, u = b$,有
 
-```math
+$$
 f(a) = f(x) + f'(x)(a - x) + \frac{f''(\xi_1)}{2!} (a - x)^2, \quad \text{①}
-```
+$$
 
 
-
-```math
+$$
 f(b) = f(x) + f'(x)(b-x) + \frac{f''(\xi_2)}{2!}(b-x)^2, \tag{2}
-```
+$$
 
 
 其中 $\xi_1 \in (a,x)$, $\xi_2 \in (x,b)$。
@@ -4254,46 +4326,46 @@ f(b) = f(x) + f'(x)(b-x) + \frac{f''(\xi_2)}{2!}(b-x)^2, \tag{2}
 ①+②, 得
 
 
-```math
+$$
 f(a)+f(b) = 2f(x) + f'(x)(a+b-2x) + \frac{1}{2}f''(\xi_1)(a-x)^2 + \frac{1}{2}f''(\xi_2)(b-x)^2.
-```
+$$
 
 
 上式两边从 $a$ 到 $b$ 积分, 得
 
 
-```math
+$$
 \begin{aligned}
 \int_a^b [f(a) + f(b)]\mathrm{d}x &= 2\int_a^b f(x)\mathrm{d}x + \int_a^b (a + b - 2x)f'(x)\mathrm{d}x + \\
 &\quad \frac{1}{2}\int_a^b [f''(\xi_1)(a - x)^2 + f''(\xi_2)(b - x)^2]\mathrm{d}x,
 \end{aligned} \tag{3}
-```
+$$
 
 
 而
 
 
-```math
+$$
 \begin{aligned}
 \int_a^b [f(a) + f(b)]\mathrm{d}x &= (b - a)[f(a) + f(b)], \\
 \int_a^b (a + b - 2x)f'(x)\mathrm{d}x &= \int_a^b (a + b - 2x)\mathrm{d}f(x) \\
 &= (a + b - 2x)f(x)\Big|_a^b + 2\int_a^b f(x)\mathrm{d}x \\
 &= (a - b)[f(a) + f(b)] + 2\int_a^b f(x)\mathrm{d}x.
 \end{aligned}
-```
+$$
 
 
 将其代入 ③ 式, 整理可得
 
 
-```math
+$$
 \begin{aligned}
 \left|\int_a^b f(x)\mathrm{d}x - \frac{1}{2}(b - a)[f(a) + f(b)]\right| &= \frac{1}{8}\left|\int_a^b [f''(\xi_1)(a - x)^2 + f''(\xi_2)(b - x)^2]\mathrm{d}x\right| \\
 &\le \frac{1}{8}\left[\int_a^b |f''(\xi_1)|(a - x)^2\mathrm{d}x + \int_a^b |f''(\xi_2)|(b - x)^2\mathrm{d}x\right] \\
 &\le \frac{M}{8}\left[\int_a^b (a - x)^2\mathrm{d}x + \int_a^b (b - x)^2\mathrm{d}x\right] \\
 &= \frac{M}{8} \cdot \frac{2}{3}(b - a)^3 = \frac{(b - a)^3}{12}M.
 \end{aligned}
-```
+$$
 
 
 **注：** 若 $f(x)\ge 0$, 则 $\left|\int_a^b f(x)\mathrm{d}x - \frac{1}{2}(b-a)[f(a)+f(b)]\right|\le \frac{(b-a)^3}{12}M$, 可看作用梯形的面积 $\frac{1}{2}(b-a)[f(a)+f(b)]$ 作为 $\int_a^b f(x)\mathrm{d}x$ 的近似值, 其绝对误差不超过 $\frac{(b-a)^3}{12}M$。
@@ -4316,122 +4388,79 @@ $(II)$ 若对任意的 $x \in [0,+\infty)$，有 $f(x)=f(x+1)$，$n$ 为正整�
 <ExamAnswer>见解析</ExamAnswer>
 
 <ExamExplanation>
-**解析：** $(I) f(x)$ 在 $x = \frac{1}{2}$ 处的泰勒展开式为
+**解析：**
 
-
-```math
-f(x) = f\left(\frac{1}{2}\right) + f'\left(\frac{1}{2}\right)\left(x - \frac{1}{2}\right) + \frac{f''(\xi)}{2!}\left(x - \frac{1}{2}\right)^2, \tag{1}
-```
-
-
-其中 $\xi$ 介于 $\frac{1}{2}$ 与 $x$ 之间.
-
-① 式两边积分, 有
-
-
-```math
+(I) 由带拉格朗日余项的泰勒公式，对任意 $x\in[0,1]$，存在介于 $x$ 与 $\frac12$ 之间的 $\xi_x$，使
+$$
+f(x)=f\left(\frac12\right)+f'\left(\frac12\right)\left(x-\frac12\right)
++\frac{f''(\xi_x)}{2}\left(x-\frac12\right)^2.
+$$
+两端在 $[0,1]$ 上积分。因为
+$$
+\int_0^1\left(x-\frac12\right)\,\mathrm{d}x=0,
+$$
+所以
+$$
+\int_0^1f(x)\,\mathrm{d}x-f\left(\frac12\right)
+=\frac12\int_0^1f''(\xi_x)\left(x-\frac12\right)^2\,\mathrm{d}x.
+$$
+由 $|f''(x)|\le1$，得
+$$
 \begin{aligned}
-\int_0^1 f(x)\mathrm{d}x &= \int_0^1 f\left(\frac{1}{2}\right)\mathrm{d}x + \int_0^1 f'\left(\frac{1}{2}\right)\left(x - \frac{1}{2}\right)\mathrm{d}x + \int_0^1 \frac{f''(\xi)}{2!}\left(x - \frac{1}{2}\right)^2\mathrm{d}x \\
-&= f\left(\frac{1}{2}\right) + 0 + \int_0^1 \frac{f''(\xi)}{2!}\left(x - \frac{1}{2}\right)^2\mathrm{d}x,
+\left|\int_0^1f(x)\,\mathrm{d}x-f\left(\frac12\right)\right|
+&\le\frac12\int_0^1\left(x-\frac12\right)^2\,\mathrm{d}x \\
+&=\frac1{24}.
 \end{aligned}
-```
+$$
+故结论成立。
 
-
-其中
-
-
-```math
-\int_0^1 f'\left(\frac{1}{2}\right)\left(x - \frac{1}{2}\right)\mathrm{d}x = \frac{1}{2}f'\left(\frac{1}{2}\right)\left(x - \frac{1}{2}\right)^2\Big|_0^1 = 0.
-```
-
-
-故
-
-
-```math
-\left|\int_0^1 f(x)\mathrm{d}x - f\left(\frac{1}{2}\right)\right| = \left|\int_0^1 \frac{f''(\xi)}{2!}\left(x - \frac{1}{2}\right)^2\mathrm{d}x\right| \le \frac{1}{2}\int_0^1 \left(x - \frac{1}{2}\right)^2\mathrm{d}x = \frac{1}{24}.
-```
-
-
-(II) 由 $f(x)=f(x+1)$，知 $f'(x)=f'(x+1)$。
-当 $x=0$ 时，有 $f(0)=f(1),f'(0)=f'(1)$，且 $\int_{0}^{n}f(x)\mathrm{d}x=n\int_{0}^{1}f(x)\mathrm{d}x$。
-利用泰勒公式，将 $f(x)$ 在 $x=0$ 与 $x=1$ 处分别展开，得
-
-```math
-f(x)=f(0)+f'(0)x+\frac{f''(\xi_1)}{2!}x^2,\quad \xi_1\text{介于}0\text{与}x\text{之间},
-```
-
-
-```math
-f(x)=f(1)+f'(1)(x-1)+\frac{f''(\xi_2)}{2!}(x-1)^2,\quad \xi_2\text{介于}1\text{与}x\text{之间}.
-```
-
-
-上两式积分，得
-
-```math
-\int_{0}^{1}f(x)\mathrm{d}x=f(0)+\frac{1}{2}f'(0)+\frac{1}{2}\int_{0}^{1}f''(\xi_1)x^2\mathrm{d}x, \tag{1}
-```
-
-
-```math
-\int_{0}^{1}f(x)\mathrm{d}x=f(1)-\frac{1}{2}f'(1)+\frac{1}{2}\int_{0}^{1}f''(\xi_2)(x-1)^2\mathrm{d}x. \tag{2}
-```
-
+(II) 由 $f(x+1)=f(x)$ 可知 $f(1)=f(0)$、$f'(1)=f'(0)$，并且
+$$
+\int_0^n f(x)\,\mathrm{d}x=n\int_0^1 f(x)\,\mathrm{d}x.
+$$
+对 $x\in[0,1]$，分别在 $0$ 与 $1$ 处使用泰勒公式：
+$$
+f(x)=f(0)+f'(0)x+\frac{f''(\xi_1)}{2}x^2,
+$$
+$$
+f(x)=f(1)+f'(1)(x-1)+\frac{f''(\xi_2)}{2}(x-1)^2,
+$$
+其中 $\xi_1\in(0,x)$，$\xi_2$ 介于 $x$ 与 $1$ 之间。分别积分得
+$$
+\int_0^1f(x)\,\mathrm{d}x
+=f(0)+\frac12f'(0)+\frac12\int_0^1f''(\xi_1)x^2\,\mathrm{d}x,
+$$
+$$
+\int_0^1f(x)\,\mathrm{d}x
+=f(1)-\frac12f'(1)+\frac12\int_0^1f''(\xi_2)(x-1)^2\,\mathrm{d}x.
+$$
+两式相加，并利用 $f(1)=f(0)$、$f'(1)=f'(0)$，得到
+$$
+\int_0^1f(x)\,\mathrm{d}x-f(0)
+=\frac14\int_0^1\left[f''(\xi_1)x^2+f''(\xi_2)(x-1)^2\right]\,\mathrm{d}x.
+$$
+因此
+$$
+\begin{aligned}
+\left|\int_0^1f(x)\,\mathrm{d}x-f(0)\right|
+&\le\frac14\int_0^1\left[x^2+(1-x)^2\right]\,\mathrm{d}x \\
+&=\frac16.
+\end{aligned}
+$$
+于是
+$$
+\left|\int_0^1f(x)\,\mathrm{d}x\right|
+\le |f(0)|+\frac16.
+$$
+最终
+$$
+\left|\int_0^n f(x)\,\mathrm{d}x\right|
+=n\left|\int_0^1 f(x)\,\mathrm{d}x\right|
+\le n\left(\frac16+|f(0)|\right).
+$$
+故结论成立。
 </ExamExplanation>
 
 </ExamSolution>
 
 </ExamQuestion>
-
-## 本章知识点与技巧总结
-
-### 1. 不定积分：先识别结构，再选方法
-
-- **第一换元法**：看到复合函数及其内层导数，如 $f(g(x))g'(x)$，优先令 $u=g(x)$。
-- **第二换元法**：根式 $\sqrt{a^2-x^2}$、$\sqrt{x^2+a^2}$、$\sqrt{x^2-a^2}$ 常配三角代换。
-- **分部积分**：常用口诀是“反对幂指三”，但真正原则是让剩余积分更简单；遇到 $\ln x$、反三角函数、含 $x$ 的乘积时尤其常用。
-- 有理函数先做代数化简、因式分解和部分分式；三角有理式可配合万能代换或利用导数结构。
-
-### 2. 定积分：对称性、周期性与区间变换
-
-- 对称区间优先检查奇偶性；$\int_{-a}^{a}$ 常可直接化简。
-- 对 $\int_0^a f(x)\,\mathrm{d}x$，代换 $x=a-t$ 常与原式相加，特别适合含 $x$ 与 $a-x$ 的结构。
-- 周期函数在长区间上的积分，先拆成完整周期，再处理剩余区间。
-
-### 3. 变上限积分与积分方程
-
-- 若 $F(x)=\int_{\alpha(x)}^{\beta(x)}f(t)\,\mathrm{d}t$，则
-  $$F'(x)=f(\beta(x))\beta'(x)-f(\alpha(x))\alpha'(x).$$
-- 含未知函数的积分方程，常通过换元把积分上下限固定，再求导转化为微分方程。
-
-### 4. 反常积分判敛
-
-- 先找瑕点与无穷区间，再分别判断；多个瑕点必须逐段收敛。
-- 常用比较：$\int_1^{\infty}x^{-p}\,\mathrm{d}x$ 在 $p>1$ 时收敛；$\int_0^1x^{-p}\,\mathrm{d}x$ 在 $p<1$ 时收敛。
-- 含对数时重点比较 $\frac1{x^p(\ln x)^q}$ 在 $x\to\infty$ 或 $x\to1^+$ 的主导阶。
-
-### 5. 面积、体积、弧长与旋转曲面
-
-- 平面面积：直角坐标用 $\int (y_{\text{上}}-y_{\text{下}})\,\mathrm{d}x$；极坐标用 $\frac12\int r^2\,\mathrm{d}\theta$。
-- 旋转体：垫片/圆环法适合垂直旋转轴切片；柱壳法适合平行旋转轴切片。
-- 弧长：$y=f(x)$ 时 $s=\int\sqrt{1+y'^2}\,\mathrm{d}x$；极坐标时 $s=\int\sqrt{r^2+r'^2}\,\mathrm{d}\theta$。
-- 旋转曲面面积中“$2\pi\times$ 到旋转轴的距离 $\times\mathrm{d}s$”最稳妥。
-
-### 6. 物理应用：功、压力与引力
-
-- **功**：$\mathrm{d}W=F(x)\,\mathrm{d}x$，先找随位置变化的力。
-- **液体压力**：深度为 $x$ 处压强为 $\rho gx$，条带压力为 $\rho gx\cdot(\text{条带宽})\,\mathrm{d}x$。
-- **引力**：先取质量微元，再利用对称性消去横向分量，只积累有效方向分量。
-
-### 7. 极限与积分结合
-
-- 积分和极限并存时，优先考虑积分中值定理、洛必达法则、等价无穷小和变量代换。
-- 含 $\sum_{k=1}^{n}f(k/n)/n$ 的极限通常是黎曼和；先把它整理成 $\Delta x\sum f(x_k)$ 的标准形式。
-
-### 8. 易错点
-
-- 换元后必须同步修改积分上下限；不定积分则要换回原变量。
-- 分部积分的符号最容易出错，建议始终写成 $\int u\,\mathrm{d}v=uv-\int v\,\mathrm{d}u$。
-- 旋转体绕非坐标轴旋转时，要重新确认“半径”是到旋转轴的距离。
-- 反常积分不能因为被积函数是奇函数就直接判为 $0$；必须先分别检查两侧是否收敛。
