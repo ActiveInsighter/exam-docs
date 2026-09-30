@@ -7,10 +7,7 @@ const expectedRootPages = ['math', '408', 'politics', 'english', 'programming'];
 const expectedModuleChildren: Record<string, string[]> = {
   math: ['index', 'past-exams', 'exam', 'zhangyu-1000', 'lizhengyuan', 'lilin-880'],
   '408': ['index', 'mock', 'past-exams'],
-  politics: [
-    'index',
-    ...Array.from({ length: 17 }, (_, index) => String(2010 + index)),
-  ],
+  politics: ['index', 'historical-questions', 'classified-questions'],
   english: ['index'],
   programming: ['index', 'algorithm'],
 };
@@ -81,18 +78,46 @@ describe('documentation source structure', () => {
     }
   }, 30_000);
 
-  it('keeps politics exam years as direct documents without year subfolders', () => {
+  it('groups politics exam years and classified chapters in their own collections', () => {
     const politicsRoot = join(docsRoot, 'politics');
     const entries = readdirSync(politicsRoot, { withFileTypes: true });
+    const historicalRoot = join(politicsRoot, 'historical-questions');
+    const historicalMeta = JSON.parse(
+      readFileSync(join(historicalRoot, 'meta.json'), 'utf8'),
+    ) as { pages?: string[] };
     const expectedYears = Array.from({ length: 17 }, (_, index) => String(2010 + index));
-    const yearPages = entries
+    const yearPages = readdirSync(historicalRoot, { withFileTypes: true })
       .filter((entry) => entry.isFile() && /^\d{4}\.mdx$/u.test(entry.name))
       .map((entry) => entry.name.replace(/\.mdx$/u, ''))
       .sort();
 
     expect(yearPages).toEqual(expectedYears);
+    expect(historicalMeta.pages).toEqual(['index', ...expectedYears]);
+    expect(
+      entries.filter((entry) => entry.isFile() && /^\d{4}\.mdx$/u.test(entry.name)),
+    ).toHaveLength(0);
     expect(
       entries.filter((entry) => entry.isDirectory() && /^\d{4}$/u.test(entry.name)),
     ).toHaveLength(0);
+
+    const classifiedRoot = join(politicsRoot, 'classified-questions');
+    const classifiedMeta = JSON.parse(
+      readFileSync(join(classifiedRoot, 'meta.json'), 'utf8'),
+    ) as { pages?: string[] };
+    const expectedModules = [
+      'marxism-principles',
+      'mao-zedong-thought',
+      'xi-jinping-thought',
+      'modern-chinese-history',
+      'ideology-morality-law',
+    ];
+
+    expect(classifiedMeta.pages).toEqual(['index', ...expectedModules]);
+    expect(
+      readdirSync(classifiedRoot, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name)
+        .sort(),
+    ).toEqual(expectedModules.slice().sort());
   });
 });
