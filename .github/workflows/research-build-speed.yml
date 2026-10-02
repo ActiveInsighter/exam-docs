@@ -1,0 +1,73 @@
+name: Research static build speed
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: build-speed-research-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  benchmark:
+    name: Benchmark ${{ matrix.mode }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [dynamic, async]
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      BENCHMARK_MODE: ${{ matrix.mode }}
+      STATIC_DOCS_SHARD_COUNT: '4'
+      STATIC_DOCS_SHARD_INDEX: '0'
+      STATIC_DOCS_SKIP_SEARCH_BUILD: '1'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - uses: actions/cache@v5
+        id: modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node22-modules-v1-${{ hashFiles('package-lock.json') }}
+      - if: steps.modules.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+      - run: npm run postinstall
+      - name: Run production deployment checks
+        run: npm test -- tests/static-docs-build.test.ts tests/cloudflare-static-assets.test.ts tests/dedupe-static-rsc.test.ts tests/deployment-workflows.test.ts tests/static-doc-shards.test.ts tests/static-build-id.test.ts tests/search-determinism.test.ts tests/static-asset-references.test.ts tests/study-module-tree.test.ts tests/study-module-route-matching.test.ts
+      - name: Select documented compilation mode
+        shell: bash
+        run: |
+          # https://www.fumadocs.dev/docs/mdx/async
+          # Async compilation enters Turbopack's persistent dependency graph.
+          if [[ "${BENCHMARK_MODE}" == 'async' ]]; then
+            python3 - <<'PYTHON'
+          from pathlib import Path
+          config = Path('source.config.ts')
+          config.write_text(config.read_text().replace('dynamic: true,', 'dynamic: false,\n    async: true,'))
+          source = Path('lib/source.ts')
+          source.write_text(source.read_text().replace("from 'collections/dynamic'", "from 'collections/server'"))
+          PYTHON
+          fi
+          rm -rf .static-docs-stage .source
+          npm run postinstall
+      - name: Measure cold and warm builds on the same runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/build-speed-results
+          for state in cold warm; do
+            /usr/bin/time -v -o "/tmp/build-speed-results/${state}.time" \
+              npm run build:static-docs 2>&1 | tee "/tmp/build-speed-results/${state}.log"
+            cp .static-docs/search-index.json "/tmp/build-speed-results/${state}.search.json" 2>/dev/null || true
+            { echo "## ${BENCHMARK_MODE} / ${state}"; echo '```'; cat "/tmp/build-speed-results/${state}.time"; echo '```'; } >> "${GITHUB_STEP_SUMMARY}"
+          done
+      - name: Upload measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-speed-${{ matrix.mode }}
+          path: /tmp/build-speed-results
+          retention-days: 14
