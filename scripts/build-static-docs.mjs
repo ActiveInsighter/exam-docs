@@ -16,7 +16,10 @@ const staticOutputRoot = path.join(projectRoot, '.static-docs');
 const staticStageRoot = path.join(projectRoot, '.static-docs-stage');
 const staticSearchRoot = path.join(projectRoot, '.static-search-output');
 
+// Tailwind respects this ignore file when scanning the isolated project.
+// Without it restored .next/cache files become accidental utility sources.
 const projectEntries = [
+  '.gitignore',
   'app',
   'components',
   'content',
