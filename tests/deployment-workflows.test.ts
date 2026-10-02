@@ -22,8 +22,8 @@ describe('static deployment workflows', () => {
     const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
     const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
 
-    expect(workflow).toContain("STATIC_DOCS_SHARD_COUNT: ${{ inputs.shards || '4' }}");
-    expect(workflow).toContain("'[0,1,2,3,4,5,6,7]' || '[0,1,2,3]'");
+    expect(workflow).toContain("STATIC_DOCS_SHARD_COUNT: ${{ inputs.shards || '8' }}");
+    expect(workflow).toContain("'[0,1,2,3]' || '[0,1,2,3,4,5,6,7]'");
     expect(workflow).toContain('Weighted static shard');
     expect(workflow).toContain('routes < 1');
     expect(workflow).toContain('Verify overlapping shared chunks are identical');
@@ -58,12 +58,12 @@ describe('static deployment workflows', () => {
     const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
     const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
 
-    expect(workflow).toContain("-weighted-search-${{ inputs.shards || '4' }}-shard-${{ matrix.shard }}-v2-${{ hashFiles(");
-    expect(workflow).toContain("-weighted-search-${{ inputs.shards || '4' }}-shard-${{ matrix.shard }}-v2-");
+    expect(workflow).toContain("-weighted-search-${{ inputs.shards || '8' }}-shard-${{ matrix.shard }}-v2-${{ hashFiles(");
+    expect(workflow).toContain("-weighted-search-${{ inputs.shards || '8' }}-shard-${{ matrix.shard }}-v2-");
     expect(workflow).toContain('-weighted-static-shard-${{ matrix.shard }}-v1-');
     expect(workflow).toContain('-static-shard-${{ matrix.shard }}-v4-');
     expect(workflow).toContain('-static-shard-${{ matrix.shard }}-v3-');
-    expect(workflow).not.toContain("-weighted-search-${{ inputs.shards || '4' }}-shard-${{ matrix.shard }}-v2-${{ github.sha }}");
+    expect(workflow).not.toContain("-weighted-search-${{ inputs.shards || '8' }}-shard-${{ matrix.shard }}-v2-${{ github.sha }}");
   });
 
   it('pins Wrangler and dry-runs only manual dispatches with deployment disabled', async () => {

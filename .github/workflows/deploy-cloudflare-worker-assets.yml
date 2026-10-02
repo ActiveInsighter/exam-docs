@@ -11,7 +11,7 @@ on:
       shards:
         description: Number of parallel static export runners (compare 4 and 8)
         required: true
-        default: '4'
+        default: '8'
         type: choice
         options: ['4', '8']
       deploy:
@@ -157,15 +157,15 @@ jobs:
           retention-days: 1
 
   build-shard:
-    name: Weighted static shard ${{ matrix.shard }} of ${{ inputs.shards || '4' }}
+    name: Weighted static shard ${{ matrix.shard }} of ${{ inputs.shards || '8' }}
     strategy:
       fail-fast: false
       matrix:
-        shard: ${{ fromJSON(inputs.shards == '8' && '[0,1,2,3,4,5,6,7]' || '[0,1,2,3]') }}
+        shard: ${{ fromJSON(inputs.shards == '4' && '[0,1,2,3]' || '[0,1,2,3,4,5,6,7]') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      STATIC_DOCS_SHARD_COUNT: ${{ inputs.shards || '4' }}
+      STATIC_DOCS_SHARD_COUNT: ${{ inputs.shards || '8' }}
       STATIC_DOCS_SHARD_INDEX: ${{ matrix.shard }}
       STATIC_DOCS_SKIP_SEARCH_BUILD: '1'
     steps:
@@ -197,9 +197,9 @@ jobs:
         uses: actions/cache@v5
         with:
           path: .static-docs-stage/.next/cache
-          key: ${{ runner.os }}-weighted-search-${{ inputs.shards || '4' }}-shard-${{ matrix.shard }}-v2-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json', 'app/**', 'components/**', 'lib/**', 'scripts/**', 'content/docs/**') }}
+          key: ${{ runner.os }}-weighted-search-${{ inputs.shards || '8' }}-shard-${{ matrix.shard }}-v2-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json', 'app/**', 'components/**', 'lib/**', 'scripts/**', 'content/docs/**') }}
           restore-keys: |
-            ${{ runner.os }}-weighted-search-${{ inputs.shards || '4' }}-shard-${{ matrix.shard }}-v2-
+            ${{ runner.os }}-weighted-search-${{ inputs.shards || '8' }}-shard-${{ matrix.shard }}-v2-
             ${{ runner.os }}-weighted-static-shard-${{ matrix.shard }}-v1-
             ${{ runner.os }}-static-shard-${{ matrix.shard }}-v4-
             ${{ runner.os }}-static-shard-${{ matrix.shard }}-v3-
@@ -266,7 +266,7 @@ jobs:
     name: Merge and deploy Worker Static Assets
     needs: [validate, search, build-shard]
     env:
-      STATIC_DOCS_SHARD_COUNT: ${{ inputs.shards || '4' }}
+      STATIC_DOCS_SHARD_COUNT: ${{ inputs.shards || '8' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
