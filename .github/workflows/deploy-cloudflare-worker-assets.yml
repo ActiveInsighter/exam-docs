@@ -8,6 +8,11 @@ on:
       - 'codex/math-past-exams-0930'
   workflow_dispatch:
     inputs:
+      probe_edit:
+        description: Temporarily change one document to verify freshness with warm caches (deploy must be false)
+        required: false
+        default: false
+        type: boolean
       shards:
         description: Number of parallel static export runners (compare 4 and 8)
         required: true
@@ -35,6 +40,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+      - name: Apply temporary content freshness probe
+        if: ${{ inputs.probe_edit }}
+        env:
+          REQUEST_DEPLOY: ${{ inputs.deploy }}
+        run: |
+          test "${REQUEST_DEPLOY}" != 'true'
+          printf '\nBUILD_SPEED_FRESHNESS_PROBE_20261002\n' >> content/docs/intro.mdx
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
@@ -78,6 +90,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+      - name: Apply temporary content freshness probe
+        if: ${{ inputs.probe_edit }}
+        env:
+          REQUEST_DEPLOY: ${{ inputs.deploy }}
+        run: |
+          test "${REQUEST_DEPLOY}" != 'true'
+          printf '\nBUILD_SPEED_FRESHNESS_PROBE_20261002\n' >> content/docs/intro.mdx
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
@@ -171,6 +190,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+      - name: Apply temporary content freshness probe
+        if: ${{ inputs.probe_edit }}
+        env:
+          REQUEST_DEPLOY: ${{ inputs.deploy }}
+        run: |
+          test "${REQUEST_DEPLOY}" != 'true'
+          printf '\nBUILD_SPEED_FRESHNESS_PROBE_20261002\n' >> content/docs/intro.mdx
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
@@ -272,6 +298,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+      - name: Apply temporary content freshness probe
+        if: ${{ inputs.probe_edit }}
+        env:
+          REQUEST_DEPLOY: ${{ inputs.deploy }}
+        run: |
+          test "${REQUEST_DEPLOY}" != 'true'
+          printf '\nBUILD_SPEED_FRESHNESS_PROBE_20261002\n' >> content/docs/intro.mdx
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
@@ -420,6 +453,12 @@ jobs:
           test -s .static-docs/search-index.json
           test -s .static-docs/404.html
           node scripts/verify-static-asset-references.mjs .static-docs
+      - name: Verify changed content survives warm caches
+        if: ${{ inputs.probe_edit }}
+        run: |
+          grep -Fq BUILD_SPEED_FRESHNESS_PROBE_20261002 .static-docs/docs/intro/index.html
+          grep -Fq BUILD_SPEED_FRESHNESS_PROBE_20261002 .static-docs/docs/intro.md
+          echo '- Warm-cache content freshness probe passed for HTML and Markdown' >> "${GITHUB_STEP_SUMMARY}"
       - name: Prepare Cloudflare Static Assets metadata
         run: npm run prepare:cloudflare-assets
       - name: Validate Cloudflare asset package
