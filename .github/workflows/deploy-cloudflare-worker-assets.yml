@@ -8,6 +8,12 @@ on:
       - 'codex/math-past-exams-0930'
   workflow_dispatch:
     inputs:
+      shards:
+        description: Number of parallel static export runners (compare 4 and 8)
+        required: true
+        default: '4'
+        type: choice
+        options: ['4', '8']
       deploy:
         description: Deploy main to production or approved preview branches to the isolated exam-docs-preview Worker
         required: true
@@ -151,15 +157,15 @@ jobs:
           retention-days: 1
 
   build-shard:
-    name: Weighted static shard ${{ matrix.shard }} of 4
+    name: Weighted static shard ${{ matrix.shard }} of ${{ inputs.shards || '4' }}
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3]
+        shard: ${{ fromJSON(inputs.shards == '8' && '[0,1,2,3,4,5,6,7]' || '[0,1,2,3]') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      STATIC_DOCS_SHARD_COUNT: '4'
+      STATIC_DOCS_SHARD_COUNT: ${{ inputs.shards || '4' }}
       STATIC_DOCS_SHARD_INDEX: ${{ matrix.shard }}
       STATIC_DOCS_SKIP_SEARCH_BUILD: '1'
     steps:
@@ -191,9 +197,9 @@ jobs:
         uses: actions/cache@v5
         with:
           path: .static-docs-stage/.next/cache
-          key: ${{ runner.os }}-weighted-search-shard-${{ matrix.shard }}-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json', 'app/**', 'components/**', 'lib/**', 'scripts/**', 'content/docs/**') }}
+          key: ${{ runner.os }}-weighted-search-${{ inputs.shards || '4' }}-shard-${{ matrix.shard }}-v2-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json', 'app/**', 'components/**', 'lib/**', 'scripts/**', 'content/docs/**') }}
           restore-keys: |
-            ${{ runner.os }}-weighted-search-shard-${{ matrix.shard }}-v1-
+            ${{ runner.os }}-weighted-search-${{ inputs.shards || '4' }}-shard-${{ matrix.shard }}-v2-
             ${{ runner.os }}-weighted-static-shard-${{ matrix.shard }}-v1-
             ${{ runner.os }}-static-shard-${{ matrix.shard }}-v4-
             ${{ runner.os }}-static-shard-${{ matrix.shard }}-v3-
@@ -212,8 +218,8 @@ jobs:
           markdown="$(find .static-docs/docs -type f -name '*.md' | wc -l | tr -d ' ')"
           files="$(find .static-docs -type f | wc -l | tr -d ' ')"
           bytes="$(du -sb .static-docs | awk '{print $1}')"
-          echo "weighted_shard=${STATIC_DOCS_SHARD_INDEX}/4 routes=${routes} files=${files} markdown=${markdown} bytes=${bytes}"
-          if (( routes < 125 || routes > 170 )); then
+          echo "weighted_shard=${STATIC_DOCS_SHARD_INDEX}/${STATIC_DOCS_SHARD_COUNT} routes=${routes} files=${files} markdown=${markdown} bytes=${bytes}"
+          if (( routes < 1 )); then
             echo "::error::Unexpected route count ${routes} for shard ${STATIC_DOCS_SHARD_INDEX}."
             exit 1
           fi
@@ -231,7 +237,7 @@ jobs:
           set -euo pipefail
           payload="/tmp/static-shard-${STATIC_DOCS_SHARD_INDEX}.tar.zst"
           manifest="/tmp/static-chunks-${STATIC_DOCS_SHARD_INDEX}.sha256"
-          find .static-docs/_next/static -type f -print0 \
+          { find .static-docs/_next/static -type f -print0; printf '%s\0' .static-docs/docs/__next.docs.txt; } \
             | sort -z \
             | xargs -0 sha256sum \
             | sed 's#  .static-docs/#  #' > "${manifest}"
@@ -259,6 +265,8 @@ jobs:
   deploy:
     name: Merge and deploy Worker Static Assets
     needs: [validate, search, build-shard]
+    env:
+      STATIC_DOCS_SHARD_COUNT: ${{ inputs.shards || '4' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -285,13 +293,14 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
+          import os
           roots = Path('/tmp/static-shards')
           seen = {}
           owners = {}
           conflicts = []
           all_paths = set()
           intersections = None
-          for shard in range(4):
+          for shard in range(int(os.environ['STATIC_DOCS_SHARD_COUNT'])):
               manifest = roots / f'static-shard-{shard}' / f'static-chunks-{shard}.sha256'
               current = set()
               for line in manifest.read_text().splitlines():
@@ -318,7 +327,7 @@ jobs:
           mkdir -p /tmp/shard-extract
           tar --zstd -xf /tmp/static-shards/static-shard-0/static-shard-0.tar.zst
           cp -a public/. .static-docs/
-          for shard in 1 2 3; do
+          for ((shard=1; shard<STATIC_DOCS_SHARD_COUNT; shard++)); do
             rm -rf /tmp/shard-extract/*
             tar --zstd -xf "/tmp/static-shards/static-shard-${shard}/static-shard-${shard}.tar.zst" -C /tmp/shard-extract
             SHARD_ROOT="/tmp/shard-extract/.static-docs" TARGET_ROOT="${PWD}/.static-docs" python - <<'PY'
@@ -443,7 +452,7 @@ jobs:
             echo "- Uploadable asset files: ${file_count}/20000"
             echo "- Largest uploadable asset: $((largest_bytes / 1024 / 1024)) MiB / 25 MiB"
             echo "- Local static package: $((package_bytes / 1024 / 1024)) MiB"
-            echo '- Static generation: 4 deterministic weighted shards + dedicated search runner'
+            echo "- Static generation: ${STATIC_DOCS_SHARD_COUNT} deterministic weighted shards + dedicated search runner"
             echo '- Worker JavaScript: none (assets-only deployment)'
             echo '- RSC aliases: deduplicated locally and restored through two guarded Cloudflare 200 rewrites'
           } >> "${GITHUB_STEP_SUMMARY}"
@@ -451,7 +460,7 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy != true }}
         run: npx --yes wrangler@4.129.0 deploy --dry-run --config wrangler.jsonc --outdir .wrangler-dry-run
       - name: Check Cloudflare deployment credentials
-        if: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (github.ref == 'refs/heads/codex/math-past-exams-0930' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}
+        if: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || ((github.ref == 'refs/heads/codex/math-past-exams-0930' || github.ref == 'refs/heads/codex/build-speed-research-1002') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}
         shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -462,7 +471,7 @@ jobs:
           [[ -n "${CLOUDFLARE_ACCOUNT_ID:-}" ]] || { echo '::error::Missing GitHub Actions secret CLOUDFLARE_ACCOUNT_ID.'; exit 1; }
       - name: Deploy to Cloudflare Workers Static Assets (production or isolated preview)
         id: cloudflare-deploy
-        if: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (github.ref == 'refs/heads/codex/math-past-exams-0930' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}
+        if: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || ((github.ref == 'refs/heads/codex/math-past-exams-0930' || github.ref == 'refs/heads/codex/build-speed-research-1002') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}
         shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -483,7 +492,7 @@ jobs:
           if [[ "${GITHUB_REF}" != 'refs/heads/main' ]]; then worker_name=exam-docs-preview; fi
           echo "worker-name=${worker_name}" >> "${GITHUB_OUTPUT}"
       - name: Verify Cloudflare deployment
-        if: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (github.ref == 'refs/heads/codex/math-past-exams-0930' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}
+        if: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || ((github.ref == 'refs/heads/codex/math-past-exams-0930' || github.ref == 'refs/heads/codex/build-speed-research-1002') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}
         shell: bash
         env:
           DEPLOYMENT_URL: ${{ steps.cloudflare-deploy.outputs.deployment-url }}

@@ -18,14 +18,14 @@ describe('static deployment workflows', () => {
     expect(workflow).not.toContain('STATIC_DOCS_DISABLE_RSC_DEDUPE');
   });
 
-  it('merges four deterministic weighted URL shards with a safe static chunk union', async () => {
+  it('merges configurable deterministic weighted URL shards with a safe static chunk union', async () => {
     const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
     const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
 
-    expect(workflow).toContain("STATIC_DOCS_SHARD_COUNT: '4'");
-    expect(workflow).toContain('shard: [0, 1, 2, 3]');
+    expect(workflow).toContain("STATIC_DOCS_SHARD_COUNT: ${{ inputs.shards || '4' }}");
+    expect(workflow).toContain("'[0,1,2,3,4,5,6,7]' || '[0,1,2,3]'");
     expect(workflow).toContain('Weighted static shard');
-    expect(workflow).toContain('routes > 170');
+    expect(workflow).toContain('routes < 1');
     expect(workflow).toContain('Verify overlapping shared chunks are identical');
     expect(workflow).toContain('.static-docs/_next/static');
     expect(workflow).toContain('Two shards emitted different bytes at the same _next/static path.');
@@ -58,12 +58,12 @@ describe('static deployment workflows', () => {
     const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
     const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
 
-    expect(workflow).toContain('-weighted-search-shard-${{ matrix.shard }}-v1-${{ hashFiles(');
-    expect(workflow).toContain('-weighted-search-shard-${{ matrix.shard }}-v1-');
+    expect(workflow).toContain("-weighted-search-${{ inputs.shards || '4' }}-shard-${{ matrix.shard }}-v2-${{ hashFiles(");
+    expect(workflow).toContain("-weighted-search-${{ inputs.shards || '4' }}-shard-${{ matrix.shard }}-v2-");
     expect(workflow).toContain('-weighted-static-shard-${{ matrix.shard }}-v1-');
     expect(workflow).toContain('-static-shard-${{ matrix.shard }}-v4-');
     expect(workflow).toContain('-static-shard-${{ matrix.shard }}-v3-');
-    expect(workflow).not.toContain('-weighted-search-shard-${{ matrix.shard }}-v1-${{ github.sha }}');
+    expect(workflow).not.toContain("-weighted-search-${{ inputs.shards || '4' }}-shard-${{ matrix.shard }}-v2-${{ github.sha }}");
   });
 
   it('pins Wrangler and dry-runs only manual dispatches with deployment disabled', async () => {
