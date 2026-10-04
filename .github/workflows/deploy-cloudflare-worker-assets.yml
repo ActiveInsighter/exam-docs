@@ -562,7 +562,8 @@ jobs:
           route_list="$(mktemp)"
           encoded_route_list="$(mktemp)"
           route_failures="$(mktemp)"
-          trap 'rm -f -- "${route_list}" "${encoded_route_list}" "${route_failures}"' EXIT
+          route_retry_list="$(mktemp)"
+          trap 'rm -f -- "${route_list}" "${encoded_route_list}" "${route_failures}" "${route_retry_list}"' EXIT
           find .static-docs/docs -type f -name index.html -print \
             | while IFS= read -r html_file; do
                 relative="/${html_file#.static-docs/}"
@@ -577,16 +578,29 @@ jobs:
           NODE
           doc_route_count="$(wc -l < "${route_list}" | tr -d ' ')"
           export base_url route_failures
-          if ! xargs -P 16 -n 1 bash -c '
+          probe_routes() {
+            local input_file="$1"
+            : > "${route_failures}"
+            xargs -P 16 -n 1 bash -c '
             path="$1"
-            status="$(curl --silent --show-error --max-time 60 -L -o /dev/null -w "%{http_code}" "${base_url}${path}")"
+            status="$(curl --silent --show-error --max-time 60 -L -o /dev/null -w "%{http_code}" "${base_url}${path}" || true)"
             if [[ "${status}" != "200" ]]; then
-              printf "%s -> %s\n" "${path}" "${status}" >> "${route_failures}"
-              exit 1
+              printf "%s\t%s\n" "${path}" "${status}" >> "${route_failures}"
             fi
-          ' _ < "${encoded_route_list}"; then
+            ' _ < "${input_file}"
+          }
+          probe_routes "${encoded_route_list}"
+          for attempt in $(seq 1 18); do
+            [[ -s "${route_failures}" ]] || break
+            failed_count="$(wc -l < "${route_failures}" | tr -d ' ')"
+            echo "Retry failing static documentation HTML routes ${attempt}/18 (${failed_count} routes pending)."
+            awk -F '\t' '{ print $1 }' "${route_failures}" > "${route_retry_list}"
+            sleep 5
+            probe_routes "${route_retry_list}"
+          done
+          if [[ -s "${route_failures}" ]]; then
             echo '::error::One or more static documentation HTML routes failed.'
-            sed -n '1,40p' "${route_failures}"
+            awk -F '\t' '{ printf "%s -> %s\n", $1, $2 }' "${route_failures}" | sed -n '1,40p'
             exit 1
           fi
           echo "Full static documentation route verification: ${doc_route_count} routes -> 200"

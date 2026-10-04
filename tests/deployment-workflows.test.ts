@@ -34,6 +34,8 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('tests/static-asset-references.test.ts');
     expect(workflow).toContain('test "${doc_routes}" = \'738\'');
     expect(workflow).toContain('test "${markdown}" = \'737\'');
+    expect(workflow).toContain('Retry failing static documentation HTML routes');
+    expect(workflow).toContain('seq 1 18');
     expect(workflow).toContain('tests/static-doc-shards.test.ts');
     expect(workflow).toContain('tests/static-build-id.test.ts');
     expect(workflow).toContain('tests/search-determinism.test.ts');
