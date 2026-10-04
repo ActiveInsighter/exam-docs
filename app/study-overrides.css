@@ -1,12 +1,9 @@
 /* Study-site refinements kept separate from the base Fumadocs theme. */
 
-/* Keep the documentation type scale compact and consistent. */
-#docs-body {
-  font-size: 1rem;
-}
+/* Documentation body sizing is owned by app/docs/docs-typography.css. */
 
 #docs-body figure.shiki [role='region'] {
-  font-size: 0.9375rem;
+  font-size: 1rem;
 }
 
 #docs-body :where(code):not(:where(pre code, .not-prose code)) {
@@ -23,14 +20,17 @@
 }
 
 /*
- * Keep wide tables inside the article column. The wrapper scrolls horizontally
- * only when the table's intrinsic width exceeds the available width, matching
- * the display-math behavior. The track always uses the page background.
+ * Keep wide tables inside the article column and let the table, rather than the
+ * page grid, own horizontal overflow. Chinese text has a legal line-break
+ * opportunity between almost every character, so cells explicitly stay on one
+ * line and the wrapper becomes the horizontal scroll container.
  */
 #docs-body :where(div):has(> table) {
+  width: 100%;
   max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
+  overscroll-behavior-x: contain;
   background: var(--background) !important;
   scrollbar-color: color-mix(in oklch, var(--foreground) 32%, var(--background))
     var(--background);
@@ -41,7 +41,15 @@
   width: max-content;
   min-width: 100%;
   max-width: none;
+  table-layout: auto;
   background: var(--background) !important;
+}
+
+#docs-body :where(div):has(> table) > table :where(th, td),
+#docs-body :where(div):has(> table) > table :where(th *, td *) {
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
 }
 
 #docs-body :where(div):has(> table)::-webkit-scrollbar {
