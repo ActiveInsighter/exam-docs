@@ -6,7 +6,7 @@ const docsRoot = join(process.cwd(), 'content', 'docs');
 const expectedRootPages = ['math', '408', 'politics', 'english', 'programming'];
 const expectedModuleChildren: Record<string, string[]> = {
   math: ['index', 'past-exams', 'exam', 'zhangyu-1000', 'lizhengyuan', 'lilin-880'],
-  '408': ['index', 'mock', 'past-exams'],
+  '408': ['index', 'mock', 'past-exams', 'past-exams-large-questions'],
   politics: ['index', 'historical-questions', 'classified-questions'],
   english: ['index'],
   programming: ['index', 'algorithm'],
@@ -54,7 +54,7 @@ describe('documentation source structure', () => {
       ]),
     );
     expect(readdirSync(join(docsRoot, '408'))).toEqual(
-      expect.arrayContaining(['mock', 'past-exams']),
+      expect.arrayContaining(['mock', 'past-exams', 'past-exams-large-questions']),
     );
     expect(readdirSync(join(docsRoot, 'programming'))).toContain('algorithm');
   });
