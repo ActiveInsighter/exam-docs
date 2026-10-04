@@ -6,6 +6,7 @@ on:
       - main
       - 'codex/lilin-880-rebuild-*'
       - 'codex/math-past-exams-0930'
+      - 'codex/math-core-questions-1005'
   workflow_dispatch:
     inputs:
       probe_edit:
@@ -137,8 +138,8 @@ jobs:
 
           const root = process.env.SEARCH_ROOT;
           const manifest = JSON.parse(readFileSync(path.join(root, 'search-index.json'), 'utf8'));
-          if (manifest.pages !== 628) {
-            throw new Error(`Expected 628 searchable pages, received ${manifest.pages}.`);
+          if (manifest.pages !== 737) {
+            throw new Error(`Expected 737 searchable pages, received ${manifest.pages}.`);
           }
           if (!Array.isArray(manifest.categories) || manifest.categories.length < 5) {
             throw new Error('Search manifest is missing module categories.');
@@ -253,7 +254,7 @@ jobs:
           test ! -e .static-docs/search-index.json
           test ! -e .static-docs/search
           if [[ "${STATIC_DOCS_SHARD_INDEX}" == '0' ]]; then
-            test "${markdown}" = '628'
+            test "${markdown}" = '737'
           else
             test "${markdown}" = '0'
           fi
@@ -418,8 +419,8 @@ jobs:
 
           const root = process.env.SEARCH_ROOT;
           const manifest = JSON.parse(readFileSync(path.join(root, 'search-index.json'), 'utf8'));
-          if (manifest.pages !== 628) {
-            throw new Error(`Expected 628 searchable pages after merge, received ${manifest.pages}.`);
+          if (manifest.pages !== 737) {
+            throw new Error(`Expected 737 searchable pages after merge, received ${manifest.pages}.`);
           }
 
           const resolveAsset = (url) => path.join(root, String(url).replace(/^\/+/, ''));
@@ -446,8 +447,8 @@ jobs:
           files="$(find .static-docs -type f | wc -l | tr -d ' ')"
           bytes="$(du -sb .static-docs | awk '{print $1}')"
           echo "merged_routes=${doc_routes} files=${files} markdown=${markdown} bytes=${bytes}"
-          test "${doc_routes}" = '629'
-          test "${markdown}" = '628'
+          test "${doc_routes}" = '738'
+          test "${markdown}" = '737'
           test -s .static-docs/docs/intro/index.html
           test -s .static-docs/docs/intro/__next._full.txt
           test -s .static-docs/docs/__next.docs.txt
@@ -501,7 +502,7 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy != true }}
         run: npx --yes wrangler@4.129.0 deploy --dry-run --config wrangler.jsonc --outdir .wrangler-dry-run
       - name: Check Cloudflare deployment credentials
-        if: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || ((github.ref == 'refs/heads/codex/math-past-exams-0930' || github.ref == 'refs/heads/codex/build-speed-research-1002') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}
+        if: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || ((github.ref == 'refs/heads/codex/math-past-exams-0930' || github.ref == 'refs/heads/codex/math-core-questions-1005' || github.ref == 'refs/heads/codex/build-speed-research-1002') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}
         shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -512,7 +513,7 @@ jobs:
           [[ -n "${CLOUDFLARE_ACCOUNT_ID:-}" ]] || { echo '::error::Missing GitHub Actions secret CLOUDFLARE_ACCOUNT_ID.'; exit 1; }
       - name: Deploy to Cloudflare Workers Static Assets (production or isolated preview)
         id: cloudflare-deploy
-        if: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || ((github.ref == 'refs/heads/codex/math-past-exams-0930' || github.ref == 'refs/heads/codex/build-speed-research-1002') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}
+        if: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || ((github.ref == 'refs/heads/codex/math-past-exams-0930' || github.ref == 'refs/heads/codex/math-core-questions-1005' || github.ref == 'refs/heads/codex/build-speed-research-1002') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}
         shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -533,7 +534,7 @@ jobs:
           if [[ "${GITHUB_REF}" != 'refs/heads/main' ]]; then worker_name=exam-docs-preview; fi
           echo "worker-name=${worker_name}" >> "${GITHUB_OUTPUT}"
       - name: Verify Cloudflare deployment
-        if: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || ((github.ref == 'refs/heads/codex/math-past-exams-0930' || github.ref == 'refs/heads/codex/build-speed-research-1002') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}
+        if: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || ((github.ref == 'refs/heads/codex/math-past-exams-0930' || github.ref == 'refs/heads/codex/math-core-questions-1005' || github.ref == 'refs/heads/codex/build-speed-research-1002') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}
         shell: bash
         env:
           DEPLOYMENT_URL: ${{ steps.cloudflare-deploy.outputs.deployment-url }}
