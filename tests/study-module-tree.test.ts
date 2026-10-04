@@ -20,6 +20,45 @@ function walkFiles(directory: string): string[] {
 }
 
 describe('documentation source structure', () => {
+  it('classifies all 126 large questions under the same 24 chapters as the 408 past exams', () => {
+    const referenceRoot = join(docsRoot, '408', 'past-exams');
+    const collectionRoot = join(docsRoot, '408', 'past-exams-large-questions');
+    const subjects = ['01-数据结构', '02-计算机组成原理', '03-操作系统', '04-计算机网络'];
+    const questionIds: number[] = [];
+    let chapterCount = 0;
+
+    for (const [subjectIndex, subject] of subjects.entries()) {
+      const chapterFiles = readdirSync(join(referenceRoot, subject))
+        .filter((name) => name.endsWith('.mdx')).sort();
+      const directory = join(collectionRoot, subject);
+      const meta = JSON.parse(readFileSync(join(directory, 'meta.json'), 'utf8'));
+      expect(meta.pages).toEqual(['index', ...chapterFiles.map((name) => name.slice(0, -4))]);
+      expect(readdirSync(directory).filter((name) => name.endsWith('.mdx')).sort())
+        .toEqual([...chapterFiles, 'index.mdx'].sort());
+
+      let subjectCount = 0;
+      for (const name of chapterFiles) {
+        const content = readFileSync(join(directory, name), 'utf8');
+        const questions = [...content.matchAll(/\*\*(\d+)\. (\d{4}) 年第 (\d+) 题\*\*/gu)];
+        const reference = readFileSync(join(referenceRoot, subject, name), 'utf8');
+        expect(content.match(/^title: .+$/mu)?.[0]).toBe(reference.match(/^title: .+$/mu)?.[0]);
+        expect(Number(content.match(/^questionCount: (\d+)$/mu)?.[1])).toBe(questions.length);
+        expect(content.match(/<ExamQuestion>/gu)?.length ?? 0).toBe(questions.length);
+        expect(content.match(/<\/ExamQuestion>/gu)?.length ?? 0).toBe(questions.length);
+        expect(content.match(/<ExamSolution>/gu)?.length ?? 0).toBe(questions.length);
+        const ids = questions.map((match) => Number(match[1]));
+        expect(ids).toEqual([...ids].sort((left, right) => left - right));
+        questionIds.push(...ids);
+        subjectCount += questions.length;
+        chapterCount += 1;
+      }
+      expect(subjectCount).toBe(subjectIndex === 3 ? 18 : 36);
+    }
+    expect(chapterCount).toBe(24);
+    expect(questionIds.sort((left, right) => left - right))
+      .toEqual(Array.from({ length: 126 }, (_, index) => index + 1));
+  });
+
   it('uses only ASCII module roots so Fumadocs can resolve the active root from pathname', () => {
     const rootMeta = JSON.parse(readFileSync(join(docsRoot, 'meta.json'), 'utf8')) as {
       pages?: string[];

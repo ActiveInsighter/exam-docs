@@ -1,0 +1,1429 @@
+---
+title: "第 2 章 进程管理"
+description: "408 操作系统历年大题 · 第 2 章 进程管理，共 16 道，按年份与原卷题号排列。"
+subject: "操作系统"
+questionCount: 16
+---
+
+# 第 2 章 进程管理
+
+本章收录 **16 道**历年大题。章节名称与 [408 真题对应章节](/docs/408/past-exams/03-169e94f1/02-bf49d8a5) 一致。
+
+<span id="question-2009-45" />
+
+## 2009 年第 45 题
+
+<ExamQuestion>
+
+**73. 2009 年第 45 题**
+
+三个进程 $P_1$、$P_2$、$P_3$ 互斥使用一个包含 $N\,(N>0)$ 个单元的缓冲区。$P_1$ 每次用 `produce()` 生成一个正整数，并用 `put()` 送入缓冲区某一空单元中；$P_2$ 每次用 `getodd()` 从缓冲区中取出一个奇数，并用 `countodd()` 统计奇数个数；$P_3$ 每次用 `geteven()` 从缓冲区中取出一个偶数，并用 `counteven()` 统计偶数个数。
+
+请用信号量机制实现这三个进程的同步与互斥活动，并说明所定义信号量的含义。要求用伪代码描述。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+设置 4 个信号量：
+
+- `mutex=1`：缓冲区互斥信号量；
+- `empty=N`：缓冲区空单元数；
+- `odd=0`：缓冲区中可供 $P_2$ 取出的奇数个数；
+- `even=0`：缓冲区中可供 $P_3$ 取出的偶数个数。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+缓冲区是三个进程共享的数据结构，因此对 `put()`、`getodd()`、`geteven()` 的实际缓冲区操作必须互斥，使用 `mutex` 保护。
+
+同时还存在三类同步约束：
+
+- 生产者只有在存在空单元时才能放入数据，用 `empty` 计数；
+- $P_2$ 只有在已有奇数时才能取奇数，用 `odd` 计数；
+- $P_3$ 只有在已有偶数时才能取偶数，用 `even` 计数。
+
+伪代码可写为：
+
+```c
+semaphore mutex = 1;
+semaphore empty = N;
+semaphore odd   = 0;
+semaphore even  = 0;
+
+P1() {
+    while (true) {
+        x = produce();
+
+        P(empty);
+        P(mutex);
+        put(x);
+        V(mutex);
+
+        if (x % 2 == 0)
+            V(even);
+        else
+            V(odd);
+    }
+}
+
+P2() {
+    while (true) {
+        P(odd);
+        P(mutex);
+        x = getodd();
+        V(mutex);
+        V(empty);
+
+        countodd();
+    }
+}
+
+P3() {
+    while (true) {
+        P(even);
+        P(mutex);
+        x = geteven();
+        V(mutex);
+        V(empty);
+
+        counteven();
+    }
+}
+```
+
+生产者先执行 `P(empty)`，避免缓冲区已满时仍进入临界区；消费者先等待相应类型的数据，再进入临界区取数。每取走一个数后执行 `V(empty)`，表示增加一个空单元。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2011-45" />
+
+## 2011 年第 45 题
+
+<ExamQuestion>
+
+**77. 2011 年第 45 题**
+
+某银行提供 1 个服务窗口和 10 个顾客等待座位。顾客到达银行时，若有空座位，则到取号机领取一个号并等待叫号。取号机每次仅允许一位顾客使用。当营业员空闲时，通过叫号选取一位顾客，并为其服务。
+
+顾客和营业员的活动过程如下：
+
+```text
+cobegin
+{
+    process 顾客 i
+    {
+        从取号机获得一个号码;
+        等待叫号;
+        获得服务;
+    }
+
+    process 营业员
+    {
+        while (TRUE) {
+            叫号;
+            为顾客服务;
+        }
+    }
+} coend
+```
+
+请添加必要的信号量和 P、V（或 `wait()`、`signal()`）操作，实现上述过程的互斥和同步。要求写出完整过程，说明各信号量的含义并赋初值。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+可设置：
+
+- `empty=10`：当前空座位数；
+- `mutex=1`：取号机互斥信号量；
+- `full=0`：已经取号并等待服务的顾客数；
+- `service=0`：营业员叫号信号。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+顾客首先必须取得一个空座位，然后互斥使用取号机。取号完成后，通知营业员“已有顾客等待”。营业员只有在存在等待顾客时才能叫号；叫到一位顾客后，该顾客离开等待座位，因此释放一个座位，并通知一个顾客开始接受服务。
+
+```c
+semaphore empty   = 10;  // 空座位数
+semaphore mutex   = 1;   // 互斥使用取号机
+semaphore full    = 0;   // 已取号、正在等待的顾客数
+semaphore service = 0;   // 叫号信号
+
+process 顾客 i {
+    P(empty);            // 等待空座位
+
+    P(mutex);            // 互斥使用取号机
+    从取号机获得一个号码;
+    V(mutex);
+
+    V(full);             // 通知营业员有顾客等待
+    P(service);          // 等待被叫号
+    获得服务;
+}
+
+process 营业员 {
+    while (TRUE) {
+        P(full);         // 没有顾客时等待
+        叫号;
+        V(empty);        // 被叫到的顾客离开等待座位
+        V(service);      // 通知一个顾客接受服务
+        为顾客服务;
+    }
+}
+```
+
+原材料中的 `fu11` 是对信号量名 `full` 的识别错误，这里统一修正为 `full`。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2013-45" />
+
+## 2013 年第 45 题
+
+<ExamQuestion>
+
+**81. 2013 年第 45 题**
+
+某博物馆最多可以容纳 500 人同时参观，只有一个出入口，且该出入口一次仅允许一个人通过。参观者的活动过程如下：
+
+```text
+cobegin
+参观者进程 i:
+{
+    ...
+    进门；
+    ...
+    参观；
+    ...
+    出门；
+    ...
+}
+coend
+```
+
+请添加必要的信号量和 P、V（或 `wait()`、`signal()`）操作，实现上述过程中的互斥与同步。要求写出完整过程，并说明信号量的含义和初值。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+设置两个信号量：
+
+- `mutex=1`：控制出入口的互斥使用；
+- `empty=500`：表示博物馆还可容纳的人数。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+出入口一次只能通过一人，因此“进门”和“出门”都必须由同一个互斥信号量 `mutex` 保护。
+
+博物馆最多同时容纳 500 人，因此用计数信号量 `empty` 表示剩余容量。参观者进门前必须先执行 `P(empty)`；离开博物馆后执行 `V(empty)`，归还一个容量名额。
+
+```c
+semaphore empty = 500;
+semaphore mutex = 1;
+
+visitor() {
+    P(empty);          // 申请一个馆内容量名额
+
+    P(mutex);
+    进门;
+    V(mutex);
+
+    参观;
+
+    P(mutex);
+    出门;
+    V(mutex);
+
+    V(empty);          // 离馆后归还容量名额
+}
+```
+
+这里不能只设置 `empty`，因为即使馆内人数没有达到 500，仍可能有两个人同时试图通过唯一出入口；也不能只设置 `mutex`，因为那样无法限制馆内总人数。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2014-47" />
+
+## 2014 年第 47 题
+
+<ExamQuestion>
+
+**84. 2014 年第 47 题**
+
+系统中有多个生产者进程和多个消费者进程，共享一个能存放 1000 件产品的环形缓冲区，初始为空。
+
+当缓冲区未满时，生产者可以放入一件产品，否则等待；当缓冲区非空时，消费者可以取走一件产品，否则等待。另要求：**一个消费者进程必须连续取出 10 件产品后，其他消费者进程才可以开始取产品。**
+
+请使用信号量 P、V（`wait()`、`signal()`）操作实现进程间的互斥与同步。要求写出完整过程，并说明所用信号量的含义和初值。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+可设置 4 个信号量：
+
+- `empty=1000`：缓冲区空位数；
+- `full=0`：缓冲区已有产品数；
+- `buffer_mutex=1`：生产者、消费者单次访问缓冲区时的互斥信号量；
+- `consumer_mutex=1`：保证一个消费者连续完成 10 次取产品操作后，其他消费者才能开始取产品。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+原材料的文字说明一度把 `empty` 和 `full` 的初值写反，但其代码及题意表明：缓冲区初始为空，因此应为
+
+```c
+semaphore empty = 1000;
+semaphore full = 0;
+```
+
+完整实现可写为：
+
+```c
+semaphore consumer_mutex = 1;
+semaphore buffer_mutex   = 1;
+semaphore empty          = 1000;
+semaphore full           = 0;
+
+Producer() {
+    while (true) {
+        生产一件产品;
+
+        P(empty);
+        P(buffer_mutex);
+        将产品放入缓冲区;
+        V(buffer_mutex);
+        V(full);
+    }
+}
+
+Consumer() {
+    while (true) {
+        P(consumer_mutex);          // 独占“连续取 10 件”的资格
+
+        for (int i = 0; i < 10; i++) {
+            P(full);
+            P(buffer_mutex);
+            从缓冲区取出一件产品;
+            V(buffer_mutex);
+            V(empty);
+
+            消费产品;
+        }
+
+        V(consumer_mutex);
+    }
+}
+```
+
+这里 `consumer_mutex` 必须包住整个 10 次循环，而不能只包住一次取产品。这样某个消费者一旦开始这一轮取产品，其他消费者就必须等它连续取满 10 件后才能进入。
+
+即使该消费者在中途因为缓冲区暂时为空而阻塞在 `P(full)`，生产者仍然可以继续运行并向缓冲区中放入产品，因此不会因此形成生产者—消费者之间的死锁。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2015-45" />
+
+## 2015 年第 45 题
+
+<ExamQuestion>
+
+**85. 2015 年第 45 题**
+
+A、B 两人通过信箱进行辩论。每个人都从自己的信箱中取出对方提出的问题，将“问题的答案”和“向对方提出的新问题”组成一个新邮件，再放入对方的信箱。
+
+A 的信箱最多存放 $M$ 个邮件，B 的信箱最多存放 $N$ 个邮件。初始时 A 的信箱中有 $x$ 个邮件，且
+
+$$
+0<x<M;
+$$
+
+B 的信箱中有 $y$ 个邮件，且
+
+$$
+0<y<N.
+$$
+
+A、B 的操作过程如下：
+
+```text
+A {
+    while (true) {
+        从 A 的信箱中取出一个邮件；
+        回答问题并提出一个新问题；
+        将新邮件放入 B 的信箱；
+    }
+}
+
+B {
+    while (true) {
+        从 B 的信箱中取出一个邮件；
+        回答问题并提出一个新问题；
+        将新邮件放入 A 的信箱；
+    }
+}
+```
+
+只有当自己的信箱非空时才能取邮件；只有当对方信箱未满时才能放入新邮件，否则等待。请添加必要的信号量和 P、V（或 `wait()`、`signal()`）操作，实现上述过程的同步。要求写出完整过程，并说明信号量的含义和初值。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+可设置：
+
+```c
+semaphore A_full  = x;
+semaphore A_empty = M - x;
+semaphore B_full  = y;
+semaphore B_empty = N - y;
+semaphore A_mutex = 1;
+semaphore B_mutex = 1;
+```
+
+其中 `A_full/B_full` 表示对应信箱中的邮件数，`A_empty/B_empty` 表示对应信箱的空位数，`A_mutex/B_mutex` 用于互斥访问对应信箱。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+对 A 的信箱而言，A 是消费者、B 是生产者；对 B 的信箱而言，B 是消费者、A 是生产者。因此两个信箱分别构成一个有界缓冲区问题。
+
+```c
+semaphore A_full  = x;
+semaphore A_empty = M - x;
+semaphore B_full  = y;
+semaphore B_empty = N - y;
+semaphore A_mutex = 1;
+semaphore B_mutex = 1;
+
+A() {
+    while (true) {
+        P(A_full);
+        P(A_mutex);
+        从 A 的信箱中取出一个邮件;
+        V(A_mutex);
+        V(A_empty);
+
+        回答问题并提出一个新问题;
+
+        P(B_empty);
+        P(B_mutex);
+        将新邮件放入 B 的信箱;
+        V(B_mutex);
+        V(B_full);
+    }
+}
+
+B() {
+    while (true) {
+        P(B_full);
+        P(B_mutex);
+        从 B 的信箱中取出一个邮件;
+        V(B_mutex);
+        V(B_empty);
+
+        回答问题并提出一个新问题;
+
+        P(A_empty);
+        P(A_mutex);
+        将新邮件放入 A 的信箱;
+        V(A_mutex);
+        V(A_full);
+    }
+}
+```
+
+以 A 为例：
+
+- `P(A_full)` 保证 A 只能在自己的信箱中确实存在邮件时取信；
+- 取出后执行 `V(A_empty)`，表示 A 信箱多出一个空位；
+- A 写入 B 信箱前执行 `P(B_empty)`，若 B 信箱已满则等待；
+- 写入成功后执行 `V(B_full)`，通知 B 又多了一封可取邮件。
+
+B 的过程完全对称。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2016-46" />
+
+## 2016 年第 46 题
+
+<ExamQuestion>
+
+**87. 2016 年第 46 题**
+
+某进程调度程序采用基于优先数 `priority` 的调度策略：每次选择**优先数最小**的进程运行。进程创建时由用户指定 `nice` 作为静态优先数。
+
+为动态调整优先数，引入运行时间 `cpuTime` 和等待时间 `waitTime`，初值均为 0：
+
+- 进程处于执行态时，`cpuTime` 定时加 1，`waitTime` 置 0；
+- 进程处于就绪态时，`cpuTime` 置 0，`waitTime` 定时加 1。
+
+请回答：
+
+1. 若只令 `priority=nice`，为什么可能出现饥饿现象？
+2. 使用 `nice`、`cpuTime` 和 `waitTime` 设计一种动态优先数计算方法以避免饥饿，并说明 `waitTime` 的作用。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+1. 静态优先数不随等待时间改变。若就绪队列中不断出现优先数更小的进程，优先数较大的进程可能长期得不到 CPU，从而发生饥饿。
+2. 一种可行方法为
+
+$$
+\text{priority}=\text{nice}+k_1\cdot\text{cpuTime}-k_2\cdot\text{waitTime},
+$$
+
+其中 $k_1>0,\ k_2>0$。`waitTime` 越大，数值优先数越小，使等待时间较长的进程逐步获得更高的调度优先级，从而实现老化并避免饥饿。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+题目规定“优先数越小，调度优先级越高”。因此动态调整时两个方向要特别注意：
+
+- 一个进程持续占用 CPU 时，`cpuTime` 增大，应让它的 `priority` 数值增大，从而降低它继续运行的优先级；
+- 一个进程长期处于就绪队列等待时，`waitTime` 增大，应让它的 `priority` 数值减小，从而提高它被调度的机会。
+
+因此可取
+
+$$
+\boxed{
+\text{priority}=\text{nice}+k_1\cdot\text{cpuTime}-k_2\cdot\text{waitTime}
+},
+$$
+
+其中 $k_1,k_2$ 均为正数，用于调节运行时间和等待时间对优先级的影响程度。
+
+`waitTime` 实际上承担了**老化（aging）**作用：等待得越久，进程的数值优先数会越低，最终能够超过原本优先级更高的进程，从而避免无限期等待。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2017-46" />
+
+## 2017 年第 46 题
+
+综合考点：线程共享资源、同步互斥。
+
+<ExamQuestion>
+
+**90. 2017 年第 46 题**
+
+某进程中有 3 个并发执行的线程 `thread1`、`thread2`、`thread3`，伪代码如下：
+
+```c
+typedef struct {
+    float a;
+    float b;
+} cnum;
+
+// 全局变量
+cnum x, y, z;
+
+// 计算两个复数之和
+cnum add(cnum p, cnum q) {
+    cnum s;
+    s.a = p.a + q.a;
+    s.b = p.b + q.b;
+    return s;
+}
+```
+
+```c
+thread1 {
+    cnum w;
+    w = add(x, y);
+    ...
+}
+
+thread2 {
+    cnum w;
+    w = add(y, z);
+    ...
+}
+
+thread3 {
+    cnum w;
+    w.a = 1;
+    w.b = 2;
+    z = add(z, w);
+    y = add(y, w);
+    ...
+}
+```
+
+请添加必要的信号量和 P、V（或 `wait()`、`signal()`）操作，要求既保证线程对临界资源的互斥访问，又尽可能提高并发程度。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+冲突关系为：
+
+- `thread1` 与 `thread3` 在变量 `y` 上存在读—写冲突；
+- `thread2` 与 `thread3` 在变量 `y`、`z` 上存在读—写冲突；
+- `thread1` 与 `thread2` 对 `y` 都只读，应允许二者并发。
+
+可设置 3 个互斥信号量：
+
+```c
+semaphore y_mutex1 = 1;  // thread1 与 thread3 关于 y
+semaphore y_mutex2 = 1;  // thread2 与 thread3 关于 y
+semaphore z_mutex  = 1;  // thread2 与 thread3 关于 z
+```
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+如果只给 `y` 设置一个普通互斥信号量，那么 `thread1` 和 `thread2` 即使都只是读取 `y`，也无法同时执行，会损失不必要的并发性。
+
+本题可以针对两个“读者—写者冲突对”分别设置两个信号量：`thread1` 读取 `y` 时只申请 `y_mutex1`，`thread2` 读取 `y` 时只申请 `y_mutex2`；`thread3` 写 `y` 时必须同时取得这两个信号量。这样 `thread1` 与 `thread2` 可以并发读，而 `thread3` 写 `y` 时又能排斥二者。
+
+```c
+semaphore y_mutex1 = 1;
+semaphore y_mutex2 = 1;
+semaphore z_mutex  = 1;
+
+cnum x, y, z;
+
+thread1() {
+    cnum w;
+
+    P(y_mutex1);
+    w = add(x, y);          // 读 x、y
+    V(y_mutex1);
+
+    ...
+}
+
+thread2() {
+    cnum w;
+
+    P(z_mutex);
+    P(y_mutex2);
+    w = add(y, z);          // 同时读取 y、z
+    V(y_mutex2);
+    V(z_mutex);
+
+    ...
+}
+
+thread3() {
+    cnum w;
+    w.a = 1;
+    w.b = 2;
+
+    P(z_mutex);
+    z = add(z, w);          // 写 z
+    V(z_mutex);
+
+    P(y_mutex1);
+    P(y_mutex2);
+    y = add(y, w);          // 写 y，必须排斥 thread1 和 thread2
+    V(y_mutex2);
+    V(y_mutex1);
+
+    ...
+}
+```
+
+各变量的访问关系如下：
+
+| 变量 | `thread1` 与 `thread2` | `thread1` 与 `thread3` | `thread2` 与 `thread3` |
+| --- | --- | --- | --- |
+| `x` | 仅 `thread1` 访问 | 仅 `thread1` 访问 | 均不访问 |
+| `y` | 同时读，可并发 | 读—写互斥 | 读—写互斥 |
+| `z` | 仅 `thread2` 访问 | 仅 `thread3` 访问 | 读—写互斥 |
+
+原解析中 `thread3` 把题面给出的 `w.b=2` 错写成 `w.b=1`，这里已按原题修正；原评分表中的线程编号也存在明显错位，这里按三个实际线程重新整理。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2019-43" />
+
+## 2019 年第 43 题
+
+<ExamQuestion>
+
+**93. 2019 年第 43 题**
+
+有 $n\;(n\ge3)$ 位哲学家围坐在一张圆桌边，每位哲学家交替进行就餐和思考。圆桌中心有 $m\;(m\ge1)$ 个碗，每两位哲学家之间有一根筷子。每位哲学家必须同时取得一个碗和自己两侧的两根筷子后才能就餐；就餐完毕后将碗和筷子放回原位并继续思考。
+
+为使尽可能多的哲学家能够同时就餐，并防止发生死锁，请使用信号量的 P、V（或 `wait()`、`signal()`）操作描述上述过程，并说明所用信号量及其初值的含义。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+可为每根筷子设置一个初值为 1 的互斥信号量，并设置一个计数信号量 `bowl`：
+
+```c
+semaphore chopstick[n] = {1};
+semaphore bowl = min(m, n - 1);
+
+philosopher(int i) {
+    while (1) {
+        think();
+
+        P(bowl);
+        P(chopstick[i]);
+        P(chopstick[(i + 1) % n]);
+
+        eat();
+
+        V(chopstick[(i + 1) % n]);
+        V(chopstick[i]);
+        V(bowl);
+    }
+}
+```
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+`chopstick[i]` 表示第 $i$ 根筷子是否可用，初值均为 1，用于保证一根筷子同一时刻只能被一个哲学家取得。
+
+若允许 $n$ 位哲学家同时开始获取筷子，就可能出现每人先拿到一根筷子、再永久等待另一根筷子的循环等待状态。因此需要限制同时进入“取筷子阶段”的哲学家数量不超过 $n-1$。
+
+另一方面，实际能参与取筷子的哲学家数量也不能超过碗的数量 $m$。因此用于限制并发数量的计数信号量初值应为
+
+$$
+\boxed{\min(m,n-1)}.
+$$
+
+当 $m<n$ 时，最多只有 $m$ 位哲学家能进入取筷子阶段；当 $m\ge n$ 时，把并发取筷子人数限制为 $n-1$，从而破坏产生死锁所需的循环等待条件。
+
+原材料中“当 $m\ge n$ 时让碗的资源量等于 `-1`”是明显的识别错误；结合后文给出的 $\min\{m,n-1\}$ 及代码，应为 $n-1$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2020-45" />
+
+## 2020 年第 45 题
+
+<ExamQuestion>
+
+**95. 2020 年第 45 题**
+
+现有 5 个操作 A、B、C、D 和 E。操作 C 必须在 A 和 B 都完成后执行，操作 E 必须在 C 和 D 都完成后执行。请使用信号量的 `wait()`、`signal()`（或 P、V）操作描述这些操作之间的同步关系，并说明所用信号量及其初值。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+可为四条跨操作的先后依赖分别设置一个初值为 0 的同步信号量：
+
+```c
+semaphore SAC = 0;
+semaphore SBC = 0;
+semaphore SCE = 0;
+semaphore SDE = 0;
+
+A() {
+    操作A;
+    V(SAC);
+}
+
+B() {
+    操作B;
+    V(SBC);
+}
+
+C() {
+    P(SAC);
+    P(SBC);
+    操作C;
+    V(SCE);
+}
+
+D() {
+    操作D;
+    V(SDE);
+}
+
+E() {
+    P(SCE);
+    P(SDE);
+    操作E;
+}
+```
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+题目中的前驱关系为：
+
+$$
+A\rightarrow C,
+\qquad
+B\rightarrow C,
+\qquad
+C\rightarrow E,
+\qquad
+D\rightarrow E.
+$$
+
+因此设置 4 个初值为 0 的同步信号量即可。
+
+- A 完成后执行 `V(SAC)`，C 在执行前通过 `P(SAC)` 等待 A；
+- B 完成后执行 `V(SBC)`，C 在执行前通过 `P(SBC)` 等待 B；
+- C 完成后执行 `V(SCE)`，E 在执行前通过 `P(SCE)` 等待 C；
+- D 完成后执行 `V(SDE)`，E 在执行前通过 `P(SDE)` 等待 D。
+
+这些信号量用于**同步**而不是互斥，所以初值均为 0。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2021-45" />
+
+## 2021 年第 45 题
+
+<ExamQuestion>
+
+**97. 2021 年第 45 题**
+
+下表给出了整型信号量 `S` 的 `wait()` 和 `signal()` 操作的功能描述，以及采用开/关中断指令实现信号量操作互斥的两种方法。
+
+功能描述：
+
+```c
+Semaphore S;
+
+wait(S) {
+    while (S <= 0);
+    S = S - 1;
+}
+
+signal(S) {
+    S = S + 1;
+}
+```
+
+方法 1：
+
+```c
+Semaphore S;
+
+wait(S) {
+    关中断;
+    while (S <= 0);
+    S = S - 1;
+    开中断;
+}
+
+signal(S) {
+    关中断;
+    S = S + 1;
+    开中断;
+}
+```
+
+方法 2：
+
+```c
+Semaphore S;
+
+wait(S) {
+    关中断;
+    while (S <= 0) {
+        开中断;
+        关中断;
+    }
+    S = S - 1;
+    开中断;
+}
+
+signal(S) {
+    关中断;
+    S = S + 1;
+    开中断;
+}
+```
+
+请回答下列问题。
+
+1. 为什么在 `wait()` 和 `signal()` 操作中，对信号量 `S` 的访问必须互斥执行？
+2. 分别说明方法 1 和方法 2 是否正确。若不正确，请说明理由。
+3. 用户程序能否使用开/关中断指令实现临界区互斥？为什么？
+
+<ExamSolution>
+
+<ExamAnswer>
+
+1. `S` 是多个进程或线程共享且会被读写的变量，对它的“判断/修改”必须原子地完成，否则会发生竞态。
+2. 方法 1 错误；方法 2 正确。方法 1 在 `S<=0` 时关闭中断后进入忙等，其他进程无法运行并执行 `signal(S)`，因此可能永久循环。方法 2 在等待期间重新打开中断，使其他进程有机会修改 `S`。
+3. 不能。开中断、关中断指令属于特权指令，只能在内核态执行。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+### （1）为什么必须互斥
+
+`wait()` 会先判断 `S` 是否大于 0，再执行 `S=S-1`；`signal()` 会执行 `S=S+1`。如果这些操作可被其他执行流交叉打断，就可能出现多个进程同时依据同一个旧值更新 `S`，导致信号量值错误。
+
+因此对 `S` 的读—改—写过程必须作为互斥的原子操作完成。
+
+### （2）两种方法
+
+**方法 1 不正确。**
+
+当进入 `wait()` 时若
+
+$$
+S\le0,
+$$
+
+程序已经关闭中断，并停留在
+
+```c
+while (S <= 0);
+```
+
+中忙等。由于中断保持关闭，处理器不能正常切换去执行可能调用 `signal(S)` 的其他进程，于是 `S` 无法改变，循环可能永远无法结束。
+
+**方法 2 正确。**
+
+方法 2 在发现 `S<=0` 时，先重新打开中断，再重新关中断检查。这样等待期间其他执行流仍有机会运行并通过 `signal()` 增加 `S`，同时在真正检查和修改 `S` 时又保持关中断状态，从而保证互斥。
+
+### （3）用户程序能否直接开/关中断
+
+不能。开中断和关中断会影响整个处理器的中断响应，属于特权操作，只允许在内核态执行；普通用户程序运行在用户态，无权执行这些指令。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2022-46" />
+
+## 2022 年第 46 题
+
+<ExamQuestion>
+
+**100. 2022 年第 46 题**
+
+某进程的两个线程 T1 和 T2 并发执行 A、B、C、D、E、F 共 6 个操作，其中 T1 依次执行 A、E、F，T2 依次执行 B、C、D。6 个操作还必须满足如下约束：C 在 A 和 B 完成后执行，D 和 E 在 C 完成后执行，F 在 E 完成后执行。
+
+<img src="/img/408/past-exams-large-questions/03-操作系统/assets/2022-46-figure-001.svg" alt="2022 年第 46 题 A、B、C、D、E、F 操作前驱关系图" />
+
+请使用信号量的 `wait()`、`signal()` 操作描述 T1 和 T2 之间的同步关系，并说明所用信号量的作用及初值。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+只需为两个跨线程的同步关系 $A\rightarrow C$ 和 $C\rightarrow E$ 设置两个初值为 0 的信号量：
+
+```c
+semaphore AC = 0;
+semaphore CE = 0;
+
+T1() {
+    A;
+    signal(AC);
+
+    wait(CE);
+    E;
+    F;
+}
+
+T2() {
+    B;
+
+    wait(AC);
+    C;
+    signal(CE);
+
+    D;
+}
+```
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+题目中的完整前驱关系是：
+
+$$
+A\rightarrow C,
+\qquad
+B\rightarrow C,
+\qquad
+C\rightarrow D,
+\qquad
+C\rightarrow E,
+\qquad
+E\rightarrow F.
+$$
+
+但其中有三条关系已经由线程自身的顺序执行天然保证：
+
+- T2 内部按照 B、C、D 的顺序执行，因此 $B\rightarrow C$ 和 $C\rightarrow D$ 不需要额外信号量；
+- T1 内部按照 A、E、F 的顺序执行，因此 $E\rightarrow F$ 不需要额外信号量。
+
+真正需要在线程之间同步的只有：
+
+$$
+A\rightarrow C,
+\qquad
+C\rightarrow E.
+$$
+
+因此：
+
+- `AC=0`：T1 完成 A 后执行 `signal(AC)`，T2 在执行 C 前执行 `wait(AC)`；
+- `CE=0`：T2 完成 C 后执行 `signal(CE)`，T1 在执行 E 前执行 `wait(CE)`。
+
+这样既满足全部前驱约束，又没有增加多余的同步操作。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2023-45" />
+
+## 2023 年第 45 题
+
+<ExamQuestion>
+
+**101. 2023 年第 45 题**
+
+现要求学生使用 `swap` 指令和布尔型共享变量 `lock` 实现临界区互斥。`lock=TRUE` 时线程不能进入临界区，`lock=FALSE` 时线程能够进入临界区。某同学编写的伪代码如下图所示。
+
+<img src="/img/408/past-exams-large-questions/03-操作系统/assets/2023-45-figure-001.svg" alt="2023 年第 45 题伪代码" />
+
+1. 图 (a) 中哪些语句存在错误？将其改为正确语句，不增加语句条数。
+2. 图 (b) 给出了交换两个变量值的函数 `newSwap()`。能否用函数调用 `newSwap(&key, &lock)` 代替指令 `swap key, lock` 来实现临界区互斥？为什么？
+
+<ExamSolution>
+
+<ExamAnswer>
+
+1. 进入区中的
+
+```c
+if (key == TRUE)
+    swap key, lock;
+```
+
+应改为
+
+```c
+while (key == TRUE)
+    swap key, lock;
+```
+
+退出区中的
+
+```c
+lock = TRUE;
+```
+
+应改为
+
+```c
+lock = FALSE;
+```
+
+2. 不能。普通函数 `newSwap()` 的“读两个变量—写回两个变量”不是一条不可分割的原子操作，多个线程并发执行时可能交叉访问共享变量 `lock`，因而不能保证互斥。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+### （1）进入区为什么必须循环执行 `swap`
+
+线程进入临界区前令 `key=TRUE`。
+
+- 若 `lock=FALSE`，执行原子的 `swap key, lock` 后得到 `key=FALSE`、`lock=TRUE`。此时该线程取得锁，可以退出循环并进入临界区。
+- 若 `lock=TRUE`，交换后 `key` 仍为 `TRUE`，说明锁仍被其他线程占用，应继续等待并再次执行 `swap`。
+
+因此不能只判断一次，必须写成 `while (key == TRUE)`。
+
+线程离开临界区时应释放锁，所以应执行 `lock=FALSE`，而不是再次置为 `TRUE`。
+
+### （2）为什么普通函数不能替代 `swap` 指令
+
+硬件 `swap` 指令的关键不是“最终交换了两个值”，而是**整个交换过程具有原子性**。图中的 `newSwap()` 实际上包含多次普通读、写操作：
+
+```c
+bool temp = *a;
+*a = *b;
+*b = temp;
+```
+
+若两个线程同时进入该函数，执行次序可以交叉，两个线程都有可能观察到不一致的中间状态，从而同时认为自己取得了锁。因此普通函数调用不能直接替代原子 `swap` 指令。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2023-46" />
+
+## 2023 年第 46 题
+
+综合考点：进程状态与调度、键盘中断和设备驱动。
+
+<ExamQuestion>
+
+**102. 2023 年第 46 题**
+
+进程 P 通过执行系统调用从键盘接收一个字符。已知此过程中与进程 P 相关的操作包括：
+
+① 将进程 P 插入就绪队列；\
+② 将进程 P 插入阻塞队列；\
+③ 将字符从键盘控制器读入系统缓冲区；\
+④ 启动键盘中断处理程序；\
+⑤ 进程 P 从系统调用返回；\
+⑥ 用户在键盘上输入字符。
+
+以上编号仅用于标记操作，与先后顺序无关。请回答：
+
+1. 操作①的前一个和后一个操作分别是哪一个？操作⑥的后一个操作是哪一个？
+2. 在哪个操作之后 CPU 一定从进程 P 切换到其他进程？在哪个操作之后 CPU 调度程序才可以选择进程 P 执行？
+3. 完成哪个操作的代码属于键盘驱动程序？
+4. 键盘中断处理程序执行时，进程 P 处于什么状态？CPU 处于内核态还是用户态？
+
+<ExamSolution>
+
+<ExamAnswer>
+
+1. 操作①之前是③，之后是⑤；操作⑥之后是④。
+2. 操作②之后 CPU 一定从进程 P 切换到其他进程；操作①之后，P 才重新具备被调度执行的条件。
+3. 操作③属于键盘驱动程序完成的工作。
+4. 此时进程 P 处于阻塞态，CPU 处于内核态。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+进程 P 发起读键盘的系统调用后，如果字符尚未到达，P 无法继续执行，于是被加入阻塞队列，即先发生②。P 阻塞后 CPU 必须调度其他可运行进程。
+
+之后用户输入字符⑥，键盘产生中断并启动中断处理程序④。中断处理过程中，驱动程序把字符从键盘控制器读入系统缓冲区③。等待该输入的进程 P 随后被唤醒并插入就绪队列①。
+
+P 进入就绪队列并不意味着立即运行，而是从此具备再次被调度的资格。等 P 真正获得 CPU 后，先前的系统调用继续执行并返回用户程序⑤。
+
+因此核心先后关系为
+
+$$
+②\rightarrow⑥\rightarrow④\rightarrow③\rightarrow①\rightarrow⑤,
+$$
+
+其中①与⑤之间还可能夹有“等待调度、获得 CPU”等未在题目编号中列出的过程。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2024-46" />
+
+## 2024 年第 46 题
+
+<ExamQuestion>
+
+**104. 2024 年第 46 题**
+
+某网络系统使用缓冲区 B 存放一个数据分组，对 B 有三种操作：
+
+- C1：将一个数据分组写入 B；
+- C2：从 B 中读出一个数据分组；
+- C3：修改 B 中的数据分组。
+
+要求：B 为空时才能执行 C1，B 非空时才能执行 C2 和 C3。
+
+1. 若进程 P1、P2 均需执行 C1，实现 C1 的代码是否为临界区？为什么？
+2. 若 B 初始为空，P1 执行 C1 一次，P2 执行 C2 一次。请定义尽可能少的信号量，并用 `wait()`、`signal()` 描述 P1、P2 的同步或互斥关系，说明信号量的作用和初值。
+3. 若 B 初始非空，P1、P2 各执行 C3 一次。请定义尽可能少的信号量，并描述同步或互斥关系。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+1. 是。P1、P2 都可能修改同一共享缓冲区 B，C1 必须互斥执行。
+2. 只需一个同步信号量，例如 `full=0`：
+
+```c
+semaphore full = 0;
+
+P1() {
+    C1;
+    signal(full);
+}
+
+P2() {
+    wait(full);
+    C2;
+}
+```
+
+3. 只需一个互斥信号量 `mutex=1`：
+
+```c
+semaphore mutex = 1;
+
+P1() {
+    wait(mutex);
+    C3;
+    signal(mutex);
+}
+
+P2() {
+    wait(mutex);
+    C3;
+    signal(mutex);
+}
+```
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+### （1）C1 是否属于临界区
+
+B 是共享数据。若两个进程同时判断“B 为空”并同时写入 B，就可能造成覆盖或数据不一致。因此多个进程执行 C1 时，对 B 的访问必须互斥，C1 对应代码属于临界区。
+
+### （2）一次 C1 与一次 C2
+
+题目限定 P1 只执行一次 C1、P2 只执行一次 C2，且 B 初始为空。只要保证 **C2 一定在 C1 完成之后执行**，两者就不会同时访问 B，因此不需要再额外设置互斥信号量。
+
+`full` 初值为 0，表示 B 中尚无可读数据。P1 完成 C1 后执行 `signal(full)`，P2 才能通过 `wait(full)` 并执行 C2。
+
+因此在“尽可能少”的要求下，一个信号量即可。
+
+### （3）两个 C3
+
+B 初始非空，两个进程都要修改同一个数据分组，因此无需解决“空/非空”的先后关系，只需保证两个 C3 互斥执行。设置初值为 1 的二元信号量 `mutex` 即可。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2025-45" />
+
+## 2025 年第 45 题
+
+<ExamQuestion>
+
+**105. 2025 年第 45 题**
+
+甲、乙、丙三人一起植树。甲负责挖坑；乙负责放树苗并填土；丙负责给新种的树苗浇水。步骤依次为：挖树坑 → 放树苗、填土 → 浇水。
+
+现有铁锹和水桶各一个，铁锹用于挖树坑和填土，水桶用于浇水。当尚未被乙处理的树坑数量小于 3 时，甲才可以继续挖坑。初始时树坑数为 0，铁锹和水桶均可用。请定义尽可能少的信号量，用 `wait()`、`signal()` 描述三人的同步、互斥关系，并说明各信号量作用及初值。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+可定义 4 个信号量：
+
+```c
+semaphore shovel = 1;   // 铁锹互斥使用
+semaphore slots  = 3;   // 还允许新增的未处理树坑数
+semaphore pits   = 0;   // 已挖好、等待乙处理的树坑数
+semaphore water  = 0;   // 已填土、等待丙浇水的树苗数
+```
+
+伪代码为：
+
+```c
+甲() {
+    while (1) {
+        wait(slots);
+        wait(shovel);
+        挖树坑;
+        signal(shovel);
+        signal(pits);
+    }
+}
+
+乙() {
+    while (1) {
+        wait(pits);
+        wait(shovel);
+        放树苗并填土;
+        signal(shovel);
+        signal(slots);
+        signal(water);
+    }
+}
+
+丙() {
+    while (1) {
+        wait(water);
+        浇水;
+    }
+}
+```
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+这是两个相邻生产—消费关系叠加而成的流水线：
+
+$$
+\text{甲挖坑}\rightarrow\text{乙放苗并填土}\rightarrow\text{丙浇水}.
+$$
+
+`slots` 初值为 3，用来限制“已经挖好但尚未被乙处理”的树坑最多为 3 个；甲每挖一个坑先消耗一个 `slots`，乙填完一个坑后再归还一个。
+
+`pits` 初值为 0，记录已经挖好、可供乙处理的坑数。乙必须先 `wait(pits)`，因此不会在没有树坑时执行放苗、填土。
+
+`water` 初值为 0，记录已经完成放苗和填土、可以浇水的树苗数，保证丙不会提前浇水。
+
+铁锹同时被甲的“挖坑”和乙的“填土”使用，所以还需二元信号量 `shovel=1` 保证互斥。水桶只有丙使用，不需要再为水桶设置互斥信号量。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2026-45" />
+
+## 2026 年第 45 题
+
+<ExamQuestion>
+
+**107. 2026 年第 45 题**
+
+系统采用“优先级 + 时间片轮转”调度算法，优先级值越大表示优先级越高。仅当发生时钟中断时才触发抢占 CPU，时钟中断间隔为 10ms。进程首次进入就绪队列时，时间片为 50ms。
+
+若进程因时间片用完而返回就绪队列，其优先级减 1；若进程被更高优先级进程抢占而返回就绪队列，其优先级不变。多个进程优先级相同时，先进入就绪队列者优先。
+
+| 进程 | 到达就绪队列时间（ms） | 初始优先级 | CPU 运行时间（ms） |
+| --- | ---: | ---: | ---: |
+| P1 | 10 | 3 | 95 |
+| P2 | 10 | 4 | 20 |
+| P3 | 12 | 2 | 40 |
+| P4 | 14 | 5 | 60 |
+
+1. 从 10ms 开始进程调度，直到所有进程结束。此过程中时钟中断次数和 CPU 调度次数分别是多少？P1、P2、P3、P4 的首次调度时刻分别是什么？
+2. 若时间片从 50ms 改为 100ms，CPU 调度次数将增大、不变还是减少？若时钟中断间隔从 10ms 改为 1ms，系统开销将增大、不变还是减少？
+
+<ExamSolution>
+
+<ExamAnswer>
+
+1. 调度过程中的关键切换时刻为 `10、20、70、80、90、140、180 ms`：
+   - 时钟中断共 22 次；
+   - CPU 调度共 7 次；
+   - P1、P2、P3、P4 的首次调度时刻分别为 `90ms、10ms、140ms、20ms`。
+2. 时间片增大到 100ms 后，CPU 调度次数减少；时钟中断间隔缩短到 1ms 后，系统开销增大。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+### （1）调度过程
+
+从 10ms 开始：
+
+| 时间段 | 运行进程 | 原因 / 结果 |
+| --- | --- | --- |
+| 10–20ms | P2 | 10ms 时 P1、P2 已就绪，P2 优先级更高；14ms 到达的 P4 要到 20ms 时钟中断时才能触发抢占 |
+| 20–70ms | P4 | 20ms 时 P4 以优先级 5 抢占 P2；运行满 50ms 后时间片耗尽，优先级降为 4 |
+| 70–80ms | P2 | 此时 P2 与 P4 均为优先级 4，P2 更早进入就绪队列；P2 再运行 10ms 后完成 |
+| 80–90ms | P4 | P4 剩余 10ms，运行后完成 |
+| 90–140ms | P1 | P1 优先级 3，高于 P3；运行满 50ms 后时间片耗尽，优先级降为 2 |
+| 140–180ms | P3 | P3 与 P1 均为优先级 2，但 P3 更早进入就绪队列；P3 运行 40ms 后完成 |
+| 180–225ms | P1 | P1 运行剩余 45ms 后完成 |
+
+所以 CPU 实际选择新运行进程的时刻共有 7 个：
+
+$$
+10,20,70,80,90,140,180\text{ ms}.
+$$
+
+按题目给出的 10ms 时钟节拍并从 10ms 开始计入，到全部进程在 225ms 完成之前，时钟中断时刻为
+
+$$
+10,20,30,\ldots,220\text{ ms},
+$$
+
+共
+
+$$
+\frac{220-10}{10}+1=22
+$$
+
+次。
+
+各进程首次获得 CPU 的时刻因此为：
+
+$$
+P2:10\text{ ms},\quad P4:20\text{ ms},\quad
+P1:90\text{ ms},\quad P3:140\text{ ms}.
+$$
+
+### （2）参数变化
+
+时间片由 50ms 增大到 100ms 后，因“时间片耗尽”导致的重新排队和切换次数减少，因此 CPU 调度次数减少。
+
+时钟中断间隔由 10ms 缩短到 1ms 后，中断发生更频繁，中断现场保护、恢复以及调度条件检查等工作更频繁，所以系统开销增大。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>

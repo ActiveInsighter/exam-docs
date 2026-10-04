@@ -1,0 +1,1136 @@
+---
+title: "第 2 章 线性表"
+description: "408 数据结构历年大题 · 第 2 章 线性表，共 10 道，按年份与原卷题号排列。"
+subject: "数据结构"
+questionCount: 10
+---
+
+# 第 2 章 线性表
+
+本章收录 **10 道**历年大题。章节名称与 [408 真题对应章节](/docs/408/past-exams/01-8c139b6e/02-cf7f17f6) 一致。
+
+<span id="question-2009-42" />
+
+## 2009 年第 42 题
+
+<ExamQuestion>
+
+**2. 2009 年第 42 题**
+
+已知一个带头结点的单链表，结点结构为 `| data | link |`。只给出头指针 `list`。
+
+在不改变链表的前提下，设计一个尽可能高效的算法，查找链表中**倒数第 $k$ 个结点**（$k$ 为正整数）。若查找成功，则输出该结点 `data` 域的值并返回 1；否则返回 0。
+
+要求：
+
+1. 描述算法的基本设计思想；
+2. 描述算法的详细实现步骤；
+3. 用 C、C++ 或 Java 描述算法，并在关键位置给出注释。
+
+<ExamSolution>
+
+<ExamAnswer>采用快慢双指针，一趟扫描完成；时间复杂度 $O(n)$，额外空间复杂度 $O(1)$。</ExamAnswer>
+
+<ExamExplanation>
+
+### 基本思想
+
+设两个指针 $p$、$q$ 都从第一个数据结点出发。先让 $p$ 向后移动 $k-1$ 次，使 $p$ 与 $q$ 相隔 $k-1$ 个结点；随后两指针同步后移。当 $p$ 到达最后一个结点时，$q$ 恰好指向倒数第 $k$ 个结点。
+
+如果在让 $p$ 先行的过程中就遇到空指针，说明链表长度小于 $k$，查找失败。
+
+### 实现步骤
+
+1. 若 $k\le 0$，直接返回 0；
+2. 令 $p=q=list\to link$；
+3. 让 $p$ 先向后移动 $k-1$ 次；若中途 $p$ 变为空，则返回 0；
+4. 当 $p\to link\ne NULL$ 时，令 $p$、$q$ 同时后移一个结点；
+5. 此时 $q$ 指向倒数第 $k$ 个结点，输出 `q->data` 并返回 1。
+
+```c
+typedef struct LNode {
+    int data;
+    struct LNode *link;
+} LNode;
+
+int FindKthFromEnd(LNode *list, int k) {
+    if (list == NULL || k <= 0) {
+        return 0;
+    }
+
+    LNode *p = list->link;
+    LNode *q = list->link;
+
+    // p 先走 k-1 步，使 p、q 相距 k-1 个结点
+    for (int i = 1; i < k; ++i) {
+        if (p == NULL) {
+            return 0;
+        }
+        p = p->link;
+    }
+
+    if (p == NULL) {          // 链表长度小于 k
+        return 0;
+    }
+
+    // p 到达尾结点时，q 正好位于倒数第 k 个结点
+    while (p->link != NULL) {
+        p = p->link;
+        q = q->link;
+    }
+
+    printf("%d\n", q->data);
+    return 1;
+}
+```
+
+整个过程中每个指针只向后移动，不发生回退，因此只需一趟扫描。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2010-42" />
+
+## 2010 年第 42 题
+
+<ExamQuestion>
+
+**4. 2010 年第 42 题**
+
+设有 $n$ 个整数（$n>1$）存放在一维数组 $R$ 中。设计一个在时间和空间两方面都尽可能高效的算法，将 $R$ 中的序列循环左移 $p$ 个位置，其中 $0<p<n$。
+
+即把
+
+$$
+\langle x_0,x_1,\ldots,x_{n-1}\rangle
+$$
+
+变换为
+
+$$
+\langle x_p,x_{p+1},\ldots,x_{n-1},x_0,x_1,\ldots,x_{p-1}\rangle.
+$$
+
+要求：
+
+1. 给出算法的基本设计思想；
+2. 用 C、C++ 或 Java 描述算法；
+3. 说明时间复杂度和空间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>采用“三次逆置”法，时间复杂度 $O(n)$，空间复杂度 $O(1)$。</ExamAnswer>
+
+<ExamExplanation>
+
+将原序列写成两个连续部分
+
+$$
+R=ab,
+$$
+
+其中 $a$ 为前 $p$ 个元素，$b$ 为后 $n-p$ 个元素。循环左移后的目标序列为
+
+$$
+ba.
+$$
+
+利用逆置运算有
+
+$$
+(ab)\xrightarrow{a\text{ 逆置}}a^{-1}b
+\xrightarrow{b\text{ 逆置}}a^{-1}b^{-1}
+\xrightarrow{\text{整体逆置}}(a^{-1}b^{-1})^{-1}=ba.
+$$
+
+例如 `abcdefgh` 左移 3 位：
+
+```text
+abcdefgh
+cbadefgh     // 逆置前 3 个元素
+cbahgfed     // 逆置后 5 个元素
+defghabc     // 整体逆置
+```
+
+```c
+void Reverse(int R[], int left, int right) {
+    while (left < right) {
+        int t = R[left];
+        R[left] = R[right];
+        R[right] = t;
+        ++left;
+        --right;
+    }
+}
+
+void LeftRotate(int R[], int n, int p) {
+    if (R == NULL || n <= 1) {
+        return;
+    }
+
+    p %= n;
+    if (p == 0) {
+        return;
+    }
+
+    Reverse(R, 0, p - 1);
+    Reverse(R, p, n - 1);
+    Reverse(R, 0, n - 1);
+}
+```
+
+三次逆置分别处理 $p$、$n-p$、$n$ 个元素，因此总时间复杂度为
+
+$$
+O(p)+O(n-p)+O(n)=O(n),
+$$
+
+只使用常数个辅助变量，空间复杂度为
+
+$$
+O(1).
+$$
+
+若使用长度为 $p$ 的辅助数组，也能做到 $O(n)$ 时间，但需要 $O(p)$ 额外空间，因此不如三次逆置法满足“时间和空间都尽可能高效”的要求。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2011-42" />
+
+## 2011 年第 42 题
+
+<ExamQuestion>
+
+**6. 2011 年第 42 题**
+
+长度为 $L$（$L\ge1$）的升序序列 $S$ 中，第
+
+$$
+\left\lceil\frac{L}{2}\right\rceil
+$$
+
+个位置上的数称为 $S$ 的中位数。例如，$S_1=(11,13,15,17,19)$ 的中位数是 15。
+
+两个序列的中位数，定义为将它们全部元素合并并按升序排列后所得序列的中位数。例如，若 $S_2=(2,4,6,8,20)$，则 $S_1$ 与 $S_2$ 的中位数为 11。
+
+现有两个**等长升序序列** $A$、$B$，设计一个在时间和空间两方面都尽可能高效的算法，求它们的中位数。
+
+<ExamSolution>
+
+<ExamAnswer>利用两个序列的中位数不断排除不可能区域，时间复杂度 $O(\log n)$，空间复杂度 $O(1)$。</ExamAnswer>
+
+<ExamExplanation>
+
+设当前考察的两个子序列长度始终相等，其中位数分别为 $a$、$b$。
+
+- 若 $a=b$，则该值就是两个序列合并后的中位数；
+- 若 $a<b$，则真正的中位数不可能落在 $A$ 的较小一半，也不可能落在 $B$ 的较大一半，因此同时舍弃这两部分；
+- 若 $a>b$，对称处理。
+
+关键是每轮必须让两个保留区间的长度仍然相等。奇数长度和偶数长度时端点的保留方式略有不同。
+
+```c
+int M_Search(int A[], int B[], int n) {
+    int s1 = 0, d1 = n - 1;
+    int s2 = 0, d2 = n - 1;
+
+    while (s1 != d1 || s2 != d2) {
+        int m1 = (s1 + d1) / 2;
+        int m2 = (s2 + d2) / 2;
+
+        if (A[m1] == B[m2]) {
+            return A[m1];
+        }
+
+        if (A[m1] < B[m2]) {
+            if ((s1 + d1) % 2 == 0) {
+                // 当前子序列长度为奇数
+                // 保留 A[m1..d1] 与 B[s2..m2]
+                s1 = m1;
+                d2 = m2;
+            } else {
+                // 当前子序列长度为偶数
+                // 为保持两边长度相等，A 从 m1+1 开始保留
+                s1 = m1 + 1;
+                d2 = m2;
+            }
+        } else {
+            if ((s2 + d2) % 2 == 0) {
+                // 当前子序列长度为奇数
+                // 保留 A[s1..m1] 与 B[m2..d2]
+                d1 = m1;
+                s2 = m2;
+            } else {
+                // 当前子序列长度为偶数
+                d1 = m1;
+                s2 = m2 + 1;
+            }
+        }
+    }
+
+    // 两个区间均只剩 1 个元素。
+    // 合并后共有 2 个数，本题中位数定义为第 1 个，即较小者。
+    return A[s1] < B[s2] ? A[s1] : B[s2];
+}
+```
+
+每次比较后，待考察区间长度大约缩小为原来的一半，因此递推关系为
+
+$$
+T(n)=T\!\left(\frac n2\right)+O(1),
+$$
+
+从而
+
+$$
+T(n)=O(\log n).
+$$
+
+算法只使用有限个下标变量，所以额外空间复杂度为
+
+$$
+O(1).
+$$
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2012-42" />
+
+## 2012 年第 42 题
+
+<ExamQuestion>
+
+**8. 2012 年第 42 题**
+
+假定采用带头结点的单链表保存单词。当两个单词有相同后缀时，可以共享相同的后缀存储空间。例如 `loading` 与 `being` 的存储映像如下图所示。
+
+<img src="/img/408/past-exams-large-questions/01-数据结构/assets/2012-42-figure-001.svg" alt="2012 年第 42 题共享后缀示意" />
+
+设 `str1`、`str2` 分别指向两个单词所在单链表的头结点，结点结构为 `| data | next |`。设计一个时间上尽可能高效的算法，找出两个链表**公共后缀的起始结点**（图中字符 `i` 所在的结点 $p$）。
+
+要求：
+
+1. 给出算法的基本设计思想；
+2. 用 C、C++ 或 Java 描述算法；
+3. 说明时间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>先求两链表长度，再让较长链表先走长度差，随后同步后移并比较结点地址。时间复杂度 $O(m+n)$，额外空间复杂度 $O(1)$。</ExamAnswer>
+
+<ExamExplanation>
+
+公共后缀一旦开始共享，则从第一个公共结点起直到表尾，后续结点完全相同。因此问题可以转化为：**让两个指针到表尾的剩余距离相同，再同步向后寻找第一个地址相同的结点。**
+
+<img src="/img/408/past-exams-large-questions/01-数据结构/assets/2012-42-figure-002.svg" alt="2012 年第 42 题尾部对齐示意" />
+
+设两个数据链表长度分别为 $m$、$n$：
+
+1. 分别遍历求出 $m$、$n$；
+2. 若 $m>n$，让第一个链表指针先走 $m-n$ 步；若 $n>m$，让第二个链表指针先走 $n-m$ 步；
+3. 此时两个指针距表尾的结点数相同；
+4. 两指针同步后移，第一次出现 `p == q` 时，该结点就是公共后缀的起始结点。
+
+```c
+typedef struct Node {
+    char data;
+    struct Node *next;
+} Node;
+
+int GetLength(Node *head) {
+    int len = 0;
+    for (Node *p = head->next; p != NULL; p = p->next) {
+        ++len;
+    }
+    return len;
+}
+
+Node *FindCommonSuffix(Node *str1, Node *str2) {
+    int m = GetLength(str1);
+    int n = GetLength(str2);
+
+    Node *p = str1->next;
+    Node *q = str2->next;
+
+    if (m > n) {
+        for (int i = 0; i < m - n; ++i) {
+            p = p->next;
+        }
+    } else {
+        for (int i = 0; i < n - m; ++i) {
+            q = q->next;
+        }
+    }
+
+    while (p != q) {
+        p = p->next;
+        q = q->next;
+    }
+
+    // 若不存在非空公共后缀，则二者最终都会为 NULL
+    return p;
+}
+```
+
+求长度、对齐以及同步扫描的总工作量均为线性量级，因此
+
+$$
+T(m,n)=O(m+n).
+$$
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2013-41" />
+
+## 2013 年第 41 题
+
+<ExamQuestion>
+
+**9. 2013 年第 41 题**
+
+已知整数序列
+
+$$
+A=(a_0,a_1,\ldots,a_{n-1}),
+$$
+
+其中
+
+$$
+0\le a_i<n\qquad(0\le i<n).
+$$
+
+若存在
+
+$$
+a_{p_1}=a_{p_2}=\cdots=a_{p_m}=x,
+$$
+
+且
+
+$$
+m>\frac n2,
+$$
+
+则称 $x$ 为 $A$ 的**主元素**。
+
+例如
+
+$$
+A=(0,5,5,3,5,7,5,5)
+$$
+
+的主元素为 5；而
+
+$$
+A=(0,5,5,3,5,1,5,7)
+$$
+
+没有主元素。
+
+设计一个尽可能高效的算法：若主元素存在则输出该元素，否则输出 $-1$。
+
+<ExamSolution>
+
+<ExamAnswer>采用 Boyer–Moore 多数投票思想先筛选候选元素，再进行一次计数验证。时间复杂度 $O(n)$，空间复杂度 $O(1)$。</ExamAnswer>
+
+<ExamExplanation>
+
+### 第一步：筛选候选元素
+
+从左到右扫描数组，维护候选值 `candidate` 和计数器 `count`：
+
+- 当前元素等于候选值：`count++`；
+- 当前元素不等于候选值：`count--`；
+- 当 `count` 降为 0 时，用当前尚未处理的新元素重新建立候选。
+
+其本质是不断让“一个候选元素”和“一个不同元素”两两抵消。若某个元素出现次数严格大于 $n/2$，无论怎样配对抵消，最后都不可能被完全消掉，因此真正的主元素一定会成为最终候选。
+
+但最终候选**不一定**真的是主元素，所以还必须进行第二趟扫描验证。
+
+```c
+int Majority(int A[], int n) {
+    if (n <= 0) {
+        return -1;
+    }
+
+    int candidate = A[0];
+    int count = 1;
+
+    // 第一趟：筛选候选元素
+    for (int i = 1; i < n; ++i) {
+        if (A[i] == candidate) {
+            ++count;
+        } else {
+            --count;
+            if (count == 0) {
+                candidate = A[i];
+                count = 1;
+            }
+        }
+    }
+
+    // 第二趟：验证候选元素是否真的出现超过 n/2 次
+    int freq = 0;
+    for (int i = 0; i < n; ++i) {
+        if (A[i] == candidate) {
+            ++freq;
+        }
+    }
+
+    return (freq > n / 2) ? candidate : -1;
+}
+```
+
+两趟扫描均为线性时间，因此
+
+$$
+T(n)=O(n),
+$$
+
+只使用常数个变量，因此
+
+$$
+S(n)=O(1).
+$$
+
+特别注意：主元素要求出现次数**严格大于** $n/2$。若恰好出现 $n/2$ 次，仍然不是主元素。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2015-41" />
+
+## 2015 年第 41 题
+
+<ExamQuestion>
+
+**13. 2015 年第 41 题**
+
+用单链表保存 $m$ 个整数，结点含 `data` 域和指针域，并满足
+
+$$
+|data|\le n,
+$$
+
+其中 $n$ 为正整数。
+
+现要求设计一个时间复杂度尽可能高效的算法：对于链表中 `data` 的**绝对值相等**的结点，仅保留第一次出现的结点，删除其余绝对值相等的结点。
+
+例如：
+
+<img src="/img/408/past-exams-large-questions/01-数据结构/assets/2015-41-figure-001.svg" alt="2015 年第 41 题原单链表示意图" />
+
+处理后为：
+
+<img src="/img/408/past-exams-large-questions/01-数据结构/assets/2015-41-figure-002.svg" alt="2015 年第 41 题删除重复绝对值后的链表" />
+
+要求：
+
+1. 给出算法的基本设计思想；
+2. 给出单链表结点的数据类型定义；
+3. 用 C 或 C++ 描述算法；
+4. 说明时间复杂度和空间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>用大小为 $n+1$ 的辅助标记数组记录某个绝对值是否已经出现，一趟扫描链表完成删除。时间复杂度 $O(m)$，额外空间复杂度 $O(n)$。</ExamAnswer>
+
+<ExamExplanation>
+
+因为 $|data|\le n$，所以结点数据的绝对值只可能落在
+
+$$
+0,1,2,\ldots,n
+$$
+
+中。设置辅助数组 `seen[0..n]`，初值全为 0。
+
+从前向后扫描链表。对于当前结点 $p$，令
+
+$$
+k=|p\to data|.
+$$
+
+- 若 `seen[k] == 0`，说明这是绝对值 $k$ 第一次出现，保留该结点并令 `seen[k] = 1`；
+- 若 `seen[k] == 1`，说明此前已经出现过绝对值相同的结点，删除当前结点。
+
+```c
+#include <stdlib.h>
+
+typedef struct LNode {
+    int data;
+    struct LNode *link;
+} LNode;
+
+void DeleteSameAbs(LNode *head, int n) {
+    int *seen = (int *)calloc(n + 1, sizeof(int));
+    if (seen == NULL) {
+        return;
+    }
+
+    LNode *pre = head;
+    LNode *p = head->link;
+
+    while (p != NULL) {
+        int k = abs(p->data);
+
+        if (seen[k] == 0) {
+            // 第一次出现，保留
+            seen[k] = 1;
+            pre = p;
+            p = p->link;
+        } else {
+            // 已出现过，删除当前结点
+            pre->link = p->link;
+            free(p);
+            p = pre->link;
+        }
+    }
+
+    free(seen);
+}
+```
+
+原整理中的实现混用了 `link` 与 `next` 两种成员名，且缺失完整的结点定义；这里已统一修正。
+
+链表共有 $m$ 个数据结点，每个结点只处理一次，因此时间复杂度为
+
+$$
+O(m).
+$$
+
+辅助数组长度为 $n+1$，故额外空间复杂度为
+
+$$
+O(n).
+$$
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2018-41" />
+
+## 2018 年第 41 题
+
+<ExamQuestion>
+
+**19. 2018 年第 41 题**
+
+给定一个含 $n\;(n\ge1)$ 个整数的数组，请设计一个在时间上尽可能高效的算法，找出数组中**未出现的最小正整数**。
+
+例如：
+
+- 数组 $\{-5,3,2,3\}$ 中未出现的最小正整数为 $1$；
+- 数组 $\{1,2,3\}$ 中未出现的最小正整数为 $4$。
+
+要求：
+
+1. 给出算法的基本设计思想；
+2. 用 C 或 C++ 描述算法；
+3. 说明时间复杂度和空间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>用长度为 $n$ 的辅助数组标记 $1\sim n$ 是否出现。若存在第一个未被标记的位置 $i$，答案为 $i+1$；否则答案为 $n+1$。时间复杂度 $O(n)$，额外空间复杂度 $O(n)$。</ExamAnswer>
+
+<ExamExplanation>
+
+一个长度为 $n$ 的数组，其“未出现的最小正整数”只可能位于
+
+$$
+1,2,\ldots,n+1.
+$$
+
+原因是：若 $1\sim n$ 全都出现，则最小缺失正整数就是 $n+1$；否则答案一定是 $1\sim n$ 中第一个未出现的数。
+
+因此建立标记数组
+
+$$
+B[0\ldots n-1],
+$$
+
+其中 `B[i]` 表示正整数 $i+1$ 是否在原数组中出现。
+
+扫描原数组时，只处理满足
+
+$$
+1\le A[i]\le n
+$$
+
+的元素，令
+
+$$
+B[A[i]-1]=1.
+$$
+
+最后从前向后寻找第一个值为 0 的位置。
+
+```c
+#include <stdlib.h>
+
+int FindMissMin(const int A[], int n) {
+    int *B = (int *)calloc(n, sizeof(int));
+    if (B == NULL) {
+        return -1;
+    }
+
+    for (int i = 0; i < n; ++i) {
+        if (A[i] >= 1 && A[i] <= n) {
+            B[A[i] - 1] = 1;
+        }
+    }
+
+    for (int i = 0; i < n; ++i) {
+        if (B[i] == 0) {
+            free(B);
+            return i + 1;
+        }
+    }
+
+    free(B);
+    return n + 1;
+}
+```
+
+原整理中的代码只判断了 `num > 0`，若出现 `num > n` 会访问 `vis[num-1]`，造成数组越界；这里已修正为同时检查上界 $n$。
+
+两次线性扫描均为 $O(n)$，因此总时间复杂度为
+
+$$
+O(n),
+$$
+
+辅助数组占用
+
+$$
+O(n)
+$$
+
+空间。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2019-41" />
+
+## 2019 年第 41 题
+
+<ExamQuestion>
+
+**21. 2019 年第 41 题**
+
+设线性表
+
+$$
+L=(a_1,a_2,a_3,\ldots,a_{n-1},a_n)
+$$
+
+采用带头结点的单链表保存，结点定义如下：
+
+```c
+typedef struct node {
+    int data;
+    struct node *next;
+} NODE;
+```
+
+请设计一个额外空间复杂度为 $O(1)$、时间上尽可能高效的算法，重新排列 $L$ 中的各结点，使其变为
+
+$$
+L'=(a_1,a_n,a_2,a_{n-1},a_3,a_{n-2},\ldots).
+$$
+
+要求：
+
+1. 给出算法的基本设计思想；
+2. 根据设计思想，采用 C 或 C++ 语言描述算法，关键之处给出注释；
+3. 说明算法的时间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>先找中点，将后半段原地逆置，再把前、后两段交替合并。时间复杂度为 $O(n)$，额外空间复杂度为 $O(1)$。</ExamAnswer>
+
+<ExamExplanation>
+
+### 基本思想
+
+目标序列需要依次取
+
+$$
+a_1,a_n,a_2,a_{n-1},a_3,a_{n-2},\ldots
+$$
+
+因此，若每次都从单链表尾部寻找结点，会造成反复遍历，时间复杂度上升到 $O(n^2)$。
+
+更高效的做法分三步：
+
+1. 使用快慢指针找到链表中点，把链表分成前、后两段；
+2. 将后半段链表**原地逆置**，于是后半段的结点顺序变为 $a_n,a_{n-1},a_{n-2},\ldots$；
+3. 将前半段与逆置后的后半段交替连接。
+
+### C 语言实现
+
+```c
+void Rearrange(NODE *head) {
+    if (head == NULL || head->next == NULL || head->next->next == NULL) {
+        return;
+    }
+
+    /* 第 1 步：找到前半段的最后一个结点 */
+    NODE *slow = head->next;
+    NODE *fast = head->next;
+    while (fast->next != NULL && fast->next->next != NULL) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+
+    /* 将前、后两段断开 */
+    NODE *second = slow->next;
+    slow->next = NULL;
+
+    /* 第 2 步：原地逆置后半段 */
+    NODE *prev = NULL;
+    NODE *cur = second;
+    while (cur != NULL) {
+        NODE *next = cur->next;
+        cur->next = prev;
+        prev = cur;
+        cur = next;
+    }
+    second = prev;
+
+    /* 第 3 步：交替合并两段 */
+    NODE *first = head->next;
+    while (second != NULL) {
+        NODE *next1 = first->next;
+        NODE *next2 = second->next;
+
+        first->next = second;
+        second->next = next1;
+
+        first = next1;
+        second = next2;
+    }
+}
+```
+
+以偶数个结点为例，若原链表为
+
+$$
+a_1\to a_2\to a_3\to a_4\to a_5\to a_6,
+$$
+
+则分段后为
+
+$$
+a_1\to a_2\to a_3,
+\qquad
+ a_4\to a_5\to a_6,
+$$
+
+后半段逆置为
+
+$$
+a_6\to a_5\to a_4,
+$$
+
+交替合并即可得到
+
+$$
+a_1\to a_6\to a_2\to a_5\to a_3\to a_4.
+$$
+
+找中点、逆置和合并都只需线性扫描，因此总时间复杂度为
+
+$$
+O(n),
+$$
+
+只使用常数个指针变量，额外空间复杂度为
+
+$$
+O(1).
+$$
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2020-41" />
+
+## 2020 年第 41 题
+
+<ExamQuestion>
+
+**23. 2020 年第 41 题**
+
+定义整数三元组 $(a,b,c)$ 的距离为
+
+$$
+D(a,b,c)=|a-b|+|b-c|+|c-a|.
+$$
+
+给定 3 个非空整数集合 $S_1,S_2,S_3$，各集合中的元素已按升序分别存放在 3 个数组中。请设计一个尽可能高效的算法，计算并输出所有可能三元组
+
+$$
+(a,b,c),\qquad a\in S_1,\ b\in S_2,\ c\in S_3
+$$
+
+中的最小距离。
+
+例如：
+
+$$
+S_1=\{-1,0,9\},
+$$
+
+$$
+S_2=\{-25,-10,10,11\},
+$$
+
+$$
+S_3=\{2,9,17,30,41\},
+$$
+
+则最小距离为 $2$，相应的三元组可以取 $(9,10,9)$。
+
+要求：
+
+1. 给出算法的基本设计思想；
+2. 根据设计思想，采用 C 或 C++ 语言描述算法，关键之处给出注释；
+3. 说明算法的时间复杂度和空间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>三个数组各设一个指针，每次计算当前三元组的距离，然后只将三个当前元素中的最小者对应的指针后移。若 $n=|S_1|+|S_2|+|S_3|$，时间复杂度为 $O(n)$，额外空间复杂度为 $O(1)$。</ExamAnswer>
+
+<ExamExplanation>
+
+### 关键性质
+
+设当前三个数按大小排列为
+
+$$
+x\le y\le z.
+$$
+
+则
+
+$$
+|x-y|+|y-z|+|z-x|
+=(y-x)+(z-y)+(z-x)
+=2(z-x).
+$$
+
+所以三元组距离只由其中的**最大值与最小值之差**决定：
+
+$$
+D=2(\max-\min).
+$$
+
+若当前最小值不变，仅增大中间值或最大值，不可能缩小当前的最大最小差；因此，要寻找更小的距离，下一步应推进**当前最小元素所在数组的指针**。
+
+### 算法
+
+```c
+#include <limits.h>
+#include <stdlib.h>
+
+int Min3Distance(int A[], int n1,
+                 int B[], int n2,
+                 int C[], int n3) {
+    int i = 0, j = 0, k = 0;
+    int dmin = INT_MAX;
+
+    while (i < n1 && j < n2 && k < n3) {
+        int a = A[i];
+        int b = B[j];
+        int c = C[k];
+
+        int d = abs(a - b) + abs(b - c) + abs(c - a);
+        if (d < dmin) {
+            dmin = d;
+        }
+
+        // 已达到理论最小值，不可能继续改进
+        if (dmin == 0) {
+            break;
+        }
+
+        // 只推进当前三个元素中的最小者
+        if (a <= b && a <= c) {
+            ++i;
+        } else if (b <= a && b <= c) {
+            ++j;
+        } else {
+            ++k;
+        }
+    }
+
+    return dmin;
+}
+```
+
+原整理中有多处下标识别错误，例如把 $C[k]$ 写成了 $C[j]$、把三个集合长度条件写成了错误的符号；这里已按三指针算法统一修正。
+
+三个指针都只会单调向后移动，每个数组元素最多被访问常数次。若
+
+$$
+n=|S_1|+|S_2|+|S_3|,
+$$
+
+则时间复杂度为
+
+$$
+O(n),
+$$
+
+额外空间复杂度为
+
+$$
+O(1).
+$$
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-2025-41" />
+
+## 2025 年第 41 题
+
+<ExamQuestion>
+
+**33. 2025 年第 41 题**
+
+设有两个长度均为 $n$ 的一维整型数组 `A` 和 `res`。对数组 `A` 中的每个元素 `A[i]`，需要计算
+
+$$
+\max_{i\le j\le n-1}\{A[i]\cdot A[j]\},
+$$
+
+并将结果保存到 `res[i]` 中。
+
+例如，若
+
+$$
+A=\{1,4,-9,6\},
+$$
+
+则
+
+$$
+res=\{6,24,81,36\}.
+$$
+
+请设计时间和空间上尽可能高效的算法
+
+```c
+void calMulMax(int A[], int res[], int n);
+```
+
+要求：
+
+1. 给出算法的基本设计思想；
+2. 使用 C 或 C++ 描述算法；
+3. 说明时间复杂度和额外空间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>从右向左扫描，同时维护后缀最大值 `maxValue` 和后缀最小值 `minValue`。对每个 `A[i]`，取 `A[i]*maxValue` 与 `A[i]*minValue` 的较大者。时间复杂度 $O(n)$，额外空间复杂度 $O(1)$。</ExamAnswer>
+
+<ExamExplanation>
+
+固定 $i$ 后，$A[i]$ 是常数，需要在后缀
+
+$$
+A[i],A[i+1],\ldots,A[n-1]
+$$
+
+中选择一个 $A[j]$ 使乘积最大。
+
+若 $A[i]>0$，应选择该后缀中的最大值；若 $A[i]<0$，应选择该后缀中的最小值。统一写成
+
+$$
+res[i]=\max\{A[i]\cdot \maxSuffix_i,\ A[i]\cdot \minSuffix_i\}.
+$$
+
+从右向左扫描即可边更新后缀极值边计算答案：
+
+```c
+void calMulMax(int A[], int res[], int n) {
+    if (n <= 0) return;
+
+    int maxValue = A[n - 1];
+    int minValue = A[n - 1];
+
+    for (int i = n - 1; i >= 0; --i) {
+        if (A[i] > maxValue) maxValue = A[i];
+        if (A[i] < minValue) minValue = A[i];
+
+        int p1 = A[i] * maxValue;
+        int p2 = A[i] * minValue;
+        res[i] = (p1 > p2) ? p1 : p2;
+    }
+}
+```
+
+以
+
+$$
+A=\{1,4,-9,6\}
+$$
+
+为例：
+
+- $i=3$：后缀最大、最小值均为 $6$，故 $res[3]=36$；
+- $i=2$：后缀最小值为 $-9$，故 $res[2]=(-9)(-9)=81$；
+- $i=1$：后缀最大值为 $6$，故 $res[1]=4\times6=24$；
+- $i=0$：后缀最大值为 $6$，故 $res[0]=1\times6=6$。
+
+数组只扫描一遍，因此时间复杂度为
+
+$$
+O(n),
+$$
+
+除输出数组 `res` 外只使用常数个辅助变量，额外空间复杂度为
+
+$$
+O(1).
+$$
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
