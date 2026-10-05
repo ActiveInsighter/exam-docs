@@ -32,8 +32,10 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('Merge static outputs with conflict checks');
     expect(workflow).toContain('node scripts/verify-static-asset-references.mjs .static-docs');
     expect(workflow).toContain('tests/static-asset-references.test.ts');
-    expect(workflow).toContain('test "${doc_routes}" = \'629\'');
-    expect(workflow).toContain('test "${markdown}" = \'628\'');
+    expect(workflow).toContain('test "${doc_routes}" = \'738\'');
+    expect(workflow).toContain('test "${markdown}" = \'737\'');
+    expect(workflow).toContain('Retry failing static documentation HTML routes');
+    expect(workflow).toContain('seq 1 18');
     expect(workflow).toContain('tests/static-doc-shards.test.ts');
     expect(workflow).toContain('tests/static-build-id.test.ts');
     expect(workflow).toContain('tests/search-determinism.test.ts');
@@ -49,7 +51,7 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('Merge dedicated search assets');
     expect(workflow).toContain('needs: [validate, search, build-shard]');
     expect(workflow).toContain('validated_search_assets=');
-    expect(workflow).toContain('manifest.pages !== 628');
+    expect(workflow).toContain('manifest.pages !== 737');
     expect(workflow).toContain('Search manifest is missing module categories.');
     expect(workflow).not.toContain('test "${search_files}" =');
   });
@@ -80,12 +82,13 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('deployment-url=${deployment_url}');
   });
 
-  it('routes main to production and Li Lin rebuild branches to an isolated preview Worker', async () => {
+  it('routes main to production and approved content branches to an isolated preview Worker', async () => {
     const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
     const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
 
     expect(workflow).toContain("github.ref == 'refs/heads/main'");
     expect(workflow).toContain('codex/lilin-880-rebuild-*');
+    expect(workflow).toContain('codex/math-core-questions-1005');
     expect(workflow).toContain('wrangler_args+=(--name exam-docs-preview)');
     expect(workflow).toContain('Deploy to Cloudflare Workers Static Assets');
     expect(workflow).toContain('Full static documentation route verification');
