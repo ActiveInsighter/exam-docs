@@ -38,7 +38,7 @@ describe('October 7 mathematics past-exam imports', () => {
         total += questions.length;
 
         const body = content.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/u, '');
-        const result = await compile(body, {
+        const result = await compile({ value: body, path: page }, {
           remarkPlugins: [remarkMath],
           rehypePlugins: [[rehypeKatex, { strict: 'ignore', output: 'html' }]],
         });
