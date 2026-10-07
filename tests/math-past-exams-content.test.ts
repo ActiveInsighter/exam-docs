@@ -24,6 +24,7 @@ describe('October 7 mathematics past-exam imports', () => {
       const pages = pagesIn(directory);
       expect(pages).toHaveLength(pageCount);
       let total = 0;
+      const renderErrors: string[] = [];
 
       for (const page of pages) {
         const content = readFileSync(page, 'utf8');
@@ -38,13 +39,20 @@ describe('October 7 mathematics past-exam imports', () => {
         total += questions.length;
 
         const body = content.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/u, '');
-        const result = await compile({ value: body, path: page }, {
-          remarkPlugins: [remarkMath],
-          rehypePlugins: [[rehypeKatex, { strict: 'ignore', output: 'html' }]],
-        });
-        expect(String(result), page).not.toContain('katex-error');
+        try {
+          const result = await compile({ value: body, path: page }, {
+            remarkPlugins: [remarkMath],
+            rehypePlugins: [[rehypeKatex, { strict: 'ignore', output: 'html' }]],
+          });
+          if (String(result).includes('katex-error')) {
+            renderErrors.push(`${page}: ${result.messages.map(String).join('; ') || 'KaTeX render error'}`);
+          }
+        } catch (error) {
+          renderErrors.push(`${page}: ${String(error)}`);
+        }
       }
       expect(total).toBe(questionCount);
+      expect(renderErrors).toEqual([]);
     }, 60_000);
 
     it(`keeps every chapter and section reachable in ${folder}`, () => {
