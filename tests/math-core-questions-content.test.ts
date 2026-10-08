@@ -16,6 +16,24 @@ function pagesIn(directory: string): string[] {
 }
 
 describe('Graduate mathematics core questions', () => {
+  it('uses the same subject chapter titles and order as mathematics past exams', () => {
+    for (const [subject, pastExamSubject] of [
+      ['01-高等数学', '01-高数分类真题0930'],
+      ['02-线性代数', '04-线性代数'],
+      ['03-概率论与数理统计', '03-概率论与数理统计'],
+    ]) {
+      const chapterTitles = (directory: string): string[] => {
+        const meta = JSON.parse(readFileSync(join(directory, 'meta.json'), 'utf8'));
+        return meta.pages.filter((page: string) => page !== 'index').map((chapter: string) =>
+          JSON.parse(readFileSync(join(directory, chapter, 'meta.json'), 'utf8')).title,
+        );
+      };
+      expect(chapterTitles(join(root, subject)), subject).toEqual(
+        chapterTitles(join(root, '../past-exams', pastExamSubject)),
+      );
+    }
+  });
+
   it('replaces the collection inside mock exams with a separate mathematics collection', () => {
     expect(existsSync(join(process.cwd(), 'content/docs/math/exam/core-questions'))).toBe(false);
     const math = JSON.parse(readFileSync(join(root, '../meta.json'), 'utf8'));

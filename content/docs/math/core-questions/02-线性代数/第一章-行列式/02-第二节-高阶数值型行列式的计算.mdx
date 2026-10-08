@@ -1,0 +1,1040 @@
+---
+title: "第二节 高阶数值型行列式的计算"
+sidebar_position: 2
+toc_min_heading_level: 2
+toc_max_heading_level: 4
+---
+
+# 第二节 高阶数值型行列式的计算
+
+## 真题：全一矩阵、循环行列式与移位结构
+
+<ExamQuestion>
+
+1. **【1997-4-3分】** 设 $ n$ 阶矩阵
+
+$$
+
+A=\begin{pmatrix}
+0 & 1 & 1 & \cdots & 1\\
+1 & 0 & 1 & \cdots & 1\\
+1 & 1 & 0 & \cdots & 1\\
+\vdots & \vdots & \vdots & & \vdots\\
+1 & 1 & 1 & \cdots & 0
+\end{pmatrix},
+
+$$
+
+则 $ |A|=$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$ (-1)^{n-1}(n-1)$。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+记 $ J$ 为所有元素均为 $ 1$ 的 $ n$ 阶矩阵，则
+
+$$
+
+ A=J-E.
+
+$$
+
+令 $ \boldsymbol{e}=(1,1,\ldots,1)^T$，则
+
+$$
+
+A\boldsymbol{e}=(n-1)\boldsymbol{e},
+
+$$
+
+故 $ n-1$ 是 $ A$ 的一个特征值。
+
+对任意满足 $ x_1+x_2+\cdots+x_n=0$ 的向量 $ \boldsymbol{x}$，有 $ J\boldsymbol{x}=\boldsymbol{0}$，从而
+
+$$
+
+A\boldsymbol{x}=-\boldsymbol{x}.
+
+$$
+
+这类向量构成 $ n-1$ 维子空间，所以 $ -1$ 是 $ n-1$ 重特征值。因此
+
+$$
+
+|A|=(n-1)(-1)^{n-1}.
+
+$$
+
+**不依赖特征值的初等变换：** 将所有行加至第一行，提出 $n-1$；之后把首行从其余各行减去，经适当消元，可得剩余因子 $(-1)^{n-1}$。也可把矩阵写成 $J-E$，其中 $J=\mathbf1\mathbf1^T$；此时只在常数向量方向偏离 $-E$，这正是后续“秩一更新”模型的起点。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. **【1991-5-3分】** $ n$ 阶行列式
+
+$$
+
+\begin{vmatrix}
+a & b & 0 & \cdots & 0 & 0\\
+0 & a & b & \cdots & 0 & 0\\
+0 & 0 & a & \cdots & 0 & 0\\
+\vdots & \vdots & \vdots & & \vdots & \vdots\\
+0 & 0 & 0 & \cdots & a & b\\
+b & 0 & 0 & \cdots & 0 & a
+\end{vmatrix}=
+
+$$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$ a^n+(-1)^{n-1}b^n$。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+按行列式的排列定义观察非零项。由于每一行只有两个可能的非零元素，要使每列也恰好选取一个元素，只有以下两种选法：
+
+第一种，全部选取主对角线上的 $ a$，所得项为
+
+$$
+
+ a^n.
+
+$$
+
+第二种，依次选取 $ (1,2),(2,3),\ldots,(n-1,n),(n,1)$ 位置上的 $ b$。对应的排列是一个 $ n$ 轮换，其符号为 $ (-1)^{n-1}$，故该项为
+
+$$
+
+ (-1)^{n-1}b^n.
+
+$$
+
+除此之外，任意混合选取都会造成某列重复或某列未被选取，因此没有其他非零项。故原行列式为
+
+$$
+
+D_n=a^n+(-1)^{n-1}b^n.
+
+$$
+
+**限制与变式：** 对 $n\ge2$，仅“全部选对角线”与“全部选循环上对角线”满足排列的一一对应条件；于是结果不需 $a\ne0$、$b\ne0$。如果把末行首列的 $b$ 改为 $tb$，循环项改为 $(-1)^{n-1}tb^n$，其余项不变。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. **【1990-5-4分】** 设 $ A$ 为 10 阶矩阵
+
+$$
+
+A=\begin{pmatrix}
+0 & 1 & 0 & \cdots & 0 & 0\\
+0 & 0 & 1 & \cdots & 0 & 0\\
+\vdots & \vdots & \vdots & & \vdots & \vdots\\
+0 & 0 & 0 & \cdots & 1 & 0\\
+0 & 0 & 0 & \cdots & 0 & 1\\
+1 & 1 & 1 & \cdots & 1 & 1
+\end{pmatrix},
+
+$$
+
+计算行列式 $ |A-\lambda E|$，其中 $ E$ 为 10 阶单位矩阵，$ \lambda$ 为常数。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$$
+
+|A-\lambda E|=\lambda^{10}-\lambda^9-\lambda^8-\cdots-\lambda-1.
+
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+设 $ \mu$ 是矩阵 $ A$ 的特征值，相应特征向量为
+
+$$
+
+\boldsymbol{x}=(x_1,x_2,\ldots,x_{10})^T\ne\boldsymbol{0}.
+
+$$
+
+由 $ A\boldsymbol{x}=\mu\boldsymbol{x}$ 的前 9 个方程得
+
+$$
+
+x_2=\mu x_1,\quad x_3=\mu x_2,\quad\ldots,\quad x_{10}=\mu x_9,
+
+$$
+
+即
+
+$$
+
+x_k=\mu^{k-1}x_1\qquad(k=1,2,\ldots,10).
+
+$$
+
+最后一个方程为
+
+$$
+
+x_1+x_2+\cdots+x_{10}=\mu x_{10}.
+
+$$
+
+代入上式，得到
+
+$$
+
+1+\mu+\mu^2+\cdots+\mu^9=\mu^{10}.
+
+$$
+
+故 $ A$ 的特征多项式为
+
+$$
+
+|\lambda E-A|=\lambda^{10}-\lambda^9-\lambda^8-\cdots-\lambda-1.
+
+$$
+
+又因为矩阵阶数为偶数，
+
+$$
+
+|A-\lambda E|=(-1)^{10}|\lambda E-A|=|\lambda E-A|,
+
+$$
+
+所以
+
+$$
+
+|A-\lambda E|=\lambda^{10}-\lambda^9-\lambda^8-\cdots-\lambda-1.
+
+$$
+
+**为什么仅求特征值还需论证：** 从 $A\boldsymbol{x}=\lambda\boldsymbol{x}$ 推出候选多项式的零点只是启发；严格证明特征多项式可利用如下恒等式：设 $S$ 是上超对角线为 $1$ 的移位矩阵、$e_n$ 为末位单位列向量，则 $A=S+e_n\boldsymbol1^T$。当 $\lambda\ne0$，
+
+$$
+
+|\lambda E-A|=\lambda^{10}\left(1-\boldsymbol1^T(\lambda E-S)^{-1}e_n\right)
+=\lambda^{10}\left(1-\sum_{j=1}^{10}\lambda^{-j}\right).
+
+$$
+
+两端都是多项式，故等式对 $\lambda=0$ 也成立。原题 $10$ 为偶数，因而 $|A-\lambda E|=|\lambda E-A|$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 真题：高阶行列式递推与特殊末列
+
+<ExamQuestion>
+
+4. **【2015-1-4分】** $ n$ 阶行列式
+
+$$
+
+D_n=\begin{vmatrix}
+2 & 0 & \cdots & 0 & 2\\
+-1 & 2 & \cdots & 0 & 2\\
+\vdots & \vdots & & \vdots & \vdots\\
+0 & 0 & \cdots & 2 & 2\\
+0 & 0 & \cdots & -1 & 2
+\end{vmatrix}=
+
+$$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$ 2^{n+1}-2$。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+按第一行展开。删除第一行、第一列后所得行列式仍具有同样结构，等于 $ D_{n-1}$，故第一项为 $ 2D_{n-1}$。
+
+删除第一行、最后一列后，所得 $ n-1$ 阶行列式为
+
+$$
+
+\begin{vmatrix}
+-1&2&0&\cdots&0\\
+0&-1&2&\cdots&0\\
+\vdots&\vdots&\ddots&\ddots&\vdots\\
+0&0&\cdots&-1&2\\
+0&0&\cdots&0&-1
+\end{vmatrix}
+=(-1)^{n-1}.
+
+$$
+
+因此最后一项为
+
+$$
+
+2(-1)^{1+n}(-1)^{n-1}=2.
+
+$$
+
+于是递推关系为
+
+$$
+
+D_n=2D_{n-1}+2,
+
+$$
+
+且 $ D_1=2$。令 $ u_n=D_n+2$，则
+
+$$
+
+u_n=2u_{n-1},\qquad u_1=4,
+
+$$
+
+所以
+
+$$
+
+u_n=2^{n+1}.
+
+$$
+
+从而
+
+$$
+
+D_n=2^{n+1}-2.
+
+$$
+
+**递推法的边界：** 本题矩阵定义从 $n\ge2$ 的展示开始，初值可取 $D_1=2$（单个对角元）。对 $n\ge2$，有 $D_n=2D_{n-1}+2$，因此 $D_n+2$ 构成公比为 $2$ 的等比数列。把最后一列的常数 $2$ 误当作上三角消元时的零，会丢掉额外的 $+2$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 精选练习：对角常数矩阵的秩一扰动
+
+<ExamQuestion>
+
+5. **【李林880·第十章】** 计算 $n$ 阶行列式
+
+$$
+
+D_n=\begin{vmatrix}
+b&a&a&\cdots&a\\
+a&b&a&\cdots&a\\
+\vdots&\vdots&\vdots&&\vdots\\
+a&a&a&\cdots&b
+\end{vmatrix}.
+
+$$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$[b+(n-1)a](b-a)^{n-1}$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**解法一：行变换。** 把第 $2,3,\ldots,n$ 行加到第 $1$ 行：
+
+$$
+
+D_n=[b+(n-1)a]
+\begin{vmatrix}
+1&1&\cdots&1\\
+a&b&\cdots&a\\
+\vdots&\vdots&&\vdots\\
+a&a&\cdots&b
+\end{vmatrix}.
+
+$$
+
+再对 $i=2,\ldots,n$ 作
+
+$$
+
+R_i\leftarrow R_i-aR_1,
+
+$$
+
+得到上三角形行列式，因此
+
+$$
+
+D_n=[b+(n-1)a](b-a)^{n-1}.
+
+$$
+
+**解法二：特征值视角。** 该矩阵可写成
+
+$$
+
+A=(b-a)E+aJ,
+
+$$
+
+其中 $J$ 为全 $1$ 矩阵。$J$ 的特征值为 $n,0,\ldots,0$，故 $A$ 的特征值为
+
+$$
+
+b+(n-1)a,\quad b-a,\ldots,b-a.
+
+$$
+
+行列式为全部特征值之积，同样得到
+
+$$
+
+D_n=[b+(n-1)a](b-a)^{n-1}.
+
+$$
+
+**技巧总结：** “主对角线同值、其余位置同值”的行列式，要么做“行求和 + 消元”，要么直接识别为 $(b-a)E+aJ$。
+
+**与 1997 年真题比较：** 该题把“主对角线为 $0$、非对角为 $1$”放宽到对角为 $b$、非对角为 $a$，但核心矩阵仍是 $(b-a)E+aJ$。不应因 $b=a$ 就直接用除以 $b-a$ 的方法；多项式表达 $[b+(n-1)a](b-a)^{n-1}$ 对一切 $a,b$ 有效。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. **【李林880·第十章】** 计算 $n$ 阶行列式
+
+$$
+
+D_n=\begin{vmatrix}
+b-a_1^2&-a_1a_2&\cdots&-a_1a_n\\
+-a_2a_1&b-a_2^2&\cdots&-a_2a_n\\
+\vdots&\vdots&&\vdots\\
+-a_na_1&-a_na_2&\cdots&b-a_n^2
+\end{vmatrix}.
+
+$$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$b^{n-1}\left(b-\displaystyle\sum_{i=1}^na_i^2\right)$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+原矩阵可写成
+
+$$
+
+bE-aa^T,
+
+$$
+
+其中
+
+$$
+
+a=(a_1,a_2,\ldots,a_n)^T.
+
+$$
+
+用加边法，可写成等值的 $(n+1)$ 阶行列式：
+
+$$
+
+D_n=\begin{vmatrix}
+1&a_1&a_2&\cdots&a_n\\
+a_1&b&0&\cdots&0\\
+a_2&0&b&\cdots&0\\
+\vdots&\vdots&\vdots&&\vdots\\
+a_n&0&0&\cdots&b
+\end{vmatrix}.
+
+$$
+
+这是箭形行列式，化简得到
+
+$$
+
+D_n=b^{n-1}\left(b-\sum_{i=1}^na_i^2\right).
+
+$$
+
+**补充理解：** 这是“标量矩阵减一个秩 $1$ 矩阵”。向量 $a$ 方向对应特征值 $b-\|a\|^2$，与 $a$ 正交的 $n-1$ 维子空间对应特征值 $b$，所以行列式就是
+
+$$
+
+b^{n-1}(b-\|a\|^2).
+
+$$
+
+这个观点也说明公式对 $b=0$ 仍然成立。
+
+**没有逆矩阵也可以算：** $bE-aa^T$ 的秩一方向是 $a$，在与 $a$ 正交的 $n-1$ 维方向上作用为 $b$，沿 $a$ 的方向为 $b-\sum a_i^2$，所以行列式为 $b^{n-1}(b-\sum a_i^2)$；对 $b=0$ 不能从 $b^{-1}$ 开始推导，却可由多项式恒等性补全。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+7. **【李林880·第十章】** 计算 $n$ 阶行列式
+
+$$
+
+D_n=\begin{vmatrix}
+a+b_1&a&\cdots&a\\
+a&a+b_2&\cdots&a\\
+\vdots&\vdots&&\vdots\\
+a&a&\cdots&a+b_n
+\end{vmatrix},\qquad b_i\ne0.
+
+$$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$\left(1+a\displaystyle\sum_{i=1}^n\frac1{b_i}\right)\displaystyle\prod_{i=1}^nb_i$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+使用加边法：
+
+$$
+
+D_n=
+\begin{vmatrix}
+1&-a&-a&\cdots&-a\\
+1&b_1&0&\cdots&0\\
+1&0&b_2&\cdots&0\\
+\vdots&\vdots&\vdots&&\vdots\\
+1&0&0&\cdots&b_n
+\end{vmatrix}.
+
+$$
+
+这是箭形行列式。由于 $b_i\ne0$，可直接使用箭形行列式公式：
+
+$$
+
+D_n=
+\left(1+\sum_{i=1}^n\frac{a}{b_i}\right)
+\prod_{i=1}^nb_i.
+
+$$
+
+即
+
+$$
+
+D_n=\left(1+a\sum_{i=1}^n\frac1{b_i}\right)\prod_{i=1}^nb_i.
+
+$$
+
+**技巧：** “对角线上各自多一个 $b_i$，其余元素全为同一个 $a$”是典型加边法结构。
+
+**去除分母后的通式：** 原式等价于
+
+$$
+
+D_n=\prod_{i=1}^n b_i+a\sum_{k=1}^n\prod_{j\ne k}b_j.
+
+$$
+
+它是多项式恒等式，故不仅在题设的 $b_i\ne0$ 时成立，也延拓到部分 $b_i=0$ 的情形。识别方式是“对角矩阵 $+\,$全一向量的秩一外积”。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 精选练习：三对角行列式的基础递推与通解
+
+<ExamQuestion>
+
+8. **【李林880·第十章】** 计算 $n$ 阶行列式
+
+$$
+
+D_n=\begin{vmatrix}
+2&-1&0&\cdots&0&0\\
+-1&2&-1&\cdots&0&0\\
+0&-1&2&\cdots&0&0\\
+\vdots&\vdots&\vdots&&\vdots&\vdots\\
+0&0&0&\cdots&2&-1\\
+0&0&0&\cdots&-1&2
+\end{vmatrix}.
+
+$$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$n+1$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+这是三对角行列式。按第一行展开：
+
+$$
+
+D_n=2D_{n-1}-D_{n-2}.
+
+$$
+
+于是
+
+$$
+
+D_n-D_{n-1}=D_{n-1}-D_{n-2},
+
+$$
+
+说明数列 $\{D_n\}$ 的一阶差分为常数。
+
+初值为
+
+$$
+
+D_1=2,\qquad D_2=\begin{vmatrix}2&-1\\-1&2\end{vmatrix}=3.
+
+$$
+
+故公差为 $1$，从而
+
+$$
+
+D_n=D_1+(n-1)=n+1.
+
+$$
+
+**技巧：** 三对角行列式优先建立二阶递推。得到递推后，再判断是等差、等比还是一般特征方程。
+
+**最短证明：** 展开得 $D_n=2D_{n-1}-D_{n-2}$，令 $\Delta_n=D_n-D_{n-1}$，则 $\Delta_n=\Delta_{n-1}=1$，所以 $D_n=n+1$。若将相邻非对角元同时从 $-1$ 改为 $+1$，乘积仍为 $1$，递推结果不变；但若只改一个符号，递推会改变。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+9. **【李林880·第十章】** 计算
+
+$$
+
+D_n=\begin{vmatrix}
+a&b&0&\cdots&0&0\\
+c&a&b&\cdots&0&0\\
+0&c&a&\cdots&0&0\\
+\vdots&\vdots&\vdots&&\vdots&\vdots\\
+0&0&0&\cdots&a&b\\
+0&0&0&\cdots&c&a
+\end{vmatrix},
+\qquad a^2-4bc\ge0.
+
+$$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+设 $r_{1,2}=\dfrac{a\pm\sqrt{a^2-4bc}}2$，则
+
+$$
+
+D_n=\begin{cases}
+\dfrac{r_1^{n+1}-r_2^{n+1}}{r_1-r_2},&r_1\ne r_2,\\[6pt]
+(n+1)r_1^n,&r_1=r_2.
+\end{cases}
+
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+按第一行展开，得到标准二阶递推：
+
+$$
+
+D_n=aD_{n-1}-bcD_{n-2},
+
+$$
+
+并取
+
+$$
+
+D_0=1,\qquad D_1=a.
+
+$$
+
+对应特征方程为
+
+$$
+
+r^2-ar+bc=0,
+
+$$
+
+其两根为
+
+$$
+
+r_{1,2}=\frac{a\pm\sqrt{a^2-4bc}}2.
+
+$$
+
+当 $r_1\ne r_2$ 时，由初值解得
+
+$$
+
+D_n=\frac{r_1^{n+1}-r_2^{n+1}}{r_1-r_2}.
+
+$$
+
+当 $r_1=r_2=r$ 时，即 $a^2=4bc$，重根递推给出
+
+$$
+
+D_n=(n+1)r^n.
+
+$$
+
+**技巧总结：** 一般常系数三对角行列式都应先写递推关系；递推式本质上就是一个二阶线性递推数列。
+
+**三个层次：** 先按首行得到 $D_n=aD_{n-1}-bcD_{n-2}$，再解二阶递推的特征方程，最后按判别式是否为零分情形。若 $r_1=r_2$ 仍套用 $\frac{r_1^{n+1}-r_2^{n+1}}{r_1-r_2}$ 就是 $0/0$，必须改用重根解 $(n+1)r^n$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+10. **【李正元·第一章】** 已知
+
+$$
+
+ D_n=
+\begin{vmatrix}
+a_1 & 1 & 0 & \cdots & 0 & 0\\
+-1 & a_2 & 1 & \cdots & 0 & 0\\
+0 & -1 & a_3 & \cdots & 0 & 0\\
+\vdots & \vdots & \vdots & & \vdots & \vdots\\
+0 & 0 & 0 & \cdots & a_{n-1} & 1\\
+0 & 0 & 0 & \cdots & -1 & a_n
+\end{vmatrix},
+
+$$
+
+若 $ D_n=a_nD_{n-1}+kD_{n-2}$，则 $ k=\underline{\qquad}$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$ 1$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+按行列式 $ D_n$ 的最后一行展开。最后一行只有第 $ n-1$ 列的元素 $ -1$ 和第 $ n$ 列的元素 $ a_n$ 非零。
+
+元素 $ a_n$ 对应的余子式正是 $ D_{n-1}$，故产生
+
+$$
+
+ a_nD_{n-1}.
+
+$$
+
+元素 $ -1$ 对应项为
+
+$$
+
+ (-1)(-1)^{n+(n-1)}M_{n,n-1}=M_{n,n-1}.
+
+$$
+
+在余子式 $ M_{n,n-1}$ 中，最后一列仅有一个非零元素 $ 1$，再沿最后一列展开，即得到 $ D_{n-2}$。因此
+
+$$
+
+ D_n=a_nD_{n-1}+D_{n-2}.
+
+$$
+
+故
+
+$$
+
+ k=1.
+
+$$
+
+**注意符号反转：** 与常见的 $D_n=2D_{n-1}-D_{n-2}$ 相比，本题上邻对角元为 $1$、下邻对角元为 $-1$，乘积为 $-1$，所以递推中的 $-uv$ 变为 $+1$。如果只记固定公式而不看两条副对角线的符号，很容易误填 $-1$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 精选练习：稀疏环结构与多项式行列式
+
+<ExamQuestion>
+
+11. **【李林880·第十章】** 计算
+
+$$
+
+\begin{aligned}
+D_n={}&
+\begin{vmatrix}
+a_1&b_1&0&\cdots&0&0\\
+0&a_2&b_2&\cdots&0&0\\
+\vdots&\vdots&\vdots&&\vdots&\vdots\\
+0&0&0&\cdots&a_{n-1}&b_{n-1}\\
+b_n&0&0&\cdots&0&a_n
+\end{vmatrix}\\
+&+
+\begin{vmatrix}
+a_1&0&0&\cdots&0&b_n\\
+b_1&a_2&0&\cdots&0&0\\
+0&b_2&a_3&\cdots&0&0\\
+\vdots&\vdots&\vdots&&\vdots&\vdots\\
+0&0&0&\cdots&a_{n-1}&0\\
+0&0&0&\cdots&b_{n-1}&a_n
+\end{vmatrix},
+\end{aligned}
+
+$$
+
+其中 $a_i,b_i$ 均不为 $0$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$2\displaystyle\prod_{i=1}^na_i+2(-1)^{n+1}\displaystyle\prod_{i=1}^nb_i$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+记两个行列式分别为 $D^{(1)}$、$D^{(2)}$。
+
+对 $D^{(1)}$ 按第一列展开，只有 $a_1$ 与 $b_n$ 两项有贡献：
+
+$$
+
+D^{(1)}=
+\prod_{i=1}^na_i+(-1)^{n+1}\prod_{i=1}^nb_i.
+
+$$
+
+第二个行列式恰好是第一个行列式的转置，因此
+
+$$
+
+D^{(2)}=D^{(1)}.
+
+$$
+
+所以
+
+$$
+
+D_n=2\prod_{i=1}^na_i+2(-1)^{n+1}\prod_{i=1}^nb_i.
+
+$$
+
+**技巧：** 环状稀疏行列式常常只有“全取主对角线”与“沿环取元素”两类非零排列项；若两个行列式互为转置，直接利用 $|A^T|=|A|$。
+
+**与 1991 年循环行列式的区别：** 原真题所有环位置同为 $b$、对角线同为 $a$，这里只保留稀疏环结构而放宽为各行不同的 $a_i,b_i$，并利用第二个行列式是第一个的转置进一步合并。必须注意循环排列的符号 $(-1)^{n-1}$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+12. **【李林880·第十章】** 计算 $n$ 阶行列式
+
+$$
+
+D_n=\begin{vmatrix}
+a_0&-1&0&\cdots&0&0\\
+a_1&x&-1&\cdots&0&0\\
+a_2&0&x&\cdots&0&0\\
+\vdots&\vdots&\vdots&&\vdots&\vdots\\
+a_{n-2}&0&0&\cdots&x&-1\\
+a_{n-1}&0&0&\cdots&0&x
+\end{vmatrix}.
+
+$$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$a_0x^{n-1}+a_1x^{n-2}+\cdots+a_{n-2}x+a_{n-1}$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+按最后一行展开。左下角元素 $a_{n-1}$ 的余子式是一个对角线全为 $-1$ 的上三角行列式，符号恰好抵消，得到
+
+$$
+
+D_n=a_{n-1}+xD_{n-1}.
+
+$$
+
+反复递推：
+
+$$
+
+\begin{aligned}
+D_n
+&=a_{n-1}+xa_{n-2}+x^2D_{n-2}\\
+&=\cdots\\
+&=a_0x^{n-1}+a_1x^{n-2}+\cdots+a_{n-2}x+a_{n-1}.
+\end{aligned}
+
+$$
+
+**技巧：** 这种“第一列放系数、上超对角线为 $-1$、其余为 $x$”的行列式本质上是在编码一个多项式。递推比直接展开最自然。
+
+**指数与维数核对：** $n$ 阶行列式有 $n$ 个系数 $a_0,\ldots,a_{n-1}$，结果是次数最多 $n-1$ 的多项式。取 $n=2$，得到 $a_0x+a_1$；一般由 $D_n=xD_{n-1}+a_{n-1}$ 递推。与张宇练习中“最后一行放系数”的转置式不同，两者都是用行列式编码多项式。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 原创变式：对三对角母题增加一个角元素
+
+<ExamQuestion>
+
+13. **【原创变式·主子式递推与代数余子式】** 设 $n\ge2$，$T_n$ 为 $n$ 阶对称三对角矩阵，主对角线元素全为 $2$，紧邻主对角线的上下元素全为 $-1$，其余元素为 $0$。令
+
+$$
+
+A_n(t)=T_n+t e_1e_n^T,
+
+$$
+
+其中 $e_1,e_n$ 为第一、末位标准基向量。
+
+（1）求 $|A_n(t)|$；（2）求使 $A_n(t)$ 奇异的全部 $t$；（3）不直接求逆矩阵，计算 $(T_n^{-1})_{n1}$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$$
+
+|A_n(t)|=n+1+t,\qquad t=-(n+1),\qquad (T_n^{-1})_{n1}=\frac1{n+1}.
+
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**第一步：利用三对角行列式母题。** 由首行展开，$d_n=|T_n|$ 满足
+
+$$
+
+d_0=1,\qquad d_1=2,\qquad d_n=2d_{n-1}-d_{n-2},
+
+$$
+
+故 $d_n=n+1>0$，说明 $T_n$ 可逆。
+
+**第二步：只改动一个矩阵元素。** $t e_1e_n^T$ 仅把第 $(1,n)$ 元增加 $t$。行列式对该元素是线性的，因此
+
+$$
+
+|A_n(t)|=|T_n|+tC_{1n}(T_n).
+
+$$
+
+删去 $T_n$ 的第一行与末列，所得 $(n-1)$ 阶矩阵为上三角矩阵，主对角线上全是 $-1$，所以
+
+$$
+
+M_{1n}=(-1)^{n-1},\qquad
+C_{1n}=(-1)^{1+n}M_{1n}=1.
+
+$$
+
+代入得 $|A_n(t)|=n+1+t$，奇异当且仅当 $t=-(n+1)$。
+
+**第三步：以伴随矩阵连接逆元。** 对可逆矩阵，$(T_n^{-1})_{n1}=C_{1n}(T_n)/|T_n|=1/(n+1)$。本题把 2015 年真题的三对角递推和代数余子式、逆矩阵联系起来；只修改一个非零位置时，通用技巧是“原行列式 $+\,$变量乘相应代数余子式”。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
