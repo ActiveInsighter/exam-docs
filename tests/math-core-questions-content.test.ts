@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { describe, expect, it } from 'vitest';
+import { getShortDocSlugPath } from '../lib/doc-paths.mjs';
 
 const root = join(process.cwd(), 'content/docs/math/core-questions');
 
@@ -76,5 +77,16 @@ describe('Graduate mathematics core questions', () => {
       for (const entry of children.filter((item) => item.isDirectory())) visit(join(directory, entry.name));
     };
     visit(root);
+  });
+
+  it('links collection and subject entry pages to generated document routes', () => {
+    const routes = new Set(pagesIn(root).map((page) =>
+      `/docs/${getShortDocSlugPath(page.slice(join(process.cwd(), 'content/docs').length + 1))}`,
+    ));
+    for (const page of pagesIn(root).filter((page) => page.endsWith('/index.mdx'))) {
+      for (const [, href] of readFileSync(page, 'utf8').matchAll(/\]\(([^)]+)\)/gu)) {
+        expect(routes.has(href), `${page}: ${href}`).toBe(true);
+      }
+    }
   });
 });
