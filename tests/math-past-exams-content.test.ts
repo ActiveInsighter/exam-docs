@@ -14,10 +14,10 @@ function pagesIn(directory: string): string[] {
   });
 }
 
-describe('October 7 mathematics past-exam imports', () => {
+describe('Classified mathematics past exams', () => {
   for (const [folder, questionCount, pageCount] of [
-    ['04-线性代数', 343, 20],
-    ['03-概率论与数理统计', 294, 17],
+    ['04-线性代数', 365, 20],
+    ['03-概率论与数理统计', 309, 17],
   ] as const) {
     it(`renders every question, solution and formula in ${folder}`, async () => {
       const directory = join(root, folder);
