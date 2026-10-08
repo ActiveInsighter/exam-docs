@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 const docsRoot = join(process.cwd(), 'content', 'docs');
 const expectedRootPages = ['math', '408', 'politics', 'english', 'programming'];
 const expectedModuleChildren: Record<string, string[]> = {
-  math: ['index', 'past-exams', 'exam', 'zhangyu-1000', 'lizhengyuan', 'lilin-880'],
+  math: ['index', 'past-exams', 'core-questions', 'exam', 'zhangyu-1000', 'lizhengyuan', 'lilin-880'],
   '408': ['index', 'mock', 'past-exams', 'past-exams-large-questions'],
   politics: ['index', 'historical-questions', 'classified-questions'],
   english: ['index'],

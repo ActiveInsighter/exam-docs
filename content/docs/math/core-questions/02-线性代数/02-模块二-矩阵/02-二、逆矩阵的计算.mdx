@@ -1,0 +1,1653 @@
+---
+title: "二、逆矩阵的计算"
+sidebar_position: 2
+toc_min_heading_level: 2
+toc_max_heading_level: 4
+---
+
+# 二、逆矩阵的计算
+
+## 真题：数值、分块与加权置换矩阵的逆
+
+<ExamQuestion>
+
+1. **【1988-45-1分】**
+
+$$
+
+\begin{pmatrix}
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0 \\
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0
+\end{pmatrix}^{-1}=
+
+$$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$$
+
+\begin{pmatrix}
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0 \\
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0
+\end{pmatrix}
+
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+记
+
+$$
+
+ P=
+\begin{pmatrix}
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0 \\
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0
+\end{pmatrix}
+
+$$
+
+。
+
+矩阵$P$表示将向量各分量的次序完全颠倒。连续作两次相同置换后，各分量恢复原位，因此
+
+$ P^2=E$。
+
+于是
+
+$ P^{-1}=P$，
+
+即
+
+$$
+
+\begin{pmatrix}
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0 \\
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0
+\end{pmatrix}^{-1}
+=
+\begin{pmatrix}
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0 \\
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0
+\end{pmatrix}
+
+$$
+
+。
+
+**特征结构：** 该反序置换矩阵 $P$ 满足 $P^2=E$，所以 $P^{-1}=P$；这是对合矩阵，而非所有置换矩阵的共同性质。一般置换矩阵的逆矩阵为其转置。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+2. **【1989-12-3分】** 设矩阵
+
+$$
+
+A=\begin{pmatrix}
+3 & 0 & 0 \\
+1 & 4 & 0 \\
+0 & 0 & 3
+\end{pmatrix},
+\qquad
+E=\begin{pmatrix}
+1 & 0 & 0 \\
+0 & 1 & 0 \\
+0 & 0 & 1
+\end{pmatrix}
+
+$$
+
+，
+
+则$ (A-2E)^{-1}=$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$$
+
+\begin{pmatrix}
+1 & 0 & 0 \\
+-\frac{1}{2} & \frac{1}{2} & 0 \\
+0 & 0 & 1
+\end{pmatrix}
+
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+先计算
+
+$$
+
+ A-2E=
+\begin{pmatrix}
+1 & 0 & 0 \\
+1 & 2 & 0 \\
+0 & 0 & 1
+\end{pmatrix}
+
+$$
+
+。
+
+对该下三角矩阵作初等行变换，或直接设其逆矩阵为下三角矩阵求解，可得
+
+$$
+
+ (A-2E)^{-1}=
+\begin{pmatrix}
+1 & 0 & 0 \\
+-\frac{1}{2} & \frac{1}{2} & 0 \\
+0 & 0 & 1
+\end{pmatrix}
+
+$$
+
+。
+
+验证：
+
+$$
+
+\begin{pmatrix}
+1 & 0 & 0 \\
+1 & 2 & 0 \\
+0 & 0 & 1
+\end{pmatrix}
+\begin{pmatrix}
+1 & 0 & 0 \\
+-\frac{1}{2} & \frac{1}{2} & 0 \\
+0 & 0 & 1
+\end{pmatrix}
+=E
+
+$$
+
+。
+
+**三角结构优先：** $A-2E$ 下三角且对角元非零，先只对左上 $2\times2$ 块求逆；右下元素直接取倒数即可。验证时使用矩阵乘积 $M M^{-1}=E$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+3. **【1991-12-3分】** 设四阶方阵
+
+$$
+
+A=\begin{pmatrix}
+5 & 2 & 0 & 0 \\
+2 & 1 & 0 & 0 \\
+0 & 0 & 1 & -2 \\
+0 & 0 & 1 & 1
+\end{pmatrix}
+
+$$
+
+，
+
+则$ A^{-1}=$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$$
+
+A^{-1}=
+\begin{pmatrix}
+1 & -2 & 0 & 0 \\
+-2 & 5 & 0 & 0 \\
+0 & 0 & \frac{1}{3} & \frac{2}{3} \\
+0 & 0 & -\frac{1}{3} & \frac{1}{3}
+\end{pmatrix}
+
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+矩阵$A$为分块对角矩阵，可写成
+
+$$
+
+ A=
+\begin{pmatrix}
+A_1 & O \\
+O & A_2
+\end{pmatrix}
+
+$$
+
+，
+
+其中
+
+$$
+
+A_1=\begin{pmatrix}5&2\\2&1\end{pmatrix},
+\qquad
+A_2=\begin{pmatrix}1&-2\\1&1\end{pmatrix}
+
+$$
+
+。
+
+因为
+
+$ |A_1|=5\cdot1-2\cdot2=1$，
+
+所以
+
+$$
+
+ A_1^{-1}=
+\begin{pmatrix}1&-2\\-2&5\end{pmatrix}
+
+$$
+
+。
+
+又因为
+
+$ |A_2|=1\cdot1-(-2)\cdot1=3$，
+
+所以
+
+$$
+
+ A_2^{-1}=
+\frac{1}{3}\begin{pmatrix}1&2\\-1&1\end{pmatrix}
+
+$$
+
+。
+
+因此
+
+$$
+
+ A^{-1}=
+\begin{pmatrix}
+A_1^{-1} & O \\
+O & A_2^{-1}
+\end{pmatrix}
+=
+\begin{pmatrix}
+1 & -2 & 0 & 0 \\
+-2 & 5 & 0 & 0 \\
+0 & 0 & \frac{1}{3} & \frac{2}{3} \\
+0 & 0 & -\frac{1}{3} & \frac{1}{3}
+\end{pmatrix}
+
+$$
+
+。
+
+**分块求逆：** 这里是两个方阵组成的**块对角**矩阵，块矩阵可分别求逆。若非零块移到反对角位置，则逆矩阵各块要交换位置，见本节后面的 1991 年真题，不可照搬。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+4. **【1994-45-3分】** 设
+
+$$
+
+A=\begin{pmatrix}
+0 & a_1 & 0 & \cdots & 0 \\
+0 & 0 & a_2 & \cdots & 0 \\
+\vdots & \vdots & \vdots & & \vdots \\
+0 & 0 & 0 & \cdots & a_{n-1} \\
+a_n & 0 & 0 & \cdots & 0
+\end{pmatrix}
+
+$$
+
+，
+
+其中$ a_i\neq0\ (i=1,2,\cdots,n)$，则$ A^{-1}=$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$$
+
+A^{-1}=
+\begin{pmatrix}
+0 & 0 & 0 & \cdots & \frac{1}{a_n} \\
+\frac{1}{a_1} & 0 & 0 & \cdots & 0 \\
+0 & \frac{1}{a_2} & 0 & \cdots & 0 \\
+\vdots & \vdots & \ddots & \ddots & \vdots \\
+0 & 0 & \cdots & \frac{1}{a_{n-1}} & 0
+\end{pmatrix}
+
+$$
+
+。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+设$ y=Ax$，其中
+
+$$
+
+x=(x_1,x_2,\cdots,x_n)^T,
+\qquad
+y=(y_1,y_2,\cdots,y_n)^T
+
+$$
+
+。
+
+由矩阵乘法得
+
+$$
+
+\begin{cases}
+y_1=a_1x_2,\\
+y_2=a_2x_3,\\
+\quad\vdots\\
+y_{n-1}=a_{n-1}x_n,\\
+y_n=a_nx_1.
+\end{cases}
+
+$$
+
+由于所有$ a_i\neq0$，可反解为
+
+$$
+
+\begin{cases}
+x_1=\frac{1}{a_n}y_n,\\
+x_2=\frac{1}{a_1}y_1,\\
+x_3=\frac{1}{a_2}y_2,\\
+\quad\vdots\\
+x_n=\frac{1}{a_{n-1}}y_{n-1}.
+\end{cases}
+
+$$
+
+因此$ x=A^{-1}y$中的系数矩阵即为
+
+$$
+
+A^{-1}=
+\begin{pmatrix}
+0 & 0 & 0 & \cdots & \frac{1}{a_n} \\
+\frac{1}{a_1} & 0 & 0 & \cdots & 0 \\
+0 & \frac{1}{a_2} & 0 & \cdots & 0 \\
+\vdots & \vdots & \ddots & \ddots & \vdots \\
+0 & 0 & \cdots & \frac{1}{a_{n-1}} & 0
+\end{pmatrix}
+
+$$
+
+。
+
+**加权置换母题：** $A=DP$，其中 $D=\operatorname{diag}(a_1,\ldots,a_n)$、$P$ 为循环置换矩阵，故 $A^{-1}=P^{-1}D^{-1}$。观察 $Ax$ 所对应的坐标关系，比对含 $n$ 个参数的矩阵作高斯消元更可靠。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+5. **【1991-4-3分】** 设$A$和$B$为可逆矩阵，$ X=\begin{pmatrix}O & A \\ B & O\end{pmatrix}$为分块矩阵，则$ X^{-1}=$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$ X^{-1}=\begin{pmatrix}O & B^{-1} \\ A^{-1} & O\end{pmatrix}$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+设
+
+$ Y=\begin{pmatrix}O & B^{-1} \\ A^{-1} & O\end{pmatrix}$。
+
+利用分块矩阵乘法，得
+
+$$
+
+XY=
+\begin{pmatrix}O&A\\B&O\end{pmatrix}
+\begin{pmatrix}O&B^{-1}\\A^{-1}&O\end{pmatrix}
+=
+\begin{pmatrix}AA^{-1}&O\\O&BB^{-1}\end{pmatrix}
+=
+\begin{pmatrix}E&O\\O&E\end{pmatrix}
+
+$$
+
+。
+
+同理，
+
+$$
+
+YX=
+\begin{pmatrix}E&O\\O&E\end{pmatrix}
+
+$$
+
+。
+
+故
+
+$$
+
+ X^{-1}=Y=
+\begin{pmatrix}O & B^{-1} \\ A^{-1} & O\end{pmatrix}
+
+$$
+
+。
+
+需要注意：右上角应为$ B^{-1}$，左下角应为$ A^{-1}$，位置不能直接照抄原矩阵中的$A,B$。
+
+**块乘法验证：** $\begin{pmatrix}O&A\\B&O\end{pmatrix}$ 的逆不是把 $A^{-1},B^{-1}$ 原位放回，而是变为 $\begin{pmatrix}O&B^{-1}\\A^{-1}&O\end{pmatrix}$；条件是两个方形块均可逆。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+6. **【2002-4-3分】** 设矩阵$ A=\begin{pmatrix}1 & -1 \\ 2 & 3\end{pmatrix}$，$ B=A^2-3A+2E$，则$ B^{-1}=$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$ B^{-1}=\begin{pmatrix}0 & \frac{1}{2} \\ -1 & -1\end{pmatrix}$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+先计算
+
+$$
+
+A^2=
+\begin{pmatrix}1 & -1 \\ 2 & 3\end{pmatrix}
+\begin{pmatrix}1 & -1 \\ 2 & 3\end{pmatrix}
+=
+\begin{pmatrix}-1 & -4 \\ 8 & 7\end{pmatrix}
+
+$$
+
+。
+
+于是
+
+$$
+
+B=A^2-3A+2E
+=
+\begin{pmatrix}-1 & -4 \\ 8 & 7\end{pmatrix}
+-
+\begin{pmatrix}3 & -3 \\ 6 & 9\end{pmatrix}
++
+\begin{pmatrix}2 & 0 \\ 0 & 2\end{pmatrix}
+=
+\begin{pmatrix}-2 & -1 \\ 2 & 0\end{pmatrix}
+
+$$
+
+。
+
+其行列式为
+
+$ |B|=(-2)\cdot0-(-1)\cdot2=2\neq0$，
+
+故$B$可逆。由二阶矩阵求逆公式，
+
+$$
+
+B^{-1}
+=
+\frac{1}{2}
+\begin{pmatrix}0 & 1 \\ -2 & -2\end{pmatrix}
+=
+\begin{pmatrix}0 & \frac{1}{2} \\ -1 & -1\end{pmatrix}
+
+$$
+
+。
+
+**矩阵函数与特征值可逆性：** 此题可先求 $B$ 再求逆，但也可用 $A$ 的特征多项式把 $B$ 降为低次多项式；必须先检查 $|B|\ne0$，不应对未证可逆的矩阵直接写 $B^{-1}$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 真题：幂零矩阵、矩阵多项式求逆
+
+<ExamQuestion>
+
+7. **【1990-4-5分】** 已知对于$n$阶方阵$A$，存在自然数$k$，使得$ A^k=O$，试证明矩阵$E-A$可逆，并写出其逆矩阵的表达式（$E$为$n$阶单位阵）。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$ (E-A)^{-1}=E+A+A^2+\cdots+A^{k-1}$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+利用有限等比恒等式，有
+
+$ (E-A)(E+A+A^2+\cdots+A^{k-1})=E-A^k$。
+
+由已知$ A^k=O$，故
+
+$ (E-A)(E+A+A^2+\cdots+A^{k-1})=E$。
+
+另一方面，由于$A$的各次幂彼此可交换，亦有
+
+$ (E+A+A^2+\cdots+A^{k-1})(E-A)=E-A^k=E$。
+
+因此$E-A$可逆，且
+
+$ (E-A)^{-1}=E+A+A^2+\cdots+A^{k-1}$。
+
+相关知识点：若$A$是幂零矩阵，则含$A$的有限几何级数常用于构造$E-A$的逆矩阵。
+
+**幂零与有限等比和：** 无需先求 $|E-A|$。$A^k=O$ 直接使 $(E-A)(E+A+\cdots+A^{k-1})=E$。对 $E+A$ 的逆矩阵只需交替符号；即使 $A$ 不是对角化矩阵也适用。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+8. **【2001-1-3分】** 设矩阵$A$满足$ A^2+A-4E=O$，其中$E$为单位矩阵，则$ (A-E)^{-1}=$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$ (A-E)^{-1}=\frac{1}{2}(A+2E)$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+由已知矩阵方程
+
+$ A^2+A-4E=O$，
+
+得
+
+$ A^2+A=4E$。
+
+考察
+
+$ (A-E)(A+2E)=A^2+A-2E$。
+
+代入$ A^2+A=4E$，可得
+
+$ (A-E)(A+2E)=2E$。
+
+同理，由于$A$与其多项式可交换，
+
+$ (A+2E)(A-E)=2E$。
+
+所以$A-E$可逆，且
+
+$ (A-E)^{-1}=\frac{1}{2}(A+2E)$。
+
+**多项式消元：** 寻找常数 $x,y$ 使 $(A-E)(xA+yE)=E$，用 $A^2=4E-A$ 降次即可。逆矩阵是 $A$ 的一次多项式，因此自动与 $A$ 交换。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+9. **【1988-5-6分】** 已知$n$阶方阵$A$满足矩阵方程$A^2-3A-2E=O$，其中$A$给定，而$E$是单位矩阵，证明$A$可逆，并求出其逆矩阵$A^{-1}$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$ A^{-1}=\frac{1}{2}(A-3E)$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+由已知
+
+$ A^2-3A-2E=O$，
+
+可得
+
+$ A^2-3A=2E$，
+
+即
+
+$ A(A-3E)=2E$。
+
+又因为$A$与关于$A$的多项式$A-3E$可交换，所以同时有
+
+$ (A-3E)A=2E$。
+
+于是
+
+$ A\left[\frac{1}{2}(A-3E)\right]=E$，
+
+且
+
+$ \left[\frac{1}{2}(A-3E)\right]A=E$。
+
+因此$A$存在左右逆，故$A$可逆，并且
+
+$ A^{-1}=\frac{1}{2}(A-3E)$。
+
+**零行列式也能推出可逆：** 从 $A^2-3A-2E=O$ 可改写 $A(A-3E)=2E$；只用“存在一个右逆”的性质即可证明 $A$ 可逆，不需要预设 $A^{-1}$ 存在。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 真题：逆矩阵和式、Cayley 型变换与抽象矩阵方程
+
+<ExamQuestion>
+
+10. **【1992-5-3分】** 设$A,B,A+B,A^{-1}+B^{-1}$均为$n$阶可逆矩阵，则$ (A^{-1}+B^{-1})^{-1}$等于( )。
+
+<ExamChoices>
+
+<ExamOption>
+
+A. $ A^{-1}+B^{-1}$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $ A+B$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $ A(A+B)^{-1}B$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $ (A+B)^{-1}$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+C
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+将原矩阵分解为
+
+$ A^{-1}+B^{-1}=B^{-1}(A+B)A^{-1}$。
+
+事实上，
+
+$$
+
+ B^{-1}(A+B)A^{-1}
+=B^{-1}AA^{-1}+B^{-1}BA^{-1}
+=B^{-1}+A^{-1}
+
+$$
+
+。
+
+因此
+
+$$
+
+(A^{-1}+B^{-1})^{-1}
+=
+\left[B^{-1}(A+B)A^{-1}\right]^{-1}
+=
+A(A+B)^{-1}B
+
+$$
+
+。
+
+故选C。
+
+A选项只是原矩阵本身；B选项忽略了逆矩阵及乘法次序；D选项少了左右两侧的矩阵因子。矩阵乘法一般不满足交换律，求乘积的逆矩阵时必须逆序排列各因子。
+
+**逆和恒等式：** $A^{-1}+B^{-1}=A^{-1}(A+B)B^{-1}$，因此逆为 $B(A+B)^{-1}A$；也可写成 $A(A+B)^{-1}B$，两者相等由原等式推出，但**不是**因 $AB=BA$。这一表达式也叫平行和模型。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+11. **【2000-2-3分】** 设
+
+$$
+
+A=\begin{pmatrix}
+1 & 0 & 0 & 0 \\
+-2 & 3 & 0 & 0 \\
+0 & -4 & 5 & 0 \\
+0 & 0 & -6 & 7
+\end{pmatrix}
+
+$$
+
+，
+
+$E$为4阶单位矩阵，且$ B=(E+A)^{-1}(E-A)$，则$ (E+B)^{-1}=$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$$
+
+(E+B)^{-1}
+=\frac{1}{2}(E+A)
+=
+\begin{pmatrix}
+1 & 0 & 0 & 0 \\
+-1 & 2 & 0 & 0 \\
+0 & -2 & 3 & 0 \\
+0 & 0 & -3 & 4
+\end{pmatrix}
+
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+由
+
+$ B=(E+A)^{-1}(E-A)$，
+
+并注意到
+
+$ E=(E+A)^{-1}(E+A)$，
+
+可得
+
+$$
+
+E+B
+=(E+A)^{-1}\big[(E+A)+(E-A)\big]
+=2(E+A)^{-1}
+
+$$
+
+。
+
+因此
+
+$ (E+B)^{-1}=\frac{1}{2}(E+A)$。
+
+又
+
+$$
+
+E+A=
+\begin{pmatrix}
+2 & 0 & 0 & 0 \\
+-2 & 4 & 0 & 0 \\
+0 & -4 & 6 & 0 \\
+0 & 0 & -6 & 8
+\end{pmatrix}
+
+$$
+
+，
+
+所以
+
+$$
+
+(E+B)^{-1}
+=
+\begin{pmatrix}
+1 & 0 & 0 & 0 \\
+-1 & 2 & 0 & 0 \\
+0 & -2 & 3 & 0 \\
+0 & 0 & -3 & 4
+\end{pmatrix}
+
+$$
+
+。
+
+本题不需要先求出$B$的具体矩阵，直接对$E+B$作代数化简更简洁。
+
+**化繁为简：** 先化 $E+B=2(E+A)^{-1}$，立即得到 $(E+B)^{-1}=(E+A)/2$；只有这里 $E+A$ 本身可逆，才允许原式写成 $(E+A)^{-1}(E-A)$。无需逐项求出四阶逆矩阵。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+12. **【2003-4-4分】** 设$A,B$均为三阶矩阵，$E$是三阶单位矩阵，已知$AB=2A+B$，$B=\begin{pmatrix}2 & 0 & 2 \\ 0 & 4 & 0 \\ 2 & 0 & 2\end{pmatrix}$，则$(A-E)^{-1}=$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$ (A-E)^{-1}=\begin{pmatrix}0 & 0 & 1 \\ 0 & 1 & 0 \\ 1 & 0 & 0\end{pmatrix}$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+由
+
+$ AB=2A+B$，
+
+移项得
+
+$ AB-B=2A$，
+
+即
+
+$ (A-E)B=2A$。
+
+又因为$ A=(A-E)+E$，所以
+
+$ (A-E)B=2(A-E)+2E$，
+
+从而
+
+$ (A-E)(B-2E)=2E$。
+
+由于$A-E$与$B-2E$均为同阶方阵，上式说明$A-E$可逆，且
+
+$ (A-E)^{-1}=\frac{1}{2}(B-2E)$。
+
+计算
+
+$$
+
+ B-2E=
+\begin{pmatrix}
+0 & 0 & 2 \\
+0 & 2 & 0 \\
+2 & 0 & 0
+\end{pmatrix}
+
+$$
+
+，
+
+故
+
+$$
+
+ (A-E)^{-1}=
+\begin{pmatrix}
+0 & 0 & 1 \\
+0 & 1 & 0 \\
+1 & 0 & 0
+\end{pmatrix}
+
+$$
+
+。
+
+本题的关键是把原矩阵等式整理成“某矩阵乘积等于单位矩阵的常数倍”的形式，而不必先求$A$。
+
+**先把方程配成单位阵：** $AB=2A+B$ 等价于 $(A-E)(B-2E)=2E$，其中 $2E$ 可逆，所以两因子也都可逆，且 $(A-E)^{-1}=\frac12(B-2E)$。直接从 $B$ 的数值矩阵求 $A$ 会徒增计算。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 精选练习：低秩更新与分块逆
+
+<ExamQuestion>
+
+13. **【李林880·线代第十一章】** 设 $\alpha, \beta$ 是 $n$ 维列向量，且 $\alpha^T \beta = 2$，证明：$A = E + \alpha \beta^T$ 可逆，并求 $A^{-1}$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$A$ 可逆，且 $A^{-1}=\dfrac{4E-A}{3}=E-\dfrac13\alpha\beta^T$。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+由于 $\beta^T\alpha=\alpha^T\beta=2$，故
+
+$$
+
+\begin{aligned}\mathbf{A}^2 &=(\mathbf{E}+\alpha\beta^{\mathrm{T}})^2 \\ &=\mathbf{E}+2\alpha\beta^{\mathrm{T}}+\alpha(\beta^{\mathrm{T}}\alpha)\beta^{\mathrm{T}} \\ &=\mathbf{E}+4\alpha\beta^{\mathrm{T}}=4\mathbf{A}-3\mathbf{E}.\end{aligned}
+
+$$
+
+即 $\mathbf{A}(\mathbf{A}-4\mathbf{E})=-3\mathbf{E}$, 故 $\mathbf{A}$ 可逆, 且 $\mathbf{A}^{-1}=\frac{4\mathbf{E}-\mathbf{A}}{3}$.
+
+**知识点与技巧：**结论: 设 $\alpha, \beta$ 为 $n$ 维列向量, $k_1 \neq 0, \beta^{\mathrm{T}}\alpha \neq \frac{1}{k_1}$, 则 $\mathbf{A}=\mathbf{E}-k_1\alpha\beta^{\mathrm{T}}$ 可逆, 且
+>
+
+$$
+
+\mathbf{A}^{-1}=\mathbf{E}-k_2\alpha\beta^{\mathrm{T}},
+
+$$
+
+> 其中 $k_1, k_2$ 满足 $\beta^{\mathrm{T}}\alpha=\frac{1}{k_1}+\frac{1}{k_2}$.
+
+**直接构造逆：** 设 $X=uv^T$，则 $X^2=2X$，所以 $(E+X)(E-X/3)=E$。对应通式为 $(E+uv^T)^{-1}=E-uv^T/(1+v^Tu)$，条件是 $1+v^Tu\ne0$；如果为零则 $u$ 为非零零特征值方向，不能强行写逆。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+14. **【李正元·线代第二章】** 设
+
+$$
+
+ A=\begin{bmatrix}
+0&0&1&2\\
+0&0&3&5\\
+2&-1&0&0\\
+-5&3&0&0
+\end{bmatrix},
+
+$$
+
+则 $ A^{-1}=\underline{\qquad}$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$$
+
+ A^{-1}=
+\begin{bmatrix}
+0&0&3&1\\
+0&0&5&2\\
+-5&2&0&0\\
+3&-1&0&0
+\end{bmatrix}.
+
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+将 $ A$ 写成二阶分块矩阵
+
+$$
+
+ A=\begin{bmatrix}
+0&C\\
+D&0
+\end{bmatrix},
+\qquad
+C=\begin{bmatrix}1&2\\3&5\end{bmatrix},
+\qquad
+D=\begin{bmatrix}2&-1\\-5&3\end{bmatrix}.
+
+$$
+
+计算得
+
+$$
+
+ C^{-1}=\begin{bmatrix}-5&2\\3&-1\end{bmatrix},
+\qquad
+D^{-1}=\begin{bmatrix}3&1\\5&2\end{bmatrix}.
+
+$$
+
+对于这种分块形式，若 $ C,D$ 均可逆，则
+
+$$
+
+ \begin{bmatrix}
+0&C\\D&0
+\end{bmatrix}^{-1}
+=
+\begin{bmatrix}
+0&D^{-1}\\C^{-1}&0
+\end{bmatrix}.
+
+$$
+
+代入即得
+
+$$
+
+ A^{-1}=
+\begin{bmatrix}
+0&0&3&1\\
+0&0&5&2\\
+-5&2&0&0\\
+3&-1&0&0
+\end{bmatrix}.
+
+$$
+
+**同一块结构的数值版：** 写成 $\begin{pmatrix}O&C\\D&O\end{pmatrix}$，则逆矩阵交换块并各自求逆。这里 $|C|=-1$、$|D|=1$，故两个块都可逆；先核对各个 $2\times2$ 行列式可防止符号错误。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+15. **【李正元·线代第二章】** 设 $ A,B$ 均为 $ n$ 阶矩阵，$ E+AB$ 可逆，化简
+
+$$
+
+ (E+BA)\left[E-B(E+AB)^{-1}A\right].
+
+$$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$$
+
+ E.
+
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+记
+
+$$
+
+ M=(E+AB)^{-1}.
+
+$$
+
+展开原式：
+
+$$
+
+ \begin{aligned}
+&(E+BA)\left[E-BMA\right]\\
+&=E+BA-(E+BA)BMA.
+\end{aligned}
+
+$$
+
+注意到
+
+$$
+
+ (E+BA)B=B+BAB=B(E+AB),
+
+$$
+
+故
+
+$$
+
+ \begin{aligned}
+(E+BA)BMA
+&=B(E+AB)(E+AB)^{-1}A\\
+&=BA.
+\end{aligned}
+
+$$
+
+所以原式为
+
+$$
+
+ E+BA-BA=E.
+
+$$
+
+**比“代入化简”更重要的推论：** $E+AB$ 可逆时，恒等式说明 $E+BA$ 也可逆，且 $(E+BA)^{-1}=E-B(E+AB)^{-1}A$。由于矩阵乘法不可交换，不能把右边的 $B$ 和 $A$ 对调。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 精选练习：幂零逆、正负交替与多项式求逆
+
+<ExamQuestion>
+
+16. **【张宇1000·线代矩阵】** $B=\begin{bmatrix}0&1&0&0\\0&0&1&0\\0&0&0&1\\0&0&0&0\end{bmatrix}$，$A=E+B+B^2+B^3$，则$A^{-1}=$_____．
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$ E-B=\begin{bmatrix}1&-1&0&0\\0&1&-1&0\\0&0&1&-1\\0&0&0&1\end{bmatrix}$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+由矩阵$B$的形式知$B^4=O$。于是
+$ (E-B)(E+B+B^2+B^3)=E-B^4=E$。
+
+故
+$ A^{-1}=E-B$。
+
+**移位幂零结构：** 上超对角线移位矩阵满足 $B^4=O$，使 $E+B+B^2+B^3=(E-B)^{-1}$。记住这是有限等比和而不是无穷级数，不能凭谱半径条件替代题设的幂零性。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+17. **【张宇1000·线代矩阵】** 设$A$是$n$阶矩阵，满足$(A-E)^5=0$，则$A^{-1}=$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$ E-(A-E)+(A-E)^2-(A-E)^3+(A-E)^4$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+令$N=A-E$，则$N^5=O$，且$A=E+N$。
+
+利用有限几何级数，
+$ (E+N)(E-N+N^2-N^3+N^4)=E+N^5=E$。
+
+故
+$ A^{-1}=E-N+N^2-N^3+N^4$，即
+$ A^{-1}=E-(A-E)+(A-E)^2-(A-E)^3+(A-E)^4$。
+
+**与 1990 年真题成对训练：** $N=A-E$ 且 $N^5=O$，故 $A=E+N$ 的逆有交替符号；1990 年题是 $E-N$ 的逆为同号求和。两题的区别是一处正负号，但正是考场高频失误点。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+18. **【李正元·线代第二章】** 设 $ A$ 是 $ n$ 阶矩阵，满足 $ A^2-2A+E=0$，则
+
+$$
+
+ (A+2E)^{-1}=\underline{\qquad}.
+
+$$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$$
+
+ (A+2E)^{-1}=\frac19(4E-A).
+
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+由已知条件
+
+$$
+
+ A^2-2A+E=0
+
+$$
+
+可得
+
+$$
+
+ A^2=2A-E.
+
+$$
+
+设所求逆矩阵为 $ xA+yE$。计算
+
+$$
+
+ (A+2E)(4E-A)
+=4A-A^2+8E-2A
+=2A-A^2+8E.
+
+$$
+
+代入 $ A^2=2A-E$，得
+
+$$
+
+ (A+2E)(4E-A)=9E.
+
+$$
+
+矩阵 $ A+2E$ 与 $ 4E-A$ 都是 $ A$ 的多项式，故二者可交换，于是
+
+$$
+
+ (A+2E)^{-1}=\frac19(4E-A).
+
+$$
+
+**特征多项式的使用条件：** 这里不必真的求特征值；直接在模 $A^2-2A+E=O$ 的意义下，将 $(A+2E)(4E-A)$ 化为 $9E$。若题设改为 $A^2-2A+E$ 只是可逆而非零矩阵，结果便不能这样推出。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 精选练习：矩阵有理变换与反对称矩阵
+
+<ExamQuestion>
+
+19. **【李林880·线代第十一章】** 设 $A = \begin{pmatrix} 1 & 0 & 0 \\ 2 & 3 & 0 \\ 0 & 4 & 5 \end{pmatrix}$，$B = (E + A)^{-1} (E - A)$，求 $[(E + B)^2]^{-1}$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$[(E+B)^2]^{-1}=\begin{pmatrix}1&0&0\\3&4&0\\2&10&9\end{pmatrix}$。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+由于 $[(\mathbf{E} + \mathbf{B})^2]^{-1} = [(\mathbf{E} + \mathbf{B})^{-1}]^2$，且
+
+$$
+
+\begin{aligned} (\mathbf{E} + \mathbf{B})^{-1} &= [\mathbf{E} + (\mathbf{E} + \mathbf{A})^{-1}(\mathbf{E} - \mathbf{A})]^{-1} \\ &= [(\mathbf{E} + \mathbf{A})^{-1}(\mathbf{E} + \mathbf{A}) + (\mathbf{E} + \mathbf{A})^{-1}(\mathbf{E} - \mathbf{A})]^{-1} \\ &= [(\mathbf{E} + \mathbf{A})^{-1}(\mathbf{E} + \mathbf{A} + \mathbf{E} - \mathbf{A})]^{-1} = [2(\mathbf{E} + \mathbf{A})^{-1}]^{-1} \\ &= \frac{1}{2}(\mathbf{E} + \mathbf{A}) = \frac{1}{2}\begin{pmatrix} 2 & 0 & 0 \\ 2 & 4 & 0 \\ 0 & 4 & 6 \end{pmatrix} = \begin{pmatrix} 1 & 0 & 0 \\ 1 & 2 & 0 \\ 0 & 2 & 3 \end{pmatrix}, \end{aligned}
+
+$$
+
+$$
+
+\therefore\; [(\mathbf{E} + \mathbf{B})^2]^{-1} = [(\mathbf{E} + \mathbf{B})^{-1}]^2 = \begin{pmatrix} 1 & 0 & 0 \\ 1 & 2 & 0 \\ 0 & 2 & 3 \end{pmatrix}^2 = \begin{pmatrix} 1 & 0 & 0 \\ 3 & 4 & 0 \\ 2 & 10 & 9 \end{pmatrix}.
+
+$$
+
+**与 2000 年真题的联系：** 同样是变换 $B=(E+A)^{-1}(E-A)$，但由“单次求逆”升级成“$(E+B)^2$ 求逆”。先利用 $E+B=2(E+A)^{-1}$，再平方，保证不会误把 $(E+B)^{-2}$ 写为 $2(E+A)$.
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+20. **【李正元·线代第二章】** 设 $ A$ 是 $ n$ 阶实反对称矩阵，证明 $ (E-A)(E+A)^{-1}$ 是正交矩阵。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+矩阵
+
+$$
+
+ R=(E-A)(E+A)^{-1}
+
+$$
+
+是正交矩阵。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+首先证明 $ E+A$ 可逆。若
+
+$$
+
+ (E+A)x=0,
+
+$$
+
+则
+
+$$
+
+ x=-Ax.
+
+$$
+
+左乘 $ x^T$，得到
+
+$$
+
+ x^Tx=-x^TAx.
+
+$$
+
+由于 $ A$ 是实反对称矩阵，
+
+$$
+
+ A^T=-A,
+
+$$
+
+而标量 $ x^TAx$ 满足
+
+$$
+
+ x^TAx=(x^TAx)^T=x^TA^Tx=-x^TAx,
+
+$$
+
+故
+
+$$
+
+ x^TAx=0.
+
+$$
+
+于是
+
+$$
+
+ x^Tx=0,
+
+$$
+
+从而 $ x=0$。因此齐次方程 $ (E+A)x=0$ 只有零解，故 $ E+A$ 可逆。
+
+令
+
+$$
+
+ R=(E-A)(E+A)^{-1}.
+
+$$
+
+则
+
+$$
+
+ \begin{aligned}
+R^T
+&=\left[(E+A)^{-1}\right]^T(E-A)^T\\
+&=\left[(E+A)^T\right]^{-1}(E-A)^T\\
+&=(E-A)^{-1}(E+A).
+\end{aligned}
+
+$$
+
+又因为 $ E+A$ 与 $ E-A$ 都是 $ A$ 的多项式，所以二者可交换。于是
+
+$$
+
+ \begin{aligned}
+R^TR
+&=(E-A)^{-1}(E+A)(E-A)(E+A)^{-1}\\
+&=(E-A)^{-1}(E-A)(E+A)(E+A)^{-1}\\
+&=E.
+\end{aligned}
+
+$$
+
+因此 $ R$ 满足
+
+$$
+
+ R^TR=E,
+
+$$
+
+故 $ R=(E-A)(E+A)^{-1}$ 是正交矩阵。
+
+**隐藏条件须证：** $A$ 是**实**反对称矩阵可推出 $x^TAx=0$，进而 $E\pm A$ 都可逆；不能跳过可逆性就写 $(E+A)^{-1}$。由 $R^TR=E$ 得到正交，属于矩阵逆、转置与正交变换的综合。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 原创变式：参数判别、低秩逆与多项式消元
+
+<ExamQuestion>
+
+21. **【原创变式·已知多项式方程的参数求逆】** 设 $A$ 为实 $n$ 阶矩阵，满足
+
+$$
+
+A^2-3A-2E=O.
+
+$$
+
+（1）证明 $A$ 可逆并求 $A^{-1}$。（2）若实数 $t$ 满足 $t^2-3t-2\ne0$，求 $(A-tE)^{-1}$。（3）说明为何不能只凭题设断言当 $t^2-3t-2=0$ 时 $A-tE$ 一定不可逆。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$$
+
+A^{-1}=\frac{A-3E}{2},\qquad
+(A-tE)^{-1}=\frac{(3-t)E-A}{t^2-3t-2}
+\quad(t^2-3t-2\ne0).
+
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**第（1）问：不预设可逆。** 由 $A^2-3A=2E$ 得
+
+$$
+
+A(A-3E)=2E.
+
+$$
+
+所以 $A$ 存在右逆 $(A-3E)/2$，对同阶方阵即说明可逆，且逆矩阵为给定表达式。
+
+**第（2）问：一次多项式消元。** 将 $A-tE$ 与 $A+(t-3)E$ 相乘：
+
+$$
+
+\begin{aligned}
+(A-tE)(A+(t-3)E)
+&=A^2-3A-t(t-3)E\\
+&=[2-t(t-3)]E\\
+&=-(t^2-3t-2)E.
+\end{aligned}
+
+$$
+
+若 $t^2-3t-2\ne0$，则上式是非零标量倍的单位阵，故
+
+$$
+
+(A-tE)^{-1}
+=-\frac{A+(t-3)E}{t^2-3t-2}
+=\frac{(3-t)E-A}{t^2-3t-2}.
+
+$$
+
+**第（3）问：边界只表示公式失效，不表示必然奇异。** 记 $\lambda_\pm=(3\pm\sqrt{17})/2$，它们是方程 $x^2-3x-2=0$ 的根。取 $A=\lambda_+ E$，满足原矩阵方程；当 $t=\lambda_-$ 时，$A-tE=(\lambda_+-\lambda_-)E$ 可逆，而当 $t=\lambda_+$ 时不可逆。故仅由 $p(t)=0$ 不能确定 $A-tE$ 是否可逆。
+
+**迁移：** 对任意已知 $p(A)=O$ 的矩阵，寻找逆矩阵可将待求因子与低次多项式相乘并用 $p(A)$ 降次，而无需先求 $A$ 的具体元素。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+22. **【原创变式·幂等投影的可逆参数与高次幂】** 设 $P$ 为 $n$ 阶实矩阵，满足 $P^2=P$，且 $P\ne O,E$。记 $M(t)=E+tP$。（1）求 $M(t)$ 可逆的全部实数 $t$；（2）在可逆时求 $M(t)^{-1}$；（3）求任意正整数 $m$ 的 $M(t)^m$；（4）当 $t=-1$ 时求 $r(M(t))$ 与 $r(P)$ 的关系。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$$
+
+\begin{aligned}
+&\det M(t)\ne0\iff t\ne-1,\\
+&M(t)^{-1}=E-\frac{t}{1+t}P\quad(t\ne-1),\\
+&M(t)^m=E+[(1+t)^m-1]P,\\
+&r(E-P)=n-r(P).
+\end{aligned}
+
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**第（1）问：正反两面都要证。** 若 $t=-1$，由于 $P\ne O$，存在非零 $x$ 属于 $\operatorname{im}P$，满足 $Px=x$，因此 $(E-P)x=0$，不可逆。若 $t\ne-1$，利用 $P^2=P$ 验证
+
+$$
+
+(E+tP)\left(E-\frac{t}{1+t}P\right)
+=E+\left(t-\frac{t}{1+t}-\frac{t^2}{1+t}\right)P=E.
+
+$$
+
+故给出显式逆矩阵且它是双侧逆。
+
+**第（2）问已由上式完成。** 比逐项求伴随矩阵更简洁，且允许 $P$ 本身奇异。
+
+**第（3）问：** 幂等性意味着 $P^k=P$（$k\ge1$）；于是
+
+$$
+
+\begin{aligned}
+(E+tP)^m
+&=E+\sum_{k=1}^m\binom mk t^kP\\
+&=E+[(1+t)^m-1]P.
+\end{aligned}
+
+$$
+
+此式对 $t=-1$ 也成立，只是该参数下的矩阵不可逆。
+
+**第（4）问：** $P(E-P)=O$ 且任意 $x$ 可唯一分解为
+
+$$
+
+x=Px+(E-P)x,\quad Px\in\operatorname{im}P,\quad (E-P)x\in\ker P.
+
+$$
+
+因此 $\operatorname{im}(E-P)=\ker P$，由秩—零度定理
+
+$$
+
+r(E-P)=\dim\ker P=n-r(P).
+
+$$
+
+**统一辨析：** 幂等条件 $P^2=P$ 与幂零条件 $N^2=O$ 不同；前者的幂系数呈 $(1+t)^m$，后者只有 $1+mtN$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
