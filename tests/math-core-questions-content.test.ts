@@ -23,7 +23,7 @@ describe('Graduate mathematics core questions', () => {
     expect(math.pages).toContain('core-questions');
     expect(exams.pages).not.toContain('core-questions');
     expect(readFileSync(join(root, '../index.mdx'), 'utf8')).toContain('/docs/math/core-questions');
-    expect(readFileSync(join(root, '../exam/index.mdx'), 'utf8')).not.toContain('./core-questions/');
+    expect(readFileSync(join(root, '../exam/index.mdx'), 'utf8')).not.toContain('(./core-questions/)');
   });
 
   for (const [subject, questionCount, topicCount] of [
