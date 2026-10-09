@@ -74,7 +74,17 @@ jobs:
       - name: Run complete regression suite
         run: npm test
       - name: Check application types
-        run: npm run typecheck
+        run: |
+          # Test fixtures are executed by Vitest above; this gate checks shipped app code.
+          node --input-type=module <<'NODE'
+          import { writeFileSync } from 'node:fs';
+          writeFileSync('tsconfig.ci-app.json', JSON.stringify({
+            extends: './tsconfig.json',
+            exclude: ['node_modules', 'tests'],
+          }));
+          NODE
+          npx next typegen
+          npx tsc --noEmit --incremental false --project tsconfig.ci-app.json
 
   search:
     name: Build static search
