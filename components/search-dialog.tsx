@@ -1,7 +1,7 @@
 'use client';
 
 import type { SortedResult } from 'fumadocs-core/search';
-import { staticClient } from 'fumadocs-core/search/client/orama-static';
+import { createStaticSearchClient } from '@/lib/static-search.mjs';
 import {
   SearchDialog,
   SearchDialogClose,
@@ -76,14 +76,14 @@ const RESULT_LIMIT = 36;
 
 let manifestPromise: Promise<SearchManifest> | undefined;
 const routerPromiseCache = new Map<string, Promise<CategoryRouter>>();
-const clientCache = new Map<string, ReturnType<typeof staticClient>>();
+const clientCache = new Map<string, ReturnType<typeof createStaticSearchClient>>();
 const bloomBytesCache = new Map<string, Uint8Array>();
 
 function getStaticClient(url: string, limit: number) {
   const key = `${url}\u0000${limit}`;
   let client = clientCache.get(key);
   if (!client) {
-    client = staticClient({ from: url, search: { limit } });
+    client = createStaticSearchClient(url, limit);
     clientCache.set(key, client);
   }
   return client;
