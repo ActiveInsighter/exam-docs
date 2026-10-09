@@ -5,6 +5,7 @@ import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { describe, expect, it } from 'vitest';
 import { getShortDocSlugPath } from '../lib/doc-paths.mjs';
+import { buildStaticMarkdownDocument } from '../scripts/static-docs-markdown.mjs';
 
 const root = join(process.cwd(), 'content/docs/math/core-questions');
 
@@ -38,12 +39,16 @@ describe('Graduate mathematics core questions', () => {
       const renderErrors: string[] = [];
       for (const page of pages) {
         const content = readFileSync(page, 'utf8');
+        const { markdown } = await buildStaticMarkdownDocument(page, page.slice(join(process.cwd(), 'content/docs').length + 1));
         const questions = [...content.matchAll(/<ExamQuestion>([\s\S]*?)<\/ExamQuestion>/gu)];
         expect(content.match(/<ExamQuestion>/gu)?.length ?? 0, page).toBe(questions.length);
         for (const [, question] of questions) {
           expect(question, page).toMatch(/<ExamSolution>[\s\S]*<\/ExamSolution>/u);
           expect(question, page).toMatch(/<ExamAnswer>\s*\S[\s\S]*<\/ExamAnswer>/u);
           expect(question, page).toMatch(/<ExamExplanation>\s*\S[\s\S]*<\/ExamExplanation>/u);
+          for (const [, , payload] of question.matchAll(/<(ExamAnswer|ExamExplanation|ExamOption)>([\s\S]*?)<\/\1>/gu)) {
+            expect(markdown, `${page}: downloadable answer, explanation or option`).toContain(payload.trim());
+          }
         }
         total += questions.length;
         for (const [image] of content.matchAll(/\/img\/[^\s)"'>]+/gu)) {
