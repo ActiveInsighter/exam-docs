@@ -1,8 +1,13 @@
 import { readFileSync, readdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const docsRoot = join(process.cwd(), 'content', 'docs');
+// Fumadocs navigation deliberately uses clearer titles than the imported labels.
+const navigationTitles: Record<string, string> = {
+  'math/lilin-880': '李林精讲精练880题（数一）',
+  'math/past-exams': '数学真题',
+};
 
 function walkFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -28,7 +33,7 @@ describe('imported document metadata', () => {
         title?: string;
       };
 
-      expect(meta.title).toBe(category.label);
+      expect(meta.title).toBe(navigationTitles[relative(docsRoot, dirname(categoryFile))] ?? category.label);
     }
   });
 });

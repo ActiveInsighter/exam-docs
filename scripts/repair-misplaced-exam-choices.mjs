@@ -4,11 +4,11 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 export const EXAM_DOCUMENT_ROOTS = [
-  '408模拟选择题',
-  '408真题',
-  '李正元练习题',
-  '数学真题',
-  '张宇1000题',
+  '408/mock',
+  '408/past-exams',
+  'math/lizhengyuan',
+  'math/past-exams',
+  'math/zhangyu-1000',
 ];
 
 const QUESTION_PATTERN = /<ExamQuestion>(?<body>[\s\S]*?)<\/ExamQuestion>/gu;

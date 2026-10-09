@@ -8,6 +8,7 @@ import { remarkMdxMermaid, structure } from 'fumadocs-core/mdx-plugins';
 import { initSimpleSearch } from 'fumadocs-core/search/server';
 import remarkMath from 'remark-math';
 import remarkMdx from 'remark-mdx';
+import { createSearchTokenizer } from '../lib/search-tokenizer.mjs';
 import {
   getStaticDocsPageUrl,
   isStaticDocSourceFile,
@@ -438,7 +439,10 @@ function formatMiB(bytes) {
 }
 
 export async function exportSimpleIndex(records) {
-  const server = initSimpleSearch({ indexes: records });
+  // 16.14.0 passes language even when a tokenizer is provided. The empty value
+  // lets ZBSearch use the tokenizer's own language without throwing.
+  // Source: https://github.com/fuma-nama/fumadocs/issues/3462
+  const server = initSimpleSearch({ indexes: records, tokenizer: createSearchTokenizer(), language: '' });
   return JSON.stringify(await server.export());
 }
 

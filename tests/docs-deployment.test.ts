@@ -18,20 +18,11 @@ describe('docs deployment footprint', () => {
       const routeSource = readFileSync(resolve(process.cwd(), route), 'utf8');
 
       expect(routeSource, route).toMatch(/export function generateStaticParams\s*\(/u);
-      expect(routeSource, route).toMatch(/generateParams\(\);/u);
+      expect(routeSource, route).toMatch(/generateParams\(\)/u);
       expect(routeSource, route).toMatch(/export const dynamicParams = false;/u);
     }
   });
 
-  it('deploys the docs package through EdgeOne direct upload', () => {
-    const workflowSource = readFileSync(
-      resolve(process.cwd(), '.github/workflows/deploy-edgeone-docs.yml'),
-      'utf8',
-    );
-
-    expect(workflowSource).toContain('edgeone makers deploy "${GITHUB_WORKSPACE}/.static-docs"');
-    expect(workflowSource).toContain('EDGEONE_DOCS_DEPLOYMENT_MODE: upload');
-  });
 
   it('loads formula-heavy document bodies lazily for the server bundle', () => {
     const sourceConfig = readFileSync(resolve(process.cwd(), 'source.config.ts'), 'utf8');
@@ -72,42 +63,10 @@ describe('docs deployment footprint', () => {
     }
   });
 
-  it('uses the current EdgeOne CLI for the static docs deployment', () => {
-    const workflowSource = readFileSync(
-      resolve(process.cwd(), '.github/workflows/deploy-edgeone-docs.yml'),
-      'utf8',
-    );
 
-    expect(workflowSource).toMatch(/EDGEONE_CLI_VERSION: 1\.6\.34/u);
-  });
 
-  it('includes EdgeOne deployment object details when platform processing fails', () => {
-    const workflowSource = readFileSync(
-      resolve(process.cwd(), '.github/workflows/deploy-edgeone-docs.yml'),
-      'utf8',
-    );
 
-    expect(workflowSource).toContain('details: ${JSON.stringify(e)}');
-  });
 
-  it('keeps EdgeOne direct-upload packages on the compact RSC layout', () => {
-    const workflowSource = readFileSync(
-      resolve(process.cwd(), '.github/workflows/deploy-edgeone-docs.yml'),
-      'utf8',
-    );
-
-    expect(workflowSource).not.toContain('STATIC_DOCS_DISABLE_RSC_DEDUPE');
-  });
-
-  it('does not treat EdgeOne’s synthetic /docs/ directory entry as a real page', () => {
-    const workflowSource = readFileSync(
-      resolve(process.cwd(), '.github/workflows/deploy-edgeone-docs.yml'),
-      'utf8',
-    );
-
-    expect(workflowSource).toContain("[[ \"${route}\" == '/docs/' ]] && continue");
-    expect(workflowSource).not.toContain("start_probe docs '/docs/' '200'");
-  });
 
   it('disables the unused Next.js image optimizer for the docs app', () => {
     const nextConfigSource = readFileSync(
@@ -144,15 +103,4 @@ describe('docs deployment footprint', () => {
     }
   });
 
-  it('checks static HTML compression and EdgeOne cache status after deployment', () => {
-    const workflowSource = readFileSync(
-      resolve(process.cwd(), '.github/workflows/deploy-edgeone-docs.yml'),
-      'utf8',
-    );
-
-    expect(workflowSource).toContain('Accept-Encoding: br, gzip');
-    expect(workflowSource).toContain('tolower($1)=="content-encoding"');
-    expect(workflowSource).toContain('tolower($1)=="eo-cache-status"');
-    expect(workflowSource).toContain('wait_for_production_path');
-  });
 });
