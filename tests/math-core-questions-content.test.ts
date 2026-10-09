@@ -56,7 +56,7 @@ describe('Graduate mathematics core questions', () => {
             rehypePlugins: [[rehypeKatex, { strict: 'ignore', output: 'html' }]],
           });
           if (String(result).includes('katex-error')) {
-            renderErrors.push(`${page}: ${result.messages.map(String).join('; ') || 'KaTeX render error'}`);
+            renderErrors.push(`${page}: ${result.messages.map((message) => `${String(message)}${message.cause instanceof Error ? `: ${message.cause.message}` : ''}`).join('; ') || 'KaTeX render error'}`);
           }
         } catch (error) {
           renderErrors.push(`${page}: ${String(error)}`);
