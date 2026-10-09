@@ -98,6 +98,12 @@ try {
   await waitFor(async () => await completed().count() === 2, 'reduced motion lost evidence', 2000);
   assert.ok(await root.locator('[data-motion-cursor]').evaluateAll(nodes => nodes.every(node => getComputedStyle(node).display === 'none')));
   await page.setViewportSize({ width: 320, height: 800 });
+  await waitFor(async () => await active().evaluateAll(nodes => nodes.every(node => {
+    const range = document.createRange();
+    range.selectNodeContents(node.querySelector('[data-motion-text]'));
+    const rects = [...range.getClientRects()].filter(rect => rect.width > 0 && rect.height > 0);
+    return node.querySelectorAll('[data-motion-line]').length === rects.length;
+  })), 'completed highlights were not remeasured after mobile wrapping');
   await question('q5').getByRole('button', { name: /第 4 段/ }).click();
   await waitFor(async () => await root.locator('[data-sentence-id="p4s2"]').evaluate(node => {
     const rect = node.getBoundingClientRect(); return rect.top >= 0 && rect.bottom <= innerHeight;

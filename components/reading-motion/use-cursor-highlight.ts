@@ -65,6 +65,7 @@ export function useCursorHighlight(rootRef: RefObject<HTMLSpanElement | null>, {
     const resize = new ResizeObserver(measure);
     resize.observe(text);
     if (root.parentElement) resize.observe(root.parentElement);
+    if (scrollRoot) resize.observe(scrollRoot);
     reduced.addEventListener('change', motionChange);
     document.fonts?.ready.then(measure);
     document.fonts?.addEventListener('loadingdone', measure);

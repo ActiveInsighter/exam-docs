@@ -1,9 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { initialReadingState, readingReducer, validateExercise } from '@/components/english-reading/model';
 import { attentionExercise } from '@/content/exercises/attention';
+import { EnglishReadingPractice } from '@/components/english-reading-practice';
 import { highlightFrame, mergeLineRects } from '@/components/reading-motion/geometry';
 
 describe('English reading practice', () => {
+  it('resolves a named exercise without an import inside Dynamic MDX', () => {
+    expect(EnglishReadingPractice({ exerciseId: 'attention-01' }).props.exercise).toBe(attentionExercise);
+    expect(EnglishReadingPractice({ exercise: attentionExercise }).props.exercise).toBe(attentionExercise);
+    // Runtime MDX authoring does not have TypeScript's prop validation.
+    // @ts-expect-error deliberately invalid authoring data
+    expect(() => EnglishReadingPractice({ exerciseId: 'missing' })).toThrow(/Unknown/);
+  });
   it('starts without answers or evidence and records an independent choice for each question', () => {
     const first = readingReducer(initialReadingState, { type: 'choose', questionId: 'q1', optionId: 'B' });
     const second = readingReducer(first, { type: 'choose', questionId: 'q2', optionId: 'A' });

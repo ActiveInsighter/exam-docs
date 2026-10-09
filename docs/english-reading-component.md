@@ -8,12 +8,12 @@ title: 阅读训练
 full: true
 ---
 
-import { exercise } from '@/content/exercises/my-exercise';
-
-<EnglishReading exercise={exercise} />
+<EnglishReading exerciseId="attention-01" />
 ```
 
-在 `content/exercises/` 中定义数据，使用 `ReadingExercise`（从 `@/components/english-reading` 导入）约束类型。每篇文章拥有唯一的 `id`、`title`、`source`，`paragraphs` 是按段组织的句子数组，句子包含唯一 `id` 和英文 `text`。题目包含唯一 `id`、`prompt`、`skill`、`options`、`answer`、中文 `explanation` 和 `evidence`。选项包含 `id`、英文 `text` 与中文 `explanation`；选错时展示该干扰项说明。`evidence` 按播放顺序引用句子 ID，可以跨段引用，不依赖文字搜索或字符偏移。
+在 `content/exercises/` 中定义数据，使用 `ReadingExercise`（从 `@/components/english-reading` 导入）约束类型，并在 `content/exercises/index.ts` 中注册 ID。本站使用 Fumadocs Dynamic Mode，MDX 中直接导入 TypeScript 路径别名不会经过 Next 的模块解析；全局 MDX 适配器通过 `exerciseId` 在服务器解析数据。React 页面也可以直接使用 `<EnglishReading exercise={exercise} />`，MDX 可传内联数据对象。
+
+每篇文章拥有唯一的 `id`、`title`、`source`，`paragraphs` 是按段组织的句子数组，句子包含唯一 `id` 和英文 `text`。题目包含唯一 `id`、`prompt`、`skill`、`options`、`answer`、中文 `explanation` 和 `evidence`。选项包含 `id`、英文 `text` 与中文 `explanation`；选错时展示该干扰项说明。`evidence` 按播放顺序引用句子 ID，可以跨段引用，不依赖文字搜索或字符偏移。
 
 服务器组件在构建时校验题目答案、重复 ID 与证据引用。客户端 reducer 管理选项、答案展开与当前解析，动画完成事件带题目 ID、播放版本和证据序号，过期回调不会影响新题。
 
