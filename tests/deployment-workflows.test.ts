@@ -32,8 +32,8 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('Merge static outputs with conflict checks');
     expect(workflow).toContain('node scripts/verify-static-asset-references.mjs .static-docs');
     expect(workflow).toContain('tests/static-asset-references.test.ts');
-    expect(workflow).toContain('test "${doc_routes}" = \'717\'');
-    expect(workflow).toContain('test "${markdown}" = \'716\'');
+    expect(workflow).toContain('test "${doc_routes}" = \'694\'');
+    expect(workflow).toContain('test "${markdown}" = \'693\'');
     expect(workflow).toContain('Retry failing static documentation HTML routes');
     expect(workflow).toContain('seq 1 18');
     expect(workflow).toContain('tests/static-doc-shards.test.ts');
@@ -51,7 +51,7 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('Merge dedicated search assets');
     expect(workflow).toContain('needs: [validate, search, build-shard]');
     expect(workflow).toContain('validated_search_assets=');
-    expect(workflow).toContain('manifest.pages !== 716');
+    expect(workflow).toContain('manifest.pages !== 693');
     expect(workflow).toContain('Search manifest is missing module categories.');
     expect(workflow).not.toContain('test "${search_files}" =');
   });

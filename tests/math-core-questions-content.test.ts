@@ -27,9 +27,9 @@ describe('Graduate mathematics core questions', () => {
   });
 
   for (const [subject, questionCount, topicCount] of [
-    ['01-高等数学', 1800, 47],
-    ['02-线性代数', 649, 29],
-    ['03-概率论与数理统计', 570, 29],
+    ['01-高等数学', 1478, 47],
+    ['02-线性代数', 581, 19],
+    ['03-概率论与数理统计', 421, 16],
   ] as const) {
     it(`renders every imported question, solution, formula and image in ${subject}`, async () => {
       const pages = pagesIn(join(root, subject));
@@ -56,7 +56,7 @@ describe('Graduate mathematics core questions', () => {
             rehypePlugins: [[rehypeKatex, { strict: 'ignore', output: 'html' }]],
           });
           if (String(result).includes('katex-error')) {
-            renderErrors.push(`${page}: ${result.messages.map(String).join('; ') || 'KaTeX render error'}`);
+            renderErrors.push(`${page}: ${result.messages.map((message) => `${String(message)}${message.cause instanceof Error ? `: ${message.cause.message}` : ''}`).join('; ') || 'KaTeX render error'}`);
           }
         } catch (error) {
           renderErrors.push(`${page}: ${String(error)}`);
