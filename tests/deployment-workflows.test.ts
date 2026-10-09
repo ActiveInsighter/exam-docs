@@ -31,14 +31,11 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('Two shards emitted different bytes at the same _next/static path.');
     expect(workflow).toContain('Merge static outputs with conflict checks');
     expect(workflow).toContain('node scripts/verify-static-asset-references.mjs .static-docs');
-    expect(workflow).toContain('tests/static-asset-references.test.ts');
     expect(workflow).toContain('test "${doc_routes}" = \'694\'');
     expect(workflow).toContain('test "${markdown}" = \'693\'');
     expect(workflow).toContain('Retry failing static documentation HTML routes');
     expect(workflow).toContain('seq 1 18');
-    expect(workflow).toContain('tests/static-doc-shards.test.ts');
-    expect(workflow).toContain('tests/static-build-id.test.ts');
-    expect(workflow).toContain('tests/search-determinism.test.ts');
+    expect(workflow).toContain('name: Run complete regression suite\n        run: npm test');
   });
 
   it('builds search once outside the static shard workers', async () => {

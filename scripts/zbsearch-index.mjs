@@ -437,7 +437,7 @@ function formatMiB(bytes) {
   return `${(bytes / 1024 / 1024).toFixed(2)} MiB`;
 }
 
-async function exportSimpleIndex(records) {
+export async function exportSimpleIndex(records) {
   const server = initSimpleSearch({ indexes: records });
   return JSON.stringify(await server.export());
 }
