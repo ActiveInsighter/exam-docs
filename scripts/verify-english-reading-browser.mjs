@@ -72,7 +72,9 @@ try {
   assert.ok(await expanded.isVisible(), 'clicked solution should stay open after pointer leaves');
 
   // Switch to multi-sentence evidence, then interrupt a replay with another question.
-  await trigger(1).click();
+  // A pinned panel may cover the next trigger; keyboard navigation can still switch directly.
+  await trigger(1).focus();
+  await page.keyboard.press('Enter');
   await waitFor(async () => await completed().count() === 2, 'evidence did not play in order');
   assert.equal(await expanded.count(), 1);
   assert.equal(await root.locator('[data-exam-key-sentence="p2s4"] [data-evidence-active="true"]').count(), 0);
@@ -81,7 +83,8 @@ try {
   await page.waitForTimeout(800);
   assert.ok(await root.locator('[data-motion-line]').evaluateAll(nodes => nodes.some(node => node.style.transform !== 'scaleX(0)')));
   await screenshot('reading-cursor.png');
-  await trigger(2).click();
+  await trigger(2).focus();
+  await page.keyboard.press('Enter');
   await waitFor(async () => await completed().count() === 1, 'interrupted playback did not switch');
   assert.equal(await root.locator('[data-exam-key-sentence="p1s3"] [data-evidence-active="true"]').count(), 0);
   await page.evaluate(() => document.documentElement.classList.add('dark'));
