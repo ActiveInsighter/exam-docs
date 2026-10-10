@@ -1,450 +1,82 @@
 ---
 title: 第三节 中心极限定理
-description: 考研数学一精选题库：标准化、样本函数正态近似、二项分布、实际风险及反求样本规模。
+description: 数学一精选母题：二项分布正态近似、非线性样本均值、装载问题、混合随机和与样本量设计。
 ---
 
-> 真题保留核心正态近似模型；练习题补入适用前提判断、配对差分、稀有事件、保险风险和逆向数量规划。有限样本的正态近似与严格概率保证在解析中明确区分。
+本节按**二项分布计数 → 函数变换后的中心极限定理 → 工程阈值逆推 → 多模型组合与精度比较**组织。核心识别：中心极限定理描述的是**中心化后按 $\sqrt n$ 缩放的随机波动**，并非宣称每个有限样本和都服从正态分布。正态近似应与可以严格保证的概率界区分。
 
-## 一、标准化与定理适用前提
-
-<ExamQuestion>
-
-**练习精选｜李林880·第二十章·原资料题序2**
-
-设随机变量 $X_1,X_2,\cdots,X_n$ 相互独立，记 $Y_n=X_1+X_2+\cdots+X_n$。根据林德伯格—列维中心极限定理，$n$ 充分大时 $Y_n$ 近似服从正态分布，则只要 $X_1,X_2,\cdots,X_n$（ ）。
-
-<ExamChoices>
-<ExamOption>
-
-A. 服从同一离散型分布
-
-</ExamOption>
-<ExamOption>
-
-B. 服从同一连续型分布
-
-</ExamOption>
-<ExamOption>
-
-C. 服从同一指数分布
-
-</ExamOption>
-<ExamOption>
-
-D. 具有相同的期望与方差
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-C
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-林德伯格—列维中心极限定理要求随机变量独立同分布，并且具有有限的数学期望和方差。
-
-A、B 虽然保证同分布，但一般的离散型或连续型分布不一定具有有限的期望和方差；D 只说明各随机变量具有相同的期望与方差，不能保证同分布。
-
-若各 $X_i$ 服从同一指数分布，则它们独立同分布且期望、方差均有限，因此满足该中心极限定理的条件。
-
-故选 C。
-
-
-**模型识别与方法：** 林德伯格—列维定理要求独立同分布且具有有限的数学期望与方差；同一指数分布满足这些条件，但仅“同属离散/连续型”或只知道相同一二阶矩不等于同分布。
-
-**易错点与重要变式：** 这是“哪项条件足以使用指定中心极限定理”的题，并非断言其他条件永远不可能对应某种更一般的中心极限定理。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
+## 一、二项分布的正态近似
 
 <ExamQuestion>
 
-**2.（96-3，6分）**
+**[1988年数学（三）真题]**
 
-假设 $X_1,X_2,\cdots,X_n$ 是来自总体 $X$ 的简单随机样本，已知
-
-$$
-E(X^k)=a_k\qquad(k=1,2,3,4).
-$$
-
-证明：当 $n$ 充分大时，随机变量
-
-$$
-Z_n=\frac1n\sum_{i=1}^nX_i^2
-$$
-
-近似服从正态分布，并指出其分布参数。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-当 $n$ 充分大时，
-
-$$
-Z_n\approx N\left(a_2,\frac{a_4-a_2^2}{n}\right).
-$$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-令
-
-$$
-Y_i=X_i^2.
-$$
-
-由于 $X_i$ 独立同分布，$Y_i$ 也独立同分布，且
-
-$$
-E(Y_i)=E(X_i^2)=a_2,
-$$
-
-$$
-D(Y_i)=E(X_i^4)-[E(X_i^2)]^2=a_4-a_2^2.
-$$
-
-而
-
-$$
-Z_n=\frac1n\sum_{i=1}^nY_i.
-$$
-
-若 $a_4>a_2^2$，由中心极限定理，
-
-$$
-\frac{Z_n-a_2}{\sqrt{(a_4-a_2^2)/n}}
-\xrightarrow{d}N(0,1).
-$$
-
-若 $a_4=a_2^2$，则 $X_i^2=a_2$ 几乎必然成立、$Z_n=a_2$，无需正态近似。否则，$n$ 较大时 $Z_n$ 近似服从
-
-$$
-N\left(a_2,\frac{a_4-a_2^2}{n}\right).
-$$
-
-
-**模型识别与方法：** 若目标是平方样本均值，就对 $Y_i=X_i^2$ 使用中心极限定理；其方差等于 $a_4-a_2^2$。
-
-**易错点与重要变式：** 正态标准化公式只在 $a_4>a_2^2$ 时有非零分母；等于零时平方样本均值退化为常数。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**练习精选｜李林880·第二十章·原资料题序7**
-
-设随机变量序列 $X_1,X_2,\cdots$ 相互独立，且均服从 $B\left(1,\frac12\right)$。若存在常数 $k$，使得
-
-$$
-\lim_{n\to\infty}P\left\{\frac{k\sum_{i=1}^n(X_{2i}-X_{2i-1})}{\sqrt n}\le x\right\}=\Phi(x),
-$$
-
-其中 $\Phi(x)$ 为 $N(0,1)$ 的分布函数，则 $k=\underline{\qquad}$。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$\sqrt2$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-令
-
-$$
-Y_i=X_{2i}-X_{2i-1}.
-$$
-
-因为各 $X_j$ 相互独立，且均服从 $B\left(1,\frac12\right)$，所以 $Y_i$ 独立同分布，且
-
-$$
-P\{Y_i=-1\}=\frac14,
-\qquad
-P\{Y_i=0\}=\frac12,
-\qquad
-P\{Y_i=1\}=\frac14.
-$$
-
-于是
-
-$$
-EY_i=0,
-\qquad
-DY_i=\frac12.
-$$
-
-由中心极限定理，
-
-$$
-\frac{\sum_{i=1}^nY_i}{\sqrt{n/2}}
-=\frac{\sqrt2\sum_{i=1}^n(X_{2i}-X_{2i-1})}{\sqrt n}
-\xrightarrow{d}N(0,1).
-$$
-
-因此
-
-$$
-k=\sqrt2.
-$$
-
-
-**模型识别与方法：** 以不重叠的偶、奇项构成独立同分布差 $Y_i=X_{2i}-X_{2i-1}$，每项均值为零、方差为 $1/2$，故正态标准化系数为 $\sqrt2$。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**练习精选｜张宇1000题·大数定律与中心极限定理·原资料题序3**
-
-设随机变量$X_1,X_2,\cdots,X_n,\cdots$相互独立且均服从$U[1,4]$，$\Phi(x)$是标准正态分布的分布函数，则$\lim\limits_{n \to \infty}P\{\frac{2\sum_{i=1}^{n}X_i-5n}{\sqrt{n}} \leq x\}=$( )
-<ExamChoices>
-<ExamOption>
-
-A. $\Phi(x)$
-
-</ExamOption>
-<ExamOption>
-
-B. $\Phi(\sqrt{3x})$
-
-</ExamOption>
-<ExamOption>
-
-C. $\Phi(\frac{x}{\sqrt{3}})$
-
-</ExamOption>
-<ExamOption>
-
-D. $\Phi(\frac{2x}{\sqrt{3}})$
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-C。
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-因为$X_i\sim U[1,4]$，所以
-$$
- E(X_i)=\frac{1+4}{2}=\frac52,
-\qquad
-D(X_i)=\frac{(4-1)^2}{12}=\frac34.
-$$
-于是
-$$
- \frac{2\sum_{i=1}^nX_i-5n}{\sqrt n}
-=\frac{2\left(\sum_{i=1}^nX_i-\frac52n\right)}{\sqrt n}.
-$$
-由中心极限定理，
-$$
- \frac{\sum_{i=1}^nX_i-\frac52n}{\sqrt{\frac34n}}
-\xrightarrow{d}N(0,1).
-$$
-因此题中随机变量的极限分布为$N(0,3)$，故
-$$
- \lim_{n\to\infty}P\left\{\frac{2\sum_{i=1}^{n}X_i-5n}{\sqrt n}\le x\right\}
-=\Phi\left(\frac{x}{\sqrt3}\right).
-$$
-
-
-**模型识别与方法：** 均匀分布样本的 $EX=5/2,DX=3/4$，题中分子已乘以2，最终极限方差是 $3$ 而不是 $1$；以 $\Phi(x/\sqrt3)$ 表示极限分布函数。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**练习精选｜李正元练习题·第五章·原资料题序4**
-
-设 $ X_1,X_2,\cdots,X_n,\cdots$ 相互独立且都服从参数为 $ \lambda\,（\lambda>0）$ 的泊松分布，则当 $ n\to\infty$ 时以 $ \Phi(x)$ 为极限的是
-
-<ExamChoices>
-<ExamOption>
-
-A.
-$$
- P\left\{\frac{\frac1n\sum_{i=1}^{n}X_i-\lambda}{\sqrt n}\le x\right\};
-$$
-
-</ExamOption>
-<ExamOption>
-
-B.
-$$
- P\left\{\frac{\sum_{i=1}^{n}X_i-n\lambda}{\sqrt n}\le x\right\};
-$$
-
-</ExamOption>
-<ExamOption>
-
-C.
-$$
- P\left\{\frac{\sum_{i=1}^{n}X_i-n\lambda}{\sqrt{n\lambda}}\le x\right\};
-$$
-
-</ExamOption>
-<ExamOption>
-
-D.
-
-$$
- P\left\{\frac{\sum_{i=1}^{n}X_i-n\lambda}{\sqrt n\lambda}\le x\right\}。
-$$
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-C
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-因为
-$$
- X_i\sim P(\lambda),
-$$
-所以
-$$
- EX_i=\lambda,
-\qquad
-DX_i=\lambda.
-$$
-根据独立同分布随机变量的中心极限定理，
-$$
- \frac{\sum_{i=1}^{n}X_i-nEX_i}{\sqrt{nDX_i}}
-=\frac{\sum_{i=1}^{n}X_i-n\lambda}{\sqrt{n\lambda}}
-\xrightarrow{d}N(0,1).
-$$
-因此，对任意实数 $ x$，
-$$
- P\left\{\frac{\sum_{i=1}^{n}X_i-n\lambda}{\sqrt{n\lambda}}\le x\right\}
-\to\Phi(x).
-$$
-故选（C）。其余选项的标准化分母均不正确。
-
-
-**模型识别与方法：** 泊松分布期望与方差都为 $\lambda$，独立和的均值是 $n\lambda$，标准差是 $\sqrt{n\lambda}$；逐项排除错误的分母。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-## 二、二项分布与计数型概率近似
-
-<ExamQuestion>
-
-**1.（88-3，6分）**
-
-某保险公司多年统计资料表明，在索赔户中被盗索赔户占 $20\%$，以 $X$ 表示在随机抽查的 $100$ 个索赔户中因被盗向保险公司索赔的户数。
+某保险公司多年统计资料表明，在索赔户中，被盗索赔户占 $20\%$。以 $X$ 表示在随机抽查的 $100$ 个索赔户中因被盗向保险公司索赔的户数。
 
 （1）写出 $X$ 的概率分布；
 
-（2）利用棣莫弗—拉普拉斯定理，求出索赔户不少于 $14$ 户且不多于 $30$ 户的概率的近似值。
+（2）利用棣莫弗—拉普拉斯定理，求被盗索赔户数不少于 $14$ 户且不多于 $30$ 户的概率的近似值。
 
 <ExamSolution>
-
 <ExamAnswer>
 
-（1）$\displaystyle P\{X=k\}=\binom{100}{k}(0.2)^k(0.8)^{100-k}$，$k=0,1,\cdots,100$；
+（1）$X\sim B(100,0.2)$，即
 
-（2）约为 $0.927$。
+$$
+P(X=k)=\binom{100}{k}(0.2)^k(0.8)^{100-k},\quad k=0,1,\ldots,100.
+$$
+
+（2）不作连续性修正时，近似为 $0.927$。
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-（1）每个索赔户是否属于被盗索赔可视为一次成功概率为 $0.2$ 的伯努利试验，因此
+**模型识别：** 每个索赔户被盗属于成功事件，按样本随机、试验独立且成功概率固定 $0.2$ 的题意建二项模型。
 
 $$
-X\sim B(100,0.2).
+E(X)=np=20,\quad D(X)=np(1-p)=16,\quad \sigma_X=4.
 $$
 
-（2）二项分布的均值和方差为
-
-$$
-E(X)=np=20,
-\qquad
-D(X)=np(1-p)=16.
-$$
-
-用正态分布近似：
-
-$$
-P\{14\le X\le30\}
-\approx
-P\left\{-1.5\le\frac{X-20}{4}\le2.5\right\}.
-$$
-
-所以
+将上下界标准化：
 
 $$
 \begin{aligned}
-P\{14\le X\le30\}
-&\approx \Phi(2.5)-\Phi(-1.5)\\
-&=\Phi(2.5)-[1-\Phi(1.5)]\\
-&=0.9938-(1-0.9332)\\
-&=0.927.
+P(14\le X\le30)
+&\approx P\left(\frac{14-20}{4}\le Z\le\frac{30-20}{4}\right)\\
+&=\Phi(2.5)-\Phi(-1.5)\\
+&=\Phi(2.5)+\Phi(1.5)-1\\
+&\approx0.9938+0.9332-1=0.9270.
 \end{aligned}
 $$
 
+其中 $Z\sim N(0,1)$，$\Phi$ 为其分布函数。
 
-**模型识别与方法：** 二元指示量之和为 $B(100,0.2)$，标准化时均值为20、标准差为4；两端同时处理得到 $\Phi(2.5)-\Phi(-1.5)$。
+**另一种近似（连续性修正）：** 若要改善离散分布的正态近似，可把闭区间整数事件 $14\le X\le30$ 对应为连续区间 $13.5<X<30.5$，得
 
-**易错点与重要变式：** 原题用不带连续性修正的棣莫弗—拉普拉斯近似；带连续性修正时 $[14,30]$ 对应正态边界 $[13.5,30.5]$，两者结果不必相同。
+$$
+P(14\le X\le30)\approx
+\Phi\left(\frac{30.5-20}{4}\right)
+-\Phi\left(\frac{13.5-20}{4}\right).
+$$
+
+两种近似在有限样本下不必相等；本题原资料给出的 $0.927$ 使用的是**未经连续性修正**的中心极限定理近似。它不是二项分布精确尾概率。
 
 </ExamExplanation>
-
 </ExamSolution>
 
 </ExamQuestion>
 
 <ExamQuestion>
 
-**4.（20-1，4分）**
+**[2020年数学（一）真题]**
 
-设 $X_1,X_2,\cdots,X_{100}$ 为来自总体 $X$ 的简单随机样本，其中
+设 $X_1,X_2,\ldots,X_{100}$ 为来自总体 $X$ 的简单随机样本，其中
 
 $$
-P\{X=0\}=P\{X=1\}=\frac12,
+P(X=0)=P(X=1)=\frac12.
 $$
 
-$\Phi(x)$ 表示标准正态分布函数。利用中心极限定理可得
+记 $\Phi(x)$ 为标准正态分布函数。利用中心极限定理得到
 
 $$
 P\left\{\sum_{i=1}^{100}X_i\le55\right\}
@@ -476,516 +108,268 @@ D. $\Phi(0.2)$
 </ExamChoices>
 
 <ExamSolution>
-
-<ExamAnswer>
-
-B
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-每个 $X_i$ 都服从参数 $p=1/2$ 的伯努利分布，故
-
-$$
-E(X_i)=\frac12,
-\qquad
-D(X_i)=\frac14.
-$$
-
-于是
-
-$$
-S=\sum_{i=1}^{100}X_i
-$$
-
-有
-
-$$
-E(S)=50,
-\qquad
-D(S)=25.
-$$
-
-由中心极限定理，$S$ 近似服从 $N(50,25)$，所以
-
-$$
-P(S\le55)
-\approx
-P\left(\frac{S-50}{5}\le1\right)
-=\Phi(1).
-$$
-
-
-**模型识别与方法：** 把独立的 $0$-$1$ 变量之和识别为 $B(100,1/2)$，求出标准差5，按题目不修正的正态近似计算 $\Phi(1)$。
-
-**易错点与重要变式：** 精细的二项近似可使用 $55.5$ 连续性边界；在原给定选项中应按原题约定选 B。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**练习精选｜张宇1000题·大数定律与中心极限定理·原资料题序9**
-
-设$X_1,X_2,\cdots,X_n$是来自总体$X \sim \begin{pmatrix}0&1&2&3\\\frac{1}{16}&\frac{3}{8}&\frac{1}{16}&\frac{1}{2}\end{pmatrix}$的简单随机样本，若取值为2的样本个数$K$满足$\lim\limits_{n \to \infty}P\{\frac{K-a}{b} \leq x\}=\Phi(x)$，其中$\Phi(x)$为标准正态分布函数，则$a,b$分别是( )
-<ExamChoices>
-<ExamOption>
-
-A. $\frac{1}{16},\frac{\sqrt{15}}{16}$
-
-</ExamOption>
-<ExamOption>
-
-B. $\frac{n}{16},\frac{\sqrt{15n}}{16}$
-
-</ExamOption>
-<ExamOption>
-
-C. $\frac{1}{16},\frac{\sqrt{15n}}{16}$
-
-</ExamOption>
-<ExamOption>
-
-D. $\frac{n}{16},\frac{\sqrt{15}}{16}$
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
 <ExamAnswer>
 
 B。
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-每个样本取值为2的概率为
+这是 $100$ 个参数为 $1/2$ 的独立伯努利变量之和，记 $S=\sum_{i=1}^{100}X_i$，则
+
 $$
- p=P(X=2)=\frac1{16}.
+E(S)=100\cdot\frac12=50,
+\qquad
+D(S)=100\cdot\frac12\cdot\frac12=25.
 $$
-因此$n$个样本中取值为2的个数
+
+标准差为 $5$，故不作连续性修正时
+
 $$
- K\sim B\left(n,\frac1{16}\right).
+P(S\le55)
+\approx\Phi\left(\frac{55-50}{5}\right)=\Phi(1).
 $$
-其均值与方差分别为
+
+**考场捷径：** 不用列举 $S=0,1,\ldots,55$ 的二项概率，先认出 $B(100,1/2)$，算 $np$、$np(1-p)$，再标准化。
+
+**适用边界：** 该题选项要求直接使用中心极限定理的标准正态近似；若额外采用连续性修正会得到 $\Phi(1.1)$，属于不同精度的近似而不是原题的选项。
+
+</ExamExplanation>
+</ExamSolution>
+
+</ExamQuestion>
+
+## 二、非线性函数的样本均值：先求变换后的矩
+
+<ExamQuestion>
+
+**[1996年数学（三）真题]**
+
+设 $X_1,X_2,\cdots,X_n$ 是来自总体 $X$ 的简单随机样本，已知
+
 $$
- E(K)=\frac n{16},
+E(X^k)=a_k\qquad(k=1,2,3,4).
 $$
+
+证明当 $n$ 充分大时，
+
 $$
- D(K)=n\cdot\frac1{16}\cdot\frac{15}{16}
-=\frac{15n}{256}.
+Z_n=\frac1n\sum_{i=1}^nX_i^2
 $$
-故由棣莫弗—拉普拉斯中心极限定理，
+
+近似服从正态分布，并指出分布参数。
+
+<ExamSolution>
+<ExamAnswer>
+
+当 $a_4>a_2^2$ 时，对于充分大的 $n$，
+
 $$
- \frac{K-\frac n{16}}{\frac{\sqrt{15n}}{16}}
+Z_n\ \text{近似服从}\ N\!\left(a_2,\frac{a_4-a_2^2}{n}\right).
+$$
+
+若 $a_4=a_2^2$，则 $Z_n=a_2$ 几乎必然成立，为退化分布。
+
+</ExamAnswer>
+<ExamExplanation>
+
+**核心构造：** 令 $Y_i=X_i^2$。样本独立同分布保证 $Y_i$ 独立同分布，且
+
+$$
+E(Y_i)=a_2,\qquad
+D(Y_i)=E(X_i^4)-[E(X_i^2)]^2=a_4-a_2^2.
+$$
+
+若 $v=a_4-a_2^2>0$，且四阶矩有限，则 $Y_i$ 的方差有限且非零。由独立同分布中心极限定理，
+
+$$
+\frac{\sum_{i=1}^nY_i-na_2}{\sqrt{nv}}
+=\frac{\sqrt n(Z_n-a_2)}{\sqrt v}
 \xrightarrow{d}N(0,1).
 $$
-所以
-$$
- a=\frac n{16},
-\qquad
-b=\frac{\sqrt{15n}}{16}.
-$$
 
+因此 $Z_n$ 可用均值为 $a_2$、方差为 $v/n$ 的正态分布近似。
 
-**模型识别与方法：** 先把“观测值等于2”转成 Bernoulli 指示量，其成功概率为 $1/16$；统计次数 $K$ 服从二项分布，中心为 $n/16$、尺度为 $\sqrt{15n}/16$。
+**不可省略的退化情形：** 因为 $v=D(X^2)\ge0$，若 $v=0$，则 $X^2=a_2$ 几乎必然，故每个 $Z_n$ 恒为 $a_2$；不能再除以 $\sqrt v$。此时题面要求的“正态近似”应改解读为零方差退化极限。
+
+**母题变式规律：** 若将 $X_i^2$ 换成一般 $g(X_i)$，方法仍是先算 $E[g(X)]$ 与 $D(g(X))$，只要后者有限且非零就可对样本均值使用中心极限定理。
 
 </ExamExplanation>
-
 </ExamSolution>
 
 </ExamQuestion>
 
-<ExamQuestion>
-
-**练习精选｜张宇1000题·大数定律与中心极限定理·原资料题序7**
-
-某保险公司接受了10000辆汽车的保险，每辆汽车每年的保费为1.2万元。若汽车丢失，则车主获得赔偿100万元。设汽车的丢失率为0.006，对于此项业务，利用中心极限定理，则保险公司一年所获利润不少于6000万元的概率为_____。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$$
- \frac12.
-$$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-若各辆汽车丢失事件相互独立、同丢失率，设一年内丢失的汽车数为$X$，则
-$$
- X\sim B(10000,0.006).
-$$
-保险公司总保费收入为
-$$
- 10000\times1.2=12000,
-$$
-赔付总额为$100X$万元，因此利润为
-$$
- L=12000-100X.
-$$
-要求$L\ge6000$，即
-$$
- X\le60.
-$$
-又
-$$
- E(X)=10000\times0.006=60,
-$$
-$$
- D(X)=10000\times0.006\times0.994=59.64.
-$$
-由中心极限定理，忽略连续性修正时，
-$$
- P(X\le60)
-\approx\Phi\left(\frac{60-60}{\sqrt{59.64}}\right)
-=\Phi(0)=\frac12.
-$$
-
-
-**模型识别与方法：** 令一年丢失汽车数 $X\sim B(10000,0.006)$，利润 $L=12000-100X$（万元），事件 $L\ge6000$ 等价于 $X\le60$，恰取在损失次数期望附近。
-
-**易错点与重要变式：** 只有在各车丢失相互独立时才可按该二项模型估算；忽略连续性修正时为 $1/2$，考虑修正则约为 $\Phi(0.5/\sqrt{59.64})$，不是精确的 $1/2$。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-## 三、样本均值、运输与连续型变量的和
+## 三、阈值逆推：从目标概率解样本容量
 
 <ExamQuestion>
 
-**3.（01-3，8分）**
+**[2001年数学（三）真题]**
 
-生产线生产的产品成箱包装，每箱的重量是随机的，假设每箱平均重量为 $50$ 千克，标准差为 $5$ 千克。若用最大载重量为 $5$ 吨的汽车承运，试利用中心极限定理说明每辆车最多可以装多少箱，才能保障不超载的概率大于 $0.977$。（$\Phi(2)=0.977$，其中 $\Phi(x)$ 为标准正态分布函数。）
+生产线生产的产品成箱包装，每箱重量为随机变量，假设每箱平均重量为 $50$ 千克，标准差为 $5$ 千克。若用最大载重量为 $5$ 吨的汽车承运，试利用中心极限定理说明每辆车最多可以装多少箱，才能使不超载的概率大于 $0.977$。（已知 $\Phi(2)=0.977$。）
 
 <ExamSolution>
-
 <ExamAnswer>
 
-$98$ 箱
+按中心极限定理作正态近似，可装至多 $98$ 箱。
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-在每箱重量相互独立、同分布的建模假设下，设第 $i$ 箱重量为 $X_i$，装 $n$ 箱的总重量为
+**突破口：** 本题未知的不是概率，而是样本量 $n$。假设各箱重量独立同分布，记第 $i$ 箱为 $X_i$、$S_n=\sum_{i=1}^nX_i$，有
 
 $$
-S_n=X_1+\cdots+X_n.
+E(S_n)=50n,\quad D(S_n)=25n.
 $$
 
-则
-
-$$
-E(S_n)=50n,
-\qquad
-D(S_n)=25n.
-$$
-
-由中心极限定理，$S_n$ 近似服从 $N(50n,25n)$。要求
-
-$$
-P(S_n\le5000)>0.977=\Phi(2).
-$$
-
-近似标准化得
+总载重量阈值为 $5000$ 千克。对足够大的 $n$，
 
 $$
 P(S_n\le5000)
-\approx
-\Phi\left(\frac{5000-50n}{5\sqrt n}\right).
+\approx\Phi\left(\frac{5000-50n}{5\sqrt n}\right).
 $$
 
-因此需
+由于 $\Phi$ 单调递增，要使近似概率大于 $\Phi(2)$，需
 
 $$
-\frac{5000-50n}{5\sqrt n}>2,
+\frac{5000-50n}{5\sqrt n}>2
+\iff 1000-10n>2\sqrt n.
 $$
 
-即
+检验临界的相邻整数：当 $n=98$ 时，
 
 $$
-1000-10n>2\sqrt n.
+\frac{5000-50\cdot98}{5\sqrt{98}}=\frac{20}{\sqrt{98}}>2,
 $$
 
-检验整数 $n$ 可得最大可取
+而 $n=99$ 时，
 
 $$
-n=98.
+\frac{5000-50\cdot99}{5\sqrt{99}}=\frac{10}{\sqrt{99}}<2.
 $$
 
+左侧随 $n$ 增大严格递减，因此最大整数为 $98$。
 
-**模型识别与方法：** 载重是若干独立箱重之和，其均值为 $50n$、标准差为 $5\sqrt n$；将达标概率的正态分位数转为关于 $n$ 的不等式，再检验整数 $n=98,99$。
-
-**易错点与重要变式：** 仅有箱重均值、方差不能严格推出有限 $n$ 的不超载概率；“保障”在此仅指根据独立同分布及中心极限定理的近似设计。
+**严谨性边界：** 题设只给均值和方差，中心极限定理并不能对固定 $n=98$ 的**真实**不超载概率作严格下界保证；$98$ 是在题目指定的正态近似模型下得到的答案。若要绝对概率保证，还需附加分布假设或采用可验证的保守界。
 
 </ExamExplanation>
-
 </ExamSolution>
 
 </ExamQuestion>
 
+## 四、原创拓展：不同观测量的统一标准化
+
 <ExamQuestion>
 
-**练习精选｜张宇1000题·大数定律与中心极限定理·原资料题序4**
+**[原创] 正态样本平方和的中心极限定理**
 
-设生产每件产品的时间服从指数分布，且平均时间为10分钟，生产各件产品的时间相互独立，由中心极限定理，在15小时至20小时之间生产100件产品的概率约为( )
-<ExamChoices>
-<ExamOption>
+设 $X_1,\ldots,X_n$ 独立同分布，$X_i\sim N(0,1)$，$a$ 为固定实数。求
 
-A. $\Phi(2)-\Phi(1)$
+$$
+\lim_{n\to\infty}P\left\{\sum_{i=1}^nX_i^2\le n+a\sqrt{2n}\right\}.
+$$
 
-</ExamOption>
-<ExamOption>
-
-B. $2\Phi(1)-\Phi(2)$
-
-</ExamOption>
-<ExamOption>
-
-C. $\Phi(1)+\Phi(2)-1$
-
-</ExamOption>
-<ExamOption>
-
-D. $2[\Phi(1)-\Phi(-2)]$
-
-</ExamOption>
-</ExamChoices>
+要求使用中心极限定理证明，不直接调用卡方分布的极限定理。
 
 <ExamSolution>
-
 <ExamAnswer>
 
-C。
+$\Phi(a)$。
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-设生产第$i$件产品所需时间为$X_i$，则$X_i$独立同分布，且指数分布的均值和标准差均为10分钟，即
+虽然 $X_i$ 正态，但 $X_i^2$ **不**是正态。令 $Y_i=X_i^2$，则独立同分布，且由标准正态的偶数阶矩，
+
 $$
- E(X_i)=10,\qquad D(X_i)=100.
+E(Y_i)=E(X_i^2)=1,
+\qquad E(Y_i^2)=E(X_i^4)=3.
 $$
-生产100件产品的总时间
+
+故 $D(Y_i)=3-1=2$。中心极限定理给出
+
 $$
- S_{100}=\sum_{i=1}^{100}X_i
+\frac{\sum_{i=1}^nY_i-n}{\sqrt{2n}}
+\xrightarrow{d}N(0,1).
 $$
-满足
-$$
- E(S_{100})=1000,
-\qquad
-\sqrt{D(S_{100})}=100.
-$$
-15小时和20小时分别为900分钟和1200分钟，因此由中心极限定理，
+
+于是对于标准正态分布函数的任意连续点 $a$（正态分布函数处处连续），有
+
 $$
 \begin{aligned}
- P(900<S_{100}<1200)
-&\approx P\left(-1<\frac{S_{100}-1000}{100}<2\right)\\
-&=\Phi(2)-\Phi(-1)\\
-&=\Phi(2)+\Phi(1)-1.
+&\lim_{n\to\infty}P\left(\sum_{i=1}^nX_i^2\le n+a\sqrt{2n}\right)\\
+&=\lim_{n\to\infty}P\left(\frac{\sum_{i=1}^nY_i-n}{\sqrt{2n}}\le a\right)
+=\Phi(a).
 \end{aligned}
 $$
-故选C。
 
-
-**模型识别与方法：** 对生产100件的时间求和，指数分布均值10分钟、方差100；转为900至1200分钟区间并标准化为 $(-1,2)$。
-
-**易错点与重要变式：** 两端的标准正态尾必须按区间概率相减，$\Phi(2)-\Phi(-1)=\Phi(2)+\Phi(1)-1$。
+**模型识别：** 样本平方和出现时，不应把 $X_i$ 的方差误当作 $X_i^2$ 的方差；第四阶矩决定正态标准化的分母 $\sqrt{2n}$。
 
 </ExamExplanation>
-
 </ExamSolution>
 
 </ExamQuestion>
 
 <ExamQuestion>
 
-**练习精选｜李正元练习题·第五章·原资料题序10**
+**[原创] 同一精度要求下比较切比雪夫与正态近似**
 
-假设排球运动员的平均身高（单位：厘米）为 $ \mu$，标准差为4。求100名排球运动员的平均身高与所有排球运动员平均身高之差在 $ (-1,1)$ 内的概率。
+设 $X_1,\ldots,X_n$ 独立同分布，$E(X_i)=\mu$、$D(X_i)=9$，记 $\overline X_n=n^{-1}\sum_{i=1}^nX_i$。希望
+
+$$
+P\{|\overline X_n-\mu|<0.3\}\ge0.95.
+$$
+
+（1）若只利用切比雪夫不等式，为确保要求满足，$n$ 至少应取多少？
+
+（2）若使用中心极限定理进行大样本近似，并取 $\Phi(1.96)\approx0.975$，则 $n$ 至少约为多少？比较两个答案的含义。
 
 <ExamSolution>
-
 <ExamAnswer>
 
-$$
- P\{|\overline X-\mu|<1\}
-\approx2\Phi(2.5)-1
-\approx0.9876.
-$$
+（1）$n\ge2000$ 足以给出严格概率保证；
+
+（2）正态近似下约取 $n\ge385$。
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-设抽取的100名排球运动员的身高为
+样本均值 $D(\overline X_n)=9/n$。由切比雪夫不等式，
+
 $$
- X_1,X_2,\cdots,X_{100},
+P\{|\overline X_n-\mu|\ge0.3\}
+\le\frac{9/n}{0.3^2}
+=\frac{100}{n}.
 $$
-其总体均值与标准差分别为
+
+要使尾概率不超过 $0.05$，充分条件是 $100/n\le0.05$，即 $n\ge2000$。这个数是**基于上界的充分样本量**，并非真实分布下必需的最小样本量。
+
+采用中心极限定理的正态近似时，
+
 $$
- EX_i=\mu,
-\qquad
-\sqrt{DX_i}=4.
+\frac{\sqrt n(\overline X_n-\mu)}3\approx N(0,1).
 $$
-样本均值为
-$$
- \overline X=\frac1{100}\sum_{i=1}^{100}X_i.
-$$
-由中心极限定理，$ \overline X$ 近似服从正态分布
-$$
- \overline X\approx N\left(\mu,\frac{4^2}{100}\right)
-=N(\mu,0.16).
-$$
-因此
-$$
- \frac{\overline X-\mu}{4/\sqrt{100}}
-=\frac{\overline X-\mu}{0.4}
-\approx N(0,1).
-$$
+
 于是
+
 $$
- \begin{aligned}
-P\{|\overline X-\mu|<1\}
-&=P\left\{\left|\frac{\overline X-\mu}{0.4}\right|<\frac1{0.4}\right\}\\
-&\approx P\{|Z|<2.5\}\\
-&=\Phi(2.5)-\Phi(-2.5)\\
-&=2\Phi(2.5)-1.
+\begin{aligned}
+P(|\overline X_n-\mu|<0.3)
+&\approx P\left(|Z|<\frac{0.3\sqrt n}3\right)\\
+&=2\Phi\left(\frac{\sqrt n}{10}\right)-1.
 \end{aligned}
 $$
-查标准正态分布表，
+
+让近似值不小于 $0.95$，需 $\sqrt n/10\ge1.96$，所以
+
 $$
- \Phi(2.5)\approx0.9938,
-$$
-故
-$$
- P\{|\overline X-\mu|<1\}
-\approx2\times0.9938-1
-=0.9876.
+n\ge(19.6)^2=384.16,
 $$
 
+最小整数近似为 $385$。
 
-**模型识别与方法：** 独立抽取100人时，样本均值标准差为 $4/\sqrt{100}=0.4$，因此偏差1厘米对应正态标准化绝对值界2.5。
-
-**易错点与重要变式：** 样本必须近似独立同分布，中心极限定理给的是近似概率，非精确等式。
+**方法比较：** 切比雪夫使用的信息少、对任意具有给定方差的分布有效，但保守；中心极限定理在适合的大样本条件下通常更准确，但 $385$ 并非对所有未知分布都可严格保证的样本量。
 
 </ExamExplanation>
-
 </ExamSolution>
 
 </ExamQuestion>
-
-## 四、逆向设计与误差来源
-
-<ExamQuestion>
-
-**练习精选｜李正元练习题·第五章·原资料题序13**
-
-设某种商品的合格率为 $ 90\%$，某单位要想给100名职工每人一件这种商品。试求：该单位至少购买多少件这种商品才能以 $ 97.5\%$ 的概率保证每人都可以得到一件合格品？
-
-<ExamSolution>
-
-<ExamAnswer>
-
-至少购买 $ 119$ 件。
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-设购买 $ n$ 件商品，其中合格品的件数为 $ X$，则
-$$
- X\sim B(n,0.9).
-$$
-要保证100名职工每人得到一件合格品，需要
-$$
- X\ge100.
-$$
-由二项分布的数学期望和方差，
-$$
- EX=0.9n,
-\qquad
-DX=0.9n\times0.1=0.09n.
-$$
-当 $ n$ 较大时，由棣莫弗—拉普拉斯中心极限定理，
-$$
- \frac{X-0.9n}{0.3\sqrt n}
-\approx N(0,1).
-$$
-所以
-$$
- \begin{aligned}
-P\{X\ge100\}
-&\approx
-P\left\{Z\ge
-\frac{100-0.9n}{0.3\sqrt n}
-\right\}.
-\end{aligned}
-$$
-要求该概率不小于 $ 0.975$。由于
-$$
- P\{Z\ge-1.96\}=\Phi(1.96)\approx0.975,
-$$
-故只需满足
-$$
- \frac{100-0.9n}{0.3\sqrt n}\le-1.96.
-$$
-即
-$$
- 0.9n-100\ge0.588\sqrt n.
-$$
-令
-$$
- t=\sqrt n>0,
-$$
-则
-$$
- 0.9t^2-0.588t-100\ge0.
-$$
-其正根为
-$$
- t_0=
-\frac{0.588+\sqrt{0.588^2+4\times0.9\times100}}{1.8}
-\approx10.873.
-$$
-因此
-$$
- n=t^2\ge t_0^2\approx118.21.
-$$
-由于 $ n$ 必须为整数，故至少应取
-$$
- n=119.
-$$
-所以按原解答未作连续性修正的正态近似，至少购买 $119$ 件商品。
-
-**精确检验：** 此处目标要求是概率至少 $0.975$，不能把近似法直接当严格概率保证。利用二项分布的精确尾概率：
-
-$$
-P\{X\ge100\}=\sum_{k=100}^{n}\binom nk(0.9)^k(0.1)^{n-k}.
-$$
-
-数值计算得，$n=118$ 时约为 $0.97458<0.975$，$n=119$ 时约为 $0.98554>0.975$。由二项分布随试验次数的单调性，精确最小值也为 $119$ 件。本例中恰与无连续性修正的正态近似一致，但不是所有反求样本量题都如此。
-
-
-**模型识别与方法：** 购买 $n$ 件后合格数 $X\sim B(n,0.9)$，要求 $P(X\ge100)\ge0.975$。先由中心极限定理反求正态分位数、解 $n$，再用二项分布尾和验证最小整数。
-
-**易错点与重要变式：** 未经连续性修正的正态近似虽算出 $119$，但必须检查原问题的精确二项概率：$n=118$ 时约 $0.97458$ 不足，$n=119$ 时约 $0.98554$ 达标。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-

@@ -1,360 +1,152 @@
 ---
 title: 第一节 切比雪夫不等式
-description: 考研数学一精选题库：切比雪夫概率上下界、线性组合、样本平方和、误差保证与通用方差模型。
+description: 数学一精选母题：尾概率界、协方差合成、四阶矩变换与最优加权估计。
 ---
 
-> 以原分类真题为主体，保留跨方差、协方差与样本矩的典型模型，精选李林880、张宇1000题、李正元练习题的有效变式；原创题另行标注。
+本节按**直接套界 → 先算线性组合方差 → 变换样本均值 → 最优界与可达性**组织。切比雪夫不等式不要求正态性，但必须针对**平方可积的同一个随机变量**计算期望与方差；当随机变量为样本函数时，应先变换再求方差。
 
-## 一、经典界限与方差计算
+## 一、直接估计与协方差引入
 
 <ExamQuestion>
 
-**1.（89-3，3分）**
+**[1989年数学（三）真题]**
 
-设随机变量 $X$ 的数学期望 $E(X)=\mu$，方差 $D(X)=\sigma^2$，则由切比雪夫不等式得
+设随机变量 $X$ 的数学期望为 $E(X)=\mu$、方差为 $D(X)=\sigma^2$，其中 $\sigma>0$。由切比雪夫不等式，
 
 $$
-P\{|X-\mu|\ge 3\sigma\}\le \underline{\qquad}.
+P\{|X-\mu|\ge3\sigma\}\le\underline{\qquad}.
 $$
 
 <ExamSolution>
-
 <ExamAnswer>
 
-$\displaystyle \frac19$
+$\displaystyle \frac19$。
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-切比雪夫不等式为
+**识别：** 偏离中心的阈值写成标准差的倍数；设 $\varepsilon=3\sigma>0$，直接代入
 
 $$
-P\{|X-E(X)|\ge\varepsilon\}\le\frac{D(X)}{\varepsilon^2}.
+P\{|X-E(X)|\ge\varepsilon\}\le\frac{D(X)}{\varepsilon^2}
 $$
 
-当 $\sigma>0$ 时取 $\varepsilon=3\sigma$，得
+可得
 
 $$
 P\{|X-\mu|\ge3\sigma\}
-\le\frac{\sigma^2}{(3\sigma)^2}
-=\frac19.
+\le\frac{\sigma^2}{9\sigma^2}=\frac19.
 $$
 
-
-**模型识别与方法：** 把题设中心 $\mu$ 与 $EX$ 对齐，代入 $P(|X-EX|\ge t)\le DX/t^2$；有限方差是定理前提。
-
-**易错点与重要变式：** 原题写 $DX=\sigma^2$ 时默认为 $\sigma>0$。若 $\sigma=0$，则 $P\{|X-\mu|\ge0\}=1$，不能将 $t=0$ 代入不等式。
+**隐含条件：** 必须有 $\sigma>0$。若允许 $\sigma=0$，题目中的事件变为 $\{|X-\mu|\ge0\}$，概率为 $1$；此时不能将 $\varepsilon=0$ 代入切比雪夫不等式。这是原题习惯性省略而应补明的条件。
 
 </ExamExplanation>
-
 </ExamSolution>
 
 </ExamQuestion>
 
 <ExamQuestion>
 
-**3.（01-3，3分）**
+**[2001年数学（一）真题]**
 
-设随机变量 $X,Y$ 的数学期望都是 $2$，方差分别为 $1$ 和 $4$，而相关系数为 $0.5$，则根据切比雪夫不等式得
+设随机变量 $X$ 的方差为 $2$，由切比雪夫不等式估计
+
+$$
+P\{|X-E(X)|\ge2\}\le\underline{\qquad}.
+$$
+
+<ExamSolution>
+<ExamAnswer>
+
+$\displaystyle \frac12$。
+
+</ExamAnswer>
+<ExamExplanation>
+
+阈值为确定常数 $2$，无需知道 $X$ 的具体分布。直接写出
+
+$$
+P\{|X-E(X)|\ge2\}
+\le\frac{D(X)}{2^2}
+=\frac24=\frac12.
+$$
+
+**命题区别：** 这给出的是对所有具有所述方差的分布都成立的上界，并非该事件的精确概率，也不能据此断定 $X$ 服从任何特定分布。
+
+</ExamExplanation>
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**[2001年数学（三）真题]**
+
+设随机变量 $X,Y$ 的数学期望均为 $2$，方差分别为 $1$ 与 $4$，相关系数为 $0.5$。根据切比雪夫不等式，
 
 $$
 P\{|X-Y|\ge6\}\le\underline{\qquad}.
 $$
 
 <ExamSolution>
-
 <ExamAnswer>
 
-$\displaystyle \frac1{12}$
+$\displaystyle \frac1{12}$。
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-先看随机变量 $X-Y$。有
+**突破口：** 不必求 $X,Y$ 的联合分布，而应先把 $X-Y$ 当作一个随机变量。
 
 $$
-E(X-Y)=2-2=0.
+E(X-Y)=0,
 $$
 
-由
-
 $$
-\operatorname{Cov}(X,Y)=\rho_{XY}\sqrt{D(X)D(Y)}
-=0.5\sqrt{1\cdot4}=1,
-$$
-
-得
-
-$$
-D(X-Y)=1+4-2\times1=3.
+\operatorname{Cov}(X,Y)
+=\rho_{XY}\sqrt{D(X)D(Y)}
+=\frac12\sqrt{1\cdot4}=1.
 $$
 
 于是
 
 $$
+\begin{aligned}
+D(X-Y)
+&=D(X)+D(Y)-2\operatorname{Cov}(X,Y)\\
+&=1+4-2=3.
+\end{aligned}
+$$
+
+从而
+
+$$
 P\{|X-Y|\ge6\}
+=P\{|(X-Y)-E(X-Y)|\ge6\}
 \le\frac{3}{6^2}
 =\frac1{12}.
 $$
 
-
-**模型识别与方法：** 先设 $Z=X-Y$，依相关系数算 $\operatorname{Cov}(X,Y)=\rho\sqrt{DX\,DY}$，得到 $DZ=DX+DY-2\operatorname{Cov}(X,Y)$ 后再使用切比雪夫。
-
-**易错点与重要变式：** 本题 $EX=EY$ 才使 $X-Y$ 自动中心化，不能把 $D(X-Y)$ 误算为 $DX+DY$。
+**易错点：** 只有当协方差为 $0$ 时，才能直接把 $D(X-Y)$ 写成 $D(X)+D(Y)$；相关系数为 $0.5$ 不能忽略。
 
 </ExamExplanation>
-
 </ExamSolution>
 
 </ExamQuestion>
 
-<ExamQuestion>
-
-**练习精选｜李林880·第二十章·原资料题序4**
-
-设随机变量 $X_i\sim B(i,0.2)\ (i=1,2,\cdots,10)$，且 $X_1,X_2,\cdots,X_{10}$ 相互独立。根据切比雪夫不等式，有
-
-$$
-P\left\{6<\sum_{i=1}^{10}X_i<16\right\}\ge \underline{\qquad}.
-$$
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$0.648$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-因为各随机变量的成功概率均为 $0.2$，且相互独立，所以二项分布具有可加性：
-
-$$
-\sum_{i=1}^{10}X_i\sim B\left(\sum_{i=1}^{10}i,0.2\right)=B(55,0.2).
-$$
-
-记
-
-$$
-S=\sum_{i=1}^{10}X_i,
-$$
-
-则
-
-$$
-ES=55\times0.2=11,
-\qquad
-DS=55\times0.2\times0.8=8.8.
-$$
-
-又
-
-$$
-6<S<16\iff |S-11|<5.
-$$
-
-由切比雪夫不等式，
-
-$$
-P\{|S-11|<5\}\ge1-\frac{8.8}{25}=0.648.
-$$
-
-因此填 $0.648$。
-
-
-**模型识别与方法：** 虽然各 $X_i$ 的二项试验次数不同，但成功率相同且独立，和仍为 $B(55,0.2)$；结合 $ES=11,DS=8.8$ 转为 $P(|S-11|<5)$。
-
-**易错点与重要变式：** 若只问切比雪夫界，只要求相互独立及已知一、二阶矩；二项可加性用于快速算矩。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
+## 二、先变换后平均：高阶矩与样本量
 
 <ExamQuestion>
 
-**练习精选｜李正元练习题·第五章·原资料题序6**
-
-设随机变量 $ X$ 与 $ Y$ 相互独立，且
-
-$$
- X\sim B(5,0.8),
-\qquad
-Y\sim N(1,1),
-$$
-
-则
-
-$$
- P\{0<X+Y<10\}\ge\underline{\qquad}。
-$$
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$ \frac{116}{125}$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-令
-$$
- Z=X+Y.
-$$
-由
-$$
- X\sim B(5,0.8)
-$$
-可得
-$$
- EX=5\times0.8=4,
-\qquad
-DX=5\times0.8\times0.2=0.8.
-$$
-又因为
-$$
- Y\sim N(1,1),
-$$
-所以
-$$
- EY=1,
-\qquad
-DY=1.
-$$
-由于 $ X,Y$ 相互独立，故
-$$
- EZ=EX+EY=5,
-$$
-$$
- DZ=DX+DY=1.8=\frac95.
-$$
-注意到
-$$
- 0<Z<10
-\quad\Longleftrightarrow\quad
-|Z-5|<5.
-$$
-由切比雪夫不等式，
-$$
- P\{|Z-5|<5\}
-\ge1-\frac{DZ}{5^2}
-=1-\frac{\frac95}{25}
-=1-\frac9{125}
-=\frac{116}{125}.
-$$
-因此所求下界为
-$$
- \frac{116}{125}.
-$$
-
-
-**模型识别与方法：** 把两个不同分布的独立随机变量之和视为新随机变量 $Z$；事件 $0<Z<10$ 等于关于 $EZ=5$ 的对称区间。
-
-**易错点与重要变式：** 切比雪夫给的是确保成立的普适下界 $116/125$，不是该事件的精确概率。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**练习精选｜李正元练习题·第五章·原资料题序1**
-
-设随机变量 $ X$ 的方差存在，并且满足不等式
-
-$$
- P\{|X-EX|\ge3\}\le\frac29,
-$$
-
-则一定有
-
-<ExamChoices>
-<ExamOption>
-
-A. $ DX=2$；
-
-</ExamOption>
-<ExamOption>
-
-B. $ P\{|X-EX|<3\}<\frac79$；
-
-</ExamOption>
-<ExamOption>
-
-C. $ DX\ne2$；
-
-</ExamOption>
-<ExamOption>
-
-D. $ P\{|X-EX|<3\}\ge\frac79$。
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-D
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-由对立事件关系，
-$$
- P\{|X-EX|<3\}=1-P\{|X-EX|\ge3\}.
-$$
-题设给出
-$$
- P\{|X-EX|\ge3\}\le\frac29,
-$$
-因此
-$$
- P\{|X-EX|<3\}
-\ge 1-\frac29
-=\frac79.
-$$
-故（D）一定成立。
-
-切比雪夫不等式只能给出
-$$
- P\{|X-EX|\ge3\}\le\frac{DX}{9},
-$$
-但由事件概率不超过 $ \frac29$ 不能反推出 $ DX=2$ 或 $ DX\ne2$，所以（A）、（C）均不一定成立；（B）与上面的结论相反。
-
-
-**模型识别与方法：** 从已知上尾概率改写为补事件概率；切比雪夫上界不能反向推断方差为某个值。
-
-**易错点与重要变式：** 已知 $P(|X-EX|\ge3)\le2/9$ 与已知 $DX\le2$ 是不同命题，后者不能由前者推出。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-## 二、样本高阶矩与平方和
-
-<ExamQuestion>
-
-**4.（22-1，5分）**
+**[2022年数学（一）第9题]**
 
 设随机变量 $X_1,X_2,\cdots,X_n$ 独立同分布，且 $X_1$ 的四阶矩存在，记
 
 $$
-E(X_1^k)=\mu_k\qquad(k=1,2,3,4),
+E(X_1^k)=\mu_k\qquad(k=1,2,3,4).
 $$
 
-则由切比雪夫不等式估计，对任意 $\varepsilon>0$ 有
+则根据切比雪夫不等式，对任意 $\varepsilon>0$ 有
 
 $$
 P\left\{\left|\frac1n\sum_{i=1}^nX_i^2-\mu_2\right|\ge\varepsilon\right\}\le(\quad).
@@ -368,283 +160,145 @@ A. $\dfrac{\mu_4-\mu_2^2}{n\varepsilon^2}$
 </ExamOption>
 <ExamOption>
 
-B. $\dfrac{\mu_4-\mu_2^2}{\sqrt n\varepsilon^2}$
+B. $\dfrac{\mu_4-\mu_2^2}{\sqrt n\,\varepsilon^2}$
 
 </ExamOption>
 <ExamOption>
 
-C. $\dfrac{\mu_2^2-\mu_1^2}{n\varepsilon^2}$
+C. $\dfrac{\mu_2-\mu_1^2}{n\varepsilon^2}$
 
 </ExamOption>
 <ExamOption>
 
-D. $\dfrac{\mu_2-\mu_1^2}{\sqrt n\varepsilon^2}$
+D. $\dfrac{\mu_2-\mu_1^2}{\sqrt n\,\varepsilon^2}$
 
 </ExamOption>
 </ExamChoices>
 
 <ExamSolution>
-
 <ExamAnswer>
 
-A
+A。
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-令
+**识别：** 求界的目标不是 $X_i$ 的均值，而是**平方后的**样本均值。令 $Y_i=X_i^2$，则 $Y_i$ 独立同分布，且
 
 $$
-Y=\frac1n\sum_{i=1}^nX_i^2.
+E(Y_i)=\mu_2,\qquad D(Y_i)=E(X_i^4)-[E(X_i^2)]^2=\mu_4-\mu_2^2.
 $$
 
-则
+所以对 $\overline Y_n=n^{-1}\sum_{i=1}^nY_i$，有
 
 $$
-E(Y)=E(X_1^2)=\mu_2.
+E(\overline Y_n)=\mu_2,\qquad
+D(\overline Y_n)=\frac{\mu_4-\mu_2^2}{n}.
 $$
 
-由于 $X_i^2$ 仍独立同分布，
+代入得
 
 $$
-D(X_1^2)=E(X_1^4)-[E(X_1^2)]^2=\mu_4-\mu_2^2,
+P\{|\overline Y_n-\mu_2|\ge\varepsilon\}
+\le\frac{\mu_4-\mu_2^2}{n\varepsilon^2}.
 $$
 
-所以
+**关键条件：** $X_1$ 的四阶矩有限，才能保证 $D(X_1^2)$ 有限；独立性保证交叉协方差为零；分母的 $n$ 来自样本均值方差，并非 $\sqrt n$。
 
-$$
-D(Y)=\frac1n(\mu_4-\mu_2^2).
-$$
-
-由切比雪夫不等式
-
-$$
-P\{|Y-\mu_2|\ge\varepsilon\}
-\le\frac{D(Y)}{\varepsilon^2}
-=\frac{\mu_4-\mu_2^2}{n\varepsilon^2}.
-$$
-
-
-**模型识别与方法：** 对 $Y_i=X_i^2$ 而不是 $X_i$ 使用切比雪夫，要求 $D(Y_i)=E(X_i^4)-[E(X_i^2)]^2$，故出现四阶原点矩。
-
-**易错点与重要变式：** 当四阶矩存在时方差有限；$X_i^2$ 的分布不必再求。
+**原始资料勘误：** 原 MDX 的 C、D 项分子误写为 $\mu_2^2-\mu_1^2$。此处据 2022 年数学一第 9 题真题核对，修复为 $\mu_2-\mu_1^2$，不改变正确答案 A。
 
 </ExamExplanation>
+</ExamSolution>
 
+</ExamQuestion>
+
+## 三、经典母题的高价值变式
+
+<ExamQuestion>
+
+**[原创] 切比雪夫上界能否达到**
+
+已知 $E(X)=0$、$D(X)=1$，求 $P(|X|\ge3)$ 的切比雪夫上界，并构造一个离散型随机变量使该上界取到等号。
+
+<ExamSolution>
+<ExamAnswer>
+
+上界为 $\dfrac19$；可取
+
+$$
+P(X=-3)=P(X=3)=\frac1{18},\qquad P(X=0)=\frac89.
+$$
+
+</ExamAnswer>
+<ExamExplanation>
+
+由切比雪夫不等式，$P(|X|\ge3)\le1/9$。要让上界取到等号，可让非零的平方偏差集中在阈值 $3$ 上。对所构造的对称分布，
+
+$$
+E(X)=-3\cdot\frac1{18}+3\cdot\frac1{18}=0,
+$$
+
+$$
+D(X)=E(X^2)=9\left(\frac1{18}+\frac1{18}\right)=1,
+$$
+
+而
+
+$$
+P(|X|\ge3)=\frac1{18}+\frac1{18}=\frac19.
+$$
+
+因此在**仅已知均值和方差**的条件下，切比雪夫常数在此例中不能统一改小。注意取等号依赖事件写成 $\ge$；若改为严格 $>$，这个构造不再取到等号。
+
+</ExamExplanation>
 </ExamSolution>
 
 </ExamQuestion>
 
 <ExamQuestion>
 
-**练习精选｜张宇1000题·大数定律与中心极限定理·原资料题序8**
+**[原创] 加权无偏估计的最优切比雪夫界**
 
-设$X_1,X_2,\cdots,X_n(n>2)$是来自总体$X \sim N(0,1)$的简单随机样本，由切比雪夫不等式得$P\{0<\sum_{i=1}^{n}X_i^2<2n\}$不小于_____。
+设 $X_1,\ldots,X_n$ 独立同分布，$E(X_i)=\mu$、$D(X_i)=\sigma^2>0$。考虑线性估计量
+
+$$
+T=\sum_{i=1}^{n}w_iX_i,\qquad \sum_{i=1}^nw_i=1,
+$$
+
+其中 $w_i$ 为实常数。对固定 $\varepsilon>0$：
+
+（1）用切比雪夫不等式估计 $P(|T-\mu|\ge\varepsilon)$；
+
+（2）求使所获**概率上界最小**的权重，并写出最小上界。
 
 <ExamSolution>
-
 <ExamAnswer>
 
-$$
- 1-\frac2n.
-$$
+（1）$\displaystyle P(|T-\mu|\ge\varepsilon)\le\frac{\sigma^2\sum_iw_i^2}{\varepsilon^2}$；
+
+（2）$w_1=\cdots=w_n=1/n$，最小上界为 $\displaystyle \frac{\sigma^2}{n\varepsilon^2}$。
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-令
+由权重和为 $1$ 得 $E(T)=\mu$；由于样本相互独立，
+
 $$
- S=\sum_{i=1}^{n}X_i^2.
-$$
-因$X_i\sim N(0,1)$，有
-$$
- E(X_i^2)=1,
-\qquad
-D(X_i^2)=E(X_i^4)-[E(X_i^2)]^2=3-1=2.
-$$
-故
-$$
- E(S)=n,
-\qquad
-D(S)=2n.
-$$
-又$S>0$几乎处处成立，因此
-$$
- \{0<S<2n\}=\{|S-n|<n\}
-$$
-除零概率事件外等价。由切比雪夫不等式，
-$$
- P(|S-n|<n)
-\ge1-\frac{D(S)}{n^2}
-=1-\frac{2n}{n^2}
-=1-\frac2n.
+D(T)=\sum_{i=1}^nw_i^2D(X_i)=\sigma^2\sum_{i=1}^nw_i^2.
 $$
 
+从而直接得到第（1）问的上界。对第（2）问，用柯西—施瓦茨不等式
 
-**模型识别与方法：** 平方和 $S=\sum X_i^2$ 的均值是 $n$、方差是 $2n$；正态四阶矩为 $3$，于是 $0<S<2n$ 是与均值距离小于 $n$ 的事件。
+$$
+1=\left(\sum_{i=1}^nw_i\right)^2
+\le n\sum_{i=1}^nw_i^2,
+$$
 
-**易错点与重要变式：** 原源文件答案后残留“强化部分”段落标题已清理；本题不需要查 $\chi^2$ 分布表。
+于是 $\sum_iw_i^2\ge1/n$，等号当且仅当各权重相同。这与约束合并，得到 $w_i=1/n$。
+
+**模型提炼：** 同方差独立样本的样本均值不仅无偏，而且在此线性类中方差最小，故具有最紧的切比雪夫上界。这里优化的是**上界**，不能因此断言所有分布下实际尾概率也逐点最小。
 
 </ExamExplanation>
-
 </ExamSolution>
 
 </ExamQuestion>
-
-<ExamQuestion>
-
-**练习精选｜李正元练习题·第五章·原资料题序5**
-
-设随机变量 $ X_1,X_2,\cdots,X_n$ 相互独立同分布，其密度函数为偶函数，且 $ DX_i=1$，$ i=1,\cdots,n$，则对任意 $ \varepsilon>0$，根据切比雪夫不等式直接可得
-
-<ExamChoices>
-<ExamOption>
-
-A.
-$$
- P\left\{\left|\frac1n\sum_{i=1}^{n}X_i-n\right|<\varepsilon\right\}
-\ge1-\frac1{\varepsilon^2};
-$$
-
-</ExamOption>
-<ExamOption>
-
-B.
-$$
- P\left\{\left|\frac1n\sum_{i=1}^{n}X_i-n\right|<\varepsilon\right\}
-\ge1-\frac1{n\varepsilon^2};
-$$
-
-</ExamOption>
-<ExamOption>
-
-C.
-$$
- P\left\{\left|\frac1n\sum_{i=1}^{n}X_i\right|<\varepsilon\right\}
-\ge1-\frac1{n\varepsilon^2};
-$$
-
-</ExamOption>
-<ExamOption>
-
-D.
-
-$$
- P\left\{\left|\frac1n\sum_{i=1}^{n}X_i\right|<\varepsilon\right\}
-\ge1-\frac1{\varepsilon^2}。
-$$
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-C
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-密度函数为偶函数，因此随机变量关于原点对称，从而
-$$
- EX_i=0.
-$$
-令
-$$
- \overline X=\frac1n\sum_{i=1}^{n}X_i.
-$$
-由独立性及 $ DX_i=1$，有
-$$
- E\overline X=0,
-$$
-以及
-$$
- D\overline X
-=\frac1{n^2}\sum_{i=1}^{n}DX_i
-=\frac1n.
-$$
-由切比雪夫不等式，
-$$
- P\{|\overline X-E\overline X|\ge\varepsilon\}
-\le\frac{D\overline X}{\varepsilon^2}
-=\frac1{n\varepsilon^2}.
-$$
-因此
-$$
- P\left\{\left|\frac1n\sum_{i=1}^{n}X_i\right|<\varepsilon\right\}
-\ge1-\frac1{n\varepsilon^2}.
-$$
-故选（C）。
-
-
-**模型识别与方法：** 密度函数为偶函数且方差存在，故 $EX_i=0$；独立同分布样本均值方差为 $1/n$，据此得到标准的 $O(1/n)$ 概率误差界。
-
-**易错点与重要变式：** 不能将样本均值和样本总和的方差混淆；该界对不具正态性的偶密度同样适用。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-## 三、原创变式：以切比雪夫下界反求样本量
-
-<ExamQuestion>
-
-**原创变式｜误差保证的最小样本量**
-
-设 $X_1,\ldots,X_n$ 独立同分布，$E(X_i)=3$，$D(X_i)=4$。只允许使用切比雪夫不等式，求保证
-
-$$
-P\left\{\left|\frac1n\sum_{i=1}^nX_i-3\right|<\frac12\right\}\ge0.96
-$$
-
-所需的最小正整数 $n$（此处“保证”指切比雪夫所得下界达到要求）。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$n=400$。
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-令 $\overline X_n=n^{-1}\sum_{i=1}^nX_i$。独立同分布保证
-
-$$
-E\overline X_n=3,\qquad D\overline X_n=\frac4n.
-$$
-
-由切比雪夫不等式，
-
-$$
-\begin{aligned}
-P\left(\left|\overline X_n-3\right|<\frac12\right)
-&\ge1-\frac{4/n}{(1/2)^2}\\
-&=1-\frac{16}{n}.
-\end{aligned}
-$$
-
-要使此下界不小于 $0.96$，须
-
-$$
-1-\frac{16}{n}\ge0.96
-\Longleftrightarrow n\ge400.
-$$
-
-故最小正整数为 $400$。
-
-**方法提炼：** 一般若 $D(X_i)=\sigma^2$，要求误差 $\varepsilon$ 内的概率至少为 $1-\alpha$，切比雪夫的充分样本量为 $n\ge\sigma^2/(\alpha\varepsilon^2)$。这是保守、分布无关的保证，不意味着 $n<400$ 时真实概率必小于 $0.96$。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
