@@ -1,15 +1,13 @@
 ---
 title: "第 2 章 进程管理"
-description: "408 操作系统历年大题 · 第 2 章 进程管理，共 16 道，按年份与原卷题号排列。"
+description: "408 操作系统历年大题，含 16 道真题和 32 道拓展题，附答案与详细解析。"
 subject: "操作系统"
-questionCount: 32
+questionCount: 48
 ---
 
 # 第 2 章 进程管理
 
-本章收录 **16 道**历年大题。
-
-每道真题后附对应原创题，以分割线和“原创”标签区分。
+本章收录 **16 道**历年大题，附 **32 道**拓展题，每道真题后紧随两道拓展题。
 
 <span id="question-2009-45" />
 
@@ -24,42 +22,40 @@ questionCount: 32
 请用信号量机制实现这三个进程的同步与互斥活动，并说明所定义信号量的含义。要求用伪代码描述。
 
 <ExamSolution>
-
 <ExamAnswer>
 
-设置 4 个信号量：`mutex=1`（缓冲区互斥）、`empty=N`（可用空单元）、`odd=0`（待取出的奇数个数）、`even=0`（待取出的偶数个数）。生产者和两个消费者分别按照“**先等待资源、后进入互斥区；离开互斥区、再通知新资源**”的顺序操作。
+1. 设置四个信号量：`mutex=1`（缓冲区临界区互斥），`empty=N`（可预订空位数），`odd=0`（可领取奇数的许可数），`even=0`（可领取偶数的许可数）。
+2. 生产者先申请空位，再互斥放入，最后依数据奇偶性发布对应许可；两个消费者先申请自己的数据许可，再互斥取走，最后释放空位。完整伪代码如下。
 
 ```c
 semaphore mutex = 1, empty = N, odd = 0, even = 0;
 
-process P1 {                    // 生产任意正整数
+process P1 {
     while (true) {
-        int x = produce();
-        P(empty);               // 先拿一个容量名额
+        int x = produce();           // 私有计算，不占互斥锁
+        P(empty);
         P(mutex);
-        put(x);                 // 放入任意一个空单元
+        put(x);                      // 放入任一空单元
         V(mutex);
-        if (x % 2 != 0) V(odd); // 通知对应类别消费者
+        if (x % 2 == 1) V(odd);
         else            V(even);
     }
 }
-
-process P2 {                    // 消费奇数
+process P2 {
     while (true) {
         P(odd);
         P(mutex);
-        int x = getodd();       // 必须真实地取走一个奇数
+        int x = getodd();            // 寻找并删除一个奇数
         V(mutex);
-        V(empty);               // 归还一个空单元
-        countodd();             // 不再占用缓冲区锁
+        V(empty);
+        countodd();                  // 私有统计，原则上放在锁外
     }
 }
-
-process P3 {                    // 消费偶数
+process P3 {
     while (true) {
         P(even);
         P(mutex);
-        int x = geteven();
+        int x = geteven();           // 寻找并删除一个偶数
         V(mutex);
         V(empty);
         counteven();
@@ -68,107 +64,90 @@ process P3 {                    // 消费偶数
 ```
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-### 一、判断信号量类型：1 个互斥、3 个资源计数
+1. **先识别三种资源约束。** `empty` 解决容量为 $N$ 的有界缓冲区“满时不可写”；`odd/even` 解决“奇数只能由 $P_2$ 领取、偶数只能由 $P_3$ 领取”；`mutex` 解决缓冲数组及其占用标记的并发读写。互斥信号量初值为 1，资源计数信号量初值反映初始资源数量。因为初始缓冲区为空，所以 `empty=N`、`odd=even=0`。`getodd()` 必须能够在缓冲区内定位奇数，而非仅从普通 FIFO 队首取元素。
+2. **顺序是得分核心：先同步后互斥。** 生产者执行 `P(empty)` 后才可能获得一次写入资格，且应在临界区外完成 `produce()`；真正写入后执行 `V(odd)` 或 `V(even)`，使消费者不会读到尚未发布的内容。消费者先 `P(odd/even)`，得到自己需要类型的许可，再 `P(mutex)`，实际移走数据后才 `V(empty)`。若写成 `P(mutex); P(empty)`，满缓冲时生产者拿着锁睡眠，消费者又无法拿锁删除数据，形成死锁；同理不能在持有 `mutex` 时等待 `odd/even`。释放顺序采用“先退出临界区、再通知其他资源请求者”更容易验证。
+3. **正确性证明。** `put/get` 均在 `mutex` 保护下执行，故缓冲区内部结构不会被并发破坏；每次成功写入恰好对一个奇偶计数执行 `V`，每次消费恰好对相应计数执行一次 `P`，数据类别不会交叉；每次写入消耗一个空位许可，移走一项归还一个许可，最多容纳 $N$ 项。在某些操作的中间步骤，已保留的空位或尚未发布的元素导致信号量值与瞬时物理单元数不同，故不应把 `empty+odd+even=N` 误当成**任意机器指令时刻**都严格成立的等式。若只观察完整的放入/取出事务边界，则保持该资源守恒关系。
+4. **考场技巧。** 列表写出“资源—初值—等待条件—释放时机”；`P(数量)` 必须在 `P(互斥)` 之前，处理完共享数据尽快 `V(互斥)`。计数器 `countodd/counteven` 分属不同消费者时可放在临界区外；如果它们也写共享变量，则应额外提供保护。若 $N=1$，写入奇数后 $P_3$ 可以阻塞，但 $P_2$ 能取数并释放空位，这属于正常同步而非死锁。公平唤醒及线程调度由实现另行保证，不应仅凭信号量代码承诺绝对无饥饿。
 
-`mutex` 属于互斥信号量，保护 `put/getodd/geteven` 对同一个物理缓冲区的结构修改；其初值是 1。`empty` 计数未被生产者预订的空槽，初值 $N$；`odd` 与 `even` 分别计数当前**可分配**给对应消费者的奇数和偶数资源，初值都是 0。**不能仅设一个 `full`**：若 P2 被唤醒但缓冲区只剩偶数，它仍无法完成合法的 `getodd()`。
-
-从资源守恒角度看，设 $E$ 表示“空槽信号量可用值”、$O$、$V$ 为两种可用商品的信号量值；由于线程在 `P` 与实际访问之间可能已经**预订**资源，不应强行断言任意指令瞬间都有 $E+O+V=N$。只在各临界操作与信号量通知均完成的**稳定状态**，才有 $E+O+V=N$，可用该不变量自检代码。
-
-### 二、P/V 排序是核心，必须先申请对应资源再加锁
-
-生产者 `P(empty) -> P(mutex) -> put -> V(mutex) -> V(odd/even)`；消费者 `P(odd/even) -> P(mutex) -> get -> V(mutex) -> V(empty)`。
-
-- 若生产者**先 `P(mutex)` 再 `P(empty)`**，满缓冲时生产者持锁睡眠，消费者取数据又必须拿 mutex，造成死锁。
-- 若消费者**先 `P(mutex)` 再 `P(odd)`**，缓冲中无奇数时可能持锁等奇数，生产者无法放入奇数，也会死锁。
-- `V(odd/even)` 必须对应刚放入的数的奇偶性；每放一个数恰好释放一次。`V(empty)` 则只能在取走一个数之后执行。
-- `countodd/counteven` 仅统计私有结果，通常可放在互斥区外，减少锁持有时间；若统计的是共享变量，还须为该共享变量另行考虑同步。
-
-### 三、为什么“不区分奇偶的生产者消费者”算法不够用
-
-传统有界缓冲区通常只设 `empty`、`full`、`mutex`。本题两类消费者需要的是**特定类型的元素**；即使 `full>0`，也不能保证奇数存在。若 P2 先对普通 `full` 做 `P(full)`，之后发现全是偶数而继续等待，可能“占住”一份属于 P3 的资源名额，导致逻辑错误。因此需为每种条件分别设资源信号量，或使用条件变量加 `while` 谓词重检。
-
-### 四、顺序交错检验
-
-例如 $N=2$，生产者依次产生 3、4，系统稳定后 `empty=0,odd=1,even=1`。若 P2 执行 `P(odd)` 后尚未取走 3，`odd=0`，物理缓冲区仍满，但奇数名额已被 P2 预订；这不是信号量计数错误。P3 取 4 后发出 `V(empty)`，生产者才能放下一个整数。不同进程何时运行由调度决定，但只要最终获得 CPU，**不存在由本方案 P/V 顺序引起的环路等待**。
-
-### 五、迁移模型
-
-把“奇/偶”换成“高/低优先级任务”“红/蓝零件”“读/写请求类型”，本质上都是**一个共享容量 + 多个资源类别 + 一个互斥访问**。若某类消费者可能永久等不到自己的资源，那是输入数据分布造成的饥饿风险，不等于互斥/同步程序本身死锁。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
-
----
 
 <span id="question-original-199" />
 
 <ExamQuestion>
 
-<span className="inline-block rounded border px-2 py-0.5 text-xs text-fd-muted-foreground">原创</span>
+一个长度为 $6$ 的共享缓冲区初始为空，生产者只生成正整数；消费者 `C1` 仅消费能被 $3$ 整除的数，`C2` 消费其他数。要求两个消费者不可同时修改缓冲区，且生产者不能覆盖未取走的数据。
 
-一个缓冲区拥有 $N\ge2$ 个单元，两个生产者进程每次须**原子地向缓冲区放入一奇一偶共两个数据**；奇数消费者和偶数消费者分别取走对应的数据。放入动作本身要互斥，取出动作也要与放入互斥，生产者可在等待容量时阻塞。请：
+1. 给出信号量、含义与初值。
+2. 写出三个进程的同步伪代码。
+3. 解释为什么消费者不能先拿互斥锁再等待自己需要的数据。
 
-1. 指出两生产者各自连续执行 `P(empty);P(empty);P(mutex);...` 为什么仍可能死锁（即使 `mutex` 初值为 1）。
-2. 设计正确的 P/V 同步程序，并给出所有信号量初值。
-3. 说明为什么不能一边持有缓冲区互斥锁一边等待两个空单元。
+<ExamSolution><ExamAnswer>
 
-<ExamSolution>
+1. `mutex=1`、`empty=6`、`multiple3=0`、`other=0`。
+2. 生产者先 `P(empty)`、后 `P(mutex)` 放数；释放互斥锁后给对应消费者发送通知。两个消费者各自先 `P(类别)`，再互斥删除，最后 `V(empty)`。
+3. 否则消费者可能持锁等待，生产者无法进临界区提供数据，形成死锁。
 
-<ExamAnswer>
+</ExamAnswer><ExamExplanation>
 
-增设 `batchGate=1`，确保**同一时刻至多一个生产者分步申请整批所需两个空位**；其余信号量为 `empty=N`、`mutex=1`、`odd=0`、`even=0`。
+1. 互斥保护的是**数据结构**，两个类别信号量保护的是**领取资格**，不需要让消费者对不属于自己的数据反复轮询。
+2. 可直接写成：
 
 ```c
-semaphore batchGate=1, empty=N, mutex=1, odd=0, even=0;
-
-process Producer {  // 两个实例并发运行
+semaphore mutex=1, empty=6, multiple3=0, other=0;
+Producer() {
     while (true) {
-        int a=produceOdd(), b=produceEven();
-        P(batchGate);
-        P(empty); P(empty);     // 持有批预约权，但不持缓冲区锁
-        P(mutex);
-        put(a); put(b);         // 两件一次性原子提交
-        V(mutex);
-        V(odd); V(even);        // 提交后发布两种可消费资源
-        V(batchGate);
+        int x=produce();
+        P(empty); P(mutex); put(x); V(mutex);
+        if (x%3==0) V(multiple3); else V(other);
     }
 }
-process OddConsumer {
+C1() {
     while (true) {
-        P(odd); P(mutex); int x=getodd(); V(mutex);
-        V(empty); countodd(x);
+        P(multiple3); P(mutex);
+        int x=get_divisible_by_3(); V(mutex); V(empty);
+        consume1(x);
     }
 }
-process EvenConsumer {
+C2() {
     while (true) {
-        P(even); P(mutex); int x=geteven(); V(mutex);
-        V(empty); counteven(x);
+        P(other); P(mutex);
+        int x=get_not_divisible_by_3(); V(mutex); V(empty);
+        consume2(x);
     }
 }
 ```
 
-</ExamAnswer>
+3. 例如缓冲区中已有 $5$ 个非 $3$ 倍数、没有 $3$ 倍数，`C1` 如先 `P(mutex)` 再 `P(multiple3)`，就握住唯一互斥锁阻塞；即使缓冲区有空位，生产者也无法放入 $3$ 倍数，`C2` 也无法取已有数据。先申请类别许可即可避免这种“占锁等待”。
 
-<ExamExplanation>
+</ExamExplanation></ExamSolution>
+</ExamQuestion>
 
-**最小死锁反例**：令 $N=2$、开始时两个槽位都空。生产者 A 执行第一个 `P(empty)` 后 `empty=1`；被切走，生产者 B 也执行第一个 `P(empty)` 后 `empty=0`。此时两者都等第二次 `P(empty)`；由于没有任何物品可以给消费者，没人会发出 `V(empty)`，系统死锁。它与 `mutex` 是否被占住无关，是**申请多单位可重复资源时的“各占一部分并等待剩余部分”**问题。
+<span id="question-original-325" />
 
-`batchGate` 将“两个空位的预约过程”串行化：A 先拿 batchGate，申请到两个完整名额再放入，B 在 batchGate 等待，因此不会发生两位生产者各占一个空槽的问题。此锁用于**批量名额预订**，而 `mutex` 仍保护缓冲区底层结构；两者职责不同。
+<ExamQuestion>
 
-不能写成 `P(mutex);P(empty);P(empty)`：如果缓冲区满，生产者持有 mutex 等消费者释放空位；消费者取出数据需先持 mutex，构成**持有互斥锁等待外部资源**的循环死锁。
+在原题基础上，将生产者改为 $2$ 个并发进程，奇数消费者有 $2$ 个、偶数消费者有 $1$ 个，缓冲区容量为 $N=4$，初始已有 **2 个奇数和 1 个偶数**，各数据放在不同单元中。
 
-在正确方案中，拿不到容量的生产者可以持有 `batchGate` 等待，但消费者无需 batchGate，始终可以取得 mutex、从对应类别取走元素、释放空位。**消费者不必原子取走一整批**，只要求生产者一次性发布包含奇偶两个数的合法批次。若真实系统在生产者完成预订后发生崩溃，还需考虑异常恢复与资源回滚；常规考题假定进程不会在临界步骤永久崩溃。
+1. 写出四个信号量的初值。
+2. 多个生产者同时向缓冲区写入时，原有的信号量操作顺序是否仍可复用？为什么？
+3. 若某生产者在 `P(empty)` 之后、真正放入之前暂停，此时信号量数值一定等于物理空单元数吗？
 
-</ExamExplanation>
+<ExamSolution><ExamAnswer>
 
-</ExamSolution>
+1. `mutex=1`、`empty=1`、`odd=2`、`even=1`。
+2. **可以**，只要 `put/get` 的共享结构操作处于同一个互斥临界区，许可与实际类别操作一一对应。
+3. **不一定**。`P(empty)` 已预订一个空位，尚未使用的物理空位可能比 `empty` 表示的未预订空位多 1。
 
+</ExamAnswer><ExamExplanation>
+
+1. 初始共占 $2+1=3$ 个单元，容量为 4，所以未预订空位为 1。此题的信号量初值不是“进程数量”，而是各类**资源数量**。
+2. 两个生产者都执行 `P(empty)` 保证不会同时占用同一个资源配额，再通过 `P(mutex)` 串行修改共享数组；两个奇数消费者都执行 `P(odd)` 保证不会重复领取同一个奇数许可，之后仍靠 `mutex` 保护底层查找和移除。每成功消费一个数必须精确 `V(empty)` 一次，否则导致空间泄漏或伪空位。
+3. 设物理上空 1 格，生产者 A 成功 `P(empty)` 后停在 `P(mutex)` 前：`empty=0`，但缓冲区仍物理空 1 格。随后 A 放入并发布类别许可才完成该次事务。**信号量刻画的是可申请的资源许可，未必是此刻逐个单元的物理状态。**
+
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
 
 <span id="question-2011-45" />
@@ -206,165 +185,129 @@ cobegin
 请添加必要的信号量和 P、V（或 `wait()`、`signal()`）操作，实现上述过程的互斥和同步。要求写出完整过程，说明各信号量的含义并赋初值。
 
 <ExamSolution>
-
 <ExamAnswer>
 
-在不要求按票号严格 FIFO 时，教材式最简答案可使用 `empty=10`、`mutex=1`、`full=0`、`service=0` 四个信号量。但**单一的 `service` 唤醒信号不能保证叫醒票号对应的顾客**。本题有“领取号码、叫号”的实际语义，以下给出严格按号码排队、且营业员一次只服务一人的可执行模型。
+1. 资源信号量 `seat=10`（空等候座位）、`customers=0`（已取号、等待叫号的顾客）；互斥信号量 `ticketMachine=1`（取号机一次仅一人）、`qMutex=1`（取号队列）。每位顾客 $i$ 另有 `called[i]=0` 与 `done[i]=0`；`ready=0` 用于顾客到服务窗口的握手。
+2. 采用**先占座、互斥取号及入队、营业员按队列叫号、对应顾客应答、营业员服务并通知完成**的流程。设队列 `Q` 存顾客编号，号码按队列插入顺序递增（若题目不要求严格叫号对应，可用单个通用 `service` 信号量的简化模型）。
 
 ```c
-semaphore seats = 10;       // 还可占用的等待座位
-semaphore mutex = 1;        // 取号机 + 等待队列（共同保护编号顺序）
-semaphore queued = 0;       // 已完成取号、等待叫号的人数
-queue<int> Q;              // FIFO，队列元素是唯一票号
-int nextTicket = 1;
-// 每名顾客独有的信号量 called[t]、ready[t]、done[t]，均初始化为 0
+semaphore seat=10, customers=0;
+semaphore ticketMachine=1, qMutex=1, ready=0;
+semaphore called[MAX_CUSTOMERS]={0}, done[MAX_CUSTOMERS]={0};
+queue Q; // 空队列，队列中的顾客均已预订等候座位
 
-process Customer {
-    P(seats);               // 若没有座位，可在门外等候
-    P(mutex);
-    int t = nextTicket++;  // 原子领取票号
-    init(called[t], 0);
-    init(ready[t], 0);
-    init(done[t], 0);
-    Q.push(t);             // 与领票号一起完成，保持编号 FIFO
-    V(mutex);
-    V(queued);             // 告知营业员队列新增一人
-
-    P(called[t]);          // 只接受针对自己的叫号
-    V(seats);             // 真正离开等待座位，释放一席
-    V(ready[t]);          // 到达窗口，通知营业员可开始服务
-    P(done[t]);            // 等到营业员真正完成自己的服务
-    // 离开银行
+process Customer(i) {
+    P(seat);
+    P(ticketMachine);
+    int no = get_ticket();
+    P(qMutex); enqueue(Q, (no,i)); V(qMutex);
+    V(ticketMachine);
+    V(customers);
+    P(called[i]);         // 唤醒的是号码对应的顾客
+    V(seat);              // 真正离开等待座位
+    V(ready);             // 已到窗口，可以开始服务
+    P(done[i]);           // 真正等服务完成
+    leave();
 }
-
 process Clerk {
     while (true) {
-        P(queued);
-        P(mutex);
-        int t = Q.front();
-        Q.pop();
-        V(mutex);
-        V(called[t]);      // 只唤醒票号为 t 的顾客
-        P(ready[t]);      // 等待他真正离开座位、到达窗口
-        serve(t);          // 独占窗口完成该人的服务
-        V(done[t]);        // 发出服务完成通知
+        P(customers);
+        P(qMutex); (no,i)=dequeue(Q); V(qMutex);
+        call_ticket(no);
+        V(called[i]);
+        P(ready);
+        serve(i);
+        V(done[i]);
     }
 }
 ```
 
-如果题目明确规定**满座顾客直接离开**，将 `P(seats)` 换成对座位信号量的**原子非阻塞 `tryP(seats)`**，失败即退出即可；上述阻塞 `P` 对应顾客可在门外等空座的通常考场抽象。
-
 </ExamAnswer>
-
 <ExamExplanation>
 
-### 一、把故事分解成三个不同对象
+1. **容量约束与设备互斥分开。** `seat` 是 10 个等待座位的资源计数；申请成功才允许取号排队。`ticketMachine` 保证同一时刻仅有一名顾客操作取号机；`customers` 由已取号入队的顾客递增，营业员需先 `P(customers)` 才可 `dequeue`，避免空队列叫号。`qMutex` 保护队列结构本身，避免取号线程更新链表与服务线程出队并发破坏内存结构。
+2. **保证“叫到谁、谁来服务”。** 原题有“号码—叫号”的对应语义。单一的 `service` 信号量若直接 `V(service)`，只能保证**某个**等待顾客被唤醒，并不能保证恰好是被叫号码的顾客；用 `called[i]` 精确通知目标，更符合取号系统。`ready` 是单服务窗口的握手：营业员发叫号后等待对应顾客表示到达窗口，再开始 `serve(i)`；`done[i]` 保证顾客不会在服务实际结束前离开。
+3. **两个关键释放时刻。** 座位在顾客被叫号、实际从等候座位起身转向服务窗口时释放，因此由顾客在 `P(called[i])` 成功之后、`V(ready)` 之前执行 `V(seat)`；不应等服务结束，更不应由营业员在客户尚未响应之前抢先发布座位空位。入队通知 `V(customers)` 必须发生在队列节点已插入之后，防止营业员取空队列。对同一客户 `called[i]` 和 `done[i]` 初值均为 0，使 `P` 真正产生等待。
+4. **不会把互斥锁带入睡眠。** 顾客等待 `P(seat)` 不持有取号机锁；营业员等待 `P(customers)` 不持有队列锁；顾客等叫号时同样不持锁。因此无“等待客户持锁 → 营业员拿不到锁”造成的锁序死锁。该解法将顾客编号当作唯一 ID，实际系统可用工单对象或每号码独立事件替代固定数组；当号码可循环使用时，须避免前一顾客的旧信号误唤醒后继者。
 
-1. **等待座位是 10 份资源**，应使用计数信号量 `seats=10`。这是等候者的容量限制，**不包括正在窗口接受服务的人**。
-2. **取号机只能一个人操作**，应使用互斥信号量 `mutex=1`。本答案用同一把锁顺便保护票号计数器和队列操作，保证“票号先后”和“入队先后”一致。
-3. **是否有顾客可被叫号**由 `queued=0` 表示；某个具体顾客是否被叫到，用顾客专用的 `called[t]` 表示；顾客已离开座位并到达窗口，用 `ready[t]` 表示；该顾客的服务是否已完成，用 `done[t]` 表示。
-
-| 信号量/结构 | 初值 | 作用及什么时候变化 |
-| --- | --- | --- |
-| `seats` | 10 | 顾客等待前 `P`；顾客收到叫号、离开座位时 `V` |
-| `mutex` | 1 | 取号与入队、营业员出队互斥 |
-| `queued` | 0 | 入队成功 `V`；营业员叫下一人之前 `P` |
-| `called[t]` | 0 | 仅顾客 $t$ 等待，营业员叫 $t$ 时通知 |
-| `ready[t]` | 0 | 顾客离开座位并到窗口后通知营业员 |
-| `done[t]` | 0 | 防止顾客在服务未完成时离开 |
-
-### 二、为什么四信号量教材写法值得补一个边界说明
-
-常见简化代码：顾客 `P(empty),P(mutex),取号,V(mutex),V(full),P(service),接受服务`；营业员 `P(full),叫号,V(empty),V(service),服务`。它对**是否有人等待**的总量同步是正确的，但若多个顾客都睡在同一个 `service` 上，`V(service)` 可以唤醒任何一位，**无法保证醒来者就是营业员叫出的票号**。只有题目明确不要求取号先后次序、把“叫号”抽象成任意唤醒等待者，这种写法才足够。本解使用单独的 `called[t]` 严格保证匹配。
-
-另一个细节：如果票号是在 mutex 内分配，但入队放在锁外，顾客 1 被抢占后顾客 2 可以先入队，FIFO 队列不再等价于票号顺序。**取号与入队必须在同一个互斥临界区中完成**，或者另外实现按票号排序的等待集合。
-
-### 三、为什么座位在“叫号”后而非“服务结束”后归还
-
-座位数限定的是**排队等候区**，不是包含服务窗口的银行总容纳人数。为了严格反映物理座位占用，本答案让**顾客在收到专属叫号、实际起身离开座位后**执行 `V(seats)`，并用 `V(ready[t])` 告诉营业员自己已到窗口；营业员 `P(ready[t])` 再开始服务。这消除了“营业员提前释放座位，而顾客尚未离席”造成的瞬时座位超售。若课程只要求抽象建模，通常也允许把“叫号并离席”视为原子事件而由营业员直接释放座位。
-
-### 四、信号量信号是否会丢失？是否会死锁？
-
-`called[t]`、`ready[t]` 与 `done[t]` 均为计数信号量，营业员即使先 `V`，顾客稍后 `P` 仍可立即通过，不会丢通知；这优于不带条件检测的忙等标志。所有可能阻塞的 `P(seats)`、`P(queued)`、`P(called[t])`、`P(done[t])`、`P(ready[t])` 均在**队列互斥锁之外**，营业员不会因拿不到 mutex 而形成必然死锁。服务顺序由营业员 FIFO 出队决定，不由调度器选择被唤醒进程的顺序决定。
-
-### 五、关于“获得服务”的两种答题口径
-
-若“获得服务”仅表示**开始接受服务**，只需等待 `called[t]`；若“获得服务”表示**服务办结并离开**，还须等待 `done[t]`。本解选择更严格的后者，并确保窗口 `serve(t)` 在一个营业员进程中串行执行。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
-
----
 
 <span id="question-original-200" />
 
 <ExamQuestion>
 
-<span className="inline-block rounded border px-2 py-0.5 text-xs text-fd-muted-foreground">原创</span>
+某办事大厅有 1 个取号机、4 个等候座位和 2 个相互独立的服务窗口。取号机一次仅一人操作，顾客必须先有空座位才能取号；窗口服务时按取号顺序派单。每名顾客需等待**自己**被叫号，且只能离开原窗口服务结束后离开。
 
-一家银行有 3 个等待座位、2 个服务窗口，每位顾客领取唯一递增票号。叫号动作必须严格按票号递增进行，但两个窗口允许并行服务，**无需按票号顺序完成**。一旦被叫号，顾客离开等待座位。请用 P/V 设计完整顾客/窗口流程；解释单一的 `called` 信号量为什么不够，并举例说明叫号顺序和服务完成顺序可以不同。
+1. 哪些资源需要计数信号量，哪些需要互斥信号量？
+2. 如果仅设置公共 `called=0`，两名窗口工作人员各叫一个不同号码，是否一定由这两个号码对应的顾客应答？
+3. 给出避免叫错人与窗口错配的核心伪代码。
 
-<ExamSolution>
+<ExamSolution><ExamAnswer>
 
-<ExamAnswer>
+1. `seat=4`、`customers=0` 是计数信号量，`machine=1`、`qMutex=1` 是互斥信号量；每名顾客另有 `called[i]=0`、`done[i]=0`。
+2. **不一定**。公共信号量不记录发给哪一个顾客，也不绑定窗口。
+3. 工作人员出队时指定顾客和窗口 `assignedWindow[i]=w`，只通知 `called[i]`，服务完通知 `done[i]`。
 
-用 `seats=3`、`mutex=1`、`pending=0` 和**每张票号专属**的 `called[t]=0`、`ready[t]=0`、`finished[t]=0`。两个窗口运行同一份 `Clerk()` 程序。
+</ExamAnswer><ExamExplanation>
+
+1. 两窗口不影响等候座位的最大容量 4，也不影响取号机一次仅一人；它使**正在服务的顾客数**最多可到 2，所以应为两个窗口创建独立的服务进程，而不再用一个全局“服务中”互斥锁串行化全部服务。
+2. 例如顾客 A、B、C 都执行 `P(called)`，工作人员叫 A，却可能唤醒 C。通用计数信号量只传递数量，不传递定向身份；题设的号码匹配是比“至少唤醒一个顾客”更强的约束。
+3. 框架（其他获取号码和入队操作与原题类似）：
 
 ```c
-semaphore seats=3, mutex=1, pending=0;
-queue<int> Q; int nextTicket=1;
-// called[t], ready[t], finished[t] 都是顾客独有、初值 0
-
-process Customer {
-    P(seats);
-    P(mutex);
-    int t=nextTicket++;
-    init(called[t], 0); init(ready[t], 0); init(finished[t], 0);
-    Q.push(t);
-    V(mutex);
-    V(pending);
-
-    P(called[t]);
-    V(seats);             // 离开座位再归还席位
-    V(ready[t]);          // 已到窗口
-    P(finished[t]);         // 等待办结再离开
+Clerk(w) {
+  while (true) {
+    P(customers);
+    P(qMutex); i = dequeue(Q); V(qMutex);
+    assignedWindow[i] = w;
+    V(called[i]);      // 定向叫号
+    P(ready[w]);       // 此窗口特有的应答信号
+    serve(w, i);
+    V(done[i]);
+  }
 }
-
-process Clerk {             // 两个窗口分别执行该循环
-    while (true) {
-        P(pending);
-        P(mutex);
-        int t=Q.front(); Q.pop();
-        V(called[t]);      // 在互斥区内发叫号信号，确保叫号顺序
-        V(mutex);
-        P(ready[t]);        // 等顾客到窗口，不在队列锁内等待
-        serve(t);          // 两窗口可以并行
-        V(finished[t]);
-    }
+Customer(i) {
+  P(seat); P(machine);
+  ticket = get_ticket();
+  P(qMutex); enqueue(Q,i); V(qMutex);
+  V(machine); V(customers);
+  P(called[i]);
+  V(seat);
+  int w = assignedWindow[i];
+  V(ready[w]);
+  P(done[i]);
 }
 ```
 
-</ExamAnswer>
+每个窗口 `ready[w]` 初值为 0。`assignedWindow[i]` 在发 `called[i]` 之前写定，避免顾客醒来后读到未设置的窗口编号。
 
-<ExamExplanation>
+</ExamExplanation></ExamSolution>
+</ExamQuestion>
 
-`seats` 限制候客人数（由被叫的顾客真正离席时释放），`pending` 表示已入队人数，`mutex` 同时保护票号分配、队列入队与窗口出队。`P(seats)` 必须在获取 mutex 前执行，`P(pending)` 也必须在 mutex 外执行，否则座位或队列空时可能持锁阻塞其他进程。
+<span id="question-original-326" />
 
-**关键细节：叫号的排序要求高于“选出最小票号”。** 如果窗口 1 已弹出 1 号后释放互斥锁、尚未实际叫号就被挂起，窗口 2 可弹出 2 号并先喊出 2 号。为避免这种“先出队却后叫号”的时序逆转，本程序将 `V(called[t])` 放在队列互斥区内，使**发出叫号信号的事件**严格按号有序；但线程何时被 CPU 唤醒仍由调度决定，无法由单个 `V` 保证顾客实际到达服务台的时间严格排序。
+<ExamQuestion>
 
-只用一个公共 `called` 会随机唤醒某位在等待的顾客，甚至将已经不该服务的人叫过来，破坏票号匹配。两位营业员也必须在同一队列互斥锁内取得号码，否则有重复取出队头的风险。
+某银行的等候区有 3 个座位，初始无顾客。顾客进入等候区时占一个座位，叫号后离开等候区，随后在独立的服务柜台接受服务。某时刻已有 A、B、C 在等候区，工作人员正在给 D 服务。
 
-**顺序示例**：两个窗口依次叫 1 号、2 号，1 号业务耗时 12 分钟，2 号耗时 2 分钟，则 2 号可以先办完。FIFO 要求的是**叫号顺序**，非**业务完成顺序**。已有两人正在两个窗口服务时，等待区仍最多可以坐 3 人，因而系统中可能同时有 5 位顾客（2 个办理、3 个等待）。
+1. 此时表示等候座位的计数信号量 `seat` 值是多少？
+2. 工作人员完成 D 的服务后叫 A，A 离开等候区但尚未完成新服务，此时 `seat` 可增加到多少？
+3. 解释为什么不能把释放座位的 `V(seat)` 放在 A 完成服务之后；此错误是否一定死锁？
 
-**工程延伸**：若题意规定“满座直接离开”，需将 `P(seats)` 换成原子非阻塞 `tryP` 并在失败时离开；该修改不会影响叫号队列的同步关系。
+<ExamSolution><ExamAnswer>
 
-</ExamExplanation>
+1. **0**。
+2. **1**。
+3. 此写法把正在柜台服务的 A 也错误计入等候座位，造成空座位被虚占、吞吐降低；**不一定死锁**，但与题意的座位资源定义不符。
 
-</ExamSolution>
+</ExamAnswer><ExamExplanation>
 
+1. A、B、C 各申请了一个等候座位，共 3 个，故剩余 0；D 在柜台服务不使用等候座位。
+2. 当叫号后 A 真正离开等候区，该座位可被新到顾客使用，即由 0 增至 1；A 是否已经接受服务与座位释放无关。
+3. 计数信号量代表特定资源，要在**该资源的使用完成时**归还。如果拖到服务结束才释放，系统会拒绝本可入座的顾客，浪费资源。单纯延迟释放通常使并发程度下降，但只要已入座顾客仍能被服务，未必形成循环等待，所以不能不加条件就宣称死锁。
+
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
 
 <span id="question-2013-45" />
@@ -395,128 +338,96 @@ coend
 请添加必要的信号量和 P、V（或 `wait()`、`signal()`）操作，实现上述过程中的互斥与同步。要求写出完整过程，并说明信号量的含义和初值。
 
 <ExamSolution>
-
 <ExamAnswer>
 
-两个信号量即可：`capacity=500` 表示尚可容纳的参观人数，`door=1` 表示单一出入口当前是否可以通过。
+1. 设置 `capacity=500`，表示仍可进入馆内的容量许可；`gate=1`，表示唯一出入口是否可用。
+2. 参观者应先申请容量，再互斥进门；参观过程中不占用 `gate`；出门也必须获得 `gate`，且实际出门后才能释放容量。
 
 ```c
-semaphore capacity = 500; // 未被占用或预订的馆内名额
-semaphore door = 1;       // 仅能一人通过同一出入口
+semaphore capacity = 500;
+semaphore gate = 1;
 
-process Visitor {
-    P(capacity);           // 先申请入馆容量，不能持门锁等待
-    P(door);
-    enter();               // 通过门进入
-    V(door);
+process Visitor(i) {
+    P(capacity);
+    P(gate);
+    enter();             // 进门
+    V(gate);
 
-    visit();               // 馆内活动不必占用门锁
+    visit();             // 参观时不占出入口
 
-    P(door);
-    leave();               // 通过门离开
-    V(door);
-    V(capacity);           // 确实离馆之后释放容量
+    P(gate);
+    exit();              // 出门
+    V(gate);
+    V(capacity);
 }
 ```
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-### 一、两个限制不是一回事
+1. **问题存在两个独立限制。** “馆内最多 500 人”是带容量上界的资源计数，故用初值为 500 的计数信号量 `capacity`；“唯一出入口一次只允许一人通过”是排他约束，故用初值 1 的二元信号量 `gate`。同一个 `gate` 必须同时保护 `enter()` 与 `exit()`，而不是给进出各设置一个互不影响的互斥锁，否则可能出现一人进、另一人出而同时穿过门口。
+2. **容量申请位置：** 在进入馆内之前执行 `P(capacity)`，否则在馆满时可能出现第 501 人先进入再阻塞。释放位置：必须完成 `exit()` 后再执行 `V(capacity)`，不能在准备离馆但仍未走出门口时提前释放容量。
+3. **锁顺序防死锁：** `P(capacity)` 应位于 `P(gate)` 前。当馆内已满时，新访客应在**门外且不占有门锁**等待，馆内参观者仍能拿到 `gate` 离开；若新访客先 `P(gate)` 再 `P(capacity)`，会握住唯一出入口等待容量，馆内人又无法通过出口，产生死锁。
+4. **临界区粒度：** 只把“通过门”的短操作放进 `gate` 临界区，而不是把整个参观过程锁住，否则实际上同时只允许一个人参观，严重浪费 500 的容量。该实现保证安全性；进入顺序与等待公平性由信号量队列调度机制另行决定。
 
-“馆内最多 500 人”是**容量同步**，对应计数信号量 `capacity=500`；“出入口同时最多一人通过”是**互斥**，对应 `door=1`。只设 `capacity` 会允许两位访客同时进出同一窄门；只设 `door` 会让馆内人数无上界地增长。
-
-每名参观者恰好在进入前预订一个容量名额、离开门后归还一个。在无异常退出的稳定状态，馆内人数 $\le500$。任何时刻把“馆内实际人数”与“正在预订但尚未过门的人数”合并计算，也不会超过 500。因为 `P(capacity)` 不允许成功超过 500 次而未获匹配 `V`。
-
-### 二、死锁陷阱：不能先锁门再等待馆内容量
-
-错误顺序如下：
-
-```c
-P(door);
-P(capacity);  // 错：满馆时新入馆者持有门锁等待
-enter();
-```
-
-若馆已满，入馆者占住唯一的出入口并等待容量释放；馆内有人想离馆，却必须先 `P(door)`，被阻塞；**入馆者在等离馆者释放容量，离馆者在等入馆者释放门锁**，形成循环等待。正确次序是 `P(capacity)` 然后 `P(door)`，因为成功申请容量后通过门不会依赖馆内其他游客先离开。
-
-### 三、为什么出门后才能释放容量，参观时必须放开门锁
-
-释放 `capacity` 代表已经为下一位访客提供新的馆内名额，因此应当在 `leave()` 之后；若先 `V(capacity)` 再走出门，实际同时在馆内的人数可能短暂超过 500。`visit()` 应放在两次持锁操作之间：一个人参观时间长短与其他人能否通过门无关，把整个参观过程放在 `P(door)` 和 `V(door)` 之间会导致不必要的**串行化**。
-
-### 四、检验极端状态与可变模型
-
-- **空馆**：`capacity=500`，第一位进入成功，入口互斥；`door` 仍为 1，离馆者不存在。
-- **满馆**：`capacity=0`，新到者只能在门外等待；馆内任一人仍可取得 `door` 走出并 `V(capacity)`，从而打破等待。
-- **只改为独立入口、出口**：就应拆成 `entry=1`、`exit=1` 两个门锁，容量信号量仍为 500，允许一人进门与另一人出门并行。
-- **不保证先来先服务**：信号量满足互斥与容量安全，不自动保证公平；如果题目另要求 FIFO 公平，应引入排队结构或公平信号量。
-
-**考试模板**：先找容量上限（计数信号量），再找临界资源（互斥信号量）；入门先“资源预约”后“门锁”，出门先“实际释放资源”后“名额归还”。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
-
----
 
 <span id="question-original-201" />
 
 <ExamQuestion>
 
-<span className="inline-block rounded border px-2 py-0.5 text-xs text-fd-muted-foreground">原创</span>
+某科技馆最多同时容纳 $200$ 名参观者，有**两个出入口**：东门和西门，两个门各自一次只允许一人通过，但不同门可同时通行。两个门均允许进、出。
 
-博物馆最多允许 $500$ 名参观者同时在馆内，改建后采用相互独立的入口与出口，两扇门各只能有一人通过，但允许一人进门与另一人出门**同时进行**。请：
+1. 需要几个信号量？写出初值和含义。
+2. 写出从东门进入、西门离开的一名游客的同步过程。
+3. 若所有人都共用一个门互斥锁，程序是否仍然正确？并发性能如何？
 
-1. 定义初值明确的信号量，编写完整入馆、参观和出馆流程；
-2. 证明始终不会出现超过 500 人在馆内，也不会有多人同时使用同一扇门；
-3. 说明如果继续使用一个公共的门锁，会有什么不足；
-4. 当容量信号量为 0 时，馆内游客能否成功出门，为什么？
+<ExamSolution><ExamAnswer>
 
-<ExamSolution>
+1. 三个：`capacity=200`、`east=1`、`west=1`。
+2. `P(capacity); P(east); enterEast(); V(east); visit(); P(west); exitWest(); V(west); V(capacity);`。
+3. **安全性正确，但限制过强**，东、西两门不能并行使用。
 
-<ExamAnswer>
+</ExamAnswer><ExamExplanation>
 
-用 `capacity=500`、`entrance=1`、`exit=1`；容量名额与两扇门的互斥操作分离。
+1. 馆内容量是共享的全馆计数，不因为有两个门就各设置 200 个名额；否则可能两门合计放入 400 人。门锁则分别代表东、西门，各有其独立互斥资源。
+2. 申请馆内容量需在门锁之前；退出西门后才归还馆内容量。不同门的通行可重叠，但东门自身进出互斥，西门亦然。
+3. 单一 `gate` 只会把所有进出串行化，依然能保持最大容量和每门互斥，因此这类错误是**过度加锁导致并发降低**，不等于数据安全错误。考场解题要做到“一个受约束的独立实体对应一个锁”。
+
+</ExamExplanation></ExamSolution>
+</ExamQuestion>
+
+<span id="question-original-327" />
+
+<ExamQuestion>
+
+单门博物馆最多容纳 3 人，初始馆内有 3 人。访客 A 在门外等待入馆，馆内访客 B 准备离馆。有程序员把进门流程错误写为：
 
 ```c
-semaphore capacity=500, entrance=1, exit=1;
-
-process Visitor {
-    P(capacity);               // 进馆前先预订一个名额
-    P(entrance);
-    enter();                   // 入口临界区
-    V(entrance);
-
-    visit();
-
-    P(exit);
-    leave();                   // 出口临界区
-    V(exit);
-    V(capacity);               // 完全离馆后归还名额
-}
+P(gate);
+P(capacity);
+enter();
+V(gate);
 ```
 
-</ExamAnswer>
+1. 给出 A、B 的一种执行交错，说明为什么可能死锁。
+2. 修复该程序，写出正确的进门流程。
+3. 如果把访客出馆的 `V(capacity)` 放到 **`P(gate)` 和 `exit()` 之前**，将引入什么不安全情形？
 
-<ExamExplanation>
+<ExamSolution><ExamAnswer>
 
-设累计**成功预订入场名额**数与**已完整离馆归还名额**数之差为 $R$。由于 `P(capacity)` 对初值 500 的计数信号量执行原子等待，任意时刻 $0\le R\le500$；实际尚在馆内的参观者是这些已预约名额持有者的一个子集，因而人数不会超过 500。严格说，在预订成功但尚未经过入口时，$R$ 可能大于馆内实际人数，这属于**安全地提前预留资源**，不代表人数计算错误。
+1. A 先执行 `P(gate)` 成功、再在 `P(capacity)` 阻塞；B 想出门却被 `P(gate)` 阻塞，二者无法继续。
+2. `P(capacity); P(gate); enter(); V(gate);`。
+3. 过早发布容量使新来者可以在旧访客尚未真正出门时进馆，从而让物理馆内人数瞬时超过 3 人。
 
-`entrance` 与 `exit` 分别提供临界区互斥：每一扇门同时最多 1 人，但入口/出口不共享同一把锁，因此允许**并行进出**。若使用一个公共门锁，仍可保证安全，但会把本来独立的两扇门人为串行化，降低吞吐率。
+</ExamAnswer><ExamExplanation>
 
-容量信号量为 0 时，新的入馆者在 `P(capacity)` 阻塞，但任何已经在馆内的访客都不需要再次取得 `capacity` 才能出馆；只要其能拿到 `exit`，便会完成 `leave()`、随后 `V(capacity)`，从而允许一名等待者进入，**不会因为满馆本身而发生死锁**。
+1. 馆满意味着 `capacity=0`。A 持有 `gate` 等待已有馆内人退出腾出名额，但已有馆内人 B 退出又必须取得 A 持有的 `gate`，构成“保持并等待 + 循环等待”的经典死锁。这不同于单纯进门排队，因为阻塞者占住了对方所需资源。
+2. 将可能长时间阻塞的容量申请移动到进入门锁之前。馆满时 A 不占门，B 便可以离馆并执行 `V(capacity)` 唤醒 A。
+3. 正确释放的时机是物理离馆后；“即将离开”的主观意图不足以归还实际占用的馆内容量。极端时，在释放许可与旧人真正离门之间，新访客已经通过门，导致同时在馆人数超限。
 
-**与单门题的关键区别**：若只有一扇门，新入馆者先 `P(door)` 再 `P(capacity)` 可能卡住唯一出口并死锁；这里两个物理门独立，虽然仍不建议在持有 `entrance` 时等待容量（降低吞吐、增加竞争），但出门者不会因入口锁被占用而失去通过出口的能力。考试中要区分“会降低并行度”与“一定产生循环等待”，不能机械套错结论。
-
-**进阶变式**：若设计要求“先入队者先入馆”，`capacity` 的信号量本身未必保证 FIFO；需引入公平队列或排号机制。容量安全、门口互斥与进入顺序公平，是三种不同的性质。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
 
 <span id="question-2014-47" />
@@ -534,150 +445,116 @@ process Visitor {
 请使用信号量 P、V（`wait()`、`signal()`）操作实现进程间的互斥与同步。要求写出完整过程，并说明所用信号量的含义和初值。
 
 <ExamSolution>
-
 <ExamAnswer>
 
-用四个信号量 `empty=1000`、`full=0`、`bufMutex=1` 和 `batchMutex=1`。生产者每次独立放一件产品；消费者取得 `batchMutex` 后，在一个循环中**连续取出 10 件产品**，然后释放批次锁。消费者在等待新产品时不得持有 `bufMutex`，否则将阻塞生产者。
+1. 设置 `empty=1000` 表示可用空槽，`full=0` 表示已发布产品数，`bufferMutex=1` 保证环形缓冲区每次入队/出队时互斥，`consumerGroup=1` 使一个消费者在完成 **10 次实际取产品**前独占消费者群体的取货资格。
+2. 正确实现如下。这里把“取出一件”和“处理该件产品”区别开：前者需要缓冲区锁，后者可以在锁外执行。
 
 ```c
 semaphore empty = 1000, full = 0;
-semaphore bufMutex = 1, batchMutex = 1;
-product buffer[1000]; int in = 0, out = 0;
+semaphore bufferMutex = 1, consumerGroup = 1;
+Item buffer[1000]; int in=0, out=0;
 
-process Producer {              // 多个生产者均执行
+process Producer {
     while (true) {
-        product item = make();
+        Item x = produce();
         P(empty);
-        P(bufMutex);
-        buffer[in] = item;
-        in = (in + 1) % 1000;
-        V(bufMutex);
+        P(bufferMutex);
+        buffer[in] = x;
+        in = (in+1) % 1000;
+        V(bufferMutex);
         V(full);
     }
 }
-
-process Consumer {              // 多个消费者均执行
+process Consumer {
     while (true) {
-        P(batchMutex);          // 排他地拥有下一批 10 件的取货权
-        for (int k = 0; k < 10; ++k) {
-            P(full);            // 可能等待；此时只持 batchMutex
-            P(bufMutex);
-            product item = buffer[out];
-            out = (out + 1) % 1000;
-            V(bufMutex);
+        P(consumerGroup);            // 连续 10 次取货的独占资格
+        for (int k=0; k<10; ++k) {
+            P(full);                 // 每件单独等待，允许生产者补货
+            P(bufferMutex);
+            Item x=buffer[out];
+            out=(out+1)%1000;
+            V(bufferMutex);
             V(empty);
-            use(item);          // 若题意仅限制“取出”，可移到批次外
+            consume(x);              // 不占用缓冲区锁
         }
-        V(batchMutex);
+        V(consumerGroup);
     }
 }
 ```
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-### 1. 资源分两层：单件缓冲区与十件取货批次
+1. **识别两层互斥。** `bufferMutex` 保护共享 `in/out` 下标和存储槽访问，入队、出队每次都要使用；`consumerGroup` 不是另一个缓冲区锁，而是保证**一个消费者开始取货后，其他消费者不得插入它的 10 次出队之间**。生产者完全不申请 `consumerGroup`，因此消费者暂停等待第 7 件时，生产者仍可放入新货。`empty=1000,full=0` 必须与“初始为空”对应。
+2. **环形缓冲区的下标。** 单次入队按 `buffer[in]=x; in=(in+1)%1000`，单次出队按 `x=buffer[out]; out=(out+1)%1000`。即使 `in==out`，也可能表示空或满；用 `empty/full` 计数辨别，故不能只凭下标相等判断。生产者写入后才 `V(full)`，消费者取走后才 `V(empty)`，杜绝未写就读和未读就覆盖。
+3. **死锁分析。** 有消费者在 `P(consumerGroup)` 内，若队列为空，它会睡在 `P(full)`；但它并未持有 `bufferMutex`，生产者可以取得 `P(empty)`、更新数组并 `V(full)`。因此在生产者能继续提供数据的假设下，不会因该独占组锁造成生产者无法推进的死锁。若错写成 `P(bufferMutex); P(full)`，消费者可能持锁等待空队列，生产者又需同锁填充，才会死锁。
+4. **“连续取”不等于“原子取 10 件”。** 题目仅要求**其他消费者不能插入**，不要求缓冲区必须事先至少有 10 件，也不排斥生产者在这 10 次之间写入。所以不能简单把 `P(full)` 连续执行 10 次后再一次性出队当成唯一方法；特别是当缓冲区容量小于 10 时，这种先预留 10 个库存许可的写法根本无法完成。`consume(x)` 是否放在 10 件组合内取决于题意：若仅要求“连续取出”，也可先将 10 件存于本地数组、释放组锁后再逐件处理，以减小其他消费者的等待。上述代码把消费放在循环内仍满足原题，只是可能占组锁更久。
+5. **验证三项不变量。** 每次写入对应一次 `P(empty)` 与 `V(full)`；每次取出对应一次 `P(full)` 与 `V(empty)`；所有 `in/out` 更新均在 `bufferMutex` 临界区，多个生产者也不会获得同一槽。`consumerGroup` 覆盖从第 1 次到第 10 次出队，令整组操作对其他消费者不可交错。
 
-- `empty` 是**空缓冲单元的计数信号量**，初值 1000；`full` 是**可消费产品的计数信号量**，初值 0。
-- `bufMutex` 保护 `buffer`、`in`、`out` 的临界访问，初值 1。即使生产者、消费者访问不同下标，也必须保证环形队列的整体插入、删除和指针更新互斥（题目采用统一共享缓冲区模型）。
-- `batchMutex` 不是容量信号量，而是**消费者之间的批次所有权锁**，初值 1。消费者持有它才可启动本轮的 10 次取货；它不妨碍生产者工作。
-
-考场可将状态不变量写成：已实际放入而尚未取走的产品数 $q$ 满足 $0\le q\le 1000$，但注意 `P(empty)` 和 `V(full)` 之间存在“已预留尚未公布的槽位”，所以不要误称每一瞬间 `empty+full=1000`；更严谨地，在操作边界、无在途插入/删除时，才有两者相加为容量。
-
-### 2. 为什么 `P(full)` 必须写在 `P(bufMutex)` 之前
-
-若把操作次序颠倒为 `P(bufMutex); P(full);`，在缓冲区空时消费者持有锁等待产品，而生产者需要该锁才能插入产品，形成**消费者等产品、生产者等锁**的死锁。
-
-同理，生产者应先 `P(empty)` 再 `P(bufMutex)`，因为满缓冲时不能占着共享缓冲区互斥锁等待消费者归还空位。
-
-`P(batchMutex)` 与 `P(full)` 的次序则可以如上述安排：持有批次锁等产品**不会阻塞生产者**，也不会发生消费者“偷走”本批中间产品的现象。生产者无须申请 `batchMutex`。
-
-### 3. 为什么只锁单次删除不够
-
-若 `batchMutex` 只锁循环内的一次 `dequeue`，两个消费者可以取走 `C_1:1件, C_2:1件, C_1:1件,...`，虽然没有缓冲区数据竞争，却违反**一个消费者必须连续取走 10 件**这一更强的语义。需要同时满足**单次访问互斥**与**批次连续性**，它们是两种不同的同步约束。
-
-### 4. 进度性、并发性与边界条件
-
-如果消费者取了 7 件后 `full` 为 0，它继续持有 `batchMutex` 等余下 3 件；生产者仍可通过 `bufMutex` 插入，从而推进该批完成。不同生产者可以并行生成产品，进入队列的实际写入仍须串行。该方案防止上述缓冲区锁导致的死锁，但**不保证批次锁公平性**：极端不公平的信号量唤醒仍可能使某消费者长期排队。
-
-**典型变式**：如果改成“一次批量原子取出 10 件，即取之前必须已有 10 件”，不能简单连续执行 10 次 `P(full)` 就声称原子批量预约；可另加可用批次条件/监视器来等到库存达到 10，再统一占有 10 个资源名额。原题只要求一个消费者连续取，而非每批必须在某一时刻整体可用。
-
-**速记**：计数信号量保资源，互斥锁保临界区，批次锁保操作序列；不能把三种约束混为一把锁。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
-
----
 
 <span id="question-original-202" />
 
 <ExamQuestion>
 
-<span className="inline-block rounded border px-2 py-0.5 text-xs text-fd-muted-foreground">原创</span>
+一个容量为 $5$ 的循环队列由多个生产者和消费者共享，初始为空。要求每个消费者一次**连续取出 3 件**，在这 3 次取出之间别的消费者不得取走任何产品，但生产者可以正常补货。
 
-有 $2$ 个生产者和 $3$ 个消费者，共享容量为 $7$ 的 FIFO 环形缓冲区。每个消费者一旦开始一批取货，必须连续取走 $4$ 件产品后才允许别的消费者取货；允许消费者在本批尚未凑齐时等待生产者。要求：
+1. 设计信号量并给出初值。
+2. 写出消费者的关键伪代码。
+3. 若一个消费者已取了 2 件，此时队列空，它能否持有组锁等待第 3 件？为什么？
 
-1. 写出仅用 P/V 同步的生产者与消费者伪代码，完整写出信号量及初值；
-2. 证明缓冲区不会溢出、不同消费者不会交错取货且不会因为锁顺序产生死锁；
-3. 分析错误代码 `P(bufMutex); P(full); dequeue(); ...` 的问题，并说明把容量改为 $3$ 后“每批取 4 件”是否必然不可行。
+<ExamSolution><ExamAnswer>
 
-<ExamSolution>
+1. `empty=5`、`full=0`、`bufferMutex=1`、`group=1`。
+2. 先 `P(group)`，循环 3 次执行 `P(full)`、单次互斥出队、`V(empty)`，最后 `V(group)`。
+3. **可以**，前提是没有持有 `bufferMutex` 且生产者仍能独立补货。
 
-<ExamAnswer>
+</ExamAnswer><ExamExplanation>
+
+1. 空槽与产品数量用计数信号量约束；缓冲区读写锁限制一次修改；组锁只限制消费者之间的切换。四者保护的资源不同。
+2. 关键段：
 
 ```c
-semaphore empty = 7, full = 0;
-semaphore bufMutex = 1, batchMutex = 1;
-item ring[7]; int head = 0, tail = 0;
-
-Producer() {
-    while (true) {
-        item x = produce();
-        P(empty);
-        P(bufMutex);
-        ring[tail] = x; tail = (tail + 1) % 7;
-        V(bufMutex);
-        V(full);
-    }
+P(group);
+for (int j=0; j<3; ++j) {
+    P(full);
+    P(bufferMutex); Item x=remove(); V(bufferMutex);
+    V(empty);
+    consume(x);
 }
-Consumer() {
-    while (true) {
-        P(batchMutex);
-        for (int i = 0; i < 4; ++i) {
-            P(full);
-            P(bufMutex);
-            item x = ring[head]; head = (head + 1) % 7;
-            V(bufMutex);
-            V(empty);
-            consume(x);
-        }
-        V(batchMutex);
-    }
-}
+V(group);
 ```
 
-</ExamAnswer>
+3. 队列空时，消费者已放开 `bufferMutex`，生产者可通过 `P(empty)`（刚取走的两件已释放容量）写入并 `V(full)`，从而唤醒它。组锁的独占范围要大，但真正的环形队列锁要小，这体现**保护逻辑事务与保护物理共享结构是两件事**。
 
-<ExamExplanation>
+</ExamExplanation></ExamSolution>
+</ExamQuestion>
 
-**模型拆解**：`empty/full` 保容量及库存，`bufMutex` 保一次入/出队及指针更新的原子性，`batchMutex` 保同一消费者独占一轮 4 件的取货权。生产者可同时在非临界区生产，但入队临界区同一时刻最多一名生产者/消费者进入。
+<span id="question-original-328" />
 
-**安全性不变量**：成功预留空槽后生产者才会写入，成功取得商品名额后消费者才会删除，因此不可能写满缓冲区外、也不可能读取不存在的商品；一个消费者持有 `batchMutex` 期间，其他消费者无法完成任何取货，故批次不被交错。
+<ExamQuestion>
 
-**关键进度性分析**：即使消费者取走第 2 件后遇到空队列并执行 `P(full)` 阻塞，它并未持有 `bufMutex`，所以生产者仍可进临界区放第 3、4 件，直到解除等待。若颠倒为先 `P(bufMutex)` 再 `P(full)`，缓冲区为空时消费者拿着互斥锁阻塞，生产者也被该互斥锁阻塞，便出现死锁。
+某系统使用容量为 $4$ 的共享缓冲区，规定一个消费者必须独占地取走连续 $6$ 件产品后其他消费者才可开始。程序员设计：消费者先 `P(full)` 连续 6 次，再一次性获得 `bufferMutex` 取出 6 件；生产者仍每放一件就需要 `P(empty)`。
 
-**容量变为 3 的变式**：如果允许“一边生产一边逐件取出”，连续取 4 件完全可以实现：每取走一件就 `V(empty)`，让生产者继续填充。只有新增“必须在**开始前**就同时存好 4 件且一口气取走、没有并发生产”的约束时，容量 3 才使任务根本不可能完成。这体现了“连续取出”和“原子批量预留”并非同一要求。
+1. 该设计能否完成一次消费？说明必要条件。
+2. 给出能够处理容量 $4$ 且每组取 $6$ 件的正确思路。
+3. 为什么不应该把 `P(full)` 放进一个始终持有 `bufferMutex` 的循环？
 
-**易错点**：把 `P(batchMutex)` 放在每次 `dequeue` 前后只会保护一件商品；把 `P(full)` 放在 `P(bufMutex)` 之后会导致死锁；用容量来代替批次大小约束也不正确。
+<ExamSolution><ExamAnswer>
 
-</ExamExplanation>
+1. 在没有其他消费者事先消费或特殊协议的情况下，**不能**：至多 4 件缓冲容量可被发布，连续预留 6 个 `full` 将堵住消费释放空槽的机会。
+2. 用 `group=1` 让一个消费者独占 6 次**逐件**取货，每件取走即 `V(empty)`，允许生产者再填入。
+3. 因为队列空时消费者持锁睡在 `P(full)`，生产者无法拿锁入队以发出 `V(full)`，造成死锁。
 
-</ExamSolution>
+</ExamAnswer><ExamExplanation>
 
+1. `full` 许可来自生产者放入的实体商品；生产者填满 4 格后只能阻塞于 `P(empty)`，而消费者想先获得第 5、第 6 个 `full` 才动手释放空间，构成资源依赖闭环。
+2. 正确时序可以是：生产 4 件 → 消费者取得组锁并逐件取走前 4 件、不断 `V(empty)` → 生产者再放 2 件并 `V(full)` → 同一消费者取完第 5、6 件 → `V(group)`。期间其他消费者始终不能取得 `group`，故满足连续 6 次的独占条件。
+3. `bufferMutex` 属于“短临界区锁”，只应覆盖 `remove()`；`P(full)` 可能无限等待，必须在锁外进行。答题判断死锁时先画出“谁持有谁、谁等待谁”，而非只看信号量个数。
+
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
 
 <span id="question-2015-45" />
@@ -725,173 +602,100 @@ B {
 只有当自己的信箱非空时才能取邮件；只有当对方信箱未满时才能放入新邮件，否则等待。请添加必要的信号量和 P、V（或 `wait()`、`signal()`）操作，实现上述过程的同步。要求写出完整过程，并说明信号量的含义和初值。
 
 <ExamSolution>
-
 <ExamAnswer>
 
-分别为 A、B 信箱设置 `aFull=x, aEmpty=M-x, aMutex=1` 和 `bFull=y, bEmpty=N-y, bMutex=1`。两人都按“**先取本信箱，释放本信箱资源后，再向对方信箱投递**”的顺序执行：
+1. 对 A 信箱设置 `Afull=x`（已有邮件）和 `Aempty=M-x`（剩余容量）；对 B 信箱设置 `Bfull=y`（已有邮件）和 `Bempty=N-y`（剩余容量），四个均为计数信号量。
+2. 两信箱若可能由多个线程访问，可分别设置 `Amutex=Bmutex=1` 保护实际取、放操作。A 先从 A 信箱成功取出邮件，再处理并投递 B 信箱；B 的过程对称：
 
 ```c
-semaphore aFull = x, aEmpty = M-x, aMutex = 1;
-semaphore bFull = y, bEmpty = N-y, bMutex = 1;
+semaphore Afull=x, Aempty=M-x;
+semaphore Bfull=y, Bempty=N-y;
+semaphore Amutex=1, Bmutex=1;
 
 process A {
     while (true) {
-        P(aFull);
-        P(aMutex);
-        Mail received = ABox.remove();
-        V(aMutex);
-        V(aEmpty);
-
-        Mail reply = answer_and_ask(received);
-
-        P(bEmpty);
-        P(bMutex);
-        BBox.insert(reply);
-        V(bMutex);
-        V(bFull);
+        P(Afull);
+        P(Amutex); Mail q=receive(Abox); V(Amutex);
+        V(Aempty);
+        Mail reply = answer_and_ask(q);
+        P(Bempty);
+        P(Bmutex); send(Bbox,reply); V(Bmutex);
+        V(Bfull);
     }
 }
-
 process B {
     while (true) {
-        P(bFull);
-        P(bMutex);
-        Mail received = BBox.remove();
-        V(bMutex);
-        V(bEmpty);
-
-        Mail reply = answer_and_ask(received);
-
-        P(aEmpty);
-        P(aMutex);
-        ABox.insert(reply);
-        V(aMutex);
-        V(aFull);
+        P(Bfull);
+        P(Bmutex); Mail q=receive(Bbox); V(Bmutex);
+        V(Bempty);
+        Mail reply = answer_and_ask(q);
+        P(Aempty);
+        P(Amutex); send(Abox,reply); V(Amutex);
+        V(Afull);
     }
 }
 ```
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-### 1. 双信箱就是两个方向相反的有界缓冲区
+1. **把双方看成两组方向相反的生产者—消费者。** 对 A 信箱，A 是消费者，B 是生产者；对 B 信箱则 B 消费、A 生产。每个信箱都有独立的“有数据”与“有空位”信号量，初始化按题设 $0<x<M$、$0<y<N$ 分别为 $x,M-x,y,N-y$。例如当 A 信箱有 $x$ 封信时，能安全再投递的名额是 $M-x$，不是 $M$。
+2. **操作先后严格依题。** 自己信箱非空才 `P(本箱 full)` 取出；取出后立刻 `V(本箱 empty)`；处理邮件可以很慢，放在两个互斥临界区之外；向对方投递前 `P(对方箱 empty)`，真正写入后 `V(对方箱 full)`。`P(full/empty)` 必须在 `P(mutex)` 前，防止等待资源时占住信箱操作锁。对每一封邮件：取走对应一次 `full--,empty++`；投入对应一次 `empty--,full++`。
+3. **为什么先取后投重要？** 若两人都改为“先向对方发信、再从自己信箱取信”，且两信箱都已满，A 会在 `P(Bempty)` 等，B 会在 `P(Aempty)` 等，双方都不取信，形成死锁。原题的先取出、释放本箱空位，再等对方有空位，避免这一特定闭环。题设还保证初始两个信箱非空，故双方开始时都有可取邮件；若两个信箱初始都空，则原协议无法自行启动，必须引入起始邮件或另设发起动作。
+4. **互斥信号量是否必需？** 严格按题仅有 A、B 两进程，且各信箱只有一个写者和一个读者，在完全原子的队列入/出操作、正确实现单生产者单消费者结构的额外假设下，可简化互斥；但一般邮箱读写涉及多步共享下标、链表和计数，使用独立 `Amutex/Bmutex` 更容易给出考试中的通用可靠解，且不会把两信箱无谓串行化。注意 `x`、`y` 是初始**邮件数**，不能拿来当互斥锁初值。
+5. **死锁与缓冲区不变量。** 对每个邮箱，完整操作边界满足 $Afull+Aempty=M$、$Bfull+Bempty=N$；在 `P` 预订和 `V` 发布的中间时刻，计数和可能暂时小于容量，不应误认为资源丢失。逻辑邮件总量在“取出邮件—生成新邮件—投递”之间存在处理中的在途邮件，不能仅把两个信箱当前邮件数相加就认为全系统邮件数量恒定。
 
-| 信箱 | 消费者（读出） | 生产者（写入） | 已有邮件 | 剩余容量 |
-| --- | --- | --- | ---: | ---: |
-| A | A | B | $x$ | $M-x$ |
-| B | B | A | $y$ | $N-y$ |
-
-每封邮件的抽取须先申请非空名额 `P(*Full)`，放入前须先申请空位 `P(*Empty)`。如果缓冲区插入、删除不是天然原子的，用独立的 `aMutex/bMutex` 保护各自信箱；不用一个“大锁”同时保护两个信箱。题设 $0<x<M$、$0<y<N$ 让初始四个计数均为正，但这**不是**“可省略同步”的理由。
-
-### 2. 信号量顺序的安全模式
-
-**先资源、再互斥、执行操作、先释放互斥、再发布新资源**。即
-
-```text
-取信：P(full) -> P(mutex) -> remove -> V(mutex) -> V(empty)
-投递：P(empty) -> P(mutex) -> insert -> V(mutex) -> V(full)
-```
-
-避免在持有 `aMutex` 时等待 `bEmpty`，也避免 A 与 B 一人锁住一个信箱却等待获取另一方的锁，否则容易构成环形等待。题面每位辩论者先取信，再加工并投递，因此可以在信箱临界区外执行长时间的“思考/写信”，提高并发度。
-
-### 3. 容量不变量、守恒与死锁判别
-
-假定一次取出一封、一次投递一封、没有丢信和外部人员添加，**系统中的总邮件数**始终是
-
-$$
-T=x+y.
-$$
-
-将 A 信箱内的邮件数记作 $a$、B 信箱内记作 $b$、目前两个人已取出尚未投递的邮件数记作 $h\in\{0,1,2\}$，则
-
-$$
-a+b+h=x+y,\qquad 0\le a\le M,\quad 0\le b\le N.
-$$
-
-不要求任何瞬间 `$a+b=x+y$`，因为正被人处理的邮件暂时不在信箱中。
-
-题设 $x<M,y<N$ 推出 $T<M+N$，因此**两个信箱不可能同时装满**。若 A、B 都执行到投递处却被 `P(对方Empty)` 卡住，则需双方目标信箱同时为满，与 $T<M+N$ 矛盾。若两人都在取信处阻塞，则需两个信箱同时为空，且没人持有待发送邮件，又与 $T=x+y>0$ 矛盾。因此在操作和调度可以继续执行的前提下，该方案不会出现“两位辩论者互相等资源”的死锁；但这不等于任何调度下都保证有界等待。
-
-### 4. 考试易错点
-
-- `aFull` 与 `aEmpty` 的初值不能设反：信箱初始有 $x$ 封邮件，就是 $x$ 个可取件名额。
-- A 写的是 **B 信箱**，必须 `P(bEmpty)` 后 `V(bFull)`；A 从 **A 信箱**读，必须 `P(aFull)` 后 `V(aEmpty)`。
-- “信箱满”不意味着立刻发生死锁：只有形成无法被其他进程解除的等待环，才算真正死锁。
-- 普通信号量的 `P/V` 保证资源条件，不自动保证投递顺序或按发件时间公平。
-
-**抽象迁移**：双向通信、乒乓缓冲、线程间消息交换都可依此分别为每条有界通道建立 `full/empty/mutex` 三元组。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
-
----
 
 <span id="question-original-203" />
 
 <ExamQuestion>
 
-<span className="inline-block rounded border px-2 py-0.5 text-xs text-fd-muted-foreground">原创</span>
+A、B 两人拥有容量分别为 $4$、$3$ 的信箱。起始 A 箱有 $1$ 封邮件、B 箱有 $2$ 封。A、B 各自一次读取一封本箱邮件，再生成一封新邮件投放对方。
 
-A、B 各有容量为 2 的信箱，开始时**两个信箱均已装满**。每人遵循“收到一封后处理，再向对方回复一封”的规则。某实现为了“预订发件容量”，让 A/B **先执行** `P(对方信箱的 empty)`，之后才 `P(自己的 full)` 取信。请回答：
+1. 给出两个信箱的 `full`、`empty` 信号量初值。
+2. 若 A 已从自己信箱取出一封、但尚未投给 B，各计数信号量的值如何变化？假设 B 暂未动作。
+3. 若处理邮件需 100 ms，应在持有信箱互斥锁时处理吗？
 
-1. 两人同时开始时会发生什么问题？画出资源等待关系；
-2. 修改成不会因这个顺序死锁的双信箱同步程序，写出所有计数初值；
-3. 说明消息在处理期间为什么不能简单用 `aFull+bFull=4` 作为任意时刻不变量。
+<ExamSolution><ExamAnswer>
 
-<ExamSolution>
+1. `Afull=1,Aempty=3,Bfull=2,Bempty=1`。
+2. A 取信并发布空位之后：`Afull=0,Aempty=4,Bfull=2,Bempty=1`。
+3. **不应该**，处理邮件是私有计算，放在互斥临界区外。
 
-<ExamAnswer>
+</ExamAnswer><ExamExplanation>
 
-初值 `aFull=bFull=2`、`aEmpty=bEmpty=0`；最先预订对方空位时，A 等 B 信箱空位、B 等 A 信箱空位，由于二人均未取信，两个空位都不会被释放，故**死锁**。改成**先取本信箱的邮件并释放其空位，再取得对方信箱的空位投递**。
+1. 每箱的空位数等于容量减已有邮件数，两个邮箱初值不可混用：A 是 $4-1=3$，B 是 $3-2=1$。
+2. A 执行 `P(Afull)` 与读出后 `V(Aempty)`；此时 B 箱尚未被写入，所以 B 的两个计数都未变化。后续只有当 A 成功执行 `P(Bempty)` 并投递后，`Bfull` 才会再加 1。
+3. 互斥锁只保护共享邮箱容器中的**短操作**，计算回复内容并不访问共享容器。如果持锁计算，将阻碍对方正常取/投，同步正确性也会更难推理。
 
-```c
-semaphore aFull=2, aEmpty=0, aMutex=1;
-semaphore bFull=2, bEmpty=0, bMutex=1;
+</ExamExplanation></ExamSolution>
+</ExamQuestion>
 
-A() {
-    while (1) {
-        P(aFull); P(aMutex);
-        Mail q=ABox.remove();
-        V(aMutex); V(aEmpty);
-        Mail r=respond(q);
-        P(bEmpty); P(bMutex);
-        BBox.insert(r);
-        V(bMutex); V(bFull);
-    }
-}
-B() {
-    while (1) {
-        P(bFull); P(bMutex);
-        Mail q=BBox.remove();
-        V(bMutex); V(bEmpty);
-        Mail r=respond(q);
-        P(aEmpty); P(aMutex);
-        ABox.insert(r);
-        V(aMutex); V(aFull);
-    }
-}
-```
+<span id="question-original-329" />
 
-</ExamAnswer>
+<ExamQuestion>
 
-<ExamExplanation>
+现将原题的两个进程错误改为“**先发新邮件，再取自己信箱的邮件**”。两信箱容量均为 $2$，初始都恰有 $2$ 封邮件；发送前必须 `P(对方的 empty)`，接收前必须 `P(自己的 full)`。
 
-**错误实现的等待图**：A 需要 B 的空槽，B 需要 A 的空槽；同时 A 尚未释放 A 的空槽、B 尚未释放 B 的空槽。两个信箱全满使 `aEmpty=bEmpty=0`，双方的 `P(empty)` 都不能返回，形成环形资源依赖，且没有外部第三方可以推进。
+1. 分析两个进程同时运行时是否可能死锁，并给出等待关系。
+2. 若初始都只有 $1$ 封邮件且严格执行“发一封—收一封”的循环，该错误顺序是否仍能使双方**同时阻塞在发送**？请根据邮件总数给出论证。
+3. 怎样仅通过改变进程内的操作顺序修复这一问题？
 
-**修改后手动模拟**：开始 A、B 各取走 1 封，释放自己信箱一个空位，信箱占用从 $(2,2)$ 变为 $(1,1)$，两人均可拿到对方的空槽并投递回复，最终两个信箱又各有 2 封。其间若执行时序不同，单方也能完成该轮，不依赖“必须两人同时抽取”。
+<ExamSolution><ExamAnswer>
 
-**守恒写法**：设两信箱中实际已存的邮件数是 $a,b$，两人手中处理或等待投递的邮件数是 $h$，则在不会丢信且每次一取一投递的语义下 $a+b+h=4$。因此当两人均拿着一封信处理时，可能 $a=b=1,h=2$，并非 $a+b=4$。信号量因存在预留与通知的微小间隙，瞬间 `aFull/bFull` 计数还未必等于物理占用，不能把信号量内部整数变化与邮件的实际数量变化混为一谈。
+1. **必然在双方都先发时相互等待**：A 等 `Bempty=0`，B 等 `Aempty=0`，没有进程取信释放空位。
+2. **不能**，在给定初态和严格的一发一收循环下，双方同时等待发送意味着均不持有已发送但未接收的邮件，此时总邮件数仍为 2，不可能令容量均为 2 的两个信箱同时满。
+3. 改回“先 `P(本箱 full)` 取出并 `V(本箱 empty)`，再 `P(对方 empty)` 投递”，且不要在等待时占有邮箱互斥锁。
 
-**方法迁移**：在资源交换系统中，错误的“先占对方的容量、后释放自己的容量”很容易制造环形等待；可用释放—申请顺序、协议化的原子交换或超时回滚打破。若操作还需要两把互斥锁，尽量不要跨信箱持锁等待，防止另一种锁顺序死锁。
+</ExamAnswer><ExamExplanation>
 
-</ExamExplanation>
+1. 在两个缓冲区都满时 `Aempty=Bempty=0`。双方都先投递意味着 A 只有等 B 取走一封，B 只有等 A 取走一封，但两个进程都卡在投递之前而尚未执行取信，构成循环等待。
+2. 初始总计 2 封邮件。每个进程一次循环中先发再收：一次发送使信箱邮件总数暂时增加 1，随后的接收又减少 1。只有正在两操作之间的进程才会增加一封“未匹配的已发送邮件”。若 **A、B 都阻塞在发送**，两人都处于发送操作之前，上一轮的接收必已完成，因此没有未匹配的发送，总邮件数为 2。两信箱都满需要共 4 封邮件，不可能同时成立。若只有一方等待发送，另一方不等待发送时仍可推进到接收并释放空间，所以不能用“可能有一箱满”直接推出死锁。
+3. 先取出本箱一封会立即释放一个空位，打破“双满且无人能取”的互等结构。特别注意：一般调度算法题需给出每一步 `full/empty` 的具体值，并验证状态可达；不能仅凭“可能同时满”而忽略每轮发、收顺序约束。
 
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
 
 <span id="question-2016-46" />
@@ -915,120 +719,85 @@ B() {
 2. 使用 `nice`、`cpuTime` 和 `waitTime` 设计一种动态优先数计算方法以避免饥饿，并说明 `waitTime` 的作用。
 
 <ExamSolution>
-
 <ExamAnswer>
 
-1. `priority=nice` 是静态优先数。若持续有数值更小（优先级更高）的进程就绪，数值较大的进程可能始终不能运行，即**饥饿**。
-2. 一种动态优先数规则是
+1. 当 `priority=nice` 始终不变且优先数越小越先运行时，只要优先数小的进程一直就绪，优先数大的进程就可能无限等待；单凭静态优先数无法保证低优先级进程最终被选中。
+2. 可设计为
 
 $$
-\boxed{priority=nice+\alpha\,cpuTime-\beta\,waitTime},\qquad\alpha>0,\;\beta>0.
+\boxed{\operatorname{priority}=\operatorname{nice}+a\cdot\operatorname{cpuTime}-b\cdot\operatorname{waitTime}},\qquad a>0,\ b>0.
 $$
 
-运行越久，优先数数值越大、优先级越低；就绪等待越久，优先数数值越小、优先级越高。`waitTime` 实现**老化（aging）**，在有限、合理的调度环境中可以消除静态优先数造成的长期等待。
+   `waitTime` 是**老化（aging）**项：就绪等待越久，优先数值越小，调度优先级越高；`cpuTime` 是运行惩罚项：已经连续运行较久者的优先数值升高。通常每次时钟滴答更新并重新评估优先级，保证长期等待者有机会先运行。
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-### 1. 先翻译题目中的优先级方向
+1. **先判优先级方向。** 本题特别规定“优先数最小优先”。例如 A 的 `nice=2`、B 的 `nice=8`，若 A 长期 CPU 密集运行且每次调度 A 都就绪，B 即使排队很久也无法超越 A。此现象是**饥饿**（有进程长期无法获得资源），与**死锁**（多个执行实体间互相等待、无进展）不同：发生饥饿时高优先级进程仍可持续推进。
+2. **两个动态量为何符号相反。** 执行态 `cpuTime` 累加、`waitTime` 清零；就绪态则 `cpuTime` 清零、`waitTime` 累加。为了惩罚连续占 CPU 的进程，应加 $a\cdot\mathrm{cpuTime}$；为了奖励等待的进程，应减 $b\cdot\mathrm{waitTime}$。如果把后一项写成正号，则等得越久，优先数越大、实际优先级越低，反而加剧饥饿。
+3. **量化直观例子。** 令 $a=1,b=2$，进程 A 的 `nice=8`、B 的 `nice=3`，起始 A 就绪，B 运行。两个时钟节拍后，A 的等待时间为 2，优先数 $8-2\times2=4$；B 已运行 2 个节拍，优先数 $3+2=5$，于是下一次选择会转向 A。也即**高静态优先级并非永久独占**；具体何时切换取决于调度评估时机、当前运行者是否允许被抢占和同优先数时的平局处理策略。
+4. **避免饥饿的前提。** 设就绪进程集合有限，`nice` 有界，调度器持续运行、按动态优先数及时（例如每时钟）重新调度，且等待时间足够长时没有被人为截断，则一个长期就绪的进程的优先数会随时间无界降低，最终压过其他有限优先数竞争者。若系统允许不断产生静态 `nice` 无下界的新任务，或将等待奖励截断且不给同优先数任务公平轮转，仅有该公式并不自动给出绝对无饥饿保证。考试通常默认正常有界的调度系统。
+5. **容易混淆的指标。** 这里 `cpuTime` 表示按题意**执行态连续经历的计时值**，回到就绪态即清零，不等同于累计 CPU 总服务时间；`waitTime` 只计**就绪队列中等待 CPU** 的时间，不包括因 I/O 而阻塞的时间。常见应用中也可能采用指数衰减或分段老化，但只要符合“等待提高优先级、运行降低优先级”即可。
 
-本题规定**优先数越小，越先调度**；这与某些系统“priority 数值越大越优先”的约定恰好相反。可画一个符号表：
-
-| 状态变化 | 应改变的数值 | 对未来调度的影响 |
-| --- | --- | --- |
-| 持续占用 CPU | `cpuTime` 增加，$+\alpha cpuTime$ 增加 | 优先数数值变大，降低再运行机会 |
-| 长期在就绪队列 | `waitTime` 增加，$-\beta waitTime$ 更负 | 优先数数值变小，提高被选中机会 |
-| 用户初始设置 | `nice` 静态保留 | 维持用户指定的基准偏好 |
-
-不要仅凭“nice”“priority”两个名字猜正负号；从**数值小者先运行**倒推才不会写反。
-
-### 2. 调整公式并非唯一，怎样说明正确性
-
-取 $\alpha=1,\beta=2$ 作为例子：
-
-| 进程 | `nice` | `cpuTime` | `waitTime` | `priority` |
-| --- | ---: | ---: | ---: | ---: |
-| A | 6 | 0 | 4 | $6+0-8=-2$ |
-| B | 1 | 2 | 0 | $1+2-0=3$ |
-| C | 5 | 0 | 2 | $5+0-4=1$ |
-
-此刻应该调度 A，因为 $-2$ 最小；尽管它的基准 `nice=6` 较不优先，但等候较长带来了老化补偿。若 B 继续执行，它的 `cpuTime` 递增；若 C 继续等待，它的 `waitTime` 递增。于是“长期用 CPU 者降低优先级，长期等待者提高优先级”。
-
-更一般地，只要等待项具有随等待时长持续增强的优先级提升趋势，即可构造不同的合法规则，例如在优先数下限未触发时每等待若干个时钟滴答减 1。但**把等待值限制在一个固定阈值**，未必还能排除饥饿。
-
-### 3. 为什么老化有用，但证明不能忽略前提
-
-对固定 `nice` 而且等待时间不断增加的某个就绪进程，$priority\to-\infty$，会逐渐超过正常优先数范围内的竞争者。对一个**有限竞争进程集合、服务能完成/被抢占、按动态优先数重新比较、优先数不发生溢出、调度及并列规则具合理公平性**的系统，这使长期等待进程得到执行机会。
-
-如果不断有任意更低 `nice` 的新任务到来，或优先数被不当截断、计时器停更、最高优先级任务永不抢占等，简单的线性公式本身**不能无条件保证所有可能环境均无饥饿**。考试中可写“通过老化防止饥饿”，深入论证时应指出这些边界。
-
-### 4. 三组概念辨析
-
-- **饥饿**：一个进程长期拿不到需要的资源/CPU，但其他进程仍在推进；与所有相关进程互相等待、无人推进的**死锁**不同。
-- **公平性**：不让长期等待者无限期让位；与短作业优先或高优先级优先所追求的响应效率可能有权衡。
-- **动态调度**：运行态的 `cpuTime` 计数、就绪态的 `waitTime` 计数均按题设复位；不能把“等待越久优先级越高”错写成 `+waitTime`。
-
-**做题模板**：先确认优先数方向 → 分析等待/执行的影响方向 → 给出带正参数的公式 → 用单调性解释老化，并在必要时说明保证无饥饿的调度前提。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
-
----
 
 <span id="question-original-204" />
 
 <ExamQuestion>
 
-<span className="inline-block rounded border px-2 py-0.5 text-xs text-fd-muted-foreground">原创</span>
+某单核抢占式调度器总是选择优先数更小的进程。采用
 
-某单 CPU 调度器每隔 1 个时间单位更新优先数，数值越小者越先执行：
+$$priority=nice+cpuTime-2waitTime,$$
 
-$$
-priority=nice+cpuTime-2\,waitTime.
-$$
+其中每经过 1 个时间单位，执行态的 `cpuTime` 加 1、`waitTime` 清零；就绪态的 `cpuTime` 清零、`waitTime` 加 1。进程 A、B 同时就绪，`nice_A=8`、`nice_B=3`，并在时刻 0 选择优先数较小者。
 
-其中就绪态的 `cpuTime=0`、`waitTime` 每单位加 1；运行态的 `waitTime=0`、`cpuTime` 每单位加 1。当前三进程信息如下：
+1. 时刻 0 运行哪一个进程？
+2. 若第 1、2 个时间单位里未发生新任务到达，分别算出两进程的动态优先数（在时间 1 和时间 2 重新比较）。
+3. 该策略体现了怎样的优先级调整逻辑？
 
-| 进程 | nice | cpuTime | waitTime |
-| --- | ---: | ---: | ---: |
-| A | 6 | 0 | 4 |
-| B | 1 | 2 | 0 |
-| C | 5 | 0 | 2 |
+<ExamSolution><ExamAnswer>
 
-1. 分别算出优先数和下一次应选择的进程；
-2. 如果程序员错误地把等待项改为 `$+2\,waitTime$`，会怎样影响长期等待者？
-3. 如果 `waitTime` 最多记到 2，且每逢 CPU 空闲都有 `nice=0` 的新进程进入，是否仍能宣称“必然杜绝饥饿”？说明原因。
+1. **B**。
+2. 时间 1：A 为 $8-2=6$，B 为 $3+1=4$，继续运行 B；时间 2：A 为 $8-4=4$，B 为 $3+2=5$，应转而调度 A。
+3. 等待积累会提高实际优先级，持续运行会降低实际优先级，从而兼顾响应性与避免饥饿。
 
-<ExamSolution>
+</ExamAnswer><ExamExplanation>
 
-<ExamAnswer>
+1. 初始两个计时量都是 0，所以 A、B 的优先数分别等于 `nice`，即 8、3。由于题设以**数值小者优先**，B 先运行。
+2. B 运行时 `cpuTime_B` 从 0 变为 1、再变为 2，优先数分别为 4 和 5。A 在就绪队列里等待，其 `waitTime_A` 从 0 到 1、再到 2，优先数由 8 下降到 6、4。时间 2 重新评估时 A 的 4 小于 B 的 5，因此若允许抢占，A 开始运行。
+3. 时间 2 后，当 A 转为执行态，`waitTime_A` 清零；B 由执行态回到就绪态时其 `cpuTime_B` 清零，开始积累 `waitTime_B`。不能把两者都永久按历史总 CPU 时间累加，否则与题目重置规则矛盾。
 
-$$
-p_A=6-2\times4=-2,\qquad p_B=1+2=3,\qquad p_C=5-2\times2=1.
-$$
+</ExamExplanation></ExamSolution>
+</ExamQuestion>
 
-因此选择 **A**。等待项加号会使越等待的进程数值越大、调度机会越差；如果等待值封顶且高优先级任务不断到达，**不能保证无饥饿**。
+<span id="question-original-330" />
 
-</ExamAnswer>
+<ExamQuestion>
 
-<ExamExplanation>
+某调度器把优先数限定在 $0$～$15$ 的整数区间（0 最高），并设置动态更新
 
-计算时逐一代入三个量，不要因 `nice` 较低就直接断言 B 最先运行。A 的 `nice=6` 原本不占优，但等候 4 个时间单位带来的老化使 $p_A=-2$，超过 B 的 3 和 C 的 1。
+$$priority=\max\{0,\min\{15,nice-waitTime\}\}.$$
 
-**符号方向是本题核心**：越久等待应越容易获得 CPU；在“数值越小越先执行”规则中，等待项应是负项，执行占用项应是正项。错误地加上 $2\,waitTime$，意味着等待越久优先数越大，可能加剧而不是缓解饥饿。
+同一优先数时总是优先挑选进程 X，而不使用轮转。系统中 X 每次只运行 1 个时间单位就重新进入就绪队列，且 `nice_X=0`；Y 的 `nice_Y=15`，一直就绪等待，两个任务长期存在。
 
-**封顶反例**：假设某就绪进程 D 的 `nice=10`，`cpuTime=0`，等待值最高记 2，那么它的优先数永远不低于 $10-2\times2=6$；如果持续有足够的 `nice=0` 新任务获得执行，它们可以优先于 D，D 便可能长期等待。即使没有封顶，若允许任意低 `nice` 的对抗性新任务持续到达，也不能脱离任务到达约束无条件证明无饥饿。
+1. Y 的等待时间达到 15 后，其优先数能降到多少？
+2. 此更新公式和破平局规则，能否**严格保证** Y 不饥饿？
+3. 给出一个改进，使 Y 最终获得处理器时间。
 
-**证明套路**：要严谨证明老化消除饥饿，至少说明竞争者数量/优先数范围有限、等待者的优先权会持续增加、调度器能够重新评估并抢占、各任务最终会交出 CPU，以及同优先数的公平处理规则。考研答题通常给出方向正确的动态公式并说明老化含义即可；遇到证明题则补齐前提。
+<ExamSolution><ExamAnswer>
 
-</ExamExplanation>
+1. **0**。
+2. **不能**。Y 至多降到 0，X 的优先数也为 0，且平局永远优先 X，Y 仍可能持续等待。
+3. 在相同动态优先数的就绪进程间采用**轮转或 FIFO**，或设计具有公平保证的老化与选择规则。
 
-</ExamSolution>
+</ExamAnswer><ExamExplanation>
 
+1. 当 `waitTime_Y=15`，$15-15=0$，再大也被下限截断为 0；它不会变为负数而“压过”X。
+2. 这一反例说明老化只能提高到某一有限等级，加之不公平的破平局方式，可能仍无法解除饥饿。理论证明不能只引用“随着时间降低优先数”，还要看有没有**上下界截断**和**平级公平性**。
+3. 例如同优先数 0 时对 X、Y 轮流分配时间片，Y 就能在有限轮次内运行。另一思路是为已到达且持续就绪的进程维护独立 FIFO 先后次序，确保有限任务数前提下不会被同级任务永远插队。
+
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
 
 <span id="question-2017-46" />
@@ -1085,153 +854,118 @@ thread3 {
 请添加必要的信号量和 P、V（或 `wait()`、`signal()`）操作，要求既保证线程对临界资源的互斥访问，又尽可能提高并发程度。
 
 <ExamSolution>
-
 <ExamAnswer>
 
-可以使用三把二元信号量实现“**读者之间允许并发，涉及写的访问必须互斥**”：`y1=1` 用于 `thread1` 的读 `y` 与 `thread3` 的写 `y` 冲突；`y2=1` 用于 `thread2` 的读 `y` 与 `thread3` 的写 `y` 冲突；`zLock=1` 用于 `thread2` 的读 `z` 与 `thread3` 的写 `z` 冲突。
+1. **访问冲突。** `thread1` 只读 `x、y`；`thread2` 只读 `y、z`；`thread3` 先读改写 `z`，再读改写 `y`。因此 `thread1` 与 `thread2` 对 `y` 的同时读应允许，`thread3` 写 `y` 时则须排斥两者；`thread2` 读 `z` 与 `thread3` 写 `z` 也要互斥。
+2. **信号量设置。** `y1=1` 限制 `thread1` 读 `y` 与 `thread3` 写 `y` 的冲突；`y2=1` 限制 `thread2` 读 `y` 与 `thread3` 写 `y` 的冲突；`zlock=1` 限制 `thread2` 读 `z` 与 `thread3` 写 `z` 的冲突。这种按冲突对设置的门闩，仅适合题设固定的三个线程。
+3. **完整伪代码。**
 
 ```c
-semaphore y1 = 1, y2 = 1, zLock = 1;
+semaphore y1 = 1, y2 = 1, zlock = 1;
 
-thread1 {
+thread1() {
     cnum w;
     P(y1);
-    w = add(x, y);         // x 不被其他线程修改，y 受保护
+    w = add(x, y);
     V(y1);
-    ...
+    // 其他操作
 }
-thread2 {
+
+thread2() {
     cnum w;
-    P(zLock);
+    P(zlock);
     P(y2);
-    w = add(y, z);         // 同一次 add 的两处共享读都受保护
+    w = add(y, z);
     V(y2);
-    V(zLock);
-    ...
+    V(zlock);
+    // 其他操作
 }
-thread3 {
-    cnum w = {1, 2};      // 注意原题 w.b = 2
-    P(zLock);
+
+thread3() {
+    cnum w = {1, 2};  // 题设的 w.b 确实为 2
+    P(zlock);
     z = add(z, w);
-    V(zLock);
+    V(zlock);
 
     P(y1);
     P(y2);
     y = add(y, w);
     V(y2);
     V(y1);
-    ...
+    // 其他操作
 }
 ```
 
-</ExamAnswer>
+4. **正确性与并发性。** 写 `y` 必须同时得到 `y1、y2`，所以不会与任一读者并发；写 `z` 必须得到 `zlock`。`thread1` 和 `thread2` 不竞争同一信号量，可以同时读 `y`。
 
+</ExamAnswer>
 <ExamExplanation>
 
-### 1. 先绘制“变量 × 读写”冲突表
+1. **先列访问矩阵，再识别读—写冲突。** `add(x,y)`、`add(y,z)` 对参数是读取；`z=add(z,w)` 与 `y=add(y,w)` 包含读旧值、运算、写新值，并非原子操作。只要同一共享对象存在“至少一个写者”，就须安排同步；**读—读不构成数据竞争**。`w` 是各线程局部变量，各自独立，`x` 只有 `thread1` 访问，都不必加锁。
+2. **为什么不能简单在所有操作外使用一个 `mutex`。** 全局互斥锁虽然安全，却迫使 `thread1` 读 `y` 与 `thread2` 读 `y、z` 串行，且 `thread3` 写 `z` 时也会阻塞只访问 `x、y` 的 `thread1`，浪费可用并发度。这里采用两个彼此独立的 `y` 读者门闩，让写者同时占有两个门闩，等价于为题设的两个固定读者分别建立写冲突约束。
+3. **为什么 `thread2` 读取 `y、z` 时同时加两把锁。** `add(y,z)` 要在整个读取期间保持 `y`、`z` 不被并发改写；先锁 `zlock` 再锁 `y2`，取值并计算后逆序释放，保证本次求和使用的是一个读临界区内稳定的两个值。锁保护的是整个被共享对象访问的时间段，而不是只保护赋值结果 `w`。
+4. **为什么没有死锁。** `thread1` 仅申请 `y1`；`thread2` 最多持有 `zlock` 再申请 `y2`；`thread3` 写 `z` 时只持有 `zlock`，释放后才去申请 `y1、y2`，且从不持有 `y2` 再申请 `zlock`。不存在由这些申请关系形成的循环等待。若把 `thread3` 的 `zlock` 一直保留到更新 `y` 完毕，则需要重新统一多锁顺序来证明无死锁。
+5. **注意原子性边界。** 这一实现仅保证共享变量级别的互斥，不保证 `thread3` 的两次更新 `z` 与 `y` 对外表现为**一个不可分割的事务**。题目要求的是冲突互斥和尽可能并发，未要求外界只能看到两者同时更新。若有额外的跨变量不变式（如 `y、z` 必须同步更新），需扩大事务临界区，并以此牺牲部分并发度。
+6. **考试技巧。** 遇到三线程、多个变量的 P/V 填空，先画“线程×共享量”的 R/W 表，分开写每一对冲突，再检查是否有锁内等待、是否出现环形锁顺序、能否让两个只读线程并发。通用系统可改用 `y` 的读写锁与 `z` 的互斥锁；这里的“三锁方案”只针对题中的固定访问者集合。
 
-| 变量 | 线程 1 | 线程 2 | 线程 3 | 实际限制 |
-| --- | --- | --- | --- | --- |
-| `x` | 读 | 不访问 | 不访问 | 不需要互斥 |
-| `y` | 读 | 读 | 写 | 写者要排斥两个读者，读者可以并发 |
-| `z` | 不访问 | 读 | 写 | 读写互斥 |
-
-`thread1`、`thread2` 都读取 `y`，**读—读无冲突**；使用一个只允许 1 人通过的 `yMutex` 会令它们无意义地串行，因此不符合“尽可能提高并发程度”。
-
-### 2. 两把 y 相关锁为何可以构成读多写少的同步
-
-`thread1` 只取得 `y1`；`thread2` 只取得 `y2`，所以两个读者可**同时**执行。`thread3` 在写 `y` 前取得 `y1` 与 `y2` 两把锁，写操作便必须等待所有读者离开，写期间新读者也无法进入。由于写线程是唯一可能同时取得 `y1`、`y2` 的线程，且其他线程分别只取其中一把，所以这两把锁之间无环形等待。
-
-`zLock` 的作用不被上述 y 锁替代：`thread2` 可能在读 `z.a` 与 `z.b` 之间遭遇 `thread3` 更新，这样得到的复数可能是混合版本。只有覆盖整个 `add(y,z)` 的 `zLock` 才能排除该读写竞争。
-
-### 3. 最大并行度与不同层次的一致性
-
-- `thread1` 与 `thread2` 可一起读 `y`，且不需要互相等锁。
-- `thread3` 可以只锁 `z` 更新 `z`，再只锁 `y` 更新 `y`，避免在无需触碰其中一个变量时长期持有其锁。
-- 这就满足原题“每一共享复数访问与其冲突写入互斥”。但如果附加要求**读者必须看到 `y,z` 属于同一批同步更新的版本**，把 `thread3` 的两次更新分别加锁仍不足以保证二者的事务级原子性，必须引入跨两变量的统一读写锁或版本检查机制。这是**数据竞争安全**和**多对象原子快照**的区别。
-
-### 4. 另一种通用思路：读写锁
-
-可为 `y` 设置一个支持多读单写的读写锁、为 `z` 设置单独读写锁；`thread1` 申请 `y` 的读锁，`thread2` 同时申请 `y`、`z` 的读锁，`thread3` 各自申请写锁。这种表达更适用于读者数目可扩展的系统。若要自己只用 P/V 搭建读写锁，还需记录读者个数及第一个/最后一个读者对写锁的申请、释放，不能仅把普通二元锁叫作“读写锁”。
-
-### 5. 易错点
-
-1. 原题 `w.b=2`，不能把虚部误抄成 1。
-2. 每个 `P` 都必须在相应访问发生**之前**，每个 `V` 必须在访问完成之后；不能只给写线程加锁却忘记读线程。
-3. 临界区边界覆盖整个读/改/写操作，不是仅保护最终赋值。
-4. 互斥不等于公平：若锁调度不公平，写者可能长时间等候；题目并未要求无饥饿调度。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
-
----
 
 <span id="question-original-205" />
 
 <ExamQuestion>
 
-<span className="inline-block rounded border px-2 py-0.5 text-xs text-fd-muted-foreground">原创</span>
+共享整数 `a` 仅由线程 R1、R2 读取，由 W 修改。设 R1、R2 各执行一次 `read(a)`，W 执行一次 `a=a+1`；线程间没有其他共享资源。
 
-全局复数 `y`、`z` 组成一个必须**成对更新**的业务状态。有两个只读线程 `R1,R2`，它们各自需要一次性读取一致的 `(y,z)` 快照；写线程 `W` 每轮先计算新 `y,z`，然后同时提交。要求读者可以并发、写者不能与任何读者或其他写者并发；用 P/V 给出一套不会因为持续到来的新读者而无限推迟已排队写者的方案，说明其依赖的公平性前提。
+1. 能否只用一个普通互斥量同时保证正确性和“两个读者可并行”？
+2. 为这三个固定线程设计允许两个读者并发的信号量伪代码。
+3. 如果 W 只能取得第一把锁而长时间等不到第二把锁，此时是否已经发生死锁？
 
-<ExamSolution>
+<ExamSolution><ExamAnswer>
 
-<ExamAnswer>
-
-采用带入口闸门的读写锁：`turn=1`（读写进入队列的闸门）、`room=1`（整组数据的写互斥）、`rMutex=1`（保护读者计数），`readers=0`。
+1. 不能：单个二元互斥量会把两个读者也串行化。
+2. 设置初值均为 1 的 `g1、g2`：
 
 ```c
-semaphore turn=1, room=1, rMutex=1;
-int readers=0;
-
-Reader() {                         // R1、R2 均执行
-    P(turn); V(turn);              // 经过等待的写者时不得插队
-    P(rMutex);
-    ++readers;
-    if (readers == 1) P(room);
-    V(rMutex);
-
-    snapshot s = read_both(y, z); // 持读锁：不会看到混合版本
-
-    P(rMutex);
-    --readers;
-    if (readers == 0) V(room);
-    V(rMutex);
-    use(s);
-}
-
-Writer() {
-    P(turn);                       // 关闭新读者入口
-    P(room);                       // 等所有已入场读者结束
-    value ny = compute_new_y();
-    value nz = compute_new_z();
-    y = ny; z = nz;
-    V(room);
-    V(turn);
-}
+R1() { P(g1); read(a); V(g1); }
+R2() { P(g2); read(a); V(g2); }
+W () { P(g1); P(g2); a = a + 1; V(g2); V(g1); }
 ```
 
-</ExamAnswer>
+3. 不一定。W 等待 R2 释放 `g2` 是正常阻塞；只要 R2 不再等待 W 所持有的 `g1`，就没有循环等待。若调度极不公平，W 可能饥饿，但饥饿也不等于死锁。
 
-<ExamExplanation>
+</ExamAnswer><ExamExplanation>
 
-**为何读者能并发**：第一个进入的读者通过 `P(room)` 排斥写者，后续读者只要通过 `rMutex` 更新 `readers`，无须再申请 `room`。因此 `R1,R2` 可一起读取，即使它们读取相同变量也不会互斥。
+1. 本题的读者固定且各持有各自的门闩；W 要同时持有所有读者门闩才能写。由此得到“任一读者活跃时写者不能写、两个读者之间互不干扰”。
+2. W 先得到 `g1` 时只会暂时阻止 R1 新进入；R2 读取结束后最终释放 `g2`，W 便可以更新 `a`。整个等待链不会回头请求 `g1`，所以不存在资源等待环。
+3. 若线程数量可动态增减，应使用**读写锁或标准读者—写者协议**，而不是给每个读者配一把永久门闩；读写锁还须考虑读者优先导致的写者饥饿。
 
-**为何快照不会混合**：写者持有 `room` 时对 `y,z` 两项提交；只要任何读者持有集体读锁（`readers>0`），写者就无法取得 `room`。所以每位读者执行 `read_both` 的整个时段与提交时段不交错。与 2017 年真题中“只保证单变量不发生读写冲突”的需求不同，这里**额外要求跨两变量事务一致性**。
+</ExamExplanation></ExamSolution>
+</ExamQuestion>
 
-**为什么需要入口闸门**：仅用 `room+rMutex+readers` 的读者优先算法，写者可能等在 `P(room)` 时源源不断有新读者进来，`readers` 长期不归零，导致写者饥饿。加 `turn` 后，写者先通过 `P(turn)` 关闭新读者入口，等待旧读者退出；新读者必须在门口等候，不能持续插队。
+<span id="question-original-331" />
 
-**条件限制**：该方案假设 `turn` 的阻塞唤醒**最终公平**（例如 FIFO 信号量）。如果允许新读者无限次绕过等待的写者取得 `turn`，仅靠 P/V 的语句排列仍不能无条件宣称无饥饿。真实编程还需使用原子信号量及统一的数据可见性/内存序保证，不能把普通非原子计数器直接跨线程无锁访问。
+<ExamQuestion>
 
-**典型陷阱**：在 `P(room)` 等待时不能已经占住一个会妨碍现有读者退出的锁；本写者持 `turn` 等待是安全的，因为**已有读者的退出路径不需要 `turn`**。
+有两个共享变量 `p、q`，由两个线程分别更新。线程 A 先锁 `Lp` 后锁 `Lq`，线程 B 先锁 `Lq` 后锁 `Lp`，两把锁的初值均为 1。
 
-</ExamExplanation>
+1. 给出一条会导致死锁的操作交错顺序。
+2. 在不减少更新原子性要求的情况下如何修改加锁顺序？
+3. 如果只要求分别修改 `p`、`q` 时互斥而不要求两变量的整体原子性，能否缩小临界区？
 
-</ExamSolution>
+<ExamSolution><ExamAnswer>
 
+1. `A:P(Lp)` → `B:P(Lq)` → `A:P(Lq)`（阻塞）→ `B:P(Lp)`（阻塞）；双方循环等待。
+2. 统一两线程的获取顺序，例如都执行 `P(Lp); P(Lq)`，完成两变量更新后 `V(Lq); V(Lp)`。
+3. 可以。如果两次修改之间不存在必须维持的不变式，则各自只在单个变量操作期间取得其对应锁，并在申请下一把锁前释放上一把锁。
+
+</ExamAnswer><ExamExplanation>
+
+1. 死锁四个必要条件是互斥、请求并保持、不可剥夺、循环等待。本例持有一把再索取另一把，最后构成环。
+2. 全体线程按全序申请锁可破坏循环等待条件；逆序释放是一种清晰且易审查的习惯，关键是**申请顺序**保持一致。
+3. 缩小锁范围能提高并发度，但如果题目要求 `p+q` 始终不变等跨变量约束，则不能任意拆分临界区。互斥正确性与事务原子性是不同层面的要求。
+
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
 
 <span id="question-2019-43" />
@@ -1247,142 +981,117 @@ Writer() {
 为使尽可能多的哲学家能够同时就餐，并防止发生死锁，请使用信号量的 P、V（或 `wait()`、`signal()`）操作描述上述过程，并说明所用信号量及其初值的含义。
 
 <ExamSolution>
-
 <ExamAnswer>
 
-设每根筷子的二元信号量 `fork[i]=1`、碗/进入取筷子阶段的许可 `entry=min(m,n-1)`。先获得 `entry`，再依次取两根筷子，用完归还两根筷子及一个许可：
+1. **信号量。** `chop[i]=1` 表示第 $i$ 根筷子空闲；`ticket=min(m,n-1)` 表示可进入“持碗并尝试取两根筷子”阶段的许可数。这里 `ticket` 同时限制碗的数量与同时竞争筷子的人数，不必再单独设置一个碗信号量。
+2. **完整算法。**
 
 ```c
-semaphore fork[n];                // 伪代码：逐个初始化为 1
-for (int j = 0; j < n; ++j) init(fork[j], 1);
-semaphore entry = min(m, n-1);
+semaphore chop[n];           // 每根筷子均初始化为 1
+semaphore ticket = min(m, n - 1);
 
-philosopher(int i) {               // i = 0,1,...,n-1
+philosopher(int i) {         // 0 <= i < n
     while (true) {
         think();
-        P(entry);
-        P(fork[i]);
-        P(fork[(i+1) % n]);
+        P(ticket);           // 占有一个实际碗使用名额
+        P(chop[i]);
+        P(chop[(i + 1) % n]);
         eat();
-        V(fork[(i+1) % n]);
-        V(fork[i]);
-        V(entry);
+        V(chop[(i + 1) % n]);
+        V(chop[i]);
+        V(ticket);
     }
 }
 ```
 
-任意时刻可同时就餐的最大人数为
+3. **死锁与并发上界。** 参与竞争筷子者至多 $n-1$ 人，不能出现 $n$ 人全部各持有一根筷子而循环等待的经典死锁状态。实际同时就餐数满足
 
 $$
-\boxed{\min\!\left(m,\left\lfloor\frac n2\right\rfloor\right)}.
+N_{eat}\le \min\left(m,\left\lfloor\frac n2\right\rfloor\right).
 $$
+
+合理调度下可以达到此上界（选取互不相邻的哲学家）。
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-### 1. 先求理论最大并行数，再设计防死锁方法
+1. **把题目拆成两类资源。** 碗是 $m$ 个同类可计数资源，每次就餐消耗 1 个；筷子是 $n$ 根具有位置约束的独占资源，第 $i$ 人必须持有 `chop[i]` 与 `chop[(i+1)%n]`，而不能任取两根。因此“一个计数信号量控制碗 + 每根筷子一个二元信号量”是自然模型。
+2. **为什么 `min(m,n-1)` 防止经典死锁。** 若 $m<n$，同一时刻最多 $m\le n-1$ 人已经取得碗；若 $m\ge n$，虽然碗充足，也必须把同时进入取筷子环节的人数限在 $n-1$。设所有进入者都卡在第二根筷子，则每个人至少占有一根；环中至少存在一位**未进入**的哲学家，于是围绕圆桌的“每人都占一根、都等右邻那根”的完整等待环不可能闭合。换一种更直接的说法：连续依次取左、右筷子形成死锁需要所有 $n$ 人均参与持有并等待；限定 $n-1$ 个参与者，破坏这一必要状态。
+3. **申请 `ticket` 的时机。** `P(ticket)` 必须发生在取筷子之前，以确保没有超过 $n-1$ 人进入风险区域。只有两个筷子都取得后才能 `eat()`；放回筷子后才 `V(ticket)`，表示碗使用名额可供下一位获取。即使暂时持碗却拿不到筷子，也不会越界消费碗。`P`、`V` 均视为原子操作。
+4. **为何并行进餐上界还有 $\lfloor n/2\rfloor$。** 相邻两位哲学家共享一根筷子，不能同时吃饭；圆环 $C_n$ 的最大独立集大小为 $\lfloor n/2\rfloor$。例如 $n=5,m=4$，尽管可有 $4$ 人拿到 `ticket`，真正同时吃饭最多 $2$ 人；$n=6,m=2$ 则同时最多 $2$ 人。算法是**保证安全并允许达到物理上限**，不是保证任意时刻都有这么多人实际吃饭。
+5. **死锁不等于饥饿。** `ticket` 和 `chop` 若没有 FIFO 公平队列，某一哲学家仍可能长期抢不到许可或筷子；题目只要求避免死锁、提高并发，未要求有界等待。若要求严格防饥饿，还需引入公平排队或者中央协调者的发放策略。
+6. **常见错误。** `ticket=m` 在 $m\ge n$ 时仍可能经典环形死锁；`ticket=n-1` 在 $m<n-1$ 时会错误地允许超过实际碗数的人就餐；只用 `mutex=1` 覆盖整个 `eat()` 会把所有人串行化；把所有筷子放进同一个计数池又会忽略“必须取自己左右两根”的位置约束。
 
-每人必须同时占有 1 只碗和左右相邻的 2 根筷子。两个相邻哲学家不能同时就餐：他们争用中间的同一根筷子。因此，从长度为 $n$ 的环上最多选取 $\lfloor n/2\rfloor$ 个**两两不相邻顶点**；碗又限制并行人数至多为 $m$，故上界
-
-$$
-E_{\max}\le \min\!\left(m,\left\lfloor\frac n2\right\rfloor\right).
-$$
-
-选取互不相邻的哲学家并把碗分配给他们，可达到此上界，所以这不是粗略上限而是**可达到的最大同时就餐人数**。
-
-### 2. 为什么令 `entry=min(m,n-1)` 而不是只令 `bowl=m`
-
-若 $m\ge n$，所有 $n$ 人可能各自先拿起一侧筷子，再共同等待另一侧筷子，形成环形等待并死锁。把**可能同时处于“已拿起一根、再请求另一根”阶段**的人数限制在 $n-1$，必有至少一位哲学家未参与取筷子的环，不能形成人人持有左筷、等待右筷的完整闭环；最终总有一位在相邻筷子释放后能拿到所需筷子并退出。
-
-当 $m<n$ 时，实际碗数天然已将参与人数限制在不超过 $n-1$，不需进一步收紧。故统一用
-
-$$
-entry=\min(m,n-1).
-$$
-
-此许可不仅表示物理碗的可用量，也承担**打破循环等待**的职责。它与“同时就餐最多 $\min(m,\lfloor n/2\rfloor)$ 人”是两个不同数字，前者允许部分哲学家拿到碗但还在等待筷子。
-
-### 3. 四个死锁条件逐项套用
-
-- **互斥**：筷子和碗都不能两个人同时持有，客观上必须满足。
-- **请求并保持**：持有 `entry` 和第一根筷子时可能请求第二根。
-- **不可剥夺**：一般不能强制抢回他人的筷子。
-- **循环等待**：限制最多 $n-1$ 人参与取筷子的过程，使以本方案同向取筷子的策略不可能形成全环等待。这是本解法着重破坏的条件。
-
-进阶方法还有资源全序法：给所有筷子规定统一编号，任何人都先取编号较小者、再取编号较大者，也能避免环形等待；但仍需正确管理碗的数量，且具体资源申请顺序要一致。
-
-### 4. 正确初始化、释放顺序及公平性
-
-注意在真实 C 语言中 `semaphore fork[n] = {1};` 若按普通数组初始化语义解读，只会把第一个元素置 1、其他元素置 0；考试伪代码应写“每根筷子各初始化为 1”，避免歧义。释放的 `V` 必须与成功执行的 `P` 一一对应；取得两根筷子后才可 `eat()`。
-
-方案保证**不会所有人死锁**，且允许达到上面的最大同时就餐人数，但不必然保证**某一哲学家永不饥饿**。若要求严格无饥饿，需要增加 FIFO 排队/公平信号量等假设。
-
-### 5. 快速带数检验
-
-若 $n=7,m=5$，同时就餐上限 $\min(5,3)=3$，参与抢筷子的许可为 $\min(5,6)=5$；若 $n=4,m=8$，许可为 3、最多同时就餐 2 人。**不要错把允许进入取筷子阶段的人数当作真正就餐人数**。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
-
----
 
 <span id="question-original-206" />
 
 <ExamQuestion>
 
-<span className="inline-block rounded border px-2 py-0.5 text-xs text-fd-muted-foreground">原创</span>
+现有 $n=7$ 位哲学家和 $m=3$ 个碗，筷子仍放在相邻哲学家之间。使用“`ticket=min(m,n-1)`，再依次获取左、右筷子”的策略。
 
-7 位哲学家围坐圆桌，7 根筷子每相邻两人共用 1 根，桌上仅有 5 只碗。每人须同时拥有相邻两根筷子和 1 只碗才可进餐。
+1. `ticket` 应初始化为多少？为何不设为 7？
+2. 同时就餐人数的理论最大值是多少？举出一组能同时就餐的哲学家编号（从 0 开始编号）。
+3. 若有一个人长期等不到碗，是否能据此判定系统死锁？
 
-1. 证明最多可有多少人同时进餐，并给出可达到上界的位置选择；
-2. 若仍按所有人先取左筷、再取右筷，使用一个计数信号量控制进入取筷阶段，其**最大安全初值**是什么？请给出完整算法；
-3. 这套算法是否自动保证每人最终都能吃上饭？若不保证，指出需要增加的性质。
+<ExamSolution><ExamAnswer>
 
-<ExamSolution>
+1. `ticket=min(3,6)=3`；设为 7 既超出实际碗数，也无法限制全部哲学家同时拿筷子的死锁风险。
+2. $\min(3,\lfloor7/2\rfloor)=3$。例如编号 0、2、4 非相邻，能分别占有自己两侧筷子，同时用 3 个碗。
+3. 不能。个体长时间等待可能是**饥饿**；死锁要求存在互相等待而无法推进的进程集合。
 
-<ExamAnswer>
+</ExamAnswer><ExamExplanation>
 
-最多可同时进餐 $\min(5,\lfloor7/2\rfloor)=\boxed{3}$ 人，例如编号 0、2、4；进入取筷阶段的许可最多可给 $\min(5,7-1)=\boxed{5}$ 个，确保不出现全环等待。
+1. `ticket` 是能参与取筷子过程的许可数，不是筷子的总数。
+2. 圆环中相邻者不能同时吃饭；7 人中可选 0、2、4 共 3 人，达到理论上界。若选择 0、2、6 则 0 和 6 相邻，不合法。
+3. 题目的限制策略能消除经典循环等待死锁，但不自带公平调度。避免死锁与避免饥饿是两类不同性质。
+
+</ExamExplanation></ExamSolution>
+</ExamQuestion>
+
+<span id="question-original-332" />
+
+<ExamQuestion>
+
+仍有 $n\ge3$ 位哲学家，现碗数为 $m\ge1$。不再使用 $n-1$ 人的入场限制，改为**给筷子编号为 $0,1,\ldots,n-1$，所有人总是先取自己两根筷子中编号较小的一根，再取编号较大的一根**。此外，用信号量 `bowl=m` 控制碗数。
+
+1. 写出一套能够防止死锁的取用和归还顺序。
+2. 为什么此策略可防止循环等待？
+3. 此策略是否自动保证不会饥饿？
+
+<ExamSolution><ExamAnswer>
+
+1. 可采用先取得碗，再按筷子编号从小到大申请：
 
 ```c
-semaphore fork[7];                // 每一项独立初始化为 1
-for (int k=0; k<7; ++k) init(fork[k], 1);
-semaphore entry=5;
+semaphore bowl = m;
+semaphore chop[n] = {1};
 
-Philosopher(int i) {
+philosopher(int i) {
     while (true) {
         think();
-        P(entry);
-        P(fork[i]);
-        P(fork[(i+1)%7]);
+        int u = i, v = (i + 1) % n;
+        int lo = min(u, v), hi = max(u, v);
+        P(bowl);
+        P(chop[lo]); P(chop[hi]);
         eat();
-        V(fork[(i+1)%7]);
-        V(fork[i]);
-        V(entry);
+        V(chop[hi]); V(chop[lo]);
+        V(bowl);
     }
 }
 ```
 
-</ExamAnswer>
+2. 所有等待筷子的边都从较小编号指向较大编号，无法组成编号严格递增又回到原点的环；碗先于筷子获取，且持有碗者之后不再等待另一种更早的资源，因此不存在混合资源的循环等待。
+3. 不保证。若信号量争抢没有公平队列，某人可能反复失败，仍有饥饿风险。
 
-<ExamExplanation>
+</ExamAnswer><ExamExplanation>
 
-**第一问：上界与构造要同时给出。** 两个相邻哲学家共享一根筷子，故同时就餐的顶点集合必须在 7 环上两两不相邻。7 环的最大独立集大小是 $\lfloor7/2\rfloor=3$，而 5 只碗允许至少 3 人各用一只。让 0、2、4 号各用相邻两根筷子，三人之间互不争筷，因而上界可实现。
+1. 这一方法不是依靠“同时只准 $n-1$ 人拿筷子”，而是依据**资源全序分配**破坏循环等待。即使 $m\ge n$ 且所有人都拿到了碗，也不会形成筷子的资源等待环。
+2. 要说明多类资源时的顺序，不能仅说“筷子无环”。本解中人人先取碗、后取筷子，不会有某线程已持筷子又回头等待碗；因此碗与筷子之间也不形成反向等待边。
+3. 此处锁顺序消除的是死锁条件中的循环等待，并未限制一个线程连续抢赢多少次。若要有界等待，应叠加公平性策略。
 
-**第二问：最大安全的取筷许可。** `entry=5` 仅允许最多 5 人开始领取碗并争取筷子。7 位中至少有 2 人还未进入争筷阶段，因而“每人持有自己左筷并等待右筷”的封闭 7 人环不可能出现；可以安排某个持有左筷的人取得右筷并最终释放资源。若认为所有 5 只碗都需要由这个信号量实际控制，那么最大安全初值就是 5：给 6 张“取碗许可”将超过碗的实际数量，违反资源约束；因此取 `min(m,n-1)` 而不是单独取 `n-1=6`。
-
-**第三问：死锁自由不等于无饥饿。** 即便始终有人能吃饭，调度器也可能不断让同一批人重复夺取碗和筷，某个哲学家一直等待。为保证每位哲学家最终得到服务，需要在资源申请过程中引入公平队列/饥饿自由的准入协议，并对“哲学家有限时间内就餐完毕”作合理假设。普通 P/V 的二元互斥本身通常不提供这样的严格保证。
-
-**数字拆分记忆**：`3` 是**真正同时就餐上限**；`5` 是**允许参与取筷阶段的最多人数**。两者不能替换。若把碗数改为 8，允许进入取筷阶段的安全上限改为 6，但最大同时吃饭人数仍是 3。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
 
 <span id="question-2020-45" />
@@ -1396,145 +1105,120 @@ Philosopher(int i) {
 现有 5 个操作 A、B、C、D 和 E。操作 C 必须在 A 和 B 都完成后执行，操作 E 必须在 C 和 D 都完成后执行。请使用信号量的 `wait()`、`signal()`（或 P、V）操作描述这些操作之间的同步关系，并说明所用信号量及其初值。
 
 <ExamSolution>
-
 <ExamAnswer>
 
-将操作先后关系画成有向无环图（DAG），其直接依赖边为 $A\to C$、$B\to C$、$C\to E$、$D\to E$。每条边设置**初值为 0** 的同步信号量：
+1. **写出所有直接前驱边。** $A\to C$、$B\to C$、$C\to E$、$D\to E$；$A$ 与 $B$ 之间、$D$ 与 $A/B/C$ 之间没有额外先后要求。
+2. **信号量均设初值 0。** `ac、bc、ce、de` 分别对应上述四条直接前驱关系；初值为 0 表示前驱事件尚未完成。
+3. **完整伪代码。**
 
 ```c
 semaphore ac = 0, bc = 0, ce = 0, de = 0;
 
-void taskA() { A(); V(ac); }
-void taskB() { B(); V(bc); }
-void taskC() {
-    P(ac); P(bc);    // A、B 均完成，C 才开始
-    C();
+process PA() { A; V(ac); }
+process PB() { B; V(bc); }
+process PC() {
+    P(ac); P(bc);     // 必须同时等待 A、B 完成
+    C;
     V(ce);
 }
-void taskD() { D(); V(de); }
-void taskE() {
-    P(ce); P(de);    // C、D 均完成，E 才开始
-    E();
+process PD() { D; V(de); }
+process PE() {
+    P(ce); P(de);     // 必须同时等待 C、D 完成
+    E;
 }
 ```
 
-这里假设五个操作均只执行一次，五个任务可以并发启动；P 表示 `wait()`，V 表示 `signal()`。
+4. **一种合法执行顺序**为 $D,A,B,C,E$；$A,C,B,D,E$ 则不合法，因为 $C$ 在 $B$ 完成前发生。
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-### 1. 把自然语言翻译成前驱图
+1. **先建依赖 DAG，再填 P/V。** 结点表示一次操作，箭头 $u\to v$ 表示必须在 $u$ 完成之后才能开始 $v$。每一条跨执行流的直接依赖，都可建立一个初值为 0 的同步信号量 `uv`：前驱完成后执行 `V(uv)`，后继执行前执行 `P(uv)`。这样信号量的“一个令牌”对应一项确实完成的前驱工作。
+2. **多个前驱是 AND，不是 OR。** `PC` 需要连续执行 `P(ac); P(bc)`；仅对其中一个执行 `P`，或把两个前驱共同写到一个信号量中而只 `P` 一次，都只证明有至少一个前驱执行完。后继若有 $k$ 个不同的必须前驱，应验证全部 $k$ 个完成许可，或者另用受保护的计数器累计完成次数。
+3. **为什么同步信号量是 0，而互斥量通常为 1。** `ac=0` 不是“资源被占用”，而是“事件尚未发生”；在 A 完成之前，C 无权通过 `P(ac)`。互斥量值 1 表示临界资源起初可用，语义不同。本题只约束操作先后，并未要求 A、B、D 互斥，因此无需额外的 `mutex`。
+4. **为什么不会因 P 的书写顺序损失正确性。** `PC` 先等 A 再等 B，或先等 B 再等 A，最后都保证两个操作已完成；`PE` 等 C、D 也是如此。改变等待顺序可能改变哪个前驱先使线程阻塞，但不改变可执行的依赖关系。各生产者只发出其许可，不依赖 C/E 先运行，因此不会构造闭环等待。
+5. **传递约束和拓扑排序。** 由于 $A\to C\to E$，已经隐含 $A\to E$，所以无需额外设置 `ae`；B 同理。答题时先写直接依赖，再根据线程内部顺序和传递性做精简，既避免漏边也避免无谓 P/V。题目给的是并发偏序，不是唯一总顺序：D 可以很早执行，但 E 总要等待 D 和 C。
+6. **适用边界。** 以上信号量是**一次性完成事件**的通行证。如果 A～E 在 `while` 中反复执行，还应检查各轮次许可是否可能串用；当一轮依赖多个发出者或存在重叠轮次时，使用轮次计数、可复用屏障、条件变量等机制更清晰，不能机械复制单次方案而忽略代际匹配。
 
-题干有两个“**同时满足所有前驱**”的门：C 等待 A 和 B，E 等待 C 和 D。画图后应得到：
-
-```text
-A ──┐
-    ├─► C ──┐
-B ──┘       ├─► E
-D ──────────┘
-```
-
-用 $X\prec Y$ 表示“X 必须先于 Y 完成/开始”。直接边集合为
-
-$$
-R=\{(A,C),(B,C),(C,E),(D,E)\}.
-$$
-
-由传递性还可得 $A\prec E$、$B\prec E$，但 **E 无须再单独等待 A、B**，因为它已经等待 C，而 C 必须等到 A、B 都完成才能执行。这叫作前驱关系的**传递约简**：保留必要的直接约束即可，不必为每条传递边都设置一个信号量。
-
-### 2. 为什么是“生产者完成后 V，消费者启动前 P”
-
-对于边 $A\to C$，A 在末尾执行 `V(ac)`，C 在执行自身操作之前执行 `P(ac)`。若 A 先结束，计数信号量会保存一个令牌，C 之后 `P` 即可消耗；若 C 先运行，它在 `P` 阻塞，直到 A 结束。**信号量不是瞬时通知**，即使先通知后等待也不会丢失这枚令牌。
-
-两条入边须分别满足，所以 C 连续执行两次 P。先 `P(ac)` 还是先 `P(bc)` 都可以；若仅等待一条边，就可能在另一前驱尚未结束时提前运行 C。
-
-### 3. 何以不是临界区互斥题
-
-- **互斥**：一次只允许一个线程访问共享资源，通常二元信号量初值为 1。
-- **同步/前驱**：某事件尚未发生就不能执行后继，信号量初值为 0，前驱完成后发信号。
-- A、B、D 之间并未规定次序，不能无故用一把全局锁把它们串行化；那样虽可能得到合法顺序，却**损失题目允许的并行性**。
-
-可能的合法调度包括 `D,A,B,C,E`、`B,D,A,C,E` 与 `A,B,C,D,E`；`A,C,B,D,E` 非法，因为 C 早于 B。
-
-### 4. 正确性和死锁分析
-
-将四条依赖边均看成只能由其前驱 V 发布的令牌，C、E 仅在取得所有输入令牌后执行，因此必然满足要求。不存在“C 在等 E、E 又在等 C”一类循环依赖，因为原前驱图是 DAG。假设每个前驱任务最终获得 CPU 并能完成且不会在外部资源上永久阻塞，则本题的同步结构本身不会死锁。
-
-### 5. 进一步减少信号量的条件
-
-**本题每个操作恰好运行一次**，还可用两个**计数信号量**合并 A/B 与 C/D 的完成通知：
-
-```c
-semaphore readyC = 0, readyE = 0;
-A(): A; V(readyC);
-B(): B; V(readyC);
-C(): P(readyC); P(readyC); C; V(readyE);
-D(): D; V(readyE);
-E(): P(readyE); P(readyE); E;
-```
-
-因为 A、B 各只贡献 1 枚令牌，C 收齐 2 枚就意味着两者都结束；对 E 同理。**不能把“两个前驱贡献的令牌”错误地解释成一个前驱可重复 V 两次**。若扩展到多轮执行或一条完成事件要广播给多个后继，则须为每一轮、每一后继设计正确的计数/通知协议，不能照搬该优化。
-
-**解题口诀**：画 DAG → 找直接依赖 → 为每条通知边设初值 0 → 前驱末尾 V、后继开头 P → 检查是否多等、漏等和环形等待。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
-
----
 
 <span id="question-original-207" />
 
 <ExamQuestion>
 
-<span className="inline-block rounded border px-2 py-0.5 text-xs text-fd-muted-foreground">原创</span>
+有四个独立线程分别只执行一次 X、Y、Z、W，要求 X、Y 均完成后 Z 才能开始，且 W 必须在 Z 之后执行；另有约束“Y 必须在 W 之前完成”。
 
-并发执行 $A,B,C,D,E,F$ 六个操作，每个操作**恰好执行一次**，约束为：$A,B$ 均完成后才可以执行 $C$；$B$ 完成后才可以执行 $D$；$C,D$ 均完成后才可以执行 $E$；$C,E$ 均完成后才可以执行 $F$。要求：
+1. 画出**无需重复的**同步前驱关系。
+2. 给出最少直接前驱边所对应的信号量方案。
+3. 能否额外规定 X 必须先于 Y？为什么？
 
-1. 画出先后约束的有向无环图，消去传递边，并给出一组仅使用计数信号量 P/V 的实现及初值；
-2. 用因果关系证明程序满足全部约束，给出一个合法和一个非法的执行顺序；
-3. 某同学认为“C 只要在结尾 `V(doneC)` 一次，E 和 F 都在开头 `P(doneC)` 即可”。指出该方案的问题，并给出简洁修正。
+<ExamSolution><ExamAnswer>
 
-<ExamSolution>
-
-<ExamAnswer>
-
-直接约束边为 $A\to C$、$B\to C$、$B\to D$、$C\to E$、$D\to E$、$E\to F$；题目额外给出的 $C\to F$ 可由 $C\to E\to F$ **传递推出**，故可在实现中省略。使用五个初值为 0 的计数信号量，其中 `abC` 需要两个完成令牌：
+1. 直接边为 $X\to Z$、$Y\to Z$、$Z\to W$；题设 $Y\to W$ 由 $Y\to Z\to W$ 已蕴含。
+2. 需要 3 个初值为 0 的信号量：
 
 ```c
-semaphore abC=0, bD=0, cE=0, dE=0, eF=0;
-
-TaskA() { A(); V(abC); }
-TaskB() { B(); V(abC); V(bD); }
-TaskC() { P(abC); P(abC); C(); V(cE); }
-TaskD() { P(bD); D(); V(dE); }
-TaskE() { P(cE); P(dE); E(); V(eF); }
-TaskF() { P(eF); F(); }
+semaphore xz = 0, yz = 0, zw = 0;
+PX() { X; V(xz); }
+PY() { Y; V(yz); }
+PZ() { P(xz); P(yz); Z; V(zw); }
+PW() { P(zw); W; }
 ```
 
-合法：`A,B,C,D,E,F`；非法：`A,C,B,D,E,F`（C 未等 B）。
+3. 不能擅自加约束。原题允许 X 和 Y 任意先后甚至并发；添加 X→Y 会排除原本合法的执行过程，降低并发。
 
-</ExamAnswer>
+</ExamAnswer><ExamExplanation>
 
-<ExamExplanation>
+1. 对 DAG 求**传递约简**：当存在经其他结点到达的路径时，显式的重复前驱边可以删掉而不损害先后要求。Y→W 有路径 Y→Z→W，故是冗余边。
+2. Z 对 X、Y 同时有两个前驱，因此必须拿到两个不同的完成许可；只在某一个事件后唤醒 Z 会产生早执行的错误。
+3. 并发编程的目标不是把全部操作排成唯一顺序，而是精确保留题目所需的偏序关系，以最大化并行机会。
 
-**第一步：区分直接依赖和传递依赖。** 原条件既说 C 后才能执行 F，又说 E 必须等 C，F 必须等 E；所以只要执行 $C\to E$、$E\to F$，自然得到 $C\to F$，不用另设一个重复的信号量。D 不需等待 A；即使 A 尚未完成，D 仍可在 B 完成后运行。
+</ExamExplanation></ExamSolution>
+</ExamQuestion>
 
-**第二步：同一事件可通过不同信号量通知两个下游。** B 同时是 C 和 D 的前驱，因此 B 完成后分别执行 `V(abC)` 和 `V(bD)`；C 要等待 A/B 两者的完成，各只发布一次 `abC` 令牌，C `P(abC)` 两次后方可运行。计数合并成立的条件是两个发布者各恰好执行一次 `V`，否则“数到 2”不等于“两个不同前驱都完成”。
+<span id="question-original-333" />
 
-**第三步：一个令牌不能同时被两次 P 消费。** 如果去掉传递约简，同时让 E 与 F 均在自己的入口 `P(doneC)`，但 C 只 `V(doneC)` 一次，则**最多仅一个后继**得到该令牌，另一个可能永久等待。想在图上保留 $C\to F$ 这条显式边，应为 E/F 分设 `cE`、`cF`（C 各 V 一次），或者 C 针对两个消费者发出两枚带正确语义的令牌。对本题最简洁的修正是直接删除多余的 $C\to F$ 显式等待，因为 F 已等待 E，而 E 已等待 C。
+<ExamQuestion>
 
-**第四步：证明安全性与进度性。** `abC` 只有 A/B 能增加，两次成功 `P` 意味着 A/B 都结束；`bD` 只能在 B 结束后增加；`cE`/`dE` 只有 C/D 完成后增加；`eF` 只在 E 完成后增加。故执行次序满足所有边。若各任务会终止且能被公平调度，图无环，所以同步依赖本身无死锁。
+两个线程不断重复执行第 $k$ 轮操作 $A_k$ 和 $B_k$（$k=0,1,2,\ldots$）。要求**任一线程开始本轮的下一轮操作前，本轮的 $A_k$ 和 $B_k$ 都已执行完**。假定每轮操作会正常结束。
 
-**方法迁移**：一对多的事件要“逐消费者通知”或“广播”，不能把互斥量/单枚信号量当广播信号；一对多的**前驱完成**和多对一的**汇合栅栏**是考试中最容易混淆的两类同步。
+1. 用两个初值为 0 的同步信号量实现双线程轮次同步。
+2. 解释为什么本轮不需要在 `A_k`、`B_k` 之间增加先后约束。
+3. 如果一方永久停止执行，另一方会怎样？这是否必然属于“死锁”？
 
-</ExamExplanation>
+<ExamSolution><ExamAnswer>
 
-</ExamSolution>
+1. 一次迭代末尾互换完成通知：
 
+```c
+semaphore doneA = 0, doneB = 0;
+T1() {
+    while (true) {
+        A();
+        V(doneA);
+        P(doneB);
+    }
+}
+T2() {
+    while (true) {
+        B();
+        V(doneB);
+        P(doneA);
+    }
+}
+```
+
+2. 同一轮 `A()` 与 `B()` 可任意先后或并行，约束只发生在**进入下一轮之前**。
+3. 幸存线程在下一轮同步处阻塞；若另一方永久退出，则是等待一个永远不会发来的事件（无法完成），但不能仅凭“一个线程永远等待”就断定出现多个线程相互等待形成的死锁环。
+
+</ExamAnswer><ExamExplanation>
+
+1. 每一轮中 `doneA` 与 `doneB` 各发布恰好一个通知、各由另一线程消费恰好一次，所以完成通知与轮次保持同步。一个线程可先发出本轮通知，但必须取得对方本轮的通知后才能进入下一轮。
+2. 若把两个线程都写成先 `P` 后 `V`，在首轮两者均因信号量为 0 而阻塞，立即造成循环等待。应该是各自完成本地操作后**先通知再等待**。
+3. 对临时性的慢线程，另一方正常阻塞是屏障的预期行为；若题目要求容忍线程永久退出，则需另设计取消、超时或参与者数量调整机制。
+
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
 
 <span id="question-2021-45" />
@@ -1610,130 +1294,87 @@ signal(S) {
 3. 用户程序能否使用开/关中断指令实现临界区互斥？为什么？
 
 <ExamSolution>
-
 <ExamAnswer>
 
-1. `wait` 的“检查 `S>0` 并递减”，以及 `signal` 的递增，必须保证为**原子临界操作**，否则出现丢失更新、重复占用等竞态。
-2. **方法 1 错误**：在 `S<=0` 时保持关中断并忙等，使同一单处理器上负责 `signal` 的执行流无法得到 CPU，可能无限等待。**方法 2 在题设的单处理器、内核态、开关中断有效等前提下正确**：等待时暂时开中断，让其他执行流有机会运行；检查与减 1 期间关中断。
-3. **普通用户程序不能**直接靠开/关中断完成临界区互斥：这是特权操作；而且在多核系统上，仅禁用本核中断无法阻止其他 CPU 并发访问同一信号量。
+1. **必须互斥的原因。** `wait(S)` 的“判断 $S>0$ 与执行 $S=S-1$”必须原子化；`signal(S)` 的加一操作也应与其他信号量操作原子互斥。否则会出现重复取得同一许可、更新丢失等竞态。
+2. **方法 1 不正确；方法 2 在题目默认的单处理器、内核态实现前提下正确。** 方法 1 在关中断期间对 `S<=0` 忙等，可能使负责 `signal(S)` 的进程永远没有运行机会。方法 2 发现无许可时临时开中断，使其他执行流得以运行；再关中断进行检查和递减，可以保证单核上的原子性。
+3. **普通用户程序不能直接开关中断。** 开关中断是特权操作，应由操作系统内核执行；普通应用应调用线程同步库或系统调用。
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-### 1. 竞态来自“判断—修改”和“读—改—写”不是天然原子
+1. **竞争示例：为什么 `S=S-1` 不是天然原子操作。** 初始 $S=1$，T1 与 T2 都执行 `while (S<=0)` 并读到 1，随后两个线程各执行 `S=S-1`。在不恰当的交错中，两线程都自认为取到一个资源许可，甚至可能都把共享旧值 1 写成 0；这违反“一个许可至多让一个执行流通过”的不变式。即使加减操作最终能算出正确数值，“检查—修改”不原子仍不行。
+2. **方法 1 的失败链。** 假设 T1 执行 `wait(S)` 时 $S=0$。T1 先关中断，再一直执行 `while(S<=0)`；在题设单核场景中，调度器缺乏正常的时钟中断抢占机会，原本准备执行 `signal(S)` 的 T2 无法及时被调度，T1 在关中断状态下不停自旋。属于**不恰当关闭中断导致进展受阻**，不是一个正确的等待协议。
+3. **方法 2 的原理与局限。** 若检查到 $S\le0$，立即执行“开中断—关中断”使系统有机会调度其他线程；只有确认 $S>0$ 时，才在不允许本核中断抢占的短临界段执行减一。这样能解决方法 1 的单核永久屏蔽中断问题，但它仍然采用**忙等**，CPU 资源利用率可能较差；开中断后能否及时发生调度，取决于系统调度机制，并不是“刚开中断就一定立刻切换”。
+4. **单核前提极关键。** “关中断”只影响执行该指令的处理器核；在多核系统中，另一个核仍能并发读写同一 `S`。因此方法 2 不能仅凭局部关中断就保证跨核原子性；真实多核内核通常利用原子读改写指令、锁和恰当的内存序，必要时组合关中断来避免本核中断处理程序竞争。
+5. **特权与操作系统接口。** 应用程序可调用 `sem_wait`/`sem_post` 或互斥锁 API，不能以普通用户指令阻断硬件中断。内核中的关中断保护区也应尽可能短，以免伤害中断响应时延。
+6. **考场作答关键。** 先判断是否已经关中断，再问等候期间有无机会让 `signal` 执行；回答“方法 2 正确”时必须写明**单核假设**，不应无条件推广到 SMP 多核。区分“有无互斥”“有无进展”“是否公平”三层性质：原子性安全不代表调度效率高或无饥饿。
 
-例如初始 `S=1`，两个线程依次读取条件 `S>0` 均为真，然后都执行 `S=S-1`：可能二者均进入本来只允许 1 人进入的临界区，信号量失去**互斥保证**。即使最终 `S=-1`，错误也已发生；若二者先各自读到 1 再写回 0，还会产生**丢失更新**。`signal(S)` 的 `S=S+1` 同样不是普通指令序列级别的原子操作。
-
-### 2. 方法 1：自锁式忙等
-
-```text
-S=0; wait() 关闭中断 → while(S<=0) 永远忙等
-               ↑                          │
-               └─ 想要 S 变正，必须由其他执行流 signal()
-```
-
-在单核处理器中，进程切换通常要依赖时钟中断等机制。若在整个等待期间一直关中断，**负责 V 的其他进程得不到机会运行**，形成“等待别人通知，却不让别人运行”的进度性错误。这里应区分：**原子性**并非唯一标准，临界区还必须保证**进度**。
-
-### 3. 方法 2：为什么考研约定下可用
-
-其循环结构相当于：
-
-```c
-关中断;
-while (S <= 0) {
-    开中断;       // 暂时允许处理时钟中断/调度
-    关中断;       // 再安全地检查 S
-}
-S -= 1;          // 与刚才的 S>0 检查构成原子段
-开中断;
-```
-
-保持关中断的区间只覆盖对共享值的检查与更新；打开中断的区间允许其他进程最终进行 `signal()`。因此在**单 CPU、信号量操作均由受控内核代码执行、正确恢复中断状态**的教学模型中，这一方法是正确的。
-
-但有四个不能省略的限制：
-
-- **这是忙等**，不意味着高效：实际内核更倾向于把不能取得资源的进程放入等待队列并调度其他进程；短临界区可用自旋锁。
-- 仅仅有一次“开中断”**不自动保证公平调度**；如果不停运行高优先级忙等者、不让唤醒者运行，可能仍长期等待。
-- **多核场景方法 2 也不成立**：关中断通常只影响当前核，其他核可以并发执行 `signal`/`wait`，需硬件原子读改写指令、跨核锁及内存序保障。
-- 真正的内核代码不能无条件改变调用者原先的中断使能状态；应保存并恢复中断标志，避免嵌套场景出错。
-
-### 4. 用户态和内核态：权限不等于线程互斥
-
-关中断会影响 CPU 响应时钟/设备中断，因此属于**特权操作**。用户程序不能自行执行；它应使用系统提供的互斥锁、信号量、原子变量或同步 API。进入内核态也不意味着“任何关中断方案在任何机器上都正确”，多核仍需考虑共享缓存一致性与硬件原子性。
-
-### 5. 考场答题模板
-
-先写：**互斥是为了防止信号量读写竞态**。再写：**方法 1 持续关中断忙等导致其他进程无法 signal；方法 2 忙等时暂时开中断，单处理器模型下可行**。最后写：**开/关中断为特权指令，用户态不可直接使用**。扩展题再补充“多核不是禁用本核中断就能实现互斥”和“忙等不等于阻塞”。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
-
----
 
 <span id="question-original-208" />
 
 <ExamQuestion>
 
-<span className="inline-block rounded border px-2 py-0.5 text-xs text-fd-muted-foreground">原创</span>
+在双核处理器上，内核分别运行 T1、T2。两线程仅关闭**本核**中断后，以普通的“读取、判断、减一”三步实现共享 `S` 的 `wait()`。初始 $S=1$。
 
-有一个初值为 $1$ 的共享信号量 `S`，两个 CPU 核分别执行 `wait(S)`；每个内核线程调用 `关中断; if(S>0) S--; 开中断` 并在成功时进入临界区。另有单核设计在 `S=0` 时关中断并一直执行 `while(S<=0);`。回答：
+1. 该方案能否保证两个线程不能同时通过 `wait()`？
+2. 给出导致安全性失效的一组并发交错。
+3. 至少指出一种能在多核上实现跨核原子性的技术。
 
-1. 为何双核版本即使在每个核上都关中断也可能让两个线程同时进入临界区？给出一条读写交错；
-2. 单核忙等版本的错误是什么？把等待阶段改成“开中断—关中断”循环后，是否就自动适用于多核？
-3. 用文字/伪代码写出阻塞式信号量的正确抽象操作，说明在“检查条件—入等待队列”之间如何防止丢失唤醒，并区分自旋与阻塞。
+<ExamSolution><ExamAnswer>
 
-<ExamSolution>
+1. **不能**。禁用本核中断不会阻止另一核访问共享内存。
+2. T1 读 `S=1`，T2 也读 `S=1`；两者都认为可以通过，再各自基于读到的旧值写回 `0`，最终都进入临界区而共享信号量只有 1 个许可。
+3. 可采用硬件原子交换、比较并交换（CAS）、测试并设置（TAS）等原子读改写指令实现锁；内核还需使用正确的内存可见性语义。
 
-<ExamAnswer>
+</ExamAnswer><ExamExplanation>
 
-1. 两核各自禁用**本地**中断并不阻止对方同时访问同一内存。可能发生：CPU0 读 `S=1`，CPU1 也读 `S=1`，CPU0 写 `S=0`，CPU1 再写 `S=0`，于是两线程都认为取得资源。
-2. 单核关中断的永久忙等阻止负责 V 的其他进程正常获得 CPU；在等待期间短暂开中断只是单核教学模型下的补救，**不提供多核互斥**。
-3. 必须让测试资源、修改计数器和等待队列登记在统一原子保护机制下完成；真正的睡眠必须和释放内部锁**原子衔接**，`signal` 对队列中的线程执行唤醒。
+1. 禁中断的作用域是**本 CPU 核的中断响应**，而不是所有核上的互斥访问。即使全部线程都在内核态，也不能只靠各自本地中断屏蔽来锁共享数据。
+2. 失败例子的关键不在最终 `S` 是否变为负数；就算丢失更新让 `S` 仍等于 0，**两个请求通过一个许可**已经违背了信号量语义。
+3. 原子读改写操作应同时保障不可分割的状态转换，并按实际内存模型满足加锁 acquire、解锁 release 等同步要求。单凭普通函数调用并不构成原子指令。
 
-</ExamAnswer>
+</ExamExplanation></ExamSolution>
+</ExamQuestion>
 
-<ExamExplanation>
+<span id="question-original-334" />
 
-**一、CPU 状态和共享内存同步不是同一个概念。** 关中断只让本 CPU 暂停响应可屏蔽中断，不能让其他 CPU 的内存读写自动串行。两个 CPU 甚至都可能在一个时钟周期内读取旧的 `S=1`。这既破坏最多一名线程持有的**安全性**，也展示了单核教材算法搬到 SMP 的失效点。
+<ExamQuestion>
 
-**二、阻塞式信号量的抽象实现。** 以下伪代码中 `guard` 必须是**跨核可见的原子锁**，`sleep_and_unlock(guard)` 表示已经进入等待队列的线程以原子方式释放 `guard` 并睡眠；被唤醒后返回前重新获取 `guard`（具体实现由内核提供）：
+初始 `lock=false` 表示互斥锁未被占用。系统提供 `atomic_exchange(&lock, true)`：它能原子地把 `lock` 设为 `true`，并返回原来的 `lock` 值。
+
+1. 写出利用这一操作实现互斥锁的 `acquire()` 和 `release()` 伪代码。
+2. 说明当原值为 `false`、`true` 时调用者分别得到什么结果。
+3. 这种锁能否保证公平、适合让线程长时间持有？
+
+<ExamSolution><ExamAnswer>
+
+1. 可实现为：
 
 ```c
-Semaphore S = { .value = 1, .guard = atomic_spinlock(),
-                .waiters = empty_queue() };
+bool lock = false;
 
-wait(S) {
-    lock_irqsave(S.guard);
-    while (S.value == 0) {
-        enqueue_current_if_needed(S.waiters);
-        sleep_and_unlock_then_relock(S.guard); // 原子释放锁+睡眠
+acquire() {
+    while (atomic_exchange(&lock, true) == true) {
+        ;  // 自旋
     }
-    --S.value;            // 仅成功得到资源时消耗 1 个许可
-    unlock_irqrestore(S.guard);
 }
-
-signal(S) {
-    lock_irqsave(S.guard);
-    ++S.value;
-    wake_one(S.waiters);  // 唤醒后仍会在 while 中复检
-    unlock_irqrestore(S.guard);
+release() {
+    atomic_store_release(&lock, false);
 }
 ```
 
-该伪代码是**内核接口抽象**，并不要求把 `sleep_and_unlock_then_relock` 当作可以在持有自旋锁时直接睡眠的普通函数；实现必须用内核的调度器/等待队列协议，使“挂入等待队列→释放保护→睡眠”不被唤醒事件漏掉。`wake_one` 只使线程**就绪**，并不直接把令牌交给它；竞争者可能抢先消耗令牌，所以醒来用 `while` 而不是 `if` 再检查条件。实际产品通常用直接令牌交接等更精细实现。
+2. 返回 `false` 时意味着调用者把锁从“空闲”原子地改为“占用”，可以进入临界区；返回 `true` 则说明锁已有持有者，必须等待。
+3. 不保证严格公平，并且占锁时间长时等待者持续自旋浪费 CPU，应考虑阻塞式互斥锁、排队锁或等待队列。
 
-**三、锁的粒度与进度**：`guard` 只保护计数器和等待队列，不得在持有 `guard` 时进行长时间忙等；等待资源的线程须真正释放保护并休眠，`signal` 才能获取 `guard` 并唤醒它。内核若可能由同一 CPU 的中断处理路径获取该锁，取得锁时应保存并暂时屏蔽本地中断，以防中断在持锁时重入造成自锁；同时跨核仍靠原子自旋锁保护。
+</ExamAnswer><ExamExplanation>
 
-**四、考点对比**：禁中断——改变本核中断响应；原子指令——跨核不可分割地更新共享内存；自旋——运行中反复检查、占 CPU；阻塞——进入等待队列、让出 CPU。既要保证**互斥安全性**，也要保证**通知不丢失**与**调度进度**。
+1. `atomic_exchange` 的**返回旧值**是争抢结果的判据。若两个线程几乎同时执行交换，原子操作保证其中至多一人见到旧值 `false`，从而不会双双入内。
+2. 上例把 `atomic_store_release` 写为具有**释放语义**的原子写操作；实际代码仍应依据对应语言和硬件内存模型选择合法的 API，防止临界区数据访问被错误重排。`atomic_exchange` 取得锁应具有获取语义。
+3. 自旋锁适合极短的临界区；若持有者被挂起而竞争者长时间占用核心，可能浪费大量计算时间。这与题干方法 2 的忙等缺陷相似，只是这里有硬件跨核原子性。
 
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
 
 <span id="question-2022-46" />
@@ -1751,136 +1392,107 @@ signal(S) {
 请使用信号量的 `wait()`、`signal()` 操作描述 T1 和 T2 之间的同步关系，并说明所用信号量的作用及初值。
 
 <ExamSolution>
-
 <ExamAnswer>
 
-仅用两个**初值为 0** 的同步信号量 `AC`、`CE` 即可，分别落实两个跨线程的直接前驱关系 $A\prec C$ 与 $C\prec E$：
+1. **先列出全部约束。** 题目要求 $A\to C$、$B\to C$、$C\to D$、$C\to E$、$E\to F$；另外 T1 按 $A\to E\to F$ 运行，T2 按 $B\to C\to D$ 运行。
+2. **找出真正的跨线程依赖。** `B→C、C→D、E→F` 已由各线程内部的程序顺序保证，不用额外信号量。仅为 $A\to C$ 与 $C\to E$ 分别设置 `AC=0`、`CE=0`。
+3. **完整伪代码。**
 
 ```c
 semaphore AC = 0, CE = 0;
 
-// 线程 T1：原定顺序 A → E → F 不改变
-void T1() {
-    A();
-    V(AC);             // 发布 A 已完成
-    P(CE);             // 等 C 完成才能执行 E
-    E();
-    F();
+T1() {
+    A;
+    V(AC);             // 通知 T2：A 完成
+    P(CE);             // C 完成后才能做 E
+    E;
+    F;
 }
-
-// 线程 T2：原定顺序 B → C → D 不改变
-void T2() {
-    B();
-    P(AC);             // B 做完，还必须等 T1 的 A
-    C();
-    V(CE);             // C 完成，允许 T1 继续 E
-    D();
+T2() {
+    B;
+    P(AC);             // B 已完成，仍须等待 A
+    C;
+    V(CE);             // 通知 T1：C 完成
+    D;
 }
 ```
 
-</ExamAnswer>
+4. **示例时序。** 合法执行次序如 $A,B,C,E,F,D$ 或 $B,A,C,D,E,F$；不能出现 $E$ 先于 $C$，也不能出现 $C$ 先于 $A$ 或 $B$。
 
+</ExamAnswer>
 <ExamExplanation>
 
-### 1. 同一线程的程序次序属于“免费同步”
+1. **先处理线程内部顺序。** T1 的源程序顺序为 $A\to E\to F$，T2 为 $B\to C\to D$；这些单线程内的先后关系不需要通过信号量再次实现。真题虽然画了前驱关系图，作答重点却是从图中删去**已经由程序顺序保证的边**。
+2. **依赖不是越多越好。** $A\to C$ 跨越 T1、T2，需要 `AC`；$C\to E$ 跨越 T2、T1，需要 `CE`。一个初值为 0 的信号量代表“某跨线程前驱尚未完成”，前驱执行完 `V` 提供一个令牌，后继 `P` 成功后才能开始。不必为 $A\to E$ 额外同步：T1 本来就在 A 之后执行 E，而且 $A\to C\to E$ 也保证了它。
+3. **按阶段检查不会死锁。** T1 先执行 A 并 `V(AC)`，才可能执行 `P(CE)`；T2 先执行 B，然后等待 `AC`。如果 T2 因 A 尚未完成而阻塞，T1 并未被什么信号量拦在 A 之前，一定可以发出 `AC`；之后 T2 能运行 C、发出 `CE`，T1 就能运行 E。不存在相互等待的闭环。
+4. **`V` 必须位于操作完成之后。** 若 T1 在 A 之前就 `V(AC)`，T2 可能在 A 完成前执行 C；若 T2 在 C 之前就 `V(CE)`，T1 可能提前执行 E。同步信号量表达的是事件**已完成**，而不是事件“即将开始”。
+5. **跨线程前驱与任意交错。** E 与 D 都在 C 之后，但 E、D 互相没有先后要求，因此允许 D 先于 E，也允许 E 先于 D；如人为设置 `D→E` 便减少并发且违背最简目标。评判一个方案时，要既检查“没有非法次序”，也检查“没不必要地禁止合法次序”。
+6. **方法迁移。** 多线程依赖题先列全 DAG，圈出各线程固有程序顺序，删除传递和同线程冗余边，剩余跨线程边各由一组 P/V 表达。若不同边汇入同一个后继，后继通常应等待**所有**前驱，而不是只等待任何一个。
 
-T1 内固定是 $A\to E\to F$，T2 内固定是 $B\to C\to D$。题目另要求：
-
-$$
-A\to C,\qquad B\to C,\qquad C\to D,\qquad C\to E,\qquad E\to F.
-$$
-
-其中 $B\to C$、$C\to D$、$E\to F$ 都已由同一个线程的顺序确保，**无须在每个条件上都创建信号量**；只有跨线程的 $A\to C$、$C\to E$ 需要通信。注意 `A` 与 `B` 不要求固定先后；`D` 与 `E` 也不要求固定先后。
-
-### 2. 逐语句解释信号量及其初值
-
-`AC=0` 保证 T2 无法在 A 未完成时运行 C。若 A 先结束，T2 后面的 `P(AC)` 即时通过；若 T2 先完成 B，则会阻塞在 `P(AC)`，直到 T1 执行 `V(AC)`。
-
-`CE=0` 保证 T1 无法在 C 未完成时运行 E。同样先 V 后 P 也不会丢失通知（计数型信号量具有记忆性）。
-
-**不能把 `AC=1` 或 `CE=1`**：初值 1 相当于预先许可，可能违反“等待前驱完成”的硬约束。
-
-### 3. 关键反例与死锁检测
-
-若删去 `P(AC)`，存在 `B,C,A,E,F,D` 这样的交错，其中 C 在 A 之前运行，违反要求。若删去 `P(CE)`，可能 `A,E,F,B,C,D`，E 在 C 之前执行，也违法。
-
-正确实现却不会因为这两个信号量死锁：T1 先做 A 才会等待 CE；T2 先做 B，才会等待 AC。即使 T2 先阻塞在 AC，T1 仍可完成 A 并解除它；随后 T2 做 C、发 CE，T1 可做 E/F。前驱依赖构成 DAG，且**没有在发布自己令牌之前先等待对方未来令牌**。
-
-### 4. 判断给定执行序列是否合法
-
-一个完整执行顺序的判据是：
-
-$$
-A<C,\quad B<C,\quad C<D,\quad C<E,\quad E<F.
-$$
-
-例如 `A,B,C,D,E,F` 合法，`B,A,C,E,F,D` 也合法；`A,E,B,C,D,F` 不合法。**D 与 F 的先后没有约束**，不要因为写在不同线程中就擅自把它们串行。
-
-### 5. 题型归纳
-
-画依赖图 → 标出每个线程已经保证的边 → 剩下的跨线程约束用 P/V；同一生产事件若允许多后继分别等待，须考虑**广播/多个令牌**，一枚令牌不应被两个消费者各消耗一次。这也是本题和 2020-45 都在考察的核心思想。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
-
----
 
 <span id="question-original-209" />
 
 <ExamQuestion>
 
-<span className="inline-block rounded border px-2 py-0.5 text-xs text-fd-muted-foreground">原创</span>
-
-两线程各自程序顺序固定：
-
-- T1：依次执行 `A、E、F`；
-- T2：依次执行 `B、C、D`。
-
-附加约束是 `A、B` 均必须先于 `C`，`C` 必须先于 `D、E`，`E` 必须先于 `F`，且 **F 必须在 D 完成之后**。要求：
-
-1. 在不改变各线程原先操作顺序的前提下，给出最少需要增加的**跨线程依赖**以及一套 P/V 实现；
-2. 说明某方案“在 T1 的 A 之前先 `P(CE)`，并让 T2 在 C 完成后 `V(CE)`”会产生什么问题；
-3. 判断 `B,A,C,E,D,F` 与 `A,B,C,E,F,D` 是否可行。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-T1 中 $A\to E\to F$、T2 中 $B\to C\to D$ 原本由程序顺序保证。新增的跨线程边为 $A\to C$、$C\to E$、$D\to F$，用 3 个初值为 0 的信号量实现：
+沿用题设 T1 执行 A、E、F，T2 执行 B、C、D，约束不变。一名学生把 T1 改写为：
 
 ```c
-semaphore ac=0, ce=0, df=0;
-
-T1() { A(); V(ac); P(ce); E(); P(df); F(); }
-T2() { B(); P(ac); C(); V(ce); D(); V(df); }
+T1() { P(CE); A; V(AC); E; F; }
+T2() { B; P(AC); C; V(CE); D; }
 ```
 
-`B,A,C,E,D,F` 合法；`A,B,C,E,F,D` 不合法，因为 F 在 D 完成之前发生。
+1. 给出可能发生死锁的执行过程。
+2. 如何只移动 T1 的一条 P 操作就修复？
+3. 如果把 T2 的 `V(CE)` 放到 D 之后，是否仍满足原约束？是否减少并发？
 
-</ExamAnswer>
+<ExamSolution><ExamAnswer>
 
-<ExamExplanation>
+1. T1 一开始因 `CE=0` 阻塞；T2 完成 B 后因 `AC=0` 阻塞，双方均无法发出对方需要的信号，形成循环等待。
+2. 把 T1 的 `P(CE)` 移到 `V(AC)` **之后、E 之前**：`A; V(AC); P(CE); E; F;`。
+3. 仍能满足“C 在 E 前”，但额外强制 $D\to E$（因为 T2 执行 D 后才通知 CE），禁止原本合法的 E 与 D 并发，降低了并发度。
 
-**一、每个信号量只管真正跨线程的约束。** 由于 T2 天然有 $B\to C\to D$，不用额外让 C 等 B 或 D 等 C；T1 天然有 $A\to E\to F$，不用再为 E→F 设信号量。然而 $A\to C$ 要跨线程、$C\to E$ 要跨线程、新加的 $D\to F$ 也要跨线程，故分别需通过两个线程间的通知来约束。在“每条跨线程前驱边各设置一个同步条件”的常见模型中有 3 条边；如果允许复杂的状态共享协议，信号量对象的数量未必是普遍意义上的数学最小值，此处只主张**最少必要直接跨线程约束**。
+</ExamAnswer><ExamExplanation>
 
-**二、手动模拟可行交错**：T2 先 B 后等 AC；T1 做 A、发 AC 后等 CE；T2 做 C、发 CE，再执行 D；此时 T1 做 E、等 DF；T2 做 D 并发 DF，T1 最后做 F。可以看到新加约束没有把 D 和 E 强制排序，仍保留部分并行可能。
+1. 死锁不是仅凭有两个 `P` 就判断：应画等待图。T1 等 T2 完成 C；T2 等 T1 完成 A；但两个线程都已在能触发对方 `V` 的语句前阻塞，因此产生闭环。
+2. 修复的核心是**先完成本线程可能解开别人阻塞的事件，再等待别人的完成事件**。T1 绝不能在 A 之前等待 C。
+3. 正确的同步除了安全性，还应关注是否过度串行。把 `V(CE)` 延迟到 D 后属于可行但不够精简的方案。
 
-**三、错误插入 P 的位置会引入同步死锁**。若 T1 在 A 前等 CE，而 T2 要等 `AC` 才能做 C 并发 CE，则 T1 等 T2 的 C、T2 等 T1 的 A。二者均无法发布对方所需信号，形成等待环
+</ExamExplanation></ExamSolution>
+</ExamQuestion>
 
-$$
-\text{T1等CE}\longleftarrow\text{T2的C}\longleftarrow\text{T2等AC}
-\longleftarrow\text{T1的A}\longleftarrow\text{T1等CE}.
-$$
+<span id="question-original-335" />
 
-**四、判序列的机械方法**：把候选序列的每个操作标上位置，依次检查 $A<C$、$B<C$、$C<D$、$C<E$、$D<F$、$E<F$ 六条约束；有任何一条违反便非法。不要只记住线程内顺序而漏检 D→F 这一额外关系。
+<ExamQuestion>
 
-</ExamExplanation>
+三个线程分别按固定顺序执行：T1 为 A、E；T2 为 B、C、D；T3 为 G、H。另外要求：C 必须等 A 完成；E 必须等 C 和 G 都完成；H 必须等 D 完成。所有操作只执行一次。
 
-</ExamSolution>
+1. 写出必须额外建立的跨线程同步边。
+2. 用初值为 0 的信号量写出三个线程的伪代码。
+3. E 与 D 能否并发执行？G 与 B 能否并发？
 
+<ExamSolution><ExamAnswer>
+
+1. 跨线程边为 $A\to C$、$C\to E$、$G\to E$、$D\to H$。
+2. 可如下设计：
+
+```c
+semaphore ac = 0, ce = 0, ge = 0, dh = 0;
+T1() { A; V(ac); P(ce); P(ge); E; }
+T2() { B; P(ac); C; V(ce); D; V(dh); }
+T3() { G; V(ge); P(dh); H; }
+```
+
+3. **均可并发。** E 与 D 只共同依赖 C，没有相互前驱关系；G 与 B 之间没有任何约束。
+
+</ExamAnswer><ExamExplanation>
+
+1. B→C、C→D、G→H、A→E 是线程内部保证的顺序（其中 A→E 也可由 A→C→E 推出），不用另建信号量。
+2. `P(ce);P(ge)` 是 E 的“与”条件：必须同时等待 C 和 G 的完成通知。若只等待其中一个，便允许 E 过早发生。
+3. 信号量置零用于同步完成事件；通知应立即紧随其前驱动作，以允许后继尽早启动，而不必等该线程其余无关动作都完成。
+
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
 
 <span id="question-2023-45" />
@@ -1899,137 +1511,108 @@ $$
 2. 图 (b) 给出了交换两个变量值的函数 `newSwap()`。能否用函数调用 `newSwap(&key, &lock)` 代替指令 `swap key, lock` 来实现临界区互斥？为什么？
 
 <ExamSolution>
-
 <ExamAnswer>
 
-1. 图 (a) 有 **2 处错误**，不增加语句条数即可修正：把进入区的 `if (key == TRUE)` 改为 `while (key == TRUE)`；把退出区的 `lock = TRUE` 改为 `lock = FALSE`。正确算法为
+1. **两处错误。** 进入区的 `if (key == TRUE)` 应改为 `while (key == TRUE)`；退出区的 `lock = TRUE` 应改为 `lock = FALSE`。仅改动现有语句，不增加语句条数。
+2. **改正后的关键流程。** 各线程有自己的局部 `key`，共享的 `lock` 初值为 `FALSE`；`swap` 是硬件原子交换指令：
 
 ```c
-bool lock = FALSE;             // 共享；FALSE=空闲
-// 每个线程各有自己的局部变量 key
-bool key = TRUE;
+// 进入区（每个线程的 key 是局部变量）
+key = TRUE;
 while (key == TRUE)
-    swap key, lock;            // 硬件原子交换
+    swap key, lock;          // 单条原子交换指令
+
 // 临界区
-lock = FALSE;                 // 释放锁
+critical_section();
+
+// 退出区
+lock = FALSE;
 ```
 
-2. **不能**直接用普通 `newSwap(&key,&lock)` 代替原子的 `swap` 指令。`newSwap` 包括三次普通内存读写，线程指令可交错；它只有相同的顺序执行**结果**，没有同样的并发**原子性**。
+3. **不能用普通 `newSwap(&key, &lock)` 替代原子 `swap` 指令。** 其内部通常由多条分离的普通读写指令构成，不是不可分割的原子读—改—写，可能使两个线程都观察到旧的 `lock=FALSE`，进而都认为拿到了锁。
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-### 1. 先认清 lock/key 的职责和真假含义
+1. **状态意义。** `lock=FALSE` 表示空闲；`lock=TRUE` 表示已被某线程占有。`key` 为每个竞争线程的局部变量，初值设成 `TRUE` 是“尚未获得锁”的标识。原子交换后若读到旧 `lock=FALSE`，就会得到 `key=FALSE`，退出忙等循环，此时交换同时将共享 `lock` 置为 TRUE，完成占有。
+2. **执行轨迹判定。** 当锁原本空闲时，交换前 `(key,lock)=(TRUE,FALSE)`；交换后为 `(FALSE,TRUE)`，说明取得锁。锁被占用时交换前 `(TRUE,TRUE)`，交换后仍为 `(TRUE,TRUE)`，所以必须继续尝试。若只写 `if`，碰到已占用的锁时只尝试一次便跳过等待，直接进入临界区，违反互斥。
+3. **离开临界区为什么释放成 FALSE。** 持有者完成共享数据访问后，必须把锁从 TRUE 变回 FALSE。若误写 `lock=TRUE`，等待者永远观察不到空闲状态，产生永久忙等。释放操作必须遵守相应内存模型中的释放语义，确保临界区内修改对后续获得锁的线程可见。
+4. **原子性在何处不可替代。** `swap` 的关键不在函数最终“把两个值交换”这一数学结果，而在检查旧锁状态和写入新锁状态不可被其他执行流插入。普通 `newSwap` 的 `temp=*a; *a=*b; *b=temp` 可发生交错：T1、T2 各自先读取 `key=TRUE`，随后分别把各自的 `key` 赋为共享 `lock` 的旧值 FALSE，再各自将 `lock` 写成 TRUE。最终两个线程的局部 `key` 都为 FALSE，于是都进入临界区。
+5. **锁保证什么、不保证什么。** 在所有参与者都使用同一原子交换锁且内存序正确的情况下，该方案保证互斥（安全性）；但它属于**自旋锁**，锁忙时仍持续消耗 CPU，且不能保证先到先得，可能使个别线程长期饥饿。单核持锁线程被抢占时，大量自旋尤其低效。
+6. **答题模板。** 先写“获得锁的充分标志是什么”（`key=FALSE`），再分析空闲和占用两个分支，最后构造至少两个线程的交错执行例子解释原子性。遇到 `TAS`、`SWAP`、`CAS`，不要只凭 API 名称判定正确，必须检查整个状态变更是否真的由**硬件原子原语**执行。
 
-| 变量 | 作用范围 | `TRUE` | `FALSE` |
-| --- | --- | --- | --- |
-| `lock` | 所有线程共享 | 锁已占用 | 锁空闲 |
-| `key` | 每个线程局部 | 自己尚未取得锁 | 自己已取得锁 |
-
-进入区先令 `key=TRUE`，再尝试原子交换 `key` 与 `lock`。存在两种情况：
-
-- 原锁值为 `FALSE`：交换后 `key=FALSE`、`lock=TRUE`，说明自己成功取得锁，退出 `while` 进入临界区。
-- 原锁值为 `TRUE`：交换后 `key=TRUE`、`lock=TRUE`，说明有人占用锁，必须再次尝试交换。因此应使用 **`while` 而不是 `if`**，否则失败线程仍会进入临界区。
-
-释放时必须 `lock=FALSE`；错写成 `lock=TRUE` 就是永久锁住，后续线程始终失败。交换必须是一条真正硬件原子操作；`key` 必须为**每个线程私有**，共享一个 `key` 又会引入新竞态。
-
-### 2. 图 (b) 的非原子函数为什么必败：构造最短反例
-
-初始 `lock=FALSE`，线程 T1、T2 的 `key1=key2=TRUE`。`newSwap()` 内部依次执行 `temp=*a; *a=*b; *b=temp`：
-
-| 步骤 | 执行者 | 操作 | 结果 |
-| --- | --- | --- | --- |
-| 1 | T1 | `temp1=key1` | `temp1=TRUE` |
-| 2 | T1 | `key1=lock` | `key1=FALSE`（T1 未写 lock） |
-| 3 | T2 | `temp2=key2` | `temp2=TRUE` |
-| 4 | T2 | `key2=lock` | `key2=FALSE`（T2 同样看见空闲） |
-| 5 | T1 | `lock=temp1` | `lock=TRUE` |
-| 6 | T2 | `lock=temp2` | `lock=TRUE` |
-
-结果 **`key1=key2=FALSE`**，两个线程均跳出循环、进入临界区，违反互斥。这比单纯说“不是原子操作”更能证明错在哪里。
-
-### 3. 互斥、忙等、进度与公平性是四个不同性质
-
-硬件原子交换保证**互斥安全性**：成功者把共享 `lock` 原子地设为 `TRUE`，别的线程只会读到已占用。失败者在 while 循环中自旋，**并未阻塞睡眠**，要消耗 CPU；单处理器若不允许线程切换，还可能造成进度性问题。
-
-原子 `swap` 本身**不保证先等待者先获得锁**：后来的线程可能抢先成功，使旧线程饥饿。若题目要求公平进入，可使用 FIFO 排队锁、票号锁等附加机制。实际机器上还需取得锁的 acquire 和释放锁的 release 内存可见性语义；教材的 `swap` 通常已抽象为原子且满足必要的内存排序。
-
-### 4. 为什么不能用 `volatile` 代替原子性
-
-`volatile` 不把多条普通读写合并为不可分割的操作，也不能自动建立跨线程同步的先行发生关系。防止编译器消除某些访问不等于消除竞争；工程实践中应使用硬件原子 RMW 指令或语言提供的原子交换/锁。
-
-**考场模板**：先写出哪两行错、各换成哪一行 → 用锁值真值表解释 `while` 与释放 → 指出普通函数的读写交错会让两个线程同时认为取锁成功 → 若问额外性质，补充忙等与不保证公平。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
-
----
 
 <span id="question-original-210" />
 
 <ExamQuestion>
 
-<span className="inline-block rounded border px-2 py-0.5 text-xs text-fd-muted-foreground">原创</span>
-
-共享 `lock=FALSE`，线程 1 和线程 2 各有局部 `key=TRUE`。进入区为 `while(key) newSwap(&key,&lock)`；普通函数 `newSwap` 依次执行 `tmp=*a; *a=*b; *b=tmp`。要求：
-
-1. 构造两个线程都误入临界区的执行交错；
-2. 假设把 `newSwap` 替换为硬件原子交换指令，能否同时保证互斥、公平、无忙等？分别解释；
-3. 进一步使用硬件原子 `fetch_add` 和一个递增服务号，设计一个**严格按取票顺序**取得临界区的自旋锁，并说明溢出/可见性的前提。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-1. 依次执行 `T1:tmp1=key1`、`T1:key1=lock`、`T2:tmp2=key2`、`T2:key2=lock`、`T1:lock=tmp1`、`T2:lock=tmp2`，两个 key 最终均为 `FALSE`，故都进入临界区。
-2. 硬件原子交换能够实现**互斥**；失败线程仍会**自旋忙等**，调度不公平时可能**饥饿**。
-3. 使用票号锁：
+有两个线程各自拥有局部 `key1=TRUE`、`key2=TRUE`，共享 `lock=FALSE`。用普通函数模拟交换：
 
 ```c
-atomic_uint next = 0, serving = 0;
-
-lock() {
-    unsigned my = fetch_add_explicit(&next, 1, relaxed);
-    while (load_acquire(&serving) != my) cpu_relax();
-}
-
-unlock() {
-    // 只有当前获票且进入临界区的线程执行
-    store_release(&serving, load_relaxed(&serving) + 1);
+void newSwap(bool *key, bool *lock) {
+    bool tmp = *key;
+    *key = *lock;
+    *lock = tmp;
 }
 ```
 
-</ExamAnswer>
+1. 给出使两个线程都从 `newSwap` 返回且局部 `key` 均为 `FALSE` 的交错过程。
+2. 为什么即使最终 `lock=TRUE`，也不能说明互斥正确？
+3. 只把 `newSwap` 整体写成一个函数调用，能使其自动变为原子操作吗？
 
-<ExamExplanation>
+<ExamSolution><ExamAnswer>
 
-**非原子 interleaving 的核心**：两个线程可以在任何一个写入共享 `lock=TRUE` 之前，都把 `FALSE` 装入自己的局部 `key`。后续谁再写 `lock` 都无法撤销它们已经判定“我拿到了锁”的事实；所以普通函数和硬件原子指令即使表面上都实现交换，**语义仍不同**。
+1. 令 T1、T2 先各执行 `tmp=*key`，各得 `TRUE`；随后 T1、T2 分别执行 `*key=*lock`，因共享 `lock` 仍为 `FALSE`，双方局部 `key` 都被写为 `FALSE`；最后两线程各执行 `*lock=tmp`，共享 `lock=TRUE`。两者均会误以为已取得锁。
+2. 因为互斥检验的是**至多一个线程进入临界区**；最终锁值只是一个共享变量的最终状态，不能反映其间有几个线程已经错误通过。
+3. 不能。函数调用边界不等于硬件原子操作，编译器甚至可能内联函数，但无法凭此赋予跨核互斥语义。
 
-**三项性质要拆开答**：
+</ExamAnswer><ExamExplanation>
 
-| 性质 | 原子交换自旋锁 | 票号锁 |
-| --- | --- | --- |
-| 临界区互斥 | 是 | 是（依赖 `fetch_add` 原子性） |
-| 严格先后 | 不保证按等候先后 | 按原子取票得到的先后顺序服务 |
-| 忙等 | 是 | 是（等待自己的号码） |
-| 无饥饿 | 原子性单独不能保证 | 假定持锁者最终退出、线程被公平调度且票号差不发生歧义，则每个票号最终轮到 |
+1. 这里两个 `tmp` 属于不同线程的局部变量，因此不会彼此覆盖。危险发生在两次普通读取共享 `lock` 之间没有硬件原子保护。
+2. 竞态的表现并不要求共享数据最后一定“明显写错”；即使锁最后是 TRUE、看似被持有过，两个线程都已拿到“通行证”。
+3. 正确做法是使用体系结构提供的原子 `swap`/CAS/TAS，或建立在其上的同步库。被调用代码的层次结构不会自动创建锁。
 
-`fetch_add` 给每个调用者分配**唯一票号** `my`；`serving` 表示当前允许进入的票号；持锁者在离开时递增 `serving`。由于 `my` 无法跳过较早领取的号码，FIFO 进入顺序由算法强制维持，但**CPU 时间调度公平**仍是最终能否获得执行的条件。
+</ExamExplanation></ExamSolution>
+</ExamQuestion>
 
-**为什么用 acquire/release**：前一临界区的修改必须在后一个持锁线程观察到 `serving` 增加之后可见。获取时使用 acquire，释放时使用 release，避免仅凭原子计数就误以为临界区数据天然按要求可见。
+<span id="question-original-336" />
 
-**计数器回绕注意事项**：对固定宽度无符号票号，只有在未完成票号数量远小于模数、回绕不会让两个尚未完成的请求持有相同票号的前提下，才能保证 FIFO 对应关系；实际实现会选足够宽的计数器或证明并发上限，不能宣称任意数量的等待者下都无歧义。
+<ExamQuestion>
 
-**考场口诀**：`swap` 解决“能否同时进去”，票号解决“先来后到”，阻塞/唤醒 API 解决“是否占着 CPU 等”，三者属于不同维度。
+某系统提供原子的 `fetch_add(&x,1)`，它把共享整数 `x` 加 1，并返回加之前的值。现有 `next=0`（下一个票号）与 `serving=0`（当前服务票号）。假定计数不溢出、票号申请者最终都获得 CPU 且持锁线程会正常释放。
 
-</ExamExplanation>
+1. 设计一种按获取票号先后进入临界区的自旋锁。
+2. 为什么它具有 FIFO 的先到先服务性质？
+3. 与普通的原子 `swap` 自旋锁相比，它的优点和代价分别是什么？
 
-</ExamSolution>
+<ExamSolution><ExamAnswer>
 
+1. 可采用票据锁：
+
+```c
+atomic_int next = 0, serving = 0;
+
+acquire() {
+    int mine = fetch_add(&next, 1);
+    while (atomic_load_acquire(&serving) != mine) { ; }
+}
+release() {
+    atomic_fetch_add_release(&serving, 1);
+}
+```
+
+2. `fetch_add` 给每个竞争者分配唯一递增票号；`serving` 从 0 依次增加，只有票号恰好等于当前服务号的线程能够进入临界区。
+3. 它能避免后来请求者反复插队，便于获得 FIFO 公平性；但等待线程仍不断读取共享 `serving`，在高并发时可产生缓存一致性流量，而且持锁线程不释放时所有后继线程都会等待。
+
+</ExamAnswer><ExamExplanation>
+
+1. 分票的原子 `fetch_add` 是**唯一票号分配点**；取得票号不等于立即取得锁，须等待服务号轮到自己。示例的读取具有获取语义，释放时对服务号的递增具有释放语义。
+2. 若票号顺序是 0、1、2，0 号进入并释放后 `serving` 才变为 1，1 号进入再释放后变为 2；后取得票号的线程不能绕过前面持有票号的线程。
+3. FIFO 保证建立在“每个排队者最终运行且持锁者释放”等活性前提下。若最小尚未服务票号对应线程永久停机，队列无法绕过它；因此 FIFO 公平并非对任意系统故障都保证进展。
+
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
 
 <span id="question-2023-46" />
@@ -2042,11 +1625,11 @@ unlock() {
 
 进程 P 通过执行系统调用从键盘接收一个字符。已知此过程中与进程 P 相关的操作包括：
 
-① 将进程 P 插入就绪队列；\
-② 将进程 P 插入阻塞队列；\
-③ 将字符从键盘控制器读入系统缓冲区；\
-④ 启动键盘中断处理程序；\
-⑤ 进程 P 从系统调用返回；\
+① 将进程 P 插入就绪队列；<br />
+② 将进程 P 插入阻塞队列；<br />
+③ 将字符从键盘控制器读入系统缓冲区；<br />
+④ 启动键盘中断处理程序；<br />
+⑤ 进程 P 从系统调用返回；<br />
 ⑥ 用户在键盘上输入字符。
 
 以上编号仅用于标记操作，与先后顺序无关。请回答：
@@ -2057,156 +1640,75 @@ unlock() {
 4. 键盘中断处理程序执行时，进程 P 处于什么状态？CPU 处于内核态还是用户态？
 
 <ExamSolution>
-
 <ExamAnswer>
 
-1. 对于题列的相关操作，①（P 加入就绪队列）之前是 **③**（从键盘控制器取字符到系统缓冲区），其后是 **⑤**（P 经调度恢复执行并从系统调用返回）；⑥（按键输入）之后是 **④**（启动键盘中断处理程序）。
-2. **②**（P 加入阻塞队列）之后 P 不能继续占用 CPU，调度程序改运行其他就绪进程（若无，则运行空闲任务）；**①** 之后 P 才重新具备调度资格。
-3. **③** 对应键盘设备驱动及其中断服务路径所做的数据搬运工作。
-4. 处理该键盘中断时，题设中 P **仍处于阻塞态**，CPU **处于内核态**。
-
-相应的关键顺序为
-
-$$
-\boxed{②\ \longrightarrow\ ⑥\ \longrightarrow\ ④\ \longrightarrow\ ③\ \longrightarrow\ ①\ \longrightarrow\ ⑤}.
-$$
+1. **①之前是③，①之后是⑤；⑥之后是④。** 编号事件的主线为 `② → ⑥ → ④ → ③ → ① → ⑤`，其中省略了进程调度、现场恢复等非编号步骤。
+2. **②之后 P 必须让出 CPU；①之后 P 才重新具备被调度资格。** 进入就绪队列不等于立刻运行。
+3. **③**（读取键盘控制器的数据并搬入内核系统缓冲区）是键盘驱动程序承担的具体设备操作。
+4. 中断处理时，按本题所描述的事件顺序，**P 为阻塞态，CPU 在内核态**；运行中断处理程序的 CPU 不一定先前正在运行 P。
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-### 1. 系统调用到设备中断：是谁主动发起、谁因什么事件阻塞
-
-P 执行“从键盘读取一个字符”的**系统调用**，CPU 由用户态经陷入（trap）进入内核态。若此时无可读取字符，内核把 P 放入**阻塞队列**（②），P 不能继续执行用户指令，CPU 会重新调度。按题意后来用户输入字符（⑥），键盘向 CPU 发中断；CPU 响应中断执行键盘处理程序（④），驱动读取数据到内核缓冲区（③），随后内核唤醒等待该字符的 P 并把它放到**就绪队列**（①）。最后 P 获得 CPU、恢复系统调用并返回（⑤）。
-
-```text
-P 用户态        内核系统调用            设备             中断服务
- 读字符 ─陷入─► 无数据 → 阻塞②          用户输入⑥
-                (调度其他进程)          │               │
-                                       └─IRQ────────► ④
-                                        驱动取字符③ → 唤醒P①
- P重新就绪 ──经调度→ 内核补完 read → 返回用户态⑤
-```
-
-### 2. “阻塞—就绪—运行”与“用户态—内核态”不是同一维度
-
-进程状态是**能否被调度**；CPU 态是**当前执行权限级别**。当键盘中断在**其他进程运行期间**到来，CPU 切到内核态执行中断处理程序，并不意味着 P 正在运行。P 仍在等待队列中，直到对应 I/O 事件被处理并被唤醒。**CPU 进入内核态不等于 P 变为就绪态，更不等于 P 立刻运行**。
-
-可画出状态迁移：
-
-$$
-\text{P运行}\xrightarrow{\text{读无数据}}\text{P阻塞}
-\xrightarrow{\text{字符到达并唤醒}}\text{P就绪}
-\xrightarrow{\text{调度}}\text{P运行}.
-$$
-
-### 3. 为什么①前是③，①后是⑤，却不能直接说“①就执行⑤”
-
-驱动必须先有可供 P 使用的数据，才唤醒等待者（③先于①）；但 P 被放进就绪队列之后可能在队列里等很久，期间 CPU 可以运行其他进程或响应其他中断。只有调度器选择 P，P 才能继续完成系统调用并最终执行⑤。题目说的“前一个/后一个”是**列出的操作间的因果先后**，不是 CPU 指令级严格相邻。
-
-### 4. 驱动、中断处理和系统调用不要混淆
-
-- **系统调用处理程序**：根据 P 的请求检查缓冲区、决定是否需要等待、最终把结果返回给 P。
-- **设备驱动程序**：理解键盘控制器接口和状态，从控制器取出字符并放入系统缓冲区（③）；这段动作可由驱动的中断处理部分执行。
-- **中断处理程序**：响应外部硬件 IRQ，调用/包含设备相关处理，必要时唤醒等待进程。
-- **进程调度器**：决定哪一个就绪进程得到 CPU，不负责直接从键盘控制器读取字符。
-
-### 5. 考点边界和易错题变式
-
-题设隐含 P **已经因等待输入而阻塞**；如果按键已经在缓冲区，`read` 可能立刻返回、根本不发生②。若中断到来前 P 还未正确登记等待条件，粗心实现可能产生“**丢失唤醒**”——必须把“检查无数据、进入等待队列、释放保护锁”做成不会与中断处理互相错过的受保护协议。
-
-**关键区分**：外部中断是一类异步事件；系统调用是一类同步陷入；就绪≠运行，阻塞≠内核态。答题时先列完整时间线，后依次回答顺序/调度/驱动/CPU 态四问，比凭直觉填编号稳健。
+1. **系统调用与进程状态的因果链。** P 在用户态执行输入操作，通过陷入指令进入内核态。如果指定的字符还没有到达，P 不能继续完成 `read`，内核执行阻塞原语，把 P 置入等待输入的阻塞队列（②），随后调度其他就绪进程。阻塞是一种主动等待条件，不是“占着 CPU 一直查询”。题目没有列出“发起系统调用”和“恢复其他进程”两件事，不能误把它们当成题目选项。
+2. **外设事件与中断的区别。** 用户按键（⑥）是外部事件，键盘控制器产生中断请求；CPU 响应后开始运行键盘中断处理程序（④）。驱动程序读取设备寄存器/控制器数据，将字符存入系统缓冲区（③）。处理程序或其后续内核路径确认 P 所等待的条件已满足，于是唤醒 P，把它从阻塞队列移至就绪队列（①）。这里“唤醒”只表示满足调度资格，不能断言 P 当即获得 CPU。
+3. **返回系统调用须经过调度。** P 真正被调度到 CPU 后，在内核中继续处理未完成的读操作，必要时把数据复制到用户缓冲区，然后返回用户态（⑤）。如果同时有更高优先级的就绪进程，①和⑤之间的间隔可能很长；因此不应把“相邻编号操作”理解为“中间不存在其他步骤”。
+4. **驱动程序、通用中断框架、调度器的职责划分。** ④一般包括保存现场、转到中断入口等中断分派过程；③涉及键盘设备寄存器读取，属于设备驱动职责；①涉及解除阻塞和就绪队列管理，与进程调度/唤醒机制有关。题目问“完成哪个操作的代码属于键盘驱动”，应答③而不是笼统答④。
+5. **内核态、进程状态不是同一维度。** “CPU 在内核态”描述处理器当前特权级；“P 在阻塞态”描述某个进程能否被调度。中断可能打断另一个正在用户态运行的进程 Q，此时 CPU 切入内核态执行中断服务，但 P 仍在阻塞队列中。这是经典概念区分。
+6. **特殊情况和答题前提。** 若字符在系统调用前已缓存在内核，`read` 可能直接返回，P 不必进入阻塞队列；本题明确列出②，故讨论的是确实阻塞的路径。若设备使用 DMA 或输入缓冲路径不同，数据的搬运细节可能改变，但“事件到达—内核处理—唤醒—重新调度”的状态逻辑不变。
 
 </ExamExplanation>
-
 </ExamSolution>
-
 </ExamQuestion>
-
----
 
 <span id="question-original-211" />
 
 <ExamQuestion>
 
-<span className="inline-block rounded border px-2 py-0.5 text-xs text-fd-muted-foreground">原创</span>
+某进程 A 发起阻塞式网络接收系统调用，在网卡尚未收到报文时进入阻塞态。网络中断到来时，CPU 正运行进程 B。设接收完成后 A 会被唤醒，但 B 的当前时间片未结束。
 
-用户进程 P 调用 `readKeyboard()`，系统输入 FIFO 为空。一个错误实现如下：
+1. 中断处理期间 CPU 处于什么特权级？A、B 各可能处于什么状态？
+2. 把 A 加入就绪队列后，是否必须立即从 B 切换到 A？
+3. 若改为非阻塞接收且接收缓冲区为空，A 是否必然进入阻塞态？为什么？
 
-```c
-readKeyboard() {
-    if (fifo.empty()) sleep(P);   // 检查和睡眠是两个独立步骤
-    return fifo.pop();
-}
+<ExamSolution><ExamAnswer>
 
-irqHandler(char c) {
-    fifo.push(c);
-    wake(P);                      // 只对已经阻塞的进程有作用
-}
-```
+1. CPU 在内核态；A 在被唤醒前处于阻塞态，唤醒后为就绪态；B 被中断暂时打断，但不因此自动成为阻塞态，通常仍被视作正在运行进程的内核执行上下文。
+2. 不必须；是否立刻抢占 B 取决于调度策略、进程优先级与是否允许中断返回前抢占。
+3. 不必然。非阻塞接收可立即返回“当前无数据”等状态，不必等待设备事件。
 
-1. 构造一个字符已经进入 FIFO，而 P 却永久睡眠的竞态过程；
-2. 说明 P 在用户态、系统调用内、阻塞队列、就绪队列、重新运行期间的状态；键盘中断处理代码属于什么权限级别？
-3. 给出使用内核等待队列与“原子释放锁并睡眠”的正确抽象伪代码，解释为什么必须使用 `while` 检查队列条件；
-4. 如果键盘字符在系统调用之前已经到达并缓冲，P 是否必然阻塞？
+</ExamAnswer><ExamExplanation>
 
-<ExamSolution>
+1. 设备中断触发特权级切换，但不等于“中断发生在 A 的上下文”。中断上下文与等待该 I/O 的目标进程可能完全不同。
+2. `BLOCKED → READY` 是唤醒；`READY → RUNNING` 是调度，两者独立。抢占式系统可以选 A，但不能无条件保证；非抢占式系统可能让 B 继续运行。
+3. 阻塞/非阻塞决定系统调用在条件不满足时是否等待；同步/异步决定完成通知的组织方式，这两组概念不是同义词。
 
-<ExamAnswer>
+</ExamExplanation></ExamSolution>
+</ExamQuestion>
 
-1. P 发现 `fifo.empty()==true` 后尚未调用 `sleep`，此时中断处理程序放入字符并调用 `wake(P)`；由于 P 此时还未阻塞，唤醒无效；中断返回后 P 才执行 `sleep(P)`，**数据已经可用但 P 睡死**。
-2. 系统调用和中断处理都运行在内核态；P 阻塞时不能被调度，唤醒后先进入就绪态，真正被调度后才恢复执行。中断处理可发生在另一个进程运行时，CPU 内核态不等于 P 正在运行。
-3. 使用锁保护条件与等待队列，加入等待队列、释放锁和睡眠之间要采用内核提供的不可丢唤醒协议。
-4. **不必阻塞**：若 FIFO 已非空，则直接获取字符、返回系统调用。
+<span id="question-original-337" />
 
-</ExamAnswer>
+<ExamQuestion>
 
-<ExamExplanation>
+进程 P 调用 `read(fd, buf, 1)` 等待键盘输入。设数据尚未到达、P 因等待输入阻塞；之后按键产生设备中断，系统使用中断驱动 I/O。
 
-**一、最短反例**：设输入队列为空、P 的进程状态为 RUNNING：
+1. 将“陷入内核、阻塞 P、按键、响应中断、读取控制器、唤醒 P、P 获得 CPU、系统调用返回”排成合法顺序。
+2. P 被唤醒时为何不能直接写作运行态？
+3. 若系统采用轮询 I/O 而不是中断驱动，变化的是哪一部分机制？阻塞式系统调用的语义是否必然改变？
 
-| 时刻 | P（读操作） | 键盘中断路径 | FIFO/进程状态 |
-| --- | --- | --- | --- |
-| $t_0$ | `if(empty)` 得真 | — | 队列为空，P运行 |
-| $t_1$ | 尚未执行 `sleep` | `push('K')` | 队列有 K |
-| $t_2$ | — | `wake(P)`，P 未阻塞，唤醒无效 | 队列仍有 K |
-| $t_3$ | 调用 `sleep(P)` | — | P阻塞，但没有下一次键盘事件 |
+<ExamSolution><ExamAnswer>
 
-这里不是 CPU “完全没收到中断”，而是应用层的**检查条件与登记等待之间缺少原子性**。
+1. `陷入内核 → 阻塞 P → 按键 → 响应中断 → 读取控制器 → 唤醒 P → P 获得 CPU → 系统调用返回`。
+2. 就绪队列可能有其他进程；必须由调度器选中 P 并恢复其执行上下文，才能运行。
+3. 检测“设备完成”的方法由中断通知改为主动查询；阻塞语义不必改变，内核仍可让 P 睡眠，由其他内核执行路径轮询并唤醒它。
 
-**二、正确的抽象协议**。`qGuard` 是中断安全、跨核同步的短临界区保护；`sleep_atomic(qWait,qGuard)` 是操作系统提供的抽象操作：**先把当前线程登记为等待者，再与释放锁/挂起动作原子衔接**，被唤醒后重新持有锁返回。不能把它错误实现为“先 unlock，再普通 sleep”。
+</ExamAnswer><ExamExplanation>
 
-```c
-readKeyboard() {
-    lock_irqsave(qGuard);
-    while (fifo.empty()) {
-        sleep_atomic(qWait, qGuard);  // 自动释放后重拿锁，不丢唤醒
-    }
-    char c = fifo.pop();
-    unlock_irqrestore(qGuard);
-    return c;
-}
+1. 在时间线题先画出“请求者—设备—CPU 中断处理”三条泳道，可避免误认按键后立刻切回 P。
+2. 就绪意味着除 CPU 外所需资源已经满足，运行态才表示实际占有 CPU；二者由调度决定。
+3. 注意“内核轮询”与“进程忙等待”不同。轮询可由独立内核线程执行，不一定要求用户进程占用 CPU；但大量轮询可能带来额外 CPU 消耗。
 
-irqHandler(char c) {
-    lock_irqsave(qGuard);
-    fifo.push(c);
-    wake_one(qWait);               // P 变就绪，未必立即运行
-    unlock_irqrestore(qGuard);
-}
-```
-
-实际内核的等待队列接口必须正确保证锁的交接；中断上下文**不能调用会阻塞睡眠的互斥量**。上面的锁在短暂区间内自旋，且同核进入时应管理中断使能状态以避免自重入；多核要用真正的原子锁。
-
-**三、为什么等待用 `while` 而不是 `if`**。被唤醒后，可能是多个读者争用同一个字符，或其他线程在 P 运行前先抢走了字符，亦或发生虚假唤醒；条件“FIFO 非空”必须重新检查。只有在持锁状态下确认非空才可以 `pop()`，防止读空队列。
-
-**四、两组状态区分**：进程状态可为运行、阻塞、就绪；CPU 权限态是用户态/内核态。P 经系统调用 trap 进入内核态后可进入阻塞态；键盘 IRQ 由内核处理并可唤醒 P，但**就绪不是运行**，更不是“立即用户态返回”。若之前已有字符，系统调用可以在内核态立刻取出后返回用户态，无需发生阻塞或等待新的键盘中断。
-
-**模型迁移**：socket 可读等待、条件变量、设备完成中断、生产者消费者中的条件队列，都必须满足“**检查条件与睡眠注册原子衔接**”，否则即使每次中断都按时发生，仍可能丢唤醒。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
 
 <span id="question-2024-46" />
@@ -2230,152 +1732,91 @@ irqHandler(char c) {
 3. 若 B 初始非空，P1、P2 各执行 C3 一次。请定义尽可能少的信号量，并描述同步或互斥关系。
 
 <ExamSolution>
-
 <ExamAnswer>
 
-1. **是临界区。** 多个进程对同一个缓冲区进行 C1 写入，必须排他地判断/占有缓冲区并完成写入，避免同时写入和覆盖。
-2. 在本题规定的“B 初始为空、P1 写一次、P2 读一次”条件下，**一个初值为 0 的同步信号量** `full` 足够：
+1. **是临界区。** P1、P2 执行 C1 时都可能读写同一个容量为一个分组的共享缓冲区；即便 B 初始为空，也必须防止两者同时判断为空并覆盖写入。
+2. **一个同步信号量** `full=0` 就够了。因为只有一次 C1 与一次 C2，满足先写后读即可：
 
 ```c
 semaphore full = 0;
-P1() { C1(); signal(full); }
-P2() { wait(full); C2(); }
+// P1
+C1; signal(full);
+// P2
+wait(full); C2;
 ```
 
-3. 在“B 初始非空、两进程只各修改一次”条件下，**一个初值为 1 的互斥信号量** `mutex` 足够：
+3. **一个互斥信号量** `mutex=1` 就够了：
 
 ```c
 semaphore mutex = 1;
-P1() { wait(mutex); C3(); signal(mutex); }
-P2() { wait(mutex); C3(); signal(mutex); }
+// P1
+wait(mutex); C3; signal(mutex);
+// P2
+wait(mutex); C3; signal(mutex);
 ```
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-### 一、先区分三种操作的“状态前提”
-
-把缓冲区状态记为 $S\in\{0,1\}$：$S=0$ 表示空，$S=1$ 表示其中恰好有一个分组。
-
-| 操作 | 执行前提 | 执行后状态 | 并发风险 |
-| --- | --- | --- | --- |
-| C1（写入） | $S=0$ | $S=1$ | 两个写者竞争同一空位，可能相互覆盖 |
-| C2（取走） | $S=1$ | $S=0$ | 两个读者可能重复消费、与修改交错 |
-| C3（修改） | $S=1$ | $S=1$ | 两个修改者可能丢失更新，或读到中间状态 |
-
-**判题关键词**：互斥关注“同一时刻有几个执行者进入”，同步关注“某事件必须发生之后才允许另一事件发生”。“空/非空”是**条件同步**，对缓冲区的互斥写入是**临界资源访问**。
-
-### 二、第（1）问为什么必须把“判断为空＋占用＋写入”视为一个整体
-
-不能采用两个进程各自执行以下非原子流程：
-
-```c
-if (B_is_empty()) C1();   // 不安全：检查与写入之间可能切换
-```
-
-假设 B 初始为空：P1 判断为空后被切换；P2 同样判断为空并写入；P1 恢复后也写入。结果 B 被覆盖，违背“空时才可 C1”。因此需用锁或等价的原子缓冲区状态转移保护**完整的检查与更新**，不仅要锁住赋值语句。
-
-### 三、第（2）问为何只需一个信号量
-
-题设 P1 仅一次 C1、P2 仅一次 C2，且 B **最初为空**，全局只须保证
-
-$$
-C1\prec C2.
-$$
-
-`full=0` 表示“尚未发生过可读取的数据就绪事件”。P2 如果先执行，会在 `wait(full)` 阻塞；P1 写完才 `signal(full)`。如 P1 先执行，其 V 留下令牌，P2 后到也能通过——信号量不同于可能丢失的单纯事件脉冲。
-
-本问不需要再添加 `mutex`：P2 在获得 `full` 之前不可能读，P1 在发信号之前已经写完，两段缓冲区访问绝不重叠。**只有单次一写一读的限定条件下**才有这个省略；若多生产者、多消费者反复运行，必须重新设计状态与互斥协议。
-
-### 四、第（3）问为什么用初值为 1 而不是 0
-
-B 一开始有分组，两个 C3 都具备“非空”的状态前提，却**不能并发修改**。`mutex=1` 允许一人先进入；进入后 P 使其变为 0，另一人阻塞；退出后 V 使第二人获准。若初值设 0 且没有其他线程负责发 V，两人会一直等待。
-
-这里**不需要额外设一个 `full`**：B 在两次 C3 前后都保持非空，已有初始状态保证。也不需要把两次 C3 强制为 P1 先、P2 后，互斥并不要求固定顺序。
-
-### 五、扩展：单缓冲区循环操作的统一做法
-
-若有任意多个执行 C1、C2、C3 的进程，并规定 C2 **取走**分组、C3 修改后仍保留分组，可用两个互补的二元计数信号量：
-
-```c
-semaphore empty = 1, full = 0;
-writer()   { wait(empty); C1(); signal(full); }
-reader()   { wait(full);  C2(); signal(empty); }
-modifier() { wait(full);  C3(); signal(full); }
-```
-
-因为同一个 `full` 令牌每次只能被一个读者或修改者取得，`empty` 也只有一个，所以访问操作本身已经串行，不必再额外加 `mutex`。**前提**是三类操作均按上述协议执行，C1/C2/C3 是不可在外部擅自并发访问缓冲区的完整操作，且一个生产者一次仅生产一个分组。信号量保证安全性，不天然保证修改者和消费者之间的严格公平性。
-
-**做题流程**：写状态表 → 分清互斥/同步 → 找最小必要前驱关系 → 赋正确初值 → 检查先后两种调度与长时间循环情况。
+1. **先分清同步与互斥。** 同步约束“事件 A 完成后才允许事件 B”，互斥约束“同一时刻至多一个执行流访问共享临界资源”。题中的三个操作对 B 都可能有写入，执行期间应当视为对共享缓冲区的整体操作，而不应拆开后允许交叉执行。若 P1、P2 均运行 C1，空缓冲区这一条件不足以防止两者读取相同旧状态，需互斥保护检查与写入的原子性。
+2. **第（2）问为什么没有 `mutex`？** 已知初始 B 为空，且 P1 只执行一次写入、P2 只执行一次读出；借助 `full=0` 令读者必须等写者完成。这里 `C1` 与 `C2` 时间段不会重叠，因此额外互斥信号量冗余。先写完后读的先行发生关系是 `C1 → signal(full) → wait(full) → C2`。题目“尽可能少”的限定要求利用操作次数简化同步。
+3. **第（3）问为什么不需要 `full`？** B 起初已非空，且两个进程只修改、不消费其中分组，非空前提持续成立；两次 C3 的首要风险是并发写导致丢失更新。`mutex=1` 提供二元互斥；若不加锁，两个进程都读旧值再改写，最后一次写入可能覆盖先前修改。
+4. **严格写法与初值。** 信号量初值是一种资源/事件的编码：`full=0` 表示尚未收到“已填充”许可，`mutex=1` 表示共享缓冲区当前无持有者。`wait()` 是原子的减计数/阻塞操作，`signal()` 是原子的增加计数/唤醒操作。不能把普通 `if(full)` 代替它们。
+5. **泛化与陷阱。** 若 P1、P2 不止执行一次，而是两个生产者和消费者循环运行，则仅 `full` 不够；通常要 `empty=1`、`full=0`、`mutex=1`，且按“先申请计数许可，再获得互斥锁”的顺序执行，避免持有互斥锁时等待另一方所需条件而死锁。若加入 C3 并发读/写，则仍需互斥或适当读写锁，不能简单以“B 非空”替代互斥。
+6. **判断是否为临界区的方法。** 按顺序问：是否访问共享可变对象？是否会修改？并发交错能否破坏不变量？本题答案依赖于缓冲区作为单个共享数据分组的设定，不应将“操作相同”误认为“可以并行”。
 
 </ExamExplanation>
-
 </ExamSolution>
-
 </ExamQuestion>
-
----
 
 <span id="question-original-212" />
 
 <ExamQuestion>
 
-<span className="inline-block rounded border px-2 py-0.5 text-xs text-fd-muted-foreground">原创</span>
+某单槽缓冲区初始为空，一个生产者连续生产 5 个分组，一个消费者连续取走 5 个分组，两者并发执行，要求严格防止“空时读、满时写”。
 
-单槽缓冲区初始为空。生产者可将一个数据包放入空缓冲区（`put`）；消费者仅在非空时取走并使缓冲区变空（`take`）；修改者仅在非空时原地修改包，修改后仍为非空（`edit`）。有多个上述三类线程可反复执行，缓冲区操作不可同时进行。
+1. 给出经典的、可推广到多生产者多消费者的三信号量方案，并注明初值。
+2. 写出两者各自的 `wait/signal` 顺序。
+3. 为什么不应在持有 `mutex` 时先等待 `empty` 或 `full`？
 
-1. 仅用 **2 个计数信号量**实现三种操作的互斥与空/满同步，给出初值和代码；
-2. 解释为何修改者不能 `wait(full)` 后在退出时执行 `signal(empty)`，也不能先 `wait(empty)` 再修改；
-3. 判断该方案是否保证修改者不会无限期抢占消费者的机会；若不保证，应增添什么类型的机制？
+<ExamSolution><ExamAnswer>
 
-<ExamSolution>
+1. 经典方案为 `empty=1`、`full=0`、`mutex=1`。它明确区分容量约束与临界区互斥，并可直接推广到多个生产者、多个消费者。
+2. 生产者：`wait(empty); wait(mutex); C1; signal(mutex); signal(full);`；消费者：`wait(full); wait(mutex); C2; signal(mutex); signal(empty);`，都循环 5 次。
+3. 若先持有 `mutex` 再等 `empty/full`，可能阻止对方进入缓冲区执行释放相应许可的操作，从而产生死锁。
 
-<ExamAnswer>
+</ExamAnswer><ExamExplanation>
 
-```c
-semaphore empty = 1, full = 0;
+1. `empty` 表示空槽数量，`full` 表示满槽数量，始终维持 `empty+full=1`（在没有预约中的瞬时状态下）。二元 `mutex` 保护对单槽数据的访问。
+2. 两方必须把“等待资源”放在“取得互斥锁”之前；完成操作先释放锁，再向另一方公布状态。单生产者单消费者的更特殊实现可利用事件同步规避部分互斥，但本题要求通用且明确保护缓冲区的版本。
+3. 死锁构造：消费者抢到 `mutex`，又因 `full=0` 被阻塞；生产者即使 `empty=1`，也无法获得 `mutex` 写数据，因此永远不能 `signal(full)`。
 
-void producer() {           // 每次产生一个分组
-    P(empty);
-    put();
-    V(full);
-}
-void consumer() {
-    P(full);
-    take();
-    V(empty);
-}
-void editor() {
-    P(full);
-    edit();
-    V(full);                 // 修改后仍是满状态
-}
-```
+</ExamExplanation></ExamSolution>
+</ExamQuestion>
 
-两个许可分别表示可取得的“空缓冲区所有权”和“满缓冲区所有权”。`editor` 必须归还 `full`，而不是 `empty`。若未保证等待者 FIFO 公平，可能发生长期饥饿。
+<span id="question-original-338" />
 
-</ExamAnswer>
+<ExamQuestion>
 
-<ExamExplanation>
+共享缓冲区 B 初始非空，两个进程各执行一次修改操作 `C3`，其中每次修改是“读取共享整数 x，计算 x+1，再写回 x”。初值 `x=7`。
 
-**一、关键不是额外再设一个 `mutex`，而是许可本身可以排他地代表缓冲区。** 在空闲边界，`empty+full=1`；某线程操作时先 P 获得一个令牌，两者可能都为 0，但不会出现两个线程同时持有许可。生产者拿空许可并归还满许可；消费者拿满许可并归还空许可；修改者拿满许可并归还满许可。
+1. 不加锁时，能否出现最终 `x=8`？给出操作交错。
+2. 用一个信号量保证结果确定，并求最终 x。
+3. 如果在不同进程间仅使用普通布尔变量 `busy` 做 `if(!busy) busy=true`，能否保证互斥？
 
-| 当前缓冲区状态 | 允许开始的操作 | 操作结束后归还 |
-| --- | --- | --- |
-| 空 | `put` | `full` |
-| 满 | `take` 或 `edit`（其中一个） | `take` 归还 `empty`；`edit` 归还 `full` |
+<ExamSolution><ExamAnswer>
 
-**二、考察对状态不变量的保护。** 如果 `edit` 结束误发 `empty`，即使包仍在 B，生产者也会被允许写入，导致覆盖；若 `edit` 先等 `empty`，它可能在真正空的时候修改不存在的分组，而且在满时等待错误资源，造成无谓阻塞。`full` 同时承担“有数据”和“该数据暂时没有被其他操作独占”的语义。
+1. 可以。两个进程都先读到 7，分别计算 8，再依次把 8 写回；一次更新被覆盖。
+2. 令 `mutex=1`，每次修改前 `wait(mutex)`，修改后 `signal(mutex)`，最终 `x=9`。
+3. 不能。两进程可能都在 `busy=false` 时通过判断，然后分别赋值 `true` 并进入临界区；检查与赋值必须具备原子性。
 
-**三、最少对象与公平性是不同问题。** 这里两种类型的状态都要表达，因此上述 2 个信号量足够；无需把 `mutex` 当作永远必须额外加的第三个量。若信号量等待队列不承诺 FIFO，修改者反复 `P(full);edit();V(full)` 可能让消费者一直得不到许可——即使没有死锁，也可能**饥饿**。要保障“消费者等待后不被修改者无限插队”，需带队列的公平唤醒策略或显式排队/批次优先级协议，不能仅靠二元计数的初值保证。
+</ExamAnswer><ExamExplanation>
 
-**四、推广**：多槽缓冲区有 `N` 个空位和若干满位，不再由单个 `full` 令牌独占整个对象，此时生产/消费还需保护缓冲区下标、队头/队尾等共享元数据，常见实现为 `empty=N, full=0, mutex=1`。本题刻意限为**单槽**，正是考“必要信号量数”而不是机械套模板。
+1. 经典**丢失更新**风险并非只有“同时写”才发生，而是读取—计算—写回三步的非原子交错。
+2. 信号量提供互斥临界区，两个 `+1` 顺序执行时得到 `7+1+1=9`。此处无需额外事件信号量，因为初始状态已经满足修改前提。
+3. 进入区正确性必须建立在原子同步原语上，例如信号量、互斥锁或 CAS；普通检查赋值不具备该性质。
 
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
 
 <span id="question-2025-45" />
@@ -2391,159 +1832,105 @@ void editor() {
 现有铁锹和水桶各一个，铁锹用于挖树坑和填土，水桶用于浇水。当尚未被乙处理的树坑数量小于 3 时，甲才可以继续挖坑。初始时树坑数为 0，铁锹和水桶均可用。请定义尽可能少的信号量，用 `wait()`、`signal()` 描述三人的同步、互斥关系，并说明各信号量作用及初值。
 
 <ExamSolution>
-
 <ExamAnswer>
 
-使用 4 个信号量（`P()`/`V()` 分别表示 `wait()`/`signal()`）：
+设置 **4 个信号量**：`shovel=1` 保护甲、乙共享的铁锹；`slots=3` 表示未处理树坑的可用容量；`pits=0` 表示已挖好但未被乙认领的树坑；`water=0` 表示已栽种、尚待丙浇水的树苗。
 
 ```c
-semaphore shovel = 1;  // 1 把铁锹：甲挖坑与乙填土互斥
-semaphore freePit = 3; // 允许尚未完成乙操作的坑的余量
-semaphore dug = 0;     // 已挖好、等待乙处理的坑
-semaphore planted = 0; // 已填土、等待丙浇水的树苗
+semaphore shovel = 1;
+semaphore slots  = 3;
+semaphore pits   = 0;
+semaphore water  = 0;
 
-void A() {                  // 甲
-    while (true) {
-        P(freePit);         // 先预订一个未填土的坑名额
-        P(shovel);
-        dig();
-        V(shovel);
-        V(dug);             // 交给乙一个已挖好的坑
+void Jia(void) {
+    while (1) {
+        wait(slots);      // 预留一个待乙处理的树坑名额
+        wait(shovel);
+        挖坑();
+        signal(shovel);
+        signal(pits);     // 一个完成的树坑可交给乙
     }
 }
-void B() {                  // 乙
-    while (true) {
-        P(dug);
-        P(shovel);
-        plant_and_fill();
-        V(shovel);
-        V(freePit);         // 已完成乙阶段，不再占坑名额
-        V(planted);
+void Yi(void) {
+    while (1) {
+        wait(pits);       // 有树坑才能放苗、填土
+        wait(shovel);
+        放苗并填土();
+        signal(shovel);
+        signal(slots);    // 该树坑已处理，释放名额
+        signal(water);    // 允许丙给它浇水
     }
 }
-void C() {                  // 丙
-    while (true) {
-        P(planted);
-        water();            // 丙是水桶的唯一使用者
+void Bing(void) {
+    while (1) {
+        wait(water);
+        浇水();
     }
 }
 ```
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-### 一、题意建模：带容量约束的三级流水线
+1. **把自然语言要求拆成三种约束。** (a) 甲挖完才允许乙放苗填土；(b) 乙填土完才允许丙浇水；(c) 未被乙处理的树坑不超过 3，且甲、乙不能同时使用铁锹。前两项是两个前驱同步关系，第三项包含容量约束和互斥约束，各用一个计数或二元信号量表达。
+2. **计数的准确语义。** `slots` 初值 3，甲每开始挖一个坑就先获取一份额度，乙处理完一个坑才释放额度。因而“已挖好、尚未处理的坑”必不超过 3。事实上该算法更保守地把正在挖的坑也算作预留容量；这不会违反题目约束。`pits` 记录尚未被乙领取的完成树坑，乙 `wait(pits)` 后即可接管一个坑。`water` 对应下一流水阶段的已完成任务，丙绝不能在乙填土完成前通过 `wait(water)`。
+3. **为何铁锹是一个独立信号量。** 即使甲、乙操作的是不同的树坑，铁锹仍只有一把；他们对工具的使用构成临界区。`wait(shovel)` 必须包住实际需要用铁锹的操作，而不是包住整个线程生命周期。
+4. **水桶为何不用另设互斥锁。** 按题设只有丙负责浇水，多个并发使用者不存在，因此无争用。若新增第二名浇水工，水桶需另设 `bucket=1`，除非采用其他等效的串行机制。
+5. **信号量顺序避免死锁。** 甲应先 `wait(slots)` 再 `wait(shovel)`：若甲先占着铁锹而因三坑已满等待额度，乙无法取得铁锹去填土并释放额度，会造成死锁。乙先 `wait(pits)` 再 `wait(shovel)`，避免拿着铁锹等待甲挖好坑，阻塞生产者。
+6. **无需要求全程串行。** 当乙已完成某个树坑并释放铁锹后，甲可以挖下一个坑，丙可以同时浇此前填好的坑。这才是流水线并发，而不是给所有动作套一把大锁。若将 `slots` 的释放提前到乙刚开始处理树坑，按“已被乙接手”理解亦可能成立；上面的实现是在乙完成处理时才释放，更保守且易证明正确。
+7. **无重复/无超前证明。** 每次 `signal(pits)` 由一次完成的挖坑产生，乙消费一个 `pits` 才能栽一棵；每次 `signal(water)` 由一次完成的填土产生，丙消费一个 `water` 才能浇一棵。由信号量许可与操作的一一对应性，可证明各阶段不凭空多执行。
 
-每棵树经历三阶段：
-
-$$
-\underbrace{\text{甲：挖坑}}_{\text{铁锹}}
-\longrightarrow
-\underbrace{\text{乙：放苗并填土}}_{\text{铁锹}}
-\longrightarrow
-\underbrace{\text{丙：浇水}}_{\text{水桶}}.
-$$
-
-“尚未被乙处理的树坑少于 3 个才能继续挖”意味着限制的是**已挖出但尚未完成填土的在制品数**，不是所有已种树木总数，也不是已浇水完成的数量；因此乙完成填土即可归还一个 `freePit` 名额，**不必等丙浇水**。
-
-### 二、四个信号量各保护什么
-
-| 信号量 | 初值 | 实际意义 | 谁 P / 谁 V |
-| --- | ---: | --- | --- |
-| `shovel` | 1 | 铁锹排他权 | 甲、乙均 P/V |
-| `freePit` | 3 | 可新挖的未处理树坑名额 | 甲 P；乙 V |
-| `dug` | 0 | 可供乙种植的已完成树坑数 | 乙 P；甲 V |
-| `planted` | 0 | 可供丙浇水的已填土树苗数 | 丙 P；乙 V |
-
-**水桶无须信号量**：题目中只有丙会使用水桶；单个进程串行执行自身浇水操作，已经天然互斥。不能机械地“有工具就多设一个互斥量”。
-
-### 三、用不变量证明坑数不超 3
-
-设 $D$ 为已完成挖坑总数、$F$ 为已完成乙填土总数，则在完整操作的边界，未填土树坑数为 $D-F$，应满足
-
-$$
-0\le D-F\le3.
-$$
-
-甲每挖一坑之前必须先拿到 1 个 `freePit` 许可。乙每完成一个坑的填土后返还 1 个许可，因此**甲已经预约但尚未由乙处理完成的坑数也不超过 3**；中途可能出现“已预约尚未挖完”的名额，使约束更保守、不会超限。`dug` 由甲完成后 V，保证乙不会对尚不存在的坑填土；`planted` 由乙完成后 V，保证丙不会提前浇水。
-
-### 四、锁的次序为何重要
-
-甲必须先 `P(freePit)`，**再** `P(shovel)`。错误写法如下：
-
-```c
-P(shovel);
-P(freePit);    // 危险：名额满时甲拿着铁锹等待
-```
-
-如果 3 个未填土坑已满，甲会持有铁锹等待乙填土释放名额，而乙恰好也需要铁锹完成填土；两者形成“甲占有工具等名额—乙需要工具才能归还名额”的死锁。正确写法在等待名额时**不持有铁锹**，乙仍可获得铁锹并释放资源。
-
-同理乙先 `P(dug)`，然后再争用 `shovel`，防止乙在没有已挖好坑时空占铁锹，导致甲无法挖坑。
-
-### 五、为什么不需要强制甲、乙、丙三人完全串行
-
-某个坑在乙完成之前不能由丙浇水，但**丙给上一棵树浇水时，甲和乙仍可以准备下一棵树**。一把铁锹使甲、乙相互排他，并不意味着丙也要争铁锹；增加全局 `mutex` 会不必要地降低流水线并行度。
-
-**答题模板**：识别“满/空”资源计数 → 识别共享工具互斥 → 先 P 可能阻塞的容量，再 P 工具 → 完成生产后 V 下游资源 → 完成消费后 V 上游容量 → 证明没有循环持有等待。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
-
----
 
 <span id="question-original-213" />
 
 <ExamQuestion>
 
-<span className="inline-block rounded border px-2 py-0.5 text-xs text-fd-muted-foreground">原创</span>
+三人植树的规则保持不变，但最多允许 **2 个**已挖好而未被乙处理的树坑。甲乙仍共用一把铁锹，丙独占水桶。
 
-三个工人 A、B、C 顺序挖坑、填土、浇水，A/B 共用唯一铁锹，只有 C 使用水桶。未完成 B 阶段的坑最多允许存在 **2** 个。三人同时循环工作。
+1. 应把原方案的哪些初值或步骤改动？
+2. 当乙暂时停止工作，甲最多能连续挖多少个尚未被乙处理的坑？
+3. 如果甲先执行 `wait(shovel)` 再执行 `wait(slots)`，能否构造死锁？
 
-1. 给出可保证上述条件的 P/V 伪代码和信号量初值；
-2. 写出包含“预留名额”的不变量，并判断当 A 已预留第 2 个名额但尚未挖完时，B 能否先完成第 1 个坑并释放名额；
-3. 若 A 写为 `P(shovel);P(slot);dig();`，构造一条发生死锁的轨迹；说明把 C 也纳入铁锹互斥是否必要。
+<ExamSolution><ExamAnswer>
 
-<ExamSolution>
+1. 只改 `slots=2`；其余 `shovel=1、pits=0、water=0` 和执行顺序不变。
+2. 最多 2 个；之后甲会阻塞在 `wait(slots)`。
+3. 可以。若 2 个树坑名额都已用尽，甲拿着铁锹等待 `slots`；乙虽已等到 `pits`，却必须取得铁锹才能填土并释放 `slots`，于是循环等待。
 
-<ExamAnswer>
+</ExamAnswer><ExamExplanation>
 
-```c
-semaphore shovel=1, slot=2, hole=0, ready=0;
+1. 容量变化应只影响代表容量的计数信号量，其他同步关系不变。
+2. `slots` 是无须查询共享计数变量的原子配额控制，比 `if(坑数<2)` 更安全。
+3. 判断信号量死锁时画资源分配图：甲持有铁锹请求名额，乙持有处理机会却等待铁锹，名额只能由乙完成填土后归还，存在环路依赖。
 
-A() { while (true) { P(slot); P(shovel); dig(); V(shovel); V(hole); } }
-B() { while (true) { P(hole); P(shovel); plant_fill(); V(shovel);
-                      V(slot); V(ready); } }
-C() { while (true) { P(ready); water(); } }
-```
+</ExamExplanation></ExamSolution>
+</ExamQuestion>
 
-“已由 A 预留而未由 B 完成的名额”始终不超过 2；若 A 抢占铁锹后等待已耗尽的 `slot`，B 无法取得铁锹完成填土，形成死锁。C 不使用铁锹，故无需参与其锁。
+<span id="question-original-339" />
 
-</ExamAnswer>
+<ExamQuestion>
 
-<ExamExplanation>
+在原植树题基础上增加第二个浇水工丁，丙丁都使用唯一水桶，其他条件不变，每名浇水工都可处理任意已栽种的树苗。
 
-**一、建模两条传送带。** A 完成的 `hole` 令牌供 B 消费；B 完成的 `ready` 令牌供 C 消费。A 提前消费一个 `slot`，B 完成时归还。铁锹互斥只覆盖 A 和 B 真正需要使用工具的阶段。`P(hole)` 在 `P(shovel)` 之前，使 B 不会拿着铁锹等待坑出现。
+1. 最少再增加哪种同步量？给出初值。
+2. 给出丙、丁的通用执行循环。
+3. 若 `signal(water)` 放在乙填土之前，会出现什么错误？
 
-**二、不变量证明。** 令 $R$ 表示 A 成功通过 `P(slot)` 的总次数，$F$ 表示 B 完成 `plant_fill()` 并执行 `V(slot)` 的总次数，则
+<ExamSolution><ExamAnswer>
 
-$$
-0\le R-F\le2,
-$$
+1. 新增 `bucket=1`，用来互斥占有唯一水桶。
+2. 两人均执行：`wait(water); wait(bucket); 浇水(); signal(bucket);`，循环运行。
+3. 丙或丁可能在树苗尚未放入、土尚未填好时就被唤醒浇水，违反必要的先后顺序。
 
-其中 $R-F$ 是被预约但尚未被 B 处理结束的数量；真正“已挖成、未填土”的坑数不超过 $R-F$。在 A 预订第 2 个名额但尚未挖完时，若第 1 个坑已由 A 完成、B 获得铁锹，B 可以填土并 `V(slot)`，从而为 A 的下一轮提供空间。这说明名额不是一把阻止流水线流动的全局锁。
+</ExamAnswer><ExamExplanation>
 
-**三、具体死锁轨迹。** 先让 A 挖好两个坑（`slot=0`），尚未让 B 填土；A 第三次迭代若先拿 `shovel`（从 1 变 0），再调用 `P(slot)` 阻塞。B 虽然 `hole>0` 可通过 `P(hole)`，却在 `P(shovel)` 阻塞；A 要等 B 归还 `slot`，B 要等 A 归还铁锹，所以两者互等。正确次序先取得容量令牌，不会拿着工具等容量。
+1. 两个浇水者竞争同一件工具，原题仅单个丙时不需要该互斥信号量；并发主体增加后资源约束随之变化。
+2. `water` 为计数许可，每完成一次填土产生一个；任一浇水者消费一次。`bucket` 才是对实际器具的独占锁，应在取得浇水任务之后再申请，避免无任务的工人一直占用水桶。
+3. 同步量 `signal()` 的放置位置代表“前驱步骤真正完成”的时刻。不能因为已经获得铁锹或开始填土就提前宣布流水线下一环节可执行。
 
-**四、最小化原则**：一把水桶只有 C 使用，不存在跨进程竞争；加 `bucket=1` 只是冗余。在不同模型下若增加第二名浇水工人，才应考虑共同水桶互斥。注意“无死锁”还不等于“调度公平”；单纯 P/V 不保证某个工人一定获得工具。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
 
 <span id="question-2026-45" />
@@ -2569,150 +1956,82 @@ $$
 2. 若时间片从 50ms 改为 100ms，CPU 调度次数将增大、不变还是减少？若时钟中断间隔从 10ms 改为 1ms，系统开销将增大、不变还是减少？
 
 <ExamSolution>
-
 <ExamAnswer>
 
-1. 以题目所给的 **10 ms 周期时钟中断**、只在中断时发生高优先级抢占、进程完成时立即重新调度为口径，调度开始时刻依次为：
-
-$$
-10,20,70,80,90,140,180\quad(\mathrm{ms}).
-$$
-
-因此 **CPU 调度（选定下一运行进程）7 次**，截至 225 ms 全部完成之前的 **时钟中断 22 次**（10、20、…、220 ms）。首次调度：$P_1=90$、$P_2=10$、$P_3=140$、$P_4=20$ ms。
-2. 时间片改成 100 ms 后调度次数由 **7 减为 5**（在其他规则不变时）；中断周期改成 1 ms，周期性中断处理频率上升，故系统的**中断处理开销增大**（总开销还取决于程序运行多久）。
+1. 从 `10 ms` 起，CPU 依次执行 `P2(10–20) → P4(20–70) → P2(70–80) → P4(80–90) → P1(90–140) → P3(140–180) → P1(180–225)`。按题设从 10 ms 开始计的时钟中断，共 **22 次**（10、20、…、220 ms）；调度共 **7 次**。首次运行时刻：**P1 为 90 ms，P2 为 10 ms，P3 为 140 ms，P4 为 20 ms**。
+2. 时间片改为 `100 ms`，**调度次数减少**（在其他条件保持不变时为 5 次）；中断间隔改为 `1 ms`，单位时间内中断更频繁，**系统开销增大**。
 
 </ExamAnswer>
-
 <ExamExplanation>
 
-### 一、先固定四条调度语义
+1. **时钟中断与进程到达分别记录。** P1、P2 同在 10 ms 就绪，初始优先级分别为 3 和 4，先选 P2。P3 在 12 ms 到达、P4 在 14 ms 到达，但题设明确“仅时钟中断才触发抢占”，所以不能把 14 ms 当作切换时刻；20 ms 中断到来，优先级 5 的 P4 抢占 P2。
+2. **抢占和时间片耗尽处罚不同。** P2 在 20 ms 被更高优先级进程抢占，原优先级仍为 4，未执行的 CPU 工作量还剩 `20−10=10 ms`。P4 从 20 ms 连续执行 50 ms 到 70 ms，时间片耗尽，优先级从 5 降为 4；P2 自 20 ms 起已在同优先级就绪队列等待，比刚在 70 ms 重新入队的 P4 更早，故先选 P2。
+3. **逐段甘特表。**
 
-- **优先级数值越大越优先**；优先级相同时按**进入就绪队列先后**选进程。
-- P3 于 12 ms、P4 于 14 ms 到达，但**到达本身不能即时抢占**；下一次允许的抢占检查点是 20 ms。
-- 时间片耗尽才将优先级减 1。**被更高优先级进程抢占时不降优先级**；正常运行完毕更不需要重新排队。
-- 进程执行完其所需 CPU 时间可以在非时钟刻度（这里是 225 ms）结束；此时可以发生完成/退出引发的调度，不必等下次时钟中断。注意“时钟中断次数”和“调度次数”是两个不同计数器。
+| 区间（ms） | 当前进程 | 完成后发生的事 | 剩余运行量（ms） |
+| --- | --- | --- | --- |
+| 10–20 | P2 | 被 P4 抢占，优先级保持 4 | P2 还需 10 |
+| 20–70 | P4 | 用尽 50 ms 时间片，优先级降为 4 | P4 还需 10 |
+| 70–80 | P2 | 运行结束 | P2 为 0 |
+| 80–90 | P4 | 运行结束 | P4 为 0 |
+| 90–140 | P1 | 用尽时间片，优先级由 3 降到 2 | P1 还需 45 |
+| 140–180 | P3 | 运行结束 | P3 为 0 |
+| 180–225 | P1 | 运行结束 | P1 为 0 |
 
-### 二、画精确甘特图，而不是按到达时间立即抢占
+4. **140 ms 的关键判定。** P1 已运行 50 ms 并降到优先级 2；P3 自 12 ms 起就在优先级 2 的就绪队列等待，故同级先到的 P3 优先。P3 运行量只有 40 ms，至 180 ms 结束；P1 再把剩余 45 ms 运行完，结束于 225 ms。累计 CPU 工作量 `95+20+40+60=215 ms`，从 10 ms 至 225 ms 正好 215 ms，没有隐含空闲段，构成独立校验。
+5. **两种“次数”不可混淆。** 时钟中断按题设 10 ms 周期，从调度起点 `10,20,…,220` 共 `(220−10)/10+1=22` 次；并非每次中断都产生上下文切换。题目所计 7 次调度是 7 个进程被选中开始或恢复执行的节点：10、20、70、80、90、140、180 ms。225 ms 完成时触发的结束调度没有另一个就绪进程运行，不纳入这 7 个选择事件。若题目采用不同的“调度次数”或“起始中断”定义，务必先说明统计口径。
+6. **改 100 ms 时间片时重新模拟，不靠猜。** P2 在 10–20 ms 运行被抢占；P4 在 20–80 ms **直接完成**（$60<100$）；P2 在 80–90 ms 完成；P1 在 90–185 ms 完成（$95<100$）；P3 在 185–225 ms 完成，共 5 段。时钟周期改 1 ms，定期中断的频率约提高 10 倍（相同运行时长条件下），但这不是说进程切换次数也一定提高 10 倍。
+7. **易错点归纳。** 优先级数字越大越优先；新进程的到达时间不一定等于被抢占时间；时间片耗尽才降低优先级；相同优先级要比较**最近一次入队的先后**；重新就绪与取得 CPU 是两件事；进程完成不一定恰落在时钟滴答上。
 
-```text
-时间(ms) 10    20                70   80   90                140           180         225
-         | P2 |       P4         | P2 | P4 |       P1         |     P3      |    P1      |
-         +----+------------------+----+----+------------------+-------------+------------+
-```
-
-| 时段 (ms) | 运行 | 运行后剩余 CPU (ms) | 事件与进入就绪队列的处理 |
-| --- | --- | ---: | --- |
-| $[10,20)$ | P2 | 10 | P2 优先级 4；20 ms 中断时发现更高优先级 P4（5），P2 **被抢占但优先级不变** |
-| $[20,70)$ | P4 | 10 | P4 用完 50 ms 时间片，优先级由 5 降至 4 并在 70 ms 排队 |
-| $[70,80)$ | P2 | 0 | P2 之前已在 20 ms 返回就绪队列；与 P4 同为优先级 4，P2 先入队，先运行完 |
-| $[80,90)$ | P4 | 0 | P4 运行剩余的 10 ms 并完成 |
-| $[90,140)$ | P1 | 45 | P1 优先级 3，运行 50 ms 后时间片耗尽、优先级变为 2 |
-| $[140,180)$ | P3 | 0 | P3 很早就在等候，且与 P1 同为优先级 2，故 P3 优先运行至完成 |
-| $[180,225)$ | P1 | 0 | P1 执行剩余 45 ms，全部进程结束 |
-
-关键细节：P4 在 70 ms 因时间片满才降为 4；P2 在 20 ms 被高优先级抢占**并没有降成 3**，故 70 ms 先运行 P2。P1 在 140 ms 时间片耗尽后与 P3 同为 2，依据入队先后 P3 在前。
-
-### 三、分别统计两种“次数”
-
-**调度次数**以 CPU 选定下一运行进程的时刻数计算：
-
-$$
-\{10,20,70,80,90,140,180\}\implies7\text{ 次}.
-$$
-
-**时钟中断次数**按整个运行区间 $[10,225)$ 中每隔 10 ms 的时钟点统计，时刻集合为
-
-$$
-\{10,20,30,\dots,220\},\qquad
-N=\frac{220-10}{10}+1=22.
-$$
-
-这里沿用原题将 **10 ms 时刻的首次计时中断/调度起点**算入中断数的口径；若某独立系统从 10 ms **之后**才开始计数，并排除起点事件，则仅有 20～220 ms 的 21 次。考试必须明确“起始中断是否纳入”的约定，不能机械地对总运行时间除以 10。
-
-### 四、把时间片改成 100 ms，重画而不是只猜“减少”
-
-总 CPU 服务量为 $95+20+40+60=215$ ms。新时间片 100 ms 已不小于任何进程的剩余运行需求（P2 虽被抢占，但没耗尽时间片），因此不再出现 **时间片到期引发的排队**。调度可列为
-
-$$
-P2\ [10,20)\to P4\ [20,80)\to P2\ [80,90)
-\to P1\ [90,185)\to P3\ [185,225).
-$$
-
-共 5 段/5 次选择，少于原来的 7 次。这里比较的是**按题目调度规则得到的 CPU 选进程次数**，不是每一次周期性时钟中断。
-
-### 五、高频时钟的利弊
-
-把周期从 10 ms 改成 1 ms，在相同长度的运行时间内，大约需要 10 倍数量级的周期时钟中断检查，保存现场、进入内核、调度条件判断等开销增多；其代价可能换来更及时地响应新高优先级就绪任务。不能据此认定 CPU 的用户计算量也变成 10 倍，亦不能假定更短的时钟周期必然改变时间片 50 ms 的**实际持续时间**。
-
-**技巧**：在时间轴上标出“到达、时钟刻度、时间片满、完成”四类事件；只在指定的抢占检查点处理高优先级到达，其他事件按题目规则更新状态。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
-
----
 
 <span id="question-original-214" />
 
 <ExamQuestion>
 
-<span className="inline-block rounded border px-2 py-0.5 text-xs text-fd-muted-foreground">原创</span>
+使用原题全部进程到达时刻、优先级和运行时间，改为“每次进入就绪队列的时间片为 100 ms，其余规则不变”，仍从 10 ms 起开始调度。
 
-单核调度采用“优先级 + 时间片轮转”，数值大的优先级更高，抢占仅在间隔为 **5 ms** 的周期时钟中断时触发；进程完成可立即调度下一就绪进程。新调度上 CPU 的进程获得一个完整 **15 ms** 时间片（即使上一次是被更高优先级进程抢占），用尽时间片仍未完成则优先级减 1。优先级相同时遵循先进入就绪队列者优先。进程如下：
+1. 写出完整的运行区间与首次运行时刻。
+2. 计算 CPU 调度次数及进程完成时刻。
+3. 为什么 14 ms 不能立刻切换到 P4？
 
-| 进程 | 到达时间 (ms) | 优先级 | CPU 总服务时间 (ms) |
-| --- | ---: | ---: | ---: |
-| A | 0 | 2 | 35 |
-| B | 7 | 3 | 13 |
-| C | 10 | 4 | 7 |
+<ExamSolution><ExamAnswer>
 
-1. 写出完整甘特图，指出 B 和 C 第一次上 CPU 的时刻；
-2. 按“每次选择进程均计一次调度，包括时间片到期后仍选中同一进程”的口径，统计调度次数；
-3. 周期中断从 $t=5$ ms 开始，到全部完成为止共有几次？说明为何不能简单地把完成时刻当作最后一次时钟中断。
+1. `P2(10–20)、P4(20–80)、P2(80–90)、P1(90–185)、P3(185–225)`；P1、P2、P3、P4 首次运行分别为 90、10、185、20 ms。
+2. 调度 5 次，最终在 225 ms 完成。
+3. 虽然 P4 在 14 ms 就绪且优先级最高，但题设限定只能由时钟中断触发抢占，因此最早到 20 ms 才切换。
 
-<ExamSolution>
+</ExamAnswer><ExamExplanation>
 
-<ExamAnswer>
+1. P4 的 60 ms 和 P1 的 95 ms 都小于新的 100 ms 时间片，因此均直接运行完毕，不会经历时间片耗尽后的优先级下降。
+2. CPU 总工作量未变仍是 215 ms，在整个区间没有空闲，所以最终完成时刻仍为 `10+215=225 ms`。
+3. 事件驱动题须区分“进入就绪队列”和“允许重新调度”的触发条件；时间片和抢占时刻均是约束，不是自由选择的调度节点。
 
-```text
-0       10     17           30        45       55 (ms)
-|   A   |  C   |     B      |    A     |   A    |
-```
+</ExamExplanation></ExamSolution>
+</ExamQuestion>
 
-B 首次在 **17 ms** 获得 CPU，C 首次在 **10 ms** 获得 CPU；选进程共 **5 次**（0、10、17、30、45 ms）；在 $[0,55)$ 内时钟中断为 5、10、15、…、50 ms，共 **10 次**。
+<span id="question-original-340" />
 
-</ExamAnswer>
+<ExamQuestion>
 
-<ExamExplanation>
+考虑三个进程 A、B、C，优先级越大越高，仅 10 ms 的时钟中断可触发抢占，时间片 20 ms，耗尽时优先级减 1。A 在 0 ms 到达，优先级 3、需要 CPU 30 ms；B 在 5 ms 到达，优先级 4、需要 10 ms；C 在 10 ms 到达，优先级 2、需要 10 ms。假设开始时刻 0 ms 立即调度，因更高优先级被抢占的进程再次被选中时获得一个新的完整 20 ms 时间片，优先级相同时先入就绪队列者优先。
 
-**一、先筛出允许发生抢占的点。** $t=7$ 时 B 虽然比 A 优先级高，但尚未到时钟中断；A 继续运行到 $t=10$。此时 C 也已就绪且优先级 4 高于 B 的 3，故选 C 而不是 B。**新到达进程最高优先级**不代表它能够在两个时钟事件之间立即夺取 CPU。
+1. 列出运行顺序与各完成时刻。
+2. A 第一次运行是否会因 B 在 5 ms 到达立即被抢占？
+3. 总 CPU 工作量是多少，何时全部完成？
 
-**二、逐段扣减剩余服务时间**：
+<ExamSolution><ExamAnswer>
 
-| 时段 | 运行者 | 结束原因 | 该进程剩余服务时间 |
-| --- | --- | --- | ---: |
-| $[0,10)$ | A | 时钟触发发现更高优先级 C | 25 ms；被抢占不减优先级 |
-| $[10,17)$ | C | 执行完毕 | 0 |
-| $[17,30)$ | B | 执行完毕 | 0 |
-| $[30,45)$ | A | 新 15 ms 时间片到期 | 10 ms；优先级由 2 降为 1 |
-| $[45,55)$ | A | 执行完毕 | 0 |
+1. `A(0–10) → B(10–20) → A(20–40) → C(40–50)`；B 在 20 ms 完成、A 在 40 ms 完成、C 在 50 ms 完成。
+2. 不会；直到 10 ms 时钟中断才检测到高优先级的 B。A 此次不是时间片耗尽，优先级仍为 3。
+3. 总工作量 `30+10+10=50 ms`，没有空闲时 50 ms 全部完成。
 
-A 在 30 ms 重新运行时**重获完整时间片**是本题特别给出的假设，不能将 0～10 ms 用掉的 10 ms 从其新时间片中扣除。A 在 45 ms 时间片耗尽后虽是唯一就绪进程，也要按本题的“重新选进程”统计一次调度；但这不一定意味着发生一次昂贵的**进程上下文切换**——前后可能仍是同一个进程。
+</ExamAnswer><ExamExplanation>
 
-**三、计数区分**：调度选择时刻 0、10、17、30、45 共 5 次；周期中断在 5 ms 的整数倍发生，首个为 5，最后一个早于 55 的为 50，故
+1. 0–10 ms 的 A 只用了最初 20 ms 时间片的前 10 ms，10 ms 被 B 抢占。B 运行至 20 ms 结束；A 优先级 3 比 C 的 2 高，重获 CPU 并运行剩余 20 ms 到 40 ms 后完成；最后 C 运行 10 ms。
+2. 题设控制的是“何时可以因为更高优先级就绪进程到达而抢占”，不是“何时允许进程因完成而退出”。B 在 20 ms 完成、A 在 40 ms 完成，均自然触发后续调度。
+3. 先做 CPU 总运行量校验，再检查时间片耗尽时是否还有尚未执行的 CPU 工作量；进程恰好执行完成不应无意义地降优先级再入队。
 
-$$
-N_{\mathrm{tick}}=\frac{50-5}{5}+1=10.
-$$
-
-虽然在 55 ms A 正好完成，不必把该完成时刻“补写”为一条周期时钟中断；若系统也在 55 ms 产生节拍，是否把和完成同时发生的这一刻纳入统计须另定事件处理口径，本题明确统计“**完成之前**”的周期中断。
-
-**四、易错总结**：把 7 ms 当成直接抢占点、忽略 10 ms 到达的 C、让完成于 17 ms 的 C 一直占 CPU 到 20 ms、只数真正更换进程而漏掉 45 ms 的一次“选同一进程”，都会得到错误结果。
-
-</ExamExplanation>
-
-</ExamSolution>
-
+</ExamExplanation></ExamSolution>
 </ExamQuestion>
