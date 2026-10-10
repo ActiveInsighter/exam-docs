@@ -1,114 +1,44 @@
 ---
-title: 第三节 连续型随机变量
-description: 数学一精选母题：分段密度、正态概率模型、二维区域积分、边缘分布与条件密度。
+title: "第三节 连续型随机变量"
+description: "考研数学一精选真题与经典习题：密度和分布函数、正态标准化、指数寿命、二维联合及条件密度、几何概率和独立正态综合。"
 ---
 
-本节按**密度与分布约束—正态标准化—二维联合密度与支持域—条件密度与综合问题**组织，保留近年真题和有互补方法的经典题。解析以模型识别、求解路径和适用前提为主，不机械重复低价值计算。
+本节围绕 **密度归一化与支撑域 → 正态标准化与参数识别 → 生存函数及条件更新 → 二维截线积分与条件密度 → 正态组合及独立性边界** 组织题目。每题突出模型识别、方法选择及关键成立条件；对于“边缘正态却不联合正态”“混合指数分布却不无记忆”等容易误用的结论，设置不同来源的实质变式。
 
-## 一、密度约束、对称性与指数无记忆性
-
-<ExamQuestion>
-
-**[2000年数学（三）真题]**
-
-设随机变量 $X$ 的概率密度为
-
-$$
-f(x)=
-\begin{cases}
-\dfrac13,&x\in[0,1],\\[4pt]
-\dfrac29,&x\in[3,6],\\[4pt]
-0,&\text{其他}.
-\end{cases}
-$$
-
-若 $k$ 使得
-
-$$
-P\{X\ge k\}=\frac23,
-$$
-
-则 $k$ 的取值范围是 $\underline{\qquad}$。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$[1,3]$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-**识别特征：密度的支持集不连通。** 尾概率函数可以在正长度区间上保持常值，分位数方程因而不必有唯一解。
-
-
-先看两个区间的概率质量：
-
-$$
-P(0\le X\le1)=\int_0^1\frac13\,dx=\frac13,
-$$
-
-$$
-P(3\le X\le6)=\int_3^6\frac29\,dx=\frac23.
-$$
-
-而区间 $(1,3)$ 上密度为 $0$。因此只要
-
-$$
-1\le k\le3,
-$$
-
-事件 $\{X\ge k\}$ 所包含的有效概率质量恰好就是 $[3,6]$ 上的全部质量，即
-
-$$
-P(X\ge k)=\frac23.
-$$
-
-故
-
-$$
-\boxed{k\in[1,3]}.
-$$
-
-**关键：**密度为零的“空档区间”内移动阈值不会改变尾概率。
-
-
-**错误提醒：** 不能机械地将 $P(X\ge k)=2/3$ 解释为某个唯一分位点。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
+## 一、密度结构、对称性、分段与混合分布
 
 <ExamQuestion>
 
-**[1993年数学（三）真题]**
+**精选题 [1993年数学三]**
 
 设随机变量 $X$ 的密度函数为 $\varphi(x)$，且 $\varphi(-x)=\varphi(x)$。$F(x)$ 是 $X$ 的分布函数，则对任意实数 $a$，有（　）。
 
 <ExamChoices>
+
 <ExamOption>
 
 A. $F(-a)=1-\displaystyle\int_0^a\varphi(x)\,dx$
 
 </ExamOption>
+
 <ExamOption>
 
 B. $F(-a)=\dfrac12-\displaystyle\int_0^a\varphi(x)\,dx$
 
 </ExamOption>
+
 <ExamOption>
 
 C. $F(-a)=F(a)$
 
 </ExamOption>
+
 <ExamOption>
 
 D. $F(-a)=2F(a)-1$
 
 </ExamOption>
+
 </ExamChoices>
 
 <ExamSolution>
@@ -121,8 +51,7 @@ B
 
 <ExamExplanation>
 
-**突破口：** 密度关于 0 对称，则 $F(-a)=1-F(a)$；任意点无质量保证左右连续的端点可相互替换。
-
+**模型识别与解题突破口：** 密度关于原点为偶函数，意味着两侧概率相等，且 $F(-a)=1-F(a)$。从中点 $F(0)=1/2$ 逆向积分最直接。
 
 由于 $\varphi(-x)=\varphi(x)$，密度关于原点对称，因此
 
@@ -154,8 +83,7 @@ $$
 
 因此选 B。
 
-
-**易错点：** 对称并非意味着 $F(-a)=F(a)$，后者只在对称中心 $a=0$（或特例平坦区间）成立。
+**方法提炼与易错边界：** 对任意 $a\in\mathbb R$ 均成立，因为带方向积分 $\int_0^a f(x)\,dx$ 已自动处理 $a<0$；本结论需关于零对称及连续型假设，不能不加条件套在一般分布函数上。
 
 </ExamExplanation>
 
@@ -165,7 +93,80 @@ $$
 
 <ExamQuestion>
 
-**[2010年数学（一）、数学（三）真题；数学（一）第8题]**
+**精选题 [2000年数学三]**
+
+设随机变量 $X$ 的概率密度为
+
+$$
+f(x)=
+\begin{cases}
+\dfrac13,&x\in[0,1],\\[4pt]
+\dfrac29,&x\in[3,6],\\[4pt]
+0,&\text{其他}.
+\end{cases}
+$$
+
+若 $k$ 使得
+
+$$
+P\{X\ge k\}=\frac23,
+$$
+
+则 $k$ 的取值范围是 $\underline{\qquad}$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$[1,3]$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 密度支撑集断裂时，分布函数有平台；尾概率条件会对应一整个阈值区间，而不是唯一实数。
+
+先看两个区间的概率质量：
+
+$$
+P(0\le X\le1)=\int_0^1\frac13\,dx=\frac13,
+$$
+
+$$
+P(3\le X\le6)=\int_3^6\frac29\,dx=\frac23.
+$$
+
+而区间 $(1,3)$ 上密度为 $0$。因此只要
+
+$$
+1\le k\le3,
+$$
+
+事件 $\{X\ge k\}$ 所包含的有效概率质量恰好就是 $[3,6]$ 上的全部质量，即
+
+$$
+P(X\ge k)=\frac23.
+$$
+
+故
+
+$$
+\boxed{k\in[1,3]}.
+$$
+
+**关键：**密度为零的“空档区间”内移动阈值不会改变尾概率。
+
+**方法提炼与易错边界：** 在 $[1,3]$ 内移动阈值都不会改变 $P(X\ge k)$；密度函数在边界的赋值不改变概率，因为连续型随机变量单点概率为 $0$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [2010年数学一、数学三]**
 
 设 $f_1(x)$ 为标准正态分布的概率密度，$f_2(x)$ 为 $[-1,3]$ 上均匀分布的概率密度。若
 
@@ -181,26 +182,31 @@ $$
 为概率密度，则 $a,b$ 应满足（　）。
 
 <ExamChoices>
+
 <ExamOption>
 
 A. $2a+3b=4$
 
 </ExamOption>
+
 <ExamOption>
 
 B. $3a+2b=4$
 
 </ExamOption>
+
 <ExamOption>
 
 C. $a+b=1$
 
 </ExamOption>
+
 <ExamOption>
 
 D. $a+b=2$
 
 </ExamOption>
+
 </ExamChoices>
 
 <ExamSolution>
@@ -213,8 +219,7 @@ A
 
 <ExamExplanation>
 
-**模型识别：分段拼接密度。** 各片段并不是完整的一份密度；须分别积分后再乘权重 $a,b$。
-
+**模型识别与解题突破口：** 分段拼接密度不能把原密度整体积分都当作 $1$；必须分别算左半正态的 $1/2$ 质量与右侧均匀密度的 $3/4$ 质量。
 
 概率密度必须满足积分为 $1$。标准正态密度关于 $0$ 对称，因此
 
@@ -242,8 +247,7 @@ $$
 
 故选 A。
 
-
-**适用条件：** 非负性由 $a,b>0$ 保证，积分等于 1 才是另一个独立的必要条件；在本题中二者合并即充分。
+**方法提炼与易错边界：** 必要且充分的条件还包括 $a>0,b>0$。不要把 $f_2$ 在 $(-1,0]$ 上的面积也计入新密度，否则会得到错误的归一化方程。
 
 </ExamExplanation>
 
@@ -253,31 +257,36 @@ $$
 
 <ExamQuestion>
 
-**[2011年数学（一）、数学（三）真题]**
+**精选题 [2011年数学一、数学三]**
 
 设 $F_1(x),F_2(x)$ 为两个分布函数，其相应的概率密度 $f_1(x),f_2(x)$ 是连续函数，则必为概率密度的是（　）。
 
 <ExamChoices>
+
 <ExamOption>
 
 A. $f_1(x)f_2(x)$
 
 </ExamOption>
+
 <ExamOption>
 
 B. $2f_2(x)F_1(x)$
 
 </ExamOption>
+
 <ExamOption>
 
 C. $f_1(x)F_2(x)$
 
 </ExamOption>
+
 <ExamOption>
 
 D. $f_1(x)F_2(x)+f_2(x)F_1(x)$
 
 </ExamOption>
+
 </ExamChoices>
 
 <ExamSolution>
@@ -290,8 +299,7 @@ D
 
 <ExamExplanation>
 
-**一眼识别：分布函数乘积求导。** $F_1F_2$ 本身还是分布函数（例如独立两变量最大值的 CDF），导数必为密度。
-
+**模型识别与解题突破口：** 看到 $F_i\!\prime=f_i$ 与乘积型候选密度时，直接试求 $\bigl(F_1F_2\bigr)\!\prime$；这是两个独立随机变量最大值分布的密度。
 
 注意
 
@@ -315,8 +323,7 @@ $$
 
 **识别技巧：**看到 $f_i=F_i'$ 时，优先联想到乘积求导。
 
-
-**方法价值：** 不可把 $f_1F_2$ 单项当作正规化密度；还缺乘积法则的第二项。
+**方法提炼与易错边界：** 若 $X,Y$ 独立且分布函数分别为 $F_1,F_2$，则 $P(\max(X,Y)\le x)=F_1(x)F_2(x)$。题目关于 $f_i$ 连续的假设保证导数操作可直接进行；非独立时不能写此乘积分布函数。
 
 </ExamExplanation>
 
@@ -326,52 +333,61 @@ $$
 
 <ExamQuestion>
 
-**[2013年数学（一）真题]**
+**精选题 [李正元]**
 
-设随机变量 $Y$ 服从参数为 $1$ 的指数分布，$a$ 为常数且大于零，则
-
-$$
-P\{Y\le a+1\mid Y>a\}=\underline{\qquad}.
-$$
+设 $ f(x)=ke^{-x^2+2x-3}\,(-\infty<x<+\infty)$ 是一概率密度，则 $ k=\underline{\qquad}$。
 
 <ExamSolution>
 
 <ExamAnswer>
 
-$1-\dfrac1e$
+$ \frac{e^2}{\sqrt\pi}$。
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-**核心模型：指数分布无记忆性。** 已度过时间 $a$ 不改变以后再经历 1 单位时间内失效的概率。
+**模型识别与解题突破口：** 指数中的二次式先配方，识别为位置平移的高斯核；归一化只需标准高斯积分 $\sqrt\pi$。
 
-
-指数分布具有无记忆性：
+概率密度必须满足归一化条件
 
 $$
-P(Y>a+t\mid Y>a)=P(Y>t).
+\int_{-\infty}^{+\infty}f(x)\,dx=1.
+$$
+
+先配方：
+
+$$
+-x^2+2x-3=-(x-1)^2-2.
 $$
 
 因此
 
 $$
-\begin{aligned}
-P(Y\le a+1\mid Y>a)
-&=1-P(Y>a+1\mid Y>a)\\
-&=1-P(Y>1)\\
-&=1-e^{-1}.
-\end{aligned}
+1
+=k\int_{-\infty}^{+\infty}e^{-(x-1)^2-2}\,dx
+=ke^{-2}\int_{-\infty}^{+\infty}e^{-(x-1)^2}\,dx.
 $$
 
-故答案为
+利用高斯积分
 
 $$
-1-\frac1e.
+\int_{-\infty}^{+\infty}e^{-u^2}\,du=\sqrt\pi,
 $$
 
+可得
 
-**条件：** 该结论针对指数分布的生存概率；一般连续分布不具备无记忆性。
+$$
+ke^{-2}\sqrt\pi=1.
+$$
+
+故
+
+$$
+k=\frac{e^2}{\sqrt\pi}.
+$$
+
+**方法提炼与易错边界：** 形式 $e^{-a(x-b)^2}$（$a>0$）的全轴积分为 $\sqrt{\pi/a}$，平移 $b$ 不影响积分；这里额外常数 $e^{-2}$ 必须保留。
 
 </ExamExplanation>
 
@@ -381,7 +397,386 @@ $$
 
 <ExamQuestion>
 
-**[2016年数学（一）真题]**
+**精选题 [李林880]**
+
+设连续型随机变量 $X$ 的分布函数为
+
+$$
+F(x)=\begin{cases} 0, & x\leqslant-a, \\ k_1+k_2\arcsin\frac{x}{a}, & -a<x\leqslant a, \\ 1, & x>a, \end{cases}
+$$
+
+其中 $a>0$。求：
+$(I)$ 常数 $k_1,k_2$ 的值；
+$(II)$ $X$ 的概率密度；
+$(III)$ $P\left\{|X|<\frac{a}{2}\right\}$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$(I)\;k_1=\frac12,\ k_2=\frac1\pi;\quad (II)\;f_X(x)=\begin{cases}\frac1{\pi\sqrt{a^2-x^2}},&|x|<a,\\0,&|x|\ge a;\end{cases}\quad (III)\;\frac13$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**跨节母题关联：** 本节复现该母题，重点从分布函数的定义迁移到连续型变量的密度变换、分段雅可比与总概率积分核查。
+
+**模型识别与解题突破口：** 首先检查 $F$ 在两个分段点处的右连续性及端点取值，确定参数后再求导；其密度在 $\pm a$ 附近虽发散，却是可积奇性。
+
+(I) 由分布函数在 $-a$ 处右连续、在 $a$ 处右连续，有
+
+$$
+F(-a+0) = F(-a), F(a+0) = F(a),
+$$
+
+得 $k_1 = \frac{1}{2}, k_2 = \frac{1}{\pi}$.
+
+(II) $f(x)=F'(x)=\begin{cases} \frac{1}{\pi\sqrt{a^2-x^2}}, & |x|<a, \\ 0, & |x|\geqslant a. \end{cases}$
+
+(III) $P\left\{|X|<\frac{a}{2}\right\}=P\left\{-\frac{a}{2}<X<\frac{a}{2}\right\}=F\left(\frac{a}{2}\right)-F\left(-\frac{a}{2}\right)$
+$=\frac{1}{2}+\frac{1}{\pi}\arcsin\frac{1}{2}-\left[\frac{1}{2}+\frac{1}{\pi}\arcsin\left(-\frac{1}{2}\right)\right]=\frac{1}{3}.$
+
+**方法提炼与易错边界：** 分布函数的分段连接条件不能只用 $F(+\infty)=1$ 代替；本题得到的反正弦密度积分为 $1$，由 $F(a)-F(-a)=1$ 即可直接复核。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [李正元]**
+
+向直线上掷一随机点，假设随机点落入区间 $ ( -\infty,0]$、$ (0,1]$ 和 $ (1,+\infty)$ 的概率分别为 $ 0.2,0.5$ 和 $ 0.3$，并且随机点在区间 $ (0,1]$ 上分布均匀。设随机点落入 $ ( -\infty,0]$ 得0分，落入 $ (1,+\infty)$ 得1分，而落入 $ (0,1]$ 坐标为 $ x$ 的点得 $ x$ 分。试求得分 $ X$ 的分布函数 $ F(x)$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$$
+F(x)=\begin{cases}
+0,&x<0,\\[1mm]
+0.2+0.5x,&0\le x<1,\\[1mm]
+1,&x\ge1.
+\end{cases}
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 这是“连续概率质量 + 两个端点原子”的混合分布；先列出 $P(X=0)$、$P(X=1)$，再写区间 $(0,1)$ 的连续累积量。
+
+得分随机变量 $ X$ 的取值范围为 $ [0,1]$。其中：
+
+- 随机点落入 $ ( -\infty,0]$ 时，$ X=0$，故在 $ 0$ 处有概率质量 $ 0.2$；
+- 随机点落入 $ (1,+\infty)$ 时，$ X=1$，故在 $ 1$ 处有概率质量 $ 0.3$；
+- 随机点落入 $ (0,1]$ 时，得分等于随机点坐标，并且条件分布为 $ (0,1]$ 上的均匀分布，这一部分的总概率为 $ 0.5$。
+
+当 $ x<0$ 时，得分不可能小于等于 $ x$，所以
+
+$$
+F(x)=P\{X\le x\}=0.
+$$
+
+当 $ 0\le x<1$ 时，事件 $ \{X\le x\}$ 包括两部分：一是落入 $ ( -\infty,0]$ 而得 $ 0$ 分，概率为 $ 0.2$；二是落入 $ (0,1]$ 且坐标不超过 $ x$。由条件均匀分布，
+
+$$
+P\{X\le x,\,X\in(0,1]\}
+=0.5\cdot\frac{x-0}{1-0}
+=0.5x.
+$$
+
+因此
+
+$$
+F(x)=0.2+0.5x,
+\qquad 0\le x<1.
+$$
+
+当 $ x\ge1$ 时，所有可能得分都不超过 $ x$，故
+
+$$
+F(x)=1.
+$$
+
+特别地，
+
+$$
+F(0)=0.2,
+\qquad
+F(1-)=0.7,
+\qquad
+F(1)=1,
+$$
+
+可见分布函数分别在 $ 0$ 和 $ 1$ 处有大小为 $ 0.2$ 和 $ 0.3$ 的跳跃。
+
+**方法提炼与易错边界：** 混合分布不能仅用一个普通概率密度积分表示全部概率：在 $0,1$ 两处有跳跃，跳跃幅度分别为 $0.2,0.3$；区间内部密度为 $0.5$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 二、正态分布参数、分位数与最优化
+
+<ExamQuestion>
+
+**精选题 [2002年数学一]**
+
+设随机变量 $X$ 服从正态分布 $N(\mu,\sigma^2)$（$\sigma>0$），且二次方程
+
+$$
+y^2+4y+X=0
+$$
+
+无实根的概率为 $\dfrac12$，则 $\mu=\underline{\qquad}$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$4$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** “二次方程无实根”先改写成判别式 $16-4X<0$，得到中位数条件 $P(X>4)=1/2$。
+
+方程无实根等价于判别式小于零：
+
+$$
+\Delta=16-4X<0,
+$$
+
+即
+
+$$
+X>4.
+$$
+
+所以题意给出
+
+$$
+P(X>4)=\frac12.
+$$
+
+正态分布关于均值 $\mu$ 对称，因此
+
+$$
+P(X>\mu)=\frac12.
+$$
+
+连续正态分布的中位数就是均值，于是
+
+$$
+\mu=4.
+$$
+
+**方法提炼与易错边界：** 正态分布的均值等于唯一中位数，故可直接反推 $\mu=4$；并非任意分布都满足“均值等于中位数”，这是对称正态模型的专有简化。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [2004年数学一、数学三]**
+
+设随机变量 $X$ 服从正态分布 $N(0,1)$。对给定的 $\alpha$（$0<\alpha<1$），数 $u_\alpha$ 满足
+
+$$
+P\{X>u_\alpha\}=\alpha.
+$$
+
+若
+
+$$
+P\{|X|<x\}=\alpha,
+$$
+
+则 $x$ 等于（　）。
+
+<ExamChoices>
+
+<ExamOption>
+
+A. $u_{\alpha/2}$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $u_{1-\alpha/2}$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $u_{(1-\alpha)/2}$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $u_{1-\alpha}$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+C
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 题目采用“右尾概率 $\alpha$”定义分位数 $u_\alpha$，必须将中央概率 $P(|X|<x)$ 先分成两侧尾部再匹配。
+
+由
+
+$$
+P(|X|<x)=\alpha,
+$$
+
+可得两侧尾概率总和为
+
+$$
+P(|X|\ge x)=1-\alpha.
+$$
+
+标准正态分布关于 $0$ 对称，因此右尾概率为
+
+$$
+P(X>x)=\frac{1-\alpha}{2}.
+$$
+
+根据 $u_\beta$ 的定义
+
+$$
+P(X>u_\beta)=\beta,
+$$
+
+取
+
+$$
+\beta=\frac{1-\alpha}{2},
+$$
+
+故
+
+$$
+x=u_{(1-\alpha)/2}.
+$$
+
+因此选 C。
+
+**方法提炼与易错边界：** 若 $P(|Z|<x)=\alpha$，则右尾概率为 $(1-\alpha)/2$；特别警惕把上侧分位数 $u_\beta$ 与分布函数的下侧 $\beta$ 分位数混写。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [2006年数学一、数学三]**
+
+设随机变量 $X$ 服从正态分布 $N(\mu_1,\sigma_1^2)$，$Y$ 服从正态分布 $N(\mu_2,\sigma_2^2)$，且
+
+$$
+P\{|X-\mu_1|<1\}>P\{|Y-\mu_2|<1\},
+$$
+
+则必有（　）。
+
+<ExamChoices>
+
+<ExamOption>
+
+A. $\sigma_1<\sigma_2$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $\sigma_1>\sigma_2$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $\mu_1<\mu_2$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $\mu_1>\mu_2$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+A
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 两项都是以各自均值为中心、半宽为 $1$ 的正态覆盖概率；标准化后均值消失，只有标准差影响覆盖率。
+
+分别标准化：
+
+$$
+P(|X-\mu_1|<1)=2\Phi\left(\frac1{\sigma_1}\right)-1,
+$$
+
+$$
+P(|Y-\mu_2|<1)=2\Phi\left(\frac1{\sigma_2}\right)-1.
+$$
+
+由于 $\Phi(x)$ 单调递增，题设不等式推出
+
+$$
+\frac1{\sigma_1}>\frac1{\sigma_2}.
+$$
+
+又 $\sigma_1,\sigma_2>0$，因此
+
+$$
+\sigma_1<\sigma_2.
+$$
+
+故选 A。注意均值在“以各自均值为中心”的概率中已经被消去。
+
+**方法提炼与易错边界：** 对任何固定 $c>0$，$P(|N(\mu,\sigma^2)-\mu|<c)=2\Phi(c/\sigma)-1$，随 $\sigma>0$ 严格递减；必须用到 $\sigma_i>0$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [2016年数学一]**
 
 设随机变量 $X\sim N(\mu,\sigma^2)$（$\sigma>0$），记
 
@@ -392,26 +787,31 @@ $$
 则（　）。
 
 <ExamChoices>
+
 <ExamOption>
 
 A. $p$ 随着 $\mu$ 的增加而增加
 
 </ExamOption>
+
 <ExamOption>
 
 B. $p$ 随着 $\sigma$ 的增加而增加
 
 </ExamOption>
+
 <ExamOption>
 
 C. $p$ 随着 $\mu$ 的增加而减少
 
 </ExamOption>
+
 <ExamOption>
 
 D. $p$ 随着 $\sigma$ 的增加而减少
 
 </ExamOption>
+
 </ExamChoices>
 
 <ExamSolution>
@@ -424,8 +824,7 @@ B
 
 <ExamExplanation>
 
-**参数陷阱：$\mu+\sigma^2$ 中移动阈值也随着参数改变。** 标准化后只剩 $\Phi(\sigma)$。
-
+**模型识别与解题突破口：** 注意给定阈值为 $\mu+\sigma^2$，标准化时要除以 $\sigma$，因此最后得到 $\Phi(\sigma)$，而不是 $\Phi(1)$。
 
 标准化：
 
@@ -442,8 +841,7 @@ $$
 
 故选 B。
 
-
-**方法价值：** 概率随参数变化问题，先化成固定标准分布下的函数，切勿直接比较未标准化的区间长度。
+**方法提炼与易错边界：** $N(\mu,\sigma^2)$ 的第二参数是方差；若题设给出的阈值改为 $\mu+c\sigma$，概率才为常数 $\Phi(c)$。
 
 </ExamExplanation>
 
@@ -453,7 +851,7 @@ $$
 
 <ExamQuestion>
 
-**[2018年数学（一）、数学（三）真题]**
+**精选题 [2018年数学一、数学三]**
 
 $f(x)$ 为某分布的密度函数，且
 
@@ -470,26 +868,31 @@ $$
 则 $P\{X<0\}=$（　）。
 
 <ExamChoices>
+
 <ExamOption>
 
 A. $0.2$
 
 </ExamOption>
+
 <ExamOption>
 
 B. $0.3$
 
 </ExamOption>
+
 <ExamOption>
 
 C. $0.4$
 
 </ExamOption>
+
 <ExamOption>
 
 D. $0.5$
 
 </ExamOption>
+
 </ExamChoices>
 
 <ExamSolution>
@@ -502,8 +905,7 @@ A
 
 <ExamExplanation>
 
-**几何识别：对称中心在 $x=1$。** 对称区间以外两侧的概率质量相等，利用补事件即可避免求密度的具体表达式。
-
+**模型识别与解题突破口：** 由 $f(1+x)=f(1-x)$ 得到密度关于 $1$ 对称；$[0,2]$ 恰好围绕对称中心，两侧外尾概率相等。
 
 条件
 
@@ -539,95 +941,7 @@ $$
 
 故选 A。
 
-
-**充分信息：** 不需要知道 $f(x)$ 的解析式；只用关于 1 的全局镜像对称即可。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**[2012年数学（一）真题]**
-
-设随机变量 $X,Y$ 相互独立，且分别服从参数为 $1$ 与参数为 $4$ 的指数分布，则
-
-$$
-P\{X<Y\}=
-$$
-
-（　）。
-
-<ExamChoices>
-<ExamOption>
-
-A. $\dfrac15$
-
-</ExamOption>
-<ExamOption>
-
-B. $\dfrac13$
-
-</ExamOption>
-<ExamOption>
-
-C. $\dfrac25$
-
-</ExamOption>
-<ExamOption>
-
-D. $\dfrac45$
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-A
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-**突破口：指数寿命竞赛。** 对独立率 $\lambda,\mu$ 的指数变量，一次积分直接给出 $P(X<Y)=\lambda/(\lambda+\mu)$。
-
-
-指数分布参数按题中定义为率参数。于是
-
-$$
-f_X(x)=e^{-x},\qquad x>0,
-$$
-
-$$
-P(Y>x)=e^{-4x}.
-$$
-
-利用独立性，
-
-$$
-\begin{aligned}
-P(X<Y)
-&=\int_0^{\infty}P(Y>x)f_X(x)\,dx\\
-&=\int_0^{\infty}e^{-4x}e^{-x}\,dx\\
-&=\int_0^{\infty}e^{-5x}\,dx\\
-&=\frac15.
-\end{aligned}
-$$
-
-故选 A。
-
-**结论：**若 $X\sim\operatorname{Exp}(\lambda_1)$、$Y\sim\operatorname{Exp}(\lambda_2)$ 且独立，则
-
-$$
-P(X<Y)=\frac{\lambda_1}{\lambda_1+\lambda_2}.
-$$
-
-
-**易错点：** 指数参数这里是“率”不是均值。参数越大，等待时间越短，因此更可能先发生。
+**方法提炼与易错边界：** 一般地，若密度关于 $c$ 对称且 $P(c-d\le X\le c+d)=p$，则 $P(X<c-d)=P(X>c+d)=(1-p)/2$。
 
 </ExamExplanation>
 
@@ -637,158 +951,7 @@ $$
 
 <ExamQuestion>
 
-**[原创·指数竞争的最小值与获胜者独立性]**
-
-设 $X\sim\operatorname{Exp}(\lambda)$、$Y\sim\operatorname{Exp}(\mu)$ 相互独立，其中 $\lambda,\mu>0$ 均为**率参数**，定义
-
-$$
-T=\min\{X,Y\},\qquad I=\mathbf 1_{\{X<Y\}}.
-$$
-
-（1）求 $T$ 的分布与 $P(I=1)$；
-
-（2）证明 $T$ 与 $I$ 相互独立，并解释在这一模型中为何“先发生的是谁”不影响“最先发生的时间”的分布。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-（1）$T\sim\operatorname{Exp}(\lambda+\mu)$，$P(I=1)=\dfrac\lambda{\lambda+\mu}$。
-
-（2）$T$ 与 $I$ 相互独立。
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-**模型识别：** 两个独立指数等待时间的“竞争风险”。求最小值优先用生存概率；求获胜者时对先发生时刻的密度积分。
-
-（1）对 $t\ge0$，由独立性，
-
-$$
-P(T>t)=P(X>t,Y>t)=e^{-\lambda t}e^{-\mu t}=e^{-(\lambda+\mu)t}.
-$$
-
-所以 $f_T(t)=(\lambda+\mu)e^{-(\lambda+\mu)t}$（$t>0$）。又
-
-$$
-\begin{aligned}
-P(I=1)&=P(X<Y)
-=\int_0^\infty \lambda e^{-\lambda t}P(Y>t)\,dt\\
-&=\int_0^\infty\lambda e^{-(\lambda+\mu)t}\,dt
-=\frac\lambda{\lambda+\mu}.
-\end{aligned}
-$$
-
-（2）对 $t>0$，在 $I=1$ 的情形下 $T=X=t$，所以联合的分段密度为
-
-$$
-P(I=1,T\in dt)=\lambda e^{-(\lambda+\mu)t}\,dt.
-$$
-
-而
-
-$$
-P(I=1)f_T(t)\,dt
-=\frac\lambda{\lambda+\mu}(\lambda+\mu)e^{-(\lambda+\mu)t}\,dt
-=\lambda e^{-(\lambda+\mu)t}\,dt.
-$$
-
-$\,I=0$ 的情况同理，联合律在 $I\in\{0,1\}$ 与 $t>0$ 上均分解为边缘律乘积，故独立。
-
-**方法价值：** 无记忆性不仅给出最小值仍为指数分布，也使获胜者概率为各自率与总率之比；一般等待时间分布没有这样的独立结论。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-## 二、正态模型：反求参数、样本均值与线性组合
-
-<ExamQuestion>
-
-**[1990年数学（三）真题]**
-
-某地抽样调查结果表明，考生的外语成绩（百分制）近似服从正态分布，平均成绩为 $72$ 分，$96$ 分以上的占考生总数的 $2.3\%$，试求考生的外语成绩在 $60$ 分至 $84$ 分之间的概率。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$0.682$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-**识别特征：正态尾概率反求尺度。** 题干给出均值与上侧尾面积，先用单调的标准正态分布函数定位标准差，再转算对称区间。
-
-
-设考生外语成绩
-
-$$
-X\sim N(72,\sigma^2).
-$$
-
-题给
-
-$$
-P(X>96)=0.023.
-$$
-
-标准化后
-
-$$
-P\left(Z>\frac{96-72}{\sigma}\right)=0.023,
-$$
-
-于是
-
-$$
-\Phi\left(\frac{24}{\sigma}\right)=0.977.
-$$
-
-查标准正态分布表可得
-
-$$
-\Phi(2)=0.9772\approx0.977,
-$$
-
-故
-
-$$
-\frac{24}{\sigma}=2,
-\qquad
-\sigma=12.
-$$
-
-于是
-
-$$
-\begin{aligned}
-P(60\le X\le84)
-&=P\left(-1\le\frac{X-72}{12}\le1\right)\\
-&=2\Phi(1)-1\\
-&\approx2\times0.841-1\\
-&=0.682.
-\end{aligned}
-$$
-
-**解题关键：**题目没有直接给标准差，要先利用右尾概率 $P(X>96)$ 反推出 $\sigma$，再计算目标区间概率。
-
-
-**边界：** 这里的 0.023 与分位数 2 是按题设表格近似；不能把由表查得的近似 $\sigma=12$ 误当作不依赖精度的严格等式。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**[1998年数学（一）真题]**
+**精选题 [1998年数学一]**
 
 从正态总体 $N(3.4,6^2)$ 中抽取容量为 $n$ 的样本，如果要求其样本均值位于区间 $(1.4,5.4)$ 内的概率不小于 $0.95$，问样本容量 $n$ 至少应取多大？
 
@@ -811,8 +974,7 @@ $35$
 
 <ExamExplanation>
 
-**核心模型：** 独立正态样本的样本均值仍精确服从正态分布，标准差按 $1/\sqrt n$ 缩小。
-
+**模型识别与解题突破口：** 识别正态总体样本均值的方差缩小为 $\sigma^2/n$，再把双侧覆盖概率写成 $2\Phi(c\sqrt n)-1$，最后取满足条件的最小整数。
 
 总体为
 
@@ -869,72 +1031,7 @@ $$
 \boxed{35}.
 $$
 
-
-**考场检查：** 求最小自然数 $n$ 先解实数不等式，再向上取整；正态性使这里无需中心极限定理近似。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**[2002年数学（一）真题]**
-
-设随机变量 $X$ 服从正态分布 $N(\mu,\sigma^2)$（$\sigma>0$），且二次方程
-
-$$
-y^2+4y+X=0
-$$
-
-无实根的概率为 $\dfrac12$，则 $\mu=\underline{\qquad}$。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$4$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-**方法选择：代数条件转事件 + 正态中位数。** 二次方程无实根等价于判别式为负，最后借正态的均值与中位数相等。
-
-
-方程无实根等价于判别式小于零：
-
-$$
-\Delta=16-4X<0,
-$$
-
-即
-
-$$
-X>4.
-$$
-
-所以题意给出
-
-$$
-P(X>4)=\frac12.
-$$
-
-正态分布关于均值 $\mu$ 对称，因此
-
-$$
-P(X>\mu)=\frac12.
-$$
-
-连续正态分布的中位数就是均值，于是
-
-$$
-\mu=4.
-$$
-
-
-**迁移：** 若判别式阈值换为常数 $c$，要求 $P(X>c)=1/2$ 就直接推出 $\mu=c$，而不必求 $\sigma$。
+**方法提炼与易错边界：** $n\ge34.5744$ 的结论要向上取整为 $35$，不可四舍五入为 $34$；这里只因总体本身正态，样本均值才对每个 $n$ 都精确服从正态，无需中心极限定理。
 
 </ExamExplanation>
 
@@ -944,98 +1041,46 @@ $$
 
 <ExamQuestion>
 
-**[2004年数学（一）、数学（三）真题]**
+**精选题 [李林880]**
 
-设随机变量 $X$ 服从正态分布 $N(0,1)$。对给定的 $\alpha$（$0<\alpha<1$），数 $u_\alpha$ 满足
-
-$$
-P\{X>u_\alpha\}=\alpha.
-$$
-
-若
-
-$$
-P\{|X|<x\}=\alpha,
-$$
-
-则 $x$ 等于（　）。
-
-<ExamChoices>
-<ExamOption>
-
-A. $u_{\alpha/2}$
-
-</ExamOption>
-<ExamOption>
-
-B. $u_{1-\alpha/2}$
-
-</ExamOption>
-<ExamOption>
-
-C. $u_{(1-\alpha)/2}$
-
-</ExamOption>
-<ExamOption>
-
-D. $u_{1-\alpha}$
-
-</ExamOption>
-</ExamChoices>
+设 $X \sim N(0, \sigma^2)$，$X$ 在区间 $(a,b)$ 内取值的概率最大，其中 $a>0$，则 $\sigma^2=$ ______。
 
 <ExamSolution>
 
 <ExamAnswer>
 
-C
+$\frac{a^2-b^2}{2(\ln a-\ln b)}$
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-**高频易错：$u_\alpha$ 是右尾分位数而非左尾。** 先由中心面积 $\alpha$ 求单侧尾面积 $(1-\alpha)/2$ 再代入。
+**模型识别与解题突破口：** 把 $P(a<X<b)=\Phi(b/\sigma)-\Phi(a/\sigma)$ 看作标准差的函数，求导后把两个指数项相等化再取对数。
 
-
-由
-
-$$
-P(|X|<x)=\alpha,
-$$
-
-可得两侧尾概率总和为
+依题意，$\frac{X-0}{\sigma}\sim N(0,1)$，故
 
 $$
-P(|X|\ge x)=1-\alpha.
+\begin{aligned}
+P\{a<X<b\} &= P\left\{\frac{a}{\sigma}<\frac{X}{\sigma}<\frac{b}{\sigma}\right\}=\Phi\left(\frac{b}{\sigma}\right)-\Phi\left(\frac{a}{\sigma}\right) \\
+&=\Phi\left(\frac b\sigma\right)-\Phi\left(\frac a\sigma\right)=:g(\sigma),
+\end{aligned}
 $$
 
-标准正态分布关于 $0$ 对称，因此右尾概率为
+所以
 
 $$
-P(X>x)=\frac{1-\alpha}{2}.
+g'(\sigma)=\frac{1}{\sqrt{2\pi}}\left[e^{-\frac{b^2}{2\sigma^2}}\cdot\left(-\frac{b}{\sigma^2}\right)-e^{-\frac{a^2}{2\sigma^2}}\cdot\left(-\frac{a}{\sigma^2}\right)\right].
 $$
 
-根据 $u_\beta$ 的定义
+令 $g'(\sigma)=0$，得 $be^{-\frac{b^2}{2\sigma^2}}=ae^{-\frac{a^2}{2\sigma^2}}$，取对数，得 $\ln b+\frac{-b^2}{2\sigma^2}=\ln a+\frac{-a^2}{2\sigma^2}$，解得
 
 $$
-P(X>u_\beta)=\beta,
+\sigma^2=\frac{b^2-a^2}{2\ln(b/a)}=\frac{a^2-b^2}{2(\ln a-\ln b)}.
 $$
 
-取
+由于 $0<a<b$，且当 $\sigma\to0^+$ 或 $\sigma\to+\infty$ 时 $P\{a<X<b\}\to0$，上述唯一驻点对应最大值。
 
-$$
-\beta=\frac{1-\alpha}{2},
-$$
-
-故
-
-$$
-x=u_{(1-\alpha)/2}.
-$$
-
-因此选 C。
-
-
-**符号检查：** 中心概率必须 $0<\alpha<1$，且解得的 $x>0$。
+**方法提炼与易错边界：** 题设应理解为 $0<a<b$。两端 $\sigma\to0^+$ 与 $\sigma\to\infty$ 时概率都趋零，内点唯一驻点才是全局最大值；不能只给驻点却不验证极大性。
 
 </ExamExplanation>
 
@@ -1043,171 +1088,87 @@ $$
 
 </ExamQuestion>
 
+## 三、独立重复、指数寿命与可靠性
+
 <ExamQuestion>
 
-**[2006年数学（一）、数学（三）真题]**
+**精选题 [1992年数学三]**
 
-设随机变量 $X$ 服从正态分布 $N(\mu_1,\sigma_1^2)$，$Y$ 服从正态分布 $N(\mu_2,\sigma_2^2)$，且
+假设测量的随机误差 $X\sim N(0,10^2)$，试求 $100$ 次独立重复测量中，至少有三次测量误差的绝对值大于 $19.6$ 的概率为 $\alpha$，并利用泊松分布求出 $\alpha$ 的近似值（要求小数点后取两位有效数字）。
+
+附表：
 
 $$
-P\{|X-\mu_1|<1\}>P\{|Y-\mu_2|<1\},
+\begin{array}{c|ccccccc}
+\lambda&1&2&3&4&5&6&7\\\hline
+e^{-\lambda}&0.368&0.135&0.050&0.018&0.007&0.002&0.001
+\end{array}
 $$
-
-则必有（　）。
-
-<ExamChoices>
-<ExamOption>
-
-A. $\sigma_1<\sigma_2$
-
-</ExamOption>
-<ExamOption>
-
-B. $\sigma_1>\sigma_2$
-
-</ExamOption>
-<ExamOption>
-
-C. $\mu_1<\mu_2$
-
-</ExamOption>
-<ExamOption>
-
-D. $\mu_1>\mu_2$
-
-</ExamOption>
-</ExamChoices>
 
 <ExamSolution>
 
 <ExamAnswer>
 
-A
+$\alpha\approx0.87$
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-**识别特征：以各自均值为中心的等长度窗口。** 标准化后均值消失，概率仅随标准差单调变化。
+**模型识别与解题突破口：** 先把一次测量的双侧正态尾概率标准化为 $p\approx0.05$，再识别 $100$ 次独立试验中的超限次数为二项计数；最后才做泊松近似。
 
-
-分别标准化：
-
-$$
-P(|X-\mu_1|<1)=2\Phi\left(\frac1{\sigma_1}\right)-1,
-$$
+先求一次测量中事件
 
 $$
-P(|Y-\mu_2|<1)=2\Phi\left(\frac1{\sigma_2}\right)-1.
+A=\{|X|>19.6\}
 $$
 
-由于 $\Phi(x)$ 单调递增，题设不等式推出
+发生的概率。由于 $X\sim N(0,10^2)$，标准化得
 
 $$
-\frac1{\sigma_1}>\frac1{\sigma_2}.
+P(A)=P\left(\left|\frac X{10}\right|>1.96\right)
+=2[1-\Phi(1.96)]\approx0.05.
 $$
 
-又 $\sigma_1,\sigma_2>0$，因此
+设 $Y$ 表示 $100$ 次独立测量中事件 $A$ 发生的次数，则
 
 $$
-\sigma_1<\sigma_2.
+Y\sim B(100,0.05).
 $$
 
-故选 A。注意均值在“以各自均值为中心”的概率中已经被消去。
-
-
-**通用方法：** 固定窗口半宽 $c>0$ 时 $P(|X-\mu|<c)=2\Phi(c/\sigma)-1$，严格随 $\sigma$ 下降。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**[2019年数学（一）、数学（三）真题]**
-
-设随机变量 $X,Y$ 相互独立，且都服从正态分布 $N(\mu,\sigma^2)$，则
+要求
 
 $$
-P\{|X-Y|<1\}
+\alpha=P(Y\ge3).
 $$
 
-（　）。
-
-<ExamChoices>
-<ExamOption>
-
-A. 与 $\mu$ 无关，而与 $\sigma^2$ 有关
-
-</ExamOption>
-<ExamOption>
-
-B. 与 $\mu$ 有关，而与 $\sigma^2$ 无关
-
-</ExamOption>
-<ExamOption>
-
-C. 与 $\mu,\sigma^2$ 都有关
-
-</ExamOption>
-<ExamOption>
-
-D. 与 $\mu,\sigma^2$ 都无关
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-A
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-**标准模型：独立正态变量的差。** 均值相消，方差相加而不是相减，得到 $N(0,2\sigma^2)$。
-
-
-由于 $X,Y$ 相互独立，且
+由于 $n=100$ 较大、$p=0.05$ 较小，可用泊松分布近似二项分布，参数为
 
 $$
-X,Y\sim N(\mu,\sigma^2),
-$$
-
-所以它们的差仍服从正态分布：
-
-$$
-X-Y\sim N(0,2\sigma^2).
-$$
-
-注意均值中的 $\mu$ 在作差时完全抵消，因此事件概率不会再含 $\mu$。
-
-标准化得
-
-$$
-\frac{X-Y}{\sqrt2\sigma}\sim N(0,1),
+\lambda=np=5.
 $$
 
 于是
 
 $$
 \begin{aligned}
-P(|X-Y|<1)
-&=P\left(\left|\frac{X-Y}{\sqrt2\sigma}\right|<\frac1{\sqrt2\sigma}\right)\\
-&=2\Phi\left(\frac1{\sqrt2\sigma}\right)-1.
+\alpha
+&\approx1-P(Y=0)-P(Y=1)-P(Y=2)\\
+&=1-e^{-5}\left(1+5+\frac{5^2}{2}\right).
 \end{aligned}
 $$
 
-因此该概率与 $\mu$ 无关，而与 $\sigma$（等价地，与 $\sigma^2$）有关，故选 A。
+由附表 $e^{-5}\approx0.007$，故
 
-**关键：**同均值正态变量作差时，均值消掉；独立正态变量线性组合的方差按系数平方相加。
+$$
+\alpha\approx1-0.007\times18.5\approx0.87.
+$$
 
+**精度说明：**本题按所给附表 $e^{-5}\approx0.007$ 计算约为 $0.87$；若精确使用 $e^{-5}=0.006737946\ldots$，泊松近似得到 $0.87535\ldots$，保留两位小数应写作 $0.88$。
 
-**进一步：** 这一概率随 $\sigma$ 增大而减小，并不只是笼统地“与方差有关”。
+**关键：**先把“至少三次”转化为计数随机变量，再识别 $B(n,p)$；当 $n$ 大、$p$ 小时用 $P(np)$ 近似。
+
+**方法提炼与易错边界：** 此题的近似值依赖查表精度：按附表 $e^{-5}\approx0.007$ 得 $0.8705\approx0.87$；用精确 $e^{-5}$ 计算的泊松近似值为 $0.87535\ldots$，保留两位小数为 $0.88$。二者均为近似值，不应与原二项分布精确概率混同。
 
 </ExamExplanation>
 
@@ -1217,300 +1178,50 @@ $$
 
 <ExamQuestion>
 
-**[2024年数学（一）真题]**
+**精选题 [2013年数学一]**
 
-设随机变量 $X,Y$ 相互独立，$X$ 服从 $N(0,2)$ 的正态分布，$Y$ 服从 $N(-2,2)$ 的正态分布。若
+设随机变量 $Y$ 服从参数为 $1$ 的指数分布，$a$ 为常数且大于零，则
 
 $$
-P\{2X+Y<a\}=P\{X>Y\},
+P\{Y\le a+1\mid Y>a\}=\underline{\qquad}.
 $$
-
-则 $a=$（　）。
-
-<ExamChoices>
-<ExamOption>
-
-A. $-2-\sqrt{10}$
-
-</ExamOption>
-<ExamOption>
-
-B. $-2+\sqrt{10}$
-
-</ExamOption>
-<ExamOption>
-
-C. $-2-\sqrt6$
-
-</ExamOption>
-<ExamOption>
-
-D. $-2+\sqrt6$
-
-</ExamOption>
-</ExamChoices>
 
 <ExamSolution>
 
 <ExamAnswer>
 
-B
+$1-\dfrac1e$
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-**近年命题：比较两个正态线性组合的概率。** 分别求均值方差、标准化，用 $\Phi$ 严格单调把概率等式变成分位数等式。
+**模型识别与解题突破口：** 事件 $\{Y>a+1\}\subset\{Y>a\}$，先用生存函数之比，再用指数分布的无记忆性；无需积分。
 
-
-这里 $N(\mu,\sigma^2)$ 的第二个参数表示方差。
-
-因为 $X,Y$ 独立，
+指数分布具有无记忆性：
 
 $$
-2X+Y\sim N(-2,10),
-$$
-
-其中
-
-$$
-E(2X+Y)=2\cdot0+(-2)=-2,
-$$
-
-$$
-D(2X+Y)=4D(X)+D(Y)=4\cdot2+2=10.
+P(Y>a+t\mid Y>a)=P(Y>t).
 $$
 
 因此
 
 $$
-P(2X+Y<a)=\Phi\left(\frac{a+2}{\sqrt{10}}\right).
-$$
-
-另一方面，
-
-$$
-X-Y\sim N(2,4),
-$$
-
-故
-
-$$
 \begin{aligned}
-P(X>Y)
-&=P(X-Y>0)\\
-&=P\left(\frac{X-Y-2}{2}>-1\right)\\
-&=\Phi(1).
-\end{aligned}
-$$
-
-于是
-
-$$
-\Phi\left(\frac{a+2}{\sqrt{10}}\right)=\Phi(1).
-$$
-
-由 $\Phi$ 严格单调，
-
-$$
-\frac{a+2}{\sqrt{10}}=1,
-$$
-
-所以
-
-$$
-a=-2+\sqrt{10}.
-$$
-
-故选 B。
-
-
-**易错点：** $N(0,2)$ 的第二参数是方差；$D(2X+Y)=4D(X)+D(Y)$ 需要独立性使协方差项为零。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**[2024年数学（三）真题]**
-
-设随机变量 $X,Y$ 相互独立，且 $X$ 服从 $N(0,2)$，$Y$ 服从 $N(-1,1)$。记
-
-$$
-p_1=P\{2X-Y>0\},\qquad
-p_2=P\{X-2Y>1\},
-$$
-
-则（　）。
-
-<ExamChoices>
-<ExamOption>
-
-A. $p_1>p_2>\dfrac12$
-
-</ExamOption>
-<ExamOption>
-
-B. $p_2>p_1>\dfrac12$
-
-</ExamOption>
-<ExamOption>
-
-C. $p_1<p_2<\dfrac12$
-
-</ExamOption>
-<ExamOption>
-
-D. $p_2<p_1<\dfrac12$
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-B
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-**近年命题：不用求数值概率，比较标准化阈值。** 把两个右尾事件写成 $\Phi$ 的形式后，直接比较 $1/3$ 与 $1/\sqrt6$。
-
-
-先分别求两个线性组合的分布。
-
-因为 $X,Y$ 独立，
-
-$$
-2X-Y\sim N(1,9),
-$$
-
-所以
-
-$$
-\begin{aligned}
-p_1
-&=P(2X-Y>0)\\
-&=P\left(\frac{2X-Y-1}{3}>-\frac13\right)\\
-&=\Phi\left(\frac13\right).
-\end{aligned}
-$$
-
-同理，
-
-$$
-X-2Y\sim N(2,6),
-$$
-
-故
-
-$$
-\begin{aligned}
-p_2
-&=P(X-2Y>1)\\
-&=P\left(\frac{X-2Y-2}{\sqrt6}>-\frac1{\sqrt6}\right)\\
-&=\Phi\left(\frac1{\sqrt6}\right).
-\end{aligned}
-$$
-
-因为
-
-$$
-\frac1{\sqrt6}>\frac13>0,
-$$
-
-而 $\Phi(x)$ 单调递增，所以
-
-$$
-p_2>p_1>\Phi(0)=\frac12.
-$$
-
-故选 B。
-
-
-**速算：** 二者均大于 $1/2$；正态线性组合先求均值方差，不能仅比事件原始阈值 0 与 1。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**[2015年数学（一）、数学（三）真题]**
-
-设二维随机变量 $(X,Y)$ 服从正态分布
-
-$$
-N(1,0;1,1;0),
-$$
-
-则
-
-$$
-P\{XY-Y<0\}=\underline{\qquad}.
-$$
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$\dfrac12$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-**结构识别：$XY-Y=(X-1)Y$。** 对二维正态，零相关意味着独立；再将两个对称正态量乘积为负化成异号事件。
-
-
-由题给二维正态分布参数可知
-
-$$
-E(X)=1,\qquad E(Y)=0,
-$$
-
-且相关系数为 $0$。二维正态情况下，不相关即可推出独立，因此 $X$ 与 $Y$ 独立。
-
-将事件改写为
-
-$$
-XY-Y=(X-1)Y<0.
-$$
-
-而
-
-$$
-X-1\sim N(0,1),
-\qquad
-Y\sim N(0,1),
-$$
-
-二者独立且都关于 $0$ 对称。乘积小于零表示二者异号：
-
-$$
-\begin{aligned}
-P((X-1)Y<0)
-&=P(X-1<0,Y>0)+P(X-1>0,Y<0)\\
-&=\frac12\cdot\frac12+\frac12\cdot\frac12\\
-&=\frac12.
+P(Y\le a+1\mid Y>a)
+&=1-P(Y>a+1\mid Y>a)\\
+&=1-P(Y>1)\\
+&=1-e^{-1}.
 \end{aligned}
 $$
 
 故答案为
 
 $$
-\boxed{\frac12}.
+1-\frac1e.
 $$
 
-
-**边界：** 只有边缘分布为正态但不保证联合正态时，不可由相关系数零直接推出独立。
+**方法提炼与易错边界：** 通式 $P(Y\le a+t\mid Y>a)=1-e^{-\lambda t}$（$t>0$）。无记忆性属于单指数分布；若是两种指数寿命的混合，则通常不再成立。
 
 </ExamExplanation>
 
@@ -1518,79 +1229,54 @@ $$
 
 </ExamQuestion>
 
-## 三、二维连续模型：支持域、面积与事件积分
-
 <ExamQuestion>
 
-**[1989年数学（三）真题]**
+**精选题 [张宇1000题]**
 
-已知随机变量 $X$ 和 $Y$ 的联合密度为
-
-$$
-f(x,y)=
-\begin{cases}
-e^{-(x+y)},&0<x<+\infty,\ 0<y<+\infty,\\
-0,&\text{其他}.
-\end{cases}
-$$
-
-试求：
-
-（1）$P\{X<Y\}$；
-
-（2）$E(XY)$。
+设某种元件的使用寿命$T$的分布函数为$F(t)=\begin{cases}1-e^{-(\frac{t}{\theta})^m},&t \geq 0\\0,&t<0\end{cases}$，其中$\theta,m$为大于零的参数。求概率$P\{T>t\}$与$P\{T>s+t | T>s\}$，其中$s>0,t>0$。
 
 <ExamSolution>
 
 <ExamAnswer>
 
-（1）$\dfrac12$；（2）$1$
+$$
+P\{T>t\}=e^{-\left(\frac{t}{\theta}\right)^m},
+$$
+
+$$
+P\{T>s+t\mid T>s\}
+=\exp\left\{-\frac{(s+t)^m-s^m}{\theta^m}\right\}.
+$$
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-**优先判独立与交换对称。** 在第一象限上 $f(x,y)=e^{-x}e^{-y}$，两个边缘均为率 1 指数分布。
+**模型识别与解题突破口：** 先求生存函数 $S(t)=1-F(t)$，再取比值 $S(s+t)/S(s)$；这是检验无记忆性的统一起点。
 
-
-### （1）求 $P(X<Y)$
-
-在第一象限内，事件 $X<Y$ 对应区域 $0<x<y<\infty$，所以
+由分布函数直接得生存函数
 
 $$
-\begin{aligned}
-P(X<Y)
-&=\int_0^{\infty}\int_0^y e^{-(x+y)}\,dx\,dy\\
-&=\int_0^{\infty}e^{-y}(1-e^{-y})\,dy\\
-&=1-\frac12=\frac12.
-\end{aligned}
+P\{T>t\}=1-F(t)=e^{-\left(\frac{t}{\theta}\right)^m}.
 $$
 
-也可以直接观察到联合密度关于交换 $x,y$ 对称，且 $P(X=Y)=0$，因此 $P(X<Y)=P(X>Y)=1/2$。
-
-### （2）求 $E(XY)$
-
-由定义
+又因$s,t>0$，事件$\{T>s+t\}\subset\{T>s\}$，所以
 
 $$
-E(XY)=\int_0^{\infty}\int_0^{\infty}xy e^{-(x+y)}\,dx\,dy.
+P\{T>s+t\mid T>s\}
+=\frac{P\{T>s+t\}}{P\{T>s\}}.
 $$
 
-积分可以分离：
+代入生存函数，得
 
 $$
-E(XY)=\left(\int_0^{\infty}xe^{-x}\,dx\right)
-\left(\int_0^{\infty}ye^{-y}\,dy\right)=1\times1=1.
+P\{T>s+t\mid T>s\}=\frac{e^{-\left(\frac{s+t}{\theta}\right)^m}}{e^{-\left(\frac{s}{\theta}\right)^m}}
+=\exp\left\{-\frac{(s+t)^m-s^m}{\theta^m}\right\}.
 $$
 
-故
+当$m=1$时，该式才退化为与$s$无关的指数分布无记忆性。
 
-$$
-E(XY)=1.
-$$
-
-
-**快速解：** 由连续同分布且独立，$P(X<Y)=P(Y<X)$，而 $P(X=Y)=0$，所以一半一半。期望乘积可用独立性分解。
+**方法提炼与易错边界：** 仅当 $m=1$ 时该 Weibull 模型满足无记忆性。$m>1$ 时剩余寿命随已服役时间变化，$0<m<1$ 时也会变化；不能仅凭出现指数符号就认定是指数分布。
 
 </ExamExplanation>
 
@@ -1600,7 +1286,170 @@ $$
 
 <ExamQuestion>
 
-**[1992年数学（三）真题]**
+**精选题 [张宇1000题]**
+
+某人在超市里买了10节甲厂生产的电池，又买了5节乙厂生产的电池。这两种电池的寿命（以小时计）分别服从参数为$\frac{1}{20}$和$\frac{1}{40}$的指数分布。他任取一节电池装在相机里。求：
+(1) 此电池寿命$X$的概率密度；
+(2) 若用了40小时电池仍有电，还可以再用20小时以上的概率。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+(1)
+
+$$
+f_X(x)=
+\begin{cases}
+\frac1{30}e^{-x/20}+\frac1{120}e^{-x/40},&x\ge0,\\
+0,&x<0;
+\end{cases}
+$$
+
+(2)
+
+$$
+P\{X>60\mid X>40\}
+=\frac{2e^{-3}+e^{-3/2}}{2e^{-2}+e^{-1}}.
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 随机选电池相当于先抽隐变量“厂家”，再依厂家抽指数寿命；总密度必须按初始厂家概率加权。
+
+任取一节时，取到甲厂电池和乙厂电池的概率分别为
+
+$$
+P(A)=\frac{10}{15}=\frac23,
+\qquad
+P(B)=\frac5{15}=\frac13.
+$$
+
+(1) 条件密度分别为
+
+$$
+f_{X\mid A}(x)=\frac1{20}e^{-x/20},\qquad x\ge0,
+$$
+
+$$
+f_{X\mid B}(x)=\frac1{40}e^{-x/40},\qquad x\ge0.
+$$
+
+由全概率公式，
+
+$$
+f_X(x)=\frac23\cdot\frac1{20}e^{-x/20}
++\frac13\cdot\frac1{40}e^{-x/40}
+=\frac1{30}e^{-x/20}+\frac1{120}e^{-x/40},
+$$
+
+其中$x\ge0$。
+
+(2) 混合分布的生存函数为
+
+$$
+P\{X>t\}=\frac23e^{-t/20}+\frac13e^{-t/40}.
+$$
+
+所以
+
+$$
+P\{X>60\mid X>40\}
+=\frac{P\{X>60\}}{P\{X>40\}}
+=\frac{\frac23e^{-3}+\frac13e^{-3/2}}{\frac23e^{-2}+\frac13e^{-1}}
+=\frac{2e^{-3}+e^{-3/2}}{2e^{-2}+e^{-1}}.
+$$
+
+注意不能直接套用单个指数分布的无记忆性，因为随机选出的电池寿命是两个指数分布的混合分布，而不是一个指数分布。
+
+**方法提炼与易错边界：** 观察“已存活 $40$ 小时”后，两种厂家的后验权重发生变化，故混合寿命**不再**具有单一指数的无记忆性。条件存活概率应为两个混合生存函数的比值。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 四、二维连续型分布的支持域、边缘与条件
+
+<ExamQuestion>
+
+**精选题 [1990年数学三]**
+
+一电子仪器由两个部件构成，以 $X$ 和 $Y$ 分别表示两个部件的寿命（单位：千小时），已知 $X$ 和 $Y$ 的联合分布函数为
+
+$$
+F(x,y)=
+\begin{cases}
+1-e^{-0.5x}-e^{-0.5y}+e^{-0.5(x+y)},&x\ge0,\ y\ge0,\\
+0,&\text{其他}.
+\end{cases}
+$$
+
+（1）问 $X$ 和 $Y$ 是否独立？
+
+（2）求两个部件的寿命都超过 $100$ 小时的概率 $p$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+（1）独立；（2）$p=e^{-0.1}$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 若联合分布函数分解为 $F_X(x)F_Y(y)$，即证独立；寿命题先把 $100$ 小时换算为 $0.1$ 千小时。
+
+### （1）判断独立性
+
+由联合分布函数求边缘分布：
+
+$$
+F_X(x)=\lim_{y\to\infty}F(x,y)=1-e^{-0.5x},\qquad x\ge0,
+$$
+
+$$
+F_Y(y)=\lim_{x\to\infty}F(x,y)=1-e^{-0.5y},\qquad y\ge0.
+$$
+
+而
+
+$$
+F(x,y)=(1-e^{-0.5x})(1-e^{-0.5y})=F_X(x)F_Y(y).
+$$
+
+所以 $X,Y$ 相互独立。
+
+### （2）寿命都超过 $100$ 小时
+
+题中单位为“千小时”，因此 $100$ 小时等于 $0.1$ 千小时。
+
+由独立性，
+
+$$
+\begin{aligned}
+p
+&=P(X>0.1,Y>0.1)\\
+&=P(X>0.1)P(Y>0.1)\\
+&=e^{-0.05}e^{-0.05}=e^{-0.1}.
+\end{aligned}
+$$
+
+**方法提炼与易错边界：** 本题的概率为 $e^{-0.1}$ 而不是 $e^{-100}$；这里 $0.5$ 是单位为千小时的指数率参数，独立性允许生存概率相乘。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [1992年数学三]**
 
 设二维随机变量 $(X,Y)$ 的概率密度为
 
@@ -1628,8 +1477,7 @@ $$
 
 <ExamExplanation>
 
-**决定性步骤：确定斜三角支持域 $0<x<y$。** 先切片得边缘密度；求事件概率时与 $x+y\le1$ 再取交。
-
+**模型识别与解题突破口：** 第一问先投影支持域 $0<x<y$ 得边缘 $f_X(x)$；第二问把新条件 $x+y\le1$ 加进支持域，确定 $0<x<1/2$ 的积分界。
 
 ### （1）求边缘密度
 
@@ -1682,8 +1530,7 @@ $$
 
 **关键：**二维积分首先要把“密度支持域”和“事件区域”取交集，再确定积分上下限。
 
-
-**常见错误：** $f(x,y)=e^{-y}$ 中的指数变量为 $y$，且 $y$ 的积分下限不能取 0。
+**方法提炼与易错边界：** 二维密度的计算核心是“固定外层变量后看截线区间”。不要错误地把 $y$ 上限设为 $1$，真正约束为 $y\le1-x$。
 
 </ExamExplanation>
 
@@ -1693,7 +1540,7 @@ $$
 
 <ExamQuestion>
 
-**[1998年数学（一）真题]**
+**精选题 [1998年数学一]**
 
 设 $D$ 由曲线 $y=\dfrac1x$ 及直线 $y=0$、$x=1$、$x=e^2$ 所围成。二维随机变量 $(X,Y)$ 在区域 $D$ 上服从均匀分布，则 $(X,Y)$ 关于 $X$ 的边缘概率密度在 $x=2$ 处的值为 $\underline{\qquad}$。
 
@@ -1707,8 +1554,7 @@ $\dfrac14$
 
 <ExamExplanation>
 
-**识别特征：二维均匀分布在曲边区域上。** 联合密度为面积倒数，边缘密度是固定横坐标时的竖切片长度乘该常数。
-
+**模型识别与解题突破口：** 二维均匀分布密度是区域面积的倒数；所求边缘密度等于竖直截线长度乘以这个常数。
 
 先求区域 $D$ 的面积：
 
@@ -1742,8 +1588,7 @@ $$
 f_X(2)=\frac14.
 $$
 
-
-**通用公式：** 若 $D=\{(x,y):a<x<b,\,g(x)<y<h(x)\}$ 且均匀，则 $f_X(x)=[h(x)-g(x)]/|D|$。
+**方法提炼与易错边界：** 若区域可写成 $a<x<b,\ 0<y<h(x)$，则 $f_X(x)=h(x)/\int_a^b h(t)\,dt$；只有 $h(x)$ 恒定时边缘才是均匀分布。
 
 </ExamExplanation>
 
@@ -1753,7 +1598,7 @@ $$
 
 <ExamQuestion>
 
-**[2003年数学（一）真题]**
+**精选题 [2003年数学一]**
 
 设二维随机变量 $(X,Y)$ 的概率密度为
 
@@ -1781,8 +1626,7 @@ $\dfrac14$
 
 <ExamExplanation>
 
-**突破口：求支持域与事件半平面的交。** 非空条件 $x<1/2$ 决定积分范围；直接对 $0<x<1$ 积分会多算不可能区域。
-
+**模型识别与解题突破口：** 先画出三角形 $0<x<y<1$，再与 $x+y\le1$ 相交；积分时 $0<x<1/2,\ x<y<1-x$。
 
 事件必须同时满足
 
@@ -1815,81 +1659,7 @@ P(X+Y\le1)
 \end{aligned}
 $$
 
-
-**校验：** 原密度总积分 $\int_0^1\int_x^1 6x\,dy\,dx=1$，事件概率应落在 $[0,1]$。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**[2012年数学（三）真题]**
-
-设随机变量 $X$ 与 $Y$ 相互独立，且都服从区间 $(0,1)$ 上的均匀分布，则
-
-$$
-P\{X^2+Y^2\le1\}=
-$$
-
-（　）。
-
-<ExamChoices>
-<ExamOption>
-
-A. $\dfrac14$
-
-</ExamOption>
-<ExamOption>
-
-B. $\dfrac12$
-
-</ExamOption>
-<ExamOption>
-
-C. $\dfrac\pi8$
-
-</ExamOption>
-<ExamOption>
-
-D. $\dfrac\pi4$
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-D
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-**几何模型：独立均匀随机点落在单位正方形。** 事件 $X^2+Y^2\le1$ 是第一象限单位圆的四分之一，概率等于面积比。
-
-
-因为 $X,Y$ 独立且都服从 $U(0,1)$，所以联合密度在单位正方形 $(0,1)\times(0,1)$ 内恒为 $1$。
-
-事件
-
-$$
-X^2+Y^2\le1
-$$
-
-在第一象限对应单位圆的四分之一圆盘，其面积为
-
-$$
-\frac14\pi\cdot1^2=\frac\pi4.
-$$
-
-由于联合密度为 $1$，概率就等于面积，故选 D。
-
-
-**局限：** 仅当联合分布均匀（本题由独立的 $U(0,1)$ 推得）时，面积比等于概率。
+**方法提炼与易错边界：** 联合密度虽为 $6x$，但概率绝不是事件面积占比。若改为在同一三角形**均匀**分布，答案会不同；模型识别要先确认密度结构。
 
 </ExamExplanation>
 
@@ -1899,149 +1669,7 @@ $$
 
 <ExamQuestion>
 
-**[2026年数学（三）第8题]**
-
-设随机变量 $X$ 与 $Y$ 独立同分布，$X$ 的概率密度为
-
-$$
-f(x)=\begin{cases}\dfrac1{(1+x)^2},&x>0,\\0,&x\le0.\end{cases}
-$$
-
-则 $P\{XY\le1\}=$（ ）。
-
-<ExamChoices>
-<ExamOption>
-
-A. $\frac34$
-
-</ExamOption>
-<ExamOption>
-
-B. $\frac12$
-
-</ExamOption>
-<ExamOption>
-
-C. $\frac13$
-
-</ExamOption>
-<ExamOption>
-
-D. $\frac16$
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-B
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-**创新模型：乘积事件 + 重尾变量。** 对 $x>0$ 先计算 $P(Y\le1/x)=1/(1+x)$，再按 $X$ 的密度作全概率积分。
-
-
-因为 $X,Y$ 独立且均非负，事件 $XY\le1$ 等价于 $0\le y\le1/x$。所以
-
-$$
-P(XY\le1)=\int_0^\infty \frac1{(1+x)^2}\left[\int_0^{1/x}\frac{dy}{(1+y)^2}\right]dx.
-$$
-
-内层积分等于 $\frac1{1+x}$，因此
-
-$$
-P(XY\le1)=\int_0^\infty\frac{dx}{(1+x)^3}=\frac12.
-$$
-
-注意积分区域是第一象限中双曲线 $xy=1$ 下方，而不是正方形。
-
-
-**巧解与推广：** 本分布满足 $1/X\overset{d}=X$。独立同分布使 $X$ 与 $1/Y$ 也是独立同分布的连续变量；因而 $P(XY\le1)=P(X\le1/Y)=1/2$。这避免了二重积分，并说明 1 是 $XY$ 的一个中位数。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-## 四、边缘分布、条件密度及区域切片
-
-<ExamQuestion>
-
-**[2007年数学（一）、数学（三）真题]**
-
-设随机变量 $(X,Y)$ 服从二维正态分布，且 $X$ 与 $Y$ 不相关。$f_X(x),f_Y(y)$ 分别表示 $X,Y$ 的概率密度，则在 $Y=y$ 条件下，$X$ 的条件概率密度 $f_{X\mid Y}(x\mid y)$ 为（　）。
-
-<ExamChoices>
-<ExamOption>
-
-A. $f_X(x)$
-
-</ExamOption>
-<ExamOption>
-
-B. $f_Y(y)$
-
-</ExamOption>
-<ExamOption>
-
-C. $f_X(x)f_Y(y)$
-
-</ExamOption>
-<ExamOption>
-
-D. $\dfrac{f_X(x)}{f_Y(y)}$
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-A
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-**关键定理：二维正态中零相关可推出独立。** 因此条件密度不随已知 $Y=y$ 的取值改变。
-
-
-对一般随机变量，“不相关”并不能推出“独立”；但对**二维正态分布**，二者等价。
-
-因此由 $X,Y$ 不相关可知 $X,Y$ 相互独立，从而
-
-$$
-f(x,y)=f_X(x)f_Y(y).
-$$
-
-于是
-
-$$
-f_{X\mid Y}(x\mid y)
-=\frac{f(x,y)}{f_Y(y)}
-=f_X(x).
-$$
-
-故选 A。
-
-
-**易错点：** “不相关推出独立”对一般二维分布不成立；本题依赖联合正态这一必要前提。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**[2009年数学（三）真题]**
+**精选题 [2009年数学三]**
 
 设二维随机变量 $(X,Y)$ 的概率密度为
 
@@ -2069,8 +1697,7 @@ $$
 
 <ExamExplanation>
 
-**模型：三角支持域上的条件均匀分布。** 固定 $X=x$ 时 $Y$ 在 $(0,x)$ 上均匀；另一方面条件在 $Y\le1$ 时须用事件概率之比。
-
+**模型识别与解题突破口：** 先求 $f_X$ 得到 $Y\mid X=x\sim U(0,x)$；第二问优先按 $0<y<x$ 的支持域取交，求两个二维区域概率的比。
 
 ### （1）求条件密度
 
@@ -2131,8 +1758,7 @@ P(X\le1\mid Y\le1)
 =\frac{e-2}{e-1}.
 $$
 
-
-**避免混淆：** $f_{Y|X}(y|x)=1/x$ 不等于 $P(X\le1|Y\le1)$；前者条件是一个数值，后者条件是一个区间事件。
+**方法提炼与易错边界：** 条件事件 $Y\le1$ 不是条件 $Y=1$，因而 $P(X\le1\mid Y\le1)$ 必须用区域积分，而不能用 $f_{X\mid Y}(x\mid1)$ 直接积分替代。
 
 </ExamExplanation>
 
@@ -2142,7 +1768,7 @@ $$
 
 <ExamQuestion>
 
-**[2010年数学（一）、数学（三）真题]**
+**精选题 [2010年数学一、数学三]**
 
 设二维随机变量 $(X,Y)$ 的概率密度为
 
@@ -2169,8 +1795,7 @@ $$
 
 <ExamExplanation>
 
-**模型识别：指数型二次型先配方。** 将 $-2x^2+2xy-y^2$ 分解成 $-x^2-(y-x)^2$，积分即可按高斯核解耦。
-
+**模型识别与解题突破口：** 指数型联合密度优先完成平方：$-2x^2+2xy-y^2=-x^2-(y-x)^2$，立刻读出归一化常数及条件正态密度。
 
 先配方：
 
@@ -2218,8 +1843,7 @@ f_{Y\mid X}(y\mid x)
 \end{aligned}
 $$
 
-
-**进一步提炼：** $Y|X=x$ 为 $N(x,1/2)$；条件均值 $x$ 反映相关性，不能因为能配成两个高斯核就断言 $X,Y$ 独立。
+**方法提炼与易错边界：** 在本题中 $Y\mid X=x\sim N(x,1/2)$，所以条件期望是 $x$，但 $X,Y$ 不是独立的；不能因为配方成为两个因子就把变量 $Y$ 与 $X$ 视为独立。
 
 </ExamExplanation>
 
@@ -2229,7 +1853,7 @@ $$
 
 <ExamQuestion>
 
-**[2011年数学（三）真题]**
+**精选题 [2011年数学三]**
 
 设二维随机变量 $(X,Y)$ 服从区域 $G$ 上的均匀分布，其中 $G$ 是由
 
@@ -2276,8 +1900,7 @@ $$
 
 <ExamExplanation>
 
-**核心模型：同一区域的两个切片方向。** 求 $f_X$ 按竖直切片，求 $f_{X|Y}$ 按水平切片，避免把 $x,y$ 的范围互换。
-
+**模型识别与解题突破口：** 三角形边缘密度的关键是横、竖截线：固定 $x$ 积分求 $f_X$；固定 $y$ 后 $x$ 在 $(y,2-y)$ 内均匀。
 
 三条边围成三角形，顶点为 $(0,0),(2,0),(1,1)$，面积为 $1$，故均匀分布的联合密度为
 
@@ -2335,8 +1958,7 @@ $$
 
 其中 $y<x<2-y$。
 
-
-**迁移：** 固定 $0<y<1$ 时条件分布 $X|Y=y$ 在 $(y,2-y)$ 上均匀。
+**方法提炼与易错边界：** 边缘 $f_X$ 是三角形密度，不是均匀密度；且 $f_{X\mid Y}$ 的分母 $2-2y$ 只在 $0<y<1$ 有意义。条件密度与边缘密度的支撑要同步写明。
 
 </ExamExplanation>
 
@@ -2346,7 +1968,7 @@ $$
 
 <ExamQuestion>
 
-**[2013年数学（三）真题]**
+**精选题 [2013年数学三]**
 
 设 $(X,Y)$ 是二维随机变量，$X$ 的边缘概率密度为
 
@@ -2404,8 +2026,7 @@ $$
 
 <ExamExplanation>
 
-**逆向构造：边缘密度 × 条件密度 = 联合密度。** 写出 $0<y<x<1$ 后，再根据积分对象决定固定 $x$ 还是固定 $y$。
-
+**模型识别与解题突破口：** 先用“条件密度 $\times$ 边缘密度 = 联合密度”恢复 $f(x,y)$，再按支撑域投影求另一个边缘，最后处理 $X>2Y$。
 
 ### （1）求联合密度
 
@@ -2487,8 +2108,7 @@ P(X>2Y)
 \end{aligned}
 $$
 
-
-**考场捷径：** (3) 可先求 $P(Y<x/2|X=x)=1/8$，它与 $x$ 无关，再对 $f_X$ 积分即得 $1/8$，比双重积分更快。
+**方法提炼与易错边界：** 这题的对数边缘 $f_Y(y)=-9y^2\ln y$ 来自积分 $\int_y^1dx/x$；若把条件密度里的 $x^{-3}$ 与 $3x^2$ 相乘时漏掉一个 $1/x$，会导致后续全部结果错误。
 
 </ExamExplanation>
 
@@ -2498,68 +2118,913 @@ $$
 
 <ExamQuestion>
 
-**[原创·二维连续密度与独立性的参数识别]**
+**精选题 [张宇1000题]**
 
-给定实参数 $\theta$，定义二维随机变量 $(X,Y)$ 的联合概率密度候选式
-
-$$
-f_\theta(x,y)=\begin{cases}\dfrac{1+\theta xy}{4},&-1<x<1,\ -1<y<1,\\0,&\text{其他} .\end{cases}
-$$
-
-（1）确定使 $f_\theta$ 成为概率密度的所有 $\theta$；
-
-（2）求 $f_X(x)$、$f_Y(y)$，并判断 $X,Y$ 何时相互独立；
-
-（3）求 $P\{XY>0\}$，说明为何边缘分布不含 $\theta$ 却不能推出独立。
+已知二维随机变量$(X,Y)$在以点$(0,0),(1,-1),(1,1)$为顶点的三角形区域上服从均匀分布。
+(1) 求边缘概率密度$f_X(x),f_Y(y)$及条件概率密度$f_{X|Y}(x|y),f_{Y|X}(y|x)$，并判断$X$与$Y$是否相互独立；
+(2) 计算概率$P\{X>\frac{1}{2} | Y>0\}$，$P\{X>\frac{1}{2}\}$。
 
 <ExamSolution>
 
 <ExamAnswer>
 
-（1）$|\theta|\le1$。
+三角形区域为
 
-（2）$X,Y$ 都服从 $U(-1,1)$；仅当 $\theta=0$ 时独立。
+$$
+D=\{(x,y):0<x<1,-x<y<x\},
+$$
 
-（3）$P(XY>0)=\dfrac12+\dfrac{\theta}{8}$。
+面积为1，因此联合密度$f(x,y)=1$（$(x,y)\in D$）。
+
+(1)
+
+$$
+f_X(x)=
+\begin{cases}
+2x,&0<x<1,\\
+0,&\text{其他},
+\end{cases}
+$$
+
+$$
+f_Y(y)=
+\begin{cases}
+1-|y|,&-1<y<1,\\
+0,&\text{其他}.
+\end{cases}
+$$
+
+$$
+f_{X|Y}(x|y)=
+\begin{cases}
+\frac1{1-|y|},&|y|<x<1,\\
+0,&\text{其他},
+\end{cases}
+$$
+
+$$
+f_{Y|X}(y|x)=
+\begin{cases}
+\frac1{2x},&-x<y<x,\\
+0,&\text{其他}.
+\end{cases}
+$$
+
+$X,Y$不相互独立。
+
+(2)
+
+$$
+P\left\{X>\frac12\mid Y>0\right\}=\frac34,
+\qquad
+P\left\{X>\frac12\right\}=\frac34.
+$$
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-**突破口：** 候选联合密度须同时满足非负性、总积分为 1。参数可行域由非负性控制；是否独立则看联合密度能否分解为两边缘密度乘积。
+**模型识别与解题突破口：** 先写三角形 $D=\{0<x<1,-x<y<x\}$ 并算面积，再用水平和竖直截线分别求两边缘、两条件密度。
 
-（1）因 $xy\in(-1,1)$，对整个开方形要求 $1+\theta xy\ge0$ 的充要条件为 $|\theta|\le1$（超出该范围可选 $xy$ 足够接近相反符号的 $\pm1$ 使密度为负）。另一方面，
-
-$$
-\int_{-1}^1\int_{-1}^1\frac{1+\theta xy}{4}\,dy\,dx
-=1+\frac{\theta}{4}\left(\int_{-1}^1x\,dx\right)^2=1.
-$$
-
-（2）对固定 $-1<x<1$，
+(1) 对$0<x<1$，固定$x$后$y$的取值长度为$2x$，故
 
 $$
-f_X(x)=\int_{-1}^1\frac{1+\theta xy}{4}\,dy=\frac12,
+f_X(x)=\int_{-x}^x1\,dy=2x.
 $$
 
-同理 $f_Y(y)=1/2$（在 $(-1,1)$ 上），其余各处均为 0。若独立，方形内必须几乎处处满足
+固定$y\in(-1,1)$后，有$|y|<x<1$，所以
 
 $$
-\frac{1+\theta xy}{4}=f_X(x)f_Y(y)=\frac14,
+f_Y(y)=\int_{|y|}^1 1\,dx=1-|y|.
 $$
 
-即 $\theta=0$；反过来 $\theta=0$ 时显然可分解，故是充要条件。
+条件密度由
 
-（3）区域 $xy>0$ 是第一、第三象限对应的两个单位小正方形，因此
+$$
+f_{X|Y}(x|y)=\frac{f(x,y)}{f_Y(y)},\qquad
+f_{Y|X}(y|x)=\frac{f(x,y)}{f_X(x)}
+$$
+
+直接得到。
+
+联合密度的支撑区域为三角形，并不是两个一维支撑区间的直积，因此$X,Y$不独立。
+
+(2) 由于区域关于$x$轴对称，$P\{Y>0\}=\frac12$。同时
+
+$$
+P\left\{X>\frac12,Y>0\right\}
+=\int_{1/2}^1\int_0^xdy\,dx
+=\int_{1/2}^1x\,dx
+=\frac38.
+$$
+
+所以
+
+$$
+P\left\{X>\frac12\mid Y>0\right\}
+=\frac{3/8}{1/2}=\frac34.
+$$
+
+又
+
+$$
+P\left\{X>\frac12\right\}
+=\int_{1/2}^12x\,dx=\frac34.
+$$
+
+**方法提炼与易错边界：** 这里 $P(X>1/2\mid Y>0)=P(X>1/2)=3/4$ 只是某两个事件独立的特殊表现，**不能**推出随机变量 $X,Y$ 独立；支撑集不是直积。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 五、独立性、正态组合、几何概率与连续型综合
+
+<ExamQuestion>
+
+**精选题 [2007年数学一、数学三]**
+
+设随机变量 $(X,Y)$ 服从二维正态分布，且 $X$ 与 $Y$ 不相关。$f_X(x),f_Y(y)$ 分别表示 $X,Y$ 的概率密度，则在 $Y=y$ 条件下，$X$ 的条件概率密度 $f_{X\mid Y}(x\mid y)$ 为（　）。
+
+<ExamChoices>
+
+<ExamOption>
+
+A. $f_X(x)$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $f_Y(y)$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $f_X(x)f_Y(y)$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $\dfrac{f_X(x)}{f_Y(y)}$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+A
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 判断条件密度时关键不是 $\operatorname{Cov}(X,Y)=0$ 本身，而是题目额外给了**二维正态**结构；此时不相关才能推出独立。
+
+对一般随机变量，“不相关”并不能推出“独立”；但对**二维正态分布**，二者等价。
+
+因此由 $X,Y$ 不相关可知 $X,Y$ 相互独立，从而
+
+$$
+f(x,y)=f_X(x)f_Y(y).
+$$
+
+于是
+
+$$
+f_{X\mid Y}(x\mid y)
+=\frac{f(x,y)}{f_Y(y)}
+=f_X(x).
+$$
+
+故选 A。
+
+**方法提炼与易错边界：** 一般联合分布的“零相关”不能推出独立，条件密度公式还要求分母 $f_Y(y)>0$；二维正态的独立结论依赖真正的联合正态假设，而非分别正态。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [2012年数学一]**
+
+设随机变量 $X,Y$ 相互独立，且分别服从参数为 $1$ 与参数为 $4$ 的指数分布，则
+
+$$
+P\{X<Y\}=
+$$
+
+（　）。
+
+<ExamChoices>
+
+<ExamOption>
+
+A. $\dfrac15$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $\dfrac13$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $\dfrac25$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $\dfrac45$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+A
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 两个独立指数寿命竞争，写作 $P(X<Y)=\int_0^\infty P(Y>x)f_X(x)\,dx$，得到“率之比”模型。
+
+指数分布参数按题中定义为率参数。于是
+
+$$
+f_X(x)=e^{-x},\qquad x>0,
+$$
+
+$$
+P(Y>x)=e^{-4x}.
+$$
+
+利用独立性，
 
 $$
 \begin{aligned}
-P(XY>0)
-&=2\int_0^1\int_0^1\frac{1+\theta xy}{4}\,dy\,dx\\
-&=\frac12+\frac\theta8.
+P(X<Y)
+&=\int_0^{\infty}P(Y>x)f_X(x)\,dx\\
+&=\int_0^{\infty}e^{-4x}e^{-x}\,dx\\
+&=\int_0^{\infty}e^{-5x}\,dx\\
+&=\frac15.
 \end{aligned}
 $$
 
-**模型提炼：** 边缘分布只能刻画单变量，联合密度中的交互项可能改变依赖关系及象限概率；不要由“边缘相同”误判为“独立”。
+故选 A。
+
+**结论：**若 $X\sim\operatorname{Exp}(\lambda_1)$、$Y\sim\operatorname{Exp}(\lambda_2)$ 且独立，则
+
+$$
+P(X<Y)=\frac{\lambda_1}{\lambda_1+\lambda_2}.
+$$
+
+**方法提炼与易错边界：** 若 $X_i\sim\operatorname{Exp}(\lambda_i)$ 独立，最小寿命的率是 $\sum_i\lambda_i$，最先失效的是第 $i$ 个元件的概率是 $\lambda_i/\sum_j\lambda_j$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [2012年数学三]**
+
+设随机变量 $X$ 与 $Y$ 相互独立，且都服从区间 $(0,1)$ 上的均匀分布，则
+
+$$
+P\{X^2+Y^2\le1\}=
+$$
+
+（　）。
+
+<ExamChoices>
+
+<ExamOption>
+
+A. $\dfrac14$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $\dfrac12$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $\dfrac\pi8$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $\dfrac\pi4$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+D
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 独立均匀变量使联合密度在单位正方形为常数；$X^2+Y^2\le1$ 与第一象限四分之一圆盘对应。
+
+因为 $X,Y$ 独立且都服从 $U(0,1)$，所以联合密度在单位正方形 $(0,1)\times(0,1)$ 内恒为 $1$。
+
+事件
+
+$$
+X^2+Y^2\le1
+$$
+
+在第一象限对应单位圆的四分之一圆盘，其面积为
+
+$$
+\frac14\pi\cdot1^2=\frac\pi4.
+$$
+
+由于联合密度为 $1$，概率就等于面积，故选 D。
+
+**方法提炼与易错边界：** 只有联合密度恒为常数，才能直接使用“有利面积/样本面积”。如边缘各自均匀但不独立，则联合分布未必是正方形上的均匀分布。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [2015年数学一、数学三]**
+
+设二维随机变量 $(X,Y)$ 服从正态分布
+
+$$
+N(1,0;1,1;0),
+$$
+
+则
+
+$$
+P\{XY-Y<0\}=\underline{\qquad}.
+$$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$\dfrac12$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 由二维正态相关系数 $0$ 得独立，事件 $(X-1)Y<0$ 再化为“两个独立对称变量异号”。
+
+由题给二维正态分布参数可知
+
+$$
+E(X)=1,\qquad E(Y)=0,
+$$
+
+且相关系数为 $0$。二维正态情况下，不相关即可推出独立，因此 $X$ 与 $Y$ 独立。
+
+将事件改写为
+
+$$
+XY-Y=(X-1)Y<0.
+$$
+
+而
+
+$$
+X-1\sim N(0,1),
+\qquad
+Y\sim N(0,1),
+$$
+
+二者独立且都关于 $0$ 对称。乘积小于零表示二者异号：
+
+$$
+\begin{aligned}
+P((X-1)Y<0)
+&=P(X-1<0,Y>0)+P(X-1>0,Y<0)\\
+&=\frac12\cdot\frac12+\frac12\cdot\frac12\\
+&=\frac12.
+\end{aligned}
+$$
+
+故答案为
+
+$$
+\boxed{\frac12}.
+$$
+
+**方法提炼与易错边界：** 只需对称性与独立性便有 $P(UV<0)=1/2$（两者连续且关于零对称），正态的精确密度并不是计算该概率的必要条件。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [2019年数学一、数学三]**
+
+设随机变量 $X,Y$ 相互独立，且都服从正态分布 $N(\mu,\sigma^2)$，则
+
+$$
+P\{|X-Y|<1\}
+$$
+
+（　）。
+
+<ExamChoices>
+
+<ExamOption>
+
+A. 与 $\mu$ 无关，而与 $\sigma^2$ 有关
+
+</ExamOption>
+
+<ExamOption>
+
+B. 与 $\mu$ 有关，而与 $\sigma^2$ 无关
+
+</ExamOption>
+
+<ExamOption>
+
+C. 与 $\mu,\sigma^2$ 都有关
+
+</ExamOption>
+
+<ExamOption>
+
+D. 与 $\mu,\sigma^2$ 都无关
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+A
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 独立同均值正态变量作差后均值消去，方差相加；故所求概率由标准差 $\sqrt2\sigma$ 控制。
+
+由于 $X,Y$ 相互独立，且
+
+$$
+X,Y\sim N(\mu,\sigma^2),
+$$
+
+所以它们的差仍服从正态分布：
+
+$$
+X-Y\sim N(0,2\sigma^2).
+$$
+
+注意均值中的 $\mu$ 在作差时完全抵消，因此事件概率不会再含 $\mu$。
+
+标准化得
+
+$$
+\frac{X-Y}{\sqrt2\sigma}\sim N(0,1),
+$$
+
+于是
+
+$$
+\begin{aligned}
+P(|X-Y|<1)
+&=P\left(\left|\frac{X-Y}{\sqrt2\sigma}\right|<\frac1{\sqrt2\sigma}\right)\\
+&=2\Phi\left(\frac1{\sqrt2\sigma}\right)-1.
+\end{aligned}
+$$
+
+因此该概率与 $\mu$ 无关，而与 $\sigma$（等价地，与 $\sigma^2$）有关，故选 A。
+
+**关键：**同均值正态变量作差时，均值消掉；独立正态变量线性组合的方差按系数平方相加。
+
+**方法提炼与易错边界：** 对一般正态向量，$D(X-Y)=D(X)+D(Y)-2\operatorname{Cov}(X,Y)$；此处能够直接相加，是因为明确给了独立性。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [2024年数学一]**
+
+设随机变量 $X,Y$ 相互独立，$X$ 服从 $N(0,2)$ 的正态分布，$Y$ 服从 $N(-2,2)$ 的正态分布。若
+
+$$
+P\{2X+Y<a\}=P\{X>Y\},
+$$
+
+则 $a=$（　）。
+
+<ExamChoices>
+
+<ExamOption>
+
+A. $-2-\sqrt{10}$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $-2+\sqrt{10}$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $-2-\sqrt6$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $-2+\sqrt6$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+B
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 先把 $2X+Y$ 与 $X-Y$ 都写成正态分布，再将左右两边变成标准正态分布函数，利用严格单调性反推 $a$。
+
+这里 $N(\mu,\sigma^2)$ 的第二个参数表示方差。
+
+因为 $X,Y$ 独立，
+
+$$
+2X+Y\sim N(-2,10),
+$$
+
+其中
+
+$$
+E(2X+Y)=2\cdot0+(-2)=-2,
+$$
+
+$$
+D(2X+Y)=4D(X)+D(Y)=4\cdot2+2=10.
+$$
+
+因此
+
+$$
+P(2X+Y<a)=\Phi\left(\frac{a+2}{\sqrt{10}}\right).
+$$
+
+另一方面，
+
+$$
+X-Y\sim N(2,4),
+$$
+
+故
+
+$$
+\begin{aligned}
+P(X>Y)
+&=P(X-Y>0)\\
+&=P\left(\frac{X-Y-2}{2}>-1\right)\\
+&=\Phi(1).
+\end{aligned}
+$$
+
+于是
+
+$$
+\Phi\left(\frac{a+2}{\sqrt{10}}\right)=\Phi(1).
+$$
+
+由 $\Phi$ 严格单调，
+
+$$
+\frac{a+2}{\sqrt{10}}=1,
+$$
+
+所以
+
+$$
+a=-2+\sqrt{10}.
+$$
+
+故选 B。
+
+**方法提炼与易错边界：** 此题 $N(0,2)$ 的“$2$”是方差，不是标准差；$D(2X+Y)=4D(X)+D(Y)=10$，不应误作 $2D(X)+D(Y)$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [2024年数学三]**
+
+设随机变量 $X,Y$ 相互独立，且 $X$ 服从 $N(0,2)$，$Y$ 服从 $N(-1,1)$。记
+
+$$
+p_1=P\{2X-Y>0\},\qquad
+p_2=P\{X-2Y>1\},
+$$
+
+则（　）。
+
+<ExamChoices>
+
+<ExamOption>
+
+A. $p_1>p_2>\dfrac12$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $p_2>p_1>\dfrac12$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $p_1<p_2<\dfrac12$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $p_2<p_1<\dfrac12$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+B
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 比较正态线性组合的尾概率时，无需求数值，只比较对应标准化的正参数 $1/3$ 与 $1/\sqrt6$ 即可。
+
+先分别求两个线性组合的分布。
+
+因为 $X,Y$ 独立，
+
+$$
+2X-Y\sim N(1,9),
+$$
+
+所以
+
+$$
+\begin{aligned}
+p_1
+&=P(2X-Y>0)\\
+&=P\left(\frac{2X-Y-1}{3}>-\frac13\right)\\
+&=\Phi\left(\frac13\right).
+\end{aligned}
+$$
+
+同理，
+
+$$
+X-2Y\sim N(2,6),
+$$
+
+故
+
+$$
+\begin{aligned}
+p_2
+&=P(X-2Y>1)\\
+&=P\left(\frac{X-2Y-2}{\sqrt6}>-\frac1{\sqrt6}\right)\\
+&=\Phi\left(\frac1{\sqrt6}\right).
+\end{aligned}
+$$
+
+因为
+
+$$
+\frac1{\sqrt6}>\frac13>0,
+$$
+
+而 $\Phi(x)$ 单调递增，所以
+
+$$
+p_2>p_1>\Phi(0)=\frac12.
+$$
+
+故选 B。
+
+**方法提炼与易错边界：** 必须先检查每个线性组合的方差以及阈值相对其均值的位置；原始随机变量 $X,Y$ 都正态，并不单独保证任意组合为正态，题中的独立性提供这一保证。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [2026年数学三]**
+
+设随机变量 $X$ 与 $Y$ 独立同分布，$X$ 的概率密度为
+
+$$
+f(x)=\begin{cases}\dfrac1{(1+x)^2},&x>0,\\0,&x\le0.\end{cases}
+$$
+
+则 $P\{XY\le1\}=$（ ）。
+
+<ExamChoices>
+
+<ExamOption>
+
+A. $\frac34$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $\frac12$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $\frac13$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $\frac16$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+B
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 传统解法在双曲线区域 $xy\le1$ 上分层积分；巧解令 $U=X/(1+X)$、$V=Y/(1+Y)$，利用雅可比或分布函数确认 $U,V$ 独立且服从 $U(0,1)$。
+
+因为 $X,Y$ 独立且均非负，事件 $XY\le1$ 等价于 $0\le y\le1/x$。所以
+
+$$
+P(XY\le1)=\int_0^\infty \frac1{(1+x)^2}\left[\int_0^{1/x}\frac{dy}{(1+y)^2}\right]dx.
+$$
+
+内层积分等于 $\frac1{1+x}$，因此
+
+$$
+P(XY\le1)=\int_0^\infty\frac{dx}{(1+x)^3}=\frac12.
+$$
+
+注意积分区域是第一象限中双曲线 $xy=1$ 下方，而不是正方形。
+
+**另一解（单调变换与单位正方形）：** 令 $U=X/(1+X)$，$V=Y/(1+Y)$，则对 $0<u<1$，
+
+$$
+P(U\le u)=P\left(X\le\frac{u}{1-u}\right)=1-\frac1{1+u/(1-u)}=u.
+$$
+
+所以 $U,V$ 独立同服从 $U(0,1)$。由于 $XY\le1$ 等价于 $U+V\le1$，故该事件对应单位正方形中的半个三角形，概率为 $1/2$。
+
+**方法提炼与易错边界：** 代换后 $XY\le1\iff UV\le(1-U)(1-V)\iff U+V\le1$，几何概率恰为 $1/2$。推广到独立同分布且 $X,Y>0$、满足 $X\overset d=1/X$ 的连续随机变量，常可用对称性得到相同概率。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [张宇1000题]**
+
+设$X,Y$独立同分布于标准正态分布$N(0,1)$，记$Z=\begin{cases}X,&XY>0\\0,&XY=0\\-X,&XY<0\end{cases}$。
+(1) 证明$Z$服从标准正态分布；
+(2) $(Y,Z)$是否服从二维正态分布？说明理由。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+(1)
+
+$$
+Z\sim N(0,1).
+$$
+
+(2) $(Y,Z)$不服从二维正态分布。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 一维边缘正态性不足以保证联合正态：先验证 $Z=\operatorname{sgn}(Y)|X|$ 的标准正态边缘，再利用 $YZ>0$ 的几乎处处约束否定二维正态。
+
+(1) 由于$P\{XY=0\}=0$，几乎处处可写成
+
+$$
+Z=\operatorname{sgn}(Y)|X|.
+$$
+
+因为$X,Y$独立，所以$|X|$与$\operatorname{sgn}(Y)$独立；又标准正态分布关于0对称，
+
+$$
+P\{Y>0\}=P\{Y<0\}=\frac12.
+$$
+
+因此$Z$等于：以概率$\frac12$取$|X|$，以概率$\frac12$取$-|X|$。这恰好恢复了标准正态分布的对称结构。
+
+也可直接验证：对$z\ge0$，
+
+$$
+P\{Z\le z\}
+=P\{Y<0\}+P\{Y>0,|X|\le z\}
+=\frac12+\frac12[2\Phi(z)-1]
+=\Phi(z).
+$$
+
+对$z<0$同理可得$P\{Z\le z\}=\Phi(z)$。故$Z\sim N(0,1)$。
+
+(2) 注意到几乎处处有
+
+$$
+YZ>0.
+$$
+
+即$(Y,Z)$只可能落在第一、第三象限，而第二、第四象限的概率均为0。
+
+另一方面，$Y$与$Z$都服从非退化标准正态分布，且它们并不存在形如$Z=cY$的几乎处处线性关系。因此若$(Y,Z)$是二维正态分布，它应为非退化二维正态分布，从而其联合密度在整个平面上为正，不可能使两个象限概率为0。故$(Y,Z)$不服从二维正态分布。
+
+**方法提炼与易错边界：** 若 $(Y,Z)$ 联合非退化正态，它的联合密度在整个平面都严格为正；但本题第二、第四象限概率为零。若想排除退化联合正态，还需指出 $Z$ 不可能是 $Y$ 的确定线性函数。
 
 </ExamExplanation>
 

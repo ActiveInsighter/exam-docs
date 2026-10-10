@@ -1,82 +1,311 @@
 ---
-title: 第三节 中心极限定理
-description: 数学一精选母题：二项分布正态近似、非线性样本均值、装载问题、混合随机和与样本量设计。
+title: "第三节 中心极限定理"
+description: "考研数学一精选：平方变换、正确标准化、二项计数与连续性修正、求样本量及商业风险综合。"
 ---
 
-本节按**二项分布计数 → 函数变换后的中心极限定理 → 工程阈值逆推 → 多模型组合与精度比较**组织。核心识别：中心极限定理描述的是**中心化后按 $\sqrt n$ 缩放的随机波动**，并非宣称每个有限样本和都服从正态分布。正态近似应与可以严格保证的概率界区分。
-
-## 一、二项分布的正态近似
+## 一、中心极限定理的标准化与退化边界
 
 <ExamQuestion>
 
-**[1988年数学（三）真题]**
+**精选题 [1996年数学三]**
 
-某保险公司多年统计资料表明，在索赔户中，被盗索赔户占 $20\%$。以 $X$ 表示在随机抽查的 $100$ 个索赔户中因被盗向保险公司索赔的户数。
+假设 $X_1,X_2,\cdots,X_n$ 是来自总体 $X$ 的简单随机样本，已知
 
-（1）写出 $X$ 的概率分布；
+$$
+E(X^k)=a_k\qquad(k=1,2,3,4).
+$$
 
-（2）利用棣莫弗—拉普拉斯定理，求被盗索赔户数不少于 $14$ 户且不多于 $30$ 户的概率的近似值。
+证明：当 $n$ 充分大时，随机变量
+
+$$
+Z_n=\frac1n\sum_{i=1}^nX_i^2
+$$
+
+近似服从正态分布，并指出其分布参数。
 
 <ExamSolution>
+
 <ExamAnswer>
 
-（1）$X\sim B(100,0.2)$，即
+当 $n$ 充分大时，
 
 $$
-P(X=k)=\binom{100}{k}(0.2)^k(0.8)^{100-k},\quad k=0,1,\ldots,100.
+Z_n\approx N\left(a_2,\frac{a_4-a_2^2}{n}\right).
 $$
-
-（2）不作连续性修正时，近似为 $0.927$。
 
 </ExamAnswer>
+
 <ExamExplanation>
 
-**模型识别：** 每个索赔户被盗属于成功事件，按样本随机、试验独立且成功概率固定 $0.2$ 的题意建二项模型。
+令
 
 $$
-E(X)=np=20,\quad D(X)=np(1-p)=16,\quad \sigma_X=4.
+Y_i=X_i^2.
 $$
 
-将上下界标准化：
+由于 $X_i$ 独立同分布，$Y_i$ 也独立同分布，且
 
 $$
-\begin{aligned}
-P(14\le X\le30)
-&\approx P\left(\frac{14-20}{4}\le Z\le\frac{30-20}{4}\right)\\
-&=\Phi(2.5)-\Phi(-1.5)\\
-&=\Phi(2.5)+\Phi(1.5)-1\\
-&\approx0.9938+0.9332-1=0.9270.
-\end{aligned}
+E(Y_i)=E(X_i^2)=a_2,
 $$
 
-其中 $Z\sim N(0,1)$，$\Phi$ 为其分布函数。
-
-**另一种近似（连续性修正）：** 若要改善离散分布的正态近似，可把闭区间整数事件 $14\le X\le30$ 对应为连续区间 $13.5<X<30.5$，得
-
 $$
-P(14\le X\le30)\approx
-\Phi\left(\frac{30.5-20}{4}\right)
--\Phi\left(\frac{13.5-20}{4}\right).
+D(Y_i)=E(X_i^4)-[E(X_i^2)]^2=a_4-a_2^2.
 $$
 
-两种近似在有限样本下不必相等；本题原资料给出的 $0.927$ 使用的是**未经连续性修正**的中心极限定理近似。它不是二项分布精确尾概率。
+而
+
+$$
+Z_n=\frac1n\sum_{i=1}^nY_i.
+$$
+
+由中心极限定理，
+
+$$
+\frac{Z_n-a_2}{\sqrt{(a_4-a_2^2)/n}}
+\xrightarrow{d}N(0,1).
+$$
+
+故 $n$ 较大时，$Z_n$ 近似服从
+
+$$
+N\left(a_2,\frac{a_4-a_2^2}{n}\right).
+$$
+
+**退化情形：** 令 $v=a_4-a_2^2=\operatorname{Var}(X^2)\ge0$。当 $v>0$ 时才可将 $(Z_n-a_2)/\sqrt{v/n}$ 标准化并应用非退化中心极限定理；当 $v=0$ 时，$X_i^2=a_2$ 几乎处处，故 $Z_n=a_2$ 几乎处处，应理解为退化分布而不是有正方差的正态分布。
 
 </ExamExplanation>
+
 </ExamSolution>
 
 </ExamQuestion>
 
 <ExamQuestion>
 
-**[2020年数学（一）真题]**
+**精选题 [张宇1000题]**
 
-设 $X_1,X_2,\ldots,X_{100}$ 为来自总体 $X$ 的简单随机样本，其中
+设随机变量$X_1,X_2,\cdots,X_n,\cdots$相互独立且均服从$U[1,4]$，$\Phi(x)$是标准正态分布的分布函数，则$\lim\limits_{n \to \infty}P\{\frac{2\sum_{i=1}^{n}X_i-5n}{\sqrt{n}} \leq x\}=$( )
+
+<ExamChoices>
+
+<ExamOption>
+
+A. $\Phi(x)$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $\Phi(\sqrt{3x})$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $\Phi(\frac{x}{\sqrt{3}})$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $\Phi(\frac{2x}{\sqrt{3}})$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+C。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+因为$X_i\sim U[1,4]$，所以
 
 $$
-P(X=0)=P(X=1)=\frac12.
+E(X_i)=\frac{1+4}{2}=\frac52,
+\qquad
+D(X_i)=\frac{(4-1)^2}{12}=\frac34.
 $$
 
-记 $\Phi(x)$ 为标准正态分布函数。利用中心极限定理得到
+于是
+
+$$
+\frac{2\sum_{i=1}^nX_i-5n}{\sqrt n}
+=\frac{2\left(\sum_{i=1}^nX_i-\frac52n\right)}{\sqrt n}.
+$$
+
+由中心极限定理，
+
+$$
+\frac{\sum_{i=1}^nX_i-\frac52n}{\sqrt{\frac34n}}
+\xrightarrow{d}N(0,1).
+$$
+
+因此题中随机变量的极限分布为$N(0,3)$，故
+
+$$
+\lim_{n\to\infty}P\left\{\frac{2\sum_{i=1}^{n}X_i-5n}{\sqrt n}\le x\right\}
+=\Phi\left(\frac{x}{\sqrt3}\right).
+$$
+
+**辨析：** 分子为 $2\sum X_i-5n$，与 $2\sum (X_i-EX_i)$ 完全一致；极限方差为 $4D(X_i)=3$，不是 $D(X_i)=3/4$。只做“看见 $\sqrt n$ 就判标准正态”会漏掉归一化常数。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [李林880]**
+
+设随机变量序列 $X_1,X_2,\cdots$ 相互独立，且均服从 $B\left(1,\frac12\right)$。若存在常数 $k$，使得
+
+$$
+\lim_{n\to\infty}P\left\{\frac{k\sum_{i=1}^n(X_{2i}-X_{2i-1})}{\sqrt n}\le x\right\}=\Phi(x),
+$$
+
+其中 $\Phi(x)$ 为 $N(0,1)$ 的分布函数，则 $k=\underline{\qquad}$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$k=\pm\sqrt2$（如题设限定 $k>0$，则取 $\sqrt2$）。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+令
+
+$$
+Y_i=X_{2i}-X_{2i-1}.
+$$
+
+因为各 $X_j$ 相互独立，且均服从 $B\left(1,\frac12\right)$，所以 $Y_i$ 独立同分布，且
+
+$$
+P\{Y_i=-1\}=\frac14,
+\qquad
+P\{Y_i=0\}=\frac12,
+\qquad
+P\{Y_i=1\}=\frac14.
+$$
+
+于是
+
+$$
+EY_i=0,
+\qquad
+DY_i=\frac12.
+$$
+
+由中心极限定理，
+
+$$
+\frac{\sum_{i=1}^nY_i}{\sqrt{n/2}}
+=\frac{\sqrt2\sum_{i=1}^n(X_{2i}-X_{2i-1})}{\sqrt n}
+\xrightarrow{d}N(0,1).
+$$
+
+因此
+
+$$
+k=\sqrt2.
+$$
+
+**方法选择：** 按相邻两项分组构造 $Y_i=X_{2i}-X_{2i-1}$，先由独立性保证不同组互相独立，再算组内方差 $1/4+1/4=1/2$。标准化系数的符号也需注意：若要求极限分布函数恰为 $\Phi(x)$，则 $k=\pm\sqrt2$ 都可以，因为标准正态分布关于零对称（如果另有 $k>0$ 条件，才唯一取 $\sqrt2$）。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 二、伯努利计数与连续性修正
+
+<ExamQuestion>
+
+**精选题 [1988年数学三]**
+
+某保险公司多年统计资料表明，在索赔户中被盗索赔户占 $20\%$，以 $X$ 表示在随机抽查的 $100$ 个索赔户中因被盗向保险公司索赔的户数。
+
+（1）写出 $X$ 的概率分布；
+
+（2）利用棣莫弗—拉普拉斯定理，求出索赔户不少于 $14$ 户且不多于 $30$ 户的概率的近似值。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+（1）$\displaystyle P\{X=k\}=\binom{100}{k}(0.2)^k(0.8)^{100-k}$，$k=0,1,\cdots,100$；
+
+（2）约为 $0.927$。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+（1）每个索赔户是否属于被盗索赔可视为一次成功概率为 $0.2$ 的伯努利试验，因此
+
+$$
+X\sim B(100,0.2).
+$$
+
+（2）二项分布的均值和方差为
+
+$$
+E(X)=np=20,
+\qquad
+D(X)=np(1-p)=16.
+$$
+
+用正态分布近似：
+
+$$
+P\{14\le X\le30\}
+\approx
+P\left\{-1.5\le\frac{X-20}{4}\le2.5\right\}.
+$$
+
+所以
+
+$$
+\begin{aligned}
+P\{14\le X\le30\}
+&\approx \Phi(2.5)-\Phi(-1.5)\\
+&=\Phi(2.5)-[1-\Phi(1.5)]\\
+&=0.9938-(1-0.9332)\\
+&=0.927.
+\end{aligned}
+$$
+
+**近似精度核查：** 题目传统解法未进行连续性修正，故给出 $0.927$。若对整数事件 $14\le X\le30$ 使用连续性修正，应代入区间 $[13.5,30.5]$，所得近似为 $\Phi(2.625)-\Phi(-1.625)\approx0.9436$；精确二项分布值约为 $0.9470$。两种正态近似不能混写成同一数值。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [2020年数学一]**
+
+设 $X_1,X_2,\cdots,X_{100}$ 为来自总体 $X$ 的简单随机样本，其中
+
+$$
+P\{X=0\}=P\{X=1\}=\frac12,
+$$
+
+$\Phi(x)$ 表示标准正态分布函数。利用中心极限定理可得
 
 $$
 P\left\{\sum_{i=1}^{100}X_i\le55\right\}
@@ -85,291 +314,508 @@ $$
 的近似值为（　）。
 
 <ExamChoices>
+
 <ExamOption>
 
 A. $1-\Phi(1)$
 
 </ExamOption>
+
 <ExamOption>
 
 B. $\Phi(1)$
 
 </ExamOption>
+
 <ExamOption>
 
 C. $1-\Phi(0.2)$
 
 </ExamOption>
+
 <ExamOption>
 
 D. $\Phi(0.2)$
 
 </ExamOption>
+
 </ExamChoices>
 
 <ExamSolution>
+
 <ExamAnswer>
 
-B。
+B
 
 </ExamAnswer>
+
 <ExamExplanation>
 
-这是 $100$ 个参数为 $1/2$ 的独立伯努利变量之和，记 $S=\sum_{i=1}^{100}X_i$，则
+每个 $X_i$ 都服从参数 $p=1/2$ 的伯努利分布，故
 
 $$
-E(S)=100\cdot\frac12=50,
+E(X_i)=\frac12,
 \qquad
-D(S)=100\cdot\frac12\cdot\frac12=25.
-$$
-
-标准差为 $5$，故不作连续性修正时
-
-$$
-P(S\le55)
-\approx\Phi\left(\frac{55-50}{5}\right)=\Phi(1).
-$$
-
-**考场捷径：** 不用列举 $S=0,1,\ldots,55$ 的二项概率，先认出 $B(100,1/2)$，算 $np$、$np(1-p)$，再标准化。
-
-**适用边界：** 该题选项要求直接使用中心极限定理的标准正态近似；若额外采用连续性修正会得到 $\Phi(1.1)$，属于不同精度的近似而不是原题的选项。
-
-</ExamExplanation>
-</ExamSolution>
-
-</ExamQuestion>
-
-## 二、非线性函数的样本均值：先求变换后的矩
-
-<ExamQuestion>
-
-**[1996年数学（三）真题]**
-
-设 $X_1,X_2,\cdots,X_n$ 是来自总体 $X$ 的简单随机样本，已知
-
-$$
-E(X^k)=a_k\qquad(k=1,2,3,4).
-$$
-
-证明当 $n$ 充分大时，
-
-$$
-Z_n=\frac1n\sum_{i=1}^nX_i^2
-$$
-
-近似服从正态分布，并指出分布参数。
-
-<ExamSolution>
-<ExamAnswer>
-
-当 $a_4>a_2^2$ 时，对于充分大的 $n$，
-
-$$
-Z_n\ \text{近似服从}\ N\!\left(a_2,\frac{a_4-a_2^2}{n}\right).
-$$
-
-若 $a_4=a_2^2$，则 $Z_n=a_2$ 几乎必然成立，为退化分布。
-
-</ExamAnswer>
-<ExamExplanation>
-
-**核心构造：** 令 $Y_i=X_i^2$。样本独立同分布保证 $Y_i$ 独立同分布，且
-
-$$
-E(Y_i)=a_2,\qquad
-D(Y_i)=E(X_i^4)-[E(X_i^2)]^2=a_4-a_2^2.
-$$
-
-若 $v=a_4-a_2^2>0$，且四阶矩有限，则 $Y_i$ 的方差有限且非零。由独立同分布中心极限定理，
-
-$$
-\frac{\sum_{i=1}^nY_i-na_2}{\sqrt{nv}}
-=\frac{\sqrt n(Z_n-a_2)}{\sqrt v}
-\xrightarrow{d}N(0,1).
-$$
-
-因此 $Z_n$ 可用均值为 $a_2$、方差为 $v/n$ 的正态分布近似。
-
-**不可省略的退化情形：** 因为 $v=D(X^2)\ge0$，若 $v=0$，则 $X^2=a_2$ 几乎必然，故每个 $Z_n$ 恒为 $a_2$；不能再除以 $\sqrt v$。此时题面要求的“正态近似”应改解读为零方差退化极限。
-
-**母题变式规律：** 若将 $X_i^2$ 换成一般 $g(X_i)$，方法仍是先算 $E[g(X)]$ 与 $D(g(X))$，只要后者有限且非零就可对样本均值使用中心极限定理。
-
-</ExamExplanation>
-</ExamSolution>
-
-</ExamQuestion>
-
-## 三、阈值逆推：从目标概率解样本容量
-
-<ExamQuestion>
-
-**[2001年数学（三）真题]**
-
-生产线生产的产品成箱包装，每箱重量为随机变量，假设每箱平均重量为 $50$ 千克，标准差为 $5$ 千克。若用最大载重量为 $5$ 吨的汽车承运，试利用中心极限定理说明每辆车最多可以装多少箱，才能使不超载的概率大于 $0.977$。（已知 $\Phi(2)=0.977$。）
-
-<ExamSolution>
-<ExamAnswer>
-
-按中心极限定理作正态近似，可装至多 $98$ 箱。
-
-</ExamAnswer>
-<ExamExplanation>
-
-**突破口：** 本题未知的不是概率，而是样本量 $n$。假设各箱重量独立同分布，记第 $i$ 箱为 $X_i$、$S_n=\sum_{i=1}^nX_i$，有
-
-$$
-E(S_n)=50n,\quad D(S_n)=25n.
-$$
-
-总载重量阈值为 $5000$ 千克。对足够大的 $n$，
-
-$$
-P(S_n\le5000)
-\approx\Phi\left(\frac{5000-50n}{5\sqrt n}\right).
-$$
-
-由于 $\Phi$ 单调递增，要使近似概率大于 $\Phi(2)$，需
-
-$$
-\frac{5000-50n}{5\sqrt n}>2
-\iff 1000-10n>2\sqrt n.
-$$
-
-检验临界的相邻整数：当 $n=98$ 时，
-
-$$
-\frac{5000-50\cdot98}{5\sqrt{98}}=\frac{20}{\sqrt{98}}>2,
-$$
-
-而 $n=99$ 时，
-
-$$
-\frac{5000-50\cdot99}{5\sqrt{99}}=\frac{10}{\sqrt{99}}<2.
-$$
-
-左侧随 $n$ 增大严格递减，因此最大整数为 $98$。
-
-**严谨性边界：** 题设只给均值和方差，中心极限定理并不能对固定 $n=98$ 的**真实**不超载概率作严格下界保证；$98$ 是在题目指定的正态近似模型下得到的答案。若要绝对概率保证，还需附加分布假设或采用可验证的保守界。
-
-</ExamExplanation>
-</ExamSolution>
-
-</ExamQuestion>
-
-## 四、原创拓展：不同观测量的统一标准化
-
-<ExamQuestion>
-
-**[原创] 正态样本平方和的中心极限定理**
-
-设 $X_1,\ldots,X_n$ 独立同分布，$X_i\sim N(0,1)$，$a$ 为固定实数。求
-
-$$
-\lim_{n\to\infty}P\left\{\sum_{i=1}^nX_i^2\le n+a\sqrt{2n}\right\}.
-$$
-
-要求使用中心极限定理证明，不直接调用卡方分布的极限定理。
-
-<ExamSolution>
-<ExamAnswer>
-
-$\Phi(a)$。
-
-</ExamAnswer>
-<ExamExplanation>
-
-虽然 $X_i$ 正态，但 $X_i^2$ **不**是正态。令 $Y_i=X_i^2$，则独立同分布，且由标准正态的偶数阶矩，
-
-$$
-E(Y_i)=E(X_i^2)=1,
-\qquad E(Y_i^2)=E(X_i^4)=3.
-$$
-
-故 $D(Y_i)=3-1=2$。中心极限定理给出
-
-$$
-\frac{\sum_{i=1}^nY_i-n}{\sqrt{2n}}
-\xrightarrow{d}N(0,1).
-$$
-
-于是对于标准正态分布函数的任意连续点 $a$（正态分布函数处处连续），有
-
-$$
-\begin{aligned}
-&\lim_{n\to\infty}P\left(\sum_{i=1}^nX_i^2\le n+a\sqrt{2n}\right)\\
-&=\lim_{n\to\infty}P\left(\frac{\sum_{i=1}^nY_i-n}{\sqrt{2n}}\le a\right)
-=\Phi(a).
-\end{aligned}
-$$
-
-**模型识别：** 样本平方和出现时，不应把 $X_i$ 的方差误当作 $X_i^2$ 的方差；第四阶矩决定正态标准化的分母 $\sqrt{2n}$。
-
-</ExamExplanation>
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**[原创] 同一精度要求下比较切比雪夫与正态近似**
-
-设 $X_1,\ldots,X_n$ 独立同分布，$E(X_i)=\mu$、$D(X_i)=9$，记 $\overline X_n=n^{-1}\sum_{i=1}^nX_i$。希望
-
-$$
-P\{|\overline X_n-\mu|<0.3\}\ge0.95.
-$$
-
-（1）若只利用切比雪夫不等式，为确保要求满足，$n$ 至少应取多少？
-
-（2）若使用中心极限定理进行大样本近似，并取 $\Phi(1.96)\approx0.975$，则 $n$ 至少约为多少？比较两个答案的含义。
-
-<ExamSolution>
-<ExamAnswer>
-
-（1）$n\ge2000$ 足以给出严格概率保证；
-
-（2）正态近似下约取 $n\ge385$。
-
-</ExamAnswer>
-<ExamExplanation>
-
-样本均值 $D(\overline X_n)=9/n$。由切比雪夫不等式，
-
-$$
-P\{|\overline X_n-\mu|\ge0.3\}
-\le\frac{9/n}{0.3^2}
-=\frac{100}{n}.
-$$
-
-要使尾概率不超过 $0.05$，充分条件是 $100/n\le0.05$，即 $n\ge2000$。这个数是**基于上界的充分样本量**，并非真实分布下必需的最小样本量。
-
-采用中心极限定理的正态近似时，
-
-$$
-\frac{\sqrt n(\overline X_n-\mu)}3\approx N(0,1).
+D(X_i)=\frac14.
 $$
 
 于是
 
 $$
+S=\sum_{i=1}^{100}X_i
+$$
+
+有
+
+$$
+E(S)=50,
+\qquad
+D(S)=25.
+$$
+
+由中心极限定理，$S$ 近似服从 $N(50,25)$，所以
+
+$$
+P(S\le55)
+\approx
+P\left(\frac{S-50}{5}\le1\right)
+=\Phi(1).
+$$
+
+**有限样本修正：** 考研原选项按不作连续性修正的标准化得到 $\Phi(1)$；二项分布的整数阈值还可用 $55.5$ 作连续性修正，得到 $\Phi(1.1)\approx0.8643$，精确值约为 $0.86437$。应明确使用了哪一种近似。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [张宇1000题]**
+
+设$X_1,X_2,\cdots,X_n$是来自总体$X \sim \begin{pmatrix}0&1&2&3\\\frac{1}{16}&\frac{3}{8}&\frac{1}{16}&\frac{1}{2}\end{pmatrix}$的简单随机样本，若取值为2的样本个数$K$满足$\lim\limits_{n \to \infty}P\{\frac{K-a}{b} \leq x\}=\Phi(x)$，其中$\Phi(x)$为标准正态分布函数，则$a,b$分别是( )
+
+<ExamChoices>
+
+<ExamOption>
+
+A. $\frac{1}{16},\frac{\sqrt{15}}{16}$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $\frac{n}{16},\frac{\sqrt{15n}}{16}$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $\frac{1}{16},\frac{\sqrt{15n}}{16}$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $\frac{n}{16},\frac{\sqrt{15}}{16}$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+B。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+每个样本取值为2的概率为
+
+$$
+p=P(X=2)=\frac1{16}.
+$$
+
+因此$n$个样本中取值为2的个数
+
+$$
+K\sim B\left(n,\frac1{16}\right).
+$$
+
+其均值与方差分别为
+
+$$
+E(K)=\frac n{16},
+$$
+
+$$
+D(K)=n\cdot\frac1{16}\cdot\frac{15}{16}
+=\frac{15n}{256}.
+$$
+
+故由棣莫弗—拉普拉斯中心极限定理，
+
+$$
+\frac{K-\frac n{16}}{\frac{\sqrt{15n}}{16}}
+\xrightarrow{d}N(0,1).
+$$
+
+所以
+
+$$
+a=\frac n{16},
+\qquad
+b=\frac{\sqrt{15n}}{16}.
+$$
+
+**通用模型：** 对任意离散总体，某一类别的出现次数是二项计数 $K=\sum I\{X_i\in A\}$，其均值为 $np$、方差为 $np(1-p)$。题目给出的其他类别概率只用于检查分布律完整性，不参与计算。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 三、累计时长、风险与样本数量反求
+
+<ExamQuestion>
+
+**精选题 [2001年数学三]**
+
+生产线生产的产品成箱包装，每箱的重量是随机的，假设每箱平均重量为 $50$ 千克，标准差为 $5$ 千克。若用最大载重量为 $5$ 吨的汽车承运，试利用中心极限定理说明每辆车最多可以装多少箱，才能保障不超载的概率大于 $0.977$。（$\Phi(2)=0.977$，其中 $\Phi(x)$ 为标准正态分布函数。）
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$98$ 箱
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+设每箱重量为 $X_i$，装 $n$ 箱的总重量为
+
+$$
+S_n=X_1+\cdots+X_n.
+$$
+
+则
+
+$$
+E(S_n)=50n,
+\qquad
+D(S_n)=25n.
+$$
+
+由中心极限定理，$S_n$ 近似服从 $N(50n,25n)$。要求
+
+$$
+P(S_n\le5000)>0.977=\Phi(2).
+$$
+
+近似标准化得
+
+$$
+P(S_n\le5000)
+\approx
+\Phi\left(\frac{5000-50n}{5\sqrt n}\right).
+$$
+
+因此需
+
+$$
+\frac{5000-50n}{5\sqrt n}>2,
+$$
+
+即
+
+$$
+1000-10n>2\sqrt n.
+$$
+
+检验整数 $n$ 可得最大可取
+
+$$
+n=98.
+$$
+
+**严格性边界：** 原题按中心极限定理作正态近似：$n=98$ 时标准化阈值为 $100/(5\sqrt{98})\approx2.0203>2$，而 $n=99$ 时为 $50/(5\sqrt{99})\approx1.005<2$。所以题目要求的**近似方案**取 $98$ 箱。但只知道单箱均值与方差，CLT 不能对这一个有限 $n$ 给出严格的概率“保证”；若要严格保证，还须额外的分布或误差界条件。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [张宇1000题]**
+
+设生产每件产品的时间服从指数分布，且平均时间为10分钟，生产各件产品的时间相互独立，由中心极限定理，在15小时至20小时之间生产100件产品的概率约为( )
+
+<ExamChoices>
+
+<ExamOption>
+
+A. $\Phi(2)-\Phi(1)$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $2\Phi(1)-\Phi(2)$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $\Phi(1)+\Phi(2)-1$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $2[\Phi(1)-\Phi(-2)]$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+C。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+设生产第$i$件产品所需时间为$X_i$，则$X_i$独立同分布，且指数分布的均值和标准差均为10分钟，即
+
+$$
+E(X_i)=10,\qquad D(X_i)=100.
+$$
+
+生产100件产品的总时间
+
+$$
+S_{100}=\sum_{i=1}^{100}X_i
+$$
+
+满足
+
+$$
+E(S_{100})=1000,
+\qquad
+\sqrt{D(S_{100})}=100.
+$$
+
+15小时和20小时分别为900分钟和1200分钟，因此由中心极限定理，
+
+$$
 \begin{aligned}
-P(|\overline X_n-\mu|<0.3)
-&\approx P\left(|Z|<\frac{0.3\sqrt n}3\right)\\
-&=2\Phi\left(\frac{\sqrt n}{10}\right)-1.
+ P(900<S_{100}<1200)
+&\approx P\left(-1<\frac{S_{100}-1000}{100}<2\right)\\
+&=\Phi(2)-\Phi(-1)\\
+&=\Phi(2)+\Phi(1)-1.
 \end{aligned}
 $$
 
-让近似值不小于 $0.95$，需 $\sqrt n/10\ge1.96$，所以
+故选C。
 
-$$
-n\ge(19.6)^2=384.16,
-$$
-
-最小整数近似为 $385$。
-
-**方法比较：** 切比雪夫使用的信息少、对任意具有给定方差的分布有效，但保守；中心极限定理在适合的大样本条件下通常更准确，但 $385$ 并非对所有未知分布都可严格保证的样本量。
+**解题突破口：** 把小时先换成分钟。独立指数工作时长的和服从 Gamma 分布；求本题指定的 CLT 近似时，直接用均值 $1000$ 分钟和标准差 $100$ 分钟即可，不需要计算 Gamma 积分。
 
 </ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [张宇1000题]**
+
+某保险公司接受了10000辆汽车的保险，每辆汽车每年的保费为1.2万元。若汽车丢失，则车主获得赔偿100万元。设汽车的丢失率为0.006，对于此项业务，利用中心极限定理，则保险公司一年所获利润不少于6000万元的概率为_____。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$$
+\frac12.
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+设一年内丢失的汽车数为$X$，则
+
+$$
+X\sim B(10000,0.006).
+$$
+
+保险公司总保费收入为
+
+$$
+10000\times1.2=12000\text{万元},
+$$
+
+赔付总额为$100X$万元，因此利润为
+
+$$
+L=12000-100X.
+$$
+
+要求$L\ge6000$，即
+
+$$
+X\le60.
+$$
+
+又
+
+$$
+E(X)=10000\times0.006=60,
+$$
+
+$$
+D(X)=10000\times0.006\times0.994=59.64.
+$$
+
+由中心极限定理，忽略连续性修正时，
+
+$$
+P(X\le60)
+\approx\Phi\left(\frac{60-60}{\sqrt{59.64}}\right)
+=\Phi(0)=\frac12.
+$$
+
+**近似与精确值：** 二项模型下事件等价于 $X\le60$，因为阈值恰好是均值，不作连续性修正的正态近似为 $1/2$。但这不是精确概率：精确二项累计概率约为 $0.53426$，连续性修正的正态近似为 $\Phi(0.5/\sqrt{59.64})\approx0.5258$。这类“阈值在均值处”的离散计数题必须区别近似值与精确值。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [李正元]**
+
+设某种商品的合格率为 $ 90\%$，某单位要想给100名职工每人一件这种商品。试求：该单位至少购买多少件这种商品才能以 $ 97.5\%$ 的概率保证每人都可以得到一件合格品？
+
+<ExamSolution>
+
+<ExamAnswer>
+
+至少购买 $ 119$ 件。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+设购买 $ n$ 件商品，其中合格品的件数为 $ X$，则
+
+$$
+X\sim B(n,0.9).
+$$
+
+要保证100名职工每人得到一件合格品，需要
+
+$$
+X\ge100.
+$$
+
+由二项分布的数学期望和方差，
+
+$$
+EX=0.9n,
+\qquad
+DX=0.9n\times0.1=0.09n.
+$$
+
+当 $ n$ 较大时，由棣莫弗—拉普拉斯中心极限定理，
+
+$$
+\frac{X-0.9n}{0.3\sqrt n}
+\approx N(0,1).
+$$
+
+所以
+
+$$
+\begin{aligned}
+P\{X\ge100\}
+&\approx
+P\left\{Z\ge
+\frac{100-0.9n}{0.3\sqrt n}
+\right\}.
+\end{aligned}
+$$
+
+要求该概率不小于 $ 0.975$。由于
+
+$$
+P\{Z\ge-1.96\}=\Phi(1.96)\approx0.975,
+$$
+
+故只需满足
+
+$$
+\frac{100-0.9n}{0.3\sqrt n}\le-1.96.
+$$
+
+即
+
+$$
+0.9n-100\ge0.588\sqrt n.
+$$
+
+令
+
+$$
+t=\sqrt n>0,
+$$
+
+则
+
+$$
+0.9t^2-0.588t-100\ge0.
+$$
+
+其正根为
+
+$$
+t_0=
+\frac{0.588+\sqrt{0.588^2+4\times0.9\times100}}{1.8}
+\approx10.873.
+$$
+
+因此
+
+$$
+n=t^2\ge t_0^2\approx118.21.
+$$
+
+由于 $ n$ 必须为整数，故至少应取
+
+$$
+n=119.
+$$
+
+所以该单位至少购买 $ 119$ 件商品。
+
+**对临界点做精确复核：** 若“至少”的含义为严格保证概率达到 $0.975$，正态近似只用于快速定位整数，最终应检查精确二项尾概率。由 $X\sim B(n,0.9)$，所求事件为 $X\ge100$。直接求和得到 $P\{B(118,0.9)\ge100\}\approx0.9745773<0.975$，而 $P\{B(119,0.9)\ge100\}\approx0.9855375>0.975$；二项分布的成功次数随 $n$ 随机单调不减，因此严格的最小购买量也是 $119$。注意：连续性修正的单次正态近似在临界点附近有可能把 $118$ 误判为合格。
+
+</ExamExplanation>
+
 </ExamSolution>
 
 </ExamQuestion>
