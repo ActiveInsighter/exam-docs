@@ -1,19 +1,17 @@
 ---
 title: "第二节 泰勒中值定理"
-description: "考研核心题目：第二节 泰勒中值定理的经典母题、模型识别与严谨证明"
+description: "泰勒余项、二阶差分、近年证明题、插值误差与导数估计"
 ---
 
 # 第二节 泰勒中值定理
 
-以“展开中心的选择、低阶项消去、余项的可控性”为主线，按证明与误差估计等模型组织。保留原资料中全部 7 道有代表性的题目，并补充一题由积分核推导精确误差的原创变式。
+本节不把泰勒公式写成一般讲义，集中训练**展开中心的选择、双侧消项、三点插值、导数估计和积分误差**。每题明确适用条件，特别注意：皮亚诺余项与拉格朗日余项并非可以在积分中随意互换。
 
-
-## 模型一：在对称点或双端点展开，消除低阶导数
-
+## 模型一：两端点展开联立——一阶导数的定量控制
 
 <ExamQuestion>
 
-**1. [1996-1-8分]** 设 $f(x)$ 在 $[0,1]$ 上具有二阶导数，且满足条件 $|f(x)|\leqslant a$，$|f''(x)|\leqslant b$，其中 $a,b$ 都是非负常数，$c$ 是 $(0,1)$ 内任一点。证明：
+**[1996-1-8分]** 设 $f(x)$ 在 $[0,1]$ 上具有二阶导数，且满足条件 $|f(x)|\leqslant a$，$|f''(x)|\leqslant b$，其中 $a,b$ 都是非负常数，$c$ 是 $(0,1)$ 内任一点。证明：
 
 $$
 |f'(c)|\leqslant 2a+\frac{b}{2}.
@@ -21,17 +19,9 @@ $$
 
 <ExamSolution>
 
-<ExamAnswer>
-
-对任意 $c\in(0,1)$，$|f\prime(c)|\le 2a+\dfrac b2$。
-
-</ExamAnswer>
+<ExamAnswer>命题成立，见下方证明。</ExamAnswer>
 
 <ExamExplanation>
-
-**模型识别与方法选择：** **双端点展开＋消去中心函数值。** 要控制任意内点的 $f\prime(c)$，以 $c$ 为共同展开中心，分别连接两个端点并相减。余项权重 $c^2+(1-c)^2\le1$，常数 $2a+b/2$ 就由“端点振幅＋曲率误差”组成。若只在单侧展开，容易出现 $1/c$ 或 $1/(1-c)$ 的无界因子。
-
-
 分别在 $x=c$ 处对 $f(0)$ 和 $f(1)$ 使用带拉格朗日余项的二阶泰勒公式。
 
 存在 $\xi_1\in(0,c)$，使
@@ -88,30 +78,95 @@ $$
 \le\boxed{2a+\frac b2}.
 $$
 
+
+**模型提炼与易错点：** 把 $f(0),f(1)$ 都在**同一展开中心 $c$** 处展开，相减消去 $f(c)$ 后才能直接控制 $f'(c)$。二阶导数绝对值有界不等于其符号确定。
 </ExamExplanation>
 
 </ExamSolution>
 
 </ExamQuestion>
 
+## 模型二：一般阶泰勒展开与拉格朗日余项
 
 <ExamQuestion>
 
-**2. [1999-2-8分]** 设函数 $f(x)$ 在闭区间 $[-1,1]$ 上具有三阶连续导数，且 $f(-1)=0$，$f(1)=1$，$f'(0)=0$。证明：在开区间 $(-1,1)$ 内至少存在一点 $\xi$，使 $f'''(\xi)=3$。
+**[1996-2-5分]** 求函数 $f(x)=\frac{1-x}{1+x}$ 在 $x=0$ 点处带拉格朗日余项的 $n$ 阶泰勒展开式。
 
 <ExamSolution>
 
-<ExamAnswer>
-
-存在 $\xi\in(-1,1)$，使 $f^{(3)}(\xi)=3$。
-
-</ExamAnswer>
+<ExamAnswer>$f(x)=\frac{1-x}{1+x}=1-2x+2x^2+\cdots+(-1)^n2x^n+(-1)^{n+1}\frac{2x^{n+1}}{(1+\theta x)^{n+2}},\quad 0<\theta<1$</ExamAnswer>
 
 <ExamExplanation>
+先写成便于求导的形式：
 
-**模型识别与方法选择：** **奇偶端点消去低阶项。** 在同一个中心 $0$ 向 $1$、$-1$ 作三阶余项展开，相减消去 $f(0),f\prime\prime(0)$，且 $f\prime(0)=0$ 消去一次项。得到两个三阶导数值的平均为 $3$，使用 $f^{(3)}$ 的连续性把平均值变成某一点的函数值。
+$$
+f(x)=\frac{1-x}{1+x}
+=-1+\frac{2}{1+x}.
+$$
+
+于是对 $k\ge1$，
+
+$$
+f^{(k)}(x)
+=2(-1)^k\frac{k!}{(1+x)^{k+1}}.
+$$
+
+特别地，
+
+$$
+f(0)=1,
+\qquad
+f^{(k)}(0)=2(-1)^k k!.
+$$
+
+在 $x=0$ 处作 $n$ 阶泰勒展开，并使用拉格朗日余项：
+
+$$
+f(x)
+=f(0)+\sum_{k=1}^n\frac{f^{(k)}(0)}{k!}x^k
++\frac{f^{(n+1)}(\theta x)}{(n+1)!}x^{n+1},
+$$
+
+其中 $0<\theta<1$。
+
+代入导数公式：
+
+$$
+f(x)
+=1-2x+2x^2-2x^3+\cdots+2(-1)^nx^n
++\frac{2(-1)^{n+1}x^{n+1}}{(1+\theta x)^{n+2}}.
+$$
+
+即
+
+$$
+\boxed{
+\frac{1-x}{1+x}
+=1-2x+2x^2+\cdots+(-1)^n2x^n
++(-1)^{n+1}\frac{2x^{n+1}}{(1+\theta x)^{n+2}}
+},
+\quad 0<\theta<1.
+$$
 
 
+**模型提炼与易错点：** 先变形成 $-1+2/(1+x)$，得到统一的 $k$ 阶导数，再写第 $n+1$ 阶导数形式的余项；$\theta\in(0,1)$ 依赖于 $x$，不得当成全局常量。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 模型三：对称点展开消去低阶未知项
+
+<ExamQuestion>
+
+**[1999-2-8分]** 设函数 $f(x)$ 在闭区间 $[-1,1]$ 上具有三阶连续导数，且 $f(-1)=0$，$f(1)=1$，$f'(0)=0$。证明：在开区间 $(-1,1)$ 内至少存在一点 $\xi$，使 $f'''(\xi)=3$。
+
+<ExamSolution>
+
+<ExamAnswer>命题成立，见下方证明。</ExamAnswer>
+
+<ExamExplanation>
 在 $x=0$ 处分别对 $x=1$ 和 $x=-1$ 使用二阶泰勒公式，并保留三阶拉格朗日余项。
 
 由于 $f'(0)=0$，存在 $\xi_1\in(0,1)$，使
@@ -164,16 +219,120 @@ $$
 \boxed{f'''(\xi)=3}.
 $$
 
+
+**模型提炼与易错点：** 在 $0$ 两侧作三阶展开，$f'(0)=0$ 令线性项消失，而 $f''(0)$ 项相减也消失；最后要用 $f'''$ 的连续性实现两个余项取值之间的目标值。
 </ExamExplanation>
 
 </ExamSolution>
 
 </ExamQuestion>
 
+## 模型四：一阶泰勒公式转化为对称积分恒等式
 
 <ExamQuestion>
 
-**3. [2023-1,2,3-12分]** 设函数 $f(x)$ 在 $[-a,a]$ 上具有二阶连续导数。证明：
+**[2001-2-8分]** 设 $f(x)$ 在区间 $[-a,a]$（$a>0$）上具有二阶连续导数，$f(0)=0$。
+
+(1) 写出 $f(x)$ 的带拉格朗日余项的一阶麦克劳林公式；
+
+(2) 证明在 $[-a,a]$ 上至少存在一点 $\eta$，使
+
+$$
+a^3f''(\eta)=3\int_{-a}^{a}f(x)\,\mathrm{d}x.
+$$
+
+<ExamSolution>
+
+<ExamAnswer>命题成立，见下方证明。</ExamAnswer>
+
+<ExamExplanation>
+**(1) 一阶麦克劳林公式**
+
+因为 $f(0)=0$，对任意 $x\in[-a,a]$，存在介于 $0$ 与 $x$ 之间的 $\xi_x$，使
+
+$$
+f(x)
+=f(0)+f'(0)x+\frac12f''(\xi_x)x^2.
+$$
+
+因此
+
+$$
+\boxed{f(x)=f'(0)x+\frac12f''(\xi_x)x^2}.
+$$
+
+**(2) 证明积分恒等式**
+
+为了便于积分，使用一阶泰勒公式的积分余项形式。对 $x\ge0$，
+
+$$
+f(x)=f'(0)x+\int_0^x(x-t)f''(t)\,\mathrm dt.
+$$
+
+对 $x\le0$，可写成
+
+$$
+f(x)=f'(0)x+\int_x^0(t-x)f''(t)\,\mathrm dt.
+$$
+
+在 $[-a,a]$ 上积分，线性项满足
+
+$$
+\int_{-a}^a f'(0)x\,\mathrm dx=0.
+$$
+
+交换积分次序后得到
+
+$$
+\int_{-a}^a f(x)\,\mathrm dx
+=\frac12\int_{-a}^0(a+t)^2f''(t)\,\mathrm dt
++\frac12\int_0^a(a-t)^2f''(t)\,\mathrm dt.
+$$
+
+两个权函数均非负。由积分中值定理，存在 $\eta\in(-a,a)$，使
+
+$$
+\int_{-a}^a f(x)\,\mathrm dx
+=f''(\eta)\left[
+\frac12\int_{-a}^0(a+t)^2\,\mathrm dt
++\frac12\int_0^a(a-t)^2\,\mathrm dt
+\right].
+$$
+
+括号内为
+
+$$
+\frac12\cdot\frac{a^3}{3}
++\frac12\cdot\frac{a^3}{3}
+=\frac{a^3}{3}.
+$$
+
+故
+
+$$
+\int_{-a}^a f(x)\,\mathrm dx
+=\frac{a^3}{3}f''(\eta),
+$$
+
+即
+
+$$
+\boxed{a^3f''(\eta)=3\int_{-a}^a f(x)\,\mathrm dx}.
+$$
+
+
+**模型提炼与易错点：** 对积分题逐点写拉格朗日型 $\xi_x$ 不便直接积分；改用**积分余项与非负核**，再用积分中值定理。对称积分中的奇次线性项抵消。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 模型五：近年证明题——对称差与内部驻点
+
+<ExamQuestion>
+
+**[2023-1,2,3-12分]** 设函数 $f(x)$ 在 $[-a,a]$ 上具有二阶连续导数。证明：
 
 (1) 若 $f(0)=0$，则存在 $\xi\in(-a,a)$，使得
 
@@ -189,17 +348,9 @@ $$
 
 <ExamSolution>
 
-<ExamAnswer>
-
-所述结论成立（完整证明见解析）
-
-</ExamAnswer>
+<ExamAnswer>命题成立，见下方证明。</ExamAnswer>
 
 <ExamExplanation>
-
-**模型识别与方法选择：** **端点对称消元与极值点展开。** (1) 以原点为中心作左右二阶泰勒，奇次导数相消；连续二阶导数的两点算术平均仍属于其值域。(2) 必须先用极值点的费马条件 $f\prime(c)=0$，再在其左右端点展开并比较二阶导数幅值。
-
-
 **(1)** 由 $f(0)=0$，分别在 $x=0$ 处对 $f(a)$、$f(-a)$ 使用二阶泰勒公式。
 
 存在 $\xi_1\in(0,a)$、$\xi_2\in(-a,0)$，使
@@ -299,293 +450,19 @@ $$
 }.
 $$
 
+
+**模型提炼与易错点：** 第 (1) 问取 $0$ 为共同中心；第 (2) 问取极值点 $c$ 为共同中心。用 $c\in(-a,a)$ 提升常数，而不是仅写一行“由泰勒公式显然”。
 </ExamExplanation>
 
 </ExamSolution>
 
 </ExamQuestion>
 
-
-## 模型二：高阶展开与切线支撑条件的判别
-
+## 模型六：近年证明题——三点插值误差与梯形求积
 
 <ExamQuestion>
 
-**4. [1996-2-5分]** 求函数 $f(x)=\frac{1-x}{1+x}$ 在 $x=0$ 点处带拉格朗日余项的 $n$ 阶泰勒展开式。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$f(x)=\frac{1-x}{1+x}=1-2x+2x^2+\cdots+(-1)^n2x^n+(-1)^{n+1}\frac{2x^{n+1}}{(1+\theta x)^{n+2}},\quad 0<\theta<1$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-**模型识别与方法选择：** **一般阶导数的模式与余项区间。** 先将有理式拆为常数加 $2/(1+x)$，归纳导数 $f^{(k)}(x)=2(-1)^kk!/(1+x)^{k+1}$，再代入泰勒公式。拉格朗日余项的中间点必须与展开点同属一个不跨越 $x=-1$ 的区间；实数 $x>-1$ 时可写 $\theta\in(0,1)$，$x=0$ 时余项为零。
-
-
-先写成便于求导的形式：
-
-$$
-f(x)=\frac{1-x}{1+x}
-=-1+\frac{2}{1+x}.
-$$
-
-于是对 $k\ge1$，
-
-$$
-f^{(k)}(x)
-=2(-1)^k\frac{k!}{(1+x)^{k+1}}.
-$$
-
-特别地，
-
-$$
-f(0)=1,
-\qquad
-f^{(k)}(0)=2(-1)^k k!.
-$$
-
-在 $x=0$ 处作 $n$ 阶泰勒展开，并使用拉格朗日余项：
-
-$$
-f(x)
-=f(0)+\sum_{k=1}^n\frac{f^{(k)}(0)}{k!}x^k
-+\frac{f^{(n+1)}(\theta x)}{(n+1)!}x^{n+1},
-$$
-
-其中 $0<\theta<1$。
-
-代入导数公式：
-
-$$
-f(x)
-=1-2x+2x^2-2x^3+\cdots+2(-1)^nx^n
-+\frac{2(-1)^{n+1}x^{n+1}}{(1+\theta x)^{n+2}}.
-$$
-
-即
-
-$$
-\boxed{
-\frac{1-x}{1+x}
-=1-2x+2x^2+\cdots+(-1)^n2x^n
-+(-1)^{n+1}\frac{2x^{n+1}}{(1+\theta x)^{n+2}}
-},
-\quad 0<\theta<1.
-$$
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-
-<ExamQuestion>
-
-**5. [2001-2-8分]** 已知函数 $f(x)$ 在区间 $(1-\delta,1+\delta)$ 内具有二阶导数，$f'(x)$ 严格单调减少，且 $f(1)=f'(1)=1$，则 $(\quad)$。
-
-<ExamChoices>
-<ExamOption>
-
-A. 在 $(1-\delta,1)$ 和 $(1,1+\delta)$ 内均有 $f(x)<x$
-
-</ExamOption>
-<ExamOption>
-
-B. 在 $(1-\delta,1)$ 和 $(1,1+\delta)$ 内均有 $f(x)>x$
-
-</ExamOption>
-<ExamOption>
-
-C. 在 $(1-\delta,1)$ 内，$f(x)<x$；在 $(1,1+\delta)$ 内，$f(x)>x$
-
-</ExamOption>
-<ExamOption>
-
-D. 在 $(1-\delta,1)$ 内，$f(x)>x$；在 $(1,1+\delta)$ 内，$f(x)<x$
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-A
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-**模型识别与方法选择：** **识别切线支撑与严格凹性。** 将 $f(x)-x$ 看作函数图像减去 $x=1$ 处切线。$f\prime$ 严格下降，故切线两侧函数值都严格位于切线下方。题目虽出现二阶导数，不必假设处处 $f\prime\prime<0$，也不必机械进行泰勒展开。
-
-
-令
-
-$$
-g(x)=f(x)-x.
-$$
-
-由题设
-
-$$
-g(1)=f(1)-1=0,
-$$
-
-并且
-
-$$
-g'(x)=f'(x)-1.
-$$
-
-由于 $f'(x)$ 严格单调减少，且 $f'(1)=1$，所以
-
-- 当 $x<1$ 时，$f'(x)>1$，因此 $g'(x)>0$；
-- 当 $x>1$ 时，$f'(x)<1$，因此 $g'(x)<0$。
-
-故 $g$ 在 $(1-\delta,1)$ 上递增，并在 $(1,1+\delta)$ 上递减，而 $g(1)=0$。
-
-于是对 $x\ne1$ 且位于题给邻域内，均有
-
-$$
-g(x)<0,
-$$
-
-即
-
-$$
-f(x)<x.
-$$
-
-所以两侧都满足 $f(x)<x$，故选
-
-$$
-\boxed{\mathrm A}.
-$$
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-
-## 模型三：积分余项、插值误差与曲率估计
-
-
-<ExamQuestion>
-
-**6. [2001-2-8分]** 设 $f(x)$ 在区间 $[-a,a]$（$a>0$）上具有二阶连续导数，$f(0)=0$。
-
-(1) 写出 $f(x)$ 的带拉格朗日余项的一阶麦克劳林公式；
-
-(2) 证明在 $[-a,a]$ 上至少存在一点 $\eta$，使
-
-$$
-a^3f''(\eta)=3\int_{-a}^{a}f(x)\,\mathrm{d}x.
-$$
-
-<ExamSolution>
-
-<ExamAnswer>
-
-所述结论成立（完整证明见解析）
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-**模型识别与方法选择：** **积分与泰勒余项不可直接交换中间点。** 一阶泰勒式中的 $\xi_x$ 随 $x$ 变化，不能写 $\int x^2f\prime\prime(\xi_x)\,dx=f\prime\prime(\eta)\int x^2\,dx$ 而不验证其结构。使用积分余项和 Fubini，得到一个非负连续核 $\tfrac12(a-|t|)^2$ 的加权平均，再应用积分中值定理。
-
-
-**(1) 一阶麦克劳林公式**
-
-因为 $f(0)=0$，对任意 $x\in[-a,a]$，存在介于 $0$ 与 $x$ 之间的 $\xi_x$，使
-
-$$
-f(x)
-=f(0)+f'(0)x+\frac12f''(\xi_x)x^2.
-$$
-
-因此
-
-$$
-\boxed{f(x)=f'(0)x+\frac12f''(\xi_x)x^2}.
-$$
-
-**(2) 证明积分恒等式**
-
-为了便于积分，使用一阶泰勒公式的积分余项形式。对 $x\ge0$，
-
-$$
-f(x)=f'(0)x+\int_0^x(x-t)f''(t)\,\mathrm dt.
-$$
-
-对 $x\le0$，可写成
-
-$$
-f(x)=f'(0)x+\int_x^0(t-x)f''(t)\,\mathrm dt.
-$$
-
-在 $[-a,a]$ 上积分，线性项满足
-
-$$
-\int_{-a}^a f'(0)x\,\mathrm dx=0.
-$$
-
-交换积分次序后得到
-
-$$
-\int_{-a}^a f(x)\,\mathrm dx
-=\frac12\int_{-a}^0(a+t)^2f''(t)\,\mathrm dt
-+\frac12\int_0^a(a-t)^2f''(t)\,\mathrm dt.
-$$
-
-两个权函数均非负。由积分中值定理，存在 $\eta\in(-a,a)$，使
-
-$$
-\int_{-a}^a f(x)\,\mathrm dx
-=f''(\eta)\left[
-\frac12\int_{-a}^0(a+t)^2\,\mathrm dt
-+\frac12\int_0^a(a-t)^2\,\mathrm dt
-\right].
-$$
-
-括号内为
-
-$$
-\frac12\cdot\frac{a^3}{3}
-+\frac12\cdot\frac{a^3}{3}
-=\frac{a^3}{3}.
-$$
-
-故
-
-$$
-\int_{-a}^a f(x)\,\mathrm dx
-=\frac{a^3}{3}f''(\eta),
-$$
-
-即
-
-$$
-\boxed{a^3f''(\eta)=3\int_{-a}^a f(x)\,\mathrm dx}.
-$$
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-
-<ExamQuestion>
-
-**7. [2024-1,2,3-12分]** 设 $f(x)$ 二阶可导，$f'(0)=f'(1)$，$|f''(x)|\leqslant 1$。试证：
+**[2024-1,2,3-12分]** 设 $f(x)$ 二阶可导，$f'(0)=f'(1)$，$|f''(x)|\leqslant 1$。试证：
 
 (1) 当 $x\in(0,1)$ 时，
 
@@ -601,17 +478,9 @@ $$
 
 <ExamSolution>
 
-<ExamAnswer>
-
-所述结论成立（完整证明见解析）
-
-</ExamAnswer>
+<ExamAnswer>命题成立，见下方证明。</ExamAnswer>
 
 <ExamExplanation>
-
-**模型识别与方法选择：** **二次插值余项与梯形公式误差。** 直线 $L$ 连接两个端点，减去 $Kt(t-1)$ 后制造 $0,x,1$ 三零点，两次罗尔定理得到 $K=f\prime\prime(\xi)/2$。将点态上界积分可得梯形公式误差界。特别注意：本题的 $f\prime(0)=f\prime(1)$ 对所要求的两个上界并非必要条件。
-
-
 记连接端点 $(0,f(0))$ 与 $(1,f(1))$ 的直线为
 
 $$
@@ -720,72 +589,192 @@ $$
 }.
 $$
 
+
+**模型提炼与易错点：** 先用线性插值 $L(x)$ 扣掉端点数据，再构造在 $0,x,1$ 三点为零的辅助函数，连续两次罗尔定理得到精确余项。原题的 $f'(0)=f'(1)$ 对这两个上界不是必需条件，不要因此误用边界导数。
 </ExamExplanation>
 
 </ExamSolution>
 
 </ExamQuestion>
 
+## 模型七：一般区间上的中心二阶差分
 
 <ExamQuestion>
 
-**8. [原创]** 设 $f\in C^2[0,1]$。证明存在 $\xi\in(0,1)$，使
+**[李正元练习题]** 设函数 $f$ 在 $[a,b]$ 上连续，在 $(a,b)$ 内二阶可导，证明存在 $\xi\in(a,b)$，使
 
 $$
-\int_0^1 f(x)\,\mathrm dx-\frac{f(0)+f(1)}2=-\frac1{12}f''(\xi).
+f(b)-2f\!\left(\frac{a+b}{2}\right)+f(a)=\frac{(b-a)^2}{4}f''(\xi).
 $$
-
-并说明若仅有 $|f''(x)|\le M$，如何推出梯形求积公式的误差估计。
 
 <ExamSolution>
 
-<ExamAnswer>
-
-存在这样的 $\xi$；误差估计为 $\left|\int_0^1f(x)\,\mathrm dx-\frac{f(0)+f(1)}2\right|\le M/12$。
-
-</ExamAnswer>
+<ExamAnswer>命题成立。</ExamAnswer>
 
 <ExamExplanation>
+设 $m=(a+b)/2$，$L(t)$ 是过 $(a,f(a))$ 与 $(b,f(b))$ 的插值直线，故
 
-**原创变式｜从误差上界进一步构造精确余项。** 与直接估值不同，本题要识别一个固定符号的积分核，以此应用加权积分中值定理。
+$$
+L(m)=\frac{f(a)+f(b)}2.
+$$
 
-两次分部积分得
+定义 $K$ 使
+
+$$
+f(m)-L(m)=K(m-a)(m-b),
+$$
+
+并取辅助函数
+
+$$
+H(t)=f(t)-L(t)-K(t-a)(t-b).
+$$
+
+由 $L(a)=f(a),L(b)=f(b)$ 及 $K$ 的定义，$H(a)=H(m)=H(b)=0$。在 $[a,m]$、$[m,b]$ 上各使用一次罗尔定理，再对两个导数零点使用一次罗尔定理，得某个 $\xi\in(a,b)$ 使 $H''(\xi)=0$。由于 $L''=0$，得
+
+$$
+f''(\xi)=2K.
+$$
+
+又 $m-a=(b-a)/2$、$m-b=-(b-a)/2$，于是
 
 $$
 \begin{aligned}
-\int_0^1x(1-x)f''(x)\,\mathrm dx
-&=\bigl[x(1-x)f'(x)\bigr]_0^1
--\int_0^1(1-2x)f'(x)\,\mathrm dx\\
-&=-\bigl[(1-2x)f(x)\bigr]_0^1
--2\int_0^1f(x)\,\mathrm dx\\
-&=f(0)+f(1)-2\int_0^1f(x)\,\mathrm dx.
+f(a)+f(b)-2f(m)
+&=-2[f(m)-L(m)]\\
+&=\frac{K(b-a)^2}{2}
+=\frac{(b-a)^2}{4}f''(\xi).
 \end{aligned}
+$$
+
+**方法价值：** 只有二阶可导而未给出 $f''$ 连续时，直接对两个拉格朗日余项取“平均再用连续性”不够严谨；三点零值辅助函数只依赖罗尔定理，避开了额外的连续性假设。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 模型八：函数和二阶导数均有界时，如何控制一阶导数
+
+<ExamQuestion>
+
+**[李正元练习题]** 设 $f$ 在 $(0,+\infty)$ 上二阶可导，且存在常数 $M,N\ge0$ 使
+
+$$
+|f(x)|\le M,\qquad |f''(x)|\le N\qquad (x>0).
+$$
+
+证明 $f'$ 在 $(0,+\infty)$ 上有界；进一步在 $M,N>0$ 时给出只依赖 $M,N$ 的统一上界。
+
+<ExamSolution>
+
+<ExamAnswer>当 $M,N>0$ 时，$|f'(x)|\le2\sqrt{MN}$；若其中之一为 $0$，则 $f'\equiv0$。</ExamAnswer>
+
+<ExamExplanation>
+**突破口：** 不要由“函数有界”直接推导“导数有界”。需要在一个可选择的小步长 $h$ 上用泰勒公式控制导数。
+
+固定 $x>0$、任意 $h>0$，由带拉格朗日余项的泰勒公式，存在 $\xi\in(x,x+h)$，使
+
+$$
+f(x+h)=f(x)+hf'(x)+\frac{h^2}{2}f''(\xi).
+$$
+
+故
+
+$$
+|f'(x)|\le\frac{|f(x+h)-f(x)|}{h}+\frac h2|f''(\xi)|
+\le\frac{2M}{h}+\frac{Nh}{2}.
+$$
+
+若 $M,N>0$，取 $h=2\sqrt{M/N}$，由算术—几何平均值等号条件得
+
+$$
+\boxed{|f'(x)|\le2\sqrt{MN}\qquad(x>0)}.
+$$
+
+若 $N=0$，$f''\equiv0$，于是 $f$ 为一次函数，在无界区间上有界意味着斜率为零。若 $M=0$，则 $f\equiv0$，亦有 $f'\equiv0$。
+
+**模型迁移：** “函数和高阶导数有界，控制中间阶导数”应先使用泰勒差商，再优化自由步长；参数的取值必须在整个定义域内有效，这里使用向右的 $h>0$ 无需担心 $x-h$ 越界。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 模型九：极值点与端点导数的协同估计
+
+<ExamQuestion>
+
+**[李林880]** 设 $f$ 在 $[0,1]$ 上二阶可导，且 $|f''(x)|\le1$。已知 $f$ 在 $(0,1)$ 内取得最小值，证明
+
+$$
+|f'(0)|+|f'(1)|\le1.
+$$
+
+<ExamSolution>
+
+<ExamAnswer>命题成立。</ExamAnswer>
+
+<ExamExplanation>
+设 $c\in(0,1)$ 为 $f$ 的一个内部最小值点，因其可导，由费马定理 $f'(c)=0$。分别在 $[0,c]$ 和 $[c,1]$ 上对 $f'$ 使用拉格朗日中值定理（$f'$ 连续且在开区间内可导），得
+
+$$
+f'(0)-f'(c)=(0-c)f''(\xi_1),\qquad\xi_1\in(0,c),
+$$
+
+$$
+f'(1)-f'(c)=(1-c)f''(\xi_2),\qquad\xi_2\in(c,1).
 $$
 
 因此
 
 $$
-\int_0^1 f(x)\,\mathrm dx-\frac{f(0)+f(1)}2
-=-\frac12\int_0^1x(1-x)f''(x)\,\mathrm dx.
+|f'(0)|\le c,\qquad |f'(1)|\le1-c,
 $$
 
-因 $f''$ 连续且 $x(1-x)>0$ 对 $x\in(0,1)$ 成立，**加权积分中值定理** 给出某 $\xi\in(0,1)$ 满足
+相加即
 
 $$
-\int_0^1x(1-x)f''(x)\,\mathrm dx
-=f''(\xi)\int_0^1x(1-x)\,\mathrm dx
-=\frac16 f''(\xi).
+\boxed{|f'(0)|+|f'(1)|\le1}.
 $$
 
-代回即得精确误差公式。另一方面，若 $|f''|\le M$，不要求 $f''$ 连续，仅对上式的核作绝对值估计便有
+**辨析：** 关键在于先用内部极值得到一个“锚点” $f'(c)=0$；只有 $|f''|\le1$ 而没有锚点时，端点导数之和可以任意大（取 $f(x)=Ax$）。
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 模型十：低阶拉格朗日余项给出全局误差
+
+<ExamQuestion>
+
+**[张宇1000题]** （1）写出 $\sin x$ 在 $x=0$ 处的一阶带拉格朗日余项的泰勒公式；（2）证明对任意 $x\ne0$，
 
 $$
-\left|\int_0^1f(x)\,\mathrm dx-\frac{f(0)+f(1)}2\right|
-\le\frac M2\int_0^1x(1-x)\,\mathrm dx=\boxed{\frac M{12}}.
+\left|\frac{\sin x}{x}-1\right|\le\frac{|x|}{2}.
 $$
 
-**方法辨析：** “存在一个余项中间点”依赖 $f''$ 的连续性；“不等式误差界”只要求二阶导数可积且绝对值有界（例如 $f\in C^2$ 已充分）。对一般区间 $[a,b]$，仿射换元得到误差 $-(b-a)^3f''(\xi)/12$。
+<ExamSolution>
 
+<ExamAnswer>不等式成立。</ExamAnswer>
+
+<ExamExplanation>
+对固定 $x\ne0$，函数 $\sin t$ 在从 $0$ 到 $x$ 的闭线段上满足泰勒定理条件，于是存在 $\theta\in(0,1)$，使
+
+$$
+\sin x=\sin0+x\cos0+\frac{x^2}{2}(-\sin(\theta x))
+=x-\frac{x^2}{2}\sin(\theta x).
+$$
+
+故
+
+$$
+\left|\frac{\sin x}{x}-1\right|
+=\frac{|x|}{2}|\sin(\theta x)|\le\boxed{\frac{|x|}{2}}.
+$$
+
+**方法比较：** 这一估计对所有实数 $x\ne0$ 成立，用 $o(x)$ 型余项只能证明局部渐近关系，不能直接得到全局不等式；因此应该选拉格朗日余项。
 </ExamExplanation>
 
 </ExamSolution>

@@ -1,61 +1,52 @@
 ---
-title: 第四节 齐次线性方程组
-description: 考研数学一精选题库：零解判定、基础解系构造、行空间正交性、秩一扰动与伴随矩阵，含17道历年真题及2道原创变式。
+title: "第四节 齐次线性方程组"
+description: "考研数学一精选：基础解系与自由变量、零空间包含和正交补、秩一参数方程组、伴随矩阵及分块同解判别。"
 ---
 
-本节按**零空间维数—基础解系构造—结构型参数矩阵—伴随矩阵**组织题目。核心是先判断 $r(A)$，再用 $\dim\ker A=n-r(A)$ 控制解空间；需要求全体解时，必须同时核验“向量是解”“彼此无关”“个数恰当”。
+按**核空间维数判别 → 同解与正交补 → 参数退化与基变换 → 伴随矩阵综合**组织经典母题和高质量变式；题目以模型突破口、完整推导及适用条件为主，不另设知识点讲义。
 
-## 一、非零解、秩与维数的基本判别
+## 一、核空间维数与自由变量——从秩、列依赖到矩阵乘积
 
 <ExamQuestion>
 
-**[1989年数学（三）真题]**
+**精选题 [李正元]**
 
-齐次线性方程组
+设齐次线性方程组经高斯消元化成的阶梯形矩阵是
 
 $$
-\begin{cases}
-\lambda x_1+x_2+x_3=0,\\
-x_1+\lambda x_2+x_3=0,\\
-x_1+x_2+x_3=0
-\end{cases}
+ \begin{bmatrix}
+1&-1&2&0&3\\
+0&0&1&3&-2\\
+0&0&0&0&6
+\end{bmatrix},
 $$
 
-只有零解，则 $\lambda$ 应满足的条件是 $\underline{\qquad}$。
+则自由变量不能取成
+
+<ExamChoices>
+<ExamOption>A. $ x_4,x_5$</ExamOption>
+<ExamOption>B. $ x_2,x_3$</ExamOption>
+<ExamOption>C. $ x_2,x_4$</ExamOption>
+<ExamOption>D. $ x_1,x_3$</ExamOption>
+</ExamChoices>
 
 <ExamSolution>
 
-<ExamAnswer>
-
-$$
-\lambda\ne1
-$$
-
-</ExamAnswer>
+<ExamAnswer>（A）</ExamAnswer>
 
 <ExamExplanation>
 
-齐次方程组只有零解，当且仅当系数矩阵可逆。其行列式为
+**模型识别：** 阶梯形矩阵的主元列固定为第 $1,3,5$ 列，但“自由变量”并不一定只能取非主元变量；关键是所选变量是否可以**独立任意赋值**。
 
+由最后一行得 $x_5=0$。第二行给 $x_3=-3x_4$，再由第一行得 $x_1=x_2+6x_4$。因而
 $$
-\begin{vmatrix}
-\lambda&1&1\\
-1&\lambda&1\\
-1&1&1
-\end{vmatrix}
-=(\lambda-1)^2.
+x=(s+6t,s,-3t,t,0)^T
+=s(1,1,0,0,0)^T+t(6,0,-3,1,0)^T,
+\quad s,t\in\mathbb R.
 $$
+其中 $x_2=s,x_4=t$ 可自由取值，$x_2,x_3$ 也可通过 $(s,-3t)$ 任意赋值，$x_1,x_3$ 亦可通过 $(s+6t,-3t)$ 任意赋值，均能唯一确定 $(s,t)$。然而 $x_5$ 恒为零，不能与 $x_4$ 共同作为任意参数。因此选 **A**。
 
-因此只有零解的条件是
-
-$$
-(\lambda-1)^2\ne0,
-$$
-
-即 $\boxed{\lambda\ne1}$。
-
-
-**识别模型：** 方阵型齐次方程组只需检验行列式是否非零；含参数的零解条件是不允许行列式退化，而不是要求每个对角元非零。
+**易错点：** 只把非主元列当作“可能的自由变量”会误判 B、D。严格判定需看这两个分量作为核空间坐标时构成的 $2\times2$ 矩阵是否可逆。
 
 </ExamExplanation>
 
@@ -65,53 +56,40 @@ $$
 
 <ExamQuestion>
 
-**[1992年数学（三）真题]**
+**精选题 [2002年数学三]**
 
-设 $A$ 为 $m\times n$ 矩阵，齐次线性方程组 $Ax=0$ 仅有零解的充分条件是（ ）。
+设 $A$ 是 $m\times n$ 矩阵，$B$ 是 $n\times m$ 矩阵，则线性方程组 $ABx=0$（ ）。
 
 <ExamChoices>
-<ExamOption>
-
-A. $A$ 的列向量线性无关
-
-</ExamOption>
-<ExamOption>
-
-B. $A$ 的列向量线性相关
-
-</ExamOption>
-<ExamOption>
-
-C. $A$ 的行向量线性无关
-
-</ExamOption>
-<ExamOption>
-
-D. $A$ 的行向量线性相关
-
-</ExamOption>
+<ExamOption>A. 当 $n>m$ 时，仅有零解</ExamOption>
+<ExamOption>B. 当 $n>m$ 时，必有非零解</ExamOption>
+<ExamOption>C. 当 $m>n$ 时，仅有零解</ExamOption>
+<ExamOption>D. 当 $m>n$ 时，必有非零解</ExamOption>
 </ExamChoices>
 
 <ExamSolution>
 
 <ExamAnswer>
 
-A
+D
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-$Ax=0$ 只有零解的充要条件是
+**突破口：看未知数的维数，而不是先比较 $m,n$ 的大小。** $AB$ 为 $m\times m$ 方阵，方程 $ABx=0$ 的未知数是 $m$ 个。
 
+由乘积秩不等式
 $$
-r(A)=n,
+r(AB)\le\min\{r(A),r(B)\}\le n.
 $$
+若 $m>n$，则 $r(AB)<m$，所以
+$$
+\dim\ker(AB)=m-r(AB)\ge m-n>0,
+$$
+必有非零解。故选 **D**。
 
-即 $A$ 的 $n$ 个列向量线性无关。因此选 A。
-
-
-**维数限制：** 若 $m<n$，则 $r(A)\le m<n$，列向量必相关，齐次系统不可能只有零解；这里“列满秩”才是恰当条件，行满秩并不等价。
+**反向不成立的理由：** 当 $n>m$ 时，$AB$ 可以等于 $I_m$（取适当左右逆），也可以等于零矩阵；因此选项 A、B 都不能断言。**通用模型：** 若线性映射通过较低维空间分解，乘积映射必有非零核。
 
 </ExamExplanation>
 
@@ -121,7 +99,57 @@ $$
 
 <ExamQuestion>
 
-**[1992年数学（三）真题]**
+**精选题 [1993年数学一]**
+
+已知
+
+$$
+Q=
+\begin{pmatrix}
+1&2&3\\
+2&4&t\\
+3&6&9
+\end{pmatrix},
+$$
+
+$P$ 为三阶非零矩阵，且满足 $PQ=O$，则（ ）。
+
+<ExamChoices>
+<ExamOption>A. 当 $t=6$ 时，$P$ 的秩必为 $1$</ExamOption>
+<ExamOption>B. 当 $t=6$ 时，$P$ 的秩必为 $2$</ExamOption>
+<ExamOption>C. 当 $t\ne6$ 时，$P$ 的秩必为 $1$</ExamOption>
+<ExamOption>D. 当 $t\ne6$ 时，$P$ 的秩必为 $2$</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+C
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+由 $PQ=0$ 有 $\operatorname{Im}(Q)\subseteq\ker(P)$，所以
+$$
+r(P)+r(Q)\le3.
+$$
+观察 $Q$ 第三行是第一行的 $3$ 倍。若 $t\ne6$，前两行不成比例，因此 $r(Q)=2$；又 $P\ne0$，故 $1\le r(P)\le3-2=1$，只能 $r(P)=1$，选 **C**。
+
+当 $t=6$ 时，$r(Q)=1$，只可知 $1\le r(P)\le2$。例如令 $u=(1,2,3)^T$，$Q=u(1,2,3)$，条件等价于 $Pu=0$；可以构造秩为 $1$ 或秩为 $2$ 的非零 $P$ 满足它，因而 A、B 都不必成立。
+
+**模型提炼：** $PQ=0$ 的本质是 $Q$ 的列空间落在 $P$ 的零空间，必要时从“空间包含”解释秩不等式的取等条件。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [1992年数学三]**
 
 已知三阶矩阵 $B\ne O$，且 $B$ 的每一个列向量都是以下方程组的解：
 
@@ -148,45 +176,16 @@ $$
 
 <ExamExplanation>
 
-设上述方程组的系数矩阵为
-
-$$
-A=
-\begin{pmatrix}
-1&2&-2\\
-2&-1&\lambda\\
-3&1&-1
-\end{pmatrix}.
-$$
-
-因为 $B\ne O$，且 $B$ 的每一列都是 $Ax=0$ 的解，所以 $Ax=0$ 存在非零解，从而
-
-$$
-|A|=0.
-$$
+由题意 $B\ne0$ 且 $B$ 的每列均属于 $\ker A$，即 $AB=0$，而 $B$ 至少含一个非零列，故 $Ax=0$ 有非零解，$|A|=0$。
 
 计算
-
 $$
+A=\begin{pmatrix}1&2&-2\\2&-1&\lambda\\3&1&-1\end{pmatrix},\qquad
 |A|=5(\lambda-1),
 $$
+得 $\boxed{\lambda=1}$。此时 $A\ne0$ 且 $AB=0$。若 $|B|\ne0$，则 $B$ 可逆，右乘 $B^{-1}$ 得 $A=0$，矛盾。因此 $\boxed{|B|=0}$。
 
-故 $\lambda=1$。
-
-又因为 $B$ 的每一列都是 $Ax=0$ 的解，所以
-
-$$
-AB=O.
-$$
-
-若 $|B|\ne0$，则 $B$ 可逆，由 $AB=O$ 得 $A=O$，显然矛盾。因此
-
-$$
-\boxed{|B|=0}.
-$$
-
-
-**突破口：** $AB=0$ 将“每一列都是解”编码成矩阵乘积；只要 $B\ne0$，就保证 $\ker A$ 非平凡。证明 $|B|=0$ 时，要指出 $A\ne0$，而非仅仅套用 $|AB|=0$。
+**更强结论：** 当 $\lambda=1$ 时可验证 $r(A)=2$，因此 $\dim\ker A=1$，$B$ 的所有列共线，从而 $r(B)=1$（因为 $B\ne0$）。这比仅证明 $|B|=0$ 更精确。
 
 </ExamExplanation>
 
@@ -196,137 +195,7 @@ $$
 
 <ExamQuestion>
 
-**[1993年数学（一）真题]**
-
-设 $n$ 阶矩阵 $A$ 的各行元素之和均为零，$A$ 的秩为 $n-1$，则 $Ax=0$ 的通解为 $\underline{\qquad}$。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$$
-x=k(1,1,\ldots,1)^T,\qquad k\in\mathbb R.
-$$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-各行元素之和为零，说明
-
-$$
-A(1,1,\ldots,1)^T=0.
-$$
-
-又因 $r(A)=n-1$，齐次方程组的基础解系只含
-
-$$
-n-r(A)=1
-$$
-
-个向量。因此 $(1,1,\ldots,1)^T$ 就可作为基础解系，通解为
-
-$$
-\boxed{x=k(1,1,\ldots,1)^T}.
-$$
-
-
-**通用模型：** $A\boldsymbol1=0$ 与 $r(A)=n-1$ 联用，已识别出维数为 $1$ 的整个零空间；一般若只知道行和为零但不知道秩，就不能断言所有解都是常数向量。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**[1993年数学（一）真题]**
-
-已知
-
-$$
-Q=
-\begin{pmatrix}
-1&2&3\\
-2&4&t\\
-3&6&9
-\end{pmatrix},
-$$
-
-$P$ 为三阶非零矩阵，且满足 $PQ=O$，则（ ）。
-
-<ExamChoices>
-<ExamOption>
-
-A. 当 $t=6$ 时，$P$ 的秩必为 $1$
-
-</ExamOption>
-<ExamOption>
-
-B. 当 $t=6$ 时，$P$ 的秩必为 $2$
-
-</ExamOption>
-<ExamOption>
-
-C. 当 $t\ne6$ 时，$P$ 的秩必为 $1$
-
-</ExamOption>
-<ExamOption>
-
-D. 当 $t\ne6$ 时，$P$ 的秩必为 $2$
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-C
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-由 $PQ=O$ 和秩不等式
-
-$$
-r(P)+r(Q)\le3.
-$$
-
-当 $t\ne6$ 时，$Q$ 的第一行和第二行不成比例，而第三行是第一行的 $3$ 倍，所以
-
-$$
-r(Q)=2.
-$$
-
-于是
-
-$$
-r(P)\le1.
-$$
-
-又 $P\ne O$，故 $r(P)\ge1$，从而
-
-$$
-r(P)=1.
-$$
-
-因此选 C。
-
-
-**方法：** $PQ=0$ 给出 $\operatorname{Im}Q\subseteq\ker P$，故 $r(P)+r(Q)\le3$。$t=6$ 时 $r(Q)=1$，只能得 $r(P)\le2$，不能断言 $r(P)$ 恰为 $1$ 或 $2$。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**[1998年数学（三）真题]**
+**精选题 [1998年数学三]**
 
 齐次线性方程组
 
@@ -341,26 +210,10 @@ $$
 的系数矩阵记为 $A$。若存在三阶矩阵 $B\ne O$ 使得 $AB=O$，则（ ）。
 
 <ExamChoices>
-<ExamOption>
-
-A. $\lambda=-2$ 且 $|B|=0$
-
-</ExamOption>
-<ExamOption>
-
-B. $\lambda=-2$ 且 $|B|\ne0$
-
-</ExamOption>
-<ExamOption>
-
-C. $\lambda=1$ 且 $|B|=0$
-
-</ExamOption>
-<ExamOption>
-
-D. $\lambda=1$ 且 $|B|\ne0$
-
-</ExamOption>
+<ExamOption>A. $\lambda=-2$ 且 $|B|=0$</ExamOption>
+<ExamOption>B. $\lambda=-2$ 且 $|B|\ne0$</ExamOption>
+<ExamOption>C. $\lambda=1$ 且 $|B|=0$</ExamOption>
+<ExamOption>D. $\lambda=1$ 且 $|B|\ne0$</ExamOption>
 </ExamChoices>
 
 <ExamSolution>
@@ -373,20 +226,17 @@ C
 
 <ExamExplanation>
 
-由 $AB=O$、$B\ne O$，任取 $B$ 的非零列 $\beta$，便有 $A\beta=0$，故 $|A|=0$。这一步不能推出 $r(A)=1$，只能推出 $r(A)<3$。
+**先用非零矩阵乘积为零判断奇异性。** 由 $AB=0$ 且 $B\ne0$，$B$ 有非零列 $b$ 满足 $Ab=0$，故 $|A|=0$。
 
-对 $A$ 作初等行变换，或直接按第三行展开，有
-
+特别注意原资料的行列式因式存在笔误。按题面实际系数矩阵展开，正确结果为
 $$
-|A|=\begin{vmatrix}\lambda&1&\lambda^2\\1&\lambda&1\\1&1&\lambda\end{vmatrix}=(\lambda-1)^2.
+\begin{vmatrix}\lambda&1&\lambda^2\\1&\lambda&1\\1&1&\lambda\end{vmatrix}
+=\lambda(\lambda^2-1)-(\lambda-1)+\lambda^2(1-\lambda)
+=(\lambda-1)^2.
 $$
+于是必须 $\lambda=1$。此时 $A$ 为全 $1$ 矩阵，$r(A)=1$。由 $AB=0$ 与 $A\ne0$，$B$ 不可能可逆（否则 $A=0$），所以 $|B|=0$，选 **C**。
 
-**源材料订正：** 原解析误写为 $(\lambda-1)^2(\lambda+2)$，并引入伪根 $\lambda=-2$；直接代入可得 $|A|=9\ne0$。
-
-因此 $\lambda=1$。此时 $A$ 的三行均为 $(1,1,1)$，$r(A)=1$。若 $|B|\ne0$，由 $AB=0$ 右乘 $B^{-1}$ 将得到 $A=0$，矛盾，故 $|B|=0$。选 C。
-
-
-**易错点：** 有非零矩阵 $B$ 满足 $AB=0$，只保证 $A$ 奇异；若希望说明 $B$ 不可逆，需要另外使用 $A\ne0$。行列式必须重新计算，不能依据选项倒推参数。
+**易错点：** 切勿将错误的因式 $\lambda+2$ 当成候选根，再凭选项排除。计算含参数行列式后应代回奇异点核验秩；本题 $\lambda=-2$ 时实际上 $|A|=9\ne0$。
 
 </ExamExplanation>
 
@@ -396,59 +246,37 @@ $$
 
 <ExamQuestion>
 
-**[2002年数学（三）真题]**
+**精选题 [2019年数学一]**
 
-设 $A$ 是 $m\times n$ 矩阵，$B$ 是 $n\times m$ 矩阵，则线性方程组 $ABx=0$（ ）。
+设 $A=(\alpha_1,\alpha_2,\alpha_3)$ 为三阶矩阵。若 $\alpha_1,\alpha_2$ 线性无关，且
 
-<ExamChoices>
-<ExamOption>
+$$
+\alpha_3=-\alpha_1+2\alpha_2,
+$$
 
-A. 当 $n>m$ 时，仅有零解
-
-</ExamOption>
-<ExamOption>
-
-B. 当 $n>m$ 时，必有非零解
-
-</ExamOption>
-<ExamOption>
-
-C. 当 $m>n$ 时，仅有零解
-
-</ExamOption>
-<ExamOption>
-
-D. 当 $m>n$ 时，必有非零解
-
-</ExamOption>
-</ExamChoices>
+则线性方程组 $Ax=0$ 的通解为 $\underline{\qquad}$。
 
 <ExamSolution>
 
 <ExamAnswer>
 
-D
+$$
+x=k(1,-2,1)^T,\qquad k\in\mathbb R.
+$$
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-$AB$ 是 $m\times m$ 矩阵，且
-
+列向量关系直接转化为齐次方程的系数关系：
 $$
-r(AB)\le \min\{r(A),r(B)\}\le n.
+\alpha_1-2\alpha_2+\alpha_3=0\quad\Longrightarrow\quad A(1,-2,1)^T=0.
 $$
-
-当 $m>n$ 时，
-
+由于 $\alpha_1,\alpha_2$ 线性无关，而 $\alpha_3$ 可由它们表示，故 $r(A)=2$，所以 $\dim\ker A=3-2=1$。已找到的非零解足以构成一个基础解系，通解为
 $$
-r(AB)\le n<m.
+\boxed{x=k(1,-2,1)^T},\qquad k\in\mathbb R.
 $$
-
-因此 $ABx=0$ 的未知数个数为 $m$，而系数矩阵秩小于 $m$，必有自由未知量，所以一定有非零解。选 D。
-
-
-**维数法：** $AB$ 虽为方阵，但它的秩至多为中间维数 $n$；$m>n$ 时必奇异。$n>m$ 时则可能可逆，如取 $A=(I_m,0)$、$B=(I_m,0)^T$。
+**模型提炼：** 当矩阵的列向量具有已知依赖式时，依赖系数向量就是核向量。必须同时求出 $r(A)$ 才能断言“这一向量张成整个零空间”。
 
 </ExamExplanation>
 
@@ -456,11 +284,12 @@ $$
 
 </ExamQuestion>
 
-## 二、基础解系的构造与行空间正交性
+
+## 二、解空间的包含、同解与正交补——基础解系的结构判断
 
 <ExamQuestion>
 
-**[1998年数学（一）真题]**
+**精选题 [1998年数学一]**
 
 已知齐次线性方程组（I）的系数矩阵为
 
@@ -505,30 +334,21 @@ $$
 
 <ExamExplanation>
 
-（I）的基础解系正是矩阵 $B$ 的各行转置，因此每个基础解向量都满足 $A\beta_i=0$，这等价于
-
+**突破口：把基础解系按行堆叠，转化为矩阵正交补。** 记 $B$ 的第 $i$ 行转置为 $\eta_i$。由于每个 $\eta_i\in\ker A$，有
 $$
-AB^T=O.
+AB^T=0\quad\Longrightarrow\quad BA^T=0.
 $$
+所以 $A$ 的每个行向量转置 $\xi_i=(a_{i1},\ldots,a_{i,2n})^T$ 都是 $By=0$ 的解。
 
-转置后得到
-
+由已知 $\eta_1,\ldots,\eta_n$ 为基础解系，$\dim\ker A=n$，故
 $$
-BA^T=O.
+r(A)=2n-n=n.
 $$
-
-故 $A^T$ 的每一列，也就是 $A$ 的各行转置 $\xi_1,\ldots,\xi_n$，都是方程组 $By=0$ 的解。
-
-又因为（I）有 $n$ 个基础解向量，而未知数有 $2n$ 个，所以
-
+因此 $\xi_1,\ldots,\xi_n$ 线性无关。同时 $B$ 的行向量为 $n$ 个线性无关的 $\eta_i^T$，所以 $r(B)=n$，从而 $\dim\ker B=2n-n=n$。因此上述 $n$ 个线性无关的解向量恰好构成 $By=0$ 的基础解系，通解为
 $$
-2n-r(A)=n\quad\Rightarrow\quad r(A)=n.
+\boxed{y=\sum_{i=1}^n k_i(a_{i1},\ldots,a_{i,2n})^T},\quad k_i\in\mathbb R.
 $$
-
-从而 $\xi_1,\ldots,\xi_n$ 线性无关，恰好构成（II）的一个基础解系。因此通解如上。
-
-
-**结构识别：** 这是零空间与行空间的正交补关系：$\ker B=\operatorname{row}(A)$（在 $\mathbb R^{2n}$ 中看成列向量）。必须同时证明“包含”与“维数相等”，不能仅凭 $BA^T=0$ 便认定已找到全部解。
+**模型推广：** $\ker A$ 与 $\operatorname{Row}(A)$ 互为正交补。遇到“由原方程组的基础解系组装成新系数矩阵”，先写 $AB^T=0$，再对照维数，避免只证“是解”却漏证“是一组基”。
 
 </ExamExplanation>
 
@@ -538,147 +358,122 @@ $$
 
 <ExamQuestion>
 
-**[2005年数学（一）、数学（二）真题]**
+**精选题 [李林880]**
 
-已知三阶矩阵 $A$ 的第一行为 $(a,b,c)$，且 $a,b,c$ 不全为零。矩阵
-
-$$
-B=
-\begin{pmatrix}
-1&2&3\\
-2&4&6\\
-3&6&k
-\end{pmatrix},
-$$
-
-其中 $k$ 为常数，且 $AB=O$。求线性方程组 $Ax=0$ 的通解。
+设 $A$ 是 $n$ 阶矩阵，对方程组 $(I) Ax = 0$ 和 $(II) A^T Ax = 0$，必有（ ）.
+<ExamChoices>
+<ExamOption>A. $(II)$ 的解是 $(I)$ 的解，$(I)$ 的解也是 $(II)$ 的解</ExamOption>
+<ExamOption>B. $(II)$ 的解是 $(I)$ 的解，但 $(I)$ 的解不是 $(II)$ 的解</ExamOption>
+<ExamOption>C. $(I)$ 的解不是 $(II)$ 的解，$(II)$ 的解也不是 $(I)$ 的解</ExamOption>
+<ExamOption>D. $(I)$ 的解是 $(II)$ 的解，但 $(II)$ 的解不是 $(I)$ 的解</ExamOption>
+</ExamChoices>
 
 <ExamSolution>
 
-<ExamAnswer>
-
-当 $k\ne9$ 时，
-
-$$
-x=k_1(1,2,3)^T+k_2(3,6,k)^T.
-$$
-
-当 $k=9$ 时需分 $r(A)$：
-
-- 若 $r(A)=2$，则
-
-$$
-x=k(1,2,3)^T;
-$$
-
-- 若 $r(A)=1$，不妨设 $a\ne0$，则
-
-$$
-x=k_1\left(-\frac ba,1,0\right)^T
-+k_2\left(-\frac ca,0,1\right)^T.
-$$
-
-</ExamAnswer>
+<ExamAnswer>A</ExamAnswer>
 
 <ExamExplanation>
 
-由 $AB=O$，$B$ 的每一个列向量都是 $Ax=0$ 的解，并且
+**核心模型：实矩阵的 Gram 乘积保持零空间。** 若 $Ax=0$，显然 $A^TAx=0$。
 
+反之，在实数域中若 $A^TAx=0$，左乘 $x^T$，得到
 $$
-r(A)+r(B)\le3.
+0=x^TA^TAx=(Ax)^T(Ax)=\|Ax\|_2^2.
 $$
-
-当 $k\ne9$ 时，$B$ 的第一列 $(1,2,3)^T$ 与第三列 $(3,6,k)^T$ 线性无关，因此 $r(B)=2$。又因 $A$ 第一行非零，所以 $r(A)\ge1$，故 $r(A)=1$。齐次方程的基础解系含 $2$ 个向量，而上述两列正好线性无关，因此直接构成基础解系。
-
-当 $k=9$ 时，$B$ 三列均成比例，$r(B)=1$，只能推出 $1\le r(A)\le2$。
-
-若 $r(A)=2$，基础解系只含一个向量，可取 $(1,2,3)^T$。
-
-若 $r(A)=1$，$A$ 的三行均为第一行的倍数，方程组等价于
-
+平方和为零推出 $Ax=0$。因此
 $$
-ax_1+bx_2+cx_3=0.
+\boxed{\ker(A^TA)=\ker A},
 $$
+两方程组同解，选 **A**。
 
-若 $a\ne0$，取 $x_2,x_3$ 为自由变量即可得到所列基础解系；若 $a=0$，可同理选取一个非零系数作为主元处理。
-
-
-**分层讨论：** 已知 $AB=0$ 与首行不全零，把 $r(A)$ 压在 $1$ 到 $3-r(B)$ 之间。$k=9$ 时维数不足以唯一确定核空间维数，必须继续分支，不可误把 $B$ 的列组都当成完整基础解系。
+**方法适用条件：** 这里用的是实内积正定性。若推广到复矩阵，应把 $A^T$ 改成共轭转置 $A^H$；直接使用复矩阵的 $A^TA$ 不一定保核。
 
 </ExamExplanation>
-
 </ExamSolution>
 
 </ExamQuestion>
 
 <ExamQuestion>
 
-**[2019年数学（一）真题]**
+**精选题 [李林880]**
 
-设 $A=(\alpha_1,\alpha_2,\alpha_3)$ 为三阶矩阵。若 $\alpha_1,\alpha_2$ 线性无关，且
-
-$$
-\alpha_3=-\alpha_1+2\alpha_2,
-$$
-
-则线性方程组 $Ax=0$ 的通解为 $\underline{\qquad}$。
+设 $A$ 是 $m \times s$ 矩阵，$B$ 是 $s \times n$ 矩阵，则方程组 $ABX=0$ 与 $BX=0$ 同解的充分必要条件是 ( ).
+<ExamChoices>
+<ExamOption>A. $r(A)=s$</ExamOption>
+<ExamOption>B. $r(AB)=r(B)$</ExamOption>
+<ExamOption>C. $r(A)=r(B)$</ExamOption>
+<ExamOption>D. $r(A)=m$</ExamOption>
+</ExamChoices>
 
 <ExamSolution>
 
-<ExamAnswer>
-
-$$
-x=k(1,-2,1)^T,\qquad k\in\mathbb R.
-$$
-
-</ExamAnswer>
+<ExamAnswer>B</ExamAnswer>
 
 <ExamExplanation>
 
-由
-
+显然 $Bx=0\Rightarrow ABx=0$，故 $\ker B\subseteq\ker(AB)$。二者都是 $\mathbb R^n$ 的子空间，按秩—零度定理
 $$
-\alpha_3=-\alpha_1+2\alpha_2
+\dim\ker B=n-r(B),\qquad \dim\ker(AB)=n-r(AB).
 $$
-
-移项得
-
+在已有包含关系下，同解等价于两个零空间维数相等，因此
 $$
-\alpha_1-2\alpha_2+\alpha_3=0.
+\boxed{\ker(AB)=\ker B\ \Longleftrightarrow\ r(AB)=r(B)}.
 $$
+选 **B**。
 
-因此
-
+**第二种识别：** 若 $y\in\operatorname{Im}B$ 且 $Ay=0$，取 $y=Bx$，便有 $ABx=0$。故同解又等价于
 $$
-(1,-2,1)^T
+\ker A\cap\operatorname{Im}B=\{0\},
 $$
+即 $A$ 在 $B$ 的像空间上的限制是单射。条件 $r(A)=s$ 只是充分条件而非必要条件。
 
-是 $Ax=0$ 的非零解。
-
-又因 $\alpha_1,\alpha_2$ 线性无关，而 $\alpha_3$ 可由它们表示，所以
-
-$$
-r(A)=2.
-$$
-
-基础解系只含一个向量，故通解为
-
-$$
-\boxed{x=k(1,-2,1)^T}.
-$$
-
-
-**最短路径：** 题设中的列关系立即提供一个非零核向量，再用“独立的两列”确定秩为 $2$，排除零空间有第二个方向的可能。
+**母题迁移：** 先识别一方程的零空间包含另一方程的零空间，再用零度相等判断同解；这是各类组合方程与增广方程的统一处理方式。
 
 </ExamExplanation>
-
 </ExamSolution>
 
 </ExamQuestion>
 
 <ExamQuestion>
 
-**[2021年数学（二）真题]**
+**精选题 [李林880]**
+
+设 $A^T = (\alpha_1, \alpha_2, \cdots, \alpha_{n-1})$ 是 $n \times (n-1)$ 矩阵，$r(A^T) = n-1$，$\beta_1, \beta_2$ 是与 $\alpha_1, \alpha_2, \cdots, \alpha_{n-1}$ 都正交的两个不同的 $n$ 维列向量，$k$ 是任意常数，则方程组 $Ax = 0$ 的通解为（ ）。
+<ExamChoices>
+<ExamOption>A. $k(\beta_1 - \beta_2)$</ExamOption>
+<ExamOption>B. $k(\beta_1 + \beta_2)$</ExamOption>
+<ExamOption>C. $k\beta_1$</ExamOption>
+<ExamOption>D. $k\beta_2$</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>A</ExamAnswer>
+
+<ExamExplanation>
+
+由于 $r(A^T)=n-1$，得 $r(A)=n-1$，所以 $\ker A$ 是一维子空间。
+
+$A$ 的行恰是 $\alpha_1^T,\ldots,\alpha_{n-1}^T$。题设两个向量均与所有 $\alpha_i$ 正交，所以 $A\beta_1=A\beta_2=0$。由 $\beta_1\ne\beta_2$，可知
+$$
+\beta_1-\beta_2\ne0,\qquad A(\beta_1-\beta_2)=0.
+$$
+一维零空间中任一非零向量均可作为基础解向量，因此通解必为
+$$
+\boxed{x=k(\beta_1-\beta_2)},\qquad k\in\mathbb R,
+$$
+选 **A**。
+
+**陷阱：** 不能单凭 $\beta_1\ne\beta_2$ 推出 $\beta_1$、$\beta_2$、$\beta_1+\beta_2$ 中任何一个非零（例如 $\beta_1=0$ 或 $\beta_1=-\beta_2$），但两者之差一定非零。
+
+</ExamExplanation>
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [2021年数学二]**
 
 设三阶矩阵
 
@@ -690,26 +485,10 @@ $$
 若向量组 $\alpha_1,\alpha_2,\alpha_3$ 可以由向量组 $\beta_1,\beta_2,\beta_3$ 线性表示，则（ ）。
 
 <ExamChoices>
-<ExamOption>
-
-A. $Ax=0$ 的解均为 $Bx=0$ 的解
-
-</ExamOption>
-<ExamOption>
-
-B. $A^Tx=0$ 的解均为 $B^Tx=0$ 的解
-
-</ExamOption>
-<ExamOption>
-
-C. $Bx=0$ 的解均为 $Ax=0$ 的解
-
-</ExamOption>
-<ExamOption>
-
-D. $B^Tx=0$ 的解均为 $A^Tx=0$ 的解
-
-</ExamOption>
+<ExamOption>A. $Ax=0$ 的解均为 $Bx=0$ 的解</ExamOption>
+<ExamOption>B. $A^Tx=0$ 的解均为 $B^Tx=0$ 的解</ExamOption>
+<ExamOption>C. $Bx=0$ 的解均为 $Ax=0$ 的解</ExamOption>
+<ExamOption>D. $B^Tx=0$ 的解均为 $A^Tx=0$ 的解</ExamOption>
 </ExamChoices>
 
 <ExamSolution>
@@ -722,28 +501,19 @@ D
 
 <ExamExplanation>
 
-“$\alpha$ 组可由 $\beta$ 组线性表示”等价于存在矩阵 $C$ 使
-
-$$
-A=BC.
-$$
-
-于是
-
+“$A$ 的列向量组可由 $B$ 的列向量组表示”等价于存在 $3\times3$ 矩阵 $C$，使得 $A=BC$。于是
 $$
 A^T=C^TB^T.
 $$
-
-若 $x$ 满足 $B^Tx=0$，则
-
+任取 $B^Tx=0$ 的解 $x$，代入得到 $A^Tx=C^TB^Tx=0$。因此
 $$
-A^Tx=C^TB^Tx=0.
+\boxed{\ker B^T\subseteq\ker A^T},
 $$
+选 **D**。
 
-所以 $B^Tx=0$ 的每一个解都是 $A^Tx=0$ 的解，选 D。
+**空间观点：** $\operatorname{Col}(A)\subseteq\operatorname{Col}(B)$，取正交补后包含方向反转：$\operatorname{Col}(B)^\perp\subseteq\operatorname{Col}(A)^\perp$。这解释了为什么转置方程的解集包含方向与“线性表出”方向相反。
 
-
-**包含方向：** $A=BC$ 意味着 $\operatorname{Im}A\subseteq\operatorname{Im}B$；取正交补得 $\ker B^T\subseteq\ker A^T$。一般不能把这一结论错误写成 $\ker B\subseteq\ker A$。
+**易错点：** $A=BC$ 一般并不能推出 $\ker B\subseteq\ker A$ 或反向包含；乘在右边的 $C$ 会改变原未知向量的作用方式。
 
 </ExamExplanation>
 
@@ -751,11 +521,114 @@ $$
 
 </ExamQuestion>
 
-## 三、秩一扰动和参数型高维齐次系统
+<ExamQuestion>
+
+**精选题 [张宇1000题]**
+
+设$A$为$n$阶实矩阵，则( ).
+<ExamChoices>
+<ExamOption>A. $\begin{bmatrix}A&O\\E&A^TA\end{bmatrix}x=0$只有零解</ExamOption>
+<ExamOption>B. $\begin{bmatrix}O&A\\A^TA&AA^TA\end{bmatrix}x=0$只有零解</ExamOption>
+<ExamOption>C. $\begin{bmatrix}A&A^TA\\O&A^TA\end{bmatrix}x=0$与$\begin{bmatrix}A^TA&A\\O&A\end{bmatrix}x=0$同解</ExamOption>
+<ExamOption>D. $\begin{bmatrix}AA^TA&A^TA\\O&A\end{bmatrix}x=0$与$\begin{bmatrix}A^TA^2&A\\O&A^TA\end{bmatrix}x=0$同解</ExamOption>
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>C</ExamAnswer>
+
+<ExamExplanation>
+
+**突破口：含 $A^TA$ 的方程先用实内积化为 $Ax=0$。** 设分块未知量 $x=(u^T,v^T)^T$，其中 $u,v\in\mathbb R^n$。
+
+选项 **C** 左边的方程组等价于
+$$
+\begin{cases}Au+A^TAv=0,\\A^TAv=0,\end{cases}
+\quad\Longleftrightarrow\quad
+Au=0,\ Av=0.
+$$
+右边的方程组为
+$$
+\begin{cases}A^TAu+Av=0,\\Av=0,\end{cases}
+\quad\Longleftrightarrow\quad
+Au=0,\ Av=0,
+$$
+两者解集均为 $\ker A\times\ker A$，故选 **C**。
+
+**排除思路：** A、B 的“只有零解”在 $A=0$ 时直接失败。D 取 $A=\begin{pmatrix}0&1\\0&0\end{pmatrix}$（$A^2=0$、$A\ne0$），左方程组推出 $Au=Av=0$，右方程组只要求 $A^2u=Av=0$，二者不同解。
+
+**方法提炼：** 处理块齐次方程，不要直接计算大行列式；先按分块未知量写联立方程，再用 $\ker(A^TA)=\ker A$ 与乘积的零空间包含关系。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+
+## 三、参数退化与基础解系构造——循环变换和秩一矩阵
 
 <ExamQuestion>
 
-**[2002年数学（三）真题]**
+**精选题 [2001年数学一]**
+
+设 $\alpha_1,\alpha_2,\ldots,\alpha_s$ 为线性方程组 $Ax=0$ 的一个基础解系，且
+
+$$
+\beta_1=t_1\alpha_1+t_2\alpha_2,
+$$
+
+$$
+\beta_2=t_1\alpha_2+t_2\alpha_3,\quad\ldots,\quad
+\beta_s=t_1\alpha_s+t_2\alpha_1,
+$$
+
+其中 $t_1,t_2$ 为实常数。试问：$t_1,t_2$ 满足什么关系时，$\beta_1,\ldots,\beta_s$ 也为 $Ax=0$ 的一个基础解系？
+
+<ExamSolution>
+
+<ExamAnswer>
+
+若 $s=2n$ 为偶数，则
+
+$$
+t_1\ne\pm t_2.
+$$
+
+若 $s=2n+1$ 为奇数，则
+
+$$
+t_1\ne -t_2.
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**先验证所有 $\beta_i$ 都是解，再判它们是否构成核空间的一组基。** 因为 $\alpha_1,\ldots,\alpha_s$ 是基础解系，每个 $\beta_i$ 都是它们的线性组合，故仍满足 $Ax=0$；只需判断 $s$ 个 $\beta_i$ 是否线性无关。
+
+将 $\beta$ 相对于 $\alpha$ 的坐标列排成 $s\times s$ 的循环矩阵 $C=t_1I_s+t_2P$，其中 $P$ 为循环置换矩阵，其特征多项式满足 $\det(tI_s-P)=t^s-1$，于是
+$$
+|C|=t_1^s-(-t_2)^s=t_1^s+(-1)^{s+1}t_2^s.
+$$
+因为 $\alpha$ 组本身线性无关，$\beta$ 组线性无关当且仅当 $|C|\ne0$。对实参数分类：
+
+- $s$ 为偶数时，$t_1^s-t_2^s\ne0\iff \boxed{t_1\ne\pm t_2}$；
+- $s$ 为奇数时，$t_1^s+t_2^s\ne0\iff \boxed{t_1\ne-t_2}$。
+
+**考场第二解：** 若 $\sum c_i\beta_i=0$，原基独立给出循环递推 $t_1c_i+t_2c_{i-1}=0$（下标模 $s$）。迭代一周得到 $(t_1^s-(-t_2)^s)c_i=0$。若行列式非零，仅有零解；若为零，系数矩阵奇异，存在非零系数解。
+
+**母题变式：** $s=4,t_1=1,t_2=t$ 便得到条件 $t\ne\pm1$；若系数位于复数域，不能再把根条件简单化为实数的 $\pm$ 情形。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [2002年数学三]**
 
 设齐次线性方程组
 
@@ -812,20 +685,23 @@ $$
 
 <ExamExplanation>
 
-对系数行列式作“所有行加到第一行，再逐行消元”的变换，可得
-
+**母题结构：对角元相同、非对角元相同。** 令 $\mathbf1=(1,\ldots,1)^T$，可写
+$$
+A=(a-b)I_n+b\mathbf1\mathbf1^T.
+$$
+将任意 $x$ 唯一分解为 $x=c\mathbf1+y$，其中 $\mathbf1^Ty=0$。那么
+$$
+Ax=[a+(n-1)b]c\mathbf1+(a-b)y.
+$$
+在直线 $\operatorname{span}\{\mathbf1\}$ 上矩阵相当于乘 $a+(n-1)b$；在 $\mathbf1^\perp$ 上相当于乘 $a-b$。故
 $$
 |A|=[a+(n-1)b](a-b)^{n-1}.
 $$
+当两因子都非零时只有零解。
 
-因此 $|A|\ne0$ 时只有零解；$|A|=0$ 时有非零解，即有无穷多解。
+当 $a=b\ne0$ 时，$A=b\mathbf1\mathbf1^T$，解集为 $\{x:\sum x_i=0\}$，可取基础解系 $e_2-e_1,\ldots,e_n-e_1$；当 $a=-(n-1)b$ 时，$a-b=-nb\ne0$，解集恰为 $\operatorname{span}\{\mathbf1\}$，基础解系取 $\mathbf1$ 即可。由于题设 $b\ne0,n\ge2$，这两种退化不会同时发生。
 
-若 $a=b$，所有方程相同，秩为 $1$，故自由未知量有 $n-1$ 个，得到上面的基础解系。
-
-若 $a=-(n-1)b$，矩阵秩为 $n-1$，且每行元素和为零，所以 $(1,\ldots,1)^T$ 是非零解。基础解系仅含一个向量，故它就是基础解向量。
-
-
-**快解与推广：** $A=(a-b)I+b\boldsymbol1\boldsymbol1^T$，在 $\operatorname{span}\{\boldsymbol1\}$ 上对应特征值 $a+(n-1)b$，在零和子空间上对应 $a-b$。求基础解系时直接拆分这两个互补子空间。
+**方法价值：** 先识别“全一方向 + 零和方向”的不变子空间，能同时得到行列式、秩、基础解系和参数分层，优于只做行列式展开。
 
 </ExamExplanation>
 
@@ -835,7 +711,7 @@ $$
 
 <ExamQuestion>
 
-**[2003年数学（三）真题]**
+**精选题 [2003年数学三]**
 
 已知齐次线性方程组
 
@@ -857,41 +733,76 @@ $$
 
 <ExamAnswer>
 
-设 $s=\sum_{i=1}^n a_i\ne0$。若 $n\ge2$，仅有零解当且仅当 $b\ne0$ 且 $b\ne-s$。
+系数行列式为
 
-非零解的两种情况：
+$$
+|A|=b^{n-1}\left(b+\sum_{i=1}^n a_i\right).
+$$
 
-- $b=0$，取任意 $a_p\ne0$，基础解系为 $\xi_j=e_j-\dfrac{a_j}{a_p}e_p$（$j\ne p$）；
-- $b=-s$，基础解系为 $\xi=(1,\ldots,1)^T$。
+1. 当
 
-若 $n=1$，仅当 $b=-a_1$ 时存在非零解，基础解系为 $\{1\}$。
+$$
+b\ne0,\qquad b+\sum_{i=1}^n a_i\ne0
+$$
 
+时，仅有零解。
+
+2. 当
+
+$$
+b=0
+$$
+
+或
+
+$$
+b=-\sum_{i=1}^n a_i
+$$
+
+时，有非零解。
+
+若 $b=0$，选取任一满足 $a_p\ne0$ 的下标 $p$，可取
+
+$$
+\xi_j=e_j-\frac{a_j}{a_p}e_p,\qquad j\ne p
+$$
+
+为基础解系。
+
+若 $b=-\sum_{i=1}^n a_i$，则可取
+
+$$
+\xi=(1,1,\ldots,1)^T
+$$
+
+为基础解系。
+
+
+
+**边界说明：** 上述 $b=0$ 时的 $n-1$ 维基础解系以 $n\ge2$ 为前提。若题面允许 $n=1$，由于 $a_1\ne0$，仅在 $b=-a_1$ 时有非零解，基础解系可取 $(1)^T$；其余 $b$ 只有零解。
 </ExamAnswer>
 
 <ExamExplanation>
 
-记 $\boldsymbol1=(1,\ldots,1)^T$，$v=(a_1,\ldots,a_n)^T$，$s=v^T\boldsymbol1=\sum_{i=1}^n a_i\ne0$。系数矩阵
-
+记 $s=\sum_{i=1}^n a_i\ne0$、$a=(a_1,\ldots,a_n)^T$、$u=(1,\ldots,1)^T$，系数矩阵为
 $$
-A=bI+\boldsymbol1v^T.
+A=bI_n+ua^T.
 $$
-
-当 $n\ge2$ 时，由矩阵行列式引理（也可用初等变换）
-
+对任意 $x$，设 $t=a^Tx$，则方程等价于
 $$
-\det A=b^{n-1}(b+s).
+bx+tu=0.
 $$
+当 $b\ne0$，$x=-(t/b)u$，再取 $a^T$ 得 $(b+s)t=0$。所以若 $b+s\ne0$ 只能 $t=0,x=0$；若 $b=-s$，全部解是 $x=cu$（因 $b\ne0$）。
 
-若 $b\ne0$ 且 $b\ne-s$，则 $A$ 可逆，仅有零解。
+当 $b=0$ 时，$Ax=u(a^Tx)=0\iff a^Tx=0$。因为 $s\ne0$，必存在 $a_p\ne0$；若 $n\ge2$，基础解系可取
+$$
+\boxed{\left\{e_j-\frac{a_j}{a_p}e_p:j\ne p\right\}},
+$$
+共 $n-1$ 个向量，均在核内且在各自第 $j$ 个坐标为 $1$，从而线性无关。
 
-若 $b=0$，则 $A=\boldsymbol1v^T$ 的秩为 $1$，$Ax=0$ 等价于 $v^Tx=0$。选任一 $a_p\ne0$，令 $\xi_j=e_j-(a_j/a_p)e_p$（$j\ne p$），这 $n-1$ 个向量无关且满足方程，构成基础解系。
+因此对 $n\ge2$，只有零解的条件为 $b\ne0$ 且 $b+s\ne0$；有非零解的条件为 $b=0$ 或 $b=-s$。相应矩阵行列式是 $b^{n-1}(b+s)$。
 
-若 $b=-s\ne0$，则 $A\boldsymbol1=(b+s)\boldsymbol1=0$；对任意 $x$，$Ax=0$ 蕴含 $bx=-\boldsymbol1v^Tx$，故 $x$ 必与 $\boldsymbol1$ 共线，基础解系恰为 $\{\boldsymbol1\}$。
-
-**边界条件：** 原题未明示 $n\ge2$；若允许 $n=1$，则方程仅为 $(a_1+b)x_1=0$，$b=0$ 时由于 $a_1\ne0$ 仍只有零解，非零解条件仅为 $b=-a_1$。上述“$b=0$ 亦非零解”的结论仅适用于 $n\ge2$。
-
-
-**方法选择：** 这是秩一扰动 $bI+uv^T$；先计算 $v^Tu$，再分别看 $b=0$ 与 $b=-v^Tu$，比机械做 $n$ 行消元更稳定。
+**原题隐含边界：** 题面未明确限定 $n\ge2$。若允许 $n=1$，则 $A=(a_1+b)$，只有 $b=-a_1$ 才有非零解；$b=0$ 因 $a_1\ne0$ 反而只有零解。解题时应明确这一特殊情况，不能直接把 $b=0$ 的 $n-1$ 维论证套到 $n=1$。
 
 </ExamExplanation>
 
@@ -901,7 +812,7 @@ $$
 
 <ExamQuestion>
 
-**[2004年数学（一）真题]**
+**精选题 [2004年数学一]**
 
 设有齐次线性方程组
 
@@ -950,32 +861,26 @@ $$
 
 <ExamExplanation>
 
-系数矩阵的第 $i$ 行除对角元多出 $a$ 外，其余元素均为 $i$。按原解答作行列式变换可得
-
+**与上一题不同的秩一更新：** 设 $u=(1,2,\ldots,n)^T$、$v=(1,\ldots,1)^T$，则原系数矩阵为
 $$
-|A|=a^{n-1}\left(a+\frac{n(n+1)}2\right).
+A=aI_n+uv^T,
+\qquad v^Tu=\frac{n(n+1)}2=:S.
 $$
-
-因此存在非零解的条件为 $|A|=0$，得到两个参数值。
-
-当 $a=0$ 时，各行互为倍数，方程组等价于
-
+任何 $x$ 满足
 $$
-x_1+x_2+\cdots+x_n=0,
+Ax=ax+u(v^Tx)=0.
 $$
+如果 $a\ne0$，必有 $x=-\frac{v^Tx}{a}u$，再左乘 $v^T$ 得 $(a+S)v^Tx=0$。于是只有在 $a=-S$ 时才有非零解，且解空间恰为 $\operatorname{span}\{u\}$。
 
-故基础解系含 $n-1$ 个向量。
+若 $a=0$，则 $Ax=0\iff v^Tx=\sum_{i=1}^nx_i=0$，可取 $n-1$ 个基础解向量 $e_2-e_1,\ldots,e_n-e_1$。
 
-当 $a=-\dfrac{n(n+1)}2$ 时，可直接验证
-
+所以
 $$
-A(1,2,\ldots,n)^T=0.
+\boxed{a=0\ \text{或}\ a=-\frac{n(n+1)}2}
 $$
+时有非零解，分别有 $n-1$ 维和 $1$ 维解空间，其余参数只有零解。且 $|A|=a^{n-1}(a+S)$。
 
-且此时 $r(A)=n-1$，故该向量构成基础解系。
-
-
-**母题变式：** 若第 $i$ 行的公共系数从 $i$ 换为任意 $u_i$，则 $A=aI+u\boldsymbol1^T$，只有 $a=0$ 或 $a=-\sum u_i$ 可能奇异；后一种情况下当 $\sum u_i\ne0$，核由 $u$ 张成。
+**辨析：** $uv^T$ 的零空间由 $v^Tx=0$ 决定，而非由 $u^Tx=0$ 决定；$a=-v^Tu$ 时产生的特征方向是 $u$。辨认左右两向量是快速求解的关键。
 
 </ExamExplanation>
 
@@ -983,35 +888,75 @@ $$
 
 </ExamQuestion>
 
-## 四、伴随矩阵与零空间的综合应用
+<ExamQuestion>
+
+**精选题 [李正元]**
+
+已知 $ a,b,c$ 不全为零，证明方程组
+
+$$
+ \begin{cases}
+ax_2+bx_3+cx_4=0,\\
+ax_1+x_2=0,\\
+bx_1+x_3=0,\\
+cx_1+x_4=0
+\end{cases}
+$$
+
+只有零解。
+
+<ExamSolution>
+
+<ExamAnswer>
+该齐次线性方程组只有零解
+
+$$
+ x_1=x_2=x_3=x_4=0.
+$$
+</ExamAnswer>
+
+<ExamExplanation>
+
+**构造思路：先用三个末行消去变量，不直接硬算四阶行列式。** 由后三式依次得到
+$$
+x_2=-ax_1,\qquad x_3=-bx_1,\qquad x_4=-cx_1.
+$$
+代入第一式，得到
+$$
+-(a^2+b^2+c^2)x_1=0.
+$$
+题设 $a,b,c$ 为实数且不全为零，故平方和严格大于零，必有 $x_1=0$；于是其余变量也全部为零。
+
+**第二解（分块消元/Schur 补）：** 系数矩阵为
+$$
+M=\begin{pmatrix}0&u^T\\u&I_3\end{pmatrix},\qquad u=(a,b,c)^T.
+$$
+下右块可逆，故
+$$
+|M|=|I_3|\bigl(0-u^TI_3^{-1}u\bigr)=-(a^2+b^2+c^2)\ne0.
+$$
+因此齐次方程仅有零解。注意：该严格正性依赖实数条件，若无实数前提则不能如此推断。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+
+## 四、伴随矩阵与含参核空间——从已知解到全部通解
 
 <ExamQuestion>
 
-**[2004年数学（三）真题]**
+**精选题 [2004年数学三]**
 
 设 $n$ 阶矩阵 $A$ 的伴随矩阵 $A^*\ne O$。若 $\xi_1,\xi_2,\xi_3,\xi_4$ 是非齐次线性方程组 $Ax=b$ 的互不相等的解，则对应的齐次线性方程组 $Ax=0$ 的基础解系（ ）。
 
 <ExamChoices>
-<ExamOption>
-
-A. 不存在
-
-</ExamOption>
-<ExamOption>
-
-B. 仅含一个非零解向量
-
-</ExamOption>
-<ExamOption>
-
-C. 含有两个线性无关的解向量
-
-</ExamOption>
-<ExamOption>
-
-D. 含有三个线性无关的解向量
-
-</ExamOption>
+<ExamOption>A. 不存在</ExamOption>
+<ExamOption>B. 仅含一个非零解向量</ExamOption>
+<ExamOption>C. 含有两个线性无关的解向量</ExamOption>
+<ExamOption>D. 含有三个线性无关的解向量</ExamOption>
 </ExamChoices>
 
 <ExamSolution>
@@ -1024,34 +969,15 @@ B
 
 <ExamExplanation>
 
-不同的非齐次解之差是对应齐次方程组的非零解。因此 $Ax=0$ 有非零解，故
+四个互不相等的非齐次解至少给出两个不同解，其差为 $Ax=0$ 的非零解，所以 $r(A)<n$。
 
+另一方面 $A^*\ne0$ 说明 $A$ 至少有一个非零的 $(n-1)$ 阶子式，故 $r(A)\ge n-1$。综上
 $$
-r(A)<n.
+r(A)=n-1,\qquad \dim\ker A=n-r(A)=1.
 $$
+故任一基础解系恰含一个非零向量，选 **B**。
 
-另一方面，伴随矩阵满足：若 $A^*\ne O$，则
-
-$$
-r(A)\ge n-1.
-$$
-
-合并两式得
-
-$$
-r(A)=n-1.
-$$
-
-于是基础解系所含向量个数为
-
-$$
-n-r(A)=1.
-$$
-
-选 B。
-
-
-**使用条件：** 对 $n\ge2$ 的方阵，$A^*\ne0$ 意味着 $r(A)\ge n-1$。但若 $A$ 可逆，则齐次系统无非零解；本题的多组非齐次解排除了可逆情形，才得到 $r(A)=n-1$。
+**母题识别：** $A^*\ne0$ 而 $A$ 奇异，直接锁定秩为 $n-1$。题给“互不相等的四个解”是冗余强化条件，关键仅在“至少有两个不同的解”。
 
 </ExamExplanation>
 
@@ -1061,7 +987,74 @@ $$
 
 <ExamQuestion>
 
-**[2011年数学（一）、数学（二）真题]**
+**精选题 [2005年数学一、数学二]**
+
+已知三阶矩阵 $A$ 的第一行为 $(a,b,c)$，且 $a,b,c$ 不全为零。矩阵
+
+$$
+B=
+\begin{pmatrix}
+1&2&3\\
+2&4&6\\
+3&6&k
+\end{pmatrix},
+$$
+
+其中 $k$ 为常数，且 $AB=O$。求线性方程组 $Ax=0$ 的通解。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+当 $k\ne9$ 时，
+
+$$
+x=k_1(1,2,3)^T+k_2(3,6,k)^T.
+$$
+
+当 $k=9$ 时需分 $r(A)$：
+
+- 若 $r(A)=2$，则
+
+$$
+x=k(1,2,3)^T;
+$$
+
+- 若 $r(A)=1$，不妨设 $a\ne0$，则
+
+$$
+x=k_1\left(-\frac ba,1,0\right)^T
++k_2\left(-\frac ca,0,1\right)^T.
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+因为 $AB=0$，矩阵 $B$ 的所有列都在 $\ker A$ 内，故
+$$
+r(A)+r(B)\le3.
+$$
+当 $k\ne9$，$B$ 的第一列 $u=(1,2,3)^T$ 与第三列 $v=(3,6,k)^T$ 线性无关（若 $v=3u$ 就要求 $k=9$），所以 $r(B)=2$。已知 $A$ 第一行不全为零，故 $r(A)\ge1$；两者夹逼得到 $r(A)=1$，$\dim\ker A=2$。因此 $\{u,v\}$ 是基础解系，
+$$
+\boxed{x=s(1,2,3)^T+t(3,6,k)^T}.
+$$
+当 $k=9$，$r(B)=1$，仅能推出 $1\le r(A)\le2$，**不能仅凭 $B$ 判断解空间维数**。此时 $u=(1,2,3)^T\in\ker A$。
+
+- 若 $r(A)=2$，$\ker A=\operatorname{span}\{u\}$，通解为 $x=su$；
+- 若 $r(A)=1$，三行均为非零第一行 $w^T=(a,b,c)$ 的倍数，通解由 $ax_1+bx_2+cx_3=0$ 给出。例如 $a\ne0$ 时可取 $(-b/a,1,0)^T,(-c/a,0,1)^T$ 作为基础解系；若 $a=0$，改选任一非零系数作为主元，同样得到两维核。
+
+**易错点：** $AB=0$ 只给包含 $\operatorname{Col}(B)\subseteq\ker A$，一般不能认定这两个空间相等；本题 $k=9$ 专门考查秩不等式不能直接取等。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**精选题 [2011年数学一、数学二]**
 
 设 $A=(\alpha_1,\alpha_2,\alpha_3,\alpha_4)$ 是四阶矩阵，$A^*$ 为 $A$ 的伴随矩阵。若
 
@@ -1072,26 +1065,10 @@ $$
 是方程组 $Ax=0$ 的一个基础解系，则 $A^*x=0$ 的基础解系可为（ ）。
 
 <ExamChoices>
-<ExamOption>
-
-A. $\alpha_1,\alpha_3$
-
-</ExamOption>
-<ExamOption>
-
-B. $\alpha_1,\alpha_2$
-
-</ExamOption>
-<ExamOption>
-
-C. $\alpha_1,\alpha_2,\alpha_3$
-
-</ExamOption>
-<ExamOption>
-
-D. $\alpha_2,\alpha_3,\alpha_4$
-
-</ExamOption>
+<ExamOption>A. $\alpha_1,\alpha_3$</ExamOption>
+<ExamOption>B. $\alpha_1,\alpha_2$</ExamOption>
+<ExamOption>C. $\alpha_1,\alpha_2,\alpha_3$</ExamOption>
+<ExamOption>D. $\alpha_2,\alpha_3,\alpha_4$</ExamOption>
 </ExamChoices>
 
 <ExamSolution>
@@ -1104,38 +1081,15 @@ D
 
 <ExamExplanation>
 
-基础解系只有一个向量，所以
-
+已知基础解系只含 $\eta=(1,0,1,0)^T$，故
 $$
-4-r(A)=1\quad\Rightarrow\quad r(A)=3.
+\dim\ker A=1,\qquad r(A)=4-1=3.
 $$
+又 $A\eta=0$ 给出 $\alpha_1+\alpha_3=0$。原矩阵秩为 $3$，因此 $\alpha_2,\alpha_3,\alpha_4$ 必线性无关：否则再加上与 $\alpha_3$ 相关的 $\alpha_1$ 后仍至多秩 $2$，矛盾。
 
-又
+因 $|A|=0$，伴随恒等式 $A^*A=|A|I=0$ 告诉我们 $A$ 的每一列都属于 $\ker A^*$；又 $r(A^*)=1$（$r(A)=3$），故 $\dim\ker A^*=3$。于是刚找到的三个独立列正好构成基础解系，选 **D**。
 
-$$
-A(1,0,1,0)^T=0
-$$
-
-说明
-
-$$
-\alpha_1+\alpha_3=0.
-$$
-
-因 $r(A)=3$，故 $\alpha_2,\alpha_3,\alpha_4$ 线性无关。
-
-又 $|A|=0$，由
-
-$$
-A^*A=|A|I=O
-$$
-
-得 $A$ 的每个列向量都是 $A^*x=0$ 的解。并且 $r(A)=3$ 时有 $r(A^*)=1$，所以 $A^*x=0$ 的基础解系含 $4-1=3$ 个向量。
-
-因此线性无关的 $\alpha_2,\alpha_3,\alpha_4$ 正好可作为基础解系，选 D。
-
-
-**伴随矩阵模型：** $r(A)=n-1$ 时 $r(A^*)=1$，且 $A^*A=0$，由维数可推出 $\ker A^*=\operatorname{Im}A$。所以关键是从 $A$ 的列里选一组秩为 $n-1$ 的列。
+**通用母题：** 若 $r(A)=n-1$，则 $\operatorname{Col}(A)=\ker A^*$。选基础解系时在 $A$ 的列中取任何极大无关组即可，不能误把 $A$ 的核向量当作 $A^*$ 的核向量。
 
 </ExamExplanation>
 
@@ -1145,31 +1099,15 @@ $$
 
 <ExamQuestion>
 
-**[2020年数学（二）、数学（三）真题]**
+**精选题 [2020年数学二、数学三]**
 
 设四阶矩阵 $A=(a_{ij})$ 不可逆，$a_{12}$ 的代数余子式 $A_{12}\ne0$，$\alpha_1,\alpha_2,\alpha_3,\alpha_4$ 为矩阵 $A$ 的列向量组，$A^*$ 为 $A$ 的伴随矩阵，则方程组 $A^*x=0$ 的通解为（ ）。
 
 <ExamChoices>
-<ExamOption>
-
-A. $x=k_1\alpha_1+k_2\alpha_2+k_3\alpha_3$
-
-</ExamOption>
-<ExamOption>
-
-B. $x=k_1\alpha_1+k_2\alpha_2+k_3\alpha_4$
-
-</ExamOption>
-<ExamOption>
-
-C. $x=k_1\alpha_1+k_2\alpha_3+k_3\alpha_4$
-
-</ExamOption>
-<ExamOption>
-
-D. $x=k_1\alpha_2+k_2\alpha_3+k_3\alpha_4$
-
-</ExamOption>
+<ExamOption>A. $x=k_1\alpha_1+k_2\alpha_2+k_3\alpha_3$</ExamOption>
+<ExamOption>B. $x=k_1\alpha_1+k_2\alpha_2+k_3\alpha_4$</ExamOption>
+<ExamOption>C. $x=k_1\alpha_1+k_2\alpha_3+k_3\alpha_4$</ExamOption>
+<ExamOption>D. $x=k_1\alpha_2+k_2\alpha_3+k_3\alpha_4$</ExamOption>
 </ExamChoices>
 
 <ExamSolution>
@@ -1182,152 +1120,17 @@ C
 
 <ExamExplanation>
 
-$A$ 不可逆，所以 $r(A)<4$。又代数余子式 $A_{12}\ne0$，说明存在非零三阶子式，因此
-
+$A$ 不可逆给出 $r(A)\le3$，而代数余子式 $A_{12}\ne0$ 表示删去第 $1$ 行、第 $2$ 列得到的三阶子式非零，因此 $r(A)\ge3$。故
 $$
-r(A)\ge3.
+r(A)=3,\qquad r(A^*)=1,\qquad \dim\ker A^*=4-1=3.
 $$
-
-故
-
+由 $A^*A=|A|I=0$，$A$ 的列全部属于 $\ker A^*$。删去第 $2$ 列仍有非零三阶子式，意味着第 $1,3,4$ 列线性无关，正好三个，故
 $$
-r(A)=3.
+\boxed{\ker A^*=\operatorname{span}\{\alpha_1,\alpha_3,\alpha_4\}},
 $$
+通解为 $x=k_1\alpha_1+k_2\alpha_3+k_3\alpha_4$，选 **C**。
 
-于是伴随矩阵的秩为
-
-$$
-r(A^*)=1,
-$$
-
-所以 $A^*x=0$ 的基础解系应含 $4-1=3$ 个线性无关向量。
-
-由
-
-$$
-A^*A=|A|I=O
-$$
-
-可知 $A$ 的每个列向量都是 $A^*x=0$ 的解。
-
-又 $A_{12}\ne0$ 表明删去第 $1$ 行、第 $2$ 列得到的三阶子式非零，对应可推出 $\alpha_1,\alpha_3,\alpha_4$ 线性无关。因此它们构成基础解系，选 C。
-
-
-**关键条件：** $A_{12}\ne0$ 指删去第 $1$ 行与第 $2$ 列后的三阶子式非零，直接选定列 $1,3,4$ 线性无关。单知 $r(A)=3$ 还不能区分 A—D 四种列组。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-## 五、原创综合变式
-
-<ExamQuestion>
-
-**[原创] 一般秩一扰动的全部齐次解与退化分支**
-
-设 $n\ge2$，$u,v$ 为 $\mathbb R^n$ 中的非零列向量，$t\in\mathbb R$，$A(t)=tI_n+uv^T$。记 $c=v^Tu$。
-
-（1）求使 $A(t)x=0$ 存在非零解的全部实数 $t$。
-
-（2）对每种参数取值，给出零空间、其维数及构造基础解系的一般方法。特别讨论 $c=0$ 的情况。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-若 $c\ne0$，恰在 $t=0$ 或 $t=-c$ 时存在非零解：
-
-$$
-\ker A(0)=\{x:v^Tx=0\},\qquad\dim\ker A(0)=n-1;
-$$
-
-$$
-\ker A(-c)=\operatorname{span}\{u\},\qquad\dim\ker A(-c)=1.
-$$
-
-若 $c=0$，仅在 $t=0$ 时有非零解，零空间仍为 $v^\perp$，维数为 $n-1$。其余参数均只有零解。
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-**突破口：** 用秩一扰动的结构分离核空间。对 $t\ne0$，若 $A(t)x=0$，则
-
-$$
-tx=-u(v^Tx),
-$$
-
-故 $x$ 必在 $\operatorname{span}\{u\}$ 中。令 $x=ku$，有
-
-$$
-A(t)x=k(t+c)u.
-$$
-
-于是仅 $t=-c$ 可能出现非零解；当 $c\ne0$ 时此参数非零，零空间恰为 $\operatorname{span}\{u\}$。当 $c=0$ 时，$t=-c=0$ 已不属于这一分支。
-
-若 $t=0$，$A(0)x=u(v^Tx)=0$。由于 $u\ne0$，这等价于 $v^Tx=0$。取任意 $v_p\ne0$，令
-
-$$
-\eta_j=e_j-\frac{v_j}{v_p}e_p,\quad j\ne p,
-$$
-
-便得到 $n-1$ 个线性无关的解，它们组成基础解系。
-
-**第二种解法（核验临界值）：** 行列式引理给出 $\det(tI+uv^T)=t^{n-1}(t+c)$，可迅速锁定可能的参数，但**仅凭行列式为零不能确定零空间维数**，仍须回到 $tx=-u(v^Tx)$ 区分 $c=0$ 和 $c\ne0$。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**[原创] 秩亏一矩阵的伴随矩阵与双侧零空间**
-
-设 $A$ 为实 $n\times n$ 矩阵，$n\ge2$，$r(A)=n-1$。已知 $0\ne v\in\ker A$，$0\ne u\in\ker A^T$。
-
-（1）证明存在非零实数 $\gamma$，使 $A^*=\gamma vu^T$。
-
-（2）求 $A^*x=0$ 的全部解，并说明为什么其解空间与 $A$ 的列空间相同。
-
-（3）证明 $Ax=b$ 有解的充要条件为 $u^Tb=0$；若 $x_0$ 是一个特解，求全部解。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-（1）$A^*=\gamma vu^T$，其中 $\gamma\ne0$。
-
-（2）$A^*x=0\iff u^Tx=0$，所以 $\ker A^*=u^\perp=\operatorname{Im}A$，维数为 $n-1$。
-
-（3）相容条件为 $u^Tb=0$；通解为 $x=x_0+kv$，$k\in\mathbb R$。
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-**（1）从两侧矩阵恒等式确定列、行空间。** 因 $|A|=0$，
-
-$$
-AA^*=A^*A=0.
-$$
-
-因此 $A^*$ 的每列都在 $\ker A=\operatorname{span}\{v\}$ 中，可写 $A^*=vw^T$。又 $r(A)=n-1$，至少存在一个非零的 $(n-1)$ 阶子式，故 $A^*\ne0$，即 $w\ne0$。代入 $A^*A=0$ 得 $w^TA=0$，故 $w\in\ker A^T=\operatorname{span}\{u\}$，从而 $w=\gamma u$，且 $\gamma\ne0$。
-
-**（2）从秩亏一得到完整零空间。** 对任意 $x$，
-
-$$
-A^*x=\gamma v(u^Tx)=0\iff u^Tx=0.
-$$
-
-另一方面 $u^TA=0$，故 $\operatorname{Im}A\subseteq u^\perp$，两空间的维数都为 $n-1$，所以相等。
-
-**（3）非齐次相容性与解的唯一自由方向。** 必要性：若 $Ax=b$，左乘 $u^T$ 得 $u^Tb=0$；充分性：$u^Tb=0$ 意味着 $b\in u^\perp=\operatorname{Im}A$，故存在 $x_0$ 满足 $Ax_0=b$。任何两个特解之差都在 $\ker A=\operatorname{span}\{v\}$，所以全体解为 $x_0+kv$。
-
-**适用条件：** 关键是 $r(A)=n-1$。若 $r(A)\le n-2$，则 $A^*=0$，结论 $A^*=\gamma vu^T$（$\gamma\ne0$）不再成立。
+**易错点：** $A_{12}$ 是删除“第 $1$ 行、第 $2$ 列”的余子式，不是删除第 $1$ 列和第 $2$ 行。选定三个基础解向量时一定要对应被保留的**列**。
 
 </ExamExplanation>
 
