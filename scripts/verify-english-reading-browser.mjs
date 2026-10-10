@@ -3,7 +3,6 @@ import { mkdir } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 
-// Installed in the CI runner's temporary directory; never changes the project lockfile.
 const require = createRequire(path.join(process.env.READING_BROWSER_MODULES, 'package.json'));
 const { chromium } = require('playwright');
 const base = process.env.DEPLOYMENT_URL.replace(/\/$/, '');
@@ -11,14 +10,16 @@ const screenshots = process.env.READING_SCREENSHOTS ?? path.resolve('reading-bro
 await mkdir(screenshots, { recursive: true });
 const browser = await chromium.launch();
 const errors = [];
-const context = await browser.newContext({ viewport: { width: 1440, height: 1080 }, colorScheme: 'light' });
-const page = await context.newPage();
+const page = await browser.newPage({ viewport: { width: 1440, height: 1080 }, colorScheme: 'light' });
 page.on('pageerror', error => errors.push(error.message));
 page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
 const root = page.locator('[data-english-reading]');
-const question = id => root.locator(`[data-question-id="${id}"]`);
-const active = () => root.locator('[data-evidence-active="true"]');
+const questions = root.locator('[data-exam-question]');
+const trigger = index => questions.nth(index).getByRole('button', { name: '查看解答', exact: true });
+const preview = page.locator('[data-exam-solution="preview"]');
+const expanded = page.locator('[data-exam-solution="expanded"]');
 const completed = () => root.locator('[data-evidence-active="true"][data-state="complete"]');
+const active = () => root.locator('[data-evidence-active="true"]');
 
 async function waitFor(check, message, timeout = 12000) {
   const until = Date.now() + timeout;
@@ -28,90 +29,115 @@ async function waitFor(check, message, timeout = 12000) {
   }
   throw new Error(message);
 }
-async function click(id, name) { await question(id).getByRole('button', { name, exact: true }).click(); }
 async function noOverflow() {
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, 'page has horizontal overflow');
-  assert.equal(await root.evaluate(node => node.scrollWidth > node.clientWidth + 1), false, 'exercise has horizontal overflow');
 }
+async function closeSolution() {
+  await page.keyboard.press('Escape');
+  await waitFor(async () => await expanded.count() === 0 && await preview.count() === 0, 'solution did not close');
+}
+async function screenshot(name) { await page.screenshot({ path: path.join(screenshots, name) }); }
 
 try {
   await page.goto(`${base}/docs/english/`, { waitUntil: 'networkidle' });
   await root.waitFor();
   await page.evaluate(() => document.documentElement.classList.remove('dark'));
-  assert.equal(await root.locator('[data-question-id]').count(), 5);
-  assert.equal(await root.getByText('正确答案 B', { exact: true }).count(), 0);
+  assert.equal(await questions.count(), 5);
   assert.equal(await active().count(), 0);
   for (const width of [320, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 1080 });
     await noOverflow();
     const article = await root.getByRole('article').boundingBox();
-    const questions = await root.getByRole('region', { name: '阅读理解题目' }).boundingBox();
-    if (width === 1440) assert.ok(questions.x > article.x + article.width - 2 && Math.abs(questions.y - article.y) < 2, 'desktop should have two columns');
-    if (width === 320) assert.ok(questions.y >= article.y + article.height - 2, 'mobile should stack article and questions');
+    const list = await root.getByRole('region', { name: '阅读理解题目' }).boundingBox();
+    if (width === 1440) assert.ok(list.x > article.x + article.width - 2, 'desktop should have two columns');
+    if (width === 320) assert.ok(list.y >= article.y + article.height - 2, 'mobile should stack article and questions');
     await root.screenshot({ path: path.join(screenshots, `reading-${width}.png`) });
   }
 
-  // Native radios support keyboard selection; answers and explanations are separate actions.
-  const firstRadio = question('q1').getByRole('radio').first();
-  await firstRadio.focus();
-  await page.keyboard.press('ArrowRight');
-  assert.ok(await question('q1').getByRole('radio').nth(1).isChecked());
-  await click('q1', '查看答案');
-  assert.ok(await question('q1').getByText('正确答案 B', { exact: true }).isVisible());
-  assert.equal(await active().count(), 0, 'answer-only should not highlight evidence');
-  assert.ok(await firstRadio.isDisabled());
-
-  await click('q1', '查看解析');
+  // Hover shows just the answer. Clicking upgrades that same anchored surface.
+  await trigger(0).hover();
+  await preview.waitFor();
+  assert.equal((await preview.innerText()).trim(), 'B');
+  assert.equal(await active().count(), 0, 'hover must not activate evidence');
+  await screenshot('reading-answer-preview.png');
+  await trigger(0).click();
+  await expanded.waitFor();
+  assert.ok((await expanded.innerText()).includes('separate the effect'));
+  assert.equal(await page.locator('dialog[open]').count(), 0, 'reading must not open a modal dialog');
+  assert.notEqual(await page.evaluate(() => document.documentElement.style.overflow), 'hidden', 'reading must not lock page scrolling');
   await waitFor(async () => await completed().count() === 1, 'first evidence never completed');
-  await root.screenshot({ path: path.join(screenshots, 'reading-evidence-light.png') });
-  // Use a wrong choice to exercise distractor feedback and switch away from q1 evidence.
-  await question('q2').getByRole('radio').first().check();
-  await click('q2', '查看解析');
-  assert.equal(await question('q1').getByRole('button', { name: '查看解析', exact: true }).getAttribute('aria-expanded'), 'false');
-  assert.ok(await question('q2').getByText('为什么不选 A？', { exact: true }).isVisible());
-  await waitFor(async () => await completed().count() === 2, 'two evidence sentences did not play sequentially');
-  assert.equal(await root.locator('[data-sentence-id="p2s4"] [data-evidence-active="true"]').count(), 0);
-  assert.equal(await root.locator('[data-sentence-id="p1s3"] [data-state="complete"]').count(), 1);
-  assert.equal(await root.locator('[data-sentence-id="p3s1"] [data-state="complete"]').count(), 1);
-  await click('q2', '重播关键句');
+  assert.equal(await root.locator('[data-exam-key-sentence="p2s4"] [data-state="complete"]').count(), 1);
+  await screenshot('reading-evidence-light.png');
+  await page.mouse.move(10, 10);
+  assert.ok(await expanded.isVisible(), 'clicked solution should stay open after pointer leaves');
+
+  // Switch to multi-sentence evidence, then interrupt a replay with another question.
+  await trigger(1).click();
+  await waitFor(async () => await completed().count() === 2, 'evidence did not play in order');
+  assert.equal(await expanded.count(), 1);
+  assert.equal(await root.locator('[data-exam-key-sentence="p2s4"] [data-evidence-active="true"]').count(), 0);
+  await expanded.getByRole('button', { name: '重播关键句' }).click();
   await waitFor(async () => await root.locator('[data-state="playing"]').count() === 1, 'replay never started');
   await page.waitForTimeout(800);
-  assert.ok(await root.locator('[data-motion-line]').evaluateAll(nodes => nodes.some(node => node.style.transform !== 'scaleX(0)')), 'selection did not fill measured lines');
-  await root.screenshot({ path: path.join(screenshots, 'reading-cursor.png') });
-  // Interrupt playback with another question. Late frames must not restore q2.
-  await click('q3', '查看解析');
-  await waitFor(async () => await completed().count() === 1, 'switching interrupted playback did not complete q3');
-  assert.equal(await root.locator('[data-sentence-id="p1s3"] [data-evidence-active="true"]').count(), 0);
+  assert.ok(await root.locator('[data-motion-line]').evaluateAll(nodes => nodes.some(node => node.style.transform !== 'scaleX(0)')));
+  await screenshot('reading-cursor.png');
+  await trigger(2).click();
+  await waitFor(async () => await completed().count() === 1, 'interrupted playback did not switch');
+  assert.equal(await root.locator('[data-exam-key-sentence="p1s3"] [data-evidence-active="true"]').count(), 0);
   await page.evaluate(() => document.documentElement.classList.add('dark'));
-  await root.screenshot({ path: path.join(screenshots, 'reading-evidence-dark.png') });
-  await noOverflow();
-  await click('q3', '收起解析');
-  assert.equal(await active().count(), 0);
-  await root.getByRole('button', { name: '重新作答', exact: true }).click();
-  assert.equal(await root.getByRole('radio', { checked: true }).count(), 0);
-  assert.equal(await root.getByText('正确答案 B', { exact: true }).count(), 0);
+  await screenshot('reading-evidence-dark.png');
+  await closeSolution();
   assert.equal(await active().count(), 0);
 
-  // Reduced motion preserves all semantic evidence without animated cursors.
+  // Keyboard focus previews the answer; Enter opens details on the first press.
+  await trigger(0).focus();
+  await preview.waitFor();
+  await page.keyboard.press('Enter');
+  await expanded.waitFor();
+  await expanded.getByRole('button', { name: '关闭解答' }).click();
+  await waitFor(async () => await expanded.count() === 0, 'close button did not close');
+  await page.locator('.docs-page-title').click();
+
+  // An oversized question gets its own matching scrollbar, while Portal avoids clipping.
+  await questions.first().locator('div').first().evaluate(node => {
+    const content = document.createElement('div');
+    content.dataset.longQuestionFixture = '';
+    content.innerHTML = '<p>Long question content for scrolling verification.</p>'.repeat(80);
+    node.append(content);
+  });
+  const longQuestion = await questions.first().evaluate(node => ({ height: node.getBoundingClientRect().height, scrollHeight: node.scrollHeight, clientHeight: node.clientHeight, background: getComputedStyle(node).backgroundColor, scrollbar: getComputedStyle(node).scrollbarColor }));
+  assert.ok(longQuestion.height <= 1080 - 112 + 1 && longQuestion.scrollHeight > longQuestion.clientHeight);
+  assert.ok(longQuestion.scrollbar.includes(longQuestion.background), 'scrollbar track differs from question surface');
+  await trigger(0).hover();
+  await preview.waitFor();
+  assert.equal((await preview.innerText()).trim(), 'B', 'hover preview was clipped by a scrolling question');
+  await trigger(0).click();
+  await expanded.waitFor();
+  const bounds = await expanded.boundingBox();
+  assert.ok(bounds.x >= 0 && bounds.y >= 0 && bounds.x + bounds.width <= 1440 && bounds.y + bounds.height <= 1080, 'solution extends beyond the viewport');
+  await closeSolution();
+  await root.locator('[data-long-question-fixture]').evaluate(node => node.remove());
+
+  // Reduced motion and mobile layout preserve selection and tap-to-open details.
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await click('q5', '查看解析');
+  await trigger(4).click();
   await waitFor(async () => await completed().count() === 2, 'reduced motion lost evidence', 2000);
   assert.ok(await root.locator('[data-motion-cursor]').evaluateAll(nodes => nodes.every(node => getComputedStyle(node).display === 'none')));
   await page.setViewportSize({ width: 320, height: 800 });
   await waitFor(async () => await active().evaluateAll(nodes => nodes.every(node => {
     const range = document.createRange();
     range.selectNodeContents(node.querySelector('[data-motion-text]'));
-    const rects = [...range.getClientRects()].filter(rect => rect.width > 0 && rect.height > 0);
-    return node.querySelectorAll('[data-motion-line]').length === rects.length;
-  })), 'completed highlights were not remeasured after mobile wrapping');
-  await question('q5').getByRole('button', { name: /第 4 段/ }).click();
-  await waitFor(async () => await root.locator('[data-sentence-id="p4s2"]').evaluate(node => {
-    const rect = node.getBoundingClientRect(); return rect.top >= 0 && rect.bottom <= innerHeight;
-  }), 'mobile evidence navigation did not reach the sentence');
-  await root.getByRole('button', { name: '返回解析', exact: true }).click();
+    return node.querySelectorAll('[data-motion-line]').length === [...range.getClientRects()].filter(rect => rect.width > 0 && rect.height > 0).length;
+  })), 'completed evidence was not remeasured after wrapping');
+  await closeSolution();
+  await trigger(0).click();
+  await expanded.waitFor();
   await noOverflow();
+  const mobile = await expanded.boundingBox();
+  assert.ok(mobile.x >= 0 && mobile.x + mobile.width <= 320 && mobile.height <= 800 - 96 + 1);
+  await screenshot('reading-mobile-solution.png');
   assert.deepEqual(errors, [], 'browser reported errors');
-  console.log('PASS: five questions; answer isolation; keyboard radios; evidence sequencing; interrupted playback; replay; reset; responsive layouts; dark theme; reduced motion; mobile evidence navigation.');
+  console.log('PASS: reused exam slots; hover-to-click details; nonmodal positioning; evidence sequencing; replay; interruption; keyboard; bounded question scrolling; matching scrollbar; responsive wrapping; dark theme; reduced motion; mobile tap.');
 } finally {
   await browser.close();
 }

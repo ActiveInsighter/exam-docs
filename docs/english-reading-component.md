@@ -1,26 +1,46 @@
 # 英语阅读组件
 
-`EnglishReading` 已注册为全局 MDX 组件。英语模块 `/docs/english` 是完整示例，文章为原创模拟内容，非真题或真实研究报道。
+阅读题复用本站既有的 `ExamQuestion`、`ExamChoices`、`ExamOption`、`ExamSolution`、`ExamAnswer` 和 `ExamExplanation`。新增的 `EnglishReading` 负责布局，`ExamArticle` 组织文章，`ExamKeySentence` 标记可引用的关键句。这些组件已全局注册，Dynamic MDX 中无需导入。
 
 ```mdx
----
-title: 阅读训练
-full: true
----
+<EnglishReading>
+<ExamArticle title="A fresh look at the familiar" source="原创模拟文章">
 
-<EnglishReading exerciseId="attention-01" />
+An ordinary walk can change when we
+<ExamKeySentence id="attention">pay attention to familiar surroundings.</ExamKeySentence>
+
+</ExamArticle>
+
+<ExamQuestion>
+
+1. What makes the difference?
+
+<ExamChoices>
+<ExamOption>A. A new location.</ExamOption>
+<ExamOption>B. Fresh attention.</ExamOption>
+</ExamChoices>
+
+<ExamSolution evidence={['attention']}>
+<ExamAnswer>B</ExamAnswer>
+<ExamExplanation>
+
+关键句中的 attention 对应选项 B。
+
+</ExamExplanation>
+</ExamSolution>
+
+</ExamQuestion>
+</EnglishReading>
 ```
 
-在 `content/exercises/` 中定义数据，使用 `ReadingExercise`（从 `@/components/english-reading` 导入）约束类型，并在 `content/exercises/index.ts` 中注册 ID。本站使用 Fumadocs Dynamic Mode，MDX 中直接导入 TypeScript 路径别名不会经过 Next 的模块解析；全局 MDX 适配器通过 `exerciseId` 在服务器解析数据。React 页面也可以直接使用 `<EnglishReading exercise={exercise} />`，MDX 可传内联数据对象。
+文章与解答可继续写普通 MDX，包括段落、列表、强调、链接、数学等。关键句只需提供在本篇文章内唯一的 ID；`ExamSolution.evidence` 按需要的播放顺序引用一个或多个 ID。服务器在构建时验证文章数量、重复 ID 和证据引用。
 
-每篇文章拥有唯一的 `id`、`title`、`source`，`paragraphs` 是按段组织的句子数组，句子包含唯一 `id` 和英文 `text`。题目包含唯一 `id`、`prompt`、`skill`、`options`、`answer`、中文 `explanation` 和 `evidence`。选项包含 `id`、英文 `text` 与中文 `explanation`；选错时展示该干扰项说明。`evidence` 按播放顺序引用句子 ID，可以跨段引用，不依赖文字搜索或字符偏移。
+`ExamQuestion` 原有结构与参数保持不变。位于 `EnglishReading` 内时，解答入口悬停/键盘聚焦显示短答案，点击原位置附近的同一面板显示完整解答，并在左侧依次定位、选中关键句。再点击入口、关闭按钮、Escape 或外部区域关闭；重播从第一条依据开始。阅读之外的题目继续使用现有答案预览和模态解答。
 
-服务器组件在构建时校验题目答案、重复 ID 与证据引用。客户端 reducer 管理选项、答案展开与当前解析，动画完成事件带题目 ID、播放版本和证据序号，过期回调不会影响新题。
+客户端只有一个当前解答状态，包含解答 ID、证据列表、证据序号和播放版本。没有独立的题库、选项作答或评分系统。上下文只负责解答展示与证据联动，文章与题目仍由服务器渲染，动画沿用 `reading-motion` 的逐行测量与光标轨迹。
 
-查看答案仅显示答案；查看解析同时显示答案并依次播放关键句。已播放的证据保留，换题或收起解析清除高亮。重播从第一句开始，重新作答清除所有选择与解析。组件实例通过 `useId` 隔离 DOM、radio 与展开区域，同页可放多组练习；换文章时应使用新的 exercise ID。
+解答面板使用 Fumadocs 已依赖的 Popover，库负责定位、边界避让、Portal 和键盘关闭，无新增依赖或手写浮层定位。面板不锁住页面滚动；可以继续阅读文章。每题最大高度为可视屏幕高度减去顶部导航留白，超出后题内滚动；文章与解析面板也使用与各自背景一致的滚动条轨道。
 
-`components/reading-motion/` 从 clone-website 的 OpenAI 阅读效果移植测量与光标轨迹，缩减为受控的 `idle / playing / complete` 三态。原文保留自然换行、复制和选择能力，覆盖层与光标仅作装饰。仅当前证据创建测量观察器与动画帧，完成后停止帧循环；字体加载或容器宽度变化会重新测量。系统减少动态效果时直接显示高亮并隐藏光标。
+桌面文章在左侧保持可见，题目在右侧沿文档流排列。窄屏上下排列。关键句 ID 在每个阅读实例内解析，同页多篇文章可使用相同的局部 ID。减少动态效果时直接显示高亮，字体加载或排版宽度变化后重新测量。
 
-桌面使用文章与题目各自滚动的双栏，组件容器小于 52rem 时改为上下排列，避免文档侧栏压缩正文。手机可在证据卡定位原文，并通过文章底部的「返回解析」回到题目。
-
-测试、类型检查、静态构建与预览浏览器验收运行于 GitHub Actions，浏览器验收覆盖作答、答案和解析区分、跨题切换、多证据顺序、重播、重做、明暗主题、320/768/1024/1440 宽度以及减少动态效果。预览只部署至 `exam-docs-preview`。
+回归、应用类型检查、静态构建和浏览器验收均运行在 GitHub Actions；预览部署至 `exam-docs-preview`。

@@ -4,7 +4,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react';
-import { ExamSolutionDialog } from './exam-solution-dialog';
+import { ExamSolutionControl } from './exam-solution-control';
 import {
   ExamAnswer,
   ExamExplanation,
@@ -16,6 +16,8 @@ export { ExamAnswer, ExamExplanation } from './exam-question-parts';
 
 type ExamSolutionProps = {
   children: ReactNode;
+  /** IDs of <ExamKeySentence> elements in the enclosing reading article. */
+  evidence?: readonly string[];
 };
 
 type ExamQuestionProps = {
@@ -84,12 +86,13 @@ export function ExamQuestion({
   return (
     <section className={styles.root} data-exam-question="">
       <div className={styles.question}>{question}</div>
-      <ExamSolutionDialog
+      <ExamSolutionControl
         question={question}
         answer={answer}
         explanation={explanation}
         buttonLabel={buttonLabel}
         dialogTitle={dialogTitle}
+        evidence={solution.props.evidence}
       />
     </section>
   );

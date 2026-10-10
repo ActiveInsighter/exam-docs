@@ -1,11 +1,11 @@
-import { EnglishReadingClient } from './reading-client';
-import { validateExercise } from './model';
-import type { ReadingExercise } from './types';
+import type { ReactNode } from 'react';
+import { ReadingLayout } from './reading-layout';
+import { splitReadingContent } from './parts';
 
-export type { ReadingExercise, ReadingQuestion, ReadingSentence } from './types';
+export { ExamArticle } from './article';
+export { ExamKeySentence } from './key-sentence';
 
-/** Server entry point: validate authored data, then mount an isolated practice session. */
-export function EnglishReading({ exercise }: { exercise: ReadingExercise }) {
-  validateExercise(exercise);
-  return <EnglishReadingClient key={exercise.id} exercise={exercise} />;
+/** Add article composition around the site's existing exam authoring structure. */
+export function EnglishReading({ children }: { children: ReactNode }) {
+  return <ReadingLayout {...splitReadingContent(children)} />;
 }
