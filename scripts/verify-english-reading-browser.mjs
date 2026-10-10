@@ -108,9 +108,22 @@ try {
     content.innerHTML = '<p>Long question content for scrolling verification.</p>'.repeat(80);
     node.append(content);
   });
-  const longQuestion = await questions.first().evaluate(node => ({ height: node.getBoundingClientRect().height, scrollHeight: node.scrollHeight, clientHeight: node.clientHeight, background: getComputedStyle(node).backgroundColor, scrollbar: getComputedStyle(node).scrollbarColor }));
+  const longQuestion = await questions.first().evaluate(node => {
+    const style = getComputedStyle(node);
+    const colors = style.scrollbarColor.match(/[a-z-]+\([^)]*\)|#[\da-f]+|[a-z]+/gi);
+    const canvas = document.createElement('canvas').getContext('2d');
+    const pixel = color => {
+      canvas.clearRect(0, 0, 1, 1);
+      canvas.fillStyle = color;
+      canvas.fillRect(0, 0, 1, 1);
+      return [...canvas.getImageData(0, 0, 1, 1).data];
+    };
+    return { height: node.getBoundingClientRect().height, scrollHeight: node.scrollHeight, clientHeight: node.clientHeight,
+      scrollbar: style.scrollbarColor, background: pixel(style.backgroundColor), track: pixel(colors.at(-1)) };
+  });
   assert.ok(longQuestion.height <= 1080 - 112 + 1 && longQuestion.scrollHeight > longQuestion.clientHeight);
-  assert.ok(longQuestion.scrollbar.includes(longQuestion.background), 'scrollbar track differs from question surface');
+  assert.notEqual(longQuestion.scrollbar, 'auto');
+  assert.deepEqual(longQuestion.track, longQuestion.background, 'scrollbar track differs from question surface');
   await trigger(0).hover();
   await preview.waitFor();
   assert.equal((await preview.innerText()).trim(), 'B', 'hover preview was clipped by a scrolling question');
