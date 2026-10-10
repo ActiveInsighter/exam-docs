@@ -1,13 +1,17 @@
 ---
 title: "第五节 积分恒等式或不等式的证明"
-description: "考研核心题目：模块四：一元函数积分学"
+description: "考研核心题目：积分平均值、导数界的最优常数、分部积分构造及单调加权积分不等式"
 ---
 
 # 第五节 积分恒等式或不等式的证明
 
+依照原始真题的证明模型精选题目，重心是识别可控的差值、选择积分表示与分部积分，以及严格追踪等号条件。真实来源保持源题标签，原创变式另行标注。
+
+## 模型一：积分差分极限与导数范数控制
+
 <ExamQuestion>
 
-1. **【1988-2-8 分】** 设 $f(x)$ 在 $(-\infty, +\infty)$ 上有连续导数，且 $m \leqslant f(x) \leqslant M$.
+**1. [1988-2-8分]** 设 $f(x)$ 在 $(-\infty, +\infty)$ 上有连续导数，且 $m \leqslant f(x) \leqslant M$.
 (1) 求 $\lim_{a \to 0^+} \frac{1}{4a^2} \int_{-a}^a [f(t+a) - f(t-a)] \mathrm{d}t$；
 (2) 证 $\left| \frac{1}{2a} \int_{-a}^a f(t) \mathrm{d}t - f(x) \right| \leqslant M - m$.
 
@@ -15,72 +19,61 @@ description: "考研核心题目：模块四：一元函数积分学"
 
 <ExamAnswer>
 
-(1) $f'(0)$ (2) 略
+(1) $\displaystyle f'(0)$；(2) 不等式对任意 $a\ne0$、任意 $x$ 成立。
 
 </ExamAnswer>
 
-
 <ExamExplanation>
 
-(1) 先化简积分。令 $u=t+a$ 与 $u=t-a$，则
+**模型识别与解题突破口：** 第一问是“双平移差分 + 缩放区间”，不能把积分与极限直接交换。把差分写为导数积分，再用连续性给出一致误差控制；第二问只需把积分平均值和函数值放进同一个区间 $[m,M]$，无须使用导数。
+
+（1）取 $a>0$。由微积分基本定理，对任意 $t\in[-a,a]$，
+
+$$
+f(t+a)-f(t-a)=\int_{t-a}^{t+a}f'(s)\,\mathrm ds.
+$$
+
+积分区域的每个 $s$ 均满足 $|s|\le 2a$。设
+
+$$
+\omega(a)=\sup_{|s|\le2a}|f'(s)-f'(0)|.
+$$
+
+因 $f'$ 在 $0$ 处连续，$\omega(a)\to0$。于是
 
 $$
 \begin{aligned}
-&\int_{-a}^{a}[f(t+a)-f(t-a)]\,\mathrm dt\\
-&=\int_0^{2a}f(u)\,\mathrm du-\int_{-2a}^{0}f(u)\,\mathrm du\\
-&=\int_0^{2a}[f(u)-f(-u)]\,\mathrm du.
+&\left|\frac{1}{4a^2}\int_{-a}^a[f(t+a)-f(t-a)]\,\mathrm dt-f'(0)\right|\\
+&=\left|\frac{1}{4a^2}\int_{-a}^{a}\int_{t-a}^{t+a}[f'(s)-f'(0)]\,\mathrm ds\,\mathrm dt\right|\\
+&\le\frac{1}{4a^2}\int_{-a}^a 2a\,\omega(a)\,\mathrm dt
+=\omega(a)\longrightarrow0.
 \end{aligned}
 $$
 
-由于 $f$ 在 $0$ 处可微，
+因此极限为 $\boxed{f'(0)}$。
+
+**方法二（利用对称差商）：** 两个平移积分变换为
 
 $$
-f(u)=f(0)+f'(0)u+o(u),
+\int_{-a}^a[f(t+a)-f(t-a)]\,\mathrm dt
+=\int_0^{2a}[f(u)-f(-u)]\,\mathrm du.
 $$
 
-$$
-f(-u)=f(0)-f'(0)u+o(u),
-$$
+因 $f(u)-f(-u)=2uf'(0)+o(u)$，故积分等于 $4a^2f'(0)+o(a^2)$，得到相同结论。方法一更适合推广到卷积平均、积分核极限；方法二计算更快。
 
-所以
+（2）对任意 $a\ne0$，积分平均值
 
 $$
-f(u)-f(-u)=2f'(0)u+o(u).
+A_a=\frac1{2a}\int_{-a}^{a}f(t)\,\mathrm dt
 $$
 
-于是
+均为区间 $[-|a|,|a|]$ 上的平均值。由 $m\le f(t)\le M$ 得 $m\le A_a\le M$，而对任意 $x$ 同样有 $m\le f(x)\le M$，因此
 
 $$
-\begin{aligned}
-\frac1{4a^2}\int_0^{2a}[f(u)-f(-u)]\,\mathrm du
-&=\frac1{4a^2}\left(4a^2f'(0)+o(a^2)\right)\\
-&\to f'(0).
-\end{aligned}
+\boxed{|A_a-f(x)|\le M-m}.
 $$
 
-故
-
-$$
-\boxed{\lim_{a\to0^+}\frac1{4a^2}\int_{-a}^a[f(t+a)-f(t-a)]\,\mathrm dt=f'(0)}.
-$$
-
-(2) 由 $m\le f(t)\le M$，对 $[-a,a]$ 积分并除以 $2a$，得
-
-$$
-m\le\frac1{2a}\int_{-a}^{a}f(t)\,\mathrm dt\le M.
-$$
-
-同时对任意 $x$ 也有
-
-$$
-m\le f(x)\le M.
-$$
-
-两个都位于闭区间 $[m,M]$ 内的实数之差的绝对值至多为 $M-m$，所以
-
-$$
-\boxed{\left|\frac1{2a}\int_{-a}^{a}f(t)\,\mathrm dt-f(x)\right|\le M-m}.
-$$
+**易错点：** 第一问中 $4a^2$ 与积分区域的边长有关，不能忽略差分内部的 $2a$；第二问不需要假设 $f$ 单调或 $x\in[-a,a]$。
 
 </ExamExplanation>
 
@@ -90,55 +83,50 @@ $$
 
 <ExamQuestion>
 
-2. **【1993-2-6 分】** 设 $f'(x)$ 在 $[0, a]$ 上连续，且 $f(0)=0$，证明：$\left| \int_0^a f(x) \mathrm{d}x \right| \leqslant \frac{Ma^2}{2}$，其中 $M = \max_{0 \leqslant x \leqslant a} |f'(x)|$.
+**2. [1993-2-6分]** 设 $f'(x)$ 在 $[0, a]$ 上连续，且 $f(0)=0$，证明：$\left| \int_0^a f(x) \mathrm{d}x \right| \leqslant \frac{Ma^2}{2}$，其中 $M = \max_{0 \leqslant x \leqslant a} |f'(x)|$.
 
 <ExamSolution>
 
 <ExamAnswer>
 
-略
+$\displaystyle\left|\int_0^af(x)\,\mathrm dx\right|\le Ma^2/2$，且常数 $1/2$ 最优（$a>0$）。
 
 </ExamAnswer>
 
-
 <ExamExplanation>
 
-由 $f(0)=0$，对任意 $x\in[0,a]$，有
+**模型识别与解题突破口：** 已知 $f(0)=0$ 且控制 $f'$，优先用积分表示 $f(x)=\int_0^xf'(t)\,\mathrm dt$。若题目要求“积分整体”的上界，还可以交换积分次序，得到更直接的权函数估计。
+
+由 $f'$ 在 $[0,a]$ 上连续，且 $a\ge0$，有 $|f'(t)|\le M$。由牛顿—莱布尼茨公式，
 
 $$
-f(x)=\int_0^x f'(t)\,\mathrm dt.
-$$
-
-又
-
-$$
-|f'(t)|\le M,
-$$
-
-因此
-
-$$
-|f(x)|
-\le\int_0^x|f'(t)|\,\mathrm dt
-\le Mx.
+|f(x)|=\left|\int_0^xf'(t)\,\mathrm dt\right|
+\le\int_0^x|f'(t)|\,\mathrm dt\le Mx.
 $$
 
 于是
 
 $$
-\begin{aligned}
-\left|\int_0^a f(x)\,\mathrm dx\right|
-&\le\int_0^a|f(x)|\,\mathrm dx\\
-&\le\int_0^aMx\,\mathrm dx\\
-&=\frac{Ma^2}{2}.
-\end{aligned}
+\boxed{\left|\int_0^af(x)\,\mathrm dx\right|
+\le\int_0^a|f(x)|\,\mathrm dx\le\frac{Ma^2}{2}}.
 $$
 
-故
+**方法二（换序揭示最优权重）：** 由连续性可交换三角区域上的积分次序：
 
 $$
-\boxed{\left|\int_0^a f(x)\,\mathrm dx\right|\le\frac{Ma^2}{2}}.
+\int_0^af(x)\,\mathrm dx
+=\int_0^a\!\int_0^xf'(t)\,\mathrm dt\,\mathrm dx
+=\int_0^a(a-t)f'(t)\,\mathrm dt.
 $$
+
+因此
+
+$$
+\left|\int_0^af(x)\,\mathrm dx\right|
+\le M\int_0^a(a-t)\,\mathrm dt=\frac{Ma^2}{2}.
+$$
+
+**最优性：** 对 $a>0$、$M>0$，取 $f(x)=Mx$（或 $-Mx$），即有等号。所以 $1/2$ 无法对这一条件类整体减小。若再给出 $f(a)=0$，可获得更强的 $1/4$ 常数，见本节原创变式。
 
 </ExamExplanation>
 
@@ -148,147 +136,125 @@ $$
 
 <ExamQuestion>
 
-3. **【1994-2-9 分】** 设 $f(x)$ 在 $[0, 1]$ 上连续且递减，证明：
+**3. [原创]** 设 $a<b$，函数 $f\in C^1[a,b]$ 满足 $f(a)=f(b)=0$，且 $|f'(x)|\le M$，其中 $M>0$。证明
+
+$$
+\left|\int_a^b f(x)\,\mathrm dx\right|\le\frac{M(b-a)^2}{4},
+$$
+
+并说明系数 $1/4$ 在上述函数类中是最优的（即不能统一换成更小的常数）。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$\displaystyle\left|\int_a^b f(x)\,\mathrm dx\right|\le\frac{M(b-a)^2}{4}$；该常数最优，但 $M>0$ 时非零等号不能由 $C^1$ 函数达到。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 单端零值导出 $Ma^2/2$，双端零值可从两侧控制函数高度，得到“帐篷函数”形状。证明最优常数不能直接拿不可导的帐篷函数当作符合 $C^1$ 的等号例子，而要构造平滑逼近。
+
+由 $f(a)=f(b)=0$、微积分基本定理及 $|f'|\le M$，对每个 $x\in[a,b]$，
+
+$$
+|f(x)|\le M(x-a),\qquad |f(x)|\le M(b-x).
+$$
+
+令 $L=b-a$，得
+
+$$
+\begin{aligned}
+\left|\int_a^bf(x)\,\mathrm dx\right|
+&\le\int_a^b|f(x)|\,\mathrm dx\\
+&\le M\int_a^b\min(x-a,b-x)\,\mathrm dx\\
+&=2M\int_0^{L/2}t\,\mathrm dt
+=\boxed{\frac{ML^2}{4}}.
+\end{aligned}
+$$
+
+为了证明常数最优，设 $c=(a+b)/2$。对 $\varepsilon>0$ 构造
+
+$$
+f_\varepsilon(x)=M\left(\sqrt{\frac{L^2}{4}+\varepsilon^2}
+-\sqrt{(x-c)^2+\varepsilon^2}\right).
+$$
+
+显然 $f_\varepsilon\in C^1[a,b]$、$f_\varepsilon(a)=f_\varepsilon(b)=0$，并且
+
+$$
+|f_\varepsilon'(x)|=
+M\frac{|x-c|}{\sqrt{(x-c)^2+\varepsilon^2}}\le M.
+$$
+
+当 $\varepsilon\to0^+$，$f_\varepsilon(x)\to M\min(x-a,b-x)$，且一致收敛（或使用支配收敛），所以
+
+$$
+\lim_{\varepsilon\to0^+}\int_a^bf_\varepsilon(x)\,\mathrm dx
+=\frac{ML^2}{4}.
+$$
+
+因此任何小于 $1/4$ 的系数都会被足够小的 $\varepsilon$ 反驳，$1/4$ 为最优常数。
+
+**易错辨析：** 帐篷函数 $M\min(x-a,b-x)$ 在中点不可导，只是极值形状，不是本题 $C^1$ 类里的合法等号函数。若 $M>0$ 且 $a<b$，连续导数条件下真正取到正上界是不可能的。
+
+</ExamExplanation>
+</ExamSolution>
+</ExamQuestion>
+
+## 模型二：单调函数的平均值与积分前缀占优
+
+<ExamQuestion>
+
+**4. [1994-2-9分]** 设 $f(x)$ 在 $[0, 1]$ 上连续且递减，证明：
 当 $0 < \lambda < 1$ 时，$\int_0^\lambda f(x) \mathrm{d}x \geqslant \lambda \int_0^1 f(x) \mathrm{d}x$.
 
 <ExamSolution>
 
 <ExamAnswer>
 
-略
+$\displaystyle\int_0^\lambda f(x)\,\mathrm dx\ge\lambda\int_0^1f(x)\,\mathrm dx$；对 $0<\lambda<1$ 等号当且仅当 $f$ 为常数。
 
 </ExamAnswer>
 
-
 <ExamExplanation>
+
+**模型识别与解题突破口：** 单调函数的“前段平均值不小于全段平均值”是本题的母模型。关键不是 $f$ 的正负，而是 $f(x)\ge f(y)$ 在 $x\le\lambda\le y$ 时恒成立。
 
 记
 
 $$
-A=\int_0^\lambda f(x)\,\mathrm dx,
-\qquad
-B=\int_\lambda^1 f(x)\,\mathrm dx.
+A=\int_0^\lambda f(x)\,\mathrm dx,\qquad
+B=\int_\lambda^1f(y)\,\mathrm dy.
 $$
 
-因为 $f$ 在 $[0,1]$ 上递减，所以在 $[0,\lambda]$ 上
+由递减性，$x\in[0,\lambda]$、$y\in[\lambda,1]$ 时 $f(x)-f(y)\ge0$。积分得到
 
 $$
-f(x)\ge f(\lambda),
-$$
-
-从而
-
-$$
-\frac A\lambda\ge f(\lambda).
-$$
-
-而在 $[\lambda,1]$ 上
-
-$$
-f(x)\le f(\lambda),
-$$
-
-所以
-
-$$
-\frac B{1-\lambda}\le f(\lambda).
-$$
-
-因此
-
-$$
-\frac A\lambda\ge\frac B{1-\lambda}.
-$$
-
-交叉相乘得
-
-$$
-(1-\lambda)A\ge\lambda B.
+\begin{aligned}
+0&\le\int_0^\lambda\int_\lambda^1[f(x)-f(y)]\,\mathrm dy\,\mathrm dx\\
+&=(1-\lambda)A-\lambda B
+=A-\lambda(A+B).
+\end{aligned}
 $$
 
 即
-
-$$
-A\ge\lambda(A+B).
-$$
-
-又 $A+B=\int_0^1f(x)\,\mathrm dx$，故
 
 $$
 \boxed{\int_0^\lambda f(x)\,\mathrm dx
 \ge\lambda\int_0^1f(x)\,\mathrm dx}.
 $$
 
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-4. **【1996-2-8 分】** 设 $f(x)$ 为连续函数.
-(1) 求初值问题 $\begin{cases} y' + ay = f(x), \\ y|_{x=0} = 0 \end{cases}$ 的解 $y(x)$，其中 $a$ 为正的常数；
-(2) 若 $|f(x)| \leqslant k$ ($k$ 为常数)，证明：当 $x \geqslant 0$ 时，有 $|y(x)| \leqslant \frac{k}{a}(1 - e^{-ax})$.
-
-<ExamSolution>
-
-<ExamAnswer>
-
-(1) $e^{-ax}\int_0^x e^{at}f(t)\mathrm{d}t$ (2) 略
-
-</ExamAnswer>
-
-
-<ExamExplanation>
-
-(1) 方程
+**方法二（平均值夹逼）：** 递减性分别给出
 
 $$
-y'+ay=f(x)
+\frac{A}{\lambda}\ge f(\lambda)\ge\frac{B}{1-\lambda},
 $$
 
-是一阶线性微分方程。积分因子为
+由此 $(1-\lambda)A\ge\lambda B$，结论同上。
 
-$$
-e^{ax}.
-$$
-
-两边同乘 $e^{ax}$：
-
-$$
-(e^{ax}y)'=e^{ax}f(x).
-$$
-
-从 $0$ 到 $x$ 积分，并利用 $y(0)=0$，得
-
-$$
-e^{ax}y(x)=\int_0^xe^{at}f(t)\,\mathrm dt.
-$$
-
-所以
-
-$$
-\boxed{y(x)=e^{-ax}\int_0^xe^{at}f(t)\,\mathrm dt}.
-$$
-
-(2) 当 $x\ge0$ 时，由 $|f(t)|\le k$，
-
-$$
-\begin{aligned}
-|y(x)|
-&\le e^{-ax}\int_0^xe^{at}|f(t)|\,\mathrm dt\\
-&\le ke^{-ax}\int_0^xe^{at}\,\mathrm dt\\
-&=ke^{-ax}\frac{e^{ax}-1}{a}\\
-&=\frac ka(1-e^{-ax}).
-\end{aligned}
-$$
-
-故
-
-$$
-\boxed{|y(x)|\le\frac ka(1-e^{-ax})}.
-$$
+**等号条件与变式：** 对 $0<\lambda<1$，连续且递减的 $f$ 若不恒为常数，则取适当跨越 $\lambda$ 的两点能使 $f(x)>f(y)$，双重积分严格为正；故本题等号当且仅当 $f$ 恒为常数。将“递减”改为“递增”，不等号方向反转。
 
 </ExamExplanation>
 
@@ -298,7 +264,7 @@ $$
 
 <ExamQuestion>
 
-5. **【2004-3-8 分】** 设 $f(x), g(x)$ 在 $[a, b]$ 上连续，且满足
+**5. [2004-3-8分]** 设 $f(x), g(x)$ 在 $[a, b]$ 上连续，且满足
 $\int_a^x f(t) \mathrm{d}t \geqslant \int_a^x g(t) \mathrm{d}t, x \in [a, b]$, $\int_a^b f(t) \mathrm{d}t = \int_a^b g(t) \mathrm{d}t$.
 证明：$\int_a^b x f(x) \mathrm{d}x \leqslant \int_a^b x g(x) \mathrm{d}x$.
 
@@ -306,57 +272,45 @@ $\int_a^x f(t) \mathrm{d}t \geqslant \int_a^x g(t) \mathrm{d}t, x \in [a, b]$, $
 
 <ExamAnswer>
 
-略
+$\displaystyle\int_a^bxf(x)\,\mathrm dx\le\int_a^bxg(x)\,\mathrm dx$；等号当且仅当 $f\equiv g$。
 
 </ExamAnswer>
 
-
 <ExamExplanation>
 
-令
+**模型识别与解题突破口：** 比较 $f,g$ 的积分原函数而非逐点大小，典型突破口是令 $F(x)=\int_a^x(f-g)$，利用 $F\ge0$ 和边界 $F(a)=F(b)=0$，对权函数 $x$ 作分部积分。
+
+设
 
 $$
 F(x)=\int_a^x[f(t)-g(t)]\,\mathrm dt.
 $$
 
-由题设，
-
-$$
-F(x)\ge0\quad(a\le x\le b),
-$$
-
-且
-
-$$
-F(a)=0,
-\qquad
-F(b)=\int_a^b[f(t)-g(t)]\,\mathrm dt=0.
-$$
-
-又
-
-$$
-F'(x)=f(x)-g(x).
-$$
-
-因此对目标积分之差作分部积分：
+由题设 $F(x)\ge0$，$F(a)=F(b)=0$。又 $f,g$ 在 $[a,b]$ 上连续，故 $F\in C^1[a,b]$、$F'(x)=f(x)-g(x)$。于是
 
 $$
 \begin{aligned}
-\int_a^b x[f(x)-g(x)]\,\mathrm dx
-&=\int_a^b xF'(x)\,\mathrm dx\\
+\int_a^bx[f(x)-g(x)]\,\mathrm dx
+&=\int_a^bxF'(x)\,\mathrm dx\\
 &=[xF(x)]_a^b-\int_a^bF(x)\,\mathrm dx\\
-&=-\int_a^bF(x)\,\mathrm dx\\
-&\le0.
+&=-\int_a^bF(x)\,\mathrm dx\le0.
 \end{aligned}
 $$
 
 所以
 
 $$
-\boxed{\int_a^bxf(x)\,\mathrm dx
-\le\int_a^bxg(x)\,\mathrm dx}.
+\boxed{\int_a^bxf(x)\,\mathrm dx\le\int_a^bxg(x)\,\mathrm dx}.
 $$
+
+**等号与母题拓展：** 连续非负 $F$ 的积分为零当且仅当 $F\equiv0$，即 $f\equiv g$。将权函数 $x$ 改为任意可微且单调不减的 $w(x)$，仍有
+
+$$
+\int_a^b w(x)[f(x)-g(x)]\,\mathrm dx
+=-\int_a^b w'(x)F(x)\,\mathrm dx\le0.
+$$
+
+这是“前缀积分占优 $\Rightarrow$ 递增权重下的积分逆序”的常用结构；它不要求 $f(x)\ge g(x)$ 对所有 $x$ 成立。
 
 </ExamExplanation>
 
@@ -366,7 +320,66 @@ $$
 
 <ExamQuestion>
 
-6. **【2005-3-8 分】** 设 $f(x), g(x)$ 在 $[0, 1]$ 上的导数连续，且
+**6. [原创]** 设 $f,g$ 在 $[a,b]$ 上连续，且
+
+$$
+F(x)=\int_a^x[f(t)-g(t)]\,\mathrm dt\ge0\quad(a\le x\le b),
+\qquad F(b)=0.
+$$
+
+（1）证明：对任意 $w\in C^1[a,b]$ 且 $w'(x)\ge0$，都有
+
+$$
+\int_a^bw(x)f(x)\,\mathrm dx
+\le\int_a^bw(x)g(x)\,\mathrm dx.
+$$
+
+（2）当 $w'(x)>0$ 对所有 $x\in(a,b)$ 成立时，证明等号当且仅当 $f\equiv g$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+（1）结论成立；（2）当 $w'>0$ 于内部时，等号当且仅当 $f\equiv g$。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 这是“积分前缀占优 + 递增权重”的分部积分统一模型。没有 $f(x)\le g(x)$ 的逐点信息，因此直接逐项比较被积函数是错误的。
+
+（1）因 $F'=f-g$ 且 $F(a)=F(b)=0$，
+
+$$
+\begin{aligned}
+\int_a^bw(x)[f(x)-g(x)]\,\mathrm dx
+&=\int_a^bw(x)F'(x)\,\mathrm dx\\
+&=[w(x)F(x)]_a^b-\int_a^bw'(x)F(x)\,\mathrm dx\\
+&=-\int_a^bw'(x)F(x)\,\mathrm dx\le0.
+\end{aligned}
+$$
+
+最后一步只使用 $w'\ge0$ 与 $F\ge0$，不依赖 $w$ 本身正负。
+
+（2）若等号成立，则
+
+$$
+\int_a^bw'(x)F(x)\,\mathrm dx=0.
+$$
+
+$w'F$ 连续非负，因此逐点为零。由 $w'(x)>0$（$a<x<b$），可得 $F(x)=0$ 于 $(a,b)$，连续延拓至两端得到 $F\equiv0$。再求导即 $f-g=F'\equiv0$。反过来若 $f\equiv g$，显然取等号。
+
+**变式价值：** 令 $w(x)=x$ 即恢复原始 2004 年真题。把 $w$ 换成 $x^3$ 时，在含负数的区间上仍有 $w'(x)=3x^2\ge0$，结论照样成立，说明真正需要的是权重的单调性而非正性。
+
+</ExamExplanation>
+</ExamSolution>
+</ExamQuestion>
+
+## 模型三：乘积导数、非负余项与稳定性估计
+
+<ExamQuestion>
+
+**7. [2005-3-8分]** 设 $f(x), g(x)$ 在 $[0, 1]$ 上的导数连续，且
 $f(0)=0, f'(x) \geqslant 0, g'(x) \geqslant 0$.
 证明：对任何 $a \in [0, 1]$，有 $\int_0^a g(x)f'(x)\mathrm{d}x + \int_0^1 f(x)g'(x)\mathrm{d}x \geqslant f(a)g(1)$.
 
@@ -374,68 +387,154 @@ $f(0)=0, f'(x) \geqslant 0, g'(x) \geqslant 0$.
 
 <ExamAnswer>
 
-略
+$\displaystyle\int_0^ag(x)f'(x)\,\mathrm dx+\int_0^1f(x)g'(x)\,\mathrm dx\ge f(a)g(1)$，$a\in[0,1]$。
 
 </ExamAnswer>
 
-
 <ExamExplanation>
 
-先对第一个积分作分部积分。由 $f(0)=0$，
+**模型识别与解题突破口：** 题目同时出现 $gf'$、$fg'$，立刻联想到乘积求导 $(fg)'=f'g+fg'$。更关键的是把固定区间 $[0,1]$ 与变动区间 $[0,a]$ 拆开，留下单调性可控的余项。
+
+由 $f(0)=0$，在 $[0,a]$ 上对 $gf'$ 分部积分：
+
+$$
+\int_0^ag(x)f'(x)\,\mathrm dx
+=f(a)g(a)-\int_0^af(x)g'(x)\,\mathrm dx.
+$$
+
+因此待证两端之差恰好等于
 
 $$
 \begin{aligned}
-\int_0^a g(x)f'(x)\,\mathrm dx
-&=[f(x)g(x)]_0^a-\int_0^a f(x)g'(x)\,\mathrm dx\\
-&=f(a)g(a)-\int_0^a f(x)g'(x)\,\mathrm dx.
+&\int_0^ag(x)f'(x)\,\mathrm dx
++\int_0^1f(x)g'(x)\,\mathrm dx-f(a)g(1)\\
+&=\int_a^1[f(x)-f(a)]g'(x)\,\mathrm dx.
 \end{aligned}
 $$
 
-因此左边两项之和为
+因 $f'(x)\ge0$，当 $x\ge a$ 时有 $f(x)\ge f(a)$，再由 $g'(x)\ge0$，可得被积函数非负，故
 
 $$
-\begin{aligned}
-&\int_0^a g(x)f'(x)\,\mathrm dx
-+\int_0^1f(x)g'(x)\,\mathrm dx\\
-&=f(a)g(a)+\int_a^1f(x)g'(x)\,\mathrm dx.
-\end{aligned}
+\boxed{\int_0^ag(x)f'(x)\,\mathrm dx
++\int_0^1f(x)g'(x)\,\mathrm dx\ge f(a)g(1)}.
 $$
 
-因为 $f'(x)\ge0$，所以 $f$ 单调不减，从而当 $x\in[a,1]$ 时
+**等号条件：** 对给定 $a$，当且仅当 $[f(x)-f(a)]g'(x)\equiv0$ 于 $[a,1]$ 时取等号（连续性保证）。尤其 $a=1$ 必为等号。
 
-$$
-f(x)\ge f(a).
-$$
-
-又 $g'(x)\ge0$，于是
-
-$$
-\int_a^1f(x)g'(x)\,\mathrm dx
-\ge f(a)\int_a^1g'(x)\,\mathrm dx
-=f(a)[g(1)-g(a)].
-$$
-
-故
-
-$$
-\begin{aligned}
-&\int_0^a g(x)f'(x)\,\mathrm dx
-+\int_0^1f(x)g'(x)\,\mathrm dx\\
-&\ge f(a)g(a)+f(a)[g(1)-g(a)]\\
-&=f(a)g(1).
-\end{aligned}
-$$
-
-因此
-
-$$
-\boxed{\int_0^a g(x)f'(x)\,\mathrm dx
-+\int_0^1f(x)g'(x)\,\mathrm dx
-\ge f(a)g(1)}.
-$$
+**易错点：** 不可直接断言 $f(x)g'(x)\ge f(a)g'(x)$ 对 $x<a$ 成立；只在 $[a,1]$ 上利用 $f$ 的单调性，因此必须先作分部积分并消去 $[0,a]$ 的项。
 
 </ExamExplanation>
 
 </ExamSolution>
 
+</ExamQuestion>
+
+<ExamQuestion>
+
+**8. [1996-2-8分]** 设 $f(x)$ 为连续函数.
+(1) 求初值问题 $\begin{cases} y' + ay = f(x), \\ y|_{x=0} = 0 \end{cases}$ 的解 $y(x)$，其中 $a$ 为正的常数；
+(2) 若 $|f(x)| \leqslant k$ ($k$ 为常数)，证明：当 $x \geqslant 0$ 时，有 $|y(x)| \leqslant \frac{k}{a}(1 - e^{-ax})$.
+
+<ExamSolution>
+
+<ExamAnswer>
+
+(1) $\displaystyle y(x)=e^{-ax}\int_0^xe^{at}f(t)\,\mathrm dt$；(2) $\displaystyle|y(x)|\le\frac{k}{a}(1-e^{-ax})$（$x\ge0$）。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** “一阶线性微分方程 + 有界外力”是稳定性估计模型。先使用积分因子求出卷积形式，再对非负权核作绝对值估计，比对解直接求最大值更稳健。
+
+（1）在 $y'+ay=f(x)$ 两端乘以积分因子 $e^{ax}$，得到
+
+$$
+(e^{ax}y(x))'=e^{ax}f(x).
+$$
+
+从 $0$ 积分至 $x$，使用 $y(0)=0$，可得
+
+$$
+\boxed{y(x)=e^{-ax}\int_0^xe^{at}f(t)\,\mathrm dt
+=\int_0^x e^{-a(x-t)}f(t)\,\mathrm dt}.
+$$
+
+（2）题设 $a>0$，$x\ge0$，故 $e^{-a(x-t)}\ge0$，并有 $|f(t)|\le k$。于是
+
+$$
+\begin{aligned}
+|y(x)|
+&\le\int_0^xe^{-a(x-t)}|f(t)|\,\mathrm dt\\
+&\le k\int_0^xe^{-a(x-t)}\,\mathrm dt
+=\boxed{\frac{k}{a}(1-e^{-ax})}.
+\end{aligned}
+$$
+
+**最优性及推广：** 若 $f(t)\equiv k$ 或 $f(t)\equiv-k$，则对每个 $x\ge0$ 都有等号。更一般地，若初值变为 $y(0)=y_0$，则
+
+$$
+|y(x)|\le |y_0|e^{-ax}+\frac{k}{a}(1-e^{-ax})\quad(x\ge0).
+$$
+
+这里 $e^{-a(x-t)}$ 的非负性和 $a>0$ 是估计成立的重要条件；若 $a<0$，衰减型结论一般不成立。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+**9. [原创]** 设 $f,g$ 都在 $[0,1]$ 上连续且单调不减，证明
+
+$$
+\int_0^1 f(x)g(x)\,\mathrm dx
+\ge \left(\int_0^1 f(x)\,\mathrm dx\right)
+\left(\int_0^1 g(x)\,\mathrm dx\right).
+$$
+
+进一步证明：等号当且仅当 $f,g$ 中至少有一个为常函数；并讨论若 $f$ 单调不减而 $g$ 单调不增时不等号如何改变。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+同向单调时“$\ge$”，等号当且仅当至少一个函数为常函数；反向单调时“$\le$”。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 两个单调函数的积分乘积不能直接比较，利用二重积分把差值写成两个函数增量的乘积，使符号由“同向单调”决定。
+
+考虑
+
+$$
+I=\int_0^1\int_0^1[f(x)-f(y)][g(x)-g(y)]\,\mathrm dx\,\mathrm dy.
+$$
+
+若 $f,g$ 同为单调不减，则任意 $x,y$ 下两增量同号或为零，故 $I\ge0$。展开并利用矩形上积分分离：
+
+$$
+\begin{aligned}
+I&=\int_0^1\!\int_0^1
+\bigl[f(x)g(x)+f(y)g(y)-f(x)g(y)-f(y)g(x)\bigr]\,\mathrm dx\,\mathrm dy\\
+&=2\int_0^1f(x)g(x)\,\mathrm dx
+-2\left(\int_0^1f(x)\,\mathrm dx\right)
+\left(\int_0^1g(x)\,\mathrm dx\right).
+\end{aligned}
+$$
+
+因此待证不等式成立。
+
+若 $f,g$ 都非常函数，由于它们连续、单调不减，有 $f(0)<f(1)$、$g(0)<g(1)$。由连续性，存在正面积的 $(x,y)$ 区域（$x$ 靠近 $0$，$y$ 靠近 $1$）使两个增量均严格不为零，从而 $I>0$。所以等号成立必有至少一个函数为常函数；此条件也显然充分。
+
+若 $f$ 单调不减、$g$ 单调不增，两个增量异号，$I\le0$，所以不等号反向。
+
+**命题拓展：** 对 $[a,b]$ 上的同向单调连续函数，应把右侧改成 $\frac1{b-a}(\int_a^bf)(\int_a^bg)$，这是长度归一化后的切比雪夫积分不等式。符号法比记忆公式更不易混淆。
+
+</ExamExplanation>
+</ExamSolution>
 </ExamQuestion>
