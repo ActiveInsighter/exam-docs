@@ -47,7 +47,7 @@ try {
   for (const width of [320, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 1080 });
     await noOverflow();
-    const article = await root.getByRole('article').boundingBox();
+    const article = await root.getByRole('article').locator('..').boundingBox();
     const list = await root.getByRole('region', { name: '阅读理解题目' }).boundingBox();
     if (width === 1440) assert.ok(list.x > article.x + article.width - 2, 'desktop should have two columns');
     if (width === 320) assert.ok(list.y >= article.y + article.height - 2, 'mobile should stack article and questions');
@@ -138,6 +138,9 @@ try {
   await screenshot('reading-mobile-solution.png');
   assert.deepEqual(errors, [], 'browser reported errors');
   console.log('PASS: reused exam slots; hover-to-click details; nonmodal positioning; evidence sequencing; replay; interruption; keyboard; bounded question scrolling; matching scrollbar; responsive wrapping; dark theme; reduced motion; mobile tap.');
+} catch (error) {
+  await page.screenshot({ path: path.join(screenshots, 'reading-failure.png'), fullPage: true });
+  throw error;
 } finally {
   await browser.close();
 }
