@@ -74,8 +74,8 @@ export function useCursorHighlight(rootRef: RefObject<HTMLSpanElement | null>, {
     if (mode === 'playing') {
       const bounds = scrollRoot?.getBoundingClientRect();
       const rect = root.getBoundingClientRect();
-      // Desktop scrolls only the article pane. Mobile brings the sentence into view.
-      if (scrollRoot && bounds && scrollRoot.scrollHeight > scrollRoot.clientHeight + 1) {
+      // A provided reading viewport owns scrolling, so the solution trigger stays visible.
+      if (scrollRoot && bounds) {
         if (rect.top < bounds.top + 24 || rect.bottom > bounds.bottom - 24) {
           scrollRoot.scrollTo({ top: scrollRoot.scrollTop + rect.top - bounds.top - (scrollRoot.clientHeight - rect.height) / 2, behavior: reduced.matches ? 'instant' : 'smooth' });
         }
