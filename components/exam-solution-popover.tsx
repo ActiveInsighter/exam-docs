@@ -18,6 +18,8 @@ export function ExamSolutionPopover({ answer, explanation, buttonLabel, dialogTi
   return (
     <div className={questionStyles.actions}>
       <Popover open={expanded || preview} modal={false} onOpenChange={(open, details) => {
+        // Keep hover enabled across modes; toggling it can reopen a dismissed panel.
+        if (expanded && details.reason === 'trigger-hover') { details.cancel(); return; }
         if (details.reason === 'trigger-press') {
           if (!expanded && !open) details.cancel();
           setPreview(false);
@@ -28,7 +30,7 @@ export function ExamSolutionPopover({ answer, explanation, buttonLabel, dialogTi
           reading.close(id);
         } else if (hasAnswer) setPreview(true);
       }}>
-        <PopoverTrigger className={`${questionStyles.trigger} ${triggerStyles.trigger}`} openOnHover={!expanded} delay={100} closeDelay={80}
+        <PopoverTrigger className={`${questionStyles.trigger} ${triggerStyles.trigger}`} openOnHover delay={100} closeDelay={80}
           onFocus={() => { if (hasAnswer && !expanded) setPreview(true); }}>
           {buttonLabel}
         </PopoverTrigger>

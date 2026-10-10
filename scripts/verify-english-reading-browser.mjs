@@ -35,6 +35,8 @@ async function noOverflow() {
 async function closeSolution() {
   await page.keyboard.press('Escape');
   await waitFor(async () => await expanded.count() === 0 && await preview.count() === 0, 'solution did not close');
+  await page.waitForTimeout(250);
+  assert.equal(await expanded.count() + await preview.count(), 0, 'dismissed solution reopened while the pointer stayed on its trigger');
 }
 async function screenshot(name) {
   await waitFor(async () => await page.locator('[data-exam-solution]').evaluateAll(nodes =>
