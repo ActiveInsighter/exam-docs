@@ -36,7 +36,11 @@ async function closeSolution() {
   await page.keyboard.press('Escape');
   await waitFor(async () => await expanded.count() === 0 && await preview.count() === 0, 'solution did not close');
 }
-async function screenshot(name) { await page.screenshot({ path: path.join(screenshots, name) }); }
+async function screenshot(name) {
+  await waitFor(async () => await page.locator('[data-exam-solution]').evaluateAll(nodes =>
+    nodes.every(node => getComputedStyle(node).opacity === '1')), 'solution entrance transition never settled');
+  await page.screenshot({ path: path.join(screenshots, name) });
+}
 
 try {
   await page.goto(`${base}/docs/english/`, { waitUntil: 'networkidle' });
