@@ -45,6 +45,16 @@ describe('documentation source structure', () => {
         originalIds.push(...originals.map((match) => Number(match[1])));
         const totalCount = questions.length + originals.length;
         expect(originals.length).toBe(questions.length);
+        const orderedAnchors = [...content.matchAll(/<span id="question-(original-\d+|\d{4}-\d+)"\s*\/>/gu)];
+        expect(orderedAnchors).toHaveLength(totalCount);
+        for (const [index, question] of questions.entries()) {
+          expect(orderedAnchors[index * 2][1]).toBe(`${question[2]}-${question[3]}`);
+          expect(orderedAnchors[index * 2 + 1][1]).toBe(`original-${originals[index][1]}`);
+        }
+        expect(content.match(/<\/ExamQuestion>\s*---\s*<span id="question-original-/gu)?.length ?? 0)
+          .toBe(originals.length);
+        expect(content.match(/>原创<\/span>/gu)?.length ?? 0).toBe(originals.length);
+        expect(content).not.toMatch(/^#{1,6} 原创|\*\*\d+\. 原创|原创拓展训练|本轮原创变式/mu);
         const reference = readFileSync(join(referenceRoot, subject, name), 'utf8');
         expect(content.match(/^title: .+$/mu)?.[0]).toBe(reference.match(/^title: .+$/mu)?.[0]);
         expect(Number(content.match(/^questionCount: (\d+)$/mu)?.[1])).toBe(totalCount);
