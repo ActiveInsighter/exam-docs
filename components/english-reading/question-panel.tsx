@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useRef, type Dispatch } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, type Dispatch } from 'react';
 import { readingReducer, type ReadingState } from './model';
 import type { ReadingQuestion } from './parts';
 import styles from './reading.module.css';
@@ -15,6 +15,7 @@ export function ReadingQuestionPanel({ id, question, state, count, dispatch }: {
   const solution = useRef<HTMLElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const evidenceTrigger = useRef<HTMLButtonElement | null>(null);
+  const previousQuestion = useRef(state.question);
   const hasAnswer = question.answer !== null && question.answer !== undefined && question.answer !== false;
 
   useEffect(() => {
@@ -27,15 +28,17 @@ export function ReadingQuestionPanel({ id, question, state, count, dispatch }: {
   useEffect(() => {
     if (state.view === 'questions') evidenceTrigger.current?.focus({ preventScroll: true });
   }, [state.view]);
+  useLayoutEffect(() => {
+    if (previousQuestion.current === state.question) return;
+    previousQuestion.current = state.question;
+    if (scroll.current) scroll.current.scrollTop = 0;
+    prompt.current?.focus({ preventScroll: true });
+  }, [state.question]);
 
   function navigate(index: number) {
     if (index < 0 || index >= count || index === state.question) return;
     evidenceTrigger.current = null;
     dispatch({ type: 'question', index, count });
-    requestAnimationFrame(() => {
-      if (scroll.current) scroll.current.scrollTop = 0;
-      prompt.current?.focus({ preventScroll: true });
-    });
   }
   function toggleSolution() {
     if (state.revealed) trigger.current?.focus({ preventScroll: true });

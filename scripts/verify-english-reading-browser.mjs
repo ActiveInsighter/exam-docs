@@ -33,6 +33,10 @@ async function openPage(options) {
   question = root.locator('[data-reading-question-scroll]');
   solution = root.locator('[data-reading-solution]');
   await root.waitFor();
+  assert.equal(await question.evaluate(node => {
+    const focused = document.activeElement;
+    return focused?.getAttribute('tabindex') === '-1' && node.contains(focused);
+  }), false, 'initial load unexpectedly focused the question prompt');
   return context;
 }
 async function dimensions() {
@@ -167,7 +171,7 @@ try {
   assert.equal(await button('第 5 题').getAttribute('aria-current'), 'step');
   await selectQuestion(1);
   await page.keyboard.press('Tab');
-  await button('查看解答').focus();
+  await waitFor(async () => await button('查看解答').evaluate(node => document.activeElement === node), 'Tab did not move focus from the question prompt to the answer control');
   await waitFor(async () => await root.locator('[data-reading-preview]').isVisible(), 'keyboard focus did not preview answer');
   await page.keyboard.press('Enter'); await solution.waitFor();
   await button('收起解答').click();
