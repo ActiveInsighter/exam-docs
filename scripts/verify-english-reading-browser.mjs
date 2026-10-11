@@ -40,15 +40,22 @@ async function dimensions() {
   assert.ok(await root.evaluate(node => node.getBoundingClientRect().height <= innerHeight - 56 + 1), 'workspace exceeds available viewport height');
   assert.equal(await root.locator('[data-exam-question]').count(), 1, 'only the current question should render');
 }
+async function desktopPanes() {
+  if (page.viewportSize().width === 1440) {
+    assert.ok(await article.isVisible() && await root.locator('[data-reading-question-pane]').isVisible(), 'desktop navigation hid an article or question pane');
+  }
+}
 async function selectQuestion(index, touch = false) {
   await button(`第 ${index} 题`)[touch ? 'tap' : 'click']();
   await waitFor(async () => await button(`第 ${index} 题`).getAttribute('aria-current') === 'step', 'question navigation did not update');
   assert.equal(await root.locator('[data-exam-question]').count(), 1);
+  await desktopPanes();
 }
 async function reveal(touch = false) {
   const before = await page.evaluate(() => scrollY);
   await button('查看解答')[touch ? 'tap' : 'click']();
   await solution.waitFor();
+  await desktopPanes();
   assert.equal(await button('收起解答').getAttribute('aria-expanded'), 'true');
   assert.ok(await solution.evaluate(node => !!node.closest('[data-reading-question-scroll]')), 'solution must stay in the question scroll region');
   assert.equal(await page.locator('dialog[open], [data-exam-solution="expanded"]').count(), 0, 'reading opened a legacy modal or portal');
@@ -121,9 +128,15 @@ async function scrollingFixture(scroller, label, touchSession) {
   for (const delta of [-240, 240]) {
     await root.evaluate(node => window.scrollTo({ top: node.getBoundingClientRect().top + scrollY - 75, behavior: 'instant' }));
     await scroller.evaluate((node, direction) => { node.scrollTop = direction < 0 ? 0 : node.scrollHeight; }, delta);
+    await page.waitForTimeout(150);
     const before = await page.evaluate(() => scrollY);
     await input(delta); await page.waitForTimeout(200); await input(delta);
-    await waitFor(async () => await page.evaluate(({ before, delta }) => delta < 0 ? scrollY < before - 10 : scrollY > before + 10, { before, delta }), `${label} trapped page scrolling at its ${delta < 0 ? 'top' : 'bottom'}`);
+    try {
+      await waitFor(async () => await page.evaluate(({ before, delta }) => delta < 0 ? scrollY < before - 10 : scrollY > before + 10, { before, delta }), `${label} trapped page scrolling at its ${delta < 0 ? 'top' : 'bottom'}`);
+    } catch (error) {
+      const position = await scroller.evaluate(node => ({ pageY: scrollY, scrollTop: node.scrollTop, max: node.scrollHeight - node.clientHeight }));
+      throw new Error(`${error.message}; before=${before}; ${JSON.stringify(position)}`, { cause: error });
+    }
   }
   await page.locator('[data-reading-long-fixture], [data-reading-test-spacer]').evaluateAll(nodes => nodes.forEach(node => node.remove()));
   await root.scrollIntoViewIfNeeded();
@@ -168,10 +181,21 @@ try {
   await desktop.close();
 
   const touch = await openPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1, colorScheme: 'light' });
-  await root.scrollIntoViewIfNeeded();
   assert.ok(await article.isVisible() && !await root.locator('[data-reading-question-pane]').isVisible(), 'mobile should initially show article alone');
   assert.equal(await button('文章').getAttribute('aria-pressed'), 'true');
+  assert.ok(await button('题目').evaluate(node => {
+    const bounds = node.getBoundingClientRect();
+    return bounds.top >= 56 && bounds.bottom <= innerHeight;
+  }), 'initial question tab is outside the visible viewport');
   await button('题目').tap();
+  await waitFor(async () => await root.evaluate(node => {
+    const bounds = node.getBoundingClientRect();
+    return bounds.top >= 55 && bounds.bottom <= innerHeight + 1;
+  }), 'selecting questions did not bring the entire workspace into the viewport');
+  assert.ok(await button('查看解答').evaluate(node => {
+    const bounds = node.getBoundingClientRect();
+    return bounds.top >= 56 && bounds.bottom <= innerHeight;
+  }), 'answer control is outside the viewport after selecting questions');
   for (const viewport of [{ width: 390, height: 844 }, { width: 320, height: 800 }, { width: 844, height: 390 }]) {
     await page.setViewportSize(viewport); await root.scrollIntoViewIfNeeded(); await dimensions();
     assert.ok(!await article.isVisible() && await root.locator('[data-reading-question-pane]').isVisible(), 'mobile question view should hide article');

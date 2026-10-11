@@ -9,6 +9,7 @@ import styles from './reading.module.css';
 
 export function ReadingLayout({ article, questions }: { article: ReactNode; questions: ReadingQuestion[] }) {
   const [state, dispatch] = useReducer(readingReducer, initialReadingState);
+  const workspace = useRef<HTMLElement>(null);
   const articlePane = useRef<HTMLDivElement>(null);
   const id = useId();
   const question = questions[state.question];
@@ -27,11 +28,14 @@ export function ReadingLayout({ article, questions }: { article: ReactNode; ques
   }, [state.evidence, state.revision, state.view]);
 
   return <ReadingEvidenceContext value={{ ids: state.revealed ? question.evidence : [], current: state.evidence, revision: state.revision }}>
-    <section className={styles.root} data-reading-workspace="" data-reading-view={state.view} aria-label="英语阅读理解">
+    <section ref={workspace} className={styles.root} data-reading-workspace="" data-reading-view={state.view} aria-label="英语阅读理解">
       <div className={styles.toolbar}>
         <div className={styles.views} aria-label="阅读区域">
-          <button type="button" aria-pressed={state.view === 'article'} aria-controls={`${id}-article`} onClick={() => dispatch({ type: 'view', view: 'article' })}>文章</button>
-          <button type="button" aria-pressed={state.view === 'questions'} aria-controls={`${id}-questions`} onClick={() => dispatch({ type: 'view', view: 'questions' })}>题目</button>
+          {(['article', 'questions'] as const).map(view => <button key={view} type="button" aria-pressed={state.view === view}
+            aria-controls={`${id}-${view}`} onClick={() => {
+              dispatch({ type: 'view', view });
+              workspace.current?.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+            }}>{view === 'article' ? '文章' : '题目'}</button>)}
         </div>
         <span className={styles.desktopLabel}>英语阅读理解</span>
         <span className={styles.count}>第 {state.question + 1} / {questions.length} 题</span>
