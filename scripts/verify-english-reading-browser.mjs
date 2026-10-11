@@ -55,9 +55,19 @@ async function scrollChaining(scroller, label, touchSession) {
     const bounds = await scroller.boundingBox();
     const viewport = page.viewportSize();
     const x = bounds.x + bounds.width / 2;
-    const y = Math.max(80, Math.min(viewport.height - 80, bounds.y + bounds.height / 2));
-    if (touchSession) await touchSession.send('Input.synthesizeScrollGesture', { x, y, yDistance: -delta, speed: 800, preventFling: true, gestureSourceType: 'touch' });
-    else { await page.mouse.move(x, y); await page.mouse.wheel(0, delta); }
+    const top = Math.max(80, bounds.y), bottom = Math.min(viewport.height - 24, bounds.y + bounds.height);
+    const y = (top + bottom) / 2;
+    if (touchSession) {
+      const endY = Math.max(24, Math.min(viewport.height - 24, y - delta));
+      await touchSession.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+      for (let step = 1; step <= 10; step++) {
+        await touchSession.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: y + (endY - y) * step / 10 }] });
+        await page.waitForTimeout(20);
+      }
+      // Hold before release so momentum cannot contaminate the next boundary check.
+      await page.waitForTimeout(150);
+      await touchSession.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    } else { await page.mouse.move(x, y); await page.mouse.wheel(0, delta); }
   };
   const middle = await scroller.evaluate(node => { node.scrollTop = (node.scrollHeight - node.clientHeight) / 2; return node.scrollTop; });
   const beforeInternal = await page.evaluate(() => scrollY);
