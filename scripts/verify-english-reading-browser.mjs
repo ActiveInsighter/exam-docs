@@ -70,6 +70,10 @@ async function scrollChaining(scroller, label, touchSession) {
     await scroller.evaluate((node, direction) => { node.scrollTop = direction < 0 ? 0 : node.scrollHeight; }, delta);
     const before = await page.evaluate(() => scrollY);
     await input(delta);
+    await page.waitForTimeout(250);
+    // scrollTop setters round fractional content offsets; continue the gesture after
+    // the first event reaches the physical edge. Containment still fails this check.
+    await input(delta);
     await waitFor(async () => await page.evaluate(({ before, delta }) => delta < 0 ? scrollY < before - 10 : scrollY > before + 10,
       { before, delta }), `${label} trapped page scrolling at its ${delta < 0 ? 'top' : 'bottom'} edge`, 4000);
   }
