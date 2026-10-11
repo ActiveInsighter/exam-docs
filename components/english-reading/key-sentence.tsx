@@ -1,21 +1,16 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useExamSolutionContext } from '../exam-solution-context';
-import { CursorHighlight } from '../reading-motion/cursor-highlight';
+import { useReadingEvidence } from './evidence-context';
+import styles from './reading.module.css';
 
+/** Native inline fragments retain correct wrapping, zoom and rich-text layout. */
 export function ExamKeySentence({ id, children }: { id: string; children: ReactNode }) {
-  const reading = useExamSolutionContext();
-  const active = reading?.active;
-  const index = active?.evidence.indexOf(id) ?? -1;
-  const mode = !active || index < 0 || index > active.index ? 'idle' : index < active.index ? 'complete' : 'playing';
-  return (
-    <span data-exam-key-sentence={id}>
-      <CursorHighlight mode={mode} playKey={active?.replay ?? 0} scrollRoot={reading?.article}
-        autoScroll={reading ? reading.wide || active?.view === 'evidence' : true}
-        onComplete={() => active && reading?.complete(active.id, active.replay, index)}>
-        {children}
-      </CursorHighlight>
-    </span>
-  );
+  const evidence = useReadingEvidence();
+  const active = evidence.ids.includes(id);
+  const Tag = active ? 'mark' : 'span';
+  return <Tag key={evidence.revision} className={styles.evidence} data-exam-key-sentence={id}
+    data-evidence-active={active} data-evidence-current={active && evidence.current === id}>
+    {children}
+  </Tag>;
 }
