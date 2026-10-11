@@ -128,7 +128,8 @@ async function scrollingFixture(scroller, label, touchSession) {
   for (const delta of [-240, 240]) {
     await root.evaluate(node => window.scrollTo({ top: node.getBoundingClientRect().top + scrollY - 75, behavior: 'instant' }));
     await scroller.evaluate((node, direction) => { node.scrollTop = direction < 0 ? 0 : node.scrollHeight; }, delta);
-    await page.waitForTimeout(150);
+    // Let Chrome's touch compositor catch up after the fixture jumps to an edge.
+    await page.waitForTimeout(touchSession ? 500 : 150);
     const before = await page.evaluate(() => scrollY);
     await input(delta); await page.waitForTimeout(200); await input(delta);
     try {
