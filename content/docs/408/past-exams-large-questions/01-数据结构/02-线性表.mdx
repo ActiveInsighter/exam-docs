@@ -1,13 +1,13 @@
 ---
 title: "第 2 章 线性表"
-description: "408 数据结构历年大题 · 第 2 章 线性表，共 10 道，按年份与原卷题号排列。"
+description: "408 数据结构历年大题，含 10 道真题和 20 道拓展题，附答案与详细解析。"
 subject: "数据结构"
-questionCount: 10
+questionCount: 30
 ---
 
 # 第 2 章 线性表
 
-本章收录 **10 道**历年大题。章节名称与 [408 真题对应章节](/docs/408/past-exams/01-8c139b6e/02-cf7f17f6) 一致。
+本章收录 **10 道**历年大题，附 **20 道**拓展题，每道真题后紧随两道拓展题。
 
 <span id="question-2009-42" />
 
@@ -29,62 +29,146 @@ questionCount: 10
 
 <ExamSolution>
 
-<ExamAnswer>采用快慢双指针，一趟扫描完成；时间复杂度 $O(n)$，额外空间复杂度 $O(1)$。</ExamAnswer>
+<ExamAnswer>令快指针比慢指针领先 $k-1$ 个结点，之后同步移动；快指针到达尾结点时慢指针就是目标结点。一次遍历，时间 $O(n)$、额外空间 $O(1)$；非法 $k$ 或链表长度不足时返回 0。</ExamAnswer>
 
 <ExamExplanation>
 
-### 基本思想
-
-设两个指针 $p$、$q$ 都从第一个数据结点出发。先让 $p$ 向后移动 $k-1$ 次，使 $p$ 与 $q$ 相隔 $k-1$ 个结点；随后两指针同步后移。当 $p$ 到达最后一个结点时，$q$ 恰好指向倒数第 $k$ 个结点。
-
-如果在让 $p$ 先行的过程中就遇到空指针，说明链表长度小于 $k$，查找失败。
-
-### 实现步骤
-
-1. 若 $k\le 0$，直接返回 0；
-2. 令 $p=q=list\to link$；
-3. 让 $p$ 先向后移动 $k-1$ 次；若中途 $p$ 变为空，则返回 0；
-4. 当 $p\to link\ne NULL$ 时，令 $p$、$q$ 同时后移一个结点；
-5. 此时 $q$ 指向倒数第 $k$ 个结点，输出 `q->data` 并返回 1。
+1. **基本设计思想：建立“固定间距”不变量。** 单链表只有 `next/link`，不能直接逆向访问，也不宜先求长度再第二次定位。让 `fast`、`slow` 同时指向第一个**数据结点**（跳过头结点）；先使 `fast` 前进 $k-1$ 步，再同时前进。此后始终有“从 `slow` 到 `fast` 含首尾共有 $k$ 个结点”。所以 `fast` 到达尾结点时，`slow` 到表尾恰有 $k$ 个结点，它就是倒数第 $k$ 个。
+2. **详细步骤及边界。** ① 若头指针为空或 $k\le0$，返回 0；② 令双指针指向 `list->link`；③ 先移动 `fast` $k-1$ 次，途中或结束后出现空指针则说明 $k>n$；④ 双指针同步向后直到 `fast->link == NULL`；⑤ 输出 `slow->data`，返回 1。$k=1$ 定位尾结点；$k=n$ 定位首元结点；空表直接失败。
+3. **C 实现。** 注意每次访问 `fast->link` 前，`fast` 必须非空。
 
 ```c
+#include <stdio.h>
+
 typedef struct LNode {
     int data;
     struct LNode *link;
 } LNode;
 
-int FindKthFromEnd(LNode *list, int k) {
-    if (list == NULL || k <= 0) {
-        return 0;
-    }
+int FindKthFromEnd(const LNode *list, int k) {
+    if (list == NULL || k <= 0) return 0;
+    const LNode *fast = list->link;
+    const LNode *slow = list->link;
 
-    LNode *p = list->link;
-    LNode *q = list->link;
-
-    // p 先走 k-1 步，使 p、q 相距 k-1 个结点
     for (int i = 1; i < k; ++i) {
-        if (p == NULL) {
-            return 0;
-        }
-        p = p->link;
+        if (fast == NULL) return 0;
+        fast = fast->link;
     }
+    if (fast == NULL) return 0;
 
-    if (p == NULL) {          // 链表长度小于 k
-        return 0;
+    while (fast->link != NULL) {
+        fast = fast->link;
+        slow = slow->link;
     }
-
-    // p 到达尾结点时，q 正好位于倒数第 k 个结点
-    while (p->link != NULL) {
-        p = p->link;
-        q = q->link;
-    }
-
-    printf("%d\n", q->data);
+    printf("%d\n", slow->data);
     return 1;
 }
 ```
 
-整个过程中每个指针只向后移动，不发生回退，因此只需一趟扫描。
+4. **正确性说明。** 在同步循环之前，两指针之间的边数为 $k-1$；每轮双指针均前进一条边，距离保持不变。循环终止时，`fast` 为末结点，故从 `slow` 到尾部共有 $k$ 个结点，结论成立。
+5. **复杂度及得分细节。** 设表长 $n$，先行最多 $k-1$ 次，同步最多 $n-k$ 次，节点前移次数为线性阶，时间 $O(n)$；只设置常数个指针，空间 $O(1)$。“一趟扫描”指不重新从头扫描，并非每个指针移动次数相加必须恰好为 $n$。要区分**头指针**与**首元结点指针**，并且返回值为 0/1，不是目标数据本身。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-original-127" />
+
+<ExamQuestion>
+
+已知一个**不带头结点**的非空单链表 `head`，每个结点含 `data` 和 `next`，要求删除倒数第 $k$ 个结点，并返回删除后可能变化的新表头。规定 $k\ge1$，若 $k$ 超过表长则不改变链表。
+
+1. 给出只遍历一次链表、额外空间为 $O(1)$ 的算法；
+2. 说明删除第一个结点时的处理方式；
+3. 分析复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>使用临时哑结点 `dummy`，令 `fast` 从哑结点前进 $k+1$ 步（可到达 `NULL`），再让 `fast`、`slow` 同步前进；最后 `slow` 是待删结点的前驱。时间 $O(n)$，空间 $O(1)$。</ExamAnswer>
+
+<ExamExplanation>
+
+1. **为什么需要哑结点？** 不带头结点链表删除首元结点时，无法找到其前驱。给 `head` 前面临时接一个栈上的 `dummy`，无论删除哪个结点，都可以统一执行 `slow->next = victim->next`，并返回 `dummy.next`。
+2. **定位过程。** 把 `slow=fast=&dummy`。先走 $k$ 步：若有一步的 `fast->next` 为空，表长不足，原样返回；再令 `fast=fast->next`，使 `fast` 比 `slow` 多出 $k+1$ 条边（`fast` 此时允许为 `NULL`）。同步走到 `fast==NULL`，`slow` 就指向倒数第 $k$ 个结点的前驱。
+3. **C 代码。**
+
+```c
+#include <stdlib.h>
+
+typedef struct Node {
+    int data;
+    struct Node *next;
+} Node;
+
+Node *DeleteKthFromEnd(Node *head, int k) {
+    if (k <= 0) return head;
+    Node dummy = {0, head};
+    Node *fast = &dummy, *slow = &dummy;
+    for (int i = 0; i < k; ++i) {
+        if (fast->next == NULL) return head;
+        fast = fast->next;
+    }
+    fast = fast->next;
+    while (fast != NULL) {
+        fast = fast->next;
+        slow = slow->next;
+    }
+    Node *victim = slow->next;
+    slow->next = victim->next;
+    free(victim);           // 前提：原结点是动态分配且归该链表所有
+    return dummy.next;
+}
+```
+
+4. **边界、复杂度。** 当 $k=n$ 时 `slow` 停在 `dummy`，自然删除原首元结点；当 $k=1$ 时删除尾结点；`head==NULL` 时也安全。总前进步数为 $O(n)$，辅助变量常数个。若结点由内存池管理，应将 `free` 换成相应释放方式。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-original-253" />
+
+<ExamQuestion>
+
+一个带头结点的单链表长度为 $n$，仅允许一次从左到右扫描。判断它是否存在“倒数第 $k$ 个结点”；若存在，返回其结点指针（不输出），并说明如何推广到求链表的中间结点。
+
+1. 写出寻找倒数第 $k$ 个结点的函数；
+2. 推导奇数、偶数长度时“慢一步、快两步”求中点会返回哪一侧的中间结点。
+
+<ExamSolution>
+
+<ExamAnswer>前一问用双指针固定间距；后一问令 `slow=head->next`、`fast=head->next`，每轮快指针走两步，返回的是奇数长度的唯一中点和偶数长度的**左中点**。</ExamAnswer>
+
+<ExamExplanation>
+
+1. **返回指针形式。** 将原题中的 `printf` 换为 `return slow`，长度不足、空表或 $k\le0$ 时返回 `NULL`；定位规则和 $O(n)$ 时间、$O(1)$ 空间不变。
+2. **中点代码。**
+
+```c
+#include <stddef.h>
+
+typedef struct Node {
+    int data;
+    struct Node *next;
+} Node;
+
+Node *MiddleLeft(Node *head) { // head 为带头结点的链表
+    if (head == NULL) return NULL;
+    Node *slow = head->next, *fast = head->next;
+    if (slow == NULL) return NULL;
+    while (fast->next != NULL && fast->next->next != NULL) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    return slow;
+}
+```
+
+3. **计数推导。** 每执行一轮，`slow` 前进 $1$ 次、`fast` 前进 $2$ 次。若 $n=2r+1$，可执行 $r$ 轮，`slow` 处在第 $r+1$ 个结点；若 $n=2r$，可执行 $r-1$ 轮，处在第 $r$ 个结点（左中点）。若使用 `while (fast && fast->next)` 且令 `fast` 从首元结点出发，则偶数长度返回右中点，务必明确循环条件和起点。
 
 </ExamExplanation>
 
@@ -122,79 +206,127 @@ $$
 
 <ExamSolution>
 
-<ExamAnswer>采用“三次逆置”法，时间复杂度 $O(n)$，空间复杂度 $O(1)$。</ExamAnswer>
+<ExamAnswer>将数组分成前 $p$ 个元素 $X$ 和其余元素 $Y$，依次逆置 $X$、逆置 $Y$、逆置整个数组，得到 $YX$。时间 $O(n)$、额外空间 $O(1)$。</ExamAnswer>
 
 <ExamExplanation>
 
-将原序列写成两个连续部分
-
-$$
-R=ab,
-$$
-
-其中 $a$ 为前 $p$ 个元素，$b$ 为后 $n-p$ 个元素。循环左移后的目标序列为
-
-$$
-ba.
-$$
-
-利用逆置运算有
-
-$$
-(ab)\xrightarrow{a\text{ 逆置}}a^{-1}b
-\xrightarrow{b\text{ 逆置}}a^{-1}b^{-1}
-\xrightarrow{\text{整体逆置}}(a^{-1}b^{-1})^{-1}=ba.
-$$
-
-例如 `abcdefgh` 左移 3 位：
-
-```text
-abcdefgh
-cbadefgh     // 逆置前 3 个元素
-cbahgfed     // 逆置后 5 个元素
-defghabc     // 整体逆置
-```
+1. **基本思想：把循环位移化为区间逆置。** 写成 $R=XY$，其中 $X=R[0..p-1]$，$Y=R[p..n-1]$。目标为 $YX$。设 $X^R$ 表示逆序，则 $(X^RY^R)^R=YX$；这是利用“逆置会反转子序列内部顺序，也会反转两段先后关系”，不是把单个元素逐次左移 $p$ 遍。
+2. **按要求给出步骤。** ① 确定区间 `[0,p-1]`、`[p,n-1]`；② 两端相向交换，分别逆置这两段；③ 再逆置 `[0,n-1]`；④ 返回结果。例：`abcdefgh` 左移 $3$ 位，依次得到 `cbadefgh`、`cbahgfed`、`defghabc`。
+3. **C 代码与边界。** 原题 $0<p<n$，下面同时支持任意非负的 $p$；取模以后 $p=0$ 时直接返回。
 
 ```c
+#include <stddef.h>
+
 void Reverse(int R[], int left, int right) {
     while (left < right) {
         int t = R[left];
-        R[left] = R[right];
-        R[right] = t;
-        ++left;
-        --right;
+        R[left++] = R[right];
+        R[right--] = t;
     }
 }
 
 void LeftRotate(int R[], int n, int p) {
-    if (R == NULL || n <= 1) {
-        return;
-    }
-
+    if (R == NULL || n <= 1 || p < 0) return;
     p %= n;
-    if (p == 0) {
-        return;
-    }
-
+    if (p == 0) return;
     Reverse(R, 0, p - 1);
     Reverse(R, p, n - 1);
     Reverse(R, 0, n - 1);
 }
 ```
 
-三次逆置分别处理 $p$、$n-p$、$n$ 个元素，因此总时间复杂度为
+4. **正确性与复杂度。** 对所有 $i$，旋转后位置 $i$ 应存放原位置 $(i+p)\bmod n$ 的元素，三次逆置得到的正是此前述 $YX$。三次逆置最多执行 $\lfloor p/2\rfloor+\lfloor(n-p)/2\rfloor+\lfloor n/2\rfloor$ 次交换，为 $O(n)$；使用常数个临时变量，额外空间 $O(1)$。任何必须真正改变数组位置的通用原地算法，在最坏情况下均需触及线性数量的元素，所以 $O(n)$ 已达到渐近最优。
+5. **易错点。** “左移 $p$ 位”不是从下标 $p+1$ 开始；边界要使用 `[0,p-1]` 和 `[p,n-1]`，不要漏掉 $R[p]$。辅助数组拷贝虽能达到 $O(n)$ 时间，却不能达到 $O(1)$ 空间。若 $p$ 很大，必须先 $p\bmod n$，否则有下标越界风险。
 
-$$
-O(p)+O(n-p)+O(n)=O(n),
-$$
+</ExamExplanation>
 
-只使用常数个辅助变量，空间复杂度为
+</ExamSolution>
 
-$$
-O(1).
-$$
+</ExamQuestion>
 
-若使用长度为 $p$ 的辅助数组，也能做到 $O(n)$ 时间，但需要 $O(p)$ 额外空间，因此不如三次逆置法满足“时间和空间都尽可能高效”的要求。
+<span id="question-original-128" />
+
+<ExamQuestion>
+
+长度为 $n$ 的数组 $A$ 初始为 $[1,2,3,4,5,6,7,8,9]$。
+
+1. 求循环**右移** $4$ 位后的序列；
+2. 不使用辅助数组，给出右移 $p$ 位的原地实现；
+3. 解释为什么右移 $p$ 位和左移 $n-p$ 位等价，并给出算法复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>右移 $4$ 位得到 $[6,7,8,9,1,2,3,4,5]$；可复用三次逆置，先逆置整个数组，再逆置前 $p$ 个、最后逆置后 $n-p$ 个。</ExamAnswer>
+
+<ExamExplanation>
+
+1. **定位关系。** 右移 $p$ 位后，原下标 $i$ 的元素进入 $(i+p)\bmod n$；同一个位置的元素来自原下标 $(i-p+n)\bmod n$。代入 $n=9,p=4$ 可得到上述结果。
+2. **逆置顺序。** 原序列表示为 $XY$，其中 $X$ 有 $n-p$ 个、$Y$ 有 $p$ 个；目标是 $YX$。首先整体逆置 $Y^RX^R$，随后各段单独逆置还原为 $YX$。注意这里与“先分段后整体”的左移写法对称。
+
+```c
+// 复用上面定义的 Reverse(A,left,right)
+void RightRotate(int A[], int n, int p) {
+    if (A == NULL || n <= 1 || p < 0) return;
+    p %= n;
+    if (p == 0) return;
+    Reverse(A, 0, n - 1);
+    Reverse(A, 0, p - 1);
+    Reverse(A, p, n - 1);
+}
+```
+
+3. **等价性与复杂度。** 原位置 $i$ 右移 $p$ 位到 $(i+p)\bmod n$，左移 $n-p$ 位也到 $(i-(n-p)+n)\bmod n=(i+p)\bmod n$。逆置法时间 $O(n)$、空间 $O(1)$；调用时先对 $p$ 取模，若 $p=0$ 无需交换。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-original-254" />
+
+<ExamQuestion>
+
+数组 $R$ 有 $n$ 个元素，需要原地循环左移 $p$ 位。现**禁止调用逆置函数**，只允许使用一个临时变量保存单个数组元素。
+
+1. 给出使用“按环置换”的算法；
+2. 说明环数为什么等于 $\gcd(n,p)$；
+3. 对 $n=12$、$p=8$，给出环数、每个环长度及总赋值次数的数量级。
+
+<ExamSolution>
+
+<ExamAnswer>以映射 $i\mapsto(i+p)\bmod n$ 将下标分为 $g=\gcd(n,p)$ 个互不重叠的环，按每个环的次序将下一个元素搬到当前位置；时间 $O(n)$，空间 $O(1)$。</ExamAnswer>
+
+<ExamExplanation>
+
+1. **为什么存在环。** 从起点 $s$ 反复访问 $(s+tp)\bmod n$。再次回到起点的最小正整数 $t$ 满足 $tp\equiv0\pmod n$，所以每个环长度是 $n/\gcd(n,p)$；总共有 $g=\gcd(n,p)$ 个环。
+2. **C 代码。** 使用 `temp` 保护每个环的起始元素；`R[cur]=R[next]` 是“左移”方向，写反则变成右移。
+
+```c
+int Gcd(int a, int b) {
+    while (b != 0) { int t = a % b; a = b; b = t; }
+    return a;
+}
+
+void LeftRotateByCycle(int R[], int n, int p) {
+    if (R == NULL || n <= 1 || p < 0) return;
+    p %= n;
+    if (p == 0) return;
+    int g = Gcd(n, p);
+    for (int s = 0; s < g; ++s) {
+        int temp = R[s], cur = s;
+        while (1) {
+            int next = (cur + p) % n;
+            if (next == s) break;
+            R[cur] = R[next];
+            cur = next;
+        }
+        R[cur] = temp;
+    }
+}
+```
+
+3. **实例与复杂度。** $\gcd(12,8)=4$，因此共有 $4$ 个环，每环 $12/4=3$ 个下标，例如起点 $0$ 的环为 $0\to8\to4\to0$。各环每个元素恰好写入一次，总写入次数为 $n=12$，故时间 $O(n)$，额外空间 $O(1)$。此法特别适合要求减少交换次数的场景；逆置法实现通常更直观。
 
 </ExamExplanation>
 
@@ -224,80 +356,131 @@ $$
 
 <ExamSolution>
 
-<ExamAnswer>利用两个序列的中位数不断排除不可能区域，时间复杂度 $O(\log n)$，空间复杂度 $O(1)$。</ExamAnswer>
+<ExamAnswer>不断比较两个当前等长升序区间的下中位数，成对舍去不可能包含答案的低端与高端，保持区间等长；区间缩到单元素时取二者较小值。时间 $O(\log n)$、空间 $O(1)$。</ExamAnswer>
 
 <ExamExplanation>
 
-设当前考察的两个子序列长度始终相等，其中位数分别为 $a$、$b$。
-
-- 若 $a=b$，则该值就是两个序列合并后的中位数；
-- 若 $a<b$，则真正的中位数不可能落在 $A$ 的较小一半，也不可能落在 $B$ 的较大一半，因此同时舍弃这两部分；
-- 若 $a>b$，对称处理。
-
-关键是每轮必须让两个保留区间的长度仍然相等。奇数长度和偶数长度时端点的保留方式略有不同。
+1. **明确题目“中位数”的特殊定义。** 合并后共有 $2n$ 个元素，按题目第 $\lceil L/2\rceil$ 个元素的定义，所求的是**第 $n$ 小元素**（下中位数），不是“中间两个元素的均值”。例如合并 `[1,3]`、`[2,4]` 后排序为 `[1,2,3,4]`，答案是 $2$ 而不是 $2.5$。
+2. **区间缩减的依据。** 两个当前等长子序列 $A[l_1..r_1]$、$B[l_2..r_2]$ 长度均为 $t$，各自下中位数的下标为 $m_1=\lfloor(l_1+r_1)/2\rfloor$、$m_2=\lfloor(l_2+r_2)/2\rfloor$。若 $A[m_1]<B[m_2]$，则目标不可能位于 $A$ 的最左端若干元素及 $B$ 的最右端相同数量的元素中，故应对称删除；反之交换 $A$、$B$ 的角色；相等时直接返回该值。
+3. **奇偶长度必须分类。** 若 $t$ 为奇数，保留 `A[m1..r1]`、`B[l2..m2]`，即中点均保留；若 $t$ 为偶数，保留 `A[m1+1..r1]`、`B[l2..m2]`，即删去 $A$ 左半段和 $B$ 右半段（两个区间都剩 $t/2$ 个）。若 $A[m_1]>B[m_2]$，则保留对称区间。随意把“+1”写在偶数另一侧可能破坏两区间等长或错误删去第 $n$ 小元素。
+4. **C 实现。**
 
 ```c
-int M_Search(int A[], int B[], int n) {
-    int s1 = 0, d1 = n - 1;
-    int s2 = 0, d2 = n - 1;
-
-    while (s1 != d1 || s2 != d2) {
-        int m1 = (s1 + d1) / 2;
-        int m2 = (s2 + d2) / 2;
-
-        if (A[m1] == B[m2]) {
-            return A[m1];
-        }
-
+int LowerMedianOfTwoSorted(const int A[], const int B[], int n) {
+    // 前提：n >= 1，两个数组各自非降序排列
+    int l1 = 0, r1 = n - 1, l2 = 0, r2 = n - 1;
+    while (l1 < r1) {
+        int t = r1 - l1 + 1;
+        int m1 = l1 + (t - 1) / 2;
+        int m2 = l2 + (t - 1) / 2;
+        if (A[m1] == B[m2]) return A[m1];
         if (A[m1] < B[m2]) {
-            if ((s1 + d1) % 2 == 0) {
-                // 当前子序列长度为奇数
-                // 保留 A[m1..d1] 与 B[s2..m2]
-                s1 = m1;
-                d2 = m2;
-            } else {
-                // 当前子序列长度为偶数
-                // 为保持两边长度相等，A 从 m1+1 开始保留
-                s1 = m1 + 1;
-                d2 = m2;
-            }
+            l1 = (t & 1) ? m1 : m1 + 1;
+            r2 = m2;
         } else {
-            if ((s2 + d2) % 2 == 0) {
-                // 当前子序列长度为奇数
-                // 保留 A[s1..m1] 与 B[m2..d2]
-                d1 = m1;
-                s2 = m2;
-            } else {
-                // 当前子序列长度为偶数
-                d1 = m1;
-                s2 = m2 + 1;
-            }
+            r1 = m1;
+            l2 = (t & 1) ? m2 : m2 + 1;
         }
     }
-
-    // 两个区间均只剩 1 个元素。
-    // 合并后共有 2 个数，本题中位数定义为第 1 个，即较小者。
-    return A[s1] < B[s2] ? A[s1] : B[s2];
+    return A[l1] < B[l2] ? A[l1] : B[l2];
 }
 ```
 
-每次比较后，待考察区间长度大约缩小为原来的一半，因此递推关系为
+5. **实例追踪。** $A=[1,3,5,7,9]$，$B=[2,4,6,8,10]$，原问题的第 $5$ 小为 $5$。首轮 $m_1=m_2=2$，$A[m_1]=5<B[m_2]=6$；保留 $A=[5,7,9]$、$B=[2,4,6]$；再比较 $7>4$，保留 $A=[5,7]$、$B=[4,6]$；比较 $5>4$（偶数），保留 $A=[5]$、$B=[6]$；返回较小值 $5$。
+6. **复杂度与考法。** 每次保留长度大约为原长的一半，$T(n)=T(\lceil n/2\rceil)+O(1)=O(\log n)$；下标及比较变量共常数个，额外空间 $O(1)$。须使用**下中位数**、验证 $n=1$ 终止条件、允许重复元素并在 `==` 时立即返回。
 
-$$
-T(n)=T\!\left(\frac n2\right)+O(1),
-$$
+</ExamExplanation>
 
-从而
+</ExamSolution>
 
-$$
-T(n)=O(\log n).
-$$
+</ExamQuestion>
 
-算法只使用有限个下标变量，所以额外空间复杂度为
+<span id="question-original-129" />
 
-$$
-O(1).
-$$
+<ExamQuestion>
+
+给出两个升序序列 $A=[1,2,2,7,9,11]$，$B=[2,2,3,4,8,10]$。
+
+1. 不进行完整合并，求合并序列的下中位数和上中位数；
+2. 说明为何不能直接把两序列各自的中位数求平均；
+3. 给出时间为 $O(n)$、空间为 $O(1)$ 的双指针备选算法，说明它与对数算法的适用区别。
+
+<ExamSolution>
+
+<ExamAnswer>合并后的第 $6$ 小是 $3$，第 $7$ 小是 $4$；通用双指针归并到所需秩即可，不必生成完整新数组。</ExamAnswer>
+
+<ExamExplanation>
+
+1. **逐步找秩。** 双指针依次取走较小元素，前 $7$ 次读出 `1,2,2,2,2,3,4`，所以第 $6$ 小为 $3$，第 $7$ 小为 $4$；这里不关心相等元素来自哪个序列。
+2. **不能对各自中位数做平均。** 本例 $A$ 的下中位数为 $2$，$B$ 的下中位数为 $3$，二者平均 $2.5$ 既不是合并后第 $6$ 小，也不是第 $7$ 小；数组内部各分位点并不能刻画全部元素的交错关系。
+3. **双指针实现。**
+
+```c
+void TwoMiddle(const int A[], int n, const int B[], int m,
+               int *lower, int *upper) {
+    int i = 0, j = 0, cur = 0;
+    int k1 = (n + m + 1) / 2;      // 1-based 下中位数秩
+    int k2 = (n + m + 2) / 2;      // 1-based 上中位数秩
+    for (int rank = 1; rank <= k2; ++rank) {
+        if (j == m || (i < n && A[i] <= B[j])) cur = A[i++];
+        else cur = B[j++];
+        if (rank == k1) *lower = cur;
+    }
+    *upper = cur;
+}
+```
+
+4. **比较方法。** 双指针方法时间 $O(n+m)$，额外空间 $O(1)$，可用于不等长数组且易写；原题两数组**等长且有序**时，区间折半可以把时间改进至 $O(\log n)$。空数组场景须保证两个数组的总长度至少为 1。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-original-255" />
+
+<ExamQuestion>
+
+两个长度不一定相等的非降序数组 $A$、$B$，长度分别为 $m$ 和 $n$（允许某个数组为空，但 $m+n\ge1$）。已知整数 $k$ 满足 $1\le k\le m+n$。
+
+1. 设计算法在不实际合并数组的情况下，求并集多重序列的第 $k$ 小元素；
+2. 分析时间、空间复杂度；
+3. 解释为何每次最多可安全丢弃某数组的前 $\lfloor k/2\rfloor$ 个元素。
+
+<ExamSolution>
+
+<ExamAnswer>比较两个数组当前的第 $\min(\lfloor k/2\rfloor,\text{剩余长度})$ 个元素；一次删除其中一个数组相应的前缀并将 $k$ 减去删除数量。时间 $O(\log(m+n))$（更精确为 $O(\log k)$），空间 $O(1)$。</ExamAnswer>
+
+<ExamExplanation>
+
+1. **第 $k$ 小问题的核心。** 维护已排除的前缀与新的目标秩 $k$：若当前 $A$ 前缀的“比较端点”值 $a$ 不大于 $B$ 的端点值 $b$，那么 $A$ 的这段前缀都不可能是剩余第 $k$ 小；否则对称丢弃 $B$ 前缀。需要按数组剩余长度截断目标步长，否则可能越界。
+2. **C 代码。**
+
+```c
+int KthOfTwoSorted(const int A[], int m, const int B[], int n, int k) {
+    // 前提：0 <= m,n；m+n >= 1；1 <= k <= m+n
+    int i = 0, j = 0;
+    while (1) {
+        if (i == m) return B[j + k - 1];
+        if (j == n) return A[i + k - 1];
+        if (k == 1) return A[i] < B[j] ? A[i] : B[j];
+        int half = k / 2;
+        int ta = half < (m - i) ? half : (m - i);
+        int tb = half < (n - j) ? half : (n - j);
+        if (A[i + ta - 1] <= B[j + tb - 1]) {
+            i += ta;
+            k -= ta;
+        } else {
+            j += tb;
+            k -= tb;
+        }
+    }
+}
+```
+
+3. **为何能排除。** 假设 $a=A[i+t_a-1]\le b=B[j+t_b-1]$，且 $t_a,t_b\le\lfloor k/2\rfloor$。对于 $A$ 被删除的任一元素 $x\le a$，其在剩余元素中的秩最多为 $t_a+t_b-1<k$（考虑相等值时选一个稳定的排名即可）。所以删除 $A$ 这 $t_a$ 个值不会跳过第 $k$ 小，新的秩为 $k-t_a$；另一分支同理。
+4. **复杂度和边界。** 在两个数组都仍有足够元素时，每轮剔除约 $k/2$ 个候选；如果其中一个数组先被耗尽，则常数时间返回。总轮数 $O(\log k)$，额外空间 $O(1)$。令 $k=\lceil(m+n)/2\rceil$ 可求题目所定义的下中位数，令 $k=\lfloor(m+n)/2\rfloor+1$ 可求上中位数。
 
 </ExamExplanation>
 
@@ -327,20 +510,67 @@ $$
 
 <ExamSolution>
 
-<ExamAnswer>先求两链表长度，再让较长链表先走长度差，随后同步后移并比较结点地址。时间复杂度 $O(m+n)$，额外空间复杂度 $O(1)$。</ExamAnswer>
+<ExamAnswer>分别求两条无环单链表的数据结点数，先将较长链表指针前移长度差，再同步移动；首次指针地址相同的结点即为公共后缀起点，无交点返回 `NULL`。时间 $O(m+n)$、空间 $O(1)$。</ExamAnswer>
 
 <ExamExplanation>
 
-公共后缀一旦开始共享，则从第一个公共结点起直到表尾，后续结点完全相同。因此问题可以转化为：**让两个指针到表尾的剩余距离相同，再同步向后寻找第一个地址相同的结点。**
+1. **识别问题本质。** 题图中的两个单词共享的是**实际结点对象**，也就是指向同一块存储空间，而非仅仅字符相等。两条无环单链表一旦在结点 $p$ 相遇，因该结点仅有一个 `next` 指针，其后所有结点必然完全重合，构成公共尾部。因此判断条件必须是 `p == q`（地址相同），不能写成 `p->data == q->data`（字符相同）。
+2. **算法思想。** 假设第一条链有 $m$ 个数据结点，第二条有 $n$ 个。若它们共享长度为 $c$ 的后缀，则各自独有的前缀长度分别为 $m-c$、$n-c$，相差 $m-n$；让长链先走 $|m-n|$ 步，就能保证两个指针剩余结点数量相同，然后同步检查相交位置。
+3. **与原题要求对应的步骤。** ① 从首元结点求两个表长；② 两指针置于各自首元结点；③ 长者先走 $|m-n|$ 步；④ 双指针每次各走一步直到 `p==q`；⑤ 若首次相等非空，则返回公共后缀起点，否则返回 `NULL`。
+4. **完整 C 代码。** 此处约定传入的是**带头结点**的两个链表，且链表无环。
 
-<img src="/img/408/past-exams-large-questions/01-数据结构/assets/2012-42-figure-002.svg" alt="2012 年第 42 题尾部对齐示意" />
+```c
+#include <stddef.h>
 
-设两个数据链表长度分别为 $m$、$n$：
+typedef struct Node {
+    char data;
+    struct Node *next;
+} Node;
 
-1. 分别遍历求出 $m$、$n$；
-2. 若 $m>n$，让第一个链表指针先走 $m-n$ 步；若 $n>m$，让第二个链表指针先走 $n-m$ 步；
-3. 此时两个指针距表尾的结点数相同；
-4. 两指针同步后移，第一次出现 `p == q` 时，该结点就是公共后缀的起始结点。
+size_t Length(const Node *head) {
+    size_t len = 0;
+    if (head == NULL) return 0;
+    for (const Node *p = head->next; p != NULL; p = p->next) ++len;
+    return len;
+}
+
+Node *CommonSuffix(Node *str1, Node *str2) {
+    if (str1 == NULL || str2 == NULL) return NULL;
+    size_t m = Length(str1), n = Length(str2);
+    Node *p = str1->next, *q = str2->next;
+    while (m > n) { p = p->next; --m; }
+    while (n > m) { q = q->next; --n; }
+    while (p != q) { p = p->next; q = q->next; }
+    return p;                 // 若未相交，最终同时等于 NULL
+}
+```
+
+5. **正确性和复杂度。** 对齐后指针距表尾的距离始终相同；若公共结点存在，两指针必在同一步第一次进入公共尾部；若不存在，则同步走到两个 `NULL`。扫描长度、前移、同步扫描的操作数合计 $O(m+n)$，仅使用常数个指针、计数变量，空间 $O(1)$。链表共享结点时必须特别注意内存所有权：不可分别释放两条链的公共尾部两次。
+6. **辨析易错考法。** 两条链表的末字符虽然相同，也未必共享结点；若两个尾结点地址不同，则整个链表都不会发生结点相交。存在环的链表不能直接使用本解法：求长度可能无法结束，必须先判环并另外分类。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-original-130" />
+
+<ExamQuestion>
+
+现给出两个**不带头结点、无环**的单链表首元指针 `a`、`b`，且不允许使用长度计数器。
+
+1. 设计 $O(m+n)$ 时间、$O(1)$ 空间算法求第一个公共结点；
+2. 说明为何采用“两指针到尾后交换起点”一定能完成尾部对齐；
+3. 分析两表不相交时的退出条件。
+
+<ExamSolution>
+
+<ExamAnswer>令指针 `p` 先走 $A$ 后走 $B$，`q` 先走 $B$ 后走 $A$；二者总计各走 $m+n$ 步后必相等（可能均为 `NULL`），首次相等的非空结点就是交点。</ExamAnswer>
+
+<ExamExplanation>
+
+1. **代码。** 该方法仍然比较地址，不比较数据域。
 
 ```c
 typedef struct Node {
@@ -348,46 +578,44 @@ typedef struct Node {
     struct Node *next;
 } Node;
 
-int GetLength(Node *head) {
-    int len = 0;
-    for (Node *p = head->next; p != NULL; p = p->next) {
-        ++len;
-    }
-    return len;
-}
-
-Node *FindCommonSuffix(Node *str1, Node *str2) {
-    int m = GetLength(str1);
-    int n = GetLength(str2);
-
-    Node *p = str1->next;
-    Node *q = str2->next;
-
-    if (m > n) {
-        for (int i = 0; i < m - n; ++i) {
-            p = p->next;
-        }
-    } else {
-        for (int i = 0; i < n - m; ++i) {
-            q = q->next;
-        }
-    }
-
+Node *FirstIntersection(Node *a, Node *b) {
+    Node *p = a, *q = b;
     while (p != q) {
-        p = p->next;
-        q = q->next;
+        p = (p == NULL) ? b : p->next;
+        q = (q == NULL) ? a : q->next;
     }
-
-    // 若不存在非空公共后缀，则二者最终都会为 NULL
     return p;
 }
 ```
 
-求长度、对齐以及同步扫描的总工作量均为线性量级，因此
+2. **证明。** 若公共尾部长度为 $c$，那么指针 `p` 经过 $m-c$ 个独有结点、再走对方表的 $n-c$ 个独有结点，`q` 经过 $n-c$、再走 $m-c$，两者最终累计均走 $m+n-c$ 步到公共首结点；如果不相交，最多各走 $m+n$ 步后都变成 `NULL`。两条路径的总长度相等，交换头指针等价于自动消去长度差。
+3. **考点提醒。** `while (p != q)` 而不是 `while (p && q)`：后一写法会在任一指针先走到 `NULL` 时错误提前退出。若允许环，二指针交替切换可能永不终止，此题无环前提不可忽略。时间 $O(m+n)$，空间 $O(1)$。
 
-$$
-T(m,n)=O(m+n).
-$$
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-original-256" />
+
+<ExamQuestion>
+
+已有三条带头结点、均无环的单链表 `A`、`B`、`C`，部分结点可能被三条链共同使用。
+
+1. 设计寻找**三条链共同后缀的第一个结点**的方法；
+2. 说明能否先找 `A`、`B` 的首个公共结点 $p$，再从 $p$ 所在的后缀与 `C` 求交；
+3. 给出时间复杂度并说明三条链可能只有两两相交而没有三者交点吗？
+
+<ExamSolution>
+
+<ExamAnswer>先求 `A`、`B` 的首个交点 $p$；若非空，将 `p` 当作不带头结点链的起点，再与 `C->next` 求交，返回所得交点。总时间 $O(|A|+|B|+|C|)$，空间 $O(1)$。</ExamAnswer>
+
+<ExamExplanation>
+
+1. **方法。** 调用原题的 `CommonSuffix(A,B)` 得到 $p$。若 $p=\mathrm{NULL}$ 则三者无公共结点。否则，构造临时头结点 `temp`，令 `temp.next=p`，再调用 `CommonSuffix(&temp,C)`；所得值即为三者共同后缀起点。
+2. **正确性。** 若 $p$ 是 `A`、`B` 的首次交点，则以 $p$ 为起点的每个后续结点都被二者共同拥有。第三条链与该后缀首次相交的结点，自然是三条链首次共同拥有的结点。
+3. **复杂度与陷阱。** 第一次求交线性扫描 `A,B`，第二次最多扫描 `A` 的一个尾部及 `C`，故总 $O(|A|+|B|+|C|)$、空间 $O(1)$。在无环**单**链表中，“`A` 与 `B` 有公共结点，`B` 与 `C` 有公共结点，而三者无公共结点”是不可能的：任意两条相交后必共享共同的尾结点，所以它们的尾结点地址相同；若 `A,B,C` 两两相交，则三条链共有同一尾结点并必有三者交点。此结论在存在环或讨论字符相等而非地址相等时不成立。
 
 </ExamExplanation>
 
@@ -447,69 +675,136 @@ $$
 
 <ExamSolution>
 
-<ExamAnswer>采用 Boyer–Moore 多数投票思想先筛选候选元素，再进行一次计数验证。时间复杂度 $O(n)$，空间复杂度 $O(1)$。</ExamAnswer>
+<ExamAnswer>先用 Boyer–Moore 消去法找唯一可能的主元素候选，再扫描原数组统计其出现次数；只有频数严格大于 $n/2$ 才返回候选，否则返回 $-1$。时间 $O(n)$，额外空间 $O(1)$。</ExamAnswer>
 
 <ExamExplanation>
 
-### 第一步：筛选候选元素
-
-从左到右扫描数组，维护候选值 `candidate` 和计数器 `count`：
-
-- 当前元素等于候选值：`count++`；
-- 当前元素不等于候选值：`count--`；
-- 当 `count` 降为 0 时，用当前尚未处理的新元素重新建立候选。
-
-其本质是不断让“一个候选元素”和“一个不同元素”两两抵消。若某个元素出现次数严格大于 $n/2$，无论怎样配对抵消，最后都不可能被完全消掉，因此真正的主元素一定会成为最终候选。
-
-但最终候选**不一定**真的是主元素，所以还必须进行第二趟扫描验证。
+1. **准确理解定义。** 主元素是出现次数 $m>n/2$ 的元素，而不是“出现次数最多的元素”（众数）。主元素至多只有一个，因为两个不同的值不可能都出现超过一半。题目给出的取值条件 $0\le a_i<n$ 可用于计数数组解法，但若要求时间与空间同时尽量高效，投票算法可以完全不用这个范围约束。
+2. **第一遍——配对抵消。** 维持候选值 `candidate` 和当前净票数 `count`；遇同值加一，异值减一，若 `count==0`，下一个元素成为新候选。可以理解为消去所有“不同值组成的对”；若真正的主元素超过一半，被消去的异值与主元素最多一样多，剩余必还有真正主元素，故最终候选只能是它。
+3. **第二遍——必要的验证。** 若不存在主元素，第一遍仍可能留下某个候选；必须重新统计候选出现的次数，检验 `freq > n/2`，不能检查 `>=`。例如 `[1,2,3]` 并没有主元素，即使投票最终候选为 `3` 也不可直接返回。
+4. **C 实现。** 这里采用最常见、最不易出错的写法：当净票数为 $0$ 时才用当前元素重新建立候选。
 
 ```c
-int Majority(int A[], int n) {
-    if (n <= 0) {
-        return -1;
-    }
+#include <stddef.h>
 
-    int candidate = A[0];
-    int count = 1;
-
-    // 第一趟：筛选候选元素
-    for (int i = 1; i < n; ++i) {
-        if (A[i] == candidate) {
+int MajorityElement(const int A[], int n) {
+    if (A == NULL || n <= 0) return -1;
+    int candidate = 0, count = 0;
+    for (int i = 0; i < n; ++i) {
+        if (count == 0) {
+            candidate = A[i];
+            count = 1;
+        } else if (A[i] == candidate) {
             ++count;
         } else {
             --count;
-            if (count == 0) {
-                candidate = A[i];
-                count = 1;
-            }
         }
     }
-
-    // 第二趟：验证候选元素是否真的出现超过 n/2 次
     int freq = 0;
     for (int i = 0; i < n; ++i) {
-        if (A[i] == candidate) {
-            ++freq;
-        }
+        if (A[i] == candidate) ++freq;
     }
-
     return (freq > n / 2) ? candidate : -1;
 }
 ```
 
-两趟扫描均为线性时间，因此
+5. **样例与证明。** `[0,5,5,3,5,7,5,5]` 中 `5` 出现 $5$ 次，$5>8/2$，返回 `5`；`[0,5,5,3,5,1,5,7]` 中 `5` 仅 $4$ 次，$4\not>4$，返回 $-1$。每抵消一对不同元素，若原序列存在真正多数，它在剩余序列中仍为多数；经过全部抵消后未抵消的候选若存在，必须是真正的多数，所以第一趟不会漏解。第二趟保证不误判。
+6. **复杂度和优化理由。** 最多两次长度为 $n$ 的扫描，$T(n)=O(n)$；固定的 `candidate,count,freq` 共占 $O(1)$。基于取值范围也可开 `count[0..n-1]`，但须占 $O(n)$ 额外空间；排序后找众数用 $O(n\log n)$ 时间或须修改原数组，都不优于本题答案。
 
-$$
-T(n)=O(n),
-$$
+</ExamExplanation>
 
-只使用常数个变量，因此
+</ExamSolution>
 
-$$
-S(n)=O(1).
-$$
+</ExamQuestion>
 
-特别注意：主元素要求出现次数**严格大于** $n/2$。若恰好出现 $n/2$ 次，仍然不是主元素。
+<span id="question-original-131" />
+
+<ExamQuestion>
+
+设长度为 $n$ 的整数数组中，某个元素若出现次数**严格大于** $n/3$，称为三级高频元素。
+
+1. 最多能有几个不同的三级高频元素？
+2. 设计 $O(n)$ 时间、$O(1)$ 额外空间算法输出全部三级高频元素；
+3. 以数组 $[1,2,1,3,2,1,2,4]$ 为例给出输出结果。
+
+<ExamSolution>
+
+<ExamAnswer>最多两个；维护两个候选及其计数，遇三个不同元素时共同减票，最后再验证两个候选实际频次。样例输出 $1,2$，它们各出现 $3$ 次，满足 $3>8/3$。</ExamAnswer>
+
+<ExamExplanation>
+
+1. **数量上界。** 若有三个不同元素出现次数都严格大于 $n/3$，三者频次之和就严格大于 $n$，矛盾。因此最多两个。
+2. **推广配对抵消。** 普通主元素通过一对异值抵消，本题采用“三种不同值各消去一个”的思想。扫描过程中维护 `c1,c2` 和 `v1,v2`：先处理与已存在候选相等的值；若有空候选槽，填入新值；否则同时减少两个候选计数。这样绝不丢失超过 $n/3$ 的所有真答案；候选集合仍需二次验证。
+
+```c
+// 返回写入 out[0..1] 的元素个数；out 至少有两个空间
+int MoreThanThird(const int A[], int n, int out[2]) {
+    int v1 = 0, v2 = 0, c1 = 0, c2 = 0;
+    for (int i = 0; i < n; ++i) {
+        int x = A[i];
+        if (c1 > 0 && x == v1) ++c1;
+        else if (c2 > 0 && x == v2) ++c2;
+        else if (c1 == 0) { v1 = x; c1 = 1; }
+        else if (c2 == 0) { v2 = x; c2 = 1; }
+        else { --c1; --c2; }
+    }
+    c1 = c2 = 0;
+    for (int i = 0; i < n; ++i) {
+        if (A[i] == v1) ++c1;
+        else if (A[i] == v2) ++c2;
+    }
+    int cnt = 0;
+    if (c1 > n / 3) out[cnt++] = v1;
+    if (v2 != v1 && c2 > n / 3) out[cnt++] = v2;
+    return cnt;
+}
+```
+
+3. **验证样例和复杂度。** $n=8$，阈值是 $8/3$，频次为 $3$ 的两个值 `1`、`2` 符合条件；`3`、`4` 各一次不符合。扫描两次 $O(n)$，只保留两个候选和计数 $O(1)$。不同候选在验证时要避免同一元素被双计，也要防止输出重复候选。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-original-257" />
+
+<ExamQuestion>
+
+对于长度为 $n$ 的整数序列，题目改为输出**出现次数最多的元素**（众数）；如果存在多个频次相同的众数，输出数值最小者。已知原题的约束 $0\le A[i]<n$，并要求算法不改变输入数组。
+
+1. 设计最坏情况下 $O(n)$ 时间的算法，分析额外空间；
+2. 对 `[0,1,1,2,2,3]` 给出结果；
+3. 解释为什么原题的 Boyer–Moore 算法不能直接用于求众数。
+
+<ExamSolution>
+
+<ExamAnswer>使用长度为 $n$ 的计数数组，统计每个值出现次数，再从小到大找最大频次；样例返回 $1$。时间 $O(n)$、空间 $O(n)$。</ExamAnswer>
+
+<ExamExplanation>
+
+1. **利用值域。** 值只在 $0,1,\ldots,n-1$ 中，因此为每个值准备一个桶，单趟计数，然后按数值升序扫描桶。当新桶计数**严格大于**当前最大频次时才更新答案，这样并列时自然保留较小数值。
+
+```c
+#include <stdlib.h>
+
+int ModeMin(const int A[], int n) {
+    if (A == NULL || n <= 0) return -1;
+    int *cnt = (int *)calloc((size_t)n, sizeof(int));
+    if (cnt == NULL) return -1;  // 实际接口可改为显式错误码
+    for (int i = 0; i < n; ++i) ++cnt[A[i]];
+    int best = 0;
+    for (int x = 1; x < n; ++x) {
+        if (cnt[x] > cnt[best]) best = x;
+    }
+    free(cnt);
+    return best;
+}
+```
+
+2. **求值。** `[0,1,1,2,2,3]` 中 `1` 与 `2` 各出现两次，并列最多，故按照“数值较小者优先”返回 `1`。
+3. **与“主元素”区别。** “出现最多”不要求频次超过一半；Boyer–Moore 仅保证 $>n/2$ 元素在抵消后被保留，对 `[1,2,3]` 这样没有主元素的序列，残留候选无众数保证。因此本题应使用值域计数、散列表或排序，而不能直接套用主元素解法。哈希法期望 $O(n)$ 但最坏复杂度依赖哈希实现；题设给出紧凑整数值域时，数组计数是确定性线性时间方案。
 
 </ExamExplanation>
 
@@ -552,26 +847,13 @@ $$
 
 <ExamSolution>
 
-<ExamAnswer>用大小为 $n+1$ 的辅助标记数组记录某个绝对值是否已经出现，一趟扫描链表完成删除。时间复杂度 $O(m)$，额外空间复杂度 $O(n)$。</ExamAnswer>
+<ExamAnswer>以绝对值作为直接寻址下标，使用 `seen[0..n]` 记录是否见过；前驱指针 `pre` 与当前指针 `p` 一次扫描，首次出现则保留，重复则摘链并释放。扫描耗时 $O(m)$；若计入初始化辅助数组的代价，总时间 $O(m+n)$，空间 $O(n)$。</ExamAnswer>
 
 <ExamExplanation>
 
-因为 $|data|\le n$，所以结点数据的绝对值只可能落在
-
-$$
-0,1,2,\ldots,n
-$$
-
-中。设置辅助数组 `seen[0..n]`，初值全为 0。
-
-从前向后扫描链表。对于当前结点 $p$，令
-
-$$
-k=|p\to data|.
-$$
-
-- 若 `seen[k] == 0`，说明这是绝对值 $k$ 第一次出现，保留该结点并令 `seen[k] = 1`；
-- 若 `seen[k] == 1`，说明此前已经出现过绝对值相同的结点，删除当前结点。
+1. **理解题意。** “绝对值相等”是等价条件：`3` 与 `-3` 属于一类，`0` 只与 `0` 同类；要求**保留第一次出现的实际结点**，不能把后面的值覆盖到前面的结点，也不能排序打乱相对次序。由于 $|data|\le n$，可使用索引 $0,1,\ldots,n$ 的标记数组，一次读写即可判断是否重复。
+2. **指针维护不变量。** 从左到右扫描，`pre` 始终指向已经决定保留的**最后一个结点**，`p` 指向下一个尚未处理的结点。若 `seen[abs(p->data)] == 0`，标记并同时后移 `pre,p`；若已见过，就执行 `pre->link=p->link`，保存旧 `p` 以便释放，再令 `p=pre->link`。删除结点时**不能移动 `pre`**，否则相邻重复值会漏删。
+3. **结点定义和完整 C 代码。** 约定链表带头结点，结点使用动态分配；若使用链表外部内存池，应按实际所有权释放结点。
 
 ```c
 #include <stdlib.h>
@@ -581,48 +863,140 @@ typedef struct LNode {
     struct LNode *link;
 } LNode;
 
-void DeleteSameAbs(LNode *head, int n) {
-    int *seen = (int *)calloc(n + 1, sizeof(int));
-    if (seen == NULL) {
-        return;
-    }
+int DeleteEqualAbsolute(LNode *head, int n) {
+    if (head == NULL || n < 0) return 0;
+    // 题目保证所有结点 |data| <= n
+    unsigned char *seen = (unsigned char *)calloc((size_t)n + 1, 1);
+    if (seen == NULL) return 0;
 
-    LNode *pre = head;
-    LNode *p = head->link;
-
+    LNode *pre = head, *p = head->link;
     while (p != NULL) {
-        int k = abs(p->data);
-
-        if (seen[k] == 0) {
-            // 第一次出现，保留
-            seen[k] = 1;
+        int key = p->data < 0 ? -p->data : p->data;
+        if (seen[key] == 0) {
+            seen[key] = 1;
             pre = p;
             p = p->link;
         } else {
-            // 已出现过，删除当前结点
+            LNode *victim = p;
             pre->link = p->link;
-            free(p);
             p = pre->link;
+            free(victim);
         }
     }
-
     free(seen);
+    return 1;
 }
 ```
 
-原整理中的实现混用了 `link` 与 `next` 两种成员名，且缺失完整的结点定义；这里已统一修正。
+4. **正确性证明。** 扫描过的链表前缀中，每个绝对值最多保留一次，并且保留的一定是原链表中该类第一次出现的结点：遇到第一次出现时标记并保留；以后凡是相同的绝对值都因标记为 1 被摘除。两个分支均使待处理结点数减少 1，因此循环终止；算法只改变 `link`，保留结点的相对次序不变。
+5. **复杂度要严谨区分。** 对 $m$ 个结点的遍历与删除共 $O(m)$，因此通常讲义写**链表处理时间**为 $O(m)$；但 `calloc(n+1)` 必须初始化 $n+1$ 字节，严格计算整个程序的时间为 $O(m+n)$，额外空间为 $O(n)$。当 $m$ 与 $n$ 同阶时两种写法等价；若 $n\gg m$，不应忽略初始化开销。若改用散列表存放已出现的绝对值，期望时间 $O(m)$、空间 $O(\min(m,n))$，但散列碰撞处理方式会影响最坏时间。
+6. **细节辨析。** 辅助数组一定是 `n+1` 个槽，因为数据可为 0 或 $\pm n$；`abs(INT_MIN)` 有潜在溢出风险，但题设保证 $|data|\le n$ 且 $n$ 为 `int` 可表示的正整数，因此合法输入不可能是 `INT_MIN`。不能删除头结点。若空链表也创建数组，会产生非必要开销，可先判断 `head->link == NULL` 并直接返回。
 
-链表共有 $m$ 个数据结点，每个结点只处理一次，因此时间复杂度为
+</ExamExplanation>
 
-$$
-O(m).
-$$
+</ExamSolution>
 
-辅助数组长度为 $n+1$，故额外空间复杂度为
+</ExamQuestion>
 
-$$
-O(n).
-$$
+<span id="question-original-132" />
+
+<ExamQuestion>
+
+现有带头结点的单链表，数据仍满足 $|data|\le n$，但要求对每个绝对值只保留**最后一次出现**的原结点，而不是第一次出现。
+
+1. 设计算法，不创建新的数据结点；
+2. 要求保留结点的相对顺序与原链表一致；
+3. 分析时间、空间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>先原地逆置链表，按“保留第一次出现”删除重复绝对值，再逆置回来；于是保留下来的是原序列每类绝对值最后一次出现的结点。遍历 $O(m)$，初始化标记表 $O(n)$，总时间 $O(m+n)$，额外空间 $O(n)$。</ExamAnswer>
+
+<ExamExplanation>
+
+1. **逆向思考。** 对原链表从后往前看，“第一次遇到某绝对值”就是它在原顺序中的最后一次出现。但单链表不能倒退，因此先原地反转 `next/link` 指针，复用原题的去重算法，最后再恢复顺序。
+2. **原地逆置函数。** 仅修改链域，不复制数据，也不会创建新结点。
+
+```c
+void ReverseList(LNode *head) {
+    if (head == NULL) return;
+    LNode *pre = NULL, *cur = head->link;
+    while (cur != NULL) {
+        LNode *next = cur->link;
+        cur->link = pre;
+        pre = cur;
+        cur = next;
+    }
+    head->link = pre;
+}
+
+int KeepLastAbsolute(LNode *head, int n) {
+    if (head == NULL) return 0;
+    ReverseList(head);
+    int ok = DeleteEqualAbsolute(head, n);
+    ReverseList(head);       // 成功失败均恢复原始方向
+    return ok;
+}
+```
+
+3. **实例验证。** 原表 `[-2,3,2,-3,4,2]`：按绝对值分类，$2$ 的最后一次在第 $6$ 个位置，$3$ 的最后一次在第 $4$ 个位置，$4$ 只出现一次在第 $5$ 个位置。结果为 `[-3,4,2]`，顺序正是原链表中存活结点的先后次序。
+4. **复杂度和前提。** 两次逆置以及一次扫描均是 $O(m)$，标记数组初始化 $O(n)$，总时间 $O(m+n)$，空间 $O(n)$。必须保证去重前、后恢复链表方向；如果 `DeleteEqualAbsolute` 因分配失败直接返回，仍需逆置恢复，代码已经考虑。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-original-258" />
+
+<ExamQuestion>
+
+一个带头结点的单链表有 $m$ 个整数，但数据的绝对值**不再有已知上界**，且禁止使用数组、哈希表、排序以及创建新结点。
+
+1. 给出保留每种绝对值第一次出现的原地算法；
+2. 为什么外层指针、内层前驱与当前指针必须分开维护？
+3. 分析最坏时间和额外空间复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>固定前面已经保留的结点 `cur`，在其后扫描整个剩余链表，删除所有绝对值与 `cur` 相等的结点；随后 `cur` 前进。最坏时间 $O(m^2)$，额外空间 $O(1)$。</ExamAnswer>
+
+<ExamExplanation>
+
+1. **两层扫描。** 外层遍历当前尚保留的每一个绝对值类别，内层从其下一个结点扫描到链表末尾，删除与当前外层值属于同一类的所有结点；每次只保留第一次出现的结点，所以删除后无需重排链表。
+
+```c
+#include <stdlib.h>
+#include <stdint.h>
+
+// 通过 int64_t 计算 |int|，避免 -INT_MIN 溢出
+static int64_t Abs64(int x) {
+    int64_t t = (int64_t)x;
+    return t < 0 ? -t : t;
+}
+
+void DedupAbsNoExtra(LNode *head) {
+    if (head == NULL) return;
+    for (LNode *cur = head->link; cur != NULL; cur = cur->link) {
+        LNode *pre = cur, *p = cur->link;
+        while (p != NULL) {
+            if (Abs64(p->data) == Abs64(cur->data)) {
+                pre->link = p->link;
+                LNode *victim = p;
+                p = pre->link;
+                free(victim);
+            } else {
+                pre = p;
+                p = p->link;
+            }
+        }
+    }
+}
+```
+
+2. **变量职责。** `cur` 是被保留的“类别代表”，外层处理它后才会移动；`pre` 是内层当前结点 `p` 的直接前驱。删除 `p` 时始终保持 `pre->link` 指向下一个未处理结点，且 `pre` 不动；保留 `p` 时 `pre` 和 `p` 同时后移。这保证相邻两个重复结点也能连续删除。
+3. **复杂度与变化考法。** 当所有元素的绝对值都不相同时，内层扫描长度依次为 $m-1,m-2,\ldots,0$，合计 $m(m-1)/2=\Theta(m^2)$；除了几个指针与一个用于安全求绝对值的整数外无额外存储，所以空间 $O(1)$。若允许增加散列表，通常可把期望时间降为 $O(m)$，但不再是严格常数空间。
 
 </ExamExplanation>
 
@@ -653,82 +1027,157 @@ $$
 
 <ExamSolution>
 
-<ExamAnswer>用长度为 $n$ 的辅助数组标记 $1\sim n$ 是否出现。若存在第一个未被标记的位置 $i$，答案为 $i+1$；否则答案为 $n+1$。时间复杂度 $O(n)$，额外空间复杂度 $O(n)$。</ExamAnswer>
+<ExamAnswer>
+
+1. **思路：** 只需考察 $1\sim n+1$。用长度为 $n$ 的标记表记录 $1\sim n$ 是否出现，找第一个未标记的正整数。
+2. **实现：** 先将标记表清零，遍历原数组时只标记 $1\le A[i]\le n$ 的值，最后顺序查找第一个未标记位置；若全部标记则返回 $n+1$。
+3. **复杂度：** 时间 $O(n)$，额外空间 $O(n)$；输入数组不被修改。
+
+</ExamAnswer>
 
 <ExamExplanation>
 
-一个长度为 $n$ 的数组，其“未出现的最小正整数”只可能位于
-
-$$
-1,2,\ldots,n+1.
-$$
-
-原因是：若 $1\sim n$ 全都出现，则最小缺失正整数就是 $n+1$；否则答案一定是 $1\sim n$ 中第一个未出现的数。
-
-因此建立标记数组
-
-$$
-B[0\ldots n-1],
-$$
-
-其中 `B[i]` 表示正整数 $i+1$ 是否在原数组中出现。
-
-扫描原数组时，只处理满足
-
-$$
-1\le A[i]\le n
-$$
-
-的元素，令
-
-$$
-B[A[i]-1]=1.
-$$
-
-最后从前向后寻找第一个值为 0 的位置。
+1. **先证明候选范围，避免直接暴力枚举。** 输入共有 $n$ 个元素，互不相同的正整数至多 $n$ 个。如果 $1,2,\ldots,n$ 全部出现，答案一定是 $n+1$；如果不全出现，答案是其中最小的缺失值。因此答案必属于 $[1,n+1]$。负数、$0$、大于 $n$ 的数和重复值都不影响这段范围内的标记。所谓“最小缺失正整数”不是“数组中的最小值加一”，也不是“最小正数”。
+2. **用下标表示数值：** 令 `seen[x - 1]` 表示 $x$ 是否出现（$1\le x\le n$）。初始全部为 $0$；遇到合法 $x$ 时改为 $1$。即使 $x$ 重复出现，重复写 $1$ 不影响结果。遍历 `seen` 发现第一个 $0$ 的位置 $i$，答案为 $i+1$；否则为 $n+1$。
+3. **规范 C 代码（保留原数组）。**
 
 ```c
 #include <stdlib.h>
 
+/* 返回 -1 仅表示内存申请失败；题意保证 n >= 1 */
 int FindMissMin(const int A[], int n) {
-    int *B = (int *)calloc(n, sizeof(int));
-    if (B == NULL) {
-        return -1;
-    }
+    if (A == NULL || n <= 0) return -1;
+    unsigned char *seen = (unsigned char *)calloc((size_t)n, 1);
+    if (seen == NULL) return -1;
 
     for (int i = 0; i < n; ++i) {
-        if (A[i] >= 1 && A[i] <= n) {
-            B[A[i] - 1] = 1;
+        if (1 <= A[i] && A[i] <= n) {
+            seen[A[i] - 1] = 1;
         }
     }
-
     for (int i = 0; i < n; ++i) {
-        if (B[i] == 0) {
-            free(B);
+        if (seen[i] == 0) {
+            free(seen);
             return i + 1;
         }
     }
-
-    free(B);
+    free(seen);
     return n + 1;
 }
 ```
 
-原整理中的代码只判断了 `num > 0`，若出现 `num > n` 会访问 `vis[num-1]`，造成数组越界；这里已修正为同时检查上界 $n$。
+4. **手工追踪与正确性。** 对 $A=\{-5,3,2,3\}$，$n=4$，只标记 $2,3$，所以 `seen={0,1,1,0}`，首个未标记正整数是 $1$。对 $A=\{1,2,3\}$，`seen={1,1,1}`，答案为 $4$。因为扫描后有 `seen[x-1]==1` 当且仅当输入含 $x$，故第一个零位置对应“最小”缺失值；若无零，则 $1\sim n$ 均已出现，必返回 $n+1$。
+5. **复杂度要算上初始化。** `calloc` 初始化 $n$ 个单元、扫描输入 $n$ 次、扫描标记表最多 $n$ 次，所以是 $O(n)$ 时间、$O(n)$ 辅助空间。用 `unsigned char` 比 `int` 标记节省常数空间，但数量级依然是 $O(n)$。线性时间在比较/访问任意未读元素可能改变答案的一般情形下是渐近最优的。若允许修改原数组，还可以把空间降至 $O(1)$（见紧随其后的题）。
+6. **常见失分点。** 未检查 `A[i] <= n` 会产生越界；忘记把辅助表清零会得到随机结果；把 $0$ 误当正整数；返回 `i` 而非 `i+1`；忽视输入中存在重复元素；声称 `calloc` 是 $O(1)$ 初始化。
 
-两次线性扫描均为 $O(n)$，因此总时间复杂度为
+</ExamExplanation>
 
-$$
-O(n),
-$$
+</ExamSolution>
 
-辅助数组占用
+</ExamQuestion>
 
-$$
-O(n)
-$$
+<span id="question-original-133" />
 
-空间。
+<ExamQuestion>
+
+长度为 $n$ 的整型数组 $A$ 可原地修改，含负数、$0$ 和重复值。现在要求在**时间 $O(n)$、额外空间 $O(1)$** 内找出未出现的最小正整数。
+
+1. 设计原地算法，并解释为什么只需将 $1\sim n$ 放入对应的下标位置；
+2. 使用 C 语言实现，特别处理重复值导致的死循环；
+3. 在 $A=\{3,4,-1,1\}$ 和 $A=\{1,1\}$ 上说明结果及复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+1. 把满足 $1\le A[i]\le n$ 的值 $x$ 尽可能交换到 `A[x-1]`，最终从左向右找首个 `A[i] != i+1`。
+2. 交换前检查 `A[A[i]-1] != A[i]`，防止重复值互相交换。
+3. 两组答案分别为 $2$、$2$；时间 $O(n)$、额外空间 $O(1)$，但会改变原数组。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+1. **“值—位置”映射。** 对有效正整数 $x\in[1,n]$，其理想位置为下标 $x-1$。例如 $1$ 应在 `A[0]`，$4$ 应在 `A[3]`。数组长度仅为 $n$，范围之外的值不用安置。
+2. **为什么是 `while` 不是 `if`？** 交换后，新换入当前位置的值可能仍需转移，必须继续处理。若目标位置已经放着相同的数，说明出现重复，不应交换，否则可能无限循环。
+
+```c
+int FirstMissingPositive(int A[], int n) {
+    if (n <= 0) return 1;
+    for (int i = 0; i < n; ++i) {
+        while (A[i] >= 1 && A[i] <= n &&
+               A[A[i] - 1] != A[i]) {
+            int pos = A[i] - 1;
+            int temp = A[pos];
+            A[pos] = A[i];
+            A[i] = temp;
+        }
+    }
+    for (int i = 0; i < n; ++i)
+        if (A[i] != i + 1) return i + 1;
+    return n + 1;
+}
+```
+
+3. **样例。** `A={3,4,-1,1}` 经放置可得到 `{1,-1,3,4}`，首个不匹配的位置为下标 $1$，故答案 $2$。`A={1,1}` 中第二个 $1$ 因目标位置已经为 $1$ 而停止交换，下标 $1$ 缺少 $2$，答案也是 $2$。
+4. **摊还时间证明。** 外层循环有 $n$ 次；每次执行有效交换，至少让一个数到达自己唯一的正确位置，已放好的位置以后不会被破坏，因此总交换次数不超过 $n$ 的常数倍。虽然使用嵌套 `while`，总时间仍为 $O(n)$，并非 $O(n^2)$。只有几个临时变量，空间 $O(1)$。此算法不保持数组的原有顺序，是与原真题“只读方案”不同的空间取舍。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-original-259" />
+
+<ExamQuestion>
+
+一组调查数据由长度为 $n$ 的整数数组 $A$ 保存，要求不修改原数组。给定参数 $m$，其中 $1\le m\le n$，需统计 $[1,m]$ 内**未在数组中出现的正整数个数**，并给出该区间内最小的缺失正整数；若区间内没有缺失，则返回 `-1`。
+
+1. 设计不受重复值和区间外数值影响的算法；
+2. 使用 C 语言写出实现，并说明输入 $A=\{2,2,4,-3,10\},m=4$ 的结果；
+3. 分析时间和空间复杂度，并解释为何不能用“数组长度减去合法元素出现次数”来计算缺失个数。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+1. 建立长度为 $m$ 的布尔标记表，每个不同的有效值只标记一次，再统计零标记个数。
+2. 样例缺失的是 $1,3$，缺失数为 $2$ 个，最小缺失值为 $1$。
+3. 时间 $O(n+m)$，额外空间 $O(m)$；简单计数会把重复的 $2$ 算两次。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+1. **关键是去重与范围限制。** 设 `seen[x-1]=1` 当且仅当 $x\in[1,m]$ 出现过，遍历 $A$ 时忽略 $0$、负数、大于 $m$ 的值。重复值不会增加标记个数。
+2. **代码中用输出参数表示两个答案。**
+
+```c
+#include <stdlib.h>
+
+int MissingInRange(const int A[], int n, int m,
+                   int *missingCount, int *smallest) {
+    if (A == NULL || missingCount == NULL || smallest == NULL ||
+        m < 1 || m > n) return 0;
+    unsigned char *seen = (unsigned char *)calloc((size_t)m, 1);
+    if (seen == NULL) return 0;
+    for (int i = 0; i < n; ++i)
+        if (A[i] >= 1 && A[i] <= m) seen[A[i] - 1] = 1;
+    *missingCount = 0;
+    *smallest = -1;
+    for (int i = 0; i < m; ++i) {
+        if (!seen[i]) {
+            ++(*missingCount);
+            if (*smallest == -1) *smallest = i + 1;
+        }
+    }
+    free(seen);
+    return 1;
+}
+```
+
+3. **正确性与复杂度。** 扫描后标记表与区间内整数一一对应，未标记的数量就是缺失值数量，首个未标记位置就是最小缺失值。初始化和检查标记表各需 $O(m)$，遍历输入需 $O(n)$，总时间 $O(n+m)$，额外空间 $O(m)$。样例 $m=4$ 时有效出现的不同元素为 $\{2,4\}$，因此缺失值为 $\{1,3\}$。若直接从 $m$ 中减去“落在范围内的输入个数”，重复的 $2$ 会让结果少计一个，属于将**出现次数**和**不同数值的个数**混淆。
 
 </ExamExplanation>
 
@@ -773,49 +1222,36 @@ $$
 
 <ExamSolution>
 
-<ExamAnswer>先找中点，将后半段原地逆置，再把前、后两段交替合并。时间复杂度为 $O(n)$，额外空间复杂度为 $O(1)$。</ExamAnswer>
+<ExamAnswer>
+
+1. **设计：** 快慢指针一次找到前半段末尾，断开链表；将后半段原地逆置；把两段按“前段一个、后段一个”的次序交替连接。
+2. **实现：** 见下列 C 代码，全程只修改 `next` 指针，不新建或删除数据结点。对奇数长度，前半段多保留一个结点。
+3. **复杂度：** 寻中点、逆置、交织各执行 $O(n)$ 次指针操作，时间 $O(n)$、额外空间 $O(1)$。
+
+</ExamAnswer>
 
 <ExamExplanation>
 
-### 基本思想
-
-目标序列需要依次取
-
-$$
-a_1,a_n,a_2,a_{n-1},a_3,a_{n-2},\ldots
-$$
-
-因此，若每次都从单链表尾部寻找结点，会造成反复遍历，时间复杂度上升到 $O(n^2)$。
-
-更高效的做法分三步：
-
-1. 使用快慢指针找到链表中点，把链表分成前、后两段；
-2. 将后半段链表**原地逆置**，于是后半段的结点顺序变为 $a_n,a_{n-1},a_{n-2},\ldots$；
-3. 将前半段与逆置后的后半段交替连接。
-
-### C 语言实现
+1. **为什么不能用尾插式的逐个查尾？** 单链表没有前驱指针。若先取 $a_1$，再从表头扫描取得 $a_n$ 的前驱，下一次又扫描取得 $a_{n-1}$ 的前驱，就会重复扫描，整体可达 $O(n^2)$。题目规定额外空间 $O(1)$，也不能用存储所有结点地址的数组。解决思路是把“倒序取后半段”转化为“原地反转后顺序取”。
+2. **分成两半的边界。** 令 `slow=fast=head->next`，循环条件为 `fast->next != NULL && fast->next->next != NULL`。若 $n=2m$，`slow` 位于 $a_m$；若 $n=2m+1$，位于 $a_{m+1}$。前半段长度为 $\lceil n/2\rceil$，后半段为 $\lfloor n/2\rfloor$；保证交替合并时前半段不会先耗尽。先用 `second=slow->next; slow->next=NULL` 真正断开两段，避免后续形成环。
+3. **三段 C 实现。** 题目中的 `NODE` 为带 `next` 指针的结点，`head` 是头结点。
 
 ```c
 void Rearrange(NODE *head) {
-    if (head == NULL || head->next == NULL || head->next->next == NULL) {
-        return;
-    }
+    if (head == NULL || head->next == NULL ||
+        head->next->next == NULL) return;   /* 0 或 1 个数据结点 */
 
-    /* 第 1 步：找到前半段的最后一个结点 */
-    NODE *slow = head->next;
-    NODE *fast = head->next;
+    /* 一、寻找前半段末结点 */
+    NODE *slow = head->next, *fast = head->next;
     while (fast->next != NULL && fast->next->next != NULL) {
         slow = slow->next;
         fast = fast->next->next;
     }
-
-    /* 将前、后两段断开 */
     NODE *second = slow->next;
-    slow->next = NULL;
+    slow->next = NULL;                     /* 必须断链 */
 
-    /* 第 2 步：原地逆置后半段 */
-    NODE *prev = NULL;
-    NODE *cur = second;
+    /* 二、原地反转后半段 */
+    NODE *prev = NULL, *cur = second;
     while (cur != NULL) {
         NODE *next = cur->next;
         cur->next = prev;
@@ -824,58 +1260,171 @@ void Rearrange(NODE *head) {
     }
     second = prev;
 
-    /* 第 3 步：交替合并两段 */
+    /* 三、前段与反转后后段交替合并 */
     NODE *first = head->next;
     while (second != NULL) {
         NODE *next1 = first->next;
         NODE *next2 = second->next;
-
         first->next = second;
         second->next = next1;
-
         first = next1;
         second = next2;
     }
 }
 ```
 
-以偶数个结点为例，若原链表为
+4. **手动模拟。** 若 $n=6$，先分为 $(a_1,a_2,a_3)$ 与 $(a_4,a_5,a_6)$，逆置后段为 $(a_6,a_5,a_4)$，交替得到 $a_1,a_6,a_2,a_5,a_3,a_4$。若 $n=5$，分为 $(a_1,a_2,a_3)$ 与 $(a_4,a_5)$，逆置并交替得 $a_1,a_5,a_2,a_4,a_3$。$n=0$ 或 $n=1$ 无须操作；$n=2$ 得到原序列，不产生空指针解引用。
+5. **正确性不变量。** 反转阶段，`prev` 始终指向已处理后半段的逆序链，`cur` 指向未处理部分；每次转移一个结点，保证所有结点恰好出现一次。合并阶段，每轮把未合并的前段首结点及后段首结点接到输出序列末尾；两段长度关系使 `first` 在需要解引用时始终非空。最终全部原结点重排，无丢失、无重复、无新增结点。
+6. **复杂度与易错点。** 找中点至多遍历 $n$ 级别，逆置 $\lfloor n/2\rfloor$ 次，合并 $\lfloor n/2\rfloor$ 次，因此 $O(n)$ 时间；只用有限指针，$O(1)$ 空间。**注意**：①头结点不计入 $a_1$；②拆链必须设置 `slow->next=NULL`；③调整 `next` 前先保存 `next1`、`next2`；④不可写成递归逆置而同时宣称严格 $O(1)$ 栈空间；⑤指针改变顺序而不是复制 `data` 值。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-original-134" />
+
+<ExamQuestion>
+
+一个**不带头结点**的单链表含 $n\ge1$ 个结点，依次为 $a_1,a_2,\ldots,a_n$。现要求只改变链接关系，把结点重排为
 
 $$
-a_1\to a_2\to a_3\to a_4\to a_5\to a_6,
+a_n,a_1,a_{n-1},a_2,a_{n-2},a_3,\ldots
 $$
 
-则分段后为
+1. 给出 $O(n)$ 时间、$O(1)$ 额外空间的算法思想；
+2. 编写 C 函数 `NODE *ReorderFromTail(NODE *head)`，返回新表头；
+3. 给出 $n=5$ 与 $n=6$ 的最终序列，并解释为什么要考虑原中点的归属。
 
-$$
-a_1\to a_2\to a_3,
-\qquad
- a_4\to a_5\to a_6,
-$$
+<ExamSolution>
 
-后半段逆置为
+<ExamAnswer>
 
-$$
-a_6\to a_5\to a_4,
-$$
+1. 将链表分为“左段长度 $\lfloor n/2\rfloor$”和“右段长度 $\lceil n/2\rceil$”，右段逆置后，从右段结点开始交织。
+2. 每轮先取右段一个，再取左段一个；见代码。
+3. $n=5$：$a_5,a_1,a_4,a_2,a_3$；$n=6$：$a_6,a_1,a_5,a_2,a_4,a_3$。
 
-交替合并即可得到
+</ExamAnswer>
 
-$$
-a_1\to a_6\to a_2\to a_5\to a_3\to a_4.
-$$
+<ExamExplanation>
 
-找中点、逆置和合并都只需线性扫描，因此总时间复杂度为
+1. **与原题的微妙区别。** 新序列从右半段取第一个，奇数长度时为了避免左段提前用完，应把原中点 $a_{(n+1)/2}$ 放进右半段。先找左段末结点：使用哑结点 `dummy`，令 `slow=&dummy,fast=head`，每轮快指针走两步、慢指针走一步，最后慢指针恰好位于左段末结点（$n=1$ 时就是哑结点）。
+2. **代码。**
 
-$$
-O(n),
-$$
+```c
+#include <stddef.h>
 
-只使用常数个指针变量，额外空间复杂度为
+NODE *ReorderFromTail(NODE *head) {
+    if (head == NULL || head->next == NULL) return head;
+    NODE dummy;
+    dummy.next = head;
+    NODE *slow = &dummy, *fast = head;
+    while (fast != NULL && fast->next != NULL) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    NODE *right = slow->next;
+    slow->next = NULL;
 
-$$
-O(1).
-$$
+    NODE *rev = NULL;
+    while (right != NULL) {
+        NODE *next = right->next;
+        right->next = rev;
+        rev = right;
+        right = next;
+    }
+
+    NODE out; NODE *tail = &out;
+    out.next = NULL;
+    NODE *left = dummy.next;
+    while (rev != NULL) {
+        NODE *rnext = rev->next;
+        tail->next = rev;
+        tail = rev;
+        rev = rnext;
+        if (left != NULL) {
+            NODE *lnext = left->next;
+            tail->next = left;
+            tail = left;
+            left = lnext;
+        }
+    }
+    tail->next = NULL;
+    return out.next;
+}
+```
+
+3. **边界校验。** $n=5$：左段 $(a_1,a_2)$，右段 $(a_3,a_4,a_5)$，逆转右段后交织得 $(a_5,a_1,a_4,a_2,a_3)$。$n=6$：左段 $(a_1,a_2,a_3)$，右段 $(a_4,a_5,a_6)$，得到 $(a_6,a_1,a_5,a_2,a_4,a_3)$。如果奇数长度时把中点放在左段，会使右段较短，在最后形成错误的输出模式。
+4. **效率。** 每个结点只经历常数次访问和连线，时间 $O(n)$，栈上哑结点、输出哑结点和指针均为常量，额外空间 $O(1)$，也没有复制数据结点。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-original-260" />
+
+<ExamQuestion>
+
+给定不带头结点的单链表，要求判断结点数据从前到后是否构成回文序列，如 $1\to2\to3\to2\to1$。判断完成后**必须将链表完整恢复**，不能申请与链表长度成比例的辅助存储。
+
+1. 设计时间 $O(n)$、额外空间 $O(1)$ 的算法，并说明偶数与奇数长度的处理；
+2. 用 C 实现，要求无论判断结果如何都恢复原链表；
+3. 分析为何仅比较而不恢复后半段不符合要求。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+1. 快慢指针定位前半段末结点，逆置后半段并与前半段逐一比较；最后对后半段再次逆置并接回。
+2. 代码在比较完成后统一执行恢复步骤，不因不等而提前返回。
+3. 两次逆置均为 $O(n)$ 时间、$O(1)$ 额外空间，恢复后链表的顺序和结点身份都不变。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+1. **中点选择。** 从 `slow=fast=head` 出发，以 `fast->next && fast->next->next` 为条件推进，$n=5$ 时 `slow` 在第 $3$ 个结点，$n=4$ 时在第 $2$ 个结点。因此 `slow->next` 正好是应对称比较的后半段起点，不需要比较奇数长度中点自身。
+2. **代码示意（沿用原题的 `NODE`）。**
+
+```c
+#include <stdbool.h>
+
+static NODE *Reverse(NODE *p) {
+    NODE *prev = NULL;
+    while (p != NULL) {
+        NODE *next = p->next;
+        p->next = prev;
+        prev = p;
+        p = next;
+    }
+    return prev;
+}
+
+bool IsPalindromeRestore(NODE *head) {
+    if (head == NULL || head->next == NULL) return true;
+    NODE *slow = head, *fast = head;
+    while (fast->next != NULL && fast->next->next != NULL) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    NODE *second = Reverse(slow->next);
+    NODE *p = head, *q = second;
+    bool same = true;
+    while (q != NULL) {
+        if (p->data != q->data) same = false;
+        p = p->next;
+        q = q->next;
+    }
+    slow->next = Reverse(second);    /* 无论 same 如何均恢复 */
+    return same;
+}
+```
+
+3. **逐例说明。** `1->2->3->2->1` 的后段 `2->1` 逆置为 `1->2`，与前段从头比较均相等；`1->2->3->4` 的后段 `3->4` 逆置为 `4->3`，首个比较就不相等，但仍必须逆置恢复为 `3->4`。空表和单结点自然是回文。
+4. **算法本质。** 原题的“后半段逆置 + 交织”把后段倒序元素用于输出，本题则用于比较，故两题共用**快慢指针 + 局部逆置**。比较指针 `q` 只走后半段，不存在空指针误用。时间 $O(n)$、额外空间 $O(1)$；若在首次不等时直接 `return false`，会让原链表保持局部逆序，违反“不改变链表”的条件。
 
 </ExamExplanation>
 
@@ -929,94 +1478,199 @@ $$
 
 <ExamSolution>
 
-<ExamAnswer>三个数组各设一个指针，每次计算当前三元组的距离，然后只将三个当前元素中的最小者对应的指针后移。若 $n=|S_1|+|S_2|+|S_3|$，时间复杂度为 $O(n)$，额外空间复杂度为 $O(1)$。</ExamAnswer>
+<ExamAnswer>
+
+1. **化简目标：** 设三元组中的最小值、最大值分别为 $lo,hi$，则 $D=2(hi-lo)$，故只需最小化当前三数的极差。
+2. **三指针：** 三个升序数组各设一个下标，每轮更新最小距离，随后仅将当前最小元素所在数组的指针右移；有相同最小值时移动其中任意一个即可。
+3. **复杂度：** 设三个数组长度之和为 $N$，时间 $O(N)$，额外空间 $O(1)$。
+
+</ExamAnswer>
 
 <ExamExplanation>
 
-### 关键性质
-
-设当前三个数按大小排列为
+1. **先进行数学化简。** 对任意三个整数，重新记为 $x\le y\le z$，有
 
 $$
-x\le y\le z.
+D=(y-x)+(z-y)+(z-x)=2(z-x)=2(\max\{a,b,c\}-\min\{a,b,c\}).
 $$
 
-则
-
-$$
-|x-y|+|y-z|+|z-x|
-=(y-x)+(z-y)+(z-x)
-=2(z-x).
-$$
-
-所以三元组距离只由其中的**最大值与最小值之差**决定：
-
-$$
-D=2(\max-\min).
-$$
-
-若当前最小值不变，仅增大中间值或最大值，不可能缩小当前的最大最小差；因此，要寻找更小的距离，下一步应推进**当前最小元素所在数组的指针**。
-
-### 算法
+   中间值 $y$ 本身不会进入简化后的式子，因此不必枚举全部 $|S_1||S_2||S_3|$ 种组合。题目求的是最小**距离**，不是三元组和最小，也不是让三个数分别最接近 $0$。
+2. **贪心动作为什么正确？** 当前值为 $(a,b,c)$，最小者设为 $a$，最大者为 $M$。若保留 $a$ 不动，而只推进另两个数组指针，它们的值只能不减，新的最大值 $M'\ge M$；只要 $a$ 仍是三个数之一，就有新极差 $\max-MIN\ge M-a$（实际上若其他数组推进超过 $a$，最小仍是 $a$）。所以**不移动当前最小者，不可能找到更小的极差**。可以安全地略过这类组合，转而推进最小者。若有多个相同的最小者，可选择其中一个先移动；下一轮仍可处理另一个。
+3. **实现细节：** 数组长度分别为 $n_1,n_2,n_3$，每次迭代必须保证三个下标均未越界；若任何数组耗尽，已经无法再组成合法三元组，立即结束。特别注意目标距离可能超过 `int` 的范围：如 $(-2147483648,0,2147483647)$ 对应距离是 $8589934590$，应在减法前提升到 `long long`。
 
 ```c
 #include <limits.h>
-#include <stdlib.h>
 
-int Min3Distance(int A[], int n1,
-                 int B[], int n2,
-                 int C[], int n3) {
+/* 题设保证三个数组非空、各自按非降序排列 */
+long long Min3Distance(const int A[], int n1,
+                       const int B[], int n2,
+                       const int C[], int n3) {
     int i = 0, j = 0, k = 0;
-    int dmin = INT_MAX;
-
+    long long best = LLONG_MAX;
     while (i < n1 && j < n2 && k < n3) {
-        int a = A[i];
-        int b = B[j];
-        int c = C[k];
-
-        int d = abs(a - b) + abs(b - c) + abs(c - a);
-        if (d < dmin) {
-            dmin = d;
-        }
-
-        // 已达到理论最小值，不可能继续改进
-        if (dmin == 0) {
-            break;
-        }
-
-        // 只推进当前三个元素中的最小者
-        if (a <= b && a <= c) {
-            ++i;
-        } else if (b <= a && b <= c) {
-            ++j;
-        } else {
-            ++k;
-        }
+        long long a = A[i], b = B[j], c = C[k];
+        long long lo = a, hi = a;
+        if (b < lo) lo = b;
+        if (c < lo) lo = c;
+        if (b > hi) hi = b;
+        if (c > hi) hi = c;
+        long long d = 2LL * (hi - lo);
+        if (d < best) best = d;
+        if (best == 0) break;  /* 绝对下界：已最优 */
+        if (a <= b && a <= c) ++i;
+        else if (b <= a && b <= c) ++j;
+        else ++k;
     }
-
-    return dmin;
+    return best;
 }
 ```
 
-原整理中有多处下标识别错误，例如把 $C[k]$ 写成了 $C[j]$、把三个集合长度条件写成了错误的符号；这里已按三指针算法统一修正。
+4. **样例关键路径。** $S_1=\{-1,0,9\}$、$S_2=\{-25,-10,10,11\}$、$S_3=\{2,9,17,30,41\}$：初始最小值 $-25$，应推进 $S_2$；当 $S_2$ 下标移到 $10$ 而 $S_1$ 当前还小于 $10$ 时，推进 $S_1$；在 $(9,10,9)$ 上得到 $D=2(10-9)=2$。全局答案不可能为负；若出现三个相等的数则提前得到 $0$。
+5. **复杂度证明：** 每轮三个下标之和严格增加 $1$，每个指针只增加，最多前进 $N$ 次；每轮比较常数次，故总时间 $O(N)$，与穷举的 $O(n_1n_2n_3)$ 相比明显改进。仅保存三个下标、极值及最优解，额外空间 $O(1)$。
+6. **常见错误：** ①推进最大元素使值更大，方向错误；②一次推进三个指针，可能跳过最优搭配；③把距离写成 `$|a-b|+|b-c|$` 漏了第三项；④下标 `C[j]`、数组长度 `n2` 与 `n3` 混用；⑤在 `int` 类型上先算 `a-b` 再强制转换，溢出已发生。
 
-三个指针都只会单调向后移动，每个数组元素最多被访问常数次。若
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-original-135" />
+
+<ExamQuestion>
+
+现有 $4$ 个非空、分别升序存储的整数数组 $S_1,S_2,S_3,S_4$，需各取一个元素构成四元组 $(a,b,c,d)$，使**极差**
 
 $$
-n=|S_1|+|S_2|+|S_3|,
+R(a,b,c,d)=\max\{a,b,c,d\}-\min\{a,b,c,d\}
 $$
 
-则时间复杂度为
+最小。例如 $S_1=\{1,8\}$、$S_2=\{4,10\}$、$S_3=\{6,9\}$、$S_4=\{7,11\}$。
+
+1. 能否推广原题三指针方法？说明每一步的推进规则及正确性；
+2. 用 C 实现最小极差计算；
+3. 写出示例答案，并分析长度之和为 $N$ 时的复杂度。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+1. 可以。维护四个下标，每轮求当前四数的最大值、最小值，更新答案后只推进**一个最小值所在的下标**。
+2. 代码使用 `long long` 表示极差，避免整型减法溢出。
+3. 示例最优可取 $(8,10,9,7)$，极差为 $10-7=3$；时间 $O(N)$、额外空间 $O(1)$。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+1. **正确性来自同一个“必要改进条件”。** 一旦固定当前最小值 $m$，只增加其他数组的下标无法让当前四元组的最大值下降，因此新极差不会优于已考察的当前极差。为了可能进一步缩小极差，至少有一个取当前最小值的数组必须向右推进。
+2. **四数组完整 C 实现。** 将四组指针统一放在下标数组里，避免写四套近似代码。
+
+```c
+#include <limits.h>
+
+long long MinRange4(const int *S[4], const int len[4]) {
+    int p[4] = {0, 0, 0, 0};
+    long long best = LLONG_MAX;
+    while (1) {
+        for (int t = 0; t < 4; ++t)
+            if (p[t] >= len[t]) return best;
+
+        long long lo = S[0][p[0]], hi = lo;
+        int minId = 0;
+        for (int t = 1; t < 4; ++t) {
+            long long v = S[t][p[t]];
+            if (v < lo) { lo = v; minId = t; }
+            if (v > hi) hi = v;
+        }
+        if (hi - lo < best) best = hi - lo;
+        if (best == 0) return 0;
+        ++p[minId];
+    }
+}
+```
+
+3. **模拟。** 初始 $(1,4,6,7)$ 极差为 $6$，推进最小值 $1$ 所在数组得到 $(8,4,6,7)$，极差为 $4$；继续推进 $4$ 所在数组得到 $(8,10,6,7)$，极差为 $4$；推进 $6$ 得到 $(8,10,9,7)$，极差为 $3$。之后继续扫描不能找到比 $3$ 更小的组合，结果为 $3$。
+4. **进一步推广。** 若有 $k$ 个升序数组，每轮线性查找最小者需 $O(k)$，总计 $O(Nk)$；以小根堆维护当前最小元素、同时维护当前最大值，每轮更新堆需 $O(\log k)$，总时间 $O(N\log k)$、额外空间 $O(k)$。当 $k=4$ 固定时，两种写法的时间均为 $O(N)$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-original-261" />
+
+<ExamQuestion>
+
+若原题的三个非空整数数组**未排序**，允许在计算过程中改变数组的元素次序，要求求出同一距离函数
 
 $$
-O(n),
+D(a,b,c)=|a-b|+|b-c|+|c-a|
 $$
 
-额外空间复杂度为
+的最小值。
+
+1. 说明原题“三指针只推进最小者”的贪心规则能否直接用于无序数组；
+2. 提出具有渐近效率保证的完整方案，说明关键处理过程；
+3. 设三个数组总长度为 $N$，分析时间和空间复杂度，并与三重循环比较。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+1. 不能直接使用。贪心证明依赖“同一个数组指针后移后，其值不减”。
+2. 用原地堆排序分别将三个数组排成非降序，再使用原题三指针；堆排序最坏时间 $O(n\log n)$，辅助空间 $O(1)$。
+3. 堆排序方案最坏时间 $O(N\log N)$、额外空间 $O(1)$；排序后扫描时间 $O(N)$。如改用归并排序，时间相同但需要 $O(N)$ 辅助空间。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+1. **反例揭示必要条件。** 考虑当前三数 $(1,5,8)$，若存放 $1$ 的数组后一个元素是 $100$，而后续又有 $6$，推进一次可能瞬间扩大极差。更根本地说，在无序数组中推进某个下标不能保证丢弃的候选值之后不再形成最优三元组，因此原证明不成立。
+2. **排序后求解的完整流程。** 对三个数组分别执行原地堆排序，升序排列后即可应用原真题的三指针算法。排序只改变排列顺序，不改变三个集合中的候选数值，所以全部可选三元组及其最优值保持不变。堆排序的最坏时间 $O(n_t\log n_t)$，比直接依赖未经指定性能的库排序更适合说明严格上界。
+3. **可运行的 C 核心代码。** 下方 `HeapSort` 是升序原地堆排序；`Min3Distance` 使用本题原真题解析中的完整实现。
+
+```c
+/* 对堆 a[0..last] 的 root 做最大堆下沉 */
+static void SiftDown(int a[], int root, int last) {
+    while (last >= 1 && root <= (last - 1) / 2) {
+        int child = 2 * root + 1;
+        if (child < last && a[child + 1] > a[child]) ++child;
+        if (a[root] >= a[child]) break;
+        int t = a[root]; a[root] = a[child]; a[child] = t;
+        root = child;
+    }
+}
+
+static void HeapSort(int a[], int n) {
+    for (int i = n / 2; i > 0; ) {
+        --i;
+        SiftDown(a, i, n - 1);
+    }
+    for (int end = n - 1; end > 0; --end) {
+        int t = a[0]; a[0] = a[end]; a[end] = t;
+        SiftDown(a, 0, end - 1);
+    }
+}
+
+long long MinDistanceUnsorted(int A[], int n1,
+                              int B[], int n2,
+                              int C[], int n3) {
+    HeapSort(A, n1);
+    HeapSort(B, n2);
+    HeapSort(C, n3);
+    return Min3Distance(A, n1, B, n2, C, n3);
+}
+```
+
+4. **复杂度计算。** 三次堆排序花费
 
 $$
-O(1).
+O(n_1\log n_1+n_2\log n_2+n_3\log n_3)\subseteq O(N\log N),
 $$
+
+   随后的三指针为 $O(N)$；堆排序原地进行，三指针也只维护常数个变量，故额外空间为 $O(1)$。三重循环的 $O(n_1n_2n_3)$ 在三个数组均较长时远慢于“先排序后扫描”。本题的核心不是背诵贪心口令，而是识别贪心的**单调性前提**。
 
 </ExamExplanation>
 
@@ -1066,68 +1720,189 @@ void calMulMax(int A[], int res[], int n);
 
 <ExamSolution>
 
-<ExamAnswer>从右向左扫描，同时维护后缀最大值 `maxValue` 和后缀最小值 `minValue`。对每个 `A[i]`，取 `A[i]*maxValue` 与 `A[i]*minValue` 的较大者。时间复杂度 $O(n)$，额外空间复杂度 $O(1)$。</ExamAnswer>
+<ExamAnswer>
+
+1. **思路：** 对固定 $i$，若 $A[i]\ge0$，应乘以区间 $A[i\ldots n-1]$ 的最大值；若 $A[i]<0$，应乘以该区间最小值。因此每个后缀只需维护最大值与最小值。
+2. **实现：** 从右向左更新后缀两端极值，计算 `res[i] = max(A[i]*maxSuffix, A[i]*minSuffix)`。
+3. **复杂度：** 时间 $O(n)$，除结果数组外额外空间 $O(1)$。题目使用 `int` 类型，默认乘积在 `int` 可表示范围内；否则需要扩大计算和结果类型。
+
+</ExamAnswer>
 
 <ExamExplanation>
 
-固定 $i$ 后，$A[i]$ 是常数，需要在后缀
+1. **先看约束 $i\le j\le n-1$。** 这是**后缀查询**：$res[i]$ 只由位置 $i$ 及其右侧的值决定。不能把整个数组的最大或最小元素拿来乘，因为它们可能处于 $i$ 的左侧；也不能把题目误解成只取 $j>i$，因为 $j=i$ 是允许的，负数与自身相乘可能取得最大值。
+2. **考虑符号，找乘积的极值。** 固定 $x=A[i]$，对变量 $y=A[j]$，函数 $f(y)=xy$ 在 $x>0$ 时随 $y$ 递增，在 $x<0$ 时随 $y$ 递减，$x=0$ 时恒为 $0$。因此仅检查后缀最大值 $M_i$ 与最小值 $m_i$ 就足够：
 
 $$
-A[i],A[i+1],\ldots,A[n-1]
+res[i]=\max\{A[i]M_i,\ A[i]m_i\},
+\quad M_i=\max_{i\le j<n} A[j],\quad m_i=\min_{i\le j<n} A[j].
 $$
 
-中选择一个 $A[j]$ 使乘积最大。
-
-若 $A[i]>0$，应选择该后缀中的最大值；若 $A[i]<0$，应选择该后缀中的最小值。统一写成
-
-$$
-res[i]=\max\{A[i]\cdot \maxSuffix_i,\ A[i]\cdot \minSuffix_i\}.
-$$
-
-从右向左扫描即可边更新后缀极值边计算答案：
+3. **最自然的扫描方向是从右向左。** 保持循环不变量：当处理完下标 $i$ 的两次极值更新后，`maxValue`、`minValue` 正好表示 $A[i..n-1]$ 的最大、最小值；于是可立刻写出正确的 `res[i]`。若从左到右，则当前右侧后缀尚未读到，难以仅用常数状态回答每个位置的要求。
 
 ```c
+/* 要求 n >= 1，且所有所求乘积在 int 范围内 */
 void calMulMax(int A[], int res[], int n) {
-    if (n <= 0) return;
-
-    int maxValue = A[n - 1];
-    int minValue = A[n - 1];
-
+    if (A == NULL || res == NULL || n <= 0) return;
+    int maxValue = A[n - 1], minValue = A[n - 1];
     for (int i = n - 1; i >= 0; --i) {
-        if (A[i] > maxValue) maxValue = A[i];
-        if (A[i] < minValue) minValue = A[i];
-
-        int p1 = A[i] * maxValue;
-        int p2 = A[i] * minValue;
-        res[i] = (p1 > p2) ? p1 : p2;
+        int x = A[i];                 /* 先保存原值 */
+        if (x > maxValue) maxValue = x;
+        if (x < minValue) minValue = x;
+        int p = x * maxValue;
+        int q = x * minValue;
+        res[i] = (p >= q) ? p : q;
     }
 }
 ```
 
-以
+4. **逐位置计算。** 对 $A=\{1,4,-9,6\}$，从右到左为：
+
+| $i$ | $A[i]$ | 当前后缀最小值 $m_i$ | 最大值 $M_i$ | $res[i]$ |
+|---|---:|---:|---:|---:|
+| 3 | 6 | 6 | 6 | 36 |
+| 2 | -9 | -9 | 6 | 81 |
+| 1 | 4 | -9 | 6 | 24 |
+| 0 | 1 | -9 | 6 | 6 |
+
+   所以 `res={6,24,81,36}`。注意 $A[2]=-9$ 时，$(-9)\times(-9)=81$，不能忽略题意允许 $j=i$。
+5. **正确性与优化。** 使用数学归纳法：$i=n-1$ 时后缀只有一个值，结论成立；假设已维护右侧后缀极值，加入 $A[i]$ 后执行两次比较即可得到新极值，再根据乘法单调性给出本位置最优乘积。因此对全部 $i$ 成立。每次循环常数操作，总时间 $O(n)$；结果数组 `res` 是题目要求的输出，不计辅助空间，故额外空间 $O(1)$。
+6. **面试与考研常见陷阱。** ①不能只维护后缀最大值，负数乘负数可能最大；②不能使用前缀极值；③只有最后一个元素时，结果是 $A[n-1]^2$；④若 `res==A`（完全同一数组），这种从右向左的顺序**仍然安全**：在覆盖 `A[i]` 前已经读到其原值，往后只用缓存的后缀极值；若是存在偏移的部分重叠区间，则不可直接保证安全；⑤若输入接近 `INT_MAX`，应使用下面的 64 位宽度版本，避免有符号整数溢出。
+
+```c
+/* 当 int × int 可能超范围时，把输出改成 long long */
+void calMulMax64(const int A[], long long res[], int n) {
+    if (n <= 0) return;
+    long long hi = A[n - 1], lo = A[n - 1];
+    for (int i = n - 1; i >= 0; --i) {
+        long long x = A[i];
+        if (x > hi) hi = x;
+        if (x < lo) lo = x;
+        long long p = x * hi, q = x * lo;
+        res[i] = (p > q) ? p : q;
+    }
+}
+```
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-original-136" />
+
+<ExamQuestion>
+
+若将原题的约束改为**严格向右选择**：对每个 $0\le i<n-1$，求
 
 $$
-A=\{1,4,-9,6\}
+res[i]=\max_{i<j<n}\{A[i]A[j]\},
 $$
 
-为例：
+并规定 `res[n-1]=LLONG_MIN` 表示不存在合法的 $j$，结果存于 `long long res[]`。
 
-- $i=3$：后缀最大、最小值均为 $6$，故 $res[3]=36$；
-- $i=2$：后缀最小值为 $-9$，故 $res[2]=(-9)(-9)=81$；
-- $i=1$：后缀最大值为 $6$，故 $res[1]=4\times6=24$；
-- $i=0$：后缀最大值为 $6$，故 $res[0]=1\times6=6$。
+1. 设计 $O(n)$ 时间、$O(1)$ 额外空间的算法；
+2. 给出 C 实现，说明“先查询、后更新”的必要性；
+3. 对 $A=\{1,4,-9,6\}$ 求 `res` 并与原题比较。
 
-数组只扫描一遍，因此时间复杂度为
+<ExamSolution>
+
+<ExamAnswer>
+
+1. 从右向左扫，在处理 $i$ 时维护仅由 $A[i+1..n-1]$ 构成的后缀最小值和最大值。
+2. 先用缓存的极值计算 `res[i]`，再将 $A[i]$ 加入缓存；否则会错误地允许 $j=i$。
+3. `res={6,24,-54,LLONG_MIN}`；原题在 $i=2$ 允许 $(-9)^2=81$，新题不允许。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+1. **“大于”与“大于等于”是关键差异。** 原题允许自己乘自己，所以每轮先更新后缀极值再求乘积；本题要求另一个位置 $j>i$，所以每轮计算时必须排除 `A[i]`，即先求乘积，后用 `A[i]` 更新最值。
+2. **C 实现。**
+
+```c
+#include <limits.h>
+
+void calMulMaxRight(const int A[], long long res[], int n) {
+    if (A == NULL || res == NULL || n <= 0) return;
+    res[n - 1] = LLONG_MIN;   /* 无合法位置 */
+    if (n == 1) return;
+    long long hi = A[n - 1], lo = A[n - 1];
+    for (int i = n - 2; i >= 0; --i) {
+        long long x = A[i];
+        long long p = x * hi, q = x * lo;
+        res[i] = (p > q) ? p : q;
+        if (x > hi) hi = x;    /* 查询后才扩展后缀 */
+        if (x < lo) lo = x;
+    }
+}
+```
+
+3. **验证。** 对 $\{1,4,-9,6\}$：$i=3$ 无候选；$i=2$ 只能选择 $6$，得 $-54$；$i=1$ 可在 $-9$ 与 $6$ 中选择，使乘积最大为 $24$；$i=0$ 最优仍是乘以 $6$，得 $6$。因此输出如答案所示。循环 $n-1$ 次，时间 $O(n)$，空间 $O(1)$；由于结果数组以 `long long` 保存，输入为 `int` 时乘积不会越过 64 位有符号整数范围。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<span id="question-original-262" />
+
+<ExamQuestion>
+
+给定整型数组 $A[0..n-1]$，现在不仅要求原题的最大乘积，还要在数组 `pos` 中记录每个位置能实现该最大乘积的**最小下标** $j$（允许 $j=i$）。若多个 $j$ 的乘积相同，应优先选最小下标。
+
+1. 如何在维护后缀最大值、最小值的同时维护相应的下标？
+2. 编写 $O(n)$ 时间、$O(1)$ 额外空间的 C 算法，结果存入 `long long res[]` 和 `int pos[]`；
+3. 对 $A=\{0,2,-3,-3,2\}$ 写出 `res` 与 `pos`。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+1. 右向左更新后缀极值时，若遇到与旧极值相等的新元素，覆盖其下标，使缓存的下标始终是该极值在后缀中的**最左位置**。
+2. 按正、负、零三种情况选 `maxIndex`、`minIndex` 或 $i$。
+3. `res={0,4,9,9,4}`，`pos={0,1,2,3,4}`。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+1. **关于并列最优。** 在处理下标 $i$ 时，若 `A[i]` 与缓存的最大值相等，最左下标应改为 $i$；最小值同理。因此更新条件使用 `>=` 与 `<=`，而不是严格比较。若 $x=A[i]>0$，选择后缀最大值的最左下标；若 $x<0$，选择后缀最小值的最左下标；若 $x=0$，所有乘积均为 $0$，根据最小下标规则必须选择 $j=i$。
+2. **代码。**
+
+```c
+void calMulMaxWithPos(const int A[], long long res[],
+                      int pos[], int n) {
+    if (A == NULL || res == NULL || pos == NULL || n <= 0) return;
+    long long hi = A[n - 1], lo = A[n - 1];
+    int hiPos = n - 1, loPos = n - 1;
+    for (int i = n - 1; i >= 0; --i) {
+        long long x = A[i];
+        if (x >= hi) { hi = x; hiPos = i; }
+        if (x <= lo) { lo = x; loPos = i; }
+        if (x > 0) {
+            res[i] = x * hi;
+            pos[i] = hiPos;
+        } else if (x < 0) {
+            res[i] = x * lo;
+            pos[i] = loPos;
+        } else {
+            res[i] = 0;
+            pos[i] = i;
+        }
+    }
+}
+```
+
+3. **样例分解。** $i=4$ 自身 $2\times2=4$，选 $j=4$；$i=3$ 的 $-3$ 与自身相乘得 $9$，选 $j=3$；$i=2$ 的 $-3$ 与 $i=2,3$ 两处的 $-3$ 相乘都得 $9$，最小下标是 $j=2$，**因此 `pos[2]=2`**。$i=1$ 的 $2$ 与 $i=4$ 的 $2$ 相乘为 $4$，$i=0$ 的 $0$ 取最小合法下标 $0$。故最终应为
 
 $$
-O(n),
+res=\{0,4,9,9,4\},\qquad pos=\{0,1,2,3,4\}.
 $$
 
-除输出数组 `res` 外只使用常数个辅助变量，额外空间复杂度为
-
-$$
-O(1).
-$$
+4. **正确性与效率。** 缓存维护的是当前后缀极值及其最小下标；更新时相等也赋新下标，使下标总是最左的。乘积关于另一个因子的单调性保证只需使用两种极值。一次逆序循环即得所有结果，时间 $O(n)$、额外空间 $O(1)$（两组输出数组不计）。
 
 </ExamExplanation>
 

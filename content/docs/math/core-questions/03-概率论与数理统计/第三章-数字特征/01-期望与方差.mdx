@@ -1,69 +1,258 @@
 ---
-title: 第一节 期望与方差
-description: 考研数学一精选题库：期望与方差的基本模型、非线性函数的期望、随机和与最值、混合分布、二维变量的矩与保险损失综合题。
+title: "第一节 期望与方差"
+description: "考研数学一高质量分类题库：函数期望、非线性变换、条件期望、停止时间、随机收益、混合分布与二阶矩的经典母题及关键变式。"
 ---
 
-> 按原真题小节覆盖的“一维随机变量—多维随机变量”范围整理。优先保留近十年数学一及相关数学三真题；补充李林880、张宇1000题、李正元练习题中与真题有方法互补的题目。真题原题来源及题号沿用源文档；练习题标明资料及原资料题序。原创题单独标注，不冒称历年真题。
+本节围绕 **先识别分布与期望是否存在 → 函数期望的求法 → 条件分解、指示变量与停止规则 → 混合分布和方差结构** 编排精选题。所有模型提炼直接嵌入题目解析，着重说明选法依据、充分条件及计算边界。
 
-## 一、期望、方差与二阶矩：分布识别及参数模型
+## 一、非线性函数期望、特殊矩与对称性
 
 <ExamQuestion>
 
-**1.（87-1，2分）**
-
-已知连续随机变量 $X$ 的概率密度函数为
+【1987年数学三】 已知随机变量 $Y$ 的概率密度为
 
 $$
-f(x)=\frac1{\sqrt\pi}e^{-x^2+2x-1},
+f(y)=
+\begin{cases}
+\dfrac{y}{a^2}e^{-\frac{y^2}{2a^2}},&y>0,\\
+0,&y\le0,
+\end{cases}
 $$
 
-则 $X$ 的数学期望为 ______，方差为 ______。
+求随机变量 $Z=\dfrac1Y$ 的数学期望 $E(Z)$。
 
 <ExamSolution>
 
 <ExamAnswer>
 
 $$
-E(X)=1,\qquad D(X)=\frac12.
+E(Z)=\frac{\sqrt{2\pi}}{2a}.
 $$
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-先配方：
+**模型识别与解题突破口：** 出现倒数 $1/Y$，不必先求其密度；直接对原密度使用函数期望公式，关键是 $y=0$ 附近的可积性。
+
+直接利用函数的期望公式，无需求 $Z$ 的密度：
 
 $$
--x^2+2x-1=-(x-1)^2.
+\begin{aligned}
+E(Z)
+&=E\left(\frac1Y\right)\\
+&=\int_0^{+\infty}\frac1y\cdot\frac{y}{a^2}
+ e^{-\frac{y^2}{2a^2}}\,dy\\
+&=\frac1{a^2}\int_0^{+\infty}
+ e^{-\frac{y^2}{2a^2}}\,dy.
+\end{aligned}
 $$
 
-于是
+令 $t=y/a$，则
 
 $$
-f(x)=\frac1{\sqrt\pi}e^{-(x-1)^2}.
+E(Z)=\frac1a\int_0^{+\infty}e^{-t^2/2}\,dt
+=\frac1a\sqrt{\frac\pi2}
+=\frac{\sqrt{2\pi}}{2a}.
 $$
 
-与正态密度
+**关键：**求 $E[g(Y)]$ 时优先使用
 
 $$
-\frac1{\sqrt{2\pi}\sigma}
-\exp\left[-\frac{(x-\mu)^2}{2\sigma^2}\right]
+E[g(Y)]=\int g(y)f_Y(y)\,dy,
 $$
 
-比较可得
+通常不必先求 $g(Y)$ 的分布。
+
+**方法提炼与易错边界：** 题中 $a$ 必须为正数，才能将其视为尺度参数；换元时不要误把 $\int_0^\infty e^{-t^2/2}dt$ 写成全轴积分。$E(1/Y)$ 有限不意味着 $E(1/Y^2)$ 有限，后者在原点附近对应 $\int dy/y$ 发散。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+【李正元】 设随机变量 $ X$ 服从 $ (0,1)$ 上的均匀分布，求下列 $ Y_i\,(i=1,2,3,4)$ 的数学期望和方差：
+
+（Ⅰ）$ Y_1=e^X$；（Ⅱ）$ Y_2=-2\ln X$；（Ⅲ）$ Y_3=\frac1X$；（Ⅳ）$ Y_4=X^2$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+（Ⅰ）
 
 $$
-\mu=1,\qquad 2\sigma^2=1,
+EY_1=e-1,
+\qquad
+DY_1=\frac{e^2-1}{2}-(e-1)^2
+=\frac{(e-1)(3-e)}2.
+$$
+
+（Ⅱ）
+
+$$
+EY_2=2,
+\qquad
+DY_2=4.
+$$
+
+（Ⅲ）
+
+$$
+EY_3=+\infty,
+$$
+
+故 $ Y_3$ 的数学期望和方差均不存在。
+
+（Ⅳ）
+
+$$
+EY_4=\frac13,
+\qquad
+DY_4=\frac4{45}.
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 同一个 $U(0,1)$ 变量经过指数、负对数、倒数和平方变换时，期望存在性不相同；统一回到积分 $E[g(X)]=\int_0^1g(x)dx$。
+
+由于
+
+$$
+X\sim U(0,1),
+$$
+
+所以其概率密度为
+
+$$
+f_X(x)=
+\begin{cases}
+1,&0<x<1,\\
+0,&\text{其他}.
+\end{cases}
+$$
+
+（Ⅰ）对 $ Y_1=e^X$，有
+
+$$
+EY_1=E(e^X)=\int_0^1e^x\,dx=e-1.
+$$
+
+又
+
+$$
+E(Y_1^2)=E(e^{2X})=\int_0^1e^{2x}\,dx=\frac{e^2-1}{2}.
+$$
+
+因此
+
+$$
+\begin{aligned}
+DY_1
+&=E(Y_1^2)-(EY_1)^2\\
+&=\frac{e^2-1}{2}-(e-1)^2\\
+&=\frac{-e^2+4e-3}{2}\\
+&=\frac{(e-1)(3-e)}2.
+\end{aligned}
 $$
 
 故
 
 $$
-E(X)=1,\qquad D(X)=\sigma^2=\frac12.
+\boxed{EY_1=e-1,
+\qquad
+DY_1=\frac{(e-1)(3-e)}2}.
 $$
 
+（Ⅱ）对 $ Y_2=-2\ln X$，先计算
 
-**模型识别与方法：** 配方识别正态分布是最快方法；先比对指数中的 $1/(2\sigma^2)$，再读出 $E(X)$ 和 $D(X)$，不能把标准差误写成方差。
+$$
+E(-\ln X)=\int_0^1(-\ln x)\,dx=1,
+$$
+
+以及
+
+$$
+E[(-\ln X)^2]=\int_0^1(\ln x)^2\,dx=2.
+$$
+
+因此
+
+$$
+EY_2=2E(-\ln X)=2,
+$$
+
+且
+
+$$
+\begin{aligned}
+DY_2
+&=4D(-\ln X)\\
+&=4\left(E[(-\ln X)^2]-[E(-\ln X)]^2\right)\\
+&=4(2-1)\\
+&=4.
+\end{aligned}
+$$
+
+也可注意到 $ -\ln X\sim E(1)$，从而直接得到上述结论。故
+
+$$
+\boxed{EY_2=2,
+\qquad
+DY_2=4}.
+$$
+
+（Ⅲ）对 $ Y_3=1/X$，有
+
+$$
+EY_3=\int_0^1\frac1x\,dx=+\infty.
+$$
+
+该反常积分发散，所以 $ Y_3$ 不存在有限的数学期望。方差的定义要求数学期望存在且二阶矩有限，因此 $ DY_3$ 也不存在。
+
+故
+
+$$
+\boxed{EY_3\text{ 发散，}DY_3\text{ 不存在}}.
+$$
+
+（Ⅳ）对 $ Y_4=X^2$，有
+
+$$
+EY_4=EX^2=\int_0^1x^2\,dx=\frac13.
+$$
+
+又
+
+$$
+E(Y_4^2)=EX^4=\int_0^1x^4\,dx=\frac15.
+$$
+
+因此
+
+$$
+\begin{aligned}
+DY_4
+&=E(Y_4^2)-(EY_4)^2\\
+&=\frac15-\frac19\\
+&=\frac4{45}.
+\end{aligned}
+$$
+
+故
+
+$$
+\boxed{EY_4=\frac13,
+\qquad
+DY_4=\frac4{45}}.
+$$
+
+**方法提炼与易错边界：** $E(1/X)=+\infty$ 应与“方差不存在”严格区分；不能写出 $D(1/X)=E(1/X^2)-[E(1/X)]^2$ 再做无穷减无穷。对 $-2\ln X$ 可直接识别为指数分布并复核方差。
 
 </ExamExplanation>
 
@@ -73,84 +262,197 @@ $$
 
 <ExamQuestion>
 
-**4.（90-1，6分）**
+【张宇1000题】 设随机变量$X$服从参数为$p(0<p<1)$的几何分布，则$E(\frac{1}{X})=$( )
 
-设二维随机变量 $(X,Y)$ 在区域
+<ExamChoices>
+
+<ExamOption>
+
+A. $p(1-p)$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $-p\ln p$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $-(1-p)\ln p$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $-\frac{p\ln p}{1-p}$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+D。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 几何分布的倒数矩转化成含 $1/k$ 的无穷级数；利用 $-\ln(1-q)=\sum_{k\ge1}q^k/k$ 比逐项积分更快。
+
+按几何分布的常用定义，
 
 $$
-D:\ 0<x<1,\quad |y|<x
+P\{X=k\}=p(1-p)^{k-1},\qquad k=1,2,\cdots.
 $$
 
-内服从均匀分布，求关于 $X$ 的边缘概率密度函数及随机变量
+于是
 
 $$
-Z=2X+1
+E\left(\frac1X\right)
+=\sum_{k=1}^{\infty}\frac1k p(1-p)^{k-1}.
 $$
 
-的方差 $D(Z)$。
+令$q=1-p$，利用
+
+$$
+\sum_{k=1}^{\infty}\frac{q^k}{k}=-\ln(1-q)=-\ln p,
+$$
+
+可得
+
+$$
+E\left(\frac1X\right)
+=\frac{p}{q}\sum_{k=1}^{\infty}\frac{q^k}{k}
+=-\frac{p\ln p}{1-p}.
+$$
+
+**方法提炼与易错边界：** 必须确认几何分布从 $1$ 开始，概率为 $p(1-p)^{k-1}$。结果在 $p\to1$ 时趋于 $1$，检验极限可发现漏除 $1-p$ 的错误。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+【张宇1000题】 设$X$服从参数为1的泊松分布，则$E(\frac{1}{X+1})=$( )
+
+<ExamChoices>
+
+<ExamOption>
+
+A. $\frac{1}{e}$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $1-\frac{1}{e}$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $\frac{2}{e}$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $1+\frac{1}{e}$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+B。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 泊松分布下 $E[1/(X+1)]$ 的核心是把 $(k+1)k!$ 合并为 $(k+1)!$，直接与指数级数匹配。
+
+$X\sim P(1)$，故
+
+$$
+P\{X=k\}=e^{-1}\frac1{k!},\qquad k=0,1,2,\cdots.
+$$
+
+于是
+
+$$
+\begin{aligned}
+ E\left(\frac1{X+1}\right)
+&=e^{-1}\sum_{k=0}^{\infty}\frac1{(k+1)k!}\\
+&=e^{-1}\sum_{k=0}^{\infty}\frac1{(k+1)!}\\
+&=e^{-1}(e-1)\\
+&=1-\frac1e.
+\end{aligned}
+$$
+
+**方法提炼与易错边界：** 对泊松参数 $\lambda>0$ 可推广为 $E[1/(X+1)]=(1-e^{-\lambda})/\lambda$。不要把 $E[1/(X+1)]$ 当成 $1/[E(X)+1]$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+【1992年数学一】 设随机变量 $X$ 服从参数为 $1$ 的指数分布，则数学期望
+
+$$
+E\left(X+e^{-2X}\right)=\underline{\qquad}.
+$$
 
 <ExamSolution>
 
 <ExamAnswer>
 
 $$
-f_X(x)=
-\begin{cases}
-2x,&0<x<1,\\
-0,&\text{otherwise},
-\end{cases}
-$$
-
-且
-
-$$
-D(Z)=\frac29.
+\frac43.
 $$
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-区域面积为
+**模型识别与解题突破口：** 线性项和指数项分别算期望，后者使用拉普拉斯积分 $E(e^{-tX})=1/(1+t)$（$t\ge0$）。
+
+对 $X\sim\operatorname{Exp}(1)$，
 
 $$
-\int_0^1 2x\,dx=1,
+E(X)=1.
 $$
 
-故联合密度在 $D$ 内为 $1$。
-
-于是边缘密度
+并且
 
 $$
-f_X(x)=\int_{-x}^{x}1\,dy=2x,
-\qquad 0<x<1.
+E(e^{-2X})
+=\int_0^{+\infty}e^{-2x}e^{-x}\,dx
+=\int_0^{+\infty}e^{-3x}\,dx
+=\frac13.
 $$
 
-接着计算
+故
 
 $$
-E(X)=\int_0^1x\cdot2x\,dx=\frac23,
+E\left(X+e^{-2X}\right)=1+\frac13=\frac43.
 $$
 
-$$
-E(X^2)=\int_0^1x^2\cdot2x\,dx=\frac12.
-$$
-
-所以
-
-$$
-D(X)=\frac12-\left(\frac23\right)^2
-=\frac1{18}.
-$$
-
-由方差性质
-
-$$
-D(2X+1)=4D(X)=\frac29.
-$$
-
-
-**模型识别与方法：** 二维均匀分布先用区域截面求边缘密度 $f_X(x)=2x$，再用 $D(aX+b)=a^2D(X)$；偏离矩形的均匀联合分布一般不能直接推出两个坐标独立。
+**方法提炼与易错边界：** 这里指数分布参数按“率”定义；若错误地按均值使用，将连 $E(X)$ 都算错。该题中两项来自同一个 $X$，但期望相加并不要求独立。
 
 </ExamExplanation>
 
@@ -160,9 +462,403 @@ $$
 
 <ExamQuestion>
 
-**6.（92-3，7分）**
+【2013年数学三】 设随机变量 $X$ 服从标准正态分布 $X\sim N(0,1)$，则
 
-一台设备由三大部分构成，在设备运转中各部件需要调整的概率相应为 $0.1,0.2,0.3$，假设各部件的状态相互独立，以 $X$ 表示同时需要调整的部件数。试求 $X$ 的概率分布、数学期望 $E(X)$ 和方差 $D(X)$。
+$$
+E\left(Xe^{2X}\right)=\underline{\qquad}.
+$$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$2e^2$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 看到 $Xe^{tX}$ 优先把它识别为正态矩母函数的一阶导数，避免配方后额外计算高斯积分。
+
+标准正态变量的矩母函数为
+
+$$
+M_X(t)=E(e^{tX})=e^{t^2/2}.
+$$
+
+对 $t$ 求导：
+
+$$
+M_X'(t)=E(Xe^{tX})=te^{t^2/2}.
+$$
+
+令 $t=2$，得
+
+$$
+E(Xe^{2X})=M_X'(2)=2e^2.
+$$
+
+**关键：** 遇到 $E(Xe^{tX})$、$E(X^2e^{tX})$ 这类结构，可优先想到矩母函数求导。
+
+**方法提炼与易错边界：** 先证明正态矩母函数在每个实数 $t$ 有限，才可以交换求导与期望。推广时 $E(X^me^{tX})=M_X^{(m)}(t)$，但不能未经核实套在柯西等矩不存在的分布上。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+【1996年数学一】 设 $\xi,\eta$ 是两个相互独立且均服从正态分布
+
+$$
+N\left(0,\left(\frac1{\sqrt2}\right)^2\right)
+$$
+
+的随机变量，则随机变量 $|\xi-\eta|$ 的数学期望
+
+$$
+E(|\xi-\eta|)=\underline{\qquad}.
+$$
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$$
+\sqrt{\frac2\pi}.
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 独立正态的差仍为正态，然后将绝对值的期望化归成标准半正态模型。
+
+因为独立正态变量之差仍为正态变量，
+
+$$
+\xi-\eta\sim N\left(0,\frac12+\frac12\right)=N(0,1).
+$$
+
+若 $Z\sim N(0,1)$，则
+
+$$
+E|Z|
+=2\int_0^{+\infty}z\frac1{\sqrt{2\pi}}e^{-z^2/2}\,dz
+=\sqrt{\frac2\pi}.
+$$
+
+因此
+
+$$
+E(|\xi-\eta|)=\sqrt{\frac2\pi}.
+$$
+
+**方法提炼与易错边界：** 这里 $N(0,(1/\sqrt2)^2)$ 的第二参数是方差 $1/2$，不是标准差；两变量独立才可把差的方差直接相加。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+【2023年数学一、数学三】 设随机变量 $X$ 服从参数为 $1$ 的泊松分布，则
+
+$$
+E\left[\left|X-E(X)\right|\right]=（\quad）.
+$$
+
+<ExamChoices>
+
+<ExamOption>
+
+A. $\dfrac1e$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $\dfrac12$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $\dfrac2e$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $1$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+C
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 处理绝对偏差时可利用 $E(X-E X)=0$，把正负两侧的绝对偏差转化为单侧两倍；泊松参数为 $1$ 时负侧只有 $X=0$。
+
+由 $X\sim P(1)$，有 $E(X)=1$，因此要求
+
+$$
+E|X-1|.
+$$
+
+利用 $E(X-1)=0$，正负偏差的期望绝对值相等。由于 $X$ 为非负整数，$X-1<0$ 只可能发生在 $X=0$，故
+
+$$
+E|X-1|=2E[(1-X)I(X<1)]
+=2P(X=0).
+$$
+
+而
+
+$$
+P(X=0)=e^{-1},
+$$
+
+所以
+
+$$
+E|X-1|=\frac2e.
+$$
+
+故选 C。
+
+**方法提炼与易错边界：** $E|X-1|$ 不是标准差，不能直接写成 $\sqrt{D(X)}$。这种单侧法可推广到其他均值恰为整数且左侧只含少数取值的离散分布。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+【2024年数学三】 设随机变量 $X$ 的概率密度为
+
+$$
+f(x)=
+\begin{cases}
+6x(1-x),&0<x<1,\\
+0,&\text{其他},
+\end{cases}
+$$
+
+则 $X$ 的三阶中心矩
+
+$$
+E\left[(X-E(X))^3\right]=（\quad）.
+$$
+
+<ExamChoices>
+
+<ExamOption>
+
+A. $-\dfrac1{32}$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $0$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $\dfrac1{10}$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $\dfrac12$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+B
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 直接验证密度关于 $1/2$ 对称，先由对称性确定均值，再证明三阶中心矩的被积函数为奇对称。
+
+注意密度满足
+
+$$
+f(1-x)=6(1-x)x=f(x),
+$$
+
+所以分布关于 $x=\frac12$ 对称，从而
+
+$$
+E(X)=\frac12.
+$$
+
+于是三阶中心矩为
+
+$$
+E\left[\left(X-\frac12\right)^3\right].
+$$
+
+被积函数关于 $x=\frac12$ 为奇对称，而密度关于 $x=\frac12$ 为偶对称，因此积分为 $0$。
+
+故选 B。
+
+**关键：** 对称分布关于对称中心的所有奇数阶中心矩均为 $0$。
+
+**方法提炼与易错边界：** 对称密度的奇数阶中心矩为零，前提是相应矩存在；普通三阶原点矩 $E(X^3)$ 通常不为零，不可混淆。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+【2020年数学三】 随机变量 $X$ 的概率分布为
+
+$$
+P\{X=k\}=\frac1{2^k},\qquad k=1,2,3,\ldots,
+$$
+
+$Y$ 表示 $X$ 被 $3$ 除的余数，则 $E(Y)=\underline{\qquad}$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$\dfrac87$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 随机变量取余后分为三个同余类，用公比为 $1/8$ 的几何级数一次求出完整分布，最后加权求期望。
+
+$Y$ 只可能取 $0,1,2$。
+
+当 $Y=0$ 时，$X=3,6,9,\ldots$，故
+
+$$
+P(Y=0)=\sum_{m=1}^{\infty}\frac1{2^{3m}}
+=\frac{1/8}{1-1/8}=\frac17.
+$$
+
+同理，
+
+$$
+P(Y=1)=\frac{1/2}{1-1/8}=\frac47,
+$$
+
+$$
+P(Y=2)=\frac{1/4}{1-1/8}=\frac27.
+$$
+
+因此
+
+$$
+E(Y)=0\cdot\frac17+1\cdot\frac47+2\cdot\frac27=\frac87.
+$$
+
+**方法提炼与易错边界：** $X$ 从 $1$ 开始取值，故余数 $0$ 对应 $3,6,\ldots$ 而不包含 $0$。先检查三类概率相加是否为 $1$，再核对 $E(Y)$ 必须介于 $0$ 与 $2$ 之间。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+【2026年数学一】 设随机变量 $X\sim N(1,2)$，令 $f(t)=E[(X+t)^2]$，则 $f(t)$ 的最小值点与最小值分别为（ ）。
+
+<ExamChoices>
+
+<ExamOption>
+
+A. $1,\ 2$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $1,\ 4$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $-1,\ 2$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $-1,\ 4$
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+C
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 把平方损失写成方差加偏差平方 $E[(X+t)^2]=D(X)+(E X+t)^2$，最优点立刻读出。
+
+利用方差分解公式
+
+$$
+E[(X+t)^2]=D(X)+[E(X)+t]^2=2+(1+t)^2.
+$$
+
+平方项在 $t=-1$ 时取到最小值 $0$，故 $f(t)$ 的最小值点为 $-1$，最小值为 $2$，选 C。
+
+**通法：** 对任意具有有限方差的随机变量，$E[(X-t)^2]$ 在 $t=E(X)$ 处取最小值 $D(X)$。
+
+**方法提炼与易错边界：** 最小值点是 $t=-E X$，不是 $t=E X$；最小值为方差 $2$ 而不是二阶原点矩 $E(X^2)=3$。这是最小二乘中心化的通用母题。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 二、指标变量、条件期望、停止试验与收益优化
+
+<ExamQuestion>
+
+【1992年数学三】 一台设备由三大部分构成，在设备运转中各部件需要调整的概率相应为 $0.1,0.2,0.3$，假设各部件的状态相互独立，以 $X$ 表示同时需要调整的部件数。试求 $X$ 的概率分布、数学期望 $E(X)$ 和方差 $D(X)$。
 
 <ExamSolution>
 
@@ -182,6 +878,8 @@ $$
 </ExamAnswer>
 
 <ExamExplanation>
+
+**模型识别与解题突破口：** 不同成功率的三个独立部件数形成泊松二项分布；分布律可枚举，但期望与方差优先用指示变量分解。
 
 令三个部件是否需要调整的指标变量分别为 $X_1,X_2,X_3$，则
 
@@ -235,8 +933,7 @@ D(X)=\sum p_i(1-p_i)
 =0.46.
 $$
 
-
-**模型识别与方法：** 写 $X=I_1+I_2+I_3$，以三项伯努利期望、方差之和迅速求出 $E(X),D(X)$；三个成功概率不同，故不能把 $X$ 直接当作二项分布。
+**方法提炼与易错边界：** $X$ 不能错误地视为 $B(3,0.2)$，因为三个部件故障率不同。$D(X)=\sum p_i(1-p_i)$ 依赖独立；即使不独立，$E(X)=\sum p_i$ 仍成立。
 
 </ExamExplanation>
 
@@ -246,109 +943,59 @@ $$
 
 <ExamQuestion>
 
-**16.（00-1，8分）**
-
-某流水生产线上每个产品不合格的概率为 $p$（$0<p<1$），各产品合格与否相互独立。当出现一个不合格产品时即停机检修，设开机后第一次停机时已生产了产品的个数为 $X$，求 $X$ 的数学期望 $E(X)$ 和方差 $D(X)$。
+【1997年数学三】 游客乘电梯从底层到电视塔顶层观光，电梯于每个整点的第 $5$ 分钟、第 $25$ 分钟和第 $55$ 分钟从底层起行。假设一游客在早晨八点的第 $X$ 分钟到达底层候梯处，且 $X$ 在 $[0,60]$ 上均匀分布，求该游客等候时间的数学期望。
 
 <ExamSolution>
 
 <ExamAnswer>
 
 $$
-E(X)=\frac1p,
-\qquad
-D(X)=\frac{1-p}{p^2}.
+E(T)=\frac{35}{3}\approx11.67\text{ 分钟}.
 $$
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-第一次出现不合格品时停机，因此
+**模型识别与解题突破口：** 等候时间是到下一次发车的剩余时间；从完整小时分为四段后用均匀密度积分，避免直接假设平均半个班次。
+
+设等候时间为 $T$。按到达时刻分段：
 
 $$
-P(X=k)=(1-p)^{k-1}p,
-\qquad k=1,2,\ldots
-$$
-
-即 $X$ 服从成功概率为 $p$、从 $1$ 开始计数的几何分布。
-
-其标准结论为
-
-$$
-E(X)=\frac1p,
-\qquad
-D(X)=\frac{1-p}{p^2}.
-$$
-
-
-**模型识别与方法：** 首次不合格的等待次数服从取值从 $1$ 开始的几何分布；由独立重复、停时定义识别参数 $p$，再取 $E(X)=1/p$ 和 $D(X)=(1-p)/p^2$。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**18.（02-1，8分）**
-
-设随机变量 $X$ 的概率密度为
-
-$$
-f(x)=
+T=
 \begin{cases}
-\dfrac12\cos\dfrac x2,&0\le x\le\pi,\\
-0,&\text{otherwise},
+5-X,&0\le X\le5,\\
+25-X,&5<X\le25,\\
+55-X,&25<X\le55,\\
+65-X,&55<X\le60.
 \end{cases}
 $$
 
-对 $X$ 独立地重复观察 $4$ 次，用 $Y$ 表示观察值大于 $\dfrac\pi3$ 的次数，求 $Y^2$ 的数学期望。
-
-<ExamSolution>
-
-<ExamAnswer>
+因为 $X\sim U(0,60)$，所以
 
 $$
-E(Y^2)=5.
+\begin{aligned}
+E(T)
+=\frac1{60}\bigg[&\int_0^5(5-x)\,dx
++\int_5^{25}(25-x)\,dx\\
+&+\int_{25}^{55}(55-x)\,dx
++\int_{55}^{60}(65-x)\,dx\bigg].
+\end{aligned}
 $$
 
-</ExamAnswer>
-
-<ExamExplanation>
-
-先求一次观察满足 $X>\pi/3$ 的概率：
+四段积分分别为
 
 $$
-P\left(X>\frac\pi3\right)
-=1-\int_0^{\pi/3}\frac12\cos\frac x2\,dx
-=1-\sin\frac\pi6
-=\frac12.
+\frac{25}{2},\quad 200,\quad 450,\quad \frac{75}{2},
 $$
 
-所以
+总和为 $700$，故
 
 $$
-Y\sim B\left(4,\frac12\right).
+E(T)=\frac{700}{60}=\frac{35}{3}.
 $$
 
-于是
-
-$$
-E(Y)=2,
-\qquad
-D(Y)=4\cdot\frac12\cdot\frac12=1.
-$$
-
-因此
-
-$$
-E(Y^2)=D(Y)+[E(Y)]^2=1+4=5.
-$$
-
-
-**模型识别与方法：** 先由连续密度计算单次命中概率，再把四次独立试验转化为 $B(4,1/2)$；只需求 $E(Y^2)$ 时，使用 $D(Y)+E(Y)^2$ 比列出全部分布更省时。
+**方法提炼与易错边界：** 每段候车长度并不相等；尤其 $55$ 分之后跨到下一小时 $5$ 分，所以最后一段对应 $65-X$，不能误写为 $60-X$。
 
 </ExamExplanation>
 
@@ -358,9 +1005,7 @@ $$
 
 <ExamQuestion>
 
-**19.（03-1，10分）**
-
-已知甲、乙两箱中装有同种产品，其中甲箱中装有 $3$ 件合格品和 $3$ 件次品，乙箱中仅装有 $3$ 件合格品。从甲箱中任取 $3$ 件产品放入乙箱后，求：
+【2003年数学一】 已知甲、乙两箱中装有同种产品，其中甲箱中装有 $3$ 件合格品和 $3$ 件次品，乙箱中仅装有 $3$ 件合格品。从甲箱中任取 $3$ 件产品放入乙箱后，求：
 
 （1）乙箱中次品件数 $X$ 的数学期望；
 
@@ -379,12 +1024,14 @@ $$
 （2）
 
 $$
-P(\mathrm{defective})=\frac14.
+P(\text{次品})=\frac14.
 $$
 
 </ExamAnswer>
 
 <ExamExplanation>
+
+**模型识别与解题突破口：** 从甲箱抽出的次品数是超几何计数，期望用“抽样个数乘次品比例”；再条件于转移结果计算乙箱抽样概率。
 
 ### （1）乙箱次品数的期望
 
@@ -401,14 +1048,13 @@ $$
 转移后乙箱中共有 $6$ 件产品，次品数为 $X$。条件于 $X$，抽到次品的概率为 $X/6$，所以
 
 $$
-P(\mathrm{defective})
+P(\text{次品})
 =E\left(\frac X6\right)
 =\frac16E(X)
 =\frac14.
 $$
 
-
-**模型识别与方法：** 超几何抽取的期望不必列完整分布：把转移的次品数写成三个取样指示量之和，再对移入后的六件产品用全概率；抽样不放回并不影响期望线性性。
+**方法提炼与易错边界：** 第二步是 $E[P(\text{次品}\mid X)]$，不能把随机次品数 $X$ 的值固定成均值而不说明线性原因。本题恰因为条件概率为 $X/6$，代入 $E(X)$ 才严格成立。
 
 </ExamExplanation>
 
@@ -418,59 +1064,34 @@ $$
 
 <ExamQuestion>
 
-**23.（10-1，4分）**
-
-设随机变量 $X$ 的概率分布为
-
-$$
-P\{X=k\}=\frac{C}{k!},\qquad k=0,1,2,\ldots,
-$$
-
-则 $E(X^2)=$ ______。
+【李林880】 从 $1, 2, 3, 4, 5$ 中任取一数 $X$，再从 $1, \cdots, X$ 中任取一数 $Y$，则 $EY = $ _________.
 
 <ExamSolution>
 
 <ExamAnswer>
 
-2
+$2$
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-先由概率和为 $1$ 求常数 $C$：
+**模型识别与解题突破口：** 先对已抽中的数 $X$ 条件化：$Y\mid X=i$ 在 $1,\ldots,i$ 上等可能，故 $E(Y\mid X=i)=(i+1)/2$。
+
+先求 $Y$ 的分布律.
+$Y$ 的所有可能取值为 $1, 2, 3, 4, 5$, 由全概率公式得
 
 $$
-1=\sum_{k=0}^{\infty}\frac{C}{k!}
-=Ce,
+P\{Y = k\} = \sum_{i=k}^{5} P\{X = i\} \cdot P\{Y = k \mid X = i\} = \frac{1}{5} \sum_{i=k}^{5} \frac{1}{i} \quad (k = 1, 2, \cdots, 5),
 $$
 
 故
 
 $$
-C=e^{-1}.
+EY = \sum_{k=1}^{5} k \cdot P\{Y = k\} = \sum_{k=1}^{5} \left(k \cdot \frac{1}{5} \sum_{i=k}^{5} \frac{1}{i}\right) = 2.
 $$
 
-于是
-
-$$
-P\{X=k\}=e^{-1}\frac1{k!},
-$$
-
-即
-
-$$
-X\sim P(1).
-$$
-
-因此
-
-$$
-E(X^2)=D(X)+[E(X)]^2=1+1=2.
-$$
-
-
-**模型识别与方法：** 先归一化得 $C=e^{-1}$，识别 $P(1)$，利用 $E(X^2)=D(X)+E(X)^2=2$；区别泊松分布参数与 $E(X^2)$。
+**方法提炼与易错边界：** 用全期望公式可直接得 $E(Y)=[E(X)+1]/2=2$，不必先求 $Y$ 的分布律。一般 $E[E(Y\mid X)]=E(Y)$，而直接将随机上界 $X$ 代成某个常数是不允许的。
 
 </ExamExplanation>
 
@@ -480,151 +1101,63 @@ $$
 
 <ExamQuestion>
 
-**27.（17-3，4分）**
-
-设随机变量 $X$ 的概率分布为
-
-$$
-P\{X=-2\}=\frac12,\qquad P\{X=1\}=a,\qquad P\{X=3\}=b,
-$$
-
-若 $E(X)=0$，则 $D(X)=\underline{\qquad}$。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$\dfrac92$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-由概率和为 $1$，
-
-$$
-a+b=\frac12.
-$$
-
-又由 $E(X)=0$，
-
-$$
--2\cdot\frac12+a+3b=0,
-$$
-
-即
-
-$$
-a+3b=1.
-$$
-
-联立得
-
-$$
-a=b=\frac14.
-$$
-
-因为 $E(X)=0$，所以
-
-$$
-D(X)=E(X^2).
-$$
-
-于是
-
-$$
-D(X)=4\cdot\frac12+1\cdot\frac14+9\cdot\frac14
-=\frac92.
-$$
-
-
-**模型识别与方法：** 三点分布的归一化约束与 $E(X)=0$ 联立先求两个未知概率，再计算二阶矩；不宜忽略 $a,b\ge0$ 的概率约束。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**30.（24-3，5分）**
-
-设随机变量 $X$ 的概率密度为
+【2015年数学一、数学三】 设随机变量 $X$ 的概率密度为
 
 $$
 f(x)=
 \begin{cases}
-6x(1-x),&0<x<1,\\
-0,&\text{otherwise},
+2^{-x}\ln2,&x>0,\\
+0,&x\le0,
 \end{cases}
 $$
 
-则 $X$ 的三阶中心矩
+对 $X$ 进行独立重复的观测，直到第二个大于 $3$ 的观测值出现为止，记 $Y$ 为观测次数。
 
-$$
-E\left[(X-E(X))^3\right]=（\quad）.
-$$
+（1）求 $Y$ 的概率分布；
 
-<ExamChoices>
-<ExamOption>
-
-A. $-\dfrac1{32}$
-
-</ExamOption>
-<ExamOption>
-
-B. $0$
-
-</ExamOption>
-<ExamOption>
-
-C. $\dfrac1{10}$
-
-</ExamOption>
-<ExamOption>
-
-D. $\dfrac12$
-
-</ExamOption>
-</ExamChoices>
+（2）求 $E(Y)$。
 
 <ExamSolution>
 
 <ExamAnswer>
 
-B
+$$
+P\{Y=n\}=(n-1)\left(\frac18\right)^2\left(\frac78\right)^{n-2},\qquad n=2,3,\ldots,
+$$
+
+$$
+E(Y)=16.
+$$
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-注意密度满足
+**模型识别与解题突破口：** 先将“观测值大于 $3$”识别为成功，算出概率 $1/8$；直到第二次成功的总试验次数是负二项停止时刻。
+
+先求一次观测“大于 $3$”的概率：
 
 $$
-f(1-x)=6(1-x)x=f(x),
+p=P(X>3)=\int_3^{\infty}2^{-x}\ln2\,dx=2^{-3}=\frac18.
 $$
 
-所以分布关于 $x=\frac12$ 对称，从而
+于是每次观测可看成一次成功概率为 $p=\frac18$ 的伯努利试验。$Y$ 表示“直到第 $2$ 次成功所需的试验次数”，因此服从负二项分布。
+
+若 $Y=n$，则第 $n$ 次必须成功，而前 $n-1$ 次中恰有一次成功，所以
 
 $$
-E(X)=\frac12.
+P\{Y=n\}
+=\binom{n-1}{1}p^2(1-p)^{n-2}
+=(n-1)\left(\frac18\right)^2\left(\frac78\right)^{n-2}.
 $$
 
-于是三阶中心矩为
+负二项分布“得到第 $r$ 次成功所需试验次数”的期望为 $r/p$，故
 
 $$
-E\left[\left(X-\frac12\right)^3\right].
+E(Y)=\frac2{1/8}=16.
 $$
 
-被积函数关于 $x=\frac12$ 为奇对称，而密度关于 $x=\frac12$ 为偶对称，因此积分为 $0$。
-
-故选 B。
-
-**关键：** 对称分布关于对称中心的所有奇数阶中心矩均为 $0$。
-
-
-**模型识别与方法：** 密度 $6x(1-x)$ 关于 $x=1/2$ 对称，均值就是对称中心，奇数阶中心矩为 $0$；其前提是所求中心矩存在。
+**方法提炼与易错边界：** 分布律的首项从 $n=2$ 开始，$\binom{n-1}{1}$ 数的是前 $n-1$ 次恰有一次成功，第 $n$ 次还须成功。期望也可用两个独立几何等待时间相加得到 $2/p$。
 
 </ExamExplanation>
 
@@ -634,444 +1167,51 @@ $$
 
 <ExamQuestion>
 
-**2026年数学（一）第8题｜选择题**
-
-设随机变量 $X\sim N(1,2)$，令 $f(t)=E[(X+t)^2]$，则 $f(t)$ 的最小值点与最小值分别为（ ）。
-
-<ExamChoices>
-<ExamOption>
-
-A. $1,\ 2$
-
-</ExamOption>
-<ExamOption>
-
-B. $1,\ 4$
-
-</ExamOption>
-<ExamOption>
-
-C. $-1,\ 2$
-
-</ExamOption>
-<ExamOption>
-
-D. $-1,\ 4$
-
-</ExamOption>
-</ExamChoices>
+【张宇1000题】 假设某种试验只有成功与失败两种结果，并且每次试验的成功率都是$p(0<p<1)$。现进行重复独立试验直至成功与失败的结果都出现为止，已知试验次数$X$的数学期望$E(X)=3$，则$p=$_____。
 
 <ExamSolution>
 
 <ExamAnswer>
 
-C
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-利用方差分解公式
-
 $$
-E[(X+t)^2]=D(X)+[E(X)+t]^2=2+(1+t)^2.
-$$
-
-平方项在 $t=-1$ 时取到最小值 $0$，故 $f(t)$ 的最小值点为 $-1$，最小值为 $2$，选 C。
-
-**通法：** 对任意具有有限方差的随机变量，$E[(X-t)^2]$ 在 $t=E(X)$ 处取最小值 $D(X)$。
-
-
-**模型识别与方法：** 平方损失的分解 $E[(X+t)^2]=D(X)+(E(X)+t)^2$ 将概率问题化成配方求最小值；即使不知道密度，也只依赖有限二阶矩。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**练习精选｜张宇1000题·数字特征·原资料题序23**
-
-设$X$服从参数为1的泊松分布，则$E(\frac{1}{X+1})=$( )
-<ExamChoices>
-<ExamOption>
-
-A. $\frac{1}{e}$
-
-</ExamOption>
-<ExamOption>
-
-B. $1-\frac{1}{e}$
-
-</ExamOption>
-<ExamOption>
-
-C. $\frac{2}{e}$
-
-</ExamOption>
-<ExamOption>
-
-D. $1+\frac{1}{e}$
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-B。
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-$X\sim P(1)$，故
-$$
- P\{X=k\}=e^{-1}\frac1{k!},\qquad k=0,1,2,\cdots.
-$$
-于是
-$$
-\begin{aligned}
- E\left(\frac1{X+1}\right)
-&=e^{-1}\sum_{k=0}^{\infty}\frac1{(k+1)k!}\\
-&=e^{-1}\sum_{k=0}^{\infty}\frac1{(k+1)!}\\
-&=e^{-1}(e-1)\\
-&=1-\frac1e.
-\end{aligned}
-$$
-
-
-**模型识别与方法：** 泊松反因子期望可将 $1/[(k+1)k!]$ 合并成 $1/(k+1)!$；比直接积分随机变量的变换密度更简洁。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**练习精选｜张宇1000题·数字特征·原资料题序4**
-
-设随机变量$X$服从参数为$p(0<p<1)$的几何分布，则$E(\frac{1}{X})=$( )
-<ExamChoices>
-<ExamOption>
-
-A. $p(1-p)$
-
-</ExamOption>
-<ExamOption>
-
-B. $-p\ln p$
-
-</ExamOption>
-<ExamOption>
-
-C. $-(1-p)\ln p$
-
-</ExamOption>
-<ExamOption>
-
-D. $-\frac{p\ln p}{1-p}$
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-D。
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-按几何分布的常用定义，
-$$
- P\{X=k\}=p(1-p)^{k-1},\qquad k=1,2,\cdots.
-$$
-于是
-$$
- E\left(\frac1X\right)
-=\sum_{k=1}^{\infty}\frac1k p(1-p)^{k-1}.
-$$
-令$q=1-p$，利用
-$$
- \sum_{k=1}^{\infty}\frac{q^k}{k}=-\ln(1-q)=-\ln p,
-$$
-可得
-$$
- E\left(\frac1X\right)
-=\frac{p}{q}\sum_{k=1}^{\infty}\frac{q^k}{k}
-=-\frac{p\ln p}{1-p}.
-$$
-
-
-**模型识别与方法：** 几何变量倒数的期望来自幂级数 $\sum_{k\ge1}q^k/k=-\ln(1-q)$，必须说明采用以 $1$ 为起点的几何分布定义。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**练习精选｜李正元练习题·第四章·原资料题序11**
-
-设随机变量 $ X$ 服从 $ (0,1)$ 上的均匀分布，求下列 $ Y_i\,(i=1,2,3,4)$ 的数学期望和方差：
-
-（Ⅰ）$ Y_1=e^X$；（Ⅱ）$ Y_2=-2\ln X$；（Ⅲ）$ Y_3=\frac1X$；（Ⅳ）$ Y_4=X^2$。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-（Ⅰ）
-
-
-$$
- EY_1=e-1,
-\qquad
-DY_1=\frac{e^2-1}{2}-(e-1)^2
-=\frac{(e-1)(3-e)}2.
-$$
-
-（Ⅱ）
-
-$$
- EY_2=2,
-\qquad
-DY_2=4.
-$$
-
-（Ⅲ）
-
-$$
- EY_3=+\infty,
-$$
-
-故 $ Y_3$ 的数学期望和方差均不存在。
-
-（Ⅳ）
-
-$$
- EY_4=\frac13,
-\qquad
-DY_4=\frac4{45}.
+p=\frac12.
 $$
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-由于
+**模型识别与解题突破口：** 第一次必然出现成功或失败之一；在此后等待相反结果，按首次结果条件化，形成两个几何期望的加权平均。
 
-$$
- X\sim U(0,1),
-$$
-
-所以其概率密度为
-
-$$
- f_X(x)=
-\begin{cases}
-1,&0<x<1,\\
-0,&\text{otherwise}.
-\end{cases}
-$$
-
-（Ⅰ）对 $ Y_1=e^X$，有
-
-$$
- EY_1=E(e^X)=\int_0^1e^x\,dx=e-1.
-$$
-
-又
-
-$$
- E(Y_1^2)=E(e^{2X})=\int_0^1e^{2x}\,dx=\frac{e^2-1}{2}.
-$$
+第一次试验后已经出现一种结果。若第一次成功，概率为$p$，接下来还需等待第一次失败，所需试验次数的期望为$\frac1{1-p}$；若第一次失败，概率为$1-p$，还需等待第一次成功，期望为$\frac1p$。
 
 因此
 
 $$
- \begin{aligned}
-DY_1
-&=E(Y_1^2)-(EY_1)^2\\
-&=\frac{e^2-1}{2}-(e-1)^2\\
-&=\frac{-e^2+4e-3}{2}\\
-&=\frac{(e-1)(3-e)}2.
-\end{aligned}
+E(X)=1+p\frac1{1-p}+(1-p)\frac1p.
 $$
 
-故
+由$E(X)=3$得
 
 $$
- \boxed{EY_1=e-1,
-\qquad
-DY_1=\frac{(e-1)(3-e)}2}.
+\frac{p}{1-p}+\frac{1-p}{p}=2.
 $$
 
-（Ⅱ）对 $ Y_2=-2\ln X$，先计算
+两边乘$p(1-p)$，得
 
 $$
- E(-\ln X)=\int_0^1(-\ln x)\,dx=1,
+p^2+(1-p)^2=2p(1-p),
 $$
 
-以及
+即
 
 $$
- E[(-\ln X)^2]=\int_0^1(\ln x)^2\,dx=2.
+(2p-1)^2=0.
 $$
 
-因此
+故$p=\frac12$。
 
-$$
- EY_2=2E(-\ln X)=2,
-$$
-
-且
-
-$$
- \begin{aligned}
-DY_2
-&=4D(-\ln X)\\
-&=4\left(E[(-\ln X)^2]-[E(-\ln X)]^2\right)\\
-&=4(2-1)\\
-&=4.
-\end{aligned}
-$$
-
-也可注意到 $ -\ln X\sim E(1)$，从而直接得到上述结论。故
-
-$$
- \boxed{EY_2=2,
-\qquad
-DY_2=4}.
-$$
-
-（Ⅲ）对 $ Y_3=1/X$，有
-
-$$
- EY_3=\int_0^1\frac1x\,dx=+\infty.
-$$
-
-该反常积分发散，所以 $ Y_3$ 不存在有限的数学期望。方差的定义要求数学期望存在且二阶矩有限，因此 $ DY_3$ 也不存在。
-
-故
-
-$$
- \boxed{EY_3\text{diverges, }DY_3\text{undefined}}.
-$$
-
-（Ⅳ）对 $ Y_4=X^2$，有
-
-$$
- EY_4=EX^2=\int_0^1x^2\,dx=\frac13.
-$$
-
-又
-
-$$
- E(Y_4^2)=EX^4=\int_0^1x^4\,dx=\frac15.
-$$
-
-因此
-
-$$
- \begin{aligned}
-DY_4
-&=E(Y_4^2)-(EY_4)^2\\
-&=\frac15-\frac19\\
-&=\frac4{45}.
-\end{aligned}
-$$
-
-故
-
-$$
- \boxed{EY_4=\frac13,
-\qquad
-DY_4=\frac4{45}}.
-$$
-
-
-**模型识别与方法：** 同一个均匀变量的 $e^X,-2\ln X,1/X,X^2$ 分别训练变换后的均值、方差和矩是否存在；尤其 $E(1/X)$ 发散，不能先假设存在再套用方差公式。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-## 二、非线性函数与条件期望：积分、等待时间和收益模型
-
-<ExamQuestion>
-
-**2.（87-3，4分）**
-
-已知随机变量 $Y$ 的概率密度为
-
-$$
-f(y)=
-\begin{cases}
-\dfrac{y}{a^2}e^{-\frac{y^2}{2a^2}},&y>0,\\
-0,&y\le0,
-\end{cases}
-$$
-
-求随机变量 $Z=\dfrac1Y$ 的数学期望 $E(Z)$。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$$
-E(Z)=\frac{\sqrt{2\pi}}{2a}.
-$$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-直接利用函数的期望公式，无需求 $Z$ 的密度：
-
-$$
-\begin{aligned}
-E(Z)
-&=E\left(\frac1Y\right)\\
-&=\int_0^{+\infty}\frac1y\cdot\frac{y}{a^2}
- e^{-\frac{y^2}{2a^2}}\,dy\\
-&=\frac1{a^2}\int_0^{+\infty}
- e^{-\frac{y^2}{2a^2}}\,dy.
-\end{aligned}
-$$
-
-令 $t=y/a$，则
-
-$$
-E(Z)=\frac1a\int_0^{+\infty}e^{-t^2/2}\,dt
-=\frac1a\sqrt{\frac\pi2}
-=\frac{\sqrt{2\pi}}{2a}.
-$$
-
-**关键：**求 $E[g(Y)]$ 时优先使用
-
-$$
-E[g(Y)]=\int g(y)f_Y(y)\,dy,
-$$
-
-通常不必先求 $g(Y)$ 的分布。
-
-
-**模型识别与方法：** 直接用 LOTUS（函数期望公式）对 $1/Y$ 积分，消去密度里的 $y$；切勿为了计算 $E(1/Y)$ 多余地求 $1/Y$ 的密度。
-
-**关键细节：** 题中 $a$ 为尺度参数，按密度须有 $a>0$，原式写法已隐含该条件。
+**方法提炼与易错边界：** 不能直接把“出现两种不同结果”当作第二次成功的负二项分布。检查 $p\to0$ 或 $p\to1$ 时所需次数期望趋于无穷；方程可能有对称的参数根，本题唯一为 $1/2$。
 
 </ExamExplanation>
 
@@ -1081,9 +1221,7 @@ $$
 
 <ExamQuestion>
 
-**8.（94-3，8分）**
-
-假设由自动线加工的某种零件的内径 $X$（毫米）服从正态分布 $N(\mu,1)$。内径小于 $10$ 或大于 $12$ 的为不合格品，其余为合格品。销售每件合格品获利，销售每件不合格品亏损。已知销售利润 $T$（单位：元）与销售零件的内径 $X$ 有如下关系：
+【1994年数学三】 假设由自动线加工的某种零件的内径 $X$（毫米）服从正态分布 $N(\mu,1)$。内径小于 $10$ 或大于 $12$ 的为不合格品，其余为合格品。销售每件合格品获利，销售每件不合格品亏损。已知销售利润 $T$（单位：元）与销售零件的内径 $X$ 有如下关系：
 
 $$
 T=
@@ -1107,6 +1245,8 @@ $$
 </ExamAnswer>
 
 <ExamExplanation>
+
+**模型识别与解题突破口：** 先用两个正态 CDF 表达分段利润期望，再对可调均值 $\mu$ 求导；关键是将临界方程转成两个标准正态密度的比值。
 
 设 $\Phi$、$\varphi$ 分别为标准正态分布函数和密度函数。由于 $X\sim N(\mu,1)$，
 
@@ -1154,71 +1294,7 @@ $$
 \boxed{\mu=11-\frac12\ln\frac{25}{21}}.
 $$
 
-
-**模型识别与方法：** 把利润函数写成标准正态分布函数的线性组合，对控制参数 $\mu$ 求导，再利用标准正态密度比解对数方程；要比较驻点前后导数符号确认最大值。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**13.（97-3，6分）**
-
-游客乘电梯从底层到电视塔顶层观光，电梯于每个整点的第 $5$ 分钟、第 $25$ 分钟和第 $55$ 分钟从底层起行。假设一游客在早晨八点的第 $X$ 分钟到达底层候梯处，且 $X$ 在 $[0,60]$ 上均匀分布，求该游客等候时间的数学期望。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$$
-E(T)=\frac{35}{3}\approx11.67\text{ min}.
-$$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-设等候时间为 $T$。按到达时刻分段：
-
-$$
-T=
-\begin{cases}
-5-X,&0\le X\le5,\\
-25-X,&5<X\le25,\\
-55-X,&25<X\le55,\\
-65-X,&55<X\le60.
-\end{cases}
-$$
-
-因为 $X\sim U(0,60)$，所以
-
-$$
-\begin{aligned}
-E(T)
-=\frac1{60}\bigg[&\int_0^5(5-x)\,dx
-+\int_5^{25}(25-x)\,dx\\
-&+\int_{25}^{55}(55-x)\,dx
-+\int_{55}^{60}(65-x)\,dx\bigg].
-\end{aligned}
-$$
-
-四段积分分别为
-
-$$
-\frac{25}{2},\quad 200,\quad 450,\quad \frac{75}{2},
-$$
-
-总和为 $700$，故
-
-$$
-E(T)=\frac{700}{60}=\frac{35}{3}.
-$$
-
-
-**模型识别与方法：** 等候时间是到达时刻的分段函数，用区间上的均匀密度分别积分；跨整点必须把下一班时间视为 $65$ 分钟，而不是重新置零。
+**方法提炼与易错边界：** 不能只求驻点就结束：$\mu$ 从负无穷到正无穷时导数从正变负，保证该点是全局最大值。合格区间两端不同亏损额使最优均值略偏离区间中点 $11$。
 
 </ExamExplanation>
 
@@ -1228,21 +1304,21 @@ $$
 
 <ExamQuestion>
 
-**15.（98-3，10分）**
-
-一商店经销某种商品，每周进货的数量 $X$ 与顾客对该种商品的需求量 $Y$ 是相互独立的随机变量，且都服从区间 $[10,20]$ 上的均匀分布。商店每售出一单位商品可得利润 $1000$ 元；若需求量超过了进货量，商店可从其他商店调剂供应，这时每单位商品获得的利润为 $500$ 元。试计算此商店经销该种商品每周所得利润的期望值。
+【1998年数学三】 一商店经销某种商品，每周进货的数量 $X$ 与顾客对该种商品的需求量 $Y$ 是相互独立的随机变量，且都服从区间 $[10,20]$ 上的均匀分布。商店每售出一单位商品可得利润 $1000$ 元；若需求量超过了进货量，商店可从其他商店调剂供应，这时每单位商品获得的利润为 $500$ 元。试计算此商店经销该种商品每周所得利润的期望值。
 
 <ExamSolution>
 
 <ExamAnswer>
 
 $$
-E(T)=14166.67\text{yuan}.
+E(T)=14166.67\text{ 元}.
 $$
 
 </ExamAnswer>
 
 <ExamExplanation>
+
+**模型识别与解题突破口：** 写利润时按需求量拆成“基本每件 $1000$ 元”减去缺货补货的每件利润差 $500$ 元，即 $T=1000Y-500(Y-X)^+$。
 
 若 $Y\le X$，利润为 $1000Y$；若 $Y>X$，则先卖出库存 $X$，超出的 $Y-X$ 单位按每单位 $500$ 元利润供应，因此
 
@@ -1285,11 +1361,10 @@ $$
 $$
 E(T)=15000-500\cdot\frac53
 =\frac{42500}{3}
-\approx14166.67\text{yuan}.
+\approx14166.67\text{ 元}.
 $$
 
-
-**模型识别与方法：** 随机进货与需求的收益函数可化为 $1000Y-500(Y-X)^+$；由于 $X,Y$ 独立同分布，$E(Y-X)^+=E|Y-X|/2$，比做两重分段积分短。
+**方法提炼与易错边界：** 两个独立同分布均匀变量满足 $E(Y-X)^+=\frac12 E|Y-X|$，这只用到差的对称性而非 $X,Y$ 各自的正态性。库存 $X$ 与需求 $Y$ 虽在同一范围，超额需求事件仍不可忽略。
 
 </ExamExplanation>
 
@@ -1299,46 +1374,63 @@ $$
 
 <ExamQuestion>
 
-**24.（13-3，4分）**
-
-设随机变量 $X$ 服从标准正态分布 $X\sim N(0,1)$，则
+【2025年数学一、数学三】 投保人的损失额为 $X$ 时，保险公司的赔付额定义为
 
 $$
-E\left(Xe^{2X}\right)=\underline{\qquad}.
+Y=\begin{cases}0,&X\le100,\\X-100,&X>100.\end{cases}
 $$
+
+损失额 $X$ 的概率密度为
+
+$$
+f(x)=\begin{cases}\dfrac{2\cdot100^2}{(100+x)^3},&x>0,\\0,&x\le0.\end{cases}
+$$
+
+（1）求 $P(Y>0)$ 和 $E(Y)$；
+
+（2）一年内发生这种损失事件的次数 $N\sim P(8)$。在 $N=n\ (n\ge1)$ 条件下，实际理赔次数 $M\sim B(n,p)$，其中 $p=P(Y>0)$。求 $M$ 的概率分布。
 
 <ExamSolution>
 
 <ExamAnswer>
 
-$2e^2$
+（1）$P(Y>0)=\frac14$，$E(Y)=50$。
+
+（2）$M\sim P(2)$，即 $P(M=k)=\dfrac{2^k e^{-2}}{k!}$，$k=0,1,2,\ldots$。
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-标准正态变量的矩母函数为
+**模型识别与解题突破口：** 赔付额 $Y=(X-100)^+$，第一问用尾积分 $E(Y)=\int_{100}^{\infty}P(X>t)dt$；第二问识别为泊松事件按赔付概率稀疏化。
+
+由 $Y>0\Longleftrightarrow X>100$，
 
 $$
-M_X(t)=E(e^{tX})=e^{t^2/2}.
+P(Y>0)=\int_{100}^{\infty}\frac{2\cdot100^2}{(100+x)^3}\,dx=\frac14.
 $$
 
-对 $t$ 求导：
+期望可直接用定义求：
 
 $$
-M_X'(t)=E(Xe^{tX})=te^{t^2/2}.
+E(Y)=\int_{100}^{\infty}(x-100)\frac{2\cdot100^2}{(100+x)^3}\,dx=50.
 $$
 
-令 $t=2$，得
+对 $M$ 求边缘分布。对 $k\ge0$，由全概率公式：
 
 $$
-E(Xe^{2X})=M_X'(2)=2e^2.
+P(M=k)=\sum_{n=k}^{\infty}\binom nk\left(\frac14\right)^k\left(\frac34\right)^{n-k}\frac{8^ne^{-8}}{n!}.
 $$
 
-**关键：** 遇到 $E(Xe^{tX})$、$E(X^2e^{tX})$ 这类结构，可优先想到矩母函数求导。
+化简并令 $j=n-k$：
 
+$$
+P(M=k)=\frac{2^ke^{-8}}{k!}\sum_{j=0}^{\infty}\frac{6^j}{j!}=\frac{2^ke^{-2}}{k!}.
+$$
 
-**模型识别与方法：** 标准正态的指数矩 $E(e^{tX})=e^{t^2/2}$ 对 $t$ 求导，得到 $E(Xe^{tX})=te^{t^2/2}$；应说明指数矩在全部实数 $t$ 处可导。
+其中 $k=0$ 时也包含 $N=0$ 情形，公式照样成立。这就是泊松分布的**独立稀疏化**：$P(8)$ 中每次以概率 $1/4$ 计入，得到 $P(2)$。
+
+**方法提炼与易错边界：** 计算 $P(Y>0)=P(X>100)=1/4$，同时 $E(Y)=50$，不应误写为 $E(X)-100$。泊松稀疏化求无条件分布时要包括 $N=0,M=0$，其最终参数为 $8/4=2$。
 
 </ExamExplanation>
 
@@ -1348,120 +1440,194 @@ $$
 
 <ExamQuestion>
 
-**25.（15-1,3，11分）**
+【李林880】 设随机变量 $X_1, X_2, X_3$ 相互独立，且均服从参数为 $\lambda$ 的指数分布，记 $Y = \min\{X_1, X_2\}, T = \max\{Y, X_3\}$。求：
 
-设随机变量 $X$ 的概率密度为
+$(I) Y$ 的概率密度 $f_Y(y)$;
+
+$(II)$ 期望 $ET$.
+
+<ExamSolution>
+
+<ExamAnswer>
+
+见解析
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 两只指数寿命的最小值为参数 $2\lambda$ 的指数变量，且与第三只独立；再用 $\max(U,V)=U+V-\min(U,V)$。
+
+(I) 由已知,得 $X_1$ 与 $X_2$ 相互独立,故 $(X_1, X_2)$ 的概率密度为
 
 $$
-f(x)=
-\begin{cases}
-2^{-x}\ln2,&x>0,\\
-0,&x\le0,
+f(x_1, x_2) = \begin{cases} \lambda^2 \mathrm{e}^{-\lambda(x_1+x_2)}, & x_1 > 0, x_2 > 0, \\ 0, & \text{其他.} \end{cases}
+$$
+
+设 $Y$ 的分布函数为 $F_Y(y)$, 则当 $y \leqslant 0$ 时, $F_Y(y) = 0$; 当 $y > 0$ 时, 有
+
+$$
+F_Y(y) = P\{\min\{X_1, X_2\} \leqslant y\} = 1 - P\{X_1 > y, X_2 > y\}
+$$
+
+$$
+= 1 - P\{X_1 > y\} \cdot P\{X_2 > y\} = 1 - \mathrm{e}^{-\lambda y} \cdot \mathrm{e}^{-\lambda y}
+$$
+
+$$
+= 1 - \mathrm{e}^{-2\lambda y}.
+$$
+
+故
+
+$$
+f_Y(y) = F_Y'(y) = \begin{cases} 2\lambda \mathrm{e}^{-2\lambda y}, & y > 0, \\ 0, & y \leqslant 0. \end{cases}
+$$
+
+(II) 先求 $T$ 的分布函数与概率密度.
+当 $t \leqslant 0$ 时, $F_T(t) = 0$; 当 $t > 0$ 时, 有
+
+$$
+F_T(t) = P\{T \leqslant t\} = P\{\max\{Y, X_3\} \leqslant t\} = P\{Y \leqslant t, X_3 \leqslant t\}.
+$$
+
+而 $Y = \min\{X_1, X_2\}$ 与 $X_3$ 相互独立, 故
+
+$$
+F_T(t) = P\{Y \leqslant t\} \cdot P\{X_3 \leqslant t\} = (1 - \mathrm{e}^{-2\lambda t})(1 - \mathrm{e}^{-\lambda t}),
+$$
+
+所以
+
+$$
+f_T(t) = F_T'(t) = \begin{cases} \lambda \mathrm{e}^{-\lambda t} + 2\lambda \mathrm{e}^{-2\lambda t} - 3\lambda \mathrm{e}^{-3\lambda t}, & t > 0, \\ 0, & t \leqslant 0. \end{cases}
+$$
+
+于是
+
+$$
+ET = \int_{0}^{+\infty} t \cdot (\lambda \mathrm{e}^{-\lambda t} + 2\lambda \mathrm{e}^{-2\lambda t} - 3\lambda \mathrm{e}^{-3\lambda t})\mathrm{d}t
+$$
+
+$$
+= \frac{1}{\lambda} + \frac{1}{2\lambda} - \frac{1}{3\lambda} = \frac{7}{6\lambda}.
+$$
+
+**方法提炼与易错边界：** 所以 $E\max(U,V)=1/(2\lambda)+1/\lambda-1/(3\lambda)=7/(6\lambda)$。不要把“最大值”当作指数分布，它的密度一般是几个指数项的线性组合。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+【李正元】 写了 $ n$ 封信，但信封上的地址是以随机的次序写的，设 $ Y$ 表示地址恰好写对的信的数目，求 $ EY$ 及 $ DY$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+当 $ n\ge2$ 时，
+
+$$
+\boxed{EY=1},
+\qquad
+\boxed{DY=1}.
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 固定点数是指示变量的和。每封信地址写对概率都是 $1/n$，两封同时写对概率为 $1/[n(n-1)]$，用两两协方差求方差。
+
+设
+
+$$
+I_i=\begin{cases}
+1,&\text{第 }i\text{ 封信的地址恰好写对},\\
+0,&\text{第 }i\text{ 封信的地址没有写对},
 \end{cases}
+\qquad i=1,2,\ldots,n.
 $$
 
-对 $X$ 进行独立重复的观测，直到第二个大于 $3$ 的观测值出现为止，记 $Y$ 为观测次数。
-
-（1）求 $Y$ 的概率分布；
-
-（2）求 $E(Y)$。
-
-<ExamSolution>
-
-<ExamAnswer>
+则
 
 $$
-P\{Y=n\}=(n-1)\left(\frac18\right)^2\left(\frac78\right)^{n-2},\qquad n=2,3,\ldots,
+Y=I_1+I_2+\cdots+I_n.
 $$
 
-$$
-E(Y)=16.
-$$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-先求一次观测“大于 $3$”的概率：
+由于所有地址的排列等可能，第 $ i$ 个地址写到正确的第 $ i$ 个信封上的概率为
 
 $$
-p=P(X>3)=\int_3^{\infty}2^{-x}\ln2\,dx=2^{-3}=\frac18.
-$$
-
-于是每次观测可看成一次成功概率为 $p=\frac18$ 的伯努利试验。$Y$ 表示“直到第 $2$ 次成功所需的试验次数”，因此服从负二项分布。
-
-若 $Y=n$，则第 $n$ 次必须成功，而前 $n-1$ 次中恰有一次成功，所以
-
-$$
-P\{Y=n\}
-=\binom{n-1}{1}p^2(1-p)^{n-2}
-=(n-1)\left(\frac18\right)^2\left(\frac78\right)^{n-2}.
-$$
-
-负二项分布“得到第 $r$ 次成功所需试验次数”的期望为 $r/p$，故
-
-$$
-E(Y)=\frac2{1/8}=16.
-$$
-
-
-**模型识别与方法：** 成功事件 $X>3$ 的概率是 $1/8$，等第二次成功的总次数服从负二项等待模型；若只求期望，独立两段几何等待期望相加最简。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**28.（20-3，4分）**
-
-随机变量 $X$ 的概率分布为
-
-$$
-P\{X=k\}=\frac1{2^k},\qquad k=1,2,3,\ldots,
-$$
-
-$Y$ 表示 $X$ 被 $3$ 除的余数，则 $E(Y)=\underline{\qquad}$。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$\dfrac87$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-$Y$ 只可能取 $0,1,2$。
-
-当 $Y=0$ 时，$X=3,6,9,\ldots$，故
-
-$$
-P(Y=0)=\sum_{m=1}^{\infty}\frac1{2^{3m}}
-=\frac{1/8}{1-1/8}=\frac17.
-$$
-
-同理，
-
-$$
-P(Y=1)=\frac{1/2}{1-1/8}=\frac47,
-$$
-
-$$
-P(Y=2)=\frac{1/4}{1-1/8}=\frac27.
+P(I_i=1)=\frac1n.
 $$
 
 因此
 
 $$
-E(Y)=0\cdot\frac17+1\cdot\frac47+2\cdot\frac27=\frac87.
+EI_i=\frac1n,
 $$
 
+从而
 
-**模型识别与方法：** 对 $X$ 按模 $3$ 拆成三条几何级数，从中计算余数 $Y=0,1,2$ 的概率，和直接计算 $E(X)$ 无法替代 $E(Y)$。
+$$
+EY=\sum_{i=1}^{n}EI_i
+=n\cdot\frac1n=1.
+$$
+
+下面计算方差。因为 $ I_i$ 是参数为 $ \frac1n$ 的伯努利随机变量，所以
+
+$$
+DI_i=\frac1n\left(1-\frac1n\right).
+$$
+
+对于 $ i\ne j$，第 $ i$、$ j$ 两封信的地址同时写对的概率为
+
+$$
+P(I_i=1,I_j=1)
+=\frac{(n-2)!}{n!}
+=\frac1{n(n-1)}.
+$$
+
+故
+
+$$
+\begin{aligned}
+\operatorname{Cov}(I_i,I_j)
+&=E(I_iI_j)-EI_iEI_j\\
+&=\frac1{n(n-1)}-\frac1{n^2}\\
+&=\frac1{n^2(n-1)}.
+\end{aligned}
+$$
+
+于是
+
+$$
+\begin{aligned}
+DY
+&=\sum_{i=1}^{n}DI_i
++2\sum_{1\le i<j\le n}\operatorname{Cov}(I_i,I_j)\\
+&=n\cdot\frac1n\left(1-\frac1n\right)
++n(n-1)\cdot\frac1{n^2(n-1)}\\
+&=1-\frac1n+\frac1n\\
+&=1.
+\end{aligned}
+$$
+
+因此
+
+$$
+\boxed{EY=1},
+\qquad
+\boxed{DY=1}.
+$$
+
+当 $ n=1$ 时，显然 $ Y\equiv1$，此时 $ EY=1,DY=0$。
+
+**方法提炼与易错边界：** 不同固定点指标并不独立，两两协方差为正；直接按二项分布方差计算会出错。$n\ge2$ 时 $E(Y)=D(Y)=1$，而 $n=1$ 时方差为 $0$。
 
 </ExamExplanation>
 
@@ -1471,35 +1637,357 @@ $$
 
 <ExamQuestion>
 
-**29.（23-1,3，5分）**
+【李正元】 设二维随机变量 $ (X,Y)$ 在区域 $ D=\{(x,y)\mid 0\le x\le1,0\le y\le2\}$ 上服从均匀分布，令 $ Z=\min(X,Y)$，求 $ EZ$ 与 $ DZ$。
 
-设随机变量 $X$ 服从参数为 $1$ 的泊松分布，则
+<ExamSolution>
+
+<ExamAnswer>
 
 $$
-E\left[\left|X-E(X)\right|\right]=（\quad）.
+\boxed{EZ=\frac5{12}},
+\qquad
+\boxed{DZ=\frac{11}{144}}.
 $$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 求 $\min(X,Y)$ 的期望优先用尾分布：$P(\min(X,Y)>z)=P(X>z)P(Y>z)$，并注意两个均匀分布的不同上界。
+
+区域 $ D$ 的面积为
+
+$$
+S_D=1\times2=2,
+$$
+
+故 $ (X,Y)$ 的联合密度为
+
+$$
+f(x,y)=\frac12,
+\qquad 0\le x\le1,\ 0\le y\le2.
+$$
+
+由于联合密度可分解为边缘密度的乘积，也可知 $ X$ 与 $ Y$ 相互独立，其中
+
+$$
+X\sim U(0,1),
+\qquad
+Y\sim U(0,2).
+$$
+
+由
+
+$$
+Z=\min(X,Y),
+$$
+
+可知 $ 0\le Z\le1$。对于 $ 0\le z\le1$，
+
+$$
+\begin{aligned}
+P\{Z>z\}
+&=P\{X>z,Y>z\}\\
+&=P\{X>z\}P\{Y>z\}\\
+&=(1-z)\frac{2-z}{2}.
+\end{aligned}
+$$
+
+利用非负随机变量的尾积分公式
+
+$$
+EZ=\int_0^{+\infty}P\{Z>z\}\,dz,
+$$
+
+得到
+
+$$
+\begin{aligned}
+EZ
+&=\int_0^1\frac{(1-z)(2-z)}2\,dz\\
+&=\frac12\int_0^1(2-3z+z^2)\,dz\\
+&=\frac12\left(2-\frac32+\frac13\right)\\
+&=\frac5{12}.
+\end{aligned}
+$$
+
+再利用
+
+$$
+EZ^2=2\int_0^{+\infty}zP\{Z>z\}\,dz,
+$$
+
+可得
+
+$$
+\begin{aligned}
+EZ^2
+&=2\int_0^1z\frac{(1-z)(2-z)}2\,dz\\
+&=\int_0^1z(2-3z+z^2)\,dz\\
+&=\int_0^1(2z-3z^2+z^3)\,dz\\
+&=1-1+\frac14\\
+&=\frac14.
+\end{aligned}
+$$
+
+因此
+
+$$
+\begin{aligned}
+DZ
+&=EZ^2-(EZ)^2\\
+&=\frac14-\left(\frac5{12}\right)^2\\
+&=\frac{11}{144}.
+\end{aligned}
+$$
+
+故
+
+$$
+\boxed{EZ=\frac5{12}},
+\qquad
+\boxed{DZ=\frac{11}{144}}.
+$$
+
+**方法提炼与易错边界：** 积分支撑是 $0<z<1$，并非 $0<z<2$；计算二阶矩可用 $E Z^2=2\int_0^\infty zP(Z>z)dz$，避免先分段求密度。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+【张宇1000题】 设随机变量$X$与$Y$独立同分布，且都服从参数为1的指数分布。若$Z=\begin{cases}2X,&X \geq Y\\Y-1,&X<Y\end{cases}$，则$E(Z)=$( )
 
 <ExamChoices>
+
 <ExamOption>
 
-A. $\dfrac1e$
+A. $\frac{2}{7}$
 
 </ExamOption>
+
 <ExamOption>
 
-B. $\dfrac12$
+B. $\frac{7}{2}$
 
 </ExamOption>
+
 <ExamOption>
 
-C. $\dfrac2e$
+C. $\frac{7}{4}$
 
 </ExamOption>
+
 <ExamOption>
 
-D. $1$
+D. $\frac{4}{7}$
 
 </ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+C。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 按事件 $X\ge Y$ 与 $X<Y$ 拆开函数期望，各自用条件积分，清楚区分 $2X$ 与 $Y-1$ 的贡献。
+
+由全期望分解，
+
+$$
+E(Z)=2E[X;X\ge Y]+E[Y-1;X<Y].
+$$
+
+由于$X,Y$独立且均服从$E(1)$，
+
+$$
+E[X;X\ge Y]
+=\int_0^{+\infty}xP\{Y\le x\}e^{-x}\,dx
+=\int_0^{+\infty}x(1-e^{-x})e^{-x}\,dx.
+$$
+
+利用
+
+$$
+\int_0^{+\infty}xe^{-x}\,dx=1,\qquad
+\int_0^{+\infty}xe^{-2x}\,dx=\frac14,
+$$
+
+得
+
+$$
+E[X;X\ge Y]=1-\frac14=\frac34.
+$$
+
+因此第一部分为$\frac32$。
+
+另一方面，
+
+$$
+E[Y-1;X<Y]
+=\int_0^{+\infty}(y-1)(1-e^{-y})e^{-y}\,dy.
+$$
+
+其中
+
+$$
+\int_0^{+\infty}(y-1)e^{-y}\,dy=0,
+$$
+
+且
+
+$$
+\int_0^{+\infty}(y-1)e^{-2y}\,dy
+=\frac14-\frac12=-\frac14.
+$$
+
+故第二部分为$\frac14$。于是
+
+$$
+E(Z)=\frac32+\frac14=\frac74.
+$$
+
+**方法提炼与易错边界：** 虽然 $X,Y$ 同分布且独立，指示事件与 $X$、$Y$ 并不独立，不能写 $E[2X;X\ge Y]=2E X\,P(X\ge Y)$。需要将事件与权重同时保留在积分中。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+## 三、几何区域、混合分布和二阶矩的综合运算
+
+<ExamQuestion>
+
+【1990年数学一】 设二维随机变量 $(X,Y)$ 在区域
+
+$$
+D:\ 0<x<1,\quad |y|<x
+$$
+
+内服从均匀分布，求关于 $X$ 的边缘概率密度函数及随机变量
+
+$$
+Z=2X+1
+$$
+
+的方差 $D(Z)$。
+
+<ExamSolution>
+
+<ExamAnswer>
+
+$$
+f_X(x)=
+\begin{cases}
+2x,&0<x<1,\\
+0,&\text{其他},
+\end{cases}
+$$
+
+且
+
+$$
+D(Z)=\frac29.
+$$
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 二维均匀区域先按竖向截线长度 $2x$ 求 $X$ 的边缘密度，再使用 $D(aX+b)=a^2D(X)$。
+
+区域面积为
+
+$$
+\int_0^1 2x\,dx=1,
+$$
+
+故联合密度在 $D$ 内为 $1$。
+
+于是边缘密度
+
+$$
+f_X(x)=\int_{-x}^{x}1\,dy=2x,
+\qquad 0<x<1.
+$$
+
+接着计算
+
+$$
+E(X)=\int_0^1x\cdot2x\,dx=\frac23,
+$$
+
+$$
+E(X^2)=\int_0^1x^2\cdot2x\,dx=\frac12.
+$$
+
+所以
+
+$$
+D(X)=\frac12-\left(\frac23\right)^2
+=\frac1{18}.
+$$
+
+由方差性质
+
+$$
+D(2X+1)=4D(X)=\frac29.
+$$
+
+**方法提炼与易错边界：** 联合密度常数等于区域面积的倒数；恰巧本题面积为 $1$，而不是所有二维均匀分布密度都等于 $1$。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>
+
+<ExamQuestion>
+
+【2009年数学一】 设随机变量 $X$ 的分布函数为
+
+$$
+F(x)=0.3\Phi(x)+0.7\Phi\left(\frac{x-1}{2}\right),
+$$
+
+其中 $\Phi(x)$ 为标准正态分布的分布函数，则 $E(X)=$（　）。
+
+<ExamChoices>
+
+<ExamOption>
+
+A. 0
+
+</ExamOption>
+
+<ExamOption>
+
+B. 0.3
+
+</ExamOption>
+
+<ExamOption>
+
+C. 0.7
+
+</ExamOption>
+
+<ExamOption>
+
+D. 1
+
+</ExamOption>
+
 </ExamChoices>
 
 <ExamSolution>
@@ -1512,95 +2000,37 @@ C
 
 <ExamExplanation>
 
-由 $X\sim P(1)$，有 $E(X)=1$，因此要求
+**模型识别与解题突破口：** 看到 CDF 的凸组合先识别混合分布，再将期望按混合权重加权；不需要先求整个混合密度。
+
+注意
 
 $$
-E|X-1|.
+\Phi(x)
 $$
 
-利用 $E(X-1)=0$，正负偏差的期望绝对值相等。由于 $X$ 为非负整数，$X-1<0$ 只可能发生在 $X=0$，故
+是 $N(0,1)$ 的分布函数，而
 
 $$
-E|X-1|=2E[(1-X)I(X<1)]
-=2P(X=0).
+\Phi\left(\frac{x-1}{2}\right)
 $$
 
-而
+是 $N(1,4)$ 的分布函数。
+
+因此 $X$ 是两个正态分布的混合：
 
 $$
-P(X=0)=e^{-1},
+0.3N(0,1)+0.7N(1,4).
 $$
 
-所以
+混合分布的期望等于各分量期望的加权平均：
 
 $$
-E|X-1|=\frac2e.
+E(X)=0.3\cdot0+0.7\cdot1=0.7.
 $$
 
 故选 C。
 
-
-**模型识别与方法：** $X\sim P(1)$ 且 $E(X)=1$；以整数支撑分开 $X=0$ 和 $X\ge2$，用期望 $E(X-1)=0$ 将正负偏差配平，避免无穷级数繁算。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**练习精选｜张宇1000题·数字特征·原资料题序2**
-
-设随机变量$X \sim E(1)$，记$Y=\max\{X,1\}$，则$E(Y)=$( )
-<ExamChoices>
-<ExamOption>
-
-A. 1
-
-</ExamOption>
-<ExamOption>
-
-B. $1-e^{-1}$
-
-</ExamOption>
-<ExamOption>
-
-C. $1+e^{-1}$
-
-</ExamOption>
-<ExamOption>
-
-D. $1+2e^{-1}$
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-C。
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-当$X\le1$时$Y=1$，当$X>1$时$Y=X$，故
-$$
- E(Y)=P\{X\le1\}+E[X;X>1].
-$$
-由于$X\sim E(1)$具有无记忆性，
-$$
- P\{X>1\}=e^{-1},\qquad E(X\mid X>1)=1+E(X)=2.
-$$
-于是
-$$
- E(Y)=1-e^{-1}+2e^{-1}=1+e^{-1}.
-$$
-
-
-**模型识别与方法：** 阈值最大值 $\max(X,1)$ 可写为 $1+(X-1)^+$，尾积分给 $E(X-1)^+=e^{-1}$；指数分布的无记忆性可作另一条快速证明。
+**方法提炼与易错边界：** $\Phi((x-1)/2)$ 对应均值为 $1$、标准差为 $2$ 的正态分布；$0.7$ 是混合权重，不是随机变量取值概率点。
 
 </ExamExplanation>
 
@@ -1610,131 +2040,64 @@ $$
 
 <ExamQuestion>
 
-**练习精选｜张宇1000题·数字特征·原资料题序11**
+【2017年数学三】 设随机变量 $X$ 的概率分布为
 
-设随机变量$X$与$Y$独立同分布，且都服从参数为1的指数分布。若$Z=\begin{cases}2X,&X \geq Y\\Y-1,&X<Y\end{cases}$，则$E(Z)=$( )
-<ExamChoices>
-<ExamOption>
+$$
+P\{X=-2\}=\frac12,\qquad P\{X=1\}=a,\qquad P\{X=3\}=b,
+$$
 
-A. $\frac{2}{7}$
-
-</ExamOption>
-<ExamOption>
-
-B. $\frac{7}{2}$
-
-</ExamOption>
-<ExamOption>
-
-C. $\frac{7}{4}$
-
-</ExamOption>
-<ExamOption>
-
-D. $\frac{4}{7}$
-
-</ExamOption>
-</ExamChoices>
+若 $E(X)=0$，则 $D(X)=\underline{\qquad}$。
 
 <ExamSolution>
 
 <ExamAnswer>
 
-C。
+$\dfrac92$
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-由全期望分解，
-$$
- E(Z)=2E[X;X\ge Y]+E[Y-1;X<Y].
-$$
-由于$X,Y$独立且均服从$E(1)$，
-$$
- E[X;X\ge Y]
-=\int_0^{+\infty}xP\{Y\le x\}e^{-x}\,dx
-=\int_0^{+\infty}x(1-e^{-x})e^{-x}\,dx.
-$$
-利用
-$$
- \int_0^{+\infty}xe^{-x}\,dx=1,\qquad
-\int_0^{+\infty}xe^{-2x}\,dx=\frac14,
-$$
-得
-$$
- E[X;X\ge Y]=1-\frac14=\frac34.
-$$
-因此第一部分为$\frac32$。
+**模型识别与解题突破口：** 未知离散概率权重由归一化与零均值两个线性方程确定，随后再求方差而不是猜测对称分布。
 
-另一方面，
-$$
- E[Y-1;X<Y]
-=\int_0^{+\infty}(y-1)(1-e^{-y})e^{-y}\,dy.
-$$
-其中
-$$
- \int_0^{+\infty}(y-1)e^{-y}\,dy=0,
-$$
-且
-$$
- \int_0^{+\infty}(y-1)e^{-2y}\,dy
-=\frac14-\frac12=-\frac14.
-$$
-故第二部分为$\frac14$。于是
-$$
- E(Z)=\frac32+\frac14=\frac74.
-$$
-
-
-**模型识别与方法：** 连续二维变量的分段收益必须按照 $X\ge Y$ 与 $X<Y$ 积分，绝不能先用无条件均值替换事件上的截断期望。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**练习精选｜张宇1000题·数字特征·原资料题序25**
-
-假设某种试验只有成功与失败两种结果，并且每次试验的成功率都是$p(0<p<1)$。现进行重复独立试验直至成功与失败的结果都出现为止，已知试验次数$X$的数学期望$E(X)=3$，则$p=$_____。
-
-<ExamSolution>
-
-<ExamAnswer>
+由概率和为 $1$，
 
 $$
- p=\frac12.
+a+b=\frac12.
 $$
 
-</ExamAnswer>
+又由 $E(X)=0$，
 
-<ExamExplanation>
+$$
+-2\cdot\frac12+a+3b=0,
+$$
 
-第一次试验后已经出现一种结果。若第一次成功，概率为$p$，接下来还需等待第一次失败，所需试验次数的期望为$\frac1{1-p}$；若第一次失败，概率为$1-p$，还需等待第一次成功，期望为$\frac1p$。
-
-因此
-$$
- E(X)=1+p\frac1{1-p}+(1-p)\frac1p.
-$$
-由$E(X)=3$得
-$$
- \frac{p}{1-p}+\frac{1-p}{p}=2.
-$$
-两边乘$p(1-p)$，得
-$$
- p^2+(1-p)^2=2p(1-p),
-$$
 即
-$$
- (2p-1)^2=0.
-$$
-故$p=\frac12$。
 
+$$
+a+3b=1.
+$$
 
-**模型识别与方法：** 第一次结果决定尚缺的另一类，利用条件期望 $1+p/(1-p)+(1-p)/p$ 求成功概率；两类都要出现是等待题的关键停止条件。
+联立得
+
+$$
+a=b=\frac14.
+$$
+
+因为 $E(X)=0$，所以
+
+$$
+D(X)=E(X^2).
+$$
+
+于是
+
+$$
+D(X)=4\cdot\frac12+1\cdot\frac14+9\cdot\frac14
+=\frac92.
+$$
+
+**方法提炼与易错边界：** 注意三个取值 $-2,1,3$ 不对称，不能由 $E X=0$ 推出概率成对相等，必须解出 $a=b=1/4$ 后才能计算 $E X^2$。
 
 </ExamExplanation>
 
@@ -1744,105 +2107,7 @@ $$
 
 <ExamQuestion>
 
-**练习精选｜李林880·第十九章·原资料题序10**
-
-从 $1, 2, 3, 4, 5$ 中任取一数 $X$，再从 $1, \cdots, X$ 中任取一数 $Y$，则 $EY = $ _________.
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$2$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-先求 $Y$ 的分布律.
-$Y$ 的所有可能取值为 $1, 2, 3, 4, 5$, 由全概率公式得
-$$
-P\{Y = k\} = \sum_{i=k}^{5} P\{X = i\} \cdot P\{Y = k \mid X = i\} = \frac{1}{5} \sum_{i=k}^{5} \frac{1}{i} \quad (k = 1, 2, \cdots, 5),
-$$
-故
-$$
-EY = \sum_{k=1}^{5} k \cdot P\{Y = k\} = \sum_{k=1}^{5} \left(k \cdot \frac{1}{5} \sum_{i=k}^{5} \frac{1}{i}\right) = 2.
-$$
-
-
-**模型识别与方法：** 先求 $E(Y\mid X=i)=(i+1)/2$，再使用全期望 $E(Y)=E[(X+1)/2]=2$，比原解答先求五个 $P(Y=k)$ 更快。
-
-**关键细节：** 题目的“任取一数”应按等可能取数理解；若抽样不等可能则该数值未必成立。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-## 三、次序统计量、绝对值与尾积分：复杂函数的期望和方差
-
-<ExamQuestion>
-
-**10.（96-1，3分）**
-
-设 $\xi,\eta$ 是两个相互独立且均服从正态分布
-
-$$
-N\left(0,\left(\frac1{\sqrt2}\right)^2\right)
-$$
-
-的随机变量，则随机变量 $|\xi-\eta|$ 的数学期望
-
-$$
-E(|\xi-\eta|)=\underline{\qquad}.
-$$
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$$
-\sqrt{\frac2\pi}.
-$$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-因为独立正态变量之差仍为正态变量，
-
-$$
-\xi-\eta\sim N\left(0,\frac12+\frac12\right)=N(0,1).
-$$
-
-若 $Z\sim N(0,1)$，则
-
-$$
-E|Z|
-=2\int_0^{+\infty}z\frac1{\sqrt{2\pi}}e^{-z^2/2}\,dz
-=\sqrt{\frac2\pi}.
-$$
-
-因此
-
-$$
-E(|\xi-\eta|)=\sqrt{\frac2\pi}.
-$$
-
-
-**模型识别与方法：** $X-Y$ 是均值为零、方差为 $1$ 的正态变量，$E|X-Y|=\sqrt{2/\pi}$ 是半正态一阶矩；必须先利用独立性计算差的方差。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**3.（98-1，6分）**
-
-设两个随机变量 $X,Y$ 相互独立，且都服从均值为 $0$、方差为 $\dfrac12$ 的正态分布，求随机变量 $|X-Y|$ 的方差。
+【1998年数学一】 设两个随机变量 $X,Y$ 相互独立，且都服从均值为 $0$、方差为 $\dfrac12$ 的正态分布，求随机变量 $|X-Y|$ 的方差。
 
 <ExamSolution>
 
@@ -1853,6 +2118,8 @@ $1-\dfrac2\pi$
 </ExamAnswer>
 
 <ExamExplanation>
+
+**模型识别与解题突破口：** 正态差先算方差并标准化，绝对值的二阶矩不变：$E|Z|^2=EZ^2$，再减去半正态均值的平方。
 
 由独立性，
 
@@ -1886,84 +2153,7 @@ D(|X-Y|)=D(|Z|)
 =1-\frac2\pi.
 $$
 
-
-**模型识别与方法：** 先看 $X-Y\sim N(0,1)$，则 $D(|X-Y|)=E(X-Y)^2-[E|X-Y|]^2$；求绝对值的方差不必求其密度。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**5.（11-1，4分）**
-
-设随机变量 $X$ 与 $Y$ 相互独立，且 $E(X)$ 与 $E(Y)$ 存在，记
-
-$$
-U=\max\{X,Y\},\qquad V=\min\{X,Y\},
-$$
-
-则 $E(UV)=$（　）。
-
-<ExamChoices>
-<ExamOption>
-
-A. $E(U)\cdot E(V)$
-
-</ExamOption>
-<ExamOption>
-
-B. $E(X)\cdot E(Y)$
-
-</ExamOption>
-<ExamOption>
-
-C. $E(U)\cdot E(Y)$
-
-</ExamOption>
-<ExamOption>
-
-D. $E(X)\cdot E(V)$
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-B
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-无论 $X\ge Y$ 还是 $X<Y$，最大值与最小值的乘积始终为
-
-$$
-UV=XY.
-$$
-
-所以
-
-$$
-E(UV)=E(XY).
-$$
-
-又因 $X,Y$ 独立，
-
-$$
-E(XY)=E(X)E(Y).
-$$
-
-故选 B。
-
-
-**模型识别与方法：** 排序恒等式 $\max(X,Y)\min(X,Y)=XY$ 对每个样本点成立，因而 $E(UV)=E(XY)$；再用 $X,Y$ 独立将其化为均值乘积。
-
-**关键细节：** 因为原题只写均值存在，独立时 $E|XY|=E|X|E|Y|<\infty$，所以乘积期望存在。
+**方法提炼与易错边界：** $D(|X-Y|)$ 与 $D(X-Y)$ 不相等，差别来自取绝对值后均值不为零。将正态变量差的方差相加必须有独立性或零协方差。
 
 </ExamExplanation>
 
@@ -1973,468 +2163,7 @@ $$
 
 <ExamQuestion>
 
-**练习精选｜李林880·第十九章·原资料题序30**
-
-设随机变量 $X$ 的概率密度为 $f(x)=\frac{1}{\pi(1+x^2)}$，则 $E(\min\{|X|, 1\})=$ ______ .
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$\frac{1}{\pi} \ln 2 + \frac{1}{2}$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-用期望的定义计算,
-$$
-E(\min\{|X|,1\}) = \int_{-\infty}^{+\infty} \min\{|x|, 1\} \cdot f(x) \mathrm{d}x.
-$$
-
-当 $|x| \leqslant 1$ 时, $\min\{|x|, 1\} = |x|$; 当 $|x| \geqslant 1$ 时, $\min\{|x|, 1\} = 1$, 所以
-
-$$
-\begin{aligned}
-\int_{-\infty}^{+\infty} \min\{|x|, 1\} f(x) \mathrm{d}x &= \frac{1}{\pi} \left[ \int_{-1}^{1} \frac{|x|}{1 + x^2} \mathrm{d}x + \int_{-\infty}^{-1} \frac{\mathrm{d}x}{1 + x^2} + \int_{1}^{+\infty} \frac{\mathrm{d}x}{1 + x^2} \right] \\
-&= \frac{2}{\pi} \left[ \int_{0}^{1} \frac{x}{1 + x^2} \mathrm{d}x + \int_{1}^{+\infty} \frac{\mathrm{d}x}{1 + x^2} \right] = \frac{1}{\pi} \ln 2 + \frac{1}{2}.
-\end{aligned}
-$$
-
-
-**模型识别与方法：** 标准柯西变量的 $E|X|$ 不存在，但有界截断函数 $\min(|X|,1)$ 的期望存在；先按 $|x|=1$ 分段积分，不可把发散的矩当作中间量。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**练习精选｜李林880·第十九章·原资料题序36**
-
-在区间 $(0, 1)$ 内随机取 $n$ 个数 $X_1, X_2, \cdots, X_n$.
-
-(I) 求最大数与最小数之间距离 $d$ 的数学期望；
-
-(II) 若用 $Y$ 表示 $n$ 个数中大于 $\frac{2}{3}$ 的个数，求 $EY$ 和 $DY$.
-
-<ExamSolution>
-
-<ExamAnswer>
-
-（I）$E(d)=\dfrac{n-1}{n+1}$；（II）$E(Y)=\dfrac n3$，$D(Y)=\dfrac{2n}{9}$（$n\ge1$）。
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-(I) 依题设, $X_i (i = 1, 2, \cdots, n)$ 相互独立, 且都在 $(0, 1)$ 内服从均匀分布, 其概率密度为
-$$
-f(x) = \begin{cases} 1, & 0 < x < 1, \\ 0, & \text{otherwise}, \end{cases}
-$$
-其分布函数为
-$$
-F(x) = \begin{cases} 0, & x \leqslant 0, \\ x, & 0 < x < 1, \\ 1, & x \ge 1. \end{cases}
-$$
-$d = \max\{X_1, X_2, \cdots, X_n\} - \min\{X_1, X_2, \cdots, X_n\} \overset{\mathrm{def}}{=} X_{(n)} - X_{(1)}$,
-其中, $X_{(n)}$ 的概率密度为
-$$
-f_{(n)}(x) = n[F(x)]^{n-1} \cdot f(x) = \begin{cases} nx^{n-1}, & 0 < x < 1, \\ 0, & \text{otherwise}, \end{cases}
-$$
-$X_{(1)}$ 的概率密度为
-$$
-f_{(1)}(x) = n[1 - F(x)]^{n-1} \cdot f(x) = \begin{cases} n(1-x)^{n-1}, & 0 < x < 1, \\ 0, & \text{otherwise}, \end{cases}
-$$
-故
-$$
-EX_{(n)} = \int_{-\infty}^{+\infty} x \cdot f_{(n)}(x) dx = \int_{0}^{1} x \cdot nx^{n-1} dx = \frac{n}{n+1},
-$$
-$$
-EX_{(1)} = \int_{-\infty}^{+\infty} x \cdot f_{(1)}(x) dx = \int_{0}^{1} x \cdot n(1-x)^{n-1} dx = \frac{1}{n+1},
-$$
-所以
-$$
-Ed = EX_{(n)} - EX_{(1)} = \frac{n}{n+1} - \frac{1}{n+1} = \frac{n-1}{n+1}.
-$$
-(II) 先求 $Y$ 的分布, 用 $X$ 表示在 $(0, 1)$ 内任取的数, 则 $X$ 在 $(0, 1)$ 内服从均匀分布, 其概率密度为
-$$
-f(x) = \begin{cases} 1, & 0 < x < 1, \\ 0, & \text{otherwise}. \end{cases}
-$$
-记 $A = \left\{X > \frac{2}{3}\right\}$, 则 $P(A) = P\left\{X > \frac{2}{3}\right\} = \int_{\frac{2}{3}}^{1} 1 dx = \frac{1}{3}$.
-由已知, 有 $Y \sim B\left(n, \frac{1}{3}\right)$, 所以
-$$
-EY = n \cdot p = \frac{n}{3},\ \ DY = np(1-p) = \frac{2n}{9}.
-$$
-
-
-**模型识别与方法：** 均匀样本的极差满足 $E(R)=E(X_{(n)})-E(X_{(1)})$；阈值计数 $Y$ 直接服从 $B(n,1/3)$，同一道题组合顺序统计量与伯努利计数。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**练习精选｜李林880·第十九章·原资料题序38**
-
-设随机变量 $X_1, X_2, X_3$ 相互独立，且均服从参数为 $\lambda$ 的指数分布，记 $Y = \min\{X_1, X_2\}, T = \max\{Y, X_3\}$。求：
-
-$(I) Y$ 的概率密度 $f_Y(y)$;
-
-$(II)$ 期望 $ET$.
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$$
-f_Y(y)=\begin{cases}2\lambda e^{-2\lambda y},&y>0,\\0,&y\le0,\end{cases}
-\qquad E(T)=\frac7{6\lambda}.
-$$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-(I) 由已知,得 $X_1$ 与 $X_2$ 相互独立,故 $(X_1, X_2)$ 的概率密度为
-$$
-f(x_1, x_2) = \begin{cases} \lambda^2 \mathrm{e}^{-\lambda(x_1+x_2)}, & x_1 > 0, x_2 > 0, \\ 0, & \text{otherwise} \end{cases}
-$$
-设 $Y$ 的分布函数为 $F_Y(y)$, 则当 $y \leqslant 0$ 时, $F_Y(y) = 0$; 当 $y > 0$ 时, 有
-$$
-F_Y(y) = P\{\min\{X_1, X_2\} \leqslant y\} = 1 - P\{X_1 > y, X_2 > y\}
-$$
-$$
-= 1 - P\{X_1 > y\} \cdot P\{X_2 > y\} = 1 - \mathrm{e}^{-\lambda y} \cdot \mathrm{e}^{-\lambda y}
-$$
-$$
-= 1 - \mathrm{e}^{-2\lambda y}.
-$$
-故
-$$
-f_Y(y) = F_Y'(y) = \begin{cases} 2\lambda \mathrm{e}^{-2\lambda y}, & y > 0, \\ 0, & y \leqslant 0. \end{cases}
-$$
-
-(II) 先求 $T$ 的分布函数与概率密度.
-当 $t \leqslant 0$ 时, $F_T(t) = 0$; 当 $t > 0$ 时, 有
-$$
-F_T(t) = P\{T \leqslant t\} = P\{\max\{Y, X_3\} \leqslant t\} = P\{Y \leqslant t, X_3 \leqslant t\}.
-$$
-而 $Y = \min\{X_1, X_2\}$ 与 $X_3$ 相互独立, 故
-$$
-F_T(t) = P\{Y \leqslant t\} \cdot P\{X_3 \leqslant t\} = (1 - \mathrm{e}^{-2\lambda t})(1 - \mathrm{e}^{-\lambda t}),
-$$
-所以
-$$
-f_T(t) = F_T'(t) = \begin{cases} \lambda \mathrm{e}^{-\lambda t} + 2\lambda \mathrm{e}^{-2\lambda t} - 3\lambda \mathrm{e}^{-3\lambda t}, & t > 0, \\ 0, & t \leqslant 0. \end{cases}
-$$
-于是
-$$
-ET = \int_{0}^{+\infty} t \cdot (\lambda \mathrm{e}^{-\lambda t} + 2\lambda \mathrm{e}^{-2\lambda t} - 3\lambda \mathrm{e}^{-3\lambda t})\mathrm{d}t
-$$
-$$
-= \frac{1}{\lambda} + \frac{1}{2\lambda} - \frac{1}{3\lambda} = \frac{7}{6\lambda}.
-$$
-
-
-**模型识别与方法：** 指数样本的最小值仍指数分布且率参数相加，$T=\max(Y,X_3)$ 则用两变量独立的分布函数乘积；积分尾概率也能一步算得 $7/(6\lambda)$。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**练习精选｜李正元练习题·第四章·原资料题序16**
-
-设二维随机变量 $ (X,Y)$ 在区域 $ D=\{(x,y)\mid 0\le x\le1,0\le y\le2\}$ 上服从均匀分布，令 $ Z=\min(X,Y)$，求 $ EZ$ 与 $ DZ$。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$$
- \boxed{EZ=\frac5{12}},
-\qquad
-\boxed{DZ=\frac{11}{144}}.
-$$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-区域 $ D$ 的面积为
-
-$$
- S_D=1\times2=2,
-$$
-
-故 $ (X,Y)$ 的联合密度为
-
-$$
- f(x,y)=\frac12,
-\qquad 0\le x\le1,\ 0\le y\le2.
-$$
-
-由于联合密度可分解为边缘密度的乘积，也可知 $ X$ 与 $ Y$ 相互独立，其中
-
-$$
- X\sim U(0,1),
-\qquad
-Y\sim U(0,2).
-$$
-
-由
-
-$$
- Z=\min(X,Y),
-$$
-
-可知 $ 0\le Z\le1$。对于 $ 0\le z\le1$，
-
-$$
- \begin{aligned}
-P\{Z>z\}
-&=P\{X>z,Y>z\}\\
-&=P\{X>z\}P\{Y>z\}\\
-&=(1-z)\frac{2-z}{2}.
-\end{aligned}
-$$
-
-利用非负随机变量的尾积分公式
-
-$$
- EZ=\int_0^{+\infty}P\{Z>z\}\,dz,
-$$
-
-得到
-
-$$
- \begin{aligned}
-EZ
-&=\int_0^1\frac{(1-z)(2-z)}2\,dz\\
-&=\frac12\int_0^1(2-3z+z^2)\,dz\\
-&=\frac12\left(2-\frac32+\frac13\right)\\
-&=\frac5{12}.
-\end{aligned}
-$$
-
-再利用
-
-$$
- EZ^2=2\int_0^{+\infty}zP\{Z>z\}\,dz,
-$$
-
-可得
-
-$$
- \begin{aligned}
-EZ^2
-&=2\int_0^1z\frac{(1-z)(2-z)}2\,dz\\
-&=\int_0^1z(2-3z+z^2)\,dz\\
-&=\int_0^1(2z-3z^2+z^3)\,dz\\
-&=1-1+\frac14\\
-&=\frac14.
-\end{aligned}
-$$
-
-因此
-
-$$
- \begin{aligned}
-DZ
-&=EZ^2-(EZ)^2\\
-&=\frac14-\left(\frac5{12}\right)^2\\
-&=\frac{11}{144}.
-\end{aligned}
-$$
-
-故
-
-$$
- \boxed{EZ=\frac5{12}},
-\qquad
-\boxed{DZ=\frac{11}{144}}.
-$$
-
-
-**模型识别与方法：** 在不同长度的独立均匀变量上求最小值期望，最稳妥是利用 $P(Z>z)=P(X>z)P(Y>z)$，再对尾概率积分求一、二阶矩。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**练习精选｜李正元练习题·第四章·原资料题序19**
-
-设随机变量 $ X$ 和 $ Y$ 独立，并且都服从正态分布 $ N(\mu,\sigma^2)$，求随机变量 $ Z=\min(X,Y)$ 的数学期望。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$$
- \boxed{EZ=\mu-\frac{\sigma}{\sqrt\pi}}.
-$$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-利用恒等式
-
-$$
- \min(X,Y)=\frac{X+Y-|X-Y|}{2},
-$$
-
-可得
-
-$$
- EZ=\frac{EX+EY-E|X-Y|}{2}.
-$$
-
-因为
-
-$$
- EX=EY=\mu,
-$$
-
-且 $ X,Y$ 相互独立，所以
-
-$$
- X-Y\sim N(0,2\sigma^2).
-$$
-
-若 $ W\sim N(0,\tau^2)$，则
-
-$$
- E|W|=\tau\sqrt{\frac2\pi}.
-$$
-
-本题中 $ \tau=\sqrt2\sigma$，故
-
-$$
- E|X-Y|
-=\sqrt2\sigma\sqrt{\frac2\pi}
-=\frac{2\sigma}{\sqrt\pi}.
-$$
-
-因此
-
-$$
- \begin{aligned}
-EZ
-&=\frac{2\mu-\frac{2\sigma}{\sqrt\pi}}2\\
-&=\mu-\frac{\sigma}{\sqrt\pi}.
-\end{aligned}
-$$
-
-故
-
-$$
- \boxed{EZ=\mu-\frac{\sigma}{\sqrt\pi}}.
-$$
-
-
-**模型识别与方法：** 恒等式 $\min(X,Y)=(X+Y-|X-Y|)/2$ 将最值问题降为正态差的绝对值一阶矩，这是不需先写极值密度的通用母题。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-## 四、多变量的矩：相关性、线性组合、混合分布与样本统计量
-
-<ExamQuestion>
-
-**1.（91-3，3分）**
-
-对于任意两个随机变量 $X$ 和 $Y$，若
-
-$$
-E(XY)=E(X)\cdot E(Y),
-$$
-
-则（　）。
-
-<ExamChoices>
-<ExamOption>
-
-A. $D(XY)=D(X)\cdot D(Y)$
-
-</ExamOption>
-<ExamOption>
-
-B. $D(X+Y)=D(X)+D(Y)$
-
-</ExamOption>
-<ExamOption>
-
-C. $X$ 和 $Y$ 独立
-
-</ExamOption>
-<ExamOption>
-
-D. $X$ 和 $Y$ 不独立
-
-</ExamOption>
-</ExamChoices>
-
-<ExamSolution>
-
-<ExamAnswer>
-
-B
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-条件
-
-$$
-E(XY)=E(X)E(Y)
-$$
-
-等价于
-
-$$
-\operatorname{Cov}(X,Y)=0.
-$$
-
-因此
-
-$$
-D(X+Y)=D(X)+D(Y)+2\operatorname{Cov}(X,Y)
-=D(X)+D(Y).
-$$
-
-不相关一般不能推出独立，因此 C、D 都不能由题设必然得到。
-
-
-**模型识别与方法：** 方差展开式 $D(X+Y)=D(X)+D(Y)+2\operatorname{Cov}(X,Y)$；不相关等价于协方差零，并不等价于独立。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**4.（99-3，3分）**
-
-设随机变量 $X_{ij}\,(i,j=1,2,\ldots,n;\ n\ge2)$ 独立同分布，$E(X_{ij})=2$，则行列式
+【1999年数学三】 设随机变量 $X_{ij}\,(i,j=1,2,\ldots,n;\ n\ge2)$ 独立同分布，$E(X_{ij})=2$，则行列式
 
 $$
 Y=
@@ -2457,6 +2186,8 @@ $0$
 </ExamAnswer>
 
 <ExamExplanation>
+
+**模型识别与解题突破口：** 行列式的期望用排列展开与不同元素的乘积期望，转化为偶排列与奇排列项完全抵消。
 
 按排列展开行列式：
 
@@ -2484,10 +2215,7 @@ $$
 E(Y)=0.
 $$
 
-
-**模型识别与方法：** 行列式对交换两行变号，而独立同分布矩阵对换行不改变联合分布，故期望为零；无需展开 $n!$ 项。
-
-**关键细节：** 只有在各项乘积可积时可直接取期望；独立同分布且一阶绝对矩存在满足这一条件。
+**方法提炼与易错边界：** 必须是 $n\ge2$ 才能给排列配对；并且各乘积中的 $n$ 个元素分别来自不同的行列，在题设独立性下期望才能拆成 $2^n$。
 
 </ExamExplanation>
 
@@ -2497,58 +2225,75 @@ $$
 
 <ExamQuestion>
 
-**6.（11-1,3，4分）**
-
-设二维随机变量 $(X,Y)$ 服从正态分布
+【2011年数学一】 设随机变量 $X$ 与 $Y$ 相互独立，且 $E(X)$ 与 $E(Y)$ 存在，记
 
 $$
-N(\mu,\mu;\sigma^2,\sigma^2;0),
+U=\max\{X,Y\},\qquad V=\min\{X,Y\},
 $$
 
-则
+则 $E(UV)=$（　）。
 
-$$
-E(XY^2)=\underline{\qquad}.
-$$
+<ExamChoices>
+
+<ExamOption>
+
+A. $E(U)\cdot E(V)$
+
+</ExamOption>
+
+<ExamOption>
+
+B. $E(X)\cdot E(Y)$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $E(U)\cdot E(Y)$
+
+</ExamOption>
+
+<ExamOption>
+
+D. $E(X)\cdot E(V)$
+
+</ExamOption>
+
+</ExamChoices>
 
 <ExamSolution>
 
 <ExamAnswer>
 
-$\mu(\mu^2+\sigma^2)$
+B
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-二维正态分布中相关系数为 $0$ 可推出 $X,Y$ 独立。
+**模型识别与解题突破口：** 不论 $X,Y$ 谁大，$\max(X,Y)\min(X,Y)=XY$ 恒成立，利用给定独立性一次消去“极大/极小”符号。
 
-因此
-
-$$
-E(XY^2)=E(X)E(Y^2).
-$$
-
-已知
+无论 $X\ge Y$ 还是 $X<Y$，最大值与最小值的乘积始终为
 
 $$
-E(X)=\mu,
+UV=XY.
 $$
 
-而
+所以
 
 $$
-E(Y^2)=D(Y)+[E(Y)]^2=\sigma^2+\mu^2.
+E(UV)=E(XY).
 $$
 
-故
+又因 $X,Y$ 独立，
 
 $$
-E(XY^2)=\mu(\mu^2+\sigma^2).
+E(XY)=E(X)E(Y).
 $$
 
+故选 B。
 
-**模型识别与方法：** 联合正态且相关系数为 $0$ 推出独立，$E(XY^2)=E(X)[D(Y)+E(Y)^2]$；一般“零相关”不足以如此分解。
+**方法提炼与易错边界：** $U,V$ 一般并不独立，所以不能写 $E(UV)=E U\,E V$；题目只给出原变量 $X,Y$ 独立。
 
 </ExamExplanation>
 
@@ -2558,9 +2303,7 @@ $$
 
 <ExamQuestion>
 
-**7.（11-3，4分）**
-
-设总体 $X$ 服从参数为 $\lambda\,(\lambda>0)$ 的泊松分布，$X_1,X_2,\ldots,X_n\,(n\ge2)$ 为来自总体 $X$ 的简单随机样本，对应统计量
+【2011年数学三】 设总体 $X$ 服从参数为 $\lambda\,(\lambda>0)$ 的泊松分布，$X_1,X_2,\ldots,X_n\,(n\ge2)$ 为来自总体 $X$ 的简单随机样本，对应统计量
 
 $$
 T_1=\frac1n\sum_{i=1}^nX_i,
@@ -2573,26 +2316,31 @@ $$
 则（　）。
 
 <ExamChoices>
+
 <ExamOption>
 
 A. $E(T_1)>E(T_2),\ D(T_1)>D(T_2)$
 
 </ExamOption>
+
 <ExamOption>
 
 B. $E(T_1)>E(T_2),\ D(T_1)<D(T_2)$
 
 </ExamOption>
+
 <ExamOption>
 
 C. $E(T_1)<E(T_2),\ D(T_1)>D(T_2)$
 
 </ExamOption>
+
 <ExamOption>
 
 D. $E(T_1)<E(T_2),\ D(T_1)<D(T_2)$
 
 </ExamOption>
+
 </ExamChoices>
 
 <ExamSolution>
@@ -2604,6 +2352,8 @@ D
 </ExamAnswer>
 
 <ExamExplanation>
+
+**模型识别与解题突破口：** 比较两个不同加权样本均值的偏差与波动，先分别计算权重之和及平方和，独立性保证方差可逐项加。
 
 泊松分布满足
 
@@ -2641,8 +2391,7 @@ $$
 
 故 $E(T_1)<E(T_2)$ 且 $D(T_1)<D(T_2)$，选 D。
 
-
-**模型识别与方法：** 线性统计量期望逐项求和，方差用各独立样本系数平方求和；第二个统计量权重之和大于 $1$，期望较高，权重更不均衡方差更高。
+**方法提炼与易错边界：** 第二个 $T_2$ 中前 $n-1$ 项的权重是 $1/(n-1)$，额外又加上 $X_n/n$，因此它不是普通样本均值，期望会比 $\lambda$ 大。
 
 </ExamExplanation>
 
@@ -2652,9 +2401,7 @@ $$
 
 <ExamQuestion>
 
-**8.（14-1，4分）**
-
-设连续型随机变量 $X_1$ 与 $X_2$ 相互独立，且方差均存在，$X_1$ 与 $X_2$ 的概率密度分别为 $f_1(x),f_2(x)$。随机变量 $Y_1$ 的概率密度为
+【2014年数学一】 设连续型随机变量 $X_1$ 与 $X_2$ 相互独立，且方差均存在，$X_1$ 与 $X_2$ 的概率密度分别为 $f_1(x),f_2(x)$。随机变量 $Y_1$ 的概率密度为
 
 $$
 f_{Y_1}(y)=\frac12[f_1(y)+f_2(y)],
@@ -2669,26 +2416,31 @@ $$
 则（　）。
 
 <ExamChoices>
+
 <ExamOption>
 
 A. $E(Y_1)>E(Y_2),\ D(Y_1)>D(Y_2)$
 
 </ExamOption>
+
 <ExamOption>
 
 B. $E(Y_1)=E(Y_2),\ D(Y_1)=D(Y_2)$
 
 </ExamOption>
+
 <ExamOption>
 
 C. $E(Y_1)=E(Y_2),\ D(Y_1)<D(Y_2)$
 
 </ExamOption>
+
 <ExamOption>
 
 D. $E(Y_1)=E(Y_2),\ D(Y_1)>D(Y_2)$
 
 </ExamOption>
+
 </ExamChoices>
 
 <ExamSolution>
@@ -2700,6 +2452,8 @@ D
 </ExamAnswer>
 
 <ExamExplanation>
+
+**模型识别与解题突破口：** “以一半概率抽取两个分布之一”的混合随机变量与“两个随机变量取平均”的方差不同；用全方差分解显出组间均值差。
 
 记
 
@@ -2734,8 +2488,7 @@ $$
 
 连续型随机变量的方差非退化，故 $D(Y_1)>D(Y_2)$。
 
-
-**模型识别与方法：** 区分“先随机选取一个分布”的混合变量 $Y_1$ 与“两个独立变量取均值”的 $Y_2$：两者均值相同，但混合方差额外包括组间均值差项。
+**方法提炼与易错边界：** 混合方差包含 $[\mu_1-\mu_2]^2/4$，而平均数的方差只保留独立方差的 $1/4$。虽然两者期望相同，混合并不会自动降低方差。
 
 </ExamExplanation>
 
@@ -2745,9 +2498,7 @@ $$
 
 <ExamQuestion>
 
-**9.（15-1，4分）**
-
-设随机变量 $X,Y$ 不相关，且
+【2015年数学一】 设随机变量 $X,Y$ 不相关，且
 
 $$
 E(X)=2,\qquad E(Y)=1,\qquad D(X)=3,
@@ -2760,26 +2511,31 @@ E[X(X+Y-2)]=（\quad）.
 $$
 
 <ExamChoices>
+
 <ExamOption>
 
 A. $-3$
 
 </ExamOption>
+
 <ExamOption>
 
 B. $3$
 
 </ExamOption>
+
 <ExamOption>
 
 C. $-5$
 
 </ExamOption>
+
 <ExamOption>
 
 D. $5$
 
 </ExamOption>
+
 </ExamChoices>
 
 <ExamSolution>
@@ -2791,6 +2547,8 @@ D
 </ExamAnswer>
 
 <ExamExplanation>
+
+**模型识别与解题突破口：** 已知 $X,Y$ 不相关，直接用 $E(XY)=E X\,E Y$ 和 $E(X^2)=D X+(E X)^2$ 展开目标期望。
 
 由于 $X,Y$ 不相关，
 
@@ -2812,8 +2570,7 @@ E[X(X+Y-2)]
 =7+2-4=5.
 $$
 
-
-**模型识别与方法：** $E[X(X+Y-2)]$ 展开为 $E(X^2)+E(XY)-2E(X)$，利用不相关把 $E(XY)$ 化成 $E(X)E(Y)$，不需要 $X,Y$ 独立。
+**方法提炼与易错边界：** 不相关并不能推出独立，但这里涉及的只是一阶混合积 $E(XY)$，所以协方差为零已足够，无需多加独立假设。
 
 </ExamExplanation>
 
@@ -2823,35 +2580,38 @@ $$
 
 <ExamQuestion>
 
-**10.（15-3，4分）**
-
-设总体 $X\sim B(m,\theta)$，$X_1,X_2,\ldots,X_n$ 为来自该总体的简单随机样本，$\overline X$ 为样本均值，则
+【2015年数学三】 设总体 $X\sim B(m,\theta)$，$X_1,X_2,\ldots,X_n$ 为来自该总体的简单随机样本，$\overline X$ 为样本均值，则
 
 $$
 E\left[\sum_{i=1}^n(X_i-\overline X)^2\right]=（\quad）.
 $$
 
 <ExamChoices>
+
 <ExamOption>
 
 A. $(m-1)n\theta(1-\theta)$
 
 </ExamOption>
+
 <ExamOption>
 
 B. $m(n-1)\theta(1-\theta)$
 
 </ExamOption>
+
 <ExamOption>
 
 C. $(m-1)(n-1)\theta(1-\theta)$
 
 </ExamOption>
+
 <ExamOption>
 
 D. $mn\theta(1-\theta)$
 
 </ExamOption>
+
 </ExamChoices>
 
 <ExamSolution>
@@ -2863,6 +2623,8 @@ B
 </ExamAnswer>
 
 <ExamExplanation>
+
+**模型识别与解题突破口：** 用平方离差恒等式 $\sum(X_i-\bar X)^2=\sum X_i^2-n\bar X^2$ 求期望，得到 $(n-1)D(X)$。
 
 样本离差平方和满足恒等式
 
@@ -2883,8 +2645,7 @@ E\left[\sum_{i=1}^n(X_i-\overline X)^2\right]
 =m(n-1)\theta(1-\theta).
 $$
 
-
-**模型识别与方法：** 围绕 $\sum(X_i-\bar X)^2=\sum X_i^2-n\bar X^2$ 展开取期望，或直接用 $(n-1)D(X)$；样本均值项与每个样本相关，不能当作独立相减。
+**方法提炼与易错边界：** 分母 $n-1$ 出现在无偏样本方差定义中；题目求的是离差平方和期望，不要错误地乘上 $n$。二项分布方差为 $m\theta(1-\theta)$。
 
 </ExamExplanation>
 
@@ -2894,9 +2655,7 @@ $$
 
 <ExamQuestion>
 
-**11.（16-3，4分）**
-
-设随机变量 $X,Y$ 独立，且
+【2016年数学三】 设随机变量 $X,Y$ 独立，且
 
 $$
 X\sim N(1,2),\qquad Y\sim N(1,4),
@@ -2905,26 +2664,31 @@ $$
 则 $D(XY)$ 为（　）。
 
 <ExamChoices>
+
 <ExamOption>
 
 A. $6$
 
 </ExamOption>
+
 <ExamOption>
 
 B. $8$
 
 </ExamOption>
+
 <ExamOption>
 
 C. $14$
 
 </ExamOption>
+
 <ExamOption>
 
 D. $15$
 
 </ExamOption>
+
 </ExamChoices>
 
 <ExamSolution>
@@ -2936,6 +2700,8 @@ C
 </ExamAnswer>
 
 <ExamExplanation>
+
+**模型识别与解题突破口：** 独立变量的乘积方差从 $D(XY)=EX^2\,EY^2-(EX\,EY)^2$ 出发，先分别计算二阶原点矩。
 
 由独立性，
 
@@ -2965,8 +2731,7 @@ $$
 D(XY)=E(X^2Y^2)-[E(XY)]^2=15-1=14.
 $$
 
-
-**模型识别与方法：** 独立随机变量乘积的方差为 $E(X^2)E(Y^2)-E(X)^2E(Y)^2$，数值上不等于 $D(X)D(Y)$；要把两个均值项计算进去。
+**方法提炼与易错边界：** 没有 $D(XY)=D(X)D(Y)$ 这种一般公式；本题多出来的 $\mu_X^2D(Y)+\mu_Y^2D(X)$ 两项不能遗漏。
 
 </ExamExplanation>
 
@@ -2976,9 +2741,7 @@ $$
 
 <ExamQuestion>
 
-**12.（21-1,3，5分）**
-
-设 $(X_1,Y_1),(X_2,Y_2),\ldots,(X_n,Y_n)$ 为来自总体
+【2021年数学一、数学三】 设 $(X_1,Y_1),(X_2,Y_2),\ldots,(X_n,Y_n)$ 为来自总体
 
 $$
 N(\mu_1,\mu_2;\sigma_1^2,\sigma_2^2,\rho)
@@ -2999,26 +2762,31 @@ $$
 则（　）。
 
 <ExamChoices>
+
 <ExamOption>
 
 A. $E(\hat\theta)=\theta,\ D(\hat\theta)=\dfrac{\sigma_1^2+\sigma_2^2}{n}$
 
 </ExamOption>
+
 <ExamOption>
 
 B. $E(\hat\theta)\ne\theta,\ D(\hat\theta)=\dfrac{\sigma_1^2+\sigma_2^2}{n}$
 
 </ExamOption>
+
 <ExamOption>
 
 C. $E(\hat\theta)=\theta,\ D(\hat\theta)=\dfrac{\sigma_1^2+\sigma_2^2-2\rho\sigma_1\sigma_2}{n}$
 
 </ExamOption>
+
 <ExamOption>
 
 D. $E(\hat\theta)\ne\theta,\ D(\hat\theta)=\dfrac{\sigma_1^2+\sigma_2^2-2\rho\sigma_1\sigma_2}{n}$
 
 </ExamOption>
+
 </ExamChoices>
 
 <ExamSolution>
@@ -3030,6 +2798,8 @@ C
 </ExamAnswer>
 
 <ExamExplanation>
+
+**模型识别与解题突破口：** 成对样本的差值均值可先视为 $\overline{(X-Y)}$，其方差等于单对差值的方差除以 $n$。
 
 首先
 
@@ -3062,8 +2832,7 @@ D(\hat\theta)
 =\frac{\sigma_1^2+\sigma_2^2-2\rho\sigma_1\sigma_2}{n}.
 $$
 
-
-**模型识别与方法：** 对同一观察对象的 $X_i,Y_i$ 允许相关，需保留组内 $\rho\sigma_1\sigma_2$；对不同 $i$ 的样本对则独立，所以差均值方差除以 $n$。
+**方法提炼与易错边界：** 不同样本对之间独立，但同一对 $(X_i,Y_i)$ 相关，因此 $\operatorname{Cov}(\bar X,\bar Y)=\rho\sigma_1\sigma_2/n$，绝不能把它直接设为零。
 
 </ExamExplanation>
 
@@ -3073,9 +2842,7 @@ $$
 
 <ExamQuestion>
 
-**13.（22-1，5分）**
-
-设随机变量
+【2022年数学一】 设随机变量
 
 $$
 X\sim U(0,3),\qquad Y\sim P(2),\qquad \operatorname{Cov}(X,Y)=-1,
@@ -3088,26 +2855,31 @@ D(2X-Y+1)=（\quad）.
 $$
 
 <ExamChoices>
+
 <ExamOption>
 
 A. $1$
 
 </ExamOption>
+
 <ExamOption>
 
 B. $5$
 
 </ExamOption>
+
 <ExamOption>
 
 C. $9$
 
 </ExamOption>
+
 <ExamOption>
 
 D. $12$
 
 </ExamOption>
+
 </ExamChoices>
 
 <ExamSolution>
@@ -3119,6 +2891,8 @@ C
 </ExamAnswer>
 
 <ExamExplanation>
+
+**模型识别与解题突破口：** 直接展开线性组合方差 $D(aX+bY+c)=a^2D X+b^2D Y+2ab\operatorname{Cov}(X,Y)$。
 
 均匀分布 $U(0,3)$ 的方差为
 
@@ -3144,8 +2918,7 @@ $$
 4\cdot\frac34+2-4(-1)=9.
 $$
 
-
-**模型识别与方法：** 线性组合的协方差项系数是 $2ab$；将 $D(X)=3/4$ 和 $D(Y)=2$ 代入 $D(2X-Y+1)=4D(X)+D(Y)-4\operatorname{Cov}(X,Y)$。
+**方法提炼与易错边界：** 由均匀分布方差 $3^2/12$ 与泊松方差 $2$ 计算；由于已给协方差为 $-1$，不能再把 $X,Y$ 当作独立。
 
 </ExamExplanation>
 
@@ -3155,9 +2928,7 @@ $$
 
 <ExamQuestion>
 
-**14.（22-3，5分）**
-
-设随机变量
+【2022年数学三】 设随机变量
 
 $$
 X\sim N(0,4),\qquad Y\sim B\left(3,\frac13\right),
@@ -3170,26 +2941,31 @@ D(X-3Y+1)=（\quad）.
 $$
 
 <ExamChoices>
+
 <ExamOption>
 
 A. $2$
 
 </ExamOption>
+
 <ExamOption>
 
 B. $4$
 
 </ExamOption>
+
 <ExamOption>
 
 C. $6$
 
 </ExamOption>
+
 <ExamOption>
 
 D. $10$
 
 </ExamOption>
+
 </ExamChoices>
 
 <ExamSolution>
@@ -3201,6 +2977,8 @@ D
 </ExamAnswer>
 
 <ExamExplanation>
+
+**模型识别与解题突破口：** 已给不相关，即协方差零，故线性组合方差没有交叉项。二项分布方差用 $np(1-p)$。
 
 由题意
 
@@ -3218,55 +2996,7 @@ $$
 D(X-3Y+1)=D(X)+9D(Y)=4+9\cdot\frac23=10.
 $$
 
-
-**模型识别与方法：** 不相关即可令协方差项为零，虽 $X$ 正态而 $Y$ 二项，题目并未说独立；计算 $D(X-3Y+1)$ 无须添加多余的独立假设。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-## 五、近年综合命题：保险赔付与二阶损失最优化
-
-<ExamQuestion>
-
-**26.（17-1，4分）**
-
-设随机变量 $X$ 的分布函数
-
-$$
-F(x)=0.5\Phi(x)+0.5\Phi\left(\frac{x-4}{2}\right),
-$$
-
-其中 $\Phi(x)$ 为标准正态分布函数，则 $E(X)=\underline{\qquad}$。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-$2$
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-$\Phi(x)$ 是 $N(0,1)$ 的分布函数，而
-
-$$
-\Phi\left(\frac{x-4}{2}\right)
-$$
-
-是 $N(4,4)$ 的分布函数。
-
-因此 $X$ 是两个正态分布各以权重 $0.5$ 混合得到的随机变量，期望为各分量期望的加权平均：
-
-$$
-E(X)=0.5\times0+0.5\times4=2.
-$$
-
-
-**模型识别与方法：** 混合正态分布的均值等于各分量均值的加权平均，不应把两种正态的密度参数直接平均后当作一个正态分布。
+**方法提炼与易错边界：** “不相关”不能推广到 $X,Y$ 独立，也不能推广到非线性函数不相关；此题之所以能直接求，是因为目标仅为线性组合的方差。
 
 </ExamExplanation>
 
@@ -3276,124 +3006,77 @@ $$
 
 <ExamQuestion>
 
-**2025年数学（一）第22题；数学（三）第22题｜解答题**
-
-投保人的损失额为 $X$ 时，保险公司的赔付额定义为
-
-$$
-Y=\begin{cases}0,&X\le100,\\X-100,&X>100.\end{cases}
-$$
-
-损失额 $X$ 的概率密度为
-
-$$
-f(x)=\begin{cases}\dfrac{2\cdot100^2}{(100+x)^3},&x>0,\\0,&x\le0.\end{cases}
-$$
-
-（1）求 $P(Y>0)$ 和 $E(Y)$；
-
-（2）一年内发生这种损失事件的次数 $N\sim P(8)$。在 $N=n\ (n\ge1)$ 条件下，实际理赔次数 $M\sim B(n,p)$，其中 $p=P(Y>0)$。求 $M$ 的概率分布。
-
-<ExamSolution>
-
-<ExamAnswer>
-
-（1）$P(Y>0)=\frac14$，$E(Y)=50$。
-
-（2）$M\sim P(2)$，即 $P(M=k)=\dfrac{2^k e^{-2}}{k!}$，$k=0,1,2,\ldots$。
-
-</ExamAnswer>
-
-<ExamExplanation>
-
-由 $Y>0\Longleftrightarrow X>100$，
-
-$$
-P(Y>0)=\int_{100}^{\infty}\frac{2\cdot100^2}{(100+x)^3}\,dx=\frac14.
-$$
-
-期望可直接用定义求：
-
-$$
-E(Y)=\int_{100}^{\infty}(x-100)\frac{2\cdot100^2}{(100+x)^3}\,dx=50.
-$$
-
-对 $M$ 求边缘分布。对 $k\ge0$，由全概率公式：
-
-$$
-P(M=k)=\sum_{n=k}^{\infty}\binom nk\left(\frac14\right)^k\left(\frac34\right)^{n-k}\frac{8^ne^{-8}}{n!}.
-$$
-
-化简并令 $j=n-k$：
-
-$$
-P(M=k)=\frac{2^ke^{-8}}{k!}\sum_{j=0}^{\infty}\frac{6^j}{j!}=\frac{2^ke^{-2}}{k!}.
-$$
-
-其中 $k=0$ 时也包含 $N=0$ 情形，公式照样成立。这就是泊松分布的**独立稀疏化**：$P(8)$ 中每次以概率 $1/4$ 计入，得到 $P(2)$。
-
-
-**模型识别与方法：** 赔付额 $Y=(X-100)^+$ 先用尾概率或截断积分求 $E(Y)$，再利用 $N\sim P(8)$ 的泊松稀疏化得到实际理赔次数；连续赔付金额与离散次数要分别处理。
-
-</ExamExplanation>
-
-</ExamSolution>
-
-</ExamQuestion>
-
-<ExamQuestion>
-
-**原创变式｜泊松损失次数与随机赔付金额的期望、方差**
-
-一年中发生损失事件的次数 $N$ 服从参数为 $\theta>0$ 的泊松分布。各次损失之间相互独立，且与 $N$ 独立。第 $i$ 次的赔付额 $U_i$ 按如下方式产生：以概率 $p$ 不赔付，以概率 $1-p$ 支付一次独立的指数分布金额，指数分布的率参数为 $\lambda>0$，其中 $0<p<1$。令年度赔付总额为
-$$
-S=\sum_{i=1}^{N}U_i,
-$$
-且约定 $N=0$ 时 $S=0$。（1）求 $E(S)$ 与 $D(S)$；（2）求 $P(S=0)$；（3）说明为什么不能用 $E(S)=\theta E(U_1)$ 的结果直接推出 $D(S)=\theta D(U_1)$。
+【李正元】 设随机变量 $ X$ 和 $ Y$ 独立，并且都服从正态分布 $ N(\mu,\sigma^2)$，求随机变量 $ Z=\min(X,Y)$ 的数学期望。
 
 <ExamSolution>
 
 <ExamAnswer>
 
 $$
-E(S)=\frac{\theta(1-p)}{\lambda},\qquad
-D(S)=\frac{2\theta(1-p)}{\lambda^2},\qquad
-P(S=0)=e^{-\theta(1-p)}.
+\boxed{EZ=\mu-\frac{\sigma}{\sqrt\pi}}.
 $$
 
 </ExamAnswer>
 
 <ExamExplanation>
 
-**突破口：**把“有损失次数”与“各次赔付金额”分层处理，识别复合泊松和随机求和的总方差模型。
+**模型识别与解题突破口：** 直接用 $\min(X,Y)=[X+Y-|X-Y|]/2$，把最小值的期望转化成正态差的绝对值期望。
 
-对单次赔付 $U$，以概率 $p$ 为零，以概率 $1-p$ 等于 $V\sim\mathrm{Exp}(\lambda)$。因而
+利用恒等式
+
 $$
-E(U)=(1-p)E(V)=\frac{1-p}{\lambda},
-\quad E(U^2)=(1-p)E(V^2)=\frac{2(1-p)}{\lambda^2},
+\min(X,Y)=\frac{X+Y-|X-Y|}{2},
 $$
-于是 $D(U)=E(U^2)-[E(U)]^2$。给定 $N=n$ 时，$S$ 为 $n$ 个独立同分布赔付额之和，满足
+
+可得
+
 $$
-E(S\mid N=n)=nE(U),\quad D(S\mid N=n)=nD(U).
+EZ=\frac{EX+EY-E|X-Y|}{2}.
 $$
-全期望公式与总方差公式给出
+
+因为
+
+$$
+EX=EY=\mu,
+$$
+
+且 $ X,Y$ 相互独立，所以
+
+$$
+X-Y\sim N(0,2\sigma^2).
+$$
+
+若 $ W\sim N(0,\tau^2)$，则
+
+$$
+E|W|=\tau\sqrt{\frac2\pi}.
+$$
+
+本题中 $ \tau=\sqrt2\sigma$，故
+
+$$
+E|X-Y|
+=\sqrt2\sigma\sqrt{\frac2\pi}
+=\frac{2\sigma}{\sqrt\pi}.
+$$
+
+因此
+
 $$
 \begin{aligned}
-E(S)&=E[N E(U)]=\theta E(U)=\frac{\theta(1-p)}{\lambda},\\
-D(S)&=E[N D(U)]+D[N E(U)]\\
-&=\theta D(U)+\theta[E(U)]^2\\
-&=\theta E(U^2)=\frac{2\theta(1-p)}{\lambda^2}.
+EZ
+&=\frac{2\mu-\frac{2\sigma}{\sqrt\pi}}2\\
+&=\mu-\frac{\sigma}{\sqrt\pi}.
 \end{aligned}
 $$
-事件 $S=0$ 当且仅当 $N$ 次均为零赔付（指数变量严格为正的概率为 $1$）。故
+
+故
+
 $$
-\begin{aligned}
-P(S=0)&=\sum_{n=0}^{\infty}P(N=n)p^n\\
-&=e^{-\theta}\sum_{n=0}^{\infty}\frac{(\theta p)^n}{n!}
-=e^{-\theta(1-p)}.
-\end{aligned}
+\boxed{EZ=\mu-\frac{\sigma}{\sqrt\pi}}.
 $$
-**易错点与变式价值：** $N$ 随机，增加了 $D[N E(U)]$ 一项；只有固定求和项数时才简单地把单项方差乘以项数。本题是 2025 年赔付额与泊松稀疏化命题的自然深化，并不是真题。
+
+**方法提炼与易错边界：** 标准差是 $\sigma$，两独立同分布正态之差的标准差为 $\sqrt2\sigma$，故 $E|X-Y|=2\sigma/\sqrt\pi$。$E\min(X,Y)$ 严格小于 $\mu$，可作结果检验。
 
 </ExamExplanation>
 
@@ -3401,3 +3084,118 @@ $$
 
 </ExamQuestion>
 
+<ExamQuestion>
+
+【张宇1000题】 设连续型随机变量$X$与$Y$独立同分布，且其分布函数$F(x)$为严格单调增加函数，若$E(X)$存在，且$E(|X-Y|)=1$，则$X$与$F(X)$的协方差为( )
+
+<ExamChoices>
+
+<ExamOption>
+
+A. 0
+
+</ExamOption>
+
+<ExamOption>
+
+B. $\frac{1}{4}$
+
+</ExamOption>
+
+<ExamOption>
+
+C. $\frac{1}{2}$
+
+</ExamOption>
+
+<ExamOption>
+
+D. 1
+
+</ExamOption>
+
+</ExamChoices>
+
+<ExamSolution>
+
+<ExamAnswer>
+
+B。
+
+</ExamAnswer>
+
+<ExamExplanation>
+
+**模型识别与解题突破口：** 独立同分布连续变量满足 $E\max(X,Y)=2E[XF(X)]$；再用极值恒等式和 $E|X-Y|=1$ 解出 $E[XF(X)]$。
+
+由于$F$连续且严格递增，概率积分变换给出
+
+$$
+F(X)\sim U(0,1),
+$$
+
+所以
+
+$$
+E[F(X)]=\frac12.
+$$
+
+又因为$X,Y$独立同分布且连续，
+
+$$
+E[\max(X,Y)]
+=E[X;X>Y]+E[Y;Y>X].
+$$
+
+两项相等，并且
+
+$$
+\begin{aligned}
+ E[X;X>Y]
+&=E\bigl[X P(Y<X\mid X)\bigr]\\
+&=E[XF(X)].
+\end{aligned}
+$$
+
+故
+
+$$
+E[\max(X,Y)]=2E[XF(X)].
+$$
+
+另一方面
+
+$$
+\max(X,Y)=\frac{X+Y+|X-Y|}{2},
+$$
+
+所以
+
+$$
+E[\max(X,Y)]=E(X)+\frac12E|X-Y|=E(X)+\frac12.
+$$
+
+因此
+
+$$
+E[XF(X)]=\frac12E(X)+\frac14.
+$$
+
+从而
+
+$$
+\begin{aligned}
+ \operatorname{Cov}(X,F(X))
+&=E[XF(X)]-E(X)E[F(X)]\\
+&=\left(\frac12E(X)+\frac14\right)-\frac12E(X)\\
+&=\frac14.
+\end{aligned}
+$$
+
+**方法提炼与易错边界：** 概率积分变换给出 $E[F(X)]=1/2$，最终 $\operatorname{Cov}(X,F(X))=1/4$。此值与 $X$ 的平移无关，但要求期望存在、分布连续；不能将任意 $G(X)$ 都视为均匀分布。
+
+</ExamExplanation>
+
+</ExamSolution>
+
+</ExamQuestion>

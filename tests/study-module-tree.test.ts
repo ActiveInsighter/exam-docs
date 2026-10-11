@@ -20,11 +20,12 @@ function walkFiles(directory: string): string[] {
 }
 
 describe('documentation source structure', () => {
-  it('classifies all 126 large questions under the same 24 chapters as the 408 past exams', () => {
+  it('preserves 126 past questions and two complete variants per question under the same 24 chapters', () => {
     const referenceRoot = join(docsRoot, '408', 'past-exams');
     const collectionRoot = join(docsRoot, '408', 'past-exams-large-questions');
     const subjects = ['01-数据结构', '02-计算机组成原理', '03-操作系统', '04-计算机网络'];
     const questionIds: number[] = [];
+    const originalIds: number[] = [];
     let chapterCount = 0;
 
     for (const [subjectIndex, subject] of subjects.entries()) {
@@ -40,12 +41,31 @@ describe('documentation source structure', () => {
       for (const name of chapterFiles) {
         const content = readFileSync(join(directory, name), 'utf8');
         const questions = [...content.matchAll(/\*\*(\d+)\. (\d{4}) 年第 (\d+) 题\*\*/gu)];
+        const originals = [...content.matchAll(/<span id="question-original-(\d+)"\s*\/>/gu)];
+        originalIds.push(...originals.map((match) => Number(match[1])));
+        const totalCount = questions.length + originals.length;
+        expect(originals.length).toBe(questions.length * 2);
+        const orderedAnchors = [...content.matchAll(/<span id="question-(original-\d+|\d{4}-\d+)"\s*\/>/gu)];
+        expect(orderedAnchors).toHaveLength(totalCount);
+        for (const [index, question] of questions.entries()) {
+          expect(orderedAnchors[index * 3][1]).toBe(`${question[2]}-${question[3]}`);
+          expect(orderedAnchors[index * 3 + 1][1]).toBe(`original-${originals[index * 2][1]}`);
+        }
+        const groups = content.split(/(?=<span id="question-\d{4}-\d+"\s*\/>)/u).slice(1);
+        expect(groups).toHaveLength(questions.length);
+        for (const group of groups) {
+          expect(group.match(/<ExamQuestion>/gu)).toHaveLength(3);
+          for (const component of ['ExamQuestion', 'ExamSolution', 'ExamAnswer', 'ExamExplanation']) {
+            expect(group.match(new RegExp(`<${component}>`, 'gu'))).toHaveLength(3);
+            expect(group.match(new RegExp(`</${component}>`, 'gu'))).toHaveLength(3);
+          }
+        }
         const reference = readFileSync(join(referenceRoot, subject, name), 'utf8');
         expect(content.match(/^title: .+$/mu)?.[0]).toBe(reference.match(/^title: .+$/mu)?.[0]);
-        expect(Number(content.match(/^questionCount: (\d+)$/mu)?.[1])).toBe(questions.length);
-        expect(content.match(/<ExamQuestion>/gu)?.length ?? 0).toBe(questions.length);
-        expect(content.match(/<\/ExamQuestion>/gu)?.length ?? 0).toBe(questions.length);
-        expect(content.match(/<ExamSolution>/gu)?.length ?? 0).toBe(questions.length);
+        expect(Number(content.match(/^questionCount: (\d+)$/mu)?.[1])).toBe(totalCount);
+        expect(content.match(/<ExamQuestion>/gu)?.length ?? 0).toBe(totalCount);
+        expect(content.match(/<\/ExamQuestion>/gu)?.length ?? 0).toBe(totalCount);
+        expect(content.match(/<ExamSolution>/gu)?.length ?? 0).toBe(totalCount);
         const ids = questions.map((match) => Number(match[1]));
         expect(ids).toEqual([...ids].sort((left, right) => left - right));
         questionIds.push(...ids);
@@ -55,6 +75,8 @@ describe('documentation source structure', () => {
       expect(subjectCount).toBe(subjectIndex === 3 ? 18 : 36);
     }
     expect(chapterCount).toBe(24);
+    expect(originalIds.sort((left, right) => left - right))
+      .toEqual(Array.from({ length: 252 }, (_, index) => index + 127));
     expect(questionIds.sort((left, right) => left - right))
       .toEqual(Array.from({ length: 126 }, (_, index) => index + 1));
   });
