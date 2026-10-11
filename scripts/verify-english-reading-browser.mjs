@@ -219,7 +219,7 @@ try {
   await screenshot('reading-touch-original-evidence.png');
   await nav.getByRole('button', { name: /返回解答/ }).tap();
   await waitFor(async () => await nav.count() === 0, 'return navigation stayed visible');
-  assert.equal(await page.evaluate(() => document.activeElement.id), detailsId, 'return did not focus the original details');
+  await waitFor(async () => await page.evaluate(() => document.activeElement.id) === detailsId, 'return did not focus the original details');
   await waitFor(async () => await expanded.evaluate(node => node.getBoundingClientRect().top >= 0 && node.getBoundingClientRect().top < innerHeight), 'return did not restore visible details');
   assert.equal(await active().count(), 2, 'return unexpectedly cleared evidence');
   await trigger(2).tap();
