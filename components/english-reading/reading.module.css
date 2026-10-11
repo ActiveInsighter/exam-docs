@@ -1,46 +1,109 @@
-.root { --reading-surface: var(--background); container-type: inline-size; margin-block: 1.5rem; }
-.layout { --reading-columns: 1; --reading-height: calc(100svh - 5.5rem); display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 2rem; }
-.articleViewport, .questions { min-width: 0; }
-.articleViewport {
+.root {
+  --reading-surface: var(--background);
+  --reading-selection: color-mix(in oklch, Highlight 30%, transparent);
+  container-type: inline-size;
+  margin-block: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--reading-surface);
+  color: var(--foreground);
+}
+.root button {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+.root button:hover:not(:disabled) { background: var(--secondary); }
+.root button:disabled { color: var(--muted-foreground); opacity: 0.55; cursor: default; }
+.root :where(button, [tabindex]):focus-visible { outline: 2px solid var(--ring); outline-offset: -3px; }
+.toolbar {
+  position: sticky;
+  top: var(--fd-header-height, 3.5rem);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 3.5rem;
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--reading-surface);
+}
+.views { display: flex; gap: 0.25rem; }
+.views button[aria-pressed='true'], .questionNav button[aria-current='step'] { background: var(--secondary); border-color: var(--border); font-weight: 600; }
+.count { margin-left: auto; color: var(--muted-foreground); font-size: 0.75rem; white-space: nowrap; }
+.desktopLabel { display: none; font-size: 0.875rem; }
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  height: min(48rem, calc(100svh - max(3.5rem, var(--fd-header-height, 3.5rem)) - 5rem));
+  min-height: 12rem;
+}
+.articlePane, .questionPane { min-width: 0; min-height: 0; }
+.articlePane, .questionScroll {
+  overflow: auto;
+  overscroll-behavior: auto;
   background: var(--reading-surface);
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in oklch, var(--foreground) 24%, var(--reading-surface)) var(--reading-surface);
+  scrollbar-color: color-mix(in oklch, var(--foreground) 25%, var(--reading-surface)) var(--reading-surface);
 }
-.articleViewport::-webkit-scrollbar, .questions :global([data-exam-question-body])::-webkit-scrollbar { width: 0.5rem; height: 0.5rem; background: var(--reading-surface); }
-.articleViewport::-webkit-scrollbar-track, .questions :global([data-exam-question-body])::-webkit-scrollbar-track { background: var(--reading-surface); }
-.articleViewport::-webkit-scrollbar-thumb, .questions :global([data-exam-question-body])::-webkit-scrollbar-thumb { border: 2px solid var(--reading-surface); border-radius: 999px; background: color-mix(in oklch, var(--foreground) 24%, var(--reading-surface)); }
-.articleViewport:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
-.articleViewport :global([data-exam-key-sentence]) { scroll-margin-block: 7rem 2rem; }
-.evidenceNav { position: sticky; top: calc(3.5rem + env(safe-area-inset-top)); z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; min-height: 3rem; padding: 0.25rem 0.5rem; border-bottom: 1px solid var(--border); background: var(--reading-surface); }
-.evidenceNav span { color: var(--muted-foreground); font-size: 0.75rem; }
-.evidenceNav button { min-height: 2.75rem; padding-inline: 0.75rem; border: 0; border-radius: 0.25rem; background: var(--secondary); color: var(--foreground); font-size: 0.875rem; cursor: pointer; }
-.evidenceNav button:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
-.article { padding: 0.25rem 0.5rem; }
-.source { color: var(--muted-foreground); font-size: 0.75rem; margin-bottom: 0.75rem; }
-.article h2 { font-family: var(--font-source-serif), Georgia, serif; margin: 0 0 1.5rem !important; }
-.passage { counter-reset: paragraph; font-family: var(--font-source-serif), Georgia, serif; font-size: 1.125rem; line-height: 1.85; }
-.passage > p { position: relative; padding-left: 1.5rem; margin: 0 0 1.5rem; overflow-wrap: anywhere; }
-.passage > p::before { counter-increment: paragraph; content: counter(paragraph); position: absolute; top: 0.3rem; left: 0; font: 400 0.6875rem/1.85 system-ui, sans-serif; color: var(--muted-foreground); }
-.questions > h2 { margin: 0 0 1.25rem !important; }
-.questions :global([data-exam-question]) {
-  background: var(--reading-surface);
-  box-sizing: border-box; padding: 1.25rem 0.5rem; border-top: 1px solid var(--border);
-}
-.questions :global([data-exam-question-body]) {
-  background: var(--reading-surface);
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in oklch, var(--foreground) 24%, var(--reading-surface)) var(--reading-surface);
-  max-height: calc(var(--reading-height) - 7rem); overflow: auto;
-}
-.questions :global([data-exam-choice-group]) { grid-template-columns: minmax(0, 1fr) !important; gap: 0.625rem; margin-block: 1rem; }
-.questions :global([data-exam-choice-option]) { font-size: 1rem; line-height: 1.65; }
+.articlePane::-webkit-scrollbar, .questionScroll::-webkit-scrollbar { width: 0.5rem; height: 0.5rem; background: var(--reading-surface); }
+.articlePane::-webkit-scrollbar-track, .questionScroll::-webkit-scrollbar-track { background: var(--reading-surface); }
+.articlePane::-webkit-scrollbar-thumb, .questionScroll::-webkit-scrollbar-thumb { border: 2px solid var(--reading-surface); border-radius: 1rem; background: color-mix(in oklch, var(--foreground) 25%, var(--reading-surface)); }
+.articlePane { display: block; }
+.questionPane { display: none; flex-direction: column; }
+.root[data-reading-view='questions'] .articlePane { display: none; }
+.root[data-reading-view='questions'] .questionPane { display: flex; }
+.article { padding: 1.25rem; }
+.source { margin-bottom: 0.5rem; color: var(--muted-foreground); font-size: 0.75rem; }
+.article h2 { margin: 0 0 1.25rem !important; font-family: var(--font-source-serif), Georgia, serif; font-size: 1.5rem; line-height: 1.35; }
+.passage { font-family: var(--font-source-serif), Georgia, serif; font-size: 1.125rem; line-height: 1.85; overflow-wrap: anywhere; }
+.passage > p { margin: 0 0 1.25rem; }
+.passage > p:last-child { margin-bottom: 0; }
+.questionNav { display: flex; flex-shrink: 0; gap: 0.25rem; overflow-x: auto; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+.questionNav button { flex-shrink: 0; }
+.questionScroll { flex: 1; min-height: 0; padding: 1.25rem; font-size: 1rem; line-height: 1.75; overflow-wrap: anywhere; }
+.prompt > :first-child { margin-top: 0 !important; }
+.prompt > :last-child { margin-bottom: 0 !important; }
+.questionScroll :global([data-exam-choice-group]) { grid-template-columns: minmax(0, 1fr) !important; gap: 0.75rem; margin-block: 1.25rem 0; }
+.solution { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+.solution h3 { margin: 0 0 1rem !important; font-size: 1rem; }
+.answer { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1rem; }
+.answer > span, .evidenceLinks > span { color: var(--muted-foreground); font-size: 0.875rem; }
+.solution :where(p, ul, ol) { margin-block: 0.75rem; }
+.evidenceLinks { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.25rem; }
+.evidenceLinks button { border-color: var(--border); }
+.controls { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 0.25rem; flex-shrink: 0; padding: 0.5rem; border-top: 1px solid var(--border); background: var(--reading-surface); }
+.controls > button:last-child { justify-self: end; }
+.controls > button:first-child { justify-self: start; }
+.solutionControl { position: relative; }
+.solutionControl > button { border-color: var(--border); background: var(--secondary); }
+.preview { position: absolute; bottom: calc(100% + 0.5rem); left: 50%; transform: translateX(-50%); min-width: 2.75rem; max-width: 14rem; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 0.25rem; background: var(--reading-surface); color: var(--foreground); text-align: center; visibility: hidden; pointer-events: none; }
+.preview p { margin: 0; }
+.solutionControl:has(button:focus-visible) .preview { visibility: visible; }
+@media (hover: hover) and (pointer: fine) { .solutionControl:has(button:hover) .preview { visibility: visible; } }
+.evidence { color: inherit; background: none; border-radius: 0.1em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.evidence[data-evidence-active='true'] { background-image: linear-gradient(var(--reading-selection), var(--reading-selection)); background-size: 100% 100%; background-repeat: no-repeat; }
+.evidence[data-evidence-current='true'] { animation: select-evidence 450ms ease-out; text-decoration: underline; text-underline-offset: 0.2em; text-decoration-color: var(--muted-foreground); }
+@keyframes select-evidence { from { background-size: 0% 100%; } to { background-size: 100% 100%; } }
+@media (prefers-reduced-motion: reduce) { .evidence[data-evidence-current='true'] { animation: none; } }
 @container (min-width: 52rem) {
-  .layout { --reading-columns: 2; --reading-height: calc(100dvh - 7rem); grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 2rem; }
-  .articleViewport { position: sticky; top: 6rem; max-height: var(--reading-height); overflow: auto; padding-right: 1rem; }
-  .questions { padding-left: 1.5rem; border-left: 1px solid var(--border); }
+  .layout { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
+  .root .articlePane { display: block; }
+  .root .questionPane { display: flex; border-left: 1px solid var(--border); }
+  .views { display: none; }
+  .desktopLabel { display: block; }
 }
 @container (max-width: 24rem) {
-  .layout { gap: 1.5rem; }
-  .article, .questions :global([data-exam-question]) { padding-inline: 0.25rem; }
+  .article, .questionScroll { padding: 1rem; }
+  .article h2 { font-size: 1.375rem; }
   .passage { font-size: 1.0625rem; }
+  .toolbar { gap: 0.25rem; padding-inline: 0.25rem; }
+  .toolbar button { padding-inline: 0.5rem; }
 }

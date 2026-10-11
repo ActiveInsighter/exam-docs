@@ -10,15 +10,14 @@ const screenshots = process.env.READING_SCREENSHOTS ?? path.resolve('reading-bro
 await mkdir(screenshots, { recursive: true });
 const browser = await chromium.launch();
 const errors = [];
-let page, root, questions, expanded;
-const trigger = index => questions.nth(index).getByRole('button', { name: '查看解答', exact: true });
+let page, root, article, question, solution;
+const button = name => root.getByRole('button', { name, exact: true });
 const active = () => root.locator('[data-evidence-active="true"]');
-const completed = () => root.locator('[data-evidence-active="true"][data-state="complete"]');
-async function waitFor(check, message, timeout = 12000) {
+async function waitFor(check, message, timeout = 8000) {
   const until = Date.now() + timeout;
   while (Date.now() < until) {
     if (await check()) return;
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(80);
   }
   throw new Error(message);
 }
@@ -28,249 +27,182 @@ async function openPage(options) {
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
   await page.goto(`${base}/docs/english/`, { waitUntil: 'networkidle' });
-  root = page.locator('[data-english-reading]');
-  questions = root.locator('[data-exam-question]');
-  expanded = page.locator('[data-exam-solution="expanded"]');
+  await page.evaluate(async () => { document.documentElement.classList.remove('dark'); document.documentElement.classList.add('light'); await document.fonts.ready; });
+  root = page.locator('[data-reading-workspace]');
+  article = root.locator('[data-reading-article-pane]');
+  question = root.locator('[data-reading-question-scroll]');
+  solution = root.locator('[data-reading-solution]');
   await root.waitFor();
-  assert.equal(await questions.count(), 5);
   return context;
 }
-async function noOverflow() {
-  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, 'page has horizontal overflow');
+async function dimensions() {
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, 'horizontal page overflow');
+  assert.ok(await root.evaluate(node => node.getBoundingClientRect().height <= innerHeight - 56 + 1), 'workspace exceeds available viewport height');
+  assert.equal(await root.locator('[data-exam-question]').count(), 1, 'only the current question should render');
+}
+async function selectQuestion(index, touch = false) {
+  await button(`第 ${index} 题`)[touch ? 'tap' : 'click']();
+  await waitFor(async () => await button(`第 ${index} 题`).getAttribute('aria-current') === 'step', 'question navigation did not update');
+  assert.equal(await root.locator('[data-exam-question]').count(), 1);
+}
+async function reveal(touch = false) {
+  const before = await page.evaluate(() => scrollY);
+  await button('查看解答')[touch ? 'tap' : 'click']();
+  await solution.waitFor();
+  assert.equal(await button('收起解答').getAttribute('aria-expanded'), 'true');
+  assert.ok(await solution.evaluate(node => !!node.closest('[data-reading-question-scroll]')), 'solution must stay in the question scroll region');
+  assert.equal(await page.locator('dialog[open], [data-exam-solution="expanded"]').count(), 0, 'reading opened a legacy modal or portal');
+  assert.ok(Math.abs(await page.evaluate(() => scrollY) - before) < 4, 'revealing the answer moved the document');
+  await waitFor(async () => await solution.locator('[data-reading-answer]').evaluate(node => {
+    const bounds = node.getBoundingClientRect();
+    const scroll = node.closest('[data-reading-question-scroll]').getBoundingClientRect();
+    return bounds.top >= Math.max(0, scroll.top) && bounds.bottom <= Math.min(innerHeight, scroll.bottom);
+  }), 'revealed answer is clipped or outside the viewport');
 }
 async function screenshot(name) {
-  await waitFor(async () => await page.locator('[data-exam-solution]').evaluateAll(nodes =>
-    nodes.every(node => getComputedStyle(node).opacity === '1')), 'solution entrance did not settle');
+  await page.waitForTimeout(150);
   await page.screenshot({ path: path.join(screenshots, name) });
 }
-async function closeDesktop() {
-  await page.keyboard.press('Escape');
-  await waitFor(async () => await page.locator('[data-exam-solution]').count() === 0, 'solution did not close');
-  await page.waitForTimeout(250);
-  assert.equal(await page.locator('[data-exam-solution]').count(), 0, 'dismissed solution reopened under the pointer');
+async function evidenceAndReturn(touch = false) {
+  const locate = button('定位依据 1');
+  await locate.scrollIntoViewIfNeeded();
+  const before = await question.evaluate(node => node.scrollTop);
+  await locate[touch ? 'tap' : 'click']();
+  await waitFor(async () => await root.getAttribute('data-reading-view') === 'article', 'evidence did not select article view');
+  const current = article.locator('[data-evidence-current="true"]');
+  assert.equal(await current.count(), 1);
+  await waitFor(async () => await current.evaluate(node => {
+    const bounds = node.getBoundingClientRect(), pane = node.closest('[data-reading-article-pane]').getBoundingClientRect();
+    return bounds.top >= Math.max(0, pane.top) && bounds.bottom <= Math.min(innerHeight, pane.bottom);
+  }), 'located evidence is not fully visible');
+  await screenshot(touch ? 'reading-touch-evidence.png' : 'reading-desktop-evidence.png');
+  await button('返回题目')[touch ? 'tap' : 'click']();
+  await waitFor(async () => await locate.evaluate(node => document.activeElement === node), 'return did not restore focus to evidence control');
+  await waitFor(async () => Math.abs(await question.evaluate(node => node.scrollTop) - before) < 3, 'return lost question scroll position');
+  assert.equal(await root.getAttribute('data-reading-view'), 'questions');
+  assert.ok(await solution.isVisible(), 'return lost the expanded solution');
 }
-async function scrollChaining(scroller, label, touchSession) {
-  assert.ok(await scroller.evaluate(node => node.scrollHeight > node.clientHeight + 2), `${label} fixture must overflow`);
-  const input = async delta => {
-    const bounds = await scroller.boundingBox();
-    const viewport = page.viewportSize();
-    const x = bounds.x + bounds.width / 2;
-    const top = Math.max(80, bounds.y), bottom = Math.min(viewport.height - 24, bounds.y + bounds.height);
-    const y = (top + bottom) / 2;
-    if (touchSession) {
-      const endY = Math.max(24, Math.min(viewport.height - 24, y - delta));
-      await touchSession.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
-      for (let step = 1; step <= 10; step++) {
-        await touchSession.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: y + (endY - y) * step / 10 }] });
-        await page.waitForTimeout(20);
-      }
-      // Hold before release so momentum cannot contaminate the next boundary check.
-      await page.waitForTimeout(150);
-      await touchSession.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-    } else { await page.mouse.move(x, y); await page.mouse.wheel(0, delta); }
-  };
-  const middle = await scroller.evaluate(node => { node.scrollTop = (node.scrollHeight - node.clientHeight) / 2; return node.scrollTop; });
-  const beforeInternal = await page.evaluate(() => scrollY);
-  await input(100);
-  await waitFor(async () => await scroller.evaluate((node, before) => node.scrollTop > before + 10, middle), `${label} did not consume internal scrolling`, 4000);
-  await page.waitForTimeout(200);
-  assert.ok(Math.abs(await page.evaluate(() => scrollY) - beforeInternal) < 4, `${label} moved the page before reaching its boundary`);
-  // Actual wheel/touch input proves boundary scrolling reaches the page, rather than only checking CSS.
-  for (const delta of [-320, 320]) {
-    await scroller.evaluate((node, direction) => { node.scrollTop = direction < 0 ? 0 : node.scrollHeight; }, delta);
-    const before = await page.evaluate(() => scrollY);
-    await input(delta);
-    await page.waitForTimeout(250);
-    // scrollTop setters round fractional content offsets; continue the gesture after
-    // the first event reaches the physical edge. Containment still fails this check.
-    await input(delta);
-    await waitFor(async () => await page.evaluate(({ before, delta }) => delta < 0 ? scrollY < before - 10 : scrollY > before + 10,
-      { before, delta }), `${label} trapped page scrolling at its ${delta < 0 ? 'top' : 'bottom'} edge`, 4000);
-  }
-}
-async function matchingScrollbar(scroller) {
+async function scrollingFixture(scroller, label, touchSession) {
+  await page.evaluate(() => {
+    for (const position of ['before', 'after']) {
+      const spacer = document.createElement('div'); spacer.dataset.readingTestSpacer = ''; spacer.style.height = `${innerHeight}px`;
+      document.querySelector('[data-reading-workspace]')[position === 'before' ? 'before' : 'after'](spacer);
+    }
+  });
+  await scroller.evaluate(node => { const fixture = document.createElement('div'); fixture.dataset.readingLongFixture = ''; fixture.innerHTML = '<p>Long reading content for native scroll verification.</p>'.repeat(80); node.append(fixture); });
+  await root.evaluate(node => window.scrollTo({ top: node.getBoundingClientRect().top + scrollY - 75, behavior: 'instant' }));
+  await page.waitForTimeout(150);
+  assert.ok(await scroller.evaluate(node => node.scrollHeight > node.clientHeight + 2), `${label} fixture does not overflow`);
   assert.ok(await scroller.evaluate(node => {
-    const style = getComputedStyle(node);
-    const colors = style.scrollbarColor.match(/[a-z-]+\([^)]*\)|#[\da-f]+|[a-z]+/gi);
+    const style = getComputedStyle(node), colors = style.scrollbarColor.match(/[a-z-]+\([^)]*\)|#[\da-f]+|[a-z]+/gi);
     if (style.scrollbarColor === 'auto') return false;
     const canvas = document.createElement('canvas').getContext('2d');
     const pixel = color => { canvas.clearRect(0, 0, 1, 1); canvas.fillStyle = color; canvas.fillRect(0, 0, 1, 1); return [...canvas.getImageData(0, 0, 1, 1).data].join(); };
     return pixel(colors.at(-1)) === pixel(style.backgroundColor);
-  }), 'scrollbar track differs from its background');
-}
-async function addLongContent(target) {
-  await target.evaluate(node => {
-    const fixture = document.createElement('div');
-    fixture.dataset.longReadingFixture = '';
-    fixture.innerHTML = '<p>Long content for scroll boundary verification.</p>'.repeat(80);
-    node.append(fixture);
-  });
-}
-async function prepareQuestion() {
-  await questions.first().evaluate(node => window.scrollTo({ top: node.getBoundingClientRect().top + scrollY - 150, behavior: 'instant' }));
-  await page.waitForTimeout(150);
+  }), `${label} scrollbar track differs from background`);
+  const input = async delta => {
+    const bounds = await scroller.boundingBox(), viewport = page.viewportSize();
+    const x = bounds.x + bounds.width / 2, y = (Math.max(80, bounds.y) + Math.min(viewport.height - 24, bounds.y + bounds.height)) / 2;
+    if (!touchSession) { await page.mouse.move(x, y); await page.mouse.wheel(0, delta); return; }
+    const endY = Math.max(24, Math.min(viewport.height - 24, y - delta));
+    await touchSession.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+    for (let step = 1; step <= 10; step++) {
+      await touchSession.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: y + (endY - y) * step / 10 }] });
+      await page.waitForTimeout(20);
+    }
+    await page.waitForTimeout(150);
+    await touchSession.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  };
+  const middle = await scroller.evaluate(node => { node.scrollTop = (node.scrollHeight - node.clientHeight) / 2; return node.scrollTop; });
+  const beforeInternal = await page.evaluate(() => scrollY);
+  await input(100);
+  await waitFor(async () => await scroller.evaluate((node, before) => node.scrollTop > before + 10, middle), `${label} did not consume internal scrolling`);
+  assert.ok(Math.abs(await page.evaluate(() => scrollY) - beforeInternal) < 4, `${label} moved page before reaching its boundary`);
+  for (const delta of [-240, 240]) {
+    await root.evaluate(node => window.scrollTo({ top: node.getBoundingClientRect().top + scrollY - 75, behavior: 'instant' }));
+    await scroller.evaluate((node, direction) => { node.scrollTop = direction < 0 ? 0 : node.scrollHeight; }, delta);
+    const before = await page.evaluate(() => scrollY);
+    await input(delta); await page.waitForTimeout(200); await input(delta);
+    await waitFor(async () => await page.evaluate(({ before, delta }) => delta < 0 ? scrollY < before - 10 : scrollY > before + 10, { before, delta }), `${label} trapped page scrolling at its ${delta < 0 ? 'top' : 'bottom'}`);
+  }
+  await page.locator('[data-reading-long-fixture], [data-reading-test-spacer]').evaluateAll(nodes => nodes.forEach(node => node.remove()));
+  await root.scrollIntoViewIfNeeded();
 }
 
 try {
   const desktop = await openPage({ viewport: { width: 1440, height: 1080 }, colorScheme: 'light' });
-  for (const width of [320, 390, 768, 1024, 1440]) {
-    await page.setViewportSize({ width, height: 1080 });
-    await noOverflow();
-    const article = root.getByRole('article').locator('..');
-    const bounds = await article.boundingBox();
-    const list = await root.getByRole('region', { name: '阅读理解题目' }).boundingBox();
-    if (width === 1440) assert.ok(list.x >= bounds.x + bounds.width - 2, 'desktop must have two columns');
-    else {
-      assert.ok(list.y >= bounds.y + bounds.height - 2, 'narrow layout must stack the complete article before questions');
-      assert.ok(await article.evaluate(node => node.scrollHeight <= node.clientHeight + 1), 'narrow article is clipped by an internal scroller');
-    }
-    await screenshot(`reading-layout-${width}.png`);
+  await root.scrollIntoViewIfNeeded();
+  await dimensions();
+  assert.ok(await article.isVisible() && await root.locator('[data-reading-question-pane]').isVisible(), 'desktop must show both panes');
+  assert.ok(await button('上一题').isDisabled());
+  await button('查看解答').hover();
+  await waitFor(async () => await root.locator('[data-reading-preview]').isVisible(), 'hover answer preview did not appear');
+  assert.equal((await root.locator('[data-reading-preview]').innerText()).trim(), 'B');
+  assert.equal(await active().count(), 0, 'hover activated evidence');
+  await reveal();
+  assert.equal(await active().count(), 1);
+  await screenshot('reading-desktop-answer.png');
+  await evidenceAndReturn();
+  await selectQuestion(2); await reveal();
+  assert.equal(await active().count(), 2);
+  for (const index of [3, 4, 1, 5]) await selectQuestion(index);
+  assert.equal(await solution.count(), 0, 'switching retained stale details');
+  assert.equal(await active().count(), 0, 'switching retained stale evidence');
+  assert.ok(await button('下一题').isDisabled());
+  await button('上一题').click(); await button('下一题').click();
+  assert.equal(await button('第 5 题').getAttribute('aria-current'), 'step');
+  await selectQuestion(1);
+  await page.keyboard.press('Tab');
+  await button('查看解答').focus();
+  await waitFor(async () => await root.locator('[data-reading-preview]').isVisible(), 'keyboard focus did not preview answer');
+  await page.keyboard.press('Enter'); await solution.waitFor();
+  await button('收起解答').click();
+  await scrollingFixture(question, 'desktop question');
+  await scrollingFixture(article, 'desktop article');
+  await selectQuestion(2); await reveal();
+  for (const width of [320, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 1080 }); await dimensions();
+    assert.ok(await solution.isVisible(), 'resize lost detailed solution');
+    assert.equal(await active().count(), 2, 'resize lost article highlights');
   }
-  const preview = page.locator('[data-exam-solution="preview"]');
-  await trigger(0).hover();
-  await preview.waitFor();
-  assert.equal((await preview.innerText()).trim(), 'B');
-  assert.equal(await active().count(), 0, 'hover must not activate evidence');
-  await trigger(0).click();
-  await expanded.waitFor();
-  assert.ok((await expanded.innerText()).includes('separate the effect'));
-  assert.equal(await page.locator('dialog[open]').count(), 0);
-  assert.notEqual(await page.evaluate(() => document.documentElement.style.overflow), 'hidden');
-  await waitFor(async () => await completed().count() === 1, 'desktop evidence did not finish');
-  await page.mouse.move(10, 10);
-  assert.ok(await expanded.isVisible(), 'clicked details must stay open when the pointer leaves');
-  await screenshot('reading-desktop-evidence.png');
-  await trigger(1).focus();
-  await page.keyboard.press('Enter');
-  await waitFor(async () => await completed().count() === 2, 'multi-sentence evidence did not finish');
-  assert.equal(await expanded.count(), 1);
-  assert.equal(await root.locator('[data-exam-key-sentence="p2s4"] [data-evidence-active="true"]').count(), 0);
-  await expanded.getByRole('button', { name: '重播关键句' }).click();
-  await waitFor(async () => await root.locator('[data-state="playing"]').count() === 1, 'replay did not begin');
-  await trigger(2).focus();
-  await page.keyboard.press('Enter');
-  await waitFor(async () => await completed().count() === 1, 'interrupted evidence did not switch');
-  assert.equal(await root.locator('[data-exam-key-sentence="p1s3"] [data-evidence-active="true"]').count(), 0);
-  await closeDesktop();
-  await trigger(0).focus();
-  await preview.waitFor();
-  await page.keyboard.press('Enter');
-  await expanded.waitFor();
-  await expanded.getByRole('button', { name: '关闭解答' }).click();
-  await waitFor(async () => await expanded.count() === 0, 'close button failed');
-  await page.locator('.docs-page-title').click();
-
-  const questionBody = questions.first().locator('[data-exam-question-body]');
-  await addLongContent(questionBody);
-  await prepareQuestion();
-  assert.ok(await questions.first().evaluate(node => node.getBoundingClientRect().height <= innerHeight - 112 + 1), 'question exceeds the viewport height');
-  await matchingScrollbar(questionBody);
-  await scrollChaining(questionBody, 'question body');
-  await prepareQuestion();
-  await addLongContent(root.getByRole('article'));
-  await scrollChaining(root.getByRole('article').locator('..'), 'desktop article');
-  await prepareQuestion();
-  await trigger(0).click();
-  await expanded.waitFor();
-  await addLongContent(expanded);
-  await matchingScrollbar(expanded);
-  await scrollChaining(expanded, 'expanded solution');
-  await closeDesktop();
-  await root.locator('[data-long-reading-fixture]').evaluateAll(nodes => nodes.forEach(node => node.remove()));
   await desktop.close();
 
-  // Fresh touch context catches first-tap and hover-dependent bugs desktop clicks miss.
   const touch = await openPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1, colorScheme: 'light' });
+  await root.scrollIntoViewIfNeeded();
+  assert.ok(await article.isVisible() && !await root.locator('[data-reading-question-pane]').isVisible(), 'mobile should initially show article alone');
+  assert.equal(await button('文章').getAttribute('aria-pressed'), 'true');
+  await button('题目').tap();
   for (const viewport of [{ width: 390, height: 844 }, { width: 320, height: 800 }, { width: 844, height: 390 }]) {
-    await page.setViewportSize(viewport);
-    await noOverflow();
-    const button = trigger(0);
-    await button.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(200);
-    const before = await page.evaluate(() => scrollY);
-    await button.tap();
-    await expanded.waitFor();
-    await waitFor(async () => await completed().count() === 1, 'touch evidence did not finish');
-    assert.ok(await questions.first().locator('[data-exam-solution="expanded"]').isVisible(), 'touch details must be inline inside their question');
-    assert.equal(await page.locator('[data-exam-solution="preview"], dialog[open]').count(), 0, 'touch must not require hover or open a modal');
-    const after = await page.evaluate(() => scrollY);
-    assert.ok(after >= before - 4 && after <= before + viewport.height, 'opening touch details jumped away from the question');
-    assert.ok(await expanded.getByText('B', { exact: true }).evaluate(node => {
-      const bounds = node.getBoundingClientRect();
-      if (bounds.top < 0 || bounds.bottom > innerHeight) return false;
-      for (let ancestor = node.parentElement; ancestor; ancestor = ancestor.parentElement) {
-        if (/(auto|scroll|hidden|clip)/.test(getComputedStyle(ancestor).overflowY)) {
-          const clip = ancestor.getBoundingClientRect();
-          if (bounds.top < clip.top || bounds.bottom > clip.bottom) return false;
-        }
-      }
-      return true;
-    }), 'first tap did not reveal an unclipped answer inside the viewport');
-    assert.equal(await page.locator('[data-reading-evidence-nav]').count(), 0, 'initial open must not navigate to evidence');
-    const controls = await questions.first().getByRole('button').evaluateAll(nodes => nodes.filter(node => node.getClientRects().length).map(node => node.getBoundingClientRect().height));
-    assert.ok(controls.every(height => height >= 44), 'touch controls are smaller than 44px');
+    await page.setViewportSize(viewport); await root.scrollIntoViewIfNeeded(); await dimensions();
+    assert.ok(!await article.isVisible() && await root.locator('[data-reading-question-pane]').isVisible(), 'mobile question view should hide article');
+    await reveal(true);
+    assert.equal(await root.getAttribute('data-reading-view'), 'questions', 'opening answer switched to article');
+    assert.equal(await button('题目').getAttribute('aria-pressed'), 'true');
+    assert.ok(await root.getByRole('button').evaluateAll(nodes => nodes.filter(node => node.getClientRects().length).every(node => node.getBoundingClientRect().height >= 44)), 'touch target smaller than 44px');
     await screenshot(`reading-touch-${viewport.width}x${viewport.height}.png`);
-    await questions.first().getByRole('button', { name: '收起解答', exact: true }).tap();
-    await waitFor(async () => await expanded.count() === 0, 'second tap did not collapse touch details');
-    assert.equal(await active().count(), 0, 'collapse left stale highlights');
+    await button('收起解答').tap();
+    assert.equal(await active().count(), 0, 'collapse left stale evidence');
   }
   await page.setViewportSize({ width: 390, height: 844 });
-  await trigger(1).tap();
-  await waitFor(async () => await completed().count() === 2, 'touch multi-sentence evidence did not finish');
-  const detailsId = await expanded.getAttribute('id');
-  await expanded.getByRole('button', { name: /查看原文依据/ }).tap();
-  const nav = page.locator('[data-reading-evidence-nav]');
-  await nav.waitFor();
-  await waitFor(async () => await completed().count() === 2, 'evidence navigation did not finish');
-  assert.ok(await active().last().evaluate(node => {
-    const bounds = node.getBoundingClientRect();
-    return bounds.top >= 0 && bounds.top < innerHeight && bounds.bottom > 0;
-  }), 'evidence navigation did not bring the sentence into view');
-  await screenshot('reading-touch-original-evidence.png');
-  await nav.getByRole('button', { name: /返回解答/ }).tap();
-  await waitFor(async () => await nav.count() === 0, 'return navigation stayed visible');
-  await waitFor(async () => await page.evaluate(() => document.activeElement.id) === detailsId, 'return did not focus the original details');
-  await waitFor(async () => await expanded.evaluate(node => node.getBoundingClientRect().top >= 0 && node.getBoundingClientRect().top < innerHeight), 'return did not restore visible details');
-  assert.equal(await active().count(), 2, 'return unexpectedly cleared evidence');
-  await trigger(2).tap();
-  await waitFor(async () => await completed().count() === 1, 'touch question switch failed');
-  assert.equal(await expanded.count(), 1);
-  assert.equal(await root.locator('[data-exam-key-sentence="p1s3"] [data-evidence-active="true"]').count(), 0);
-  await page.evaluate(() => document.documentElement.classList.add('dark'));
+  await selectQuestion(2, true); await reveal(true); await evidenceAndReturn(true);
+  const light = await root.evaluate(node => getComputedStyle(node).color);
+  await page.evaluate(() => { document.documentElement.classList.remove('light'); document.documentElement.classList.add('dark'); });
+  assert.notEqual(await root.evaluate(node => getComputedStyle(node).color), light, 'dark theme did not change rendered colors');
   await screenshot('reading-touch-dark.png');
-  await questions.nth(2).getByRole('button', { name: '收起解答', exact: true }).tap();
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await trigger(4).tap();
-  await waitFor(async () => await completed().count() === 2, 'reduced motion lost evidence', 2000);
-  assert.ok(await root.locator('[data-motion-cursor]').evaluateAll(nodes => nodes.every(node => getComputedStyle(node).display === 'none')));
-  await page.setViewportSize({ width: 320, height: 800 });
-  await waitFor(async () => await active().evaluateAll(nodes => nodes.every(node => {
-    const range = document.createRange();
-    range.selectNodeContents(node.querySelector('[data-motion-text]'));
-    return node.querySelectorAll('[data-motion-line]').length === [...range.getClientRects()].filter(rect => rect.width > 0 && rect.height > 0).length;
-  })), 'completed evidence was not remeasured after wrapping');
-  await noOverflow();
-  await screenshot('reading-touch-reduced-motion.png');
-  await questions.nth(4).getByRole('button', { name: '收起解答', exact: true }).tap();
-  const touchSession = await touch.newCDPSession(page);
-  const touchBody = questions.first().locator('[data-exam-question-body]');
-  await addLongContent(touchBody);
-  await prepareQuestion();
-  await matchingScrollbar(touchBody);
-  await scrollChaining(touchBody, 'touch question body', touchSession);
-  await trigger(0).tap();
-  await expanded.waitFor();
-  await addLongContent(expanded);
-  await expanded.evaluate(node => node.scrollIntoView({ block: 'center', behavior: 'instant' }));
-  await matchingScrollbar(expanded);
-  await scrollChaining(expanded, 'touch inline solution', touchSession);
-  await touchSession.detach();
-  await touch.close();
+  assert.ok(await active().evaluateAll(nodes => nodes.every(node => getComputedStyle(node).animationDuration === '0s' && getComputedStyle(node).transitionDuration === '0s')), 'reduced motion leaves animated highlights');
+  assert.equal(await root.locator('[data-motion-line], [data-motion-cursor]').count(), 0, 'reading still uses manual text overlays');
+  await button('文章').tap(); await page.setViewportSize({ width: 320, height: 800 });
+  assert.equal(await active().count(), 2); await dimensions();
+  await screenshot('reading-touch-article-reduced.png');
+  const session = await touch.newCDPSession(page);
+  await scrollingFixture(article, 'touch article', session);
+  await button('题目').tap();
+  await scrollingFixture(question, 'touch question and solution', session);
+  await session.detach(); await touch.close();
   assert.deepEqual(errors, [], 'browser reported errors');
-  console.log('PASS: responsive article flow; desktop hover/click and keyboard; touch first-tap visible inline answer; evidence/return navigation; touch controls; internal scrolling and wheel/touch chaining at both ends; bounded question; matching scrollbar; sequencing and interruption; dark/reduced motion; responsive line measurement.');
+  console.log('PASS: bounded reading workspace; single-question navigation; desktop hover and keyboard answer; inline details; evidence and focus/scroll restoration; real touch portrait/landscape; responsive state; native wheel/touch scrolling and both-edge page chaining; matching scrollbar; dark/reduced motion; no portal or console errors.');
 } catch (error) {
   if (page && !page.isClosed()) await page.screenshot({ path: path.join(screenshots, 'reading-failure.png'), fullPage: true }).catch(() => {});
   throw error;
-} finally {
-  await browser.close();
-}
+} finally { await browser.close(); }
