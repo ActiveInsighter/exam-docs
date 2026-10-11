@@ -9,13 +9,14 @@ export interface CursorHighlightProps {
   mode?: HighlightMode;
   playKey?: string | number;
   scrollRoot?: HTMLElement | null;
+  autoScroll?: boolean;
   onComplete?: () => void;
 }
 
 /** A decorative selection layer; the real text stays selectable and accessible. */
-export function CursorHighlight({ children, mode = 'idle', playKey = 0, scrollRoot = null, onComplete }: CursorHighlightProps) {
+export function CursorHighlight({ children, mode = 'idle', playKey = 0, scrollRoot = null, autoScroll = true, onComplete }: CursorHighlightProps) {
   const root = useRef<HTMLSpanElement>(null);
-  useCursorHighlight(root, { mode, playKey, scrollRoot, onComplete });
+  useCursorHighlight(root, { mode, playKey, scrollRoot, autoScroll, onComplete });
   return (
     <span ref={root} className={styles.highlight} data-reading-motion="highlight" data-evidence-active={mode !== 'idle'}>
       <span className={styles.overlay} data-motion-overlay="" aria-hidden="true" />

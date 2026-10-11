@@ -85,7 +85,7 @@ export function ExamQuestion({
 
   return (
     <section className={styles.root} data-exam-question="">
-      <div className={styles.question}>{question}</div>
+      <div className={styles.question} data-exam-question-body="">{question}</div>
       <ExamSolutionControl
         question={question}
         answer={answer}

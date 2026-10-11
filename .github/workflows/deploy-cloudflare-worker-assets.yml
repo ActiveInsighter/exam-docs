@@ -536,7 +536,7 @@ jobs:
           if [[ "${GITHUB_REF}" != 'refs/heads/main' ]]; then worker_name=exam-docs-preview; fi
           echo "worker-name=${worker_name}" >> "${GITHUB_OUTPUT}"
       - name: Verify English reading interactions in Chromium
-        if: ${{ github.ref == 'refs/heads/codex/english-reading-motion-1010' && steps.cloudflare-deploy.outputs.deployment-url != '' }}
+        if: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/codex/english-reading-motion-1010') && steps.cloudflare-deploy.outputs.deployment-url != '' }}
         env:
           DEPLOYMENT_URL: ${{ steps.cloudflare-deploy.outputs.deployment-url }}
           READING_BROWSER_MODULES: ${{ runner.temp }}/reading-browser
@@ -546,7 +546,7 @@ jobs:
           "${READING_BROWSER_MODULES}/node_modules/.bin/playwright" install --with-deps chromium
           node scripts/verify-english-reading-browser.mjs
       - name: Upload reading browser screenshots
-        if: ${{ always() && github.ref == 'refs/heads/codex/english-reading-motion-1010' }}
+        if: ${{ always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/codex/english-reading-motion-1010') }}
         uses: actions/upload-artifact@v4
         with:
           name: english-reading-browser-screenshots

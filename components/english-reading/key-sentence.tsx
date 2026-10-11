@@ -12,6 +12,7 @@ export function ExamKeySentence({ id, children }: { id: string; children: ReactN
   return (
     <span data-exam-key-sentence={id}>
       <CursorHighlight mode={mode} playKey={active?.replay ?? 0} scrollRoot={reading?.article}
+        autoScroll={reading ? reading.wide || active?.view === 'evidence' : true}
         onComplete={() => active && reading?.complete(active.id, active.replay, index)}>
         {children}
       </CursorHighlight>

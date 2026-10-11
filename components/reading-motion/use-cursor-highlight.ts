@@ -8,11 +8,12 @@ export type HighlightMode = 'idle' | 'playing' | 'complete';
 
 /** Only active evidence measures or animates. React never renders animation frames. */
 export function useCursorHighlight(rootRef: RefObject<HTMLSpanElement | null>, {
-  mode, playKey, scrollRoot, onComplete,
+  mode, playKey, scrollRoot, autoScroll, onComplete,
 }: {
   mode: HighlightMode;
   playKey: string | number;
   scrollRoot: HTMLElement | null;
+  autoScroll: boolean;
   onComplete?: () => void;
 }) {
   const callback = useRef(onComplete);
@@ -71,11 +72,11 @@ export function useCursorHighlight(rootRef: RefObject<HTMLSpanElement | null>, {
     document.fonts?.addEventListener('loadingdone', measure);
     measure();
 
-    if (mode === 'playing') {
+    if (mode === 'playing' && autoScroll) {
       const bounds = scrollRoot?.getBoundingClientRect();
       const rect = root.getBoundingClientRect();
-      // A provided reading viewport owns scrolling, so the solution trigger stays visible.
-      if (scrollRoot && bounds) {
+      // Wide layouts scroll the article pane; stacked layouts use the document.
+      if (scrollRoot && bounds && getComputedStyle(scrollRoot).overflowY === 'auto') {
         if (rect.top < bounds.top + 24 || rect.bottom > bounds.bottom - 24) {
           scrollRoot.scrollTo({ top: scrollRoot.scrollTop + rect.top - bounds.top - (scrollRoot.clientHeight - rect.height) / 2, behavior: reduced.matches ? 'instant' : 'smooth' });
         }
@@ -108,5 +109,5 @@ export function useCursorHighlight(rootRef: RefObject<HTMLSpanElement | null>, {
       document.fonts?.removeEventListener('loadingdone', measure);
       overlay.replaceChildren(); cursor.style.opacity = '0';
     };
-  }, [mode, playKey, rootRef, scrollRoot]);
+  }, [mode, playKey, rootRef, scrollRoot, autoScroll]);
 }

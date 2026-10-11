@@ -1,17 +1,20 @@
 .root { --reading-surface: var(--background); container-type: inline-size; margin-block: 1.5rem; }
-.layout { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 2rem; }
+.layout { --reading-columns: 1; --reading-height: calc(100svh - 5.5rem); display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 2rem; }
 .articleViewport, .questions { min-width: 0; }
-.articleViewport { max-height: calc(100dvh - 7rem); overflow: auto; }
 .articleViewport {
   background: var(--reading-surface);
   scrollbar-width: thin;
   scrollbar-color: color-mix(in oklch, var(--foreground) 24%, var(--reading-surface)) var(--reading-surface);
-  overscroll-behavior: contain;
 }
-.articleViewport::-webkit-scrollbar, .questions :global([data-exam-question])::-webkit-scrollbar { width: 0.5rem; height: 0.5rem; background: var(--reading-surface); }
-.articleViewport::-webkit-scrollbar-track, .questions :global([data-exam-question])::-webkit-scrollbar-track { background: var(--reading-surface); }
-.articleViewport::-webkit-scrollbar-thumb, .questions :global([data-exam-question])::-webkit-scrollbar-thumb { border: 2px solid var(--reading-surface); border-radius: 999px; background: color-mix(in oklch, var(--foreground) 24%, var(--reading-surface)); }
+.articleViewport::-webkit-scrollbar, .questions :global([data-exam-question-body])::-webkit-scrollbar { width: 0.5rem; height: 0.5rem; background: var(--reading-surface); }
+.articleViewport::-webkit-scrollbar-track, .questions :global([data-exam-question-body])::-webkit-scrollbar-track { background: var(--reading-surface); }
+.articleViewport::-webkit-scrollbar-thumb, .questions :global([data-exam-question-body])::-webkit-scrollbar-thumb { border: 2px solid var(--reading-surface); border-radius: 999px; background: color-mix(in oklch, var(--foreground) 24%, var(--reading-surface)); }
 .articleViewport:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+.articleViewport :global([data-exam-key-sentence]) { scroll-margin-block: 7rem 2rem; }
+.evidenceNav { position: sticky; top: calc(3.5rem + env(safe-area-inset-top)); z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; min-height: 3rem; padding: 0.25rem 0.5rem; border-bottom: 1px solid var(--border); background: var(--reading-surface); }
+.evidenceNav span { color: var(--muted-foreground); font-size: 0.75rem; }
+.evidenceNav button { min-height: 2.75rem; padding-inline: 0.75rem; border: 0; border-radius: 0.25rem; background: var(--secondary); color: var(--foreground); font-size: 0.875rem; cursor: pointer; }
+.evidenceNav button:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
 .article { padding: 0.25rem 0.5rem; }
 .source { color: var(--muted-foreground); font-size: 0.75rem; margin-bottom: 0.75rem; }
 .article h2 { font-family: var(--font-source-serif), Georgia, serif; margin: 0 0 1.5rem !important; }
@@ -21,16 +24,19 @@
 .questions > h2 { margin: 0 0 1.25rem !important; }
 .questions :global([data-exam-question]) {
   background: var(--reading-surface);
+  box-sizing: border-box; padding: 1.25rem 0.5rem; border-top: 1px solid var(--border);
+}
+.questions :global([data-exam-question-body]) {
+  background: var(--reading-surface);
   scrollbar-width: thin;
   scrollbar-color: color-mix(in oklch, var(--foreground) 24%, var(--reading-surface)) var(--reading-surface);
-  overscroll-behavior: contain;
-  box-sizing: border-box; max-height: calc(100dvh - 7rem); overflow: auto; padding: 1.25rem 0.5rem; border-top: 1px solid var(--border);
+  max-height: calc(var(--reading-height) - 7rem); overflow: auto;
 }
 .questions :global([data-exam-choice-group]) { grid-template-columns: minmax(0, 1fr) !important; gap: 0.625rem; margin-block: 1rem; }
 .questions :global([data-exam-choice-option]) { font-size: 1rem; line-height: 1.65; }
 @container (min-width: 52rem) {
-  .layout { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 2rem; }
-  .articleViewport { position: sticky; top: 6rem; padding-right: 1rem; }
+  .layout { --reading-columns: 2; --reading-height: calc(100dvh - 7rem); grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 2rem; }
+  .articleViewport { position: sticky; top: 6rem; max-height: var(--reading-height); overflow: auto; padding-right: 1rem; }
   .questions { padding-left: 1.5rem; border-left: 1px solid var(--border); }
 }
 @container (max-width: 24rem) {

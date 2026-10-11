@@ -66,6 +66,21 @@ describe('reading evidence state', () => {
     expect(readingReducer(replayed, { type: 'close', id: 'q2' })).toBe(replayed);
     expect(readingReducer(replayed, { type: 'close', id: 'q1' })).toBeNull();
   });
+  it('returns from evidence to the same solution without resetting the selection', () => {
+    const opened = readingReducer(null, { type: 'open', id: 'q1', evidence: ['a', 'b'] });
+    const viewing = readingReducer(opened, { type: 'show-evidence', id: 'q1' });
+    expect(viewing?.view).toBe('evidence');
+    const completed = readingReducer(viewing, { type: 'complete', id: 'q1', replay: viewing!.replay, index: 0 });
+    expect(readingReducer(completed, { type: 'return', id: 'q1' })).toEqual({ ...completed, view: 'solution' });
+    expect(readingReducer(completed, { type: 'return', id: 'q2' })).toBe(completed);
+  });
+  it('starts a new question in solution view and ignores old evidence navigation', () => {
+    const first = readingReducer(null, { type: 'open', id: 'q1', evidence: ['a'] });
+    const viewing = readingReducer(first, { type: 'show-evidence', id: 'q1' });
+    const second = readingReducer(viewing, { type: 'open', id: 'q2', evidence: ['b'] });
+    expect(second?.view).toBe('solution');
+    expect(readingReducer(second, { type: 'show-evidence', id: 'q1' })).toBe(second);
+  });
 });
 
 describe('wrapped sentence selection', () => {
