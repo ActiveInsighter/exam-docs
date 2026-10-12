@@ -55,7 +55,7 @@ try {
   await tooltip.waitFor({ state: 'visible' });
   assert.equal((await tooltip.innerText()).trim(), 'B', 'shared hover answer is wrong');
   await verifySolution(page, trigger);
-  await desktop.root.locator('[data-exam-question]').nth(3).scrollIntoViewIfNeeded();
+  await article.evaluate(node => window.scrollTo(0, node.getBoundingClientRect().top + scrollY - 72));
   assert.ok(await article.evaluate(node => {
     const box = node.getBoundingClientRect();
     return getComputedStyle(node).position === 'sticky' && box.top >= 56 && box.bottom <= innerHeight;
@@ -76,6 +76,11 @@ try {
   await page.mouse.move(moved.x + moved.width / 2, moved.y + moved.height / 2);
   await page.mouse.wheel(0, -240);
   await page.waitForFunction(previous => scrollY < previous - 5, before);
+  await desktop.root.locator('[data-exam-question]').nth(4).scrollIntoViewIfNeeded();
+  assert.ok(await article.evaluate(node => {
+    const box = node.getBoundingClientRect();
+    return box.bottom > 72 && box.top < innerHeight;
+  }), 'article disappeared beside the final question');
   await desktop.context.close();
 
   for (const width of [390, 320, 844]) {
