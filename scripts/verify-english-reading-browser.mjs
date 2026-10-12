@@ -32,6 +32,7 @@ async function verifySolution(page, trigger, touch = false) {
   else await trigger.click();
   const dialog = page.getByRole('dialog', { name: '题目与解析', exact: true });
   await dialog.waitFor({ state: 'visible' });
+  await dialog.evaluate(node => Promise.all(node.getAnimations().map(animation => animation.finished.catch(() => {}))));
   assert.ok((await dialog.innerText()).includes('定位第二段末句。'), 'original explanation is missing');
   assert.ok(await dialog.evaluate(node => {
     const box = node.getBoundingClientRect();
