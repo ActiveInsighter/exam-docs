@@ -16,8 +16,6 @@ export { ExamAnswer, ExamExplanation } from './exam-question-parts';
 
 type ExamSolutionProps = {
   children: ReactNode;
-  /** IDs of <ExamKeySentence> elements in the enclosing reading article. */
-  evidence?: readonly string[];
 };
 
 type ExamQuestionProps = {

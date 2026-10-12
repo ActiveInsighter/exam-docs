@@ -5,7 +5,7 @@ import {
   ExamSolution,
 } from '@/components/exam-question';
 import { ExamChoices, ExamOption } from '@/components/exam-choices';
-import { EnglishReading, ExamArticle, ExamKeySentence } from '@/components/english-reading';
+import { EnglishReading, ExamArticle } from '@/components/english-reading';
 import { Mermaid } from '@/components/mdx/mermaid';
 import * as AccordionComponents from 'fumadocs-ui/components/accordion';
 import * as FilesComponents from 'fumadocs-ui/components/files';
@@ -40,7 +40,6 @@ export function getMDXComponents(components?: MDXComponents) {
     ExamSolution,
     EnglishReading,
     ExamArticle,
-    ExamKeySentence,
     Mermaid,
     TypeTable,
     ...components,
