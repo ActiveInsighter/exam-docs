@@ -146,6 +146,13 @@ export function StudyHome() {
         <p className="mt-14 text-sm text-fd-muted-foreground">
           今天不必解决所有问题。先打开下一节。
         </p>
+        {/* Plain-text index of every page; lets AI browsers reach all docs from the homepage. */}
+        <a
+          href="/llms.txt"
+          className="mt-3 inline-block text-xs text-fd-muted-foreground underline underline-offset-4 hover:text-fd-foreground"
+        >
+          全部文档目录
+        </a>
       </section>
     </main>
   );

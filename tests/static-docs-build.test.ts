@@ -34,6 +34,12 @@ describe('static docs build', () => {
     expect(shouldIncludeInStaticDocsProject('app/llms.mdx/docs/[[...slug]]/route.ts')).toBe(false);
   });
 
+  it('ships crawler discovery files in the static package', () => {
+    expect(shouldIncludeInStaticDocsProject('app/robots.ts')).toBe(true);
+    expect(shouldIncludeInStaticDocsProject('app/sitemap.ts')).toBe(true);
+    expect(shouldIncludeInStaticDocsProject('app/llms.txt/route.ts')).toBe(true);
+  });
+
   it('excludes all API routes from the pure static package', () => {
     expect(shouldIncludeInStaticDocsProject('app/api')).toBe(false);
     expect(shouldIncludeInStaticDocsProject('app/api/search')).toBe(false);

@@ -3,15 +3,22 @@ import 'katex/dist/katex.css';
 import './surface-overrides.css';
 import './study-overrides.css';
 import { SearchProvider } from '@/components/search-provider';
+import { getSiteOrigin } from '@/lib/site-url';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteOrigin()),
   title: {
     default: '考研学习',
     template: '%s | 考研学习',
   },
   description: '按数学、专业课与算法练习组织的考研学习知识库。',
+  openGraph: {
+    type: 'website',
+    locale: 'zh_CN',
+    siteName: '考研学习',
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
