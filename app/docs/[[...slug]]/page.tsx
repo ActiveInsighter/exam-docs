@@ -1,4 +1,5 @@
 import { getMDXComponents } from '@/components/mdx';
+import { toCanonicalPagePath, toMarkdownPath } from '@/lib/site-url';
 import { shardStaticDocParams } from '@/lib/static-doc-shards';
 import { source } from '@/lib/source';
 import type { Metadata } from 'next';
@@ -53,7 +54,7 @@ export default async function Page({ params }: PageParameters) {
 
   const data = await page.data.load();
   const MDX = data.body;
-  const markdownUrl = `${page.url}.md`;
+  const markdownUrl = toMarkdownPath(page.url);
 
   return (
     <DocsPage toc={data.toc} full={page.data.full}>
@@ -91,8 +92,20 @@ export async function generateMetadata({
   const page = source.getPage(slug);
   if (!page) notFound();
 
+  const canonical = toCanonicalPagePath(page.url);
+
   return {
     title: page.data.title,
     description: page.data.description,
+    alternates: {
+      canonical,
+      types: { 'text/markdown': toMarkdownPath(page.url) },
+    },
+    openGraph: {
+      type: 'article',
+      url: canonical,
+      title: page.data.title,
+      description: page.data.description,
+    },
   };
 }

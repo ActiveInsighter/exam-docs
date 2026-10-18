@@ -1,4 +1,5 @@
 import { getMDXComponents } from '@/components/mdx';
+import { toCanonicalPagePath } from '@/lib/site-url';
 import { blogSource } from '@/lib/source';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -104,7 +105,9 @@ export async function generateMetadata({
   params,
 }: PageParameters): Promise<Metadata> {
   const { slug } = await params;
-  if (!slug) return { title: 'Blog' };
+  if (!slug || slug.length === 0) {
+    return { title: 'Blog', alternates: { canonical: '/blog/' } };
+  }
 
   const page = blogSource.getPage(slug);
   if (!page) notFound();
@@ -112,5 +115,6 @@ export async function generateMetadata({
   return {
     title: page.data.title,
     description: page.data.description,
+    alternates: { canonical: toCanonicalPagePath(page.url) },
   };
 }
