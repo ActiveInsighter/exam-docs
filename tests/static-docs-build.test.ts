@@ -90,6 +90,67 @@ describe('static docs build', () => {
     expect(markdown).toContain('Tail');
   });
 
+  it('keeps text nested in exam components so choices and answers are exported', async () => {
+    const markdown = await renderStaticMarkdown(
+      [
+        '{/* 此文件由脚本自动生成，请勿直接修改。 */}',
+        '',
+        '<ExamQuestion>',
+        '',
+        '1. 题干（  ）。',
+        '',
+        '<ExamChoices>',
+        '<ExamOption>A. $x^2$</ExamOption>',
+        '<ExamOption>',
+        'B. 多行选项',
+        '</ExamOption>',
+        '</ExamChoices>',
+        '',
+        '<ExamSolution>',
+        '<ExamAnswer>B</ExamAnswer>',
+        '<ExamExplanation>',
+        '解析第一行',
+        '最后一行</ExamExplanation>',
+        '</ExamSolution>',
+        '',
+        '</ExamQuestion>',
+      ].join('\n'),
+      { title: '题目', url: '/docs/q' },
+    );
+
+    expect(markdown).toContain('A. $x^2$');
+    expect(markdown).toContain('B. 多行选项');
+    expect(markdown).toContain('**答案：** B');
+    expect(markdown).toContain('**解析：**');
+    expect(markdown).toContain('最后一行');
+    expect(markdown).not.toMatch(/<\/?Exam/);
+    expect(markdown).not.toContain('{/*');
+  });
+
+  it('keeps titles of Callout and Card components and leaves code fences untouched', async () => {
+    const markdown = await renderStaticMarkdown(
+      [
+        '<Callout type="warn" title="公式成立有前提">',
+        '正文',
+        '</Callout>',
+        '<Card title="易错点">忘记目标节点。</Card>',
+        '<InlineSvg src="/a.svg" />',
+        '',
+        '```tsx',
+        '<ExamOption>A. 保留</ExamOption>',
+        '{/* 保留 */}',
+        '```',
+      ].join('\n'),
+      { title: '示例', url: '/docs/example' },
+    );
+
+    expect(markdown).toContain('**公式成立有前提**');
+    expect(markdown).toContain('**易错点** 忘记目标节点。');
+    expect(markdown).not.toContain('InlineSvg');
+    expect(markdown).toContain('<ExamOption>A. 保留</ExamOption>');
+    expect(markdown).toContain('{/* 保留 */}');
+  });
+
   it('builds section-aware ZBSearch source records without enabling remarkStructure globally', () => {
     const index = buildZBSearchSourceIndex(
       'math/example.mdx',

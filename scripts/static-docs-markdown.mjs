@@ -58,18 +58,71 @@ function countUnbalancedDelimiters(text) {
   return depth;
 }
 
-function isJsxComponentLine(trimmedLine) {
-  return /^<\/?[A-Z][\w.-]*(\s|>|\/>)/.test(trimmedLine);
-}
-
 function isCodeFenceLine(trimmedLine) {
   return /^(```|~~~)/.test(trimmedLine);
 }
 
+const JSX_OPEN_TAG = /^<([A-Z][\w.-]*)((?:\s[^<>]*)?)\/?>/;
+const JSX_CLOSE_TAG = /^<\/[A-Z][\w.-]*>/;
+const JSX_TRAILING_CLOSE_TAGS = /(?:\s*<\/[A-Z][\w.-]*>)+\s*$/;
+const JSX_COMMENT_LINE = /^\{\/\*.*\*\/\}$/;
+// Labels keep question structure readable once the wrapper tags are gone.
+const JSX_LABELS = new Map([
+  ['ExamAnswer', '答案：'],
+  ['ExamExplanation', '解析：'],
+]);
+
+function isJsxComponentLine(trimmedLine) {
+  return /^<\/?[A-Z][\w.-]*(\s|>|\/>)/.test(trimmedLine);
+}
+
+function getJsxAttribute(attributes, name) {
+  const match = new RegExp(`\\b${name}=(?:"([^"]*)"|'([^']*)')`).exec(attributes);
+  return match ? (match[1] ?? match[2]) : undefined;
+}
+
 /**
- * Remove MDX module syntax (import/export statements) and block-level JSX
- * component usage while preserving markdown content, math delimiters, and
- * fenced code blocks untouched.
+ * Turn a line that starts with a JSX component tag into plain markdown.
+ * Wrapper tags are dropped but the text between them is kept, so
+ * `<ExamOption>A. foo</ExamOption>` becomes `A. foo`.
+ */
+function unwrapJsxComponentLine(trimmedLine) {
+  let rest = trimmedLine;
+  let label;
+
+  for (;;) {
+    const close = JSX_CLOSE_TAG.exec(rest);
+    if (close) {
+      rest = rest.slice(close[0].length).trimStart();
+      continue;
+    }
+
+    const open = JSX_OPEN_TAG.exec(rest);
+    if (!open) break;
+
+    const [tag, name, attributes] = open;
+    if (!tag.endsWith('/>')) {
+      label ??=
+        JSX_LABELS.get(name) ??
+        getJsxAttribute(attributes, 'title') ??
+        (name === 'Tab' ? getJsxAttribute(attributes, 'value') : undefined);
+    }
+    rest = rest.slice(tag.length).trimStart();
+  }
+
+  // A tag we cannot parse on one line (for example attributes spread over
+  // several lines) is dropped, matching the previous behaviour.
+  if (/^<\/?[A-Z]/.test(rest)) return [];
+
+  const text = rest.replace(JSX_TRAILING_CLOSE_TAGS, '').trim();
+  if (label) return [text ? `**${label}** ${text}` : `**${label}**`];
+  return text ? [text] : [];
+}
+
+/**
+ * Remove MDX module syntax (import/export statements), JSX comments and
+ * component wrapper tags while preserving markdown content, math delimiters,
+ * text nested inside components, and fenced code blocks untouched.
  */
 export function stripMdxRuntimeSyntax(body) {
   const lines = body.split(/\r?\n/);
@@ -102,9 +155,15 @@ export function stripMdxRuntimeSyntax(body) {
       continue;
     }
 
-    if (isJsxComponentLine(trimmed)) continue;
+    if (JSX_COMMENT_LINE.test(trimmed)) continue;
 
-    kept.push(line);
+    if (isJsxComponentLine(trimmed)) {
+      kept.push(...unwrapJsxComponentLine(trimmed));
+      continue;
+    }
+
+    // Multi-line components close at the end of their last text line.
+    kept.push(trimmed.endsWith('>') ? line.replace(JSX_TRAILING_CLOSE_TAGS, '') : line);
   }
 
   return kept.join('\n');
