@@ -1,15 +1,8 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { getChoiceColumnCount, getChoiceDensity } from '@/components/exam/choice-layout';
-import {
-  ExamAnswer,
-  ExamChoices,
-  ExamExplanation,
-  ExamOption,
-  ExamQuestion,
-  ExamSolution,
-} from '@/components/exam';
+import { getChoiceColumnCount, getChoiceDensity } from '@/components/question/choice-layout';
+import { Blank, Option, Question, Solution } from '@/components/question';
 
 describe('getChoiceDensity', () => {
   it('marks short options as compact so wide pages can use four columns', () => {
@@ -102,84 +95,129 @@ describe('getChoiceColumnCount', () => {
   });
 });
 
-function choices(...labels: string[]) {
-  return createElement(
-    ExamChoices,
-    { key: 'choices' },
-    ...labels.map((label) => createElement(ExamOption, { key: label }, label)),
-  );
+type Choice = string | { text: string; correct?: boolean };
+
+function options(...items: Choice[]) {
+  return items.map((item, index) => {
+    const { text, correct } = typeof item === 'string' ? { text: item, correct: false } : item;
+    return createElement(Option, { key: index, correct }, text);
+  });
 }
 
-function question(answer: string, ...labels: string[]) {
+function question(
+  props: { type: 'single' | 'multiple' | 'boolean' | 'essay'; answer?: boolean },
+  ...children: ReturnType<typeof createElement>[]
+) {
   return createElement(
-    ExamQuestion,
-    null,
+    Question,
+    { id: 'q1', ...props },
     createElement('p', { key: 'prompt' }, '题干'),
-    choices(...labels),
-    createElement(
-      ExamSolution,
-      { key: 'solution' },
-      createElement(ExamAnswer, { key: 'answer' }, answer),
-      createElement(ExamExplanation, { key: 'explanation' }, '解析内容'),
-    ),
+    ...children,
+    createElement(Solution, { key: 'solution' }, '解析内容'),
   );
 }
 
-describe('ExamChoices', () => {
+const single = (...items: Choice[]) => question({ type: 'single' }, ...options(...items));
+
+describe('Question choices', () => {
   it('renders stable data markers for the shared layout measurement', () => {
-    const markup = renderToStaticMarkup(choices('A. 1', 'B. 2', 'C. 3', 'D. 4'));
+    const markup = renderToStaticMarkup(
+      single('1', { text: '2', correct: true }, '3', '4'),
+    );
 
     expect(markup).toContain('data-exam-choice-group=""');
     expect(markup).toContain('data-density="compact"');
     expect(markup.match(/data-exam-choice-option=""/g)).toHaveLength(4);
   });
 
-  it('turns the authored "A. " prefix into the option marker', () => {
-    const markup = renderToStaticMarkup(choices('A. 有且仅有水平渐近线', 'B. 其他'));
+  it('numbers the options with automatic letters', () => {
+    const markup = renderToStaticMarkup(single('有穷性', { text: '可读性', correct: true }));
 
     expect(markup).toContain('>A</span>');
-    expect(markup).toContain('>有且仅有水平渐近线</span>');
-    expect(markup).not.toContain('A. 有且仅有');
+    expect(markup).toContain('>B</span>');
+    expect(markup).toContain('>有穷性</span>');
   });
 
-  it('stays a static list outside a gradable question', () => {
-    const markup = renderToStaticMarkup(choices('A. 1', 'B. 2'));
-
-    expect(markup).toContain('role="list"');
-    expect(markup).not.toContain('aria-pressed="');
-  });
-
-  it('becomes a single-answer toggle group when the answer is an option letter', () => {
-    const markup = renderToStaticMarkup(question('B。', 'A. 1', 'B. 2', 'C. 3', 'D. 4'));
+  it('becomes a single-answer toggle group graded on click', () => {
+    const markup = renderToStaticMarkup(single('1', { text: '2', correct: true }, '3', '4'));
 
     expect(markup).toContain('role="group"');
     expect(markup.match(/aria-pressed="false"/g)).toHaveLength(4);
     expect(markup).toContain('aria-label="选项"');
     expect(markup).not.toContain('提交答案');
+    expect(markup).toContain('data-question-type="single"');
   });
 
   it('offers an explicit submit step for multiple answers', () => {
-    const markup = renderToStaticMarkup(question('ACD', 'A. 1', 'B. 2', 'C. 3', 'D. 4'));
+    const markup = renderToStaticMarkup(
+      question(
+        { type: 'multiple' },
+        ...options({ text: '1', correct: true }, '2', { text: '3', correct: true }, '4'),
+      ),
+    );
 
     expect(markup).toContain('aria-label="选项（多选）"');
     expect(markup).toContain('提交答案');
   });
 
-  it('does not grade answers that are not options of the question', () => {
-    const freeForm = renderToStaticMarkup(question('原选项中无正确项。', 'A. 1', 'B. 2'));
-    const outOfRange = renderToStaticMarkup(question('E', 'A. 1', 'B. 2'));
+  it('shows options statically when the key is missing or inconsistent', () => {
+    const noKey = renderToStaticMarkup(single('1', '2'));
+    const twoKeys = renderToStaticMarkup(single({ text: '1', correct: true }, { text: '2', correct: true }));
 
-    for (const markup of [freeForm, outOfRange]) {
+    for (const markup of [noKey, twoKeys]) {
       expect(markup).toContain('role="list"');
       expect(markup).not.toContain('aria-pressed="');
     }
   });
 
+  it('grades a boolean question through generated 正确 / 错误 options', () => {
+    const markup = renderToStaticMarkup(question({ type: 'boolean', answer: false }));
+
+    expect(markup).toContain('>正确</span>');
+    expect(markup).toContain('>错误</span>');
+    expect(markup.match(/aria-pressed="false"/g)).toHaveLength(2);
+  });
+
+  it('turns blanks into inputs with a submit step', () => {
+    const markup = renderToStaticMarkup(
+      createElement(
+        Question,
+        { id: 'q2', type: 'blank' },
+        createElement('p', { key: 'stem' }, 'TCP 位于', createElement(Blank, { answer: '传输层' }), '。'),
+        createElement(Solution, { key: 'solution' }, '解析内容'),
+      ),
+    );
+
+    expect(markup).toContain('aria-label="第 1 空"');
+    expect(markup).toContain('提交答案');
+  });
+
+  it('prints the resolved number in front of the stem', () => {
+    const numbered = renderToStaticMarkup(
+      createElement(Question, { id: 'q3', type: 'essay', index: '7' }, createElement('p', null, '简述进程。')),
+    );
+    const hidden = renderToStaticMarkup(
+      createElement(Question, { id: 'q4', type: 'essay', index: '7', number: false }, createElement('p', null, '简述进程。')),
+    );
+
+    expect(numbered).toContain('data-question-number=""');
+    expect(numbered).toContain('>7.</span>');
+    expect(hidden).not.toContain('data-question-number');
+  });
+
   it('keeps the solution out of the page and behind the dialog trigger', () => {
-    const markup = renderToStaticMarkup(question('A', 'A. 1', 'B. 2'));
+    const markup = renderToStaticMarkup(single('1', { text: '2', correct: true }));
 
     expect(markup).toContain('aria-haspopup="dialog"');
     expect(markup).toContain('查看解答');
     expect(markup).not.toContain('解析内容');
+  });
+
+  it('omits the dialog trigger for a question without a solution', () => {
+    const markup = renderToStaticMarkup(
+      createElement(Question, { id: 'q5', type: 'essay' }, createElement('p', null, '题干')),
+    );
+
+    expect(markup).not.toContain('aria-haspopup="dialog"');
   });
 });

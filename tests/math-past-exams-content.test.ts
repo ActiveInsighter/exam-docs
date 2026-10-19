@@ -29,12 +29,10 @@ describe('Classified mathematics past exams', () => {
       for (const page of pages) {
         const content = readFileSync(page, 'utf8');
         expect(content, page).not.toMatch(/图片占位|待补充|待完善|TODO|FIXME/u);
-        const questions = [...content.matchAll(/<ExamQuestion>([\s\S]*?)<\/ExamQuestion>/gu)];
-        expect(content.match(/<ExamQuestion>/gu)?.length ?? 0, page).toBe(questions.length);
+        const questions = [...content.matchAll(/<Question\b[^>]*>([\s\S]*?)<\/Question>/gu)];
+        expect(content.match(/<Question\b/gu)?.length ?? 0, page).toBe(questions.length);
         for (const [, question] of questions) {
-          expect(question, page).toMatch(/<ExamSolution>[\s\S]*<\/ExamSolution>/u);
-          expect(question, page).toMatch(/<ExamAnswer>\s*\S[\s\S]*<\/ExamAnswer>/u);
-          expect(question, page).toMatch(/<ExamExplanation>\s*\S[\s\S]*<\/ExamExplanation>/u);
+          expect(question, page).toMatch(/<Solution>\s*\S[\s\S]*<\/Solution>/u);
         }
         total += questions.length;
 

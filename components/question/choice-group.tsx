@@ -6,11 +6,13 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { toggleVariants } from '@/components/ui/toggle';
 import { cn } from '@/lib/utils';
 import type { ChoiceDensity } from './choice-layout';
-import { useChoiceReveal, useExamQuestion } from './question-state';
+import { useQuestionReveal, useQuestionState } from './question-state';
 import { useChoiceColumns } from './use-choice-columns';
 
 export type ChoiceOption = {
   label: string;
+  /** Marker text when it differs from the label (true/false questions). */
+  marker?: string;
   content: ReactNode;
 };
 
@@ -154,12 +156,13 @@ export function ChoiceGroup({
   density: ChoiceDensity;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const question = useExamQuestion();
-  const reveal = useChoiceReveal();
+  const question = useQuestionState();
+  const reveal = useQuestionReveal();
   useChoiceColumns(ref);
 
-  const answerKey = question?.answerKey ?? null;
-  const multiple = question?.multiple ?? false;
+  const choice = question?.spec.kind === 'choice' ? question.spec : null;
+  const answerKey = choice?.key ?? null;
+  const multiple = choice?.multiple ?? false;
   const selected = question?.selected ?? [];
   const submitted = question?.submitted ?? false;
   const interactive = answerKey !== null && !reveal;
@@ -191,7 +194,7 @@ export function ChoiceGroup({
                   feedbackClassName[feedback],
                 )}
               >
-                <OptionMarker label={option.label} feedback={feedback} multiple={multiple} />
+                <OptionMarker label={option.marker ?? option.label} feedback={feedback} multiple={multiple} />
                 <OptionContent>{option.content}</OptionContent>
               </div>
             );
@@ -231,7 +234,7 @@ export function ChoiceGroup({
                 feedbackMotion[feedback],
               )}
             >
-              <OptionMarker label={option.label} feedback={feedback} multiple={multiple} />
+              <OptionMarker label={option.marker ?? option.label} feedback={feedback} multiple={multiple} />
               <OptionContent>{option.content}</OptionContent>
             </ToggleGroupItem>
           );

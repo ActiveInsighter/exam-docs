@@ -9,22 +9,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { ChoiceReveal } from './question-state';
+import { QuestionReveal } from './question-state';
 
-type ExamSolutionDialogProps = {
+type QuestionSolutionDialogProps = {
   question: ReactNode;
+  /** Short answer (option letters, blank answers); null for essays. */
   answer: ReactNode | null;
-  explanation: ReactNode;
+  solution: ReactNode;
+  /** Heading of the solution section: 解析 beside an answer, else 解答. */
+  solutionLabel: string;
   buttonLabel: string;
   dialogTitle: string;
-  /** Show the answer in a hover preview. Off for gradable questions. */
-  preview: boolean;
 };
 
 // The popup is portaled out of #docs-body, so content opts back into the
@@ -44,27 +40,21 @@ function SectionLabel({ children }: { children: ReactNode }) {
 const paneClassName =
   'min-w-0 px-5 pt-5 pb-8 md:overflow-y-auto md:overscroll-contain md:px-7 md:pt-6 [scrollbar-width:thin]';
 
-export function ExamSolutionDialog({
+export function QuestionSolutionDialog({
   question,
   answer,
-  explanation,
+  solution,
+  solutionLabel,
   buttonLabel,
   dialogTitle,
-  preview,
-}: ExamSolutionDialogProps) {
+}: QuestionSolutionDialogProps) {
   const [open, setOpen] = useState(false);
-  const [tooltipOpen, setTooltipOpen] = useState(false);
-  // After closing, focus returns to the trigger; keep the preview quiet until
-  // the pointer or focus actually leaves it once.
-  const [previewSuppressed, setPreviewSuppressed] = useState(false);
 
   const trigger = (
     <Button
       variant="ghost"
       size="sm"
       className="text-muted-foreground hover:text-foreground"
-      onPointerLeave={() => setPreviewSuppressed(false)}
-      onBlur={() => setPreviewSuppressed(false)}
     />
   );
   const triggerContent = (
@@ -75,29 +65,8 @@ export function ExamSolutionDialog({
   );
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(next) => {
-        setOpen(next);
-        setTooltipOpen(false);
-        if (!next) setPreviewSuppressed(true);
-      }}
-    >
-      {preview ? (
-        <Tooltip
-          open={tooltipOpen && !previewSuppressed && !open}
-          onOpenChange={setTooltipOpen}
-        >
-          <TooltipTrigger delay={250} render={<DialogTrigger render={trigger} />}>
-            {triggerContent}
-          </TooltipTrigger>
-          <TooltipContent className="max-w-[min(24rem,calc(100vw-1.5rem))] px-3 py-2 text-sm [&_.katex-display]:my-0 [&_p]:my-0 [&_strong]:font-normal">
-            {answer}
-          </TooltipContent>
-        </Tooltip>
-      ) : (
-        <DialogTrigger render={trigger}>{triggerContent}</DialogTrigger>
-      )}
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={trigger}>{triggerContent}</DialogTrigger>
 
       <DialogContent
         className={cn(
@@ -118,7 +87,7 @@ export function ExamSolutionDialog({
           >
             <SectionLabel>题目</SectionLabel>
             <div className={cn(prose, proseReset)}>
-              <ChoiceReveal>{question}</ChoiceReveal>
+              <QuestionReveal>{question}</QuestionReveal>
             </div>
           </section>
 
@@ -140,9 +109,9 @@ export function ExamSolutionDialog({
             ) : null}
 
             <div className="animate-in fade-in-0 slide-in-from-bottom-1 fill-mode-both duration-300 delay-150">
-              <SectionLabel>解析</SectionLabel>
+              <SectionLabel>{solutionLabel}</SectionLabel>
               <div className={cn(prose, proseReset, '[&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden')}>
-                {explanation}
+                {solution}
               </div>
             </div>
           </section>

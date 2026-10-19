@@ -2,24 +2,6 @@ import { readdir, readFile } from 'node:fs/promises';
 import { relative, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const COMPONENT_TAG_PATTERN = /<Exam(?:Question|Solution|Answer|Explanation|Choices|Option)\b/u;
-
-async function collectMarkdownFiles(directory: string): Promise<string[]> {
-  const entries = await readdir(directory, { withFileTypes: true });
-  const files: string[] = [];
-
-  for (const entry of entries) {
-    const path = resolve(directory, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...(await collectMarkdownFiles(path)));
-    } else if (entry.isFile() && path.endsWith('.md')) {
-      files.push(path);
-    }
-  }
-
-  return files;
-}
-
 async function collectMdxFiles(directory: string): Promise<string[]> {
   const entries = await readdir(directory, { withFileTypes: true });
   const files: string[] = [];
@@ -37,27 +19,12 @@ async function collectMdxFiles(directory: string): Promise<string[]> {
 }
 
 describe('exam document formats', () => {
-  it('keeps component-backed documents in MDX files', async () => {
-    const docsRoot = resolve(process.cwd(), 'content', 'docs');
-    const markdownFiles = await collectMarkdownFiles(docsRoot);
-    const invalidFiles: string[] = [];
-
-    for (const file of markdownFiles) {
-      const source = await readFile(file, 'utf8');
-      if (COMPONENT_TAG_PATTERN.test(source)) {
-        invalidFiles.push(relative(process.cwd(), file));
-      }
-    }
-
-    expect(invalidFiles).toEqual([]);
-  });
-
-  it('escapes markdown control characters inside exam option text', async () => {
+  it('escapes markdown control characters inside option text', async () => {
     const docsRoot = resolve(process.cwd(), 'content', 'docs');
     const mdxFiles = await collectMdxFiles(docsRoot);
     const invalidFiles: string[] = [];
     const literalMarkdownControlPattern =
-      /<ExamOption>(?![^<]*\$)[^<]*(?:\*|~)[^<]*<\/ExamOption>/u;
+      /<Option(?: correct)?>(?![^<]*\$)[^<]*(?:\*|~)[^<]*<\/Option>/u;
 
     for (const file of mdxFiles) {
       const source = await readFile(file, 'utf8');

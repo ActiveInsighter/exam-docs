@@ -54,18 +54,17 @@ describe('documentation source structure', () => {
         const groups = content.split(/(?=<span id="question-\d{4}-\d+"\s*\/>)/u).slice(1);
         expect(groups).toHaveLength(questions.length);
         for (const group of groups) {
-          expect(group.match(/<ExamQuestion>/gu)).toHaveLength(3);
-          for (const component of ['ExamQuestion', 'ExamSolution', 'ExamAnswer', 'ExamExplanation']) {
-            expect(group.match(new RegExp(`<${component}>`, 'gu'))).toHaveLength(3);
-            expect(group.match(new RegExp(`</${component}>`, 'gu'))).toHaveLength(3);
-          }
+          expect(group.match(/<Question\b/gu)).toHaveLength(3);
+          expect(group.match(/<\/Question>/gu)).toHaveLength(3);
+          expect(group.match(/<Solution>/gu)).toHaveLength(3);
+          expect(group.match(/<\/Solution>/gu)).toHaveLength(3);
         }
         const reference = readFileSync(join(referenceRoot, subject, name), 'utf8');
         expect(content.match(/^title: .+$/mu)?.[0]).toBe(reference.match(/^title: .+$/mu)?.[0]);
         expect(Number(content.match(/^questionCount: (\d+)$/mu)?.[1])).toBe(totalCount);
-        expect(content.match(/<ExamQuestion>/gu)?.length ?? 0).toBe(totalCount);
-        expect(content.match(/<\/ExamQuestion>/gu)?.length ?? 0).toBe(totalCount);
-        expect(content.match(/<ExamSolution>/gu)?.length ?? 0).toBe(totalCount);
+        expect(content.match(/<Question\b/gu)?.length ?? 0).toBe(totalCount);
+        expect(content.match(/<\/Question>/gu)?.length ?? 0).toBe(totalCount);
+        expect(content.match(/<Solution>/gu)?.length ?? 0).toBe(totalCount);
         const ids = questions.map((match) => Number(match[1]));
         expect(ids).toEqual([...ids].sort((left, right) => left - right));
         questionIds.push(...ids);

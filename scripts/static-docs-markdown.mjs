@@ -66,11 +66,37 @@ const JSX_OPEN_TAG = /^<([A-Z][\w.-]*)((?:\s[^<>]*)?)\/?>/;
 const JSX_CLOSE_TAG = /^<\/[A-Z][\w.-]*>/;
 const JSX_TRAILING_CLOSE_TAGS = /(?:\s*<\/[A-Z][\w.-]*>)+\s*$/;
 const JSX_COMMENT_LINE = /^\{\/\*.*\*\/\}$/;
-// Labels keep question structure readable once the wrapper tags are gone.
-const JSX_LABELS = new Map([
-  ['ExamAnswer', '答案：'],
-  ['ExamExplanation', '解析：'],
-]);
+const QUESTION_OPEN = /^<Question\b/;
+const QUESTION_CLOSE = /^<\/Question>/;
+const OPTION_OPEN = /^<Option(\s+correct(?:=\{true\})?)?\s*>/;
+const SOLUTION_OPEN = /^<Solution>/;
+const BLANK_TAG =
+  /<Blank\b[^>]*?\banswer=(?:"([^"]*)"|'([^']*)'|\{\s*(?:"([^"]*)"|'([^']*)'|([^{}]*?))\s*\})[^>]*?\/>/gu;
+
+/**
+ * Question answers live in props (`<Option correct>`, `<Blank answer>`,
+ * `answer={…}`), so the export has to turn them back into readable text:
+ * options get their letter, blanks become ____, and the key is printed in
+ * front of the explanation.
+ */
+function createQuestionState() {
+  return {
+    open: false,
+    optionCount: 0,
+    pendingLetter: null,
+    correct: [],
+    blankAnswers: [],
+    booleanAnswer: null,
+    answerPrinted: false,
+  };
+}
+
+function getQuestionAnswerText(state) {
+  if (state.correct.length > 0) return state.correct.join('');
+  if (state.booleanAnswer !== null) return state.booleanAnswer ? '正确' : '错误';
+  if (state.blankAnswers.length > 0) return state.blankAnswers.join('；');
+  return null;
+}
 
 function isJsxComponentLine(trimmedLine) {
   return /^<\/?[A-Z][\w.-]*(\s|>|\/>)/.test(trimmedLine);
@@ -84,7 +110,7 @@ function getJsxAttribute(attributes, name) {
 /**
  * Turn a line that starts with a JSX component tag into plain markdown.
  * Wrapper tags are dropped but the text between them is kept, so
- * `<ExamOption>A. foo</ExamOption>` becomes `A. foo`.
+ * `<Option>foo</Option>` becomes `A. foo`.
  */
 function unwrapJsxComponentLine(trimmedLine) {
   let rest = trimmedLine;
@@ -103,7 +129,6 @@ function unwrapJsxComponentLine(trimmedLine) {
     const [tag, name, attributes] = open;
     if (!tag.endsWith('/>')) {
       label ??=
-        JSX_LABELS.get(name) ??
         getJsxAttribute(attributes, 'title') ??
         (name === 'Tab' ? getJsxAttribute(attributes, 'value') : undefined);
     }
@@ -129,9 +154,10 @@ export function stripMdxRuntimeSyntax(body) {
   const kept = [];
   let insideCodeFence = false;
   let statementDepth = 0;
+  let question = createQuestionState();
 
-  for (const line of lines) {
-    const trimmed = line.trim();
+  for (let line of lines) {
+    let trimmed = line.trim();
 
     if (isCodeFenceLine(trimmed)) {
       insideCodeFence = !insideCodeFence;
@@ -156,6 +182,57 @@ export function stripMdxRuntimeSyntax(body) {
     }
 
     if (JSX_COMMENT_LINE.test(trimmed)) continue;
+
+    if (QUESTION_OPEN.test(trimmed)) {
+      question = createQuestionState();
+      question.open = true;
+      const answer = /\banswer=\{(true|false)\}/u.exec(trimmed);
+      if (answer) question.booleanAnswer = answer[1] === 'true';
+      continue;
+    }
+
+    if (question.open && QUESTION_CLOSE.test(trimmed)) {
+      const answer = getQuestionAnswerText(question);
+      if (answer && !question.answerPrinted) kept.push('', `**答案：** ${answer}`);
+      question = createQuestionState();
+      continue;
+    }
+
+    if (question.open) {
+      line = line.replace(BLANK_TAG, (_tag, ...groups) => {
+        question.blankAnswers.push(groups.slice(0, 5).find((value) => value !== undefined)?.trim() ?? '');
+        return '____';
+      });
+      trimmed = line.trim();
+    }
+
+    if (question.open && SOLUTION_OPEN.test(trimmed)) {
+      const answer = getQuestionAnswerText(question);
+      if (answer) {
+        kept.push(`**答案：** ${answer}`, '', '**解析：**', '');
+        question.answerPrinted = true;
+      }
+      continue;
+    }
+
+    if (question.open) {
+      const option = OPTION_OPEN.exec(trimmed);
+      if (option) {
+        const letter = String.fromCharCode(65 + question.optionCount);
+        question.optionCount += 1;
+        if (option[1]) question.correct.push(letter);
+        const text = trimmed.slice(option[0].length).replace(JSX_TRAILING_CLOSE_TAGS, '').trim();
+        if (text) kept.push(`${letter}. ${text}`);
+        else question.pendingLetter = letter;
+        continue;
+      }
+
+      if (question.pendingLetter && trimmed !== '' && !isJsxComponentLine(trimmed)) {
+        kept.push(`${question.pendingLetter}. ${trimmed.replace(JSX_TRAILING_CLOSE_TAGS, '').trim()}`);
+        question.pendingLetter = null;
+        continue;
+      }
+    }
 
     if (isJsxComponentLine(trimmed)) {
       kept.push(...unwrapJsxComponentLine(trimmed));

@@ -1,11 +1,4 @@
-import {
-  ExamAnswer,
-  ExamChoices,
-  ExamExplanation,
-  ExamOption,
-  ExamQuestion,
-  ExamSolution,
-} from '@/components/exam';
+import { Blank, Option, Question, Solution } from '@/components/question';
 import { EnglishReading, ExamArticle } from '@/components/english-reading';
 import { Mermaid } from '@/components/mdx/mermaid';
 import * as AccordionComponents from 'fumadocs-ui/components/accordion';
@@ -22,10 +15,10 @@ import type { MDXComponents } from 'mdx/types';
  * Cards and Callout are included by Fumadocs' default mapping. The additional
  * official component groups below are registered globally so documentation can
  * use Tabs, Accordions, Steps, Files, TypeTable and Mermaid without repeating
- * imports in every MDX file. ExamQuestion/ExamSolution and their answer /
- * explanation markers provide the lightweight answer-dialog pattern used by
- * exercise documents. ExamChoices/ExamOption provide responsive, clickable
- * option grids that are graded against the question's ExamAnswer.
+ * imports in every MDX file. Question, Option, Blank and Solution are the
+ * exercise components: <Question id type> declares the interaction (single /
+ * multiple / boolean / blank / essay), <Option correct> and <Blank answer>
+ * carry the key, and <Solution> holds the reference answer shown in the dialog.
  */
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -34,12 +27,10 @@ export function getMDXComponents(components?: MDXComponents) {
     ...FilesComponents,
     ...StepsComponents,
     ...TabsComponents,
-    ExamAnswer,
-    ExamChoices,
-    ExamExplanation,
-    ExamOption,
-    ExamQuestion,
-    ExamSolution,
+    Blank,
+    Option,
+    Question,
+    Solution,
     EnglishReading,
     ExamArticle,
     Mermaid,

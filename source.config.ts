@@ -5,7 +5,7 @@ import lastModified from 'fumadocs-mdx/plugins/last-modified';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { z } from 'zod';
-import { remarkExamHeadings } from './lib/remark-exam-headings';
+import { remarkQuestion } from './lib/remark-question';
 
 const isStaticDocsBuild = process.env.STATIC_DOCS_BUILD === '1';
 
@@ -43,11 +43,12 @@ export const blog = defineCollections({
 export default defineConfig({
   plugins: [lastModified()],
   mdxOptions: {
-    // Strip heading semantics from question/solution content before
-    // remarkStructure sees the tree, so exercise-internal headings never leak
-    // into the page TOC or create unstable sidebar jump targets.
+    // Validate <Question> structure, strip heading semantics from question and
+    // solution content before remarkStructure sees the tree (so exercise
+    // headings never leak into the page TOC), and stamp each question with
+    // its display number and content revision.
     remarkPlugins: (plugins) => [
-      remarkExamHeadings,
+      remarkQuestion,
       ...(isStaticDocsBuild
         ? plugins.filter((plugin) => {
             const entry = Array.isArray(plugin) ? plugin[0] : plugin;

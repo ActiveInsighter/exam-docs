@@ -90,30 +90,41 @@ describe('static docs build', () => {
     expect(markdown).toContain('Tail');
   });
 
-  it('keeps text nested in exam components so choices and answers are exported', async () => {
+  it('exports question options, blanks and answers as readable text', async () => {
     const markdown = await renderStaticMarkdown(
       [
         '{/* 此文件由脚本自动生成，请勿直接修改。 */}',
         '',
-        '<ExamQuestion>',
+        '<Question id="q1" type="single">',
         '',
-        '1. 题干（  ）。',
+        '题干（  ）。',
         '',
-        '<ExamChoices>',
-        '<ExamOption>A. $x^2$</ExamOption>',
-        '<ExamOption>',
-        'B. 多行选项',
-        '</ExamOption>',
-        '</ExamChoices>',
+        '<Option>$x^2$</Option>',
+        '<Option correct>',
+        '多行选项',
+        '</Option>',
         '',
-        '<ExamSolution>',
-        '<ExamAnswer>B</ExamAnswer>',
-        '<ExamExplanation>',
+        '<Solution>',
         '解析第一行',
-        '最后一行</ExamExplanation>',
-        '</ExamSolution>',
+        '最后一行</Solution>',
         '',
-        '</ExamQuestion>',
+        '</Question>',
+        '',
+        '<Question id="q2" type="blank">',
+        '',
+        '传输层协议 TCP 建立连接需要 <Blank answer="3" /> 次握手，位于 <Blank answer={"传输层"} />。',
+        '',
+        '<Solution>',
+        '三次握手。',
+        '</Solution>',
+        '',
+        '</Question>',
+        '',
+        '<Question id="q3" type="boolean" answer={false}>',
+        '',
+        '用户态线程切换必须经过内核。',
+        '',
+        '</Question>',
       ].join('\n'),
       { title: '题目', url: '/docs/q' },
     );
@@ -123,7 +134,10 @@ describe('static docs build', () => {
     expect(markdown).toContain('**答案：** B');
     expect(markdown).toContain('**解析：**');
     expect(markdown).toContain('最后一行');
-    expect(markdown).not.toMatch(/<\/?Exam/);
+    expect(markdown).toContain('需要 ____ 次握手，位于 ____。');
+    expect(markdown).toContain('**答案：** 3；传输层');
+    expect(markdown).toContain('**答案：** 错误');
+    expect(markdown).not.toMatch(/<\/?(?:Question|Option|Solution|Blank)\b/);
     expect(markdown).not.toContain('{/*');
   });
 
@@ -137,7 +151,7 @@ describe('static docs build', () => {
         '<InlineSvg src="/a.svg" />',
         '',
         '```tsx',
-        '<ExamOption>A. 保留</ExamOption>',
+        '<Option>A. 保留</Option>',
         '{/* 保留 */}',
         '```',
       ].join('\n'),
@@ -147,7 +161,7 @@ describe('static docs build', () => {
     expect(markdown).toContain('**公式成立有前提**');
     expect(markdown).toContain('**易错点** 忘记目标节点。');
     expect(markdown).not.toContain('InlineSvg');
-    expect(markdown).toContain('<ExamOption>A. 保留</ExamOption>');
+    expect(markdown).toContain('<Option>A. 保留</Option>');
     expect(markdown).toContain('{/* 保留 */}');
   });
 
