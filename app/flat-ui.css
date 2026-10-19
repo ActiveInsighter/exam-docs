@@ -2,8 +2,8 @@
  * Flat UI layer for the official Fumadocs components.
  *
  * Fumadocs draws outlines, inset rings and drop shadows around its controls,
- * cards and panels. This file removes them and lets background contrast carry
- * the hierarchy instead. Every colour, radius and shadow comes from
+ * cards and panels. Filled surfaces replace decorative outlines while native
+ * navigation guides and state effects remain. Every colour, radius and shadow comes from
  * styles/tokens; nothing here introduces a raw value.
  *
  * Selectors rely on stable hooks the components expose (ids, data-* and ARIA
@@ -81,34 +81,15 @@ div[class*='grid-area:toc-popover'] > div[class*='rounded-t-2xl'] {
   background-color: var(--ui-fill-strong);
 }
 
-/* Page tree items. */
-:is(#nd-sidebar, #nd-sidebar-mobile) :where(a, button)[data-active] {
-  border-radius: var(--ui-radius-control);
+/* Preserve Fumadocs tree guides, active markers and the gliding hover block.
+ * Only the existing navigation fills are themed here; shape, type and motion
+ * continue to come from the official component. */
+:is(#nd-sidebar, #nd-sidebar-mobile) :where(a[data-active], button[aria-expanded]):hover {
+  background-color: var(--ui-nav-hover);
 }
 
 :is(#nd-sidebar, #nd-sidebar-mobile) [data-active='true'] {
-  background-color: var(--ui-fill-active);
-  color: var(--foreground);
-  font-weight: 500;
-}
-
-/*
- * Hover highlight. The Spacious sidebar glides a single block under the
- * hovered item; it is the first, aria-hidden child of the item list and has no
- * other hook than its accent class.
- */
-:is(#nd-sidebar, #nd-sidebar-mobile) div[aria-hidden='true'][class*='bg-fd-accent'] {
-  border-radius: var(--ui-radius-control);
-  background-color: var(--ui-fill-hover);
-}
-
-/* Folder indent guides and the active marker on nested items (1px spans). */
-:is(#nd-sidebar, #nd-sidebar-mobile) span.absolute.w-px {
-  background-color: var(--ui-tree-guide);
-}
-
-:is(#nd-sidebar, #nd-sidebar-mobile) span.absolute.w-px.bg-fd-primary {
-  background-color: var(--ui-tree-active-line);
+  background-color: var(--ui-nav-active);
 }
 
 /* ---------------------------------------------------------------------------
@@ -136,11 +117,6 @@ div[class*='grid-area:toc-popover'] > div[class*='rounded-t-2xl'] {
 [role='menu'] [role='group'][class*='rounded-full'] {
   border-width: 0;
   background-color: var(--ui-fill);
-}
-
-[role='menu'] [role='group'][class*='rounded-full'] > span[aria-hidden='true'] {
-  background-color: var(--ui-segment-thumb);
-  box-shadow: none;
 }
 
 /* Search dialog (centred, not anchored, so it has no data-side). */
@@ -226,15 +202,7 @@ body:has(#docs-page-actions .docs-page-action[data-popup-open])
   color: var(--foreground);
 }
 
-/*
- * Table of contents: the active range is a gradient strip by default; a solid
- * fill reads as one flat highlight.
- */
-#nd-toc [class*='bg-linear-to-r'] {
-  border-radius: calc(var(--ui-radius-control) - 0.125rem);
-  background-image: none;
-  background-color: var(--ui-fill-active);
-}
+/* The TOC keeps its native fading highlight and scroll-linked animation. */
 
 /* Previous / next page cards (no hook besides their classes). */
 #nd-page a.group[class*='rounded-2xl'] {
