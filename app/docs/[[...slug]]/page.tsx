@@ -15,7 +15,7 @@ import {
   MarkdownCopyButton,
   PageLastUpdate,
   ViewOptionsPopover,
-} from 'fumadocs-ui/layouts/flux/page';
+} from 'fumadocs-ui/layouts/docs/page';
 
 type PageParameters = {
   params: Promise<{
