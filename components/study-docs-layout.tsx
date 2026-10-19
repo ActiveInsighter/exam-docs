@@ -1,15 +1,15 @@
 'use client';
 
-import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/notebook';
+import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import { CrawlableSidebarFolder } from './crawlable-sidebar-folder';
 
 // Keep component overrides on the client side of the layout boundary.
-export function StudyDocsLayout({ nav, ...props }: DocsLayoutProps) {
+// Standard docs layout: one sidebar tree of all modules, with the in-page
+// table of contents shown at the top of each page on narrow screens.
+export function StudyDocsLayout(props: DocsLayoutProps) {
   return (
     <DocsLayout
       {...props}
-      nav={{ ...nav, mode: 'top' }}
-      tabMode="navbar"
       sidebar={{ components: { Folder: CrawlableSidebarFolder } }}
     />
   );
