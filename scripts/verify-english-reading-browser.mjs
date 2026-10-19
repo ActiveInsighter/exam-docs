@@ -13,6 +13,17 @@ const errors = [];
 
 async function openPage(options) {
   const context = await browser.newContext(options);
+  // The Spacious layout scrolls inside the page panel on desktop and the
+  // document on mobile, so measure whichever ancestor actually scrolls.
+  await context.addInitScript(() => {
+    window.__readingScroller = node => {
+      for (let element = node.parentElement; element; element = element.parentElement) {
+        const overflowY = getComputedStyle(element).overflowY;
+        if ((overflowY === 'auto' || overflowY === 'scroll') && element.scrollHeight > element.clientHeight) return element;
+      }
+      return document.scrollingElement;
+    };
+  });
   const page = await context.newPage();
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
@@ -56,7 +67,7 @@ try {
   await tooltip.waitFor({ state: 'visible' });
   assert.equal((await tooltip.innerText()).trim(), 'B', 'shared hover answer is wrong');
   await verifySolution(page, trigger);
-  await article.evaluate(node => window.scrollTo(0, node.getBoundingClientRect().top + scrollY - 72));
+  await article.evaluate(node => { window.__readingScroller(node).scrollTop += node.getBoundingClientRect().top - 72; });
   assert.ok(await article.evaluate(node => {
     const box = node.getBoundingClientRect();
     return getComputedStyle(node).position === 'sticky' && box.top >= 56 && box.bottom <= innerHeight;
@@ -66,17 +77,18 @@ try {
 
   // Native scrolling must chain to the document at either end of a long article.
   await article.evaluate(node => { node.scrollTop = node.scrollHeight; });
-  let before = await page.evaluate(() => scrollY);
+  const scrollTop = () => article.evaluate(node => window.__readingScroller(node).scrollTop);
+  let before = await scrollTop();
   const box = await article.boundingBox();
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.wheel(0, 240);
-  await page.waitForFunction(previous => scrollY > previous + 5, before);
+  await page.waitForFunction(([previous]) => window.__readingScroller(document.querySelector('[data-reading-article]')).scrollTop > previous + 5, [before]);
   await article.evaluate(node => { node.scrollTop = 0; });
-  before = await page.evaluate(() => scrollY);
+  before = await scrollTop();
   const moved = await article.boundingBox();
   await page.mouse.move(moved.x + moved.width / 2, moved.y + moved.height / 2);
   await page.mouse.wheel(0, -240);
-  await page.waitForFunction(previous => scrollY < previous - 5, before);
+  await page.waitForFunction(([previous]) => window.__readingScroller(document.querySelector('[data-reading-article]')).scrollTop < previous - 5, [before]);
   await desktop.root.locator('[data-exam-question]').nth(4).scrollIntoViewIfNeeded();
   assert.ok(await article.evaluate(node => {
     const box = node.getBoundingClientRect();
