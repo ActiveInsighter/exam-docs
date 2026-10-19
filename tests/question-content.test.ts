@@ -56,6 +56,17 @@ describe('question documents', () => {
     expect(invalid).toEqual([]);
   });
 
+  it('never opens display math on the same line as a plain option label', async () => {
+    // "A. $$" starts an inline span that MDX then reads as a JS expression.
+    const invalid: string[] = [];
+    for (const file of await collectFiles(docsRoot, '.mdx')) {
+      if (/^[A-H]\. \$\$$/mu.test(await readFile(file, 'utf8'))) {
+        invalid.push(relative(process.cwd(), file));
+      }
+    }
+    expect(invalid).toEqual([]);
+  });
+
   it('has structurally valid questions with globally unique ids', async () => {
     const problems: string[] = [];
     const ids = new Map<string, string>();
