@@ -1,12 +1,15 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { getChoiceColumnCount } from '@/components/exam-choice-layout';
+import { getChoiceColumnCount, getChoiceDensity } from '@/components/exam/choice-layout';
 import {
+  ExamAnswer,
   ExamChoices,
+  ExamExplanation,
   ExamOption,
-  getChoiceDensity,
-} from '@/components/exam-choices';
+  ExamQuestion,
+  ExamSolution,
+} from '@/components/exam';
 
 describe('getChoiceDensity', () => {
   it('marks short options as compact so wide pages can use four columns', () => {
@@ -99,20 +102,84 @@ describe('getChoiceColumnCount', () => {
   });
 });
 
-describe('ExamChoices measurement hooks', () => {
-  it('renders stable data markers for the shared layout enhancer', () => {
-    const markup = renderToStaticMarkup(
-      createElement(
-        ExamChoices,
-        null,
-        createElement(ExamOption, null, 'A. 1'),
-        createElement(ExamOption, null, 'B. 2'),
-        createElement(ExamOption, null, 'C. 3'),
-        createElement(ExamOption, null, 'D. 4'),
-      ),
-    );
+function choices(...labels: string[]) {
+  return createElement(
+    ExamChoices,
+    { key: 'choices' },
+    ...labels.map((label) => createElement(ExamOption, { key: label }, label)),
+  );
+}
+
+function question(answer: string, ...labels: string[]) {
+  return createElement(
+    ExamQuestion,
+    null,
+    createElement('p', { key: 'prompt' }, '题干'),
+    choices(...labels),
+    createElement(
+      ExamSolution,
+      { key: 'solution' },
+      createElement(ExamAnswer, { key: 'answer' }, answer),
+      createElement(ExamExplanation, { key: 'explanation' }, '解析内容'),
+    ),
+  );
+}
+
+describe('ExamChoices', () => {
+  it('renders stable data markers for the shared layout measurement', () => {
+    const markup = renderToStaticMarkup(choices('A. 1', 'B. 2', 'C. 3', 'D. 4'));
 
     expect(markup).toContain('data-exam-choice-group=""');
+    expect(markup).toContain('data-density="compact"');
     expect(markup.match(/data-exam-choice-option=""/g)).toHaveLength(4);
+  });
+
+  it('turns the authored "A. " prefix into the option marker', () => {
+    const markup = renderToStaticMarkup(choices('A. 有且仅有水平渐近线', 'B. 其他'));
+
+    expect(markup).toContain('>A</span>');
+    expect(markup).toContain('>有且仅有水平渐近线</span>');
+    expect(markup).not.toContain('A. 有且仅有');
+  });
+
+  it('stays a static list outside a gradable question', () => {
+    const markup = renderToStaticMarkup(choices('A. 1', 'B. 2'));
+
+    expect(markup).toContain('role="list"');
+    expect(markup).not.toContain('aria-pressed="');
+  });
+
+  it('becomes a single-answer toggle group when the answer is an option letter', () => {
+    const markup = renderToStaticMarkup(question('B。', 'A. 1', 'B. 2', 'C. 3', 'D. 4'));
+
+    expect(markup).toContain('role="group"');
+    expect(markup.match(/aria-pressed="false"/g)).toHaveLength(4);
+    expect(markup).toContain('aria-label="选项"');
+    expect(markup).not.toContain('提交答案');
+  });
+
+  it('offers an explicit submit step for multiple answers', () => {
+    const markup = renderToStaticMarkup(question('ACD', 'A. 1', 'B. 2', 'C. 3', 'D. 4'));
+
+    expect(markup).toContain('aria-label="选项（多选）"');
+    expect(markup).toContain('提交答案');
+  });
+
+  it('does not grade answers that are not options of the question', () => {
+    const freeForm = renderToStaticMarkup(question('原选项中无正确项。', 'A. 1', 'B. 2'));
+    const outOfRange = renderToStaticMarkup(question('E', 'A. 1', 'B. 2'));
+
+    for (const markup of [freeForm, outOfRange]) {
+      expect(markup).toContain('role="list"');
+      expect(markup).not.toContain('aria-pressed="');
+    }
+  });
+
+  it('keeps the solution out of the page and behind the dialog trigger', () => {
+    const markup = renderToStaticMarkup(question('A', 'A. 1', 'B. 2'));
+
+    expect(markup).toContain('aria-haspopup="dialog"');
+    expect(markup).toContain('查看解答');
+    expect(markup).not.toContain('解析内容');
   });
 });

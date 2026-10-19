@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { ExamQuestion, ExamSolution, ExamAnswer, ExamExplanation } from '@/components/exam-question';
+import { ExamQuestion, ExamSolution, ExamAnswer, ExamExplanation } from '@/components/exam';
 import { ExamArticle, EnglishReading } from '@/components/english-reading';
 
 const article = createElement(ExamArticle, { title: 'A familiar park', children:
@@ -23,9 +23,6 @@ describe('English reading composition', () => {
     expect(html).toContain('Why pay attention?');
     expect(html).toContain('What changed?');
     expect(html.match(/aria-haspopup="dialog"/g)).toHaveLength(2);
-    expect(html.match(/role="tooltip"/g)).toHaveLength(2);
-    expect(html).toContain('>B<');
-    expect(html).toContain('>C<');
     expect(html).not.toContain('Observe the familiar surroundings.');
     expect(html).toContain('<em>the details nearby.</em>');
     expect(html.indexOf('A familiar park')).toBeLessThan(html.indexOf('Why pay attention?'));

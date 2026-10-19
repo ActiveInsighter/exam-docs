@@ -1,7 +1,5 @@
 import './docs-typography.css';
-import './exam-choice-layout.css';
 
-import { ExamChoiceLayoutEnhancer } from '@/components/exam-choice-layout-enhancer';
 import { baseOptions } from '@/lib/layout.shared';
 import { source } from '@/lib/source';
 import { StudyDocsLayout } from '@/components/study-docs-layout';
@@ -13,7 +11,6 @@ export default function DocsRootLayout({ children }: { children: ReactNode }) {
       {...baseOptions()}
       tree={source.getPageTree()}
     >
-      <ExamChoiceLayoutEnhancer />
       {children}
     </StudyDocsLayout>
   );

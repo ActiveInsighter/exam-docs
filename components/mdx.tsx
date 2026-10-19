@@ -1,10 +1,11 @@
 import {
   ExamAnswer,
+  ExamChoices,
   ExamExplanation,
+  ExamOption,
   ExamQuestion,
   ExamSolution,
-} from '@/components/exam-question';
-import { ExamChoices, ExamOption } from '@/components/exam-choices';
+} from '@/components/exam';
 import { EnglishReading, ExamArticle } from '@/components/english-reading';
 import { Mermaid } from '@/components/mdx/mermaid';
 import * as AccordionComponents from 'fumadocs-ui/components/accordion';
@@ -23,7 +24,8 @@ import type { MDXComponents } from 'mdx/types';
  * use Tabs, Accordions, Steps, Files, TypeTable and Mermaid without repeating
  * imports in every MDX file. ExamQuestion/ExamSolution and their answer /
  * explanation markers provide the lightweight answer-dialog pattern used by
- * exercise documents. ExamChoices/ExamOption provide responsive option grids.
+ * exercise documents. ExamChoices/ExamOption provide responsive, clickable
+ * option grids that are graded against the question's ExamAnswer.
  */
 export function getMDXComponents(components?: MDXComponents) {
   return {
