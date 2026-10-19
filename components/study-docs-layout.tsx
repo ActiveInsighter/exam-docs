@@ -1,16 +1,9 @@
 'use client';
 
-import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
-import { CrawlableSidebarFolder } from './crawlable-sidebar-folder';
+import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/spacious';
 
-// Standard Fumadocs docs layout: left sidebar, right table of contents, and
-// `root: true` folders as the sidebar tab dropdown. Keep component overrides
-// on the client side of the layout boundary.
+// Spacious layout (the one fumadocs.dev uses): `root: true` folders become the
+// sidebar tab dropdown.
 export function StudyDocsLayout(props: DocsLayoutProps) {
-  return (
-    <DocsLayout
-      {...props}
-      sidebar={{ components: { Folder: CrawlableSidebarFolder } }}
-    />
-  );
+  return <DocsLayout {...props} sidebar={{ defaultOpenLevel: 0 }} />;
 }

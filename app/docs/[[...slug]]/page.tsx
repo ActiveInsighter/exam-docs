@@ -15,7 +15,7 @@ import {
   MarkdownCopyButton,
   PageLastUpdate,
   ViewOptionsPopover,
-} from 'fumadocs-ui/layouts/docs/page';
+} from 'fumadocs-ui/layouts/spacious/page';
 
 type PageParameters = {
   params: Promise<{
