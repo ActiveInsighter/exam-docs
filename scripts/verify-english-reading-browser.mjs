@@ -49,7 +49,7 @@ async function verifySolution(page, trigger, touch = false) {
     const box = node.getBoundingClientRect();
     return box.left >= -1 && box.right <= innerWidth + 1 && box.top >= -1 && box.bottom <= innerHeight + 1;
   }), 'solution dialog exceeds viewport');
-  if (touch) await dialog.getByRole('button', { name: '关闭解答' }).tap();
+  if (touch) await dialog.getByRole('button', { name: '关闭' }).tap();
   else await page.keyboard.press('Escape');
   await dialog.waitFor({ state: 'hidden' });
   assert.ok(await trigger.evaluate(node => node === document.activeElement), 'shared dialog lost return focus');
@@ -61,11 +61,14 @@ try {
   const { page, article, questions, triggers } = desktop;
   const left = await article.boundingBox(), right = await questions.boundingBox();
   assert.ok(left.x + left.width <= right.x, 'article and questions must be side by side');
+  // Choice questions are graded in place: picking the key marks it correct.
+  const firstQuestion = desktop.root.locator('[data-exam-question]').first();
+  const options = firstQuestion.locator('[data-exam-choice-option]');
+  assert.equal(await options.count(), 4, 'all four options must be clickable');
+  await options.nth(1).click();
+  await firstQuestion.getByText('回答正确', { exact: true }).waitFor({ state: 'visible' });
+  assert.equal(await options.nth(1).getAttribute('data-feedback'), 'correct', 'answer B must be graded correct');
   const trigger = triggers.first();
-  await trigger.hover();
-  const tooltip = desktop.root.getByRole('tooltip').first();
-  await tooltip.waitFor({ state: 'visible' });
-  assert.equal((await tooltip.innerText()).trim(), 'B', 'shared hover answer is wrong');
   await verifySolution(page, trigger);
   await article.evaluate(node => { window.__readingScroller(node).scrollTop += node.getBoundingClientRect().top - 72; });
   assert.ok(await article.evaluate(node => {
@@ -108,7 +111,7 @@ try {
     await mobile.context.close();
   }
   assert.deepEqual(errors, [], 'browser runtime errors');
-  console.log('Reading layout verified: desktop columns/sticky article, native scroll chaining, all five original questions, hover answers, shared dialogs, and 390/320/844px touch layouts.');
+  console.log('Reading layout verified: desktop columns/sticky article, native scroll chaining, all five original questions, in-place answer grading, shared dialogs, and 390/320/844px touch layouts.');
 } finally {
   await browser.close();
 }
