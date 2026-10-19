@@ -13,6 +13,35 @@ const params: Param[] = [
 ];
 
 describe('static documentation sharding', () => {
+  it('passes decoded Unicode params to Next and deduplicates equivalent source slugs', () => {
+    const routes = shardStaticDocParams([
+      { slug: ['algorithm', encodeURI('目录')] },
+      { slug: ['algorithm', '目录'] },
+      { slug: ['math', encodeURI('01-极限与连续')] },
+    ]);
+    expect(routes).toEqual([
+      { slug: ['algorithm', '目录'] },
+      { slug: ['math', '01-极限与连续'] },
+    ]);
+    const owners = Array.from({ length: 4 }, (_, index) =>
+      shardStaticDocParams(routes, 4, index),
+    ).flat();
+    expect(owners).toHaveLength(2);
+    expect(new Set(owners.map(getStaticDocRouteKey)).size).toBe(2);
+  });
+
+  it('decodes percent characters once and preserves malformed or reserved escapes', () => {
+    const routes = shardStaticDocParams([
+      { slug: ['100%25'] },
+      { slug: ['literal%2520'] },
+      { slug: ['incomplete%'] },
+      { slug: ['reserved%2Fsegment'] },
+    ]);
+    expect(routes.map(getStaticDocRouteKey)).toEqual([
+      '100%', 'incomplete%', 'literal%20', 'reserved%2Fsegment',
+    ]);
+  });
+
   it('deduplicates final routes before assigning owners', () => {
     const all = shardStaticDocParams(params);
     expect(all.map(getStaticDocRouteKey)).toEqual([
