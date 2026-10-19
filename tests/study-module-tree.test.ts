@@ -98,8 +98,9 @@ describe('documentation source structure', () => {
     for (const [moduleName, pages] of Object.entries(expectedModuleChildren)) {
       const meta = JSON.parse(
         readFileSync(join(docsRoot, moduleName, 'meta.json'), 'utf8'),
-      ) as { pages?: string[] };
+      ) as { root?: boolean; pages?: string[] };
 
+      expect(meta.root).toBe(true);
       expect(meta.pages).toEqual(pages);
       expect(meta.pages?.some((page) => page.includes('..'))).toBe(false);
     }
