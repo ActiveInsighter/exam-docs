@@ -15,7 +15,7 @@ import {
   MarkdownCopyButton,
   PageLastUpdate,
   ViewOptionsPopover,
-} from 'fumadocs-ui/layouts/docs/page';
+} from 'fumadocs-ui/layouts/notebook/page';
 
 type PageParameters = {
   params: Promise<{
@@ -57,7 +57,12 @@ export default async function Page({ params }: PageParameters) {
   const markdownUrl = toMarkdownPath(page.url);
 
   return (
-    <DocsPage toc={data.toc} full={page.data.full}>
+    <DocsPage
+      toc={data.toc}
+      full={page.data.full}
+      tableOfContent={{ style: 'block' }}
+      tableOfContentPopover={{ style: 'block' }}
+    >
       <DocsTitle className="docs-page-title font-medium">{page.data.title}</DocsTitle>
       <DocsDescription className="mb-1 font-normal">
         {page.data.description}
