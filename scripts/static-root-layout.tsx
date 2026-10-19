@@ -1,24 +1,13 @@
 import './global.css';
 import 'katex/dist/katex.css';
-import './surface-overrides.css';
+import './flat-ui.css';
+import './study-overrides.css';
 import { SearchProvider } from '@/components/search-provider';
-import { getSiteOrigin } from '@/lib/site-url';
+import { getRootMetadata, siteConfig } from '@/lib/site-config';
 import type { Metadata } from 'next';
 import type { CSSProperties, ReactNode } from 'react';
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getSiteOrigin()),
-  title: {
-    default: '考研学习',
-    template: '%s | 考研学习',
-  },
-  description: '按数学、专业课与算法练习组织的考研学习知识库。',
-  openGraph: {
-    type: 'website',
-    locale: 'zh_CN',
-    siteName: '考研学习',
-  },
-};
+export const metadata: Metadata = getRootMetadata();
 
 const fontVariables = {
   '--font-inter': "'Inter', 'Arial'",
@@ -28,7 +17,7 @@ const fontVariables = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="zh-CN" style={fontVariables} suppressHydrationWarning>
+    <html lang={siteConfig.lang} style={fontVariables} suppressHydrationWarning>
       <body className="flex min-h-screen flex-col font-sans" suppressHydrationWarning>
         <SearchProvider>{children}</SearchProvider>
       </body>

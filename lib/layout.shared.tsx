@@ -2,13 +2,14 @@ import type {
   BaseLayoutProps,
   LinkItemType,
 } from 'fumadocs-ui/layouts/shared';
+import { siteConfig } from './site-config';
 
 export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
-      title: '考研学习',
+      title: siteConfig.name,
     },
-    githubUrl: 'https://github.com/ActiveInsighter/exam-docs',
+    githubUrl: siteConfig.repository.url,
   };
 }
 

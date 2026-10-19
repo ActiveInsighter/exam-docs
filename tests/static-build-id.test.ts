@@ -45,4 +45,15 @@ describe('static shell build id', () => {
     await writeFile(path.join(root, 'content', 'docs', 'b.md'), '# B\n');
     expect(await computeStaticBuildId(root)).not.toBe(before);
   });
+
+  it('changes when a shared theme token changes', async () => {
+    const root = await fixture();
+    const tokens = path.join(root, 'styles', 'tokens');
+    await mkdir(tokens, { recursive: true });
+    const theme = path.join(tokens, 'theme.css');
+    await writeFile(theme, ':root { --background: white; }\n');
+    const before = await computeStaticBuildId(root);
+    await writeFile(theme, ':root { --background: black; }\n');
+    expect(await computeStaticBuildId(root)).not.toBe(before);
+  });
 });

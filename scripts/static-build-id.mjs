@@ -10,6 +10,7 @@ const SHELL_ENTRIES = [
   'app',
   'components',
   'lib',
+  'styles',
   'package.json',
   'package-lock.json',
   'next.config.static.mjs',

@@ -1,4 +1,5 @@
 import { getMDXComponents } from '@/components/mdx';
+import { getContentSourceUrl } from '@/lib/site-config';
 import { toCanonicalPagePath, toMarkdownPath } from '@/lib/site-url';
 import { shardStaticDocParams } from '@/lib/static-doc-shards';
 import { source } from '@/lib/source';
@@ -65,14 +66,14 @@ export default async function Page({ params }: PageParameters) {
       <DocsDescription className="mb-1 font-normal">
         {page.data.description}
       </DocsDescription>
-      <div id="docs-page-actions" className="flex items-center gap-2 border-b pb-6 pt-2">
+      <div id="docs-page-actions" className="flex items-center gap-2 pb-4 pt-2">
         <MarkdownCopyButton
           markdownUrl={markdownUrl}
           className="docs-page-action"
         />
         <ViewOptionsPopover
           markdownUrl={markdownUrl}
-          githubUrl={`https://github.com/ActiveInsighter/exam-docs/blob/main/content/docs/${page.path}`}
+          githubUrl={getContentSourceUrl(page.path)}
           className="docs-page-action"
         />
       </div>

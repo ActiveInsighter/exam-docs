@@ -1,0 +1,356 @@
+/*
+ * Flat UI layer for the official Fumadocs components.
+ *
+ * Fumadocs draws outlines, inset rings and drop shadows around its controls,
+ * cards and panels. This file removes them and lets background contrast carry
+ * the hierarchy instead. Every colour, radius and shadow comes from
+ * styles/tokens; nothing here introduces a raw value.
+ *
+ * Selectors rely on stable hooks the components expose (ids, data-* and ARIA
+ * attributes). Where Fumadocs offers no hook, a Tailwind class is matched and
+ * the reason is noted next to the rule.
+ */
+
+/* ---------------------------------------------------------------------------
+ * Layout chrome: frame, page panel, mobile header
+ * ------------------------------------------------------------------------- */
+
+#fd-spacious-layout {
+  background-color: var(--ui-canvas);
+}
+
+#nd-page-panel {
+  border-width: 0;
+  border-radius: var(--ui-radius-panel);
+  background-color: var(--ui-panel);
+  box-shadow: none;
+}
+
+/* Mobile: the decorative rounded top edge drawn under the TOC bar. */
+div[class*='grid-area:toc-popover'] > div[class*='rounded-t-2xl'] {
+  border-color: transparent;
+  outline-color: var(--ui-canvas);
+}
+
+#nd-subnav {
+  background-color: var(--ui-canvas);
+}
+
+/* ---------------------------------------------------------------------------
+ * Sidebar (desktop #nd-sidebar and the mobile drawer #nd-sidebar-mobile)
+ * ------------------------------------------------------------------------- */
+
+#nd-sidebar {
+  border-inline-end-color: transparent;
+}
+
+#nd-sidebar-mobile {
+  border-width: 0;
+  background-color: var(--ui-canvas);
+  box-shadow: var(--ui-shadow-overlay);
+}
+
+/* Section switcher (layout tabs) and the search trigger: filled, no outline. */
+:is(#nd-sidebar, #nd-sidebar-mobile) button[aria-haspopup='menu'],
+[data-search-full] {
+  border-width: 0;
+  border-radius: var(--ui-radius-control);
+  background-color: var(--ui-fill);
+  box-shadow: none;
+  transition: background-color var(--ui-duration) var(--ui-ease);
+}
+
+:is(#nd-sidebar, #nd-sidebar-mobile) button[aria-haspopup='menu']:hover,
+[data-search-full]:hover {
+  background-color: var(--ui-fill-hover);
+}
+
+:is(#nd-sidebar, #nd-sidebar-mobile) button[aria-haspopup='menu'][data-popup-open] {
+  background-color: var(--ui-fill-active);
+}
+
+/* Keyboard hint chips inside the search trigger. */
+[data-search-full] kbd {
+  border-width: 0;
+  border-radius: calc(var(--ui-radius-control) - 0.25rem);
+  background-color: var(--ui-fill);
+}
+
+/* Fallback letter badge shown before each section title. */
+:is(#nd-sidebar, #nd-sidebar-mobile) button[aria-haspopup='menu'] > span:first-child {
+  background-color: var(--ui-fill-strong);
+}
+
+/* Page tree items. */
+:is(#nd-sidebar, #nd-sidebar-mobile) :where(a, button)[data-active] {
+  border-radius: var(--ui-radius-control);
+}
+
+:is(#nd-sidebar, #nd-sidebar-mobile) [data-active='true'] {
+  background-color: var(--ui-fill-active);
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+/*
+ * Hover highlight. The Spacious sidebar glides a single block under the
+ * hovered item; it is the first, aria-hidden child of the item list and has no
+ * other hook than its accent class.
+ */
+:is(#nd-sidebar, #nd-sidebar-mobile) div[aria-hidden='true'][class*='bg-fd-accent'] {
+  border-radius: var(--ui-radius-control);
+  background-color: var(--ui-fill-hover);
+}
+
+/* Folder indent guides and the active marker on nested items (1px spans). */
+:is(#nd-sidebar, #nd-sidebar-mobile) span.absolute.w-px {
+  background-color: var(--ui-tree-guide);
+}
+
+:is(#nd-sidebar, #nd-sidebar-mobile) span.absolute.w-px.bg-fd-primary {
+  background-color: var(--ui-tree-active-line);
+}
+
+/* ---------------------------------------------------------------------------
+ * Floating layers: menus and popovers (Base UI marks them with data-side)
+ * ------------------------------------------------------------------------- */
+
+:where([role='menu'], [role='dialog'])[data-side] {
+  border-width: 0;
+  border-radius: var(--ui-radius-popover);
+  background-color: var(--ui-popover);
+  box-shadow: var(--ui-shadow-float);
+}
+
+/* Section dividers inside the options menu. */
+[role='menu'][data-side] > * {
+  border-color: transparent;
+}
+
+[role='menu'][data-side] [data-highlighted] {
+  background-color: var(--ui-fill-hover);
+  color: var(--foreground);
+}
+
+/* Theme switcher segments in the options menu. */
+[role='menu'] [role='group'][class*='rounded-full'] {
+  border-width: 0;
+  background-color: var(--ui-fill);
+}
+
+[role='menu'] [role='group'][class*='rounded-full'] > span[aria-hidden='true'] {
+  background-color: var(--ui-segment-thumb);
+  box-shadow: none;
+}
+
+/* Search dialog (centred, not anchored, so it has no data-side). */
+[role='dialog'][class*='max-w-screen-sm'] {
+  border-width: 0;
+  border-radius: var(--ui-radius-popover);
+  background-color: var(--ui-popover);
+  box-shadow: var(--ui-shadow-overlay);
+}
+
+[role='dialog'][class*='max-w-screen-sm'] * {
+  border-color: transparent;
+}
+
+[role='dialog'][class*='max-w-screen-sm'] [data-selected='true'],
+[role='dialog'][class*='max-w-screen-sm'] [aria-selected='true'] {
+  background-color: var(--ui-fill-active);
+}
+
+/* ---------------------------------------------------------------------------
+ * Page: actions, table of contents, pagination
+ * ------------------------------------------------------------------------- */
+
+#docs-page-actions .docs-page-action {
+  border: 0;
+  border-radius: var(--ui-radius-control);
+  background-color: var(--docs-action-background);
+  color: var(--foreground);
+  box-shadow: none;
+}
+
+#docs-page-actions .docs-page-action > svg {
+  color: var(--muted-foreground);
+}
+
+#docs-page-actions .docs-page-action:hover,
+#docs-page-actions .docs-page-action[data-popup-open] {
+  background-color: var(--docs-action-hover);
+  color: var(--foreground);
+}
+
+#docs-page-actions .docs-page-action:hover > svg,
+#docs-page-actions .docs-page-action[data-popup-open] > svg {
+  color: var(--foreground);
+}
+
+/* The view-options popup is portalled, so scope it by the open action. */
+body:has(#docs-page-actions .docs-page-action[data-popup-open])
+  [role='dialog'].flex.flex-col
+  > a {
+  border: 0;
+  border-radius: var(--ui-radius-control);
+  color: var(--foreground);
+  transition: background-color var(--ui-duration) ease, color var(--ui-duration) ease;
+}
+
+body:has(#docs-page-actions .docs-page-action[data-popup-open])
+  [role='dialog'].flex.flex-col
+  > a
+  > svg {
+  color: var(--foreground);
+}
+
+body:has(#docs-page-actions .docs-page-action[data-popup-open])
+  [role='dialog'].flex.flex-col
+  > a
+  > svg:last-child {
+  color: var(--muted-foreground);
+}
+
+body:has(#docs-page-actions .docs-page-action[data-popup-open])
+  [role='dialog'].flex.flex-col
+  > a:is(:hover, :focus-visible) {
+  background-color: var(--docs-menu-hover);
+  color: var(--foreground);
+  outline: none;
+}
+
+body:has(#docs-page-actions .docs-page-action[data-popup-open])
+  [role='dialog'].flex.flex-col
+  > a:hover
+  > svg:last-child {
+  color: var(--foreground);
+}
+
+/*
+ * Table of contents: the active range is a gradient strip by default; a solid
+ * fill reads as one flat highlight.
+ */
+#nd-toc [class*='bg-linear-to-r'] {
+  border-radius: calc(var(--ui-radius-control) - 0.125rem);
+  background-image: none;
+  background-color: var(--ui-fill-active);
+}
+
+/* Previous / next page cards (no hook besides their classes). */
+#nd-page a.group[class*='rounded-2xl'] {
+  border-width: 0;
+  border-radius: var(--ui-radius-surface);
+  background-color: var(--ui-fill);
+  transition: background-color var(--ui-duration) var(--ui-ease);
+}
+
+#nd-page a.group[class*='rounded-2xl']:hover {
+  background-color: var(--ui-fill-hover);
+}
+
+/* ---------------------------------------------------------------------------
+ * Content components
+ * ------------------------------------------------------------------------- */
+
+/* Shadows from Fumadocs utilities (callout and card icons, etc.). */
+#docs-body :where(.shadow-sm, .shadow, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl),
+:is(#nd-sidebar, #nd-sidebar-mobile) :where(.shadow-sm, .shadow, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl) {
+  box-shadow: none !important;
+}
+
+/* Callout: a tint of its semantic colour replaces the outline and side bar. */
+#docs-body div[style*='--callout-color'] {
+  border-width: 0;
+  border-radius: var(--ui-radius-surface);
+  /* oklab, not oklch: mixing a hue with the achromatic panel in oklch drifts hue. */
+  background-color: color-mix(
+    in oklab,
+    var(--callout-color) var(--ui-callout-tint),
+    var(--ui-panel)
+  );
+  padding-inline-start: 0.875rem;
+}
+
+#docs-body div[style*='--callout-color'] > [role='none'] {
+  display: none;
+}
+
+/* The icon glyph is cut out in the card colour; match the tinted surface. */
+#docs-body div[style*='--callout-color'] > svg {
+  color: color-mix(in oklab, var(--callout-color) var(--ui-callout-tint), var(--ui-panel));
+}
+
+/* Cards. */
+#docs-body [data-card] {
+  border-width: 0;
+  border-radius: var(--ui-radius-surface);
+  background-color: var(--ui-fill);
+  transition: background-color var(--ui-duration) var(--ui-ease);
+}
+
+#docs-body a[data-card]:hover {
+  background-color: var(--ui-fill-hover);
+  transform: none;
+}
+
+#docs-body [data-card] > div:first-child {
+  border-width: 0;
+  background-color: var(--ui-fill);
+}
+
+/* Accordions: separate filled rows instead of one outlined, divided box. */
+#docs-body div:has(> div > [data-accordion-value]) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  overflow: visible;
+  border-width: 0;
+  background-color: transparent;
+}
+
+#docs-body div:has(> [data-accordion-value]) {
+  overflow: hidden;
+  border-width: 0;
+  border-radius: var(--ui-radius-surface);
+  background-color: var(--ui-fill);
+}
+
+/* ---------------------------------------------------------------------------
+ * KaTeX display math scrolls inside the article column
+ *
+ * KaTeX keeps display math on one line by design. Clip it to the docs column
+ * and let readers scroll only that equation when it is wider than the column;
+ * otherwise the equation expands the page grid into the right-hand TOC.
+ * ------------------------------------------------------------------------- */
+
+#docs-body .katex-display {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 0.25rem;
+  scrollbar-color: var(--ui-scrollbar-thumb) var(--background);
+  scrollbar-width: thin;
+}
+
+#docs-body .katex-display > .katex {
+  min-width: max-content;
+}
+
+#docs-body .katex-display::-webkit-scrollbar {
+  height: 0.5rem;
+  background: var(--background);
+}
+
+#docs-body .katex-display::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+#docs-body .katex-display::-webkit-scrollbar-thumb {
+  border: 2px solid var(--background);
+  border-radius: 999px;
+  background-color: var(--ui-scrollbar-thumb);
+}
+
+#docs-body .katex-display::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ui-scrollbar-thumb-hover);
+}

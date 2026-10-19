@@ -25,6 +25,7 @@ const projectEntries = [
   'content',
   'lib',
   'public',
+  'styles',
   '.source',
   'next-env.d.ts',
   'package.json',
