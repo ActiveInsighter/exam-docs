@@ -37,7 +37,21 @@ export function shardStaticDocParams<T extends StaticDocParam>(
   }
 
   const unique = new Map<string, T>();
-  for (const param of sourceParams) {
+  for (const sourceParam of sourceParams) {
+    // Fumadocs slugs are URL-encoded; Next.js encodes static params itself.
+    // Passing encoded Chinese segments makes Next export a 404 route shell.
+    const param = sourceParam.slug
+      ? {
+          ...sourceParam,
+          slug: sourceParam.slug.map((segment) => {
+            try {
+              return decodeURI(segment);
+            } catch {
+              return segment;
+            }
+          }),
+        }
+      : sourceParam;
     const key = getStaticDocRouteKey(param);
     if (!unique.has(key)) unique.set(key, param);
   }
