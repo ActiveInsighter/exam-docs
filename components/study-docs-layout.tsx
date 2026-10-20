@@ -22,7 +22,7 @@ function StudyHeaderActions({ className, ...props }: ComponentProps<'div'>) {
 }
 
 // Keep sign-in reachable on phones, where Spacious hides its desktop actions.
-function StudyMobileHeader({ className, ...props }: ComponentProps<'div'>) {
+function StudyMobileHeader({ className, ...props }: ComponentProps<'header'>) {
   const { slots } = useSpaciousLayout();
   return (
     <header id="nd-subnav" className={cn('sticky top-(--fd-banner-height,0px) z-30 [grid-area:header] flex h-(--fd-header-height) items-center gap-1 bg-fd-card ps-4 pe-2.5 md:hidden', className)} {...props}>
