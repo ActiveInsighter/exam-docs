@@ -152,6 +152,7 @@ function FocusToggle({ focus, onToggle, className }: { focus: boolean; onToggle:
       className={cn(styles.iconButton, className)}
       onClick={onToggle}
       aria-pressed={focus}
+      data-reading-focus-toggle=""
       aria-label={focus ? '退出专注模式' : '专注模式'}
       title={focus ? '退出专注模式 (Esc)' : '专注模式'}
     >
@@ -220,6 +221,11 @@ export function ReadingWorkspace({ article, children }: { article: ReactNode; ch
     const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const behavior: ScrollBehavior = smooth ? 'smooth' : 'auto';
 
+    // Keyboard users land on the first answer control of the picked question.
+    const focusAnswer = () => target
+      .querySelector<HTMLElement>('[data-exam-choice-option]:not([disabled]), input:not([disabled])')
+      ?.focus({ preventScroll: true });
+
     if (scrollsInside(pane)) {
       const top = target.getBoundingClientRect().top - pane.getBoundingClientRect().top + pane.scrollTop;
       pane.scrollTo({ top: Math.max(0, top - 12), behavior });
@@ -228,12 +234,16 @@ export function ReadingWorkspace({ article, children }: { article: ReactNode; ch
         const { scroller, distance } = dockDistance(card);
         if (Math.abs(distance) > 1) scroller.scrollBy({ top: distance, behavior });
       }
+      focusAnswer();
     } else {
-      setView('questions');
-      requestAnimationFrame(() => target.scrollIntoView({ block: 'start', behavior }));
+      switchView('questions');
+      // The pane becomes visible on the next frame.
+      requestAnimationFrame(() => {
+        target.scrollIntoView({ block: 'start', behavior });
+        focusAnswer();
+      });
     }
-    target.querySelector<HTMLElement>('[data-exam-choice-option]:not([disabled]), input:not([disabled])')?.focus({ preventScroll: true });
-  }, [focus, pin]);
+  }, [focus, pin, switchView]);
 
   /*
    * Side by side, a wheel over the card first docks the card fully in view
@@ -261,9 +271,12 @@ export function ReadingWorkspace({ article, children }: { article: ReactNode; ch
     return () => card.removeEventListener('wheel', onWheel);
   }, [focus]);
 
-  // Focus mode: Esc leaves (unless a solution dialog is handling it).
+  // Focus mode: Esc leaves (unless a solution dialog is handling it); focus
+  // moves into the card and returns to where it was on exit.
   useEffect(() => {
     if (!focus) return;
+    const returnTo = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    cardRef.current?.focus({ preventScroll: true });
     const onKey = (event: globalThis.KeyboardEvent) => {
       if (event.key !== 'Escape' || event.defaultPrevented) return;
       if (document.querySelector('[data-slot="dialog-content"]')) return;
@@ -276,22 +289,26 @@ export function ReadingWorkspace({ article, children }: { article: ReactNode; ch
     return () => {
       html.style.overflow = previous;
       document.removeEventListener('keydown', onKey);
+      // The toggle that opened focus mode is unmounted/moved; find its twin.
+      const visibleToggle = Array.from(cardRef.current?.querySelectorAll<HTMLElement>('[data-reading-focus-toggle]') ?? [])
+        .find((toggle) => toggle.getClientRects().length > 0);
+      const target = returnTo?.isConnected && returnTo.getClientRects().length > 0 ? returnTo : visibleToggle;
+      target?.focus({ preventScroll: true });
     };
   }, [focus]);
 
   const toggleFocus = useCallback(() => {
-    setFocus((value) => {
-      if (value) {
-        requestAnimationFrame(() => {
-          const card = cardRef.current;
-          if (!card) return;
-          const { scroller, distance } = dockDistance(card);
-          scroller.scrollBy({ top: distance });
-        });
-      }
-      return !value;
-    });
-  }, []);
+    if (focus) {
+      // Back in the page: dock the card where focus mode left it.
+      requestAnimationFrame(() => {
+        const card = cardRef.current;
+        if (!card) return;
+        const { scroller, distance } = dockDistance(card);
+        scroller.scrollBy({ top: distance });
+      });
+    }
+    setFocus(!focus);
+  }, [focus]);
 
   // Divider: pointer drag, arrow keys, double-click to reset.
   const dragFrom = (event: PointerEvent<HTMLDivElement>) => {
@@ -339,10 +356,11 @@ export function ReadingWorkspace({ article, children }: { article: ReactNode; ch
         data-view={view}
         data-focus={focus ? '' : undefined}
         data-resizing={resizing ? '' : undefined}
+        tabIndex={-1}
         aria-label="英语阅读理解"
       >
         {/* Narrow layouts: one pane at a time. */}
-        <div className={styles.switcher} data-reading-switcher="">
+        <div className={styles.switcher} data-reading-switcher="" data-reading-sticky="">
           <div role="tablist" aria-label="切换原文与题目" className={styles.segments}>
             <button
               type="button"
@@ -384,7 +402,7 @@ export function ReadingWorkspace({ article, children }: { article: ReactNode; ch
               </span>
               {stats ? <span className={styles.stats}>{stats}</span> : null}
             </div>
-            <div className={styles.progress} aria-hidden="true" />
+            <div className={styles.progress} aria-hidden="true"><span /></div>
             <div ref={articleRef} className={styles.scroller} data-reading-article="" tabIndex={-1}>
               {article}
               <button type="button" className={styles.startButton} onClick={() => switchView('questions')}>
@@ -413,7 +431,7 @@ export function ReadingWorkspace({ article, children }: { article: ReactNode; ch
           />
 
           <div className={styles.pane} data-pane="questions" id={questionsId}>
-            <div className={styles.paneHeader}>
+            <div className={styles.paneHeader} data-reading-sticky="">
               <span className={styles.paneLabel}>
                 <ListChecksIcon aria-hidden="true" />
                 题目

@@ -35,8 +35,12 @@ function referenceLine(container: HTMLElement) {
   const scrollsInside = /(auto|scroll)/.test(getComputedStyle(container).overflowY);
   if (scrollsInside) return container.getBoundingClientRect().top + 96;
   const card = container.closest('[data-english-reading]');
-  const switcher = card?.querySelector('[data-reading-switcher]')?.getBoundingClientRect();
-  return Math.max(switcher?.bottom ?? 0, 0) + 96;
+  let bottom = 0;
+  for (const sticky of card?.querySelectorAll('[data-reading-sticky]') ?? []) {
+    const box = sticky.getBoundingClientRect();
+    if (box.height > 0) bottom = Math.max(bottom, box.bottom);
+  }
+  return bottom + 64;
 }
 
 export function useQuestionNav(ref: RefObject<HTMLElement | null>) {

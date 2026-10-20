@@ -122,6 +122,12 @@ try {
   assert.ok(Number(await divider.getAttribute('aria-valuenow')) < start, 'divider resizes from the keyboard');
   await page.keyboard.press('Enter');
   await page.screenshot({ path: path.join(screenshots, 'reading-desktop.png') });
+
+  // Printing shows both panes in full rather than their scrolled windows.
+  await page.emulateMedia({ media: 'print' });
+  assert.ok(await page.evaluate(() => [...document.querySelectorAll('[data-reading-article], [data-reading-questions]')]
+    .every(node => node.getClientRects().length > 0 && node.scrollHeight <= node.clientHeight + 1)), 'print must not clip either pane');
+  await page.emulateMedia({ media: 'screen' });
   await desktop.context.close();
 
   for (const width of [390, 320, 700]) {
@@ -135,6 +141,16 @@ try {
     assert.ok(await mobile.questions.isVisible(), 'start button switches to the questions');
     assert.equal(await mobile.article.isVisible(), false);
     assert.equal(await mobile.triggers.count(), 5);
+    // The navigator sticks below the switcher and jumps to a question.
+    const chips = mobile.root.getByRole('navigation', { name: '题目导航' }).getByRole('button');
+    assert.equal(await chips.count(), 5, 'narrow layout keeps the question navigator');
+    await chips.nth(4).tap();
+    await mobile.page.waitForFunction(() => {
+      const last = document.querySelectorAll('[data-reading-questions] [data-exam-question]')[4];
+      const nav = document.querySelector('[aria-label="题目导航"]').getBoundingClientRect();
+      const box = last.getBoundingClientRect();
+      return box.top >= nav.bottom - 1 && box.top < innerHeight - 80;
+    });
     await mobile.triggers.first().scrollIntoViewIfNeeded();
     await verifySolution(mobile.page, mobile.triggers.first(), true);
     await tabs.first().tap();
