@@ -1,4 +1,4 @@
-import { cp, mkdir, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { cpus, freemem, totalmem } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -207,6 +207,21 @@ async function walkFiles(directory) {
   return files;
 }
 
+// Both directories reside under the same project root in CI, so an atomic
+// rename avoids copying every HTML, image and static chunk twice. Keep a
+// cross-device fallback for unusual local build directory mounts.
+async function moveStaticExport(sourceRoot, destinationRoot) {
+  try {
+    await rename(sourceRoot, destinationRoot);
+    console.log('[static-docs] Reused export files via an atomic directory move.');
+  } catch (error) {
+    if (error?.code !== 'EXDEV') throw error;
+    await cp(sourceRoot, destinationRoot, { recursive: true });
+    await rm(sourceRoot, { recursive: true, force: true });
+    console.log('[static-docs] Cross-device output; copied export files instead.');
+  }
+}
+
 async function copyDirectoryContents(sourceRoot, destinationRoot) {
   for (const entry of await readdir(sourceRoot, { withFileTypes: true })) {
     const sourcePath = path.join(sourceRoot, entry.name);
@@ -314,7 +329,7 @@ async function main() {
 
     const assembleStartedAt = Date.now();
     await rm(staticOutputRoot, { recursive: true, force: true });
-    await cp(path.join(stageRoot, 'out'), staticOutputRoot, { recursive: true });
+    await moveStaticExport(path.join(stageRoot, 'out'), staticOutputRoot);
     if (ownsGlobalAssets) await copyDirectoryContents(staticSearchRoot, staticOutputRoot);
     console.log(`[timing] assemble_static_and_search=${formatSeconds(Date.now() - assembleStartedAt)}`);
 
