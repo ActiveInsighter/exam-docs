@@ -1,5 +1,5 @@
 import { IDBFactory, IDBObjectStore } from 'fake-indexeddb';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   QuestionDatabase, QuestionSyncEngine, namespaceForUser, questionKey,
   type AnswerState, type QuestionIdentity, type QuestionNamespace, type RemoteAttempt,
@@ -108,6 +108,8 @@ describe('question browser database', () => {
   });
 
   it('compacts unsent keystrokes without deleting submitted history', async () => {
+    // Submissions can share a millisecond; UUID ordering must not affect preservation.
+    vi.spyOn(Date.prototype, 'toISOString').mockReturnValue('2026-10-20T00:00:00.000Z');
     const db = await open();
     for (const text of ['a', 'ab', 'abc']) await db.save(ACCOUNT, identity, draft(text));
     expect((await db.stats(ACCOUNT)).pending).toBe(1);
@@ -115,7 +117,11 @@ describe('question browser database', () => {
     await db.save(ACCOUNT, identity, draft('new'));
     await db.save(ACCOUNT, identity, submitted('new', 2), { submission: true });
     expect((await db.stats(ACCOUNT)).pending).toBe(2);
-    expect((await db.listAttempts(ACCOUNT)).map((attempt) => attempt.state.values[0])).toEqual(['abc', 'new']);
+    const attempts = await db.listAttempts(ACCOUNT);
+    expect(attempts).toHaveLength(2);
+    expect(attempts.map((attempt) => attempt.state)).toEqual(
+      expect.arrayContaining([submitted('abc'), submitted('new', 2)]),
+    );
   });
 
   it('rolls back the current answer if the atomic outbox write fails', async () => {
