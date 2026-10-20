@@ -141,11 +141,11 @@ export function Question({
       data-question-id={id}
       data-question-type={questionType}
       data-question-revision={revision}
-      className="min-w-0 @container"
+      className="min-w-0 pb-1 @container"
     >
       <div
         data-exam-question-body=""
-        className="min-w-0 [&>:first-child]:mt-0! [&>:last-child]:mb-0!"
+        className="min-w-0 [&>:first-child]:mt-0! [&>:last-child]:mb-0! [&>p]:my-2.5"
       >
         {numberedStem}
       </div>
@@ -159,7 +159,7 @@ export function Question({
           dialogTitle={dialogTitle}
         />
       ) : null}
-      <Separator className="mt-3" />
+      <Separator className="mt-4 mb-5" />
     </section>
   );
 

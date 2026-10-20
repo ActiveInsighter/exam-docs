@@ -14,14 +14,14 @@ const toggleVariants = cva(
         // Rich-content answer option (exam choices): left-aligned, wrapping,
         // resting on the flat fill scale instead of a toolbar look.
         choice:
-          "w-full min-w-0 items-start justify-start gap-3 rounded-[var(--ui-radius-control)] bg-(--exam-choice) text-left text-[length:inherit] leading-relaxed font-normal whitespace-normal text-foreground hover:bg-(--exam-choice-hover) aria-pressed:bg-(--exam-choice-active) data-[state=on]:bg-(--exam-choice-active) disabled:pointer-events-none disabled:opacity-100",
+          "w-full min-w-0 items-start justify-start gap-3 rounded-(--ui-radius-control) bg-(--exam-choice) text-left text-[length:inherit] leading-relaxed font-normal whitespace-normal text-foreground hover:bg-(--exam-choice-hover) aria-pressed:bg-(--exam-choice-active) data-[state=on]:bg-(--exam-choice-active) disabled:pointer-events-none disabled:opacity-100",
       },
       size: {
         default:
           "h-8 min-w-8 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
         sm: "h-7 min-w-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
         lg: "h-9 min-w-9 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
-        choice: "h-auto min-h-10 px-3 py-1.5",
+        choice: "h-auto min-h-11 px-3 py-2",
       },
     },
     defaultVariants: {

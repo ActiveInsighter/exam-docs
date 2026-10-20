@@ -50,12 +50,15 @@ div[class*='grid-area:toc-popover'] > div[class*='rounded-t-2xl'] {
   box-shadow: var(--ui-shadow-overlay);
 }
 
-/* Section switcher (layout tabs) and the search trigger: filled, no outline. */
+/* Section switcher (layout tabs) and the search trigger: one pair of rounded,
+ * filled fields. */
 :is(#nd-sidebar, #nd-sidebar-mobile) button[aria-haspopup='menu'],
 [data-search-full] {
+  height: 2.75rem;
   border-width: 0;
-  border-radius: var(--ui-radius-control);
+  border-radius: var(--ui-radius-field);
   background-color: var(--ui-fill);
+  padding-inline: 0.875rem 0.75rem;
   box-shadow: none;
   transition: background-color var(--ui-duration) var(--ui-ease);
 }
@@ -72,13 +75,31 @@ div[class*='grid-area:toc-popover'] > div[class*='rounded-t-2xl'] {
 /* Keyboard hint chips inside the search trigger. */
 [data-search-full] kbd {
   border-width: 0;
-  border-radius: calc(var(--ui-radius-control) - 0.25rem);
+  border-radius: 0.5rem;
   background-color: var(--ui-fill);
+  padding: 0.125rem 0.4rem;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
-/* Fallback letter badge shown before each section title. */
-:is(#nd-sidebar, #nd-sidebar-mobile) button[aria-haspopup='menu'] > span:first-child {
+/* Fallback letter chip shown before each section title, in the switcher and
+ * in its menu. */
+:is(#nd-sidebar, #nd-sidebar-mobile) button[aria-haspopup='menu'] > span:first-child,
+[role='menu'][data-side] > a > span:first-child {
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 0.5rem;
   background-color: var(--ui-fill-strong);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Collapse / expand toggle (sidebar header, and the page header once the
+ * sidebar is folded away) and the mobile header buttons. */
+button[aria-controls='nd-sidebar'],
+#nd-subnav :is(button, [data-search]) {
+  border-radius: var(--ui-radius-icon);
 }
 
 /* Preserve Fumadocs tree guides, active markers and the gliding hover block.
@@ -129,6 +150,24 @@ div[class*='grid-area:toc-popover'] > div[class*='rounded-t-2xl'] {
 
 [role='dialog'][class*='max-w-screen-sm'] * {
   border-color: transparent;
+}
+
+/* ESC / close button: a filled chip instead of an outlined button. */
+[data-fd-search-dialog-input] + button {
+  border-width: 0;
+  border-radius: var(--ui-radius-icon);
+  background-color: var(--ui-fill);
+  font-family: inherit;
+  font-size: 0.75rem;
+}
+
+[data-fd-search-dialog-input] + button:hover {
+  background-color: var(--ui-fill-hover);
+}
+
+#fd-search-list {
+  /* Never taller than the visible viewport, whatever the keyboard does. */
+  max-height: min(460px, calc(100dvh - 7rem));
 }
 
 [role='dialog'][class*='max-w-screen-sm'] [data-selected='true'],

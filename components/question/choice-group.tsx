@@ -37,32 +37,26 @@ const gridClassName = cn(
 
 const optionClassName = cn(
   'group-data-measuring/choices:w-max group-data-measuring/choices:max-w-none group-data-measuring/choices:whitespace-nowrap',
-  'transition-[background-color,box-shadow,opacity] duration-200',
+  'transition-[background-color,opacity] duration-200',
 );
 
-const feedbackClassName: Record<Feedback, string> = {
-  idle: '',
-  selected: '',
-  correct: 'bg-success/12! ring-1 ring-inset ring-success/45',
-  incorrect: 'bg-destructive/10! ring-1 ring-inset ring-destructive/40',
-  missed: 'bg-success/6! ring-1 ring-inset ring-success/35',
-  answer: 'bg-success/10! ring-1 ring-inset ring-success/40',
-  dimmed: 'opacity-55',
+/*
+ * Flat, outline-free feedback. `!` lets the tint win over the toggle's own
+ * pressed/hover fills; the marker chip carries the strong colour.
+ */
+const feedbackStyle: Record<Feedback, { option: string; marker: string }> = {
+  idle: { option: '', marker: 'bg-background text-muted-foreground' },
+  selected: { option: '', marker: 'bg-foreground text-background' },
+  correct: { option: 'bg-success/12!', marker: 'bg-success text-background' },
+  incorrect: { option: 'bg-destructive/10!', marker: 'bg-destructive text-background' },
+  missed: { option: 'bg-success/8!', marker: 'bg-success/20 text-success' },
+  answer: { option: 'bg-success/10!', marker: 'bg-success text-background' },
+  dimmed: { option: 'opacity-55', marker: 'bg-background text-muted-foreground' },
 };
 
 const feedbackMotion: Partial<Record<Feedback, string>> = {
   correct: 'motion-safe:animate-choice-pop',
   incorrect: 'motion-safe:animate-choice-shake',
-};
-
-const markerClassName: Record<Feedback, string> = {
-  idle: 'bg-background text-muted-foreground ring-1 ring-border',
-  selected: 'bg-primary text-primary-foreground ring-1 ring-primary',
-  correct: 'bg-success text-success-foreground',
-  incorrect: 'bg-destructive text-background',
-  missed: 'border border-dashed border-success bg-background text-success',
-  answer: 'bg-success text-success-foreground',
-  dimmed: 'bg-background text-muted-foreground ring-1 ring-border',
 };
 
 function OptionMarker({
@@ -81,15 +75,22 @@ function OptionMarker({
       <XIcon strokeWidth={3} />
     ) : null;
 
+  // Latin letters borrow KaTeX's math italic so they read like variables on an
+  // exam paper; other labels (对 / 错) keep the UI font.
+  const letter = /^[A-Za-z]$/.test(label);
+
   // The outer box is one content line tall (1lh of the option text), so the
   // marker stays centred on the first line for single- and multi-line options.
   return (
-    <span aria-hidden="true" className="flex h-lh shrink-0 items-center self-start py-0.5 box-content">
+    <span aria-hidden="true" className="box-content flex h-lh shrink-0 items-center self-start py-0.5">
       <span
         className={cn(
-          'grid size-6 place-items-center text-xs leading-none font-medium transition-colors duration-200',
-          multiple ? 'rounded-md' : 'rounded-full',
-          markerClassName[feedback],
+          'grid size-7 place-items-center leading-none transition-colors duration-200',
+          letter
+            ? 'font-[KaTeX_Math] text-[1.125rem] font-bold italic'
+            : 'text-[0.8125rem] font-semibold',
+          multiple ? 'rounded-[0.5rem]' : 'rounded-full',
+          feedbackStyle[feedback].marker,
         )}
       >
         {icon ? (
@@ -177,7 +178,7 @@ export function ChoiceGroup({
 
   if (!interactive || !question) {
     return (
-      <div className="my-2 @container">
+      <div className="my-3 @container">
         <div ref={ref} role="list" className={gridClassName} {...groupProps}>
           {options.map((option) => {
             const feedback = feedbackFor(option.label);
@@ -191,7 +192,7 @@ export function ChoiceGroup({
                   toggleVariants({ variant: 'choice', size: 'choice' }),
                   'pointer-events-none',
                   optionClassName,
-                  feedbackClassName[feedback],
+                  feedbackStyle[feedback].option,
                 )}
               >
                 <OptionMarker label={option.marker ?? option.label} feedback={feedback} multiple={multiple} />
@@ -205,7 +206,7 @@ export function ChoiceGroup({
   }
 
   return (
-    <div className="my-2 @container">
+    <div className="my-3 @container">
       <ToggleGroup
         ref={ref}
         multiple={multiple}
@@ -230,7 +231,7 @@ export function ChoiceGroup({
                 'cursor-pointer active:scale-[0.99]',
                 submitted && 'pointer-events-none',
                 optionClassName,
-                feedbackClassName[feedback],
+                feedbackStyle[feedback].option,
                 feedbackMotion[feedback],
               )}
             >

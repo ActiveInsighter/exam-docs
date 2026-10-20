@@ -45,7 +45,7 @@ function AttemptStatus() {
     return (
       <div className="flex items-center gap-2">
         <Badge variant="secondary">{spec.kind === 'blank' ? '填空' : '多选'}</Badge>
-        <Button variant="outline" size="sm" disabled={!canSubmit} onClick={submit}>
+        <Button size="sm" disabled={!canSubmit} onClick={submit}>
           提交答案
         </Button>
       </div>

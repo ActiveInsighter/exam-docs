@@ -382,7 +382,12 @@ export function ShardedSearchDialog(props: SharedProps) {
   return (
     <SearchDialog search={search} onSearchChange={setSearch} isLoading={isLoading} {...props}>
       <SearchDialogOverlay />
-      <SearchDialogContent>
+      {/*
+        * Touch devices pin the dialog to the top. The desktop offset is a
+        * percentage of the viewport, which a soft keyboard would shrink and
+        * push the dialog off-screen.
+        */}
+      <SearchDialogContent className="md:top-4 md:pointer-fine:top-[max(1rem,calc(50%-250px))]">
         <SearchDialogHeader>
           <SearchDialogIcon />
           <SearchDialogInput />
