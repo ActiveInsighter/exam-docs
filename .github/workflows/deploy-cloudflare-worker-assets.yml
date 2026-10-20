@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 'codex/optimize-build-deploy-20261020'
       - 'codex/lilin-880-rebuild-*'
       - 'codex/math-past-exams-0930'
       - 'codex/math-core-questions-1005'
@@ -519,7 +520,7 @@ jobs:
             echo '- RSC aliases: deduplicated locally and restored through two guarded Cloudflare 200 rewrites'
           } >> "${GITHUB_STEP_SUMMARY}"
       - name: Validate Wrangler configuration with a dry run
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy != true }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.deploy != true) || github.ref == 'refs/heads/codex/optimize-build-deploy-20261020' }}
         run: npx --yes wrangler@4.129.0 deploy --dry-run --config wrangler.jsonc --outdir .wrangler-dry-run
       - name: Check Cloudflare deployment credentials
         if: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || ((github.ref == 'refs/heads/codex/math-past-exams-0930' || github.ref == 'refs/heads/codex/math-core-questions-1005' || github.ref == 'refs/heads/codex/build-speed-research-1002' || github.ref == 'refs/heads/codex/english-reading-layout-1012') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}
