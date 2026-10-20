@@ -41,13 +41,21 @@ function formatAnswer(spec: GradingSpec): ReactNode {
   return spec.blanks.map((blank) => blank.answer).join('；');
 }
 
-/** Puts the number in front of the first line of the stem. */
+const TYPE_LABELS: Record<QuestionType, string> = {
+  single: '单选题',
+  multiple: '多选题',
+  boolean: '判断题',
+  blank: '填空题',
+  essay: '解答题',
+};
+
+/** Puts the number chip in front of the first line of the stem. */
 function withNumber(stem: ReactNode[], label: string): ReactNode[] {
   const mark = (
     <span
       key="question-number"
       data-question-number=""
-      className="mr-2 font-medium tabular-nums text-muted-foreground"
+      className="relative -top-px mr-2.5 inline-flex h-[1.625rem] min-w-[1.625rem] items-center justify-center rounded-md bg-(--ui-fill-strong) px-1.5 align-middle font-sans text-[0.8125rem] leading-none font-semibold text-foreground/80 tabular-nums"
     >
       {label}
     </span>
@@ -128,7 +136,7 @@ export function Question({
   const label = number === false ? null : (number ?? index);
   const parsedNumber = parseNumber(label);
   const displayNumber =
-    parsedNumber !== null ? `${parsedNumber}.` : typeof label === 'string' ? label : null;
+    parsedNumber !== null ? String(parsedNumber) : typeof label === 'string' ? label : null;
   const numberedStem = displayNumber ? withNumber(stem, displayNumber) : stem;
 
   const solution = split.solution?.props.children;
@@ -142,7 +150,7 @@ export function Question({
       data-question-id={id}
       data-question-type={questionType}
       data-question-revision={revision}
-      className="min-w-0 pb-1 @container"
+      className="min-w-0 scroll-mt-4 pb-1 @container"
     >
       <div
         data-exam-question-body=""
@@ -159,9 +167,11 @@ export function Question({
           buttonLabel={buttonLabel}
           dialogTitle={dialogTitle}
           showSolution={hasSolution}
+          numberLabel={displayNumber}
+          typeLabel={TYPE_LABELS[questionType]}
         />
       ) : null}
-      <Separator className="mt-4 mb-5" />
+      <Separator className="mt-5 mb-6" />
     </section>
   );
 

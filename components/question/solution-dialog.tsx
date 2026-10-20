@@ -1,16 +1,18 @@
 'use client';
 
-import { BookOpenTextIcon } from 'lucide-react';
-import { type ReactNode, useState } from 'react';
+import { BookOpenTextIcon, CheckIcon, XIcon } from 'lucide-react';
+import { type ReactNode, useCallback, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { QuestionReveal } from './question-state';
+import { QuestionReveal, useQuestionState } from './question-state';
+import { useSheetDrag } from './use-sheet-drag';
 
 type QuestionSolutionDialogProps = {
   question: ReactNode;
@@ -21,6 +23,10 @@ type QuestionSolutionDialogProps = {
   solutionLabel: string;
   buttonLabel: string;
   dialogTitle: string;
+  /** Display number of the question ("3", "例 1"), if any. */
+  numberLabel?: string | null;
+  /** 单选题 / 多选题 / …, shown beside the title. */
+  typeLabel?: string;
 };
 
 // The popup is portaled out of #docs-body, so content opts back into the
@@ -36,6 +42,31 @@ function SectionLabel({ children }: { children: ReactNode }) {
   );
 }
 
+function Chip({ children }: { children: ReactNode }) {
+  return (
+    <span className="inline-flex h-6 items-center rounded-md bg-(--ui-fill) px-2 text-xs font-medium text-muted-foreground tabular-nums">
+      {children}
+    </span>
+  );
+}
+
+/** What the reader submitted, in the same notation as the key. */
+function useReaderAnswer(): { text: string; correct: boolean } | null {
+  const state = useQuestionState();
+  if (!state?.submitted || !state.result) return null;
+  const { spec } = state;
+  let text: string;
+  if (spec.kind === 'choice') {
+    // Boolean questions grade letters (A = 正确, B = 错误) but show words.
+    text = spec.keyText && !spec.multiple
+      ? (state.selected[0] === 'A' ? '正确' : '错误')
+      : [...state.selected].sort().join('');
+  } else {
+    text = spec.blanks.map((_, index) => state.values[index]?.trim() || '—').join('；');
+  }
+  return { text, correct: state.result === 'correct' };
+}
+
 /* Each pane scrolls on its own on desktop; on mobile the whole body scrolls. */
 const paneClassName =
   'min-w-0 px-5 pt-5 pb-8 md:overflow-y-auto md:overscroll-contain md:px-7 md:pt-6 [scrollbar-width:thin]';
@@ -47,14 +78,20 @@ export function QuestionSolutionDialog({
   solutionLabel,
   buttonLabel,
   dialogTitle,
+  numberLabel,
+  typeLabel,
 }: QuestionSolutionDialogProps) {
   const [open, setOpen] = useState(false);
+  const reader = useReaderAnswer();
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const close = useCallback(() => setOpen(false), []);
+  const dragHandlers = useSheetDrag(sheetRef, close);
 
   const trigger = (
     <Button
       variant="ghost"
       size="sm"
-      className="text-muted-foreground hover:text-foreground"
+      className="bg-(--ui-fill) px-3 text-foreground/80 hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active)"
     />
   );
   const triggerContent = (
@@ -69,18 +106,43 @@ export function QuestionSolutionDialog({
       <DialogTrigger render={trigger}>{triggerContent}</DialogTrigger>
 
       <DialogContent
+        ref={sheetRef}
+        showCloseButton={false}
         className={cn(
           'flex flex-col gap-0 overflow-hidden bg-(--ui-panel) p-0 text-base text-foreground shadow-(--ui-shadow-overlay) duration-200 ease-out',
           'h-[min(48rem,calc(100dvh-4rem))] w-[min(72rem,calc(100vw-2rem))] max-w-none sm:max-w-none rounded-(--ui-radius-panel)',
-          'max-md:inset-0 max-md:size-full max-md:translate-x-0 max-md:translate-y-0 max-md:rounded-none max-md:ring-0',
-          'max-md:data-open:zoom-in-100 max-md:data-open:slide-in-from-bottom-8 max-md:data-closed:zoom-out-100 max-md:data-closed:slide-out-to-bottom-8',
+          /*
+           * Phones: a bottom sheet sized to its content (leaving a strip of
+           * the page visible). It slides the full height on CSS transitions
+           * keyed to Base UI's starting/ending styles, so a close can start
+           * from wherever a drag left it; keyframe zoom/fade is switched off.
+           */
+          'max-md:top-auto max-md:bottom-0 max-md:left-0 max-md:h-auto max-md:max-h-[calc(100dvh-2.5rem)] max-md:w-full max-md:translate-x-0 max-md:translate-y-0 max-md:rounded-t-[1.25rem] max-md:rounded-b-none max-md:ring-0',
+          'max-md:data-open:animate-none max-md:data-closed:animate-none',
+          'max-md:transition-[translate,transform] max-md:duration-[460ms] max-md:ease-[cubic-bezier(0.32,0.72,0,1)]',
+          'max-md:data-starting-style:translate-y-full max-md:data-ending-style:translate-y-full max-md:data-ending-style:duration-[280ms] max-md:data-ending-style:ease-[cubic-bezier(0.4,0,1,1)]',
+          'motion-reduce:max-md:transition-none',
         )}
       >
-        <header className="flex h-14 shrink-0 items-center pr-12 pl-5 md:pl-7">
-          <DialogTitle className="text-base font-medium">{dialogTitle}</DialogTitle>
-        </header>
+        {/* Grab zone: handle and header follow the finger on phones. */}
+        <div className="shrink-0 max-md:touch-none max-md:select-none" {...dragHandlers}>
+          <div aria-hidden="true" className="flex justify-center pt-2 pb-1 md:hidden">
+            <div className="h-1.5 w-10 rounded-full bg-(--ui-fill-strong)" />
+          </div>
+          <header className="flex min-h-14 items-center gap-2.5 pr-3 pl-5 max-md:min-h-11 max-md:pb-1 md:pl-7">
+            <DialogTitle className="text-base font-medium">{dialogTitle}</DialogTitle>
+            {numberLabel ? <Chip>第 {numberLabel} 题</Chip> : null}
+            {typeLabel ? <Chip>{typeLabel}</Chip> : null}
+            <DialogClose
+              render={<Button variant="ghost" size="icon-sm" className="ml-auto text-muted-foreground hover:text-foreground max-md:size-8 max-md:rounded-full max-md:bg-(--ui-fill)" />}
+            >
+              <XIcon />
+              <span className="sr-only">关闭</span>
+            </DialogClose>
+          </header>
+        </div>
 
-        <div className="grid min-h-0 flex-1 max-md:overflow-y-auto max-md:overscroll-contain md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <div className="grid min-h-0 flex-1 max-md:overflow-y-auto max-md:overscroll-contain max-md:pb-[env(safe-area-inset-bottom)] md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           <section
             aria-label="题目"
             className={cn(paneClassName, 'bg-(--exam-question-pane) @container')}
@@ -95,15 +157,37 @@ export function QuestionSolutionDialog({
             {answer !== null ? (
               <div className="animate-in fade-in-0 slide-in-from-bottom-1 fill-mode-both duration-300 delay-75">
                 <SectionLabel>答案</SectionLabel>
-                <div
-                  className={cn(
-                    prose,
-                    'rounded-(--ui-radius-control) bg-success/10 px-4 py-3 text-lg leading-relaxed [&_b]:font-normal [&_strong]:font-normal',
-                    proseReset,
-                    '[&_.katex-display]:my-1 [&_.katex-display]:overflow-x-auto',
-                  )}
-                >
-                  {answer}
+                <div className="grid gap-2 sm:grid-cols-[repeat(auto-fit,minmax(11rem,1fr))]">
+                  <div
+                    className={cn(
+                      prose,
+                      'flex items-baseline gap-3 rounded-(--ui-radius-control) bg-success/10 px-4 py-3 leading-relaxed [&_b]:font-normal [&_strong]:font-normal',
+                      '[&_.katex-display]:my-1 [&_.katex-display]:overflow-x-auto',
+                    )}
+                  >
+                    <span className="shrink-0 text-sm text-success">正确答案</span>
+                    <span className="min-w-0 text-lg font-semibold text-foreground">{answer}</span>
+                  </div>
+                  {reader ? (
+                    <div
+                      className={cn(
+                        'flex items-baseline gap-3 rounded-(--ui-radius-control) px-4 py-3 leading-relaxed',
+                        reader.correct ? 'bg-(--ui-fill)' : 'bg-destructive/8',
+                      )}
+                    >
+                      <span className="shrink-0 text-sm text-muted-foreground">你的答案</span>
+                      <span className="min-w-0 text-lg font-semibold break-words">{reader.text}</span>
+                      <span
+                        className={cn(
+                          'ml-auto grid size-5 shrink-0 place-items-center self-center rounded-full text-background [&_svg]:size-3',
+                          reader.correct ? 'bg-success' : 'bg-destructive',
+                        )}
+                        aria-label={reader.correct ? '正确' : '错误'}
+                      >
+                        {reader.correct ? <CheckIcon strokeWidth={3} /> : <XIcon strokeWidth={3} />}
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             ) : null}
