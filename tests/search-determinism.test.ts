@@ -18,7 +18,6 @@ describe('static search determinism', () => {
       }
     };
     vi.stubGlobal('Intl', runtimeIntl);
-    // @ts-expect-error Search exports are intentionally Node.js ESM scripts.
     const { exportSimpleIndex } = await import('../scripts/zbsearch-index.mjs');
     const raw = await exportSimpleIndex([
       { title: '考研核心题目', url: '/docs/math/core-questions', content: '考研核心题目' },
@@ -38,7 +37,6 @@ describe('static search determinism', () => {
     const runtimeIntl = Object.create(Intl);
     runtimeIntl.Segmenter = undefined;
     vi.stubGlobal('Intl', runtimeIntl);
-    // @ts-expect-error Search exports are intentionally Node.js ESM scripts.
     const { exportSimpleIndex } = await import('../scripts/zbsearch-index.mjs');
     const raw = await exportSimpleIndex([
       { title: '1009线性代数核心题目', url: '/docs/math/linear', content: '线性代数' },

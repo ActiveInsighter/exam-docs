@@ -47,7 +47,7 @@ export function BlankField({ answer, index }: { answer: string; index: number })
     <input
       type="text"
       value={value}
-      disabled={question.submitted}
+      disabled={question.submitted || !question.ready}
       onChange={(event) => question.setValue(index, event.target.value)}
       onKeyDown={(event) => {
         if (event.key === 'Enter') question.submit();
@@ -57,6 +57,7 @@ export function BlankField({ answer, index }: { answer: string; index: number })
       autoComplete="off"
       autoCapitalize="off"
       spellCheck={false}
+      maxLength={8192}
       data-question-blank=""
       data-feedback={state}
       style={{ width: `${Math.min(Math.max(answer.length, 3) + 2, 24)}ch` }}

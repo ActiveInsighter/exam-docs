@@ -22,6 +22,11 @@ const SHELL_ENTRIES = [
 ];
 
 const ROUTE_ROOTS = ['content/docs', 'content/blog'];
+const PUBLIC_BUILD_ENV = [
+  'NEXT_PUBLIC_SITE_URL',
+  'NEXT_PUBLIC_SUPABASE_URL',
+  'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
+];
 
 async function exists(filePath) {
   try {
@@ -64,9 +69,12 @@ function addField(hash, label, value) {
  * the shared `_next/static/<build-id>` namespace stable, but adding/removing a
  * route or changing code/styles/dependencies produces a new namespace.
  */
-export async function computeStaticBuildId(projectRoot = defaultProjectRoot) {
+export async function computeStaticBuildId(projectRoot = defaultProjectRoot, publicEnv = process.env) {
   const hash = createHash('sha256');
   addField(hash, 'format', 'exam-docs-static-shell-v1');
+  // Next inlines public browser config. Changing that config must create a new
+  // shared asset namespace, even when every source file stays unchanged.
+  for (const name of PUBLIC_BUILD_ENV) addField(hash, name, publicEnv[name] ?? '');
 
   for (const entry of SHELL_ENTRIES) {
     const absoluteEntry = path.join(projectRoot, entry);

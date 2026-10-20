@@ -11,6 +11,19 @@ npm run dev
 
 Open `http://localhost:3000/docs`.
 
+## Question progress
+
+The custom question components save answers in browser IndexedDB, including
+drafts, submissions and resets. Browser storage is the first read/write path.
+Cloud sync is optional: without Supabase configuration, questions remain usable
+locally and make no question-sync requests.
+
+To enable account sync, copy `.env.example` to `.env.local` and set
+`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Only public
+project configuration belongs in these variables. See the Chinese
+[database and sync guide](docs/question-database.md) for architecture, account
+isolation, conflicts, migrations, authentication and rollout steps.
+
 ## ZBSearch
 
 Documentation search uses Fumadocs' built-in ZBSearch engine and remains fully
@@ -67,38 +80,37 @@ file at 25,000,000 bytes to stay below EdgeOne's single-file limit.
 
 ## Deployment
 
-Production documentation deployments run in GitHub Actions and are uploaded to
-Tencent EdgeOne Makers as a pure static package. The documentation package is:
+The current deployment workflow,
+`.github/workflows/deploy-cloudflare-worker-assets.yml`, builds documentation in
+GitHub Actions and publishes a pure static package to Cloudflare Workers Static
+Assets. `main` targets `exam-docs`; approved preview branches target the isolated
+`exam-docs-preview` Worker. The documentation package is:
 
 - HTML, JS, CSS, Markdown downloads, the search manifest, category routers, and
   ZBSearch indexes are static files;
 - documentation search runs in the browser with ZBSearch;
-- Cloud Functions: 0;
-- Edge Functions: 0.
+- no application server or question API hosted with the static package.
 
-The production EdgeOne project used by this repository is `exam-docs`. It is
-an EdgeOne Upload project, so the production workflow uses the Makers ZIP
-upload API. The isolated preview workflow uses `exam-docs-preview`.
-
-Required GitHub Actions secret for EdgeOne production or preview deployment:
-
-- `EDGEONE_API_TOKEN`
+The static output retains its EdgeOne-compatible routing metadata. Supabase
+Auth and database RPCs are reached directly from the browser when cloud sync is
+configured; adding them does not require a Next.js server.
 
 Required GitHub Actions secrets for Cloudflare deployment:
 
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 
-Optional GitHub Actions variables:
+Optional GitHub Actions repository **Variables** for question sync:
 
-- `EDGEONE_DOCS_PUBLIC_URL` — the custom production URL to verify after an
-  EdgeOne deployment. If omitted, the workflow verifies the deployment URL
-  returned by EdgeOne instead.
-- `EDGEONE_PREVIEW_PROJECT_ID` — used only for optional preview failure
-  diagnostics; it is not needed for a successful deployment.
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 
-The old Blob publishing secrets and `fumadocs-upload` project variables are not
-used by the current static documentation deployment workflows.
+These are build-time public values. An empty configuration keeps local-only
+mode. Changing a value requires rebuilding the static site. Supabase migrations
+live under `supabase/migrations/` and are deployed by the connected Supabase
+GitHub integration after **Deploy to production** is enabled. Database migration
+and static-site deployment are separate jobs; see the
+[rollout guide](docs/question-database.md#仓库与部署) before enabling cloud sync.
 
-Do not commit any secret values. Runtime secrets are written to the relevant
-EdgeOne project by CI and are never exposed to the browser.
+Do not commit secret values. Database passwords, personal access tokens,
+`service_role` keys and `sb_secret_` keys must never be browser variables.

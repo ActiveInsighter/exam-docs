@@ -224,7 +224,8 @@ export function ChoiceGroup({
             <ToggleGroupItem
               key={option.label}
               value={option.label}
-              aria-disabled={submitted || undefined}
+              disabled={!question.ready}
+              aria-disabled={submitted || !question.ready || undefined}
               data-exam-choice-option=""
               data-feedback={feedback}
               className={cn(

@@ -137,6 +137,7 @@ export function Question({
 
   const section = (
     <section
+      id={`question-${id}`}
       data-exam-question=""
       data-question-id={id}
       data-question-type={questionType}
@@ -149,7 +150,7 @@ export function Question({
       >
         {numberedStem}
       </div>
-      {hasSolution ? (
+      {hasSolution || spec ? (
         <QuestionFooter
           question={stem}
           answer={shortAnswer}
@@ -157,12 +158,13 @@ export function Question({
           solutionLabel={shortAnswer ? '解析' : '解答'}
           buttonLabel={buttonLabel}
           dialogTitle={dialogTitle}
+          showSolution={hasSolution}
         />
       ) : null}
       <Separator className="mt-4 mb-5" />
     </section>
   );
 
-  return spec ? <QuestionProvider spec={spec}>{section}</QuestionProvider> : section;
+  return spec ? <QuestionProvider key={`${id}:${revision}`} spec={spec} questionId={id} questionRevision={revision}>{section}</QuestionProvider> : section;
 }
 

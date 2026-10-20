@@ -87,6 +87,7 @@ export function QuestionFooter({
   solutionLabel,
   buttonLabel,
   dialogTitle,
+  showSolution = true,
 }: {
   question: ReactNode;
   answer: ReactNode | null;
@@ -94,20 +95,23 @@ export function QuestionFooter({
   solutionLabel: string;
   buttonLabel: string;
   dialogTitle: string;
+  showSolution?: boolean;
 }) {
+  const state = useQuestionState();
   return (
     <div className="mt-3 flex min-h-8 flex-wrap items-center gap-x-3 gap-y-2">
       <div role="status" aria-live="polite" className="min-w-0 flex-1">
         <AttemptStatus />
+        {state?.storageError ? <p role="alert" className="mt-1 text-sm text-destructive">{state.storageError}</p> : null}
       </div>
-      <QuestionSolutionDialog
+      {showSolution ? <QuestionSolutionDialog
         question={question}
         answer={answer}
         solution={solution}
         solutionLabel={solutionLabel}
         buttonLabel={buttonLabel}
         dialogTitle={dialogTitle}
-      />
+      /> : null}
     </div>
   );
 }

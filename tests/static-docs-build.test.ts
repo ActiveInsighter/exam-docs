@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
-// @ts-expect-error The static build helpers are intentionally Node.js ESM scripts.
 import { getStaticDocsConfig, shouldIncludeInStaticDocsProject } from '../scripts/static-docs-config.mjs';
-// @ts-expect-error The static build helpers are intentionally Node.js ESM scripts.
 import { getStaticMarkdownOutputPath, renderStaticMarkdown } from '../scripts/static-docs-markdown.mjs';
-// @ts-expect-error The static search helpers are intentionally Node.js ESM scripts.
 import {
   buildSearchRoutingTokens,
   buildZBSearchSectionIndexes,

@@ -3,6 +3,7 @@ import { cpus, freemem, totalmem } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
+import nextEnv from '@next/env';
 import { computeStaticBuildId } from './static-build-id.mjs';
 import { shouldIncludeInStaticDocsProject } from './static-docs-config.mjs';
 import {
@@ -267,6 +268,9 @@ function logRunnerResources() {
 }
 
 async function main() {
+  // The isolated Next project does not copy .env files. Load the root config
+  // before hashing/building so local exports and CI inline the same values.
+  nextEnv.loadEnvConfig(projectRoot, false);
   const totalStartedAt = Date.now();
   const stageRoot = staticStageRoot;
   const { shardCount, shardIndex } = getShardCoordinates();

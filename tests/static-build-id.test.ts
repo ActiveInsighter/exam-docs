@@ -56,4 +56,25 @@ describe('static shell build id', () => {
     await writeFile(theme, ':root { --background: black; }\n');
     expect(await computeStaticBuildId(root)).not.toBe(before);
   });
+
+  it('separates cached static shells when the public Supabase target or key changes', async () => {
+    const root = await fixture();
+    const environment = {
+      NEXT_PUBLIC_SUPABASE_URL: 'https://first.supabase.co',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_first',
+    };
+    const before = await computeStaticBuildId(root, environment);
+    expect(await computeStaticBuildId(root, {
+      ...environment,
+      NEXT_PUBLIC_SUPABASE_URL: 'https://second.supabase.co',
+    })).not.toBe(before);
+    expect(await computeStaticBuildId(root, {
+      ...environment,
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_second',
+    })).not.toBe(before);
+    expect(await computeStaticBuildId(root, {
+      ...environment,
+      SUPABASE_ACCESS_TOKEN: 'server-only-ci-token',
+    })).toBe(before);
+  });
 });

@@ -73,6 +73,13 @@ TCP 位于 <Blank answer="传输层" />，建立连接需要 <Blank answer="3" /
     expect(html).toContain('提交答案');
   });
 
+  it('allows submitting a question even when no reference solution is authored', async () => {
+    const html = await render('<Question id="no-solution" type="blank">结果为 <Blank answer="3" />。</Question>');
+    expect(html).toContain('提交答案');
+    expect(html).not.toContain('查看解答');
+    expect(html).toContain('id="question-no-solution"');
+  });
+
   it('renders migrated 408, mathematics and English documents', async () => {
     const mock = await render(doc('408/mock/01-数据结构/01-绪论.mdx'));
     expect(mock.match(/data-question-type="single"/gu)?.length).toBeGreaterThan(5);

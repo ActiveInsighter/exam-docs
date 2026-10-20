@@ -1,9 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-// @ts-expect-error The URL helper is intentionally a Node.js ESM script.
 import { encodeHttpPath } from '../scripts/http-paths.mjs';
-// @ts-expect-error The deployment helper is intentionally a Node.js ESM script.
 import {
   buildCloudflareAssetsIgnore,
   buildCloudflareHeaders,
