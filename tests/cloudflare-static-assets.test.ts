@@ -16,14 +16,16 @@ describe('Cloudflare Workers Static Assets deployment', () => {
     );
   });
 
-  it('uses an assets-only SSG configuration with canonical trailing-slash handling', () => {
+  it('serves static documentation with a selective same-origin Supabase gateway', () => {
     const config = JSON.parse(readFileSync(resolve('wrangler.jsonc'), 'utf8'));
 
     expect(config.name).toBe('exam-docs');
-    expect(config.main).toBeUndefined();
+    expect(config.main).toBe('worker/index.ts');
     expect(config.workers_dev).toBe(true);
     expect(config.assets).toEqual({
       directory: './.static-docs',
+      binding: 'ASSETS',
+      run_worker_first: ['/api/supabase/*'],
       not_found_handling: '404-page',
       html_handling: 'auto-trailing-slash',
     });

@@ -40,6 +40,7 @@ permissions:
 env:
   NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+  NEXT_PUBLIC_SUPABASE_PROXY_PATH: /api/supabase
 
 jobs:
   validate:
@@ -87,11 +88,12 @@ jobs:
           import { writeFileSync } from 'node:fs';
           writeFileSync('tsconfig.ci-app.json', JSON.stringify({
             extends: './tsconfig.json',
-            exclude: ['node_modules', 'tests'],
+            exclude: ['node_modules', 'tests', 'worker'],
           }));
           NODE
           npx next typegen
           npx tsc --noEmit --incremental false --project tsconfig.ci-app.json
+          npx tsc --project worker/tsconfig.json
 
   search:
     name: Build static search
@@ -516,12 +518,12 @@ jobs:
             echo "- Largest uploadable asset: $((largest_bytes / 1024 / 1024)) MiB / 25 MiB"
             echo "- Local static package: $((package_bytes / 1024 / 1024)) MiB"
             echo "- Static generation: ${STATIC_DOCS_SHARD_COUNT} deterministic weighted shards + dedicated search runner"
-            echo '- Worker JavaScript: none (assets-only deployment)'
+            echo '- Worker JavaScript: same-origin Supabase Auth and question RPC gateway; documentation remains static'
             echo '- RSC aliases: deduplicated locally and restored through two guarded Cloudflare 200 rewrites'
           } >> "${GITHUB_STEP_SUMMARY}"
       - name: Validate Wrangler configuration with a dry run
         if: ${{ (github.event_name == 'workflow_dispatch' && inputs.deploy != true) || github.ref == 'refs/heads/codex/optimize-build-deploy-20261020' }}
-        run: npx --yes wrangler@4.129.0 deploy --dry-run --config wrangler.jsonc --outdir .wrangler-dry-run
+        run: npx --yes wrangler@4.129.0 deploy --dry-run --config wrangler.jsonc --var "SUPABASE_URL:${NEXT_PUBLIC_SUPABASE_URL}" --outdir .wrangler-dry-run
       - name: Check Cloudflare deployment credentials
         if: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || ((github.ref == 'refs/heads/codex/math-past-exams-0930' || github.ref == 'refs/heads/codex/math-core-questions-1005' || github.ref == 'refs/heads/codex/build-speed-research-1002' || github.ref == 'refs/heads/codex/english-reading-layout-1012') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}
         shell: bash
@@ -543,7 +545,7 @@ jobs:
           set -euo pipefail
           deploy_log="$(mktemp)"
           trap 'rm -f -- "${deploy_log}"' EXIT
-          wrangler_args=(--config wrangler.jsonc)
+          wrangler_args=(--config wrangler.jsonc --var "SUPABASE_URL:${NEXT_PUBLIC_SUPABASE_URL}")
           if [[ "${GITHUB_REF}" != 'refs/heads/main' ]]; then
             wrangler_args+=(--name exam-docs-preview)
           fi

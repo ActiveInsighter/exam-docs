@@ -2,6 +2,8 @@
 
 题目正文、选项、标准答案和解析继续由 MDX 和 Git 管理。浏览器数据库保存读者的答题状态；Supabase 为登录用户提供跨设备同步。打开题目、选择答案和填写空格都先使用本地状态，网络不处于答题交互的关键路径。
 
+Cloudflare 生产部署现在通过同域 `/api/supabase` 转发登录与答题 RPC，以减少浏览器直连 Supabase 域名的网络限制。数据库表仍位于 `exam_private` schema；默认 `public` 下没有答题表是正常的。SMTP 与验证码模板配置见 [账号模块的 Resend 配置](account.md#resend-邮件配置)。
+
 本地持久化使用 IndexedDB；未配置 Supabase 或未登录时也能保存、刷新恢复。这里的离线能力指已加载页面中的答题记录持久化，没有额外实现 Service Worker，也不保证断网后首次打开文档或加载未缓存的页面。
 
 ## 数据边界

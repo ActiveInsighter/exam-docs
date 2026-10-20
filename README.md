@@ -23,7 +23,9 @@ components and attached through Fumadocs' public layout options. See
 The custom question components save answers in browser IndexedDB, including
 drafts, submissions and resets. Browser storage is the first read/write path.
 Cloud sync is optional: without Supabase configuration, questions remain usable
-locally and make no question-sync requests.
+locally and make no question-sync requests. Cloudflare deployments route Auth
+and question RPC requests through the same-origin `/api/supabase` gateway, so
+the browser does not need to reach the Supabase hostname directly.
 
 To enable account sync, copy `.env.example` to `.env.local` and set
 `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Only public
@@ -89,18 +91,20 @@ file at 25,000,000 bytes to stay below EdgeOne's single-file limit.
 
 The current deployment workflow,
 `.github/workflows/deploy-cloudflare-worker-assets.yml`, builds documentation in
-GitHub Actions and publishes a pure static package to Cloudflare Workers Static
+GitHub Actions and publishes static documentation with a Supabase gateway to Cloudflare Workers Static
 Assets. `main` targets `exam-docs`; approved preview branches target the isolated
 `exam-docs-preview` Worker. The documentation package is:
 
 - HTML, JS, CSS, Markdown downloads, the search manifest, category routers, and
   ZBSearch indexes are static files;
 - documentation search runs in the browser with ZBSearch;
-- no application server or question API hosted with the static package.
+- a small Worker forwards only account endpoints and the question sync RPC to
+  the configured Supabase project; it adds no privileged key and disables caching.
 
 The static output retains its EdgeOne-compatible routing metadata. Supabase
-Auth and database RPCs are reached directly from the browser when cloud sync is
-configured; adding them does not require a Next.js server.
+Auth and database RPCs are reached through the same-origin Worker when cloud sync
+is configured; no Next.js server is required. Local development can leave
+`NEXT_PUBLIC_SUPABASE_PROXY_PATH` empty to reach Supabase directly.
 
 Required GitHub Actions secrets for Cloudflare deployment:
 

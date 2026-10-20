@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { useAccount } from './account-provider';
+import { accountErrorMessage } from '@/lib/account/errors';
 
 const RESEND_SECONDS = 60;
 
@@ -36,7 +37,7 @@ export function SignInDialog({ open, onOpenChange }: { open: boolean; onOpenChan
 
   async function run(task: () => Promise<void>) {
     setBusy(true); setFailure(null);
-    try { await task(); } catch (error) { setFailure(error instanceof Error ? error.message : '操作失败，请重试'); }
+    try { await task(); } catch (error) { setFailure(accountErrorMessage(error)); }
     finally { setBusy(false); }
   }
 
@@ -76,10 +77,10 @@ export function SignInDialog({ open, onOpenChange }: { open: boolean; onOpenChan
           <form onSubmit={verify}>
             <FieldGroup>
               <p role="status" className="text-sm text-muted-foreground">
-                已向 {sentTo} 发送邮件，打开其中的链接即可登录。
+                已向 {sentTo} 发送邮件。输入邮件中的验证码，或打开其中的登录链接。
               </p>
               <Field>
-                <FieldLabel htmlFor={`${id}-code`}>邮件中的验证码（可选）</FieldLabel>
+                <FieldLabel htmlFor={`${id}-code`}>邮件中的验证码</FieldLabel>
                 <Input id={`${id}-code`} inputMode="numeric" autoComplete="one-time-code"
                   value={code} onChange={(event) => setCode(event.target.value)} disabled={busy} />
                 <FieldDescription>邮件包含数字验证码时，可在此输入代替点击链接。</FieldDescription>

@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { createSupabaseFetch } from './supabase-fetch';
 
 /*
  * One browser Supabase client shared by every feature (account, question sync,
@@ -19,7 +20,15 @@ export function getSupabaseClient(): Promise<SupabaseClient> {
     createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-      { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } },
+      {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+        global: process.env.NEXT_PUBLIC_SUPABASE_PROXY_PATH && typeof window !== 'undefined'
+          ? { fetch: createSupabaseFetch(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            new URL(process.env.NEXT_PUBLIC_SUPABASE_PROXY_PATH, window.location.origin).href,
+          ) }
+          : undefined,
+      },
     ),
   ));
 }
