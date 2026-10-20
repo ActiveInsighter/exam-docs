@@ -1,159 +1,79 @@
-'use client';
-
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { ArrowRight, ArrowUpRight, BookOpen, Calculator, Check, ChevronRight, Code2, FileText, Globe2, Languages, Network } from 'lucide-react';
+import { TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/ui/tabs';
+import { homeSubjects } from '@/lib/study-home-content';
+import { StudyRhythm } from './study-home-rhythm';
+import { StudyPreviewTabs } from './study-preview-tabs';
 
-const EXPECTED_EXAM_START = new Date('2026-12-19T08:30:00+08:00').getTime();
-
-const encouragements = [
-  '不用突然变得很厉害，今天比昨天多会一道题就够了。',
-  '把不会的题留下痕迹，它们会慢慢变成你的分数。',
-  '稳定不是每天状态都满格，而是状态一般也能继续。',
-  '先完成，再漂亮；先把这一页学明白。',
-  '真正拉开差距的，常常是那些普通但没有放弃的下午。',
-  '错题不是扣分记录，是下一次拿分的地图。',
-  '今天记住的一个结论，会在考场上替你省下一分钟。',
-  '别和整本书较劲，只处理眼前这一小节。',
-  '专注四十分钟，比焦虑四个小时更接近答案。',
-  '进度可以慢，方向别乱；重复本身就是复利。',
-  '有些知识第一次只是见面，第二次才认识，第三次才会用。',
-  '你不需要等状态来，开始之后状态才会来。',
-] as const;
-
-const modules = [
-  { name: '数学', href: '/docs/math' },
-  { name: '408', href: '/docs/408' },
-  { name: '政治', href: '/docs/politics' },
-  { name: '英语', href: '/docs/english' },
-  { name: '编程', href: '/docs/programming' },
-] as const;
-
-type Remaining = {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-};
-
-function getRemaining(now: number): Remaining {
-  const totalSeconds = Math.max(0, Math.floor((EXPECTED_EXAM_START - now) / 1000));
-  return {
-    days: Math.floor(totalSeconds / 86400),
-    hours: Math.floor((totalSeconds % 86400) / 3600),
-    minutes: Math.floor((totalSeconds % 3600) / 60),
-    seconds: totalSeconds % 60,
-  };
-}
-
-function pad(value: number) {
-  return String(value).padStart(2, '0');
-}
+const subjectIcons = { math: Calculator, computer: Network, english: Languages, politics: Globe2, code: Code2 };
 
 export function StudyHome() {
-  const [remaining, setRemaining] = useState<Remaining | null>(null);
-  const [encouragementIndex, setEncouragementIndex] = useState(0);
-
-  useEffect(() => {
-    const tick = () => setRemaining(getRemaining(Date.now()));
-    tick();
-    const timer = window.setInterval(tick, 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    const dayIndex = Math.floor(Date.now() / 86_400_000);
-    setEncouragementIndex(dayIndex % encouragements.length);
-  }, []);
-
-  const countdown = useMemo(
-    () => ({
-      days: remaining ? String(remaining.days) : '—',
-      hours: remaining ? pad(remaining.hours) : '—',
-      minutes: remaining ? pad(remaining.minutes) : '—',
-      seconds: remaining ? pad(remaining.seconds) : '—',
-    }),
-    [remaining],
-  );
-
-  const nextEncouragement = () => {
-    setEncouragementIndex((current) => (current + 1) % encouragements.length);
-  };
-
   return (
-    <main className="flex min-h-[calc(100dvh-4rem)] items-center px-6 py-16 sm:px-10">
-      <section className="mx-auto w-full max-w-5xl">
-        <p className="text-sm font-medium tracking-wide text-fd-muted-foreground">
-          考研学习 · 2027
-        </p>
-
-        <h1 className="mt-5 max-w-4xl text-4xl font-semibold tracking-tight sm:text-6xl lg:text-7xl">
-          把今天学明白，明天就会轻一点。
-        </h1>
-
-        <div className="mt-12 border-y py-8" aria-label="考研倒计时" aria-live="polite">
-          <p className="mb-5 text-sm text-fd-muted-foreground">距离预计初试开始还有</p>
-          <div className="flex flex-wrap items-baseline gap-x-5 gap-y-3 sm:gap-x-8">
-            <span className="text-5xl font-semibold tabular-nums sm:text-7xl">
-              {countdown.days}
-              <span className="ml-2 text-base font-normal text-fd-muted-foreground">天</span>
-            </span>
-            <span className="text-3xl font-medium tabular-nums sm:text-5xl">
-              {countdown.hours}
-              <span className="ml-1.5 text-sm font-normal text-fd-muted-foreground">时</span>
-            </span>
-            <span className="text-3xl font-medium tabular-nums sm:text-5xl">
-              {countdown.minutes}
-              <span className="ml-1.5 text-sm font-normal text-fd-muted-foreground">分</span>
-            </span>
-            <span className="text-3xl font-medium tabular-nums sm:text-5xl">
-              {countdown.seconds}
-              <span className="ml-1.5 text-sm font-normal text-fd-muted-foreground">秒</span>
-            </span>
+    <div className="study-home">
+      <section className="study-hero" aria-labelledby="study-hero-heading">
+        <div className="study-hero-art" aria-hidden="true">
+          <div className="study-hero-orbit" /><div className="study-hero-orbit study-hero-orbit-inner" />
+          <span className="study-hero-spark study-hero-spark-one">+</span><span className="study-hero-spark study-hero-spark-two">+</span>
+        </div>
+        <div className="study-hero-copy">
+          <p className="study-hero-label"><span />你的考研学习空间</p>
+          <h1 id="study-hero-heading">把知识连起来，<br />把每一步学扎实。</h1>
+          <p className="study-hero-description">从一道题回到一个知识点，再把它变成自己的答案。<br className="study-desktop-break" />整理、练习、回顾，在这里接着学。</p>
+          <div className="study-hero-actions">
+            <Link href="/docs/math/" className="study-button study-button-primary">开始学习<ArrowRight aria-hidden="true" /></Link>
+            <a href="#subjects" className="study-button study-button-secondary">浏览学习模块<ChevronRight aria-hidden="true" /></a>
           </div>
-          <p className="mt-5 text-xs leading-5 text-fd-muted-foreground">
-            2027 年考研初试时间目前尚未正式公布，暂按 2026 年 12 月 19 日 08:30（北京时间）计算。
-          </p>
         </div>
-
-        <div className="mt-9 flex max-w-3xl items-start gap-4">
-          <p className="min-h-14 flex-1 text-lg leading-8 sm:text-xl">
-            “{encouragements[encouragementIndex]}”
-          </p>
-          <button
-            type="button"
-            onClick={nextEncouragement}
-            className="shrink-0 border-b border-current py-1 text-sm text-fd-muted-foreground transition-colors hover:text-fd-foreground"
-          >
-            换一句
-          </button>
-        </div>
-
-        <nav className="mt-12 flex flex-wrap gap-x-7 gap-y-4" aria-label="学习模块">
-          {modules.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className="group inline-flex items-center gap-2 text-base font-medium"
-            >
-              <span>{item.name}</span>
-              <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">
-                →
-              </span>
-            </Link>
-          ))}
-        </nav>
-
-        <p className="mt-14 text-sm text-fd-muted-foreground">
-          今天不必解决所有问题。先打开下一节。
-        </p>
-        {/* Plain-text index of every page; lets AI browsers reach all docs from the homepage. */}
-        <a
-          href="/llms.txt"
-          className="mt-3 inline-block text-xs text-fd-muted-foreground underline underline-offset-4 hover:text-fd-foreground"
-        >
-          全部文档目录
-        </a>
+        <section className="study-preview" aria-label="学习内容预览">
+          <div className="study-preview-toolbar">
+            <span className="study-window-dots" aria-hidden="true"><i /><i /><i /></span>
+            <span><BookOpen aria-hidden="true" />考研学习 / 学习空间</span>
+            <span className="study-preview-hint">内容预览</span>
+          </div>
+          <StudyPreviewTabs>
+            <aside className="study-preview-sidebar">
+              <p>我的知识库</p>
+              <TabsList className="study-preview-tabs" aria-label="预览学习科目">
+                {homeSubjects.map((subject) => {
+                  const Icon = subjectIcons[subject.icon];
+                  return <TabsTrigger key={subject.id} value={subject.id} aria-label={subject.name} className="study-preview-tab"><Icon aria-hidden="true" /><span className="study-tab-name">{subject.name}</span><span className="study-tab-short">{subject.shortName}</span><ChevronRight aria-hidden="true" /></TabsTrigger>;
+                })}
+              </TabsList>
+              <div className="study-preview-sidebar-note"><span className="study-brand-mark" aria-hidden="true"><BookOpen /></span><span>学过的，<br />慢慢成为自己的。</span></div>
+            </aside>
+            {homeSubjects.map((subject) => (
+              <TabsContent key={subject.id} value={subject.id} className="study-preview-content">
+                <div className="study-preview-breadcrumb">学习空间<ChevronRight aria-hidden="true" />{subject.name}</div>
+                <div className="study-preview-title-row"><h2>{subject.previewTitle}</h2><Link href={subject.href} aria-label={`进入${subject.name}`}><ArrowUpRight aria-hidden="true" /></Link></div>
+                <p className="study-preview-description">{subject.previewDescription}</p>
+                <div className="study-preview-topic-list">{subject.topics.map((topic) => <span key={topic}><Check aria-hidden="true" />{topic}</span>)}</div>
+                <div className="study-preview-sections">
+                  {subject.sections.map((section) => <Link key={section.title} href={section.href} className="study-preview-section"><FileText aria-hidden="true" /><span><strong>{section.title}</strong><span>{section.description}</span></span><ChevronRight aria-hidden="true" /></Link>)}
+                </div>
+                <div className="study-preview-bottom"><span>{subject.formula ?? '理解一个概念，再向前一步。'}</span><Link href={subject.href}>打开{subject.shortName}<ArrowRight aria-hidden="true" /></Link></div>
+              </TabsContent>
+            ))}
+          </StudyPreviewTabs>
+        </section>
       </section>
-    </main>
+      <section id="subjects" className="study-subjects" aria-labelledby="study-subjects-heading">
+        <div className="study-section-heading"><div><p>从这里开始</p><h2 id="study-subjects-heading">每一门，都有清晰的入口。</h2></div><p>找到正在学的内容，<br />按自己的节奏往下走。</p></div>
+        <nav className="study-subject-grid" aria-label="学习模块">
+          {homeSubjects.map((subject) => {
+            const Icon = subjectIcons[subject.icon];
+            return <Link key={subject.id} href={subject.href} className="study-subject"><div className="study-subject-top"><Icon aria-hidden="true" /><ArrowUpRight aria-hidden="true" /></div><h3>{subject.name}</h3><p>{subject.description}</p><span className="study-subject-topics">{subject.topics.join(' / ')}</span></Link>;
+          })}
+        </nav>
+      </section>
+      <StudyRhythm />
+      <section className="study-home-closing" aria-labelledby="study-closing-heading">
+        <BookOpen aria-hidden="true" /><h2 id="study-closing-heading">今天，就从下一页开始。</h2><p>不用一次走完。把眼前这一节，学成自己的。</p>
+        <Link href="/docs/math/" className="study-button study-button-primary">打开学习资料<ArrowRight aria-hidden="true" /></Link>
+      </section>
+      <footer className="study-home-footer">
+        <span><BookOpen aria-hidden="true" />考研学习</span>
+        <nav aria-label="更多资源"><Link href="/blog/">学习笔记<ArrowUpRight aria-hidden="true" /></Link><a href="/llms.txt">全部文档目录<ArrowUpRight aria-hidden="true" /></a><a href="https://fumadocs.dev" target="_blank" rel="noreferrer">Built with Fumadocs<ArrowUpRight aria-hidden="true" /></a></nav>
+      </footer>
+    </div>
   );
 }
