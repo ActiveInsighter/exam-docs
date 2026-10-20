@@ -74,6 +74,10 @@ describe('static shell build id', () => {
     })).not.toBe(before);
     expect(await computeStaticBuildId(root, {
       ...environment,
+      NEXT_PUBLIC_SUPABASE_PROXY_PATH: '/api/supabase',
+    })).not.toBe(before);
+    expect(await computeStaticBuildId(root, {
+      ...environment,
       SUPABASE_ACCESS_TOKEN: 'server-only-ci-token',
     })).toBe(before);
   });
