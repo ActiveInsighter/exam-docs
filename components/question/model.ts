@@ -35,6 +35,9 @@ export type QuestionModel =
   | { kind: 'blank'; blanks: BlankSpec[] }
   | { kind: 'none' };
 
+/** Stem spacing, shared by the question in the page and in its solution sheet. */
+export const questionStemClassName = '[&>:first-child]:mt-0! [&>:last-child]:mb-0! [&>p]:my-2.5';
+
 export function isWhitespaceNode(node: ReactNode) {
   return typeof node === 'string' && node.trim() === '';
 }

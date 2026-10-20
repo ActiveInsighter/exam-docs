@@ -1,5 +1,6 @@
 import { Children, cloneElement, isValidElement, type ReactNode } from 'react';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import { ChoiceGroup } from './choice-group';
 import { getChoiceDensity } from './choice-layout';
 import { QUESTION_TYPES, getOptionLetter, type QuestionType } from './grading';
@@ -7,6 +8,7 @@ import {
   buildChoiceModel,
   hasContent,
   indexBlanks,
+  questionStemClassName,
   splitQuestion,
   type ChoiceOptionModel,
 } from './model';
@@ -154,7 +156,7 @@ export function Question({
     >
       <div
         data-exam-question-body=""
-        className="min-w-0 [&>:first-child]:mt-0! [&>:last-child]:mb-0! [&>p]:my-2.5"
+        className={cn('min-w-0', questionStemClassName)}
       >
         {numberedStem}
       </div>
