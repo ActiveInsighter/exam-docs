@@ -5,7 +5,7 @@ export function ExamArticle({ children, title, source }: { children: ReactNode; 
   return (
     <article className={styles.article} aria-label="英文文章">
       {source && <div className={styles.source}>{source}</div>}
-      <h2 lang="en">{title}</h2>
+      <h2 className={styles.title} lang="en">{title}</h2>
       <div className={styles.passage} lang="en">{children}</div>
     </article>
   );

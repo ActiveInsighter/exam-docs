@@ -37,7 +37,7 @@ const gridClassName = cn(
 
 const optionClassName = cn(
   'group-data-measuring/choices:w-max group-data-measuring/choices:max-w-none group-data-measuring/choices:whitespace-nowrap',
-  'transition-[background-color,opacity] duration-200',
+  'transition-[background-color,opacity,transform] duration-200 ease-(--ui-ease)',
 );
 
 /*
@@ -45,13 +45,16 @@ const optionClassName = cn(
  * pressed/hover fills; the marker chip carries the strong colour.
  */
 const feedbackStyle: Record<Feedback, { option: string; marker: string }> = {
-  idle: { option: '', marker: 'bg-background text-muted-foreground' },
-  selected: { option: '', marker: 'bg-foreground text-background' },
+  idle: {
+    option: '',
+    marker: 'bg-background text-muted-foreground group-hover/toggle:text-foreground group-focus-visible/toggle:text-foreground',
+  },
+  selected: { option: '', marker: 'bg-foreground text-background scale-105' },
   correct: { option: 'bg-success/12!', marker: 'bg-success text-background' },
   incorrect: { option: 'bg-destructive/10!', marker: 'bg-destructive text-background' },
   missed: { option: 'bg-success/8!', marker: 'bg-success/20 text-success' },
   answer: { option: 'bg-success/10!', marker: 'bg-success text-background' },
-  dimmed: { option: 'opacity-55', marker: 'bg-background text-muted-foreground' },
+  dimmed: { option: 'opacity-50', marker: 'bg-background text-muted-foreground' },
 };
 
 const feedbackMotion: Partial<Record<Feedback, string>> = {
@@ -85,7 +88,7 @@ function OptionMarker({
     <span aria-hidden="true" className="box-content flex h-lh shrink-0 items-center self-start py-0.5">
       <span
         className={cn(
-          'grid size-7 place-items-center leading-none transition-colors duration-200',
+          'grid size-7 place-items-center leading-none shadow-[0_1px_2px_rgb(0_0_0/6%)] transition-[background-color,color,transform] duration-200 ease-(--ui-ease)',
           letter
             ? 'font-[KaTeX_Math] text-[1.125rem] font-bold italic'
             : 'text-[0.8125rem] font-semibold',

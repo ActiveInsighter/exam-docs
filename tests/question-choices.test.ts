@@ -201,7 +201,7 @@ describe('Question choices', () => {
     );
 
     expect(numbered).toContain('data-question-number=""');
-    expect(numbered).toContain('>7.</span>');
+    expect(numbered).toContain('>7</span>');
     expect(hidden).not.toContain('data-question-number');
   });
 

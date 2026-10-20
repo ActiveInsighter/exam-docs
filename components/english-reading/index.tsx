@@ -1,10 +1,14 @@
 import { Children, isValidElement, type ReactNode } from 'react';
 import { ExamArticle } from './article';
-import styles from './reading.module.css';
+import { ReadingWorkspace } from './workspace';
 
 export { ExamArticle } from './article';
 
-/** Lay out an article beside the existing question components without changing them. */
+/**
+ * Lays an article beside the shared question components without changing
+ * them. The server part only validates and splits the authored children; the
+ * client workspace owns the card, the split view and the question navigator.
+ */
 export function EnglishReading({ children }: { children: ReactNode }) {
   const nodes = Children.toArray(children);
   const articles = nodes.filter((node) => isValidElement(node) && node.type === ExamArticle);
@@ -12,13 +16,8 @@ export function EnglishReading({ children }: { children: ReactNode }) {
   const article = articles[0];
 
   return (
-    <section className={styles.root} data-english-reading="" aria-label="英语阅读理解">
-      <div className={styles.layout}>
-        <div className={styles.articleColumn} data-reading-article="">{article}</div>
-        <div className={styles.questions} data-reading-questions="">
-          {nodes.filter((node) => node !== article)}
-        </div>
-      </div>
-    </section>
+    <ReadingWorkspace article={article}>
+      {nodes.filter((node) => node !== article)}
+    </ReadingWorkspace>
   );
 }

@@ -48,7 +48,8 @@ describe('question documents through the real MDX pipeline', () => {
 
     expect(html).toContain('data-question-id="q1"');
     expect(html).toMatch(/data-question-revision="[0-9a-f]{8}"/u);
-    expect(html).toContain('>1.</span>');
+    expect(html).toContain('>1</span>');
+    expect(html).toContain('data-attempt-result="idle"');
     expect(html.match(/data-exam-choice-option=""/gu)).toHaveLength(4);
     expect(html.match(/aria-pressed="false"/gu)).toHaveLength(4);
     expect(html).toContain('>D</span>');

@@ -27,6 +27,21 @@ describe('English reading composition', () => {
     expect(html.indexOf('A familiar park')).toBeLessThan(html.indexOf('Why pay attention?'));
   });
 
+  it('wraps article and questions in one card with a split view, switcher and navigator', () => {
+    const html = renderToStaticMarkup(createElement(EnglishReading, null,
+      article, question('Why pay attention?', 'q1')));
+    expect(html).toContain('data-english-reading=""');
+    expect(html).toContain('data-reading-article=""');
+    expect(html).toContain('data-reading-questions=""');
+    // Narrow layouts start on the article; the switcher controls both panes.
+    expect(html).toContain('data-view="article"');
+    expect(html.match(/role="tab"/g)).toHaveLength(2);
+    // Wide layouts get a keyboard-operable divider with a bounded value.
+    expect(html).toMatch(/role="separator"[^>]*aria-orientation="vertical"/);
+    expect(html).toContain('aria-valuenow="55"');
+    expect(html.indexOf('data-reading-article')).toBeLessThan(html.indexOf('data-reading-questions'));
+  });
+
   it('preserves the shared question component’s support for an exercise without a solution', () => {
     const html = renderToStaticMarkup(createElement(EnglishReading, null,
       article, createElement(Question, { id: 'q3', type: 'essay' }, 'An unfinished exercise')));
