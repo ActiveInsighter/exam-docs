@@ -64,7 +64,7 @@ function getShardCoordinates() {
   return { shardCount, shardIndex };
 }
 
-async function copyProjectEntry(stageRoot, relativePath) {
+async function copyProjectEntry(stageRoot, relativePath, ownsGlobalAssets) {
   const sourcePath = path.join(projectRoot, relativePath);
   if (!(await exists(sourcePath))) return;
 
@@ -75,7 +75,16 @@ async function copyProjectEntry(stageRoot, relativePath) {
     await cp(sourcePath, destinationPath, {
       recursive: true,
       filter: (candidatePath) => {
-        const candidateRelativePath = path.relative(projectRoot, candidatePath);
+        const candidateRelativePath = path.relative(projectRoot, candidatePath).replaceAll('\\\\', '/');
+        // Question PNGs are served as plain URLs, not imported into Next's
+        // server bundle. Only shard 0 needs to carry them into the final site.
+        // Excluding these from other shards avoids repeated 100+ MiB copies
+        // on exam-docs; the merged payload still contains all original images.
+        if (
+          !ownsGlobalAssets &&
+          (candidateRelativePath === 'public/img/questions' ||
+            candidateRelativePath.startsWith('public/img/questions/'))
+        ) return false;
         return shouldIncludeInStaticDocsProject(candidateRelativePath);
       },
     });
@@ -103,9 +112,9 @@ async function cleanStagePreservingBuildCache(stageRoot) {
   }
 }
 
-async function prepareStage(stageRoot) {
+async function prepareStage(stageRoot, ownsGlobalAssets) {
   for (const entry of projectEntries) {
-    await copyProjectEntry(stageRoot, entry);
+    await copyProjectEntry(stageRoot, entry, ownsGlobalAssets);
   }
 
   await cp(
@@ -305,7 +314,7 @@ async function main() {
     console.log(`[static-docs] Next build cache state: ${cacheState}.`);
 
     const prepareStartedAt = Date.now();
-    await prepareStage(stageRoot);
+    await prepareStage(stageRoot, ownsGlobalAssets);
     console.log(`[timing] prepare_static_stage=${formatSeconds(Date.now() - prepareStartedAt)}`);
     logRunnerResources();
 
