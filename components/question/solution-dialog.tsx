@@ -1,16 +1,18 @@
 'use client';
 
 import { BookOpenTextIcon, CheckIcon, XIcon } from 'lucide-react';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useCallback, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { QuestionReveal, useQuestionState } from './question-state';
+import { useSheetDrag } from './use-sheet-drag';
 
 type QuestionSolutionDialogProps = {
   question: ReactNode;
@@ -81,6 +83,9 @@ export function QuestionSolutionDialog({
 }: QuestionSolutionDialogProps) {
   const [open, setOpen] = useState(false);
   const reader = useReaderAnswer();
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const close = useCallback(() => setOpen(false), []);
+  const dragHandlers = useSheetDrag(sheetRef, close);
 
   const trigger = (
     <Button
@@ -101,22 +106,43 @@ export function QuestionSolutionDialog({
       <DialogTrigger render={trigger}>{triggerContent}</DialogTrigger>
 
       <DialogContent
+        ref={sheetRef}
+        showCloseButton={false}
         className={cn(
           'flex flex-col gap-0 overflow-hidden bg-(--ui-panel) p-0 text-base text-foreground shadow-(--ui-shadow-overlay) duration-200 ease-out',
           'h-[min(48rem,calc(100dvh-4rem))] w-[min(72rem,calc(100vw-2rem))] max-w-none sm:max-w-none rounded-(--ui-radius-panel)',
-          // Phones: a bottom sheet that leaves a strip of the page visible.
-          'max-md:top-auto max-md:bottom-0 max-md:left-0 max-md:h-[calc(100dvh-2.5rem)] max-md:w-full max-md:translate-x-0 max-md:translate-y-0 max-md:rounded-b-none max-md:ring-0',
-          'max-md:data-open:zoom-in-100 max-md:data-open:slide-in-from-bottom-1/4 max-md:data-closed:zoom-out-100 max-md:data-closed:slide-out-to-bottom-1/4',
+          /*
+           * Phones: a bottom sheet sized to its content (leaving a strip of
+           * the page visible). It slides the full height on CSS transitions
+           * keyed to Base UI's starting/ending styles, so a close can start
+           * from wherever a drag left it; keyframe zoom/fade is switched off.
+           */
+          'max-md:top-auto max-md:bottom-0 max-md:left-0 max-md:h-auto max-md:max-h-[calc(100dvh-2.5rem)] max-md:w-full max-md:translate-x-0 max-md:translate-y-0 max-md:rounded-t-[1.25rem] max-md:rounded-b-none max-md:ring-0',
+          'max-md:data-open:animate-none max-md:data-closed:animate-none',
+          'max-md:transition-[translate,transform] max-md:duration-[460ms] max-md:ease-[cubic-bezier(0.32,0.72,0,1)]',
+          'max-md:data-starting-style:translate-y-full max-md:data-ending-style:translate-y-full max-md:data-ending-style:duration-[280ms] max-md:data-ending-style:ease-[cubic-bezier(0.4,0,1,1)]',
+          'motion-reduce:max-md:transition-none',
         )}
       >
-        <div aria-hidden="true" className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-(--ui-fill-strong) md:hidden" />
-        <header className="flex min-h-14 shrink-0 items-center gap-2.5 pr-12 pl-5 max-md:min-h-12 md:pl-7">
-          <DialogTitle className="text-base font-medium">{dialogTitle}</DialogTitle>
-          {numberLabel ? <Chip>第 {numberLabel} 题</Chip> : null}
-          {typeLabel ? <Chip>{typeLabel}</Chip> : null}
-        </header>
+        {/* Grab zone: handle and header follow the finger on phones. */}
+        <div className="shrink-0 max-md:touch-none max-md:select-none" {...dragHandlers}>
+          <div aria-hidden="true" className="flex justify-center pt-2 pb-1 md:hidden">
+            <div className="h-1.5 w-10 rounded-full bg-(--ui-fill-strong)" />
+          </div>
+          <header className="flex min-h-14 items-center gap-2.5 pr-3 pl-5 max-md:min-h-11 max-md:pb-1 md:pl-7">
+            <DialogTitle className="text-base font-medium">{dialogTitle}</DialogTitle>
+            {numberLabel ? <Chip>第 {numberLabel} 题</Chip> : null}
+            {typeLabel ? <Chip>{typeLabel}</Chip> : null}
+            <DialogClose
+              render={<Button variant="ghost" size="icon-sm" className="ml-auto text-muted-foreground hover:text-foreground max-md:size-8 max-md:rounded-full max-md:bg-(--ui-fill)" />}
+            >
+              <XIcon />
+              <span className="sr-only">关闭</span>
+            </DialogClose>
+          </header>
+        </div>
 
-        <div className="grid min-h-0 flex-1 max-md:overflow-y-auto max-md:overscroll-contain md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <div className="grid min-h-0 flex-1 max-md:overflow-y-auto max-md:overscroll-contain max-md:pb-[env(safe-area-inset-bottom)] md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           <section
             aria-label="题目"
             className={cn(paneClassName, 'bg-(--exam-question-pane) @container')}

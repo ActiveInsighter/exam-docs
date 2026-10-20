@@ -78,8 +78,9 @@ function OptionMarker({
       <XIcon strokeWidth={3} />
     ) : null;
 
-  // Latin letters borrow KaTeX's math italic so they read like variables on an
-  // exam paper; other labels (对 / 错) keep the UI font.
+  // Upright letters sit squarely in the chip (an italic leans off-centre).
+  // Latin capitals are trimmed to their cap height so they centre optically;
+  // other labels (对 / 错) keep the font's own line box.
   const letter = /^[A-Za-z]$/.test(label);
 
   // The outer box is one content line tall (1lh of the option text), so the
@@ -89,9 +90,8 @@ function OptionMarker({
       <span
         className={cn(
           'grid size-7 place-items-center leading-none shadow-[0_1px_2px_rgb(0_0_0/6%)] transition-[background-color,color,transform] duration-200 ease-(--ui-ease)',
-          letter
-            ? 'font-[KaTeX_Math] text-[1.125rem] font-bold italic'
-            : 'text-[0.8125rem] font-semibold',
+          'font-sans font-semibold',
+          letter ? 'text-[0.875rem]' : 'text-[0.8125rem]',
           multiple ? 'rounded-[0.5rem]' : 'rounded-full',
           feedbackStyle[feedback].marker,
         )}
@@ -103,6 +103,8 @@ function OptionMarker({
           >
             {icon}
           </span>
+        ) : letter ? (
+          <span className="block leading-none [text-box:trim-both_cap_alphabetic]">{label}</span>
         ) : (
           label
         )}
