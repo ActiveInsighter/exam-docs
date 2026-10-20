@@ -1,5 +1,4 @@
 import { getMDXComponents } from '@/components/mdx';
-import { QuestionDatabasePanel } from '@/components/question/database-panel';
 import { getContentSourceUrl } from '@/lib/site-config';
 import { toCanonicalPagePath, toMarkdownPath } from '@/lib/site-url';
 import { shardStaticDocParams } from '@/lib/static-doc-shards';
@@ -77,7 +76,6 @@ export default async function Page({ params }: PageParameters) {
           githubUrl={getContentSourceUrl(page.path)}
           className="docs-page-action"
         />
-        <QuestionDatabasePanel />
       </div>
       <DocsBody id="docs-body" className="pb-10 pt-4">
         <MDX

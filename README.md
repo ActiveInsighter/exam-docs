@@ -11,6 +11,13 @@ npm run dev
 
 Open `http://localhost:3000/docs`.
 
+## Account
+
+The account button next to the GitHub icon opens a menu with sign-in and sign-out.
+It is a standalone module (`components/account`, `lib/account`) built on shadcn
+components and attached through Fumadocs' public layout options. See
+[docs/account.md](docs/account.md).
+
 ## Question progress
 
 The custom question components save answers in browser IndexedDB, including

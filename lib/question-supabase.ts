@@ -7,23 +7,7 @@ import {
   type SyncResponse,
 } from './question-store/types';
 
-export const questionCloudConfigured = Boolean(
-  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-);
-
-let clientPromise: Promise<SupabaseClient> | undefined;
-
-/** Loaded only in a configured browser; static rendering never contacts Supabase. */
-export function getQuestionSupabaseClient(): Promise<SupabaseClient> {
-  if (!questionCloudConfigured) return Promise.reject(new Error('尚未配置云同步'));
-  return (clientPromise ??= import('@supabase/supabase-js').then(({ createClient }) =>
-    createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-      { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } },
-    ),
-  ));
-}
+export { cloudConfigured as questionCloudConfigured, getSupabaseClient as getQuestionSupabaseClient } from './supabase-client';
 
 export function validateSyncResponse(value: unknown): asserts value is SyncResponse {
   if (!value || typeof value !== 'object') throw new Error('云同步返回格式有误');

@@ -2,7 +2,7 @@ import './global.css';
 import 'katex/dist/katex.css';
 import './flat-ui.css';
 import './study-overrides.css';
-import { SearchProvider } from '@/components/search-provider';
+import { AppProviders } from '@/components/app-providers';
 import { getRootMetadata, siteConfig } from '@/lib/site-config';
 import type { Metadata } from 'next';
 import type { CSSProperties, ReactNode } from 'react';
@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang={siteConfig.lang} style={fontVariables} suppressHydrationWarning>
       <body className="flex min-h-screen flex-col font-sans" suppressHydrationWarning>
-        <SearchProvider>{children}</SearchProvider>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

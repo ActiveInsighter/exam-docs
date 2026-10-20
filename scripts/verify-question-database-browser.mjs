@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 
@@ -125,25 +125,9 @@ try {
   const narrow = await pageIn(mobile);
   await choose(narrow.question);
   await saved(narrow.page, ['B'], true, 1);
-  await narrow.page.getByRole('button', { name: /答题记录.*本机/ }).first().click();
-  const dialog = narrow.page.getByRole('dialog', { name: '答题记录', exact: true });
-  await dialog.waitFor();
-  await dialog.evaluate(node => Promise.all(node.getAnimations().map(animation => animation.finished.catch(() => {}))));
-  const bounds = await dialog.boundingBox();
-  assert.ok(bounds && bounds.x >= -1 && bounds.y >= -1 && bounds.x + bounds.width <= 391 && bounds.y + bounds.height <= 845, 'mobile database dialog must fit the viewport');
   assert.equal(await narrow.page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, 'mobile horizontal overflow');
-  await narrow.page.screenshot({ path: path.join(output, 'mobile-database-panel.png') });
-  const downloadPromise = narrow.page.waitForEvent('download');
-  await dialog.getByRole('button', { name: '导出本机备份', exact: true }).click();
-  const download = await downloadPromise;
-  const backupPath = path.join(output, 'guest-answer-backup.json');
-  await download.saveAs(backupPath);
-  const backup = JSON.parse(await readFile(backupPath, 'utf8'));
-  assert.equal(backup.format, 'exam-docs-question-backup');
-  assert.equal(backup.namespace, 'guest');
-  assert.equal(backup.records.find(value => value.questionId === questionId)?.state.selected[0], 'B');
-  assert.equal(backup.attempts.filter(value => value.questionId === questionId).length, 1);
-  record('390×844 database dialog fits and exports a parseable answer/history backup', { dialogBounds: bounds });
+  await narrow.page.screenshot({ path: path.join(output, 'mobile-persisted-answer.png') });
+  record('390×844 question page has no horizontal overflow');
   await mobile.close();
   assert.deepEqual(errors, [], 'browser hydration or runtime errors');
   evidence.passed = true;
