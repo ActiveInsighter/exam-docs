@@ -3,13 +3,11 @@
 import { type PointerEvent, type RefObject, useCallback, useRef } from 'react';
 
 /*
- * Drag-to-dismiss for the phone bottom sheet. The handle and header follow
- * the finger; letting go far enough down (or with a quick flick) closes the
- * sheet, otherwise it springs back. Only active while the sheet layout
- * applies (below md), and never for drags that start on a button.
+ * Drag-to-dismiss for the bottom sheet. The handle and header follow the
+ * pointer; letting go far enough down (or with a quick flick) closes the
+ * sheet, otherwise it springs back. Drags that start on a button are ignored.
  */
 
-const SHEET_QUERY = '(max-width: 47.999rem)';
 /** Fraction of the sheet height, or an absolute distance, that dismisses. */
 const DISMISS_RATIO = 0.25;
 const DISMISS_MAX_PX = 160;
@@ -27,7 +25,7 @@ export function useSheetDrag(sheet: RefObject<HTMLElement | null>, close: () => 
 
   const onPointerDown = useCallback((event: PointerEvent<HTMLElement>) => {
     const element = sheet.current;
-    if (!element || event.button !== 0 || !window.matchMedia(SHEET_QUERY).matches) return;
+    if (!element || event.button !== 0) return;
     if ((event.target as Element).closest('button, a, input')) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     drag.current = {
@@ -79,7 +77,9 @@ export function useSheetDrag(sheet: RefObject<HTMLElement | null>, close: () => 
     const threshold = Math.min(DISMISS_MAX_PX, element.offsetHeight * DISMISS_RATIO);
     const dismiss = !cancelled && state.offset > 8 && (state.offset > threshold || state.velocity > FLICK_VELOCITY);
     if (dismiss) {
-      // The closing transition continues from the dragged position.
+      // The closing transition continues from the dragged position, and the
+      // backdrop fades out from wherever the drag left it.
+      if (backdrop) backdrop.style.opacity = '0';
       close();
     } else {
       element.style.transform = '';

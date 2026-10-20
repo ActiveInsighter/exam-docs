@@ -29,9 +29,18 @@ type QuestionSolutionDialogProps = {
   typeLabel?: string;
 };
 
-// The popup is portaled out of #docs-body, so content opts back into the
-// Fumadocs typography explicitly.
-const prose = 'prose max-w-none min-w-0 text-[1.0625rem] leading-[1.85]';
+/* The backdrop fades on the same clock as the sheet it sits behind. */
+const overlayClassName = [
+  'data-open:animate-none! data-closed:animate-none!',
+  'transition-opacity duration-[480ms] ease-[cubic-bezier(0.32,0.72,0,1)]',
+  'data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-[300ms]',
+  'motion-reduce:transition-none',
+].join(' ');
+
+// The sheet is portaled out of #docs-body. `docs-prose` makes it pick up the
+// same typography rules as the page (headings, tables, code, callouts, math),
+// so a solution reads exactly like it does in the document.
+const prose = 'prose docs-prose max-w-none min-w-0';
 const proseReset = '[&>:first-child]:mt-0 [&>:last-child]:mb-0';
 
 function SectionLabel({ children }: { children: ReactNode }) {
@@ -108,33 +117,35 @@ export function QuestionSolutionDialog({
       <DialogContent
         ref={sheetRef}
         showCloseButton={false}
+        overlayClassName={overlayClassName}
         className={cn(
-          'flex flex-col gap-0 overflow-hidden bg-(--ui-panel) p-0 text-base text-foreground shadow-(--ui-shadow-overlay) duration-200 ease-out',
-          'h-[min(48rem,calc(100dvh-4rem))] w-[min(72rem,calc(100vw-2rem))] max-w-none sm:max-w-none rounded-(--ui-radius-panel)',
+          'flex flex-col gap-0 overflow-hidden bg-(--ui-panel) p-0 text-base text-foreground shadow-(--ui-shadow-overlay) ring-0 will-change-transform',
           /*
-           * Phones: a bottom sheet sized to its content (leaving a strip of
-           * the page visible). It slides the full height on CSS transitions
-           * keyed to Base UI's starting/ending styles, so a close can start
-           * from wherever a drag left it; keyframe zoom/fade is switched off.
+           * A bottom sheet at every size: anchored to the bottom edge, centred
+           * on desktop and full width on phones. It rises the full height on
+           * CSS transitions keyed to Base UI's starting/ending styles, so a
+           * close can start from wherever a drag left it; the stock keyframe
+           * zoom/fade is switched off.
            */
-          'max-md:top-auto max-md:bottom-0 max-md:left-0 max-md:h-auto max-md:max-h-[calc(100dvh-2.5rem)] max-md:w-full max-md:translate-x-0 max-md:translate-y-0 max-md:rounded-t-[1.25rem] max-md:rounded-b-none max-md:ring-0',
-          'max-md:data-open:animate-none max-md:data-closed:animate-none',
-          'max-md:transition-[translate,transform] max-md:duration-[460ms] max-md:ease-[cubic-bezier(0.32,0.72,0,1)]',
-          'max-md:data-starting-style:translate-y-full max-md:data-ending-style:translate-y-full max-md:data-ending-style:duration-[280ms] max-md:data-ending-style:ease-[cubic-bezier(0.4,0,1,1)]',
-          'motion-reduce:max-md:transition-none',
+          'top-auto bottom-0 left-1/2 w-[min(72rem,100vw-2rem)] max-w-none translate-y-0 rounded-t-[1.25rem] rounded-b-none sm:max-w-none',
+          'h-[min(48rem,calc(100dvh-4rem))] max-md:left-0 max-md:h-auto max-md:max-h-[calc(100dvh-2.5rem)] max-md:w-full max-md:translate-x-0',
+          'data-open:animate-none! data-closed:animate-none!',
+          'transition-[translate,transform] duration-[480ms] ease-[cubic-bezier(0.32,0.72,0,1)]',
+          'data-starting-style:translate-y-full data-ending-style:translate-y-full data-ending-style:duration-[300ms] data-ending-style:ease-[cubic-bezier(0.4,0,1,1)]',
+          'motion-reduce:transition-none',
         )}
       >
-        {/* Grab zone: handle and header follow the finger on phones. */}
-        <div className="shrink-0 max-md:touch-none max-md:select-none" {...dragHandlers}>
-          <div aria-hidden="true" className="flex justify-center pt-2 pb-1 md:hidden">
+        {/* Grab zone: handle and header follow the pointer. */}
+        <div className="shrink-0 touch-none select-none" {...dragHandlers}>
+          <div aria-hidden="true" className="flex justify-center pt-2.5 pb-1">
             <div className="h-1.5 w-10 rounded-full bg-(--ui-fill-strong)" />
           </div>
-          <header className="flex min-h-14 items-center gap-2.5 pr-3 pl-5 max-md:min-h-11 max-md:pb-1 md:pl-7">
+          <header className="flex min-h-12 items-center gap-2.5 pr-3 pb-1 pl-5 md:pl-7">
             <DialogTitle className="text-base font-medium">{dialogTitle}</DialogTitle>
             {numberLabel ? <Chip>第 {numberLabel} 题</Chip> : null}
             {typeLabel ? <Chip>{typeLabel}</Chip> : null}
             <DialogClose
-              render={<Button variant="ghost" size="icon-sm" className="ml-auto text-muted-foreground hover:text-foreground max-md:size-8 max-md:rounded-full max-md:bg-(--ui-fill)" />}
+              render={<Button variant="ghost" size="icon-sm" className="ml-auto size-8 rounded-full bg-(--ui-fill) text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground" />}
             >
               <XIcon />
               <span className="sr-only">关闭</span>
