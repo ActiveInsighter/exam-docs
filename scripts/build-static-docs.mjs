@@ -75,7 +75,7 @@ async function copyProjectEntry(stageRoot, relativePath, ownsGlobalAssets) {
     await cp(sourcePath, destinationPath, {
       recursive: true,
       filter: (candidatePath) => {
-        const candidateRelativePath = path.relative(projectRoot, candidatePath).replaceAll('\\\\', '/');
+        const candidateRelativePath = path.relative(projectRoot, candidatePath).split(path.sep).join('/');
         // Question PNGs are served as plain URLs, not imported into Next's
         // server bundle. Only shard 0 needs to carry them into the final site.
         // Excluding these from other shards avoids repeated 100+ MiB copies
