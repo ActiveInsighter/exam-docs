@@ -70,10 +70,11 @@ export function useSheetDrag(sheet: RefObject<HTMLElement | null>, close: () => 
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
     if (!element) return;
-    // Hand motion back to the stylesheet transitions.
+    // Hand motion back to the stylesheet transitions, so the spring-back or
+    // the close runs on the same curve as opening.
     element.style.transition = '';
     const backdrop = backdropOf(element);
-    if (backdrop) backdrop.style.transition = 'opacity 300ms cubic-bezier(0.32, 0.72, 0, 1)';
+    if (backdrop) backdrop.style.transition = '';
     const threshold = Math.min(DISMISS_MAX_PX, element.offsetHeight * DISMISS_RATIO);
     const dismiss = !cancelled && state.offset > 8 && (state.offset > threshold || state.velocity > FLICK_VELOCITY);
     if (dismiss) {

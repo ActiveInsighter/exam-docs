@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { questionStemClassName } from './model';
 import { QuestionReveal, useQuestionState } from './question-state';
 import { useSheetDrag } from './use-sheet-drag';
 
@@ -29,13 +30,19 @@ type QuestionSolutionDialogProps = {
   typeLabel?: string;
 };
 
-/* The backdrop fades on the same clock as the sheet it sits behind. */
-const overlayClassName = [
+/*
+ * Sheet and backdrop share one curve and clock, so the dimming tracks the
+ * sheet in both directions: a long, settling rise and a quicker drop.
+ */
+const sheetEase = 'ease-[cubic-bezier(0.32,0.72,0,1)]';
+
+const overlayClassName = cn(
   'data-open:animate-none! data-closed:animate-none!',
-  'transition-opacity duration-[480ms] ease-[cubic-bezier(0.32,0.72,0,1)]',
-  'data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-[300ms]',
+  'transition-opacity duration-500',
+  sheetEase,
+  'data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-[340ms]',
   'motion-reduce:transition-none',
-].join(' ');
+);
 
 // The sheet is portaled out of #docs-body. `docs-prose` makes it pick up the
 // same typography rules as the page (headings, tables, code, callouts, math),
@@ -119,7 +126,10 @@ export function QuestionSolutionDialog({
         showCloseButton={false}
         overlayClassName={overlayClassName}
         className={cn(
-          'flex flex-col gap-0 overflow-hidden bg-(--ui-panel) p-0 text-base text-foreground shadow-(--ui-shadow-overlay) ring-0 will-change-transform',
+          'flex flex-col gap-0 overflow-hidden bg-(--ui-panel) p-0 text-base text-foreground ring-0 will-change-transform',
+          // Lit from below the fold: the shadow falls upward, and in dark mode a
+          // hairline edge lifts the black sheet off the dimmed page.
+          'shadow-[0_-12px_40px_-12px_rgb(0_0_0/0.22)] dark:shadow-[0_-12px_40px_-8px_rgb(0_0_0/0.8)] dark:ring-1 dark:ring-white/10',
           /*
            * A bottom sheet at every size: anchored to the bottom edge, centred
            * on desktop and full width on phones. It rises the full height on
@@ -128,15 +138,17 @@ export function QuestionSolutionDialog({
            * zoom/fade is switched off.
            */
           'top-auto bottom-0 left-1/2 w-[min(72rem,100vw-2rem)] max-w-none translate-y-0 rounded-t-[1.25rem] rounded-b-none sm:max-w-none',
-          'h-[min(48rem,calc(100dvh-4rem))] max-md:left-0 max-md:h-auto max-md:max-h-[calc(100dvh-2.5rem)] max-md:w-full max-md:translate-x-0',
+          // Sized to its content, up to a gap above that keeps the page in view.
+          'max-h-[min(52rem,calc(100dvh-3rem))] md:min-h-[min(26rem,calc(100dvh-3rem))] max-md:left-0 max-md:max-h-[calc(100dvh-2.5rem)] max-md:w-full max-md:translate-x-0',
           'data-open:animate-none! data-closed:animate-none!',
-          'transition-[translate,transform] duration-[480ms] ease-[cubic-bezier(0.32,0.72,0,1)]',
-          'data-starting-style:translate-y-full data-ending-style:translate-y-full data-ending-style:duration-[300ms] data-ending-style:ease-[cubic-bezier(0.4,0,1,1)]',
+          'transition-[translate,transform] duration-500',
+          sheetEase,
+          'data-starting-style:translate-y-full data-ending-style:translate-y-full data-ending-style:duration-[340ms]',
           'motion-reduce:transition-none',
         )}
       >
         {/* Grab zone: handle and header follow the pointer. */}
-        <div className="shrink-0 touch-none select-none" {...dragHandlers}>
+        <div className="shrink-0 touch-none select-none md:cursor-grab md:active:cursor-grabbing" {...dragHandlers}>
           <div aria-hidden="true" className="flex justify-center pt-2.5 pb-1">
             <div className="h-1.5 w-10 rounded-full bg-(--ui-fill-strong)" />
           </div>
@@ -153,13 +165,13 @@ export function QuestionSolutionDialog({
           </header>
         </div>
 
-        <div className="grid min-h-0 flex-1 max-md:overflow-y-auto max-md:overscroll-contain max-md:pb-[env(safe-area-inset-bottom)] md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <div className="grid min-h-0 flex-1 md:grid-rows-[minmax(0,1fr)] max-md:overflow-y-auto max-md:overscroll-contain max-md:pb-[env(safe-area-inset-bottom)] md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           <section
             aria-label="题目"
             className={cn(paneClassName, 'bg-(--exam-question-pane) @container')}
           >
             <SectionLabel>题目</SectionLabel>
-            <div className={cn(prose, proseReset)}>
+            <div className={cn(prose, questionStemClassName)}>
               <QuestionReveal>{question}</QuestionReveal>
             </div>
           </section>
