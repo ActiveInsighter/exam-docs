@@ -1,4 +1,4 @@
-import { cp, mkdir, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { cp, link, mkdir, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { cpus, freemem, totalmem } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -64,7 +64,33 @@ function getShardCoordinates() {
   return { shardCount, shardIndex };
 }
 
-async function copyProjectEntry(stageRoot, relativePath, ownsGlobalAssets) {
+// Isolated Next builds need every local image: Fumadocs/remark-image reads
+// PNG dimensions during prerender, even for routes owned by other shards.
+// Hard links avoid copying large public trees (100+ MiB in exam-docs) to each
+// stage, while preserving normal file paths and reading behavior. This stage
+// never modifies public files. Cross-device/permission failures fall back to
+// the original byte-for-byte copy.
+async function hardlinkPublicDirectory(sourceRoot, targetRoot) {
+  await mkdir(targetRoot, { recursive: true });
+  for (const entry of await readdir(sourceRoot, { withFileTypes: true })) {
+    const from = path.join(sourceRoot, entry.name);
+    const to = path.join(targetRoot, entry.name);
+    if (entry.isDirectory()) {
+      await hardlinkPublicDirectory(from, to);
+    } else if (entry.isFile()) {
+      try {
+        await link(from, to);
+      } catch (error) {
+        if (!['EXDEV', 'EPERM', 'EOPNOTSUPP', 'EMLINK', 'ENOSYS'].includes(error?.code)) throw error;
+        await cp(from, to);
+      }
+    } else {
+      await cp(from, to, { recursive: true });
+    }
+  }
+}
+
+async function copyProjectEntry(stageRoot, relativePath) {
   const sourcePath = path.join(projectRoot, relativePath);
   if (!(await exists(sourcePath))) return;
 
@@ -72,19 +98,14 @@ async function copyProjectEntry(stageRoot, relativePath, ownsGlobalAssets) {
   const sourceStat = await stat(sourcePath);
 
   if (sourceStat.isDirectory()) {
+    if (relativePath === 'public') {
+      await hardlinkPublicDirectory(sourcePath, destinationPath);
+      return;
+    }
     await cp(sourcePath, destinationPath, {
       recursive: true,
       filter: (candidatePath) => {
         const candidateRelativePath = path.relative(projectRoot, candidatePath).split(path.sep).join('/');
-        // Question PNGs are served as plain URLs, not imported into Next's
-        // server bundle. Only shard 0 needs to carry them into the final site.
-        // Excluding these from other shards avoids repeated 100+ MiB copies
-        // on exam-docs; the merged payload still contains all original images.
-        if (
-          !ownsGlobalAssets &&
-          (candidateRelativePath === 'public/img/questions' ||
-            candidateRelativePath.startsWith('public/img/questions/'))
-        ) return false;
         return shouldIncludeInStaticDocsProject(candidateRelativePath);
       },
     });
@@ -112,9 +133,9 @@ async function cleanStagePreservingBuildCache(stageRoot) {
   }
 }
 
-async function prepareStage(stageRoot, ownsGlobalAssets) {
+async function prepareStage(stageRoot) {
   for (const entry of projectEntries) {
-    await copyProjectEntry(stageRoot, entry, ownsGlobalAssets);
+    await copyProjectEntry(stageRoot, entry);
   }
 
   await cp(
@@ -314,7 +335,7 @@ async function main() {
     console.log(`[static-docs] Next build cache state: ${cacheState}.`);
 
     const prepareStartedAt = Date.now();
-    await prepareStage(stageRoot, ownsGlobalAssets);
+    await prepareStage(stageRoot);
     console.log(`[timing] prepare_static_stage=${formatSeconds(Date.now() - prepareStartedAt)}`);
     logRunnerResources();
 
