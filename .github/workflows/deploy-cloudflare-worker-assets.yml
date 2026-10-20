@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 'codex/optimize-build-deploy-20261020'
       - 'codex/lilin-880-rebuild-*'
       - 'codex/math-past-exams-0930'
       - 'codex/math-core-questions-1005'
@@ -128,13 +129,25 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Refresh Fumadocs generated source
         run: npm run postinstall
+      - name: Restore deterministic search assets
+        id: static-search-cache
+        uses: actions/cache@v5
+        with:
+          path: /tmp/static-search-output
+          # Content-aware: app/layout-only changes can reuse the exact search index.
+          # The full source + indexer inputs invalidate the cache after content edits.
+          key: ${{ runner.os }}-static-search-v1-${{ hashFiles('content/docs/**', 'source.config.ts', 'lib/**', 'data/**', 'scripts/build-search-index.mjs', 'scripts/zbsearch-index.mjs', 'scripts/canonicalize-zbsearch.mjs', 'scripts/search-manifest.mjs', 'package-lock.json') }}
       - name: Build deterministic search assets
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf /tmp/static-search-output
-          mkdir -p /tmp/static-search-output
-          /usr/bin/time -v node scripts/build-search-index.mjs /tmp/static-search-output/search-index.json
+          if [[ '${{ steps.static-search-cache.outputs.cache-hit }}' != 'true' ]]; then
+            rm -rf /tmp/static-search-output
+            mkdir -p /tmp/static-search-output
+            /usr/bin/time -v node scripts/build-search-index.mjs /tmp/static-search-output/search-index.json
+          else
+            echo '[search] Reusing the content-addressed static search index.'
+          fi
           test -s /tmp/static-search-output/search-index.json
           test -d /tmp/static-search-output/search
           search_files="$(find /tmp/static-search-output -type f | wc -l | tr -d ' ')"
@@ -507,7 +520,7 @@ jobs:
             echo '- RSC aliases: deduplicated locally and restored through two guarded Cloudflare 200 rewrites'
           } >> "${GITHUB_STEP_SUMMARY}"
       - name: Validate Wrangler configuration with a dry run
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy != true }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.deploy != true) || github.ref == 'refs/heads/codex/optimize-build-deploy-20261020' }}
         run: npx --yes wrangler@4.129.0 deploy --dry-run --config wrangler.jsonc --outdir .wrangler-dry-run
       - name: Check Cloudflare deployment credentials
         if: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || ((github.ref == 'refs/heads/codex/math-past-exams-0930' || github.ref == 'refs/heads/codex/math-core-questions-1005' || github.ref == 'refs/heads/codex/build-speed-research-1002' || github.ref == 'refs/heads/codex/english-reading-layout-1012') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}

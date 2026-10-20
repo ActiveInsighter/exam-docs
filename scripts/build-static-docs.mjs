@@ -1,4 +1,4 @@
-import { cp, mkdir, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { cp, link, mkdir, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { cpus, freemem, totalmem } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -64,6 +64,32 @@ function getShardCoordinates() {
   return { shardCount, shardIndex };
 }
 
+// Isolated Next builds need every local image: Fumadocs/remark-image reads
+// PNG dimensions during prerender, even for routes owned by other shards.
+// Hard links avoid copying large public trees (100+ MiB in exam-docs) to each
+// stage, while preserving normal file paths and reading behavior. This stage
+// never modifies public files. Cross-device/permission failures fall back to
+// the original byte-for-byte copy.
+async function hardlinkPublicDirectory(sourceRoot, targetRoot) {
+  await mkdir(targetRoot, { recursive: true });
+  for (const entry of await readdir(sourceRoot, { withFileTypes: true })) {
+    const from = path.join(sourceRoot, entry.name);
+    const to = path.join(targetRoot, entry.name);
+    if (entry.isDirectory()) {
+      await hardlinkPublicDirectory(from, to);
+    } else if (entry.isFile()) {
+      try {
+        await link(from, to);
+      } catch (error) {
+        if (!['EXDEV', 'EPERM', 'EOPNOTSUPP', 'EMLINK', 'ENOSYS'].includes(error?.code)) throw error;
+        await cp(from, to);
+      }
+    } else {
+      await cp(from, to, { recursive: true });
+    }
+  }
+}
+
 async function copyProjectEntry(stageRoot, relativePath) {
   const sourcePath = path.join(projectRoot, relativePath);
   if (!(await exists(sourcePath))) return;
@@ -72,10 +98,14 @@ async function copyProjectEntry(stageRoot, relativePath) {
   const sourceStat = await stat(sourcePath);
 
   if (sourceStat.isDirectory()) {
+    if (relativePath === 'public') {
+      await hardlinkPublicDirectory(sourcePath, destinationPath);
+      return;
+    }
     await cp(sourcePath, destinationPath, {
       recursive: true,
       filter: (candidatePath) => {
-        const candidateRelativePath = path.relative(projectRoot, candidatePath);
+        const candidateRelativePath = path.relative(projectRoot, candidatePath).split(path.sep).join('/');
         return shouldIncludeInStaticDocsProject(candidateRelativePath);
       },
     });
@@ -207,6 +237,21 @@ async function walkFiles(directory) {
   return files;
 }
 
+// Both directories reside under the same project root in CI, so an atomic
+// rename avoids copying every HTML, image and static chunk twice. Keep a
+// cross-device fallback for unusual local build directory mounts.
+async function moveStaticExport(sourceRoot, destinationRoot) {
+  try {
+    await rename(sourceRoot, destinationRoot);
+    console.log('[static-docs] Reused export files via an atomic directory move.');
+  } catch (error) {
+    if (error?.code !== 'EXDEV') throw error;
+    await cp(sourceRoot, destinationRoot, { recursive: true });
+    await rm(sourceRoot, { recursive: true, force: true });
+    console.log('[static-docs] Cross-device output; copied export files instead.');
+  }
+}
+
 async function copyDirectoryContents(sourceRoot, destinationRoot) {
   for (const entry of await readdir(sourceRoot, { withFileTypes: true })) {
     const sourcePath = path.join(sourceRoot, entry.name);
@@ -314,7 +359,7 @@ async function main() {
 
     const assembleStartedAt = Date.now();
     await rm(staticOutputRoot, { recursive: true, force: true });
-    await cp(path.join(stageRoot, 'out'), staticOutputRoot, { recursive: true });
+    await moveStaticExport(path.join(stageRoot, 'out'), staticOutputRoot);
     if (ownsGlobalAssets) await copyDirectoryContents(staticSearchRoot, staticOutputRoot);
     console.log(`[timing] assemble_static_and_search=${formatSeconds(Date.now() - assembleStartedAt)}`);
 
