@@ -200,11 +200,13 @@ gh workflow run deploy-cloudflare-worker-assets.yml --ref "$(git branch --show-c
 | 真实 Supabase SQL 冒烟检查 | `supabase/tests/cloud-smoke.sql` 已执行通过；测试事务回滚，并确认测试用户已清理（`fixture_removed: true`） |
 | Supabase advisors | 安全与性能检查均未返回 lint（`[]`） |
 | 本机连接配置 | `.env.local` 已设置实际项目 URL 和 publishable key，文件由 Git 忽略 |
-| 浏览器本地持久化 | 已验证单选提交后刷新恢复，以及重做后刷新保持清空 |
-| 类型与回归检查 | 类型检查通过；27 个测试文件、172 项回归通过，本次回归排除两项完整题库重型渲染套件；新增功能子集 37 项、浏览器验证 5 项通过 |
-| 完整构建 | 本机全量构建按用户偏好已停止；后续完整构建使用 GitHub Actions 的 8 分片验证流程，完成结果以实际 Actions 运行记录为准 |
+| 浏览器本地持久化 | 5 项真实浏览器验证通过：刷新恢复、重做历史、多标签页、断网作答恢复、手机弹窗与备份下载；无运行时或 hydration 错误 |
+| 类型与回归检查 | 云端完整回归 29 个测试文件、182 项测试全部通过，包括两项完整题库渲染套件；应用类型检查通过 |
+| 完整构建 | [GitHub Actions #39351920241](https://github.com/ActiveInsighter/exam-docs/actions/runs/39351920241) 全部成功，8 个静态分片、搜索与合并包校验通过；总耗时约 3 分 11 秒。本机全量构建已停止，后续按约定使用云端构建 |
 | 邮件与账号完整链路 | 尚未发送登录测试邮件；邮件投递、允许回调域名与真实多设备登录仍需按前文配置后验收 |
-| 仓库与静态站发布 | 云端构建使用工作分支与 `deploy=false`，当前未发布新静态站；GitHub 集成的生产自动迁移设置仍应在 Dashboard 核查 |
+| 仓库与静态站发布 | 功能代码与工作流配置已推送至 `codex/question-local-first-supabase`，通过验证的代码提交为 `0a8c125`；本次 `deploy=false`，Wrangler dry run 成功，实际站点部署步骤已跳过 |
+
+该次云端合并包包含 694 个文档 HTML 路由和 693 份 Markdown，181 个共享静态文件在全部分片中内容一致。生产启用云同步前，仍需按上文设置 GitHub 两项公共构建变量、Supabase 登录回调域名，并核查 GitHub 集成的生产自动迁移设置。
 
 本地账号分区选择与 Supabase 会话恢复分离：即使过期会话正在尝试联网刷新，仍可恢复上次所选账号的本机答案。缓存的账号选择只用于路由本地数据；上传仍须真实登录会话，不能把本机选择当作云端授权。
 
