@@ -76,6 +76,17 @@ begin
     or v_result -> 'attempts' <> '[]'::jsonb or v_result ->> 'cursor' <> '3'
   then raise exception 'Conflict resolution duplicated the attempt: %', v_result; end if;
 
+  -- The feed is compacted: a full pull returns only the newest state per question.
+  v_result := public.exam_sync_question_state('[]', 0, 100);
+  if jsonb_array_length(v_result -> 'changes') <> 1 or v_result #>> '{changes,0,version}' <> '2'
+    or jsonb_array_length(v_result -> 'attempts') <> 1 or v_result ->> 'cursor' <> '3'
+  then raise exception 'Compacted full pull failed: %', v_result; end if;
+
+  v_result := public.exam_sync_question_state('[]', 99, 100);
+  if v_result ->> 'reset' <> 'true' or v_result ->> 'cursor' <> '3'
+    or jsonb_array_length(v_result -> 'changes') <> 1
+  then raise exception 'Cursor ahead of account did not restart the feed: %', v_result; end if;
+
   begin
     perform public.exam_sync_question_state(jsonb_build_array(jsonb_set(jsonb_set(v_stale,
       '{operationId}', '"b2cb59eb-7be1-45a0-bdfd-aebf131c8662"'), '{attempt,state,submitted}', 'false')), 3, 100);
@@ -106,7 +117,7 @@ begin
   if (select count(*) from exam_private.question_progress where user_id = v_owner) <> 1
     or (select count(*) from exam_private.question_attempts where user_id = v_owner) <> 1
     or (select count(*) from exam_private.question_operations where user_id = v_owner) <> 3
-    or (select count(*) from exam_private.question_events where user_id = v_owner) <> 3
+    or (select cursor from exam_private.question_sync_heads where user_id = v_owner) <> 3
   then raise exception 'Unexpected fixture counts after retries and conflicts'; end if;
 end;
 $$;

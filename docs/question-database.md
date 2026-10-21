@@ -23,23 +23,31 @@ Cloudflare 生产部署现在通过同域 `/api/supabase` 转发登录与答题 
 ```mermaid
 flowchart LR
   MDX[静态 MDX 题目] --> UI[题目组件]
-  UI -->|立即更新| Memory[页面状态]
-  Memory -->|持久化| IDB[(IndexedDB)]
+  UI <-->|同步读取 / 立即写入| Cache[内存答案缓存]
+  Cache -->|按页一次索引读取 · 有序写入| IDB[(IndexedDB)]
   IDB --> Outbox[持久化待同步队列]
   Outbox -->|登录且联网，批量 RPC| RPC[exam_sync_question_state]
   RPC --> DB[(Supabase Postgres)]
-  DB -->|增量事件与确认| IDB
+  DB -->|压缩增量与确认| IDB
+  DB -.->|Realtime 私有广播：仅新游标| Engine[其他设备的同步器]
+  Engine -->|拉取| RPC
   RPC -->|版本冲突| Conflict[保留本地与云端两个版本]
-  Conflict -->|用户选择| IDB
+  Conflict -->|账号菜单中选择| IDB
 ```
 
-读题时从本地恢复；输入时先更新 React 状态，再保存到 IndexedDB。云端不可用不会撤销已保存的本地输入。同步队列与待上传内容持久化，刷新后能继续重试。界面会显示本地保存、待同步、同步失败或冲突状态，避免把内存中的答案误报为已经持久保存。
+**缓存读取。** 全站只有一个 `QuestionDatabaseProvider`（挂在 `AppProviders`），为当前账号分区维护一个内存缓存 `QuestionAnswerCache`。页面上的题目挂载时只触发一次按文档的 IndexedDB 索引读取（`records.document`），之后每次渲染都通过 `useSyncExternalStore` 同步读取内存，不再每道题各开一个事务。同步或其他标签页带来的变化只按变化事件里的题目 key 刷新对应条目。
 
-本地数据库名为 `exam-docs-questions`，初始 schema 版本为 1，包含 `records`、`operations`、`attempts`、`conflicts`、`metadata`。一次答题写入会在同一个 IndexedDB 事务中保存当前状态、同步操作和已产生的提交记录。普通未发送草稿可合并；已经发出的操作和历史提交保留稳定 UUID，不因重试换身份。
+**实时写入。** 输入先写入内存并立即重渲染，再按顺序写入 IndexedDB。同一道题连续的草稿只保留最新一份待写入值，提交永不合并（每次提交都是一条不可变历史）。某道题的写入排队或失败时，内存值优先，较慢的外部刷新不会回滚正在输入的答案。
 
-同步器在用户登录后运行，编辑停止 1.5 秒后批量交换。每批最多 50 个操作、请求目标上限 240 KiB；同一道题依次发送，保留版本先后关系。一个 RPC 同时提交变更和拉取增量，登录后立即检查，联网恢复和手动同步会再检查；页面重新获得焦点或变为可见时，距上次成功同步超过 60 秒或有待上传记录也会检查。失败后按 1 至 60 秒上限退避并加随机抖动，重试信息持久保存。
+读题时从本地恢复；输入时先更新内存缓存，再保存到 IndexedDB。云端不可用不会撤销已保存的本地输入。同步队列与待上传内容持久化，刷新后能继续重试。界面会显示本地保存、待同步、同步失败或冲突状态，避免把内存中的答案误报为已经持久保存。
 
-长时间空闲没有定时轮询；题目组件也不分别创建 Supabase 连接。标签页之间通过 BroadcastChannel 失效通知和数据库同步租约减少重复请求。当前实现不订阅 Realtime，不承诺另一台设备的修改即时出现；主动同步和重新进入页面可拉取更新。
+本地数据库名为 `exam-docs-questions`，schema 版本为 2（v2 新增 `records.document` 与 `conflicts.question` 索引；从 v1 原地升级时保留全部答案、历史和待同步队列，只把同步游标清零，下一次拉取按 v2 压缩增量从头开始），包含 `records`、`operations`、`attempts`、`conflicts`、`metadata`。一次答题写入会在同一个 IndexedDB 事务中保存当前状态、同步操作和已产生的提交记录。普通未发送草稿可合并；已经发出的操作和历史提交保留稳定 UUID，不因重试换身份。
+
+同步器在用户登录后运行：草稿编辑停止 0.8 秒后上传；提交、冲突选择和导入在 150 ms 批处理后立即上传，持续输入不会推迟它们；页面隐藏或关闭前有待上传记录也会立即发送。每批最多 50 个操作、请求目标上限 240 KiB，每页最多拉取 200 条；同一道题依次发送，保留版本先后关系。一个 RPC 同时提交变更和拉取增量，登录后立即检查，联网恢复和手动同步会再检查；页面重新获得焦点或变为可见时，距上次成功同步超过 60 秒或有待上传记录也会检查。失败后按 1 至 60 秒上限退避并加随机抖动，重试信息持久保存。
+
+**实时同步。** 每次 RPC 提交了变化，数据库在同一事务内通过 `realtime.send` 向私有频道 `exam-sync:<用户 id>` 发送事件 `changed`，载荷只有新游标，不含答案。其他设备的同步器收到后，若本机游标落后就立即拉取；频道（重新）连上时也补拉一次断线期间的变化。广播只是提示：真正的数据仍通过游标协议拉取，广播丢失只会推迟更新，不会丢数据。`realtime.messages` 的 RLS 只允许频道所属用户订阅，没有插入策略，浏览器无法伪造通知。Cloudflare 部署中 WebSocket 同样经过 `/api/supabase/realtime/v1/websocket` 同域转发。
+
+长时间空闲没有定时轮询；题目组件也不分别创建 Supabase 连接。标签页之间通过 BroadcastChannel 失效通知和数据库同步租约减少重复请求。
 
 ### 身份隔离
 
@@ -70,13 +78,16 @@ flowchart LR
 
 | 对象 | 职责 |
 | --- | --- |
-| `question_progress` | 每位用户、文档、题目、revision 的当前答案和云端版本 |
-| `question_attempts` | 按提交 UUID 追加的历史提交 |
-| `question_operations` | 操作 UUID、原始请求和幂等确认收据 |
-| `question_sync_heads` | 每位用户已提交事件的单调递增游标 |
-| `question_events` | 按用户及游标排序的增量事件流 |
+| `question_progress` | 每位用户、文档、题目、revision 的当前答案、云端版本，以及最近一次写入的 `seq` |
+| `question_attempts` | 按提交 UUID 追加的历史提交及其 `seq` |
+| `question_operations` | 精简幂等收据：操作 UUID、请求哈希、结果状态；30 天后由该用户下一次同步清理 |
+| `question_sync_heads` | 每位用户单调递增的游标（最近分配的 `seq`） |
 
-RPC 参数为 `p_operations`、`p_cursor`、`p_limit`。服务端在单个事务中检查身份、处理上传并返回后续事件。每位用户的同步事务串行分配游标，避免事务提交顺序形成游标空洞，造成客户端跳过较晚提交的事件。服务端限制一次上传的数量与内容大小，客户端分批继续处理。
+v2（迁移 `20261021120000_question_sync_v2.sql`）取消了追加式 `question_events` 事件表，改为**压缩增量**：每次写入把该行的 `seq` 更新为该用户的下一个游标，拉取即读取 `seq > cursor` 的行（`(user_id, seq)` 唯一索引）。因此一道题被改了 100 次，另一台设备也只拉到最新一份，历史快照不再无限增长。被重写的行会移到游标末尾，正在分页的读者稍后仍会读到它。
+
+RPC 参数为 `p_operations`、`p_cursor`、`p_limit`（1–500，默认 200）。服务端在单个事务中检查身份、处理上传并返回后续一页；`hasMore` 通过多读一行判定。每位用户的同步事务以咨询锁串行分配 `seq`，避免事务提交顺序形成游标空洞。客户端游标超过账号游标（数据库恢复、协议升级）时，服务端从 0 重新返回并标记 `reset: true`，不再报错。
+
+重试已确认的操作 UUID 时，服务端核对请求哈希并返回该题**当前**的云端行：客户端要么确认自己的写入，要么得知更新的版本。收据过期后重试的旧 UUID 会被当作新写入；若云端行已经等于所发送的答案，客户端把这个 CAS 失败视为确认，不产生冲突。
 
 表按用户启用 RLS，浏览器角色没有内部表直接写入权限。公开入口只给 `authenticated` 执行；私有执行函数从 `auth.uid()` 取用户身份，使用固定 search path。客户端无法通过请求体指定别人的 owner。publishable key 只是公开项目标识，数据权限依赖登录会话与数据库授权。
 
@@ -115,7 +126,7 @@ npm run dev
 
 保持下面两个环境变量为空。打开一个包含选择题或填空题的文档，填写或提交后刷新，检查状态恢复；重做后刷新应保持清空。IndexedDB 被浏览器禁止或配额不足时，应看到保存错误提示。导出 JSON 备份适合主动保存记录，浏览器清理站点数据、隐私模式结束或更换域名都可能失去原来的本地数据。
 
-原先的同步面板（导出备份、导入访客记录、选择冲突答案）已从界面移除，数据层 API 仍可使用。在重新提供入口之前，版本冲突只会保留两份记录，界面上没有选择入口。
+账号菜单的「答题记录」分区汇总本机作答数、提交数与提交历史，并提供立即同步、选择冲突答案（打开对比弹窗）、导入未登录时的记录、导出本机备份。头像上的圆点在同步中、待上传、冲突或失败时出现；账号名下方一行显示「实时同步中」「n 条修改待上传」「离线 · 答案已保存在本机」等状态。
 
 本地数据库按浏览器 origin 隔离。`localhost:3000`、生产自定义域名、`workers.dev` 和预览域名各有独立数据；登录同一 Supabase 账号后可通过云端同步交换记录，访客数据不会自动跨域迁移。
 
@@ -190,7 +201,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 ## 验收与后续演进
 
 ```bash
-npm test -- --exclude '.worktrees/**' tests/question-store.test.ts tests/question-store-integration.test.ts supabase/tests/question-sync.test.ts
+npm test -- --exclude '.worktrees/**' tests/question-store.test.ts tests/question-cache.test.ts tests/question-store-integration.test.ts supabase/tests/question-sync.test.ts
 npm run typecheck
 ```
 
@@ -226,4 +237,4 @@ gh workflow run deploy-cloudflare-worker-assets.yml --ref "$(git branch --show-c
 
 至少验证以下流程：刷新恢复选择题与填空草稿；重做后不恢复旧答案；题目 revision 改变后使用独立状态；退出与切换账号隔离；显式导入访客；断网输入后恢复同步；请求响应丢失后的幂等重试；两台设备同时修改同一道题并选择本地或云端；非本人数据不可访问；导出 JSON 可以检查内容。
 
-当前设计优先保证答案不被静默覆盖。后续可独立增加答题统计、错题本、历史提交浏览与设备管理，再按实际用户量决定是否增加 Realtime 通知或事件归档。若未来压缩幂等收据和事件日志，必须同时定义过期游标后的全量恢复协议，不能直接删除客户端还依赖的数据。
+当前设计优先保证答案不被静默覆盖。后续可独立增加错题本、历史提交浏览与设备管理。v2 已压缩增量并为收据设置 30 天保留期；过期游标通过 `reset` 全量重拉恢复，过期收据通过“云端行等于所发答案即确认”避免误报冲突。

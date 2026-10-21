@@ -14,12 +14,13 @@ const bundle = await build({
     resolveDir: process.cwd(), loader: 'tsx', contents: `
       import { createRoot } from 'react-dom/client';
       import { QuestionDatabase } from './lib/question-store/database';
+      import { QuestionAnswerCache } from './lib/question-store/cache';
       import { QuestionProvider, useQuestionState } from './components/question/question-state';
       import { QuestionFooter } from './components/question/question-footer';
       const namespace = 'user:11111111-1111-4111-8111-111111111111';
       const identity = { documentPath: '/docs/storage-recovery', questionId: 'recovery', questionRevision: 'v1' };
       const database = await QuestionDatabase.open();
-      window.storage = { database, namespace, ready: true };
+      window.storage = { database, namespace, ready: true, cache: new QuestionAnswerCache(database, namespace) };
       window.snapshot = async () => ({ record: await database.get(namespace, identity), attempts: await database.listAttempts(namespace) });
       function Probe() {
         const state = useQuestionState();
@@ -40,7 +41,7 @@ const bundle = await build({
     name: 'browser-harness-context',
     setup(plugin) {
       plugin.onResolve({ filter: /^next\/navigation$/ }, () => ({ path: 'navigation', namespace: 'harness' }));
-      plugin.onResolve({ filter: /^\.\/database-provider$/ }, () => ({ path: 'database-provider', namespace: 'harness' }));
+      plugin.onResolve({ filter: /^\.\/database-context$/ }, () => ({ path: 'database-context', namespace: 'harness' }));
       plugin.onLoad({ filter: /.*/, namespace: 'harness' }, ({ path: name }) => ({ contents: name === 'navigation'
         ? `export const usePathname = () => '/docs/storage-recovery';`
         : 'export const useQuestionDatabase = () => window.storage;' }));

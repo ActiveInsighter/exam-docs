@@ -1,11 +1,11 @@
-import { readFileSync, readdirSync } from 'node:fs';
-import { PGlite } from '@electric-sql/pglite';
+import type { PGlite } from '@electric-sql/pglite';
 import { IDBFactory } from 'fake-indexeddb';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   QuestionDatabase, QuestionSyncEngine, namespaceForUser, type AnswerState,
   type QuestionIdentity, type QuestionSyncTransport, type SyncRequest, type SyncResponse,
 } from '../lib/question-store';
+import { createSupabaseTestDatabase } from '../supabase/tests/pglite';
 
 const USER = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const namespace = namespaceForUser(USER);
@@ -40,21 +40,7 @@ describe('IndexedDB and PostgreSQL synchronization integration', () => {
   }
 
   beforeAll(async () => {
-    postgres = await PGlite.create();
-    await postgres.exec(`
-      create role anon nologin;
-      create role authenticated nologin;
-      create role service_role nologin bypassrls;
-      create schema auth;
-      create table auth.users (id uuid primary key);
-      create function auth.uid() returns uuid language sql stable security invoker
-        as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
-      grant usage on schema auth, public to anon, authenticated, service_role;
-      grant execute on function auth.uid() to anon, authenticated, service_role;
-    `);
-    for (const file of readdirSync(new URL('../supabase/migrations/', import.meta.url)).filter((name) => name.endsWith('.sql')).sort()) {
-      await postgres.exec(readFileSync(new URL(`../supabase/migrations/${file}`, import.meta.url), 'utf8'));
-    }
+    postgres = await createSupabaseTestDatabase();
   }, 30_000);
 
   beforeEach(async () => {

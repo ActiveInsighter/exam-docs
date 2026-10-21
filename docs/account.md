@@ -12,7 +12,8 @@ components/account/
   account-menu.tsx                头部按钮 + 下拉菜单（shadcn DropdownMenu/Avatar）
   sign-in-dialog.tsx              邮箱登录/注册弹窗（shadcn Dialog/Field）
   menu-section.ts                 菜单分区的扩展接口
-  sections/                       内置分区：identity、session；index.ts 是注册表
+  menu-registry.tsx               运行时分区注册：useAccountMenuSection()
+  sections/                       内置分区：identity（含访客登录按钮）、session（退出）；index.ts 是注册表
   index.ts                        对外入口
 components/app-providers.tsx      站点级 Provider（Account + Search），供根布局与静态构建根布局共用
 ```
@@ -41,11 +42,21 @@ flowchart LR
 
 文档页手机宽度下，默认桌面工具栏会隐藏，因此通过公开的 `slots.header` 挂载移动导航，保留标题、搜索和侧边栏按钮，并加入账号入口。首页的手机菜单中也有账号入口。升级 Fumadocs 时检查这些布局挂载点即可，无需修改其内部代码。
 
+## 菜单结构
+
+| 位置 | 内容 |
+| --- | --- |
+| 头部按钮 | 已登录显示首字母头像，访客显示账号图标；功能分区可通过 `indicator` 叠加状态圆点（答题同步中、待上传、冲突、失败） |
+| identity（0） | 大头像、邮箱、一行状态（由功能分区的 `status` 提供，例如「实时同步中」）；访客/未启用时显示说明和主色「登录 / 注册」按钮 |
+| 答题记录（500） | 由题目模块注册：作答/提交/提交历史统计、立即同步、选择冲突答案、导入未登录记录、导出本机备份 |
+| session（1000） | 仅登录后显示「退出登录」，并提示本机记录保留 |
+
 ## 新增菜单功能
 
-1. 在 `components/account/sections/` 新建文件，导出 `AccountMenuSection`（`id`、`order`、`audience`、`render`）。`render` 返回 `DropdownMenuGroup` 内的菜单项，分隔线由菜单绘制。
-2. 在 `sections/index.ts` 的数组里加一行。内置分区 `order` 为 0（identity）与 1000（session），新功能取中间值。
-3. 需要弹窗时，在自己的分区组件里管理状态，不要改动 `account-menu.tsx`。
+- 账号模块内置的分区：在 `components/account/sections/` 新建文件导出 `AccountMenuSection`，并加入 `sections/index.ts`。
+- 功能模块的分区：在功能自己的 Provider 中调用 `useAccountMenuSection(section)`（传入模块级常量），账号模块不需要 import 该功能。题目模块即以此方式注册 `components/question/account-section.tsx`。
+- `render` 返回 `DropdownMenuGroup` 内的菜单项，分隔线由菜单绘制；可选 `indicator`、`status` 返回自带 hooks 的元素。
+- 菜单关闭时内容会卸载，弹窗必须由功能的 Provider 持有（例如冲突弹窗由 `QuestionDatabaseProvider` 渲染），不要改动 `account-menu.tsx`。
 
 新增登录方式（如 OAuth、密码）时，在 `AccountState` 增加对应动作，在 `sign-in-dialog.tsx` 中增加入口；其他代码不受影响。
 
@@ -53,9 +64,9 @@ flowchart LR
 
 Cloudflare 构建设置 `NEXT_PUBLIC_SUPABASE_PROXY_PATH=/api/supabase`，浏览器的邮箱登录、验证码、会话刷新、退出及答题 RPC 都经过同域 Worker。Supabase 原始 URL 仍用于创建客户端，原有会话 storage key 和账号缓存不会因转发而改变。本地 `next dev` 不包含 Worker，保持该变量为空，直接访问 Supabase。
 
-部署命令把 GitHub 变量 `NEXT_PUBLIC_SUPABASE_URL` 同时传给 Worker 的 `SUPABASE_URL`，避免前后端指向不同项目。Worker 只接受固定的 Auth 路径和 `exam_sync_question_state` RPC，转发用户公钥与 JWT，不注入 service key，不转发站点 Cookie，也不缓存响应。所有文档依旧通过 Static Assets 分发。修改转发路径需要云端重新构建。
+部署命令把 GitHub 变量 `NEXT_PUBLIC_SUPABASE_URL` 同时传给 Worker 的 `SUPABASE_URL`，避免前后端指向不同项目。Worker 只接受固定的 Auth 路径、`exam_sync_question_state` RPC 和 Realtime WebSocket（`/realtime/v1/websocket`，仅 `Upgrade: websocket` 握手；频道权限由 `realtime.messages` 的 RLS 判定），转发用户公钥与 JWT，不注入 service key，不转发站点 Cookie，也不缓存响应。所有文档依旧通过 Static Assets 分发。修改转发路径需要云端重新构建。
 
-`Failed to fetch` 表示请求未取得可读的 HTTP 响应，可能涉及网络、DNS、TLS、浏览器拦截或 CORS。不能据此判断数据库不存在。当前数据库的 5 张答题表位于 `exam_private`，不是 `public`；在 Supabase Table Editor 中切换 schema，或在 SQL Editor 查询：
+`Failed to fetch` 表示请求未取得可读的 HTTP 响应，可能涉及网络、DNS、TLS、浏览器拦截或 CORS。不能据此判断数据库不存在。当前数据库的 4 张答题表位于 `exam_private`，不是 `public`；在 Supabase Table Editor 中切换 schema，或在 SQL Editor 查询：
 
 ```sql
 select tablename from pg_tables where schemaname = 'exam_private';

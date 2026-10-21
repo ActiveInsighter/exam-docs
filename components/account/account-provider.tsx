@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import type { User } from '@supabase/supabase-js';
 import { cloudConfigured, getSupabaseClient } from '@/lib/supabase-client';
 import type { AccountIdentity, AccountPhase, AccountState } from '@/lib/account/types';
+import { AccountMenuRegistry } from './menu-registry';
 
 /*
  * The single owner of "who is signed in". Features read it through
@@ -110,5 +111,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     () => ({ phase, user, cachedUser, error, sendEmailLink, verifyEmailCode, signOut }),
     [phase, user, cachedUser, error, sendEmailLink, verifyEmailCode, signOut],
   );
-  return <Context.Provider value={value}>{children}</Context.Provider>;
+  return (
+    <Context.Provider value={value}>
+      <AccountMenuRegistry>{children}</AccountMenuRegistry>
+    </Context.Provider>
+  );
 }

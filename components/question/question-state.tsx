@@ -8,7 +8,7 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
+  useSyncExternalStore,
 } from 'react';
 import { usePathname } from 'next/navigation';
 import {
@@ -17,9 +17,9 @@ import {
   gradeBlanks,
   gradeChoice,
 } from './grading';
-import { useQuestionDatabase } from './database-provider';
-import { questionKey, type AnswerState, type QuestionIdentity } from '@/lib/question-store/types';
-import { questionStorageError } from '@/lib/question-store/errors';
+import { useQuestionDatabase } from './database-context';
+import { PENDING_SNAPSHOT, QuestionAnswerCache, emptyAnswer } from '@/lib/question-store/cache';
+import type { AnswerState, QuestionIdentity } from '@/lib/question-store/types';
 
 /*
  * Per-question client state. The choice grid, the blanks, the status bar and
@@ -61,7 +61,8 @@ export function useQuestionState() {
   return useContext(QuestionContext);
 }
 
-const emptyAnswer = (): AnswerState => ({ selected: [], values: [], submitted: false, attempt: 0 });
+/** Questions rendered outside the site provider (tests, previews) keep answers in memory only. */
+let memoryCache: QuestionAnswerCache | undefined;
 
 export function QuestionProvider({
   spec,
@@ -77,105 +78,34 @@ export function QuestionProvider({
   const storage = useQuestionDatabase();
   const pathname = usePathname();
   const documentPath = (pathname ?? '/').replace(/\/+$/, '') || '/';
-  const [answerState, setAnswerState] = useState<AnswerState>(emptyAnswer);
-  const current = useRef(answerState);
-  const binding = useRef<{
-    identity: QuestionIdentity;
-    pending: number;
-    read: number;
-    write: number;
-    failed: boolean;
-    failedSubmission: boolean;
-    disposed: boolean;
-    reload: () => Promise<void>;
-  } | null>(null);
-  const [hydratedKey, setHydratedKey] = useState<string | null>(null);
-  const [storageError, setStorageError] = useState<string | null>(null);
-  const bindingKey = JSON.stringify([storage?.namespace ?? 'memory', documentPath, questionId, questionRevision]);
-  const ready = !storage || (storage.ready && (!storage.database || hydratedKey === bindingKey));
-  const { selected, values, submitted, attempt } = ready ? answerState : emptyAnswer();
-
-  useEffect(() => {
-    if (!storage?.ready || !storage.database) return;
-    const { database, namespace } = storage;
-    const target: QuestionIdentity = {
-      documentPath,
-      questionId,
-      questionRevision,
-    };
-    const active = { identity: target, pending: 0, read: 0, write: 0, failed: false, failedSubmission: false, disposed: false, reload: async () => {} };
-    binding.current = active;
-    setStorageError(null);
-    const load = async () => {
-      if (active.pending > 0 || active.failed) return; // Keep an unsaved answer visible after a storage failure.
-      const version = ++active.read;
-      try {
-        const record = await database.get(namespace, target);
-        if (active.disposed || version !== active.read || active.pending > 0) return;
-        const next = record?.state ?? emptyAnswer();
-        current.current = next;
-        setAnswerState(next);
-        setHydratedKey(bindingKey);
-        setStorageError(null);
-      } catch {
-        if (!active.disposed) {
-          setStorageError('答案读取失败，请刷新页面后重试。');
-        }
-      }
-    };
-    active.reload = load;
-    void load();
-    const unsubscribe = database.subscribe((change) => {
-      if (change.namespace === namespace && (!change.key || change.key === questionKey(target))) void load();
-    });
-    return () => {
-      active.disposed = true; unsubscribe();
-      if (binding.current === active) binding.current = null;
-    };
-  }, [storage?.database, storage?.namespace, storage?.ready, documentPath, questionId, questionRevision, bindingKey]);
+  const cache = storage ? storage.cache : (memoryCache ??= new QuestionAnswerCache(null, 'guest'));
+  const identity = useMemo<QuestionIdentity>(() => ({ documentPath, questionId, questionRevision }), [documentPath, questionId, questionRevision]);
+  // Reads come from the shared memory cache: one IndexedDB read per page, no per-question round trip.
+  const subscribe = useCallback((listener: () => void) => cache?.subscribe(identity, listener) ?? (() => {}), [cache, identity]);
+  const snapshot = useSyncExternalStore(subscribe, () => cache?.read(identity) ?? PENDING_SNAPSHOT, () => PENDING_SNAPSHOT);
+  const { ready, error: storageError } = snapshot;
+  // The ref sees a write before React re-renders, so rapid input never builds on a stale answer.
+  const current = useRef(snapshot.state);
+  current.current = snapshot.state;
+  const { selected, values, submitted, attempt } = snapshot.state;
 
   const update = useCallback((next: AnswerState, submission = false) => {
     current.current = next;
-    setAnswerState(next);
-    const active = binding.current;
-    if (!storage?.database || !active || active.disposed) return;
-    const database = storage.database;
-    const target = active.identity;
-    const namespace = storage.namespace;
-    active.pending += 1;
-    const write = ++active.write;
-    active.read += 1; // Invalidate reads that began before this keystroke.
-    void database.save(namespace, target, next, { submission }).then(() => {
-      if (!active.disposed && write === active.write) { active.failed = false; setStorageError(null); }
-    }).catch((error: unknown) => {
-      if (!active.disposed && write === active.write) {
-        active.failed = true;
-        active.failedSubmission = submission;
-        setStorageError(questionStorageError(error));
-      }
-    }).finally(() => {
-      active.pending -= 1;
-      if (!active.disposed && active.pending === 0 && !active.failed) void active.reload();
-    });
-  }, [storage?.database, storage?.namespace]);
+    cache?.write(identity, next, { submission });
+  }, [cache, identity]);
 
-  const retryStorage = useCallback(() => {
-    const active = binding.current;
-    if (!active || active.disposed || active.pending > 0) return;
-    if (active.failed) update(current.current, active.failedSubmission);
-    else void active.reload();
-  }, [update]);
+  const retryStorage = useCallback(() => { cache?.retry(identity); }, [cache, identity]);
 
   useEffect(() => {
-    if (!storageError || !binding.current?.failed) return;
+    if (!storageError || !cache) return;
     const beforeUnload = (event: BeforeUnloadEvent) => {
-      if (!binding.current?.failed) return;
+      if (!cache.hasUnsaved()) return;
       event.preventDefault();
       event.returnValue = '';
     };
     window.addEventListener('beforeunload', beforeUnload);
     return () => window.removeEventListener('beforeunload', beforeUnload);
-  }, [storageError]);
+  }, [storageError, cache]);
 
   const isChoice = spec.kind === 'choice';
   const multiple = isChoice && spec.multiple;

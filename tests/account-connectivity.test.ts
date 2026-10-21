@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
-import { createSupabaseFetch } from '@/lib/supabase-fetch';
+import { createSupabaseFetch, proxiedSupabaseUrl } from '@/lib/supabase-fetch';
 import { accountErrorMessage } from '@/lib/account/errors';
 import worker from '../worker';
 
@@ -81,6 +81,36 @@ describe('same-origin account and question connectivity', () => {
     const response = await worker.fetch(new Request(`${gateway}/auth/v1/settings`), env);
     expect(response.status).toBe(502);
     expect(await response.json()).toEqual({ message: '登录服务暂时无法连接，请稍后重试。' });
+  });
+
+  it('relays the Realtime WebSocket upgrade with handshake headers but no site cookies', async () => {
+    const upstream = vi.fn(async (url: URL, init: RequestInit) => {
+      const headers = new Headers(init.headers);
+      expect(url.href).toBe(`${project}/realtime/v1/websocket?apikey=sb_publishable_test&vsn=2.0.0`);
+      expect(headers.get('Upgrade')).toBe('websocket');
+      expect(headers.get('Sec-WebSocket-Key')).toBe('dGhlIHNhbXBsZSBub25jZQ==');
+      expect(headers.has('Cookie')).toBe(false);
+      return new Response(null, { status: 403 });
+    });
+    vi.stubGlobal('fetch', upstream);
+    const socket = (headers: Record<string, string>) => worker.fetch(new Request(`${gateway}/realtime/v1/websocket?apikey=sb_publishable_test&vsn=2.0.0`, {
+      headers: { Origin: 'https://exam.any1.tech', Cookie: 'site=private', ...headers },
+    }), env);
+    expect((await socket({})).status).toBe(426);
+    expect(upstream).not.toHaveBeenCalled();
+    const refused = await socket({ Upgrade: 'websocket', 'Sec-WebSocket-Key': 'dGhlIHNhbXBsZSBub25jZQ==', 'Sec-WebSocket-Version': '13' });
+    expect(refused.status).toBe(403);
+    expect(upstream).toHaveBeenCalledOnce();
+    expect((await worker.fetch(new Request(`${gateway}/realtime/v1/websocket`, { headers: { Upgrade: 'websocket', Origin: 'https://evil.example' } }), env)).status).toBe(403);
+    expect(upstream).toHaveBeenCalledOnce();
+  });
+
+  it('rewrites Realtime socket URLs onto the same-origin gateway', () => {
+    expect(proxiedSupabaseUrl(project, gateway, 'wss://hqtpzhefihdwllbqjeot.supabase.co/realtime/v1/websocket?apikey=k&vsn=2.0.0'))
+      .toBe('wss://exam.any1.tech/api/supabase/realtime/v1/websocket?apikey=k&vsn=2.0.0');
+    expect(proxiedSupabaseUrl(project, 'http://localhost:8787/api/supabase', 'wss://hqtpzhefihdwllbqjeot.supabase.co/realtime/v1/websocket'))
+      .toBe('ws://localhost:8787/api/supabase/realtime/v1/websocket');
+    expect(proxiedSupabaseUrl(project, gateway, 'wss://other.example/socket')).toBe('wss://other.example/socket');
   });
 
   it('keeps static document requests on the assets binding', async () => {
