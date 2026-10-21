@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { Option, Question, Solution } from '@/components/question';
-import { ExamArticle, EnglishReading } from '@/components/english-reading';
+import { ExamArticle, EnglishReading, Paragraph, Translation } from '@/components/english-reading';
 
 const article = createElement(ExamArticle, { title: 'A familiar park', children:
   createElement('p', null, 'Notice ', createElement('em', null, 'the details nearby.')) });
@@ -47,6 +47,41 @@ describe('English reading composition', () => {
       article, createElement(Question, { id: 'q3', type: 'essay' }, 'An unfinished exercise')));
     expect(html).toContain('An unfinished exercise');
     expect(html).not.toContain('aria-haspopup="dialog"');
+  });
+
+  it('pairs each paragraph with its translation behind a 翻译 toggle beside 原文', () => {
+    const translated = createElement(ExamArticle, { title: 'A familiar park', titleTranslation: '熟悉的公园', children: [
+      createElement(Paragraph, { key: 1, children: [
+        createElement('p', { key: 'en' }, 'Notice the details nearby.'),
+        createElement(Translation, { key: 'zh', children: '留意身边的细节。' }),
+      ] }),
+      createElement(Paragraph, { key: 2, children: createElement('p', null, 'An untranslated paragraph.') }),
+    ] });
+    const html = renderToStaticMarkup(createElement(EnglishReading, null,
+      translated, question('Why pay attention?', 'q1')));
+    // Both toggles (switcher icon and labelled pill) start off.
+    expect(html.match(/aria-pressed="false"[^>]*title="逐段显示中英对照翻译"/g)).toHaveLength(2);
+    expect(html).not.toContain('data-translation=""');
+    // Translations are rendered once, paired inside their own paragraph.
+    expect(html.match(/data-reading-paragraph=""/g)).toHaveLength(2);
+    expect(html.match(/data-reading-translation=""/g)).toHaveLength(2);
+    expect(html).toMatch(/Notice the details nearby\.<\/p><\/div><div[^>]*lang="zh-CN"[^>]*>留意身边的细节。/);
+    expect(html).toContain('熟悉的公园');
+    expect(html.indexOf('>翻译<')).toBeLessThan(html.indexOf('data-reading-article'));
+  });
+
+  it('offers no 翻译 toggle for an article without translations', () => {
+    const html = renderToStaticMarkup(createElement(EnglishReading, null,
+      article, question('Why pay attention?', 'q1')));
+    expect(html).not.toContain('对照翻译');
+  });
+
+  it('allows a single translation per paragraph', () => {
+    expect(() => renderToStaticMarkup(createElement(Paragraph, { children: [
+      createElement(Translation, { key: 1, children: '一' }),
+      createElement(Translation, { key: 2, children: '二' }),
+    ] })))
+      .toThrow(/at most one Translation/);
   });
 
   it('requires exactly one article rather than silently dropping authored content', () => {
