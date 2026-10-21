@@ -1,4 +1,4 @@
-import { IDBFactory, IDBObjectStore } from 'fake-indexeddb';
+import { IDBFactory, IDBObjectStore, forceCloseDatabase } from 'fake-indexeddb';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   QuestionDatabase, QuestionSyncEngine, namespaceForUser, questionKey,
@@ -88,6 +88,40 @@ afterEach(() => {
 });
 
 describe('question browser database', () => {
+  it('reopens an interrupted connection without losing answers, attempts or subscriptions', async () => {
+    const factory = new IDBFactory();
+    const originalOpen = factory.open.bind(factory);
+    let connection: IDBDatabase;
+    const opening = vi.spyOn(factory, 'open').mockImplementation((...args) => {
+      const result = originalOpen(...args);
+      result.addEventListener('success', () => { connection = result.result; });
+      return result;
+    });
+    const db = await open(factory);
+    const changed = vi.fn();
+    db.subscribe(changed);
+    await db.save(ACCOUNT, identity, submitted('first'), { submission: true });
+    // fake-indexeddb 6.2.6 declares a constructor here, but accepts a connection.
+    forceCloseDatabase(connection! as unknown as Parameters<typeof forceCloseDatabase>[0]);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await Promise.all([
+      db.save(ACCOUNT, identity, submitted('second', 2), { submission: true }),
+      db.save('guest', { ...identity, questionId: 'other' }, draft('parallel')),
+    ]);
+    expect(opening).toHaveBeenCalledTimes(2);
+    expect((await db.get(ACCOUNT, identity))?.state).toEqual(submitted('second', 2));
+    expect(await db.listAttempts(ACCOUNT)).toHaveLength(2);
+    expect((await db.stats(ACCOUNT)).pending).toBe(2);
+    expect(changed).toHaveBeenCalledTimes(3);
+    // A normal close does not dispatch a close event; transaction creation must recover too.
+    connection!.close();
+    expect((await db.get(ACCOUNT, identity))?.state).toEqual(submitted('second', 2));
+    expect(opening).toHaveBeenCalledTimes(3);
+    db.close();
+    await expect(db.get(ACCOUNT, identity)).rejects.toThrow();
+    expect(opening).toHaveBeenCalledTimes(3);
+  });
+
   it('persists offline drafts, submitted attempts and reset tombstones across reloads', async () => {
     const factory = new IDBFactory();
     const name = crypto.randomUUID();

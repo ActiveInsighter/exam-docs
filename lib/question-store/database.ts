@@ -26,9 +26,12 @@ export interface QuestionDatabaseOptions {
 export class QuestionDatabase {
   private readonly listeners = new Set<(change: DatabaseChange) => void>();
   private channel: BroadcastChannel | null = null;
+  private closed = false;
+  private disconnected = false;
+  private reconnecting: Promise<void> | null = null;
 
-  private constructor(private readonly database: IDBDatabase, broadcast: boolean) {
-    database.onversionchange = () => this.close();
+  private constructor(private database: IDBDatabase, private readonly factory: IDBFactory, broadcast: boolean) {
+    this.watchConnection(database);
     if (broadcast && typeof BroadcastChannel !== 'undefined') {
       this.channel = new BroadcastChannel(`${database.name}:changes`);
       this.channel.onmessage = (event: MessageEvent<DatabaseChange>) => {
@@ -40,7 +43,12 @@ export class QuestionDatabase {
   static async open(options: QuestionDatabaseOptions = {}): Promise<QuestionDatabase> {
     const factory = options.indexedDB ?? globalThis.indexedDB;
     if (!factory) throw new Error('此浏览器无法使用 IndexedDB，答题记录无法持久保存。');
-    const opening = factory.open(options.name ?? 'exam-docs-questions', 1);
+    const db = await this.openConnection(factory, options.name ?? 'exam-docs-questions');
+    return new QuestionDatabase(db, factory, options.broadcast !== false);
+  }
+
+  private static openConnection(factory: IDBFactory, name: string): Promise<IDBDatabase> {
+    const opening = factory.open(name, 1);
     opening.onupgradeneeded = () => {
       const db = opening.result;
       const records = db.createObjectStore('records', { keyPath: ['namespace', 'key'] });
@@ -51,7 +59,7 @@ export class QuestionDatabase {
       for (const store of [records, operations, attempts, conflicts]) store.createIndex('namespace', 'namespace');
       operations.createIndex('question', ['namespace', 'key']);
     };
-    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+    return new Promise<IDBDatabase>((resolve, reject) => {
       let blocked = false;
       opening.onsuccess = () => {
         if (blocked) opening.result.close();
@@ -63,12 +71,42 @@ export class QuestionDatabase {
         reject(new Error('数据库升级被其他标签页阻止，请关闭旧标签页后重试。'));
       };
     });
-    return new QuestionDatabase(db, options.broadcast !== false);
+  }
+
+  private watchConnection(db: IDBDatabase): void {
+    db.onclose = () => { if (this.database === db) this.disconnected = true; };
+    db.onversionchange = () => {
+      db.close();
+      if (this.database === db) this.disconnected = true;
+    };
+  }
+
+  private reconnect(): Promise<void> {
+    if (this.closed) return Promise.reject(new Error('Browser database is closed'));
+    return this.reconnecting ??= (async () => {
+      this.database.close();
+      const db = await QuestionDatabase.openConnection(this.factory, this.database.name);
+      if (this.closed) { db.close(); throw new Error('Browser database is closed'); }
+      this.database = db;
+      this.disconnected = false;
+      this.watchConnection(db);
+    })().finally(() => { this.reconnecting = null; });
   }
 
   private async transaction<T>(stores: readonly typeof STORES[number][], mode: IDBTransactionMode,
-    run: (tx: IDBTransaction) => Promise<T>): Promise<T> {
-    const tx = this.database.transaction([...stores], mode);
+    run: (tx: IDBTransaction) => Promise<T>, retry = true): Promise<T> {
+    if (this.closed) throw new Error('Browser database is closed');
+    if (this.disconnected || this.reconnecting) await this.reconnect();
+    let tx: IDBTransaction;
+    try {
+      tx = this.database.transaction([...stores], mode);
+    } catch (error) {
+      // No transaction started, so reconnecting cannot duplicate a submission.
+      if (!retry || !(error instanceof DOMException) || error.name !== 'InvalidStateError') throw error;
+      this.disconnected = true;
+      await this.reconnect();
+      return this.transaction(stores, mode, run, false);
+    }
     const completed = new Promise<void>((resolve, reject) => {
       tx.oncomplete = () => resolve();
       tx.onabort = () => reject(tx.error ?? new Error('Browser database transaction aborted'));
@@ -81,6 +119,11 @@ export class QuestionDatabase {
     } catch (error) {
       try { tx.abort(); } catch { /* already complete */ }
       await completed.catch(() => undefined);
+      // Only replay a rolled-back transaction after a connection interruption.
+      if (retry && !this.closed && this.disconnected) {
+        await this.reconnect();
+        return this.transaction(stores, mode, run, false);
+      }
       throw error;
     }
   }
@@ -96,6 +139,7 @@ export class QuestionDatabase {
   }
 
   close(): void {
+    this.closed = true;
     this.channel?.close();
     this.channel = null;
     this.listeners.clear();

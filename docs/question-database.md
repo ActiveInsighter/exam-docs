@@ -84,6 +84,18 @@ RPC 参数为 `p_operations`、`p_cursor`、`p_limit`。服务端在单个事务
 
 ## 本地开发与云端启用
 
+浏览器关闭 IndexedDB 连接后，下一次读写会重新连接并在安全范围内重试一次，
+不会清空本机数据库。保存失败时保留当前页面中的答案，区分空间不足、权限拒绝
+和连接中断，并提供「重试保存」；失败答案未保存前刷新或关闭页面会触发浏览器
+离开确认。刷新前仍应先重试或复制答案，刷新无法恢复从未写入本机的结果。
+
+无需完整构建即可验证连接恢复、写入回滚、原答案重试及刷新恢复：
+
+```bash
+QUESTION_BROWSER_MODULES=/包含Playwright的目录 \
+node scripts/verify-question-storage-recovery-browser.mjs
+```
+
 浏览器回归脚本可复用现有 Playwright 安装，检查真实 IndexedDB、刷新恢复、重做历史、多标签页、断网作答、手机弹窗和备份下载：
 
 ```bash
