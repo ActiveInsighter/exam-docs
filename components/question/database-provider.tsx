@@ -1,33 +1,31 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { useAccount } from '@/components/account';
-import type { AccountIdentity } from '@/lib/account/types';
-import { QuestionDatabase, QuestionSyncEngine } from '@/lib/question-store';
-import { namespaceForUser, type QuestionNamespace } from '@/lib/question-store/types';
-import { createQuestionTransport, getQuestionSupabaseClient } from '@/lib/question-supabase';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useAccount, useAccountMenuSection } from '@/components/account';
+import { QuestionAnswerCache, QuestionDatabase, QuestionSyncEngine } from '@/lib/question-store';
+import { namespaceForUser, type QuestionSyncStatus } from '@/lib/question-store/types';
+import { createQuestionTransport, getQuestionSupabaseClient, subscribeQuestionRealtime } from '@/lib/question-supabase';
+import { questionAccountSection } from './account-section';
+import { QuestionConflictDialog } from './conflict-dialog';
+import { LOCAL_STATUS, QuestionDatabaseContextValue, type QuestionDatabaseContext } from './database-context';
 
-type DatabaseContext = {
-  database: QuestionDatabase | null;
-  namespace: QuestionNamespace;
-  user: AccountIdentity | null;
-  cachedAccount: AccountIdentity | null;
-  engine: QuestionSyncEngine | null;
-  ready: boolean;
-  error: string | null;
-};
+export { useQuestionDatabase } from './database-context';
 
-const Context = createContext<DatabaseContext | null>(null);
-
-export function useQuestionDatabase() { return useContext(Context); }
-
+/**
+ * Site-wide owner of the reader's answers: one IndexedDB connection, one
+ * memory cache per account namespace, and (when signed in) one sync engine
+ * woken by edits and by realtime pokes from the account's other devices.
+ */
 export function QuestionDatabaseProvider({ children }: { children: ReactNode }) {
   const { user, cachedUser: cachedAccount, error: accountError } = useAccount();
   const [database, setDatabase] = useState<QuestionDatabase | null>(null);
   const [engine, setEngine] = useState<QuestionSyncEngine | null>(null);
+  const [status, setStatus] = useState<QuestionSyncStatus>(LOCAL_STATUS);
   const [localReady, setLocalReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [conflictsOpen, setConflictsOpen] = useState(false);
   const namespace = namespaceForUser(user?.id ?? cachedAccount?.id);
+  useAccountMenuSection(questionAccountSection);
 
   useEffect(() => {
     let disposed = false;
@@ -46,22 +44,49 @@ export function QuestionDatabaseProvider({ children }: { children: ReactNode }) 
     return () => { disposed = true; opened?.close(); };
   }, []);
 
+  const [cache, setCache] = useState<QuestionAnswerCache | null>(null);
+  // Created in an effect so a (Strict Mode) remount disposes exactly the cache it created.
+  useEffect(() => {
+    if (!localReady) return;
+    const created = new QuestionAnswerCache(database, namespace);
+    setCache(created);
+    return () => { created.dispose(); setCache((current) => (current === created ? null : current)); };
+  }, [localReady, database, namespace]);
+
   useEffect(() => {
     if (!database || !user) { setEngine(null); return; }
     let disposed = false;
     let active: QuestionSyncEngine | undefined;
+    let stopRealtime: (() => void) | undefined;
     void getQuestionSupabaseClient().then((client) => {
       if (disposed) return;
-      active = new QuestionSyncEngine(database, namespace, createQuestionTransport(client, user.id));
-      setEngine(active);
-      active.start();
+      const current = new QuestionSyncEngine(database, namespace, createQuestionTransport(client, user.id));
+      active = current;
+      setEngine(current);
+      current.start();
+      stopRealtime = subscribeQuestionRealtime(client, user.id, {
+        onChanged: (cursor) => current.poke(cursor),
+        onLive: (live) => current.setLive(live),
+      });
     }).catch(() => {
       if (!disposed) setError('云同步暂时无法启动，答题继续保存在本机。');
     });
-    return () => { disposed = true; active?.stop(); };
+    return () => { disposed = true; stopRealtime?.(); active?.stop(); };
   }, [database, namespace, user?.id]);
 
-  const value = useMemo(() => ({ database, namespace, user, cachedAccount, engine, ready: localReady, error: error ?? accountError }),
-    [database, namespace, user, cachedAccount, engine, localReady, error, accountError]);
-  return <Context.Provider value={value}>{children}</Context.Provider>;
+  useEffect(() => {
+    if (engine) return engine.subscribe(setStatus);
+    setStatus(LOCAL_STATUS);
+  }, [engine]);
+
+  const value = useMemo<QuestionDatabaseContext>(() => ({
+    database, cache, namespace, user, cachedAccount, engine, status, ready: localReady,
+    error: error ?? accountError, openConflicts: () => setConflictsOpen(true),
+  }), [database, cache, namespace, user, cachedAccount, engine, status, localReady, error, accountError]);
+  return (
+    <QuestionDatabaseContextValue.Provider value={value}>
+      {children}
+      <QuestionConflictDialog open={conflictsOpen} onOpenChange={setConflictsOpen} />
+    </QuestionDatabaseContextValue.Provider>
+  );
 }

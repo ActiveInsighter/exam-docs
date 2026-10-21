@@ -88,6 +88,8 @@ export interface SyncResponse {
   attempts: RemoteAttempt[];
   cursor: string;
   hasMore: boolean;
+  /** The server restarted the feed from zero because the sent cursor was ahead of the account. */
+  reset?: boolean;
 }
 
 export interface QuestionSyncTransport {
@@ -97,7 +99,10 @@ export interface QuestionSyncTransport {
 export interface DatabaseChange {
   namespace: QuestionNamespace;
   kind: 'local' | 'sync';
-  key?: string;
+  /** Question keys whose current record may have changed; absent means "any". */
+  keys?: string[];
+  /** A submission or explicit choice that should reach the cloud without debounce. */
+  urgent?: boolean;
 }
 
 export interface SyncMetadata {
@@ -115,6 +120,18 @@ export interface QuestionSyncStatus {
   conflicts: number;
   lastSyncedAt: string | null;
   error: string | null;
+  /** The realtime channel is connected, so other devices' writes arrive within seconds. */
+  live: boolean;
+}
+
+/** Counts shown in the account menu. */
+export interface QuestionSummary {
+  /** Questions with a non-empty current answer. */
+  answered: number;
+  /** Questions whose current answer is submitted. */
+  submitted: number;
+  /** Immutable submission history entries. */
+  attempts: number;
 }
 
 export function namespaceForUser(userId?: string | null): QuestionNamespace {

@@ -13,7 +13,8 @@ export function validateSyncResponse(value: unknown): asserts value is SyncRespo
   if (!value || typeof value !== 'object') throw new Error('云同步返回格式有误');
   const data = value as SyncResponse;
   if (!Array.isArray(data.receipts) || !Array.isArray(data.changes) || !Array.isArray(data.attempts) ||
-    typeof data.hasMore !== 'boolean' || typeof data.cursor !== 'string' || !/^\d+$/.test(data.cursor)) {
+    typeof data.hasMore !== 'boolean' || typeof data.cursor !== 'string' || !/^\d+$/.test(data.cursor) ||
+    (data.reset !== undefined && typeof data.reset !== 'boolean')) {
     throw new Error('云同步返回格式有误');
   }
   for (const record of data.changes) validateRemote(record);
@@ -44,9 +45,49 @@ export function createQuestionTransport(client: SupabaseClient, userId: string):
         p_cursor: cursor ?? '0',
         p_limit: limit,
       }).setHeader('Authorization', `Bearer ${session.access_token}`);
-      if (error) throw new Error(`云同步失败：${error.message}`);
+      if (error) {
+        if (/jwt|token/i.test(`${error.code} ${error.message}`) || error.code === 'PGRST301') throw new Error('登录已失效，请重新登录后继续同步。');
+        if (/function .* does not exist|PGRST202/i.test(`${error.code} ${error.message}`)) throw new Error('云端同步服务正在升级，答案已保存在本机，稍后自动重试。');
+        throw new Error(`云同步失败：${error.message}`);
+      }
       validateSyncResponse(data);
       return data;
     },
+  };
+}
+
+export interface QuestionRealtimeHandlers {
+  /** The account feed advanced to `cursor` on another device or tab. */
+  onChanged(cursor: string): void;
+  /** The private channel is joined (true) or interrupted (false). */
+  onLive(live: boolean): void;
+}
+
+/**
+ * Listens to the account's private broadcast topic. The database sends a poke
+ * after each committed sync; the payload holds only the new cursor, never
+ * answers, and RLS on realtime.messages admits only the topic's owner.
+ */
+export function subscribeQuestionRealtime(client: SupabaseClient, userId: string, handlers: QuestionRealtimeHandlers): () => void {
+  let disposed = false;
+  let channel: ReturnType<SupabaseClient['channel']> | undefined;
+  void (async () => {
+    const { data: { session } } = await client.auth.getSession();
+    if (disposed || session?.user.id !== userId) return;
+    // Private channels authorize the join with the user's JWT, not the publishable key.
+    await client.realtime.setAuth(session.access_token);
+    if (disposed) return;
+    channel = client.channel(`exam-sync:${userId}`, { config: { private: true } })
+      .on('broadcast', { event: 'changed' }, (message: { payload?: { cursor?: unknown } }) => {
+        const cursor = message.payload?.cursor;
+        if (typeof cursor === 'string') handlers.onChanged(cursor);
+      })
+      .subscribe((status) => {
+        if (!disposed) handlers.onLive(status === 'SUBSCRIBED');
+      });
+  })().catch(() => { if (!disposed) handlers.onLive(false); });
+  return () => {
+    disposed = true;
+    if (channel) void client.removeChannel(channel);
   };
 }
