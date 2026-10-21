@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRightIcon, BookOpenTextIcon, ListChecksIcon, Maximize2Icon, Minimize2Icon } from 'lucide-react';
+import { ArrowRightIcon, BookOpenTextIcon, LanguagesIcon, ListChecksIcon, Maximize2Icon, Minimize2Icon } from 'lucide-react';
 import {
   type CSSProperties,
   type RefObject,
@@ -92,14 +92,20 @@ function useSplit() {
   return [split, setSplit, commit] as const;
 }
 
+/** Numbered paragraphs of the passage: authored <Paragraph>s or bare <p>s. */
+const PARAGRAPHS = ':scope > p, :scope > [data-reading-paragraph]';
+
 /** Paragraphs, words and an estimated reading time, read from the passage. */
 function useArticleStats(ref: RefObject<HTMLElement | null>) {
   const [stats, setStats] = useState<string | null>(null);
   useEffect(() => {
-    const passage = ref.current?.querySelector('[lang="en"] p')?.parentElement;
+    const passage = ref.current?.querySelector<HTMLElement>('[data-reading-passage]');
     if (!passage) return;
-    const paragraphs = passage.querySelectorAll(':scope > p').length;
-    const words = (passage.textContent ?? '').match(/[A-Za-z]+(?:['’-][A-Za-z]+)*/g)?.length ?? 0;
+    const paragraphs = passage.querySelectorAll(PARAGRAPHS).length;
+    // Count the English only, never the hidden translations.
+    const english = passage.cloneNode(true) as HTMLElement;
+    english.querySelectorAll('[data-reading-translation]').forEach((node) => node.remove());
+    const words = (english.textContent ?? '').match(/[A-Za-z]+(?:['’-][A-Za-z]+)*/g)?.length ?? 0;
     if (words === 0) return;
     // A brisk exam reading pace of about 150 words per minute.
     setStats(`${paragraphs} 段 · ${words} 词 · 约 ${Math.max(1, Math.round(words / 150))} 分钟`);
@@ -145,6 +151,27 @@ function QuestionNav({
   );
 }
 
+function TranslationToggle({ on, onToggle, className, compact }: {
+  on: boolean;
+  onToggle: () => void;
+  className?: string;
+  compact?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      className={cn(compact ? styles.iconButton : styles.translateButton, className)}
+      onClick={onToggle}
+      aria-pressed={on}
+      aria-label={compact ? (on ? '隐藏对照翻译' : '显示对照翻译') : undefined}
+      title={on ? '隐藏对照翻译' : '逐段显示中英对照翻译'}
+    >
+      <LanguagesIcon aria-hidden="true" />
+      {compact ? null : '翻译'}
+    </button>
+  );
+}
+
 function FocusToggle({ focus, onToggle, className }: { focus: boolean; onToggle: () => void; className?: string }) {
   return (
     <button
@@ -168,8 +195,18 @@ function FocusToggle({ focus, onToggle, className }: { focus: boolean; onToggle:
  * its own inside a card sized to the viewport, with a draggable divider.
  * Narrow containers: one pane at a time behind a sticky 原文 / 题目 switch,
  * scrolling with the page. Focus mode lifts the card above the page.
+ * The 翻译 toggle (beside 原文) reveals each paragraph's Chinese translation.
  */
-export function ReadingWorkspace({ article, children }: { article: ReactNode; children: ReactNode }) {
+export function ReadingWorkspace({
+  article,
+  translatable = false,
+  children,
+}: {
+  article: ReactNode;
+  /** The article carries <Translation>s, so the 翻译 toggle is offered. */
+  translatable?: boolean;
+  children: ReactNode;
+}) {
   const baseId = useId();
   const cardRef = useRef<HTMLDivElement>(null);
   const panesRef = useRef<HTMLDivElement>(null);
@@ -178,6 +215,7 @@ export function ReadingWorkspace({ article, children }: { article: ReactNode; ch
   const [view, setView] = useState<View>('article');
   const [focus, setFocus] = useState(false);
   const [resizing, setResizing] = useState(false);
+  const [translated, setTranslated] = useState(false);
   const [split, setSplit, commitSplit] = useSplit();
   const { items, active, pin } = useQuestionNav(questionsRef);
   const stats = useArticleStats(articleRef);
@@ -212,6 +250,39 @@ export function ReadingWorkspace({ article, children }: { article: ReactNode; ch
     if (saved !== undefined) scroller.scrollTop = Math.max(saved, floor);
     else if (scroller.scrollTop > floor) scroller.scrollTop = floor;
   }, [view]);
+
+  /*
+   * Showing or hiding translations reflows the passage. Keep the paragraph at
+   * the top of the visible article where it was, so the reader never loses
+   * their place (native scroll anchoring is off on the passage for this).
+   */
+  const anchor = useRef<{ node: HTMLElement; top: number } | null>(null);
+
+  const toggleTranslation = useCallback(() => {
+    const scroller = articleRef.current;
+    const card = cardRef.current;
+    if (scroller && card) {
+      const visibleTop = scrollsInside(scroller)
+        ? scroller.getBoundingClientRect().top
+        : Math.max(0, card.querySelector('[data-reading-switcher]')?.getBoundingClientRect().bottom ?? 0);
+      const passage = scroller.querySelector('[data-reading-passage]');
+      const node = Array.from(passage?.querySelectorAll<HTMLElement>(PARAGRAPHS) ?? [])
+        .find((paragraph) => paragraph.getBoundingClientRect().bottom > visibleTop);
+      anchor.current = node ? { node, top: node.getBoundingClientRect().top } : null;
+    }
+    setTranslated((on) => !on);
+  }, []);
+
+  useLayoutEffect(() => {
+    const saved = anchor.current;
+    anchor.current = null;
+    const card = cardRef.current;
+    if (!saved || !card || !saved.node.isConnected) return;
+    const shift = saved.node.getBoundingClientRect().top - saved.top;
+    if (Math.abs(shift) < 1) return;
+    const scroller = scrollsInside(articleRef.current) ? articleRef.current! : pageScroller(card);
+    scroller.scrollTop += shift;
+  }, [translated]);
 
   const pickQuestion = useCallback((id: string) => {
     const pane = questionsRef.current;
@@ -356,6 +427,7 @@ export function ReadingWorkspace({ article, children }: { article: ReactNode; ch
         data-view={view}
         data-focus={focus ? '' : undefined}
         data-resizing={resizing ? '' : undefined}
+        data-translation={translated ? '' : undefined}
         tabIndex={-1}
         aria-label="英语阅读理解"
       >
@@ -386,6 +458,9 @@ export function ReadingWorkspace({ article, children }: { article: ReactNode; ch
               {progress ? <span className={styles.segmentCount}>{progress}</span> : null}
             </button>
           </div>
+          {translatable ? (
+            <TranslationToggle on={translated} onToggle={toggleTranslation} className={styles.switcherTranslate} compact />
+          ) : null}
           <FocusToggle focus={focus} onToggle={toggleFocus} />
         </div>
 
@@ -400,6 +475,7 @@ export function ReadingWorkspace({ article, children }: { article: ReactNode; ch
                 <BookOpenTextIcon aria-hidden="true" />
                 原文
               </span>
+              {translatable ? <TranslationToggle on={translated} onToggle={toggleTranslation} /> : null}
               {stats ? <span className={styles.stats}>{stats}</span> : null}
             </div>
             <div className={styles.progress} aria-hidden="true"><span /></div>

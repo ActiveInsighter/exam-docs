@@ -8,7 +8,12 @@
  *   < 48rem   one pane at a time behind a sticky 原文 / 题目 switch; the page
  *             scrolls (no nested scrolling on phones and narrow columns)
  *   ≥ 48rem   side by side; the card fits the visible panel and each pane
- *             scrolls on its own, chaining to the page at either end
+ *             scrolls on its own (scrollbars hidden), chaining to the page at
+ *             either end
+ *
+ * The 翻译 toggle sets data-translation on the card, revealing every
+ * paragraph's Chinese translation: stacked below the English, or beside it
+ * once the article pane (its own size container) is wide enough.
  */
 
 .card {
@@ -21,7 +26,7 @@
   --reading-sticky-top: var(--reading-header);
   --reading-switcher-height: 3.5rem;
 
-  container-type: inline-size;
+  container: reading-card / inline-size;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -95,7 +100,8 @@
   color: var(--foreground);
   box-shadow: 0 1px 2px rgb(0 0 0 / 8%), 0 1px 1px rgb(0 0 0 / 4%);
 }
-.segment:focus-visible, .iconButton:focus-visible, .navItem:focus-visible, .startButton:focus-visible {
+.segment:focus-visible, .iconButton:focus-visible, .navItem:focus-visible, .startButton:focus-visible,
+.translateButton:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 1px;
 }
@@ -124,6 +130,35 @@
 .iconButton svg { width: 1rem; height: 1rem; }
 .iconButton:hover { background: var(--ui-fill-hover); color: var(--foreground); }
 
+/* The 翻译 toggle: a compact icon in the switcher, a labelled pill beside 原文. */
+.switcherTranslate[aria-pressed='true'] { background: var(--ui-fill-strong); color: var(--foreground); }
+.card[data-view='questions'] .switcherTranslate { display: none; }
+
+.translateButton {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.3125rem;
+  height: 1.75rem;
+  margin-left: -0.25rem;
+  padding-inline: 0.5rem 0.625rem;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--ui-fill-strong);
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: background-color var(--ui-duration) var(--ui-ease), color var(--ui-duration) var(--ui-ease), box-shadow var(--ui-duration) var(--ui-ease);
+  cursor: pointer;
+}
+.translateButton svg { width: 0.875rem; height: 0.875rem; }
+.translateButton:hover { background: var(--ui-fill-hover); color: var(--foreground); }
+.translateButton[aria-pressed='true'] {
+  background: var(--primary);
+  box-shadow: none;
+  color: var(--primary-foreground);
+}
+.translateButton[aria-pressed='true']:hover { opacity: 0.88; }
+
 /* ---------- Panes ---------- */
 
 .panes {
@@ -151,6 +186,11 @@
 
 .card[data-view] .pane {
   animation: reading-pane-in 220ms var(--ui-ease);
+}
+
+/* Lets the translation layout follow the article pane's own width. */
+.pane[data-pane='article'] {
+  container: reading-article / inline-size;
 }
 
 @keyframes reading-pane-in {
@@ -288,6 +328,8 @@
 
 .passage {
   --line: calc(1.125rem * 1.8);
+  /* The translation toggle keeps the reader's paragraph in place itself. */
+  overflow-anchor: none;
   counter-reset: reading-paragraph;
   padding-left: 1.75rem;
   font-family: var(--reading-serif);
@@ -298,15 +340,19 @@
   hyphens: manual;
 }
 
-.passage > p {
+.passage > p,
+.passage > .paragraph {
   position: relative;
   margin: 0 0 1.1em;
   counter-increment: reading-paragraph;
 }
-.passage > p:last-child { margin-bottom: 0; }
+.passage > :is(p, .paragraph):last-child { margin-bottom: 0; }
+
+.original > p { margin: 0; }
+.original > p + p { margin-top: 1.1em; }
 
 /* Paragraph numbers in the gutter, for "Paragraph 3" style questions. */
-.passage > p::before {
+.passage > :is(p, .paragraph)::before {
   content: counter(reading-paragraph);
   position: absolute;
   top: 0;
@@ -321,7 +367,62 @@
   text-align: right;
   transition: color var(--ui-duration) var(--ui-ease);
 }
-.passage > p:hover::before { color: var(--foreground); }
+.passage > :is(p, .paragraph):hover::before { color: var(--foreground); }
+
+/* ---------- Translation ---------- */
+
+.translation,
+.titleTranslation {
+  display: none;
+  font-family: var(--font-sans);
+  overflow-wrap: anywhere;
+}
+
+.translation {
+  margin-top: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.625rem;
+  background: var(--ui-fill);
+  color: color-mix(in oklch, var(--foreground) 82%, transparent);
+  font-size: 0.9375rem;
+  line-height: 1.75;
+}
+
+.titleTranslation {
+  margin: -0.75rem 0 1.25rem;
+  color: var(--muted-foreground);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.card[data-translation] .translation,
+.card[data-translation] .titleTranslation {
+  display: block;
+  animation: reading-translation-in 200ms var(--ui-ease);
+}
+
+.card[data-translation] .passage > .paragraph { margin-bottom: 1.5em; }
+.card[data-translation] .passage > :is(p, .paragraph):last-child { margin-bottom: 0; }
+
+@keyframes reading-translation-in {
+  from { opacity: 0; transform: translateY(-2px); }
+}
+
+/* A wide article pane sets English and Chinese side by side, row by row. */
+@container reading-article (min-width: 50rem) {
+  .card[data-translation] .paragraph {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    column-gap: 1.5rem;
+  }
+  .card[data-translation] .translation {
+    margin-top: 0;
+    padding: 0.1875rem 0 0 1.25rem;
+    border-left: 1px solid var(--border);
+    border-radius: 0;
+    background: none;
+  }
+}
 
 .startButton {
   display: flex;
@@ -384,9 +485,11 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--ui-scrollbar-thumb) transparent;
+  scrollbar-width: none;
 }
+
+/* Panes scroll without visible scrollbars (WebKit needs its own rule). */
+.scroller::-webkit-scrollbar { display: none; }
 
 @media (min-width: 48rem) {
   .card[data-focus] {
@@ -405,7 +508,7 @@
 
 /* ---------- Side by side ---------- */
 
-@container (min-width: 48rem) {
+@container reading-card (min-width: 48rem) {
   .switcher { display: none; }
   .startButton { display: none; }
   .headerFocus { display: inline-grid; width: 2rem; height: 2rem; }
@@ -443,20 +546,21 @@
     overflow-y: auto;
     /* Native chaining: at either end the page continues to scroll. */
     overscroll-behavior-x: contain;
-    scrollbar-gutter: stable;
-    scrollbar-width: thin;
-    scrollbar-color: var(--ui-scrollbar-thumb) transparent;
+    /* No scrollbar; the article header's progress bar shows the position. */
+    scrollbar-width: none;
     /* Soft edges where content runs under the pane header and bottom. */
     mask-image: linear-gradient(to bottom, transparent 0, #000 0.75rem, #000 calc(100% - 1.5rem), transparent 100%);
   }
 
-  .pane[data-pane='questions'] .scroller { padding-top: 0.75rem; padding-inline: 1.25rem 1rem; }
+  .pane[data-pane='questions'] .scroller { padding-top: 0.75rem; padding-inline: 1.25rem; }
 
   .pane[data-pane='article'] .scroller > .article,
   .pane[data-pane='article'] .scroller > * {
     max-width: 44rem;
     margin-inline: auto;
   }
+  /* Room for English and Chinese side by side when the pane allows it. */
+  .card[data-translation] .pane[data-pane='article'] .scroller > * { max-width: 76rem; }
 
   .pane[data-pane='questions'] [data-exam-question] {
     scroll-margin-top: 0.75rem;
@@ -529,15 +633,17 @@
 }
 
 /* Very narrow phones: tighter gutters. */
-@container (max-width: 24rem) {
+@container reading-card (max-width: 24rem) {
   .scroller { padding-inline: 0.875rem; }
   .passage { padding-left: 1.375rem; font-size: 1.0625rem; --line: calc(1.0625rem * 1.8); }
-  .passage > p::before { left: -1.375rem; width: 0.875rem; }
+  .passage > :is(p, .paragraph)::before { left: -1.375rem; width: 0.875rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .card[data-view] .pane,
   .card[data-focus],
+  .card[data-translation] .translation,
+  .card[data-translation] .titleTranslation,
   .backdrop {
     animation: none;
   }

@@ -1,5 +1,5 @@
 import { Blank, Option, Question, Solution } from '@/components/question';
-import { EnglishReading, ExamArticle } from '@/components/english-reading';
+import { EnglishReading, ExamArticle, Paragraph, Translation } from '@/components/english-reading';
 import { Mermaid } from '@/components/mdx/mermaid';
 import * as AccordionComponents from 'fumadocs-ui/components/accordion';
 import * as FilesComponents from 'fumadocs-ui/components/files';
@@ -19,6 +19,8 @@ import type { MDXComponents } from 'mdx/types';
  * exercise components: <Question id type> declares the interaction (single /
  * multiple / boolean / blank / essay), <Option correct> and <Blank answer>
  * carry the key, and <Solution> holds the reference answer shown in the dialog.
+ * <EnglishReading> pairs one <ExamArticle> with questions; its <Paragraph>s
+ * may each hold a <Translation> for the card's 中英对照 toggle.
  */
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -33,6 +35,8 @@ export function getMDXComponents(components?: MDXComponents) {
     Solution,
     EnglishReading,
     ExamArticle,
+    Paragraph,
+    Translation,
     Mermaid,
     TypeTable,
     ...components,
