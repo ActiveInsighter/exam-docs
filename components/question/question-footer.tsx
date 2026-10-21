@@ -130,7 +130,10 @@ export function QuestionFooter({
     >
       <div role="status" aria-live="polite" className="min-w-0 flex-1">
         <AttemptStatusView />
-        {state?.storageError ? <p role="alert" className="mt-1 text-sm text-destructive">{state.storageError}</p> : null}
+        {state?.storageError ? <div className="mt-1 flex flex-wrap items-center gap-2">
+          <p role="alert" className="text-sm text-destructive">{state.storageError}</p>
+          <Button variant="outline" size="sm" onClick={state.retryStorage}>重试保存</Button>
+        </div> : null}
       </div>
       {showSolution ? <QuestionSolutionDialog
         question={question}

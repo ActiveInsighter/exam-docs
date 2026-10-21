@@ -19,6 +19,7 @@ import {
 } from './grading';
 import { useQuestionDatabase } from './database-provider';
 import { questionKey, type AnswerState, type QuestionIdentity } from '@/lib/question-store/types';
+import { questionStorageError } from '@/lib/question-store/errors';
 
 /*
  * Per-question client state. The choice grid, the blanks, the status bar and
@@ -47,6 +48,7 @@ type QuestionState = {
   canSubmit: boolean;
   ready: boolean;
   storageError: string | null;
+  retryStorage: () => void;
   select: (letters: readonly string[]) => void;
   setValue: (index: number, value: string) => void;
   submit: () => void;
@@ -83,6 +85,7 @@ export function QuestionProvider({
     read: number;
     write: number;
     failed: boolean;
+    failedSubmission: boolean;
     disposed: boolean;
     reload: () => Promise<void>;
   } | null>(null);
@@ -100,7 +103,7 @@ export function QuestionProvider({
       questionId,
       questionRevision,
     };
-    const active = { identity: target, pending: 0, read: 0, write: 0, failed: false, disposed: false, reload: async () => {} };
+    const active = { identity: target, pending: 0, read: 0, write: 0, failed: false, failedSubmission: false, disposed: false, reload: async () => {} };
     binding.current = active;
     setStorageError(null);
     const load = async () => {
@@ -144,16 +147,35 @@ export function QuestionProvider({
     active.read += 1; // Invalidate reads that began before this keystroke.
     void database.save(namespace, target, next, { submission }).then(() => {
       if (!active.disposed && write === active.write) { active.failed = false; setStorageError(null); }
-    }).catch(() => {
+    }).catch((error: unknown) => {
       if (!active.disposed && write === active.write) {
         active.failed = true;
-        setStorageError('答案未能保存到本机，请先复制当前答案并检查浏览器存储空间。');
+        active.failedSubmission = submission;
+        setStorageError(questionStorageError(error));
       }
     }).finally(() => {
       active.pending -= 1;
       if (!active.disposed && active.pending === 0 && !active.failed) void active.reload();
     });
   }, [storage?.database, storage?.namespace]);
+
+  const retryStorage = useCallback(() => {
+    const active = binding.current;
+    if (!active || active.disposed || active.pending > 0) return;
+    if (active.failed) update(current.current, active.failedSubmission);
+    else void active.reload();
+  }, [update]);
+
+  useEffect(() => {
+    if (!storageError || !binding.current?.failed) return;
+    const beforeUnload = (event: BeforeUnloadEvent) => {
+      if (!binding.current?.failed) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', beforeUnload);
+    return () => window.removeEventListener('beforeunload', beforeUnload);
+  }, [storageError]);
 
   const isChoice = spec.kind === 'choice';
   const multiple = isChoice && spec.multiple;
@@ -214,12 +236,13 @@ export function QuestionProvider({
       canSubmit,
       ready,
       storageError,
+      retryStorage,
       select,
       setValue,
       submit,
       reset,
     };
-  }, [attempt, canSubmit, ready, storageError, reset, select, selected, setValue, spec, submit, submitted, values]);
+  }, [attempt, canSubmit, ready, storageError, retryStorage, reset, select, selected, setValue, spec, submit, submitted, values]);
 
   return <QuestionContext.Provider value={value}>{children}</QuestionContext.Provider>;
 }
