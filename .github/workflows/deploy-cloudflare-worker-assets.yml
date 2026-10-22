@@ -599,7 +599,8 @@ jobs:
           READING_SCREENSHOTS: ${{ runner.temp }}/reading-browser-screenshots
         run: |
           npm install --prefix "${READING_BROWSER_MODULES}" --no-package-lock --no-audit --no-fund playwright@1.63.0
-          "${READING_BROWSER_MODULES}/node_modules/.bin/playwright" install --with-deps chromium
+          # The check runs headless, so the full Chrome for Testing download is unused.
+          "${READING_BROWSER_MODULES}/node_modules/.bin/playwright" install --with-deps --only-shell chromium
           node scripts/verify-english-reading-browser.mjs
       - name: Upload reading browser screenshots
         if: ${{ always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/codex/english-reading-layout-1012') }}
@@ -657,9 +658,10 @@ jobs:
           probe_routes() {
             local input_file="$1"
             : > "${route_failures}"
-            xargs -P 16 -n 1 bash -c '
+            # HEAD returns the same status without downloading every page body.
+            xargs -P 32 -n 1 bash -c '
             path="$1"
-            status="$(curl --silent --show-error --max-time 60 -L -o /dev/null -w "%{http_code}" "${base_url}${path}" || true)"
+            status="$(curl --silent --show-error --max-time 60 --head -L -o /dev/null -w "%{http_code}" "${base_url}${path}" || true)"
             if [[ "${status}" != "200" ]]; then
               printf "%s\t%s\n" "${path}" "${status}" >> "${route_failures}"
             fi

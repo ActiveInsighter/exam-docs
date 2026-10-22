@@ -1,11 +1,9 @@
-import { compile } from '@mdx-js/mdx';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import rehypeKatex from 'rehype-katex';
-import remarkMath from 'remark-math';
 import { describe, expect, it } from 'vitest';
 import { getShortDocSlugPath } from '../lib/doc-paths.mjs';
 import { buildStaticMarkdownDocument } from '../scripts/static-docs-markdown.mjs';
+import { findFormulaErrors } from './helpers/formula-errors';
 
 const root = join(process.cwd(), 'content/docs/math/core-questions');
 
@@ -53,14 +51,8 @@ describe('Graduate mathematics core questions', () => {
           expect(existsSync(join(process.cwd(), 'public', image)), `${page}: ${image}`).toBe(true);
         }
         try {
-          const body = content.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/u, '');
-          const result = await compile({ value: body, path: page }, {
-            remarkPlugins: [remarkMath],
-            rehypePlugins: [[rehypeKatex, { strict: 'ignore', output: 'html' }]],
-          });
-          if (String(result).includes('katex-error')) {
-            renderErrors.push(`${page}: ${result.messages.map((message) => `${String(message)}${message.cause instanceof Error ? `: ${message.cause.message}` : ''}`).join('; ') || 'KaTeX render error'}`);
-          }
+          const errors = findFormulaErrors(content.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/u, ''));
+          if (errors.length > 0) renderErrors.push(`${page}: ${errors.join('; ')}`);
         } catch (error) {
           renderErrors.push(`${page}: ${String(error)}`);
         }

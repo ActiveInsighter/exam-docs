@@ -1,9 +1,7 @@
-import { compile } from '@mdx-js/mdx';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import rehypeKatex from 'rehype-katex';
-import remarkMath from 'remark-math';
 import { describe, expect, it } from 'vitest';
+import { findFormulaErrors } from './helpers/formula-errors';
 
 const root = join(process.cwd(), 'content/docs/math/past-exams');
 
@@ -19,7 +17,7 @@ describe('Classified mathematics past exams', () => {
     ['04-线性代数', 365, 20],
     ['03-概率论与数理统计', 309, 17],
   ] as const) {
-    it(`renders every question, solution and formula in ${folder}`, async () => {
+    it(`renders every question, solution and formula in ${folder}`, () => {
       const directory = join(root, folder);
       const pages = pagesIn(directory);
       expect(pages).toHaveLength(pageCount);
@@ -38,13 +36,8 @@ describe('Classified mathematics past exams', () => {
 
         const body = content.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/u, '');
         try {
-          const result = await compile({ value: body, path: page }, {
-            remarkPlugins: [remarkMath],
-            rehypePlugins: [[rehypeKatex, { strict: 'ignore', output: 'html' }]],
-          });
-          if (String(result).includes('katex-error')) {
-            renderErrors.push(`${page}: ${result.messages.map(String).join('; ') || 'KaTeX render error'}`);
-          }
+          const errors = findFormulaErrors(body);
+          if (errors.length > 0) renderErrors.push(`${page}: ${errors.join('; ')}`);
         } catch (error) {
           renderErrors.push(`${page}: ${String(error)}`);
         }

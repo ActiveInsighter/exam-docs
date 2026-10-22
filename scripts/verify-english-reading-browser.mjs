@@ -47,10 +47,13 @@ async function verifySolution(page, trigger, touch = false) {
   await dialog.waitFor({ state: 'visible' });
   await dialog.evaluate(node => Promise.all(node.getAnimations().map(animation => animation.finished.catch(() => {}))));
   assert.ok((await dialog.innerText()).includes('定位第二段末句。'), 'original explanation is missing');
-  assert.ok(await dialog.evaluate(node => {
+  // The sheet may still be sliding in when its animation has not started yet,
+  // so wait for it to settle; one that really overflows still fails.
+  const fitsViewport = await page.waitForFunction(node => {
     const box = node.getBoundingClientRect();
     return box.left >= -1 && box.right <= innerWidth + 1 && box.top >= -1 && box.bottom <= innerHeight + 1;
-  }), 'solution dialog exceeds viewport');
+  }, await dialog.elementHandle(), { timeout: 5000 }).then(() => true, () => false);
+  assert.ok(fitsViewport, 'solution dialog exceeds viewport');
   if (touch) await dialog.getByRole('button', { name: '关闭' }).tap();
   else await page.keyboard.press('Escape');
   await dialog.waitFor({ state: 'hidden' });
@@ -58,7 +61,7 @@ async function verifySolution(page, trigger, touch = false) {
   assert.notEqual(await page.evaluate(() => document.documentElement.style.overflow), 'hidden', 'dialog left page scrolling locked');
 }
 
-try {
+async function verifyDesktop() {
   const desktop = await openPage({ viewport: { width: 1440, height: 1080 } });
   const { page, root, article, questions, triggers } = desktop;
   assert.equal(await triggers.count(), 5, 'both panes are visible side by side');
@@ -129,35 +132,40 @@ try {
     .every(node => node.getClientRects().length > 0 && node.scrollHeight <= node.clientHeight + 1)), 'print must not clip either pane');
   await page.emulateMedia({ media: 'screen' });
   await desktop.context.close();
+}
 
-  for (const width of [390, 320, 700]) {
-    const mobile = await openPage({ viewport: { width, height: 844 }, isMobile: true, hasTouch: true });
-    const tabs = mobile.root.getByRole('tab');
-    assert.equal(await tabs.count(), 2, 'narrow layout offers the 原文 / 题目 switch');
-    assert.ok(await mobile.article.isVisible(), 'narrow layout starts on the article');
-    assert.equal(await mobile.questions.isVisible(), false, 'only one pane is shown at a time');
-    assert.equal(await overflowY(mobile.article), 'visible', 'mobile article must use normal page scrolling');
-    await mobile.root.getByRole('button', { name: /开始答题/ }).tap();
-    assert.ok(await mobile.questions.isVisible(), 'start button switches to the questions');
-    assert.equal(await mobile.article.isVisible(), false);
-    assert.equal(await mobile.triggers.count(), 5);
-    // The navigator sticks below the switcher and jumps to a question.
-    const chips = mobile.root.getByRole('navigation', { name: '题目导航' }).getByRole('button');
-    assert.equal(await chips.count(), 5, 'narrow layout keeps the question navigator');
-    await chips.nth(4).tap();
-    await mobile.page.waitForFunction(() => {
-      const last = document.querySelectorAll('[data-reading-questions] [data-exam-question]')[4];
-      const nav = document.querySelector('[aria-label="题目导航"]').getBoundingClientRect();
-      const box = last.getBoundingClientRect();
-      return box.top >= nav.bottom - 1 && box.top < innerHeight - 80;
-    });
-    await mobile.triggers.first().scrollIntoViewIfNeeded();
-    await verifySolution(mobile.page, mobile.triggers.first(), true);
-    await tabs.first().tap();
-    assert.ok(await mobile.article.isVisible(), 'switch returns to the article');
-    await mobile.page.screenshot({ path: path.join(screenshots, `reading-mobile-${width}.png`) });
-    await mobile.context.close();
-  }
+async function verifyMobile(width) {
+  const mobile = await openPage({ viewport: { width, height: 844 }, isMobile: true, hasTouch: true });
+  const tabs = mobile.root.getByRole('tab');
+  assert.equal(await tabs.count(), 2, 'narrow layout offers the 原文 / 题目 switch');
+  assert.ok(await mobile.article.isVisible(), 'narrow layout starts on the article');
+  assert.equal(await mobile.questions.isVisible(), false, 'only one pane is shown at a time');
+  assert.equal(await overflowY(mobile.article), 'visible', 'mobile article must use normal page scrolling');
+  await mobile.root.getByRole('button', { name: /开始答题/ }).tap();
+  assert.ok(await mobile.questions.isVisible(), 'start button switches to the questions');
+  assert.equal(await mobile.article.isVisible(), false);
+  assert.equal(await mobile.triggers.count(), 5);
+  // The navigator sticks below the switcher and jumps to a question.
+  const chips = mobile.root.getByRole('navigation', { name: '题目导航' }).getByRole('button');
+  assert.equal(await chips.count(), 5, 'narrow layout keeps the question navigator');
+  await chips.nth(4).tap();
+  await mobile.page.waitForFunction(() => {
+    const last = document.querySelectorAll('[data-reading-questions] [data-exam-question]')[4];
+    const nav = document.querySelector('[aria-label="题目导航"]').getBoundingClientRect();
+    const box = last.getBoundingClientRect();
+    return box.top >= nav.bottom - 1 && box.top < innerHeight - 80;
+  });
+  await mobile.triggers.first().scrollIntoViewIfNeeded();
+  await verifySolution(mobile.page, mobile.triggers.first(), true);
+  await tabs.first().tap();
+  assert.ok(await mobile.article.isVisible(), 'switch returns to the article');
+  await mobile.page.screenshot({ path: path.join(screenshots, `reading-mobile-${width}.png`) });
+  await mobile.context.close();
+}
+
+try {
+  // Each layout runs in its own browser context, so they are checked concurrently.
+  await Promise.all([verifyDesktop(), ...[390, 320, 700].map(verifyMobile)]);
   assert.deepEqual(errors, [], 'browser runtime errors');
   console.log('Reading layout verified: rounded split card, docked wheel scrolling, independent panes with native chaining, navigator, keyboard divider, in-place grading, shared dialogs, and 390/320/700px tabbed touch layouts.');
 } finally {

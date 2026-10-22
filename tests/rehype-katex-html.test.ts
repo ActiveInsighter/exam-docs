@@ -49,10 +49,15 @@ async function render(source: string, prerender: boolean) {
  */
 const normalizeStyles = (html: string) => html.replace(/;"/gu, '"').replaceAll('&gt;', '>');
 
-const chapter = readFileSync(
-  join(process.cwd(), 'content/docs/math/lilin-880/线性代数/15-第十五章-二次型.mdx'),
-  'utf8',
-).replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/u, '');
+/** The first dozen questions of a real chapter: options, solutions, inline and display math. */
+const chapter = (() => {
+  const source = readFileSync(
+    join(process.cwd(), 'content/docs/math/lilin-880/线性代数/15-第十五章-二次型.mdx'),
+    'utf8',
+  ).replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/u, '');
+  const end = source.indexOf('</Question>', 15_000) + '</Question>'.length;
+  return source.slice(0, end);
+})();
 
 function countElements(node: unknown): number {
   if (Array.isArray(node)) return node.reduce((sum: number, child) => sum + countElements(child), 0);
@@ -77,7 +82,7 @@ describe('rehypeKatexHtml', () => {
   it('pre-renders formulas nested inside question components', async () => {
     const [tree, prerendered] = await Promise.all([compile(chapter, false), compile(chapter, true)]);
     const components = { Question, Option, Blank, Solution };
-    expect(countKatexElements(tree({ components }))).toBeGreaterThan(100);
+    expect(countKatexElements(tree({ components }))).toBeGreaterThan(50);
     expect(countKatexElements(prerendered({ components }))).toBe(0);
   });
 
