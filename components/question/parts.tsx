@@ -19,6 +19,14 @@ export type BlankProps = {
   aliases?: readonly (string | number)[];
   /** Accepts numeric input within ±tolerance of the answer or an alias. */
   tolerance?: number;
+  /**
+   * text: the system keyboard, compared as normalised text.
+   * math: the maths keypad, compared as equivalent expressions.
+   * Default: math for purely numeric answers ("3", "-1/2", "2√3"), else text.
+   */
+  kind?: 'text' | 'math';
+  /** Hint shown in the empty field. */
+  placeholder?: string;
   /** Position of the blank in its question; assigned by <Question>. */
   index?: number;
 };
@@ -41,6 +49,6 @@ export function Solution({ children }: SolutionProps) {
 }
 
 /** A blank inside the stem of a `blank` question. */
-export function Blank({ answer, index }: BlankProps) {
-  return <BlankField answer={String(answer)} index={index ?? 0} />;
+export function Blank({ answer, index, kind, placeholder }: BlankProps) {
+  return <BlankField answer={String(answer)} index={index ?? 0} kind={kind === 'math' ? 'math' : 'text'} placeholder={placeholder} />;
 }

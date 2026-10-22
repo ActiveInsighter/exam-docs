@@ -1,72 +1,83 @@
 'use client';
 
-import { useQuestionReveal, useQuestionState } from './question-state';
-import { cn } from '@/lib/utils';
+import { type KeyboardEvent, useCallback } from 'react';
+import type { BlankKind, BlankVerdict } from './grading';
+import { advanceFrom } from './blank-navigation';
+import { MathBlank } from './math-blank';
+import { useQuestionState } from './question-state';
+
+const CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
+export const blankBadge = (index: number) => CIRCLED[index] ?? String(index + 1);
+
+/** Width that fits the expected answer and grows with what is typed. */
+export function blankWidth(answer: string, value: string) {
+  const length = Math.max([...answer].length, [...value].length, 3);
+  return `${Math.min(length + 2.5, 28)}ch`;
+}
+
+export type BlankFieldProps = {
+  answer: string;
+  index: number;
+  kind: BlankKind;
+  placeholder?: string;
+};
 
 /**
- * One blank of a `blank` question: an inline input while answering, the
- * answer itself inside the solution dialog.
+ * One blank of a `blank` question: a text input, or for maths a field that
+ * opens the on-screen maths keypad instead of the system keyboard.
  */
-export function BlankField({ answer, index }: { answer: string; index: number }) {
+export function BlankField({ answer, index, kind, placeholder }: BlankFieldProps) {
   const question = useQuestionState();
-  const reveal = useQuestionReveal();
+  const spec = question?.spec.kind === 'blank' ? question.spec : null;
   const label = `第 ${index + 1} 空`;
 
-  if (reveal) {
-    return (
-      <span
-        className="mx-1 inline-block rounded-sm bg-success/12 px-1.5 font-medium text-success ring-1 ring-inset ring-success/40"
-        data-question-blank=""
-        aria-label={`${label}答案`}
-      >
-        {answer}
-      </span>
-    );
-  }
+  const onKeyDown = useCallback((event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter' || event.nativeEvent.isComposing || !question) return;
+    event.preventDefault();
+    advanceFrom(event.currentTarget, question);
+  }, [question]);
 
-  if (!question || question.spec.kind !== 'blank') {
-    return (
-      <span
-        className="mx-1 inline-block min-w-12 border-b border-foreground/50 align-baseline"
-        data-question-blank=""
-        aria-label={label}
-      >
-        {' '}
-      </span>
-    );
+  if (!question || !spec) {
+    return <span data-question-blank="" data-kind={kind} aria-label={label} style={{ width: blankWidth(answer, '') }}>{' '}</span>;
   }
 
   const value = question.values[index] ?? '';
-  const state = question.submitted
-    ? question.blankResults[index]
-      ? 'correct'
-      : 'incorrect'
-    : 'idle';
+  const verdict: BlankVerdict | 'idle' = question.evaluation?.blanks[index] ?? 'idle';
+  const several = spec.blanks.length > 1;
+  const last = index === spec.blanks.length - 1;
+  const common = {
+    value,
+    disabled: question.submitted || !question.ready,
+    'aria-label': several ? label : '答案',
+    'aria-invalid': verdict === 'incorrect' || verdict === 'invalid' || undefined,
+    placeholder,
+    'data-feedback': verdict,
+    'data-fresh': question.fresh ? '' : undefined,
+    style: { width: blankWidth(answer, value) },
+  } as const;
 
   return (
-    <input
-      type="text"
-      value={value}
-      disabled={question.submitted || !question.ready}
-      onChange={(event) => question.setValue(index, event.target.value)}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter') question.submit();
-      }}
-      aria-label={label}
-      aria-invalid={state === 'incorrect' || undefined}
-      autoComplete="off"
-      autoCapitalize="off"
-      spellCheck={false}
-      maxLength={8192}
-      data-question-blank=""
-      data-feedback={state}
-      style={{ width: `${Math.min(Math.max(answer.length, 3) + 2, 24)}ch` }}
-      className={cn(
-        'mx-1 inline-block max-w-full rounded-none border-0 border-b bg-transparent px-1 text-center align-baseline text-[length:inherit] outline-none transition-colors',
-        'border-foreground/50 focus-visible:border-primary focus-visible:bg-primary/5',
-        state === 'correct' && 'border-success bg-success/12 text-success',
-        state === 'incorrect' && 'border-destructive bg-destructive/10 text-destructive',
+    <span className="inline whitespace-nowrap">
+      {several ? <span data-blank-index="" aria-hidden="true">{index + 1}</span> : null}
+      {kind === 'math' ? (
+        <MathBlank {...common} question={question} index={index} label={label} last={last} />
+      ) : (
+        <input
+          {...common}
+          type="text"
+          inputMode="text"
+          enterKeyHint={last ? 'done' : 'next'}
+          autoComplete="off"
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
+          maxLength={8192}
+          data-question-blank=""
+          data-kind="text"
+          onChange={(event) => question.setValue(index, event.target.value)}
+          onKeyDown={onKeyDown}
+        />
       )}
-    />
+    </span>
   );
 }

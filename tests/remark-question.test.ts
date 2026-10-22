@@ -248,6 +248,28 @@ describe('getQuestionProblems', () => {
     ]);
   });
 
+  it('validates blank kinds and maths answers', () => {
+    expect(problemsOf('<Question id="m" type="blank">\n\n值 <Blank answer="x^2+1" kind="math" /> 与 <Blank answer="3" />\n\n</Question>')).toEqual([]);
+    expect(problemsOf('<Question id="m" type="blank">\n\n值 <Blank answer={"sqrt(2)/2"} kind="math" />\n\n</Question>')).toEqual([]);
+    expect(problemsOf('<Question id="m" type="blank">\n\n值 <Blank answer="(1+" kind="math" />\n\n</Question>')).toEqual([
+      expect.stringContaining('无法解析'),
+    ]);
+    expect(problemsOf('<Question id="m" type="blank">\n\n值 <Blank answer="1" kind="number" />\n\n</Question>')).toEqual([
+      expect.stringContaining('kind'),
+    ]);
+  });
+
+  it('accepts built-in tags as a comma list or a string array', () => {
+    expect(problemsOf('<Question id="t" type="essay" tags="2023 统考, 易错">\n\n题\n\n</Question>')).toEqual([]);
+    expect(problemsOf('<Question id="t" type="essay" tags={["来源:2023 统考", "易错"]}>\n\n题\n\n</Question>')).toEqual([]);
+    expect(problemsOf('<Question id="t" type="essay" tags={[1, 2]}>\n\n题\n\n</Question>')).toEqual([
+      expect.stringContaining('tags'),
+    ]);
+    expect(problemsOf(`<Question id="t" type="essay" tags="${'a,'.repeat(9)}">\n\n题\n\n</Question>`)).toEqual([
+      expect.stringContaining('最多 8 个'),
+    ]);
+  });
+
   it('points authors at the new components when a legacy tag is used', () => {
     expect(
       problemsOf('<Question id="e" type="essay">\n\n<ExamSolution>\n\n旧\n\n</ExamSolution>\n\n</Question>'),

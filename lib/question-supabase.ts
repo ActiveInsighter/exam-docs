@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { validateAnnotationResponse } from './question-store/annotations';
 import {
   validateIdentity,
   validateRemote,
@@ -35,28 +36,51 @@ export function validateSyncResponse(value: unknown): asserts value is SyncRespo
   }
 }
 
+function describeRpcError(error: { code?: string; message: string }): Error {
+  const text = `${error.code} ${error.message}`;
+  if (/abort|timeout/i.test(text)) return new Error('云同步超时，答案已保存在本机，稍后自动重试。');
+  if (/jwt|token/i.test(text) || error.code === 'PGRST301') return new Error('登录已失效，请重新登录后继续同步。');
+  if (/function .* does not exist|PGRST202/i.test(text)) return new Error('云端同步服务正在升级，答案已保存在本机，稍后自动重试。');
+  return new Error(`云同步失败：${error.message}`);
+}
+
+const isMissingFunction = (error: { code?: string; message: string }) =>
+  /function .* does not exist|PGRST202/i.test(`${error.code} ${error.message}`);
+
 export function createQuestionTransport(client: SupabaseClient, userId: string): QuestionSyncTransport {
+  /** Refuses a request if the account changed while a retry was waiting. */
+  async function call(name: string, args: Record<string, unknown>) {
+    const { data: { session }, error: authError } = await client.auth.getSession();
+    if (authError) throw authError;
+    if (session?.user.id !== userId) throw new Error('登录状态已变化，请重新同步');
+    let query = client.rpc(name, args).setHeader('Authorization', `Bearer ${session.access_token}`);
+    // A stalled mobile connection must fail instead of holding the sync turn.
+    if (typeof AbortSignal.timeout === 'function') query = query.abortSignal(AbortSignal.timeout(RPC_TIMEOUT_MS));
+    return query;
+  }
+
   return {
     async sync({ operations, cursor, limit }) {
-      // Refuse a request if the account changed while a retry was waiting.
-      const { data: { session }, error: authError } = await client.auth.getSession();
-      if (authError) throw authError;
-      if (session?.user.id !== userId) throw new Error('登录状态已变化，请重新同步');
-      let query = client.rpc('exam_sync_question_state', {
+      const { data, error } = await call('exam_sync_question_state', {
         p_operations: operations,
         p_cursor: cursor ?? '0',
         p_limit: limit,
-      }).setHeader('Authorization', `Bearer ${session.access_token}`);
-      // A stalled mobile connection must fail instead of holding the sync turn.
-      if (typeof AbortSignal.timeout === 'function') query = query.abortSignal(AbortSignal.timeout(RPC_TIMEOUT_MS));
-      const { data, error } = await query;
-      if (error) {
-        if (/abort|timeout/i.test(`${error.code} ${error.message}`)) throw new Error('云同步超时，答案已保存在本机，稍后自动重试。');
-        if (/jwt|token/i.test(`${error.code} ${error.message}`) || error.code === 'PGRST301') throw new Error('登录已失效，请重新登录后继续同步。');
-        if (/function .* does not exist|PGRST202/i.test(`${error.code} ${error.message}`)) throw new Error('云端同步服务正在升级，答案已保存在本机，稍后自动重试。');
-        throw new Error(`云同步失败：${error.message}`);
-      }
+      });
+      if (error) throw describeRpcError(error);
       validateSyncResponse(data);
+      return data;
+    },
+    async syncAnnotations({ tags, marks, cursor, limit }) {
+      const { data, error } = await call('exam_sync_question_annotations', {
+        p_tags: tags,
+        p_marks: marks,
+        p_cursor: cursor ?? '0',
+        p_limit: limit,
+      });
+      // Answers keep syncing while a deployment has not created the function yet.
+      if (error && isMissingFunction(error)) return null;
+      if (error) throw describeRpcError(error);
+      validateAnnotationResponse(data);
       return data;
     },
   };

@@ -1,13 +1,19 @@
+import { QuestionAnnotationStore } from './annotations';
+import { byNamespace, request } from './idb';
 import {
   type AnswerState, type DatabaseChange, type OutboxOperation, type QuestionAttempt,
   type QuestionConflict, type QuestionIdentity, type QuestionNamespace, type QuestionRecord,
-  type QuestionSummary, type RemoteQuestionRecord, type SyncMetadata, type SyncOperation, type SyncResponse,
+  type QuestionSummary, type RemoteQuestionRecord, type StoredQuestionMark, type StoredUserTag, type SyncMetadata, type SyncOperation, type SyncResponse,
   questionKey, sameState, validateRemote, validateState,
 } from './types';
 
-const STORES = ['records', 'operations', 'attempts', 'conflicts', 'metadata'] as const;
-/** v2: per-document and per-question indexes; the server feed changed, so sync cursors restart. */
-const SCHEMA_VERSION = 2;
+export const STORES = ['records', 'operations', 'attempts', 'conflicts', 'metadata', 'tags', 'marks'] as const;
+export type StoreName = typeof STORES[number];
+/**
+ * v2: per-document and per-question indexes; the server feed changed, so sync cursors restart.
+ * v3: the reader's tags and question marks (favourite, note, tags).
+ */
+const SCHEMA_VERSION = 3;
 /**
  * Fallback cross-tab sync lease for browsers without Web Locks. It is renewed
  * before every exchange, which the engine bounds by its request timeout, so a
@@ -17,22 +23,19 @@ export const LEASE_MS = 45_000;
 const DEFAULT_METADATA: SyncMetadata = { cursor: null, lastSyncedAt: null, retryCount: 0, nextRetryAt: 0 };
 const uuid = () => crypto.randomUUID();
 const identityOf = (value: QuestionIdentity): QuestionIdentity => ({ documentPath: value.documentPath, questionId: value.questionId, questionRevision: value.questionRevision });
-const request = <T>(value: IDBRequest<T>) => new Promise<T>((resolve, reject) => {
-  value.onsuccess = () => resolve(value.result);
-  value.onerror = () => reject(value.error ?? new Error('Browser database request failed'));
-});
-const byNamespace = <T>(store: IDBObjectStore, namespace: QuestionNamespace) => request(store.index('namespace').getAll(namespace)) as Promise<T[]>;
 const byQuestion = <T>(store: IDBObjectStore, namespace: QuestionNamespace, key: string) => request(store.index('question').getAll([namespace, key])) as Promise<T[]>;
 const answered = (state: AnswerState) => state.selected.length > 0 || state.values.some((value) => value.trim() !== '');
 
 export interface QuestionBackup {
   format: 'exam-docs-question-backup';
-  version: 2;
+  version: 3;
   exportedAt: string;
   namespace: QuestionNamespace;
   records: QuestionRecord[];
   attempts: QuestionAttempt[];
   conflicts: QuestionConflict[];
+  tags: StoredUserTag[];
+  marks: StoredQuestionMark[];
 }
 
 export interface QuestionDatabaseOptions {
@@ -49,6 +52,8 @@ export class QuestionDatabase {
   private closed = false;
   private disconnected = false;
   private reconnecting: Promise<void> | null = null;
+  /** The reader's tags, favourites and notes, stored in the same database. */
+  readonly annotations = new QuestionAnnotationStore(this);
 
   private constructor(private database: IDBDatabase, private readonly factory: IDBFactory, broadcast: boolean) {
     this.watchConnection(database);
@@ -96,6 +101,13 @@ export class QuestionDatabase {
           entry.continue();
         };
       }
+      if (event.oldVersion < 3) {
+        const tags = db.createObjectStore('tags', { keyPath: ['namespace', 'tagId'] });
+        tags.createIndex('namespace', 'namespace');
+        const marks = db.createObjectStore('marks', { keyPath: ['namespace', 'key'] });
+        marks.createIndex('namespace', 'namespace');
+        marks.createIndex('document', ['namespace', 'documentPath']);
+      }
     };
     return new Promise<IDBDatabase>((resolve, reject) => {
       let blocked = false;
@@ -131,7 +143,8 @@ export class QuestionDatabase {
     })().finally(() => { this.reconnecting = null; });
   }
 
-  private async transaction<T>(stores: readonly typeof STORES[number][], mode: IDBTransactionMode,
+  /** @internal Shared with the annotation store; one connection, one retry policy. */
+  async transaction<T>(stores: readonly StoreName[], mode: IDBTransactionMode,
     run: (tx: IDBTransaction) => Promise<T>, retry = true): Promise<T> {
     if (this.closed) throw new Error('Browser database is closed');
     if (this.disconnected || this.reconnecting) await this.reconnect();
@@ -166,7 +179,8 @@ export class QuestionDatabase {
     }
   }
 
-  private emit(change: DatabaseChange, broadcast = true): void {
+  /** @internal */
+  emit(change: DatabaseChange, broadcast = true): void {
     for (const listener of this.listeners) listener(change);
     if (broadcast) this.channel?.postMessage(change);
   }
@@ -221,11 +235,13 @@ export class QuestionDatabase {
 
   /** A readable JSON snapshot of one identity's local data, including resolved conflicts. */
   async exportBackup(namespace: QuestionNamespace): Promise<QuestionBackup> {
-    return this.transaction(['records', 'attempts', 'conflicts'], 'readonly', async (tx) => ({
-      format: 'exam-docs-question-backup', version: 2, exportedAt: new Date().toISOString(), namespace,
+    return this.transaction(['records', 'attempts', 'conflicts', 'tags', 'marks'], 'readonly', async (tx) => ({
+      format: 'exam-docs-question-backup', version: 3, exportedAt: new Date().toISOString(), namespace,
       records: await byNamespace<QuestionRecord>(tx.objectStore('records'), namespace),
       attempts: (await byNamespace<QuestionAttempt>(tx.objectStore('attempts'), namespace)).sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
       conflicts: await byNamespace<QuestionConflict>(tx.objectStore('conflicts'), namespace),
+      tags: await byNamespace<StoredUserTag>(tx.objectStore('tags'), namespace),
+      marks: await byNamespace<StoredQuestionMark>(tx.objectStore('marks'), namespace),
     }));
   }
 
@@ -286,7 +302,7 @@ export class QuestionDatabase {
   }
 
   /** Explicit copy; guest records remain intact and repeated imports never duplicate attempts. */
-  async importGuest(namespace: QuestionNamespace): Promise<{ records: number; attempts: number }> {
+  async importGuest(namespace: QuestionNamespace): Promise<{ records: number; attempts: number; marks: number }> {
     if (namespace === 'guest') throw new Error('Choose an account before importing');
     const changed = new Set<string>();
     const result = await this.transaction(STORES, 'readwrite', async (tx) => {
@@ -325,7 +341,7 @@ export class QuestionDatabase {
       return { records: recordCount, attempts: attemptCount };
     });
     this.emit({ namespace, kind: 'local', keys: [...changed], urgent: true });
-    return result;
+    return { ...result, marks: await this.annotations.importGuest(namespace) };
   }
 
   async resolveConflict(namespace: QuestionNamespace, conflictId: string, resolution: 'local' | 'remote'): Promise<void> {
@@ -368,8 +384,9 @@ export class QuestionDatabase {
   }
 
   async stats(namespace: QuestionNamespace): Promise<{ pending: number; conflicts: number }> {
-    return this.transaction(['operations', 'conflicts'], 'readonly', async (tx) => ({
-      pending: await request(tx.objectStore('operations').index('namespace').count(namespace)),
+    return this.transaction(['operations', 'conflicts', 'tags', 'marks'], 'readonly', async (tx) => ({
+      pending: await request(tx.objectStore('operations').index('namespace').count(namespace)) +
+        await this.annotations.countDirty(tx, namespace),
       conflicts: (await byNamespace<QuestionConflict>(tx.objectStore('conflicts'), namespace)).filter((value) => !value.resolvedAt).length,
     }));
   }

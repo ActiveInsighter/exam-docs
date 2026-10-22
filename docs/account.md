@@ -64,7 +64,7 @@ flowchart LR
 
 Cloudflare 构建设置 `NEXT_PUBLIC_SUPABASE_PROXY_PATH=/api/supabase`，浏览器的邮箱登录、验证码、会话刷新、退出及答题 RPC 都经过同域 Worker。Supabase 原始 URL 仍用于创建客户端，原有会话 storage key 和账号缓存不会因转发而改变。本地 `next dev` 不包含 Worker，保持该变量为空，直接访问 Supabase。
 
-部署命令把 GitHub 变量 `NEXT_PUBLIC_SUPABASE_URL` 同时传给 Worker 的 `SUPABASE_URL`，避免前后端指向不同项目。Worker 只接受固定的 Auth 路径、`exam_sync_question_state` RPC，转发用户公钥与 JWT，不注入 service key，不转发站点 Cookie，也不缓存响应。所有文档依旧通过 Static Assets 分发。修改转发路径需要云端重新构建。
+部署命令把 GitHub 变量 `NEXT_PUBLIC_SUPABASE_URL` 同时传给 Worker 的 `SUPABASE_URL`，避免前后端指向不同项目。Worker 只接受固定的 Auth 路径、`exam_sync_question_state` 与 `exam_sync_question_annotations` 两个 RPC，转发用户公钥与 JWT，不注入 service key，不转发站点 Cookie，也不缓存响应。所有文档依旧通过 Static Assets 分发。修改转发路径需要云端重新构建。
 
 `Failed to fetch` 表示请求未取得可读的 HTTP 响应，可能涉及网络、DNS、TLS、浏览器拦截或 CORS。不能据此判断数据库不存在。当前数据库的 4 张答题表位于 `exam_private`，不是 `public`；在 Supabase Table Editor 中切换 schema，或在 SQL Editor 查询：
 

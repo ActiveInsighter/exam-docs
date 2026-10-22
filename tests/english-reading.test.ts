@@ -21,7 +21,7 @@ describe('English reading composition', () => {
       article, question('Why pay attention?', 'q1'), question('What changed?', 'q2')));
     expect(html).toContain('Why pay attention?');
     expect(html).toContain('What changed?');
-    expect(html.match(/aria-haspopup="dialog"/g)).toHaveLength(2);
+    expect(html.match(/data-solution-trigger=""/g)).toHaveLength(2);
     expect(html).not.toContain('Observe the familiar surroundings.');
     expect(html).toContain('<em>the details nearby.</em>');
     expect(html.indexOf('A familiar park')).toBeLessThan(html.indexOf('Why pay attention?'));
@@ -46,7 +46,7 @@ describe('English reading composition', () => {
     const html = renderToStaticMarkup(createElement(EnglishReading, null,
       article, createElement(Question, { id: 'q3', type: 'essay' }, 'An unfinished exercise')));
     expect(html).toContain('An unfinished exercise');
-    expect(html).not.toContain('aria-haspopup="dialog"');
+    expect(html).not.toContain('data-solution-trigger');
   });
 
   it('pairs each paragraph with its translation behind a 翻译 toggle beside 原文', () => {

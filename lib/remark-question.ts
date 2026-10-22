@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { parseMath } from './math-expression';
 
 /*
  * Compile-time support for <Question> documents:
@@ -232,6 +233,15 @@ function validateQuestion(question: QuestionNode, seenIds: Set<string>): Questio
       if (!answer.present || answer.text === null || answer.text === '') {
         report('Blank 必须提供非空的 answer', blank);
       }
+      const kind = readAttribute(blank, 'kind');
+      if (kind.present && (!kind.literal || !['text', 'math'].includes(kind.text ?? ''))) {
+        report('Blank 的 kind 只能是 "text" 或 "math"', blank);
+      } else if (kind.text === 'math' && answer.text) {
+        // Expression answers ({"…"} or {3}) are read the way the component reads them.
+        const value = answer.literal ? answer.text : answer.text.replace(/^(["'`])(.*)\1$/su, '$2');
+        const parsed = parseMath(value);
+        if (!parsed.ok) report(`数学填空的答案「${value}」无法解析：${parsed.error}`, blank);
+      }
       const tolerance = readAttribute(blank, 'tolerance');
       if (tolerance.present && (tolerance.literal || !Number.isFinite(Number(tolerance.text)))) {
         report('tolerance 必须是数字，例如 tolerance={0.01}', blank);
@@ -239,6 +249,14 @@ function validateQuestion(question: QuestionNode, seenIds: Set<string>): Questio
     }
   } else if (found.blanks.length > 0) {
     report(`${type} 题不能包含 Blank`);
+  }
+
+  const tags = readAttribute(question, 'tags');
+  if (tags.present) {
+    const list = readTagList(tags);
+    if (!list) report('tags 必须是字符串（逗号分隔）或字符串数组，例如 tags="2023 统考, 易错"');
+    else if (list.length > 8) report('tags 最多 8 个');
+    else if (list.some((tag) => tag.length > 32)) report('每个 tag 最多 32 个字符');
   }
 
   const points = readAttribute(question, 'points');
@@ -256,6 +274,22 @@ function validateQuestion(question: QuestionNode, seenIds: Set<string>): Questio
   }
 
   return problems;
+}
+
+/** Tags from tags="a, b" or tags={["a", "b"]}; null when the value is not a list of strings. */
+function readTagList(attribute: Attribute): string[] | null {
+  if (attribute.text === null) return null;
+  let values: unknown = attribute.text;
+  if (!attribute.literal) {
+    try {
+      values = JSON.parse(attribute.text);
+    } catch {
+      return null;
+    }
+  }
+  const list = typeof values === 'string' ? values.split(/[,，、]/u) : values;
+  if (!Array.isArray(list) || list.some((value) => typeof value !== 'string')) return null;
+  return (list as string[]).map((value) => value.trim()).filter(Boolean);
 }
 
 /** Finds every <Question> in document order. */

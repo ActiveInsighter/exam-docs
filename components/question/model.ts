@@ -2,7 +2,10 @@ import { Children, cloneElement, isValidElement, type ReactElement, type ReactNo
 import { Blank, Option, Solution, type BlankProps, type OptionProps } from './parts';
 import {
   getOptionLetter,
+  inferBlankKind,
+  type BlankKind,
   type BlankSpec,
+  type GradingSpec,
   type QuestionType,
 } from './grading';
 
@@ -17,23 +20,8 @@ type WithChildren = { children?: ReactNode };
 export type ChoiceOptionModel = {
   /** Stable key used for selection and grading (A, B, …). */
   label: string;
-  /** Text shown in the marker when it differs from the label. */
-  marker?: string;
   content: ReactNode;
-  correct: boolean;
 };
-
-export type QuestionModel =
-  | {
-      kind: 'choice';
-      multiple: boolean;
-      options: ChoiceOptionModel[];
-      key: string[];
-      /** Answer text for display when it is not just the letters. */
-      keyText?: string;
-    }
-  | { kind: 'blank'; blanks: BlankSpec[] }
-  | { kind: 'none' };
 
 /** Stem spacing, shared by the question in the page and in its solution sheet. */
 export const questionStemClassName = '[&>:first-child]:mt-0! [&>:last-child]:mb-0! [&>p]:my-2.5';
@@ -72,8 +60,6 @@ export type SplitQuestion = {
   optionSlot: number;
   solution: ReactElement<WithChildren> | null;
 };
-
-export const OPTION_SLOT = Symbol('question-option-slot');
 
 export function splitQuestion(children: ReactNode): SplitQuestion {
   const stem: ReactNode[] = [];
@@ -114,19 +100,22 @@ function toText(value: unknown) {
 }
 
 export function toBlankSpec(props: BlankProps): BlankSpec {
+  const answer = toText(props.answer);
+  const kind: BlankKind = props.kind === 'math' || props.kind === 'text' ? props.kind : inferBlankKind(answer);
   return {
-    answer: toText(props.answer),
+    answer,
     aliases: (props.aliases ?? []).map(toText).filter((alias) => alias !== ''),
     tolerance:
       typeof props.tolerance === 'number' && Number.isFinite(props.tolerance)
         ? props.tolerance
         : undefined,
+    kind,
   };
 }
 
 /**
  * Finds every <Blank> in the stem (in document order) and hands each one its
- * position, returning the rewritten stem together with the answer specs.
+ * position and resolved kind, returning the rewritten stem with the specs.
  */
 export function indexBlanks(stem: ReactNode[]) {
   const specs: BlankSpec[] = [];
@@ -136,9 +125,9 @@ export function indexBlanks(stem: ReactNode[]) {
     if (!isValidElement<WithChildren>(node)) return node;
 
     if (isBlank(node)) {
-      const props = (node as ReactElement<BlankProps>).props;
-      specs.push(toBlankSpec(props));
-      return cloneElement(node as ReactElement<BlankProps>, { index: specs.length - 1 });
+      const spec = toBlankSpec((node as ReactElement<BlankProps>).props);
+      specs.push(spec);
+      return cloneElement(node as ReactElement<BlankProps>, { index: specs.length - 1, kind: spec.kind });
     }
 
     const children = node.props.children;
@@ -150,45 +139,81 @@ export function indexBlanks(stem: ReactNode[]) {
   return { stem: stem.map(visit), blanks: specs };
 }
 
-export const BOOLEAN_OPTIONS: ChoiceOptionModel[] = [
-  { label: 'A', marker: '对', content: '正确', correct: false },
-  { label: 'B', marker: '错', content: '错误', correct: false },
-];
-
 type BuildInput = {
   type: QuestionType;
   answer?: boolean;
   options: ReactElement<OptionProps>[];
+  blanks: BlankSpec[];
 };
 
-/** Builds the gradable model; anything inconsistent degrades to "none". */
-export function buildChoiceModel({ type, answer, options }: BuildInput): QuestionModel {
-  if (type === 'boolean') {
-    if (typeof answer !== 'boolean') return { kind: 'none' };
-    const items = BOOLEAN_OPTIONS.map((option, index) => ({
-      ...option,
-      correct: answer === (index === 0),
-    }));
-    return {
-      kind: 'choice',
-      multiple: false,
-      options: items,
-      key: [answer ? 'A' : 'B'],
-      keyText: answer ? '正确' : '错误',
-    };
+/** The gradable spec of a question; null when it is an essay or its key is inconsistent. */
+export function buildGradingSpec({ type, answer, options, blanks }: BuildInput): GradingSpec | null {
+  if (type === 'boolean') return typeof answer === 'boolean' ? { kind: 'boolean', answer } : null;
+  if (type === 'blank') return blanks.length > 0 ? { kind: 'blank', blanks } : null;
+  if (type !== 'single' && type !== 'multiple') return null;
+
+  const key = options.flatMap((option, index) => (option.props.correct === true ? [getOptionLetter(index)] : []));
+  const valid = options.length >= 2 && (type === 'single' ? key.length === 1 : key.length >= 2);
+  return valid ? { kind: 'choice', multiple: type === 'multiple', key } : null;
+}
+
+export function toChoiceOptions(options: ReactElement<OptionProps>[]): ChoiceOptionModel[] {
+  return options.map((option, index) => ({ label: getOptionLetter(index), content: option.props.children }));
+}
+
+/* ---------------------------------------------------------------------------
+ * Built-in question tags
+ *
+ *   tags="2023 统考, 数据结构, 易错"
+ *   tags={["来源:2023 统考", "章节:栈与队列"]}
+ *
+ * Commas (, ， 、) separate tags. "分类:值" shows the category in a lighter
+ * weight, and every tag of one category shares a colour.
+ * ------------------------------------------------------------------------- */
+
+export const QUESTION_TAG_LIMIT = 8;
+export const QUESTION_TAG_MAX_LENGTH = 32;
+export const TAG_TONES = 8;
+
+export type QuestionTag = {
+  label: string;
+  /** Category before a colon, if any. */
+  group?: string;
+  /** Palette index, stable across pages. */
+  tone: number;
+};
+
+/** FNV-1a; colours must not change between builds or devices. */
+export function tagTone(text: string): number {
+  let hash = 0x811c9dc5;
+  for (const char of text) {
+    hash ^= char.codePointAt(0)!;
+    hash = Math.imul(hash, 0x01000193);
   }
+  return (hash >>> 0) % TAG_TONES;
+}
 
-  if (type !== 'single' && type !== 'multiple') return { kind: 'none' };
+export function splitTagList(value: unknown): string[] {
+  const list = Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : typeof value === 'string'
+      ? value.split(/[,，、]/u)
+      : [];
+  return list.map((item) => item.trim()).filter((item) => item !== '');
+}
 
-  const items = options.map((option, index) => ({
-    label: getOptionLetter(index),
-    content: option.props.children,
-    correct: option.props.correct === true,
-  }));
-  const key = items.filter((item) => item.correct).map((item) => item.label);
-  const valid =
-    items.length >= 2 && (type === 'single' ? key.length === 1 : key.length >= 2);
-  return valid
-    ? { kind: 'choice', multiple: type === 'multiple', options: items, key }
-    : { kind: 'none' };
+export function parseQuestionTags(value: unknown): QuestionTag[] {
+  const seen = new Set<string>();
+  const tags: QuestionTag[] = [];
+  for (const item of splitTagList(value)) {
+    const match = /^([^:：]{1,12})[:：]\s*(.+)$/u.exec(item);
+    const group = match?.[1].trim();
+    const label = (match?.[2] ?? item).trim();
+    const key = `${group ?? ''}\u0000${label}`;
+    if (!label || seen.has(key)) continue;
+    seen.add(key);
+    tags.push({ label, ...(group ? { group } : {}), tone: tagTone(group ?? label) });
+    if (tags.length === QUESTION_TAG_LIMIT) break;
+  }
+  return tags;
 }

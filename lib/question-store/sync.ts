@@ -1,5 +1,6 @@
 import { QuestionDatabase } from './database';
 import { LEASE_MS } from './database';
+import { ANNOTATION_BATCH } from './annotations';
 import type { QuestionNamespace, QuestionSyncStatus, QuestionSyncTransport } from './types';
 
 export interface QuestionSyncOptions {
@@ -265,6 +266,28 @@ export class QuestionSyncEngine {
     }
   }
 
+  /**
+   * Tags, favourites and notes ride the same wake, lock and backoff as the
+   * answers, through their own last-writer-wins exchange.
+   */
+  private async exchangeAnnotations(): Promise<void> {
+    const transport = this.transport!;
+    if (!transport.syncAnnotations) return;
+    const store = this.database.annotations;
+    for (let count = 0; count < 10; count++) {
+      if (this.stopped || !this.online()) return;
+      const sent = await store.batch(this.namespace);
+      const cursor = await store.cursor(this.namespace);
+      const response = await withTimeout(transport.syncAnnotations({ ...sent, cursor, limit: 200 }),
+        this.options.requestTimeoutMs ?? REQUEST_TIMEOUT_MS);
+      if (!response) return;
+      await store.apply(this.namespace, response, sent);
+      await this.refresh();
+      if (!response.hasMore && sent.marks.length < ANNOTATION_BATCH.marks) return;
+    }
+    this.rescheduleAfterRun = true;
+  }
+
   private async exchangeLoop(): Promise<void> {
     const transport = this.transport!;
     this.update({ phase: 'syncing', error: null });
@@ -286,6 +309,7 @@ export class QuestionSyncEngine {
       }
       if (count === 19) this.rescheduleAfterRun = true;
     }
+    await this.exchangeAnnotations();
     if (!this.stopped) this.update({ phase: this.online() ? 'idle' : 'offline', error: null });
   }
 }

@@ -15,6 +15,8 @@ Cloudflare 生产部署现在通过同域 `/api/supabase` 转发登录与答题 
 | 每次已提交答案 | 本地提交记录；登录后追加至云端 | 与当前草稿分离，避免新草稿覆盖历史提交 |
 | 尚未确认的本地写入、冲突、同步游标 | 浏览器 IndexedDB | 断网重试和冲突恢复 |
 | 身份与登录会话 | Supabase Auth | 云端按用户授权 |
+| 读者自定义标签、收藏、注释 | 浏览器 IndexedDB（`tags`、`marks`）；登录后同步至 Supabase | 属于读者，不属于题目内容；见下文「标签、收藏与注释」 |
+| 题目内置标签（来源、分类） | MDX 的 `tags` 属性 | 随题目内容审查，见 [question-components.md](question-components.md#内置标签) |
 
 题目身份由文档路径、稳定的 `Question id` 和编译生成的 `revision` 组成。修改题目内容、选项顺序或答案会改变 revision，新版题目获得独立状态。旧版记录保留，不把旧选项字母套用到新版题目。作者需保持 id 稳定，组件写法见 [question-components.md](question-components.md)。
 
@@ -39,7 +41,7 @@ flowchart LR
 
 读题时从本地恢复；输入时先更新内存缓存，再保存到 IndexedDB。云端不可用不会撤销已保存的本地输入。同步队列与待上传内容持久化，刷新后能继续重试。界面会显示本地保存、待同步、同步失败或冲突状态，避免把内存中的答案误报为已经持久保存。
 
-本地数据库名为 `exam-docs-questions`，schema 版本为 2（v2 新增 `records.document` 与 `conflicts.question` 索引；从 v1 原地升级时保留全部答案、历史和待同步队列，只把同步游标清零，下一次拉取按 v2 压缩增量从头开始），包含 `records`、`operations`、`attempts`、`conflicts`、`metadata`。一次答题写入会在同一个 IndexedDB 事务中保存当前状态、同步操作和已产生的提交记录。普通未发送草稿可合并；已经发出的操作和历史提交保留稳定 UUID，不因重试换身份。
+本地数据库名为 `exam-docs-questions`，schema 版本为 3（v2 新增 `records.document` 与 `conflicts.question` 索引；从 v1 原地升级时保留全部答案、历史和待同步队列，只把同步游标清零，下一次拉取按 v2 压缩增量从头开始；v3 新增读者标签 `tags` 与题目标记 `marks`，不改动已有数据），包含 `records`、`operations`、`attempts`、`conflicts`、`metadata`、`tags`、`marks`。一次答题写入会在同一个 IndexedDB 事务中保存当前状态、同步操作和已产生的提交记录。普通未发送草稿可合并；已经发出的操作和历史提交保留稳定 UUID，不因重试换身份。
 
 同步器在用户登录后运行：草稿编辑停止 0.8 秒后上传；提交、冲突选择和导入在 150 ms 批处理后立即上传，持续输入不会推迟它们；页面隐藏或关闭前有待上传记录也会立即发送。每批最多 50 个操作、请求目标上限 240 KiB，每页最多拉取 200 条；同一道题依次发送，保留版本先后关系。一个 RPC 同时提交变更和拉取增量，登录后立即检查，联网恢复和手动同步会再检查；页面重新获得焦点或变为可见时，距上次成功同步超过 60 秒或有待上传记录也会检查。失败后按 1 至 60 秒上限退避并加随机抖动，重试信息持久保存。
 
@@ -71,6 +73,29 @@ flowchart LR
 | 同一道题并发提交 | 当前答案仍检查版本；有效提交记录可独立追加保存 |
 
 填空答案和选项集合不做逐字段自动合并。一台设备改第一个空、另一台改第二个空时，也会按同一道题产生冲突，避免拼接出用户从未提交过的答案。
+
+## 标签、收藏与注释
+
+每道题右上角有三个按钮：收藏（星标）、标签、注释。读者可以新建自己的标签（如「难题」「二刷」），改名、换色、删除；标签以带色点的胶囊显示在题目内置标签之后。注释在题目卡片下方显示，点击即可编辑（⌘/Ctrl + Enter 保存，Esc 取消）。账号菜单的「收藏与标签」汇总所有被收藏、打标签或写了注释的题目，可按收藏、注释或标签筛选，并跳转到原题。
+
+**身份。** 标记属于「文档路径 + 题目 id」，不含 revision：题目改了错别字或答案，读者的注释和标签仍然保留。
+
+**本地存储。** IndexedDB v3 的 `tags`（键 `[namespace, tagId]`）和 `marks`（键 `[namespace, key]`，`document` 索引按页读取）与答案共用连接、事务重试与账号分区。页面上的题目通过 `QuestionAnnotationCache` 一次读取整页的标记，之后同步读内存；收藏、改标签等操作先更新内存（乐观更新），写入失败会回滚并提示。
+
+**同步。** 与答案不同，标记使用「最后写入者胜出」：每行带 `updatedAt` 时间戳和 dirty 标记，没有 outbox。同步器在答案交换之后调用 `exam_sync_question_annotations`，上传 dirty 行，服务器保留两次写入中较新的一次，并返回当前行和压缩增量（`seq` 游标，分页）。其他设备离线创建同名标签时，服务器把新标签合并到已有标签（`merged` 字段），客户端随之替换题目上的标签 id。删除标签保留墓碑，服务器同时从所有题目移除该标签并重新广播受影响的题目。设备时钟超前时服务器把时间钳制到「当前时间 + 5 分钟」，避免一台时钟错误的设备永远胜出。服务器尚未部署该函数时，RPC 返回「函数不存在」，客户端跳过标记同步、答案照常同步，标记保持待上传。
+
+**限制。** 每个账号最多 200 个有效标签，标签名 1–24 字（同一账号内不区分大小写唯一）；每题最多 20 个标签；注释最多 4000 字；摘要 160 字。访客数据可在账号菜单「导入未登录时的记录」时一并导入：同名标签合并，收藏取并集，注释不同时拼接，重复导入不会重复追加。
+
+**云端表（`exam_private`）。**
+
+| 表 | 主键 / 约束 | 用途 |
+| --- | --- | --- |
+| `question_tags` | `(user_id, tag_id)`；`(user_id, lower(name)) where not deleted` 唯一；颜色枚举检查 | 读者标签与删除墓碑 |
+| `question_marks` | `(user_id, identity_hash)`；检查 `identity_hash` 与路径、题目 id 一致 | 收藏、注释、摘要 |
+| `question_mark_tags` | `(user_id, identity_hash, tag_id)`；两个复合外键级联删除 | 题目与标签的关联，保证不能引用他人标签 |
+| `question_annotation_heads` | `user_id` | 每个账号的增量游标 |
+
+索引：`(user_id, seq)` 唯一（两张主表的增量）、`question_marks (user_id, updated_at desc) where favorite`（收藏列表）、`question_mark_tags (user_id, tag_id)`（按标签查题、删除标签）。所有表启用 RLS，只有本人可读；浏览器没有表权限，只能调用经过鉴权的 `public.exam_sync_question_annotations`（security invoker 包装 `exam_private` 中的 security definer 实现，空 `search_path`）。账号删除时数据随 `auth.users` 级联删除。迁移：`supabase/migrations/20261022120000_question_annotations.sql`，契约测试：`supabase/tests/question-annotations.test.ts`（真实 PostgreSQL），端到端测试：`tests/question-annotations.test.ts`（两台浏览器经由 RPC 同步）。
 
 ## Supabase 结构与权限
 

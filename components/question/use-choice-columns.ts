@@ -10,6 +10,11 @@ import { getChoiceColumnCount } from './choice-layout';
  * commit are flushed together in a microtask (still before paint), so a page
  * with dozens of questions costs a single forced layout instead of one each.
  * Results are written straight to a CSS variable, never to React state.
+ *
+ * Question cards use `content-visibility: auto`, so the browser skips layout
+ * of cards far off screen. Measuring them up front would force that layout
+ * for the whole page; instead a group is first measured when it comes near
+ * the viewport. Until then the container-query density hint lays it out.
  */
 
 const OPTION_SELECTOR = '[data-exam-choice-option]';
@@ -21,6 +26,7 @@ const pending = new Set<HTMLElement>();
 const knownWidths = new WeakMap<HTMLElement, number>();
 let flushQueued = false;
 let resizeObserver: ResizeObserver | null = null;
+let nearObserver: IntersectionObserver | null = null;
 let fontsListening = false;
 
 function measureOptionWidth(option: HTMLElement) {
@@ -99,11 +105,56 @@ function getResizeObserver() {
   return resizeObserver;
 }
 
+/** Measures each group once it is within a screen of the viewport; resizes are handled by the ResizeObserver. */
+function getNearObserver() {
+  if (nearObserver || typeof IntersectionObserver === 'undefined') return nearObserver;
+  nearObserver = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      const group = entry.target as HTMLElement;
+      nearObserver?.unobserve(group);
+      if (!tracked.has(group)) continue;
+      getResizeObserver()?.observe(group);
+      schedule(group);
+    }
+  }, { rootMargin: '100% 0px' });
+  return nearObserver;
+}
+
+const registering = new Set<HTMLElement>();
+let registerQueued = false;
+
+/**
+ * Groups already near the viewport are measured in the same pre-paint
+ * microtask (no visible column jump); the rest wait for the observer.
+ */
+function register(group: HTMLElement) {
+  registering.add(group);
+  if (registerQueued) return;
+  registerQueued = true;
+  queueMicrotask(() => {
+    registerQueued = false;
+    const groups = Array.from(registering).filter((entry) => tracked.has(entry) && entry.isConnected);
+    registering.clear();
+    const near = getNearObserver();
+    const limit = window.innerHeight * 2;
+    const tops = groups.map((entry) => entry.getBoundingClientRect().top);
+    groups.forEach((entry, index) => {
+      if (!near || (tops[index] > -limit && tops[index] < limit)) {
+        getResizeObserver()?.observe(entry);
+        schedule(entry);
+      } else {
+        near.observe(entry);
+      }
+    });
+  });
+}
+
 function listenForFonts() {
   if (fontsListening || !('fonts' in document)) return;
   fontsListening = true;
   document.fonts.addEventListener('loadingdone', () => {
-    for (const group of tracked) schedule(group);
+    for (const group of tracked) if (knownWidths.has(group)) schedule(group);
   });
 }
 
@@ -113,13 +164,13 @@ export function useChoiceColumns(ref: RefObject<HTMLElement | null>, enabled = t
     if (!enabled || !group) return;
 
     tracked.add(group);
-    getResizeObserver()?.observe(group);
     listenForFonts();
-    schedule(group);
+    register(group);
 
     return () => {
       tracked.delete(group);
       pending.delete(group);
+      nearObserver?.unobserve(group);
       resizeObserver?.unobserve(group);
     };
   }, [ref, enabled]);

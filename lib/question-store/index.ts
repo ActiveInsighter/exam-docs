@@ -2,3 +2,5 @@ export { QuestionDatabase, type QuestionBackup, type QuestionDatabaseOptions } f
 export { QuestionAnswerCache, PENDING_SNAPSHOT, emptyAnswer, type AnswerSnapshot } from './cache';
 export { QuestionSyncEngine, type QuestionSyncOptions } from './sync';
 export * from './types';
+export { QuestionAnnotationStore, AnnotationError, type MarkPatch, type TagInput } from './annotations';
+export { QuestionAnnotationCache, type MarkSnapshot, type TagsSnapshot } from './annotation-cache';
