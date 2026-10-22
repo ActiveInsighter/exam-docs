@@ -17,11 +17,13 @@ type IntentLinkProps = Omit<ComponentProps<'a'>, 'href'> & {
  * prefetched sibling chapters in the background, which mobile browsers can
  * be killed for.
  *
- * This link prefetches only on intent: a mouse hover or the start of a touch,
- * one route at a time, shortly before the click that navigates. An explicit
- * `prefetch` prop still wins.
+ * This link prefetches only when a mouse hovers it, one route at a time,
+ * usually well before the click. Touch gets no prefetch: the click follows
+ * pointerdown within milliseconds, so a prefetch started there never finishes
+ * first and only made the phone download and parse the page twice. An
+ * explicit `prefetch` prop still wins.
  */
-export function IntentLink({ href = '#', prefetch, onPointerEnter, onPointerDown, onFocus, ...props }: IntentLinkProps) {
+export function IntentLink({ href = '#', prefetch, onPointerEnter, ...props }: IntentLinkProps) {
   const router = useRouter();
   const warmed = useRef<string | null>(null);
   const warm = useCallback(() => {
@@ -37,14 +39,6 @@ export function IntentLink({ href = '#', prefetch, onPointerEnter, onPointerDown
       onPointerEnter={(event) => {
         if (event.pointerType === 'mouse') warm();
         onPointerEnter?.(event);
-      }}
-      onPointerDown={(event) => {
-        warm();
-        onPointerDown?.(event);
-      }}
-      onFocus={(event) => {
-        warm();
-        onFocus?.(event);
       }}
       {...props}
     />
