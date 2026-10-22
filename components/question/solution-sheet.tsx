@@ -1,9 +1,9 @@
 'use client';
 
 import { BookOpenTextIcon, CheckIcon, ChevronDownIcon, NotebookPenIcon, XIcon } from 'lucide-react';
-import { type ReactNode, useCallback, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { type ReactNode, type RefObject, useCallback, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Dialog, DialogClose, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { blankBadge } from './blank-field';
 import { formatKey, formatResponse, type GradingSpec } from './grading';
@@ -213,37 +213,60 @@ export type QuestionSolutionSheetProps = {
   tags: QuestionTag[];
 };
 
-export function QuestionSolutionSheet({ questionId, solution, buttonLabel, dialogTitle, numberLabel, typeLabel, tags }: QuestionSolutionSheetProps) {
+/*
+ * The trigger is a plain button; the dialog tree mounts on first open and
+ * then stays so later opens and the close animation are instant. A long page
+ * has a hundred of these, most never opened.
+ */
+export function QuestionSolutionSheet({ buttonLabel, ...props }: QuestionSolutionSheetProps) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        data-solution-trigger=""
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        className={cn(
+          buttonVariants({ variant: 'ghost', size: 'sm' }),
+          'ml-auto h-8 rounded-full bg-(--ui-fill) px-3.5 text-foreground/80 hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active)',
+        )}
+        onClick={() => { setMounted(true); setOpen(true); }}
+      >
+        <BookOpenTextIcon data-icon="inline-start" />
+        {buttonLabel}
+      </button>
+      {mounted ? <SheetDialog {...props} open={open} setOpen={setOpen} triggerRef={triggerRef} /> : null}
+    </>
+  );
+}
+
+type SheetDialogProps = Omit<QuestionSolutionSheetProps, 'buttonLabel'> & {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  triggerRef: RefObject<HTMLButtonElement | null>;
+};
+
+function SheetDialog({ questionId, solution, dialogTitle, numberLabel, typeLabel, tags, open, setOpen, triggerRef }: SheetDialogProps) {
   const [editingNote, setEditingNote] = useState(false);
   const desktop = useDesktop();
   const state = useQuestionState();
   const sheetRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const close = useCallback(() => setOpen(false), []);
+  const close = useCallback(() => setOpen(false), [setOpen]);
   const dragHandlers = useSheetDrag(sheetRef, close);
   const spec = state?.spec ?? null;
 
   return (
     <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (!next) setEditingNote(false); }}>
-      <DialogTrigger
-        render={(
-          <Button
-            data-solution-trigger=""
-            variant="ghost"
-            size="sm"
-            className="ml-auto h-8 rounded-full bg-(--ui-fill) px-3.5 text-foreground/80 hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active)"
-          />
-        )}
-      >
-        <BookOpenTextIcon data-icon="inline-start" />
-        {buttonLabel}
-      </DialogTrigger>
-
       <DialogContent
         ref={sheetRef}
         showCloseButton={false}
         initialFocus={titleRef}
+        finalFocus={triggerRef}
         overlayClassName={overlayClassName}
         className={cn(
           'flex flex-col gap-0 overflow-hidden bg-(--ui-panel) p-0 text-base text-foreground ring-0 will-change-transform',

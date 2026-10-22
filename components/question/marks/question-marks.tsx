@@ -1,6 +1,6 @@
 'use client';
 
-import { NotebookPenIcon, StarIcon, TagIcon } from 'lucide-react';
+import { NotebookPenIcon } from 'lucide-react';
 import {
   createContext,
   type ReactNode,
@@ -11,7 +11,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import type { MarkPatch } from '@/lib/question-store';
 import type { QuestionMark, UserTag } from '@/lib/question-store/types';
 import { cn } from '@/lib/utils';
@@ -74,15 +74,15 @@ export function QuestionMarksProvider({ questionId, children }: { questionId: st
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 
-const actionClass = 'size-8 rounded-full text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active) aria-expanded:text-foreground';
+/* Plain buttons styled like ghost icon buttons: three per card, so no Base UI wrapper. */
+const actionClass = buttonVariants({ variant: 'ghost', size: 'icon' }) + ' size-8 rounded-full text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active) aria-expanded:text-foreground';
 
 function FavoriteButton() {
   const marks = useMarks();
   const on = marks?.mark?.favorite ?? false;
   return (
-    <Button
-      variant="ghost"
-      size="icon"
+    <button
+      type="button"
       className={cn(actionClass, on && 'text-warning hover:text-warning')}
       aria-pressed={on}
       aria-label={on ? '取消收藏' : '收藏'}
@@ -91,8 +91,8 @@ function FavoriteButton() {
       data-favorite={on ? 'on' : 'off'}
       onClick={() => void marks?.update({ favorite: !on })}
     >
-      <StarIcon className={cn('transition-[fill,transform] duration-300', on && 'fill-current')} />
-    </Button>
+      <span data-action-icon="star" aria-hidden="true" />
+    </button>
   );
 }
 
@@ -108,16 +108,11 @@ export function QuestionMarkActions({ onEditNote, editingNote }: { onEditNote?: 
   return (
     <div data-question-actions="">
       <FavoriteButton />
-      <TagPicker
-        trigger={(
-          <Button variant="ghost" size="icon" className={cn(actionClass, marks.assigned.length > 0 && 'text-foreground')} aria-label="标签" title="标签" disabled={!marks.ready}>
-            <TagIcon />
-          </Button>
-        )}
-      />
-      <Button
-        variant="ghost"
-        size="icon"
+      <TagPicker className={cn(actionClass, marks.assigned.length > 0 && 'text-foreground')} aria-label="标签" title="标签" disabled={!marks.ready}>
+        <span data-action-icon="tag" aria-hidden="true" />
+      </TagPicker>
+      <button
+        type="button"
         className={cn(actionClass, (hasNote || editing) && 'text-foreground')}
         aria-label={hasNote ? '编辑注释' : '添加注释'}
         aria-expanded={editing}
@@ -125,8 +120,8 @@ export function QuestionMarkActions({ onEditNote, editingNote }: { onEditNote?: 
         disabled={!marks.ready}
         onClick={() => (onEditNote ? onEditNote() : marks.setEditingNote(!marks.editingNote))}
       >
-        <NotebookPenIcon />
-      </Button>
+        <span data-action-icon="note" aria-hidden="true" />
+      </button>
     </div>
   );
 }

@@ -1,8 +1,8 @@
 'use client';
 
 import { CheckIcon, ChevronLeftIcon, PlusIcon, Settings2Icon, Trash2Icon } from 'lucide-react';
-import { type ReactElement, useState } from 'react';
-import { Popover, PopoverContent, PopoverTitle, PopoverTrigger } from '@/components/ui/popover';
+import { type ComponentProps, useRef, useState } from 'react';
+import { Popover, PopoverContent, PopoverTitle } from '@/components/ui/popover';
 import { ANNOTATION_LIMITS, normalizeTagName, type TagColor, type UserTag } from '@/lib/question-store/types';
 import { cn } from '@/lib/utils';
 import { useMarks } from './question-marks';
@@ -185,15 +185,49 @@ function ManageView({ onBack }: { onBack: () => void }) {
   );
 }
 
-/** Popover for picking, creating and managing the reader's tags on one question. */
-export function TagPicker({ trigger }: { trigger: ReactElement }) {
+type TagPickerProps = Omit<ComponentProps<'button'>, 'onClick' | 'type'>;
+
+/**
+ * Button and popover for picking, creating and managing the reader's tags on
+ * one question. The trigger is a plain button and the popover anchors to it,
+ * mounting on first use: every question card has one.
+ */
+export function TagPicker(props: TagPickerProps) {
+  const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [view, setView] = useState<'pick' | 'manage'>('pick');
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  /* A press on the button counts as an outside press, which closes the popover before the click. */
+  const wasOpen = useRef(false);
+
+  const change = (next: boolean) => {
+    setOpen(next);
+    if (!next) setView('pick');
+  };
+
   return (
-    <Popover onOpenChange={(open) => { if (!open) setView('pick'); }}>
-      <PopoverTrigger render={trigger} />
-      <PopoverContent aria-label="标签">
-        {view === 'pick' ? <PickView onManage={() => setView('manage')} /> : <ManageView onBack={() => setView('pick')} />}
-      </PopoverContent>
-    </Popover>
+    <>
+      <button
+        {...props}
+        ref={buttonRef}
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onPointerDown={() => { wasOpen.current = open; }}
+        onClick={() => {
+          const close = wasOpen.current;
+          wasOpen.current = false;
+          setMounted(true);
+          change(!close);
+        }}
+      />
+      {mounted ? (
+        <Popover open={open} onOpenChange={change}>
+          <PopoverContent aria-label="标签" anchor={buttonRef} finalFocus={buttonRef}>
+            {view === 'pick' ? <PickView onManage={() => setView('manage')} /> : <ManageView onBack={() => setView('pick')} />}
+          </PopoverContent>
+        </Popover>
+      ) : null}
+    </>
   );
 }

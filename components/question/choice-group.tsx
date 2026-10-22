@@ -43,20 +43,11 @@ export function getChoiceFeedback({
 
 const NOTES: Partial<Record<ChoiceFeedback, string>> = { missed: '漏选', answer: '正确答案' };
 
-/** Marker drawn once per option: letter, feedback icons and the multi-select tick. */
+/** The letter in its ring; feedback icons and the tick are CSS pseudo-elements. */
 function Marker({ label }: { label: string }) {
   return (
     <span data-choice-marker="" aria-hidden="true">
       <span data-choice-letter="">{label}</span>
-      <span data-choice-icon="correct">
-        <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
-      </span>
-      <span data-choice-icon="incorrect">
-        <svg viewBox="0 0 24 24"><path d="M7 7l10 10" /><path d="M17 7L7 17" /></svg>
-      </span>
-      <span data-choice-tick="">
-        <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
-      </span>
     </span>
   );
 }

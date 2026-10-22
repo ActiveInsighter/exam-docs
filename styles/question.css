@@ -99,6 +99,23 @@
   margin-inline-end: -0.375rem;
 }
 
+/*
+ * Card action icons (lucide star / tag / notebook-pen) as one masked element
+ * each instead of inline SVG trees: three per card on pages of 100+ cards.
+ */
+[data-action-icon] {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  background: currentColor;
+  mask: var(--action-icon) center / contain no-repeat;
+}
+[data-action-icon='star'] { --action-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z'/%3E%3C/svg%3E"); }
+[data-favorite='on'] [data-action-icon='star'] { --action-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z'/%3E%3C/svg%3E"); }
+[data-action-icon='tag'] { --action-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z'/%3E%3Ccircle cx='7.5' cy='7.5' r='.5' fill='black'/%3E%3C/svg%3E"); }
+[data-action-icon='note'] { --action-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4M2 6h4M2 10h4M2 14h4M2 18h4'/%3E%3Cpath d='M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z'/%3E%3C/svg%3E"); }
+
 /* ------------------------------------------------------------------ tags */
 
 [data-question-tag] {
@@ -340,55 +357,38 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
   transition: opacity 160ms var(--ui-ease), transform 220ms var(--ui-ease);
 }
 
-[data-choice-icon] {
+/*
+ * Feedback icons and the multiple-answer tick are pseudo-elements with
+ * mask images, not DOM nodes: a long page has hundreds of options.
+ */
+[data-choice-marker]::before {
+  content: '';
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
+  background: currentColor;
+  mask: var(--choice-icon, none) center / 0.9375rem no-repeat;
   opacity: 0;
-}
-
-[data-choice-icon] svg {
-  width: 0.9375rem;
-  height: 0.9375rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-[data-choice-icon] path {
-  stroke-dasharray: 24;
-  stroke-dashoffset: 24;
+  clip-path: inset(0 100% 0 0);
 }
 
 /* Small check that marks a picked option of a multiple-answer question. */
-[data-choice-tick] {
+[data-multiple] [data-choice-marker]::after {
+  content: '';
   position: absolute;
   right: -0.25rem;
   bottom: -0.25rem;
-  display: grid;
-  place-items: center;
   width: 0.875rem;
   height: 0.875rem;
   border-radius: 999px;
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--background) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 0.5625rem no-repeat;
   box-shadow: 0 0 0 1.5px var(--exam-choice-active);
   opacity: 0;
   transform: scale(0.4);
   transition: opacity 160ms var(--ui-ease), transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-[data-choice-tick] svg {
-  width: 0.5625rem;
-  height: 0.5625rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 3.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.dark [data-multiple] [data-choice-marker]::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fafafa' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
 }
 
 /* "漏选" / "正确答案" note at the end of an option. */
@@ -421,7 +421,7 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
   color: var(--background);
   transform: scale(1.06);
 }
-[data-feedback='selected'] [data-choice-tick] {
+[data-feedback='selected'] [data-choice-marker]::after {
   opacity: 1;
   transform: scale(1);
 }
@@ -485,20 +485,13 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
   opacity: 0;
   transform: scale(0.5);
 }
-[data-feedback='correct'] [data-choice-icon='correct'],
-[data-feedback='incorrect'] [data-choice-icon='incorrect'] {
+[data-feedback='correct'] [data-choice-marker] { --choice-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E"); }
+[data-feedback='incorrect'] [data-choice-marker] { --choice-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M7 7l10 10M17 7L7 17'/%3E%3C/svg%3E"); }
+[data-feedback='correct'] [data-choice-marker]::before,
+[data-feedback='incorrect'] [data-choice-marker]::before {
   opacity: 1;
-}
-[data-feedback='correct'] [data-choice-icon='correct'] path,
-[data-feedback='incorrect'] [data-choice-icon='incorrect'] path {
-  animation: exam-draw 360ms cubic-bezier(0.65, 0, 0.35, 1) forwards 80ms;
-}
-[data-feedback='incorrect'] [data-choice-icon='incorrect'] path + path {
-  animation-delay: 200ms;
-}
-
-@keyframes exam-draw {
-  to { stroke-dashoffset: 0; }
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 340ms cubic-bezier(0.65, 0, 0.35, 1) 80ms;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -534,12 +527,10 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
   [data-exam-choice-option],
   [data-exam-choice-option]::before,
   [data-choice-marker],
-  [data-choice-letter],
-  [data-choice-tick] {
-    transition-duration: 1ms;
-  }
-  [data-choice-icon] path {
-    animation-duration: 1ms !important;
+  [data-choice-marker]::before,
+  [data-choice-marker]::after,
+  [data-choice-letter] {
+    transition-duration: 1ms !important;
   }
 }
 
