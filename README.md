@@ -101,6 +101,21 @@ Assets. `main` targets `exam-docs`; approved preview branches target the isolate
 - a small Worker forwards only account endpoints and the question sync RPC to
   the configured Supabase project; it adds no privileged key and disables caching.
 
+Two settings keep client-side navigation from exhausting mobile browser memory
+(they caused the HarmonyOS Huawei browser to crash after a few page switches):
+
+- Every static response sends `Speculation-Rules: "/speculation-rules.json"`, an
+  empty rule set (`scripts/prepare-cloudflare-static-assets.mjs`). Cloudflare
+  Speed Brain does not override an origin's header. Its document rule made
+  Chromium retain every removed link, and with it each previous page: about
+  117k DOM nodes after nine navigations instead of about 13k. Turning Speed
+  Brain off in the zone settings (`speed_brain = off`) is the matching
+  dashboard change.
+- Links do not prefetch when they scroll into view (`components/intent-link.tsx`,
+  passed to Fumadocs' `RootProvider`). A question page's RSC payload is several
+  MB, and a phone used to parse about 18 MB of sibling chapters on every page
+  load. Links prefetch only on mouse hover; taps fetch just the target page.
+
 The static output retains its EdgeOne-compatible routing metadata. Supabase
 Auth and database RPCs are reached through the same-origin Worker when cloud sync
 is configured; no Next.js server is required. Local development can leave

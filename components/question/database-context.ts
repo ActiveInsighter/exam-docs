@@ -19,7 +19,7 @@ export type QuestionDatabaseContext = {
   openConflicts(): void;
 };
 
-export const LOCAL_STATUS: QuestionSyncStatus = { phase: 'local', pending: 0, conflicts: 0, lastSyncedAt: null, error: null, live: false };
+export const LOCAL_STATUS: QuestionSyncStatus = { phase: 'local', pending: 0, conflicts: 0, lastSyncedAt: null, error: null };
 
 export const QuestionDatabaseContextValue = createContext<QuestionDatabaseContext | null>(null);
 

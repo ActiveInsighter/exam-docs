@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useAccount, useAccountMenuSection } from '@/components/account';
 import { QuestionAnswerCache, QuestionDatabase, QuestionSyncEngine } from '@/lib/question-store';
 import { namespaceForUser, type QuestionSyncStatus } from '@/lib/question-store/types';
-import { createQuestionTransport, getQuestionSupabaseClient, subscribeQuestionRealtime } from '@/lib/question-supabase';
+import { createQuestionTransport, getQuestionSupabaseClient } from '@/lib/question-supabase';
 import { questionAccountSection } from './account-section';
 import { QuestionConflictDialog } from './conflict-dialog';
 import { LOCAL_STATUS, QuestionDatabaseContextValue, type QuestionDatabaseContext } from './database-context';
@@ -14,7 +14,9 @@ export { useQuestionDatabase } from './database-context';
 /**
  * Site-wide owner of the reader's answers: one IndexedDB connection, one
  * memory cache per account namespace, and (when signed in) one sync engine
- * woken by edits and by realtime pokes from the account's other devices.
+ * woken by edits and page lifecycle events. No long-lived socket is kept
+ * open: mobile browsers pay for an idle WebSocket in memory and battery, and
+ * a pull on return to the page covers other devices' changes.
  */
 export function QuestionDatabaseProvider({ children }: { children: ReactNode }) {
   const { user, cachedUser: cachedAccount, error: accountError } = useAccount();
@@ -57,21 +59,16 @@ export function QuestionDatabaseProvider({ children }: { children: ReactNode }) 
     if (!database || !user) { setEngine(null); return; }
     let disposed = false;
     let active: QuestionSyncEngine | undefined;
-    let stopRealtime: (() => void) | undefined;
     void getQuestionSupabaseClient().then((client) => {
       if (disposed) return;
       const current = new QuestionSyncEngine(database, namespace, createQuestionTransport(client, user.id));
       active = current;
       setEngine(current);
       current.start();
-      stopRealtime = subscribeQuestionRealtime(client, user.id, {
-        onChanged: (cursor) => current.poke(cursor),
-        onLive: (live) => current.setLive(live),
-      });
     }).catch(() => {
       if (!disposed) setError('云同步暂时无法启动，答题继续保存在本机。');
     });
-    return () => { disposed = true; stopRealtime?.(); active?.stop(); };
+    return () => { disposed = true; active?.stop(); };
   }, [database, namespace, user?.id]);
 
   useEffect(() => {

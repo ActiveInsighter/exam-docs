@@ -534,6 +534,9 @@ jobs:
           grep -F '/docs/*/__next.docs.txt /docs/__next.docs.txt 200' .static-docs/_redirects
           grep -Fx '/*.md' .static-docs/_headers
           grep -F 'Content-Type: text/markdown; charset=utf-8' .static-docs/_headers
+          # Speed Brain's document rules leak every previous page on client-side navigation.
+          grep -F 'Speculation-Rules: "/speculation-rules.json"' .static-docs/_headers
+          test -s .static-docs/speculation-rules.json
           grep -Fx 'edgeone.json' .static-docs/.assetsignore
           file_count="$(find .static-docs -type f ! -name 'edgeone.json' ! -name '.assetsignore' ! -name '_redirects' ! -name '_headers' | wc -l | tr -d ' ')"
           largest_bytes="$(find .static-docs -type f ! -name 'edgeone.json' ! -name '.assetsignore' ! -name '_redirects' ! -name '_headers' -printf '%s\n' | awk 'BEGIN { max = 0 } $1 > max { max = $1 } END { print max }')"

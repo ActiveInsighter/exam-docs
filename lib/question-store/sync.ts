@@ -33,10 +33,10 @@ function webLocks(): LockManager | undefined {
 }
 
 /**
- * A single bounded exchange loop. It wakes on edits, on realtime pokes from
- * the account's other devices, and on browser lifecycle events; there is no
- * idle polling. Realtime is only a hint: every wake pulls through the cursor
- * protocol, so a missed poke delays an update but never loses it.
+ * A single bounded exchange loop. It wakes on edits and on browser lifecycle
+ * events (focus, becoming visible, coming online); there is no idle polling
+ * and no open socket. Every wake pulls through the cursor protocol, so other
+ * devices' changes arrive the next time this page is used.
  */
 export class QuestionSyncEngine {
   private readonly owner = crypto.randomUUID();
@@ -55,7 +55,7 @@ export class QuestionSyncEngine {
     private readonly transport?: QuestionSyncTransport,
     private readonly options: QuestionSyncOptions = {},
   ) {
-    this.current = { phase: transport && namespace !== 'guest' ? 'idle' : 'local', pending: 0, conflicts: 0, lastSyncedAt: null, error: null, live: false };
+    this.current = { phase: transport && namespace !== 'guest' ? 'idle' : 'local', pending: 0, conflicts: 0, lastSyncedAt: null, error: null };
   }
 
   get status(): QuestionSyncStatus { return this.current; }
@@ -75,7 +75,27 @@ export class QuestionSyncEngine {
     return this.options.online?.() ?? (typeof navigator === 'undefined' || navigator.onLine !== false);
   }
 
-  private async refresh(): Promise<void> {
+  private refreshing: Promise<void> | null = null;
+  private refreshQueued: Promise<void> | null = null;
+
+  /**
+   * Re-reads the pending/conflict counts. Every saved keystroke asks for one,
+   * so concurrent requests share the read in flight plus at most one queued
+   * behind it, instead of each starting its own IndexedDB transactions.
+   */
+  private refresh(): Promise<void> {
+    if (!this.refreshing) {
+      const read = this.readStatus().finally(() => { if (this.refreshing === read) this.refreshing = null; });
+      this.refreshing = read;
+      return read;
+    }
+    return this.refreshQueued ??= this.refreshing.catch(() => undefined).then(() => {
+      this.refreshQueued = null;
+      return this.refresh();
+    });
+  }
+
+  private async readStatus(): Promise<void> {
     const [stats, metadata] = await Promise.all([this.database.stats(this.namespace), this.database.metadata(this.namespace)]);
     if (!this.stopped) this.update({ ...stats, lastSyncedAt: metadata.lastSyncedAt });
   }
@@ -95,27 +115,6 @@ export class QuestionSyncEngine {
     this.dueAt = due;
     this.dueIsDebounce = debounce;
     this.timer = setTimeout(() => { this.dueAt = Infinity; void this.run(false); }, Math.max(0, delay));
-  }
-
-  /** Realtime said the account feed reached `cursor`; pull if this device is behind. */
-  poke(cursor: string): void {
-    if (!/^\d+$/.test(cursor)) return;
-    void this.database.metadata(this.namespace).then((meta) => {
-      if (!meta.cursor || BigInt(cursor) > BigInt(meta.cursor)) {
-        if (this.running) this.rescheduleAfterRun = true;
-        else this.schedule(0);
-      }
-    }).catch(() => this.schedule(0));
-  }
-
-  /** The realtime channel (re)connected: catch up on anything sent while it was down. */
-  setLive(live: boolean): void {
-    if (live === this.current.live) return;
-    this.update({ live });
-    if (live && !this.running) {
-      const last = this.current.lastSyncedAt ? Date.parse(this.current.lastSyncedAt) : 0;
-      if (Date.now() - last > 3000) this.schedule(0);
-    }
   }
 
   private readonly onOnline = () => { this.schedule(0); };

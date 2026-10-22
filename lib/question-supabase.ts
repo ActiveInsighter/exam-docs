@@ -10,8 +10,6 @@ import {
 export { cloudConfigured as questionCloudConfigured, getSupabaseClient as getQuestionSupabaseClient } from './supabase-client';
 
 const RPC_TIMEOUT_MS = 20_000;
-/** An unauthorized private join is not retried by the library's fast rejoin loop. */
-const REALTIME_DENIED_RETRY_MS = 5 * 60_000;
 
 export function validateSyncResponse(value: unknown): asserts value is SyncResponse {
   if (!value || typeof value !== 'object') throw new Error('云同步返回格式有误');
@@ -61,79 +59,5 @@ export function createQuestionTransport(client: SupabaseClient, userId: string):
       validateSyncResponse(data);
       return data;
     },
-  };
-}
-
-export interface QuestionRealtimeHandlers {
-  /** The account feed advanced to `cursor` on another device or tab. */
-  onChanged(cursor: string): void;
-  /** The private channel is joined (true) or interrupted (false). */
-  onLive(live: boolean): void;
-}
-
-/**
- * Listens to the account's private broadcast topic. The database sends a poke
- * after each committed sync; the payload holds only the new cursor, never
- * answers, and RLS on realtime.messages admits only the topic's owner.
- *
- * The channel is joined only while the page is visible: a hidden or
- * backgrounded mobile tab keeps no WebSocket open (the library closes the
- * socket shortly after its last channel leaves), and the engine pulls on
- * return anyway. A join the
- * server refuses is not left to the library's endless fast rejoin; it is tried
- * again after several minutes or the next time the page becomes visible.
- */
-export function subscribeQuestionRealtime(client: SupabaseClient, userId: string, handlers: QuestionRealtimeHandlers): () => void {
-  let disposed = false;
-  let channel: ReturnType<SupabaseClient['channel']> | undefined;
-  let generation = 0;
-  let retry: ReturnType<typeof setTimeout> | undefined;
-  const hidden = () => typeof document !== 'undefined' && document.visibilityState === 'hidden';
-
-  const leave = () => {
-    generation++;
-    clearTimeout(retry);
-    retry = undefined;
-    if (channel) void client.removeChannel(channel);
-    channel = undefined;
-    if (!disposed) handlers.onLive(false);
-  };
-
-  const join = async () => {
-    if (disposed || channel || hidden()) return;
-    const current = ++generation;
-    const { data: { session } } = await client.auth.getSession();
-    if (disposed || current !== generation || session?.user.id !== userId) return;
-    // Private channels authorize the join with the user's JWT, not the publishable key.
-    await client.realtime.setAuth(session.access_token);
-    if (disposed || current !== generation) return;
-    const joined = client.channel(`exam-sync:${userId}`, { config: { private: true } })
-      .on('broadcast', { event: 'changed' }, (message: { payload?: { cursor?: unknown } }) => {
-        const cursor = message.payload?.cursor;
-        if (typeof cursor === 'string') handlers.onChanged(cursor);
-      });
-    channel = joined;
-    joined.subscribe((status, error) => {
-      if (disposed || channel !== joined) return;
-      if (status === 'SUBSCRIBED') return handlers.onLive(true);
-      if (status === 'CHANNEL_ERROR' && /unauthori[sz]ed|permission/i.test(error?.message ?? '')) {
-        leave();
-        retry = setTimeout(() => { void join().catch(() => undefined); }, REALTIME_DENIED_RETRY_MS);
-        return;
-      }
-      handlers.onLive(false);
-    });
-  };
-
-  const onVisibility = () => {
-    if (hidden()) leave();
-    else void join().catch(() => { if (!disposed) handlers.onLive(false); });
-  };
-  if (typeof document !== 'undefined') document.addEventListener('visibilitychange', onVisibility);
-  void join().catch(() => { if (!disposed) handlers.onLive(false); });
-  return () => {
-    disposed = true;
-    if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', onVisibility);
-    leave();
   };
 }
