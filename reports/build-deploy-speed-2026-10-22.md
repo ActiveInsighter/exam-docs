@@ -31,3 +31,11 @@
 
 - **exam-docs 的预上传尚未在真实部署中运行**：本仓库只允许 main 和指定分支部署，所以本次只做了构建验证。完全相同的脚本和步骤已在 fumadocs-study 实测：wrangler 上传从 5174 个文件、146 秒降到 0 个文件，"No updated asset files to upload"。exam-docs 部署 job 中的上传约占 209 秒，合并到 main 后可直接核对其日志中的 `[cloudflare-upload]` 行与 wrangler 的 `No updated asset files` 行。
 - English reading 浏览器验证曾尝试改用 runner 自带的 Chrome（可省约 20 秒），已撤回：完整版 Chrome 会自动请求 `/favicon.ico`，而站点该路径返回 404，会使 console 错误断言失败。
+
+## 第二轮：测试与浏览器验证
+
+- **内容测试**：公式检查改为 `tests/helpers/formula-errors.ts`。只解析一次 MDX，再按 rehype-katex 的方式逐个用 KaTeX 渲染公式，不再对每页做完整 MDX 编译（代码生成是主要耗时）。已在 core-questions 与 past-exams 的全部页面以及故意写错的公式上，与原编译检查逐页核对，结果一致。本机全部 222 个测试由 90 秒降到 26 秒；CI `validate` 中 vitest 由约 71 秒降到 30 秒（[39707368775](https://github.com/ActiveInsighter/exam-docs/actions/runs/39707368775)，构建总耗时 117 秒）。
+- **English reading 浏览器验证**：桌面和 390/320/700 三种触屏布局原本就各用独立的浏览器上下文，现改为并发执行。解答弹层的视口检查改为等待其动画稳定，原先的单次采样在负载下会与滑入动画竞争；真正溢出的弹层仍会失败。只安装实际使用的 headless shell。对生产站点本机实测由约 30 秒降到约 10 秒，连续 8 次通过。
+- **路由验证**：694 个文档路由改用 HEAD 请求、32 路并发。对生产站点逐一比对，HEAD 与原 GET 状态码完全一致，且不再下载约 2.2 GB 的页面正文。
+- 以上浏览器与路由验证只在 main 部署时运行，本分支 CI 未执行。本机已对生产站点验证。
+- 本机使用的旧版 Chromium（build 1194）在 `$`/`%24` 两种拼写的 RSC 预取文件间出现 `ERR_TOO_MANY_REDIRECTS`；fumadocs-study 的 CI 日志显示，新版 Chrome 跟随一次 307 后即得到 200。属原有问题，本轮未修改。
