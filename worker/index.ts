@@ -7,11 +7,7 @@ const ENDPOINTS = new Map([
   ['/auth/v1/user', ['GET']],
   ['/auth/v1/logout', ['POST']],
   ['/rest/v1/rpc/exam_sync_question_state', ['POST']],
-  // Realtime pokes for question sync; RLS on realtime.messages limits each JWT to its own topic.
-  ['/realtime/v1/websocket', ['GET']],
 ]);
-const WEBSOCKET_PATH = '/realtime/v1/websocket';
-const WEBSOCKET_HEADERS = ['upgrade', 'sec-websocket-key', 'sec-websocket-version', 'sec-websocket-protocol', 'sec-websocket-extensions'];
 const FORWARDED_HEADERS = [
   'accept', 'apikey', 'authorization', 'content-type', 'x-client-info',
   'x-supabase-api-version', 'prefer', 'accept-profile', 'content-profile',
@@ -42,25 +38,10 @@ export default {
     }
     upstream.pathname = path;
     upstream.search = url.search;
-    const websocket = path === WEBSOCKET_PATH;
-    if (websocket && request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') {
-      return failure(426, '实时同步需要 WebSocket 连接。');
-    }
     const headers = new Headers();
-    for (const name of websocket ? [...FORWARDED_HEADERS, ...WEBSOCKET_HEADERS] : FORWARDED_HEADERS) {
+    for (const name of FORWARDED_HEADERS) {
       const value = request.headers.get(name);
       if (value) headers.set(name, value);
-    }
-    if (websocket) {
-      // The 101 response carries the upstream socket; Workers relays frames both ways.
-      try {
-        const response = await fetch(upstream, { headers });
-        if (response.status === 101) return response;
-        return failure(response.status >= 400 ? response.status : 502, '实时同步暂时无法连接，已改为按需同步。');
-      } catch {
-        console.error(JSON.stringify({ event: 'supabase_realtime_unavailable', path }));
-        return failure(502, '实时同步暂时无法连接，已改为按需同步。');
-      }
     }
     // No service key is added: Supabase still verifies the caller's JWT and RLS.
     const forwarded = new Request(upstream, request);

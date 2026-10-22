@@ -1,8 +1,8 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { cloudConfigured, getSupabaseClient } from '@/lib/supabase-client';
+import { authStorageKey, cloudConfigured, getSupabaseClient, mayHaveSession } from '@/lib/supabase-client';
 import type { AccountIdentity, AccountPhase, AccountState } from '@/lib/account/types';
 import { AccountMenuRegistry } from './menu-registry';
 
@@ -55,11 +55,15 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     setCachedUser(readCachedIdentity());
   }, []);
 
+  // Loads the auth SDK and follows its session; started once, on demand.
+  const connectRef = useRef<() => Promise<void>>(() => Promise.resolve());
+
   useEffect(() => {
     if (!cloudConfigured) return;
     let disposed = false;
     let unsubscribe: (() => void) | undefined;
-    void getSupabaseClient().then(async (client) => {
+    let connecting: Promise<void> | undefined;
+    const connect = () => connecting ??= getSupabaseClient().then(async (client) => {
       if (disposed) return;
       let authEvent = false;
       const apply = (account: User | null) => {
@@ -82,10 +86,26 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     }).finally(() => {
       if (!disposed) setSessionRead(true);
     });
-    return () => { disposed = true; unsubscribe?.(); };
+    connectRef.current = connect;
+
+    // A guest never loads the SDK until it is needed.
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === authStorageKey && event.newValue) void connect();
+    };
+    if (mayHaveSession()) void connect();
+    else {
+      setSessionRead(true);
+      window.addEventListener('storage', onStorage);
+    }
+    return () => {
+      disposed = true;
+      window.removeEventListener('storage', onStorage);
+      unsubscribe?.();
+    };
   }, []);
 
   const sendEmailLink = useCallback(async (email: string) => {
+    await connectRef.current();
     const client = await getSupabaseClient();
     const { error: failure } = await client.auth.signInWithOtp({
       email: email.trim(),
@@ -95,6 +115,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const verifyEmailCode = useCallback(async (email: string, token: string) => {
+    await connectRef.current();
     const client = await getSupabaseClient();
     const { error: failure } = await client.auth.verifyOtp({ email: email.trim(), token: token.trim(), type: 'email' });
     if (failure) throw failure;

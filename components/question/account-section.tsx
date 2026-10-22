@@ -45,7 +45,6 @@ export function describeSync(context: QuestionDatabaseContext | null): { tone: T
   if (status.phase === 'syncing') return { tone: 'busy', text: '正在同步…' };
   if (status.pending) return { tone: 'busy', text: `${status.pending} 条修改待上传` };
   const when = relativeTime(status.lastSyncedAt);
-  if (status.live) return { tone: 'ok', text: when ? `实时同步中 · ${when}更新` : '实时同步中' };
   return { tone: 'ok', text: when ? `已同步 · ${when}` : '已同步' };
 }
 

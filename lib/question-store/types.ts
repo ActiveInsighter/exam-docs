@@ -120,8 +120,6 @@ export interface QuestionSyncStatus {
   conflicts: number;
   lastSyncedAt: string | null;
   error: string | null;
-  /** The realtime channel is connected, so other devices' writes arrive within seconds. */
-  live: boolean;
 }
 
 /** Counts shown in the account menu. */

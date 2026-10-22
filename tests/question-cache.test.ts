@@ -19,8 +19,8 @@ async function open(factory = new IDBFactory(), name = crypto.randomUUID()) {
   return db;
 }
 
-function cacheFor(db: QuestionDatabase | null) {
-  const cache = new QuestionAnswerCache(db, ACCOUNT);
+function cacheFor(db: QuestionDatabase | null, draftDelayMs = 0) {
+  const cache = new QuestionAnswerCache(db, ACCOUNT, { draftDelayMs });
   cleanup.push(() => cache.dispose());
   return cache;
 }
@@ -67,6 +67,52 @@ describe('question answer memory cache', () => {
     expect(save.mock.calls.map(([, , state, options]) => `${state.values[0]}${options?.submission ? '!' : ''}`)).toEqual(['a', 'abc', 'abc!', 'xy']);
     expect((await db.get(ACCOUNT, id))?.state.values).toEqual(['xy']);
     expect(await db.listAttempts(ACCOUNT)).toHaveLength(1);
+  });
+
+  it('persists a burst of draft edits once after input pauses, and immediately on submit, hide or dispose', async () => {
+    const db = await open();
+    const save = vi.spyOn(db, 'save');
+    const cache = cacheFor(db, 40);
+    const id = question('q1');
+    cache.subscribe(id, () => {});
+    await until(() => cache.read(id).ready);
+    for (const text of ['a', 'ab', 'abc']) cache.write(id, draft(text));
+    expect(cache.read(id).state.values).toEqual(['abc']);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(save).not.toHaveBeenCalled();
+    await until(() => save.mock.calls.length === 1);
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    expect(save.mock.calls.map(([, , state]) => state.values[0])).toEqual(['abc']);
+
+    // A submission writes the waiting draft and itself without waiting.
+    cache.write(id, draft('abcd'));
+    cache.write(id, submitted('abcd'), { submission: true });
+    await until(() => save.mock.calls.length === 3);
+    expect(save.mock.calls.slice(1).map(([, , state, options]) => `${state.values[0]}${options?.submission ? '!' : ''}`)).toEqual(['abcd', 'abcd!']);
+
+  });
+
+  it('writes a waiting draft at once when the page is hidden or the cache is disposed', async () => {
+    const db = await open();
+    const save = vi.spyOn(db, 'save');
+    const cache = cacheFor(db, 60_000);
+    const id = question('q1');
+    cache.subscribe(id, () => {});
+    await until(() => cache.read(id).ready);
+
+    // pagehide / visibilitychange call persistNow().
+    cache.write(id, draft('hidden'));
+    expect(save).not.toHaveBeenCalled();
+    cache.persistNow();
+    await until(() => save.mock.calls.length === 1 && !cache.hasUnsaved());
+    expect((await db.get(ACCOUNT, id))?.state.values).toEqual(['hidden']);
+
+    // Disposing (account switch) still writes the waiting draft to its own namespace.
+    cache.write(id, draft('last'));
+    cache.dispose();
+    await until(() => save.mock.calls.length === 2);
+    for (let i = 0; i < 20 && (await db.get(ACCOUNT, id))?.state.values[0] !== 'last'; i++) await settle();
+    expect((await db.get(ACCOUNT, id))?.state.values).toEqual(['last']);
   });
 
   it('keeps an unsaved answer in memory after a storage failure and persists it on retry', async () => {
@@ -174,22 +220,6 @@ describe('realtime-driven sync engine', () => {
     };
     return { transport, requests, advance: () => String(++cursor) };
   }
-
-  it('pulls on a poke only when this device is behind and reports realtime state', async () => {
-    const db = await open();
-    const remote = server();
-    const sync = new QuestionSyncEngine(db, ACCOUNT, remote.transport, { online: () => true });
-    cleanup.push(() => sync.stop());
-    sync.start();
-    await until(() => remote.requests.length === 1 && sync.status.phase === 'idle');
-    sync.poke('0');
-    await new Promise((resolve) => setTimeout(resolve, 30));
-    expect(remote.requests).toHaveLength(1);
-    sync.poke(remote.advance());
-    await until(() => remote.requests.length === 2);
-    sync.setLive(true);
-    expect(sync.status.live).toBe(true);
-  });
 
   it('uploads a submission without waiting for the draft debounce', async () => {
     const db = await open();

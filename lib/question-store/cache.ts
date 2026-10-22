@@ -16,6 +16,12 @@ import { questionKey, sameState, type AnswerState, type QuestionIdentity, type Q
  * the newest one, submissions are never collapsed (each one becomes an
  * immutable attempt). While a write is queued or failed the memory value is
  * authoritative, so a slower external refresh can never roll back typing.
+ *
+ * Drafts are persisted after a short pause in input rather than on every
+ * keystroke: each save is a multi-store IndexedDB transaction plus change
+ * notifications, which mobile browsers (whose storage runs in the browser
+ * process) handle poorly in bursts. Submissions, hiding or leaving the page,
+ * and disposing the cache write waiting drafts immediately.
  */
 
 export interface AnswerSnapshot {
@@ -32,6 +38,8 @@ interface Entry {
   identity: QuestionIdentity;
   snapshot: AnswerSnapshot;
   queue: Write[];
+  /** A draft is waiting for input to pause before it is persisted. */
+  timer: ReturnType<typeof setTimeout> | undefined;
   flushing: boolean;
   failed: boolean;
   listeners: Set<() => void>;
@@ -41,24 +49,59 @@ const EMPTY: AnswerState = Object.freeze({ selected: [], values: [], submitted: 
 export const emptyAnswer = (): AnswerState => ({ selected: [], values: [], submitted: false, attempt: 0 });
 export const PENDING_SNAPSHOT: AnswerSnapshot = Object.freeze({ state: EMPTY, ready: false, error: null });
 
+/** Quiet period after the last draft edit before it is written to IndexedDB. */
+export const DRAFT_PERSIST_MS = 400;
+
+export interface QuestionAnswerCacheOptions {
+  /** Delay before persisting a draft; 0 writes every change immediately. */
+  draftDelayMs?: number;
+}
+
 export class QuestionAnswerCache {
   private readonly entries = new Map<string, Entry>();
   private readonly documents = new Map<string, Promise<void>>();
   private readonly unsubscribe: (() => void) | undefined;
+  private readonly draftDelayMs: number;
   private disposed = false;
 
-  constructor(private readonly database: QuestionDatabase | null, readonly namespace: QuestionNamespace) {
+  constructor(private readonly database: QuestionDatabase | null, readonly namespace: QuestionNamespace,
+    options: QuestionAnswerCacheOptions = {}) {
+    this.draftDelayMs = options.draftDelayMs ?? DRAFT_PERSIST_MS;
     this.unsubscribe = database?.subscribe((change) => {
       if (change.namespace !== namespace || this.disposed) return;
       if (change.keys) void this.refresh(change.keys);
       else for (const path of this.documents.keys()) void this.refreshDocument(path);
     });
+    if (database && typeof window !== 'undefined') {
+      window.addEventListener('pagehide', this.persistNow);
+      document.addEventListener('visibilitychange', this.onVisibility);
+    }
   }
 
   dispose(): void {
+    // Waiting drafts still belong to this namespace; write them before letting go.
+    this.persistNow();
     this.disposed = true;
     this.unsubscribe?.();
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('pagehide', this.persistNow);
+      document.removeEventListener('visibilitychange', this.onVisibility);
+    }
   }
+
+  private readonly onVisibility = () => {
+    if (document.visibilityState === 'hidden') this.persistNow();
+  };
+
+  /** Writes every draft that is waiting for input to pause. */
+  readonly persistNow = (): void => {
+    for (const entry of this.entries.values()) {
+      if (entry.timer === undefined) continue;
+      clearTimeout(entry.timer);
+      entry.timer = undefined;
+      void this.flush(entry);
+    }
+  };
 
   private entry(identity: QuestionIdentity): Entry {
     const key = questionKey(identity);
@@ -67,7 +110,7 @@ export class QuestionAnswerCache {
       entry = {
         identity: { documentPath: identity.documentPath, questionId: identity.questionId, questionRevision: identity.questionRevision },
         snapshot: this.database ? PENDING_SNAPSHOT : { state: EMPTY, ready: true, error: null },
-        queue: [], flushing: false, failed: false, listeners: new Set(),
+        queue: [], timer: undefined, flushing: false, failed: false, listeners: new Set(),
       };
       this.entries.set(key, entry);
     }
@@ -153,7 +196,16 @@ export class QuestionAnswerCache {
     else entry.queue.push({ state: value, submission });
     // A new edit also retries a failed earlier write, which stays first in the queue.
     entry.failed = false;
-    void this.flush(entry);
+    clearTimeout(entry.timer);
+    entry.timer = undefined;
+    if (submission || this.draftDelayMs <= 0) {
+      void this.flush(entry);
+      return;
+    }
+    entry.timer = setTimeout(() => {
+      entry.timer = undefined;
+      void this.flush(entry);
+    }, this.draftDelayMs);
   }
 
   /** Persist again after a storage failure, keeping the memory value. */
@@ -162,6 +214,8 @@ export class QuestionAnswerCache {
     if (!entry) return;
     if (entry.failed) {
       entry.failed = false;
+      clearTimeout(entry.timer);
+      entry.timer = undefined;
       void this.flush(entry);
     } else if (!this.busy(entry)) {
       this.publish(entry, { ready: false, error: null });
@@ -179,13 +233,14 @@ export class QuestionAnswerCache {
     if (entry.flushing || !this.database) return;
     entry.flushing = true;
     try {
-      while (entry.queue.length && !this.disposed) {
+      // Queued writes finish even after dispose: they target this cache's namespace.
+      while (entry.queue.length) {
         const next = entry.queue[0];
         try {
           await this.database.save(this.namespace, entry.identity, next.state, { submission: next.submission });
         } catch (error) {
           entry.failed = true;
-          this.publish(entry, { error: questionStorageError(error) });
+          if (!this.disposed) this.publish(entry, { error: questionStorageError(error) });
           return;
         }
         entry.queue.shift();
