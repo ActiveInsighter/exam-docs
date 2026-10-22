@@ -193,6 +193,9 @@ TCP 位于 OSI 的 <Blank answer="传输层" aliases={["运输层"]} />，建立
 - 每题的「查看解答」浮窗和标签弹层都是普通按钮，第一次打开时才挂载对应的 Dialog / Popover。
 - 选项的判分图标、多选勾选角标和卡片右上角的收藏 / 标签 / 注释图标都是 CSS mask 伪元素或单个元素，不为每个选项生成 SVG。
 - 选项分栏只测量视口附近的题目，其余进入视口前再测量；数学键盘与「收藏与标签」对话框按需加载。
+- 生命周期与页面相同的观察器和全局监听器（如 `use-choice-columns.ts` 中的 `IntersectionObserver`、`ResizeObserver`、`document.fonts` 监听）在模块加载时创建，不要在 effect 里懒创建：
+  压缩器会把只用一次的辅助函数内联进 effect，回调因此与 effect 共享作用域，持有某个题目元素，客户端切换页面后整个旧页面无法回收
+  （2026-10-22 线上实测：离开 136 题页面后残留约 2.7 万个节点）。检查方法：切换页面并强制 GC 后，CDP `Performance.getMetrics` 的 `Nodes` 应接近当前 DOM 元素数。
 
 ## 版本哈希
 
