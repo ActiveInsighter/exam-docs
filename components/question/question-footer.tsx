@@ -26,7 +26,7 @@ export function describeResult(spec: GradingSpec, evaluation: Evaluation, select
   if (evaluation.result === 'incorrect') return '回答错误';
   if (spec.kind === 'choice') {
     const missed = spec.key.length - selected.filter((label) => spec.key.includes(label)).length;
-    return `少选了 · 漏选 ${missed} 项`;
+    return `少选 · 漏选 ${missed} 项`;
   }
   if (spec.kind === 'blank') {
     const right = evaluation.blanks.filter((verdict) => verdict === 'correct').length;
@@ -72,7 +72,7 @@ function SubmitHint() {
 function AttemptView() {
   const question = useQuestionState();
   if (!question) return null;
-  const { spec, submitted, evaluation, attempt, canSubmit, submit, reset, selected } = question;
+  const { spec, submitted, evaluation, attempt, canSubmit, submit, selected } = question;
   const needsSubmit = spec.kind === 'blank' || (spec.kind === 'choice' && spec.multiple);
 
   if (!submitted || !evaluation) {
@@ -82,7 +82,7 @@ function AttemptView() {
         <Button size="sm" disabled={!canSubmit} onClick={submit} className="h-8 rounded-full px-4">
           提交答案
         </Button>
-        <span className="text-sm text-muted-foreground"><SubmitHint /></span>
+        <span className="text-[0.8125rem] text-muted-foreground"><SubmitHint /></span>
       </div>
     );
   }
@@ -95,19 +95,15 @@ function AttemptView() {
         {describeResult(spec, evaluation, selected)}
       </span>
       {evaluation.result !== 'correct' ? (
-        <span className="inline-flex flex-wrap items-baseline gap-1.5 text-sm text-muted-foreground">
+        <span data-result-key="">
           正确答案 <KeyText spec={spec} evaluation={evaluation} />
         </span>
       ) : null}
       {invalid.length ? (
-        <span className="text-sm text-muted-foreground">
+        <span className="text-[0.8125rem] text-muted-foreground">
           {invalid.map((index) => blankBadge(index)).join('')} 无法识别为数学表达式
         </span>
       ) : null}
-      <Button variant="ghost" size="sm" className="h-8 rounded-full text-muted-foreground" onClick={reset}>
-        <RotateCcwIcon data-icon="inline-start" />
-        重做
-      </Button>
     </div>
   );
 }
@@ -135,16 +131,25 @@ export function QuestionFooter({ showSolution, ...sheet }: QuestionFooterProps) 
   const status = useAttemptStatus();
   return (
     <div data-question-footer="" data-attempt-result={status}>
-      <div role="status" aria-live="polite" className="min-w-0 flex-1">
+      <div role="status" aria-live="polite" data-footer-status="">
         <AttemptView />
         {state?.storageError ? (
-          <div className="mt-1 flex flex-wrap items-center gap-2">
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             <p role="alert" className="text-sm text-destructive">{state.storageError}</p>
             <Button variant="outline" size="sm" onClick={state.retryStorage}>重试保存</Button>
           </div>
         ) : null}
       </div>
-      {showSolution ? <QuestionSolutionSheet {...sheet} /> : null}
+      {/* Redo sits with 查看解答 so the grade line stays one unit when the footer wraps. */}
+      <div data-footer-actions="">
+        {state?.submitted && state.evaluation ? (
+          <Button variant="ghost" size="sm" className="h-8 rounded-full px-3 text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground" onClick={state.reset}>
+            <RotateCcwIcon data-icon="inline-start" />
+            重做
+          </Button>
+        ) : null}
+        {showSolution ? <QuestionSolutionSheet {...sheet} /> : null}
+      </div>
     </div>
   );
 }

@@ -111,7 +111,7 @@ function Verdict({ correct }: { correct: boolean }) {
   );
 }
 
-const tile = 'flex min-w-0 items-baseline gap-3 rounded-(--ui-radius-control) px-4 py-3 leading-relaxed';
+const tile = 'flex min-w-0 items-baseline gap-3 rounded-(--ui-radius-control) px-4 py-2.5 leading-relaxed';
 
 /** Correct answer beside the reader's submitted one. */
 function AnswerSummary({ spec, state }: { spec: GradingSpec; state: QuestionState | null }) {
@@ -145,7 +145,7 @@ function AnswerSummary({ spec, state }: { spec: GradingSpec; state: QuestionStat
   }
 
   return (
-    <div className="grid gap-2 sm:grid-cols-[repeat(auto-fit,minmax(11rem,1fr))]">
+    <div className="grid gap-2 sm:grid-cols-[repeat(auto-fill,minmax(13rem,1fr))]">
       <div className={cn(tile, 'bg-success/10')}>
         <span className="shrink-0 text-sm text-success">正确答案</span>
         <span className="min-w-0 text-lg font-semibold">{formatKey(spec)}</span>
@@ -232,7 +232,7 @@ export function QuestionSolutionSheet({ buttonLabel, ...props }: QuestionSolutio
         aria-expanded={open}
         className={cn(
           buttonVariants({ variant: 'ghost', size: 'sm' }),
-          'ml-auto h-8 rounded-full bg-(--ui-fill) px-3.5 text-foreground/80 hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active)',
+          'h-8 rounded-full bg-(--ui-fill) px-3.5 text-foreground/80 hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active)',
         )}
         onClick={() => { setMounted(true); setOpen(true); }}
       >
