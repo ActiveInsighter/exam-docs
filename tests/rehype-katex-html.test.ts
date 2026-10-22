@@ -54,7 +54,24 @@ function countElements(node: unknown): number {
   return 0;
 }
 
+/** Counts KaTeX internals still present as React elements, e.g. inside <Question> children. */
+function countKatexElements(node: unknown): number {
+  if (Array.isArray(node)) return node.reduce((sum: number, child) => sum + countKatexElements(child), 0);
+  if (node && typeof node === 'object' && 'props' in node) {
+    const { children, className } = (node as { props: { children?: unknown; className?: unknown } }).props;
+    return (className === 'katex-html' ? 1 : 0) + countKatexElements(children);
+  }
+  return 0;
+}
+
 describe('rehypeKatexHtml', () => {
+  it('pre-renders formulas nested inside question components', async () => {
+    const [tree, prerendered] = await Promise.all([compile(chapter, false), compile(chapter, true)]);
+    const components = { Question, Option, Blank, Solution };
+    expect(countKatexElements(tree({ components }))).toBeGreaterThan(100);
+    expect(countKatexElements(prerendered({ components }))).toBe(0);
+  });
+
   it('renders the same HTML for a math-heavy chapter', async () => {
     const [tree, prerendered] = await Promise.all([render(chapter, false), render(chapter, true)]);
     expect(prerendered).toContain('<span class="katex"><span class="katex-html"');

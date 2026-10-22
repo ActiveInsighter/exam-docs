@@ -26,15 +26,15 @@ export function rehypeKatexHtml() {
   };
 }
 
+/** Walks elements and MDX JSX nodes alike: formulas often sit inside components. */
 function replaceFormulas(parent: { children: RootContent[] }) {
   parent.children.forEach((child, index) => {
-    if (child.type !== 'element') return;
-    const className = getKatexRootClassName(child);
+    const className = child.type === 'element' ? getKatexRootClassName(child) : null;
     if (className) {
-      parent.children[index] = toPrerenderedSpan(className, child) as unknown as RootContent;
-      return;
+      parent.children[index] = toPrerenderedSpan(className, child as Element) as unknown as RootContent;
+    } else if ('children' in child) {
+      replaceFormulas(child as { children: RootContent[] });
     }
-    replaceFormulas(child);
   });
 }
 
