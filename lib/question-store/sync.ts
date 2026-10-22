@@ -1,4 +1,5 @@
 import { QuestionDatabase } from './database';
+import { LEASE_MS } from './database';
 import type { QuestionNamespace, QuestionSyncStatus, QuestionSyncTransport } from './types';
 
 export interface QuestionSyncOptions {
@@ -7,7 +8,28 @@ export interface QuestionSyncOptions {
   /** Submissions and explicit choices are uploaded after this short batching delay. */
   urgentMs?: number;
   staleMs?: number;
+  /** Upper bound for one network exchange; a hung request must not block later syncs. */
+  requestTimeoutMs?: number;
   online?: () => boolean;
+}
+
+const REQUEST_TIMEOUT_MS = 30_000;
+const LEASE_RETRY_MS = LEASE_MS + 500;
+/** A manual sync waits this long for another tab's exchange to finish. */
+const LOCK_WAIT_MS = 15_000;
+
+function withTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const expired = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error('云同步超时，答案已保存在本机，稍后自动重试。')), ms);
+  });
+  return Promise.race([work, expired]).finally(() => clearTimeout(timer));
+}
+
+/** Web Locks are released by the browser when the holding tab closes, crashes or is discarded. */
+function webLocks(): LockManager | undefined {
+  return typeof navigator !== 'undefined' && typeof navigator.locks?.request === 'function' &&
+    typeof AbortSignal.timeout === 'function' ? navigator.locks : undefined;
 }
 
 /**
@@ -154,6 +176,40 @@ export class QuestionSyncEngine {
     }
   }
 
+  /**
+   * Runs `work` while this tab is the account's only syncing tab. Returns false
+   * when another tab holds the turn. With Web Locks a crashed or killed tab
+   * can never block the others; the IndexedDB lease is a fallback for browsers
+   * without them and expires on its own. A manual sync waits briefly for the
+   * other tab, and without Web Locks proceeds anyway: every write carries an
+   * idempotent operation ID, so an overlapping exchange cannot duplicate data.
+   */
+  private async exclusive(force: boolean, work: () => Promise<void>): Promise<boolean> {
+    const locks = webLocks();
+    if (locks) {
+      const name = `exam-docs-question-sync:${this.namespace}`;
+      const options: LockOptions = force ? { signal: AbortSignal.timeout(LOCK_WAIT_MS) } : { ifAvailable: true };
+      try {
+        return await locks.request(name, options, async (lock) => {
+          if (!lock) return false;
+          await work();
+          return true;
+        });
+      } catch (error) {
+        if (error instanceof DOMException && (error.name === 'AbortError' || error.name === 'TimeoutError')) return false;
+        throw error;
+      }
+    }
+    const leased = await this.database.acquireLease(this.namespace, this.owner);
+    if (!leased && !force) return false;
+    try {
+      await work();
+    } finally {
+      if (leased) await this.database.releaseLease(this.namespace, this.owner).catch(() => undefined);
+    }
+    return true;
+  }
+
   /** Explicit manual sync bypasses retry delay. Failures are reflected in status and remain durable. */
   sync(): Promise<void> { return this.run(true); }
 
@@ -183,39 +239,19 @@ export class QuestionSyncEngine {
       await this.refresh();
       return;
     }
-    let leased = false;
     try {
       const meta = await this.database.metadata(this.namespace);
       if (!force && meta.nextRetryAt > Date.now()) {
         this.schedule(meta.nextRetryAt - Date.now());
         return;
       }
-      leased = await this.database.acquireLease(this.namespace, this.owner);
-      if (!leased) {
-        // The other tab broadcasts committed results. A delayed wake also recovers a crashed tab.
-        this.schedule(120_500);
+      const ran = await this.exclusive(force, () => this.exchangeLoop());
+      if (!ran) {
+        // The other tab broadcasts committed results; a later wake covers anything it left.
+        this.schedule(webLocks() ? 5_000 : LEASE_RETRY_MS);
+        if (force && !this.stopped) this.update({ phase: 'error', error: '另一个标签页正在同步，请稍后再试。' });
         await this.refresh();
-        return;
       }
-      this.update({ phase: 'syncing', error: null });
-      // Bound one wake to 20 exchanges; very large backlogs continue in a later task.
-      for (let count = 0; count < 20; count++) {
-        if (this.stopped || !this.online()) break;
-        await this.database.acquireLease(this.namespace, this.owner);
-        const metadata = await this.database.metadata(this.namespace);
-        const operations = await this.database.batch(this.namespace);
-        const response = await this.transport.sync({ operations, cursor: metadata.cursor, limit: 200 });
-        // A completed old-account request may safely commit only to its original namespace.
-        await this.database.apply(this.namespace, response, operations);
-        await this.refresh();
-        if (this.stopped) break;
-        if (!response.hasMore) {
-          const remaining = await this.database.batch(this.namespace, false);
-          if (!remaining.length) break;
-        }
-        if (count === 19) this.rescheduleAfterRun = true;
-      }
-      if (!this.stopped) this.update({ phase: this.online() ? 'idle' : 'offline', error: null });
     } catch (error) {
       if (!this.stopped) {
         this.update({ phase: this.online() ? 'error' : 'offline', error: error instanceof Error ? error.message : String(error) });
@@ -227,8 +263,30 @@ export class QuestionSyncEngine {
           this.update({ phase: 'error', error: storageError instanceof Error ? storageError.message : String(storageError) });
         }
       }
-    } finally {
-      if (leased) await this.database.releaseLease(this.namespace, this.owner).catch(() => undefined);
     }
+  }
+
+  private async exchangeLoop(): Promise<void> {
+    const transport = this.transport!;
+    this.update({ phase: 'syncing', error: null });
+    // Bound one wake to 20 exchanges; very large backlogs continue in a later task.
+    for (let count = 0; count < 20; count++) {
+      if (this.stopped || !this.online()) break;
+      if (!webLocks()) await this.database.acquireLease(this.namespace, this.owner);
+      const metadata = await this.database.metadata(this.namespace);
+      const operations = await this.database.batch(this.namespace);
+      const response = await withTimeout(transport.sync({ operations, cursor: metadata.cursor, limit: 200 }),
+        this.options.requestTimeoutMs ?? REQUEST_TIMEOUT_MS);
+      // A completed old-account request may safely commit only to its original namespace.
+      await this.database.apply(this.namespace, response, operations);
+      await this.refresh();
+      if (this.stopped) break;
+      if (!response.hasMore) {
+        const remaining = await this.database.batch(this.namespace, false);
+        if (!remaining.length) break;
+      }
+      if (count === 19) this.rescheduleAfterRun = true;
+    }
+    if (!this.stopped) this.update({ phase: this.online() ? 'idle' : 'offline', error: null });
   }
 }

@@ -8,6 +8,12 @@ import {
 const STORES = ['records', 'operations', 'attempts', 'conflicts', 'metadata'] as const;
 /** v2: per-document and per-question indexes; the server feed changed, so sync cursors restart. */
 const SCHEMA_VERSION = 2;
+/**
+ * Fallback cross-tab sync lease for browsers without Web Locks. It is renewed
+ * before every exchange, which the engine bounds by its request timeout, so a
+ * tab that dies mid-sync blocks the others only briefly.
+ */
+export const LEASE_MS = 45_000;
 const DEFAULT_METADATA: SyncMetadata = { cursor: null, lastSyncedAt: null, retryCount: 0, nextRetryAt: 0 };
 const uuid = () => crypto.randomUUID();
 const identityOf = (value: QuestionIdentity): QuestionIdentity => ({ documentPath: value.documentPath, questionId: value.questionId, questionRevision: value.questionRevision });
@@ -373,7 +379,7 @@ export class QuestionDatabase {
       const store = tx.objectStore('metadata');
       const lease = await request<{ owner: string; expiresAt: number } | undefined>(store.get([namespace, 'lease']));
       if (lease && lease.owner !== owner && lease.expiresAt > Date.now()) return false;
-      await request(store.put({ namespace, key: 'lease', owner, expiresAt: Date.now() + 120_000 }));
+      await request(store.put({ namespace, key: 'lease', owner, expiresAt: Date.now() + LEASE_MS }));
       return true;
     });
   }

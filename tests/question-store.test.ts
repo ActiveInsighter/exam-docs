@@ -214,6 +214,37 @@ describe('question browser database', () => {
 });
 
 describe('question synchronization', () => {
+  it('lets a manual sync proceed while a tab that died mid-sync still holds the fallback lease', async () => {
+    const db = await open();
+    const server = new Server();
+    await db.save(ACCOUNT, identity, submitted('after crash'), { submission: true });
+    // A tab killed during an exchange never released its lease.
+    expect(await db.acquireLease(ACCOUNT, 'crashed-tab')).toBe(true);
+    const sync = engine(db, server);
+    await sync.sync();
+    expect(server.requests).toHaveLength(1);
+    expect((await db.stats(ACCOUNT)).pending).toBe(0);
+    expect(sync.status.phase).toBe('idle');
+  });
+
+  it('times out a stalled request, keeps the outbox and can sync again', async () => {
+    const db = await open();
+    const server = new Server();
+    let stall = true;
+    const transport: QuestionSyncTransport = { sync: (input) => stall ? new Promise(() => undefined) : server.sync(input) };
+    const sync = new QuestionSyncEngine(db, ACCOUNT, transport, { requestTimeoutMs: 50 });
+    engines.push(sync);
+    await db.save(ACCOUNT, identity, draft('stalled'));
+    await sync.sync();
+    expect(sync.status.phase).toBe('error');
+    expect(sync.status.error).toContain('超时');
+    expect((await db.stats(ACCOUNT)).pending).toBe(1);
+    stall = false;
+    await sync.sync();
+    expect(sync.status.phase).toBe('idle');
+    expect((await db.stats(ACCOUNT)).pending).toBe(0);
+  });
+
   it('does no cloud work offline and does not sync guest records', async () => {
     const db = await open();
     const server = new Server();
