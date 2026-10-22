@@ -25,9 +25,6 @@ const tracked = new Set<HTMLElement>();
 const pending = new Set<HTMLElement>();
 const knownWidths = new WeakMap<HTMLElement, number>();
 let flushQueued = false;
-let resizeObserver: ResizeObserver | null = null;
-let nearObserver: IntersectionObserver | null = null;
-let fontsListening = false;
 
 function measureOptionWidth(option: HTMLElement) {
   // Layout widths ignore transforms, so dialogs measure correctly mid-animation.
@@ -88,37 +85,41 @@ function schedule(group: HTMLElement) {
   queueMicrotask(flush);
 }
 
-function getResizeObserver() {
-  if (resizeObserver || typeof ResizeObserver === 'undefined') return resizeObserver;
-
-  resizeObserver = new ResizeObserver((entries) => {
-    for (const entry of entries) {
-      const group = entry.target as HTMLElement;
-      const width = entry.contentRect.width;
-      const previous = knownWidths.get(group);
-      // Only a real inline-size change can alter the column decision.
-      if (previous === undefined || Math.abs(width - previous) > WIDTH_CHANGE_EPSILON_PX) {
-        schedule(group);
-      }
-    }
-  });
-  return resizeObserver;
-}
-
-/** Measures each group once it is within a screen of the viewport; resizes are handled by the ResizeObserver. */
-function getNearObserver() {
-  if (nearObserver || typeof IntersectionObserver === 'undefined') return nearObserver;
-  nearObserver = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      if (!entry.isIntersecting) continue;
-      const group = entry.target as HTMLElement;
-      nearObserver?.unobserve(group);
-      if (!tracked.has(group)) continue;
-      getResizeObserver()?.observe(group);
+/*
+ * The observers and the font listener live as long as the page, so they are
+ * created when this module is evaluated, not from the effect. A callback
+ * created inside the effect (the minifier inlines single-use helpers into it)
+ * shares the effect's scope and keeps the first group, and through it a whole
+ * previous page, alive after client-side navigation.
+ */
+const resizeObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver((entries) => {
+  for (const entry of entries) {
+    const group = entry.target as HTMLElement;
+    const width = entry.contentRect.width;
+    const previous = knownWidths.get(group);
+    // Only a real inline-size change can alter the column decision.
+    if (previous === undefined || Math.abs(width - previous) > WIDTH_CHANGE_EPSILON_PX) {
       schedule(group);
     }
-  }, { rootMargin: '100% 0px' });
-  return nearObserver;
+  }
+});
+
+/** Measures each group once it is within a screen of the viewport; resizes are handled by the ResizeObserver. */
+const nearObserver = typeof IntersectionObserver === 'undefined' ? null : new IntersectionObserver((entries) => {
+  for (const entry of entries) {
+    if (!entry.isIntersecting) continue;
+    const group = entry.target as HTMLElement;
+    nearObserver?.unobserve(group);
+    if (!tracked.has(group)) continue;
+    resizeObserver?.observe(group);
+    schedule(group);
+  }
+}, { rootMargin: '100% 0px' });
+
+if (typeof document !== 'undefined' && 'fonts' in document) {
+  document.fonts.addEventListener('loadingdone', () => {
+    for (const group of tracked) if (knownWidths.has(group)) schedule(group);
+  });
 }
 
 const registering = new Set<HTMLElement>();
@@ -132,37 +133,23 @@ function register(group: HTMLElement) {
   registering.add(group);
   if (registerQueued) return;
   registerQueued = true;
-  queueMicrotask(() => {
-    registerQueued = false;
-    const groups = Array.from(registering).filter((entry) => tracked.has(entry) && entry.isConnected);
-    registering.clear();
-    const near = getNearObserver();
-    const limit = window.innerHeight * 2;
-    const tops = groups.map((entry) => entry.getBoundingClientRect().top);
-    groups.forEach((entry, index) => {
-      if (!near || (tops[index] > -limit && tops[index] < limit)) {
-        getResizeObserver()?.observe(entry);
-        schedule(entry);
-      } else {
-        near.observe(entry);
-      }
-    });
+  queueMicrotask(flushRegistrations);
+}
+
+function flushRegistrations() {
+  registerQueued = false;
+  const groups = Array.from(registering).filter((entry) => tracked.has(entry) && entry.isConnected);
+  registering.clear();
+  const limit = window.innerHeight * 2;
+  const tops = groups.map((entry) => entry.getBoundingClientRect().top);
+  groups.forEach((entry, index) => {
+    if (!nearObserver || (tops[index] > -limit && tops[index] < limit)) {
+      resizeObserver?.observe(entry);
+      schedule(entry);
+    } else {
+      nearObserver.observe(entry);
+    }
   });
-}
-
-/*
- * Module-level on purpose: the listener lives as long as the page, and a
- * closure created inside the effect below would share its scope and keep the
- * first group (and through it a whole previous page) alive after navigation.
- */
-function remeasureAfterFonts() {
-  for (const group of tracked) if (knownWidths.has(group)) schedule(group);
-}
-
-function listenForFonts() {
-  if (fontsListening || !('fonts' in document)) return;
-  fontsListening = true;
-  document.fonts.addEventListener('loadingdone', remeasureAfterFonts);
 }
 
 export function useChoiceColumns(ref: RefObject<HTMLElement | null>, enabled = true) {
@@ -171,7 +158,6 @@ export function useChoiceColumns(ref: RefObject<HTMLElement | null>, enabled = t
     if (!enabled || !group) return;
 
     tracked.add(group);
-    listenForFonts();
     register(group);
 
     return () => {
