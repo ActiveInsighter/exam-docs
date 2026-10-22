@@ -41,6 +41,11 @@ env:
   NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
   NEXT_PUBLIC_SUPABASE_PROXY_PATH: /api/supabase
+  # Runs that deploy (same condition as the deploy step) let the search and
+  # shard runners pre-upload their finished files to the target Worker's asset
+  # store in parallel, so `wrangler deploy` only uploads what is still missing.
+  CLOUDFLARE_PREUPLOAD: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || ((github.ref == 'refs/heads/codex/math-past-exams-0930' || github.ref == 'refs/heads/codex/math-core-questions-1005' || github.ref == 'refs/heads/codex/build-speed-research-1002' || github.ref == 'refs/heads/codex/english-reading-layout-1012') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}
+  CLOUDFLARE_WORKER_NAME: ${{ github.ref == 'refs/heads/main' && 'exam-docs' || 'exam-docs-preview' }}
 
 jobs:
   validate:
@@ -198,6 +203,14 @@ jobs:
           path: /tmp/static-search-output
           compression-level: 0
           retention-days: 1
+      - name: Pre-upload search assets to Cloudflare
+        if: ${{ env.CLOUDFLARE_PREUPLOAD == 'true' }}
+        # Only an optimisation: wrangler deploy uploads anything missing.
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/upload-cloudflare-assets.mjs /tmp/static-search-output --worker "${CLOUDFLARE_WORKER_NAME}"
 
   build-shard:
     name: Weighted static shard ${{ matrix.shard }} of ${{ inputs.shards || '8' }}
@@ -313,6 +326,25 @@ jobs:
             /tmp/static-layout-${{ matrix.shard }}.txt
           compression-level: 0
           retention-days: 1
+      - name: Pre-upload shard assets to Cloudflare
+        if: ${{ env.CLOUDFLARE_PREUPLOAD == 'true' }}
+        # Only an optimisation: wrangler deploy uploads anything missing.
+        continue-on-error: true
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if [[ "${STATIC_DOCS_SHARD_INDEX}" == '0' ]]; then
+            node scripts/upload-cloudflare-assets.mjs .static-docs --worker "${CLOUDFLARE_WORKER_NAME}"
+          else
+            # Upload exactly this shard's contribution to the merged package; shard 0
+            # owns the shared chunks, the docs entry/layout and the Markdown exports.
+            rm -f .static-docs/docs/index.html .static-docs/docs/__next.docs.txt
+            find .static-docs/docs -type f -name '*.md' -delete
+            node scripts/upload-cloudflare-assets.mjs .static-docs/docs --worker "${CLOUDFLARE_WORKER_NAME}"
+          fi
 
   deploy:
     name: Merge and deploy Worker Static Assets
@@ -387,7 +419,10 @@ jobs:
           tar --zstd -xf /tmp/static-shards/static-shard-0/static-shard-0.tar.zst
           cp -a public/. .static-docs/
           for ((shard=1; shard<STATIC_DOCS_SHARD_COUNT; shard++)); do
-            rm -rf /tmp/shard-extract/*
+            # Recreate the directory: a `*` glob would keep the hidden .static-docs
+            # tree, so every later shard would re-hash all earlier shards' files.
+            rm -rf /tmp/shard-extract
+            mkdir -p /tmp/shard-extract
             tar --zstd -xf "/tmp/static-shards/static-shard-${shard}/static-shard-${shard}.tar.zst" -C /tmp/shard-extract
             SHARD_ROOT="/tmp/shard-extract/.static-docs" TARGET_ROOT="${PWD}/.static-docs" python - <<'PY'
           from pathlib import Path

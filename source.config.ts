@@ -5,6 +5,7 @@ import lastModified from 'fumadocs-mdx/plugins/last-modified';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { z } from 'zod';
+import { rehypeKatexHtml } from './lib/rehype-katex-html';
 import { remarkQuestion } from './lib/remark-question';
 
 const isStaticDocsBuild = process.env.STATIC_DOCS_BUILD === '1';
@@ -69,6 +70,7 @@ export default defineConfig({
     // deploy-size impact; it is not a production accessibility decision.
     rehypePlugins: (plugins) => [
       [rehypeKatex, { strict: 'ignore', output: 'html' }],
+      rehypeKatexHtml,
       ...plugins,
     ],
   },

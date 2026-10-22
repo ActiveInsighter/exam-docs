@@ -14,6 +14,39 @@ export type ChoiceColumnCount = 1 | 2 | 4;
 
 const FIT_EPSILON_PX = 1;
 
+type ElementProps = {
+  children?: ReactNode;
+  className?: unknown;
+  dangerouslySetInnerHTML?: { __html?: unknown };
+};
+
+const HTML_ENTITY = /&(?:#x([0-9a-f]+)|#(\d+)|(amp|lt|gt|quot));/giu;
+const NAMED_ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"' };
+
+/** Pre-rendered formulas (see lib/rehype-katex-html) carry their markup as a string. */
+function getInnerHtml(props: ElementProps): string | null {
+  const html = props.dangerouslySetInnerHTML?.__html;
+  return typeof html === 'string' ? html : null;
+}
+
+/** Same count as walking the equivalent element tree: trimmed text of every text node. */
+function getHtmlTextLength(html: string): number {
+  return html
+    .split(/<[^>]*>/u)
+    .reduce(
+      (length, text) =>
+        length +
+        text
+          .replace(HTML_ENTITY, (_, hex: string, dec: string, name: string) =>
+            name
+              ? NAMED_ENTITIES[name.toLowerCase()]
+              : String.fromCodePoint(hex ? Number.parseInt(hex, 16) : Number(dec)),
+          )
+          .trim().length,
+      0,
+    );
+}
+
 function getNodeTextLength(node: ReactNode): number {
   if (node === null || node === undefined || typeof node === 'boolean') return 0;
   if (typeof node === 'string' || typeof node === 'number') {
@@ -22,24 +55,33 @@ function getNodeTextLength(node: ReactNode): number {
   if (Array.isArray(node)) {
     return node.reduce((length, child) => length + getNodeTextLength(child), 0);
   }
-  if (isValidElement<{ children?: ReactNode }>(node)) {
-    return getNodeTextLength(node.props.children);
+  if (isValidElement<ElementProps>(node)) {
+    const html = getInnerHtml(node.props);
+    return html === null ? getNodeTextLength(node.props.children) : getHtmlTextLength(html);
   }
   return 1;
 }
 
-const COMPLEX_MATH_CLASS =
-  /(?:^|\s)(?:mfrac|mroot|msup|msub|msubsup|mover|munder|mtable|katex-display)(?:\s|$)/u;
+const COMPLEX_MATH_CLASSES = 'mfrac|mroot|msup|msub|msubsup|mover|munder|mtable|katex-display';
+const COMPLEX_MATH_CLASS = new RegExp(`(?:^|\\s)(?:${COMPLEX_MATH_CLASSES})(?:\\s|$)`, 'u');
+const COMPLEX_MATH_CLASS_ATTRIBUTE = new RegExp(
+  `class="(?:[^"]*\\s)?(?:${COMPLEX_MATH_CLASSES})(?:\\s[^"]*)?"`,
+  'u',
+);
 
 function hasComplexMath(node: ReactNode): boolean {
   if (Array.isArray(node)) return node.some(hasComplexMath);
-  if (!isValidElement<{ children?: ReactNode; className?: unknown }>(node)) {
+  if (!isValidElement<ElementProps>(node)) {
     return false;
   }
 
   const className =
     typeof node.props.className === 'string' ? node.props.className : '';
-  return COMPLEX_MATH_CLASS.test(className) || hasComplexMath(node.props.children);
+  if (COMPLEX_MATH_CLASS.test(className)) return true;
+  const html = getInnerHtml(node.props);
+  return html === null
+    ? hasComplexMath(node.props.children)
+    : COMPLEX_MATH_CLASS_ATTRIBUTE.test(html);
 }
 
 /** Server-rendered fallback until the client has measured real widths. */
