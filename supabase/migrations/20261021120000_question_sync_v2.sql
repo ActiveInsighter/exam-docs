@@ -24,15 +24,21 @@ alter table exam_private.question_progress
   add column last_operation_id uuid;
 alter table exam_private.question_attempts add column seq bigint;
 
+-- Numbering continues after each account's v1 head. Browsers may already hold
+-- a v1 event-log cursor (the v2 client can ship before this migration), and a
+-- v1 cursor means nothing in the compacted feed. Starting above it makes every
+-- such cursor pull the whole compacted feed once instead of skipping rows.
 create temporary table question_feed_backfill as
-select user_id, kind, ref, row_number() over (partition by user_id order by at, kind, ref) as seq
+select feed.user_id, kind, ref,
+  coalesce(h.cursor, 0) + row_number() over (partition by feed.user_id order by at, kind, ref) as seq
 from (
   select user_id, 'progress' as kind, encode(identity_hash, 'hex') as ref, updated_at as at
     from exam_private.question_progress
   union all
   select user_id, 'attempt', attempt_id::text, received_at
     from exam_private.question_attempts
-) as feed;
+) as feed
+left join exam_private.question_sync_heads as h on h.user_id = feed.user_id;
 
 update exam_private.question_progress as p set seq = b.seq
   from question_feed_backfill as b
@@ -44,8 +50,6 @@ update exam_private.question_attempts as a set seq = b.seq
 insert into exam_private.question_sync_heads(user_id, cursor)
   select user_id, max(seq) from question_feed_backfill group by user_id
   on conflict (user_id) do update set cursor = excluded.cursor;
-update exam_private.question_sync_heads as h set cursor = 0
-  where not exists (select 1 from question_feed_backfill as b where b.user_id = h.user_id);
 
 alter table exam_private.question_progress
   alter column seq set not null,

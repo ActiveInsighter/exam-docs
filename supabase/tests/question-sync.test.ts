@@ -284,12 +284,12 @@ describe('question sync v1 to v2 data migration', () => {
     try {
       expect(migrationNames().length).toBeGreaterThan(1);
       await db.query('insert into auth.users(id) values ($1), ($2)', [USER_A, USER_B]);
-      const run = async (user: string, operations: unknown[]) => {
+      const run = async (user: string, operations: unknown[], cursor = '0') => {
         await db.exec('reset role');
         await db.query('select set_config($1, $2, false)', ['request.jwt.claim.sub', user]);
         await db.exec('set role authenticated');
-        return (await db.query<{ result: Response }>('select public.exam_sync_question_state($1::jsonb, 0, 100) as result',
-          [JSON.stringify(operations)])).rows[0].result;
+        return (await db.query<{ result: Response }>('select public.exam_sync_question_state($1::jsonb, $2::bigint, 100) as result',
+          [JSON.stringify(operations), cursor])).rows[0].result;
       };
       const submission = { attemptId: randomUUID(), state: state('B', true), createdAt: '2026-10-20T00:00:00Z' };
       const retried = operation();
@@ -298,14 +298,22 @@ describe('question sync v1 to v2 data migration', () => {
       await db.exec('reset role');
       for (const name of migrationNames().slice(1)) await db.exec(readMigration(name));
 
+      // v1 wrote four events for USER_A; the three compacted rows are numbered after them.
       const pulled = await run(USER_A, []);
-      expect(pulled).toMatchObject({ cursor: '3', hasMore: false, reset: false });
+      expect(pulled).toMatchObject({ cursor: '7', hasMore: false, reset: false });
       expect(pulled.changes.map((record) => `${record.questionId}@${record.version}`).sort()).toEqual(['q1@2', 'q2@1']);
       expect(pulled.attempts.map((attempt) => attempt.attemptId)).toEqual([submission.attemptId]);
+      // A browser that already stored a v1 event-log cursor pulls every compacted row once.
+      for (const cursor of ['1', '2', '4']) {
+        const resumed = await run(USER_A, [], cursor);
+        expect(resumed).toMatchObject({ cursor: '7', reset: false });
+        expect(resumed.changes).toHaveLength(2);
+        expect(resumed.attempts).toHaveLength(1);
+      }
       // A v1 receipt still answers a retried UUID instead of writing twice.
       const retry = await run(USER_A, [retried]);
       expect(retry.receipts[0]).toMatchObject({ status: 'applied', record: { version: 2 } });
-      expect(retry.cursor).toBe('3');
+      expect(retry.cursor).toBe('7');
       expect((await run(USER_B, [])).changes.map((record) => record.state)).toEqual([state('X')]);
       await db.exec('reset role');
       expect((await db.query("select to_regclass('exam_private.question_events') as events")).rows).toEqual([{ events: null }]);
