@@ -43,7 +43,8 @@ const overflowY = locator => locator.evaluate(node => getComputedStyle(node).ove
 async function verifySolution(page, trigger, touch = false) {
   if (touch) await trigger.tap();
   else await trigger.click();
-  const dialog = page.getByRole('dialog', { name: '题目与解析', exact: true });
+  // The solution sheet is titled with the question number, e.g. "第 1 题".
+  const dialog = page.getByRole('dialog', { name: /^第 \d+ 题$/ });
   await dialog.waitFor({ state: 'visible' });
   await dialog.evaluate(node => Promise.all(node.getAnimations().map(animation => animation.finished.catch(() => {}))));
   assert.ok((await dialog.innerText()).includes('定位第二段末句。'), 'original explanation is missing');
