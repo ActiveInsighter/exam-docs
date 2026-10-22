@@ -15,16 +15,25 @@ import { remarkQuestion } from '@/lib/remark-question';
 
 const katex: Pluggable = [rehypeKatex, { strict: 'ignore', output: 'html' }];
 
+const compiled = new Map<string, ReturnType<typeof evaluate>>();
+
+/** Memoised: the full chapter is shared by several tests and slow to compile. */
 async function compile(source: string, prerender: boolean) {
-  const { default: Content } = await evaluate(
-    { value: source, path: 'test.mdx' },
-    {
-      ...runtime,
-      remarkPlugins: [remarkQuestion, remarkMath],
-      rehypePlugins: prerender ? [katex, rehypeKatexHtml] : [katex],
-    },
-  );
-  return Content;
+  const key = `${prerender}:${source}`;
+  if (!compiled.has(key)) {
+    compiled.set(
+      key,
+      evaluate(
+        { value: source, path: 'test.mdx' },
+        {
+          ...runtime,
+          remarkPlugins: [remarkQuestion, remarkMath],
+          rehypePlugins: prerender ? [katex, rehypeKatexHtml] : [katex],
+        },
+      ),
+    );
+  }
+  return (await compiled.get(key)!).default;
 }
 
 async function render(source: string, prerender: boolean) {
