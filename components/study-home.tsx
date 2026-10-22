@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { IntentLink as Link } from './intent-link';
 import { ArrowRight, ArrowUpRight, BookOpen, Calculator, Check, ChevronRight, Code2, FileText, Globe2, Languages, Network } from 'lucide-react';
 import { TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/ui/tabs';
 import { homeSubjects } from '@/lib/study-home-content';

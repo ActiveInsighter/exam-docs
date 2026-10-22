@@ -5,6 +5,8 @@ import { encodeHttpPath } from '../scripts/http-paths.mjs';
 import {
   buildCloudflareAssetsIgnore,
   buildCloudflareHeaders,
+  buildSpeculationRules,
+  SPECULATION_RULES_PATH,
   buildCloudflareRedirects,
   CLOUDFLARE_DYNAMIC_REDIRECT_LIMIT,
 } from '../scripts/prepare-cloudflare-static-assets.mjs';
@@ -76,6 +78,14 @@ describe('Cloudflare Workers Static Assets deployment', () => {
 
     expect(headers).toContain('/*.md');
     expect(headers).toContain('Content-Type: text/markdown; charset=utf-8');
+  });
+
+  it('opts every page out of Speed Brain with an empty Speculation-Rules set', () => {
+    const headers = buildCloudflareHeaders();
+
+    expect(headers).toContain(`/*\n  Speculation-Rules: "${SPECULATION_RULES_PATH}"`);
+    expect(headers).toContain(`${SPECULATION_RULES_PATH}\n  Content-Type: application/speculationrules+json`);
+    expect(JSON.parse(buildSpeculationRules())).toEqual({ prefetch: [], prerender: [] });
   });
 
   it('excludes EdgeOne deployment metadata from Cloudflare asset upload', () => {

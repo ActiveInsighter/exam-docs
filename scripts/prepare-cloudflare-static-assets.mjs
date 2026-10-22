@@ -41,11 +41,37 @@ export function buildCloudflareRedirects(rewrites) {
   return `${lines.join('\n')}\n`;
 }
 
+export const SPECULATION_RULES_PATH = '/speculation-rules.json';
+
+/*
+ * Cloudflare Speed Brain adds `Speculation-Rules: "/cdn-cgi/speculation"` to
+ * every page, a document rule matching all same-origin links. Chromium keeps a
+ * speculation candidate for each anchor it has seen, and a candidate keeps its
+ * removed <a> alive, so every client-side navigation leaked the whole previous
+ * page (measured: 117k retained DOM nodes after nine navigations, about 13k
+ * without the rule). Mobile browsers crashed after a few page switches.
+ *
+ * Speed Brain never overrides a Speculation-Rules header the origin already
+ * sends, so the pages point at an empty rule set of their own instead.
+ * Next.js link prefetching (on intent) is unaffected.
+ */
+export function buildSpeculationRules() {
+  return `${JSON.stringify({ prefetch: [], prerender: [] })}\n`;
+}
+
 export function buildCloudflareHeaders() {
   return [
     '# Explicit UTF-8 charset for direct Markdown views served by Workers Static Assets.',
     '/*.md',
     '  Content-Type: text/markdown; charset=utf-8',
+    '',
+    '# Opt out of Cloudflare Speed Brain document rules (they retain removed links and leak',
+    '# every previous page on client-side navigation); see buildSpeculationRules().',
+    '/*',
+    `  Speculation-Rules: "${SPECULATION_RULES_PATH}"`,
+    '',
+    SPECULATION_RULES_PATH,
+    '  Content-Type: application/speculationrules+json',
     '',
   ].join('\n');
 }
@@ -64,6 +90,7 @@ export async function prepareCloudflareStaticAssets(outputRoot = path.resolve('.
   const assetsIgnorePath = path.join(outputRoot, '.assetsignore');
   const headersPath = path.join(outputRoot, '_headers');
   const notFoundPath = path.join(outputRoot, '404.html');
+  const speculationRulesPath = path.join(outputRoot, SPECULATION_RULES_PATH.slice(1));
 
   const edgeOneConfig = JSON.parse(await readFile(edgeOneConfigPath, 'utf8'));
   const redirects = buildCloudflareRedirects(edgeOneConfig.rewrites);
@@ -73,10 +100,11 @@ export async function prepareCloudflareStaticAssets(outputRoot = path.resolve('.
     writeFile(redirectsPath, redirects, 'utf8'),
     writeFile(assetsIgnorePath, buildCloudflareAssetsIgnore(), 'utf8'),
     writeFile(headersPath, buildCloudflareHeaders(), 'utf8'),
+    writeFile(speculationRulesPath, buildSpeculationRules(), 'utf8'),
   ]);
 
   console.log(`[cloudflare-assets] Wrote ${redirectsPath}.`);
-  console.log(`[cloudflare-assets] Wrote ${headersPath} with UTF-8 Markdown Content-Type.`);
+  console.log(`[cloudflare-assets] Wrote ${headersPath} with UTF-8 Markdown Content-Type and an empty Speculation-Rules set.`);
   console.log('[cloudflare-assets] Prepared Cloudflare Static Assets metadata from the EdgeOne route config.');
   console.log('[cloudflare-assets] Confirmed 404.html for not_found_handling=404-page.');
 }

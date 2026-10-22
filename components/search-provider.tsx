@@ -2,6 +2,7 @@
 
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { ReactNode } from 'react';
+import { IntentLink } from './intent-link';
 import { ShardedSearchDialog } from './search-dialog';
 
 /**
@@ -12,6 +13,9 @@ import { ShardedSearchDialog } from './search-dialog';
 export function SearchProvider({ children }: { children: ReactNode }) {
   return (
     <RootProvider
+      // Every Fumadocs link (sidebar, breadcrumbs, page footer, MDX links)
+      // prefetches on intent instead of whenever it scrolls into view.
+      components={{ Link: IntentLink }}
       search={{
         SearchDialog: ShardedSearchDialog,
       }}
