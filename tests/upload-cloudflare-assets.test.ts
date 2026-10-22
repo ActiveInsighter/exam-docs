@@ -101,7 +101,11 @@ describe('uploadAssets', () => {
       expect(upload.url).toBe('https://api.cloudflare.com/client/v4/accounts/acct/workers/assets/upload?base64=true');
       expect((upload.init.headers as Record<string, string>).Authorization).toBe(`Bearer ${jwt({})}`);
     }
-    const part = (uploads[0].init.body as FormData).get(html) as File;
+    // Buckets upload concurrently, so find the request that carries this hash.
+    const part = uploads
+      .map((upload) => (upload.init.body as FormData).get(html))
+      .find((value): value is File => value instanceof File);
+    if (!part) throw new Error('The HTML asset was not uploaded.');
     expect(part.type).toBe('text/html; charset=utf-8');
     expect(Buffer.from(await part.text(), 'base64').toString()).toBe('<!doctype html><p>intro</p>');
     expect(stats).toMatchObject({ fileCount: 3, uploadedFiles: 2 });
