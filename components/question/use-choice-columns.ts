@@ -150,12 +150,19 @@ function register(group: HTMLElement) {
   });
 }
 
+/*
+ * Module-level on purpose: the listener lives as long as the page, and a
+ * closure created inside the effect below would share its scope and keep the
+ * first group (and through it a whole previous page) alive after navigation.
+ */
+function remeasureAfterFonts() {
+  for (const group of tracked) if (knownWidths.has(group)) schedule(group);
+}
+
 function listenForFonts() {
   if (fontsListening || !('fonts' in document)) return;
   fontsListening = true;
-  document.fonts.addEventListener('loadingdone', () => {
-    for (const group of tracked) if (knownWidths.has(group)) schedule(group);
-  });
+  document.fonts.addEventListener('loadingdone', remeasureAfterFonts);
 }
 
 export function useChoiceColumns(ref: RefObject<HTMLElement | null>, enabled = true) {
