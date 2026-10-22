@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CloudOffIcon, DownloadIcon, FileInputIcon, RefreshCwIcon, TriangleAlertIcon } from 'lucide-react';
+import { CloudOffIcon, DownloadIcon, FileInputIcon, LibraryBigIcon, RefreshCwIcon, TriangleAlertIcon } from 'lucide-react';
 import type { AccountMenuSection } from '@/components/account';
 import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import type { QuestionSummary } from '@/lib/question-store/types';
@@ -146,8 +146,8 @@ function QuestionRecordsMenu() {
           disabled={!database}
           onClick={() => {
             void database?.importGuest(namespace).then((result) => {
-              setMessage(result.records || result.attempts
-                ? `已导入 ${result.records} 道题、${result.attempts} 次提交，未登录记录仍保留。`
+              setMessage(result.records || result.attempts || result.marks
+                ? `已导入 ${result.records} 道题、${result.attempts} 次提交、${result.marks} 条收藏与注释，未登录记录仍保留。`
                 : '未登录记录已全部导入过。');
             }).catch(() => setMessage('导入失败，请重试。'));
           }}
@@ -155,6 +155,9 @@ function QuestionRecordsMenu() {
           <FileInputIcon />导入未登录时的记录
         </DropdownMenuItem>
       ) : null}
+      <DropdownMenuItem onClick={() => context.openLibrary()}>
+        <LibraryBigIcon />收藏与标签
+      </DropdownMenuItem>
       <DropdownMenuItem
         disabled={!database}
         onClick={() => {

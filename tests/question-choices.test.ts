@@ -138,11 +138,13 @@ describe('Question choices', () => {
     expect(markup).toContain('>有穷性</span>');
   });
 
-  it('becomes a single-answer toggle group graded on click', () => {
+  it('becomes a radio group graded on click', () => {
     const markup = renderToStaticMarkup(single('1', { text: '2', correct: true }, '3', '4'));
 
-    expect(markup).toContain('role="group"');
-    expect(markup.match(/aria-pressed="false"/g)).toHaveLength(4);
+    expect(markup).toContain('role="radiogroup"');
+    expect(markup.match(/role="radio"/g)).toHaveLength(4);
+    expect(markup.match(/aria-checked="false"/g)).toHaveLength(4);
+    expect(markup.match(/tabindex="-1"/g)).toHaveLength(3);
     expect(markup).toContain('aria-label="选项"');
     expect(markup).not.toContain('提交答案');
     expect(markup).toContain('data-question-type="single"');
@@ -156,7 +158,9 @@ describe('Question choices', () => {
       ),
     );
 
-    expect(markup).toContain('aria-label="选项（多选）"');
+    expect(markup).toContain('aria-label="选项（可多选）"');
+    expect(markup.match(/role="checkbox"/g)).toHaveLength(4);
+    expect(markup).toContain('data-multiple=""');
     expect(markup).toContain('提交答案');
   });
 
@@ -166,16 +170,20 @@ describe('Question choices', () => {
 
     for (const markup of [noKey, twoKeys]) {
       expect(markup).toContain('role="list"');
-      expect(markup).not.toContain('aria-pressed="');
+      expect(markup).not.toContain('role="radio"');
     }
   });
 
-  it('grades a boolean question through generated 正确 / 错误 options', () => {
+  it('grades a boolean question through two true / false buttons', () => {
     const markup = renderToStaticMarkup(question({ type: 'boolean', answer: false }));
 
-    expect(markup).toContain('>正确</span>');
-    expect(markup).toContain('>错误</span>');
-    expect(markup.match(/aria-pressed="false"/g)).toHaveLength(2);
+    expect(markup).toContain('data-exam-boolean=""');
+    expect(markup).toContain('data-value="true"');
+    expect(markup).toContain('data-value="false"');
+    expect(markup).toContain('正确</button>');
+    expect(markup).toContain('错误</button>');
+    expect(markup.match(/role="radio"/g)).toHaveLength(2);
+    expect(markup).not.toContain('提交答案');
   });
 
   it('turns blanks into inputs with a submit step', () => {
@@ -188,8 +196,35 @@ describe('Question choices', () => {
       ),
     );
 
-    expect(markup).toContain('aria-label="第 1 空"');
+    expect(markup).toContain('data-question-blank=""');
+    expect(markup).toContain('data-kind="text"');
+    expect(markup).toContain('inputMode="text"');
     expect(markup).toContain('提交答案');
+  });
+
+  it('gives numeric and maths blanks the keypad instead of the system keyboard', () => {
+    const markup = renderToStaticMarkup(
+      createElement(
+        Question,
+        { id: 'q6', type: 'blank' },
+        createElement('p', { key: 'stem' }, '握手', createElement(Blank, { answer: '3' }), '次，', createElement(Blank, { answer: 'x^2', kind: 'math' }), '；', createElement(Blank, { answer: '42', kind: 'text' })),
+      ),
+    );
+
+    expect(markup.match(/inputMode="none"/g)).toHaveLength(2);
+    expect(markup.match(/data-kind="math"/g)).toHaveLength(2);
+    expect(markup).toContain('aria-label="第 3 空"');
+    expect(markup.match(/data-blank-index=""/g)).toHaveLength(3);
+  });
+
+  it('shows built-in tags as capsules in the header', () => {
+    const markup = renderToStaticMarkup(
+      createElement(Question, { id: 'q7', type: 'essay', tags: '来源:2023 统考, 易错' }, createElement('p', null, '题干')),
+    );
+
+    expect(markup.match(/data-question-tag=""/g)).toHaveLength(2);
+    expect(markup).toContain('data-tag-group="">来源</span>');
+    expect(markup).toContain('>易错</span>');
   });
 
   it('prints the resolved number in front of the stem', () => {
@@ -208,7 +243,7 @@ describe('Question choices', () => {
   it('keeps the solution out of the page and behind the dialog trigger', () => {
     const markup = renderToStaticMarkup(single('1', { text: '2', correct: true }));
 
-    expect(markup).toContain('aria-haspopup="dialog"');
+    expect(markup).toContain('data-solution-trigger=""');
     expect(markup).toContain('查看解答');
     expect(markup).not.toContain('解析内容');
   });
@@ -218,6 +253,6 @@ describe('Question choices', () => {
       createElement(Question, { id: 'q5', type: 'essay' }, createElement('p', null, '题干')),
     );
 
-    expect(markup).not.toContain('aria-haspopup="dialog"');
+    expect(markup).not.toContain('data-solution-trigger');
   });
 });

@@ -11,44 +11,39 @@ import {
   useSyncExternalStore,
 } from 'react';
 import { usePathname } from 'next/navigation';
-import {
-  type AttemptResult,
-  type BlankSpec,
-  gradeBlanks,
-  gradeChoice,
-} from './grading';
-import { useQuestionDatabase } from './database-context';
 import { PENDING_SNAPSHOT, QuestionAnswerCache, emptyAnswer } from '@/lib/question-store/cache';
 import type { AnswerState, QuestionIdentity } from '@/lib/question-store/types';
+import { useQuestionStorage } from './database-context';
+import { evaluateAttempt, isAnswered, type Evaluation, type GradingSpec } from './grading';
 
 /*
- * Per-question client state. The choice grid, the blanks, the status bar and
- * the solution dialog all read the same attempt, so the dialog shows exactly
- * what the reader entered on the page.
+ * Per-question client state. The options, blanks, footer and solution sheet
+ * all read the same attempt, so the sheet shows exactly what the reader
+ * entered on the page.
  */
 
-export type { AttemptResult } from './grading';
+export type { AttemptResult, GradingSpec } from './grading';
 
-export type GradingSpec =
-  | { kind: 'choice'; multiple: boolean; key: readonly string[]; keyText?: string }
-  | { kind: 'blank'; blanks: readonly BlankSpec[] };
-
-type QuestionState = {
+export type QuestionState = {
   spec: GradingSpec;
-  /** Option letters picked so far (choice questions). */
+  identity: QuestionIdentity;
+  /** Option letters picked so far (choice and boolean questions). */
   selected: readonly string[];
   /** Typed text per blank (blank questions). */
   values: readonly string[];
   submitted: boolean;
-  result: AttemptResult | null;
-  /** Per-blank correctness after submitting. */
-  blankResults: readonly boolean[];
+  /** Grade of the submitted answer; null while answering. */
+  evaluation: Evaluation | null;
   /** Increments per submission so feedback motion replays on retry. */
   attempt: number;
+  /** The shown grade was submitted in this visit (restored grades do not animate). */
+  fresh: boolean;
+  answered: boolean;
   canSubmit: boolean;
   ready: boolean;
   storageError: string | null;
   retryStorage: () => void;
+  /** Replaces the selection; single-answer questions are graded at once. */
   select: (letters: readonly string[]) => void;
   setValue: (index: number, value: string) => void;
   submit: () => void;
@@ -59,6 +54,12 @@ const QuestionContext = createContext<QuestionState | null>(null);
 
 export function useQuestionState() {
   return useContext(QuestionContext);
+}
+
+/** The page path questions are stored under (no trailing slash). */
+export function useDocumentPath() {
+  const pathname = usePathname();
+  return (pathname ?? '/').replace(/\/+$/, '') || '/';
 }
 
 /** Questions rendered outside the site provider (tests, previews) keep answers in memory only. */
@@ -75,9 +76,8 @@ export function QuestionProvider({
   questionRevision?: string;
   children: ReactNode;
 }) {
-  const storage = useQuestionDatabase();
-  const pathname = usePathname();
-  const documentPath = (pathname ?? '/').replace(/\/+$/, '') || '/';
+  const storage = useQuestionStorage();
+  const documentPath = useDocumentPath();
   const cache = storage ? storage.cache : (memoryCache ??= new QuestionAnswerCache(null, 'guest'));
   const identity = useMemo<QuestionIdentity>(() => ({ documentPath, questionId, questionRevision }), [documentPath, questionId, questionRevision]);
   // Reads come from the shared memory cache: one IndexedDB read per page, no per-question round trip.
@@ -88,6 +88,10 @@ export function QuestionProvider({
   const current = useRef(snapshot.state);
   current.current = snapshot.state;
   const { selected, values, submitted, attempt } = snapshot.state;
+  // The attempt count first read from storage; later submissions are "fresh".
+  const baseline = useRef<number | null>(null);
+  if (ready && baseline.current === null) baseline.current = attempt;
+  const fresh = submitted && baseline.current !== null && attempt > baseline.current;
 
   const update = useCallback((next: AnswerState, submission = false) => {
     current.current = next;
@@ -107,86 +111,67 @@ export function QuestionProvider({
     return () => window.removeEventListener('beforeunload', beforeUnload);
   }, [storageError, cache]);
 
-  const isChoice = spec.kind === 'choice';
-  const multiple = isChoice && spec.multiple;
-  const canSubmit = ready && (isChoice
-    ? selected.length > 0
-    : values.some((value) => value.trim() !== ''));
+  const kind = spec.kind;
+  const instant = kind === 'boolean' || (kind === 'choice' && !spec.multiple);
+  const answered = isAnswered(spec, selected, values);
+  const canSubmit = ready && !submitted && answered;
 
   const select = useCallback(
     (letters: readonly string[]) => {
-      if (!ready || !isChoice || current.current.submitted) return;
-      const finish = !multiple && letters.length > 0;
+      if (!ready || kind === 'blank' || current.current.submitted) return;
+      const finish = instant && letters.length > 0;
       update({ ...current.current, selected: [...letters], submitted: finish,
         attempt: current.current.attempt + (finish ? 1 : 0) }, finish);
     },
-    [ready, isChoice, multiple, update],
+    [ready, kind, instant, update],
   );
 
   const setValue = useCallback(
     (index: number, value: string) => {
-      if (!ready || isChoice || current.current.submitted) return;
+      if (!ready || kind !== 'blank' || current.current.submitted) return;
       const next = Array.from({ length: Math.max(index + 1, current.current.values.length) }, (_, position) => current.current.values[position] ?? '');
       next[index] = value;
       update({ ...current.current, values: next });
     },
-    [ready, isChoice, update],
+    [ready, kind, update],
   );
 
   const submit = useCallback(() => {
-    if (current.current.submitted || !canSubmit) return;
-    update({ ...current.current, submitted: true, attempt: current.current.attempt + 1 }, true);
-  }, [canSubmit, update]);
+    const state = current.current;
+    if (!ready || state.submitted || !isAnswered(spec, state.selected, state.values)) return;
+    update({ ...state, submitted: true, attempt: state.attempt + 1 }, true);
+  }, [ready, spec, update]);
 
   const reset = useCallback(() => {
     if (!ready) return;
     update({ ...emptyAnswer(), attempt: current.current.attempt });
   }, [ready, update]);
 
-  const value = useMemo<QuestionState>(() => {
-    let result: AttemptResult | null = null;
-    let blankResults: readonly boolean[] = [];
-    if (submitted) {
-      if (spec.kind === 'choice') {
-        result = gradeChoice(selected, spec.key);
-      } else {
-        const graded = gradeBlanks(values, spec.blanks);
-        result = graded.result;
-        blankResults = graded.correct;
-      }
-    }
-    return {
-      spec,
-      selected,
-      values,
-      submitted,
-      result,
-      blankResults,
-      attempt,
-      canSubmit,
-      ready,
-      storageError,
-      retryStorage,
-      select,
-      setValue,
-      submit,
-      reset,
-    };
-  }, [attempt, canSubmit, ready, storageError, retryStorage, reset, select, selected, setValue, spec, submit, submitted, values]);
+  // Grading parses maths answers, so it runs once per submitted state, not per render.
+  const evaluation = useMemo(
+    () => (submitted ? evaluateAttempt(spec, selected, values) : null),
+    [submitted, spec, selected, values],
+  );
+
+  const value = useMemo<QuestionState>(() => ({
+    spec,
+    identity,
+    selected,
+    values,
+    submitted,
+    evaluation,
+    attempt,
+    fresh,
+    answered,
+    canSubmit,
+    ready,
+    storageError,
+    retryStorage,
+    select,
+    setValue,
+    submit,
+    reset,
+  }), [spec, identity, selected, values, submitted, evaluation, attempt, fresh, answered, canSubmit, ready, storageError, retryStorage, select, setValue, submit, reset]);
 
   return <QuestionContext.Provider value={value}>{children}</QuestionContext.Provider>;
-}
-
-/**
- * Inside the solution dialog the stem is read-only and always shows the key,
- * on top of whatever the reader already entered.
- */
-const RevealContext = createContext(false);
-
-export function QuestionReveal({ children }: { children: ReactNode }) {
-  return <RevealContext.Provider value>{children}</RevealContext.Provider>;
-}
-
-export function useQuestionReveal() {
-  return useContext(RevealContext);
 }

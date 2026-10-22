@@ -177,8 +177,8 @@ describe('question browser database', () => {
     await db.save('guest', identity, submitted('guest'), { submission: true });
     await db.save(ACCOUNT, identity, draft('account'));
     await db.save(OTHER, identity, draft('other'));
-    expect(await db.importGuest(ACCOUNT)).toEqual({ records: 0, attempts: 1 });
-    expect(await db.importGuest(ACCOUNT)).toEqual({ records: 0, attempts: 0 });
+    expect(await db.importGuest(ACCOUNT)).toEqual({ records: 0, attempts: 1, marks: 0 });
+    expect(await db.importGuest(ACCOUNT)).toEqual({ records: 0, attempts: 0, marks: 0 });
     expect((await db.get(ACCOUNT, identity))?.state.values).toEqual(['account']);
     expect((await db.get(OTHER, identity))?.state.values).toEqual(['other']);
     expect((await db.get('guest', identity))?.state.values).toEqual(['guest']);

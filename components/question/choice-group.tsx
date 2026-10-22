@@ -1,252 +1,146 @@
 'use client';
 
-import { CheckIcon, XIcon } from 'lucide-react';
-import { type ReactNode, useRef } from 'react';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { toggleVariants } from '@/components/ui/toggle';
-import { cn } from '@/lib/utils';
+import { type KeyboardEvent, type ReactNode, useRef } from 'react';
 import type { ChoiceDensity } from './choice-layout';
-import { useQuestionReveal, useQuestionState } from './question-state';
+import { useQuestionState } from './question-state';
 import { useChoiceColumns } from './use-choice-columns';
 
 export type ChoiceOption = {
   label: string;
-  /** Marker text when it differs from the label (true/false questions). */
-  marker?: string;
   content: ReactNode;
 };
 
-type Feedback =
-  | 'idle'
-  | 'selected'
-  | 'correct'
-  | 'incorrect'
-  | 'missed'
-  | 'answer'
-  | 'dimmed';
-
-/*
- * Columns come from --choice-cols-measured (client measurement) and fall back
- * to the server density hint through container queries.
+/**
+ * idle · selected (picked, not graded) · correct / incorrect (picked, graded) ·
+ * missed (a key option left out of a multiple answer: 漏选) ·
+ * answer (the key of a single answer the reader missed) · dimmed (not involved).
  */
-const gridClassName = cn(
-  'group/choices grid w-full items-stretch gap-x-3 gap-y-2',
-  'grid-cols-[repeat(var(--choice-cols-measured,var(--choice-cols,1)),minmax(0,1fr))]',
-  'data-[density=compact]:@xl:[--choice-cols:4] data-[density=regular]:@xl:[--choice-cols:2]',
-);
+export type ChoiceFeedback = 'idle' | 'selected' | 'correct' | 'incorrect' | 'missed' | 'answer' | 'dimmed';
 
-const optionClassName = cn(
-  'group-data-measuring/choices:w-max group-data-measuring/choices:max-w-none group-data-measuring/choices:whitespace-nowrap',
-  'transition-[background-color,opacity,transform] duration-200 ease-(--ui-ease)',
-);
-
-/*
- * Flat, outline-free feedback. `!` lets the tint win over the toggle's own
- * pressed/hover fills; the marker chip carries the strong colour.
- */
-const feedbackStyle: Record<Feedback, { option: string; marker: string }> = {
-  idle: {
-    option: '',
-    marker: 'bg-background text-muted-foreground group-hover/toggle:text-foreground group-focus-visible/toggle:text-foreground',
-  },
-  selected: { option: '', marker: 'bg-foreground text-background scale-105' },
-  correct: { option: 'bg-success/12!', marker: 'bg-success text-background' },
-  incorrect: { option: 'bg-destructive/10!', marker: 'bg-destructive text-background' },
-  missed: { option: 'bg-success/8!', marker: 'bg-success/20 text-success' },
-  answer: { option: 'bg-success/10!', marker: 'bg-success text-background' },
-  dimmed: { option: 'opacity-50', marker: 'bg-background text-muted-foreground' },
-};
-
-const feedbackMotion: Partial<Record<Feedback, string>> = {
-  correct: 'motion-safe:animate-choice-pop',
-  incorrect: 'motion-safe:animate-choice-shake',
-};
-
-function OptionMarker({
-  label,
-  feedback,
-  multiple,
-}: {
-  label: string;
-  feedback: Feedback;
-  multiple: boolean;
-}) {
-  const icon =
-    feedback === 'correct' ? (
-      <CheckIcon strokeWidth={3} />
-    ) : feedback === 'incorrect' ? (
-      <XIcon strokeWidth={3} />
-    ) : null;
-
-  // Upright letters sit squarely in the chip (an italic leans off-centre).
-  // Latin capitals are trimmed to their cap height so they centre optically;
-  // other labels (对 / 错) keep the font's own line box.
-  const letter = /^[A-Za-z]$/.test(label);
-
-  // The outer box is one content line tall (1lh of the option text), so the
-  // marker stays centred on the first line for single- and multi-line options.
-  return (
-    <span aria-hidden="true" className="box-content flex h-lh shrink-0 items-center self-start py-0.5">
-      <span
-        className={cn(
-          'grid size-7 place-items-center leading-none shadow-[0_1px_2px_rgb(0_0_0/6%)] transition-[background-color,color,transform] duration-200 ease-(--ui-ease)',
-          'font-sans font-semibold',
-          letter ? 'text-[0.875rem]' : 'text-[0.8125rem]',
-          multiple ? 'rounded-[0.5rem]' : 'rounded-full',
-          feedbackStyle[feedback].marker,
-        )}
-      >
-        {icon ? (
-          <span
-            key={feedback}
-            className="grid place-items-center animate-in fade-in-0 zoom-in-50 duration-300 [&_svg]:size-3.5"
-          >
-            {icon}
-          </span>
-        ) : letter ? (
-          <span className="block leading-none [text-box:trim-both_cap_alphabetic]">{label}</span>
-        ) : (
-          label
-        )}
-      </span>
-    </span>
-  );
-}
-
-function OptionContent({ children }: { children: ReactNode }) {
-  return (
-    <span className="block min-w-0 flex-1 py-0.5 [&_.katex-display]:my-1 [&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden [&>:first-child]:mt-0 [&>:last-child]:mb-0">
-      {children}
-    </span>
-  );
-}
-
-function getFeedback({
+export function getChoiceFeedback({
   label,
   answerKey,
   selected,
   submitted,
-  reveal,
   multiple,
 }: {
   label: string;
   answerKey: readonly string[] | null;
   selected: readonly string[];
   submitted: boolean;
-  reveal: boolean;
   multiple: boolean;
-}): Feedback {
+}): ChoiceFeedback {
   const isSelected = selected.includes(label);
   if (!answerKey) return 'idle';
-
   const isKey = answerKey.includes(label);
   if (submitted) {
     if (isSelected) return isKey ? 'correct' : 'incorrect';
     if (isKey) return multiple ? 'missed' : 'answer';
     return 'dimmed';
   }
-  if (reveal) return isKey ? 'answer' : 'idle';
   return isSelected ? 'selected' : 'idle';
 }
 
+const NOTES: Partial<Record<ChoiceFeedback, string>> = { missed: '漏选', answer: '正确答案' };
+
+/** The letter in its ring; feedback icons and the tick are CSS pseudo-elements. */
+function Marker({ label }: { label: string }) {
+  return (
+    <span data-choice-marker="" aria-hidden="true">
+      <span data-choice-letter="">{label}</span>
+    </span>
+  );
+}
+
+function OptionBody({ option, feedback }: { option: ChoiceOption; feedback: ChoiceFeedback }) {
+  const note = NOTES[feedback];
+  return (
+    <>
+      <Marker label={option.label} />
+      <span data-choice-content="">{option.content}</span>
+      {note ? <span data-choice-note="">{note}</span> : null}
+    </>
+  );
+}
+
+/** Arrow keys move between options; Home / End jump to the ends. */
+function moveFocus(event: KeyboardEvent<HTMLDivElement>) {
+  const keys = ['ArrowDown', 'ArrowRight', 'ArrowUp', 'ArrowLeft', 'Home', 'End'];
+  if (!keys.includes(event.key)) return;
+  const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('button[data-exam-choice-option]'));
+  const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+  if (index === -1) return;
+  event.preventDefault();
+  const next = event.key === 'Home' ? 0
+    : event.key === 'End' ? buttons.length - 1
+      : (index + (event.key === 'ArrowDown' || event.key === 'ArrowRight' ? 1 : -1) + buttons.length) % buttons.length;
+  buttons[next]?.focus();
+}
+
 /**
- * Renders the option grid. Inside a gradable question the options are toggle
- * buttons (single answer: graded on click; multiple: submitted from the status
- * bar). Elsewhere, and in the read-only dialog copy, they render statically.
+ * The option grid. Inside a gradable question the options are buttons
+ * (single answer: graded on click; multiple: submitted from the footer);
+ * otherwise they render as a static list.
  */
-export function ChoiceGroup({
-  options,
-  density,
-}: {
-  options: ChoiceOption[];
-  density: ChoiceDensity;
-}) {
+export function ChoiceGroup({ options, density }: { options: ChoiceOption[]; density: ChoiceDensity }) {
   const ref = useRef<HTMLDivElement>(null);
   const question = useQuestionState();
-  const reveal = useQuestionReveal();
   useChoiceColumns(ref);
 
-  const choice = question?.spec.kind === 'choice' ? question.spec : null;
-  const answerKey = choice?.key ?? null;
-  const multiple = choice?.multiple ?? false;
-  const selected = question?.selected ?? [];
-  const submitted = question?.submitted ?? false;
-  const interactive = answerKey !== null && !reveal;
+  const spec = question?.spec.kind === 'choice' ? question.spec : null;
+  const multiple = spec?.multiple ?? false;
 
-  const feedbackFor = (label: string) =>
-    getFeedback({ label, answerKey, selected, submitted, reveal, multiple });
-
-  const groupProps = {
-    'data-density': density,
-    'data-exam-choice-group': '',
-  };
-
-  if (!interactive || !question) {
+  if (!question || !spec) {
     return (
-      <div className="my-3 @container">
-        <div ref={ref} role="list" className={gridClassName} {...groupProps}>
-          {options.map((option) => {
-            const feedback = feedbackFor(option.label);
-            return (
-              <div
-                key={option.label}
-                role="listitem"
-                data-exam-choice-option=""
-                data-feedback={feedback}
-                className={cn(
-                  toggleVariants({ variant: 'choice', size: 'choice' }),
-                  'pointer-events-none',
-                  optionClassName,
-                  feedbackStyle[feedback].option,
-                )}
-              >
-                <OptionMarker label={option.marker ?? option.label} feedback={feedback} multiple={multiple} />
-                <OptionContent>{option.content}</OptionContent>
-              </div>
-            );
-          })}
-        </div>
+      <div ref={ref} role="list" data-exam-choice-group="" data-density={density}>
+        {options.map((option) => (
+          <div key={option.label} role="listitem" data-exam-choice-option="" data-option-label={option.label} data-feedback="idle">
+            <OptionBody option={option} feedback="idle" />
+          </div>
+        ))}
       </div>
     );
   }
 
+  const { selected, submitted, ready, fresh } = question;
+  const toggle = (label: string) => {
+    if (!multiple) question.select([label]);
+    else question.select(selected.includes(label) ? selected.filter((item) => item !== label) : [...selected, label]);
+  };
+  // Radio pattern: one tab stop, on the picked option or the first.
+  const tabStop = multiple ? null : (selected[0] ?? options[0]?.label);
+
   return (
-    <div className="my-3 @container">
-      <ToggleGroup
-        ref={ref}
-        multiple={multiple}
-        value={[...selected]}
-        onValueChange={(value) => question.select(value as string[])}
-        aria-label={multiple ? '选项（多选）' : '选项'}
-        variant="choice"
-        size="choice"
-        className={gridClassName}
-        {...groupProps}
-      >
-        {options.map((option) => {
-          const feedback = feedbackFor(option.label);
-          return (
-            <ToggleGroupItem
-              key={option.label}
-              value={option.label}
-              disabled={!question.ready}
-              aria-disabled={submitted || !question.ready || undefined}
-              data-exam-choice-option=""
-              data-feedback={feedback}
-              className={cn(
-                'cursor-pointer active:scale-[0.99]',
-                submitted && 'pointer-events-none',
-                optionClassName,
-                feedbackStyle[feedback].option,
-                feedbackMotion[feedback],
-              )}
-            >
-              <OptionMarker label={option.marker ?? option.label} feedback={feedback} multiple={multiple} />
-              <OptionContent>{option.content}</OptionContent>
-            </ToggleGroupItem>
-          );
-        })}
-      </ToggleGroup>
+    <div
+      ref={ref}
+      role={multiple ? 'group' : 'radiogroup'}
+      aria-label={multiple ? '选项（可多选）' : '选项'}
+      data-exam-choice-group=""
+      data-density={density}
+      data-multiple={multiple ? '' : undefined}
+      onKeyDown={moveFocus}
+    >
+      {options.map((option) => {
+        const feedback = getChoiceFeedback({ label: option.label, answerKey: spec.key, selected, submitted, multiple });
+        const locked = submitted || !ready;
+        return (
+          <button
+            key={option.label}
+            type="button"
+            role={multiple ? 'checkbox' : 'radio'}
+            aria-checked={selected.includes(option.label)}
+            aria-disabled={locked || undefined}
+            tabIndex={tabStop === null || tabStop === option.label ? 0 : -1}
+            data-exam-choice-option=""
+            data-option-label={option.label}
+            data-feedback={feedback}
+            data-fresh={fresh ? '' : undefined}
+            onClick={() => { if (!locked) toggle(option.label); }}
+          >
+            <OptionBody option={option} feedback={feedback} />
+          </button>
+        );
+      })}
     </div>
   );
 }

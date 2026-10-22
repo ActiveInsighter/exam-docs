@@ -68,7 +68,7 @@ export class QuestionAnswerCache {
     options: QuestionAnswerCacheOptions = {}) {
     this.draftDelayMs = options.draftDelayMs ?? DRAFT_PERSIST_MS;
     this.unsubscribe = database?.subscribe((change) => {
-      if (change.namespace !== namespace || this.disposed) return;
+      if (change.namespace !== namespace || this.disposed || change.scope === 'annotations') return;
       if (change.keys) void this.refresh(change.keys);
       else for (const path of this.documents.keys()) void this.refreshDocument(path);
     });

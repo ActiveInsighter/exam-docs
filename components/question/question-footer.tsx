@@ -1,97 +1,110 @@
 'use client';
 
-import {
-  CircleAlertIcon,
-  CircleCheckIcon,
-  CircleXIcon,
-  RotateCcwIcon,
-} from 'lucide-react';
+import { CircleAlertIcon, CircleCheckIcon, CircleXIcon, RotateCcwIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { type AttemptResult, useQuestionState } from './question-state';
-import { QuestionSolutionDialog } from './solution-dialog';
-
-type Copy = { icon: ReactNode; text: string; className: string };
-
-/* Result pills: tinted fill, coloured text, no outline. */
-const choiceCopy: Record<AttemptResult, Copy> = {
-  correct: { icon: <CircleCheckIcon />, text: '回答正确', className: 'bg-success/12 text-success' },
-  partial: { icon: <CircleAlertIcon />, text: '少选了', className: 'bg-(--ui-fill-strong) text-foreground' },
-  incorrect: { icon: <CircleXIcon />, text: '回答错误', className: 'bg-destructive/10 text-destructive' },
-};
-
-const blankCopy: Record<AttemptResult, Copy> = {
-  correct: choiceCopy.correct,
-  partial: { ...choiceCopy.partial, text: '部分正确' },
-  incorrect: choiceCopy.incorrect,
-};
-
-/** The key as shown to the reader: letters for choices, answers for blanks. */
-export function formatKey(spec: NonNullable<ReturnType<typeof useQuestionState>>['spec']) {
-  return spec.kind === 'choice'
-    ? (spec.keyText ?? spec.key.join(''))
-    : spec.blanks.map((blank) => blank.answer).join('；');
-}
+import { blankBadge } from './blank-field';
+import type { AttemptResult, BlankSpec, Evaluation, GradingSpec } from './grading';
+import { formatKey } from './grading';
+import { MathPreview } from './math-preview';
+import type { QuestionTag } from './model';
+import { useQuestionState } from './question-state';
+import { QuestionSolutionSheet } from './solution-sheet';
 
 /** Coarse state published on the footer for page-level navigators. */
 export type AttemptStatus = 'idle' | 'draft' | AttemptResult;
 
-function useAttemptStatus(): AttemptStatus | undefined {
-  const question = useQuestionState();
-  if (!question) return undefined;
-  if (question.submitted && question.result) return question.result;
-  const touched = question.spec.kind === 'choice'
-    ? question.selected.length > 0
-    : question.values.some((value) => value.trim() !== '');
-  return touched ? 'draft' : 'idle';
+const ICONS: Record<AttemptResult, ReactNode> = {
+  correct: <CircleCheckIcon aria-hidden="true" />,
+  partial: <CircleAlertIcon aria-hidden="true" />,
+  incorrect: <CircleXIcon aria-hidden="true" />,
+};
+
+/** Words for a result: "少选" for a subset of a multiple answer, "部分正确" for blanks. */
+export function describeResult(spec: GradingSpec, evaluation: Evaluation, selected: readonly string[]): string {
+  if (evaluation.result === 'correct') return '回答正确';
+  if (evaluation.result === 'incorrect') return '回答错误';
+  if (spec.kind === 'choice') {
+    const missed = spec.key.length - selected.filter((label) => spec.key.includes(label)).length;
+    return `少选了 · 漏选 ${missed} 项`;
+  }
+  if (spec.kind === 'blank') {
+    const right = evaluation.blanks.filter((verdict) => verdict === 'correct').length;
+    return `部分正确 · ${right}/${spec.blanks.length} 空`;
+  }
+  return '部分正确';
 }
 
-/** Left side of the footer: submit button, then the graded result. */
-function AttemptStatusView() {
+export function BlankAnswer({ blank }: { blank: BlankSpec }) {
+  return blank.kind === 'math'
+    ? <MathPreview text={blank.answer} className="text-[1.05em]" />
+    : <span>{blank.answer}</span>;
+}
+
+/** The key as shown under a graded question. */
+function KeyText({ spec, evaluation }: { spec: GradingSpec; evaluation: Evaluation }) {
+  if (spec.kind !== 'blank') return <span className="font-semibold text-foreground">{formatKey(spec)}</span>;
+  const several = spec.blanks.length > 1;
+  return (
+    <span className="inline-flex flex-wrap items-baseline gap-x-3 gap-y-1 text-foreground">
+      {spec.blanks.map((blank, index) => evaluation.blanks[index] === 'correct' && several ? null : (
+        <span key={index} className="inline-flex items-baseline gap-1">
+          {several ? <span className="text-muted-foreground">{blankBadge(index)}</span> : null}
+          <span className="font-semibold"><BlankAnswer blank={blank} /></span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function SubmitHint() {
+  const question = useQuestionState()!;
+  const { spec, selected } = question;
+  if (spec.kind === 'blank') {
+    const math = spec.blanks.some((blank) => blank.kind === 'math');
+    const several = spec.blanks.length > 1;
+    return <>{several ? '回车跳到下一空' : '回车提交'}{math ? ' · 数学空可用屏幕键盘输入' : ''}</>;
+  }
+  return <>{selected.length ? `已选 ${selected.length} 项` : '可多选，选出全部正确项后提交'}</>;
+}
+
+/** Left side of the footer: submit step while answering, the grade afterwards. */
+function AttemptView() {
   const question = useQuestionState();
   if (!question) return null;
+  const { spec, submitted, evaluation, attempt, canSubmit, submit, reset, selected } = question;
+  const needsSubmit = spec.kind === 'blank' || (spec.kind === 'choice' && spec.multiple);
 
-  const { spec, submitted, result, attempt, canSubmit, submit, reset, selected } = question;
-  const needsSubmit = spec.kind === 'blank' || spec.multiple;
-
-  if (!submitted || !result) {
+  if (!submitted || !evaluation) {
     if (!needsSubmit) return null;
-    const hint = spec.kind === 'blank'
-      ? '填空题 · 回车提交'
-      : selected.length > 0 ? `多选题 · 已选 ${selected.length} 项` : '多选题 · 选出全部正确项';
     return (
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <Button size="sm" disabled={!canSubmit} onClick={submit} className="px-3.5">
+        <Button size="sm" disabled={!canSubmit} onClick={submit} className="h-8 rounded-full px-4">
           提交答案
         </Button>
-        <span className="text-sm text-muted-foreground">{hint}</span>
+        <span className="text-sm text-muted-foreground"><SubmitHint /></span>
       </div>
     );
   }
 
-  const copy = (spec.kind === 'blank' ? blankCopy : choiceCopy)[result];
+  const invalid = evaluation.blanks.flatMap((verdict, index) => (verdict === 'invalid' ? [index] : []));
   return (
-    <div
-      key={attempt}
-      className="flex flex-wrap items-center gap-x-3 gap-y-2 animate-in fade-in-0 slide-in-from-left-1 duration-300"
-    >
-      <span
-        className={cn(
-          'inline-flex h-7 items-center gap-1.5 rounded-full pr-3 pl-2 text-sm font-medium [&_svg]:size-4 [&_svg]:shrink-0',
-          'motion-safe:animate-in motion-safe:zoom-in-90 motion-safe:duration-300',
-          copy.className,
-        )}
-      >
-        {copy.icon}
-        {copy.text}
+    <div key={attempt} className="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <span data-result-pill={evaluation.result}>
+        {ICONS[evaluation.result]}
+        {describeResult(spec, evaluation, selected)}
       </span>
-      {result !== 'correct' ? (
-        <span className="text-sm text-muted-foreground">
-          正确答案 <span className="font-semibold text-foreground">{formatKey(spec)}</span>
+      {evaluation.result !== 'correct' ? (
+        <span className="inline-flex flex-wrap items-baseline gap-1.5 text-sm text-muted-foreground">
+          正确答案 <KeyText spec={spec} evaluation={evaluation} />
         </span>
       ) : null}
-      <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={reset}>
+      {invalid.length ? (
+        <span className="text-sm text-muted-foreground">
+          {invalid.map((index) => blankBadge(index)).join('')} 无法识别为数学表达式
+        </span>
+      ) : null}
+      <Button variant="ghost" size="sm" className="h-8 rounded-full text-muted-foreground" onClick={reset}>
         <RotateCcwIcon data-icon="inline-start" />
         重做
       </Button>
@@ -99,52 +112,39 @@ function AttemptStatusView() {
   );
 }
 
-export function QuestionFooter({
-  question,
-  answer,
-  solution,
-  solutionLabel,
-  buttonLabel,
-  dialogTitle,
-  showSolution = true,
-  numberLabel,
-  typeLabel,
-}: {
-  question: ReactNode;
-  answer: ReactNode | null;
+function useAttemptStatus(): AttemptStatus | undefined {
+  const question = useQuestionState();
+  if (!question) return undefined;
+  if (question.submitted && question.evaluation) return question.evaluation.result;
+  return question.answered ? 'draft' : 'idle';
+}
+
+export type QuestionFooterProps = {
+  questionId: string;
   solution: ReactNode;
-  solutionLabel: string;
+  showSolution: boolean;
   buttonLabel: string;
   dialogTitle: string;
-  showSolution?: boolean;
-  numberLabel?: string | null;
-  typeLabel?: string;
-}) {
+  numberLabel: string | null;
+  typeLabel: string;
+  tags: QuestionTag[];
+};
+
+export function QuestionFooter({ showSolution, ...sheet }: QuestionFooterProps) {
   const state = useQuestionState();
   const status = useAttemptStatus();
   return (
-    <div
-      data-question-footer=""
-      data-attempt-result={status}
-      className="mt-4 flex min-h-8 flex-wrap items-center gap-x-3 gap-y-2"
-    >
+    <div data-question-footer="" data-attempt-result={status}>
       <div role="status" aria-live="polite" className="min-w-0 flex-1">
-        <AttemptStatusView />
-        {state?.storageError ? <div className="mt-1 flex flex-wrap items-center gap-2">
-          <p role="alert" className="text-sm text-destructive">{state.storageError}</p>
-          <Button variant="outline" size="sm" onClick={state.retryStorage}>重试保存</Button>
-        </div> : null}
+        <AttemptView />
+        {state?.storageError ? (
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <p role="alert" className="text-sm text-destructive">{state.storageError}</p>
+            <Button variant="outline" size="sm" onClick={state.retryStorage}>重试保存</Button>
+          </div>
+        ) : null}
       </div>
-      {showSolution ? <QuestionSolutionDialog
-        question={question}
-        answer={answer}
-        solution={solution}
-        solutionLabel={solutionLabel}
-        buttonLabel={buttonLabel}
-        dialogTitle={dialogTitle}
-        numberLabel={numberLabel}
-        typeLabel={typeLabel}
-      /> : null}
+      {showSolution ? <QuestionSolutionSheet {...sheet} /> : null}
     </div>
   );
 }
