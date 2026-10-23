@@ -11,6 +11,13 @@ npm run dev
 
 Open `http://localhost:3000/docs`.
 
+## Mermaid diagrams
+
+Mermaid is pinned to 12.2.0. Use Node.js 22.12+ within the Node 22 release line;
+Mermaid 12 targets ES2024 and Safari 17.4+. The shared renderer explicitly keeps
+the `dagre` layout and `classic` look for existing documents and follows the site
+theme. Individual diagrams can override these defaults in Mermaid frontmatter.
+
 ## Account
 
 The account button next to the GitHub icon opens a menu with sign-in and sign-out.
