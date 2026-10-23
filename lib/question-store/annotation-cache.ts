@@ -45,6 +45,7 @@ export class QuestionAnnotationCache {
   private tagsLoading: Promise<void> | null = null;
   private readonly unsubscribe: (() => void) | undefined;
   private disposed = false;
+  private pruneQueued = false;
 
   constructor(private readonly database: QuestionDatabase | null, readonly namespace: QuestionNamespace) {
     this.tagsSnapshot = { tags: [], ready: !database };
@@ -52,7 +53,7 @@ export class QuestionAnnotationCache {
       if (change.namespace !== namespace || change.scope !== 'annotations' || this.disposed) return;
       void this.refreshTags();
       if (change.keys?.length) void this.refreshMarks(change.keys);
-      else if (!change.keys) for (const path of this.documents.keys()) void this.refreshDocument(path);
+      else if (!change.keys) for (const path of new Set([...this.marks.values()].map((entry) => entry.identity.documentPath))) void this.loadDocument(path);
     });
   }
 
@@ -149,11 +150,22 @@ export class QuestionAnnotationCache {
     return this.marks.get(markKey(identity))?.snapshot ?? (this.database ? PENDING_MARK : READY_EMPTY);
   }
 
+  private prune(): void {
+    if (!this.database || this.pruneQueued) return;
+    this.pruneQueued = true;
+    queueMicrotask(() => {
+      this.pruneQueued = false;
+      for (const [key, entry] of this.marks) {
+        if (!entry.listeners.size && !entry.pending) this.marks.delete(key);
+      }
+    });
+  }
+
   subscribeMark(identity: MarkIdentity, listener: () => void): () => void {
     const entry = this.entry(identity);
     entry.listeners.add(listener);
     if (!entry.snapshot.ready) void this.loadDocument(identity.documentPath);
-    return () => { entry.listeners.delete(listener); };
+    return () => { entry.listeners.delete(listener); this.prune(); };
   }
 
   private loadDocument(documentPath: string): Promise<void> {
@@ -161,7 +173,10 @@ export class QuestionAnnotationCache {
     if (!loading) {
       loading = this.refreshDocument(documentPath);
       this.documents.set(documentPath, loading);
-      loading.catch(() => { if (this.documents.get(documentPath) === loading) this.documents.delete(documentPath); });
+      void loading.finally(() => {
+        if (this.documents.get(documentPath) === loading) this.documents.delete(documentPath);
+        this.prune();
+      });
     }
     return loading;
   }
@@ -214,6 +229,8 @@ export class QuestionAnnotationCache {
       entry.pending--;
       if (!this.disposed) this.publishMark(entry, previous);
       throw error;
+    } finally {
+      this.prune();
     }
   }
 

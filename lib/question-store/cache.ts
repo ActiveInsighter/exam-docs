@@ -48,6 +48,7 @@ interface Entry {
 const EMPTY: AnswerState = Object.freeze({ selected: [], values: [], submitted: false, attempt: 0 }) as AnswerState;
 export const emptyAnswer = (): AnswerState => ({ selected: [], values: [], submitted: false, attempt: 0 });
 export const PENDING_SNAPSHOT: AnswerSnapshot = Object.freeze({ state: EMPTY, ready: false, error: null });
+const EMPTY_SNAPSHOT: AnswerSnapshot = Object.freeze({ state: EMPTY, ready: true, error: null });
 
 /** Quiet period after the last draft edit before it is written to IndexedDB. */
 export const DRAFT_PERSIST_MS = 400;
@@ -63,6 +64,7 @@ export class QuestionAnswerCache {
   private readonly unsubscribe: (() => void) | undefined;
   private readonly draftDelayMs: number;
   private disposed = false;
+  private pruneQueued = false;
 
   constructor(private readonly database: QuestionDatabase | null, readonly namespace: QuestionNamespace,
     options: QuestionAnswerCacheOptions = {}) {
@@ -70,7 +72,9 @@ export class QuestionAnswerCache {
     this.unsubscribe = database?.subscribe((change) => {
       if (change.namespace !== namespace || this.disposed || change.scope === 'annotations') return;
       if (change.keys) void this.refresh(change.keys);
-      else for (const path of this.documents.keys()) void this.refreshDocument(path);
+      else for (const path of new Set([...this.entries.values()].map((entry) => entry.identity.documentPath))) {
+        void this.loadDocument(path).catch(() => undefined);
+      }
     });
     if (database && typeof window !== 'undefined') {
       window.addEventListener('pagehide', this.persistNow);
@@ -129,15 +133,27 @@ export class QuestionAnswerCache {
     return entry.flushing || entry.failed || entry.queue.length > 0;
   }
 
+  /** IndexedDB owns saved answers; visited pages must not accumulate in the provider. */
+  private prune(): void {
+    if (!this.database || this.pruneQueued) return;
+    this.pruneQueued = true;
+    queueMicrotask(() => {
+      this.pruneQueued = false;
+      for (const [key, entry] of this.entries) {
+        if (!entry.listeners.size && !this.busy(entry)) this.entries.delete(key);
+      }
+    });
+  }
+
   read(identity: QuestionIdentity): AnswerSnapshot {
-    return this.entries.get(questionKey(identity))?.snapshot ?? (this.database ? PENDING_SNAPSHOT : { state: EMPTY, ready: true, error: null });
+    return this.entries.get(questionKey(identity))?.snapshot ?? (this.database ? PENDING_SNAPSHOT : EMPTY_SNAPSHOT);
   }
 
   subscribe(identity: QuestionIdentity, listener: () => void): () => void {
     const entry = this.entry(identity);
     entry.listeners.add(listener);
-    if (!entry.snapshot.ready) void this.loadDocument(identity.documentPath);
-    return () => { entry.listeners.delete(listener); };
+    if (!entry.snapshot.ready) void this.loadDocument(identity.documentPath).catch(() => undefined);
+    return () => { entry.listeners.delete(listener); this.prune(); };
   }
 
   private loadDocument(documentPath: string): Promise<void> {
@@ -145,8 +161,13 @@ export class QuestionAnswerCache {
     if (!loading) {
       loading = this.refreshDocument(documentPath);
       this.documents.set(documentPath, loading);
-      // A failed first read is retried by the next subscriber instead of being cached.
-      loading.catch(() => { if (this.documents.get(documentPath) === loading) this.documents.delete(documentPath); });
+      // Deduplicate only in-flight reads. A later subscriber may introduce a new
+      // question on this document (or return after its saved entry was evicted).
+      const finished = () => {
+        if (this.documents.get(documentPath) === loading) this.documents.delete(documentPath);
+        this.prune();
+      };
+      void loading.then(finished, finished);
     }
     return loading;
   }
@@ -248,6 +269,7 @@ export class QuestionAnswerCache {
       }
     } finally {
       entry.flushing = false;
+      this.prune();
     }
   }
 }
