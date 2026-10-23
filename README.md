@@ -18,6 +18,15 @@ It is a standalone module (`components/account`, `lib/account`) built on shadcn
 components and attached through Fumadocs' public layout options. See
 [docs/account.md](docs/account.md).
 
+## Modal
+
+`components/ui/modal.tsx` is a general modal built on the shadcn Dialog parts:
+a frosted floating header (title, tags, toolbar, close), single or split-pane
+content, a bottom sheet with drag-to-dismiss on phones, and stacked nested
+levels with back / close-all. The question solution sheet and the
+"收藏与标签" library are built from it. See
+[docs/modal-component.md](docs/modal-component.md).
+
 ## Question progress
 
 The custom question components save answers in browser IndexedDB, including

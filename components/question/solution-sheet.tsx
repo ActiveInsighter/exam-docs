@@ -1,41 +1,34 @@
 'use client';
 
-import { BookOpenTextIcon, CheckIcon, ChevronDownIcon, NotebookPenIcon, XIcon } from 'lucide-react';
-import { type ReactNode, type RefObject, useCallback, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { BookOpenTextIcon, CheckIcon, ChevronDownIcon, LibraryBigIcon, NotebookPenIcon, XIcon } from 'lucide-react';
+import { lazy, type ReactNode, type RefObject, Suspense, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { Dialog, DialogClose, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Modal, ModalContent, ModalHeader, ModalPane, ModalSplit, ModalTags, ModalTitle, ModalToolbar } from '@/components/ui/modal';
 import { cn } from '@/lib/utils';
 import { blankBadge } from './blank-field';
 import { formatKey, formatResponse, type GradingSpec } from './grading';
-import { QuestionMarkActions, useMarks } from './marks/question-marks';
+import { QuestionMarkActions, QuestionUserTags, useMarks } from './marks/question-marks';
 import { NoteEditor } from './marks/note-editor';
 import { MathPreview } from './math-preview';
 import { BuiltinTags } from './question-tags';
 import type { QuestionTag } from './model';
 import { mirrorQuestion } from './question-mirror';
 import { useQuestionState, type QuestionState } from './question-state';
-import { useSheetDrag } from './use-sheet-drag';
+
+// Opened from the toolbar on top of the sheet; loaded on first use.
+const QuestionLibraryDialog = lazy(() => import('./marks/library-dialog').then((module) => ({ default: module.QuestionLibraryDialog })));
 
 /*
- * "题目与解析": a bottom sheet with the question (a read-only copy of the
- * page's own rendering, the key revealed), the reader's answer next to the
- * correct one, the solution and the reader's note.
+ * "题目与解析": a modal (components/ui/modal.tsx) with the question (a
+ * read-only copy of the page's own rendering, the key revealed), the
+ * reader's answer next to the correct one, the solution and the reader's note.
  *
- * Desktop: two panes that scroll on their own. Phones: one scroll, the
- * question folded to a few lines first so the answer is in view at once.
- * Closes with Esc, the close button, the backdrop or a downward drag; focus
- * starts on the title and returns to the trigger.
+ * Header: number, type and tags; the reader's marks and the library in the
+ * toolbar. The library opens as a second level on top of this one.
+ * Content: two panes that scroll on their own on desktop; one scroll on
+ * phones, the question folded to a few lines first so the answer is in view.
+ * Focus starts on the title and returns to the trigger.
  */
-
-const sheetEase = 'ease-[cubic-bezier(0.32,0.72,0,1)]';
-
-const overlayClassName = cn(
-  'data-open:animate-none! data-closed:animate-none!',
-  'transition-opacity duration-500',
-  sheetEase,
-  'data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-[340ms]',
-  'motion-reduce:transition-none',
-);
 
 // Portaled out of #docs-body: `docs-prose` gives it the page typography.
 const prose = 'prose docs-prose max-w-none min-w-0';
@@ -200,9 +193,6 @@ function useDesktop() {
   return useSyncExternalStore(subscribeDesktop, () => window.matchMedia(DESKTOP).matches, () => true);
 }
 
-/* Each pane scrolls on its own on desktop; on phones the whole body scrolls. */
-const paneClassName = 'min-w-0 px-5 pt-4 pb-8 md:overflow-y-auto md:overscroll-contain md:px-7 md:pt-5 [scrollbar-width:thin]';
-
 export type QuestionSolutionSheetProps = {
   questionId: string;
   solution: ReactNode;
@@ -250,85 +240,80 @@ type SheetDialogProps = Omit<QuestionSolutionSheetProps, 'buttonLabel'> & {
   triggerRef: RefObject<HTMLButtonElement | null>;
 };
 
+const toolbarButton = buttonVariants({ variant: 'ghost', size: 'icon' }) + ' size-8 rounded-full text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active) aria-expanded:text-foreground';
+
 function SheetDialog({ questionId, solution, dialogTitle, numberLabel, typeLabel, tags, open, setOpen, triggerRef }: SheetDialogProps) {
   const [editingNote, setEditingNote] = useState(false);
+  const [library, setLibrary] = useState<'closed' | 'open' | 'mounted'>('closed');
   const desktop = useDesktop();
   const state = useQuestionState();
-  const sheetRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const close = useCallback(() => setOpen(false), [setOpen]);
-  const dragHandlers = useSheetDrag(sheetRef, close);
   const spec = state?.spec ?? null;
 
   return (
-    <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (!next) setEditingNote(false); }}>
-      <DialogContent
-        ref={sheetRef}
-        showCloseButton={false}
+    <Modal open={open} onOpenChange={(next) => { setOpen(next); if (!next) setEditingNote(false); }}>
+      <ModalContent
+        size="xl"
         initialFocus={titleRef}
         finalFocus={triggerRef}
-        overlayClassName={overlayClassName}
-        className={cn(
-          'flex flex-col gap-0 overflow-hidden bg-(--ui-panel) p-0 text-base text-foreground ring-0 will-change-transform',
-          'shadow-[0_-12px_40px_-12px_rgb(0_0_0/0.22)] dark:shadow-[0_-12px_40px_-8px_rgb(0_0_0/0.8)] dark:ring-1 dark:ring-white/10',
-          'top-auto bottom-0 left-1/2 w-[min(72rem,100vw-2rem)] max-w-none translate-y-0 rounded-t-[1.5rem] rounded-b-none sm:max-w-none',
-          'max-h-[min(52rem,calc(100dvh-3rem))] md:min-h-[min(26rem,calc(100dvh-3rem))] max-md:left-0 max-md:max-h-[calc(100dvh-2.5rem)] max-md:w-full max-md:translate-x-0',
-          'data-open:animate-none! data-closed:animate-none!',
-          'transition-[translate,transform] duration-500',
-          sheetEase,
-          'data-starting-style:translate-y-full data-ending-style:translate-y-full data-ending-style:duration-[340ms]',
-          'motion-reduce:transition-none',
-        )}
+        className="text-base md:min-h-[min(30rem,calc(100dvh-4rem))]"
       >
-        {/* Grab zone: the handle and header follow a downward drag. */}
-        <div className="shrink-0 touch-none select-none md:cursor-grab md:active:cursor-grabbing" {...dragHandlers}>
-          <div aria-hidden="true" className="flex justify-center pt-2.5 pb-1">
-            <div className="h-1.5 w-10 rounded-full bg-(--ui-fill-strong)" />
-          </div>
-          <header className="flex min-h-12 flex-wrap items-center gap-x-2 gap-y-1.5 pr-3 pb-2 pl-5 md:pl-7">
-            <DialogTitle ref={titleRef} tabIndex={-1} className="text-base font-semibold outline-none">
-              {numberLabel ? `第 ${numberLabel} 题` : dialogTitle}
-            </DialogTitle>
+        <ModalHeader>
+          <ModalTitle ref={titleRef}>{numberLabel ? `第 ${numberLabel} 题` : dialogTitle}</ModalTitle>
+          <ModalTags aria-label="标签">
             <Chip>{typeLabel}</Chip>
-            <span className="hidden flex-wrap gap-1.5 sm:flex"><BuiltinTags tags={tags} /></span>
-            <div className="ml-auto flex items-center gap-1">
-              <QuestionMarkActions editingNote={editingNote} onEditNote={() => setEditingNote(!editingNote)} />
-              <DialogClose
-                render={<Button variant="ghost" size="icon" className="size-8 rounded-full bg-(--ui-fill) text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground" />}
-              >
-                <XIcon />
-                <span className="sr-only">关闭</span>
-              </DialogClose>
-            </div>
-          </header>
-        </div>
+            <BuiltinTags tags={tags} />
+            <QuestionUserTags />
+          </ModalTags>
+          <ModalToolbar aria-label="题目操作">
+            <QuestionMarkActions editingNote={editingNote} onEditNote={() => setEditingNote(!editingNote)} />
+            <button
+              type="button"
+              className={toolbarButton}
+              aria-haspopup="dialog"
+              aria-expanded={library === 'open'}
+              aria-label="收藏与标签"
+              title="收藏与标签"
+              onClick={() => setLibrary('open')}
+            >
+              <LibraryBigIcon />
+            </button>
+          </ModalToolbar>
+        </ModalHeader>
 
-        <div className="grid min-h-0 flex-1 max-md:overflow-y-auto max-md:overscroll-contain max-md:pb-[env(safe-area-inset-bottom)] md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:grid-rows-[minmax(0,1fr)]">
-          <div className={cn(paneClassName, 'flex flex-col gap-7 bg-(--exam-question-pane) @container')}>
+        <ModalSplit columns="minmax(0,0.9fr) minmax(0,1.1fr)">
+          <ModalPane tone="muted" className="@container flex flex-col gap-7">
             <section aria-label="题目">
               <SectionLabel>题目</SectionLabel>
               <QuestionMirror questionId={questionId} state={state} />
             </section>
             {desktop ? <SheetNote editing={editingNote} setEditing={setEditingNote} /> : null}
-          </div>
+          </ModalPane>
 
-          <div className={cn(paneClassName, 'flex flex-col gap-7 bg-(--exam-question-solution-pane)')}>
+          <ModalPane className="flex flex-col gap-7">
             {spec ? (
-              <section aria-label="答案" className="animate-in fade-in-0 slide-in-from-bottom-1 fill-mode-both duration-300 delay-75">
+              <section aria-label="答案" className="animate-in fade-in-0 slide-in-from-bottom-1 fill-mode-both duration-300 delay-100">
                 <SectionLabel>答案</SectionLabel>
                 <AnswerSummary spec={spec} state={state} />
               </section>
             ) : null}
-            <section aria-label={spec ? '解析' : '参考解答'} className="animate-in fade-in-0 slide-in-from-bottom-1 fill-mode-both duration-300 delay-150">
+            <section aria-label={spec ? '解析' : '参考解答'} className="animate-in fade-in-0 slide-in-from-bottom-1 fill-mode-both duration-300 delay-200">
               <SectionLabel>{spec ? '解析' : '参考解答'}</SectionLabel>
               <div className={cn(prose, proseReset, '[&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden')}>
                 {solution}
               </div>
             </section>
             {!desktop ? <SheetNote editing={editingNote} setEditing={setEditingNote} /> : null}
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+          </ModalPane>
+        </ModalSplit>
+
+        {/* Second level: rendered inside this modal so it stacks on top of it. */}
+        {library !== 'closed' ? (
+          <Suspense fallback={null}>
+            <QuestionLibraryDialog open={library === 'open'} onOpenChange={(next) => setLibrary(next ? 'open' : 'mounted')} />
+          </Suspense>
+        ) : null}
+      </ModalContent>
+    </Modal>
   );
 }

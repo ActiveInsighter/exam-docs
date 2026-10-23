@@ -1,0 +1,384 @@
+/*
+ * Modal (components/ui/modal.tsx): placement, motion, the frosted header and
+ * stacked levels. Colours come from the --modal-* tokens in
+ * styles/tokens/components.css.
+ *
+ * In the components layer, so Tailwind utilities passed as className win.
+ *
+ * Phones: a bottom sheet sliding up on a spring-like curve. Wide screens: a
+ * centred panel rising and settling from 97 %, or a sheet with
+ * data-placement="sheet". A level with another opened on top of it scales
+ * back, lifts and dims (Base UI sets data-nested-dialog-open and
+ * --nested-dialogs on it).
+ */
+@layer components {
+  [data-slot='modal-backdrop'] {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: var(--modal-backdrop);
+    transition: opacity 450ms var(--modal-ease-out);
+  }
+
+  [data-slot='modal-backdrop']:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
+  }
+
+  [data-slot='modal-backdrop'][data-ending-style] {
+    transition-duration: 300ms;
+  }
+
+  /* ---- Popup: a bottom sheet by default ---------------------------------- */
+
+  [data-slot='modal-content'] {
+    --modal-header-h: 3.75rem;
+    --modal-gutter: 1.25rem;
+    --modal-width: 34rem;
+    --modal-max-height: 44rem;
+
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    /* Each level of a stack sits a little lower, so the ones behind peek out. */
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 1.5rem - var(--modal-depth, 0) * 0.75rem);
+    overflow: hidden;
+    isolation: isolate;
+    border-radius: var(--modal-radius) var(--modal-radius) 0 0;
+    background: var(--modal-surface);
+    color: var(--foreground);
+    box-shadow: var(--modal-shadow);
+    outline: none;
+    transform-origin: 50% 0;
+    transition-property: translate, scale, opacity, transform;
+    transition-duration: 520ms;
+    transition-timing-function: var(--modal-ease-sheet);
+  }
+
+  /* Before the enter/exit states, so a level closing with its stack still leaves. */
+  [data-slot='modal-content'][data-nested-dialog-open] {
+    translate: 0 calc(var(--nested-dialogs) * -0.625rem);
+    scale: calc(1 - var(--nested-dialogs) * 0.05);
+  }
+
+  [data-slot='modal-content']:is([data-starting-style], [data-ending-style]) {
+    translate: 0 100%;
+  }
+
+  [data-slot='modal-content'][data-ending-style] {
+    transition-duration: 340ms;
+  }
+
+  /* Dims a level while another is open on top; taps on it return to it. */
+  [data-slot='modal-content']::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    border-radius: inherit;
+    background: var(--modal-stack-dim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 420ms var(--modal-ease-out);
+  }
+
+  [data-slot='modal-content'][data-nested-dialog-open]::after {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  [data-slot='modal-content'][data-size='sm'] { --modal-width: 26rem; }
+  [data-slot='modal-content'][data-size='lg'] { --modal-width: 48rem; --modal-max-height: 48rem; }
+  [data-slot='modal-content'][data-size='xl'] { --modal-width: 72rem; --modal-max-height: 52rem; }
+  [data-slot='modal-content'][data-size='full'] { --modal-width: 100vw; --modal-max-height: 100dvh; }
+
+  /* ---- Wide screens -------------------------------------------------------- */
+
+  @media (width >= 48rem) {
+    [data-slot='modal-backdrop'] {
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+    }
+
+    [data-slot='modal-content'] {
+      --modal-gutter: 1.75rem;
+    }
+
+    [data-slot='modal-content'][data-placement='center'] {
+      inset: 0;
+      margin: auto;
+      width: min(var(--modal-width), calc(100vw - 3rem));
+      height: fit-content;
+      max-height: min(var(--modal-max-height), calc(100dvh - 4rem));
+      border-radius: var(--modal-radius);
+      transition-duration: 420ms;
+      transition-timing-function: var(--modal-ease-out);
+    }
+
+    [data-slot='modal-content'][data-placement='center'][data-size='full'] {
+      height: calc(100dvh - 4rem);
+    }
+
+    [data-slot='modal-content'][data-placement='center'][data-nested-dialog-open] {
+      translate: 0 calc(var(--nested-dialogs) * -1rem);
+      scale: calc(1 - var(--nested-dialogs) * 0.04);
+    }
+
+    [data-slot='modal-content'][data-placement='center']:is([data-starting-style], [data-ending-style]) {
+      opacity: 0;
+      translate: 0 0.75rem;
+      scale: 0.97;
+    }
+
+    [data-slot='modal-content'][data-placement='center'][data-ending-style] {
+      translate: 0 0.375rem;
+      scale: 0.985;
+      transition-duration: 200ms;
+      transition-timing-function: var(--modal-ease-in);
+    }
+
+    [data-slot='modal-content'][data-placement='sheet'] {
+      inset-inline: 0;
+      margin-inline: auto;
+      width: min(var(--modal-width), calc(100vw - 2rem));
+      max-height: min(var(--modal-max-height), calc(100dvh - 3rem - var(--modal-depth, 0) * 0.75rem));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-slot='modal-content'][data-placement] {
+      transition-property: opacity;
+      transition-duration: 160ms;
+    }
+
+    [data-slot='modal-content'][data-placement][data-size]:is([data-starting-style], [data-ending-style]) {
+      opacity: 0;
+      translate: none;
+      scale: none;
+    }
+  }
+
+  /* ---- Header ------------------------------------------------------------- */
+
+  [data-slot='modal-header'] {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 20;
+    padding: 0.5rem 0.75rem 0.625rem var(--modal-gutter);
+    touch-action: none;
+    user-select: none;
+  }
+
+  /* Frosted glass that fades out downwards, shown once content is under it. */
+  [data-slot='modal-header']::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 calc(-1 * var(--modal-header-fade));
+    z-index: -1;
+    pointer-events: none;
+    background: var(--modal-glass);
+    -webkit-backdrop-filter: blur(16px) saturate(1.6);
+    backdrop-filter: blur(16px) saturate(1.6);
+    -webkit-mask-image: linear-gradient(#000 calc(100% - var(--modal-header-fade)), transparent);
+    mask-image: linear-gradient(#000 calc(100% - var(--modal-header-fade)), transparent);
+    opacity: 0;
+    transition: opacity 260ms var(--modal-ease-out);
+  }
+
+  [data-slot='modal-content'][data-scrolled] [data-slot='modal-header']::before {
+    opacity: 1;
+  }
+
+  [data-slot='modal-handle'] {
+    width: 2.5rem;
+    height: 0.3125rem;
+    margin: 0 auto 0.375rem;
+    border-radius: 999px;
+    background: var(--ui-fill-strong);
+  }
+
+  @media (width >= 48rem) {
+    [data-slot='modal-content'][data-placement='center'] [data-slot='modal-header'] {
+      padding-top: 0.75rem;
+      touch-action: auto;
+      user-select: auto;
+    }
+
+    [data-slot='modal-content'][data-placement='center'] [data-slot='modal-handle'] {
+      display: none;
+    }
+
+    [data-slot='modal-content'][data-placement='sheet'] [data-slot='modal-header'] {
+      cursor: grab;
+    }
+
+    [data-slot='modal-content'][data-placement='sheet'] [data-slot='modal-header']:active {
+      cursor: grabbing;
+    }
+  }
+
+  [data-slot='modal-header-bar'] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+  }
+
+  [data-slot='modal-title'] {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  [data-slot='modal-description'] {
+    order: 11;
+    flex-basis: 100%;
+    margin-top: -0.25rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  /* Tags fill the row; the fade covers only the end padding until they overflow. */
+  [data-slot='modal-tags'] {
+    display: flex;
+    flex: 1 1 0;
+    align-items: center;
+    gap: 0.375rem;
+    min-width: 0;
+    padding: 2px 1.25rem 2px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    touch-action: pan-x;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.25rem), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 1.25rem), transparent);
+  }
+
+  [data-slot='modal-tags']::-webkit-scrollbar {
+    display: none;
+  }
+
+  [data-slot='modal-tags']:empty {
+    display: none;
+  }
+
+  [data-slot='modal-toolbar'] {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: auto;
+  }
+
+  /* A hairline between the toolbar and the close button. */
+  [data-slot='modal-toolbar']:has(+ [data-slot='modal-close'])::after {
+    content: '';
+    width: 1px;
+    height: 1.125rem;
+    margin-left: 0.25rem;
+    background: var(--ui-fill-strong);
+  }
+
+  [data-slot='modal-close'] {
+    margin-left: auto;
+  }
+
+  [data-slot='modal-toolbar'] ~ [data-slot='modal-close'] {
+    margin-left: 0;
+  }
+
+  @media (width < 48rem) {
+    [data-slot='modal-tags'] {
+      order: 10;
+      flex-basis: 100%;
+    }
+  }
+
+  /* ---- Content ------------------------------------------------------------- */
+
+  [data-slot='modal-body'],
+  [data-slot='modal-split'] {
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-top: var(--modal-header-h);
+    scrollbar-width: thin;
+    animation: modal-content-in 420ms var(--modal-ease-out) 60ms both;
+  }
+
+  [data-slot='modal-body'] {
+    padding: calc(var(--modal-header-h) + 0.25rem) var(--modal-gutter) calc(1.75rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  [data-slot='modal-body']:has(~ [data-slot='modal-footer']) {
+    padding-bottom: 1.5rem;
+  }
+
+  [data-slot='modal-split'] {
+    display: grid;
+  }
+
+  [data-slot='modal-pane'] {
+    min-width: 0;
+    padding: 1.25rem var(--modal-gutter) 1.75rem;
+    background: var(--modal-pane-background, transparent);
+  }
+
+  [data-slot='modal-pane'][data-tone='muted'] {
+    --modal-pane-background: var(--modal-pane-muted);
+  }
+
+  [data-slot='modal-pane']:first-child {
+    padding-top: calc(var(--modal-header-h) + 0.25rem);
+  }
+
+  [data-slot='modal-pane']:last-child {
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  @media (width >= 48rem) {
+    [data-slot='modal-split'] {
+      overflow: hidden;
+      grid-template-columns: var(--modal-split-columns, repeat(2, minmax(0, 1fr)));
+      grid-template-rows: minmax(0, 1fr);
+    }
+
+    [data-slot='modal-pane'] {
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-top: calc(var(--modal-header-h) + 0.25rem);
+      padding-bottom: 2rem;
+      scroll-padding-top: var(--modal-header-h);
+      scrollbar-width: thin;
+    }
+  }
+
+  [data-slot='modal-footer'] {
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.75rem var(--modal-gutter) calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    background: var(--modal-surface);
+    box-shadow: 0 -1px 0 var(--ui-fill);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-slot='modal-body'],
+    [data-slot='modal-split'] {
+      animation: none;
+    }
+  }
+}
+
+@keyframes modal-content-in {
+  from {
+    opacity: 0;
+    translate: 0 0.375rem;
+  }
+}

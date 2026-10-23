@@ -2,8 +2,8 @@
 
 import { NotebookPenIcon, StarIcon } from 'lucide-react';
 import Link from 'next/link';
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { type ComponentProps, type ReactNode, useEffect, useMemo, useState } from 'react';
+import { Modal, ModalBody, ModalContent, ModalDescription, ModalHeader, ModalTags, ModalTitle, useModal } from '@/components/ui/modal';
 import type { QuestionMark } from '@/lib/question-store/types';
 import { cn } from '@/lib/utils';
 import { useQuestionDatabase } from '../database-context';
@@ -13,6 +13,9 @@ import { liveTagsOf, useUserTags } from './use-marks';
 /*
  * Every question the reader starred, tagged or annotated, across pages,
  * filterable by favourite, note or tag. Each entry links to the question.
+ *
+ * Opens on its own from the account menu, or as a second level on top of a
+ * solution sheet; following an entry closes every level.
  */
 
 type Filter = 'all' | 'favorite' | 'note' | `tag:${string}`;
@@ -29,6 +32,12 @@ function matches(mark: QuestionMark, filter: Filter) {
   if (filter === 'note') return mark.note !== '';
   if (filter.startsWith('tag:')) return mark.tagIds.includes(filter.slice(4));
   return true;
+}
+
+/** Closes the whole modal stack (without moving focus) and follows the link. */
+function EntryLink(props: ComponentProps<typeof Link>) {
+  const modal = useModal();
+  return <Link prefetch={false} {...props} onClick={() => modal?.closeAll({ returnFocus: false })} />;
 }
 
 export function QuestionLibraryDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
@@ -72,55 +81,55 @@ export function QuestionLibraryDialog({ open, onOpenChange }: { open: boolean; o
   );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[min(44rem,calc(100dvh-2rem))] flex-col gap-0 overflow-hidden rounded-(--ui-radius-panel) p-0 sm:max-w-xl">
-        <div className="px-5 pt-5 pb-3">
-          <DialogTitle className="text-base font-semibold">收藏与标签</DialogTitle>
-          <p className="mt-1 text-sm text-muted-foreground">在题目右上角收藏、打标签或写注释，都会汇总到这里。</p>
-        </div>
-        <div className="flex gap-1.5 overflow-x-auto px-5 pb-3 [scrollbar-width:none]" role="group" aria-label="筛选">
-          {chip('all', '全部', counts.all)}
-          {chip('favorite', <><StarIcon className="size-3.5" />收藏</>, counts.favorite)}
-          {chip('note', <><NotebookPenIcon className="size-3.5" />注释</>, counts.note)}
-          {tags.map((tag) => chip(`tag:${tag.tagId}`, <><span data-tag-dot="" data-tag-color={tag.color} />{tag.name}</>))}
-        </div>
-        <ul className="min-h-40 flex-1 overflow-y-auto overscroll-contain px-3 pb-4">
-          {marks === null ? (
-            <li className="px-2 py-8 text-center text-sm text-muted-foreground">正在读取…</li>
-          ) : shown.length === 0 ? (
-            <li className="px-2 py-8 text-center text-sm text-muted-foreground">
-              {marks.length ? '这个分类下还没有题目。' : '还没有收藏、标签或注释的题目。'}
-            </li>
-          ) : shown.map((mark) => {
-            const href = `${mark.documentPath}#question-${encodeURIComponent(mark.questionId)}`;
-            const assigned = liveTagsOf(mark, tags);
-            return (
-              <li key={`${mark.documentPath}\u0000${mark.questionId}`}>
-                <Link
-                  href={href}
-                  prefetch={false}
-                  onClick={() => onOpenChange(false)}
-                  className="block rounded-xl px-3 py-2.5 transition-colors hover:bg-(--ui-fill-hover) focus-visible:bg-(--ui-fill-hover) focus-visible:outline-none"
-                >
-                  <span className="line-clamp-2 text-[0.9375rem] leading-relaxed text-foreground">
-                    {mark.favorite ? <StarIcon className="mr-1 inline size-3.5 -translate-y-px fill-warning text-warning" aria-label="已收藏" /> : null}
-                    {mark.excerpt || mark.questionId}
-                  </span>
-                  {mark.note ? (
-                    <span className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                      <NotebookPenIcon className="mr-1 inline size-3.5 -translate-y-px" aria-label="注释" />{mark.note}
-                    </span>
-                  ) : null}
-                  <span className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-                    <span className="mr-1 truncate">{pageName(mark.documentPath)}</span>
-                    {assigned.map((tag) => <UserTagChip key={tag.tagId} tag={tag} />)}
-                  </span>
-                </Link>
+    <Modal open={open} onOpenChange={onOpenChange}>
+      <ModalContent size="md" className="md:min-h-[min(22rem,calc(100dvh-4rem))]">
+        <ModalHeader>
+          <ModalTitle>收藏与标签</ModalTitle>
+          <ModalTags role="group" aria-label="筛选">
+            {chip('all', '全部', counts.all)}
+            {chip('favorite', <><StarIcon className="size-3.5" />收藏</>, counts.favorite)}
+            {chip('note', <><NotebookPenIcon className="size-3.5" />注释</>, counts.note)}
+            {tags.map((tag) => chip(`tag:${tag.tagId}`, <><span data-tag-dot="" data-tag-color={tag.color} />{tag.name}</>))}
+          </ModalTags>
+        </ModalHeader>
+        <ModalBody className="px-3 md:px-4">
+          <ModalDescription className="mb-2 px-3 text-sm text-muted-foreground">在题目右上角收藏、打标签或写注释，都会汇总到这里。</ModalDescription>
+          <ul className="min-h-40">
+            {marks === null ? (
+              <li className="px-2 py-8 text-center text-sm text-muted-foreground">正在读取…</li>
+            ) : shown.length === 0 ? (
+              <li className="px-2 py-8 text-center text-sm text-muted-foreground">
+                {marks.length ? '这个分类下还没有题目。' : '还没有收藏、标签或注释的题目。'}
               </li>
-            );
-          })}
-        </ul>
-      </DialogContent>
-    </Dialog>
+            ) : shown.map((mark) => {
+              const href = `${mark.documentPath}#question-${encodeURIComponent(mark.questionId)}`;
+              const assigned = liveTagsOf(mark, tags);
+              return (
+                <li key={`${mark.documentPath}\u0000${mark.questionId}`}>
+                  <EntryLink
+                    href={href}
+                    className="block rounded-xl px-3 py-2.5 transition-colors hover:bg-(--ui-fill-hover) focus-visible:bg-(--ui-fill-hover) focus-visible:outline-none"
+                  >
+                    <span className="line-clamp-2 text-[0.9375rem] leading-relaxed text-foreground">
+                      {mark.favorite ? <StarIcon className="mr-1 inline size-3.5 -translate-y-px fill-warning text-warning" aria-label="已收藏" /> : null}
+                      {mark.excerpt || mark.questionId}
+                    </span>
+                    {mark.note ? (
+                      <span className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                        <NotebookPenIcon className="mr-1 inline size-3.5 -translate-y-px" aria-label="注释" />{mark.note}
+                      </span>
+                    ) : null}
+                    <span className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                      <span className="mr-1 truncate">{pageName(mark.documentPath)}</span>
+                      {assigned.map((tag) => <UserTagChip key={tag.tagId} tag={tag} />)}
+                    </span>
+                  </EntryLink>
+                </li>
+              );
+            })}
+          </ul>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
   );
 }

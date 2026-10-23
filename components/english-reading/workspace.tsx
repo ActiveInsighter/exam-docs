@@ -350,7 +350,7 @@ export function ReadingWorkspace({
     cardRef.current?.focus({ preventScroll: true });
     const onKey = (event: globalThis.KeyboardEvent) => {
       if (event.key !== 'Escape' || event.defaultPrevented) return;
-      if (document.querySelector('[data-slot="dialog-content"]')) return;
+      if (document.querySelector('[data-slot="dialog-content"], [data-slot="modal-content"]')) return;
       setFocus(false);
     };
     const html = document.documentElement;
