@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createQuestionTransport } from '@/lib/question-supabase';
 
 const userId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -22,6 +22,34 @@ function clientFor(actor: string, data: unknown = response, error: unknown = nul
 }
 
 describe('Supabase question transport', () => {
+  afterEach(() => vi.useRealTimers());
+
+  it('actually aborts stalled RPCs without AbortSignal.timeout and clears finished timers', async () => {
+    vi.useFakeTimers();
+    vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => { throw new Error('Unavailable on this browser'); });
+    const { client, abortSignal } = clientFor(userId);
+    await createQuestionTransport(client, userId).sync({ operations: [], cursor: null, limit: 100 });
+    expect(vi.getTimerCount()).toBe(0);
+
+    let signal: AbortSignal | undefined;
+    const stalled = {
+      setHeader: () => stalled,
+      abortSignal: (value: AbortSignal) => { signal = value; return stalled; },
+      then: (resolve: (value: unknown) => void) => new Promise<void>((done) => {
+        signal!.addEventListener('abort', () => {
+          resolve({ data: null, error: { message: 'AbortError' } }); done();
+        }, { once: true });
+      }),
+    };
+    vi.mocked(client.rpc).mockReturnValue(stalled as never);
+    const pending = createQuestionTransport(client, userId).sync({ operations: [], cursor: null, limit: 100 });
+    const rejected = expect(pending).rejects.toThrow('云同步超时');
+    await vi.advanceTimersByTimeAsync(20_000);
+    await rejected;
+    expect(signal?.aborted).toBe(true);
+    expect(abortSignal).toHaveBeenCalledOnce();
+    expect(vi.getTimerCount()).toBe(0);
+  });
   it('pins the verified account token on the request even if the shared auth client changes', async () => {
     const { client, rpc, setHeader } = clientFor(userId);
     expect(await createQuestionTransport(client, userId).sync({ operations: [], cursor: null, limit: 100 })).toEqual(response);

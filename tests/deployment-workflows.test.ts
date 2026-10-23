@@ -65,6 +65,7 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('name: static-search');
     expect(workflow).toContain('Merge dedicated search assets');
     expect(workflow).toContain('needs: [validate, search, build-shard]');
+    expect(workflow).toContain('npx tsc --noEmit --incremental false --project tsconfig.ci-app.json');
     expect(workflow).toContain('validated_search_assets=');
     expect(workflow).toContain('manifest.pages !== 694');
     expect(workflow).toContain('Search manifest is missing module categories.');

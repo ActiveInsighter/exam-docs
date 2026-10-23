@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { getStaticDocsConfig, shouldIncludeInStaticDocsProject } from '../scripts/static-docs-config.mjs';
 import { getStaticMarkdownOutputPath, renderStaticMarkdown } from '../scripts/static-docs-markdown.mjs';
 import {
@@ -14,6 +14,19 @@ import {
 } from '../scripts/zbsearch-index.mjs';
 
 describe('static docs build', () => {
+  it('checks types by default and allows the separately gated CI export to skip duplicate checks', () => {
+    vi.stubEnv('GITHUB_ACTIONS', '');
+    vi.stubEnv('STATIC_DOCS_SKIP_TYPECHECK', '');
+    expect(getStaticDocsConfig().typescript?.ignoreBuildErrors).toBe(false);
+    vi.stubEnv('STATIC_DOCS_SKIP_TYPECHECK', '1');
+    expect(getStaticDocsConfig().typescript?.ignoreBuildErrors).toBe(true);
+    vi.stubEnv('STATIC_DOCS_SKIP_TYPECHECK', '');
+    vi.stubEnv('GITHUB_ACTIONS', 'true');
+    vi.stubEnv('GITHUB_WORKFLOW', 'Unrelated workflow');
+    expect(getStaticDocsConfig().typescript?.ignoreBuildErrors).toBe(false);
+    vi.stubEnv('GITHUB_WORKFLOW', 'Deploy exam-docs to Cloudflare');
+    expect(getStaticDocsConfig().typescript?.ignoreBuildErrors).toBe(true);
+  });
   it('uses a pure static export with Turbopack build caching enabled', () => {
     const config = getStaticDocsConfig();
 

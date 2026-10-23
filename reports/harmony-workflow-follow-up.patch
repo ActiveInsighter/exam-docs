@@ -1,0 +1,41 @@
+diff --git a/.github/workflows/deploy-cloudflare-worker-assets.yml b/.github/workflows/deploy-cloudflare-worker-assets.yml
+index a2293f5..006a78c 100644
+--- a/.github/workflows/deploy-cloudflare-worker-assets.yml
++++ b/.github/workflows/deploy-cloudflare-worker-assets.yml
+@@ -143,7 +143,7 @@ jobs:
+           path: /tmp/static-search-output
+           # Content-aware: app/layout-only changes can reuse the exact search index.
+           # The full source + indexer inputs invalidate the cache after content edits.
+-          key: ${{ runner.os }}-static-search-v1-${{ hashFiles('content/docs/**', 'source.config.ts', 'lib/**', 'data/**', 'scripts/build-search-index.mjs', 'scripts/zbsearch-index.mjs', 'scripts/canonicalize-zbsearch.mjs', 'scripts/search-manifest.mjs', 'package-lock.json') }}
++          key: ${{ runner.os }}-static-search-v2-${{ hashFiles('content/docs/**', 'source.config.ts', 'lib/search-tokenizer.mjs', 'lib/doc-paths.mjs', 'scripts/static-docs-markdown.mjs', 'scripts/build-search-index.mjs', 'scripts/zbsearch-index.mjs', 'scripts/canonicalize-zbsearch.mjs', 'scripts/search-manifest.mjs', 'package-lock.json') }}
+       - name: Build deterministic search assets
+         shell: bash
+         run: |
+@@ -224,6 +224,8 @@ jobs:
+       STATIC_DOCS_SHARD_COUNT: ${{ inputs.shards || '8' }}
+       STATIC_DOCS_SHARD_INDEX: ${{ matrix.shard }}
+       STATIC_DOCS_SKIP_SEARCH_BUILD: '1'
++      # The independent validate job remains a required dependency of deploy.
++      STATIC_DOCS_SKIP_TYPECHECK: '1'
+     steps:
+       - name: Checkout repository
+         uses: actions/checkout@v6
+@@ -718,3 +720,18 @@ jobs:
+           path: ${{ runner.temp }}/reading-browser-screenshots
+           if-no-files-found: ignore
+           retention-days: 7
++      - name: Verify search cancellation and recovery
++        env:
++          DEPLOYMENT_URL: ${{ needs.deploy.outputs.deployment-url }}
++          READING_BROWSER_MODULES: ${{ runner.temp }}/reading-browser
++          READING_BROWSER_CHANNEL: chrome
++          READING_SCREENSHOTS: ${{ runner.temp }}/search-browser-screenshots
++        run: node scripts/verify-search-browser.mjs
++      - name: Upload search browser evidence
++        if: ${{ always() }}
++        uses: actions/upload-artifact@v4
++        with:
++          name: search-browser-screenshots
++          path: ${{ runner.temp }}/search-browser-screenshots
++          if-no-files-found: ignore
++          retention-days: 7

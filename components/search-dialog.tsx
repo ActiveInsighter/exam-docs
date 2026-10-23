@@ -1,7 +1,7 @@
 'use client';
 
 import type { SortedResult } from 'fumadocs-core/search';
-import { createStaticSearchClient } from '@/lib/static-search.mjs';
+import type { SearchWorkerRequest, SearchWorkerResponse } from '@/lib/search-worker';
 import {
   SearchDialog,
   SearchDialogClose,
@@ -73,29 +73,26 @@ const MAX_CATEGORY_ROUTERS_PER_QUERY = 4;
 const MAX_CORE_SHARDS_PER_QUERY = 6;
 const MAX_BODY_SHARDS_PER_QUERY = 9;
 const RESULT_LIMIT = 36;
+const SEARCH_TIMEOUT_MS = 30_000;
 
 let manifestPromise: Promise<SearchManifest> | undefined;
 const routerPromiseCache = new Map<string, Promise<CategoryRouter>>();
-const clientCache = new Map<string, ReturnType<typeof createStaticSearchClient>>();
 const bloomBytesCache = new Map<string, Uint8Array>();
 
-function getStaticClient(url: string, limit: number) {
-  const key = `${url}\u0000${limit}`;
-  let client = clientCache.get(key);
-  if (!client) {
-    client = createStaticSearchClient(url, limit);
-    clientCache.set(key, client);
+async function fetchSearchJson<T>(url: string, cache: RequestCache): Promise<T> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), SEARCH_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, { cache, signal: controller.signal });
+    if (!response.ok) throw new Error(`Failed to load ${url}: HTTP ${response.status}`);
+    return await response.json() as T;
+  } finally {
+    clearTimeout(timer);
   }
-  return client;
 }
 
 async function loadManifest() {
-  const response = await fetch('/search-index.json', { cache: 'no-cache' });
-  if (!response.ok) {
-    throw new Error(`Failed to load ZBSearch manifest: HTTP ${response.status}`);
-  }
-
-  const manifest = (await response.json()) as SearchManifest;
+  const manifest = await fetchSearchJson<SearchManifest>('/search-index.json', 'no-cache');
   if (
     manifest.version !== 4 ||
     manifest.engine !== 'zbsearch' ||
@@ -109,17 +106,12 @@ async function loadManifest() {
 }
 
 function getManifest() {
-  manifestPromise ??= loadManifest();
+  manifestPromise ??= loadManifest().catch((error) => { manifestPromise = undefined; throw error; });
   return manifestPromise;
 }
 
 async function loadCategoryRouter(category: SearchCategory) {
-  const response = await fetch(category.router.url, { cache: 'force-cache' });
-  if (!response.ok) {
-    throw new Error(`Failed to load search router ${category.id}: HTTP ${response.status}`);
-  }
-
-  const router = (await response.json()) as CategoryRouter;
+  const router = await fetchSearchJson<CategoryRouter>(category.router.url, 'force-cache');
   if (
     router.version !== 2 ||
     router.engine !== 'zbsearch' ||
@@ -135,7 +127,7 @@ async function loadCategoryRouter(category: SearchCategory) {
 function getCategoryRouter(category: SearchCategory) {
   let promise = routerPromiseCache.get(category.router.url);
   if (!promise) {
-    promise = loadCategoryRouter(category);
+    promise = loadCategoryRouter(category).catch((error) => { routerPromiseCache.delete(category.router.url); throw error; });
     routerPromiseCache.set(category.router.url, promise);
   }
   return promise;
@@ -255,11 +247,27 @@ function mergeRoundRobin(groups: SortedResult[][], limit = RESULT_LIMIT) {
   return merged;
 }
 
-async function searchFiles(files: SearchFile[], query: string, limitPerFile: number) {
-  const groups = await Promise.all(
-    files.map((file) => getStaticClient(file.url, limitPerFile).search(query)),
-  );
-  return mergeRoundRobin(groups, RESULT_LIMIT);
+async function searchFiles(files: SearchFile[], query: string, limitPerFile: number, signal: AbortSignal): Promise<SortedResult[]> {
+  if (signal.aborted) throw new DOMException('Search cancelled', 'AbortError');
+  if (!files.length) return [];
+  return new Promise((resolve, reject) => {
+    const worker = new Worker(new URL('../lib/search-worker.ts', import.meta.url), { type: 'module' });
+    const finish = () => {
+      clearTimeout(timer);
+      worker.terminate();
+      signal.removeEventListener('abort', abort);
+    };
+    const abort = () => { finish(); reject(new DOMException('Search cancelled', 'AbortError')); };
+    const timer = setTimeout(() => { finish(); reject(new Error('搜索超时，请重试。')); }, SEARCH_TIMEOUT_MS);
+    signal.addEventListener('abort', abort, { once: true });
+    worker.onmessage = ({ data }: MessageEvent<SearchWorkerResponse>) => {
+      finish();
+      if ('error' in data) reject(new Error(data.error));
+      else resolve(mergeRoundRobin(data.groups, RESULT_LIMIT));
+    };
+    worker.onerror = (event) => { finish(); reject(new Error(event.message || '搜索暂时不可用，请重试。')); };
+    worker.postMessage({ urls: files.map((file) => file.url), query, limit: limitPerFile } satisfies SearchWorkerRequest);
+  });
 }
 
 function rankCategories(manifest: SearchManifest, query: string) {
@@ -321,28 +329,34 @@ export function ShardedSearchDialog(props: SharedProps) {
   const [search, setSearch] = useState('');
   const [items, setItems] = useState<SortedResult[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
   const requestRef = useRef(0);
 
   useEffect(() => {
     const requestId = ++requestRef.current;
     const query = search.trim();
+    const controller = new AbortController();
+    const current = () => requestRef.current === requestId && !controller.signal.aborted;
+    setError(null);
 
-    if (!query) {
+    if (!props.open || !query) {
       setItems(null);
       setIsLoading(false);
       return;
     }
 
     setIsLoading(true);
+    setItems(null);
     const timer = window.setTimeout(() => {
       void (async () => {
         try {
           const manifest = await getManifest();
-          if (requestRef.current !== requestId) return;
+          if (!current()) return;
 
           const categories = rankCategories(manifest, query);
           const routers = await Promise.all(categories.map(getCategoryRouter));
-          if (requestRef.current !== requestId) return;
+          if (!current()) return;
 
           const coreShards = rankShards(
             routers.flatMap((router) => router.core),
@@ -357,27 +371,38 @@ export function ShardedSearchDialog(props: SharedProps) {
             MAX_BODY_SHARDS_PER_QUERY,
           );
 
-          const coreResults = await searchFiles(coreShards, query, 10);
-          if (requestRef.current !== requestId) return;
+          const coreResults = await searchFiles(coreShards, query, 10, controller.signal);
+          if (!current()) return;
           setItems(coreResults.length > 0 ? coreResults : null);
 
-          const bodyResults = await searchFiles(bodyShards, query, 10);
-          if (requestRef.current !== requestId) return;
+          const bodyResults = await searchFiles(bodyShards, query, 10, controller.signal);
+          if (!current()) return;
 
           const merged = mergeRoundRobin([bodyResults, coreResults], RESULT_LIMIT);
           setItems(merged.length > 0 ? merged : null);
           setIsLoading(false);
         } catch (error) {
-          if (requestRef.current !== requestId) return;
+          if (!current()) return;
           console.error('[search] Failed to query local ZBSearch indexes.', error);
-          setItems(null);
           setIsLoading(false);
+          setError('搜索暂时不可用，请检查网络后重试。');
         }
       })();
     }, SEARCH_DELAY_MS);
 
-    return () => window.clearTimeout(timer);
-  }, [search]);
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        controller.abort();
+        setIsLoading(false);
+      } else setRetry((value) => value + 1);
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [search, props.open, retry]);
 
   return (
     <SearchDialog search={search} onSearchChange={setSearch} isLoading={isLoading} {...props}>
@@ -393,6 +418,7 @@ export function ShardedSearchDialog(props: SharedProps) {
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
+        {error ? <p role="status" className="px-4 py-3 text-sm text-muted-foreground">{error} <button type="button" className="underline underline-offset-4 focus-visible:outline-2" onClick={() => setRetry((value) => value + 1)}>重试搜索</button></p> : null}
         <SearchDialogList items={items} />
       </SearchDialogContent>
       <SearchDialogFooter />

@@ -8,6 +8,15 @@ export function getStaticDocsConfig() {
   return {
     output: 'export',
     trailingSlash: true,
+    // CI's validate job checks the application once and gates the merge/deploy
+    // job. Repeating the same typecheck in all eight export runners wastes CPU.
+    // Ad-hoc/local builds still check types unless explicitly opted out.
+    typescript: {
+      ignoreBuildErrors: process.env.STATIC_DOCS_SKIP_TYPECHECK === '1' || (
+        process.env.GITHUB_ACTIONS === 'true' &&
+        process.env.GITHUB_WORKFLOW === 'Deploy exam-docs to Cloudflare'
+      ),
+    },
     // The build runner computes a content-aware static-shell fingerprint and
     // passes it to every shard. The fallback is only for ad-hoc manual builds.
     generateBuildId: () => process.env.STATIC_DOCS_BUILD_ID ?? 'exam-docs-static-local',

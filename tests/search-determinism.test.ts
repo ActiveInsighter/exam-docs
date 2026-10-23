@@ -3,6 +3,43 @@ import { describe, expect, it, vi } from 'vitest';
 import { canonicalizeZBSearchDatabase } from '../scripts/canonicalize-zbsearch.mjs';
 
 describe('static search determinism', () => {
+  it('preserves Fumadocs result ordering and releases ownership between clients', async () => {
+    const { exportSimpleIndex } = await import('../scripts/zbsearch-index.mjs');
+    const { staticClient } = await import('fumadocs-core/search/client/orama-static');
+    const { createSearchTokenizer } = await import('../lib/search-tokenizer.mjs');
+    const { create } = await import('zbsearch');
+    const { createStaticSearchClient } = await import('../lib/static-search.mjs');
+    const raw = await exportSimpleIndex([
+      { title: '特征值与矩阵', content: '矩阵相似对角化与特征向量', url: '/docs/eigen#matrix', breadcrumbs: ['数学'] },
+      { title: 'CPU pipeline', content: 'Instruction pipeline', url: '/docs/pipeline' },
+      { title: '特征值', content: '矩阵与特征值', url: '/docs/eigen' },
+    ]);
+    const fetcher = vi.fn(async () => new Response(raw));
+    vi.stubGlobal('fetch', fetcher);
+    const own = createStaticSearchClient('/search/owned.json', 10);
+    for (const query of ['特征值', 'pipline', 'unknown']) {
+      const baseline = staticClient({ from: '/search/baseline.json',
+        initDB: () => create({ schema: { _: 'string' }, components: { tokenizer: createSearchTokenizer() } }),
+        search: { limit: 10, ...(/\p{Script=Han}/u.test(query) ? { tolerance: 0, threshold: 0 } : {}) } });
+      expect(await own.search(query)).toEqual(await baseline.search(query));
+    }
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    await createStaticSearchClient('/search/owned.json', 10).search('特征值');
+    expect(fetcher).toHaveBeenCalledTimes(3);
+  });
+
+  it('retries a failed index fetch instead of caching the rejection forever', async () => {
+    const { exportSimpleIndex } = await import('../scripts/zbsearch-index.mjs');
+    const raw = await exportSimpleIndex([{ title: '矩阵', content: '矩阵', url: '/docs/matrix' }]);
+    const fetcher = vi.fn().mockResolvedValueOnce(new Response('', { status: 503 }))
+      .mockImplementation(async () => new Response(raw));
+    vi.stubGlobal('fetch', fetcher);
+    const { createStaticSearchClient } = await import('../lib/static-search.mjs');
+    const client = createStaticSearchClient('/search/retry.json', 10);
+    await expect(client.search('矩阵')).rejects.toThrow('503');
+    expect((await client.search('矩阵'))[0].url).toBe('/docs/matrix');
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
   it('finds a Chinese title when browser and build ICU dictionaries differ', async () => {
     let browserRuntime = false;
     const nativeSegmenter = new Intl.Segmenter(undefined, { granularity: 'word' });

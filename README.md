@@ -126,6 +126,14 @@ Two settings keep client-side navigation from exhausting mobile browser memory
   MB, and a phone used to parse about 18 MB of sibling chapters on every page
   load. Links prefetch only on mouse hover; taps fetch just the target page.
 
+The browser also releases saved answer/mark cache entries when their last
+subscriber leaves (pending or failed answer writes remain until persisted).
+Search parses and queries shards sequentially in short-lived Web Workers;
+completion, replacement, closing, hiding and a 30-second timeout terminate the
+worker and release parsed indexes. Search failures can be retried in place.
+See [the performance and HarmonyOS investigation](reports/performance-harmony-2026-10-23.md)
+for measurements and the remaining device-verification limit.
+
 The static output retains its EdgeOne-compatible routing metadata. Supabase
 Auth and database RPCs are reached through the same-origin Worker when cloud sync
 is configured; no Next.js server is required. Local development can leave

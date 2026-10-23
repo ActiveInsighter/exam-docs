@@ -53,10 +53,18 @@ export function createQuestionTransport(client: SupabaseClient, userId: string):
     const { data: { session }, error: authError } = await client.auth.getSession();
     if (authError) throw authError;
     if (session?.user.id !== userId) throw new Error('登录状态已变化，请重新同步');
-    let query = client.rpc(name, args).setHeader('Authorization', `Bearer ${session.access_token}`);
-    // A stalled mobile connection must fail instead of holding the sync turn.
-    if (typeof AbortSignal.timeout === 'function') query = query.abortSignal(AbortSignal.timeout(RPC_TIMEOUT_MS));
-    return query;
+    // Always cancel the underlying fetch, including browsers without the newer
+    // AbortSignal.timeout API. Merely racing a timeout leaves requests alive
+    // while the engine retries, accumulating work on a stalled mobile network.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), RPC_TIMEOUT_MS);
+    try {
+      return await client.rpc(name, args)
+        .setHeader('Authorization', `Bearer ${session.access_token}`)
+        .abortSignal(controller.signal);
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   return {
