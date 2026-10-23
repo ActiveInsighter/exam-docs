@@ -13,6 +13,12 @@ Open `http://localhost:3000/docs`.
 
 ## Mermaid diagrams
 
+The blog at `/blog/mermaid-theme-gallery` compares seven light/dark presets
+across flowcharts, sequence diagrams and class diagrams. Use
+`<Mermaid preset="neo" chart={source} />` to opt in; omitting `preset` keeps
+existing document styles. Presets live in `lib/mermaid-presets.ts`. Rendering
+is serialized so each diagram keeps its own theme configuration.
+
 Mermaid is pinned to 12.2.0. Use Node.js 22.12+ within the Node 22 release line;
 Mermaid 12 targets ES2024 and Safari 17.4+. The shared renderer explicitly keeps
 the `dagre` layout and `classic` look for existing documents and follows the site
