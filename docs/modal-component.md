@@ -31,7 +31,7 @@
 | 组件 | 说明 |
 | --- | --- |
 | `Modal` | 根组件，属性同 Base UI `Dialog.Root`（`open`、`defaultOpen`、`onOpenChange`、`actionsRef` 等）。 |
-| `ModalContent` | 弹窗本体，任何宽度都是底部抽屉。`size` 限制宽屏上的最大宽度：`sm` 28rem、`md` 40rem（默认）、`lg` 56rem、`xl` 76rem、`full` 整屏；手机上始终铺满宽度。嵌套层至少与下层同宽。`initialFocus` 默认聚焦标题，`finalFocus` 默认回到触发按钮。 |
+| `ModalContent` | 弹窗本体，任何宽度都是底部抽屉。`size` 限制宽屏上的最大宽度：`sm` 28rem、`md` 40rem（默认）、`lg` 56rem、`xl` 76rem、`full` 整屏；手机上始终铺满宽度。嵌套层至少与下层同宽。`height` 决定高度：`auto`（默认）随内容伸缩；`fixed` 占满可用高度；也可传 CSS 长度（如 `"36rem"`）固定为该高度。三者都不超过视口上限，固定高度适合内容会原地切换的弹窗（如逐张翻看的卡片），切换时不跳动。`initialFocus` 默认聚焦标题，`finalFocus` 默认回到触发按钮。 |
 | `ModalHeader` | 悬浮顶栏。`showBack`（默认 `true`，仅嵌套层显示）、`showClose`（默认 `true`）。 |
 | `ModalTitle` / `ModalDescription` | 无障碍标题与描述，弹窗以标题命名。 |
 | `ModalTags` | 标题旁的标签行，宽屏与标题同行，手机换到第二行横向滚动；为空时不占位。 |
