@@ -8,6 +8,8 @@
 
 现有生产版本已经关闭 Cloudflare 推测加载、触屏视口预取与 Realtime WebSocket；代码中的同步没有空闲轮询。本次 Chromium 移动仿真以访客身份连续切换 9 个李林 880 数学章节，逐页执行 GC 后 JS 堆为 23.1–24.7 MB，未见随章节数持续增长；随后静置 10 秒，DOM、布局和样式重算次数均无增长，JS 堆减少 948 字节。详见 [原始采样](harmony-browser-baseline-2026-10-23.json)。这只测量该场景的 JS/DOM，未覆盖真实设备的原生、图片和 GPU 内存，也未覆盖长时间登录态。
 
+另一次在同一数学章节静置 90 秒：DOM、监听器数量与 JS 堆完全稳定，没有网络请求，主线程 TaskDuration 只增加约 4.7 毫秒。采样保存在同一 JSON 的 `idle90s`。因此本次没有证据把访客静置退出归因于数据库空闲轮询或路由泄漏。
+
 ## 已修复的代码问题
 
 1. **答案与标记缓存无回收。** 站点 Provider 跨路由存活，原来的 Map 保留所有访问过的题目及已完成的文档读取 Promise。现在最后一个订阅者离开后批量回收已落库条目；尚在排队、写入或写入失败的答案保留，成功落库后才回收。只合并同时进行的整页读取，返回旧页及同页延后挂载的题目都能从 IndexedDB 恢复。无数据库的临时缓存保持原有行为，空快照也保持稳定，避免 `useSyncExternalStore` 收到无变化的新对象。
@@ -27,7 +29,22 @@
 - 应用与 Worker 类型检查通过（与 CI 相同的应用范围，排除测试文件和独立 Worker）；现有 `npm run typecheck` 会额外检查测试文件，其原有 `tests/account-connectivity.test.ts` 直接访问 SDK 的 protected `storageKey`，不应据此误报发布应用有类型错误。
 - `verify-english-reading-browser.mjs`：桌面与 390/320/700px 触屏布局、题目即时判分、原文翻译、分栏滚动、导航器及解答弹层交互通过。
 - `verify-search-browser.mjs`：模拟 503 后原位重试、同查询关闭重开、关闭时取消挂起的索引请求、无横向溢出及无未捕获异常。5 个 Worker 被创建，结束时保留 0 个。脚本已提交，自动接入发布后验证的步骤在上述工作流补丁中。
-- 完整构建按仓库约定在 GitHub Actions 执行：`deploy=false, shards=8`。云端结果与可比计时在完成后补充。
+- 完整构建按仓库约定在 GitHub Actions 执行：`deploy=false, shards=8`。[main 基线](https://github.com/ActiveInsighter/exam-docs/actions/runs/39905704198) 与 [修复分支](https://github.com/ActiveInsighter/exam-docs/actions/runs/39906065913) 全部通过；8 个分片的共享文件与合并冲突检查均通过，实际部署步骤跳过。
+- 将该次云端生成的 shard 0、shard 7 和搜索产物下载回本机，用静态 HTTP 服务运行，搜索及英语阅读两套浏览器检查再次通过。确认生产打包的 `turbopack-worker-*.js` 可以正常加载和终止，验证不只基于开发服务器。
+
+## 云端构建实测
+
+同日同样 8 分片、均不部署的两次运行，详见 [计时数据](build-comparison-2026-10-23.json)：
+
+| 指标 | main 基线 | 修复分支 |
+| --- | ---: | ---: |
+| Next 静态构建中位耗时 | 42.40 秒 | 37.38 秒 |
+| 最慢 Next 分片 | 45.40 秒 | 47.33 秒 |
+| 全工作流 | 141 秒 | 172 秒 |
+
+分片中位耗时降低约 11.8%，每分片省去约 2.4–4.2 秒重复类型检查，日志确认 8 个分片均跳过该检查，统一的应用/Worker 检查仍通过。最慢分片没有提速，端到端耗时也没有改善：这次合并 job 下载搜索产物用了 40 秒，基线同一步约 2 秒。不能将中位分片改善描述为整体 CI 提速保证。
+
+针对这个实际瓶颈，工作流补丁还将搜索产物 `compression-level` 从 0 改为 1。对下载的 39 个搜索文件使用同类 DEFLATE level 1 实测，74,111,962 字节可压至 20,243,271 字节，用时约 0.88 秒（不是 GitHub runner 的实测压缩耗时）。可降低传输量约 73%，分片 tar.zst 保持不重复压缩。补丁已用 `git apply --check` 检查，因缺少 workflow 写权限尚未应用或云端验证。
 
 ## 真机下一步
 
