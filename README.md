@@ -17,6 +17,9 @@ Mermaid is pinned to 12.2.0. Use Node.js 22.12+ within the Node 22 release line;
 Mermaid 12 targets ES2024 and Safari 17.4+. The shared renderer explicitly keeps
 the `dagre` layout and `classic` look for existing documents and follows the site
 theme. Individual diagrams can override these defaults in Mermaid frontmatter.
+`postinstall` applies an idempotent 12.2.0 workaround
+(`scripts/patch-mermaid-block-layout.mjs`) for block-layout debug logging that
+otherwise JSON-serializes circular React DOM references. Review it on upgrades.
 
 ## Account
 
