@@ -1,3 +1,4 @@
+import { ButtonDemo } from '@/components/blog/button-demos';
 import { ModalDemo } from '@/components/blog/modal-demos';
 import { getMDXComponents } from '@/components/mdx';
 import { toCanonicalPagePath } from '@/lib/site-url';
@@ -81,6 +82,7 @@ async function BlogPost({ slug }: { slug: string[] }) {
             components={getMDXComponents({
               a: createRelativeLink(blogSource, page),
               // Component showcase demos; blog pages only.
+              ButtonDemo,
               ModalDemo,
             })}
           />

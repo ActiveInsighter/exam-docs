@@ -31,12 +31,21 @@ components and attached through Fumadocs' public layout options. See
 ## Modal
 
 `components/ui/modal.tsx` is a general modal built on the shadcn Dialog parts:
-a bottom sheet at every width (slides up, drags down to dismiss), a floating
-translucent header (title, tags, toolbar, close), single or split-pane
-content, and stacked nested levels with back / close-all. The question solution sheet and the
+a bottom sheet at every width (slides up on every open, drags down to
+dismiss), a low frosted-glass header (title, tags, toolbar, close), single or
+split-pane content, and nested levels stacked like a deck of cards with back /
+close-all. The question solution sheet and the
 "收藏与标签" library are built from it. See
 [docs/modal-component.md](docs/modal-component.md) and the live demos on the
 blog post `/blog/component-showcase`.
+
+## Buttons
+
+`components/ui/button.tsx` extends the shadcn Button with click-to-fill: given
+`revealed`, a button fills with `--reveal-color` as a circle spreading from the
+point it was pressed. `TileButton` is a selectable card button built on it; the
+question options and true / false buttons use it. See
+[docs/button-component.md](docs/button-component.md).
 
 ## Question progress
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { type KeyboardEvent, type ReactNode, useRef } from 'react';
+import { TileButton, tileVariants } from '@/components/ui/button';
 import type { ChoiceDensity } from './choice-layout';
 import { useQuestionState } from './question-state';
 import { useChoiceColumns } from './use-choice-columns';
@@ -41,6 +42,11 @@ export function getChoiceFeedback({
   return isSelected ? 'selected' : 'idle';
 }
 
+/** Feedback states that colour the option: its fill spreads in from the press. */
+export function isFilled(feedback: ChoiceFeedback) {
+  return feedback !== 'idle' && feedback !== 'dimmed';
+}
+
 const NOTES: Partial<Record<ChoiceFeedback, string>> = { missed: '漏选', answer: '正确答案' };
 
 /** The letter in its ring; feedback icons and the tick are CSS pseudo-elements. */
@@ -77,10 +83,13 @@ function moveFocus(event: KeyboardEvent<HTMLDivElement>) {
   buttons[next]?.focus();
 }
 
+const staticTile = tileVariants({ interactive: false });
+
 /**
- * The option grid. Inside a gradable question the options are buttons
- * (single answer: graded on click; multiple: submitted from the footer);
- * otherwise they render as a static list.
+ * The option grid. Inside a gradable question the options are tile buttons
+ * (single answer: graded on click; multiple: submitted from the footer)
+ * whose colour fills in from where they were pressed; otherwise they render
+ * as a static list of the same tiles.
  */
 export function ChoiceGroup({ options, density }: { options: ChoiceOption[]; density: ChoiceDensity }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -94,7 +103,7 @@ export function ChoiceGroup({ options, density }: { options: ChoiceOption[]; den
     return (
       <div ref={ref} role="list" data-exam-choice-group="" data-density={density}>
         {options.map((option) => (
-          <div key={option.label} role="listitem" data-exam-choice-option="" data-option-label={option.label} data-feedback="idle">
+          <div key={option.label} role="listitem" className={staticTile} data-exam-choice-option="" data-option-label={option.label} data-feedback="idle">
             <OptionBody option={option} feedback="idle" />
           </div>
         ))}
@@ -124,9 +133,8 @@ export function ChoiceGroup({ options, density }: { options: ChoiceOption[]; den
         const feedback = getChoiceFeedback({ label: option.label, answerKey: spec.key, selected, submitted, multiple });
         const locked = submitted || !ready;
         return (
-          <button
+          <TileButton
             key={option.label}
-            type="button"
             role={multiple ? 'checkbox' : 'radio'}
             aria-checked={selected.includes(option.label)}
             aria-disabled={locked || undefined}
@@ -135,10 +143,11 @@ export function ChoiceGroup({ options, density }: { options: ChoiceOption[]; den
             data-option-label={option.label}
             data-feedback={feedback}
             data-fresh={fresh ? '' : undefined}
+            revealed={isFilled(feedback)}
             onClick={() => { if (!locked) toggle(option.label); }}
           >
             <OptionBody option={option} feedback={feedback} />
-          </button>
+          </TileButton>
         );
       })}
     </div>

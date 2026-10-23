@@ -51,6 +51,7 @@ export function mirrorQuestion(questionId: string, state: MirrorState): HTMLElem
     copy.querySelectorAll<HTMLElement>('[data-exam-choice-option]').forEach((option) => {
       const isKey = spec.key.includes(option.dataset.optionLabel ?? '');
       option.dataset.feedback = isKey ? 'answer' : 'idle';
+      option.dataset.reveal = isKey ? 'on' : 'off';
       option.querySelector('[data-choice-note]')?.remove();
       if (isKey) option.append(note('正确答案'));
     });
@@ -59,6 +60,7 @@ export function mirrorQuestion(questionId: string, state: MirrorState): HTMLElem
     const key = String(spec.answer);
     copy.querySelectorAll<HTMLElement>('[data-boolean-option]').forEach((option) => {
       option.dataset.feedback = option.dataset.value === key ? 'answer' : 'idle';
+      option.dataset.reveal = option.dataset.value === key ? 'on' : 'off';
     });
   }
   if (spec?.kind === 'blank') {

@@ -40,8 +40,8 @@ function Chip({ children, tone }: { children: ReactNode; tone?: string }) {
 function Paragraphs({ count, topic }: { count: number; topic: string }) {
   return Array.from({ length: count }, (_, index) => (
     <p key={index} className="mb-4 leading-7 text-foreground/90">
-      {topic} · 第 {index + 1} 段。内容从顶栏下方滚过时，顶栏换上略带透明的底色，标题和按钮依旧清楚；
-      向上滚回顶部，底色随即褪去，顶栏与内容融为一体。手机和宽屏都是底部抽屉，按住顶栏向下拖动即可关闭。
+      {topic} · 第 {index + 1} 段。顶栏是一层磨砂玻璃：内容从它下方滚过时被柔和地模糊，标题和按钮依旧清楚；
+      滚回顶部，它与弹窗表面融为一体。手机和宽屏都是从底部弹出的抽屉，按住顶栏向下拖动即可关闭。
     </p>
   ));
 }
@@ -150,34 +150,49 @@ function SplitDemo() {
   );
 }
 
+const LEVELS = [
+  {
+    title: '第 1 层 · 题目列表',
+    text: '点击下面的按钮，在这一层之上再打开一层。这一层会从底边微微后退、变窄并变暗，顶部露出一条，像一叠卡片。',
+    paragraphs: 6,
+  },
+  {
+    title: '第 2 层 · 收藏与标签',
+    text: '新一层至少与下层同宽，所以下层只从顶部露出。返回按钮、Esc 或点击露出的那一条都只关闭这一层；右上角的「全部关闭」关闭整个栈。',
+    paragraphs: 2,
+  },
+  {
+    title: '第 3 层 · 确认',
+    text: '再深一层时，最底层退得更远、更暗。这一层很矮，下面两层保持原位，不会跟着沉下去。',
+    paragraphs: 0,
+  },
+] as const;
+
 /** One level of the nested demo; each level can open the next. */
-function Level({ depth, max }: { depth: number; max: number }) {
+function Level({ index }: { index: number }) {
   const [open, setOpen] = useState(false);
   const modal = useModal();
-  const last = depth === max;
+  const level = LEVELS[index];
+  const last = index === LEVELS.length - 1;
   return (
     <>
       <ModalHeader>
-        <ModalTitle>第 {depth} 层</ModalTitle>
+        <ModalTitle>{level.title}</ModalTitle>
         <ModalTags>
-          <Chip tone={String(depth)}>depth {modal?.depth ?? depth - 1}</Chip>
+          <Chip tone={String(index + 1)}>depth {modal?.depth ?? index}</Chip>
         </ModalTags>
       </ModalHeader>
       <ModalBody>
-        <p className="mb-4 leading-7">
-          {depth === 1
-            ? '点击下面的按钮在这一层之上再打开一层。下层会缩小、上移并变暗，从新一层后方露出。'
-            : '左上角的返回按钮、Esc 或点击下层露出的部分，都只关闭这一层；右上角的「全部关闭」关闭整个栈。'}
-        </p>
-        <Paragraphs count={depth === 1 ? 3 : 2} topic={`第 ${depth} 层`} />
+        <p className="mb-4 leading-7">{level.text}</p>
+        <Paragraphs count={level.paragraphs} topic={level.title} />
       </ModalBody>
       <ModalFooter>
-        {depth > 1 ? (
+        {index > 0 ? (
           <Button variant="ghost" className="h-9 rounded-full px-4" onClick={() => modal?.closeAll()}>全部关闭</Button>
         ) : null}
         {!last ? (
           <Button className="h-9 rounded-full px-4" onClick={() => setOpen(true)}>
-            <Layers3Icon data-icon="inline-start" />打开第 {depth + 1} 层
+            <Layers3Icon data-icon="inline-start" />打开第 {index + 2} 层
           </Button>
         ) : (
           <Button className="h-9 rounded-full px-4" onClick={() => modal?.close()}>返回上一层</Button>
@@ -185,8 +200,8 @@ function Level({ depth, max }: { depth: number; max: number }) {
       </ModalFooter>
       {!last ? (
         <Modal open={open} onOpenChange={setOpen}>
-          <ModalContent size={depth === 1 ? 'md' : 'sm'}>
-            <Level depth={depth + 1} max={max} />
+          <ModalContent size="sm">
+            <Level index={index + 1} />
           </ModalContent>
         </Modal>
       ) : null}
@@ -196,13 +211,13 @@ function Level({ depth, max }: { depth: number; max: number }) {
 
 function NestedDemo() {
   return (
-    <DemoFrame caption="多级弹窗：在弹窗内渲染 <Modal> 即叠加一层。这里最多三层。">
+    <DemoFrame caption="多级弹窗：在弹窗内渲染 <Modal> 即叠加一层，像一叠卡片。三层高度各不相同，下层总是只在需要时抬起，露出顶部一条。">
       <Modal>
         <ModalTrigger className={trigger}>
           <BookmarkIcon className="size-4" />多级弹窗
         </ModalTrigger>
         <ModalContent size="lg">
-          <Level depth={1} max={3} />
+          <Level index={0} />
         </ModalContent>
       </Modal>
     </DemoFrame>

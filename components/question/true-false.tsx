@@ -1,6 +1,7 @@
 'use client';
 
 import type { KeyboardEvent } from 'react';
+import { TileButton } from '@/components/ui/button';
 import { BOOLEAN_FALSE, BOOLEAN_TRUE, booleanLetter } from './grading';
 import { useQuestionState } from './question-state';
 
@@ -27,8 +28,9 @@ function moveFocus(event: KeyboardEvent<HTMLDivElement>) {
 }
 
 /**
- * A true / false question: two large buttons, graded on click. Picking the
- * wrong one marks it red and outlines the right one in green.
+ * A true / false question: two large tile buttons, graded on click. The
+ * pick fills green or red from where it was pressed; picking the wrong one
+ * also fills the right one in green.
  */
 export function TrueFalse() {
   const question = useQuestionState();
@@ -43,9 +45,8 @@ export function TrueFalse() {
       {CHOICES.map((choice, index) => {
         const feedback = getBooleanFeedback(choice.letter, picked, key, submitted);
         return (
-          <button
+          <TileButton
             key={choice.letter}
-            type="button"
             role="radio"
             aria-checked={picked === choice.letter}
             aria-disabled={locked || undefined}
@@ -54,6 +55,7 @@ export function TrueFalse() {
             data-value={String(choice.value)}
             data-feedback={feedback}
             data-fresh={question?.fresh ? '' : undefined}
+            revealed={feedback !== 'idle' && feedback !== 'dimmed'}
             onClick={() => { if (!locked) question.select([choice.letter]); }}
           >
             {/* The option's own mark; after grading, a tick or a cross for the reader's pick. */}
@@ -63,7 +65,7 @@ export function TrueFalse() {
               <svg viewBox="0 0 24 24" data-boolean-icon="incorrect"><path d="M7 7l10 10" /><path d="M17 7L7 17" /></svg>
             </span>
             {choice.label}
-          </button>
+          </TileButton>
         );
       })}
     </div>

@@ -42,6 +42,8 @@
 - 选项字母用 Computer Modern 数学斜体（KaTeX 自带的 `KaTeX_Math` 字体，与公式变量同款）排在柔和的圆底上，
   判分后的「正确答案」等答案字母也用同一字体。
 - 多选题把每个正确选项都标上 `correct`。
+- 选项与判断按钮都是 [`TileButton`](button-component.md)：选中、判对、判错的底色从点击位置以圆形扩散铺满；
+  没点到而被揭示的正确答案从字母处扩散，键盘操作从字母处扩散。
 - 判分反馈：选对为绿色勾，选错为红色叉并轻微抖动；单选答错时正确项以绿色描边标出「正确答案」；
   多选题没选到的正确项以**黄色**标出「漏选」。结果胶囊：回答正确（绿）、少选（黄，只选了正确项的一部分）、回答错误（红，选了错误项）。
 
@@ -188,7 +190,7 @@ TCP 位于 OSI 的 <Blank answer="传输层" aliases={["运输层"]} />，建立
 | `choice-group.tsx` / `true-false.tsx` / `blank-field.tsx` / `math-blank.tsx` / `math-keypad.tsx` | 各题型交互；数学键盘按需加载 |
 | `question-footer.tsx` / `solution-sheet.tsx` / `question-mirror.ts` | 判分结果、题目与解析浮窗（组装 `components/ui/modal.tsx`） |
 | `components/question/marks/` | 收藏、读者标签、注释与「收藏与标签」汇总 |
-| `styles/question.css` | 全部题目样式。组件只设置 `data-*` 状态属性，外观集中在这里 |
+| `styles/question.css` | 全部题目样式。组件只设置 `data-*` 状态属性，外观集中在这里；选项的卡片外观与点击填充来自 `TileButton`，这里按状态设置 `--tile-ring` 与 `--reveal-color` |
 
 ## 性能约定
 
@@ -196,6 +198,7 @@ TCP 位于 OSI 的 <Blank answer="传输层" aliases={["运输层"]} />，建立
 
 - 卡片使用 `content-visibility: auto`，屏幕外的题目跳过布局与绘制。
 - 每题的「查看解答」浮窗和标签弹层都是普通按钮，第一次打开时才挂载对应的 Modal / Popover。
+- 选项的点击填充是 CSS 伪元素，按下位置直接写入元素的 CSS 变量，不触发重新渲染。
 - 选项的判分图标、多选勾选角标和卡片右上角的收藏 / 标签 / 注释图标都是 CSS mask 伪元素或单个元素，不为每个选项生成 SVG。
 - 选项分栏只测量视口附近的题目，其余进入视口前再测量；数学键盘与「收藏与标签」对话框按需加载。
 - 生命周期与页面相同的观察器和全局监听器（如 `use-choice-columns.ts` 中的 `IntersectionObserver`、`ResizeObserver`、`document.fonts` 监听）在模块加载时创建，不要在 effect 里懒创建：

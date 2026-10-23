@@ -244,80 +244,23 @@
   [data-exam-choice-group][data-density='regular'] { --choice-cols: 2; }
 }
 
+/*
+ * Options are tiles (TileButton / tileVariants in components/ui/button.tsx):
+ * surface, ring, hover, press, focus and the click-to-fill layer come from
+ * there; the fill spreads from where the option was pressed. Here: the
+ * layout inside, and per feedback state the ring (--tile-ring) and the fill
+ * colour (--reveal-color).
+ */
 [data-exam-choice-option] {
-  --tint: transparent;
-  position: relative;
-  isolation: isolate;
-  display: flex;
   align-items: flex-start;
   gap: 0.6875rem;
-  min-width: 0;
   min-height: 3rem;
   padding: 0.625rem 0.875rem 0.625rem 0.6875rem;
-  border: 0;
-  border-radius: 0.875rem;
-  background: var(--exam-choice);
-  box-shadow: inset 0 0 0 1px var(--exam-choice-ring), var(--exam-choice-shadow);
-  color: var(--foreground);
-  font: inherit;
   line-height: 1.65;
-  text-align: left;
   overflow-wrap: anywhere;
-  transition:
-    background-color 180ms var(--ui-ease),
-    box-shadow 180ms var(--ui-ease),
-    opacity 220ms var(--ui-ease),
-    transform 160ms var(--ui-ease);
-  -webkit-tap-highlight-color: transparent;
-}
-
-/*
- * The state colour spreads outward from the letter, like ink: a circle
- * clipped from the marker's centre grows over the whole option.
- */
-[data-exam-choice-option]::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  /* Inside the ring: negative-z content paints over the element's inset shadow. */
-  margin: 1.5px;
-  border-radius: calc(0.875rem - 1.5px);
-  background: var(--tint);
-  clip-path: circle(0 at calc(0.6875rem + var(--marker) / 2) 1.5rem);
-  transition: clip-path 420ms cubic-bezier(0.3, 0.7, 0.2, 1), background-color 220ms var(--ui-ease);
-}
-
-[data-exam-choice-option]:not([data-feedback='idle'], [data-feedback='dimmed'])::before {
-  clip-path: circle(150% at calc(0.6875rem + var(--marker) / 2) 1.5rem);
-}
-
-button[data-exam-choice-option] {
-  cursor: pointer;
-}
-
-button[data-exam-choice-option]:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
-@media (hover: hover) {
-  button[data-exam-choice-option][data-feedback='idle']:hover {
-    background: var(--exam-choice-hover);
-    box-shadow: inset 0 0 0 1px var(--exam-choice-ring), var(--exam-choice-shadow-hover);
-  }
-  button[data-exam-choice-option][data-feedback='idle']:hover [data-choice-marker] {
-    background: var(--exam-marker-hover);
-    color: var(--foreground);
-  }
-}
-
-button[data-exam-choice-option]:not([aria-disabled='true']):active {
-  transform: scale(0.985);
-}
-
-[data-exam-choice-option][aria-disabled='true'] {
-  cursor: default;
+  /* Fills not started by a press (keyboard, grading) spread from the letter. */
+  --reveal-x: calc(0.6875rem + var(--marker) / 2);
+  --reveal-y: 1.5rem;
 }
 
 [data-choice-content] {
@@ -351,6 +294,13 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
 /* Feedback notes come and go; they must not change the column count. */
 [data-exam-choice-group][data-measuring] [data-choice-note] {
   display: none;
+}
+
+@media (hover: hover) {
+  [data-exam-choice-option]:not([aria-disabled='true'])[data-feedback='idle']:hover [data-choice-marker] {
+    background: var(--exam-marker-hover);
+    color: var(--foreground);
+  }
 }
 
 /*
@@ -472,8 +422,8 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
 /* --- states --- */
 
 [data-exam-choice-option][data-feedback='selected'] {
-  --tint: var(--exam-choice-active);
-  box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--foreground) 28%, transparent), var(--exam-choice-shadow);
+  --tile-ring: color-mix(in oklch, var(--foreground) 28%, transparent);
+  --tile-ring-width: 1.5px;
 }
 [data-feedback='selected'] [data-choice-marker] {
   background: var(--foreground);
@@ -487,8 +437,9 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
 }
 
 [data-exam-choice-option][data-feedback='correct'] {
-  --tint: var(--exam-correct-tint);
-  box-shadow: inset 0 0 0 1px var(--exam-correct-ring);
+  --reveal-color: var(--exam-correct-tint);
+  --tile-ring: var(--exam-correct-ring);
+  --tile-shadow: 0 0 #0000;
 }
 [data-feedback='correct'] [data-choice-marker] {
   background: var(--success);
@@ -497,8 +448,9 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
 }
 
 [data-exam-choice-option][data-feedback='incorrect'] {
-  --tint: var(--exam-incorrect-tint);
-  box-shadow: inset 0 0 0 1px var(--exam-incorrect-ring);
+  --reveal-color: var(--exam-incorrect-tint);
+  --tile-ring: var(--exam-incorrect-ring);
+  --tile-shadow: 0 0 #0000;
 }
 [data-feedback='incorrect'] [data-choice-marker] {
   background: var(--destructive);
@@ -508,8 +460,9 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
 
 /* A key option the reader did not pick in a multiple-answer question: amber. */
 [data-exam-choice-option][data-feedback='missed'] {
-  --tint: var(--exam-missed-tint);
-  box-shadow: inset 0 0 0 1px var(--exam-missed-ring);
+  --reveal-color: var(--exam-missed-tint);
+  --tile-ring: var(--exam-missed-ring);
+  --tile-shadow: 0 0 #0000;
 }
 [data-feedback='missed'] [data-choice-marker] {
   background: color-mix(in oklch, var(--warning) 20%, transparent);
@@ -523,8 +476,10 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
 
 /* The key of a single-answer question the reader missed, or the revealed key. */
 [data-exam-choice-option][data-feedback='answer'] {
-  --tint: var(--exam-answer-tint);
-  box-shadow: inset 0 0 0 1.5px var(--exam-correct-ring);
+  --reveal-color: var(--exam-answer-tint);
+  --tile-ring: var(--exam-correct-ring);
+  --tile-ring-width: 1.5px;
+  --tile-shadow: 0 0 #0000;
 }
 [data-feedback='answer'] [data-choice-marker] {
   background: color-mix(in oklch, var(--success) 14%, transparent);
@@ -533,8 +488,8 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
 }
 /* Options not involved in the result fade, but keep their tile. */
 [data-exam-choice-option][data-feedback='dimmed'] {
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--foreground) 4%, transparent);
-  background: color-mix(in oklch, var(--exam-choice) 60%, transparent);
+  --tile-bg: color-mix(in oklch, var(--exam-choice) 60%, transparent);
+  --tile-ring: color-mix(in oklch, var(--foreground) 4%, transparent);
 }
 [data-exam-choice-option][data-feedback='dimmed'] > * {
   opacity: 0.48;
@@ -586,8 +541,6 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-exam-choice-option],
-  [data-exam-choice-option]::before,
   [data-choice-marker],
   [data-choice-marker]::before,
   [data-choice-marker]::after,
@@ -606,42 +559,15 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
   margin-block: 1rem 0.25rem;
 }
 
+/* Tiles too (TileButton); the fill spreads from the press, else the centre. */
 [data-boolean-option] {
-  --tint: transparent;
   --accent: var(--foreground);
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  align-items: center;
   justify-content: center;
   gap: 0.5rem;
   height: 3rem;
-  border: 0;
-  border-radius: 0.875rem;
-  background: var(--exam-choice);
-  box-shadow: inset 0 0 0 1px var(--exam-choice-ring), var(--exam-choice-shadow);
-  color: var(--foreground);
-  font: inherit;
+  min-height: 0;
+  padding-block: 0;
   font-weight: 550;
-  cursor: pointer;
-  transition: background-color 180ms var(--ui-ease), box-shadow 180ms var(--ui-ease), opacity 220ms var(--ui-ease), transform 160ms var(--ui-ease);
-  -webkit-tap-highlight-color: transparent;
-}
-
-[data-boolean-option]::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  margin: 1.5px;
-  border-radius: calc(0.875rem - 1.5px);
-  background: var(--tint);
-  clip-path: circle(0 at 50% 50%);
-  transition: clip-path 420ms cubic-bezier(0.3, 0.7, 0.2, 1);
-}
-
-[data-boolean-option]:not([data-feedback='idle'], [data-feedback='dimmed'])::before {
-  clip-path: circle(75% at 50% 50%);
 }
 
 [data-boolean-option][data-value='true'] { --accent: var(--success); }
@@ -689,33 +615,27 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
 }
 
 @media (hover: hover) {
-  [data-boolean-option][data-feedback='idle']:not([aria-disabled='true']):hover {
-    background: var(--exam-choice-hover);
-  }
   [data-boolean-option][data-feedback='idle']:not([aria-disabled='true']):hover [data-boolean-glyph] {
     box-shadow: inset 0 0 0 1.5px var(--accent);
     color: var(--accent);
   }
 }
 
-[data-boolean-option]:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-[data-boolean-option]:not([aria-disabled='true']):active { transform: scale(0.98); }
-[data-boolean-option][aria-disabled='true'] { cursor: default; }
-
 [data-boolean-option][data-feedback='correct'] {
-  --tint: var(--exam-correct-tint);
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--success) 40%, transparent);
+  --reveal-color: var(--exam-correct-tint);
+  --tile-ring: color-mix(in oklch, var(--success) 40%, transparent);
+  --tile-shadow: 0 0 #0000;
 }
 [data-boolean-option][data-feedback='incorrect'] {
-  --tint: var(--exam-incorrect-tint);
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--destructive) 38%, transparent);
+  --reveal-color: var(--exam-incorrect-tint);
+  --tile-ring: color-mix(in oklch, var(--destructive) 38%, transparent);
+  --tile-shadow: 0 0 #0000;
 }
 [data-boolean-option][data-feedback='answer'] {
-  --tint: var(--exam-answer-tint);
-  box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--success) 55%, transparent);
+  --reveal-color: var(--exam-answer-tint);
+  --tile-ring: color-mix(in oklch, var(--success) 55%, transparent);
+  --tile-ring-width: 1.5px;
+  --tile-shadow: 0 0 #0000;
 }
 [data-boolean-option][data-feedback='answer']::after { content: '正确答案'; }
 [data-boolean-option][data-feedback='dimmed'] > * { opacity: 0.48; }
