@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils"
  *
  *   <Modal>
  *     <ModalTrigger />
- *     <ModalContent size="lg">
+ *     <ModalContent size="lg" height="fixed">
  *       <ModalHeader>
  *         <ModalTitle /> <ModalTags /> <ModalToolbar />
  *       </ModalHeader>
@@ -28,8 +28,10 @@ import { cn } from "@/lib/utils"
  *
  * A bottom sheet at every width: it slides up from the bottom edge (also
  * when it mounts already open), back down on close, and follows a downward
- * drag on its header. Wide screens centre it and cap its width by size. The
- * low header floats over the content as frosted glass.
+ * drag on its header. Wide screens centre it and cap its width by size. Its
+ * height follows the content by default, or stays fixed (`height`), so
+ * content that changes in place does not make it jump. The low header
+ * floats over the content as frosted glass.
  *
  * A <Modal> rendered inside another's content is a level of a stack, laid
  * out like a deck of cards: each level below steps back (narrower, dimmed)
@@ -391,11 +393,18 @@ const MODAL_WIDTHS = {
   full: "100vw",
 } as const
 
+/**
+ * "auto" follows the content; "fixed" takes the full height available; a CSS
+ * length fixes it at that height. Either way the viewport caps it.
+ */
+type ModalHeight = "auto" | "fixed" | (string & {})
+
 type FocusTarget = DialogPrimitive.Popup.Props["finalFocus"]
 type CloseType = Parameters<Extract<FocusTarget, (...args: never[]) => unknown>>[0]
 
 function ModalContent({
   size = "md",
+  height = "auto",
   className,
   backdropClassName,
   initialFocus,
@@ -410,6 +419,8 @@ function ModalContent({
    * A nested level is at least as wide as the level below it.
    */
   size?: keyof typeof MODAL_WIDTHS
+  /** "auto" (default) follows the content; "fixed" or a CSS length keeps one height. */
+  height?: ModalHeight
   backdropClassName?: string
 }) {
   const level = useModal()
@@ -453,7 +464,12 @@ function ModalContent({
     return finalFocus ?? true
   }, [finalFocus, skipFocus])
 
-  const depthStyle = { "--modal-depth": depth, "--modal-width": width } as React.CSSProperties
+  const fixedHeight = height === "auto" ? undefined : height === "fixed" ? "fixed" : "length"
+  const depthStyle = {
+    "--modal-depth": depth,
+    "--modal-width": width,
+    ...(fixedHeight === "length" ? { "--modal-height": height } : null),
+  } as React.CSSProperties
   return (
     <DialogPortal>
       {depth === 0 ? (
@@ -467,6 +483,7 @@ function ModalContent({
         ref={setPopup}
         data-slot="modal-content"
         data-size={size}
+        data-height={fixedHeight}
         initialFocus={initialFocus ?? (() => titleRef.current ?? true)}
         finalFocus={resolveFinalFocus}
         className={className}

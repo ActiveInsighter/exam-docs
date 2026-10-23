@@ -253,12 +253,56 @@ function SizesDemo() {
   );
 }
 
+const HEIGHTS = [
+  ['auto', '随内容'],
+  ['fixed', '占满可用高度'],
+  ['30rem', '固定 30rem'],
+] as const;
+
+/** Content that grows and shrinks in place, to show which heights follow it. */
+function GrowingBody() {
+  const [count, setCount] = useState(1);
+  return (
+    <ModalBody>
+      <div className="mb-4 flex flex-wrap gap-2">
+        <Button variant="secondary" className="h-9 rounded-full px-4" onClick={() => setCount((value) => Math.min(value + 2, 9))}>
+          加两段
+        </Button>
+        <Button variant="ghost" className="h-9 rounded-full px-4" onClick={() => setCount(1)}>
+          只留一段
+        </Button>
+      </div>
+      <Paragraphs count={count} topic="高度" />
+    </ModalBody>
+  );
+}
+
+function HeightDemo() {
+  return (
+    <DemoFrame caption="height：auto 随内容伸缩；fixed 占满可用高度；CSS 长度固定为该高度。都不超过视口。在弹窗里增删段落，看高度是否跟着变。">
+      {HEIGHTS.map(([height, label]) => (
+        <Modal key={height}>
+          <ModalTrigger className={trigger}>{height}</ModalTrigger>
+          <ModalContent size="md" height={height}>
+            <ModalHeader>
+              <ModalTitle>height=&quot;{height}&quot;</ModalTitle>
+              <ModalTags><Chip>{label}</Chip></ModalTags>
+            </ModalHeader>
+            <GrowingBody />
+          </ModalContent>
+        </Modal>
+      ))}
+    </DemoFrame>
+  );
+}
+
 const DEMOS = {
   basic: BasicDemo,
   toolbar: ToolbarDemo,
   split: SplitDemo,
   nested: NestedDemo,
   sizes: SizesDemo,
+  heights: HeightDemo,
 };
 
 export function ModalDemo({ kind }: { kind: keyof typeof DEMOS }) {
