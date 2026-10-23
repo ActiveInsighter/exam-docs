@@ -43,7 +43,9 @@ export function BlankAnswer({ blank }: { blank: BlankSpec }) {
 
 /** The key as shown under a graded question. */
 function KeyText({ spec, evaluation }: { spec: GradingSpec; evaluation: Evaluation }) {
-  if (spec.kind !== 'blank') return <span className="font-semibold text-foreground">{formatKey(spec)}</span>;
+  if (spec.kind !== 'blank') {
+    return <span className="font-semibold text-foreground" data-choice-letters={spec.kind === 'choice' ? '' : undefined}>{formatKey(spec)}</span>;
+  }
   const several = spec.blanks.length > 1;
   return (
     <span className="inline-flex flex-wrap items-baseline gap-x-3 gap-y-1 text-foreground">

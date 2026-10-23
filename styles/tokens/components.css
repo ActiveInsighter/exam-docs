@@ -10,37 +10,49 @@
      the canvas tone beside the surface, so split panes need no divider. */
   --modal-surface: var(--ui-panel);
   --modal-pane-muted: var(--ui-canvas);
-  /* Header glass: denser at the top edge, lighter where it fades out. */
-  --modal-glass: linear-gradient(
-    color-mix(in oklch, var(--modal-surface) 92%, transparent),
-    color-mix(in oklch, var(--modal-surface) 70%, transparent)
-  );
-  --modal-header-fade: 1.25rem;
+  /* Header veils: the surface (or muted pane) beneath, slightly see-through. */
+  --modal-veil: color-mix(in oklch, var(--modal-surface) 90%, transparent);
+  --modal-veil-muted: color-mix(in oklch, var(--modal-pane-muted) 90%, transparent);
   --modal-backdrop: rgb(0 0 0 / 38%);
-  --modal-stack-dim: rgb(0 0 0 / 6%);
+  --modal-stack-dim: rgb(0 0 0 / 9%);
   --modal-radius: 1.5rem;
   --modal-shadow:
-    0 32px 80px -24px rgb(0 0 0 / 30%),
-    0 8px 24px -12px rgb(0 0 0 / 12%);
-  --modal-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --modal-ease-in: cubic-bezier(0.4, 0, 0.7, 0.2);
-  --modal-ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+    0 -16px 48px -16px rgb(0 0 0 / 22%),
+    0 -2px 12px -4px rgb(0 0 0 / 6%);
+  /* One curve for opening, closing, springing back and stacking. */
+  --modal-ease: cubic-bezier(0.32, 0.72, 0, 1);
 
-  /* Question card: a quiet tinted plate; options sit on it as lighter tiles. */
+  /* Question card: a quiet tinted plate; options sit on it as lighter tiles,
+     lifted by a soft shadow rather than outlined. */
   --exam-card: color-mix(in oklch, var(--foreground) 2.6%, var(--ui-panel));
   --exam-card-radius: 1.25rem;
   --exam-choice: var(--ui-panel);
-  --exam-choice-hover: color-mix(in oklch, var(--foreground) 2.5%, var(--ui-panel));
-  --exam-choice-active: color-mix(in oklch, var(--foreground) 6%, var(--ui-panel));
-  --exam-choice-ring: color-mix(in oklch, var(--foreground) 7%, transparent);
-  --exam-marker: color-mix(in oklch, var(--foreground) 2.5%, transparent);
+  --exam-choice-hover: color-mix(in oklch, var(--foreground) 1.5%, var(--ui-panel));
+  --exam-choice-active: color-mix(in oklch, var(--foreground) 5%, var(--ui-panel));
+  --exam-choice-ring: color-mix(in oklch, var(--foreground) 5%, transparent);
+  --exam-choice-shadow: 0 1px 2px rgb(0 0 0 / 4%), 0 1px 1px rgb(0 0 0 / 2%);
+  --exam-choice-shadow-hover: 0 4px 14px -6px rgb(0 0 0 / 14%), 0 1px 2px rgb(0 0 0 / 5%);
+  --exam-marker: color-mix(in oklch, var(--foreground) 5.5%, transparent);
+  --exam-marker-hover: color-mix(in oklch, var(--foreground) 10%, transparent);
   --exam-marker-ring: color-mix(in oklch, var(--foreground) 16%, transparent);
+  /* Option letters in Computer Modern math italic (see the 'Exam Letter'
+     face in styles/question.css); system serifs italic until it loads. */
+  --exam-letter-font: 'Exam Letter', Georgia, 'Times New Roman', serif;
 
-  /* Feedback tints laid over an option or blank. */
-  --exam-correct-tint: color-mix(in oklch, var(--success) 11%, var(--ui-panel));
-  --exam-incorrect-tint: color-mix(in oklch, var(--destructive) 9%, var(--ui-panel));
-  --exam-missed-tint: color-mix(in oklch, var(--warning) 14%, var(--ui-panel));
-  --exam-answer-tint: color-mix(in oklch, var(--success) 6%, var(--ui-panel));
+  /* Feedback tints laid over an option or blank: light, so the marker
+     carries the colour and the option text stays calm. */
+  --exam-correct-tint: color-mix(in oklch, var(--success) 7%, var(--ui-panel));
+  --exam-incorrect-tint: color-mix(in oklch, var(--destructive) 5.5%, var(--ui-panel));
+  --exam-missed-tint: color-mix(in oklch, var(--warning) 9%, var(--ui-panel));
+  --exam-answer-tint: color-mix(in oklch, var(--success) 4.5%, var(--ui-panel));
+  --exam-correct-ring: color-mix(in oklch, var(--success) 30%, transparent);
+  --exam-incorrect-ring: color-mix(in oklch, var(--destructive) 26%, transparent);
+  --exam-missed-ring: color-mix(in oklch, var(--warning) 42%, transparent);
+  /* Edge tags ("正确答案" / "漏选"): soft but opaque, covering the edge they sit on. */
+  --exam-note-correct-bg: color-mix(in oklch, var(--success) 16%, var(--ui-panel));
+  --exam-note-correct-fg: color-mix(in oklch, var(--success) 78%, var(--foreground));
+  --exam-note-missed-bg: color-mix(in oklch, var(--warning) 24%, var(--ui-panel));
+  --exam-note-missed-fg: color-mix(in oklch, var(--warning) 55%, var(--foreground));
 
   /* Built-in tag capsules: one hue per tone (lightness and chroma shared). */
   --exam-tag-bg-l: 0.95;
@@ -62,7 +74,7 @@
   --modal-backdrop: rgb(0 0 0 / 62%);
   --modal-stack-dim: rgb(0 0 0 / 38%);
   --modal-shadow:
-    0 32px 80px -16px rgb(0 0 0 / 85%),
+    0 -16px 48px -12px rgb(0 0 0 / 80%),
     0 0 0 1px rgb(255 255 255 / 8%);
 
   --exam-card: oklch(0.165 0 0);
@@ -70,13 +82,23 @@
   --exam-choice-hover: oklch(0.245 0 0);
   --exam-choice-active: oklch(0.28 0 0);
   --exam-choice-ring: rgb(255 255 255 / 6%);
-  --exam-marker: rgb(255 255 255 / 4%);
+  --exam-choice-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
+  --exam-choice-shadow-hover: inset 0 1px 0 rgb(255 255 255 / 6%), 0 6px 16px -8px rgb(0 0 0 / 70%);
+  --exam-marker: rgb(255 255 255 / 7%);
+  --exam-marker-hover: rgb(255 255 255 / 12%);
   --exam-marker-ring: rgb(255 255 255 / 22%);
 
-  --exam-correct-tint: color-mix(in oklch, var(--success) 20%, oklch(0.215 0 0));
-  --exam-incorrect-tint: color-mix(in oklch, var(--destructive) 20%, oklch(0.215 0 0));
-  --exam-missed-tint: color-mix(in oklch, var(--warning) 20%, oklch(0.215 0 0));
-  --exam-answer-tint: color-mix(in oklch, var(--success) 10%, oklch(0.215 0 0));
+  --exam-correct-tint: color-mix(in oklch, var(--success) 12%, oklch(0.215 0 0));
+  --exam-incorrect-tint: color-mix(in oklch, var(--destructive) 11%, oklch(0.215 0 0));
+  --exam-missed-tint: color-mix(in oklch, var(--warning) 12%, oklch(0.215 0 0));
+  --exam-answer-tint: color-mix(in oklch, var(--success) 7%, oklch(0.215 0 0));
+  --exam-correct-ring: color-mix(in oklch, var(--success) 34%, transparent);
+  --exam-incorrect-ring: color-mix(in oklch, var(--destructive) 30%, transparent);
+  --exam-missed-ring: color-mix(in oklch, var(--warning) 40%, transparent);
+  --exam-note-correct-bg: color-mix(in oklch, var(--success) 26%, oklch(0.215 0 0));
+  --exam-note-correct-fg: color-mix(in oklch, var(--success) 85%, white);
+  --exam-note-missed-bg: color-mix(in oklch, var(--warning) 26%, oklch(0.215 0 0));
+  --exam-note-missed-fg: color-mix(in oklch, var(--warning) 85%, white);
 
   --exam-tag-bg-l: 0.3;
   --exam-tag-bg-c: 0.06;

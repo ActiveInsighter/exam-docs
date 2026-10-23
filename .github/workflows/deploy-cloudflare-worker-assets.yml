@@ -353,6 +353,8 @@ jobs:
       STATIC_DOCS_SHARD_COUNT: ${{ inputs.shards || '8' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    outputs:
+      deployment-url: ${{ steps.cloudflare-deploy.outputs.deployment-url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -594,25 +596,6 @@ jobs:
           worker_name=exam-docs
           if [[ "${GITHUB_REF}" != 'refs/heads/main' ]]; then worker_name=exam-docs-preview; fi
           echo "worker-name=${worker_name}" >> "${GITHUB_OUTPUT}"
-      - name: Verify English reading interactions in Chromium
-        if: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/codex/english-reading-layout-1012') && steps.cloudflare-deploy.outputs.deployment-url != '' }}
-        env:
-          DEPLOYMENT_URL: ${{ steps.cloudflare-deploy.outputs.deployment-url }}
-          READING_BROWSER_MODULES: ${{ runner.temp }}/reading-browser
-          READING_SCREENSHOTS: ${{ runner.temp }}/reading-browser-screenshots
-        run: |
-          npm install --prefix "${READING_BROWSER_MODULES}" --no-package-lock --no-audit --no-fund playwright@1.63.0
-          # The check runs headless, so the full Chrome for Testing download is unused.
-          "${READING_BROWSER_MODULES}/node_modules/.bin/playwright" install --with-deps --only-shell chromium
-          node scripts/verify-english-reading-browser.mjs
-      - name: Upload reading browser screenshots
-        if: ${{ always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/codex/english-reading-layout-1012') }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: english-reading-browser-screenshots
-          path: ${{ runner.temp }}/reading-browser-screenshots
-          if-no-files-found: ignore
-          retention-days: 7
       - name: Verify Cloudflare deployment
         if: ${{ (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || (startsWith(github.ref, 'refs/heads/codex/lilin-880-rebuild-') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) || ((github.ref == 'refs/heads/codex/math-past-exams-0930' || github.ref == 'refs/heads/codex/math-core-questions-1005' || github.ref == 'refs/heads/codex/build-speed-research-1002' || github.ref == 'refs/heads/codex/english-reading-layout-1012') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy == true))) }}
         shell: bash
@@ -695,3 +678,43 @@ jobs:
           echo "Markdown Content-Type verified as UTF-8: ${markdown_content_type}"
           echo "- Cloudflare Worker: ${WORKER_NAME}" >> "${GITHUB_STEP_SUMMARY}"
           echo "- Cloudflare deployment: ${DEPLOYMENT_URL}" >> "${GITHUB_STEP_SUMMARY}"
+
+  # Browser checks against the live deployment, in their own job so the
+  # deploy job finishes as soon as the site is up. The runner image already
+  # ships Google Chrome, so nothing is installed with apt and no browser is
+  # downloaded: only playwright-core (no postinstall download) from npm.
+  verify-browser:
+    name: Verify deployed site in Chromium
+    needs: deploy
+    if: ${{ needs.deploy.outputs.deployment-url != '' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/codex/english-reading-layout-1012') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout verification scripts
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: scripts
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - name: Install Playwright driver
+        env:
+          READING_BROWSER_MODULES: ${{ runner.temp }}/reading-browser
+        run: npm install --prefix "${READING_BROWSER_MODULES}" --no-package-lock --no-audit --no-fund playwright-core@1.63.0
+      - name: Verify English reading interactions
+        env:
+          DEPLOYMENT_URL: ${{ needs.deploy.outputs.deployment-url }}
+          READING_BROWSER_MODULES: ${{ runner.temp }}/reading-browser
+          READING_BROWSER_CHANNEL: chrome
+          READING_SCREENSHOTS: ${{ runner.temp }}/reading-browser-screenshots
+        run: node scripts/verify-english-reading-browser.mjs
+      - name: Upload reading browser screenshots
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: english-reading-browser-screenshots
+          path: ${{ runner.temp }}/reading-browser-screenshots
+          if-no-files-found: ignore
+          retention-days: 7

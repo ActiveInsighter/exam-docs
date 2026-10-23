@@ -4,11 +4,19 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 
 const require = createRequire(path.join(process.env.READING_BROWSER_MODULES, 'package.json'));
-const { chromium } = require('playwright');
+// CI installs only playwright-core and drives the runner's own Chrome
+// (READING_BROWSER_CHANNEL=chrome); a full playwright install also works.
+const loadPlaywright = () => {
+  try { return require('playwright-core'); } catch { return require('playwright'); }
+};
+const { chromium } = loadPlaywright();
 const base = process.env.DEPLOYMENT_URL.replace(/\/$/, '');
 const screenshots = process.env.READING_SCREENSHOTS ?? path.resolve('reading-browser-screenshots');
 await mkdir(screenshots, { recursive: true });
-const browser = await chromium.launch();
+const browser = await chromium.launch({
+  channel: process.env.READING_BROWSER_CHANNEL || undefined,
+  executablePath: process.env.READING_BROWSER_EXECUTABLE || undefined,
+});
 const errors = [];
 
 async function openPage(options) {

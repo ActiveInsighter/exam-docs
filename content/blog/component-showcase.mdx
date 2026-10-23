@@ -1,0 +1,149 @@
+---
+title: 组件展示：模态弹窗与题目组件
+description: 站内自建组件的现场演示——底部抽屉式模态弹窗（标签、工具栏、左右分栏、多级弹窗、尺寸）与全部题型的题目组件和解答弹窗。
+date: 2026-10-23
+author: exam-docs
+---
+
+这一页把站内自己写的组件都放在一起，方便直接看效果。所有演示都是真实组件，不是截图：可以在手机和电脑上分别打开，也可以切换浅色 / 深色主题对照。
+
+## 模态弹窗 Modal
+
+`components/ui/modal.tsx` 基于 shadcn 的 Dialog 与 Button。无论屏幕宽窄都是**底部抽屉**：从底部弹出、向下收回；宽屏上居中并按 `size` 限制最大宽度。顶栏悬浮在内容之上，内容滚过时换上略带透明的底色；按住顶栏向下拖动可以关闭。用法与全部属性见 `docs/modal-component.md`。
+
+### 基础弹窗
+
+<ModalDemo kind="basic" />
+
+### 标签与工具栏
+
+<ModalDemo kind="toolbar" />
+
+### 左右分栏
+
+题目解答弹窗就是用它组装的：左栏题目，右栏答案与解析。
+
+<ModalDemo kind="split" />
+
+### 多级弹窗
+
+在弹窗内容里再渲染一个 `<Modal>`，就叠加为新的一层。嵌套层左上角自动出现「返回」，右上角是「全部关闭」。
+
+<ModalDemo kind="nested" />
+
+### 尺寸
+
+<ModalDemo kind="sizes" />
+
+## 题目组件
+
+题目组件已全局注册，博客里同样可以直接使用。选项字母用 Computer Modern 数学斜体排版（与公式里的变量同一字体），作答记录保存在浏览器本地。
+
+点击「查看解答」打开题目与解析弹窗；它的工具栏里还有「收藏与标签」，会作为第二层弹窗叠在解答之上。
+
+### 单选
+
+<Question id="blog-showcase-single" type="single" tags="来源:408 统考 2019, 数据结构">
+
+设栈 S 和队列 Q 的初始状态均为空，元素 a、b、c、d 依次进栈 S，出栈后立即进入队列 Q。若出队顺序为 b、d、c、a，则栈 S 的容量至少应该是（ ）。
+
+<Option>1</Option>
+<Option>2</Option>
+<Option correct>3</Option>
+<Option>4</Option>
+
+<Solution>
+
+b 出栈时栈内为 a；随后 c、d 进栈，d 出栈前栈内为 a、c、d，共 3 个元素，所以容量至少为 3。
+
+</Solution>
+
+</Question>
+
+### 多选
+
+<Question id="blog-showcase-multiple" type="multiple" tags={["来源:模拟题", "操作系统", "易错"]}>
+
+下列关于进程与线程的说法中，正确的有（ ）。
+
+<Option correct>线程是处理机调度的基本单位</Option>
+<Option>同一进程的线程各自拥有独立的地址空间</Option>
+<Option correct>进程是资源分配的基本单位</Option>
+<Option correct>用户级线程的切换可以不经过内核</Option>
+
+<Solution>
+
+同一进程内的线程共享进程的地址空间，B 错误；其余说法正确。只选其中一部分正确项，没选到的正确项会标出「漏选」。
+
+</Solution>
+
+</Question>
+
+### 公式选项
+
+<Question id="blog-showcase-math-choice" type="single" tags="高等数学, 极限">
+
+极限 $\displaystyle\lim_{x\to 0}\frac{\sin 3x}{x}$ 的值为（ ）。
+
+<Option>$0$</Option>
+<Option>$1$</Option>
+<Option correct>$3$</Option>
+<Option>$\dfrac{1}{3}$</Option>
+
+<Solution>
+
+由重要极限 $\displaystyle\lim_{t\to 0}\frac{\sin t}{t}=1$，令 $t=3x$：
+
+$$
+\lim_{x\to 0}\frac{\sin 3x}{x}=3\lim_{x\to 0}\frac{\sin 3x}{3x}=3.
+$$
+
+</Solution>
+
+</Question>
+
+### 判断
+
+<Question id="blog-showcase-boolean" type="boolean" answer={true} tags="计算机网络">
+
+TCP 提供面向连接的可靠字节流服务。
+
+<Solution>
+
+TCP 通过三次握手建立连接，并用序号、确认和重传保证可靠的字节流传输。
+
+</Solution>
+
+</Question>
+
+### 填空
+
+文字空唤起系统键盘；数学空从底部弹出屏幕数学键盘，按数值等价判分（`1/2` 与 `0.5` 都算对）。
+
+<Question id="blog-showcase-blank" type="blank" tags="计算机网络, 高等数学">
+
+TCP 位于 OSI 参考模型的 <Blank answer="传输层" aliases={["运输层"]} />；$\displaystyle\int_0^1 x\,dx=$ <Blank answer="1/2" kind="math" />。
+
+<Solution>
+
+TCP 是传输层协议。$\displaystyle\int_0^1 x\,dx=\left.\frac{x^2}{2}\right|_0^1=\frac{1}{2}$。
+
+</Solution>
+
+</Question>
+
+### 解答
+
+<Question id="blog-showcase-essay" type="essay" points={10}>
+
+简述进程与线程的主要区别。
+
+<Solution>
+
+1. 进程是资源分配的基本单位，线程是 CPU 调度的基本单位。
+2. 同一进程的线程共享进程的地址空间和资源，线程只拥有少量私有数据（栈、寄存器）。
+3. 线程切换开销比进程切换小。
+
+</Solution>
+
+</Question>

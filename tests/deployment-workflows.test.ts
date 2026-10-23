@@ -38,6 +38,24 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('name: Run complete regression suite\n        run: npm test');
   });
 
+  it('checks the live site in a browser in its own job, on the runner Chrome', async () => {
+    const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
+    const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
+    const deployJob = workflow.slice(workflow.indexOf('\n  deploy:\n'), workflow.indexOf('\n  verify-browser:\n'));
+    const browserJob = workflow.slice(workflow.indexOf('\n  verify-browser:\n'));
+
+    // The deploy job finishes as soon as the site is up and verified over HTTP.
+    expect(deployJob).toContain('deployment-url: ${{ steps.cloudflare-deploy.outputs.deployment-url }}');
+    expect(deployJob).not.toContain('verify-english-reading-browser');
+    expect(browserJob).toContain('needs: deploy');
+    expect(browserJob).toContain('DEPLOYMENT_URL: ${{ needs.deploy.outputs.deployment-url }}');
+    // No apt fonts and no browser download: playwright-core drives the preinstalled Chrome.
+    expect(browserJob).toContain('playwright-core@');
+    expect(browserJob).toContain('READING_BROWSER_CHANNEL: chrome');
+    expect(workflow).not.toContain('--with-deps');
+    expect(workflow).not.toContain('playwright install');
+  });
+
   it('builds search once outside the static shard workers', async () => {
     const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
     const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');

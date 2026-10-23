@@ -141,12 +141,12 @@ function AnswerSummary({ spec, state }: { spec: GradingSpec; state: QuestionStat
     <div className="grid gap-2 sm:grid-cols-[repeat(auto-fill,minmax(13rem,1fr))]">
       <div className={cn(tile, 'bg-success/10')}>
         <span className="shrink-0 text-sm text-success">正确答案</span>
-        <span className="min-w-0 text-lg font-semibold">{formatKey(spec)}</span>
+        <span className="min-w-0 text-lg font-semibold" data-choice-letters={spec.kind === 'choice' ? '' : undefined}>{formatKey(spec)}</span>
       </div>
       {submitted ? (
         <div className={cn(tile, submitted.evaluation!.result === 'correct' ? 'bg-(--ui-fill)' : submitted.evaluation!.result === 'partial' ? 'bg-warning/15' : 'bg-destructive/8')}>
           <span className="shrink-0 text-sm text-muted-foreground">你的答案</span>
-          <span className="min-w-0 text-lg font-semibold break-words">{formatResponse(spec, submitted.selected, submitted.values)}</span>
+          <span className="min-w-0 text-lg font-semibold break-words" data-choice-letters={spec.kind === 'choice' && submitted.selected.length ? '' : undefined}>{formatResponse(spec, submitted.selected, submitted.values)}</span>
           <span className="ml-auto self-center"><Verdict correct={submitted.evaluation!.result === 'correct'} /></span>
         </div>
       ) : null}
@@ -256,7 +256,7 @@ function SheetDialog({ questionId, solution, dialogTitle, numberLabel, typeLabel
         size="xl"
         initialFocus={titleRef}
         finalFocus={triggerRef}
-        className="text-base md:min-h-[min(30rem,calc(100dvh-4rem))]"
+        className="text-base md:min-h-[min(32rem,calc(100dvh-2.5rem))]"
       >
         <ModalHeader>
           <ModalTitle ref={titleRef}>{numberLabel ? `第 ${numberLabel} 题` : dialogTitle}</ModalTitle>
@@ -292,12 +292,12 @@ function SheetDialog({ questionId, solution, dialogTitle, numberLabel, typeLabel
 
           <ModalPane className="flex flex-col gap-7">
             {spec ? (
-              <section aria-label="答案" className="animate-in fade-in-0 slide-in-from-bottom-1 fill-mode-both duration-300 delay-100">
+              <section aria-label="答案">
                 <SectionLabel>答案</SectionLabel>
                 <AnswerSummary spec={spec} state={state} />
               </section>
             ) : null}
-            <section aria-label={spec ? '解析' : '参考解答'} className="animate-in fade-in-0 slide-in-from-bottom-1 fill-mode-both duration-300 delay-200">
+            <section aria-label={spec ? '解析' : '参考解答'}>
               <SectionLabel>{spec ? '解析' : '参考解答'}</SectionLabel>
               <div className={cn(prose, proseReset, '[&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden')}>
                 {solution}

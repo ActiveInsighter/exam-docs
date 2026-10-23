@@ -9,10 +9,26 @@
  * Colours come from styles/tokens (theme.css, components.css).
  */
 
+/*
+ * Option letters: KaTeX's Computer Modern math italic (KaTeX_Math-Italic,
+ * MIT), subset to A–Z: 4.5 KB, fetched only where letters render, shown in
+ * a system serif until then (KaTeX's own face blocks text while loading).
+ */
+@font-face {
+  font-family: 'Exam Letter';
+  src: url('/fonts/exam-letter-v1.woff2') format('woff2');
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0041-005A;
+}
+
 /* ------------------------------------------------------------------ card */
 
 [data-exam-question] {
   position: relative;
+  /* The blog sets its prose in serif; questions keep the interface face. */
+  font-family: var(--font-sans);
   margin-block: 1.25rem;
   padding: 0.875rem 0.875rem 0.75rem;
   border-radius: var(--exam-card-radius);
@@ -26,22 +42,6 @@
   [data-exam-question] {
     padding: 1.125rem 1.375rem 1rem;
   }
-}
-
-/*
- * Wide display maths scrolls inside the card; the docs-wide scrollbar paints
- * its track in the page colour, which shows as a stripe on the card tone.
- */
-[data-exam-question] .katex-display {
-  scrollbar-color: var(--ui-scrollbar-thumb) transparent;
-}
-[data-exam-question] .katex-display::-webkit-scrollbar,
-[data-exam-question] .katex-display::-webkit-scrollbar-track {
-  background: transparent;
-}
-[data-exam-question] .katex-display::-webkit-scrollbar-thumb {
-  border-color: transparent;
-  background-clip: padding-box;
 }
 
 /* Authors separated questions with "---"; the cards are separation enough. */
@@ -257,7 +257,7 @@
   border: 0;
   border-radius: 0.875rem;
   background: var(--exam-choice);
-  box-shadow: inset 0 0 0 1px var(--exam-choice-ring);
+  box-shadow: inset 0 0 0 1px var(--exam-choice-ring), var(--exam-choice-shadow);
   color: var(--foreground);
   font: inherit;
   line-height: 1.65;
@@ -304,10 +304,10 @@ button[data-exam-choice-option]:focus-visible {
 @media (hover: hover) {
   button[data-exam-choice-option][data-feedback='idle']:hover {
     background: var(--exam-choice-hover);
-    box-shadow: inset 0 0 0 1px var(--exam-marker-ring);
+    box-shadow: inset 0 0 0 1px var(--exam-choice-ring), var(--exam-choice-shadow-hover);
   }
   button[data-exam-choice-option][data-feedback='idle']:hover [data-choice-marker] {
-    box-shadow: inset 0 0 0 1.5px var(--foreground);
+    background: var(--exam-marker-hover);
     color: var(--foreground);
   }
 }
@@ -353,7 +353,10 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
   display: none;
 }
 
-/* Marker: the letter in a ring. Round for one answer, squarer for several. */
+/*
+ * Marker: the letter, set in Computer Modern math italic like a variable in
+ * a formula, on a soft disc. Round for one answer, squarer for several.
+ */
 [data-choice-marker] {
   position: relative;
   display: grid;
@@ -364,11 +367,11 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
   margin-top: 0.0625rem;
   border-radius: 999px;
   background: var(--exam-marker);
-  box-shadow: inset 0 0 0 1.5px var(--exam-marker-ring);
-  color: var(--muted-foreground);
-  font-family: var(--font-outfit), var(--font-sans);
-  font-size: 0.8125rem;
-  font-weight: 600;
+  color: color-mix(in oklch, var(--foreground) 78%, transparent);
+  font-family: var(--exam-letter-font);
+  font-size: 1.125rem;
+  font-style: italic;
+  font-weight: 400;
   line-height: 1;
   transition:
     background-color 200ms var(--ui-ease),
@@ -382,8 +385,10 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
 }
 
 [data-choice-letter] {
-  /* Latin capitals trimmed to cap height centre optically. */
+  /* Latin capitals trimmed to cap height centre optically; the italic leans
+     right, so it is nudged back a hair. */
   text-box: trim-both cap alphabetic;
+  translate: -0.04em 0;
   transition: opacity 160ms var(--ui-ease), transform 220ms var(--ui-ease);
 }
 
@@ -437,8 +442,8 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
   height: 1.125rem;
   padding-inline: 0.4375rem;
   border-radius: 999px;
-  background: var(--success);
-  color: var(--success-foreground);
+  background: var(--exam-note-correct-bg);
+  color: var(--exam-note-correct-fg);
   font-family: var(--font-sans);
   font-size: 0.6875rem;
   font-weight: 600;
@@ -454,11 +459,21 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
   from { opacity: 0; transform: translateY(-20%) scale(0.85); }
 }
 
+/* Option letters quoted elsewhere (the key under a graded question, the
+   solution sheet) use the marker's face, so "ACD" reads as the same letters. */
+[data-choice-letters] {
+  font-family: var(--exam-letter-font);
+  font-size: 1.15em;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+
 /* --- states --- */
 
 [data-exam-choice-option][data-feedback='selected'] {
   --tint: var(--exam-choice-active);
-  box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--foreground) 34%, transparent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--foreground) 28%, transparent), var(--exam-choice-shadow);
 }
 [data-feedback='selected'] [data-choice-marker] {
   background: var(--foreground);
@@ -473,7 +488,7 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
 
 [data-exam-choice-option][data-feedback='correct'] {
   --tint: var(--exam-correct-tint);
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--success) 38%, transparent);
+  box-shadow: inset 0 0 0 1px var(--exam-correct-ring);
 }
 [data-feedback='correct'] [data-choice-marker] {
   background: var(--success);
@@ -483,7 +498,7 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
 
 [data-exam-choice-option][data-feedback='incorrect'] {
   --tint: var(--exam-incorrect-tint);
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--destructive) 36%, transparent);
+  box-shadow: inset 0 0 0 1px var(--exam-incorrect-ring);
 }
 [data-feedback='incorrect'] [data-choice-marker] {
   background: var(--destructive);
@@ -494,31 +509,32 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
 /* A key option the reader did not pick in a multiple-answer question: amber. */
 [data-exam-choice-option][data-feedback='missed'] {
   --tint: var(--exam-missed-tint);
-  box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--warning) 55%, transparent);
+  box-shadow: inset 0 0 0 1px var(--exam-missed-ring);
 }
 [data-feedback='missed'] [data-choice-marker] {
-  background: color-mix(in oklch, var(--warning) 22%, transparent);
-  box-shadow: inset 0 0 0 1.5px var(--warning);
-  color: color-mix(in oklch, var(--warning) 70%, var(--foreground));
+  background: color-mix(in oklch, var(--warning) 20%, transparent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--warning) 80%, transparent);
+  color: color-mix(in oklch, var(--warning) 62%, var(--foreground));
 }
 [data-feedback='missed'] [data-choice-note] {
-  background: var(--warning);
-  color: var(--warning-foreground);
+  background: var(--exam-note-missed-bg);
+  color: var(--exam-note-missed-fg);
 }
 
 /* The key of a single-answer question the reader missed, or the revealed key. */
 [data-exam-choice-option][data-feedback='answer'] {
   --tint: var(--exam-answer-tint);
-  box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--success) 55%, transparent);
+  box-shadow: inset 0 0 0 1.5px var(--exam-correct-ring);
 }
 [data-feedback='answer'] [data-choice-marker] {
-  background: color-mix(in oklch, var(--success) 10%, transparent);
-  box-shadow: inset 0 0 0 1.5px var(--success);
-  color: var(--success);
+  background: color-mix(in oklch, var(--success) 14%, transparent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--success) 70%, transparent);
+  color: color-mix(in oklch, var(--success) 85%, var(--foreground));
 }
 /* Options not involved in the result fade, but keep their tile. */
 [data-exam-choice-option][data-feedback='dimmed'] {
   box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--foreground) 4%, transparent);
+  background: color-mix(in oklch, var(--exam-choice) 60%, transparent);
 }
 [data-exam-choice-option][data-feedback='dimmed'] > * {
   opacity: 0.48;
@@ -603,7 +619,7 @@ button[data-exam-choice-option]:not([aria-disabled='true']):active {
   border: 0;
   border-radius: 0.875rem;
   background: var(--exam-choice);
-  box-shadow: inset 0 0 0 1px var(--exam-choice-ring);
+  box-shadow: inset 0 0 0 1px var(--exam-choice-ring), var(--exam-choice-shadow);
   color: var(--foreground);
   font: inherit;
   font-weight: 550;

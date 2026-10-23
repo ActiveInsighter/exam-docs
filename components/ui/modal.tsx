@@ -26,10 +26,10 @@ import { cn } from "@/lib/utils"
  *     </ModalContent>
  *   </Modal>
  *
- * Phones get a bottom sheet dragged down by its header; wider screens a
- * centred panel (or a sheet with placement="sheet"). The header floats over
- * the content and turns to frosted glass, fading out at its lower edge, once
- * the content scrolls under it.
+ * A bottom sheet at every width: it slides up from the bottom edge, back
+ * down on close, and follows a downward drag on its header. Wide screens
+ * centre it and cap its width by size. The header floats over the content
+ * and takes a translucent surface once the content scrolls under it.
  *
  * A <Modal> rendered inside another's content is a level of a stack: the one
  * below scales back and dims, the new one gets a back button, Esc and the
@@ -140,8 +140,6 @@ type ModalSurface = {
 
 const ModalSurfaceContext = React.createContext<ModalSurface | null>(null)
 
-const WIDE_SCREEN = "(min-width: 48rem)"
-
 /** Fraction of the sheet height, or an absolute distance, that dismisses. */
 const DISMISS_RATIO = 0.25
 const DISMISS_MAX_PX = 160
@@ -158,15 +156,14 @@ type Drag = {
 }
 
 /*
- * Drag-to-dismiss for sheets. The popup follows the pointer from the
- * header; letting go far enough down (or with a quick flick) closes it,
- * otherwise it springs back on the stylesheet's curve. Drags that start on
- * a control are left to the control.
+ * Drag-to-dismiss. The popup follows the pointer from the header; letting go
+ * far enough down (or with a quick flick) closes it, otherwise it springs
+ * back on the stylesheet's curve. Drags that start on a control are left to
+ * the control.
  */
 function useSwipeDismiss(
   popup: React.RefObject<HTMLElement | null>,
   backdrop: React.RefObject<HTMLElement | null>,
-  placement: ModalPlacement,
   close: () => void
 ) {
   const drag = React.useRef<Drag | null>(null)
@@ -174,7 +171,6 @@ function useSwipeDismiss(
   const onPointerDown = React.useCallback((event: React.PointerEvent<HTMLElement>) => {
     const element = popup.current
     if (!element || event.button !== 0) return
-    if (placement === "center" && window.matchMedia(WIDE_SCREEN).matches) return
     if ((event.target as Element).closest("button, a, input, textarea, select, [data-modal-no-drag]")) return
     event.currentTarget.setPointerCapture(event.pointerId)
     drag.current = {
@@ -187,7 +183,7 @@ function useSwipeDismiss(
     }
     element.style.transition = "none"
     if (backdrop.current) backdrop.current.style.transition = "none"
-  }, [backdrop, placement, popup])
+  }, [backdrop, popup])
 
   const onPointerMove = React.useCallback((event: React.PointerEvent<HTMLElement>) => {
     const state = drag.current
@@ -242,14 +238,25 @@ function useSwipeDismiss(
   }), [finish, onPointerDown, onPointerMove])
 }
 
-/** Marks the popup while any of its scroll areas has left the top. */
+/**
+ * Marks the popup while any of its scroll areas has left the top, and, for
+ * split panes stacked on phones, gives the header the tone of the pane
+ * scrolled under it. Only the header restyles on these changes.
+ */
 function trackScroll(popup: HTMLElement) {
   let frame = 0
   const update = () => {
     frame = 0
-    const scrolled = Array.from(popup.querySelectorAll<HTMLElement>("[data-modal-scroll]"))
-      .some((area) => area.scrollTop > 1)
-    popup.toggleAttribute("data-scrolled", scrolled)
+    const areas = Array.from(popup.querySelectorAll<HTMLElement>("[data-modal-scroll]"))
+    popup.toggleAttribute("data-scrolled", areas.some((area) => area.scrollTop > 1))
+    const split = popup.querySelector<HTMLElement>('[data-slot="modal-split"]')
+    const header = popup.querySelector<HTMLElement>('[data-slot="modal-header"]')
+    if (!split || !header) return
+    const headerBottom = split.getBoundingClientRect().top + header.offsetHeight
+    const under = Array.from(split.querySelectorAll<HTMLElement>('[data-slot="modal-pane"]'))
+      .find((pane) => pane.getBoundingClientRect().bottom > headerBottom)
+    const tone = under?.dataset.tone ?? "default"
+    if (header.dataset.underTone !== tone) header.dataset.underTone = tone
   }
   const onScroll = () => {
     if (!frame) frame = requestAnimationFrame(update)
@@ -266,13 +273,11 @@ function assignRef<T>(ref: React.Ref<T> | undefined, value: T | null) {
   else if (ref) ref.current = value
 }
 
-type ModalPlacement = "center" | "sheet"
 type FocusTarget = DialogPrimitive.Popup.Props["finalFocus"]
 type CloseType = Parameters<Extract<FocusTarget, (...args: never[]) => unknown>>[0]
 
 function ModalContent({
   size = "md",
-  placement = "center",
   className,
   backdropClassName,
   initialFocus,
@@ -282,10 +287,8 @@ function ModalContent({
   children,
   ...props
 }: DialogPrimitive.Popup.Props & {
-  /** Width on wide screens: sm 26rem, md 34rem, lg 48rem, xl 72rem, full. */
+  /** Width cap on wide screens: sm 28rem, md 40rem, lg 56rem, xl 76rem, full. */
   size?: "sm" | "md" | "lg" | "xl" | "full"
-  /** Wide screens only; phones always get a bottom sheet. */
-  placement?: ModalPlacement
   backdropClassName?: string
 }) {
   const level = useModal()
@@ -293,7 +296,7 @@ function ModalContent({
   const popupRef = React.useRef<HTMLDivElement | null>(null)
   const backdropRef = React.useRef<HTMLDivElement | null>(null)
   const titleRef = React.useRef<HTMLElement | null>(null)
-  const dragHandlers = useSwipeDismiss(popupRef, backdropRef, placement, level.close)
+  const dragHandlers = useSwipeDismiss(popupRef, backdropRef, level.close)
   const surface = React.useMemo(() => ({ titleRef, dragHandlers }), [dragHandlers])
 
   // The popup mounts and unmounts with the open state, so set up on the node.
@@ -331,7 +334,6 @@ function ModalContent({
         ref={setPopup}
         data-slot="modal-content"
         data-size={size}
-        data-placement={placement}
         initialFocus={initialFocus ?? (() => titleRef.current ?? true)}
         finalFocus={resolveFinalFocus}
         className={className}
@@ -375,12 +377,25 @@ function ModalHeader({
   const surface = React.useContext(ModalSurfaceContext)
   const headerRef = React.useRef<HTMLElement>(null)
 
-  // The content scrolls under the header, so it is padded by its height.
+  /*
+   * The content scrolls under the header, so the scroll areas are padded by
+   * its height. The variable is registered as non-inherited (modal.css) and
+   * set on those areas only: setting an inherited variable on the popup would
+   * restyle every element in it, a thousand on a long solution.
+   */
   React.useLayoutEffect(() => {
     const header = headerRef.current
     const popup = header?.closest<HTMLElement>('[data-slot="modal-content"]')
     if (!header || !popup) return
-    const update = () => popup.style.setProperty("--modal-header-h", `${header.offsetHeight}px`)
+    let last = ""
+    const update = () => {
+      const height = `${header.offsetHeight}px`
+      if (height === last) return
+      last = height
+      popup.querySelectorAll<HTMLElement>("[data-modal-scroll]").forEach((area) => {
+        area.style.setProperty("--modal-header-h", height)
+      })
+    }
     update()
     const observer = new ResizeObserver(update)
     observer.observe(header)
@@ -503,8 +518,37 @@ function ModalSplit({
   /** grid-template-columns on wide screens; two equal columns by default. */
   columns?: string
 }) {
+  const splitRef = React.useRef<HTMLDivElement>(null)
+
+  // The header's veil takes each pane's tone, changing where the first pane
+  // ends. Written on the header, so only the header restyles.
+  React.useLayoutEffect(() => {
+    const split = splitRef.current
+    const panes = split ? Array.from(split.querySelectorAll<HTMLElement>(':scope > [data-slot="modal-pane"]')) : []
+    const header = split?.closest('[data-slot="modal-content"]')?.querySelector<HTMLElement>('[data-slot="modal-header"]')
+    if (!split || !header || panes.length === 0) return
+    const veil = (pane: HTMLElement | undefined) =>
+      pane?.dataset.tone === "muted" ? "var(--modal-veil-muted)" : "var(--modal-veil)"
+    header.dataset.split = ""
+    header.style.setProperty("--modal-veil-left", veil(panes[0]))
+    header.style.setProperty("--modal-veil-right", veil(panes[panes.length - 1]))
+    let last = ""
+    const update = () => {
+      const x = `${panes[0].offsetWidth}px`
+      if (x !== last) header.style.setProperty("--modal-split-x", (last = x))
+    }
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(panes[0])
+    return () => {
+      observer.disconnect()
+      delete header.dataset.split
+    }
+  }, [])
+
   return (
     <div
+      ref={splitRef}
       data-slot="modal-split"
       data-modal-scroll=""
       className={className}

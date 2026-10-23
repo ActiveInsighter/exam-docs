@@ -1,23 +1,46 @@
 /*
- * Modal (components/ui/modal.tsx): placement, motion, the frosted header and
- * stacked levels. Colours come from the --modal-* tokens in
+ * Modal (components/ui/modal.tsx): placement, motion, the header and stacked
+ * levels. Colours come from the --modal-* tokens in
  * styles/tokens/components.css.
  *
  * In the components layer, so Tailwind utilities passed as className win.
  *
- * Phones: a bottom sheet sliding up on a spring-like curve. Wide screens: a
- * centred panel rising and settling from 97 %, or a sheet with
- * data-placement="sheet". A level with another opened on top of it scales
- * back, lifts and dims (Base UI sets data-nested-dialog-open and
- * --nested-dialogs on it).
+ * A bottom sheet at every width: it slides up from the bottom edge and back
+ * down on close, on one spring-like curve. Wide screens centre it and cap
+ * its width by size. A level with another opened on top of it scales back,
+ * lifts and dims (Base UI sets data-nested-dialog-open and --nested-dialogs).
  */
+/*
+ * Variables that change while a modal is open are registered as
+ * non-inherited: a change then restyles only the element it is set on, not
+ * every element of a long solution inside it.
+ */
+@property --modal-header-h {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 4.25rem;
+}
+
+@property --modal-split-x {
+  syntax: '<length-percentage>';
+  inherits: false;
+  initial-value: 50%;
+}
+
+/* Set by Base UI on the popup when levels open on top of it. */
+@property --nested-dialogs {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
 @layer components {
   [data-slot='modal-backdrop'] {
     position: fixed;
     inset: 0;
     z-index: 50;
     background: var(--modal-backdrop);
-    transition: opacity 450ms var(--modal-ease-out);
+    transition: opacity 480ms var(--modal-ease);
   }
 
   [data-slot='modal-backdrop']:is([data-starting-style], [data-ending-style]) {
@@ -25,24 +48,28 @@
   }
 
   [data-slot='modal-backdrop'][data-ending-style] {
-    transition-duration: 300ms;
+    transition-duration: 360ms;
   }
 
-  /* ---- Popup: a bottom sheet by default ---------------------------------- */
+  /* ---- Popup -------------------------------------------------------------- */
 
   [data-slot='modal-content'] {
-    --modal-header-h: 3.75rem;
     --modal-gutter: 1.25rem;
-    --modal-width: 34rem;
-    --modal-max-height: 44rem;
+    --modal-width: 40rem;
+    --modal-max-height: 100dvh;
 
     position: fixed;
     inset: auto 0 0;
     z-index: 50;
     display: flex;
     flex-direction: column;
+    width: 100%;
+    margin-inline: auto;
     /* Each level of a stack sits a little lower, so the ones behind peek out. */
-    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 1.5rem - var(--modal-depth, 0) * 0.75rem);
+    max-height: min(
+      var(--modal-max-height),
+      calc(100dvh - env(safe-area-inset-top, 0px) - 1.5rem - var(--modal-depth, 0) * 0.75rem)
+    );
     overflow: hidden;
     isolation: isolate;
     border-radius: var(--modal-radius) var(--modal-radius) 0 0;
@@ -51,15 +78,15 @@
     box-shadow: var(--modal-shadow);
     outline: none;
     transform-origin: 50% 0;
-    transition-property: translate, scale, opacity, transform;
-    transition-duration: 520ms;
-    transition-timing-function: var(--modal-ease-sheet);
+    transition-property: translate, scale, transform;
+    transition-duration: 560ms;
+    transition-timing-function: var(--modal-ease);
   }
 
   /* Before the enter/exit states, so a level closing with its stack still leaves. */
   [data-slot='modal-content'][data-nested-dialog-open] {
-    translate: 0 calc(var(--nested-dialogs) * -0.625rem);
-    scale: calc(1 - var(--nested-dialogs) * 0.05);
+    translate: 0 calc(var(--nested-dialogs) * -0.75rem);
+    scale: calc(1 - var(--nested-dialogs) * 0.04);
   }
 
   [data-slot='modal-content']:is([data-starting-style], [data-ending-style]) {
@@ -67,7 +94,7 @@
   }
 
   [data-slot='modal-content'][data-ending-style] {
-    transition-duration: 340ms;
+    transition-duration: 380ms;
   }
 
   /* Dims a level while another is open on top; taps on it return to it. */
@@ -80,7 +107,7 @@
     background: var(--modal-stack-dim);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 420ms var(--modal-ease-out);
+    transition: opacity 420ms var(--modal-ease);
   }
 
   [data-slot='modal-content'][data-nested-dialog-open]::after {
@@ -88,72 +115,39 @@
     pointer-events: auto;
   }
 
-  [data-slot='modal-content'][data-size='sm'] { --modal-width: 26rem; }
-  [data-slot='modal-content'][data-size='lg'] { --modal-width: 48rem; --modal-max-height: 48rem; }
-  [data-slot='modal-content'][data-size='xl'] { --modal-width: 72rem; --modal-max-height: 52rem; }
-  [data-slot='modal-content'][data-size='full'] { --modal-width: 100vw; --modal-max-height: 100dvh; }
-
-  /* ---- Wide screens -------------------------------------------------------- */
+  [data-slot='modal-content'][data-size='sm'] { --modal-width: 28rem; }
+  [data-slot='modal-content'][data-size='lg'] { --modal-width: 56rem; }
+  [data-slot='modal-content'][data-size='xl'] { --modal-width: 76rem; }
+  [data-slot='modal-content'][data-size='full'] { --modal-width: 100vw; }
 
   @media (width >= 48rem) {
-    [data-slot='modal-backdrop'] {
-      -webkit-backdrop-filter: blur(4px);
-      backdrop-filter: blur(4px);
-    }
-
     [data-slot='modal-content'] {
       --modal-gutter: 1.75rem;
-    }
-
-    [data-slot='modal-content'][data-placement='center'] {
-      inset: 0;
-      margin: auto;
-      width: min(var(--modal-width), calc(100vw - 3rem));
-      height: fit-content;
-      max-height: min(var(--modal-max-height), calc(100dvh - 4rem));
-      border-radius: var(--modal-radius);
-      transition-duration: 420ms;
-      transition-timing-function: var(--modal-ease-out);
-    }
-
-    [data-slot='modal-content'][data-placement='center'][data-size='full'] {
-      height: calc(100dvh - 4rem);
-    }
-
-    [data-slot='modal-content'][data-placement='center'][data-nested-dialog-open] {
-      translate: 0 calc(var(--nested-dialogs) * -1rem);
-      scale: calc(1 - var(--nested-dialogs) * 0.04);
-    }
-
-    [data-slot='modal-content'][data-placement='center']:is([data-starting-style], [data-ending-style]) {
-      opacity: 0;
-      translate: 0 0.75rem;
-      scale: 0.97;
-    }
-
-    [data-slot='modal-content'][data-placement='center'][data-ending-style] {
-      translate: 0 0.375rem;
-      scale: 0.985;
-      transition-duration: 200ms;
-      transition-timing-function: var(--modal-ease-in);
-    }
-
-    [data-slot='modal-content'][data-placement='sheet'] {
-      inset-inline: 0;
-      margin-inline: auto;
       width: min(var(--modal-width), calc(100vw - 2rem));
-      max-height: min(var(--modal-max-height), calc(100dvh - 3rem - var(--modal-depth, 0) * 0.75rem));
+      max-height: min(
+        var(--modal-max-height),
+        calc(100dvh - 2.5rem - var(--modal-depth, 0) * 0.75rem)
+      );
+    }
+
+    [data-slot='modal-content'][data-size='full'] {
+      width: 100vw;
+      height: calc(100dvh - 2.5rem);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    [data-slot='modal-content'][data-placement] {
+    [data-slot='modal-content'][data-size] {
       transition-property: opacity;
       transition-duration: 160ms;
     }
 
-    [data-slot='modal-content'][data-placement][data-size]:is([data-starting-style], [data-ending-style]) {
+    [data-slot='modal-content'][data-size]:is([data-starting-style], [data-ending-style]) {
       opacity: 0;
+      translate: none;
+    }
+
+    [data-slot='modal-content'][data-size][data-nested-dialog-open] {
       translate: none;
       scale: none;
     }
@@ -166,28 +160,54 @@
     inset: 0 0 auto;
     z-index: 20;
     padding: 0.5rem 0.75rem 0.625rem var(--modal-gutter);
+    /*
+     * The surface beneath, slightly see-through: invisible over empty space,
+     * and it keeps the header legible once content scrolls under it.
+     */
+    background: var(--modal-veil);
     touch-action: none;
     user-select: none;
+    cursor: grab;
+    transition: box-shadow 200ms var(--modal-ease);
   }
 
-  /* Frosted glass that fades out downwards, shown once content is under it. */
-  [data-slot='modal-header']::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 calc(-1 * var(--modal-header-fade));
-    z-index: -1;
-    pointer-events: none;
-    background: var(--modal-glass);
-    -webkit-backdrop-filter: blur(16px) saturate(1.6);
-    backdrop-filter: blur(16px) saturate(1.6);
-    -webkit-mask-image: linear-gradient(#000 calc(100% - var(--modal-header-fade)), transparent);
-    mask-image: linear-gradient(#000 calc(100% - var(--modal-header-fade)), transparent);
-    opacity: 0;
-    transition: opacity 260ms var(--modal-ease-out);
+  [data-slot='modal-header']:active {
+    cursor: grabbing;
   }
 
-  [data-slot='modal-content'][data-scrolled] [data-slot='modal-header']::before {
-    opacity: 1;
+  [data-slot='modal-content'][data-scrolled] [data-slot='modal-header'] {
+    box-shadow: 0 1px 0 var(--ui-fill);
+  }
+
+  /*
+   * Split panes have their own tones, so the veil follows the pane under the
+   * header. ModalSplit marks the header (data-split) and sets
+   * --modal-veil-left / --modal-veil-right and --modal-split-x on it. Side by
+   * side, two bands meet at the first pane's width; stacked on phones, the
+   * pane currently scrolled under it decides (data-under-tone).
+   */
+  @media (width < 48rem) {
+    [data-slot='modal-header'][data-split] {
+      background: var(--modal-veil-left, var(--modal-veil));
+    }
+
+    [data-slot='modal-header'][data-split][data-under-tone='muted'] {
+      background: var(--modal-veil-muted);
+    }
+
+    [data-slot='modal-header'][data-split][data-under-tone='default'] {
+      background: var(--modal-veil);
+    }
+  }
+
+  @media (width >= 48rem) {
+    [data-slot='modal-header'][data-split] {
+      background: linear-gradient(
+        to right,
+        var(--modal-veil-left, var(--modal-veil)) var(--modal-split-x),
+        var(--modal-veil-right, var(--modal-veil)) var(--modal-split-x)
+      );
+    }
   }
 
   [data-slot='modal-handle'] {
@@ -198,32 +218,13 @@
     background: var(--ui-fill-strong);
   }
 
-  @media (width >= 48rem) {
-    [data-slot='modal-content'][data-placement='center'] [data-slot='modal-header'] {
-      padding-top: 0.75rem;
-      touch-action: auto;
-      user-select: auto;
-    }
-
-    [data-slot='modal-content'][data-placement='center'] [data-slot='modal-handle'] {
-      display: none;
-    }
-
-    [data-slot='modal-content'][data-placement='sheet'] [data-slot='modal-header'] {
-      cursor: grab;
-    }
-
-    [data-slot='modal-content'][data-placement='sheet'] [data-slot='modal-header']:active {
-      cursor: grabbing;
-    }
-  }
-
   [data-slot='modal-header-bar'] {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
     min-height: 2.5rem;
+    cursor: auto;
   }
 
   [data-slot='modal-title'] {
@@ -304,13 +305,12 @@
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
-    scroll-padding-top: var(--modal-header-h);
-    scrollbar-width: thin;
-    animation: modal-content-in 420ms var(--modal-ease-out) 60ms both;
+    scroll-padding-top: var(--modal-header-h, 4.25rem);
+    animation: modal-content-in 460ms var(--modal-ease) 80ms both;
   }
 
   [data-slot='modal-body'] {
-    padding: calc(var(--modal-header-h) + 0.25rem) var(--modal-gutter) calc(1.75rem + env(safe-area-inset-bottom, 0px));
+    padding: calc(var(--modal-header-h, 4.25rem) + 0.25rem) var(--modal-gutter) calc(1.75rem + env(safe-area-inset-bottom, 0px));
   }
 
   [data-slot='modal-body']:has(~ [data-slot='modal-footer']) {
@@ -332,7 +332,7 @@
   }
 
   [data-slot='modal-pane']:first-child {
-    padding-top: calc(var(--modal-header-h) + 0.25rem);
+    padding-top: calc(var(--modal-header-h, 4.25rem) + 0.25rem);
   }
 
   [data-slot='modal-pane']:last-child {
@@ -349,10 +349,9 @@
     [data-slot='modal-pane'] {
       overflow-y: auto;
       overscroll-behavior: contain;
-      padding-top: calc(var(--modal-header-h) + 0.25rem);
+      padding-top: calc(var(--modal-header-h, 4.25rem) + 0.25rem);
       padding-bottom: 2rem;
-      scroll-padding-top: var(--modal-header-h);
-      scrollbar-width: thin;
+      scroll-padding-top: var(--modal-header-h, 4.25rem);
     }
   }
 
@@ -379,6 +378,6 @@
 @keyframes modal-content-in {
   from {
     opacity: 0;
-    translate: 0 0.375rem;
+    translate: 0 0.5rem;
   }
 }
