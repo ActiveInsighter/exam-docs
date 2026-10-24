@@ -121,6 +121,7 @@ export function Question({
         {hasSolution || spec ? (
           <QuestionFooter
             questionId={id}
+            questionType={questionType}
             solution={solution}
             showSolution={hasSolution}
             buttonLabel={buttonLabel}

@@ -4,7 +4,7 @@ import { CircleAlertIcon, CircleCheckIcon, CircleXIcon, RotateCcwIcon } from 'lu
 import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { blankBadge } from './blank-field';
-import type { AttemptResult, BlankSpec, Evaluation, GradingSpec } from './grading';
+import type { AttemptResult, BlankSpec, Evaluation, GradingSpec, QuestionType } from './grading';
 import { formatKey } from './grading';
 import { MathPreview } from './math-preview';
 import type { QuestionTag } from './model';
@@ -119,6 +119,7 @@ function useAttemptStatus(): AttemptStatus | undefined {
 
 export type QuestionFooterProps = {
   questionId: string;
+  questionType: QuestionType;
   solution: ReactNode;
   showSolution: boolean;
   buttonLabel: string;

@@ -1,47 +1,58 @@
 'use client';
 
 import { BookOpenTextIcon, CheckIcon, ChevronDownIcon, LibraryBigIcon, NotebookPenIcon, XIcon } from 'lucide-react';
-import { lazy, type ReactNode, type RefObject, Suspense, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { lazy, type ReactNode, type RefObject, Suspense, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { Modal, ModalContent, ModalHeader, ModalPane, ModalSplit, ModalTags, ModalTitle, ModalToolbar } from '@/components/ui/modal';
+import {
+  StudyCard,
+  StudyCardAside,
+  StudyCardHeader,
+  StudyCardMain,
+  StudyCardSection,
+  StudyCardStage,
+  studyCardReveal,
+} from '@/components/ui/study-card';
 import { cn } from '@/lib/utils';
 import { blankBadge } from './blank-field';
-import { formatKey, formatResponse, type GradingSpec } from './grading';
-import { QuestionMarkActions, QuestionUserTags, useMarks } from './marks/question-marks';
+import { formatKey, formatResponse, type GradingSpec, type QuestionType } from './grading';
+import { QuestionMarkActions, QuestionMarksScope, QuestionUserTags, useMarks } from './marks/question-marks';
 import { NoteEditor } from './marks/note-editor';
 import { MathPreview } from './math-preview';
 import { BuiltinTags } from './question-tags';
 import type { QuestionTag } from './model';
 import { mirrorQuestion } from './question-mirror';
-import { useQuestionState, type QuestionState } from './question-state';
+import { QuestionStateScope, useQuestionState, type QuestionState } from './question-state';
+import { removeSolutionEntry, setSolutionEntry, useSolutionDeck, type SolutionEntry } from './solution-deck';
 
-// Opened from the toolbar on top of the sheet; loaded on first use.
+// Opened from the toolbar as a page of the card; loaded on first use.
 const QuestionLibraryDialog = lazy(() => import('./marks/library-dialog').then((module) => ({ default: module.QuestionLibraryDialog })));
 
 /*
- * "题目与解析": a modal (components/ui/modal.tsx) with the question (a
- * read-only copy of the page's own rendering, the key revealed), the
- * reader's answer next to the correct one, the solution and the reader's note.
+ * "题目与解析": a study card (components/ui/study-card.tsx) for each question
+ * of the page that has a solution, opened on the question asked and stepped
+ * through the others with the pager, ←/→ or a swipe.
  *
- * Header: number, type and tags; the reader's marks and the library in the
- * toolbar. The library opens as a second level on top of this one.
- * Content: two panes that scroll on their own on desktop; one scroll on
- * phones, the question folded to a few lines first so the answer is in view.
- * Focus starts on the title and returns to the trigger.
+ *   header   number, type and tags; the reader's marks, the library and
+ *            the pager in the toolbar (top right)
+ *   aside    the question (a read-only copy of the page's own rendering,
+ *            the key revealed), on a wash of the question type's colour;
+ *            on desktop also the reader's note
+ *   main     the reader's answer next to the correct one, the solution,
+ *            and on phones the note
+ *
+ * Desktop shows the two side by side, each scrolling on its own; phones
+ * stack them in one scroll, the question folded to a few lines first so the
+ * answer is in view. The library opens as a page of the same card, pushed in
+ * from the right. Focus starts on the title and returns, on close, to the
+ * 查看解答 button of the question last shown, which scrolls it into view.
+ *
+ * Every sheet registers its question in the page's deck (solution-deck.ts);
+ * a card shows another question with that question's own state and marks.
  */
 
 // Portaled out of #docs-body: `docs-prose` gives it the page typography.
 const prose = 'prose docs-prose max-w-none min-w-0';
 const proseReset = '[&>:first-child]:mt-0 [&>:last-child]:mb-0';
-
-function SectionLabel({ children, action }: { children: ReactNode; action?: ReactNode }) {
-  return (
-    <div className="mb-3 flex min-h-7 items-center gap-2 text-xs font-medium tracking-wider text-muted-foreground">
-      <span>{children}</span>
-      {action ? <span className="ml-auto">{action}</span> : null}
-    </div>
-  );
-}
 
 function Chip({ children }: { children: ReactNode }) {
   return (
@@ -155,21 +166,20 @@ function AnswerSummary({ spec, state }: { spec: GradingSpec; state: QuestionStat
 }
 
 /** The reader's note, editable in place inside the sheet. */
-function SheetNote({ editing, setEditing }: { editing: boolean; setEditing: (editing: boolean) => void }) {
+function SheetNote({ editing, setEditing, order }: { editing: boolean; setEditing: (editing: boolean) => void; order: number }) {
   const marks = useMarks();
   if (!marks) return null;
   const note = marks.mark?.note ?? '';
   return (
-    <section aria-label="我的注释">
-      <SectionLabel
-        action={!editing ? (
-          <Button variant="ghost" size="xs" className="text-muted-foreground" onClick={() => setEditing(true)} disabled={!marks.ready}>
-            <NotebookPenIcon data-icon="inline-start" />{note ? '编辑' : '添加'}
-          </Button>
-        ) : null}
-      >
-        我的注释
-      </SectionLabel>
+    <StudyCardSection
+      label="我的注释"
+      meta={!editing ? (
+        <Button variant="ghost" size="xs" className="-my-1 text-muted-foreground" onClick={() => setEditing(true)} disabled={!marks.ready}>
+          <NotebookPenIcon data-icon="inline-start" />{note ? '编辑' : '添加'}
+        </Button>
+      ) : null}
+      {...studyCardReveal(order)}
+    >
       {editing ? (
         <NoteEditor initial={note} onCancel={() => setEditing(false)} onSave={async (next) => { if (await marks.update({ note: next })) setEditing(false); }} />
       ) : note ? (
@@ -177,7 +187,7 @@ function SheetNote({ editing, setEditing }: { editing: boolean; setEditing: (edi
       ) : (
         <p className="text-sm text-muted-foreground">还没有注释。记下思路或易错点，下次复习一眼可见。</p>
       )}
-    </section>
+    </StudyCardSection>
   );
 }
 
@@ -193,8 +203,18 @@ function useDesktop() {
   return useSyncExternalStore(subscribeDesktop, () => window.matchMedia(DESKTOP).matches, () => true);
 }
 
+/** The colour each question type washes its card's question pane with. */
+const TYPE_TINTS: Record<QuestionType, string> = {
+  single: 'oklch(0.62 0.13 250)',
+  multiple: 'oklch(0.6 0.13 292)',
+  boolean: 'oklch(0.64 0.1 182)',
+  blank: 'oklch(0.7 0.12 74)',
+  essay: 'oklch(0.64 0.12 28)',
+};
+
 export type QuestionSolutionSheetProps = {
   questionId: string;
+  questionType: QuestionType;
   solution: ReactNode;
   buttonLabel: string;
   dialogTitle: string;
@@ -204,14 +224,26 @@ export type QuestionSolutionSheetProps = {
 };
 
 /*
- * The trigger is a plain button; the dialog tree mounts on first open and
- * then stays so later opens and the close animation are instant. A long page
- * has a hundred of these, most never opened.
+ * The trigger is a plain button; the card mounts on first open and then
+ * stays so later opens and the close animation are instant. A long page has
+ * a hundred of these, most never opened: until then each one only keeps its
+ * entry in the page's deck current.
  */
-export function QuestionSolutionSheet({ buttonLabel, ...props }: QuestionSolutionSheetProps) {
+export function QuestionSolutionSheet({ buttonLabel, questionId, questionType, solution, dialogTitle, numberLabel, typeLabel, tags }: QuestionSolutionSheetProps) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const key = useId();
+  const state = useQuestionState();
+  const marks = useMarks();
+
+  const entry = useMemo<SolutionEntry>(() => ({
+    key, questionId, questionType, trigger: triggerRef, solution, dialogTitle, numberLabel, typeLabel, tags, state, marks,
+  }), [key, questionId, questionType, solution, dialogTitle, numberLabel, typeLabel, tags, state, marks]);
+
+  useEffect(() => setSolutionEntry(entry), [entry]);
+  useEffect(() => () => removeSolutionEntry(key), [key]);
+
   return (
     <>
       <button
@@ -229,91 +261,143 @@ export function QuestionSolutionSheet({ buttonLabel, ...props }: QuestionSolutio
         <BookOpenTextIcon data-icon="inline-start" />
         {buttonLabel}
       </button>
-      {mounted ? <SheetDialog {...props} open={open} setOpen={setOpen} triggerRef={triggerRef} /> : null}
+      {mounted ? <SolutionCard self={entry} open={open} setOpen={setOpen} triggerRef={triggerRef} /> : null}
     </>
   );
 }
 
-type SheetDialogProps = Omit<QuestionSolutionSheetProps, 'buttonLabel'> & {
+const toolbarButton = buttonVariants({ variant: 'ghost', size: 'icon' }) + ' size-8 rounded-full text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active) aria-expanded:text-foreground';
+
+/** Gives a card the live state and marks of the question it shows. */
+function EntryScope({ entry, children }: { entry: SolutionEntry; children: ReactNode }) {
+  return (
+    <QuestionStateScope value={entry.state}>
+      <QuestionMarksScope value={entry.marks}>{children}</QuestionMarksScope>
+    </QuestionStateScope>
+  );
+}
+
+function SolutionCard({ self, open, setOpen, triggerRef }: {
+  self: SolutionEntry;
   open: boolean;
   setOpen: (open: boolean) => void;
   triggerRef: RefObject<HTMLButtonElement | null>;
-};
-
-const toolbarButton = buttonVariants({ variant: 'ghost', size: 'icon' }) + ' size-8 rounded-full text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active) aria-expanded:text-foreground';
-
-function SheetDialog({ questionId, solution, dialogTitle, numberLabel, typeLabel, tags, open, setOpen, triggerRef }: SheetDialogProps) {
+}) {
+  const deck = useSolutionDeck(open);
+  const [currentKey, setCurrentKey] = useState(self.key);
   const [editingNote, setEditingNote] = useState(false);
   const [library, setLibrary] = useState<'closed' | 'open' | 'mounted'>('closed');
   const desktop = useDesktop();
-  const state = useQuestionState();
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const spec = state?.spec ?? null;
+
+  // Every open starts on the question it was opened from.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (wasOpen !== open) {
+    setWasOpen(open);
+    if (open) setCurrentKey(self.key);
+  }
+
+  const found = deck.findIndex((entry) => entry.key === currentKey);
+  const cards = found >= 0 ? deck : [self];
+  const index = Math.max(0, found);
+  const entry = cards[index] ?? self;
 
   return (
-    <Modal open={open} onOpenChange={(next) => { setOpen(next); if (!next) setEditingNote(false); }}>
-      <ModalContent
-        size="xl"
-        initialFocus={titleRef}
-        finalFocus={triggerRef}
-        className="text-base md:min-h-[min(32rem,calc(100dvh-2.5rem))]"
-      >
-        <ModalHeader>
-          <ModalTitle ref={titleRef}>{numberLabel ? `第 ${numberLabel} 题` : dialogTitle}</ModalTitle>
-          <ModalTags aria-label="标签">
-            <Chip>{typeLabel}</Chip>
-            <BuiltinTags tags={tags} />
-            <QuestionUserTags />
-          </ModalTags>
-          <ModalToolbar aria-label="题目操作">
-            <QuestionMarkActions editingNote={editingNote} onEditNote={() => setEditingNote(!editingNote)} />
-            <button
-              type="button"
-              className={toolbarButton}
-              aria-haspopup="dialog"
-              aria-expanded={library === 'open'}
-              aria-label="收藏与标签"
-              title="收藏与标签"
-              onClick={() => setLibrary('open')}
-            >
-              <LibraryBigIcon />
-            </button>
-          </ModalToolbar>
-        </ModalHeader>
+    <StudyCard
+      open={open}
+      onOpenChange={(next) => { setOpen(next); if (!next) setEditingNote(false); }}
+      count={cards.length}
+      index={index}
+      onIndexChange={(next) => {
+        const target = cards[next];
+        if (!target) return;
+        setCurrentKey(target.key);
+        setEditingNote(false);
+      }}
+      itemKey={entry.key}
+      labels={{ group: '切换题目', prev: '上一题', next: '下一题' }}
+      tint={TYPE_TINTS[entry.questionType]}
+      size="xl"
+      height="46rem"
+      className="text-base"
+      finalFocus={() => entry.trigger.current ?? triggerRef.current ?? true}
+    >
+      <EntryScope entry={entry}>
+        <StudyCardHeader
+          title={entry.numberLabel ? `第 ${entry.numberLabel} 题` : entry.dialogTitle}
+          tags={(
+            <>
+              <Chip>{entry.typeLabel}</Chip>
+              <BuiltinTags tags={entry.tags} />
+              <QuestionUserTags />
+            </>
+          )}
+          tagsProps={{ 'aria-label': '标签' }}
+          actionsLabel="题目操作"
+          actions={(
+            <>
+              <QuestionMarkActions editingNote={editingNote} onEditNote={() => setEditingNote(!editingNote)} />
+              <button
+                type="button"
+                className={toolbarButton}
+                aria-expanded={library === 'open'}
+                aria-label="收藏与标签"
+                title="收藏与标签"
+                onClick={() => setLibrary('open')}
+              >
+                <LibraryBigIcon />
+              </button>
+            </>
+          )}
+        />
+      </EntryScope>
 
-        <ModalSplit columns="minmax(0,0.9fr) minmax(0,1.1fr)">
-          <ModalPane tone="muted" className="@container flex flex-col gap-7">
-            <section aria-label="题目">
-              <SectionLabel>题目</SectionLabel>
-              <QuestionMirror questionId={questionId} state={state} />
-            </section>
-            {desktop ? <SheetNote editing={editingNote} setEditing={setEditingNote} /> : null}
-          </ModalPane>
+      <StudyCardStage ratio={0.46}>
+        <EntryScope entry={entry}>
+          <SolutionCardBody entry={entry} desktop={desktop} editingNote={editingNote} setEditingNote={setEditingNote} />
+        </EntryScope>
+      </StudyCardStage>
 
-          <ModalPane className="flex flex-col gap-7">
-            {spec ? (
-              <section aria-label="答案">
-                <SectionLabel>答案</SectionLabel>
-                <AnswerSummary spec={spec} state={state} />
-              </section>
-            ) : null}
-            <section aria-label={spec ? '解析' : '参考解答'}>
-              <SectionLabel>{spec ? '解析' : '参考解答'}</SectionLabel>
-              <div className={cn(prose, proseReset, '[&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden')}>
-                {solution}
-              </div>
-            </section>
-            {!desktop ? <SheetNote editing={editingNote} setEditing={setEditingNote} /> : null}
-          </ModalPane>
-        </ModalSplit>
+      {/* A page of this card: pushed in from the right, back returns here. */}
+      {library !== 'closed' ? (
+        <Suspense fallback={null}>
+          <QuestionLibraryDialog open={library === 'open'} onOpenChange={(next) => setLibrary(next ? 'open' : 'mounted')} />
+        </Suspense>
+      ) : null}
+    </StudyCard>
+  );
+}
 
-        {/* Second level: rendered inside this modal so it stacks on top of it. */}
-        {library !== 'closed' ? (
-          <Suspense fallback={null}>
-            <QuestionLibraryDialog open={library === 'open'} onOpenChange={(next) => setLibrary(next ? 'open' : 'mounted')} />
-          </Suspense>
+/** One card's panes. Kept as rendered while the card leaves, with the scope it was given. */
+function SolutionCardBody({ entry, desktop, editingNote, setEditingNote }: {
+  entry: SolutionEntry;
+  desktop: boolean;
+  editingNote: boolean;
+  setEditingNote: (editing: boolean) => void;
+}) {
+  const { questionId, state, solution } = entry;
+  const spec = state?.spec ?? null;
+  return (
+    <>
+      <StudyCardAside className="@container">
+        <StudyCardSection label="题目" {...studyCardReveal(0)}>
+          <QuestionMirror questionId={questionId} state={state} />
+        </StudyCardSection>
+        {desktop ? <SheetNote editing={editingNote} setEditing={setEditingNote} order={1} /> : null}
+      </StudyCardAside>
+
+      <StudyCardMain>
+        {spec ? (
+          <StudyCardSection label="答案" {...studyCardReveal(0)}>
+            <AnswerSummary spec={spec} state={state} />
+          </StudyCardSection>
         ) : null}
-      </ModalContent>
-    </Modal>
+        <StudyCardSection label={spec ? '解析' : '参考解答'} {...studyCardReveal(1)}>
+          <div className={cn(prose, proseReset, '[&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden')}>
+            {solution}
+          </div>
+        </StudyCardSection>
+        {!desktop ? <SheetNote editing={editingNote} setEditing={setEditingNote} order={2} /> : null}
+      </StudyCardMain>
+    </>
   );
 }

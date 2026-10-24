@@ -19,15 +19,15 @@ import {
   useModal,
 } from '@/components/ui/modal';
 import {
-  KnowledgeCard,
-  KnowledgeCardAside,
-  KnowledgeCardHeader,
-  KnowledgeCardHero,
-  KnowledgeCardMain,
-  KnowledgeCardSection,
-  KnowledgeCardStage,
-  knowledgeCardReveal,
-} from '@/components/ui/knowledge-card';
+  StudyCard,
+  StudyCardAside,
+  StudyCardHeader,
+  StudyCardHero,
+  StudyCardMain,
+  StudyCardSection,
+  StudyCardStage,
+  studyCardReveal,
+} from '@/components/ui/study-card';
 import { cn } from '@/lib/utils';
 
 /*
@@ -160,74 +160,71 @@ function SplitDemo() {
   );
 }
 
-const LEVELS = [
+const PAGES = [
   {
-    title: '第 1 层 · 题目列表',
-    text: '点击下面的按钮，在这一层之上再打开一层。这一层会从底边微微后退、变窄并变暗，顶部露出一条，像一叠卡片。',
+    title: '题目列表',
+    text: '点击下面的按钮打开下一页。它不会再叠一个弹窗，而是在同一个面板里从右侧推入，这一页向左退开并变暗；左上角出现返回按钮。',
     paragraphs: 6,
   },
   {
-    title: '第 2 层 · 收藏与标签',
-    text: '新一层至少与下层同宽，所以下层只从顶部露出。返回按钮、Esc 或点击露出的那一条都只关闭这一层；右上角的「全部关闭」关闭整个栈。',
+    title: '收藏与标签',
+    text: '面板宽度不变，高度只会为更高的页面长高，不会因为这一页较短而缩小。返回按钮或 Esc 回到上一页，右上角的关闭按钮、点遮罩或下拉顶栏关闭整个面板。',
     paragraphs: 2,
   },
   {
-    title: '第 3 层 · 确认',
-    text: '再深一层时，最底层退得更远、更暗。这一层很矮，下面两层保持原位，不会跟着沉下去。',
+    title: '确认',
+    text: '再深一页也一样。返回时上一页保留原来的滚动位置和状态，焦点回到打开这一页的按钮。',
     paragraphs: 0,
   },
 ] as const;
 
-/** One level of the nested demo; each level can open the next. */
-function Level({ index }: { index: number }) {
-  const [open, setOpen] = useState(false);
+/** One page of the navigation demo; each page can push the next. */
+function Page({ index }: { index: number }) {
   const modal = useModal();
-  const level = LEVELS[index];
-  const last = index === LEVELS.length - 1;
+  const page = PAGES[index];
+  const last = index === PAGES.length - 1;
   return (
     <>
       <ModalHeader>
-        <ModalTitle>{level.title}</ModalTitle>
+        <ModalTitle>{page.title}</ModalTitle>
         <ModalTags>
-          <Chip tone={String(index + 1)}>depth {modal?.depth ?? index}</Chip>
+          <Chip tone={String(index + 1)}>第 {index + 1} 页</Chip>
         </ModalTags>
       </ModalHeader>
       <ModalBody>
-        <p className="mb-4 leading-7">{level.text}</p>
-        <Paragraphs count={level.paragraphs} topic={level.title} />
+        <p className="mb-4 leading-7">{page.text}</p>
+        <Paragraphs count={page.paragraphs} topic={page.title} />
       </ModalBody>
       <ModalFooter>
         {index > 0 ? (
-          <Button variant="ghost" className="h-9 rounded-full px-4" onClick={() => modal?.closeAll()}>全部关闭</Button>
+          <Button variant="ghost" className="h-9 rounded-full px-4" onClick={() => modal?.closeAll()}>关闭面板</Button>
         ) : null}
         {!last ? (
-          <Button className="h-9 rounded-full px-4" onClick={() => setOpen(true)}>
-            <Layers3Icon data-icon="inline-start" />打开第 {index + 2} 层
-          </Button>
+          <Modal>
+            <ModalTrigger className={cn(buttonVariants(), 'h-9 rounded-full px-4')}>
+              <Layers3Icon data-icon="inline-start" />打开「{PAGES[index + 1].title}」
+            </ModalTrigger>
+            <ModalContent>
+              <Page index={index + 1} />
+            </ModalContent>
+          </Modal>
         ) : (
-          <Button className="h-9 rounded-full px-4" onClick={() => modal?.close()}>返回上一层</Button>
+          <Button className="h-9 rounded-full px-4" onClick={() => modal?.close()}>返回上一页</Button>
         )}
       </ModalFooter>
-      {!last ? (
-        <Modal open={open} onOpenChange={setOpen}>
-          <ModalContent size="sm">
-            <Level index={index + 1} />
-          </ModalContent>
-        </Modal>
-      ) : null}
     </>
   );
 }
 
 function NestedDemo() {
   return (
-    <DemoFrame caption="多级弹窗：在弹窗内渲染 <Modal> 即叠加一层，像一叠卡片。三层高度各不相同，下层总是只在需要时抬起，露出顶部一条。">
+    <DemoFrame caption="页面切换：在弹窗内容里再渲染 <Modal>，它成为同一面板的下一页，从右向左推入；左上角返回，Esc 也返回一页。">
       <Modal>
         <ModalTrigger className={trigger}>
-          <BookmarkIcon className="size-4" />多级弹窗
+          <BookmarkIcon className="size-4" />页面切换
         </ModalTrigger>
         <ModalContent size="lg">
-          <Level index={0} />
+          <Page index={0} />
         </ModalContent>
       </Modal>
     </DemoFrame>
@@ -309,6 +306,7 @@ function HeightDemo() {
 const CONCEPTS = [
   {
     term: '极限',
+    tint: 'oklch(0.62 0.13 250)',
     english: 'limit',
     tag: '函数与极限',
     points: ['ε-δ 定义刻画“任意接近”', '左右极限存在且相等', '四则运算与夹逼准则'],
@@ -320,6 +318,7 @@ const CONCEPTS = [
   },
   {
     term: '导数',
+    tint: 'oklch(0.64 0.1 182)',
     english: 'derivative',
     tag: '一元微分',
     points: ['函数增量与自变量增量之比的极限', '几何意义：切线斜率', '可导必连续，反之不然'],
@@ -331,6 +330,7 @@ const CONCEPTS = [
   },
   {
     term: '定积分',
+    tint: 'oklch(0.66 0.12 40)',
     english: 'definite integral',
     tag: '一元积分',
     points: ['分割、近似、求和、取极限', '几何意义：有向面积', '牛顿—莱布尼茨公式连接微分与积分'],
@@ -342,47 +342,48 @@ const CONCEPTS = [
   },
 ] as const;
 
-function KnowledgeDemo() {
+function StudyDemo() {
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
   const concept = CONCEPTS[index];
   return (
-    <DemoFrame caption="KnowledgeCard 只提供结构与动效：顶栏翻页器、左右分栏、卡片切换动画、←/→ 与左右滑动；内容由调用方填进 Aside / Main。">
+    <DemoFrame caption="StudyCard 只提供结构与动效：顶栏翻页器、左右分栏（ratio 控制比例）、可选彩色底的左栏、卡片切换动画、←/→ 与左右滑动；内容由调用方填进 Aside / Main。">
       <Button variant="secondary" size="lg" className="h-10 rounded-full px-4" onClick={() => setOpen(true)}>
-        <Layers3Icon data-icon="inline-start" />知识卡片
+        <Layers3Icon data-icon="inline-start" />学习卡片
       </Button>
-      <KnowledgeCard
+      <StudyCard
         open={open}
         onOpenChange={setOpen}
         count={CONCEPTS.length}
         index={index}
         onIndexChange={setIndex}
         labels={{ group: '切换概念', prev: '上一个概念', next: '下一个概念' }}
+        tint={concept.tint}
         height="34rem"
       >
-        <KnowledgeCardHeader title={concept.term} titleMode="scrolled" />
-        <KnowledgeCardStage columns="minmax(0,0.9fr) minmax(0,1.1fr)">
-          <KnowledgeCardAside>
-            <KnowledgeCardHero title={concept.term} subtitle={concept.english} badge={<Chip tone="5">{concept.tag}</Chip>} />
-            <KnowledgeCardSection label="要点">
+        <StudyCardHeader title={concept.term} titleMode="scrolled" />
+        <StudyCardStage ratio={0.45}>
+          <StudyCardAside>
+            <StudyCardHero title={concept.term} subtitle={concept.english} badge={<Chip tone="5">{concept.tag}</Chip>} />
+            <StudyCardSection label="要点">
               <ul className="grid gap-2 text-[0.9375rem] leading-relaxed">
                 {concept.points.map((point, order) => (
-                  <li key={point} className="rounded-xl bg-(--ui-fill) px-3 py-2" {...knowledgeCardReveal(order)}>
+                  <li key={point} className="rounded-xl bg-(--ui-fill) px-3 py-2" {...studyCardReveal(order)}>
                     {point}
                   </li>
                 ))}
               </ul>
-            </KnowledgeCardSection>
-          </KnowledgeCardAside>
-          <KnowledgeCardMain>
+            </StudyCardSection>
+          </StudyCardAside>
+          <StudyCardMain>
             {concept.sections.map(([label, text], order) => (
-              <KnowledgeCardSection key={label} label={label} {...knowledgeCardReveal(order)}>
+              <StudyCardSection key={label} label={label} {...studyCardReveal(order)}>
                 <p className="leading-7 text-foreground/90">{text}</p>
-              </KnowledgeCardSection>
+              </StudyCardSection>
             ))}
-          </KnowledgeCardMain>
-        </KnowledgeCardStage>
-      </KnowledgeCard>
+          </StudyCardMain>
+        </StudyCardStage>
+      </StudyCard>
     </DemoFrame>
   );
 }
@@ -394,7 +395,7 @@ const DEMOS = {
   nested: NestedDemo,
   sizes: SizesDemo,
   heights: HeightDemo,
-  knowledge: KnowledgeDemo,
+  study: StudyDemo,
 };
 
 export function ModalDemo({ kind }: { kind: keyof typeof DEMOS }) {
