@@ -15,6 +15,7 @@ import {
   useState,
 } from 'react';
 import { cn } from '@/lib/utils';
+import { PAGE_QUESTION_STATUS_TEXT } from '@/components/question/page-questions';
 import { type NavItem, useQuestionNav } from './use-question-nav';
 import styles from './reading.module.css';
 
@@ -113,14 +114,6 @@ function useArticleStats(ref: RefObject<HTMLElement | null>) {
   return stats;
 }
 
-const statusText: Record<NavItem['status'], string> = {
-  idle: '未作答',
-  draft: '作答中',
-  correct: '回答正确',
-  partial: '部分正确',
-  incorrect: '回答错误',
-};
-
 function QuestionNav({
   items,
   active,
@@ -140,8 +133,8 @@ function QuestionNav({
           className={styles.navItem}
           data-status={item.status}
           aria-current={item.id === active ? 'true' : undefined}
-          aria-label={`第 ${item.label} 题，${statusText[item.status]}`}
-          title={`第 ${item.label} 题 · ${statusText[item.status]}`}
+          aria-label={`第 ${item.label} 题，${PAGE_QUESTION_STATUS_TEXT[item.status]}`}
+          title={`第 ${item.label} 题 · ${PAGE_QUESTION_STATUS_TEXT[item.status]}`}
           onClick={() => onPick(item.id)}
         >
           {item.label}

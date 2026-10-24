@@ -1,4 +1,5 @@
 import { getMDXComponents } from '@/components/mdx';
+import { QuestionDock } from '@/components/question-dock';
 import { getContentSourceUrl } from '@/lib/site-config';
 import { toCanonicalPagePath, toMarkdownPath } from '@/lib/site-url';
 import { shardStaticDocParams } from '@/lib/static-doc-shards';
@@ -84,6 +85,7 @@ export default async function Page({ params }: PageParameters) {
           })}
         />
       </DocsBody>
+      <QuestionDock key={page.url} />
       {data.lastModified && <PageLastUpdate date={data.lastModified} />}
     </DocsPage>
   );

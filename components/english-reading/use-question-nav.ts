@@ -1,34 +1,12 @@
 'use client';
 
 import { type RefObject, useCallback, useEffect, useRef, useState } from 'react';
+import { QUESTION_SELECTOR, readPageQuestions as readItems, samePageQuestions as sameItems, type PageQuestion, type PageQuestionStatus } from '@/components/question/page-questions';
 
-/*
- * Reads the questions rendered inside the reading card from the DOM, so the
- * shared <Question> component needs no knowledge of the reading layout. Each
- * question footer publishes its state in data-attempt-result.
- */
+/* The questions inside the reading card, read from the DOM (see page-questions). */
 
-export type NavStatus = 'idle' | 'draft' | 'correct' | 'partial' | 'incorrect';
-export type NavItem = { id: string; label: string; status: NavStatus };
-
-const STATUSES = new Set<NavStatus>(['idle', 'draft', 'correct', 'partial', 'incorrect']);
-const QUESTION_SELECTOR = '[data-exam-question]';
-
-function readItems(container: HTMLElement): NavItem[] {
-  return Array.from(container.querySelectorAll<HTMLElement>(QUESTION_SELECTOR), (question, position) => {
-    const status = question.querySelector<HTMLElement>('[data-attempt-result]')?.dataset.attemptResult;
-    const label = question.querySelector('[data-question-number]')?.textContent?.trim() || String(position + 1);
-    return {
-      id: question.id,
-      label,
-      status: status && STATUSES.has(status as NavStatus) ? (status as NavStatus) : 'idle',
-    };
-  });
-}
-
-const sameItems = (left: NavItem[], right: NavItem[]) =>
-  left.length === right.length &&
-  left.every((item, index) => item.id === right[index].id && item.status === right[index].status && item.label === right[index].label);
+export type NavStatus = PageQuestionStatus;
+export type NavItem = PageQuestion;
 
 /** Line, in viewport pixels, below which a question counts as "current". */
 function referenceLine(container: HTMLElement) {
