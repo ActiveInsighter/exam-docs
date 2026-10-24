@@ -1,0 +1,244 @@
+/*
+ * Floating question dock (components/question-dock): the ball, its result
+ * ring and the answer sheet / stopwatch panel. State is in data attributes.
+ */
+
+/* The panel is portalled out of the dock, so both carry the palette. */
+[data-question-dock],
+[data-dock-panel] {
+  --dock-correct: var(--success);
+  --dock-incorrect: var(--destructive);
+  --dock-partial: var(--warning);
+  --dock-draft: color-mix(in oklch, var(--foreground) 42%, transparent);
+  --dock-idle: var(--ui-fill-strong);
+}
+
+[data-question-dock] {
+  --dock-size: 3.5rem;
+  position: fixed;
+  right: calc(1.25rem + env(safe-area-inset-right, 0px));
+  bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  animation: dock-in 420ms var(--ui-ease) both;
+}
+
+/* The maths keypad takes the bottom of the screen; the dock steps aside. */
+html[data-keypad-open] [data-question-dock] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes dock-in {
+  from { opacity: 0; transform: translateY(0.75rem) scale(0.85); }
+}
+
+/* ---------------------------------------------------------------- ball */
+
+[data-dock-ball] {
+  position: relative;
+  display: grid;
+  width: var(--dock-size);
+  height: var(--dock-size);
+  place-items: center;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--ui-popover) 86%, transparent);
+  color: var(--foreground);
+  box-shadow: var(--ui-shadow-float), 0 0 0 1px color-mix(in oklch, var(--foreground) 7%, transparent);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 220ms var(--ui-ease), box-shadow 220ms var(--ui-ease);
+}
+
+@media (hover: hover) {
+  [data-dock-ball]:hover { transform: translateY(-2px); }
+}
+[data-dock-ball]:active { transform: scale(0.94); }
+[data-dock-ball][data-popup-open] { transform: scale(0.96); }
+[data-dock-ball]:focus-visible {
+  box-shadow: var(--ui-shadow-float), 0 0 0 3px color-mix(in oklch, var(--ring) 60%, transparent);
+}
+
+[data-dock-ring] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+[data-dock-ring] circle {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke 360ms var(--ui-ease);
+}
+[data-dock-ring] [data-dock-track] { stroke: var(--ui-fill); stroke-linecap: butt; }
+
+[data-dock-ring] [data-status='idle'] { stroke: var(--dock-idle); }
+[data-dock-ring] [data-status='draft'] { stroke: var(--dock-draft); }
+[data-dock-ring] [data-status='correct'] { stroke: var(--dock-correct); }
+[data-dock-ring] [data-status='partial'] { stroke: var(--dock-partial); }
+[data-dock-ring] [data-status='incorrect'] { stroke: var(--dock-incorrect); }
+
+[data-dock-face] {
+  position: relative;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+[data-dock-count] {
+  font-size: 0.9375rem;
+  font-weight: 650;
+}
+[data-dock-count] small {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+[data-dock-time] {
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+/* A paused clock reads as quieter than a running one. */
+[data-dock-ball]:not([data-running]) [data-dock-time] { color: var(--muted-foreground); }
+
+/* -------------------------------------------------------------- panel */
+
+[data-dock-panel] {
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+}
+
+[data-dock-timer] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 0.875rem 0.875rem 1.125rem;
+}
+
+[data-dock-clock] {
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+  transition: color 220ms var(--ui-ease);
+}
+[data-dock-clock][data-running] { color: var(--foreground); }
+
+[data-dock-marks] {
+  max-height: 8.5rem;
+  margin: 0 0.5rem 0.5rem;
+  overflow-y: auto;
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-fill);
+  padding: 0.25rem;
+  list-style: none;
+}
+[data-dock-marks] button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: calc(var(--ui-radius-control) - 0.25rem);
+  font-size: 0.8125rem;
+  text-align: left;
+  transition: background-color var(--ui-duration) var(--ui-ease);
+}
+[data-dock-marks] button:not(:disabled) { cursor: pointer; }
+[data-dock-marks] button:not(:disabled):hover { background: var(--ui-fill-hover); }
+[data-dock-marks] button:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
+[data-dock-marks] svg { width: 0.875rem; height: 0.875rem; flex: none; color: var(--dock-partial); }
+[data-dock-split] {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-dock-sheet] {
+  padding: 0.875rem 1.125rem 1rem;
+  border-top: 1px solid color-mix(in oklch, var(--foreground) 7%, transparent);
+}
+
+[data-dock-grid] {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(2.25rem, 1fr));
+  gap: 0.375rem;
+  max-height: 13.5rem;
+  margin: 0.75rem -0.25rem 0;
+  padding: 0.25rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+[data-dock-grid] button {
+  position: relative;
+  display: grid;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 0.625rem;
+  background: var(--ui-fill);
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color var(--ui-duration) var(--ui-ease), color var(--ui-duration) var(--ui-ease), transform var(--ui-duration) var(--ui-ease);
+}
+[data-dock-grid] button:hover { background: var(--ui-fill-hover); color: var(--foreground); }
+[data-dock-grid] button:active { transform: scale(0.92); }
+[data-dock-grid] button:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+[data-dock-grid] [data-status='draft'] { background: var(--ui-fill-strong); color: var(--foreground); }
+[data-dock-grid] [data-status='correct'] { background: color-mix(in oklch, var(--dock-correct) 16%, transparent); color: var(--dock-correct); }
+[data-dock-grid] [data-status='partial'] { background: color-mix(in oklch, var(--dock-partial) 18%, transparent); color: color-mix(in oklch, var(--dock-partial) 80%, var(--foreground)); }
+[data-dock-grid] [data-status='incorrect'] { background: color-mix(in oklch, var(--dock-incorrect) 13%, transparent); color: var(--dock-incorrect); }
+[data-dock-grid] [aria-current='true'] { box-shadow: inset 0 0 0 1.5px currentColor; }
+[data-dock-grid] [data-marked]::after {
+  content: '';
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  width: 0.3125rem;
+  height: 0.3125rem;
+  border-radius: 999px;
+  background: var(--dock-partial);
+}
+
+[data-dock-legend] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.875rem;
+  margin-top: 0.75rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  list-style: none;
+}
+[data-dock-legend] li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+[data-dock-legend] li::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--dock-idle);
+}
+[data-dock-legend] [data-status='correct']::before { background: var(--dock-correct); }
+[data-dock-legend] [data-status='incorrect']::before { background: var(--dock-incorrect); }
+[data-dock-legend] [data-status='partial']::before { background: var(--dock-partial); }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-question-dock] { animation: none; }
+  [data-dock-ball], [data-dock-ring] circle { transition: none; }
+}
+
+@media print {
+  [data-question-dock] { display: none; }
+}
