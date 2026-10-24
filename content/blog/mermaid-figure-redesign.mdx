@@ -1,0 +1,306 @@
+---
+title: 重新设计的 Mermaid 图表：更好看，也更好用
+description: 站内 Mermaid 组件全面改版：统一的卡片外观、跟随站点的中性配色、源码查看与复制、SVG 下载，以及可拖动缩放的全屏查看。本文用 12 张实际渲染的图展示效果。
+date: 2026-10-24
+author: 学习站编辑部
+---
+
+以前站里的 Mermaid 图直接贴在正文里：浅紫色节点、粗边框、没有边界，图一多，页面就显得杂乱；遇到宽图只能眯着眼看。这次把它重做成一个完整的“图表卡片”，写法不变，所有已有文章自动换上新样式。
+
+## 一张图由什么组成
+
+<Mermaid
+  title="新版图表卡片的结构"
+  caption="顶栏左侧自动识别图表类型，右侧是工具按钮；画布使用淡淡的点阵底纹，说明文字放在底部。"
+  chart={`flowchart LR
+  H["顶栏<br/>类型 · 工具"] --> C["画布<br/>点阵 · 图表"] --> F(["说明文字"])`}
+/>
+
+- **类型识别**：顶栏会根据源码第一行显示“流程图”“时序图”等名称和对应图标，也可以用 `title` 自定义。
+- **查看源码**：点击 `</>` 按钮，在图和源码之间切换，适合边看边学语法。
+- **复制源码**、**下载 SVG**：一键复制 Mermaid 文本，或把当前配色的矢量图保存到本地（会带上画布底色）。
+- **放大查看**：打开全屏画布，滚轮或双指缩放、拖动平移、双击放大，按 `0` 适应窗口，按 `Esc` 关闭。
+
+## 写法完全不变
+
+普通的 `mermaid` 代码围栏仍然有效，会自动套用新外观：
+
+````md
+```mermaid
+flowchart LR
+  A[写下想法] --> B[画出关系] --> C[验证理解]
+```
+````
+
+需要标题或说明文字时，改用全局注册的 `Mermaid` 组件：
+
+```tsx
+<Mermaid
+  title="新版图表卡片的结构"
+  caption="说明文字显示在图的下方。"
+  chart={`flowchart LR
+  A --> B`}
+/>
+```
+
+<TypeTable
+  type={{
+    chart: { type: 'string', description: 'Mermaid 源码。字符串中的 \\n 会被当作换行。', required: true },
+    title: { type: 'string', description: '顶栏标题，默认是自动识别的图表类型。' },
+    caption: { type: 'ReactNode', description: '图下方的说明文字。' },
+    preset: {
+      type: "'modern' | 'classic' | 'neo' | 'redux' | 'redux-color' | 'hand-drawn' | 'teal' | 'indigo'",
+      description: '配色方案，全部跟随网站深浅模式。',
+      default: "'modern'",
+    },
+  }}
+/>
+
+## 新的默认配色
+
+默认的 `modern` 主题和站点界面使用同一套中性色：白色节点、浅灰细边框、灰色连线，只在需要区分的地方使用一抹蓝色。连线上的文字底色与画布一致，不再出现突兀的色块。切换右上角的深浅模式，图会在后台重新绘制完毕后再替换，不会闪烁。
+
+## 效果展示
+
+下面每张图都是实时渲染的。可以打开“查看源码”，或点击放大按钮试试全屏查看。
+
+### 流程图
+
+```mermaid
+flowchart TD
+  start([打开一道题]) --> read[读题并圈出条件]
+  read --> plan{能想到解法吗？}
+  plan -->|能| solve[写出完整过程]
+  plan -->|不能| hint[查看提示与相关知识点]
+  hint --> read
+  solve --> check{答案正确？}
+  check -->|是| done([记录用时，进入下一题])
+  check -->|否| review[对照解析找出错因]
+  review --> note[(错题本)]
+  note -.->|三天后| read
+```
+
+### 时序图
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor U as 学习者
+  participant B as 浏览器
+  participant S as 静态站点
+  participant I as 搜索索引
+  U->>B: 输入关键词
+  B->>I: 加载索引分片
+  activate I
+  I-->>B: 返回匹配结果
+  deactivate I
+  B-->>U: 展示候选页面
+  U->>B: 打开文章
+  B->>S: 请求页面
+  alt 已缓存
+    S-->>B: 304 Not Modified
+  else 首次访问
+    S-->>B: 200 HTML + 资源
+  end
+  Note over B,S: 静态资源由 CDN 分发
+```
+
+### 状态图
+
+```mermaid
+stateDiagram-v2
+  [*] --> 未学习
+  未学习 --> 学习中: 打开笔记
+  学习中 --> 已掌握: 练习全对
+  学习中 --> 待复习: 出现错题
+  待复习 --> 学习中: 到期提醒
+  已掌握 --> 待复习: 间隔到期
+  已掌握 --> [*]
+```
+
+### 类图
+
+```mermaid
+classDiagram
+  direction LR
+  class 课程 {
+    +String 名称
+    +List~章节~ 章节
+    +进度() float
+  }
+  class 章节 {
+    +String 标题
+    +int 序号
+  }
+  class 知识点 {
+    +String 名称
+    +int 掌握程度
+    +复习()
+  }
+  class 练习 {
+    <<interface>>
+    +提交(answer) bool
+  }
+  课程 "1" *-- "多个" 章节
+  章节 "1" o-- "多个" 知识点
+  知识点 ..> 练习 : 巩固
+```
+
+### 实体关系图
+
+```mermaid
+erDiagram
+  USER ||--o{ ATTEMPT : makes
+  QUESTION ||--o{ ATTEMPT : receives
+  QUESTION }o--|| CHAPTER : belongs_to
+  USER {
+    uuid id PK
+    string name
+  }
+  ATTEMPT {
+    uuid id PK
+    uuid user_id FK
+    uuid question_id FK
+    bool correct
+    int seconds
+  }
+  QUESTION {
+    uuid id PK
+    string stem
+    uuid chapter_id FK
+  }
+  CHAPTER {
+    uuid id PK
+    string title
+  }
+```
+
+### 甘特图
+
+```mermaid
+gantt
+  title 四周复习计划（演示数据）
+  dateFormat YYYY-MM-DD
+  axisFormat %m/%d
+  section 基础
+    概念梳理      :done,    a1, 2026-11-02, 5d
+    公式推导      :done,    a2, after a1, 4d
+  section 强化
+    专题练习      :active,  b1, 2026-11-10, 7d
+    错题回顾      :         b2, after b1, 3d
+  section 冲刺
+    模拟考试      :crit,    c1, 2026-11-21, 3d
+    查漏补缺      :         c2, after c1, 4d
+```
+
+### 饼图
+
+```mermaid
+pie showData
+  title 一周学习时间分配（小时，演示数据）
+  "数学" : 14
+  "专业课" : 11
+  "英语" : 7
+  "政治" : 4
+  "复盘" : 3
+```
+
+### 思维导图
+
+```mermaid
+mindmap
+  root((画好一张图))
+    选对图种
+      流程 → 流程图
+      交互 → 时序图
+      结构 → 类图 / ER 图
+    控制规模
+      一张图一个主题
+      节点不超过二十个
+    写清文字
+      动词开头
+      分支写条件
+```
+
+### 时间线
+
+```mermaid
+timeline
+  title 一篇笔记的生命周期
+  草稿 : 记录要点 : 补充例题
+  成文 : 画出图解 : 校对公式
+  发布 : 推送到仓库 : 自动部署
+  维护 : 读者反馈 : 定期修订
+```
+
+### Git 分支图
+
+```mermaid
+gitGraph
+  commit id: "init"
+  branch feature/mermaid
+  checkout feature/mermaid
+  commit id: "新配色"
+  commit id: "工具栏"
+  checkout main
+  commit id: "修复错字"
+  checkout feature/mermaid
+  commit id: "全屏查看"
+  checkout main
+  merge feature/mermaid id: "发布"
+```
+
+### 象限图
+
+```mermaid
+quadrantChart
+  title 复习优先级（演示数据）
+  x-axis 掌握程度低 --> 掌握程度高
+  y-axis 考频低 --> 考频高
+  quadrant-1 保持手感
+  quadrant-2 优先攻克
+  quadrant-3 适当了解
+  quadrant-4 偶尔回顾
+  极限: [0.35, 0.85]
+  矩阵: [0.7, 0.78]
+  概率: [0.25, 0.4]
+  数列: [0.8, 0.3]
+  积分: [0.45, 0.65]
+```
+
+### XY 图
+
+```mermaid
+xychart-beta
+  title "每周练习正确率（%，演示数据）"
+  x-axis ["第1周", "第2周", "第3周", "第4周", "第5周", "第6周"]
+  y-axis "正确率" 40 --> 100
+  bar [52, 61, 66, 72, 78, 85]
+  line [52, 61, 66, 72, 78, 85]
+```
+
+## 出错时也友好
+
+源码写错时，卡片会保留外观，直接显示 Mermaid 给出的错误位置，方便排查，而不会让整页崩溃：
+
+<Mermaid
+  title="一张写错的图"
+  chart={`flowchart LR
+  A[开始] --> B{判断
+  B -->|是| C`}
+/>
+
+## 其他配色
+
+旧版的浅紫主题和其他内置风格仍然可以通过 `preset` 使用，比如手绘风格：
+
+<Mermaid
+  preset="hand-drawn"
+  title="手绘风格 · preset=&quot;hand-drawn&quot;"
+  chart={`flowchart LR
+  A[读题] --> B[画图] --> C{想通了吗}
+  C -->|是| D[写答案]
+  C -->|否| B`}
+/>
+
+八种配色的完整对比见[Mermaid 主题对比](/blog/mermaid-theme-gallery)。实现集中在 `components/mdx/mermaid.tsx`、`components/mdx/mermaid-viewer.tsx`、`lib/mermaid-presets.ts` 与 `styles/mermaid.css`，调整配色只需修改 `modern` 预设的调色板。
