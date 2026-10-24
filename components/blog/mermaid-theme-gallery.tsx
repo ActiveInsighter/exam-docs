@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Mermaid } from '@/components/mdx/mermaid';
 import { mermaidPresets } from '@/lib/mermaid-presets';
@@ -58,11 +57,7 @@ export function MermaidThemeGallery() {
                     <h3 className="text-base font-semibold text-fd-foreground">{preset.name}</h3>
                     <p className="mt-1 text-sm leading-relaxed text-fd-muted-foreground">{preset.description}</p>
                   </header>
-                  <div className="flex min-h-80 min-w-0 flex-1 items-center justify-center overflow-x-auto rounded-lg border border-fd-border bg-fd-background p-3 [&>div]:w-full [&_svg]:mx-auto">
-                    <Suspense fallback={<p role="status" className="text-sm text-fd-muted-foreground">正在绘制图表…</p>}>
-                      <Mermaid chart={example.source} preset={preset.id} />
-                    </Suspense>
-                  </div>
+                  <Mermaid chart={example.source} preset={preset.id} title={`${example.name} · ${preset.id}`} className="my-0 flex-1" />
                   <details className="text-sm text-fd-muted-foreground">
                     <summary className="cursor-pointer rounded-sm py-1 focus-visible:outline-2 focus-visible:outline-fd-ring">查看用法与图表源码</summary>
                     <pre className="mt-2 overflow-x-auto rounded-lg bg-fd-secondary p-3 text-xs leading-relaxed"><code>{`<Mermaid preset="${preset.id}" chart={\`\n${example.source}\n\`} />`}</code></pre>
