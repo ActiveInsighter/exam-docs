@@ -26,7 +26,7 @@ import { liveTagsOf, useQuestionMark, useUserTags } from './use-marks';
  * tag chips and the note block below the footer read it.
  */
 
-type MarksContext = {
+export type MarksContext = {
   questionId: string;
   mark: QuestionMark | null;
   tags: readonly UserTag[];
@@ -42,6 +42,11 @@ const Context = createContext<MarksContext | null>(null);
 
 export function useMarks() {
   return useContext(Context);
+}
+
+/** Provides marks read elsewhere on the page: the solution sheet showing another question. */
+export function QuestionMarksScope({ value, children }: { value: MarksContext | null; children: ReactNode }) {
+  return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 
 export function QuestionMarksProvider({ questionId, children }: { questionId: string; children: ReactNode }) {

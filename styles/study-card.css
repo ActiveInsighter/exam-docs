@@ -1,0 +1,432 @@
+/*
+ * Study card (components/ui/study-card.tsx), laid out inside the general
+ * Modal (styles/modal.css). Structure and motion, plus one optional colour:
+ * with `tint` (--sc-tint) the aside sits on a soft wash of it. Otherwise it
+ * has no colours of its own beyond the modal and --ui-* tokens, so a caller
+ * can also tone it by re-pointing --modal-pane-muted and friends on the popup.
+ *
+ * In the components layer, so Tailwind utilities passed as className win.
+ *
+ * A step swaps whole cards, both in the same place (.sc-viewport):
+ *
+ *   leaving   stays put underneath (sc-stage-hold) while its content drifts
+ *             out towards the side it leaves by and fades;
+ *   current   fades in over it (sc-stage-in) while its content settles in
+ *             from the other side, rows rising one after another.
+ *
+ * The leaving card is removed when its hold ends.
+ */
+@layer components {
+  [data-study-card] {
+    --sc-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --sc-shift: 1.75rem;
+  }
+
+  /* ---- Tint ---------------------------------------------------------------- */
+
+  /*
+   * A calm base of the tint (which phones also show under the header, see
+   * modal.css) with two faint glows: a brighter one from the top left, where
+   * the eye starts, and an echo in the far corner.
+   */
+  [data-study-card][data-tint] {
+    --modal-pane-muted: color-mix(in oklch, var(--sc-tint) 9%, var(--modal-surface));
+  }
+
+  .dark [data-study-card][data-tint] {
+    --modal-pane-muted: color-mix(in oklch, var(--sc-tint) 12%, var(--modal-surface));
+  }
+
+  [data-study-card][data-tint] [data-slot='modal-pane'][data-tone='muted'] {
+    background-image:
+      radial-gradient(120% 75% at 0% 0%, color-mix(in oklch, var(--sc-tint) 15%, transparent), transparent 64%),
+      radial-gradient(90% 60% at 100% 100%, color-mix(in oklch, var(--sc-tint) 8%, transparent), transparent 70%);
+  }
+
+  .dark [data-study-card][data-tint] [data-slot='modal-pane'][data-tone='muted'] {
+    background-image:
+      radial-gradient(120% 75% at 0% 0%, color-mix(in oklch, var(--sc-tint) 13%, transparent), transparent 64%),
+      radial-gradient(90% 60% at 100% 100%, color-mix(in oklch, var(--sc-tint) 6%, transparent), transparent 70%);
+  }
+
+  /* Glass controls over a tinted pane take a breath of the tint, so they do not read grey. */
+  [data-study-card][data-tint] :is([data-slot='modal-toolbar'], [data-slot='modal-close'], [data-slot='modal-back']) {
+    background-color: color-mix(in oklch, var(--modal-glass) 88%, var(--sc-tint) 12%);
+  }
+
+  /* ---- Header -------------------------------------------------------------- */
+
+  /* "scrolled": phones show the title once the card is under the header. */
+  [data-sc-title='scrolled'] {
+    opacity: 0;
+    translate: 0 4px;
+    transition:
+      opacity 180ms ease,
+      translate 260ms var(--sc-ease);
+  }
+
+  [data-study-card] [data-slot='modal-page'][data-scrolled] [data-sc-title='scrolled'] {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  @media (width >= 48rem) {
+    [data-study-card] [data-slot='modal-page'][data-scrolled] [data-sc-title='scrolled'] {
+      opacity: 0;
+    }
+  }
+
+  [data-slot='sc-title-text'] {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  [data-slot='sc-title-text'][data-direction='next'] {
+    animation: sc-title-next 380ms var(--sc-ease);
+  }
+
+  [data-slot='sc-title-text'][data-direction='prev'] {
+    animation: sc-title-prev 380ms var(--sc-ease);
+  }
+
+  [data-slot='sc-pager'] {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* Actions before the pager: a hairline between the two groups. */
+  [data-slot='modal-toolbar'] > :not([data-slot='sc-pager']) + [data-slot='sc-pager']::before {
+    content: '';
+    width: 1px;
+    height: 1.125rem;
+    margin-inline: 0.25rem;
+    background: var(--ui-fill-strong);
+  }
+
+  [data-slot='sc-pager-step'] {
+    display: inline-grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color var(--ui-duration) var(--ui-ease),
+      color var(--ui-duration) var(--ui-ease),
+      scale 220ms var(--sc-ease);
+  }
+
+  [data-slot='sc-pager-step'] svg {
+    width: 1.0625rem;
+    height: 1.0625rem;
+  }
+
+  [data-slot='sc-pager-step']:hover:not(:disabled) {
+    background: var(--ui-fill-hover);
+    color: var(--foreground);
+  }
+
+  [data-slot='sc-pager-step']:active:not(:disabled) {
+    scale: 0.9;
+  }
+
+  [data-slot='sc-pager-step']:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: -2px;
+  }
+
+  [data-slot='sc-pager-step']:disabled {
+    cursor: default;
+    opacity: 0.32;
+  }
+
+  [data-slot='sc-pager-count'] {
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: center;
+    min-width: 3.75em;
+    overflow: hidden;
+    color: var(--foreground);
+    font-size: 0.8125rem;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+    line-height: 2rem;
+    white-space: nowrap;
+  }
+
+  [data-slot='sc-pager-current'] {
+    display: inline-block;
+  }
+
+  [data-slot='sc-pager-current'][data-direction='next'] {
+    animation: sc-count-next 320ms var(--sc-ease);
+  }
+
+  [data-slot='sc-pager-current'][data-direction='prev'] {
+    animation: sc-count-prev 320ms var(--sc-ease);
+  }
+
+  [data-slot='sc-pager-total'] {
+    color: var(--muted-foreground);
+    font-weight: 500;
+  }
+
+  [data-slot='sc-pager-slash'] {
+    margin-inline: 0.3em;
+    opacity: 0.7;
+  }
+
+  /* ---- Stage ---------------------------------------------------------------- */
+
+  [data-slot='sc-viewport'] {
+    position: relative;
+    isolation: isolate;
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* Sideways swipes step; vertical ones still scroll. */
+  [data-slot='sc-viewport'][data-swipe] {
+    touch-action: pan-y pinch-zoom;
+  }
+
+  [data-sc-stage] {
+    position: absolute;
+    inset: 0;
+  }
+
+  [data-sc-stage='current'] {
+    z-index: 1;
+  }
+
+  [data-sc-stage='current'][data-direction] {
+    animation: sc-stage-in 300ms var(--sc-ease) both;
+  }
+
+  [data-sc-stage='leaving'] {
+    z-index: 0;
+    pointer-events: none;
+    animation: sc-stage-hold 380ms linear both;
+  }
+
+  [data-slot='sc-content'] {
+    display: flex;
+    flex-direction: column;
+    gap: 1.625rem;
+  }
+
+  [data-sc-stage='current'][data-direction='next'] [data-slot='sc-content'] {
+    animation: sc-content-in-next 520ms var(--sc-ease) both;
+  }
+
+  [data-sc-stage='current'][data-direction='prev'] [data-slot='sc-content'] {
+    animation: sc-content-in-prev 520ms var(--sc-ease) both;
+  }
+
+  /* The aside leads, the main column follows a beat later. */
+  [data-sc-stage='current'][data-direction] [data-sc-region='main'] > [data-slot='sc-content'] {
+    animation-delay: 40ms;
+  }
+
+  [data-sc-stage='leaving'][data-direction='next'] [data-slot='sc-content'] {
+    animation: sc-content-out-next 200ms cubic-bezier(0.4, 0, 1, 1) both;
+  }
+
+  [data-sc-stage='leaving'][data-direction='prev'] [data-slot='sc-content'] {
+    animation: sc-content-out-prev 200ms cubic-bezier(0.4, 0, 1, 1) both;
+  }
+
+  /* Rows rise one after another as their card settles, also on first open. */
+  [data-sc-stage='current'] [data-sc-reveal] {
+    animation: sc-rise 440ms var(--sc-ease) both;
+    animation-delay: calc(90ms + var(--sc-i, 0) * 38ms);
+  }
+
+  /* ---- Regions -------------------------------------------------------------- */
+
+  [data-slot='sc-hero-headline'] {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem 0.875rem;
+  }
+
+  [data-slot='sc-hero-title'] {
+    min-width: 0;
+    color: var(--foreground);
+    font-size: clamp(2rem, 1.6rem + 1.4vw, 2.75rem);
+    font-weight: 760;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    overflow-wrap: anywhere;
+  }
+
+  [data-slot='sc-hero-badge'] {
+    flex-shrink: 0;
+    margin-top: 0.55rem;
+  }
+
+  [data-slot='sc-hero-subtitle'] {
+    margin-top: 0.5rem;
+    color: var(--muted-foreground);
+    font-size: 1.0625rem;
+    font-weight: 500;
+  }
+
+  [data-slot='sc-section'] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  [data-slot='sc-section-head'] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 0.75rem;
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+
+  [data-slot='sc-section-label'] {
+    font-weight: 680;
+    letter-spacing: 0.08em;
+  }
+
+  [data-slot='sc-section-meta'] {
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  @media (width < 48rem) {
+    [data-slot='sc-content'] {
+      gap: 1.375rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-study-card] {
+      --sc-shift: 0px;
+    }
+
+    [data-sc-stage='current'][data-direction] {
+      animation-duration: 160ms;
+    }
+
+    [data-sc-stage='leaving'] {
+      animation-duration: 180ms;
+    }
+
+    [data-sc-stage] [data-slot='sc-content'],
+    [data-sc-stage='current'] [data-sc-reveal],
+    [data-slot='sc-pager-current'],
+    [data-slot='sc-title-text'] {
+      animation: none !important;
+    }
+
+    [data-sc-stage='leaving'] [data-slot='sc-content'] {
+      opacity: 0;
+    }
+
+    [data-sc-title='scrolled'] {
+      transition: none;
+    }
+  }
+}
+
+@keyframes sc-stage-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Holds the leaving card in place; its end removes the card. */
+@keyframes sc-stage-hold {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sc-content-in-next {
+  from {
+    opacity: 0;
+    translate: var(--sc-shift) 0;
+    filter: blur(6px);
+  }
+}
+
+@keyframes sc-content-in-prev {
+  from {
+    opacity: 0;
+    translate: calc(-1 * var(--sc-shift)) 0;
+    filter: blur(6px);
+  }
+}
+
+@keyframes sc-content-out-next {
+  to {
+    opacity: 0;
+    translate: calc(-0.6 * var(--sc-shift)) 0;
+    filter: blur(4px);
+  }
+}
+
+@keyframes sc-content-out-prev {
+  to {
+    opacity: 0;
+    translate: calc(0.6 * var(--sc-shift)) 0;
+    filter: blur(4px);
+  }
+}
+
+@keyframes sc-rise {
+  from {
+    opacity: 0;
+    translate: 0 0.625rem;
+  }
+}
+
+@keyframes sc-title-next {
+  from {
+    opacity: 0;
+    translate: 0.75rem 0;
+  }
+}
+
+@keyframes sc-title-prev {
+  from {
+    opacity: 0;
+    translate: -0.75rem 0;
+  }
+}
+
+@keyframes sc-count-next {
+  from {
+    opacity: 0;
+    translate: 0 0.6em;
+  }
+}
+
+@keyframes sc-count-prev {
+  from {
+    opacity: 0;
+    translate: 0 -0.6em;
+  }
+}

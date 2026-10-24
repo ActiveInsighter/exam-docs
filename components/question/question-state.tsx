@@ -56,6 +56,11 @@ export function useQuestionState() {
   return useContext(QuestionContext);
 }
 
+/** Provides a state read elsewhere on the page: the solution sheet showing another question. */
+export function QuestionStateScope({ value, children }: { value: QuestionState | null; children: ReactNode }) {
+  return <QuestionContext.Provider value={value}>{children}</QuestionContext.Provider>;
+}
+
 /** The page path questions are stored under (no trailing slash). */
 export function useDocumentPath() {
   const pathname = usePathname();

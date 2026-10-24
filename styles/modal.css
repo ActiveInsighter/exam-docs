@@ -1,6 +1,6 @@
 /*
- * Modal (components/ui/modal.tsx): placement, motion, the header and stacked
- * levels. Colours come from the --modal-* tokens in
+ * Modal (components/ui/modal.tsx): placement, motion, the header and pages.
+ * Colours come from the --modal-* tokens in
  * styles/tokens/components.css.
  *
  * In the components layer, so Tailwind utilities passed as className win.
@@ -8,16 +8,22 @@
  * A sheet that slides up from the bottom edge and back down on close, on one
  * spring-like curve. Phones get it edge to edge; wide screens float it a
  * little above the bottom edge (--modal-float), centred and capped in width
- * (--modal-width, set by ModalContent). Levels of a stack sit like a deck of
- * cards: ModalContent's stack writes --modal-stack-y, --modal-stack-scale and
- * data-stacked on each level behind the front one.
+ * (--modal-width, set by ModalContent).
+ *
+ * Pages. A <Modal> opened inside another's content is a page of the same
+ * panel (.modal-pages holds them all). The page in front is in the flow and
+ * sets the panel's height; the others fill the panel behind it. A pushed
+ * page slides in from the right edge (data-phase="enter") while the page it
+ * covers eases a third of the way left and dims (data-covered); going back
+ * reverses both (data-phase="exit"). The panel never shrinks under a pushed
+ * page (--modal-hold, set by ModalContent, which also morphs the height).
  *
  * The header has no background. Its controls are frosted-glass capsules
  * (--modal-glass-*), and every scroll area fades its content out under the
  * header (a mask sized by --modal-header-h), so the title stays legible.
  * Note that a mask, filter or opacity below 1 on the header or its ancestors
  * would cut the glass off from the content behind it (a backdrop root), so
- * none of them carry one.
+ * none of them carry one; pages move with translate, which does not.
  *
  * Entering is a keyframe animation, not a transition from Base UI's
  * data-starting-style: a modal that mounts already open (say, one rendered
@@ -35,24 +41,10 @@
   initial-value: 3.5rem;
 }
 
-/* Placement of a level behind the front one (createModalStack). */
-@property --modal-stack-y {
+@property --modal-hold {
   syntax: '<length>';
   inherits: false;
   initial-value: 0px;
-}
-
-@property --modal-stack-scale {
-  syntax: '<number>';
-  inherits: false;
-  initial-value: 1;
-}
-
-/* Set by Base UI on the popup when levels open on top of it (unused here). */
-@property --nested-dialogs {
-  syntax: '<number>';
-  inherits: false;
-  initial-value: 0;
 }
 
 @layer components {
@@ -76,6 +68,9 @@
     --modal-max-height: 100dvh;
     /* Gap under a floating sheet (wide screens). */
     --modal-float: 0px;
+    --modal-page-duration: 520ms;
+    /* The tallest the panel may be. */
+    --modal-cap: min(var(--modal-max-height), calc(100dvh - env(safe-area-inset-top, 0px) - 1.5rem));
 
     position: fixed;
     inset: auto 0 var(--modal-float);
@@ -84,11 +79,9 @@
     flex-direction: column;
     width: 100%;
     margin-inline: auto;
-    /* Each level of a stack is a little shorter, leaving room for the strips behind. */
-    max-height: min(
-      var(--modal-max-height),
-      calc(100dvh - env(safe-area-inset-top, 0px) - 1.5rem - var(--modal-depth, 0) * 0.75rem)
-    );
+    max-height: var(--modal-cap);
+    /* Under a pushed page, at least as tall as before it (min() keeps the cap in charge). */
+    min-height: min(var(--modal-hold), var(--modal-cap));
     overflow: hidden;
     isolation: isolate;
     border-radius: var(--modal-radius) var(--modal-radius) 0 0;
@@ -96,13 +89,9 @@
     color: var(--foreground);
     box-shadow: var(--modal-shadow);
     outline: none;
-    /* Levels behind the front one step back from their bottom edge. */
-    translate: 0 var(--modal-stack-y);
-    scale: var(--modal-stack-scale);
-    transform-origin: 50% 100%;
     animation: modal-sheet-in 560ms var(--modal-ease);
-    transition-property: translate, scale, opacity, background-color;
-    transition-duration: 560ms, 560ms, 560ms, 240ms;
+    transition-property: translate, opacity;
+    transition-duration: 560ms;
     transition-timing-function: var(--modal-ease);
   }
 
@@ -116,42 +105,12 @@
     transition-duration: 380ms;
   }
 
-  /* Dims a level while another is open in front; taps on it return to it. */
-  [data-slot='modal-content']::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 30;
-    border-radius: inherit;
-    background: var(--modal-stack-dim);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 420ms var(--modal-ease), background-color 420ms var(--modal-ease);
-  }
-
-  [data-slot='modal-content'][data-stacked]::after {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  [data-slot='modal-content'][data-stacked='2']::after {
-    background: var(--modal-stack-dim-deep);
-  }
-
-  /* Further back than two levels: out of sight. */
-  [data-slot='modal-content'][data-stacked='hidden'] {
-    opacity: 0;
-  }
-
   @media (width >= 48rem) {
     [data-slot='modal-content'] {
       --modal-gutter: 1.75rem;
       --modal-float: 0.75rem;
+      --modal-cap: min(var(--modal-max-height), calc(100dvh - 2.5rem - var(--modal-float)));
       width: min(var(--modal-width, 40rem), calc(100vw - 2rem));
-      max-height: min(
-        var(--modal-max-height),
-        calc(100dvh - 2.5rem - var(--modal-float) - var(--modal-depth, 0) * 0.75rem)
-      );
       border-radius: var(--modal-radius);
       box-shadow: var(--modal-shadow-float);
     }
@@ -177,7 +136,89 @@
 
     [data-slot='modal-content'][data-size][data-ending-style] {
       opacity: 0;
-      translate: 0 var(--modal-stack-y);
+      translate: none;
+    }
+  }
+
+  /* ---- Pages --------------------------------------------------------------- */
+
+  [data-slot='modal-pages'] {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  /* Each page is opaque and its own stacking context, so a page in front hides the one behind. */
+  [data-slot='modal-page'] {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    outline: none;
+    background-color: var(--modal-page-background, var(--modal-surface));
+    transition:
+      translate var(--modal-page-duration) var(--modal-ease),
+      background-color 240ms var(--modal-ease);
+  }
+
+  /* Behind the page in front (covered, or sliding away): fill the panel, out of the flow. */
+  [data-slot='modal-page']:not([data-front]) {
+    position: absolute;
+    inset: 0;
+  }
+
+  [data-slot='modal-page'][data-covered] {
+    translate: -30% 0;
+  }
+
+  /* Dims a covered page; it brightens again as the page in front slides away. */
+  [data-slot='modal-page']::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    background: var(--modal-page-dim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--modal-page-duration) var(--modal-ease);
+  }
+
+  [data-slot='modal-page'][data-covered]::after {
+    opacity: 1;
+  }
+
+  /* A pushed page casts a soft shadow from its leading edge while it moves. */
+  [data-slot='modal-page']:not([data-depth='0']) {
+    box-shadow: -18px 0 44px -22px var(--modal-page-shadow);
+  }
+
+  [data-slot='modal-page'][data-phase='enter'] {
+    animation: modal-page-in var(--modal-page-duration) var(--modal-ease) backwards;
+  }
+
+  [data-slot='modal-page'][data-phase='exit'] {
+    animation: modal-page-out 420ms var(--modal-ease) forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-slot='modal-content'] {
+      --modal-page-duration: 200ms;
+    }
+
+    [data-slot='modal-page'][data-covered] {
+      translate: none;
+    }
+
+    [data-slot='modal-page'][data-phase='enter'] {
+      animation-name: modal-fade-in;
+    }
+
+    [data-slot='modal-page'][data-phase='exit'] {
+      animation: modal-fade-out 180ms ease forwards;
     }
   }
 
@@ -196,6 +237,11 @@
 
   [data-slot='modal-header']:active {
     cursor: grabbing;
+  }
+
+  /* A back button leads the row: the header starts closer to the edge. */
+  [data-slot='modal-header']:has([data-slot='modal-back']) {
+    padding-left: 0.75rem;
   }
 
   /* The drag handle overlays the top padding, adding no height. */
@@ -294,8 +340,20 @@
     height: 1.125rem;
   }
 
+  /* The back chevron sits a touch left of centre and nudges left when pointed at. */
   [data-slot='modal-back'] {
-    margin-left: -0.5rem;
+    color: var(--foreground);
+  }
+
+  [data-slot='modal-back'] svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    translate: -1px 0;
+    transition: translate 260ms var(--modal-ease);
+  }
+
+  [data-slot='modal-back']:hover svg {
+    translate: -3px 0;
   }
 
   [data-slot='modal-back']:hover,
@@ -386,6 +444,11 @@
       margin-inline: calc(-1 * var(--modal-gutter)) -0.75rem;
       padding-inline: var(--modal-gutter) 0.75rem;
     }
+
+    [data-slot='modal-header']:has([data-slot='modal-back']) [data-slot='modal-tags'] {
+      margin-left: -0.75rem;
+      padding-left: 0.75rem;
+    }
   }
 
   /* ---- Content ------------------------------------------------------------- */
@@ -418,6 +481,11 @@
     animation: modal-content-in 460ms var(--modal-ease) 80ms both;
   }
 
+  /* A pushed page moves as a whole; its content does not rise on its own. */
+  [data-slot='modal-page']:not([data-depth='0']) :is([data-slot='modal-body'], [data-slot='modal-split']) {
+    animation: none;
+  }
+
   [data-slot='modal-body'] {
     padding: calc(var(--modal-header-h) + 0.25rem) var(--modal-gutter) calc(2rem + env(safe-area-inset-bottom, 0px));
     -webkit-mask-image: var(--modal-fade-top), var(--modal-fade-bottom);
@@ -440,7 +508,7 @@
 
   [data-slot='modal-pane'] {
     min-width: 0;
-    background: var(--modal-pane-background, transparent);
+    background-color: var(--modal-pane-background, transparent);
     transition: background-color 420ms var(--modal-ease);
   }
 
@@ -462,12 +530,12 @@
 
   /*
    * Stacked on phones, the split scrolls as one column and its faded top
-   * shows the popup beneath, so the popup takes the tone of the pane under
+   * shows the page beneath, so the page takes the tone of the pane under
    * the header (data-under-tone, set by trackScroll).
    */
   @media (width < 48rem) {
-    [data-slot='modal-content'][data-under-tone='muted'] {
-      background-color: var(--modal-pane-muted);
+    [data-slot='modal-page'][data-under-tone='muted'] {
+      --modal-page-background: var(--modal-pane-muted);
     }
   }
 
@@ -479,6 +547,11 @@
       grid-template-rows: minmax(0, 1fr);
       -webkit-mask-image: none;
       mask-image: none;
+    }
+
+    /* A single pane takes the whole width, whatever the columns say. */
+    [data-slot='modal-split']:has(> [data-slot='modal-pane']:only-child) {
+      grid-template-columns: minmax(0, 1fr);
     }
 
     [data-slot='modal-pane'] {
@@ -521,6 +594,7 @@
     }
 
     [data-slot='modal-back'],
+    [data-slot='modal-back'] svg,
     [data-slot='modal-close'] {
       transition: none;
     }
@@ -539,9 +613,28 @@
   }
 }
 
+@keyframes modal-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes modal-content-in {
   from {
     opacity: 0;
     translate: 0 0.5rem;
+  }
+}
+
+/* A pushed page comes in from the right edge, and leaves the same way. */
+@keyframes modal-page-in {
+  from {
+    translate: 100% 0;
+  }
+}
+
+@keyframes modal-page-out {
+  to {
+    translate: 100% 0;
   }
 }
