@@ -18,6 +18,16 @@ import {
   ModalTrigger,
   useModal,
 } from '@/components/ui/modal';
+import {
+  KnowledgeCard,
+  KnowledgeCardAside,
+  KnowledgeCardHeader,
+  KnowledgeCardHero,
+  KnowledgeCardMain,
+  KnowledgeCardSection,
+  KnowledgeCardStage,
+  knowledgeCardReveal,
+} from '@/components/ui/knowledge-card';
 import { cn } from '@/lib/utils';
 
 /*
@@ -40,7 +50,7 @@ function Chip({ children, tone }: { children: ReactNode; tone?: string }) {
 function Paragraphs({ count, topic }: { count: number; topic: string }) {
   return Array.from({ length: count }, (_, index) => (
     <p key={index} className="mb-4 leading-7 text-foreground/90">
-      {topic} · 第 {index + 1} 段。顶栏是一层磨砂玻璃：内容从它下方滚过时被柔和地模糊，标题和按钮依旧清楚；
+      {topic} · 第 {index + 1} 段。顶栏没有底色，按钮与标签是磨砂玻璃：内容滚到顶栏下方时柔和淡出，标题和按钮依旧清楚；
       滚回顶部，它与弹窗表面融为一体。手机和宽屏都是从底部弹出的抽屉，按住顶栏向下拖动即可关闭。
     </p>
   ));
@@ -296,6 +306,87 @@ function HeightDemo() {
   );
 }
 
+const CONCEPTS = [
+  {
+    term: '极限',
+    english: 'limit',
+    tag: '函数与极限',
+    points: ['ε-δ 定义刻画“任意接近”', '左右极限存在且相等', '四则运算与夹逼准则'],
+    sections: [
+      ['定义', '对任意 ε > 0，存在 δ > 0，当 0 < |x − x₀| < δ 时，恒有 |f(x) − A| < ε，则称 A 为 f(x) 在 x₀ 处的极限。'],
+      ['常用方法', '等价无穷小替换、洛必达法则、泰勒展开，以及单调有界准则。'],
+      ['易错点', '等价无穷小只能在乘除中替换；加减时需展开到足够阶数。'],
+    ],
+  },
+  {
+    term: '导数',
+    english: 'derivative',
+    tag: '一元微分',
+    points: ['函数增量与自变量增量之比的极限', '几何意义：切线斜率', '可导必连续，反之不然'],
+    sections: [
+      ['定义', 'f′(x₀) = lim (f(x₀ + Δx) − f(x₀)) / Δx，Δx → 0；左右导数存在且相等时可导。'],
+      ['常用方法', '复合函数链式法则、隐函数求导、参数方程求导与对数求导法。'],
+      ['易错点', '分段函数在分段点处须用定义求导，不能直接对两段公式求导后比较。'],
+    ],
+  },
+  {
+    term: '定积分',
+    english: 'definite integral',
+    tag: '一元积分',
+    points: ['分割、近似、求和、取极限', '几何意义：有向面积', '牛顿—莱布尼茨公式连接微分与积分'],
+    sections: [
+      ['定义', '把区间分成 n 份，作黎曼和 Σ f(ξᵢ)Δxᵢ，当最大子区间长度趋于 0 时的极限。'],
+      ['常用方法', '换元积分、分部积分、对称区间上的奇偶性，以及区间再现公式。'],
+      ['易错点', '换元时上下限要同时换；被积函数在区间内无界时要按反常积分处理。'],
+    ],
+  },
+] as const;
+
+function KnowledgeDemo() {
+  const [open, setOpen] = useState(false);
+  const [index, setIndex] = useState(0);
+  const concept = CONCEPTS[index];
+  return (
+    <DemoFrame caption="KnowledgeCard 只提供结构与动效：顶栏翻页器、左右分栏、卡片切换动画、←/→ 与左右滑动；内容由调用方填进 Aside / Main。">
+      <Button variant="secondary" size="lg" className="h-10 rounded-full px-4" onClick={() => setOpen(true)}>
+        <Layers3Icon data-icon="inline-start" />知识卡片
+      </Button>
+      <KnowledgeCard
+        open={open}
+        onOpenChange={setOpen}
+        count={CONCEPTS.length}
+        index={index}
+        onIndexChange={setIndex}
+        labels={{ group: '切换概念', prev: '上一个概念', next: '下一个概念' }}
+        height="34rem"
+      >
+        <KnowledgeCardHeader title={concept.term} titleMode="scrolled" />
+        <KnowledgeCardStage columns="minmax(0,0.9fr) minmax(0,1.1fr)">
+          <KnowledgeCardAside>
+            <KnowledgeCardHero title={concept.term} subtitle={concept.english} badge={<Chip tone="5">{concept.tag}</Chip>} />
+            <KnowledgeCardSection label="要点">
+              <ul className="grid gap-2 text-[0.9375rem] leading-relaxed">
+                {concept.points.map((point, order) => (
+                  <li key={point} className="rounded-xl bg-(--ui-fill) px-3 py-2" {...knowledgeCardReveal(order)}>
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            </KnowledgeCardSection>
+          </KnowledgeCardAside>
+          <KnowledgeCardMain>
+            {concept.sections.map(([label, text], order) => (
+              <KnowledgeCardSection key={label} label={label} {...knowledgeCardReveal(order)}>
+                <p className="leading-7 text-foreground/90">{text}</p>
+              </KnowledgeCardSection>
+            ))}
+          </KnowledgeCardMain>
+        </KnowledgeCardStage>
+      </KnowledgeCard>
+    </DemoFrame>
+  );
+}
+
 const DEMOS = {
   basic: BasicDemo,
   toolbar: ToolbarDemo,
@@ -303,6 +394,7 @@ const DEMOS = {
   nested: NestedDemo,
   sizes: SizesDemo,
   heights: HeightDemo,
+  knowledge: KnowledgeDemo,
 };
 
 export function ModalDemo({ kind }: { kind: keyof typeof DEMOS }) {

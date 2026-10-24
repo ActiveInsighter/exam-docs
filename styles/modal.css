@@ -5,32 +5,34 @@
  *
  * In the components layer, so Tailwind utilities passed as className win.
  *
- * A bottom sheet at every width: it slides up from the bottom edge and back
- * down on close, on one spring-like curve. Wide screens centre it and cap
- * its width (--modal-width, set by ModalContent). Levels of a stack sit like
- * a deck of cards: ModalContent's stack writes --modal-stack-y,
- * --modal-stack-scale and data-stacked on each level behind the front one.
+ * A sheet that slides up from the bottom edge and back down on close, on one
+ * spring-like curve. Phones get it edge to edge; wide screens float it a
+ * little above the bottom edge (--modal-float), centred and capped in width
+ * (--modal-width, set by ModalContent). Levels of a stack sit like a deck of
+ * cards: ModalContent's stack writes --modal-stack-y, --modal-stack-scale and
+ * data-stacked on each level behind the front one.
+ *
+ * The header has no background. Its controls are frosted-glass capsules
+ * (--modal-glass-*), and every scroll area fades its content out under the
+ * header (a mask sized by --modal-header-h), so the title stays legible.
+ * Note that a mask, filter or opacity below 1 on the header or its ancestors
+ * would cut the glass off from the content behind it (a backdrop root), so
+ * none of them carry one.
  *
  * Entering is a keyframe animation, not a transition from Base UI's
- * data-starting-style: a modal that mounts already open (the solution sheet
- * mounts on first click, the library lazily) gets no starting style and
+ * data-starting-style: a modal that mounts already open (say, one rendered
+ * only after its trigger is clicked) gets no starting style and
  * would otherwise just appear. Leaving is a transition to data-ending-style.
  */
 /*
  * Variables that change while a modal is open are registered as
  * non-inherited: a change then restyles only the element it is set on, not
- * every element of a long solution inside it.
+ * every element of long content inside it.
  */
 @property --modal-header-h {
   syntax: '<length>';
   inherits: false;
-  initial-value: 3.25rem;
-}
-
-@property --modal-split-x {
-  syntax: '<length-percentage>';
-  inherits: false;
-  initial-value: 50%;
+  initial-value: 3.5rem;
 }
 
 /* Placement of a level behind the front one (createModalStack). */
@@ -72,9 +74,11 @@
   [data-slot='modal-content'] {
     --modal-gutter: 1.25rem;
     --modal-max-height: 100dvh;
+    /* Gap under a floating sheet (wide screens). */
+    --modal-float: 0px;
 
     position: fixed;
-    inset: auto 0 0;
+    inset: auto 0 var(--modal-float);
     z-index: 50;
     display: flex;
     flex-direction: column;
@@ -88,7 +92,7 @@
     overflow: hidden;
     isolation: isolate;
     border-radius: var(--modal-radius) var(--modal-radius) 0 0;
-    background: var(--modal-surface);
+    background-color: var(--modal-surface);
     color: var(--foreground);
     box-shadow: var(--modal-shadow);
     outline: none;
@@ -97,8 +101,8 @@
     scale: var(--modal-stack-scale);
     transform-origin: 50% 100%;
     animation: modal-sheet-in 560ms var(--modal-ease);
-    transition-property: translate, scale, opacity;
-    transition-duration: 560ms;
+    transition-property: translate, scale, opacity, background-color;
+    transition-duration: 560ms, 560ms, 560ms, 240ms;
     transition-timing-function: var(--modal-ease);
   }
 
@@ -108,7 +112,7 @@
   }
 
   [data-slot='modal-content'][data-ending-style] {
-    translate: 0 100%;
+    translate: 0 calc(100% + var(--modal-float));
     transition-duration: 380ms;
   }
 
@@ -142,16 +146,21 @@
   @media (width >= 48rem) {
     [data-slot='modal-content'] {
       --modal-gutter: 1.75rem;
+      --modal-float: 0.75rem;
       width: min(var(--modal-width, 40rem), calc(100vw - 2rem));
       max-height: min(
         var(--modal-max-height),
-        calc(100dvh - 2.5rem - var(--modal-depth, 0) * 0.75rem)
+        calc(100dvh - 2.5rem - var(--modal-float) - var(--modal-depth, 0) * 0.75rem)
       );
+      border-radius: var(--modal-radius);
+      box-shadow: var(--modal-shadow-float);
     }
 
     [data-slot='modal-content'][data-size='full'] {
+      --modal-float: 0px;
       width: 100vw;
       height: calc(100dvh - 2.5rem);
+      border-radius: var(--modal-radius) var(--modal-radius) 0 0;
     }
   }
 
@@ -174,62 +183,19 @@
 
   /* ---- Header ------------------------------------------------------------- */
 
+  /* No background: only its controls are drawn, each on frosted glass. */
   [data-slot='modal-header'] {
     position: absolute;
     inset: 0 0 auto;
     z-index: 20;
-    padding: 0.625rem 0.75rem 0.375rem var(--modal-gutter);
-    /*
-     * Frosted glass: the surface beneath, see-through and blurred. Over the
-     * empty top of the content it reads as the surface itself; content
-     * scrolled under it shows through, softened.
-     */
-    background: var(--modal-veil);
-    -webkit-backdrop-filter: var(--modal-header-blur);
-    backdrop-filter: var(--modal-header-blur);
+    padding: 0.75rem 0.75rem 0.5rem var(--modal-gutter);
     touch-action: none;
     user-select: none;
     cursor: grab;
-    transition: box-shadow 200ms var(--modal-ease);
   }
 
   [data-slot='modal-header']:active {
     cursor: grabbing;
-  }
-
-  [data-slot='modal-content'][data-scrolled] [data-slot='modal-header'] {
-    box-shadow: 0 1px 0 var(--ui-fill);
-  }
-
-  /*
-   * Split panes have their own tones, so the veil follows the pane under the
-   * header. ModalSplit marks the header (data-split) and sets
-   * --modal-veil-left / --modal-veil-right and --modal-split-x on it. Side by
-   * side, two bands meet at the first pane's width; stacked on phones, the
-   * pane currently scrolled under it decides (data-under-tone).
-   */
-  @media (width < 48rem) {
-    [data-slot='modal-header'][data-split] {
-      background: var(--modal-veil-left, var(--modal-veil));
-    }
-
-    [data-slot='modal-header'][data-split][data-under-tone='muted'] {
-      background: var(--modal-veil-muted);
-    }
-
-    [data-slot='modal-header'][data-split][data-under-tone='default'] {
-      background: var(--modal-veil);
-    }
-  }
-
-  @media (width >= 48rem) {
-    [data-slot='modal-header'][data-split] {
-      background: linear-gradient(
-        to right,
-        var(--modal-veil-left, var(--modal-veil)) var(--modal-split-x),
-        var(--modal-veil-right, var(--modal-veil)) var(--modal-split-x)
-      );
-    }
   }
 
   /* The drag handle overlays the top padding, adding no height. */
@@ -260,7 +226,7 @@
     }
 
     [data-slot='modal-header'] {
-      padding-top: 0.5rem;
+      padding-top: 0.625rem;
     }
   }
 
@@ -280,19 +246,88 @@
     line-height: 1.5;
   }
 
-  /* Tags fill the row; the fade covers only the end padding until they overflow. */
+  /*
+   * Frosted glass: a translucent, blurred and saturated layer with a light
+   * rim on top and a soft shadow, the same on every surface and tone.
+   */
+  [data-slot='modal-back'],
+  [data-slot='modal-close'],
+  [data-slot='modal-toolbar'],
+  [data-slot='modal-tag'],
+  [data-slot='modal-tags'] > * {
+    -webkit-backdrop-filter: var(--modal-glass-blur);
+    backdrop-filter: var(--modal-glass-blur);
+    box-shadow: var(--modal-glass-shadow);
+  }
+
+  [data-slot='modal-back'],
+  [data-slot='modal-close'],
+  [data-slot='modal-toolbar'],
+  [data-slot='modal-tag'] {
+    background-color: var(--modal-glass);
+  }
+
+  /* Round glass buttons at the ends of the row. */
+  [data-slot='modal-back'],
+  [data-slot='modal-close'] {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color var(--ui-duration) var(--ui-ease),
+      color var(--ui-duration) var(--ui-ease),
+      scale 220ms var(--modal-ease);
+  }
+
+  [data-slot='modal-back'] svg,
+  [data-slot='modal-close'] svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  [data-slot='modal-back'] {
+    margin-left: -0.5rem;
+  }
+
+  [data-slot='modal-back']:hover,
+  [data-slot='modal-close']:hover {
+    background-color: var(--modal-glass-hover);
+    color: var(--foreground);
+  }
+
+  [data-slot='modal-back']:active,
+  [data-slot='modal-close']:active {
+    scale: 0.92;
+  }
+
+  [data-slot='modal-back']:focus-visible,
+  [data-slot='modal-close']:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* Tags fill the row and scroll sideways when they overflow. */
   [data-slot='modal-tags'] {
     display: flex;
     flex: 1 1 0;
     align-items: center;
     gap: 0.375rem;
     min-width: 0;
-    padding: 2px 1.25rem 2px 0;
+    /* Room for the glass shadow, which the scroll box would clip. */
+    margin: -0.375rem 0;
+    padding: 0.375rem 0.5rem 0.375rem 0.125rem;
     overflow-x: auto;
     scrollbar-width: none;
     touch-action: pan-x;
-    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.25rem), transparent);
-    mask-image: linear-gradient(to right, #000 calc(100% - 1.25rem), transparent);
   }
 
   [data-slot='modal-tags']::-webkit-scrollbar {
@@ -303,20 +338,37 @@
     display: none;
   }
 
+  [data-slot='modal-tags'] > * {
+    flex-shrink: 0;
+  }
+
+  [data-slot='modal-tag'] {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3125rem;
+    height: 1.625rem;
+    padding-inline: 0.625rem;
+    border-radius: 999px;
+    color: var(--foreground);
+    font-size: 0.75rem;
+    font-weight: 560;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* One capsule holding every action; buttons inside stay transparent. */
   [data-slot='modal-toolbar'] {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.125rem;
+    min-height: 2.25rem;
     margin-left: auto;
+    padding: 0.125rem;
+    border-radius: 999px;
   }
 
-  /* A hairline between the toolbar and the close button. */
-  [data-slot='modal-toolbar']:has(+ [data-slot='modal-close'])::after {
-    content: '';
-    width: 1px;
-    height: 1.125rem;
-    margin-left: 0.25rem;
-    background: var(--ui-fill-strong);
+  [data-slot='modal-toolbar']:empty {
+    display: none;
   }
 
   [data-slot='modal-close'] {
@@ -331,10 +383,29 @@
     [data-slot='modal-tags'] {
       order: 10;
       flex-basis: 100%;
+      margin-inline: calc(-1 * var(--modal-gutter)) -0.75rem;
+      padding-inline: var(--modal-gutter) 0.75rem;
     }
   }
 
   /* ---- Content ------------------------------------------------------------- */
+
+  /*
+   * Scroll edges. Content fades out as it passes under the header and, where
+   * nothing follows, in the last stretch at the bottom. The mask sits on the
+   * scroll box, so it stays put while the content moves through it. Defined
+   * on the scroll areas, where --modal-header-h (non-inherited) is set.
+   */
+  [data-modal-scroll] {
+    --modal-fade-top: linear-gradient(
+      to bottom,
+      transparent 0,
+      rgb(0 0 0 / 6%) calc(var(--modal-header-h) * 0.45),
+      rgb(0 0 0 / 45%) calc(var(--modal-header-h) * 0.8),
+      #000 calc(var(--modal-header-h) + 0.5rem)
+    );
+    --modal-fade-bottom: linear-gradient(to top, transparent 0, #000 1.5rem);
+  }
 
   [data-slot='modal-body'],
   [data-slot='modal-split'] {
@@ -342,53 +413,93 @@
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
-    scroll-padding-top: var(--modal-header-h, 3.25rem);
+    scroll-padding-top: var(--modal-header-h);
+    scrollbar-width: thin;
     animation: modal-content-in 460ms var(--modal-ease) 80ms both;
   }
 
   [data-slot='modal-body'] {
-    padding: calc(var(--modal-header-h, 3.25rem) + 0.25rem) var(--modal-gutter) calc(1.75rem + env(safe-area-inset-bottom, 0px));
+    padding: calc(var(--modal-header-h) + 0.25rem) var(--modal-gutter) calc(2rem + env(safe-area-inset-bottom, 0px));
+    -webkit-mask-image: var(--modal-fade-top), var(--modal-fade-bottom);
+    mask-image: var(--modal-fade-top), var(--modal-fade-bottom);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
   }
 
   [data-slot='modal-body']:has(~ [data-slot='modal-footer']) {
     padding-bottom: 1.5rem;
+    -webkit-mask-image: var(--modal-fade-top);
+    mask-image: var(--modal-fade-top);
   }
 
   [data-slot='modal-split'] {
     display: grid;
+    -webkit-mask-image: var(--modal-fade-top);
+    mask-image: var(--modal-fade-top);
   }
 
   [data-slot='modal-pane'] {
     min-width: 0;
-    padding: 1.25rem var(--modal-gutter) 1.75rem;
     background: var(--modal-pane-background, transparent);
+    transition: background-color 420ms var(--modal-ease);
   }
 
   [data-slot='modal-pane'][data-tone='muted'] {
     --modal-pane-background: var(--modal-pane-muted);
   }
 
-  [data-slot='modal-pane']:first-child {
-    padding-top: calc(var(--modal-header-h, 3.25rem) + 0.25rem);
+  [data-slot='modal-pane-scroll'] {
+    padding: 1.25rem var(--modal-gutter) 1.75rem;
   }
 
-  [data-slot='modal-pane']:last-child {
+  [data-slot='modal-pane']:first-child > [data-slot='modal-pane-scroll'] {
+    padding-top: calc(var(--modal-header-h) + 0.25rem);
+  }
+
+  [data-slot='modal-pane']:last-child > [data-slot='modal-pane-scroll'] {
     padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
   }
 
+  /*
+   * Stacked on phones, the split scrolls as one column and its faded top
+   * shows the popup beneath, so the popup takes the tone of the pane under
+   * the header (data-under-tone, set by trackScroll).
+   */
+  @media (width < 48rem) {
+    [data-slot='modal-content'][data-under-tone='muted'] {
+      background-color: var(--modal-pane-muted);
+    }
+  }
+
   @media (width >= 48rem) {
+    /* Side by side, each pane scrolls on its own and fades its own content. */
     [data-slot='modal-split'] {
       overflow: hidden;
       grid-template-columns: var(--modal-split-columns, repeat(2, minmax(0, 1fr)));
       grid-template-rows: minmax(0, 1fr);
+      -webkit-mask-image: none;
+      mask-image: none;
     }
 
     [data-slot='modal-pane'] {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    [data-slot='modal-pane'] > [data-slot='modal-pane-scroll'] {
+      flex: 1 1 0%;
+      min-height: 0;
       overflow-y: auto;
       overscroll-behavior: contain;
-      padding-top: calc(var(--modal-header-h, 3.25rem) + 0.25rem);
-      padding-bottom: 2rem;
-      scroll-padding-top: var(--modal-header-h, 3.25rem);
+      padding-top: calc(var(--modal-header-h) + 0.25rem);
+      padding-bottom: 2.25rem;
+      scroll-padding-top: var(--modal-header-h);
+      scrollbar-width: thin;
+      -webkit-mask-image: var(--modal-fade-top), var(--modal-fade-bottom);
+      mask-image: var(--modal-fade-top), var(--modal-fade-bottom);
+      -webkit-mask-composite: source-in;
+      mask-composite: intersect;
     }
   }
 
@@ -399,9 +510,8 @@
     align-items: center;
     justify-content: flex-end;
     gap: 0.5rem;
-    padding: 0.75rem var(--modal-gutter) calc(0.75rem + env(safe-area-inset-bottom, 0px));
-    background: var(--modal-surface);
-    box-shadow: 0 -1px 0 var(--ui-fill);
+    padding: 0.75rem var(--modal-gutter) calc(0.875rem + env(safe-area-inset-bottom, 0px));
+    background: transparent;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -409,12 +519,17 @@
     [data-slot='modal-split'] {
       animation: none;
     }
+
+    [data-slot='modal-back'],
+    [data-slot='modal-close'] {
+      transition: none;
+    }
   }
 }
 
 @keyframes modal-sheet-in {
   from {
-    translate: 0 100%;
+    translate: 0 calc(100% + var(--modal-float, 0px));
   }
 }
 

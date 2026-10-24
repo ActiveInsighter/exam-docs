@@ -3,7 +3,6 @@
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { ChevronLeftIcon, XIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import {
   DialogClose,
   DialogDescription,
@@ -19,19 +18,24 @@ import { cn } from "@/lib/utils"
  *     <ModalTrigger />
  *     <ModalContent size="lg" height="fixed">
  *       <ModalHeader>
- *         <ModalTitle /> <ModalTags /> <ModalToolbar />
+ *         <ModalTitle /> <ModalTags><ModalTag /></ModalTags> <ModalToolbar />
  *       </ModalHeader>
  *       <ModalBody /> | <ModalSplit><ModalPane /><ModalPane /></ModalSplit>
  *       <ModalFooter />
  *     </ModalContent>
  *   </Modal>
  *
- * A bottom sheet at every width: it slides up from the bottom edge (also
- * when it mounts already open), back down on close, and follows a downward
- * drag on its header. Wide screens centre it and cap its width by size. Its
- * height follows the content by default, or stays fixed (`height`), so
- * content that changes in place does not make it jump. The low header
- * floats over the content as frosted glass.
+ * A sheet that slides up from the bottom edge (also when it mounts already
+ * open), back down on close, and follows a downward drag on its header.
+ * Phones get it edge to edge; wide screens float it just above the bottom
+ * edge, centred and capped in width by size. Its height follows the content
+ * by default, or stays fixed (`height`), so content that changes in place
+ * does not make it jump.
+ *
+ * The header has no background of its own. Its controls (back, toolbar,
+ * tags, close) are frosted-glass capsules, and the content scrolling under it
+ * dissolves at the top edge (a mask on each scroll area), so the title stays
+ * legible without a bar behind it.
  *
  * A <Modal> rendered inside another's content is a level of a stack, laid
  * out like a deck of cards: each level below steps back (narrower, dimmed)
@@ -87,7 +91,7 @@ type ModalStack = {
 
 /*
  * Places the levels of one stack like a deck of cards. The front level sits
- * on the bottom edge as usual. Each level behind it scales back from its
+ * on its bottom edge as usual. Each level behind it scales back from its
  * bottom edge and, if the one in front would hide it, rises until a
  * STACK_PEEK strip shows above it. A level never sinks: one taller than the
  * level in front simply shows more of itself.
@@ -115,14 +119,15 @@ function createModalStack(): ModalStack {
     const front = popups.at(-1)
     if (!front) return
     clear(front)
-    const viewport = window.innerHeight
-    let edge = viewport - front.offsetHeight
+    // Wide screens float the sheets above the bottom edge; all levels share the gap.
+    const floor = window.innerHeight - (Number.parseFloat(getComputedStyle(front).bottom) || 0)
+    let edge = floor - front.offsetHeight
     for (let index = popups.length - 2; index >= 0; index--) {
       const popup = popups[index]
       const behind = popups.length - 1 - index
       const width = popup.offsetWidth || 1
       const scale = Math.max(0.5, 1 - behind * Math.min(STACK_MAX_STEP, (STACK_INSET * 2) / width))
-      const top = viewport - popup.offsetHeight * scale
+      const top = floor - popup.offsetHeight * scale
       const lift = Math.min(0, edge - STACK_PEEK - top)
       popup.style.setProperty("--modal-stack-y", `${lift.toFixed(1)}px`)
       popup.style.setProperty("--modal-stack-scale", scale.toFixed(4))
@@ -247,6 +252,11 @@ type ModalSurface = {
   dragHandlers: ReturnType<typeof useSwipeDismiss>
   /** CSS width of this level on wide screens; levels opened on top are at least as wide. */
   width: string
+  /** Height of the floating header; the scroll areas start below it. */
+  headerHeight: string | undefined
+  setHeaderHeight: (height: string) => void
+  /** Re-reads the scroll state after scroll areas mount, unmount or swap. */
+  refreshScroll: () => void
 }
 
 const ModalSurfaceContext = React.createContext<ModalSurface | null>(null)
@@ -350,32 +360,39 @@ function useSwipeDismiss(
 }
 
 /**
- * Marks the popup while any of its scroll areas has left the top, and, for
- * split panes stacked on phones, gives the header the tone of the pane
- * scrolled under it. Only the header restyles on these changes.
+ * Marks the popup while any of its scroll areas has left the top
+ * (data-scrolled) and, for split panes stacked on phones, with the tone of
+ * the pane under the header (data-under-tone): the faded top edge shows the
+ * popup beneath, which takes that tone. Only attributes on the popup change.
  */
 function trackScroll(popup: HTMLElement) {
   let frame = 0
   const update = () => {
     frame = 0
-    const areas = Array.from(popup.querySelectorAll<HTMLElement>("[data-modal-scroll]"))
+    const areas = Array.from(popup.querySelectorAll<HTMLElement>("[data-modal-scroll]:not([inert] *)"))
     popup.toggleAttribute("data-scrolled", areas.some((area) => area.scrollTop > 1))
-    const split = popup.querySelector<HTMLElement>('[data-slot="modal-split"]')
+    const split = Array.from(popup.querySelectorAll<HTMLElement>('[data-slot="modal-split"]:not([inert])')).at(-1)
     const header = popup.querySelector<HTMLElement>('[data-slot="modal-header"]')
-    if (!split || !header) return
-    const headerBottom = split.getBoundingClientRect().top + header.offsetHeight
-    const under = Array.from(split.querySelectorAll<HTMLElement>('[data-slot="modal-pane"]'))
-      .find((pane) => pane.getBoundingClientRect().bottom > headerBottom)
-    const tone = under?.dataset.tone ?? "default"
-    if (header.dataset.underTone !== tone) header.dataset.underTone = tone
+    let tone = "default"
+    if (split && header) {
+      const headerBottom = popup.getBoundingClientRect().top + header.offsetHeight
+      const under = Array.from(split.querySelectorAll<HTMLElement>(':scope > [data-slot="modal-pane"]'))
+        .find((pane) => pane.getBoundingClientRect().bottom > headerBottom)
+      tone = under?.dataset.tone ?? "default"
+    }
+    if (popup.dataset.underTone !== tone) popup.dataset.underTone = tone
   }
-  const onScroll = () => {
+  const schedule = () => {
     if (!frame) frame = requestAnimationFrame(update)
   }
-  popup.addEventListener("scroll", onScroll, { capture: true, passive: true })
-  return () => {
-    popup.removeEventListener("scroll", onScroll, { capture: true })
-    cancelAnimationFrame(frame)
+  popup.addEventListener("scroll", schedule, { capture: true, passive: true })
+  update()
+  return {
+    refresh: schedule,
+    dispose: () => {
+      popup.removeEventListener("scroll", schedule, { capture: true })
+      cancelAnimationFrame(frame)
+    },
   }
 }
 
@@ -429,10 +446,16 @@ function ModalContent({
   const popupRef = React.useRef<HTMLDivElement | null>(null)
   const backdropRef = React.useRef<HTMLDivElement | null>(null)
   const titleRef = React.useRef<HTMLElement | null>(null)
+  const scrollRef = React.useRef<ReturnType<typeof trackScroll> | null>(null)
   const [popup, setPopupNode] = React.useState<HTMLDivElement | null>(null)
+  const [headerHeight, setHeaderHeight] = React.useState<string | undefined>(undefined)
   const dragHandlers = useSwipeDismiss(popupRef, backdropRef, level.close)
   const width = below ? `max(${MODAL_WIDTHS[size]}, ${below.width})` : MODAL_WIDTHS[size]
-  const surface = React.useMemo(() => ({ titleRef, dragHandlers, width }), [dragHandlers, width])
+  const refreshScroll = React.useCallback(() => scrollRef.current?.refresh(), [])
+  const surface = React.useMemo<ModalSurface>(
+    () => ({ titleRef, dragHandlers, width, headerHeight, setHeaderHeight, refreshScroll }),
+    [dragHandlers, width, headerHeight, refreshScroll]
+  )
 
   // The popup mounts and unmounts with the open state, so set up on the node.
   const setPopup = React.useCallback((node: HTMLDivElement | null) => {
@@ -440,9 +463,11 @@ function ModalContent({
     assignRef(ref, node)
     setPopupNode(node)
     if (!node) return
-    const untrack = trackScroll(node)
+    const tracker = trackScroll(node)
+    scrollRef.current = tracker
     return () => {
-      untrack()
+      tracker.dispose()
+      if (scrollRef.current === tracker) scrollRef.current = null
       popupRef.current = null
       assignRef(ref, null)
       setPopupNode(null)
@@ -500,12 +525,29 @@ function ModalContent({
   )
 }
 
+/**
+ * Props every scroll area shares: the header height it starts below (as a
+ * non-inherited variable on the area itself, so a change restyles the area
+ * alone, not the long content inside it), and a scroll-state refresh when it
+ * mounts or unmounts.
+ */
+function useScrollArea(style: React.CSSProperties | undefined) {
+  const surface = React.useContext(ModalSurfaceContext)
+  const refresh = surface?.refreshScroll
+  React.useLayoutEffect(() => {
+    refresh?.()
+    return () => refresh?.()
+  }, [refresh])
+  const height = surface?.headerHeight
+  return React.useMemo(
+    () => (height ? { "--modal-header-h": height, ...style } as React.CSSProperties : style),
+    [height, style]
+  )
+}
+
 /* ------------------------------------------------------------------------ */
 /* Header: handle, back, title, tags, toolbar, close                         */
 /* ------------------------------------------------------------------------ */
-
-const headerButton =
-  "size-8 shrink-0 rounded-full bg-(--ui-fill) text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground"
 
 /**
  * The floating header. Children are laid out on one row (title, tags,
@@ -526,31 +568,17 @@ function ModalHeader({
   const level = useModal()
   const surface = React.useContext(ModalSurfaceContext)
   const headerRef = React.useRef<HTMLElement>(null)
+  const setHeaderHeight = surface?.setHeaderHeight
 
-  /*
-   * The content scrolls under the header, so the scroll areas are padded by
-   * its height. The variable is registered as non-inherited (modal.css) and
-   * set on those areas only: setting an inherited variable on the popup would
-   * restyle every element in it, a thousand on a long solution.
-   */
   React.useLayoutEffect(() => {
     const header = headerRef.current
-    const popup = header?.closest<HTMLElement>('[data-slot="modal-content"]')
-    if (!header || !popup) return
-    let last = ""
-    const update = () => {
-      const height = `${header.offsetHeight}px`
-      if (height === last) return
-      last = height
-      popup.querySelectorAll<HTMLElement>("[data-modal-scroll]").forEach((area) => {
-        area.style.setProperty("--modal-header-h", height)
-      })
-    }
+    if (!header || !setHeaderHeight) return
+    const update = () => setHeaderHeight(`${header.offsetHeight}px`)
     update()
     const observer = new ResizeObserver(update)
     observer.observe(header)
     return () => observer.disconnect()
-  }, [])
+  }, [setHeaderHeight])
 
   return (
     <header
@@ -591,56 +619,65 @@ function ModalDescription({ className, ...props }: DialogPrimitive.Description.P
   return <DialogDescription data-slot="modal-description" className={className} {...props} />
 }
 
-/** Capsules beside the title; a scrolling row of their own on phones. */
+/**
+ * Capsules beside the title; a scrolling row of their own on phones. Each
+ * child is frosted: give it a translucent background, or use ModalTag.
+ */
 function ModalTags({ className, ...props }: React.ComponentProps<"div">) {
   return <div data-slot="modal-tags" className={className} {...props} />
 }
 
-/** Actions before the close button. */
+/** A frosted-glass tag for ModalTags. */
+function ModalTag({ className, ...props }: React.ComponentProps<"span">) {
+  return <span data-slot="modal-tag" className={className} {...props} />
+}
+
+/** Actions before the close button, grouped on one frosted-glass capsule. */
 function ModalToolbar({ className, ...props }: React.ComponentProps<"div">) {
   return <div role="group" data-slot="modal-toolbar" className={className} {...props} />
 }
 
 /** Returns to the level below. Rendered by ModalHeader on nested levels. */
-function ModalBack({ className, ...props }: Omit<DialogPrimitive.Close.Props, "render">) {
+function ModalBack({ className, ...props }: Omit<DialogPrimitive.Close.Props, "render" | "className"> & { className?: string }) {
   return (
     <DialogClose
       data-slot="modal-back"
-      render={<Button variant="ghost" size="icon" className={cn(headerButton, "-ml-1.5", className)} />}
+      render={<button type="button" className={className} />}
       {...props}
     >
-      <ChevronLeftIcon className="size-4.5" />
+      <ChevronLeftIcon aria-hidden="true" />
       <span className="sr-only">返回</span>
     </DialogClose>
   )
 }
 
 /** Closes the modal; on a nested level, the whole stack. */
-function ModalClose({ className, ...props }: Omit<React.ComponentProps<typeof Button>, "render">) {
+function ModalClose({ className, onClick, ...props }: React.ComponentProps<"button">) {
   const level = useModal()
-  const nested = Boolean(level && level.depth > 0)
-  if (nested) {
+  if (level && level.depth > 0) {
     return (
-      <Button
-        variant="ghost"
-        size="icon"
+      <button
+        type="button"
         data-slot="modal-close"
-        className={cn(headerButton, className)}
+        className={className}
         title="全部关闭"
-        onClick={() => level?.closeAll()}
+        onClick={(event) => {
+          onClick?.(event)
+          if (!event.defaultPrevented) level.closeAll()
+        }}
         {...props}
       >
-        <XIcon />
+        <XIcon aria-hidden="true" />
         <span className="sr-only">全部关闭</span>
-      </Button>
+      </button>
     )
   }
   return (
     <DialogClose
       data-slot="modal-close"
-      render={<Button variant="ghost" size="icon" className={cn(headerButton, className)} {...props} />}
+      render={<button type="button" className={className} onClick={onClick} {...props} />}
     >
-      <XIcon />
+      <XIcon aria-hidden="true" />
       <span className="sr-only">关闭</span>
     </DialogClose>
   )
@@ -651,8 +688,9 @@ function ModalClose({ className, ...props }: Omit<React.ComponentProps<typeof Bu
 /* ------------------------------------------------------------------------ */
 
 /** One scrolling content area under the header. */
-function ModalBody({ className, ...props }: React.ComponentProps<"div">) {
-  return <div data-slot="modal-body" data-modal-scroll="" className={className} {...props} />
+function ModalBody({ className, style, ...props }: React.ComponentProps<"div">) {
+  const areaStyle = useScrollArea(style)
+  return <div data-slot="modal-body" data-modal-scroll="" className={className} style={areaStyle} {...props} />
 }
 
 /**
@@ -668,55 +706,34 @@ function ModalSplit({
   /** grid-template-columns on wide screens; two equal columns by default. */
   columns?: string
 }) {
-  const splitRef = React.useRef<HTMLDivElement>(null)
-
-  // The header's veil takes each pane's tone, changing where the first pane
-  // ends. Written on the header, so only the header restyles.
-  React.useLayoutEffect(() => {
-    const split = splitRef.current
-    const panes = split ? Array.from(split.querySelectorAll<HTMLElement>(':scope > [data-slot="modal-pane"]')) : []
-    const header = split?.closest('[data-slot="modal-content"]')?.querySelector<HTMLElement>('[data-slot="modal-header"]')
-    if (!split || !header || panes.length === 0) return
-    const veil = (pane: HTMLElement | undefined) =>
-      pane?.dataset.tone === "muted" ? "var(--modal-veil-muted)" : "var(--modal-veil)"
-    header.dataset.split = ""
-    header.style.setProperty("--modal-veil-left", veil(panes[0]))
-    header.style.setProperty("--modal-veil-right", veil(panes[panes.length - 1]))
-    let last = ""
-    const update = () => {
-      const x = `${panes[0].offsetWidth}px`
-      if (x !== last) header.style.setProperty("--modal-split-x", (last = x))
-    }
-    update()
-    const observer = new ResizeObserver(update)
-    observer.observe(panes[0])
-    return () => {
-      observer.disconnect()
-      delete header.dataset.split
-    }
-  }, [])
-
-  return (
-    <div
-      ref={splitRef}
-      data-slot="modal-split"
-      data-modal-scroll=""
-      className={className}
-      style={columns ? { "--modal-split-columns": columns, ...style } as React.CSSProperties : style}
-      {...props}
-    />
+  const splitStyle = React.useMemo(
+    () => (columns ? { "--modal-split-columns": columns, ...style } as React.CSSProperties : style),
+    [columns, style]
   )
+  const areaStyle = useScrollArea(splitStyle)
+  return <div data-slot="modal-split" data-modal-scroll="" className={className} style={areaStyle} {...props} />
 }
 
+/**
+ * One pane of a ModalSplit. The tone sits on the pane itself and the
+ * content scrolls inside it, so the faded top edge of the content never
+ * fades the pane's colour. Props, ref and className go to the scrolling
+ * content element.
+ */
 function ModalPane({
-  className,
   tone = "default",
+  style,
   ...props
 }: React.ComponentProps<"div"> & {
   /** "muted" sets the pane on the quieter tone, which separates panes without a rule. */
   tone?: "default" | "muted"
 }) {
-  return <div data-slot="modal-pane" data-modal-scroll="" data-tone={tone} className={className} {...props} />
+  const areaStyle = useScrollArea(style)
+  return (
+    <div data-slot="modal-pane" data-tone={tone}>
+      <div data-slot="modal-pane-scroll" data-modal-scroll="" style={areaStyle} {...props} />
+    </div>
+  )
 }
 
 function ModalFooter({ className, ...props }: React.ComponentProps<"div">) {
@@ -734,6 +751,7 @@ export {
   ModalHeader,
   ModalPane,
   ModalSplit,
+  ModalTag,
   ModalTags,
   ModalTitle,
   ModalToolbar,
