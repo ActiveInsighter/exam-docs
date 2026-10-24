@@ -1,0 +1,370 @@
+/*
+ * Knowledge card (components/ui/knowledge-card.tsx), laid out inside the
+ * general Modal (styles/modal.css). Structure and motion only: no colours of
+ * its own beyond the modal and --ui-* tokens, so a caller tints it by
+ * re-pointing --modal-pane-muted and friends on the popup.
+ *
+ * In the components layer, so Tailwind utilities passed as className win.
+ *
+ * A step swaps whole cards, both in the same place (.kc-viewport):
+ *
+ *   leaving   stays put underneath (kc-stage-hold) while its content drifts
+ *             out towards the side it leaves by and fades;
+ *   current   fades in over it (kc-stage-in) while its content settles in
+ *             from the other side, rows rising one after another.
+ *
+ * The leaving card is removed when its hold ends.
+ */
+@layer components {
+  [data-knowledge-card] {
+    --kc-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --kc-shift: 1.75rem;
+  }
+
+  /* ---- Header -------------------------------------------------------------- */
+
+  /* "scrolled": phones show the title once the card is under the header. */
+  [data-kc-title='scrolled'] {
+    opacity: 0;
+    translate: 0 4px;
+    transition:
+      opacity 180ms ease,
+      translate 260ms var(--kc-ease);
+  }
+
+  [data-knowledge-card][data-scrolled] [data-kc-title='scrolled'] {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  @media (width >= 48rem) {
+    [data-knowledge-card][data-scrolled] [data-kc-title='scrolled'] {
+      opacity: 0;
+    }
+  }
+
+  [data-slot='kc-pager'] {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* Actions before the pager: a hairline between the two groups. */
+  [data-slot='modal-toolbar'] > :not([data-slot='kc-pager']) + [data-slot='kc-pager']::before {
+    content: '';
+    width: 1px;
+    height: 1.125rem;
+    margin-inline: 0.25rem;
+    background: var(--ui-fill-strong);
+  }
+
+  [data-slot='kc-pager-step'] {
+    display: inline-grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color var(--ui-duration) var(--ui-ease),
+      color var(--ui-duration) var(--ui-ease),
+      scale 220ms var(--kc-ease);
+  }
+
+  [data-slot='kc-pager-step'] svg {
+    width: 1.0625rem;
+    height: 1.0625rem;
+  }
+
+  [data-slot='kc-pager-step']:hover:not(:disabled) {
+    background: var(--ui-fill-hover);
+    color: var(--foreground);
+  }
+
+  [data-slot='kc-pager-step']:active:not(:disabled) {
+    scale: 0.9;
+  }
+
+  [data-slot='kc-pager-step']:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: -2px;
+  }
+
+  [data-slot='kc-pager-step']:disabled {
+    cursor: default;
+    opacity: 0.32;
+  }
+
+  [data-slot='kc-pager-count'] {
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: center;
+    min-width: 3.75em;
+    overflow: hidden;
+    color: var(--foreground);
+    font-size: 0.8125rem;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+    line-height: 2rem;
+    white-space: nowrap;
+  }
+
+  [data-slot='kc-pager-current'] {
+    display: inline-block;
+  }
+
+  [data-slot='kc-pager-current'][data-direction='next'] {
+    animation: kc-count-next 320ms var(--kc-ease);
+  }
+
+  [data-slot='kc-pager-current'][data-direction='prev'] {
+    animation: kc-count-prev 320ms var(--kc-ease);
+  }
+
+  [data-slot='kc-pager-total'] {
+    color: var(--muted-foreground);
+    font-weight: 500;
+  }
+
+  [data-slot='kc-pager-slash'] {
+    margin-inline: 0.3em;
+    opacity: 0.7;
+  }
+
+  /* ---- Stage ---------------------------------------------------------------- */
+
+  [data-slot='kc-viewport'] {
+    position: relative;
+    isolation: isolate;
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* Sideways swipes step; vertical ones still scroll. */
+  [data-slot='kc-viewport'][data-swipe] {
+    touch-action: pan-y pinch-zoom;
+  }
+
+  [data-kc-stage] {
+    position: absolute;
+    inset: 0;
+  }
+
+  [data-kc-stage='current'] {
+    z-index: 1;
+  }
+
+  [data-kc-stage='current'][data-direction] {
+    animation: kc-stage-in 300ms var(--kc-ease) both;
+  }
+
+  [data-kc-stage='leaving'] {
+    z-index: 0;
+    pointer-events: none;
+    animation: kc-stage-hold 380ms linear both;
+  }
+
+  [data-slot='kc-content'] {
+    display: flex;
+    flex-direction: column;
+    gap: 1.625rem;
+  }
+
+  [data-kc-stage='current'][data-direction='next'] [data-slot='kc-content'] {
+    animation: kc-content-in-next 520ms var(--kc-ease) both;
+  }
+
+  [data-kc-stage='current'][data-direction='prev'] [data-slot='kc-content'] {
+    animation: kc-content-in-prev 520ms var(--kc-ease) both;
+  }
+
+  /* The aside leads, the main column follows a beat later. */
+  [data-kc-stage='current'][data-direction] [data-kc-region='main'] > [data-slot='kc-content'] {
+    animation-delay: 40ms;
+  }
+
+  [data-kc-stage='leaving'][data-direction='next'] [data-slot='kc-content'] {
+    animation: kc-content-out-next 200ms cubic-bezier(0.4, 0, 1, 1) both;
+  }
+
+  [data-kc-stage='leaving'][data-direction='prev'] [data-slot='kc-content'] {
+    animation: kc-content-out-prev 200ms cubic-bezier(0.4, 0, 1, 1) both;
+  }
+
+  /* Rows rise one after another as their card settles, also on first open. */
+  [data-kc-stage='current'] [data-kc-reveal] {
+    animation: kc-rise 440ms var(--kc-ease) both;
+    animation-delay: calc(90ms + var(--kc-i, 0) * 38ms);
+  }
+
+  /* ---- Regions -------------------------------------------------------------- */
+
+  [data-slot='kc-hero-headline'] {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem 0.875rem;
+  }
+
+  [data-slot='kc-hero-title'] {
+    min-width: 0;
+    color: var(--foreground);
+    font-size: clamp(2rem, 1.6rem + 1.4vw, 2.75rem);
+    font-weight: 760;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    overflow-wrap: anywhere;
+  }
+
+  [data-slot='kc-hero-badge'] {
+    flex-shrink: 0;
+    margin-top: 0.55rem;
+  }
+
+  [data-slot='kc-hero-subtitle'] {
+    margin-top: 0.5rem;
+    color: var(--muted-foreground);
+    font-size: 1.0625rem;
+    font-weight: 500;
+  }
+
+  [data-slot='kc-section'] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  [data-slot='kc-section-head'] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 0.75rem;
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+
+  [data-slot='kc-section-label'] {
+    font-weight: 680;
+    letter-spacing: 0.08em;
+  }
+
+  [data-slot='kc-section-meta'] {
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  @media (width < 48rem) {
+    [data-slot='kc-content'] {
+      gap: 1.375rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-knowledge-card] {
+      --kc-shift: 0px;
+    }
+
+    [data-kc-stage='current'][data-direction] {
+      animation-duration: 160ms;
+    }
+
+    [data-kc-stage='leaving'] {
+      animation-duration: 180ms;
+    }
+
+    [data-kc-stage] [data-slot='kc-content'],
+    [data-kc-stage='current'] [data-kc-reveal],
+    [data-slot='kc-pager-current'] {
+      animation: none !important;
+    }
+
+    [data-kc-stage='leaving'] [data-slot='kc-content'] {
+      opacity: 0;
+    }
+
+    [data-kc-title='scrolled'] {
+      transition: none;
+    }
+  }
+}
+
+@keyframes kc-stage-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Holds the leaving card in place; its end removes the card. */
+@keyframes kc-stage-hold {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes kc-content-in-next {
+  from {
+    opacity: 0;
+    translate: var(--kc-shift) 0;
+    filter: blur(6px);
+  }
+}
+
+@keyframes kc-content-in-prev {
+  from {
+    opacity: 0;
+    translate: calc(-1 * var(--kc-shift)) 0;
+    filter: blur(6px);
+  }
+}
+
+@keyframes kc-content-out-next {
+  to {
+    opacity: 0;
+    translate: calc(-0.6 * var(--kc-shift)) 0;
+    filter: blur(4px);
+  }
+}
+
+@keyframes kc-content-out-prev {
+  to {
+    opacity: 0;
+    translate: calc(0.6 * var(--kc-shift)) 0;
+    filter: blur(4px);
+  }
+}
+
+@keyframes kc-rise {
+  from {
+    opacity: 0;
+    translate: 0 0.625rem;
+  }
+}
+
+@keyframes kc-count-next {
+  from {
+    opacity: 0;
+    translate: 0 0.6em;
+  }
+}
+
+@keyframes kc-count-prev {
+  from {
+    opacity: 0;
+    translate: 0 -0.6em;
+  }
+}
