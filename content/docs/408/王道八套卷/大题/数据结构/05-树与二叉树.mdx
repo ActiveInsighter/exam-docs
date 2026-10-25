@@ -1,0 +1,298 @@
+---
+title: "第5章 树与二叉树·综合应用题"
+description: "2027王道408冲刺模拟八套卷，数据结构第5章，共4题"
+---
+
+# 数据结构 · 第5章 树与二叉树
+
+本章收录综合应用题 **4** 道，按第 1～8 套试卷的顺序排列；题号保留原试卷编号。
+
+## 第1套试卷 · 第42题
+
+<Question id="wd408-2027-s01-q42" type="essay" number={42} tags="王道8套卷, 第1套, 数据结构, 树与二叉树, 考点:二叉树高度与AVL平衡条件的后序递归" points={13}>
+
+假设二叉树采用二叉链表存储，试设计算法求该二叉树的高度，并判断该二叉树是否平衡。本题中的“平衡”是指**二叉树中任意一个结点的左、右子树的高度差的绝对值不超过 1**。二叉树结点定义如下：
+
+```c
+#include <stddef.h>
+typedef struct BiTNode {
+    int data;
+    struct BiTNode *lchild, *rchild;
+} BiTNode, *BiTree;
+```
+
+回答下列问题：
+
+1. 给出算法的基本设计思想。
+2. 根据设计思想，采用 C 或 C++ 语言描述算法，关键之处给出注释。
+
+<Solution>
+
+### 参考答案
+
+**（1）基本思想：一次后序遍历同时求高度、判定平衡。**
+
+对每个结点，先递归求出左、右子树高度 $h_L$ 与 $h_R$，再令当前子树高度为 $1+\max(h_L,h_R)$。只要有某个结点满足 $|h_L-h_R|>1$，便将布尔标志设为不平衡，但**不提前停止高度计算**，以保证即使整树不平衡仍能返回正确的树高。空树高度为 0，叶结点高度为 1。
+
+**（2）C 语言实现：**
+
+```c
+#include <stdlib.h> // abs
+#include <stddef.h>
+
+typedef struct BiTNode {
+    int data;
+    struct BiTNode *lchild, *rchild;
+} BiTNode, *BiTree;
+
+static int visitHeight(BiTree T, int *balanced) {
+    if (T == NULL) return 0;
+
+    int hl = visitHeight(T->lchild, balanced);
+    int hr = visitHeight(T->rchild, balanced);
+    if (abs(hl - hr) > 1) *balanced = 0;
+    return (hl > hr ? hl : hr) + 1;
+}
+
+// 输出参数 *height 为实际树高，*balanced 为 1(平衡) / 0(不平衡)
+void heightAndBalance(BiTree T, int *height, int *balanced) {
+    *balanced = 1;
+    *height = visitHeight(T, balanced);
+}
+```
+
+**正确性说明：**在后序遍历中，进入父结点的判断前，两棵子树的高度都已得到正确值。若任一子树内部失衡，则标志已被置零；若当前结点高度差超过 1，也将标志置零。因此遍历完毕后，标志为 1 **当且仅当全树每个结点都满足平衡条件**。
+
+**复杂度补充：**每个结点恰好访问一次，时间复杂度 $O(n)$；递归栈深为树高 $h$，辅助空间 $O(h)$，最坏退化为 $O(n)$，平衡树为 $O(\log n)$。
+
+**易错点：**不能只检查根结点左右子树高度差，也不能只返回“失衡”哨兵而忽略题目要求的实际整树高度。
+
+</Solution>
+
+</Question>
+
+{/* 第 11 页 */}
+
+---
+
+## 第2套试卷 · 第41题
+
+<Question id="wd408-2027-s02-q41" type="essay" number={41} tags="王道8套卷, 第2套, 数据结构, 树与二叉树, 考点:有序二叉树逻辑结构与带不同属性的二叉链式存储" points={11}>
+
+某组织中，每位领导均直接管理两名下属，分别记为“下属1”和“下属2”：
+
+- 对“下属1”的考核指标为**工作能力**，以整型评分表示；
+- 对“下属2”的考核指标为**外貌形象**，以整型评分表示；
+- 组织中**最高层领导**无考核标准。
+
+说明：两类下属的考核指标互不相同，且每个下属仅具备其对应的评价属性。
+
+已知该组织的层级关系：领导“咸鱼”的下属1为“木鱼”，下属2为“腊鱼”；领导“腊鱼”的下属1为“干鱼”，下属2为“冻鱼”；“咸鱼”为最高层领导（上述均为昵称）。
+
+回答下列问题：
+
+1. 将组织层级关系抽象为数据结构时，其对应的逻辑结构是什么？
+2. 设计一种合适的链式存储结构表示组织关系，要求同时存储层级管理关系及两类下属的不同评价属性（下属1：工作能力评分；下属2：外貌形象评分）。简要说明设计理由。
+3. 依据第 2 问的结构，画出所给组织关系的链式存储示意图，须包含结点、指针及属性字段。
+
+<Solution>
+
+### 参考答案
+
+**（1）逻辑结构。**
+
+这是**一棵有根有序二叉树**：根为最高层“咸鱼”；每位领导最多有按类型区分的两个孩子，左孩子代表“下属1”（工作能力考核），右孩子代表“下属2”（外貌形象考核）。其中“咸鱼”和“腊鱼”为内部结点，“木鱼”“干鱼”“冻鱼”为叶结点。注意“每位领导各有两名下属”不意味着叶结点也须再添加不存在的后代。
+
+**（2）链式存储设计。**
+
+采用**二叉链表**。每个结点包含昵称 `name`、属性类别 `kind`、仅对应一种评分的共用体 `rating`，以及指向两类直属下属的指针 `child1`、`child2`。`kind` 分别取 `TOP`（根结点，无考核）、`ABILITY`（来自父结点的下属1，能力评分）和 `APPEARANCE`（来自父结点的下属2，形象评分）。共用体保证结点只存储**本身适用的一种评分**。
+
+```c
+#include <stddef.h>
+
+typedef enum { TOP, ABILITY, APPEARANCE } AttrKind;
+
+typedef struct OrgNode {
+    char name[16];
+    AttrKind kind;
+    union {
+        int ability;     // kind == ABILITY 时有效
+        int appearance;  // kind == APPEARANCE 时有效
+    } rating;
+    struct OrgNode *child1; // 左指针：下属1
+    struct OrgNode *child2; // 右指针：下属2
+} OrgNode;
+```
+
+这种结构既保存父子层级与左右孩子的**有序关系**，又用 `kind` 明确解释评分字段，避免误把一个结点同时设为“能力分”和“形象分”。最高层结点无需读取 `rating`。
+
+**（3）链式存储示意图。**原题未给出具体分数，下图用“未给定”表示，**不可擅自填写数值**：
+
+```text
+root ──► ┌─────────────────────────────────────────────┐
+         │ 咸鱼 | kind=TOP | rating=无                 │
+         │ child1=指向木鱼 | child2=指向腊鱼           │
+         └──────────┬─────────────────┬────────────────┘
+                    │child1           │child2
+                    ▼                 ▼
+           ┌─────────────────┐  ┌────────────────────────────┐
+           │ 木鱼            │  │ 腊鱼                       │
+           │ kind=ABILITY    │  │ kind=APPEARANCE            │
+           │ 能力分=未给定   │  │ 形象分=未给定              │
+           │ child1=NULL     │  │ child1=指向干鱼            │
+           │ child2=NULL     │  │ child2=指向冻鱼            │
+           └─────────────────┘  └──────────┬─────────┬───────┘
+                                          │child1   │child2
+                                          ▼         ▼
+                        ┌───────────────────┐ ┌────────────────────┐
+                        │ 干鱼              │ │ 冻鱼               │
+                        │ kind=ABILITY      │ │ kind=APPEARANCE    │
+                        │ 能力分=未给定     │ │ 形象分=未给定      │
+                        │ child1=NULL       │ │ child1=NULL        │
+                        │ child2=NULL       │ │ child2=NULL        │
+                        └───────────────────┘ └────────────────────┘
+```
+
+**检查：**“木鱼”“干鱼”作为各自父结点的下属1，只存能力评分；“腊鱼”“冻鱼”作为下属2，只存形象评分。虽然“腊鱼”本身还管理两名下属，也不会因此改变它作为“咸鱼”下属2的考核类型。
+
+</Solution>
+
+</Question>
+
+---
+
+## 第4套试卷 · 第42题
+
+<Question id="wd408-2027-s04-q42" type="essay" number={42} tags="王道8套卷, 第4套, 数据结构, 树与二叉树, 考点:镜像同构与递归比较" points={13}>
+
+两棵二叉树 $T_1$ 和 $T_2$ **镜像相似**，是指它们仅在树形上左右翻转后同构，**不要求对应结点的数据域相等**。图中二叉树 A、B 即为一组镜像相似的示例。
+
+![二叉树 A、B 的镜像相似示意图](/images/27王道8套卷1025/p043-1.svg)
+
+二叉树采用二叉链表存储：
+
+```c
+typedef struct BiTNode {
+    int data;
+    struct BiTNode *lchild, *rchild;
+} BiTNode, *BiTree;
+```
+
+1. 给出判断两棵二叉树是否镜像相似的基本设计思想。
+2. 用 C 或 C++ 编写算法，对关键步骤加注释，并分析复杂度。
+
+<Solution>
+
+### 参考答案
+
+**（1）基本思想：递归比较相反方向的子树。**
+
+令 `mirror(A,B)` 表示以 A、B 为根的两棵树是否镜像相似。依据结构归纳：
+
+- A、B **均为空树**：成立。
+- **仅有一棵为空树**：不成立。
+- 二者均非空：当且仅当 `A->lchild` 与 `B->rchild` 镜像相似，**并且** `A->rchild` 与 `B->lchild` 镜像相似。
+
+**只比较结构，不比较 `data`**；“镜像相似”比“带结点数值的镜像相等”要求弱。
+
+**（2）C 语言实现：**
+
+```c
+#include <stdbool.h>
+#include <stddef.h>
+
+typedef struct BiTNode {
+    int data;
+    struct BiTNode *lchild, *rchild;
+} BiTNode, *BiTree;
+
+bool mirrorSimilar(const BiTNode *a, const BiTNode *b) {
+    if (a == NULL && b == NULL) return true;
+    if (a == NULL || b == NULL) return false;
+
+    // 镜像的左子树对应另一棵树的右子树，反之亦然。
+    return mirrorSimilar(a->lchild, b->rchild) &&
+           mirrorSimilar(a->rchild, b->lchild);
+}
+```
+
+**正确性证明（结构归纳）：**高度为 0 的两棵空树显然镜像；当至少一棵树非空时，根是否同时存在是镜像相似的必要条件。当根同时存在后，两对子树镜像相似是根所在两棵树镜像相似的充要条件。递归在子树规模减小时终止，因此算法正确。
+
+**复杂度：**设两树结点数为 $n_1,n_2$。最坏情况下需要检查对应的所有结点，时间复杂度为 $O(\min(n_1,n_2)+1)$；当两树大小同阶为 $n$ 时记为 $O(n)$。递归栈深最多为 $O(\min(h_1,h_2)+1)$，其中 $h_1,h_2$ 为树高；最坏退化时为 $O(n)$，平衡情况下为 $O(\log n)$。若在结构不一致处提前返回，实际访问量可能更少。
+
+**结合图示：**左树根的左孩子有一个右孩子，右树根的右孩子有一个左孩子，恰好满足交叉比较条件；根及孩子结点的数值是否一致不影响判定。
+
+**易错点：**写成 `a->lchild` 对 `b->lchild`、`a->rchild` 对 `b->rchild` 判断的是一般的树形同构，而非镜像相似。
+
+</Solution>
+
+</Question>
+
+---
+
+## 第7套试卷 · 第42题
+
+<Question id="wd408-2027-s07-q42" type="essay" number={42} tags="王道8套卷, 第7套, 数据结构, 树与二叉树, 考点:孩子兄弟表示法与树的度" points={13}>
+
+树 $T$ 采用**孩子—兄弟链表**（结点含数据域、指向第一个孩子的指针和指向下一个兄弟的指针）表示。设计一个算法计算树 $T$ 的**度**。
+
+1. 写出结点的 C 语言数据结构定义。
+2. 给出算法的基本设计思想。
+3. 用 C 或 C++ 实现算法，对关键步骤加注释，并分析复杂度。
+
+<Solution>
+
+### 参考答案
+
+**先区分概念：**结点的度是该结点**直接孩子的个数**；树的度是整棵树中**结点度的最大值**，不是树的深度，也不是结点总数。
+
+**（1）数据结构。**
+
+```c
+#include <stddef.h>
+
+typedef struct CSNode {
+    int data;
+    struct CSNode *firstchild;   // 第一个孩子
+    struct CSNode *nextsibling;  // 下一个兄弟
+} CSNode, *CSTree;
+```
+
+**（2）基本思想：遍历每个结点，统计其孩子兄弟链的长度。**
+
+对任一结点 `p`，令 `q=p->firstchild`，沿 `nextsibling` 逐个计数即可得 `p` 的孩子数。对树内每个结点重复上述步骤，维护最大值 `maxDegree`。由于所有结点通过各自父结点的 `firstchild/nextsibling` 链连接，遍历整个树时不会重复计算同一结点。空树度取 0，只有根结点的树度也为 0。
+
+**（3）C 语言实现。**沿用第（1）问中的 `CSNode` 定义。
+
+```c
+// p 代表一棵孩子兄弟树的根（不沿 p 自身的兄弟指针遍历）。
+static void collectDegree(const CSNode *p, int *maxDegree) {
+    if (p == NULL) return;
+
+    int degree = 0;
+    for (const CSNode *c = p->firstchild; c != NULL;
+         c = c->nextsibling) {
+        ++degree;                 // 统计 p 的直属孩子
+        collectDegree(c, maxDegree); // 递归扫描该孩子及其后代
+    }
+    if (degree > *maxDegree) *maxDegree = degree;
+}
+
+int treeDegree(const CSNode *root) {
+    int maxDegree = 0;
+    collectDegree(root, &maxDegree);
+    return maxDegree;
+}
+```
+
+**正确性说明：**`p->firstchild` 开始的一条兄弟链恰好包含 `p` 的全部直属孩子，循环次数正好等于结点 `p` 的度；循环又递归访问这些孩子，因此从根开始最终访问所有结点，并把各结点度的最大值保存下来。
+
+**复杂度：**设树含 $n$ 个结点。每个结点被递归调用一次，每个父子链中的孩子结点被计数一次，故**时间复杂度为 $O(n)$**；辅助空间是递归栈，最坏 $O(h)$，$h$ 为原树的高度，退化成一条链时为 $O(n)$。
+
+**例：**根有 3 个孩子，其中一个孩子又有 5 个直属孩子，则树的度为 5（不是 3、8 或树高）。
+
+**易错点：**不能把 `nextsibling` 视作另一个孩子直接相加求“二叉树结点的度”；孩子兄弟表示法是用二叉链存储**一般树**，原树结点度可能大于 2。
+
+</Solution>
+
+</Question>
