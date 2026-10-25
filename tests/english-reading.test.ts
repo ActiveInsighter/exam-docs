@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { Option, Question, Solution } from '@/components/question';
-import { ExamArticle, EnglishReading, Paragraph, Translation } from '@/components/english-reading';
+import { Evidence, ExamArticle, EnglishReading, Paragraph, Translation } from '@/components/english-reading';
 
 const article = createElement(ExamArticle, { title: 'A familiar park', children:
   createElement('p', null, 'Notice ', createElement('em', null, 'the details nearby.')) });
@@ -27,9 +27,9 @@ describe('English reading composition', () => {
     expect(html.indexOf('A familiar park')).toBeLessThan(html.indexOf('Why pay attention?'));
   });
 
-  it('wraps article and questions in one card with a split view, switcher and navigator', () => {
+  it('wraps article and questions in one card with a split view, switcher, answer sheet and stepper', () => {
     const html = renderToStaticMarkup(createElement(EnglishReading, null,
-      article, question('Why pay attention?', 'q1')));
+      article, question('Why pay attention?', 'q1'), question('What changed?', 'q2')));
     expect(html).toContain('data-english-reading=""');
     expect(html).toContain('data-reading-article=""');
     expect(html).toContain('data-reading-questions=""');
@@ -38,8 +38,22 @@ describe('English reading composition', () => {
     expect(html.match(/role="tab"/g)).toHaveLength(2);
     // Wide layouts get a keyboard-operable divider with a bounded value.
     expect(html).toMatch(/role="separator"[^>]*aria-orientation="vertical"/);
-    expect(html).toContain('aria-valuenow="55"');
+    expect(html).toContain('aria-valuenow="54"');
     expect(html.indexOf('data-reading-article')).toBeLessThan(html.indexOf('data-reading-questions'));
+    // Every question is rendered (one is shown at a time once hydrated).
+    expect(html.match(/data-exam-question=""/g)).toHaveLength(2);
+    // Text size controls and the focus toggle are always offered.
+    expect(html).toContain('aria-label="增大字号"');
+    expect(html).toContain('aria-label="专注模式"');
+  });
+
+  it('marks the evidence of a question in the passage without changing its text', () => {
+    const withEvidence = createElement(ExamArticle, { title: 'A familiar park', children:
+      createElement('p', null, 'Some walked. ', createElement(Evidence, { for: 'q1' }, 'Attention made the difference.')) });
+    const html = renderToStaticMarkup(createElement(EnglishReading, null, withEvidence, question('Why?', 'q1')));
+    expect(html).toMatch(/<span[^>]*data-reading-evidence="q1"[^>]*>Attention made the difference\.<\/span>/);
+    // Nothing is marked until the question is graded.
+    expect(html).not.toContain('data-lit');
   });
 
   it('preserves the shared question component’s support for an exercise without a solution', () => {
@@ -49,7 +63,7 @@ describe('English reading composition', () => {
     expect(html).not.toContain('data-solution-trigger');
   });
 
-  it('pairs each paragraph with its translation behind a 翻译 toggle beside 原文', () => {
+  it('pairs each paragraph with its translation behind the 译 switch and the paragraph number', () => {
     const translated = createElement(ExamArticle, { title: 'A familiar park', titleTranslation: '熟悉的公园', children: [
       createElement(Paragraph, { key: 1, children: [
         createElement('p', { key: 'en' }, 'Notice the details nearby.'),
@@ -59,21 +73,23 @@ describe('English reading composition', () => {
     ] });
     const html = renderToStaticMarkup(createElement(EnglishReading, null,
       translated, question('Why pay attention?', 'q1')));
-    // Both toggles (switcher icon and labelled pill) start off.
-    expect(html.match(/aria-pressed="false"[^>]*title="逐段显示中英对照翻译"/g)).toHaveLength(2);
+    // The switch (narrow bar and wide pane header) starts off.
+    expect(html.match(/aria-pressed="false"[^>]*aria-label="显示中文翻译"/g)).toHaveLength(2);
     expect(html).not.toContain('data-translation=""');
     // Translations are rendered once, paired inside their own paragraph.
     expect(html.match(/data-reading-paragraph=""/g)).toHaveLength(2);
     expect(html.match(/data-reading-translation=""/g)).toHaveLength(2);
     expect(html).toMatch(/Notice the details nearby\.<\/p><\/div><div[^>]*lang="zh-CN"[^>]*>留意身边的细节。/);
     expect(html).toContain('熟悉的公园');
-    expect(html.indexOf('>翻译<')).toBeLessThan(html.indexOf('data-reading-article'));
+    // Only the translated paragraph's number is a toggle.
+    expect(html.match(/data-reading-paragraph-toggle=""/g)).toHaveLength(1);
   });
 
-  it('offers no 翻译 toggle for an article without translations', () => {
+  it('offers no 译 switch for an article without translations', () => {
     const html = renderToStaticMarkup(createElement(EnglishReading, null,
       article, question('Why pay attention?', 'q1')));
-    expect(html).not.toContain('对照翻译');
+    expect(html).not.toContain('中文翻译');
+    expect(html).not.toContain('data-reading-paragraph-toggle');
   });
 
   it('allows a single translation per paragraph', () => {

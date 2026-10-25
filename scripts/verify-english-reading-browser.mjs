@@ -39,14 +39,29 @@ async function openPage(options) {
   await page.evaluate(() => document.fonts.ready);
   const root = page.locator('[data-english-reading]');
   await root.waitFor();
-  assert.equal(await root.locator('[data-exam-question]').count(), 5, 'every question must render');
-  // Narrow layouts hide the inactive pane, so count only what is visible.
-  const triggers = root.locator('[data-exam-question]').getByRole('button', { name: '查看解答', exact: true });
+  await page.waitForFunction(() => document.querySelector('[data-english-reading]')?.hasAttribute('data-ready'));
+  assert.equal(await root.locator('[data-exam-question]').count(), 5, 'every question must be rendered');
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, 'horizontal page overflow');
-  return { context, page, root, triggers, article: root.locator('[data-reading-article]'), questions: root.locator('[data-reading-questions]') };
+  return {
+    context,
+    page,
+    root,
+    article: root.locator('[data-reading-article]'),
+    questions: root.locator('[data-reading-question-scroller]'),
+    current: root.locator('[data-exam-question][data-reading-current]'),
+    strip: root.getByRole('navigation', { name: '题目导航' }).getByRole('button'),
+  };
 }
 
 const overflowY = locator => locator.evaluate(node => getComputedStyle(node).overflowY);
+const visibleQuestions = root => root.locator('[data-exam-question]').evaluateAll(nodes => nodes.filter(node => node.getClientRects().length > 0).map(node => node.id));
+
+async function expectCurrent(reading, number) {
+  await reading.page.waitForFunction(([id, index]) => document.querySelector('[data-reading-current]')?.id === id
+    && document.querySelectorAll('[aria-label="题目导航"] button')[index]?.getAttribute('aria-current') === 'step',
+  [`question-english-reading-00${number}`, number - 1]);
+  assert.deepEqual(await visibleQuestions(reading.root), [`question-english-reading-00${number}`], 'exactly one question is shown');
+}
 
 async function verifySolution(page, trigger, touch = false) {
   if (touch) await trigger.tap();
@@ -56,8 +71,6 @@ async function verifySolution(page, trigger, touch = false) {
   await dialog.waitFor({ state: 'visible' });
   await dialog.evaluate(node => Promise.all(node.getAnimations().map(animation => animation.finished.catch(() => {}))));
   assert.ok((await dialog.innerText()).includes('定位第二段末句。'), 'original explanation is missing');
-  // The sheet may still be sliding in when its animation has not started yet,
-  // so wait for it to settle; one that really overflows still fails.
   const fitsViewport = await page.waitForFunction(node => {
     const box = node.getBoundingClientRect();
     return box.left >= -1 && box.right <= innerWidth + 1 && box.top >= -1 && box.bottom <= innerHeight + 1;
@@ -71,60 +84,76 @@ async function verifySolution(page, trigger, touch = false) {
 }
 
 async function verifyDesktop() {
-  const desktop = await openPage({ viewport: { width: 1440, height: 1080 } });
-  const { page, root, article, questions, triggers } = desktop;
-  assert.equal(await triggers.count(), 5, 'both panes are visible side by side');
+  const reading = await openPage({ viewport: { width: 1440, height: 1080 } });
+  const { page, root, article, questions, current, strip } = reading;
   const left = await article.boundingBox(), right = await questions.boundingBox();
   assert.ok(left.x + left.width <= right.x, 'article and questions must be side by side');
   assert.ok(left.width > right.width * 0.9 && left.width < right.width * 1.6, 'split ratio favours the article moderately');
   assert.equal(await overflowY(article), 'auto', 'article pane scrolls on its own');
   assert.equal(await overflowY(questions), 'auto', 'question pane scrolls on its own');
   assert.ok(await root.evaluate(node => getComputedStyle(node).borderTopLeftRadius !== '0px'), 'reading card must be rounded');
+  assert.equal(await strip.count(), 5, 'the answer sheet lists every question');
+  await expectCurrent(reading, 1);
 
-  // A wheel over the card first docks it fully in view, then scrolls the pane.
-  await root.evaluate(node => { window.__readingScroller(node).scrollTop = 0; });
-  const paneBox = await questions.boundingBox();
-  await page.mouse.move(paneBox.x + paneBox.width / 2, Math.min(paneBox.y + 120, 1000));
-  for (let step = 0; step < 6; step += 1) {
-    await page.mouse.wheel(0, 160);
-    await page.waitForTimeout(80);
-  }
-  await page.waitForTimeout(300);
-  assert.ok(await root.evaluate(node => {
-    const box = node.getBoundingClientRect();
-    return box.top >= 0 && box.bottom <= innerHeight + 1;
-  }), 'card must dock fully in view before its panes scroll');
-  assert.ok(await questions.evaluate(node => node.scrollTop > 0), 'remaining wheel distance scrolls the pane');
-
-  // Choice questions are graded in place and reported in the navigator.
-  const firstQuestion = root.locator('[data-exam-question]').first();
-  const options = firstQuestion.locator('[data-exam-choice-option]');
+  // Graded in place; the answer sheet follows; 原文定位 marks the evidence.
+  const options = current.locator('[data-exam-choice-option]');
   assert.equal(await options.count(), 4, 'all four options must be clickable');
   await options.nth(1).click();
-  await firstQuestion.getByText('回答正确', { exact: true }).waitFor({ state: 'visible' });
+  await current.getByText('回答正确', { exact: true }).waitFor({ state: 'visible' });
   assert.equal(await options.nth(1).getAttribute('data-feedback'), 'correct', 'answer B must be graded correct');
-  const nav = root.getByRole('navigation', { name: '题目导航' }).getByRole('button');
-  assert.equal(await nav.count(), 5);
   await page.waitForFunction(() => document.querySelector('[aria-label="题目导航"] button')?.dataset.status === 'correct');
-  await verifySolution(page, triggers.first());
-
-  // The navigator scrolls the question pane, not the page.
-  await nav.nth(4).click();
+  await root.getByRole('button', { name: '原文定位' }).click();
+  const evidence = root.locator('[data-reading-evidence="english-reading-001"]');
+  assert.equal(await evidence.getAttribute('data-lit'), '', 'graded question marks its evidence');
   await page.waitForFunction(() => {
-    const pane = document.querySelector('[data-reading-questions]');
-    const last = pane.querySelectorAll('[data-exam-question]')[4];
-    const a = pane.getBoundingClientRect(), b = last.getBoundingClientRect();
-    return b.top >= a.top - 1 && b.top < a.bottom - 40;
+    const pane = document.querySelector('[data-reading-article]').getBoundingClientRect();
+    const box = document.querySelector('[data-reading-evidence="english-reading-001"]').getBoundingClientRect();
+    return box.top >= pane.top && box.bottom <= pane.bottom;
   });
-  await page.waitForFunction(() => document.querySelectorAll('[aria-label="题目导航"] button')[4]?.getAttribute('aria-current') === 'true');
+  await verifySolution(page, current.getByRole('button', { name: '查看解答', exact: true }));
 
-  // Native scrolling chains to the page at the end of a pane.
-  await questions.evaluate(node => { node.scrollTop = node.scrollHeight; });
-  const before = await root.evaluate(node => window.__readingScroller(node).scrollTop);
-  const box = await questions.boundingBox();
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await page.mouse.wheel(0, 240);
-  await page.waitForFunction(([previous]) => window.__readingScroller(document.querySelector('[data-english-reading]')).scrollTop > previous + 5, [before]);
+  // 下一题 / 上一题 and the answer sheet move between questions.
+  await root.getByRole('button', { name: '下一题' }).click();
+  await expectCurrent(reading, 2);
+  await strip.nth(4).click();
+  await expectCurrent(reading, 5);
+  await root.getByRole('button', { name: '上一题' }).click();
+  await expectCurrent(reading, 4);
+
+  // A question that names a paragraph links to it.
+  await strip.nth(2).click();
+  await expectCurrent(reading, 3);
+  await root.getByRole('button', { name: '第 3 段' }).click();
+  await page.waitForFunction(() => {
+    const pane = document.querySelector('[data-reading-article]').getBoundingClientRect();
+    const box = document.querySelectorAll('[data-reading-passage] > [data-reading-paragraph]')[2].getBoundingClientRect();
+    return box.top >= pane.top - 1 && box.top < pane.bottom - 40;
+  });
+
+  // Navigators elsewhere (the floating dock) reveal a hidden question.
+  await page.evaluate(() => document.getElementById('question-english-reading-002')
+    .dispatchEvent(new CustomEvent('exam:reveal-question', { bubbles: true, cancelable: true })));
+  await expectCurrent(reading, 2);
+
+  // The highlighter, where the browser supports custom highlights.
+  if (await page.evaluate(() => 'highlights' in CSS)) {
+    await article.evaluate(node => { node.scrollTop = 0; });
+    const box = await root.locator('[data-reading-original]').first().boundingBox();
+    await page.mouse.move(box.x + 4, box.y + 10);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 220, box.y + 10, { steps: 6 });
+    await page.mouse.up();
+    await page.getByRole('toolbar', { name: '高亮' }).getByRole('button', { name: '高亮' }).click();
+    assert.equal(await page.evaluate(() => CSS.highlights.get('exam-reading-mark')?.size), 1, 'selection is highlighted');
+    await root.getByRole('button', { name: /清除全部/ }).click();
+    assert.equal(await page.evaluate(() => CSS.highlights.has('exam-reading-mark')), false, 'highlights clear');
+  }
+
+  // Translation and text size keep working.
+  await root.locator('[data-pane="article"]').getByRole('button', { name: '显示中文翻译' }).click();
+  assert.ok(await root.locator('[data-reading-translation]').first().isVisible(), 'translations show');
+  await root.locator('[data-pane="article"]').getByRole('button', { name: '增大字号' }).click();
+  assert.equal(await root.getAttribute('data-size'), '2', 'text size grows');
 
   // The divider is keyboard operable.
   const divider = root.getByRole('separator', { name: '调整原文与题目的宽度' });
@@ -135,48 +164,55 @@ async function verifyDesktop() {
   await page.keyboard.press('Enter');
   await page.screenshot({ path: path.join(screenshots, 'reading-desktop.png') });
 
-  // Printing shows both panes in full rather than their scrolled windows.
+  // Printing shows the passage and every question in full.
   await page.emulateMedia({ media: 'print' });
-  assert.ok(await page.evaluate(() => [...document.querySelectorAll('[data-reading-article], [data-reading-questions]')]
+  assert.equal((await visibleQuestions(root)).length, 5, 'print shows every question');
+  assert.ok(await page.evaluate(() => [...document.querySelectorAll('[data-reading-article], [data-reading-question-scroller]')]
     .every(node => node.getClientRects().length > 0 && node.scrollHeight <= node.clientHeight + 1)), 'print must not clip either pane');
   await page.emulateMedia({ media: 'screen' });
-  await desktop.context.close();
+  await reading.context.close();
 }
 
 async function verifyMobile(width) {
-  const mobile = await openPage({ viewport: { width, height: 844 }, isMobile: true, hasTouch: true });
-  const tabs = mobile.root.getByRole('tab');
+  const reading = await openPage({ viewport: { width, height: 844 }, isMobile: true, hasTouch: true });
+  const { page, root, article, questions, current, strip } = reading;
+  const tabs = root.getByRole('tab');
   assert.equal(await tabs.count(), 2, 'narrow layout offers the 原文 / 题目 switch');
-  assert.ok(await mobile.article.isVisible(), 'narrow layout starts on the article');
-  assert.equal(await mobile.questions.isVisible(), false, 'only one pane is shown at a time');
-  assert.equal(await overflowY(mobile.article), 'visible', 'mobile article must use normal page scrolling');
-  await mobile.root.getByRole('button', { name: /开始答题/ }).tap();
-  assert.ok(await mobile.questions.isVisible(), 'start button switches to the questions');
-  assert.equal(await mobile.article.isVisible(), false);
-  assert.equal(await mobile.triggers.count(), 5);
-  // The navigator sticks below the switcher and jumps to a question.
-  const chips = mobile.root.getByRole('navigation', { name: '题目导航' }).getByRole('button');
-  assert.equal(await chips.count(), 5, 'narrow layout keeps the question navigator');
-  await chips.nth(4).tap();
-  await mobile.page.waitForFunction(() => {
-    const last = document.querySelectorAll('[data-reading-questions] [data-exam-question]')[4];
-    const nav = document.querySelector('[aria-label="题目导航"]').getBoundingClientRect();
-    const box = last.getBoundingClientRect();
-    return box.top >= nav.bottom - 1 && box.top < innerHeight - 80;
-  });
-  await mobile.triggers.first().scrollIntoViewIfNeeded();
-  await verifySolution(mobile.page, mobile.triggers.first(), true);
+  assert.ok(await article.isVisible(), 'narrow layout starts on the article');
+  assert.equal(await questions.isVisible(), false, 'only one pane is shown at a time');
+  assert.equal(await overflowY(article), 'visible', 'mobile article must use normal page scrolling');
+  await tabs.nth(1).tap();
+  assert.ok(await questions.isVisible(), 'the switch shows the questions');
+  assert.equal(await article.isVisible(), false);
+  assert.equal(await strip.count(), 5, 'narrow layout keeps the answer sheet');
+  await strip.nth(4).tap();
+  await expectCurrent(reading, 5);
+  await strip.nth(0).tap();
+  await expectCurrent(reading, 1);
+  await current.locator('[data-exam-choice-option]').nth(1).tap();
+  await current.getByText('回答正确', { exact: true }).waitFor({ state: 'visible' });
+  // 原文定位 switches to the passage and offers the way back.
+  await root.getByRole('button', { name: '原文定位' }).tap();
+  assert.ok(await article.isVisible(), 'locating evidence shows the passage');
+  await root.getByRole('button', { name: /回到第 1 题/ }).tap();
+  assert.ok(await questions.isVisible(), 'the way back returns to the question');
+  const trigger = current.getByRole('button', { name: '查看解答', exact: true });
+  await trigger.scrollIntoViewIfNeeded();
+  await verifySolution(page, trigger, true);
+  await root.getByRole('button', { name: '下一题' }).tap();
+  await expectCurrent(reading, 2);
   await tabs.first().tap();
-  assert.ok(await mobile.article.isVisible(), 'switch returns to the article');
-  await mobile.page.screenshot({ path: path.join(screenshots, `reading-mobile-${width}.png`) });
-  await mobile.context.close();
+  assert.ok(await article.isVisible(), 'switch returns to the article');
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, 'horizontal page overflow');
+  await page.screenshot({ path: path.join(screenshots, `reading-mobile-${width}.png`) });
+  await reading.context.close();
 }
 
 try {
   // Each layout runs in its own browser context, so they are checked concurrently.
   await Promise.all([verifyDesktop(), ...[390, 320, 700].map(verifyMobile)]);
   assert.deepEqual(errors, [], 'browser runtime errors');
-  console.log('Reading layout verified: rounded split card, docked wheel scrolling, independent panes with native chaining, navigator, keyboard divider, in-place grading, shared dialogs, and 390/320/700px tabbed touch layouts.');
+  console.log('Reading layout verified: split card with independent panes, one question at a time, answer sheet and stepper, evidence and paragraph locators, highlighter, translation and text size, keyboard divider, revealed questions, shared dialogs, print, and 390/320/700px tabbed touch layouts.');
 } finally {
   await browser.close();
 }

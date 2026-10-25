@@ -5,6 +5,7 @@ import { memo, useEffect, useState } from 'react';
 import {
   PAGE_QUESTION_STATUS_TEXT,
   readPageQuestions,
+  revealQuestion,
   samePageQuestions,
   type PageQuestion,
   type PageQuestionStatus,
@@ -56,7 +57,8 @@ function questionInView(items: readonly PageQuestion[]) {
   let current: PageQuestion | null = null;
   for (const item of items) {
     const element = document.getElementById(item.id);
-    if (!element) continue;
+    // Questions kept out of layout (the reading card shows one at a time).
+    if (!element || element.getClientRects().length === 0) continue;
     if (!current || element.getBoundingClientRect().top <= line) current = item;
     else break;
   }
@@ -104,7 +106,7 @@ const INTERRUPTS = ['wheel', 'touchstart', 'keydown'] as const;
  */
 function jumpTo(id: string) {
   const target = document.getElementById(id);
-  if (!target) return;
+  if (!target || revealQuestion(target)) return;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let goal = 0;
   const aim = () => {

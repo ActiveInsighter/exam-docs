@@ -20,6 +20,7 @@ import { NoteEditor } from './marks/note-editor';
 import { MathPreview } from './math-preview';
 import { BuiltinTags } from './question-tags';
 import type { QuestionTag } from './model';
+import { revealQuestion } from './page-questions';
 import { mirrorQuestion } from './question-mirror';
 import { QuestionStateScope, useQuestionState, type QuestionState } from './question-state';
 import { removeSolutionEntry, setSolutionEntry, useSolutionDeck, type SolutionEntry } from './solution-deck';
@@ -35,8 +36,9 @@ const QuestionLibraryDialog = lazy(() => import('./marks/library-dialog').then((
  *   header   number, type and tags; the reader's marks, the library and
  *            the pager in the toolbar (top right)
  *   aside    the question (a read-only copy of the page's own rendering,
- *            the key revealed), on a wash of the question type's colour;
- *            on desktop also the reader's note
+ *            the key revealed) on one solid colour that blocks against
+ *            the white main pane (question.css); on desktop also the
+ *            reader's note
  *   main     the reader's answer next to the correct one, the solution,
  *            and on phones the note
  *
@@ -56,7 +58,7 @@ const proseReset = '[&>:first-child]:mt-0 [&>:last-child]:mb-0';
 
 function Chip({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex h-6 items-center rounded-full bg-(--ui-fill) px-2.5 text-xs font-medium whitespace-nowrap text-muted-foreground tabular-nums">
+    <span className="inline-flex h-6.5 items-center rounded-full bg-(--modal-glass) px-2.5 text-xs font-medium whitespace-nowrap text-foreground/78 tabular-nums">
       {children}
     </span>
   );
@@ -203,15 +205,6 @@ function useDesktop() {
   return useSyncExternalStore(subscribeDesktop, () => window.matchMedia(DESKTOP).matches, () => true);
 }
 
-/** The colour each question type washes its card's question pane with. */
-const TYPE_TINTS: Record<QuestionType, string> = {
-  single: 'oklch(0.62 0.13 250)',
-  multiple: 'oklch(0.6 0.13 292)',
-  boolean: 'oklch(0.64 0.1 182)',
-  blank: 'oklch(0.7 0.12 74)',
-  essay: 'oklch(0.64 0.12 28)',
-};
-
 export type QuestionSolutionSheetProps = {
   questionId: string;
   questionType: QuestionType;
@@ -315,11 +308,16 @@ function SolutionCard({ self, open, setOpen, triggerRef }: {
       }}
       itemKey={entry.key}
       labels={{ group: '切换题目', prev: '上一题', next: '下一题' }}
-      tint={TYPE_TINTS[entry.questionType]}
+      data-solution-card=""
       size="xl"
       height="46rem"
       className="text-base"
-      finalFocus={() => entry.trigger.current ?? triggerRef.current ?? true}
+      finalFocus={() => {
+        // A question the reader paged to may be out of layout (the reading card).
+        const question = document.getElementById(`question-${entry.questionId}`);
+        if (question) revealQuestion(question);
+        return entry.trigger.current ?? triggerRef.current ?? true;
+      }}
     >
       <EntryScope entry={entry}>
         <StudyCardHeader

@@ -70,6 +70,8 @@ const QUESTION_OPEN = /^<Question\b/;
 const QUESTION_CLOSE = /^<\/Question>/;
 const OPTION_OPEN = /^<Option(\s+correct(?:=\{true\})?)?\s*>/;
 const SOLUTION_OPEN = /^<Solution>/;
+// Inline markers inside prose keep only their text: <Evidence for="…">…</Evidence>.
+const INLINE_MARKER = /<\/?Evidence\b[^<>]*>/g;
 const BLANK_TAG =
   /<Blank\b[^>]*?\banswer=(?:"([^"]*)"|'([^']*)'|\{\s*(?:"([^"]*)"|'([^']*)'|([^{}]*?))\s*\})[^>]*?\/>/gu;
 
@@ -182,6 +184,11 @@ export function stripMdxRuntimeSyntax(body) {
     }
 
     if (JSX_COMMENT_LINE.test(trimmed)) continue;
+
+    if (line.includes('<Evidence') || line.includes('</Evidence')) {
+      line = line.replace(INLINE_MARKER, '');
+      trimmed = line.trim();
+    }
 
     if (QUESTION_OPEN.test(trimmed)) {
       question = createQuestionState();
