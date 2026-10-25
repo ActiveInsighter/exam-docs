@@ -42,9 +42,12 @@ describe('English reading composition', () => {
     expect(html.indexOf('data-reading-article')).toBeLessThan(html.indexOf('data-reading-questions'));
     // Every question is rendered (one is shown at a time once hydrated).
     expect(html.match(/data-exam-question=""/g)).toHaveLength(2);
-    // Text size controls and the focus toggle are always offered.
+    // Text size controls and the expand toggle are always offered.
     expect(html).toContain('aria-label="增大字号"');
-    expect(html).toContain('aria-label="专注模式"');
+    expect(html).toContain('aria-label="展开阅读卡"');
+    // Grading is per question by default; the reader can switch to grading the whole passage.
+    expect(html).toMatch(/role="radio" aria-checked="true">逐题判分/);
+    expect(html).toMatch(/role="radio" aria-checked="false">整篇提交/);
   });
 
   it('marks the evidence of a question in the passage without changing its text', () => {

@@ -1,14 +1,15 @@
 'use client';
 
-import { CircleAlertIcon, CircleCheckIcon, CircleXIcon, RotateCcwIcon } from 'lucide-react';
+import { CircleAlertIcon, CircleCheckIcon, CircleXIcon, ClockIcon, RotateCcwIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { blankBadge } from './blank-field';
 import type { AttemptResult, BlankSpec, Evaluation, GradingSpec, QuestionType } from './grading';
-import { formatKey } from './grading';
+import { formatKey, selfGradeOf } from './grading';
 import { MathPreview } from './math-preview';
 import type { QuestionTag } from './model';
 import { useQuestionState } from './question-state';
+import { SelfGrade } from './self-grade';
 import { QuestionSolutionSheet } from './solution-sheet';
 
 /** Coarse state published on the footer for page-level navigators. */
@@ -22,6 +23,7 @@ const ICONS: Record<AttemptResult, ReactNode> = {
 
 /** Words for a result: "少选" for a subset of a multiple answer, "部分正确" for blanks. */
 export function describeResult(spec: GradingSpec, evaluation: Evaluation, selected: readonly string[]): string {
+  if (spec.kind === 'self') return `自评 · ${selfGradeOf(selected[0])?.label ?? '错误'}`;
   if (evaluation.result === 'correct') return '回答正确';
   if (evaluation.result === 'incorrect') return '回答错误';
   if (spec.kind === 'choice') {
@@ -74,10 +76,27 @@ function SubmitHint() {
 function AttemptView() {
   const question = useQuestionState();
   if (!question) return null;
-  const { spec, submitted, evaluation, attempt, canSubmit, submit, selected } = question;
+  const { spec, submitted, evaluation, attempt, canSubmit, submit, selected, deferred, answered } = question;
   const needsSubmit = spec.kind === 'blank' || (spec.kind === 'choice' && spec.multiple);
 
+  if (spec.kind === 'self' && (!submitted || !evaluation)) {
+    return (
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <span className="text-[0.8125rem] text-muted-foreground">对照解答自评</span>
+        <SelfGrade />
+      </div>
+    );
+  }
+
   if (!submitted || !evaluation) {
+    if (deferred) {
+      return answered ? (
+        <span data-deferred-note="" className="inline-flex items-center gap-1.5 text-[0.8125rem] text-muted-foreground">
+          <ClockIcon aria-hidden="true" className="size-3.5" />
+          已作答，整篇提交时判分
+        </span>
+      ) : null;
+    }
     if (!needsSubmit) return null;
     return (
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -96,7 +115,7 @@ function AttemptView() {
         {ICONS[evaluation.result]}
         {describeResult(spec, evaluation, selected)}
       </span>
-      {evaluation.result !== 'correct' ? (
+      {evaluation.result !== 'correct' && spec.kind !== 'self' ? (
         <span data-result-key="">
           正确答案 <KeyText spec={spec} evaluation={evaluation} />
         </span>
@@ -148,7 +167,7 @@ export function QuestionFooter({ showSolution, ...sheet }: QuestionFooterProps) 
         {state?.submitted && state.evaluation ? (
           <Button variant="ghost" size="sm" className="h-8 rounded-full px-3 text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground" onClick={state.reset}>
             <RotateCcwIcon data-icon="inline-start" />
-            重做
+            {state.spec.kind === 'self' ? '重新自评' : '重做'}
           </Button>
         ) : null}
         {showSolution ? <QuestionSolutionSheet {...sheet} /> : null}

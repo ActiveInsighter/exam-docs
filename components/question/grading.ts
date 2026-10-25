@@ -39,11 +39,15 @@ export type BlankSpec = {
   kind: BlankKind;
 };
 
-/** The graded part of a question, derived from its props at render time. */
+/**
+ * The graded part of a question, derived from its props at render time.
+ * `self`: an essay, which the reader grades against the reference solution.
+ */
 export type GradingSpec =
   | { kind: 'choice'; multiple: boolean; key: readonly string[] }
   | { kind: 'boolean'; answer: boolean }
-  | { kind: 'blank'; blanks: readonly BlankSpec[] };
+  | { kind: 'blank'; blanks: readonly BlankSpec[] }
+  | { kind: 'self' };
 
 /*
  * Boolean answers are stored as the letters they used when they were drawn
@@ -52,6 +56,18 @@ export type GradingSpec =
 export const BOOLEAN_TRUE = 'A';
 export const BOOLEAN_FALSE = 'B';
 export const booleanLetter = (value: boolean) => (value ? BOOLEAN_TRUE : BOOLEAN_FALSE);
+
+/*
+ * An essay's self-grade is stored as a letter too (like a boolean answer), so
+ * saved and synced records keep the same shape as every other question.
+ */
+export const SELF_GRADES: readonly { letter: string; result: AttemptResult; label: string }[] = [
+  { letter: 'A', result: 'correct', label: '正确' },
+  { letter: 'B', result: 'partial', label: '部分正确' },
+  { letter: 'C', result: 'incorrect', label: '错误' },
+];
+
+export const selfGradeOf = (letter: string | undefined) => SELF_GRADES.find((grade) => grade.letter === letter);
 
 export function getOptionLetter(index: number) {
   return String.fromCharCode(65 + index);
@@ -177,6 +193,8 @@ export function evaluateAttempt(
       const graded = gradeBlanks(values, spec.blanks);
       return { result: graded.result, blanks: graded.verdicts };
     }
+    case 'self':
+      return { result: selfGradeOf(selected[0])?.result ?? 'incorrect', blanks: [] };
   }
 }
 
@@ -186,6 +204,7 @@ export function formatKey(spec: GradingSpec): string {
     case 'choice': return spec.key.join('');
     case 'boolean': return spec.answer ? '正确' : '错误';
     case 'blank': return spec.blanks.map((blank) => blank.answer).join('；');
+    case 'self': return '见参考解答';
   }
 }
 
@@ -195,5 +214,6 @@ export function formatResponse(spec: GradingSpec, selected: readonly string[], v
     case 'choice': return [...selected].sort().join('') || '—';
     case 'boolean': return selected[0] === BOOLEAN_TRUE ? '正确' : selected[0] === BOOLEAN_FALSE ? '错误' : '—';
     case 'blank': return spec.blanks.map((_, index) => values[index]?.trim() || '—').join('；');
+    case 'self': return selfGradeOf(selected[0])?.label ?? '—';
   }
 }

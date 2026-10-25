@@ -148,9 +148,19 @@ describe('question model', () => {
     ]);
     expect(buildGradingSpec({ type: 'single', options, blanks: [] })).toEqual({ kind: 'choice', multiple: false, key: ['B'] });
     expect(buildGradingSpec({ type: 'multiple', options, blanks: [] })).toBeNull();
-    expect(buildGradingSpec({ type: 'essay', options, blanks: [] })).toBeNull();
+    // Essays are graded by the reader against the reference solution.
+    expect(buildGradingSpec({ type: 'essay', options, blanks: [] })).toEqual({ kind: 'self' });
     expect(buildGradingSpec({ type: 'boolean', answer: false, options: [], blanks: [] })).toEqual({ kind: 'boolean', answer: false });
     expect(buildGradingSpec({ type: 'boolean', options: [], blanks: [] })).toBeNull();
+  });
+
+  it('reads an essay self-grade from its stored letter', () => {
+    const spec = { kind: 'self' } as const;
+    expect(evaluateAttempt(spec, ['A'], []).result).toBe('correct');
+    expect(evaluateAttempt(spec, ['B'], []).result).toBe('partial');
+    expect(evaluateAttempt(spec, ['C'], []).result).toBe('incorrect');
+    expect(formatResponse(spec, ['B'], [])).toBe('部分正确');
+    expect(formatResponse(spec, [], [])).toBe('—');
   });
 
   it('numbers blanks in document order and collects their answers', () => {

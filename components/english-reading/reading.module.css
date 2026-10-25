@@ -14,7 +14,8 @@
  *             scrolls on its own, chaining to the page at either end
  */
 
-.card {
+/* Shared by the card and the expanded study card (.modal). */
+:is(.card, .modal) {
   --reading-radius: var(--ui-radius-panel);
   --reading-pad: 0.375rem;
   --reading-pane-radius: calc(var(--reading-radius) - var(--reading-pad));
@@ -28,7 +29,9 @@
   /* The evidence of a graded question (the highlighter's colours are in use-highlights.tsx). */
   --reading-evidence: color-mix(in oklch, var(--success) 13%, transparent);
   --reading-evidence-line: color-mix(in oklch, var(--success) 72%, transparent);
+}
 
+.card {
   container: reading-card / inline-size;
   position: relative;
   display: flex;
@@ -43,12 +46,12 @@
   scroll-margin-top: calc(var(--reading-header) + 0.75rem);
 }
 
-:global(.dark) .card {
+:global(.dark) :is(.card, .modal) {
   --reading-evidence: color-mix(in oklch, var(--success) 20%, transparent);
 }
 
-.card[data-size='0'] { --reading-size: 1rem; }
-.card[data-size='2'] { --reading-size: 1.25rem; }
+:is(.card, .modal)[data-size='0'] { --reading-size: 1rem; }
+:is(.card, .modal)[data-size='2'] { --reading-size: 1.25rem; }
 
 /* From md the docs panel scrolls, and its top padding already clears the
    header, so sticky offsets start at zero (scroll margins still need it). */
@@ -322,6 +325,9 @@
 
 /* ---------- One question at a time ---------- */
 
+/* The leaving question overlays the next while it fades (switchQuestion in workspace.tsx). */
+.questions { position: relative; }
+
 .questions > [data-exam-question] {
   margin-block: 0;
   scroll-margin-top: calc(var(--reading-header) + var(--reading-bar-height) + 4rem);
@@ -331,16 +337,17 @@
 
 /* Before hydration, the first; after, the one picked. */
 .card:not([data-ready]) .questions > [data-exam-question] ~ [data-exam-question],
-.card[data-ready] .questions > [data-exam-question]:not([data-reading-current]) {
+:is(.card, .modal)[data-ready] .questions > [data-exam-question]:not([data-reading-current], [data-reading-leaving]) {
   display: none;
 }
 
-.card[data-ready] .questions > [data-reading-current] {
-  animation: reading-question-in 260ms var(--ui-ease);
-}
+.questions > [data-reading-current] { z-index: 1; }
 
-@keyframes reading-question-in {
-  from { opacity: 0; transform: translateX(6px); }
+.questions > [data-reading-leaving] {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 0;
+  pointer-events: none;
 }
 
 /* ---------- Stepper ---------- */
@@ -428,6 +435,230 @@
   .stepButton span { display: none; }
 }
 
+/* ---------- Grading: 逐题判分 / 整篇提交 ---------- */
+
+.modeRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.modeSwitch {
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  padding: 0.1875rem;
+  border-radius: 999px;
+  background: var(--ui-fill);
+}
+
+.modeSwitch button {
+  height: 1.75rem;
+  padding-inline: 0.75rem;
+  border-radius: 999px;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  font-weight: 550;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--ui-duration) var(--ui-ease), color var(--ui-duration) var(--ui-ease), box-shadow var(--ui-duration) var(--ui-ease);
+}
+.modeSwitch button:hover { color: var(--foreground); }
+.modeSwitch button[aria-checked='true'] {
+  background: var(--ui-panel);
+  color: var(--foreground);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 8%), 0 1px 1px rgb(0 0 0 / 4%);
+}
+.modeSwitch button:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+
+.modeNote {
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+}
+
+.modeAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  height: 1.875rem;
+  padding-inline: 0.625rem 0.75rem;
+  border-radius: 999px;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  font-weight: 550;
+  cursor: pointer;
+  transition: background-color var(--ui-duration) var(--ui-ease), color var(--ui-duration) var(--ui-ease);
+}
+.modeAction svg { width: 0.875rem; height: 0.875rem; }
+.modeAction:hover { background: var(--ui-fill-hover); color: var(--foreground); }
+.modeAction:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+
+/* 提交全部: quiet until there is something to grade, then the one dark button. */
+.submitAll {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 2.375rem;
+  padding-inline: 0.875rem 0.5rem;
+  border-radius: 999px;
+  background: var(--ui-fill);
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 200ms var(--ui-ease), color 200ms var(--ui-ease), transform var(--ui-duration) var(--ui-ease);
+}
+.submitAll svg { width: 1rem; height: 1rem; }
+.submitAll:disabled { cursor: default; opacity: 0.6; }
+.submitAll[data-ready] { background: var(--foreground); color: var(--background); }
+.submitAll[data-ready]:hover { background: color-mix(in oklch, var(--foreground) 86%, transparent); }
+.submitAll:active:not(:disabled) { transform: scale(0.97); }
+.submitAll:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+.submitCount {
+  display: inline-grid;
+  min-width: 1.375rem;
+  height: 1.375rem;
+  place-items: center;
+  padding-inline: 0.3125rem;
+  border-radius: 999px;
+  background: color-mix(in oklch, currentColor 16%, transparent);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.625rem 1rem;
+  margin-top: 1rem;
+  padding: 0.75rem 0.75rem 0.75rem 1rem;
+  border-radius: calc(var(--reading-pane-radius) + 0.125rem);
+  background: color-mix(in oklch, var(--warning) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--warning) 32%, transparent);
+  animation: reading-confirm-in 260ms var(--ui-ease);
+}
+.confirm p {
+  margin: 0;
+  color: color-mix(in oklch, var(--warning) 45%, var(--foreground));
+  font-size: 0.875rem;
+}
+.confirmActions { display: flex; gap: 0.375rem; }
+
+.confirmButton {
+  height: 2.125rem;
+  padding-inline: 0.875rem;
+  border-radius: 999px;
+  background: var(--ui-panel);
+  box-shadow: inset 0 0 0 1px var(--ui-fill-strong);
+  color: var(--foreground);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--ui-duration) var(--ui-ease), opacity var(--ui-duration) var(--ui-ease);
+}
+.confirmButton:hover:not(:disabled) { background: var(--ui-fill-hover); }
+.confirmButton[data-primary] { background: var(--foreground); box-shadow: none; color: var(--background); }
+.confirmButton[data-primary]:hover { background: color-mix(in oklch, var(--foreground) 86%, transparent); }
+.confirmButton:disabled { cursor: default; opacity: 0.45; }
+.confirmButton:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+@keyframes reading-confirm-in {
+  from { opacity: 0; transform: translateY(4px); }
+}
+
+/* ---------- Expanded: the card on the page holds its place ---------- */
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 12rem;
+  border-radius: var(--reading-pane-radius);
+  background: var(--ui-panel);
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+.placeholder > svg { width: 1.25rem; height: 1.25rem; }
+.placeholder p { margin: 0; }
+
+/* ---------- Expanded: the study card ---------- */
+
+.modal { font-family: var(--font-sans); }
+
+/* Passage tools in the header's glass capsule. */
+.modalTool {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+}
+
+.modalSegments { display: none; }
+
+/* The passage on the grey aside, set like the page. */
+.modalArticle {
+  container: reading-article / inline-size;
+}
+.modalArticle > * {
+  max-width: 42rem;
+  margin-inline: auto;
+}
+.modal[data-translation] .modalArticle > * { max-width: 76rem; }
+
+.modalHead {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.875rem;
+}
+
+.modal .stepper {
+  position: static;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  border-top: 0;
+  background: none;
+}
+
+.modal .questions > [data-exam-question] {
+  scroll-margin-top: calc(var(--modal-header-h, 4rem) + 1rem);
+}
+
+@media (width >= 48rem) {
+  .modal .returnPill { display: none; }
+}
+
+/* Phones: one pane at a time, switched from the header. */
+@media (width < 48rem) {
+  .modalSegments {
+    display: grid;
+    order: 11;
+    flex-basis: 100%;
+    margin-top: 0.25rem;
+  }
+  .modal[data-view='article'] [data-slot='modal-pane']:has(> [data-reading-region='questions']),
+  .modal[data-view='questions'] [data-slot='modal-pane']:has(> [data-reading-region='article']) {
+    display: none;
+  }
+  /* The questions pane is second in the split, so it is not the one padded below the header. */
+  .modal[data-view='questions'] [data-reading-region='questions'] {
+    padding-top: calc(var(--modal-header-h) + 0.25rem);
+  }
+}
+
+@media (width < 30rem) {
+  .modal .stepButton { width: 2.375rem; padding: 0; justify-content: center; }
+  .modal .stepButton span { display: none; }
+}
+
 /* ---------- Article ---------- */
 
 .article { min-width: 0; }
@@ -511,7 +742,7 @@ button.number {
   cursor: pointer;
 }
 button.number:hover { background: var(--ui-fill-hover); color: var(--foreground); }
-.card:not([data-translation]) .paragraph[data-open] > button.number {
+:is(.card, .modal):not([data-translation]) .paragraph[data-open] > button.number {
   background: var(--foreground);
   box-shadow: none;
   color: var(--background);
@@ -578,14 +809,14 @@ button.number:hover { background: var(--ui-fill-hover); color: var(--foreground)
   line-height: 1.6;
 }
 
-.card[data-translation] .translation,
-.card[data-translation] .titleTranslation,
+:is(.card, .modal)[data-translation] .translation,
+:is(.card, .modal)[data-translation] .titleTranslation,
 .paragraph[data-open] > .translation {
   display: block;
   animation: reading-translation-in 200ms var(--ui-ease);
 }
 
-.card[data-translation] .passage > .paragraph,
+:is(.card, .modal)[data-translation] .passage > .paragraph,
 .passage > .paragraph[data-open] { margin-bottom: 1.5em; }
 .passage > :is(p, .paragraph):last-child { margin-bottom: 0; }
 
@@ -595,12 +826,12 @@ button.number:hover { background: var(--ui-fill-hover); color: var(--foreground)
 
 /* A wide article pane sets English and Chinese side by side, row by row. */
 @container reading-article (min-width: 50rem) {
-  .card[data-translation] .paragraph {
+  :is(.card, .modal)[data-translation] .paragraph {
     display: grid;
     grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
     column-gap: 1.5rem;
   }
-  .card[data-translation] .translation {
+  :is(.card, .modal)[data-translation] .translation {
     margin-top: 0;
     padding: 0.1875rem 0 0 1.25rem;
     border-left: 1px solid var(--border);
@@ -669,54 +900,6 @@ button.number:hover { background: var(--ui-fill-hover); color: var(--foreground)
 }
 .returnPill svg { width: 1rem; height: 1rem; }
 
-/* ---------- Focus mode ---------- */
-
-.backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  background: var(--ui-backdrop);
-  animation: reading-fade-in 200ms var(--ui-ease);
-}
-
-.card[data-focus] {
-  --reading-sticky-top: 0px;
-  position: fixed;
-  inset: 0;
-  z-index: 41;
-  margin: 0;
-  border-radius: 0;
-  box-shadow: var(--ui-shadow-overlay);
-  animation: reading-focus-in 240ms var(--ui-ease);
-}
-
-.card[data-focus] .panes {
-  flex: 1;
-  grid-template-rows: minmax(0, 1fr);
-}
-
-.card[data-focus] .pane .scroller {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-@media (min-width: 48rem) {
-  .card[data-focus] {
-    inset: 1rem;
-    border-radius: var(--reading-radius);
-  }
-}
-
-@keyframes reading-fade-in {
-  from { opacity: 0; }
-}
-
-@keyframes reading-focus-in {
-  from { opacity: 0; transform: scale(0.985); }
-}
-
 /* The floating dock would cover the stepper on phones; the strip replaces it here. */
 @media (max-width: 47.99rem) {
   :global(html):has(.card[data-view='questions']) :global([data-question-dock]) {
@@ -745,8 +928,6 @@ button.number:hover { background: var(--ui-fill-hover); color: var(--foreground)
     /* Fit the visible docs panel, within comfortable bounds. */
     height: clamp(30rem, calc(var(--fd-docs-height, 100dvh - 4.5rem) - 2rem), 60rem);
   }
-
-  .card[data-focus] .panes { height: auto; }
 
   .paneHead,
   .pane[data-pane='questions'] .paneHead {
@@ -864,13 +1045,13 @@ button.number:hover { background: var(--ui-fill-hover); color: var(--foreground)
 
 @media (prefers-reduced-motion: reduce) {
   .card[data-view] .pane,
-  .card[data-focus],
-  .card[data-ready] .questions > [data-reading-current],
-  .card[data-translation] .translation,
+  :is(.card, .modal)[data-translation] .translation,
   .paragraph[data-open] > .translation,
   .passage [data-flash],
   .markMenu,
-  .backdrop {
+  .modeSwitch button,
+  .submitAll,
+  .confirm {
     animation: none;
   }
   .passage { transition: none; }
@@ -878,26 +1059,25 @@ button.number:hover { background: var(--ui-fill-hover); color: var(--foreground)
 
 /* Print the whole exercise: the passage, then every question; no controls. */
 @media print {
-  .card,
-  .card[data-focus] {
+  .card {
     position: static;
     padding: 0;
     background: none;
     box-shadow: none;
     overflow: visible;
   }
-  .backdrop,
   .bar,
   .divider,
   .paneHead,
   .progress,
   .stepper,
   .returnPill,
+  .modeRow,
+  .confirm,
   .hint {
     display: none !important;
   }
-  .panes,
-  .card[data-focus] .panes {
+  .panes {
     display: block;
     height: auto !important;
   }
@@ -906,8 +1086,7 @@ button.number:hover { background: var(--ui-fill-hover); color: var(--foreground)
     overflow: visible;
     animation: none;
   }
-  .card .pane .scroller,
-  .card[data-focus] .pane .scroller {
+  .card .pane .scroller {
     overflow: visible !important;
     padding: 0;
     mask-image: none;

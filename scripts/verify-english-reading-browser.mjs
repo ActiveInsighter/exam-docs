@@ -57,8 +57,10 @@ const overflowY = locator => locator.evaluate(node => getComputedStyle(node).ove
 const visibleQuestions = root => root.locator('[data-exam-question]').evaluateAll(nodes => nodes.filter(node => node.getClientRects().length > 0).map(node => node.id));
 
 async function expectCurrent(reading, number) {
+  // The question stepped away from fades out for a moment (data-reading-leaving); wait for it to go.
   await reading.page.waitForFunction(([id, index]) => document.querySelector('[data-reading-current]')?.id === id
-    && document.querySelectorAll('[aria-label="题目导航"] button')[index]?.getAttribute('aria-current') === 'step',
+    && document.querySelectorAll('[aria-label="题目导航"] button')[index]?.getAttribute('aria-current') === 'step'
+    && !document.querySelector('[data-reading-leaving]'),
   [`question-english-reading-00${number}`, number - 1]);
   assert.deepEqual(await visibleQuestions(reading.root), [`question-english-reading-00${number}`], 'exactly one question is shown');
 }
@@ -164,6 +166,33 @@ async function verifyDesktop() {
   await page.keyboard.press('Enter');
   await page.screenshot({ path: path.join(screenshots, 'reading-desktop.png') });
 
+  // 整篇提交: a pick waits as a draft until 提交全部 grades the passage together.
+  await root.getByRole('radio', { name: '整篇提交' }).click();
+  await strip.nth(1).click();
+  await expectCurrent(reading, 2);
+  const draft = current.locator('[data-exam-choice-option]').nth(2);
+  await draft.click();
+  assert.equal(await draft.getAttribute('data-feedback'), 'selected', 'a pick is held as a draft');
+  await root.getByRole('button', { name: /提交全部/ }).click();
+  await root.getByRole('alertdialog').getByRole('button', { name: '仍然提交' }).click();
+  await page.waitForFunction(() => document.querySelectorAll('[aria-label="题目导航"] button')[1]?.dataset.status === 'correct');
+  await expectCurrent(reading, 1);
+  await root.getByRole('radio', { name: '逐题判分' }).click();
+
+  // 展开阅读卡: the passage and questions move into a study card, and back on close.
+  await root.locator('[data-reading-expand]:visible').click();
+  const expanded = page.locator('[data-english-reading-modal]');
+  await expanded.waitFor();
+  assert.equal(await expanded.locator('[data-exam-question]').count(), 5, 'the expanded card holds every question');
+  assert.equal(await root.locator('[data-exam-question]').count(), 0, 'questions are never rendered twice');
+  assert.ok(await expanded.locator('[data-reading-passage]').isVisible(), 'the passage shows in the expanded card');
+  await expanded.locator('[data-slot="sc-pager"]').getByRole('button', { name: '下一题' }).click();
+  await page.waitForFunction(() => document.querySelector('[data-english-reading-modal] [data-reading-current]')?.id === 'question-english-reading-002');
+  await page.screenshot({ path: path.join(screenshots, 'reading-expanded.png') });
+  await page.keyboard.press('Escape');
+  await expanded.waitFor({ state: 'detached' });
+  await expectCurrent(reading, 2);
+
   // Printing shows the passage and every question in full.
   await page.emulateMedia({ media: 'print' });
   assert.equal((await visibleQuestions(root)).length, 5, 'print shows every question');
@@ -212,7 +241,7 @@ try {
   // Each layout runs in its own browser context, so they are checked concurrently.
   await Promise.all([verifyDesktop(), ...[390, 320, 700].map(verifyMobile)]);
   assert.deepEqual(errors, [], 'browser runtime errors');
-  console.log('Reading layout verified: split card with independent panes, one question at a time, answer sheet and stepper, evidence and paragraph locators, highlighter, translation and text size, keyboard divider, revealed questions, shared dialogs, print, and 390/320/700px tabbed touch layouts.');
+  console.log('Reading layout verified: split card with independent panes, one question at a time, answer sheet and stepper, evidence and paragraph locators, highlighter, translation and text size, keyboard divider, revealed questions, shared dialogs, 整篇提交, the expanded study card, print, and 390/320/700px tabbed touch layouts.');
 } finally {
   await browser.close();
 }
