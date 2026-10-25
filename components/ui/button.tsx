@@ -43,21 +43,21 @@ const buttonVariants = cva(
 )
 
 /*
- * Click-to-fill (radial colour reveal). A button given `revealed` carries a
- * fill layer in --reveal-color that, when `revealed` turns true, spreads as a
+ * Click-to-fill (radial colour reveal). A button given `revealed` carries an
+ * ink layer in --reveal-color that, when `revealed` turns true, spreads as a
  * circle from the point the button was pressed until it covers the button,
  * and draws back into the latest press point when it turns false. Keyboard
  * presses spread from the default origin (--reveal-x / --reveal-y, the centre
  * unless a stylesheet moves it). The layer and its motion are CSS
- * (styles/reveal.css); this only records the press point, written straight
- * on the element so a press re-renders nothing.
+ * (styles/reveal.css), which also sizes the circle; this only records the
+ * press point, written straight on the element so a press re-renders nothing.
  */
 type RevealProps = {
   /** true fills the button, false empties it; leave unset for no fill layer. */
   revealed?: boolean
 }
 
-const revealVars = ["--reveal-x", "--reveal-y", "--reveal-r"] as const
+const revealVars = ["--reveal-x", "--reveal-y"] as const
 
 function recordRevealOrigin(event: React.PointerEvent<HTMLElement>) {
   const element = event.currentTarget
@@ -66,15 +66,8 @@ function recordRevealOrigin(event: React.PointerEvent<HTMLElement>) {
   // Fractions of the box, so a press point survives the press-down scale.
   const x = (event.clientX - box.left) / box.width
   const y = (event.clientY - box.top) / box.height
-  // A little past the farthest corner, so the circle covers the button before
-  // the ease-out tail and never lingers just short of the edge.
-  const reach = Math.hypot(
-    Math.max(x, 1 - x) * element.offsetWidth,
-    Math.max(y, 1 - y) * element.offsetHeight
-  ) * 1.15 + 4
   element.style.setProperty("--reveal-x", `${(x * 100).toFixed(2)}%`)
   element.style.setProperty("--reveal-y", `${(y * 100).toFixed(2)}%`)
-  element.style.setProperty("--reveal-r", `${reach.toFixed(1)}px`)
 }
 
 function clearRevealOrigin(element: HTMLElement) {

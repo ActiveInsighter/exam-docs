@@ -102,33 +102,77 @@
   min-height: 1.75rem;
 }
 
+/*
+ * Header tiers, from strongest to quietest, each in its own shape so they
+ * never read as one row of look-alike capsules:
+ *
+ *   number   a raised ink key-cap (squircle, gradient, top highlight)
+ *   type     an outlined neutral chip with the type's icon: what kind of
+ *            question, not a category, so it carries no colour
+ *   tags     soft colour washes (below)
+ */
 [data-question-number] {
   display: inline-grid;
   place-items: center;
-  min-width: 1.75rem;
-  height: 1.75rem;
-  padding-inline: 0.4375rem;
-  border-radius: 0.5625rem;
-  background: var(--foreground);
-  color: var(--background);
+  min-width: 1.875rem;
+  height: 1.875rem;
+  padding-inline: 0.5rem;
+  border-radius: 0.625rem;
+  background: linear-gradient(180deg, var(--exam-number-top), var(--exam-number-bottom));
+  box-shadow:
+    inset 0 1px 0 var(--exam-number-highlight),
+    inset 0 0 0 1px var(--exam-number-edge),
+    0 1px 2px var(--exam-number-shadow),
+    0 3px 8px -3px var(--exam-number-shadow);
+  color: var(--exam-number-fg);
   font-family: var(--font-outfit), var(--font-sans);
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.9375rem;
+  font-weight: 650;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  margin-inline-end: 0.125rem;
 }
 
 [data-question-type-label] {
-  margin-inline: 0.125rem 0.25rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--muted-foreground);
+  --type-icon: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  height: 1.5rem;
+  padding-inline: 0.4375rem 0.5625rem;
+  border-radius: 0.5rem;
+  box-shadow: inset 0 0 0 1px var(--exam-type-ring);
+  background: var(--exam-type-bg);
+  color: var(--exam-type-fg);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
   white-space: nowrap;
 }
 
-[data-question-type-label]:first-child {
-  margin-inline-start: 0;
+[data-question-type-label]::before {
+  content: '';
+  flex-shrink: 0;
+  width: 0.8125rem;
+  height: 0.8125rem;
+  background: currentColor;
+  opacity: 0.8;
+  mask: var(--type-icon) center / contain no-repeat;
+}
+
+/* Icons (lucide circle-dot / square-check-big / pen-line / text-cursor-input; a check and a cross for true / false). */
+[data-question-type='single'] [data-question-type-label] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Ccircle cx='12' cy='12' r='3.5' fill='black'/%3E%3C/svg%3E"); }
+[data-question-type='multiple'] [data-question-type-label] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 10.656V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.344'/%3E%3Cpath d='m9 11 3 3L22 4'/%3E%3C/svg%3E"); }
+[data-question-type='boolean'] [data-question-type-label] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 12.5l3.5 3.5 6-7.5'/%3E%3Cpath d='M15 8.5l7 7M22 8.5l-7 7'/%3E%3C/svg%3E"); }
+[data-question-type='blank'] [data-question-type-label] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h-1a2 2 0 0 1-2-2 2 2 0 0 1-2 2H6'/%3E%3Cpath d='M13 8h7a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-7'/%3E%3Cpath d='M5 16H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h1'/%3E%3Cpath d='M6 4h1a2 2 0 0 1 2 2 2 2 0 0 1 2-2h1'/%3E%3Cpath d='M9 6v12'/%3E%3C/svg%3E"); }
+[data-question-type='essay'] [data-question-type-label] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 21h8'/%3E%3Cpath d='M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z'/%3E%3C/svg%3E"); }
+
+/* The tags start a little apart from the number and type. */
+[data-question-type-label] + [data-question-tag],
+[data-question-type-label] + [data-user-tag] {
+  margin-inline-start: 0.25rem;
 }
 
 [data-question-actions] {
@@ -159,19 +203,30 @@
 
 /* ------------------------------------------------------------------ tags */
 
+/*
+ * Built-in tags: a soft wash of colour with a hairline of the same hue and
+ * text in its deep shade. Eight hand-tuned tones rather than one lightness
+ * and chroma for every hue: yellows need more light and less chroma to stay
+ * clean (a uniform palette turns them olive and its reds brick), blues and
+ * violets take more chroma before they read as coloured. All eight sit at
+ * the same perceived weight, so any mix on one card looks like a set.
+ * Category ("考点:…") in a lighter weight before the value.
+ */
 [data-question-tag] {
-  --tag-hue: 250;
+  --tag-bg: var(--exam-tag-5-bg);
+  --tag-fg: var(--exam-tag-5-fg);
   display: inline-flex;
   align-items: center;
-  gap: 0.3125rem;
-  height: 1.375rem;
-  max-width: 14rem;
-  padding-inline: 0.5625rem;
+  gap: 0.375rem;
+  height: 1.5rem;
+  max-width: 16rem;
+  padding-inline: 0.625rem;
   border-radius: 999px;
-  background: oklch(var(--exam-tag-bg-l) var(--exam-tag-bg-c) var(--tag-hue));
-  color: oklch(var(--exam-tag-fg-l) var(--exam-tag-fg-c) var(--tag-hue));
+  background: var(--tag-bg);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--tag-fg) 16%, transparent);
+  color: var(--tag-fg);
   font-size: 0.75rem;
-  font-weight: 550;
+  font-weight: 560;
   line-height: 1;
   white-space: nowrap;
 }
@@ -189,18 +244,30 @@
 
 [data-question-tag] [data-tag-group] {
   flex-shrink: 0;
-  font-weight: 450;
-  opacity: 0.72;
+  font-weight: 500;
+  opacity: 0.7;
 }
 
-[data-question-tag][data-tone='0'] { --tag-hue: 25; }
-[data-question-tag][data-tone='1'] { --tag-hue: 55; }
-[data-question-tag][data-tone='2'] { --tag-hue: 85; }
-[data-question-tag][data-tone='3'] { --tag-hue: 150; }
-[data-question-tag][data-tone='4'] { --tag-hue: 195; }
-[data-question-tag][data-tone='5'] { --tag-hue: 245; }
-[data-question-tag][data-tone='6'] { --tag-hue: 290; }
-[data-question-tag][data-tone='7'] { --tag-hue: 340; }
+/* A hairline between category and value. */
+[data-question-tag] [data-tag-group]::after {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 0.6875rem;
+  margin-inline-start: 0.375rem;
+  background: currentColor;
+  opacity: 0.45;
+  vertical-align: -0.0625rem;
+}
+
+[data-question-tag][data-tone='0'] { --tag-bg: var(--exam-tag-0-bg); --tag-fg: var(--exam-tag-0-fg); }
+[data-question-tag][data-tone='1'] { --tag-bg: var(--exam-tag-1-bg); --tag-fg: var(--exam-tag-1-fg); }
+[data-question-tag][data-tone='2'] { --tag-bg: var(--exam-tag-2-bg); --tag-fg: var(--exam-tag-2-fg); }
+[data-question-tag][data-tone='3'] { --tag-bg: var(--exam-tag-3-bg); --tag-fg: var(--exam-tag-3-fg); }
+[data-question-tag][data-tone='4'] { --tag-bg: var(--exam-tag-4-bg); --tag-fg: var(--exam-tag-4-fg); }
+[data-question-tag][data-tone='5'] { --tag-bg: var(--exam-tag-5-bg); --tag-fg: var(--exam-tag-5-fg); }
+[data-question-tag][data-tone='6'] { --tag-bg: var(--exam-tag-6-bg); --tag-fg: var(--exam-tag-6-fg); }
+[data-question-tag][data-tone='7'] { --tag-bg: var(--exam-tag-7-bg); --tag-fg: var(--exam-tag-7-fg); }
 
 /* The reader's own tags: neutral capsule with a coloured dot. */
 [data-user-tag] {
@@ -564,12 +631,20 @@
   transition: clip-path 340ms cubic-bezier(0.65, 0, 0.35, 1) 80ms;
 }
 
+/*
+ * Grading motion plays on the marker only, never on the whole option. An
+ * animated transform hands the tile to the compositor at its sub-pixel
+ * position; when the animation ends the browser paints it again snapped to
+ * the pixel grid, so the ring, the text and the ink all jump in one frame:
+ * the flash at the end of the fill. A 1.75rem disc carries the same cue
+ * without that seam.
+ */
 @media (prefers-reduced-motion: no-preference) {
-  [data-exam-choice-option][data-feedback='correct'][data-fresh] {
-    animation: exam-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  [data-exam-choice-option][data-feedback='correct'][data-fresh] [data-choice-marker] {
+    animation: exam-pop 480ms var(--ui-ease) 40ms;
   }
-  [data-exam-choice-option][data-feedback='incorrect'][data-fresh] {
-    animation: exam-shake 400ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  [data-exam-choice-option][data-feedback='incorrect'][data-fresh] [data-choice-marker] {
+    animation: exam-shake 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97) 60ms;
   }
   [data-exam-choice-option][data-feedback='missed'][data-fresh] [data-choice-marker] {
     animation: exam-nudge 900ms var(--ui-ease) 200ms;
@@ -577,9 +652,11 @@
 }
 
 @keyframes exam-pop {
-  40% { transform: scale(1.02); }
+  35% { transform: scale(1.2); }
+  70% { transform: scale(0.96); }
 }
 
+/* Blanks, which carry no ink layer, still shake as a whole. */
 @keyframes exam-shake {
   20% { transform: translateX(-4px); }
   40% { transform: translateX(4px); }
@@ -708,8 +785,8 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  [data-boolean-option][data-feedback='correct'][data-fresh] { animation: exam-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1); }
-  [data-boolean-option][data-feedback='incorrect'][data-fresh] { animation: exam-shake 400ms cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+  [data-boolean-option][data-feedback='correct'][data-fresh] [data-boolean-glyph] { animation: exam-pop 480ms var(--ui-ease) 40ms; }
+  [data-boolean-option][data-feedback='incorrect'][data-fresh] [data-boolean-glyph] { animation: exam-shake 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97) 60ms; }
 }
 
 /* ----------------------------------------------------------------- blanks */
@@ -839,9 +916,10 @@ input[data-question-blank][data-active] {
 [data-result-pill] {
   display: inline-flex;
   align-items: center;
-  gap: 0.3125rem;
-  height: 1.75rem;
-  padding-inline: 0.5rem 0.6875rem;
+  gap: 0.375rem;
+  /* As tall as the buttons beside it, so the footer is one row of capsules. */
+  height: 2rem;
+  padding-inline: 0.625rem 0.8125rem;
   border-radius: 999px;
   font-size: 0.8125rem;
   font-weight: 600;

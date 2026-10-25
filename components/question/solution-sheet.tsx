@@ -248,7 +248,7 @@ export function QuestionSolutionSheet({ buttonLabel, questionId, questionType, s
         aria-expanded={open}
         className={cn(
           buttonVariants({ variant: 'ghost', size: 'sm' }),
-          'h-8 rounded-full bg-(--ui-fill) px-3.5 text-foreground/80 hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active)',
+          'h-8 gap-1.5 rounded-full bg-(--ui-fill) px-3.5 text-[0.8125rem] text-foreground/80 hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active) has-data-[icon=inline-start]:pl-3',
         )}
         onClick={() => { setMounted(true); setOpen(true); }}
       >
