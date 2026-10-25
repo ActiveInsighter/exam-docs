@@ -1,20 +1,17 @@
 /*
- * English reading card (workspace.tsx), laid out like a computer-based
- * reading test: the passage on paper at left, one question at a time at
- * right, an answer-sheet strip above it and 上一题 / 下一题 below.
+ * English reading (workspace.tsx).
  *
- * One rounded frame on the canvas tone holds two white panes, mirroring the
- * site frame. The card is a size container, so every layout decision below
- * follows the card's own width, not the viewport:
- *
- *   < 48rem   one pane at a time behind a sticky 原文 / 题目 bar; the page
- *             scrolls (no nested scrolling on phones), and the stepper
- *             sticks to the bottom of the screen
- *   ≥ 48rem   side by side in a card that fits the visible panel; each pane
- *             scrolls on its own, chaining to the page at either end
+ *   page (.card)    one rounded frame on the canvas tone: a bar with
+ *                   开始答题 that sticks under the docs header, and the
+ *                   passage on a white sheet of paper
+ *   card (.modal)   the study card, laid out like a computer-based reading
+ *                   test: the passage on the grey aside at left, one
+ *                   question at a time at right under a row holding the
+ *                   answer-sheet strip and the grading switch, 上一题 /
+ *                   下一题 below; phones show one pane at a time
  */
 
-/* Shared by the card and the expanded study card (.modal). */
+/* Shared by the page and the card. */
 :is(.card, .modal) {
   --reading-radius: var(--ui-radius-panel);
   --reading-pad: 0.375rem;
@@ -25,11 +22,24 @@
   /* The docs header overlays the top of whichever element scrolls the page. */
   --reading-header: var(--fd-header-height, 3.5rem);
   --reading-sticky-top: var(--reading-header);
-  --reading-bar-height: 3.25rem;
   /* The evidence of a graded question (the highlighter's colours are in use-highlights.tsx). */
   --reading-evidence: color-mix(in oklch, var(--success) 13%, transparent);
   --reading-evidence-line: color-mix(in oklch, var(--success) 72%, transparent);
 }
+
+:global(.dark) :is(.card, .modal) {
+  --reading-evidence: color-mix(in oklch, var(--success) 20%, transparent);
+}
+
+:is(.card, .modal)[data-size='0'] { --reading-size: 1rem; }
+:is(.card, .modal)[data-size='2'] { --reading-size: 1.25rem; }
+
+:is(.start, .segment, .tool, .sheetItem, .stepButton, .locator, .returnPill, .number, .markMenu button):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+/* ---------- Page ---------- */
 
 .card {
   container: reading-card / inline-size;
@@ -41,54 +51,151 @@
   padding: var(--reading-pad);
   border-radius: var(--reading-radius);
   background: var(--ui-canvas);
-  /* clip (not hidden) keeps the sticky bar and stepper working. */
+  /* clip (not hidden) keeps the sticky bar working. */
   overflow: clip;
-  scroll-margin-top: calc(var(--reading-header) + 0.75rem);
 }
-
-:global(.dark) :is(.card, .modal) {
-  --reading-evidence: color-mix(in oklch, var(--success) 20%, transparent);
-}
-
-:is(.card, .modal)[data-size='0'] { --reading-size: 1rem; }
-:is(.card, .modal)[data-size='2'] { --reading-size: 1.25rem; }
 
 /* From md the docs panel scrolls, and its top padding already clears the
-   header, so sticky offsets start at zero (scroll margins still need it). */
+   header, so the bar sticks at the top of the panel. */
 @media (min-width: 48rem) {
   .card { --reading-sticky-top: 0px; }
 }
 
-.card:focus { outline: none; }
-
-.card[data-resizing] {
-  cursor: col-resize;
-  user-select: none;
-}
-
-:is(.segment, .tool, .sheetItem, .stepButton, .locator, .returnPill, .number, .markMenu button):focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 1px;
-}
-
-/* ---------- Bar (narrow) ---------- */
-
-.bar {
+.startBar {
   position: sticky;
   top: var(--reading-sticky-top);
   z-index: 3;
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  height: var(--reading-bar-height);
+  gap: 0.75rem;
+  min-height: 3.25rem;
   margin: calc(var(--reading-pad) * -1) calc(var(--reading-pad) * -1) 0;
-  padding: var(--reading-pad);
+  padding: var(--reading-pad) var(--reading-pad) var(--reading-pad) 1.125rem;
   background: var(--ui-canvas);
 }
 
-.segments {
-  display: grid;
+.startInfo {
+  display: flex;
   flex: 1;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.125rem 0.625rem;
+  min-width: 0;
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+
+.startTitle {
+  color: var(--foreground);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.startFacts,
+.startScore { white-space: nowrap; }
+.scoreCorrect { color: color-mix(in oklch, var(--success) 85%, var(--foreground)); }
+
+.start {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.375rem;
+  height: 2.5rem;
+  padding-inline: 1.125rem 0.875rem;
+  border-radius: 999px;
+  background: var(--foreground);
+  color: var(--background);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--ui-duration) var(--ui-ease), transform var(--ui-duration) var(--ui-ease);
+}
+.start svg { width: 1rem; height: 1rem; transition: transform 220ms var(--ui-ease); }
+.start:hover { background: color-mix(in oklch, var(--foreground) 86%, transparent); }
+.start:hover svg { transform: translateX(2px); }
+.start:active { transform: scale(0.97); }
+.start:focus-visible { outline-offset: 2px; }
+
+/* The passage on paper. */
+.paper {
+  container: reading-article / inline-size;
+  min-width: 0;
+  padding: 1.5rem 1.125rem 1.75rem;
+  border-radius: var(--reading-pane-radius);
+  background: var(--ui-panel);
+}
+.paper > * {
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+@container reading-card (min-width: 48rem) {
+  .paper { padding: 2.25rem 2rem 2.5rem 1.75rem; }
+}
+
+/* Very narrow phones: tighter gutters. */
+@container reading-card (max-width: 24rem) {
+  .card { --reading-gutter: 1.625rem; }
+  .paper { padding-inline: 0.875rem; }
+  .startBar { padding-left: 0.875rem; }
+}
+
+/* The questions wait on the page, out of sight, while the card is closed. */
+.parked { display: none; }
+
+/* ---------- Card ---------- */
+
+.modal { font-family: var(--font-sans); }
+
+/* Passage tools in the header's glass capsule. */
+.tool {
+  display: inline-grid;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: background-color var(--ui-duration) var(--ui-ease), color var(--ui-duration) var(--ui-ease);
+}
+.tool svg { width: 1rem; height: 1rem; }
+.tool:hover:not(:disabled) { background: var(--ui-fill-hover); color: var(--foreground); }
+.tool:disabled { cursor: default; opacity: 0.35; }
+.tool[aria-pressed='true'] { background: var(--foreground); color: var(--background); }
+.tool[aria-pressed='true']:hover { background: color-mix(in oklch, var(--foreground) 86%, transparent); color: var(--background); }
+
+.glyph,
+.glyphSmall {
+  font-family: var(--reading-serif);
+  font-weight: 600;
+  line-height: 1;
+}
+.glyph { font-size: 1.0625rem; }
+.glyphSmall { font-size: 0.8125rem; }
+
+.sizeGroup {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* The passage on the grey aside, set like the page. */
+.modalArticle {
+  container: reading-article / inline-size;
+}
+.modalArticle > * {
+  max-width: 42rem;
+  margin-inline: auto;
+}
+.modal[data-translation] .modalArticle > * { max-width: 76rem; }
+
+/* 原文 / 题目, shown on phones only. */
+.segments {
+  display: none;
   grid-template-columns: 1fr 1fr;
   gap: 0.25rem;
   min-width: 0;
@@ -129,147 +236,41 @@
   line-height: 1.25rem;
 }
 
-.barTools {
+@media (width >= 48rem) {
+  .modal .returnPill { display: none; }
+}
+
+/* Phones: one pane at a time, switched from the header. */
+@media (width < 48rem) {
+  .segments {
+    display: grid;
+    order: 11;
+    flex-basis: 100%;
+    margin-top: 0.25rem;
+  }
+  .modal[data-view='article'] [data-slot='modal-pane']:has(> [data-reading-region='questions']),
+  .modal[data-view='questions'] [data-slot='modal-pane']:has(> [data-reading-region='article']) {
+    display: none;
+  }
+  /* The questions pane is second in the split, so it is not the one padded below the header. */
+  .modal[data-view='questions'] [data-reading-region='questions'] {
+    padding-top: calc(var(--modal-header-h) + 0.25rem);
+  }
+}
+
+/* ---------- Answer sheet and grading, on one row ---------- */
+
+.questionHead {
   display: flex;
-  flex: none;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.125rem;
+  gap: 0.625rem 0.75rem;
+  margin-bottom: 0.875rem;
 }
-
-/* ---------- Tools ---------- */
-
-.tool {
-  display: inline-grid;
-  flex: none;
-  width: 2.25rem;
-  height: 2.25rem;
-  place-items: center;
-  border-radius: var(--ui-radius-control);
-  color: var(--muted-foreground);
-  cursor: pointer;
-  transition: background-color var(--ui-duration) var(--ui-ease), color var(--ui-duration) var(--ui-ease);
-}
-.tool svg { width: 1rem; height: 1rem; }
-.tool:hover:not(:disabled) { background: var(--ui-fill-hover); color: var(--foreground); }
-.tool:disabled { cursor: default; opacity: 0.35; }
-.tool[aria-pressed='true'] { background: var(--foreground); color: var(--background); }
-.tool[aria-pressed='true']:hover { background: color-mix(in oklch, var(--foreground) 86%, transparent); color: var(--background); }
-
-.glyph,
-.glyphSmall {
-  font-family: var(--reading-serif);
-  font-weight: 600;
-  line-height: 1;
-}
-.glyph { font-size: 1.0625rem; }
-.glyphSmall { font-size: 0.8125rem; }
-
-.sizeGroup {
-  display: inline-flex;
-  align-items: center;
-}
-
-/* ---------- Panes ---------- */
-
-.panes {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  min-height: 0;
-}
-
-.pane {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  min-height: 0;
-  border-radius: var(--reading-pane-radius);
-  background: var(--ui-panel);
-  /* Keep the scroller's corners rounded without clipping sticky content. */
-  overflow: clip;
-}
-
-.card[data-view='article'] .pane[data-pane='questions'],
-.card[data-view='questions'] .pane[data-pane='article'] {
-  display: none;
-}
-
-.card[data-view] .pane {
-  animation: reading-pane-in 220ms var(--ui-ease);
-}
-
-/* Lets the translation layout follow the article pane's own width. */
-.pane[data-pane='article'] {
-  container: reading-article / inline-size;
-}
-
-@keyframes reading-pane-in {
-  from { opacity: 0; transform: translateY(4px); }
-}
-
-.paneHead {
-  display: none;
-  align-items: center;
-  gap: 0.5rem;
-  min-height: 3.25rem;
-  padding: 0.375rem 0.5rem 0.375rem 1.25rem;
-  position: relative;
-  z-index: 1;
-}
-
-.paneTitle {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  gap: 0.375rem;
-  color: var(--foreground);
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-.paneTitle svg { width: 0.9375rem; height: 0.9375rem; color: var(--muted-foreground); }
-
-.stats {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--muted-foreground);
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.paneTools {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: 0.125rem;
-  margin-left: auto;
-}
-
-.paneFocus { display: none; }
-
-/* Narrow: the question pane keeps its answer-sheet row. */
-.pane[data-pane='questions'] .paneHead {
-  display: flex;
-  padding: 0.75rem 0.875rem 0.25rem 1.125rem;
-}
-
-.scroller {
-  min-width: 0;
-  padding: 1.5rem 1.125rem 1.75rem;
-  outline: none;
-}
-
-.pane[data-pane='questions'] > .scroller { padding-top: 0.75rem; }
-
-/* Reading progress under the article header (scroll-driven, no JS). */
-.progress { display: none; }
-
-/* ---------- Answer-sheet strip ---------- */
 
 .sheet {
   display: flex;
-  flex: 1;
+  flex: 1 1 10rem;
   min-width: 0;
   gap: 0.3125rem;
   overflow-x: auto;
@@ -314,14 +315,59 @@
   color: color-mix(in oklch, var(--sheet-tone) 85%, var(--foreground));
 }
 
-.score {
+.modeGroup {
+  display: flex;
   flex: none;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.modeSwitch {
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  padding: 0.1875rem;
+  border-radius: 999px;
+  background: var(--ui-fill);
+}
+
+.modeSwitch button {
+  height: 1.75rem;
+  padding-inline: 0.75rem;
+  border-radius: 999px;
   color: var(--muted-foreground);
   font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
+  font-weight: 550;
   white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--ui-duration) var(--ui-ease), color var(--ui-duration) var(--ui-ease), box-shadow var(--ui-duration) var(--ui-ease);
 }
-.scoreCorrect { color: color-mix(in oklch, var(--success) 85%, var(--foreground)); }
+.modeSwitch button:hover { color: var(--foreground); }
+.modeSwitch button[aria-checked='true'] {
+  background: var(--ui-panel);
+  color: var(--foreground);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 8%), 0 1px 1px rgb(0 0 0 / 4%);
+}
+.modeSwitch button:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+
+.modeAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  height: 1.875rem;
+  padding-inline: 0.625rem 0.75rem;
+  border-radius: 999px;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  font-weight: 550;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--ui-duration) var(--ui-ease), color var(--ui-duration) var(--ui-ease);
+}
+.modeAction svg { width: 0.875rem; height: 0.875rem; }
+.modeAction:hover { background: var(--ui-fill-hover); color: var(--foreground); }
+.modeAction:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
 
 /* ---------- One question at a time ---------- */
 
@@ -330,14 +376,12 @@
 
 .questions > [data-exam-question] {
   margin-block: 0;
-  scroll-margin-top: calc(var(--reading-header) + var(--reading-bar-height) + 4rem);
+  scroll-margin-top: calc(var(--modal-header-h, 4rem) + 1rem);
   /* Shown one at a time: no reason to defer their layout. */
   content-visibility: visible;
 }
 
-/* Before hydration, the first; after, the one picked. */
-.card:not([data-ready]) .questions > [data-exam-question] ~ [data-exam-question],
-:is(.card, .modal)[data-ready] .questions > [data-exam-question]:not([data-reading-current], [data-reading-leaving]) {
+.modal .questions > [data-exam-question]:not([data-reading-current], [data-reading-leaving]) {
   display: none;
 }
 
@@ -352,19 +396,12 @@
 
 /* ---------- Stepper ---------- */
 
-/* Follows the question; on phones it sticks to the bottom of the screen. */
 .stepper {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.5rem;
-  margin: 1rem -1.125rem -1.75rem;
-  padding: 0.625rem 0.75rem calc(0.625rem + env(safe-area-inset-bottom, 0px));
-  border-top: 1px solid var(--ui-fill);
-  background: var(--ui-panel);
+  margin-top: 1.25rem;
 }
 
 .stepButton {
@@ -430,73 +467,14 @@
 }
 
 /* Narrow: labels give way to arrows so the locators keep the middle. */
-@container reading-card (max-width: 30rem) {
+@media (width < 30rem) {
   .stepButton { width: 2.375rem; padding: 0; justify-content: center; }
   .stepButton span { display: none; }
 }
 
-/* ---------- Grading: 逐题判分 / 整篇提交 ---------- */
+/* ---------- Grading together: 提交全部 ---------- */
 
-.modeRow {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.modeSwitch {
-  display: inline-grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  padding: 0.1875rem;
-  border-radius: 999px;
-  background: var(--ui-fill);
-}
-
-.modeSwitch button {
-  height: 1.75rem;
-  padding-inline: 0.75rem;
-  border-radius: 999px;
-  color: var(--muted-foreground);
-  font-size: 0.8125rem;
-  font-weight: 550;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background-color var(--ui-duration) var(--ui-ease), color var(--ui-duration) var(--ui-ease), box-shadow var(--ui-duration) var(--ui-ease);
-}
-.modeSwitch button:hover { color: var(--foreground); }
-.modeSwitch button[aria-checked='true'] {
-  background: var(--ui-panel);
-  color: var(--foreground);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 8%), 0 1px 1px rgb(0 0 0 / 4%);
-}
-.modeSwitch button:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
-
-.modeNote {
-  color: var(--muted-foreground);
-  font-size: 0.8125rem;
-}
-
-.modeAction {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3125rem;
-  height: 1.875rem;
-  padding-inline: 0.625rem 0.75rem;
-  border-radius: 999px;
-  color: var(--muted-foreground);
-  font-size: 0.8125rem;
-  font-weight: 550;
-  cursor: pointer;
-  transition: background-color var(--ui-duration) var(--ui-ease), color var(--ui-duration) var(--ui-ease);
-}
-.modeAction svg { width: 0.875rem; height: 0.875rem; }
-.modeAction:hover { background: var(--ui-fill-hover); color: var(--foreground); }
-.modeAction:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
-
-/* 提交全部: quiet until there is something to grade, then the one dark button. */
+/* Quiet until there is something to grade, then the one dark button. */
 .submitAll {
   display: inline-flex;
   align-items: center;
@@ -567,96 +545,10 @@
 .confirmButton:hover:not(:disabled) { background: var(--ui-fill-hover); }
 .confirmButton[data-primary] { background: var(--foreground); box-shadow: none; color: var(--background); }
 .confirmButton[data-primary]:hover { background: color-mix(in oklch, var(--foreground) 86%, transparent); }
-.confirmButton:disabled { cursor: default; opacity: 0.45; }
 .confirmButton:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 
 @keyframes reading-confirm-in {
   from { opacity: 0; transform: translateY(4px); }
-}
-
-/* ---------- Expanded: the card on the page holds its place ---------- */
-
-.placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  min-height: 12rem;
-  border-radius: var(--reading-pane-radius);
-  background: var(--ui-panel);
-  color: var(--muted-foreground);
-  font-size: 0.875rem;
-}
-.placeholder > svg { width: 1.25rem; height: 1.25rem; }
-.placeholder p { margin: 0; }
-
-/* ---------- Expanded: the study card ---------- */
-
-.modal { font-family: var(--font-sans); }
-
-/* Passage tools in the header's glass capsule. */
-.modalTool {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 999px;
-}
-
-.modalSegments { display: none; }
-
-/* The passage on the grey aside, set like the page. */
-.modalArticle {
-  container: reading-article / inline-size;
-}
-.modalArticle > * {
-  max-width: 42rem;
-  margin-inline: auto;
-}
-.modal[data-translation] .modalArticle > * { max-width: 76rem; }
-
-.modalHead {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.875rem;
-}
-
-.modal .stepper {
-  position: static;
-  margin: 1.25rem 0 0;
-  padding: 0;
-  border-top: 0;
-  background: none;
-}
-
-.modal .questions > [data-exam-question] {
-  scroll-margin-top: calc(var(--modal-header-h, 4rem) + 1rem);
-}
-
-@media (width >= 48rem) {
-  .modal .returnPill { display: none; }
-}
-
-/* Phones: one pane at a time, switched from the header. */
-@media (width < 48rem) {
-  .modalSegments {
-    display: grid;
-    order: 11;
-    flex-basis: 100%;
-    margin-top: 0.25rem;
-  }
-  .modal[data-view='article'] [data-slot='modal-pane']:has(> [data-reading-region='questions']),
-  .modal[data-view='questions'] [data-slot='modal-pane']:has(> [data-reading-region='article']) {
-    display: none;
-  }
-  /* The questions pane is second in the split, so it is not the one padded below the header. */
-  .modal[data-view='questions'] [data-reading-region='questions'] {
-    padding-top: calc(var(--modal-header-h) + 0.25rem);
-  }
-}
-
-@media (width < 30rem) {
-  .modal .stepButton { width: 2.375rem; padding: 0; justify-content: center; }
-  .modal .stepButton span { display: none; }
 }
 
 /* ---------- Article ---------- */
@@ -706,7 +598,6 @@
   border-radius: 0.375rem;
   counter-increment: reading-paragraph;
 }
-.passage > :is(p, .paragraph):last-child { margin-bottom: 0; }
 
 .original > p { margin: 0; }
 .original > p + p { margin-top: 1.1em; }
@@ -809,14 +700,14 @@ button.number:hover { background: var(--ui-fill-hover); color: var(--foreground)
   line-height: 1.6;
 }
 
-:is(.card, .modal)[data-translation] .translation,
-:is(.card, .modal)[data-translation] .titleTranslation,
+.modal[data-translation] .translation,
+.modal[data-translation] .titleTranslation,
 .paragraph[data-open] > .translation {
   display: block;
   animation: reading-translation-in 200ms var(--ui-ease);
 }
 
-:is(.card, .modal)[data-translation] .passage > .paragraph,
+.modal[data-translation] .passage > .paragraph,
 .passage > .paragraph[data-open] { margin-bottom: 1.5em; }
 .passage > :is(p, .paragraph):last-child { margin-bottom: 0; }
 
@@ -826,12 +717,12 @@ button.number:hover { background: var(--ui-fill-hover); color: var(--foreground)
 
 /* A wide article pane sets English and Chinese side by side, row by row. */
 @container reading-article (min-width: 50rem) {
-  :is(.card, .modal)[data-translation] .paragraph {
+  .modal[data-translation] .paragraph {
     display: grid;
     grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
     column-gap: 1.5rem;
   }
-  :is(.card, .modal)[data-translation] .translation {
+  .modal[data-translation] .translation {
     margin-top: 0;
     padding: 0.1875rem 0 0 1.25rem;
     border-left: 1px solid var(--border);
@@ -876,18 +767,18 @@ button.number:hover { background: var(--ui-fill-hover); color: var(--foreground)
   from { opacity: 0; transform: translate(-50%, calc(-100% - 0.125rem)) scale(0.94); }
 }
 
-/* ---------- Back to the question (narrow, after a locate) ---------- */
+/* ---------- Back to the question (phones, after a locate) ---------- */
 
 .returnPill {
   position: sticky;
   bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
   z-index: 2;
-  display: inline-flex;
-  align-self: center;
+  display: flex;
   align-items: center;
   gap: 0.375rem;
   height: 2.5rem;
-  margin-bottom: 1rem;
+  margin: 1rem auto;
+  width: fit-content;
   padding-inline: 0.875rem 1rem;
   border-radius: 999px;
   background: var(--foreground);
@@ -900,156 +791,11 @@ button.number:hover { background: var(--ui-fill-hover); color: var(--foreground)
 }
 .returnPill svg { width: 1rem; height: 1rem; }
 
-/* The floating dock would cover the stepper on phones; the strip replaces it here. */
-@media (max-width: 47.99rem) {
-  :global(html):has(.card[data-view='questions']) :global([data-question-dock]) {
-    opacity: 0;
-    pointer-events: none;
-  }
-}
-
-/* ---------- Side by side ---------- */
-
-.divider { display: none; }
-
-@container reading-card (min-width: 48rem) {
-  .bar { display: none; }
-  .paneFocus { display: inline-flex; }
-  .hint { padding-left: var(--reading-gutter); }
-
-  .card[data-view] .pane[data-pane] {
-    display: flex;
-    animation: none;
-  }
-
-  .panes {
-    grid-template-columns: minmax(0, var(--reading-split, 54%)) 0.5rem minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr);
-    /* Fit the visible docs panel, within comfortable bounds. */
-    height: clamp(30rem, calc(var(--fd-docs-height, 100dvh - 4.5rem) - 2rem), 60rem);
-  }
-
-  .paneHead,
-  .pane[data-pane='questions'] .paneHead {
-    display: flex;
-    padding: 0.375rem 0.5rem 0.375rem 1.25rem;
-  }
-
-  .scroller {
-    flex: 1;
-    min-height: 0;
-    padding: 0.75rem 1.75rem 2rem 1.5rem;
-    overflow-y: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: thin;
-    scrollbar-color: var(--ui-scrollbar-thumb) transparent;
-    /* Soft edges where content runs under the pane header. */
-    mask-image: linear-gradient(to bottom, transparent 0, #000 0.75rem, #000 calc(100% - 1rem), transparent 100%);
-  }
-
-  .pane[data-pane='questions'] .scroller { padding: 0.5rem 1rem 1.25rem; }
-
-  .pane[data-pane='article'] .scroller > * {
-    max-width: 42rem;
-    margin-inline: auto;
-  }
-  /* Room for English and Chinese side by side when the pane allows it. */
-  .card[data-translation] .pane[data-pane='article'] .scroller > * { max-width: 76rem; }
-
-  .stepper {
-    position: static;
-    margin: 1rem 0 0;
-    padding: 0;
-    border-top: 0;
-    background: none;
-  }
-
-  .returnPill { display: none; }
-
-  .divider {
-    position: relative;
-    display: block;
-    cursor: col-resize;
-    touch-action: none;
-    outline: none;
-  }
-
-  .divider::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0.25rem;
-    height: 2.5rem;
-    border-radius: 999px;
-    background: var(--ui-fill-strong);
-    transform: translate(-50%, -50%);
-    transition: background-color var(--ui-duration) var(--ui-ease), height 200ms var(--ui-ease);
-  }
-
-  .divider:hover::after,
-  .divider:focus-visible::after,
-  .card[data-resizing] .divider::after {
-    height: 4rem;
-    background: color-mix(in oklch, var(--foreground) 45%, transparent);
-  }
-
-  .card[data-resizing] .pane { pointer-events: none; }
-
-  @supports (animation-timeline: scroll()) {
-    .pane[data-pane='article'] { timeline-scope: --reading-article; }
-    .pane[data-pane='article'] .scroller { scroll-timeline: --reading-article block; }
-    .progress {
-      display: block;
-      position: absolute;
-      top: 3.25rem;
-      right: 1.25rem;
-      left: 1.25rem;
-      z-index: 1;
-      height: 2px;
-      overflow: hidden;
-      border-radius: 999px;
-      background: var(--ui-fill);
-    }
-    .progress > span {
-      display: block;
-      height: 100%;
-      border-radius: inherit;
-      background: color-mix(in oklch, var(--foreground) 55%, transparent);
-      transform-origin: left;
-      animation: reading-progress linear both;
-      animation-timeline: --reading-article;
-    }
-  }
-}
-
-/* Mid widths: the stats give way to the tools. */
-@container reading-card (min-width: 48rem) and (max-width: 60rem) {
-  .stats { display: none; }
-}
-
-@keyframes reading-progress {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
-}
-
-/* Very narrow phones: tighter gutters, and the switch drops its icons. */
-@container reading-card (max-width: 24rem) {
-  .card { --reading-gutter: 1.625rem; }
-  .scroller { padding-inline: 0.875rem; }
-  .stepper { margin-inline: -0.875rem; }
-  .segment svg,
-  .segmentCount { display: none; }
-  .tool { width: 2rem; }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .card[data-view] .pane,
-  :is(.card, .modal)[data-translation] .translation,
+  .modal[data-translation] .translation,
   .paragraph[data-open] > .translation,
   .passage [data-flash],
   .markMenu,
-  .modeSwitch button,
   .submitAll,
   .confirm {
     animation: none;
@@ -1060,40 +806,20 @@ button.number:hover { background: var(--ui-fill-hover); color: var(--foreground)
 /* Print the whole exercise: the passage, then every question; no controls. */
 @media print {
   .card {
-    position: static;
     padding: 0;
     background: none;
-    box-shadow: none;
     overflow: visible;
   }
-  .bar,
-  .divider,
-  .paneHead,
-  .progress,
-  .stepper,
-  .returnPill,
-  .modeRow,
-  .confirm,
+  .startBar,
   .hint {
     display: none !important;
   }
-  .panes {
+  .paper { padding: 0; }
+  .parked {
     display: block;
-    height: auto !important;
+    margin-top: 1.5rem;
   }
-  .card[data-view] .pane[data-pane] {
-    display: block;
-    overflow: visible;
-    animation: none;
-  }
-  .card .pane .scroller {
-    overflow: visible !important;
-    padding: 0;
-    mask-image: none;
-  }
-  .card .questions > [data-exam-question] {
-    display: block !important;
+  .parked .questions > [data-exam-question] {
     margin-block: 1rem;
   }
-  .pane[data-pane='article'] { margin-bottom: 1.5rem; }
 }
