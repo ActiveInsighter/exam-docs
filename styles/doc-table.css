@@ -1,0 +1,324 @@
+/*
+ * Documentation tables (components/mdx/doc-table.tsx).
+ *
+ * Every surface here is transparent or a translucent fill, so a table takes
+ * on whatever it sits in: the page, a callout tint, a card, a tab, an
+ * accordion, a question card or a modal. Never give these layers an opaque
+ * background, or nested tables show a mismatched block again.
+ *
+ * Layout: cells wrap; each column keeps a floor of min(one-line width, cap),
+ * written by the component as --doc-col-fit on the header cell. The cap
+ * follows the visible width (cqi of the scroll box), so phones wrap sooner.
+ * When the floors add up to more than the column, the scroll box scrolls.
+ *
+ * The selectors outrank the Fumadocs typography rules (`.prose :where(td)`),
+ * so none of them need !important.
+ */
+
+[data-doc-table] {
+  --doc-table-col-cap: clamp(8em, 34cqi, 13em);
+  --doc-table-pad-block: 0.625rem;
+  --doc-table-pad-inline: 0.75rem;
+  --doc-table-radius: var(--ui-radius-control);
+
+  position: relative;
+  min-width: 0;
+  margin-block: 1rem;
+  margin-inline: 0;
+}
+
+[data-doc-table]:first-child {
+  margin-top: 0;
+}
+
+[data-doc-table]:last-child {
+  margin-bottom: 0;
+}
+
+[data-doc-table] [data-slot='doc-table-scroll'] {
+  container-type: inline-size;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  border-radius: var(--doc-table-radius);
+  scrollbar-width: thin;
+  outline: none;
+}
+
+[data-doc-table] [data-slot='doc-table-scroll']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+[data-doc-table] table {
+  width: 100%;
+  margin: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent;
+  line-height: 1.6;
+  table-layout: auto;
+}
+
+[data-doc-table] :is(th, td) {
+  min-width: min(var(--doc-col-fit, 0px), var(--doc-table-col-cap));
+  padding: var(--doc-table-pad-block) var(--doc-table-pad-inline);
+  border: 0;
+  border-block-end: 1px solid var(--docs-table-rule);
+  background: transparent;
+  text-align: start;
+  vertical-align: top;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* The header is one filled, rounded band; rows below are split by rules. */
+[data-doc-table] thead :is(th, td) {
+  border-block-end: 0;
+  background: var(--docs-table-head);
+  color: var(--foreground);
+  font-weight: 600;
+  vertical-align: bottom;
+}
+
+[data-doc-table] thead tr > :first-child {
+  border-start-start-radius: var(--doc-table-radius);
+  border-end-start-radius: var(--doc-table-radius);
+}
+
+[data-doc-table] thead tr > :last-child {
+  border-start-end-radius: var(--doc-table-radius);
+  border-end-end-radius: var(--doc-table-radius);
+}
+
+[data-doc-table] tbody tr:last-child > * {
+  border-block-end: 0;
+}
+
+[data-doc-table] tbody tr {
+  transition: background-color var(--ui-duration) var(--ui-ease);
+}
+
+[data-doc-table] tbody tr:hover {
+  background: var(--docs-table-row-hover);
+}
+
+/* Measuring pass: every column at its one-line width, for one layout. */
+[data-doc-table] table[data-measuring] {
+  width: max-content;
+}
+
+[data-doc-table] table[data-measuring] :is(th, td) {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+ * Actions: copy and expand
+ *
+ * Mice: a glass capsule that floats over the end of the header row while the
+ * table is hovered or focused. Touch has no hover, so the buttons sit in a
+ * short row of their own above the table instead of covering a header.
+ * ------------------------------------------------------------------------- */
+
+[data-doc-table] > [data-slot='doc-table-actions'] {
+  position: absolute;
+  top: 0.4375rem;
+  inset-inline-end: 0.375rem;
+  z-index: 1;
+  display: flex;
+  gap: 0.125rem;
+  padding: 0.125rem;
+  border-radius: calc(var(--doc-table-radius) - 0.125rem);
+  background: color-mix(in oklab, var(--ui-panel) 72%, transparent);
+  -webkit-backdrop-filter: blur(8px) saturate(1.4);
+  backdrop-filter: blur(8px) saturate(1.4);
+  transition: opacity var(--ui-duration) var(--ui-ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-doc-table] > [data-slot='doc-table-actions'] {
+    opacity: 0;
+  }
+
+  [data-doc-table]:is(:hover, :focus-within) > [data-slot='doc-table-actions'] {
+    opacity: 1;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  [data-doc-table] > [data-slot='doc-table-actions'] {
+    position: static;
+    justify-content: flex-end;
+    margin-block-end: 0.125rem;
+    padding: 0;
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+[data-slot='doc-table-action'] {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--doc-table-radius) - 0.25rem);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--ui-duration) var(--ui-ease),
+    color var(--ui-duration) var(--ui-ease),
+    scale 160ms var(--ui-ease);
+}
+
+[data-slot='doc-table-action'] svg {
+  width: 0.9375rem;
+  height: 0.9375rem;
+}
+
+[data-slot='doc-table-action']:hover {
+  background: var(--ui-fill-hover);
+  color: var(--foreground);
+}
+
+[data-slot='doc-table-action']:active {
+  scale: 0.92;
+}
+
+[data-slot='doc-table-action']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+[data-slot='doc-table-action'][data-checked] {
+  color: var(--foreground);
+}
+
+/* ---------------------------------------------------------------------------
+ * Expanded view on the general Modal
+ *
+ * Portalled out of the article, so nothing from #docs-body or the prose
+ * typography reaches it: the sheet carries its own type and inline styles.
+ * ------------------------------------------------------------------------- */
+
+[data-doc-table-modal] [data-slot='modal-toolbar'] [data-slot='doc-table-action'] {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+}
+
+[data-doc-table-modal] [data-slot='modal-toolbar'] [data-slot='doc-table-action'] svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+[data-slot='doc-table-sheet'] {
+  --doc-table-col-cap: clamp(6em, 16cqi, 14em);
+  --doc-table-pad-block: 0.75rem;
+  --doc-table-pad-inline: 1rem;
+  --doc-table-radius: var(--ui-radius-surface);
+
+  color: var(--foreground);
+  font-size: 0.9375rem;
+}
+
+[data-slot='doc-table-sheet'] [data-slot='doc-table-scroll'] {
+  container-type: inline-size;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  outline: none;
+}
+
+[data-slot='doc-table-sheet'] table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  line-height: 1.65;
+}
+
+[data-slot='doc-table-sheet'] :is(th, td) {
+  min-width: min(var(--doc-col-fit, 0px), var(--doc-table-col-cap));
+  padding: var(--doc-table-pad-block) var(--doc-table-pad-inline);
+  text-align: start;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+[data-slot='doc-table-sheet'] thead :is(th, td) {
+  background: var(--docs-table-head-strong);
+  font-weight: 600;
+  vertical-align: bottom;
+}
+
+[data-slot='doc-table-sheet'] thead tr > :first-child {
+  border-start-start-radius: var(--doc-table-radius);
+  border-end-start-radius: var(--doc-table-radius);
+}
+
+[data-slot='doc-table-sheet'] thead tr > :last-child {
+  border-start-end-radius: var(--doc-table-radius);
+  border-end-end-radius: var(--doc-table-radius);
+}
+
+/* Zebra rows instead of rules: easier to follow across many wide columns. */
+[data-slot='doc-table-sheet'] tbody tr:nth-child(even) > * {
+  background: var(--docs-table-stripe);
+}
+
+[data-slot='doc-table-sheet'] tbody tr > :first-child {
+  border-start-start-radius: var(--doc-table-radius);
+  border-end-start-radius: var(--doc-table-radius);
+}
+
+[data-slot='doc-table-sheet'] tbody tr > :last-child {
+  border-start-end-radius: var(--doc-table-radius);
+  border-end-end-radius: var(--doc-table-radius);
+}
+
+[data-slot='doc-table-sheet'] tbody tr:hover > * {
+  background: var(--docs-table-row-hover-strong);
+}
+
+[data-slot='doc-table-sheet'] table[data-measuring] {
+  width: max-content;
+}
+
+[data-slot='doc-table-sheet'] table[data-measuring] :is(th, td) {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+[data-slot='doc-table-sheet'] :where(code):not(:where(pre code)) {
+  border-radius: 0.35rem;
+  background: var(--docs-inline-code-background);
+  padding: 0.12em 0.38em;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+[data-slot='doc-table-sheet'] :where(strong) {
+  font-weight: 600;
+}
+
+[data-slot='doc-table-sheet'] :where(a) {
+  color: inherit;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: var(--ui-fill-strong);
+  text-underline-offset: 0.2em;
+}
+
+[data-slot='doc-table-sheet'] :where(a):hover {
+  text-decoration-color: currentColor;
+}

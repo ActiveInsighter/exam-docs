@@ -1,5 +1,6 @@
 import { Blank, Option, Question, Solution } from '@/components/question';
 import { EnglishReading, Evidence, ExamArticle, Paragraph, Translation } from '@/components/english-reading';
+import { DocTable } from '@/components/mdx/doc-table';
 import { Mermaid } from '@/components/mdx/mermaid';
 import * as AccordionComponents from 'fumadocs-ui/components/accordion';
 import * as FilesComponents from 'fumadocs-ui/components/files';
@@ -12,7 +13,8 @@ import type { MDXComponents } from 'mdx/types';
 /**
  * Global MDX component registry.
  *
- * Cards and Callout are included by Fumadocs' default mapping. The additional
+ * Cards and Callout are included by Fumadocs' default mapping; Markdown tables
+ * replace its `table` with DocTable (wrapping columns, copy and expand). The additional
  * official component groups below are registered globally so documentation can
  * use Tabs, Accordions, Steps, Files, TypeTable and Mermaid without repeating
  * imports in every MDX file. Question, Option, Blank and Solution are the
@@ -30,6 +32,7 @@ export function getMDXComponents(components?: MDXComponents) {
     ...FilesComponents,
     ...StepsComponents,
     ...TabsComponents,
+    table: DocTable,
     Blank,
     Option,
     Question,
