@@ -42,6 +42,8 @@
 
 /* Mermaid figure and zoom viewer (components/mdx/mermaid.tsx). */
 @import '../styles/mermaid.css';
+/* MDX tables: wrapping columns, copy / expand actions (components/mdx/doc-table.tsx). */
+@import '../styles/doc-table.css';
 
 /* Expose the semantic variables as Tailwind CSS 4 utilities. */
 @theme inline {
@@ -214,8 +216,9 @@
   box-shadow: none !important;
 }
 
+/* The fill is translucent, so only the figure paints it; inner layers stay clear. */
 :is(#docs-body, .docs-prose) figure.shiki :where([role='region'], pre) {
-  background: var(--docs-code-block-background) !important;
+  background: transparent !important;
 }
 
 :is(#docs-body, .docs-prose) figure.shiki [role='region'] {
@@ -266,6 +269,8 @@
   > figure.shiki {
   width: 100%;
   margin: 0 !important;
+  /* The tab surface already paints the fill; a second translucent layer would darken it. */
+  background: transparent !important;
 }
 
 /* Inline code: larger, quiet and borderless. Keep component-owned code untouched. */
@@ -280,53 +285,4 @@
   font-weight: 500;
 }
 
-/*
- * Minimal table style based on the supplied reference: transparent cells,
- * no outer box, no vertical rules, and one restrained horizontal separator.
- */
-:is(#docs-body, .docs-prose) :where(div):has(> table) {
-  margin-block: 0.625rem !important;
-}
-
-:is(#docs-body, .docs-prose) table {
-  width: 100%;
-  border: 0 !important;
-  border-collapse: collapse;
-  border-spacing: 0;
-  background: transparent !important;
-  font-size: inherit;
-  line-height: 1.55;
-}
-
-:is(#docs-body, .docs-prose) :where(thead, tbody, tr, th, td) {
-  background: transparent !important;
-}
-
-:is(#docs-body, .docs-prose) :where(th, td) {
-  border: 0 !important;
-  border-block-end: 1px solid var(--docs-table-rule) !important;
-  padding: 0.7rem 0.75rem;
-  text-align: start;
-  vertical-align: top;
-}
-
-:is(#docs-body, .docs-prose) th {
-  color: var(--foreground);
-  font-weight: 600;
-}
-
-:is(#docs-body, .docs-prose) :where(th, td):first-child {
-  padding-inline-start: 0;
-}
-
-:is(#docs-body, .docs-prose) :where(th, td):last-child {
-  padding-inline-end: 0;
-}
-
-:is(#docs-body, .docs-prose) tbody tr:last-child td {
-  border-block-end: 0 !important;
-}
-
-:is(#docs-body, .docs-prose) tbody tr:hover {
-  background: transparent !important;
-}
+/* Tables are styled by styles/doc-table.css (components/mdx/doc-table.tsx). */
