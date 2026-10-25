@@ -66,10 +66,12 @@ function recordRevealOrigin(event: React.PointerEvent<HTMLElement>) {
   // Fractions of the box, so a press point survives the press-down scale.
   const x = (event.clientX - box.left) / box.width
   const y = (event.clientY - box.top) / box.height
+  // A little past the farthest corner, so the circle covers the button before
+  // the ease-out tail and never lingers just short of the edge.
   const reach = Math.hypot(
     Math.max(x, 1 - x) * element.offsetWidth,
     Math.max(y, 1 - y) * element.offsetHeight
-  )
+  ) * 1.15 + 4
   element.style.setProperty("--reveal-x", `${(x * 100).toFixed(2)}%`)
   element.style.setProperty("--reveal-y", `${(y * 100).toFixed(2)}%`)
   element.style.setProperty("--reveal-r", `${reach.toFixed(1)}px`)

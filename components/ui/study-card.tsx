@@ -92,6 +92,8 @@ const OWN_KEYS = "input, textarea, select, [contenteditable=''], [contenteditabl
 type StudyCardProps = Omit<React.ComponentProps<typeof ModalContent>, "children"> & {
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** After the open or close animation has finished. */
+  onOpenChangeComplete?: (open: boolean) => void
   /** Number of cards in the deck. */
   count: number
   /** The card shown; leave it out (with defaultIndex) to let the deck keep it. */
@@ -111,6 +113,7 @@ type StudyCardProps = Omit<React.ComponentProps<typeof ModalContent>, "children"
 function StudyCard({
   open,
   onOpenChange,
+  onOpenChangeComplete,
   count,
   index: indexProp,
   defaultIndex = 0,
@@ -180,7 +183,7 @@ function StudyCard({
 
   const tintStyle = tint ? { "--sc-tint": tint } as React.CSSProperties : undefined
   return (
-    <Modal open={open} onOpenChange={onOpenChange}>
+    <Modal open={open} onOpenChange={onOpenChange} onOpenChangeComplete={onOpenChangeComplete}>
       <ModalContent
         size={size}
         height={height}

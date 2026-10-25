@@ -13,6 +13,7 @@ import {
 import { usePathname } from 'next/navigation';
 import { PENDING_SNAPSHOT, QuestionAnswerCache, emptyAnswer } from '@/lib/question-store/cache';
 import type { AnswerState, QuestionIdentity } from '@/lib/question-store/types';
+import { useQuestionBatch } from './question-batch';
 import { useQuestionStorage } from './database-context';
 import { evaluateAttempt, isAnswered, type Evaluation, type GradingSpec } from './grading';
 
@@ -40,6 +41,8 @@ export type QuestionState = {
   fresh: boolean;
   answered: boolean;
   canSubmit: boolean;
+  /** In a batch graded together (question-batch): no grading of its own. */
+  deferred: boolean;
   ready: boolean;
   storageError: string | null;
   retryStorage: () => void;
@@ -82,6 +85,8 @@ export function QuestionProvider({
   children: ReactNode;
 }) {
   const storage = useQuestionStorage();
+  const batch = useQuestionBatch();
+  const deferred = (batch?.deferred ?? false) && spec.kind !== 'self';
   const documentPath = useDocumentPath();
   const cache = storage ? storage.cache : (memoryCache ??= new QuestionAnswerCache(null, 'guest'));
   const identity = useMemo<QuestionIdentity>(() => ({ documentPath, questionId, questionRevision }), [documentPath, questionId, questionRevision]);
@@ -117,9 +122,10 @@ export function QuestionProvider({
   }, [storageError, cache]);
 
   const kind = spec.kind;
-  const instant = kind === 'boolean' || (kind === 'choice' && !spec.multiple);
+  // An essay's self-grade is final when given; batches defer the others (question-batch).
+  const instant = kind === 'self' || (!deferred && (kind === 'boolean' || (kind === 'choice' && !spec.multiple)));
   const answered = isAnswered(spec, selected, values);
-  const canSubmit = ready && !submitted && answered;
+  const canSubmit = ready && !submitted && answered && !deferred;
 
   const select = useCallback(
     (letters: readonly string[]) => {
@@ -152,6 +158,15 @@ export function QuestionProvider({
     update({ ...emptyAnswer(), attempt: current.current.attempt });
   }, [ready, update]);
 
+  // The batch submits and resets through the same paths as the footer.
+  useEffect(() => batch?.register({
+    id: questionId,
+    answered: () => isAnswered(spec, current.current.selected, current.current.values),
+    submitted: () => current.current.submitted,
+    submit,
+    reset,
+  }), [batch, questionId, spec, submit, reset]);
+
   // Grading parses maths answers, so it runs once per submitted state, not per render.
   const evaluation = useMemo(
     () => (submitted ? evaluateAttempt(spec, selected, values) : null),
@@ -169,6 +184,7 @@ export function QuestionProvider({
     fresh,
     answered,
     canSubmit,
+    deferred,
     ready,
     storageError,
     retryStorage,
@@ -176,7 +192,7 @@ export function QuestionProvider({
     setValue,
     submit,
     reset,
-  }), [spec, identity, selected, values, submitted, evaluation, attempt, fresh, answered, canSubmit, ready, storageError, retryStorage, select, setValue, submit, reset]);
+  }), [spec, identity, selected, values, submitted, evaluation, attempt, fresh, answered, canSubmit, deferred, ready, storageError, retryStorage, select, setValue, submit, reset]);
 
   return <QuestionContext.Provider value={value}>{children}</QuestionContext.Provider>;
 }

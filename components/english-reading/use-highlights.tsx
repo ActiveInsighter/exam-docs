@@ -1,7 +1,7 @@
 'use client';
 
 import { HighlighterIcon, EraserIcon } from 'lucide-react';
-import { type RefObject, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './reading.module.css';
 
@@ -151,7 +151,8 @@ function markAtPoint(roots: HTMLElement[], x: number, y: number): Mark | null {
   return { p, s: at, e: at + 1 };
 }
 
-export function useHighlights(scrollerRef: RefObject<HTMLElement | null>, storageKey: string) {
+/** `scroller` is the element holding the passage; marks follow it when it is remounted elsewhere (the expanded card). */
+export function useHighlights(scroller: HTMLElement | null, storageKey: string) {
   const [marks, setMarks] = useState<Mark[]>([]);
   const [toolbar, setToolbar] = useState<Toolbar | null>(null);
   const [enabled, setEnabled] = useState(false);
@@ -162,9 +163,9 @@ export function useHighlights(scrollerRef: RefObject<HTMLElement | null>, storag
   marksRef.current = marks;
 
   const roots = useCallback(() => {
-    const passage = scrollerRef.current?.querySelector('[data-reading-passage]');
+    const passage = scroller?.querySelector('[data-reading-passage]');
     return passage ? paragraphRoots(passage) : [];
-  }, [scrollerRef]);
+  }, [scroller]);
 
   // Load once mounted; the key names this page and article.
   useEffect(() => {
@@ -196,7 +197,6 @@ export function useHighlights(scrollerRef: RefObject<HTMLElement | null>, storag
 
   // A finished selection (or a tap on a highlight) opens the toolbar above it.
   useEffect(() => {
-    const scroller = scrollerRef.current;
     if (!enabled || !scroller) return;
     let pressed: { x: number; y: number } | null = null;
 
@@ -253,7 +253,7 @@ export function useHighlights(scrollerRef: RefObject<HTMLElement | null>, storag
       scroller.removeEventListener('scroll', close);
       window.removeEventListener('scroll', close, { capture: true });
     };
-  }, [enabled, roots, scrollerRef]);
+  }, [enabled, roots, scroller]);
 
   // Esc closes the toolbar.
   useEffect(() => {

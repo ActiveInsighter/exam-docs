@@ -146,8 +146,9 @@ type BuildInput = {
   blanks: BlankSpec[];
 };
 
-/** The gradable spec of a question; null when it is an essay or its key is inconsistent. */
+/** The gradable spec of a question (essays are self-graded); null when its key is inconsistent. */
 export function buildGradingSpec({ type, answer, options, blanks }: BuildInput): GradingSpec | null {
+  if (type === 'essay') return { kind: 'self' };
   if (type === 'boolean') return typeof answer === 'boolean' ? { kind: 'boolean', answer } : null;
   if (type === 'blank') return blanks.length > 0 ? { kind: 'blank', blanks } : null;
   if (type !== 'single' && type !== 'multiple') return null;

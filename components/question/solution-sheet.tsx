@@ -21,6 +21,7 @@ import { MathPreview } from './math-preview';
 import { BuiltinTags } from './question-tags';
 import type { QuestionTag } from './model';
 import { revealQuestion } from './page-questions';
+import { SelfGrade } from './self-grade';
 import { mirrorQuestion } from './question-mirror';
 import { QuestionStateScope, useQuestionState, type QuestionState } from './question-state';
 import { removeSolutionEntry, setSolutionEntry, useSolutionDeck, type SolutionEntry } from './solution-deck';
@@ -374,6 +375,13 @@ function SolutionCardBody({ entry, desktop, editingNote, setEditingNote }: {
 }) {
   const { questionId, state, solution } = entry;
   const spec = state?.spec ?? null;
+  const solutionSection = (order: number) => (
+    <StudyCardSection label={spec && spec.kind !== 'self' ? '解析' : '参考解答'} {...studyCardReveal(order)}>
+      <div className={cn(prose, proseReset, '[&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden')}>
+        {solution}
+      </div>
+    </StudyCardSection>
+  );
   return (
     <>
       <StudyCardAside className="@container">
@@ -384,16 +392,24 @@ function SolutionCardBody({ entry, desktop, editingNote, setEditingNote }: {
       </StudyCardAside>
 
       <StudyCardMain>
-        {spec ? (
-          <StudyCardSection label="答案" {...studyCardReveal(0)}>
-            <AnswerSummary spec={spec} state={state} />
-          </StudyCardSection>
-        ) : null}
-        <StudyCardSection label={spec ? '解析' : '参考解答'} {...studyCardReveal(1)}>
-          <div className={cn(prose, proseReset, '[&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden')}>
-            {solution}
-          </div>
-        </StudyCardSection>
+        {spec?.kind === 'self' ? (
+          <>
+            {solutionSection(0)}
+            {/* Read the reference first, then grade yourself against it. */}
+            <StudyCardSection label="自评" meta={state?.submitted ? '可随时改' : '对照参考解答'} {...studyCardReveal(1)}>
+              <SelfGrade />
+            </StudyCardSection>
+          </>
+        ) : (
+          <>
+            {spec ? (
+              <StudyCardSection label="答案" {...studyCardReveal(0)}>
+                <AnswerSummary spec={spec} state={state} />
+              </StudyCardSection>
+            ) : null}
+            {solutionSection(1)}
+          </>
+        )}
         {!desktop ? <SheetNote editing={editingNote} setEditing={setEditingNote} order={2} /> : null}
       </StudyCardMain>
     </>
