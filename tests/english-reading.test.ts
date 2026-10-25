@@ -27,27 +27,24 @@ describe('English reading composition', () => {
     expect(html.indexOf('A familiar park')).toBeLessThan(html.indexOf('Why pay attention?'));
   });
 
-  it('wraps article and questions in one card with a split view, switcher, answer sheet and stepper', () => {
+  it('shows the article on the page with 开始答题 and keeps the questions out of sight', () => {
     const html = renderToStaticMarkup(createElement(EnglishReading, null,
       article, question('Why pay attention?', 'q1'), question('What changed?', 'q2')));
     expect(html).toContain('data-english-reading=""');
     expect(html).toContain('data-reading-article=""');
     expect(html).toContain('data-reading-questions=""');
-    // Narrow layouts start on the article; the switcher controls both panes.
-    expect(html).toContain('data-view="article"');
-    expect(html.match(/role="tab"/g)).toHaveLength(2);
-    // Wide layouts get a keyboard-operable divider with a bounded value.
-    expect(html).toMatch(/role="separator"[^>]*aria-orientation="vertical"/);
-    expect(html).toContain('aria-valuenow="54"');
+    // One button opens the card; the bar already counts the questions before hydration.
+    expect(html).toMatch(/data-reading-start="">开始答题/);
+    expect(html).toContain('2 题');
+    expect(html.indexOf('data-reading-start')).toBeLessThan(html.indexOf('data-reading-article'));
     expect(html.indexOf('data-reading-article')).toBeLessThan(html.indexOf('data-reading-questions'));
-    // Every question is rendered (one is shown at a time once hydrated).
+    // Every question is rendered (for the dock, the solution deck and print), out of sight.
     expect(html.match(/data-exam-question=""/g)).toHaveLength(2);
-    // Text size controls and the expand toggle are always offered.
-    expect(html).toContain('aria-label="增大字号"');
-    expect(html).toContain('aria-label="展开阅读卡"');
-    // Grading is per question by default; the reader can switch to grading the whole passage.
-    expect(html).toMatch(/role="radio" aria-checked="true">逐题判分/);
-    expect(html).toMatch(/role="radio" aria-checked="false">整篇提交/);
+    // No in-page workspace: no pane switcher, divider, stepper or grading switch until the card opens.
+    expect(html).not.toContain('role="tab"');
+    expect(html).not.toContain('role="separator"');
+    expect(html).not.toContain('上一题');
+    expect(html).not.toContain('逐题判分');
   });
 
   it('marks the evidence of a question in the passage without changing its text', () => {
@@ -66,7 +63,7 @@ describe('English reading composition', () => {
     expect(html).not.toContain('data-solution-trigger');
   });
 
-  it('pairs each paragraph with its translation behind the 译 switch and the paragraph number', () => {
+  it('pairs each paragraph with its translation behind its paragraph number', () => {
     const translated = createElement(ExamArticle, { title: 'A familiar park', titleTranslation: '熟悉的公园', children: [
       createElement(Paragraph, { key: 1, children: [
         createElement('p', { key: 'en' }, 'Notice the details nearby.'),
@@ -76,8 +73,7 @@ describe('English reading composition', () => {
     ] });
     const html = renderToStaticMarkup(createElement(EnglishReading, null,
       translated, question('Why pay attention?', 'q1')));
-    // The switch (narrow bar and wide pane header) starts off.
-    expect(html.match(/aria-pressed="false"[^>]*aria-label="显示中文翻译"/g)).toHaveLength(2);
+    // The 译 switch lives in the card; on the page, nothing is translated yet.
     expect(html).not.toContain('data-translation=""');
     // Translations are rendered once, paired inside their own paragraph.
     expect(html.match(/data-reading-paragraph=""/g)).toHaveLength(2);

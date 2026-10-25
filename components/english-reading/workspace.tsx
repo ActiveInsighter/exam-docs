@@ -7,16 +7,12 @@ import {
   CrosshairIcon,
   EraserIcon,
   ListChecksIcon,
-  Maximize2Icon,
   RotateCcwIcon,
   SendHorizontalIcon,
   TextQuoteIcon,
   UndoDotIcon,
 } from 'lucide-react';
 import {
-  type CSSProperties,
-  type KeyboardEvent,
-  type PointerEvent,
   type ReactNode,
   useCallback,
   useEffect,
@@ -42,48 +38,44 @@ import { PASSAGE_PARAGRAPHS, useHighlights } from './use-highlights';
 import styles from './reading.module.css';
 
 /*
- * The reading card, laid out like a computer-based reading test.
+ * The reading exercise, in two places.
  *
- *   wide (card ≥ 48rem)   passage left, one question at a time right, each
- *                         pane scrolling on its own; a draggable divider
- *   narrow                原文 / 题目 switch in a bar that sticks under the
- *                         docs header; the page scrolls
- *   expanded              the same passage and questions in a study card
- *                         (components/ui/study-card.tsx): the passage on the
- *                         card's grey aside, the questions on its white main
- *                         pane, the card's pager stepping questions
+ *   page    the passage alone, on paper, under a bar with 开始答题; the
+ *           questions are rendered with it but kept out of sight
+ *   card    a study card (components/ui/study-card.tsx) laid out like a
+ *           computer-based reading test: the passage on the grey aside,
+ *           one question at a time on the white main pane, the answer-sheet
+ *           strip and the grading switch on one row above it, 上一题 /
+ *           下一题 below; phones show one pane at a time
  *
- * Passage tools: 译 (every paragraph's translation; a paragraph number
- * shows that paragraph's alone), text size, and a highlighter
- * (use-highlights). Question tools: the answer-sheet strip, 上一题 / 下一题,
- * links to the paragraphs a question names ("Paragraph 3"), and, once a
- * question is graded, 原文定位 to the <Evidence> it is answered from.
+ * Passage tools (in the card's header): 译 (every paragraph's translation;
+ * a paragraph number shows that paragraph's alone, on the page too), text
+ * size, and a highlighter (use-highlights). Question tools: the answer-sheet
+ * strip, links to the paragraphs a question names ("Paragraph 3"), and,
+ * once a question is graded, 原文定位 to the <Evidence> it is answered from.
  *
  * Grading: 逐题判分 grades each question as it is answered (the shared
  * question behaviour); 整篇提交 holds every answer as a draft until 提交全部
  * grades them together (question-batch). The choice is kept per reader.
  *
  * Every question stays mounted (its state, the solution deck and the
- * floating dock read them from the page); the ones not shown are only out
- * of layout. Expanding moves them into the card and back (their answers
- * live in the question store, so they come back as they were). Navigators
- * ask for one with revealQuestion (page-questions).
+ * floating dock read them from the page): hidden on the page, moved into the
+ * card while it is open and back once it has closed (answers live in the
+ * question store, so they come back as they were). Navigators ask for one
+ * with revealQuestion (page-questions), which opens the card on it.
  */
 
 type View = 'article' | 'questions';
 type Status = PageQuestion['status'];
 type Direction = 'next' | 'prev';
 
-const SPLIT_DEFAULT = 54;
-const SPLIT_MIN = 34;
-const SPLIT_MAX = 68;
-const SPLIT_KEY = 'exam-reading-split';
+const SPLIT = 'minmax(0, 54fr) minmax(0, 46fr)';
 const SIZE_KEY = 'exam-reading-size';
 const MODE_KEY = 'exam-reading-mode';
 const SIZES = ['小', '中', '大'] as const;
 
-const clampSplit = (value: number) => Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, Math.round(value * 10) / 10));
 const clampMode = (value: number) => (value === 1 ? 1 : 0);
+const clampSize = (value: number) => Math.min(SIZES.length - 1, Math.max(0, Math.round(value)));
 const graded = (status: Status | undefined) => status === 'correct' || status === 'partial' || status === 'incorrect';
 const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const EASE_OUT = 'cubic-bezier(0.22, 1, 0.36, 1)';
@@ -105,7 +97,7 @@ function store(key: string, value: number) {
   }
 }
 
-/** A setting kept across visits (pane split, text size, grading mode). */
+/** A setting kept across visits (text size, grading mode). */
 function useStored(key: string, initial: number, clamp: (value: number) => number) {
   const [value, setValue] = useState(initial);
   useEffect(() => {
@@ -117,12 +109,10 @@ function useStored(key: string, initial: number, clamp: (value: number) => numbe
     setValue(clamped);
     store(key, clamped);
   }, [key, clamp]);
-  return [value, setValue, commit] as const;
+  return [value, commit] as const;
 }
 
-const clampSize = (value: number) => Math.min(SIZES.length - 1, Math.max(0, Math.round(value)));
-
-/** The element that scrolls the content around a node (the docs page, or the expanded card on phones). */
+/** The element that scrolls the content around a node (a card pane, or the whole card on phones). */
 function pageScroller(node: HTMLElement): HTMLElement {
   for (let element = node.parentElement; element; element = element.parentElement) {
     if (/(auto|scroll)/.test(getComputedStyle(element).overflowY) && element.scrollHeight > element.clientHeight) return element;
@@ -130,16 +120,9 @@ function pageScroller(node: HTMLElement): HTMLElement {
   return (document.scrollingElement as HTMLElement | null) ?? document.documentElement;
 }
 
-/** True when the panes scroll on their own (side by side, inline or expanded). */
+/** True when the panes scroll on their own (side by side). */
 function scrollsInside(element: HTMLElement | null) {
   return !!element && /(auto|scroll)/.test(getComputedStyle(element).overflowY);
-}
-
-/** Brings the whole card into view when it is partly off screen. */
-function bringIntoView(card: HTMLElement) {
-  const box = card.getBoundingClientRect();
-  if (box.top >= 0 && box.bottom <= window.innerHeight) return;
-  card.scrollIntoView({ block: box.height > window.innerHeight ? 'start' : 'nearest', behavior: reduceMotion() ? 'auto' : 'smooth' });
 }
 
 /** A brief glow on what a locate jumped to. */
@@ -203,7 +186,7 @@ function paragraphRefs(question: Element | null, count: number) {
   return [...found].sort((a, b) => a - b);
 }
 
-/** The questions in the card and their results, read from the rendered cards. */
+/** The questions and their results, read from the rendered cards. */
 function useQuestions(container: HTMLElement | null) {
   const [items, setItems] = useState<PageQuestion[]>([]);
   useEffect(() => {
@@ -229,28 +212,27 @@ function useQuestions(container: HTMLElement | null) {
   return items;
 }
 
-/** Paragraphs, words and an estimated reading time. */
-function useArticleStats(scroller: HTMLElement | null) {
+/** Paragraphs and words of the passage. */
+function useArticleStats(article: HTMLElement | null) {
   const [stats, setStats] = useState<{ paragraphs: number; words: number } | null>(null);
   useEffect(() => {
-    const passage = scroller?.querySelector<HTMLElement>('[data-reading-passage]');
+    const passage = article?.querySelector<HTMLElement>('[data-reading-passage]');
     if (!passage) return;
     const english = passage.cloneNode(true) as HTMLElement;
     english.querySelectorAll('[data-reading-translation]').forEach((node) => node.remove());
     const words = (english.textContent ?? '').match(/[A-Za-z]+(?:['’-][A-Za-z]+)*/g)?.length ?? 0;
     setStats({ paragraphs: passage.querySelectorAll(PASSAGE_PARAGRAPHS).length, words });
-  }, [scroller]);
+  }, [article]);
   return stats;
 }
 
-function ToolButton({ label, pressed, disabled, onClick, children, className, ...rest }: {
+function ToolButton({ label, pressed, disabled, onClick, children, className }: {
   label: string;
   pressed?: boolean;
   disabled?: boolean;
   onClick: () => void;
   children: ReactNode;
   className?: string;
-  [data: `data-${string}`]: string | undefined;
 }) {
   return (
     <button
@@ -261,7 +243,6 @@ function ToolButton({ label, pressed, disabled, onClick, children, className, ..
       title={label}
       disabled={disabled}
       onClick={onClick}
-      {...rest}
     >
       {children}
     </button>
@@ -294,6 +275,7 @@ export function ReadingWorkspace({
   article,
   translatable = false,
   storageKey,
+  questionCount,
   children,
 }: {
   article: ReactNode;
@@ -301,22 +283,24 @@ export function ReadingWorkspace({
   translatable?: boolean;
   /** Names this article for the reader's highlights. */
   storageKey: string;
+  /** How many questions follow the article, known before the page hydrates. */
+  questionCount: number;
   children: ReactNode;
 }) {
   const baseId = useId();
-  const cardRef = useRef<HTMLElement>(null);
-  const panesRef = useRef<HTMLDivElement>(null);
+  const startRef = useRef<HTMLButtonElement>(null);
   const articleRef = useRef<HTMLDivElement | null>(null);
   const questionsRef = useRef<HTMLDivElement | null>(null);
   const questionScrollRef = useRef<HTMLDivElement | null>(null);
 
-  // The passage and question elements move into the expanded card and back;
-  // the hooks reading them follow the element in use.
-  const [articleEl, setArticleEl] = useState<HTMLDivElement | null>(null);
+  // The questions move into the card and back; the hooks reading them follow
+  // the element in use. The passage is on the page and, while open, in the card.
+  const [pageArticleEl, setPageArticleEl] = useState<HTMLDivElement | null>(null);
+  const [cardArticleEl, setCardArticleEl] = useState<HTMLDivElement | null>(null);
   const [questionsEl, setQuestionsEl] = useState<HTMLDivElement | null>(null);
-  const bindArticle = useCallback((node: HTMLDivElement | null) => {
+  const bindCardArticle = useCallback((node: HTMLDivElement | null) => {
     articleRef.current = node;
-    setArticleEl(node);
+    setCardArticleEl(node);
   }, []);
   const bindQuestions = useCallback((node: HTMLDivElement | null) => {
     questionsRef.current = node;
@@ -326,26 +310,23 @@ export function ReadingWorkspace({
     questionScrollRef.current = node;
   }, []);
 
-  const [view, setView] = useState<View>('article');
-  const [resizing, setResizing] = useState(false);
+  const [view, setView] = useState<View>('questions');
   const [translated, setTranslated] = useState(false);
   const [current, setCurrent] = useState<string | null>(null);
-  /* Narrow layout, after 原文定位: the question to come back to. */
+  /* Phones, after 原文定位: the question to come back to. */
   const [returnTo, setReturnTo] = useState<string | null>(null);
-  const [split, setSplit, commitSplit] = useStored(SPLIT_KEY, SPLIT_DEFAULT, clampSplit);
-  const [size, , commitSize] = useStored(SIZE_KEY, 1, clampSize);
-  const [mode, , commitMode] = useStored(MODE_KEY, 0, clampMode);
+  const [size, commitSize] = useStored(SIZE_KEY, 1, clampSize);
+  const [mode, commitMode] = useStored(MODE_KEY, 0, clampMode);
   const batchMode = mode === 1;
   const [confirming, setConfirming] = useState(false);
 
-  /* Expanded: `expanded` drives the card; `inModal` holds the content there until it has closed. */
-  const [expanded, setExpanded] = useState(false);
-  const [inModal, setInModal] = useState(false);
-  const [placeholderHeight, setPlaceholderHeight] = useState<number | null>(null);
+  /* `open` drives the card; `inCard` holds the questions there until it has closed. */
+  const [open, setOpen] = useState(false);
+  const [inCard, setInCard] = useState(false);
 
   const items = useQuestions(questionsEl);
-  const stats = useArticleStats(articleEl);
-  const marks = useHighlights(articleEl, `exam-reading-marks:${storageKey}`);
+  const stats = useArticleStats(pageArticleEl);
+  const marks = useHighlights(inCard ? cardArticleEl : pageArticleEl, `exam-reading-marks:${storageKey}`);
 
   const index = Math.max(0, items.findIndex((item) => item.id === current));
   const item = items[index];
@@ -375,6 +356,25 @@ export function ReadingWorkspace({
     if (!batchMode || drafts === 0) setConfirming(false);
   }, [batchMode, drafts]);
 
+  /* ---- Opening the card ---- */
+
+  /** Opens the card on a question (the one last shown by default), its questions pane in front on phones. */
+  const start = useCallback((id?: string) => {
+    if (id) setCurrent(id);
+    setReturnTo(null);
+    setView('questions');
+    setInCard(true);
+    setOpen(true);
+  }, []);
+
+  // The questions return to the page once the close animation is over;
+  // the fallback covers a close that reports no animation.
+  useEffect(() => {
+    if (open || !inCard) return;
+    const timer = window.setTimeout(() => setInCard(false), 900);
+    return () => window.clearTimeout(timer);
+  }, [open, inCard]);
+
   /* ---- Showing one question ---- */
 
   /** Shows one question and hides the rest, in the DOM at once (no render needed). */
@@ -393,29 +393,25 @@ export function ReadingWorkspace({
 
   useLayoutEffect(() => {
     display(shownId);
-    cardRef.current?.setAttribute('data-ready', '');
   }, [display, shownId, questionsEl]);
 
   const narrow = () => !scrollsInside(articleRef.current);
 
-  /** Where content starts below what overlays it: the sticky bar, or the expanded card's header. */
-  const topInset = () => {
-    const root = inModal ? questionsRef.current?.closest('[data-english-reading-modal]') : cardRef.current;
-    const bar = root?.querySelector<HTMLElement>(inModal ? '[data-slot="modal-header"]' : '[data-reading-bar]');
-    return bar?.getBoundingClientRect().bottom ?? 0;
-  };
+  /** Where content starts below the card's header. */
+  const topInset = () =>
+    questionsRef.current?.closest('[data-english-reading-modal]')
+      ?.querySelector<HTMLElement>('[data-slot="modal-header"]')
+      ?.getBoundingClientRect().bottom ?? 0;
 
-  /** Moves to a question: shown, scrolled to its top, and in view. */
+  /** Moves to a question in the open card: shown, scrolled to its top. */
   const show = useCallback((id: string, { focusAnswer = false } = {}) => {
-    const container = questionsRef.current;
-    const target = container?.querySelector<HTMLElement>(`[id="${CSS.escape(id)}"]`);
+    const target = questionsRef.current?.querySelector<HTMLElement>(`[id="${CSS.escape(id)}"]`);
     if (!target) return;
     const from = items.findIndex((entry) => entry.id === shownId);
     const to = items.findIndex((entry) => entry.id === id);
     display(id, from < 0 || to < 0 || from === to ? null : to > from ? 'next' : 'prev');
     setCurrent(id);
     setReturnTo(null);
-    const card = cardRef.current;
     if (narrow()) {
       setView('questions');
       requestAnimationFrame(() => {
@@ -425,7 +421,6 @@ export function ReadingWorkspace({
       });
     } else {
       questionScrollRef.current?.scrollTo({ top: 0 });
-      if (card && !inModal) bringIntoView(card);
     }
     if (focusAnswer) {
       requestAnimationFrame(() => target
@@ -434,29 +429,30 @@ export function ReadingWorkspace({
     }
     // topInset and narrow read the DOM at call time.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [display, items, shownId, inModal]);
+  }, [display, items, shownId]);
 
   // Navigators elsewhere (the floating dock, the solution card, #links) ask
-  // for a question through revealQuestion; take over and show it here.
+  // for a question through revealQuestion: show it in the card, opening it.
   useEffect(() => {
     if (!questionsEl) return;
     const onReveal = (event: Event) => {
       const question = (event.target as Element).closest<HTMLElement>(QUESTION_SELECTOR);
       if (!question || !questionsEl.contains(question)) return;
       event.preventDefault();
-      show(question.id);
+      if (inCard && open) show(question.id);
+      else start(question.id);
     };
     questionsEl.addEventListener(REVEAL_QUESTION_EVENT, onReveal);
     return () => questionsEl.removeEventListener(REVEAL_QUESTION_EVENT, onReveal);
-  }, [show, questionsEl]);
+  }, [show, start, questionsEl, inCard, open]);
 
-  // Only on load and on hash changes, not whenever `show` changes.
-  const showRef = useRef(show);
-  showRef.current = show;
+  // Only on load and on hash changes: a link to a question opens the card on it.
+  const startLatest = useRef(start);
+  startLatest.current = start;
   useEffect(() => {
     const fromHash = () => {
       const id = decodeURIComponent(location.hash.slice(1));
-      if (id && questionsRef.current?.querySelector(`[id="${CSS.escape(id)}"]`)) showRef.current(id);
+      if (id && questionsRef.current?.querySelector(`[id="${CSS.escape(id)}"]`)) startLatest.current(id);
     };
     fromHash();
     window.addEventListener('hashchange', fromHash);
@@ -508,7 +504,7 @@ export function ReadingWorkspace({
   const [hasEvidence, setHasEvidence] = useState(false);
   const [refs, setRefs] = useState<number[]>([]);
 
-  // The shown question's evidence is marked in the passage once it is graded.
+  // The shown question's evidence is marked in the card's passage once it is graded.
   useEffect(() => {
     const root = passage();
     if (!root) return;
@@ -519,12 +515,11 @@ export function ReadingWorkspace({
     const question = shownId ? questionsRef.current?.querySelector(`[id="${CSS.escape(shownId)}"]`) ?? null : null;
     setRefs(paragraphRefs(question, root.querySelectorAll(PASSAGE_PARAGRAPHS).length));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shownId, shownGraded, articleEl, questionsEl]);
+  }, [shownId, shownGraded, cardArticleEl, questionsEl]);
 
   /** Scrolls the passage to an element (evidence or a paragraph) and makes it glow. */
   const reveal = (target: HTMLElement | undefined) => {
     const scroller = articleRef.current;
-    const card = cardRef.current;
     if (!target || !scroller) return;
     const behavior: ScrollBehavior = reduceMotion() ? 'auto' : 'smooth';
     if (narrow()) {
@@ -538,7 +533,6 @@ export function ReadingWorkspace({
     }
     const top = target.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop;
     scroller.scrollTo({ top: Math.max(0, top - scroller.clientHeight * 0.28), behavior });
-    if (card && !inModal) bringIntoView(card);
     flash(target);
   };
 
@@ -552,7 +546,7 @@ export function ReadingWorkspace({
     if (id) show(id);
   };
 
-  /* ---- Translation ---- */
+  /* ---- Translation and text size ---- */
 
   /*
    * Showing or hiding translations reflows the passage. Keep the paragraph at
@@ -563,9 +557,7 @@ export function ReadingWorkspace({
   const keepPlace = () => {
     const scroller = articleRef.current;
     if (!scroller) return;
-    const visibleTop = scrollsInside(scroller)
-      ? Math.max(scroller.getBoundingClientRect().top, inModal ? topInset() : 0)
-      : topInset();
+    const visibleTop = Math.max(scrollsInside(scroller) ? scroller.getBoundingClientRect().top : 0, topInset());
     const node = Array.from(passage()?.querySelectorAll<HTMLElement>(PASSAGE_PARAGRAPHS) ?? [])
       .find((paragraph) => paragraph.getBoundingClientRect().bottom > visibleTop);
     anchor.current = node ? { node, top: node.getBoundingClientRect().top } : null;
@@ -597,113 +589,46 @@ export function ReadingWorkspace({
     const toggle = (event.target as Element).closest<HTMLElement>('[data-reading-paragraph-toggle]');
     const paragraph = toggle?.closest<HTMLElement>('[data-reading-paragraph]');
     if (!toggle || !paragraph) return;
-    const open = !paragraph.hasAttribute('data-open');
-    paragraph.toggleAttribute('data-open', open);
-    toggle.setAttribute('aria-expanded', String(open));
-  };
-
-  /* ---- Expanded card ---- */
-
-  const expand = () => {
-    setPlaceholderHeight(cardRef.current?.getBoundingClientRect().height ?? null);
-    setInModal(true);
-    setExpanded(true);
-  };
-
-  // The card's content returns to the page once the close animation is over;
-  // the fallback covers a close that reports no animation.
-  useEffect(() => {
-    if (expanded || !inModal) return;
-    const timer = window.setTimeout(() => setInModal(false), 900);
-    return () => window.clearTimeout(timer);
-  }, [expanded, inModal]);
-
-  const returned = useRef(false);
-  useEffect(() => {
-    if (inModal) {
-      returned.current = true;
-      return;
-    }
-    if (!returned.current) return;
-    returned.current = false;
-    const card = cardRef.current;
-    if (!card) return;
-    card.querySelector<HTMLElement>('[data-reading-expand]:not([hidden])')?.focus({ preventScroll: true });
-    requestAnimationFrame(() => bringIntoView(card));
-  }, [inModal]);
-
-  /* ---- Divider: drag, arrow keys, double-click to reset ---- */
-
-  const dragFrom = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0) return;
-    event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    setResizing(true);
-  };
-  const dragMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (!resizing || !panesRef.current) return;
-    const box = panesRef.current.getBoundingClientRect();
-    setSplit(clampSplit(((event.clientX - box.left) / box.width) * 100));
-  };
-  const dragEnd = (event: PointerEvent<HTMLDivElement>) => {
-    if (!resizing) return;
-    event.currentTarget.releasePointerCapture(event.pointerId);
-    setResizing(false);
-    commitSplit(split);
-  };
-  const resizeByKey = (event: KeyboardEvent<HTMLDivElement>) => {
-    const by = event.shiftKey ? 8 : 2;
-    const next =
-      event.key === 'ArrowLeft' ? split - by
-      : event.key === 'ArrowRight' ? split + by
-      : event.key === 'Home' ? SPLIT_MIN
-      : event.key === 'End' ? SPLIT_MAX
-      : event.key === 'Enter' ? SPLIT_DEFAULT
-      : null;
-    if (next === null) return;
-    event.preventDefault();
-    commitSplit(next);
+    const opened = !paragraph.hasAttribute('data-open');
+    paragraph.toggleAttribute('data-open', opened);
+    toggle.setAttribute('aria-expanded', String(opened));
   };
 
   /* ---- Render ---- */
 
   const articleId = `${baseId}-article`;
   const questionsId = `${baseId}-questions`;
-  const progress = items.length ? `${started}/${items.length}` : null;
+  const total = items.length || questionCount;
+  const progress = total ? `${started}/${total}` : null;
   const last = index >= items.length - 1;
   const forward = shownGraded || (batchMode && item?.status === 'draft');
+  const done = total > 0 && gradedCount === total;
 
-  const passageTools = (modal = false) => (
+  const passageTools = (
     <>
       {translatable ? (
-        <ToolButton label={translated ? '隐藏中文翻译' : '显示中文翻译'} pressed={translated} onClick={toggleTranslation} className={cn(styles.toolText, modal && styles.modalTool)}>
+        <ToolButton label={translated ? '隐藏中文翻译' : '显示中文翻译'} pressed={translated} onClick={toggleTranslation}>
           <span aria-hidden="true" className={styles.glyph}>译</span>
         </ToolButton>
       ) : null}
       <span className={styles.sizeGroup} role="group" aria-label={`字号：${SIZES[size]}`}>
-        <ToolButton label="减小字号" onClick={() => changeSize(-1)} disabled={size === 0} className={modal ? styles.modalTool : undefined}>
+        <ToolButton label="减小字号" onClick={() => changeSize(-1)} disabled={size === 0}>
           <span aria-hidden="true" className={styles.glyphSmall}>A</span>
         </ToolButton>
-        <ToolButton label="增大字号" onClick={() => changeSize(1)} disabled={size === SIZES.length - 1} className={modal ? styles.modalTool : undefined}>
+        <ToolButton label="增大字号" onClick={() => changeSize(1)} disabled={size === SIZES.length - 1}>
           <span aria-hidden="true" className={styles.glyph}>A</span>
         </ToolButton>
       </span>
       {marks.count ? (
-        <ToolButton label={`清除全部 ${marks.count} 处高亮`} onClick={marks.clear} className={modal ? styles.modalTool : undefined}>
+        <ToolButton label={`清除全部 ${marks.count} 处高亮`} onClick={marks.clear}>
           <EraserIcon aria-hidden="true" />
         </ToolButton>
       ) : null}
     </>
   );
 
-  const expandToggle = (
-    <ToolButton label="展开阅读卡" onClick={expand} data-reading-expand="">
-      <Maximize2Icon aria-hidden="true" />
-    </ToolButton>
-  );
-
-  const segments = (className: string) => (
-    <div role="tablist" aria-label="切换原文与题目" className={className}>
+  const segments = (
+    <div role="tablist" aria-label="切换原文与题目" className={styles.segments}>
       <button
         type="button"
         role="tab"
@@ -730,13 +655,6 @@ export function ReadingWorkspace({
     </div>
   );
 
-  const score = progress ? (
-    <span className={styles.score} aria-live="polite">
-      已答 {progress}
-      {gradedCount ? <> · <span className={styles.scoreCorrect}>对 {correct}</span></> : null}
-    </span>
-  ) : null;
-
   const articleBody = (
     <>
       {article}
@@ -744,23 +662,22 @@ export function ReadingWorkspace({
     </>
   );
 
-  // Rendered with the page, so the question does not move down once hydrated.
-  const modeRow = (
-    <div className={styles.modeRow}>
-      <div role="radiogroup" aria-label="判分方式" className={styles.modeSwitch}>
-        <button type="button" role="radio" aria-checked={!batchMode} onClick={() => commitMode(0)}>逐题判分</button>
-        <button type="button" role="radio" aria-checked={batchMode} onClick={() => commitMode(1)}>整篇提交</button>
-      </div>
-      {batchMode ? (
-        gradedCount > 0 ? (
-          <button type="button" className={styles.modeAction} onClick={resetAll}>
+  // The answer sheet and the grading switch share one row above the question.
+  const questionHead = (
+    <div className={styles.questionHead}>
+      <SheetStrip items={items} current={shownId} onPick={(id) => show(id, { focusAnswer: true })} />
+      <div className={styles.modeGroup}>
+        {batchMode && gradedCount > 0 ? (
+          <button type="button" className={styles.modeAction} onClick={resetAll} title="清空答案，重新作答">
             <RotateCcwIcon aria-hidden="true" />
             全部重做
           </button>
-        ) : (
-          <span className={styles.modeNote}>做完再统一判分</span>
-        )
-      ) : null}
+        ) : null}
+        <div role="radiogroup" aria-label="判分方式" className={styles.modeSwitch}>
+          <button type="button" role="radio" aria-checked={!batchMode} title="每题作答后立即判分" onClick={() => commitMode(0)}>逐题判分</button>
+          <button type="button" role="radio" aria-checked={batchMode} title="做完再统一判分" onClick={() => commitMode(1)}>整篇提交</button>
+        </div>
+      </div>
     </div>
   );
 
@@ -840,104 +757,44 @@ export function ReadingWorkspace({
     </button>
   ) : null;
 
-  const shared = {
-    'data-view': view,
-    'data-translation': translated ? '' : undefined,
-    'data-size': size,
-  };
+  const facts = [
+    stats ? `${stats.paragraphs} 段 · ${stats.words} 词` : null,
+    total ? `${total} 题` : null,
+  ].filter(Boolean).join(' · ');
 
   return (
     <QuestionBatchProvider value={batch}>
-      <section
-        ref={cardRef}
-        className={styles.card}
-        data-english-reading=""
-        data-resizing={resizing ? '' : undefined}
-        data-expanded={inModal ? '' : undefined}
-        {...shared}
-        tabIndex={-1}
-        aria-label="英语阅读理解"
-      >
-        {inModal ? (
-          <div className={styles.placeholder} style={placeholderHeight ? { minHeight: placeholderHeight - 12 } : undefined}>
-            <Maximize2Icon aria-hidden="true" />
-            <p>阅读卡已展开</p>
-            <button type="button" className={styles.confirmButton} onClick={() => setExpanded(true)} disabled={expanded}>
-              回到阅读卡
-            </button>
-          </div>
-        ) : (
-          <>
-            {/* Narrow layouts: one pane at a time, switched from a sticky bar. */}
-            <div className={styles.bar} data-reading-bar="">
-              {segments(styles.segments)}
-              <div className={styles.barTools} data-view-tools={view}>
-                {view === 'article' ? passageTools() : null}
-                {expandToggle}
-              </div>
-            </div>
+      <section className={styles.card} data-english-reading="" data-size={size} aria-label="英语阅读理解">
+        <div className={styles.startBar} data-reading-bar="">
+          <p className={styles.startInfo}>
+            <span className={styles.startTitle}>阅读理解</span>
+            {facts ? <span className={styles.startFacts}>{facts}</span> : null}
+            {started ? (
+              <span className={styles.startScore} aria-live="polite">
+                已答 {progress}
+                {gradedCount ? <> · <span className={styles.scoreCorrect}>对 {correct}</span></> : null}
+              </span>
+            ) : null}
+          </p>
+          <button ref={startRef} type="button" className={styles.start} onClick={() => start()} data-reading-start="">
+            {done ? '查看作答' : started ? '继续答题' : '开始答题'}
+            <ArrowRightIcon aria-hidden="true" />
+          </button>
+        </div>
 
-            <div ref={panesRef} className={styles.panes} style={{ '--reading-split': `${split}%` } as CSSProperties}>
-              <div className={styles.pane} data-pane="article">
-                <div className={styles.paneHead}>
-                  <span className={styles.paneTitle}>
-                    <BookOpenTextIcon aria-hidden="true" />
-                    原文
-                  </span>
-                  {stats ? (
-                    <span className={styles.stats}>
-                      {stats.paragraphs} 段 · {stats.words} 词 · 约 {Math.max(1, Math.round(stats.words / 150))} 分钟
-                    </span>
-                  ) : null}
-                  <span className={styles.paneTools}>{passageTools()}</span>
-                </div>
-                <div className={styles.progress} aria-hidden="true"><span /></div>
-                <div ref={bindArticle} id={articleId} className={styles.scroller} data-reading-article="" tabIndex={-1} onClick={onArticleClick}>
-                  {articleBody}
-                </div>
-                {returnPill}
-              </div>
+        <div ref={setPageArticleEl} className={styles.paper} data-reading-article="" onClick={onArticleClick}>
+          {articleBody}
+        </div>
 
-              <div
-                role="separator"
-                aria-orientation="vertical"
-                aria-controls={articleId}
-                aria-label="调整原文与题目的宽度"
-                aria-valuemin={SPLIT_MIN}
-                aria-valuemax={SPLIT_MAX}
-                aria-valuenow={Math.round(split)}
-                tabIndex={0}
-                className={styles.divider}
-                onPointerDown={dragFrom}
-                onPointerMove={dragMove}
-                onPointerUp={dragEnd}
-                onPointerCancel={dragEnd}
-                onKeyDown={resizeByKey}
-                onDoubleClick={() => commitSplit(SPLIT_DEFAULT)}
-              />
-
-              <div className={styles.pane} data-pane="questions">
-                <div className={styles.paneHead}>
-                  <SheetStrip items={items} current={shownId} onPick={(id) => show(id, { focusAnswer: true })} />
-                  {score}
-                  <span className={styles.paneFocus}>{expandToggle}</span>
-                </div>
-                <div ref={bindQuestionScroll} id={questionsId} className={styles.scroller} data-reading-question-scroller="">
-                  {modeRow}
-                  {questionList}
-                  {stepper}
-                </div>
-              </div>
-            </div>
-          </>
-        )}
+        {/* Out of sight on the page (printed, though); in the card while it is open. */}
+        {inCard ? null : <div className={styles.parked}>{questionList}</div>}
       </section>
 
-      {inModal ? (
+      {inCard ? (
         <StudyCard
-          open={expanded}
-          onOpenChange={setExpanded}
-          onOpenChangeComplete={(open) => { if (!open) setInModal(false); }}
+          open={open}
+          onOpenChange={setOpen}
+          onOpenChangeComplete={(isOpen) => { if (!isOpen) setInCard(false); }}
           count={items.length}
           index={index}
           onIndexChange={(next) => { const target = items[next]; if (target) show(target.id); }}
@@ -947,9 +804,10 @@ export function ReadingWorkspace({
           height="fixed"
           className={styles.modal}
           data-english-reading-modal=""
-          data-ready=""
-          {...shared}
-          finalFocus={() => cardRef.current ?? true}
+          data-view={view}
+          data-translation={translated ? '' : undefined}
+          data-size={size}
+          finalFocus={() => startRef.current ?? true}
         >
           <StudyCardHeader
             title="阅读理解"
@@ -961,14 +819,14 @@ export function ReadingWorkspace({
             )}
             tagsProps={{ 'aria-label': '概况' }}
             actionsLabel="阅读工具"
-            actions={passageTools(true)}
+            actions={passageTools}
           >
-            {segments(cn(styles.segments, styles.modalSegments))}
+            {segments}
           </StudyCardHeader>
-          <ModalSplit columns={`minmax(0, ${split}fr) minmax(0, ${100 - split}fr)`}>
+          <ModalSplit columns={SPLIT}>
             <ModalPane
               tone="muted"
-              ref={bindArticle}
+              ref={bindCardArticle}
               id={articleId}
               className={styles.modalArticle}
               data-reading-article=""
@@ -982,14 +840,10 @@ export function ReadingWorkspace({
             <ModalPane
               ref={bindQuestionScroll}
               id={questionsId}
-              className={styles.modalQuestions}
               data-reading-question-scroller=""
               data-reading-region="questions"
             >
-              <div className={styles.modalHead}>
-                <SheetStrip items={items} current={shownId} onPick={(id) => show(id, { focusAnswer: true })} />
-              </div>
-              {modeRow}
+              {questionHead}
               {questionList}
               {stepper}
             </ModalPane>
