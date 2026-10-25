@@ -20,11 +20,11 @@ describe('question solution card palette', () => {
     const backgrounds = values('exam-solution-aside');
     expect(backgrounds).toHaveLength(2);
     for (const color of backgrounds) {
-      expect(color).toMatch(/^oklch\\([\\d.]+ 0 0\\)$/);
+      expect(color).toMatch(/^oklch\([\d.]+ 0 0\)$/);
     }
     expect(values('exam-solution-aside-muted')).toHaveLength(2);
     for (const color of values('exam-solution-aside-muted')) {
-      expect(color).toMatch(/^oklch\\([\\d.]+ 0 0\\)$/);
+      expect(color).toMatch(/^oklch\([\d.]+ 0 0\)$/);
     }
     expect(question).toContain('--modal-pane-muted: var(--exam-solution-aside)');
   });
@@ -35,11 +35,11 @@ describe('choice radial reveal', () => {
     const fills = values('exam-choice-active');
     expect(fills).toHaveLength(2);
     for (const fill of fills) {
-      const proportion = fill.match(/var\\(--foreground\\) ([\\d.]+)%/);
+      const proportion = fill.match(/var\(--foreground\) ([\d.]+)%/);
       expect(proportion).not.toBeNull();
       expect(Number(proportion![1])).toBeGreaterThanOrEqual(12);
     }
-    expect(question).toMatch(/\\[data-exam-choice-option\\]\\[data-feedback='selected'\\][\\s\\S]*?--reveal-color: var\\(--exam-choice-active\\)/);
+    expect(question).toMatch(/\[data-exam-choice-option\]\[data-feedback='selected'\][\s\S]*?--reveal-color: var\(--exam-choice-active\)/);
   });
 
   it('retains clearly visible graded states and continuous circle expansion', () => {
@@ -47,7 +47,7 @@ describe('choice radial reveal', () => {
       const fills = values(`exam-${state}-tint`);
       expect(fills).toHaveLength(2);
       for (const fill of fills) {
-        const percent = fill.match(/\\) ([\\d.]+)%/);
+        const percent = fill.match(/\) ([\d.]+)%/);
         expect(percent).not.toBeNull();
         expect(Number(percent![1])).toBeGreaterThanOrEqual(12);
       }
