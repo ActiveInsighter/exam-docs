@@ -33,7 +33,7 @@ describe('English reading composition', () => {
     expect(html).toContain('data-english-reading=""');
     expect(html).toContain('data-reading-article=""');
     expect(html).toContain('data-reading-questions=""');
-    // One button opens the card; the bar already counts the questions before hydration.
+    // One button opens the card; the caption already counts the questions before hydration.
     expect(html).toMatch(/data-reading-start="">开始答题/);
     expect(html).toContain('2 题');
     expect(html.indexOf('data-reading-start')).toBeLessThan(html.indexOf('data-reading-article'));

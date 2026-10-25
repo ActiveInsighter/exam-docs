@@ -40,13 +40,15 @@ import styles from './reading.module.css';
 /*
  * The reading exercise, in two places.
  *
- *   page    the passage alone, on paper, under a bar with 开始答题; the
- *           questions are rendered with it but kept out of sight
+ *   page    the passage alone, on paper, under a quiet caption (length,
+ *           progress); 开始答题 floats at the bottom right beside the
+ *           question dock while the passage is in view. The questions are
+ *           rendered with it but kept out of sight
  *   card    a study card (components/ui/study-card.tsx) laid out like a
  *           computer-based reading test: the passage on the grey aside,
  *           one question at a time on the white main pane, the answer-sheet
  *           strip and the grading switch on one row above it, 上一题 /
- *           下一题 below; phones show one pane at a time
+ *           下一题 pinned to the pane's bottom; phones show one pane at a time
  *
  * Passage tools (in the card's header): 译 (every paragraph's translation;
  * a paragraph number shows that paragraph's alone, on the page too), text
@@ -134,41 +136,51 @@ function flash(element: HTMLElement) {
   element.addEventListener('animationend', () => element.removeAttribute('data-flash'), { once: true });
 }
 
+/** Ends a question's switch at once: no motion left, nothing overlaid. */
+function settle(question: Element) {
+  for (const animation of question.getAnimations()) animation.cancel();
+  if (question instanceof HTMLElement && question.hasAttribute('data-reading-leaving')) {
+    question.removeAttribute('data-reading-leaving');
+    question.style.removeProperty('top');
+    question.inert = false;
+  }
+}
+
 /*
- * Stepping between questions: the one left drifts out towards the side it is
- * left by and fades, while the next comes in from the other side, its header,
- * stem rows and footer rising one after another. Without a direction (a jump
- * from elsewhere) the question only rises into place.
+ * Stepping between questions moves the card as one piece, like turning a
+ * page sideways: the one left slides a little towards the side it is left by
+ * and fades quickly, held where it was on screen (`offset`: how far the pane
+ * had scrolled) while the pane returns to the top; the next then slides in
+ * from the other side as it fades in. Without a direction (a jump from elsewhere)
+ * the question only fades up into place. A new step settles any switch still
+ * running first, so quick steps never stack questions.
  */
-function switchQuestion(entering: HTMLElement, leaving: HTMLElement | null, direction: Direction | null) {
+function switchQuestion(entering: HTMLElement, leaving: HTMLElement | null, direction: Direction | null, offset = 0) {
+  entering.parentElement?.querySelectorAll(':scope > [data-reading-leaving]').forEach(settle);
+  settle(entering);
+  if (leaving) settle(leaving);
   if (reduceMotion() || typeof entering.animate !== 'function') return;
   const shift = direction === 'prev' ? -1 : 1;
-  const crossing = !!(leaving && direction);
-  if (leaving && crossing) {
+  if (leaving && direction) {
     leaving.setAttribute('data-reading-leaving', '');
+    if (offset) leaving.style.top = `${-offset}px`;
     leaving.inert = true;
     const out = leaving.animate(
-      [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-shift * 1.5}rem)` }],
-      { duration: 180, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' },
+      [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-shift * 1.25}rem)` }],
+      { duration: 140, easing: 'cubic-bezier(0.4, 0, 1, 1)', fill: 'forwards' },
     );
-    const done = () => {
-      leaving.removeAttribute('data-reading-leaving');
-      leaving.inert = false;
-      out.cancel();
-    };
-    out.finished.then(done, done);
+    out.finished.then(() => settle(leaving), () => {});
+    // In as the other is all but gone, so the two never read as one.
+    entering.animate(
+      [{ opacity: 0, transform: `translateX(${shift * 1.75}rem)` }, { opacity: 1, transform: 'none' }],
+      { duration: 340, delay: 110, easing: EASE_OUT, fill: 'backwards' },
+    );
+    return;
   }
   entering.animate(
-    [{ opacity: 0, transform: crossing ? `translateX(${shift * 2.25}rem)` : 'translateY(0.375rem)' }, { opacity: 1, transform: 'none' }],
-    { duration: crossing ? 460 : 320, delay: crossing ? 100 : 0, easing: EASE_OUT, fill: 'backwards' },
+    [{ opacity: 0, transform: 'translateY(0.375rem)' }, { opacity: 1, transform: 'none' }],
+    { duration: 280, easing: EASE_OUT, fill: 'backwards' },
   );
-  const rows = entering.querySelectorAll<HTMLElement>(':scope > [data-question-header], :scope > [data-exam-question-body] > *, :scope > [data-question-footer]');
-  Array.from(rows).slice(0, 10).forEach((row, order) => {
-    row.animate(
-      [{ opacity: 0, transform: 'translateY(0.5rem)' }, { opacity: 1, transform: 'none' }],
-      { duration: 440, delay: (crossing ? 140 : 30) + order * 38, easing: EASE_OUT, fill: 'backwards' },
-    );
-  });
 }
 
 /** Paragraph numbers a question names: "Paragraph 3", "Para. 2", "第 4 段". */
@@ -226,6 +238,18 @@ function useArticleStats(article: HTMLElement | null) {
   return stats;
 }
 
+/** Whether some of an element is on screen (true until it is known). */
+function useInView(element: HTMLElement | null) {
+  const [inView, setInView] = useState(true);
+  useEffect(() => {
+    if (!element || typeof IntersectionObserver !== 'function') return;
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [element]);
+  return inView;
+}
+
 function ToolButton({ label, pressed, disabled, onClick, children, className }: {
   label: string;
   pressed?: boolean;
@@ -249,10 +273,34 @@ function ToolButton({ label, pressed, disabled, onClick, children, className }: 
   );
 }
 
+/**
+ * The answer sheet: one button per question in its result colour, and a ring
+ * that glides to the question shown.
+ */
 function SheetStrip({ items, current, onPick }: { items: PageQuestion[]; current: string | null; onPick: (id: string) => void }) {
+  const stripRef = useRef<HTMLElement>(null);
+  const ringRef = useRef<HTMLSpanElement>(null);
+  const status = items.find((item) => item.id === current)?.status;
+
+  useLayoutEffect(() => {
+    const strip = stripRef.current;
+    const ring = ringRef.current;
+    const button = strip?.querySelector<HTMLElement>('[aria-current="step"]');
+    if (!strip || !ring || !button) return;
+    ring.style.width = `${button.offsetWidth}px`;
+    ring.style.transform = `translateX(${button.offsetLeft}px)`;
+    // Placed without motion the first time, glides after.
+    if (!ring.hasAttribute('data-placed')) requestAnimationFrame(() => ring.setAttribute('data-placed', ''));
+    const left = button.offsetLeft - strip.scrollLeft;
+    if (left < 0 || left + button.offsetWidth > strip.clientWidth) {
+      strip.scrollTo({ left: button.offsetLeft - (strip.clientWidth - button.offsetWidth) / 2, behavior: reduceMotion() ? 'auto' : 'smooth' });
+    }
+  }, [current, items.length]);
+
   if (items.length === 0) return null;
   return (
-    <nav aria-label="题目导航" className={styles.sheet}>
+    <nav ref={stripRef} aria-label="题目导航" className={styles.sheet}>
+      <span ref={ringRef} aria-hidden="true" className={styles.sheetRing} data-status={status} />
       {items.map((item) => (
         <button
           key={item.id}
@@ -326,6 +374,7 @@ export function ReadingWorkspace({
 
   const items = useQuestions(questionsEl);
   const stats = useArticleStats(pageArticleEl);
+  const passageInView = useInView(pageArticleEl);
   const marks = useHighlights(inCard ? cardArticleEl : pageArticleEl, `exam-reading-marks:${storageKey}`);
 
   const index = Math.max(0, items.findIndex((item) => item.id === current));
@@ -378,7 +427,7 @@ export function ReadingWorkspace({
   /* ---- Showing one question ---- */
 
   /** Shows one question and hides the rest, in the DOM at once (no render needed). */
-  const display = useCallback((id: string | null, direction: Direction | null = null) => {
+  const display = useCallback((id: string | null, direction: Direction | null = null, offset = 0) => {
     const container = questionsRef.current;
     if (!container || !id) return;
     const previous = container.querySelector<HTMLElement>(':scope > [data-reading-current]');
@@ -388,7 +437,7 @@ export function ReadingWorkspace({
       question.toggleAttribute('data-reading-current', on);
       if (on) next = question;
     }
-    if (next && previous && previous !== next) switchQuestion(next, previous, direction);
+    if (next && previous && previous !== next) switchQuestion(next, previous, direction, offset);
   }, []);
 
   useLayoutEffect(() => {
@@ -409,10 +458,12 @@ export function ReadingWorkspace({
     if (!target) return;
     const from = items.findIndex((entry) => entry.id === shownId);
     const to = items.findIndex((entry) => entry.id === id);
-    display(id, from < 0 || to < 0 || from === to ? null : to > from ? 'next' : 'prev');
+    const pane = questionScrollRef.current;
+    const wide = !narrow();
+    display(id, from < 0 || to < 0 || from === to ? null : to > from ? 'next' : 'prev', wide ? pane?.scrollTop ?? 0 : 0);
     setCurrent(id);
     setReturnTo(null);
-    if (narrow()) {
+    if (!wide) {
       setView('questions');
       requestAnimationFrame(() => {
         const inset = topInset();
@@ -420,7 +471,7 @@ export function ReadingWorkspace({
         if (top < inset || top > window.innerHeight * 0.6) pageScroller(target).scrollBy({ top: top - inset - 64, behavior: 'auto' });
       });
     } else {
-      questionScrollRef.current?.scrollTo({ top: 0 });
+      pane?.scrollTo({ top: 0 });
     }
     if (focusAnswer) {
       requestAnimationFrame(() => target
@@ -681,8 +732,9 @@ export function ReadingWorkspace({
     </div>
   );
 
+  // Pinned to the bottom of the question pane, so it holds still whatever the question's length.
   const stepper = items.length ? (
-    <>
+    <div className={styles.footer}>
       {confirming ? (
         <div ref={confirmRef} role="alertdialog" aria-labelledby={`${baseId}-confirm`} className={styles.confirm}>
           <p id={`${baseId}-confirm`}>还有 {unanswered.length} 题未作答，未答的题不判分。</p>
@@ -741,7 +793,7 @@ export function ReadingWorkspace({
           <ArrowRightIcon aria-hidden="true" />
         </button>
       </div>
-    </>
+    </div>
   ) : null;
 
   const questionList = (
@@ -765,25 +817,35 @@ export function ReadingWorkspace({
   return (
     <QuestionBatchProvider value={batch}>
       <section className={styles.card} data-english-reading="" data-size={size} aria-label="英语阅读理解">
-        <div className={styles.startBar} data-reading-bar="">
-          <p className={styles.startInfo}>
-            <span className={styles.startTitle}>阅读理解</span>
-            {facts ? <span className={styles.startFacts}>{facts}</span> : null}
+        {/* Floats at the bottom right, beside the question dock, while the passage is in view. */}
+        <button
+          ref={startRef}
+          type="button"
+          className={styles.start}
+          onClick={() => start()}
+          data-reading-start=""
+          data-away={passageInView && !open ? undefined : ''}
+        >
+          {done ? '查看作答' : started ? '继续答题' : '开始答题'}
+          {started && !done ? <span className={styles.startCount}>{progress}</span> : null}
+          <ArrowRightIcon aria-hidden="true" />
+        </button>
+
+        <div className={styles.frame}>
+          <p className={styles.caption} data-reading-bar="">
+            <span className={styles.captionTitle}>阅读理解</span>
+            {facts ? <span className={styles.captionFacts}>{facts}</span> : null}
             {started ? (
-              <span className={styles.startScore} aria-live="polite">
+              <span className={styles.captionScore} aria-live="polite">
                 已答 {progress}
                 {gradedCount ? <> · <span className={styles.scoreCorrect}>对 {correct}</span></> : null}
               </span>
             ) : null}
           </p>
-          <button ref={startRef} type="button" className={styles.start} onClick={() => start()} data-reading-start="">
-            {done ? '查看作答' : started ? '继续答题' : '开始答题'}
-            <ArrowRightIcon aria-hidden="true" />
-          </button>
-        </div>
 
-        <div ref={setPageArticleEl} className={styles.paper} data-reading-article="" onClick={onArticleClick}>
-          {articleBody}
+          <div ref={setPageArticleEl} className={styles.paper} data-reading-article="" onClick={onArticleClick}>
+            {articleBody}
+          </div>
         </div>
 
         {/* Out of sight on the page (printed, though); in the card while it is open. */}
@@ -820,6 +882,8 @@ export function ReadingWorkspace({
             tagsProps={{ 'aria-label': '概况' }}
             actionsLabel="阅读工具"
             actions={passageTools}
+            // The answer sheet and 上一题 / 下一题 already step (as do ← / →).
+            pager={false}
           >
             {segments}
           </StudyCardHeader>
@@ -840,6 +904,7 @@ export function ReadingWorkspace({
             <ModalPane
               ref={bindQuestionScroll}
               id={questionsId}
+              className={styles.questionPane}
               data-reading-question-scroller=""
               data-reading-region="questions"
             >
