@@ -2,13 +2,13 @@ import { Children, isValidElement, type ReactElement, type ComponentProps, type 
 import { ExamArticle, hasTranslation } from './article';
 import { ReadingWorkspace } from './workspace';
 
-export { ExamArticle, Paragraph, Translation } from './article';
+export { Evidence, ExamArticle, Paragraph, Translation } from './article';
 
 /**
  * Lays an article beside the shared question components without changing
  * them. The server part only validates and splits the authored children; the
- * client workspace owns the card, the split view, the translation toggle and
- * the question navigator.
+ * client workspace owns the card: the split view, one question at a time,
+ * the answer-sheet strip, translation, text size, highlighter and evidence.
  */
 export function EnglishReading({ children }: { children: ReactNode }) {
   const nodes = Children.toArray(children);
@@ -17,7 +17,7 @@ export function EnglishReading({ children }: { children: ReactNode }) {
   const article = articles[0] as ReactElement<ComponentProps<typeof ExamArticle>>;
 
   return (
-    <ReadingWorkspace article={article} translatable={hasTranslation(article.props)}>
+    <ReadingWorkspace article={article} translatable={hasTranslation(article.props)} storageKey={article.props.title}>
       {nodes.filter((node) => node !== article)}
     </ReadingWorkspace>
   );

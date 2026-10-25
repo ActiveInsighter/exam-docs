@@ -175,6 +175,16 @@ describe('static docs build', () => {
     expect(markdown).toContain('{/* 保留 */}');
   });
 
+  it('keeps the text of inline evidence markers in reading passages', async () => {
+    const markdown = await renderStaticMarkdown(
+      '<p>Some walked. <Evidence for="english-reading-001">Attention made the difference.</Evidence> Others did not.</p>',
+      { title: '阅读', url: '/docs/english' },
+    );
+
+    expect(markdown).toContain('Some walked. Attention made the difference. Others did not.');
+    expect(markdown).not.toContain('Evidence');
+  });
+
   it('builds section-aware ZBSearch source records without enabling remarkStructure globally', () => {
     const index = buildZBSearchSourceIndex(
       'math/example.mdx',

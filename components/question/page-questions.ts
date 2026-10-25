@@ -35,3 +35,16 @@ export function readPageQuestions(container: ParentNode): PageQuestion[] {
 export const samePageQuestions = (left: readonly PageQuestion[], right: readonly PageQuestion[]) =>
   left.length === right.length &&
   left.every((item, index) => item.id === right[index].id && item.status === right[index].status && item.label === right[index].label);
+
+/*
+ * A container that shows its questions one at a time (the reading card)
+ * keeps the others out of layout. Before scrolling to or focusing a question,
+ * navigators dispatch this event on it; a container that handles it shows
+ * the question synchronously and calls preventDefault, taking over the scroll.
+ */
+export const REVEAL_QUESTION_EVENT = 'exam:reveal-question';
+
+/** Asks the question's container to show it; true when a container took over. */
+export function revealQuestion(question: Element): boolean {
+  return !question.dispatchEvent(new CustomEvent(REVEAL_QUESTION_EVENT, { bubbles: true, cancelable: true }));
+}

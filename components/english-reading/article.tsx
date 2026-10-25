@@ -12,13 +12,26 @@ export function Translation({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * The sentence (or phrase) of the passage a question is answered from:
+ * <Evidence for="english-reading-001">…</Evidence>. Plain text until that
+ * question is graded; then 原文定位 scrolls to it and it is marked.
+ */
+export function Evidence({ for: questionId, children }: { for: string; children: ReactNode }) {
+  return (
+    <span className={styles.evidence} data-reading-evidence={questionId}>
+      {children}
+    </span>
+  );
+}
+
 const isTranslation = (node: ReactNode): node is ReactElement<{ children: ReactNode }> =>
   isValidElement(node) && node.type === Translation;
 
 /**
  * One numbered paragraph of the passage, optionally paired with its
- * <Translation>. The translation stays hidden until the reader turns on the
- * card's 翻译 toggle, then sits directly below (or beside) the English.
+ * <Translation>. A translated paragraph's number is a button that shows or
+ * hides that paragraph's Chinese alone; the card's 译 switch shows them all.
  */
 export function Paragraph({ children }: { children: ReactNode }) {
   const nodes = Children.toArray(children);
@@ -27,13 +40,25 @@ export function Paragraph({ children }: { children: ReactNode }) {
 
   return (
     <div className={styles.paragraph} data-reading-paragraph="">
-      <div className={styles.original}>{nodes.filter((node) => !isTranslation(node))}</div>
+      {translations.length ? (
+        <button
+          type="button"
+          className={styles.number}
+          data-reading-paragraph-toggle=""
+          aria-expanded="false"
+          aria-label="本段翻译"
+          title="显示或隐藏本段翻译"
+        />
+      ) : (
+        <span className={styles.number} aria-hidden="true" />
+      )}
+      <div className={styles.original} data-reading-original="">{nodes.filter((node) => !isTranslation(node))}</div>
       {translations[0]}
     </div>
   );
 }
 
-/** Whether the article carries any translation, so the toggle is worth showing. */
+/** Whether the article carries any translation, so the 译 switch is worth showing. */
 export function hasTranslation({ children, titleTranslation }: ArticleProps) {
   if (titleTranslation) return true;
   return Children.toArray(children).some((node) =>
@@ -45,11 +70,13 @@ export function hasTranslation({ children, titleTranslation }: ArticleProps) {
 export function ExamArticle({ children, title, titleTranslation, source }: ArticleProps) {
   return (
     <article className={styles.article} aria-label="英文文章">
-      {source && <div className={styles.source}>{source}</div>}
-      <h2 className={styles.title} lang="en">{title}</h2>
-      {titleTranslation && (
-        <p className={styles.titleTranslation} lang="zh-CN" data-reading-translation="">{titleTranslation}</p>
-      )}
+      <header className={styles.articleHead}>
+        {source ? <p className={styles.source}>{source}</p> : null}
+        <h2 className={styles.title} lang="en">{title}</h2>
+        {titleTranslation ? (
+          <p className={styles.titleTranslation} lang="zh-CN" data-reading-translation="">{titleTranslation}</p>
+        ) : null}
+      </header>
       <div className={styles.passage} lang="en" data-reading-passage="">{children}</div>
     </article>
   );

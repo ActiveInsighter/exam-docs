@@ -27,6 +27,7 @@
 
 [data-exam-question] {
   position: relative;
+  isolation: isolate;
   /* The blog sets its prose in serif; questions keep the interface face. */
   font-family: var(--font-sans);
   margin-block: 1.25rem;
@@ -36,6 +37,25 @@
   /* Long pages: skip layout and paint of cards far off screen. */
   content-visibility: auto;
   contain-intrinsic-size: auto 18rem;
+}
+
+/*
+ * Squared paper in the top right corner, under the card's actions: a dot
+ * grid that fades out towards the stem, so the plate reads as an exam sheet
+ * without a pattern behind the text.
+ */
+[data-exam-question]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-image: radial-gradient(circle, var(--exam-card-dot) 0.75px, transparent 1.15px);
+  background-size: 0.875rem 0.875rem;
+  background-position: right 0.4375rem top 0.4375rem;
+  -webkit-mask-image: radial-gradient(ellipse 46% 62% at 100% 0%, #000 0%, rgb(0 0 0 / 35%) 45%, transparent 100%);
+  mask-image: radial-gradient(ellipse 46% 62% at 100% 0%, #000 0%, rgb(0 0 0 / 35%) 45%, transparent 100%);
+  pointer-events: none;
 }
 
 @media (min-width: 640px) {
@@ -156,11 +176,10 @@
   white-space: nowrap;
 }
 
-/* In a modal header the tags are frosted glass: the tint turns translucent. */
+/* In a modal header the tags are frosted glass (see the solution card below). */
 [data-slot='modal-tags'] [data-question-tag] {
   height: 1.625rem;
   padding-inline: 0.625rem;
-  background: oklch(var(--exam-tag-bg-l) var(--exam-tag-bg-c) var(--tag-hue) / 62%);
 }
 
 [data-question-tag] > span {
@@ -258,6 +277,73 @@
  * layout inside, and per feedback state the ring (--tile-ring) and the fill
  * colour (--reveal-color).
  */
+/*
+ * Options sit on the question's own plate: no surface of their own, only a
+ * hairline outline whose top-left and bottom-right corners are inked in
+ * (::after, the outline masked down to its two corners). Hover draws the
+ * corners further along; picking an option of a multiple answer closes them
+ * into a full outline. Graded states hide the corners and keep their fills.
+ */
+[data-exam-choice-option],
+[data-boolean-option] {
+  --tile-bg: transparent;
+  --tile-bg-hover: var(--exam-choice-hover);
+  --tile-ring: var(--exam-choice-ring);
+  --tile-shadow: 0 0 #0000;
+  --tile-shadow-hover: 0 0 #0000;
+  --corner: 1.125rem;
+}
+
+[data-exam-choice-option]::after,
+[data-boolean-option]:not([data-feedback='answer'])::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--exam-choice-corner);
+  border-radius: inherit;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  -webkit-mask-position: left top, right bottom;
+  mask-position: left top, right bottom;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: var(--corner) var(--corner), var(--corner) var(--corner);
+  mask-size: var(--corner) var(--corner), var(--corner) var(--corner);
+  transition:
+    -webkit-mask-size 420ms var(--ui-ease),
+    mask-size 420ms var(--ui-ease),
+    border-color 200ms var(--ui-ease),
+    opacity 200ms var(--ui-ease);
+}
+
+@media (hover: hover) {
+  :is([data-exam-choice-option], [data-boolean-option])[data-feedback='idle']:not([aria-disabled='true']):hover {
+    --corner: 2.25rem;
+  }
+  :is([data-exam-choice-option], [data-boolean-option])[data-feedback='idle']:not([aria-disabled='true']):hover::after {
+    border-color: var(--exam-choice-corner-hover);
+  }
+}
+
+[data-exam-choice-option][data-feedback='selected'] {
+  --corner: 100%;
+}
+[data-exam-choice-option][data-feedback='selected']::after {
+  border-color: var(--exam-choice-corner-hover);
+}
+
+:is([data-exam-choice-option], [data-boolean-option]):not([data-feedback='idle'], [data-feedback='selected'])::after {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-exam-choice-option]::after,
+  [data-boolean-option]::after {
+    transition-duration: 1ms;
+  }
+}
+
 [data-exam-choice-option] {
   align-items: flex-start;
   gap: 0.6875rem;
@@ -429,8 +515,7 @@
 /* --- states --- */
 
 [data-exam-choice-option][data-feedback='selected'] {
-  --tile-ring: color-mix(in oklch, var(--foreground) 28%, transparent);
-  --tile-ring-width: 1.5px;
+  --tile-ring: transparent;
 }
 [data-feedback='selected'] [data-choice-marker] {
   background: var(--foreground);
@@ -495,7 +580,6 @@
 }
 /* Options not involved in the result fade, but keep their tile. */
 [data-exam-choice-option][data-feedback='dimmed'] {
-  --tile-bg: color-mix(in oklch, var(--exam-choice) 60%, transparent);
   --tile-ring: color-mix(in oklch, var(--foreground) 4%, transparent);
 }
 [data-exam-choice-option][data-feedback='dimmed'] > * {
@@ -1036,4 +1120,36 @@ html[data-keypad-open] body {
   color: var(--destructive);
   font-family: var(--font-sans);
   font-size: 0.8125rem;
+}
+
+/* -------------------------------------------------------- solution card */
+
+/*
+ * "题目与解析" (solution-sheet.tsx): the question pane is one solid colour,
+ * the same for every question type, blocked against the white answer pane
+ * (and, on phones, under the header above it). No gradients: the colour is
+ * the whole idea, so it stays calm over a long session.
+ */
+[data-solution-card] {
+  --modal-pane-muted: var(--exam-solution-aside);
+}
+
+[data-solution-card] [data-slot='modal-pane'][data-tone='muted'] {
+  --muted-foreground: var(--exam-solution-aside-muted);
+  --ui-fill: var(--exam-solution-aside-fill);
+  --ui-fill-hover: var(--exam-solution-aside-fill-hover);
+}
+
+/* Stacked on phones: the answer pane is a white sheet over the colour. */
+@media (width < 48rem) {
+  [data-solution-card] [data-slot='modal-pane']:not([data-tone='muted']) {
+    --modal-pane-background: var(--modal-surface);
+    border-radius: 1.5rem 1.5rem 0 0;
+  }
+}
+
+/* Header capsules are neutral glass like its buttons, never coloured. */
+[data-slot='modal-tags'] [data-question-tag] {
+  background: var(--modal-glass);
+  color: color-mix(in oklch, var(--foreground) 78%, transparent);
 }
