@@ -42,6 +42,11 @@ async function verifyPage({ page, root }) {
   }
   const start = root.getByRole('button', { name: '开始答题' });
   assert.ok(await start.isVisible(), '开始答题 is offered');
+  // It floats at the bottom right, beside the question dock, not in a bar over the passage.
+  const box = await start.boundingBox(), size = page.viewportSize();
+  assert.ok(box.x + box.width > size.width * 0.6 && box.y + box.height > size.height - 96, '开始答题 sits at the bottom right');
+  const dock = await page.locator('[data-dock-ball]').boundingBox();
+  if (dock) assert.ok(box.x + box.width <= dock.x, '开始答题 leaves the dock clear');
   await page.waitForFunction(() => document.querySelector('[data-reading-bar]')?.textContent.includes('5 题'));
   return start;
 }
@@ -126,14 +131,18 @@ async function verifyDesktop() {
   });
   await verifySolution(page, current.getByRole('button', { name: '查看解答', exact: true }));
 
-  // 下一题 / 上一题, the answer sheet and the card's pager move between questions.
+  // 下一题 / 上一题, the answer sheet and ← / → move between questions; the stepper holds still.
+  const stepperTop = async () => (await questions.getByRole('button', { name: '下一题' }).boundingBox()).y;
+  const firstStepperTop = await stepperTop();
   await questions.getByRole('button', { name: '下一题' }).click();
   await expectCurrent(page, card, 2);
   await strip.nth(4).click();
   await expectCurrent(page, card, 5);
   await questions.getByRole('button', { name: '上一题' }).click();
   await expectCurrent(page, card, 4);
-  await card.locator('[data-slot="sc-pager"]').getByRole('button', { name: '上一题' }).click();
+  assert.ok(Math.abs(await stepperTop() - firstStepperTop) < 2, '上一题 / 下一题 stay put from question to question');
+  assert.equal(await card.locator('[data-slot="sc-pager"]').count(), 0, 'the header has no second pager');
+  await page.keyboard.press('ArrowLeft');
   await expectCurrent(page, card, 3);
 
   // A question that names a paragraph links to it.
@@ -240,7 +249,7 @@ try {
   // Each layout runs in its own browser context, so they are checked concurrently.
   await Promise.all([verifyDesktop(), ...[390, 320, 700].map(verifyMobile)]);
   assert.deepEqual(errors, [], 'browser runtime errors');
-  console.log('Reading verified: the passage alone on the page with 开始答题; the study card with independent panes, one question at a time, the answer sheet and grading switch on one row, stepper and pager, evidence and paragraph locators, highlighter, translation and text size, shared dialogs, 整篇提交, questions returned to the page with their answers, revealed questions, print, and 390/320/700px tabbed touch layouts.');
+  console.log('Reading verified: the passage alone on the page with a floating 开始答题; the study card with independent panes, one question at a time, the answer sheet and grading switch on one row, a stepper that holds still, ← / →, evidence and paragraph locators, highlighter, translation and text size, shared dialogs, 整篇提交, questions returned to the page with their answers, revealed questions, print, and 390/320/700px tabbed touch layouts.');
 } finally {
   await browser.close();
 }
