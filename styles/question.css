@@ -275,72 +275,32 @@
  * surface, ring, hover, press, focus and the click-to-fill layer come from
  * there; the fill spreads from where the option was pressed. Here: the
  * layout inside, and per feedback state the ring (--tile-ring) and the fill
- * colour (--reveal-color).
+ * colour (--reveal-color, the translucent --exam-choice-*-fill tokens).
  */
 /*
- * Options sit on the question's own plate: no surface of their own, only a
- * hairline outline whose top-left and bottom-right corners are inked in
- * (::after, the outline masked down to its two corners). Hover draws the
- * corners further along; picking an option of a multiple answer closes them
- * into a full outline. Graded states hide the corners and keep their fills.
+ * Options are answer slips laid on the question's plate: a white slip with
+ * a hairline edge and a soft shadow, lifted a little more on hover. The slip
+ * stays quiet so the one strong moment is the pick: ink spreads from the
+ * press point over the whole slip, edge included (--reveal-inset 0, under the
+ * ring), with no seam. Graded colours flood it the same way. Per state: the
+ * edge (--tile-ring, --tile-ring-width) and the ink (--reveal-color).
  */
 [data-exam-choice-option],
 [data-boolean-option] {
-  --tile-bg: transparent;
-  --tile-bg-hover: var(--exam-choice-hover);
+  --tile-bg: var(--exam-choice);
+  --tile-bg-hover: var(--exam-choice);
   --tile-ring: var(--exam-choice-ring);
-  --tile-shadow: 0 0 #0000;
-  --tile-shadow-hover: 0 0 #0000;
-  --corner: 1.125rem;
-}
-
-[data-exam-choice-option]::after,
-[data-boolean-option]:not([data-feedback='answer'])::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 1.5px solid var(--exam-choice-corner);
-  border-radius: inherit;
-  pointer-events: none;
-  -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
-  mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
-  -webkit-mask-position: left top, right bottom;
-  mask-position: left top, right bottom;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: var(--corner) var(--corner), var(--corner) var(--corner);
-  mask-size: var(--corner) var(--corner), var(--corner) var(--corner);
-  transition:
-    -webkit-mask-size 420ms var(--ui-ease),
-    mask-size 420ms var(--ui-ease),
-    border-color 200ms var(--ui-ease),
-    opacity 200ms var(--ui-ease);
+  --tile-shadow: var(--exam-choice-shadow);
+  --tile-shadow-hover: var(--exam-choice-shadow-hover);
+  /* The tile's default fill is opaque and inset; these are see-through and
+     reach the edge, so the ring shows through them. */
+  --reveal-color: var(--exam-choice-fill);
+  --reveal-inset: 0px;
 }
 
 @media (hover: hover) {
   :is([data-exam-choice-option], [data-boolean-option])[data-feedback='idle']:not([aria-disabled='true']):hover {
-    --corner: 2.25rem;
-  }
-  :is([data-exam-choice-option], [data-boolean-option])[data-feedback='idle']:not([aria-disabled='true']):hover::after {
-    border-color: var(--exam-choice-corner-hover);
-  }
-}
-
-[data-exam-choice-option][data-feedback='selected'] {
-  --corner: 100%;
-}
-[data-exam-choice-option][data-feedback='selected']::after {
-  border-color: var(--exam-choice-corner-hover);
-}
-
-:is([data-exam-choice-option], [data-boolean-option]):not([data-feedback='idle'], [data-feedback='selected'])::after {
-  opacity: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [data-exam-choice-option]::after,
-  [data-boolean-option]::after {
-    transition-duration: 1ms;
+    --tile-ring: var(--exam-choice-ring-hover);
   }
 }
 
@@ -470,9 +430,9 @@
 }
 
 /*
- * "漏选" / "正确答案": a tab sitting on the option's top edge. It takes no
- * inline space, so it never covers the option text, however narrow the
- * column (the option grid is measured without it).
+ * "漏选" / "正确答案": a tab sitting on the option's top edge, outlined solid. It takes no inline space, so it never
+ * covers the option text, however narrow the column (the option grid is
+ * measured without it).
  */
 [data-choice-note],
 [data-boolean-option][data-feedback='answer']::after {
@@ -484,6 +444,7 @@
   align-items: center;
   height: 1.125rem;
   padding-inline: 0.4375rem;
+  border: 1px solid var(--exam-note-correct-line);
   border-radius: 999px;
   background: var(--exam-note-correct-bg);
   color: var(--exam-note-correct-fg);
@@ -515,7 +476,8 @@
 /* --- states --- */
 
 [data-exam-choice-option][data-feedback='selected'] {
-  --tile-ring: transparent;
+  --tile-ring: var(--exam-choice-ring-strong);
+  --tile-ring-width: 1.5px;
 }
 [data-feedback='selected'] [data-choice-marker] {
   background: var(--foreground);
@@ -529,9 +491,9 @@
 }
 
 [data-exam-choice-option][data-feedback='correct'] {
-  --reveal-color: var(--exam-correct-tint);
+  --reveal-color: var(--exam-choice-correct-fill);
   --tile-ring: var(--exam-correct-ring);
-  --tile-shadow: 0 0 #0000;
+  --tile-ring-width: 1.5px;
 }
 [data-feedback='correct'] [data-choice-marker] {
   background: var(--success);
@@ -540,9 +502,8 @@
 }
 
 [data-exam-choice-option][data-feedback='incorrect'] {
-  --reveal-color: var(--exam-incorrect-tint);
+  --reveal-color: var(--exam-choice-incorrect-fill);
   --tile-ring: var(--exam-incorrect-ring);
-  --tile-shadow: 0 0 #0000;
 }
 [data-feedback='incorrect'] [data-choice-marker] {
   background: var(--destructive);
@@ -552,9 +513,9 @@
 
 /* A key option the reader did not pick in a multiple-answer question: amber. */
 [data-exam-choice-option][data-feedback='missed'] {
-  --reveal-color: var(--exam-missed-tint);
+  --reveal-color: var(--exam-choice-missed-fill);
   --tile-ring: var(--exam-missed-ring);
-  --tile-shadow: 0 0 #0000;
+  --tile-ring-width: 1.5px;
 }
 [data-feedback='missed'] [data-choice-marker] {
   background: color-mix(in oklch, var(--warning) 20%, transparent);
@@ -562,25 +523,27 @@
   color: color-mix(in oklch, var(--warning) 62%, var(--foreground));
 }
 [data-feedback='missed'] [data-choice-note] {
+  border-color: var(--exam-note-missed-line);
   background: var(--exam-note-missed-bg);
   color: var(--exam-note-missed-fg);
 }
 
 /* The key of a single-answer question the reader missed, or the revealed key. */
 [data-exam-choice-option][data-feedback='answer'] {
-  --reveal-color: var(--exam-answer-tint);
+  --reveal-color: var(--exam-choice-answer-fill);
   --tile-ring: var(--exam-correct-ring);
   --tile-ring-width: 1.5px;
-  --tile-shadow: 0 0 #0000;
 }
 [data-feedback='answer'] [data-choice-marker] {
   background: color-mix(in oklch, var(--success) 14%, transparent);
   box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--success) 70%, transparent);
   color: color-mix(in oklch, var(--success) 85%, var(--foreground));
 }
-/* Options not involved in the result fade, but keep their tile. */
-[data-exam-choice-option][data-feedback='dimmed'] {
-  --tile-ring: color-mix(in oklch, var(--foreground) 4%, transparent);
+/* Options not involved in the result recede: flat, half-transparent slips. */
+[data-exam-choice-option][data-feedback='dimmed'],
+[data-boolean-option][data-feedback='dimmed'] {
+  --tile-bg: var(--exam-choice-dimmed);
+  --tile-shadow: 0 0 #0000;
 }
 [data-exam-choice-option][data-feedback='dimmed'] > * {
   opacity: 0.48;
@@ -713,20 +676,18 @@
 }
 
 [data-boolean-option][data-feedback='correct'] {
-  --reveal-color: var(--exam-correct-tint);
-  --tile-ring: color-mix(in oklch, var(--success) 40%, transparent);
-  --tile-shadow: 0 0 #0000;
+  --reveal-color: var(--exam-choice-correct-fill);
+  --tile-ring: var(--exam-correct-ring);
+  --tile-ring-width: 1.5px;
 }
 [data-boolean-option][data-feedback='incorrect'] {
-  --reveal-color: var(--exam-incorrect-tint);
-  --tile-ring: color-mix(in oklch, var(--destructive) 38%, transparent);
-  --tile-shadow: 0 0 #0000;
+  --reveal-color: var(--exam-choice-incorrect-fill);
+  --tile-ring: var(--exam-incorrect-ring);
 }
 [data-boolean-option][data-feedback='answer'] {
-  --reveal-color: var(--exam-answer-tint);
-  --tile-ring: color-mix(in oklch, var(--success) 55%, transparent);
+  --reveal-color: var(--exam-choice-answer-fill);
+  --tile-ring: var(--exam-correct-ring);
   --tile-ring-width: 1.5px;
-  --tile-shadow: 0 0 #0000;
 }
 [data-boolean-option][data-feedback='answer']::after { content: '正确答案'; }
 [data-boolean-option][data-feedback='dimmed'] > * { opacity: 0.48; }
@@ -1125,10 +1086,11 @@ html[data-keypad-open] body {
 /* -------------------------------------------------------- solution card */
 
 /*
- * "题目与解析" (solution-sheet.tsx): the question pane is one solid colour,
- * the same for every question type, blocked against the white answer pane
- * (and, on phones, under the header above it). No gradients: the colour is
- * the whole idea, so it stays calm over a long session.
+ * "题目与解析" (solution-sheet.tsx): the question pane is one flat light
+ * grey, the same for every question type, blocked against the white answer
+ * pane (and, on phones, under the header above it). No hue and no gradients,
+ * so the pair stays calm over a long session and the graded colours of the
+ * options are the only colour on it.
  */
 [data-solution-card] {
   --modal-pane-muted: var(--exam-solution-aside);
