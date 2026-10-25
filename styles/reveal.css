@@ -37,13 +37,10 @@
     border-radius: inherit;
     background: var(--reveal-color, color-mix(in oklch, currentColor 12%, transparent));
     pointer-events: none;
-    /*
-     * The press radius is measured for the button's size at the time. Once
-     * fully on, a further 300% (added only at exactly 1) keeps it covered if
-     * the button later grows.
-     */
+    /* The old 300% end jump skipped the last part of the radial expansion.
+       Keep the measured corner-reaching radius continuous through 100%. */
     clip-path: circle(
-      calc(var(--reveal-r, 150%) * var(--reveal-on) + 300% * max(0, var(--reveal-on) - 0.999) * 1000)
+      calc(var(--reveal-r, 150%) * var(--reveal-on))
       at var(--reveal-x, 50%) var(--reveal-y, 50%)
     );
     transition:
@@ -55,7 +52,7 @@
   [data-reveal='on']::before {
     --reveal-on: 1;
     transition:
-      --reveal-on 560ms cubic-bezier(0.22, 0.75, 0.2, 1),
+      --reveal-on 500ms cubic-bezier(0.18, 0.75, 0.22, 1),
       background-color 220ms var(--ui-ease);
   }
 
