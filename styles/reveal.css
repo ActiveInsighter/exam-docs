@@ -1,31 +1,39 @@
 /*
  * Click-to-fill (radial colour reveal) for Button and TileButton
  * (components/ui/button.tsx). A button with `revealed` set carries
- * data-reveal="on" | "off"; its ::before is a layer in --reveal-color,
- * clipped to a circle centred on the press point. Turning on grows the
- * circle until it covers the button; turning off shrinks it back into the
- * latest press point.
+ * data-reveal="on" | "off"; its ::before is an ink layer: a radial gradient
+ * centred on the press point whose hard edge grows until it reaches the
+ * farthest corner. Turning on spreads the ink; turning off draws it back
+ * into the latest press point.
  *
- *   --reveal-color   the fill (default: a light wash of the text colour)
+ *   --reveal-color   the ink (default: a light wash of the text colour)
  *   --reveal-x/-y    circle centre; written by the button on pointer press,
  *                    else the centre (a stylesheet may set another default)
- *   --reveal-r       radius that just covers the button from that centre;
- *                    written with the press point, else 150% (covers from
- *                    anywhere inside)
  *   --reveal-inset   keeps the layer inside an inset ring (tiles: 1.5px)
+ *
+ * The edge is measured in the gradient's own `farthest-corner` units, so
+ * 100% is exactly "covers the box" from any press point, at any size, at
+ * every frame: no radius measured in script, nothing that can fall short
+ * when the box changes size mid-spread, and no jump when the motion ends.
  *
  * In the components layer, so utilities and component stylesheets win.
  */
 
 /*
- * Progress of the fill, registered so it can transition on its own: the
- * centre then moves to a new press point at once, and only the radius
- * animates. Not inherited, so changing it restyles only the layer.
+ * Progress of the fill and the colour of the ink, registered so each can
+ * transition on its own while the centre moves to a new press point at once.
+ * Not inherited, so changing them restyles only the layer.
  */
 @property --reveal-on {
   syntax: '<number>';
   inherits: false;
   initial-value: 0;
+}
+
+@property --reveal-ink {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: transparent;
 }
 
 @layer components {
@@ -35,34 +43,47 @@
     inset: var(--reveal-inset, 0px);
     z-index: -1;
     border-radius: inherit;
-    background: var(--reveal-color, color-mix(in oklch, currentColor 12%, transparent));
+    /*
+     * The edge runs from 1px before the centre (nothing shows at 0) to 1px
+     * past the farthest corner (every pixel covered at 1); the 1px between
+     * the two stops antialiases it.
+     */
+    background: radial-gradient(
+      circle farthest-corner at var(--reveal-x, 50%) var(--reveal-y, 50%),
+      var(--reveal-ink) calc(var(--reveal-on) * (100% + 1px) - 1px),
+      transparent calc(var(--reveal-on) * (100% + 1px))
+    );
     pointer-events: none;
     /*
-     * The press radius is measured for the button's size at the time. Once
-     * fully on, a further 300% (added only at exactly 1) keeps it covered if
-     * the button later grows.
+     * Off, the ink keeps the colour it had while it draws back, and clears
+     * only once it is gone: the state that turned it off (a reset, another
+     * pick) has already changed --reveal-color, which must not repaint the
+     * retreating ink.
      */
-    clip-path: circle(
-      calc(var(--reveal-r, 150%) * var(--reveal-on) + 300% * max(0, var(--reveal-on) - 0.999) * 1000)
-      at var(--reveal-x, 50%) var(--reveal-y, 50%)
-    );
+    --reveal-ink: transparent;
     transition:
       --reveal-on 320ms cubic-bezier(0.4, 0, 0.2, 1),
-      background-color 220ms var(--ui-ease);
+      --reveal-ink 0s linear 320ms;
   }
 
-  /* Spreads like ink: quick off the press point, settling at the edges. */
+  /*
+   * Spreads like ink: quick off the press point, settling at the edges. The
+   * colour fades in from clear (never from the previous state's colour) and
+   * cross-fades when a filled button changes state (picked → graded).
+   */
   [data-reveal='on']::before {
     --reveal-on: 1;
+    --reveal-ink: var(--reveal-color, color-mix(in oklch, currentColor 12%, transparent));
     transition:
       --reveal-on 560ms cubic-bezier(0.22, 0.75, 0.2, 1),
-      background-color 220ms var(--ui-ease);
+      --reveal-ink 180ms var(--ui-ease);
   }
 
   @media (prefers-reduced-motion: reduce) {
     [data-reveal]::before,
     [data-reveal='on']::before {
       transition-duration: 1ms;
+      transition-delay: 0s;
     }
   }
 }

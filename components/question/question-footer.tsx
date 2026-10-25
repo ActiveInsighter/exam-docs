@@ -165,7 +165,7 @@ export function QuestionFooter({ showSolution, ...sheet }: QuestionFooterProps) 
       {/* Redo sits with 查看解答 so the grade line stays one unit when the footer wraps. */}
       <div data-footer-actions="">
         {state?.submitted && state.evaluation ? (
-          <Button variant="ghost" size="sm" className="h-8 rounded-full px-3 text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground" onClick={state.reset}>
+          <Button variant="ghost" size="sm" className="h-8 gap-1.5 rounded-full px-3 text-[0.8125rem] text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground has-data-[icon=inline-start]:pl-2.5" onClick={state.reset}>
             <RotateCcwIcon data-icon="inline-start" />
             {state.spec.kind === 'self' ? '重新自评' : '重做'}
           </Button>
