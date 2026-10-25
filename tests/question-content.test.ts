@@ -36,6 +36,19 @@ const LEGACY_TAG = /<Exam(?:Question|Solution|Answer|Explanation|Choices|Option)
 const COMPONENT_TAG = /<Question\b|<\/?Solution>|<Option(?: correct)?>|<Blank\b[^>]*\/>/u;
 
 describe('question documents', () => {
+  it('does not classify explicit fill-in blanks as essay questions', async () => {
+    const invalid: string[] = [];
+    for (const file of await collectFiles(docsRoot, '.mdx')) {
+      const source = await readFile(file, 'utf8');
+      for (const question of source.matchAll(/<Question\b[^>]*type="essay"[^>]*>([\s\S]*?)<Solution>/gu)) {
+        if (/_{2,}|＿{2,}|\\underline\{(?:\\hspace\{[^}]+\}|\\qquad|\\quad|\\ |\s|-)+\}/u.test(question[1])) {
+          invalid.push(`${relative(process.cwd(), file)}: ${question[0].match(/id="([^"]+)"/u)?.[1]}`);
+        }
+      }
+    }
+    expect(invalid).toEqual([]);
+  });
+
   it('uses only the Question / Option / Blank / Solution components', async () => {
     const files = [
       ...(await collectFiles(docsRoot, '.mdx')),

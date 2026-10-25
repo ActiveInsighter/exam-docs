@@ -122,6 +122,14 @@ EdgeOne deployment artifact and reports raw/gzip/Brotli sizes. The build has a
 10 MB soft split target, warns at 15 MB, and rejects any individual static search
 file at 25,000,000 bytes to stay below EdgeOne's single-file limit.
 
+## Sidebar folders
+
+Documentation folders start collapsed on desktop and mobile, including ancestors
+of the current page. The source loader sets `defaultOpen: false` for every folder.
+`postinstall` applies `scripts/patch-fumadocs-sidebar.mjs` so the pinned Fumadocs
+16.17.5 respects that explicit preference; review the workaround on upgrades.
+Readers can expand and collapse folders normally.
+
 ## Deployment
 
 The current deployment workflow,

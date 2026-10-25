@@ -8,6 +8,17 @@ export const source = loader({
   baseUrl: '/docs',
   source: docs.toFumadocsSource(),
   slugs: (file) => getShortDocSlugs(file.path),
+  plugins: ({ typedPlugin }) => [
+    typedPlugin({
+      name: 'collapsed-sidebar-folders',
+      transformPageTree: {
+        folder(node) {
+          node.defaultOpen = false;
+          return node;
+        },
+      },
+    }),
+  ],
 });
 
 export const blogSource = loader({
