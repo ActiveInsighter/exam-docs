@@ -3,7 +3,7 @@
 import { type ReactNode, type RefObject, useSyncExternalStore } from 'react';
 import type { QuestionType } from './grading';
 import type { MarksContext } from './marks/question-marks';
-import type { QuestionTag } from './model';
+import type { QuestionTags } from './model';
 import type { QuestionState } from './question-state';
 
 /*
@@ -27,7 +27,8 @@ export type SolutionEntry = {
   dialogTitle: string;
   numberLabel: string | null;
   typeLabel: string;
-  tags: readonly QuestionTag[];
+  points?: number;
+  tags: QuestionTags;
   state: QuestionState | null;
   marks: MarksContext | null;
 };

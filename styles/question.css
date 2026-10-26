@@ -84,22 +84,54 @@
   container-type: inline-size;
 }
 
-/* Header: number, type, built-in tags, reader tags · actions on the right. */
+/*
+ * Header: number, type, traits and the reader's tags · source trail ·
+ * actions, on one row while the card is wide; a narrow card gives the
+ * trail its own row under them, the full width of the card, so it rarely
+ * needs to truncate.
+ */
+[data-exam-question] {
+  container: exam-card / inline-size;
+}
+
 [data-question-header] {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  display: grid;
+  grid-template-columns: minmax(0, max-content) minmax(0, 1fr) auto;
+  grid-template-areas: 'meta trail actions';
+  align-items: start;
+  gap: 0.375rem 0.75rem;
+  margin-bottom: 0.875rem;
 }
 
 [data-question-meta] {
+  grid-area: meta;
   display: flex;
-  flex: 1;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.375rem;
+  gap: 0.375rem 0.5rem;
   min-width: 0;
-  min-height: 1.75rem;
+  min-height: 1.875rem;
+}
+
+[data-question-header] > [data-source-trail] {
+  grid-area: trail;
+  justify-self: start;
+  height: 1.875rem;
+}
+
+[data-question-header] > [data-question-actions] {
+  grid-area: actions;
+}
+
+@container exam-card (width < 36rem) {
+  [data-question-header] {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'meta actions' 'trail trail';
+  }
+
+  [data-question-header] > [data-source-trail] {
+    height: 1.25rem;
+  }
 }
 
 /*
@@ -107,9 +139,12 @@
  * never read as one row of look-alike capsules:
  *
  *   number   a raised ink key-cap (squircle, gradient, top highlight)
- *   type     an outlined neutral chip with the type's icon: what kind of
- *            question, not a category, so it carries no colour
- *   tags     soft colour washes (below)
+ *   type     an outlined neutral chip with the type's icon and score;
+ *            traits (易错…) beside it, outlined in their accent
+ *   source   no chip at all: a trail of plain text behind a book icon
+ *
+ * Colour is only ever an icon or a hairline (one accent per kind, tokens
+ * --exam-*-accent), never a fill, so a long row stays calm.
  */
 [data-question-number] {
   display: inline-grid;
@@ -163,16 +198,29 @@
 }
 
 /* Icons (lucide circle-dot / square-check-big / pen-line / text-cursor-input; a check and a cross for true / false). */
-[data-question-type='single'] [data-question-type-label] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Ccircle cx='12' cy='12' r='3.5' fill='black'/%3E%3C/svg%3E"); }
-[data-question-type='multiple'] [data-question-type-label] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 10.656V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.344'/%3E%3Cpath d='m9 11 3 3L22 4'/%3E%3C/svg%3E"); }
-[data-question-type='boolean'] [data-question-type-label] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 12.5l3.5 3.5 6-7.5'/%3E%3Cpath d='M15 8.5l7 7M22 8.5l-7 7'/%3E%3C/svg%3E"); }
-[data-question-type='blank'] [data-question-type-label] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h-1a2 2 0 0 1-2-2 2 2 0 0 1-2 2H6'/%3E%3Cpath d='M13 8h7a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-7'/%3E%3Cpath d='M5 16H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h1'/%3E%3Cpath d='M6 4h1a2 2 0 0 1 2 2 2 2 0 0 1 2-2h1'/%3E%3Cpath d='M9 6v12'/%3E%3C/svg%3E"); }
-[data-question-type='essay'] [data-question-type-label] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 21h8'/%3E%3Cpath d='M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z'/%3E%3C/svg%3E"); }
+[data-question-type-label][data-type='single'] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Ccircle cx='12' cy='12' r='3.5' fill='black'/%3E%3C/svg%3E"); }
+[data-question-type-label][data-type='multiple'] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 10.656V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.344'/%3E%3Cpath d='m9 11 3 3L22 4'/%3E%3C/svg%3E"); }
+[data-question-type-label][data-type='boolean'] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 12.5l3.5 3.5 6-7.5'/%3E%3Cpath d='M15 8.5l7 7M22 8.5l-7 7'/%3E%3C/svg%3E"); }
+[data-question-type-label][data-type='blank'] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h-1a2 2 0 0 1-2-2 2 2 0 0 1-2 2H6'/%3E%3Cpath d='M13 8h7a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-7'/%3E%3Cpath d='M5 16H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h1'/%3E%3Cpath d='M6 4h1a2 2 0 0 1 2 2 2 2 0 0 1 2-2h1'/%3E%3Cpath d='M9 6v12'/%3E%3C/svg%3E"); }
+[data-question-type-label][data-type='essay'] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 21h8'/%3E%3Cpath d='M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z'/%3E%3C/svg%3E"); }
 
-/* The tags start a little apart from the number and type. */
-[data-question-type-label] + [data-question-tag],
-[data-question-type-label] + [data-user-tag] {
-  margin-inline-start: 0.25rem;
+/* The score, after a hairline inside the type chip. */
+[data-type-points] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-inline-start: 0.125rem;
+  color: var(--muted-foreground);
+  font-weight: 560;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+[data-type-points]::before {
+  content: '';
+  width: 1px;
+  height: 0.6875rem;
+  background: var(--exam-type-ring);
 }
 
 [data-question-actions] {
@@ -204,70 +252,164 @@
 /* ------------------------------------------------------------------ tags */
 
 /*
- * Built-in tags: a soft wash of colour with a hairline of the same hue and
- * text in its deep shade. Eight hand-tuned tones rather than one lightness
- * and chroma for every hue: yellows need more light and less chroma to stay
- * clean (a uniform palette turns them olive and its reds brick), blues and
- * violets take more chroma before they read as coloured. All eight sit at
- * the same perceived weight, so any mix on one card looks like a set.
- * Category ("考点:…") in a lighter weight before the value.
+ * Built-in tags (question-tags.tsx). One chip for every kind: a hairline
+ * and an icon in the kind's accent on a neutral ground. A kind sets
+ * --tag-accent and --tag-icon; a new kind needs nothing else.
  */
 [data-question-tag] {
-  --tag-bg: var(--exam-tag-5-bg);
-  --tag-fg: var(--exam-tag-5-fg);
+  --tag-accent: var(--muted-foreground);
+  --tag-icon: none;
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  height: 1.5rem;
-  max-width: 16rem;
-  padding-inline: 0.625rem;
-  border-radius: 999px;
-  background: var(--tag-bg);
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--tag-fg) 16%, transparent);
-  color: var(--tag-fg);
+  gap: 0.3125rem;
+  max-width: 100%;
+  min-height: 1.5rem;
+  padding: 0.1875rem 0.5625rem 0.1875rem 0.4375rem;
+  border-radius: 0.5rem;
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--tag-accent) 30%, transparent);
+  color: color-mix(in oklch, var(--foreground) 80%, transparent);
   font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+[data-question-tag]::before {
+  content: '';
+  flex-shrink: 0;
+  width: 0.8125rem;
+  height: 0.8125rem;
+  background: var(--tag-accent);
+  mask: var(--tag-icon) center / contain no-repeat;
+}
+
+/* Traits of the question itself (lucide flame). */
+[data-question-tag='type'] {
+  --tag-accent: var(--exam-trait-accent);
+  --tag-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z'/%3E%3C/svg%3E");
+}
+
+/*
+ * Knowledge points (lucide target), shown with the solution: larger,
+ * wrapping chips on a light ground, so a list of them reads as a set of
+ * cards under the question rather than a row of labels.
+ */
+[data-point-tags] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-question-tag='point'] {
+  --tag-accent: var(--exam-point-accent);
+  --tag-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Ccircle cx='12' cy='12' r='6'/%3E%3Ccircle cx='12' cy='12' r='2' fill='black'/%3E%3C/svg%3E");
+  gap: 0.4375rem;
+  min-height: 2rem;
+  padding: 0.375rem 0.75rem 0.375rem 0.625rem;
+  border-radius: 0.75rem;
+  background: var(--exam-point-bg);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklch, var(--tag-accent) 22%, transparent),
+    0 1px 2px rgb(0 0 0 / 3%);
+  color: var(--foreground);
+  font-size: 0.8125rem;
   font-weight: 560;
+  line-height: 1.35;
+  letter-spacing: 0;
+  white-space: normal;
+}
+
+[data-question-tag='point']::before {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/*
+ * Source: book › paper › subject › chapter as plain text behind a book
+ * icon (lucide book-open). Steps shrink with an ellipsis before the trail
+ * would overflow, the last one (the most specific) a shade darker.
+ */
+[data-source-trail] {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  height: 1.5rem;
+  padding-inline: 0.125rem 0.25rem;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  font-weight: 500;
   line-height: 1;
   white-space: nowrap;
 }
 
-/* In a modal header the tags are frosted glass (see the solution card below). */
-[data-slot='modal-tags'] [data-question-tag] {
-  height: 1.625rem;
-  padding-inline: 0.625rem;
+[data-source-trail]::before {
+  content: '';
+  flex-shrink: 0;
+  width: 0.9375rem;
+  height: 0.9375rem;
+  margin-inline-end: 0.4375rem;
+  background: var(--exam-source-accent);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7v14'/%3E%3Cpath d='M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
-[data-question-tag] > span {
+[data-trail-step] {
+  flex: 0 1 auto;
+  min-width: 2.5em;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-[data-question-tag] [data-tag-group] {
-  flex-shrink: 0;
-  font-weight: 500;
-  opacity: 0.7;
+/* Later steps keep a chevron's room more. The last, most specific one gives way least. */
+[data-trail-step] + [data-trail-step] {
+  min-width: calc(2.5em + 0.875rem);
 }
 
-/* A hairline between category and value. */
-[data-question-tag] [data-tag-group]::after {
+[data-trail-step]:last-child {
+  flex-shrink: 0.35;
+  color: color-mix(in oklch, var(--foreground) 82%, transparent);
+  font-weight: 560;
+}
+
+[data-trail-more] {
+  display: none;
+}
+
+/*
+ * The solution card's header on phones folds the middle steps of a long
+ * trail into "…": the book and the most specific step say the most, and
+ * two whole words beat four clipped ones. Cards give the trail a row of
+ * its own instead, where it fits whole.
+ */
+@container sheet-tags (width < 28rem) {
+  /* Four steps or more: the sixth span after the screen-reader text and "…". */
+  [data-source-trail]:has(> :nth-child(6)) > [data-trail-more] {
+    display: inline;
+    min-width: auto;
+    flex-shrink: 0;
+  }
+
+  [data-source-trail]:has(> :nth-child(6)) > [data-trail-step]:not([data-trail-edge], [data-trail-more]) {
+    display: none;
+  }
+}
+
+/* A chevron between steps (lucide chevron-right), drawn before the step it leads to. */
+[data-trail-step] + [data-trail-step]::before {
   content: '';
   display: inline-block;
-  width: 1px;
-  height: 0.6875rem;
-  margin-inline-start: 0.375rem;
+  width: 0.625rem;
+  height: 0.625rem;
+  margin-inline: 0.125rem 0.125rem;
   background: currentColor;
   opacity: 0.45;
   vertical-align: -0.0625rem;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E") center / contain no-repeat;
 }
-
-[data-question-tag][data-tone='0'] { --tag-bg: var(--exam-tag-0-bg); --tag-fg: var(--exam-tag-0-fg); }
-[data-question-tag][data-tone='1'] { --tag-bg: var(--exam-tag-1-bg); --tag-fg: var(--exam-tag-1-fg); }
-[data-question-tag][data-tone='2'] { --tag-bg: var(--exam-tag-2-bg); --tag-fg: var(--exam-tag-2-fg); }
-[data-question-tag][data-tone='3'] { --tag-bg: var(--exam-tag-3-bg); --tag-fg: var(--exam-tag-3-fg); }
-[data-question-tag][data-tone='4'] { --tag-bg: var(--exam-tag-4-bg); --tag-fg: var(--exam-tag-4-fg); }
-[data-question-tag][data-tone='5'] { --tag-bg: var(--exam-tag-5-bg); --tag-fg: var(--exam-tag-5-fg); }
-[data-question-tag][data-tone='6'] { --tag-bg: var(--exam-tag-6-bg); --tag-fg: var(--exam-tag-6-fg); }
-[data-question-tag][data-tone='7'] { --tag-bg: var(--exam-tag-7-bg); --tag-fg: var(--exam-tag-7-fg); }
 
 /* The reader's own tags: neutral capsule with a coloured dot. */
 [data-user-tag] {
@@ -1236,8 +1378,98 @@ html[data-keypad-open] body {
   }
 }
 
-/* Header capsules are neutral glass like its buttons, never coloured. */
-[data-slot='modal-tags'] [data-question-tag] {
-  background: var(--modal-glass);
-  color: color-mix(in oklch, var(--foreground) 78%, transparent);
+/*
+ * Header: type, score, traits, source and the reader's tags share one
+ * frosted capsule beside the title, the type's outline dropped for a
+ * hairline divider. A single capsule, so a single blurred layer over the
+ * scrolling panes (each one is a filter pass per frame), and the trail
+ * truncates inside it instead of the row scrolling sideways.
+ */
+[data-solution-card] [data-slot='modal-tags'] {
+  container: sheet-tags / inline-size;
+}
+
+[data-slot='modal-tags'] > [data-tag-capsule] {
+  display: inline-flex;
+  flex-shrink: 1;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+  max-width: 100%;
+  height: 2rem;
+  padding-inline: 0.25rem 0.625rem;
+  border-radius: 999px;
+  background-color: var(--modal-glass);
+}
+
+[data-tag-capsule] [data-question-type-label] {
+  height: 1.625rem;
+  padding-inline: 0.5rem 0.25rem;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+  color: color-mix(in oklch, var(--foreground) 82%, transparent);
+}
+
+[data-tag-capsule] [data-question-tag] {
+  flex-shrink: 0;
+  min-height: 1.375rem;
+  border-radius: 999px;
+}
+
+[data-tag-capsule] [data-source-trail] {
+  padding-inline-start: 0.5rem;
+  border-inline-start: 1px solid var(--ui-fill-strong);
+  height: 1rem;
+}
+
+[data-tag-capsule] [data-user-tag] {
+  flex-shrink: 0;
+}
+
+/*
+ * Title: the question's number as the same key-cap as on the card, its
+ * words for screen readers only. Narrow enough that the toolbar and the
+ * close button share the first row on phones.
+ */
+[data-solution-card] [data-slot='sc-title-text'] {
+  overflow: visible;
+}
+
+[data-solution-card] [data-slot='modal-title'] {
+  overflow: visible;
+}
+
+[data-solution-card] [data-slot='modal-title'] [data-question-number] {
+  min-width: 2.25rem;
+  height: 2.25rem;
+  margin: 0;
+  border-radius: 0.75rem;
+  font-size: 1.0625rem;
+}
+
+@media (width < 48rem) {
+  [data-solution-card] [data-slot='modal-toolbar'] :is(button, [data-slot='sc-pager-step']) {
+    width: 1.875rem;
+    height: 1.875rem;
+  }
+
+  [data-solution-card] [data-slot='sc-pager-count'] {
+    min-width: 3em;
+  }
+}
+
+/*
+ * Figures in a question or solution: diagrams drawn black on white. The
+ * filter (app/layout.tsx, #exam-figure-ink) turns white into transparency
+ * and keeps the ink, so a figure sits on whatever holds it (the tinted
+ * card, the solution card's grey pane) with no white box, the same way
+ * on every surface; in dark mode the ink turns light.
+ */
+:is([data-exam-question-body], [data-solution-card] .prose) img {
+  filter: url('#exam-figure-ink');
+}
+
+.dark :is([data-exam-question-body], [data-solution-card] .prose) img {
+  filter: url('#exam-figure-ink-dark');
 }

@@ -15,7 +15,7 @@ import {
 } from './model';
 import { QuestionFooter } from './question-footer';
 import { QuestionProvider } from './question-state';
-import { BuiltinTags } from './question-tags';
+import { QuestionSourceTrail, QuestionTagChips, QuestionTypeTag } from './question-tags';
 import { TrueFalse } from './true-false';
 
 export type QuestionProps = {
@@ -28,8 +28,9 @@ export type QuestionProps = {
   /** Overrides the automatic number; `false` hides it. */
   number?: number | string | false;
   /**
-   * Built-in tags shown as capsules in the card's top-left corner:
-   * tags="2023 统考, 数据结构" or tags={["来源:2023 统考", "易错"]}.
+   * Built-in tags, sorted into type traits, source and knowledge points
+   * (model.ts): tags="王道8套卷, 第4套, 考点:VLAN, 易错". The header shows the
+   * first two; knowledge points appear with the solution.
    */
   tags?: string | readonly string[];
   /** Display number resolved by remarkQuestion (document order). */
@@ -51,7 +52,8 @@ function displayNumber(number: QuestionProps['number'], index: QuestionProps['in
 /**
  * One exercise, rendered as a card:
  *
- *   header   number · type · built-in tags · the reader's tags   ☆ tags note
+ *   header   number · type, score, traits · the reader's tags
+ *            source trail                            ☆ tags note
  *   stem     MDX with options / true-false buttons / blanks in place
  *   footer   submit · grade · 查看解答
  *   note     the reader's note, if any
@@ -64,6 +66,7 @@ export function Question({
   id,
   type,
   answer,
+  points,
   number,
   tags,
   index,
@@ -89,6 +92,7 @@ export function Question({
 
   const numberLabel = displayNumber(number, index);
   const builtinTags = parseQuestionTags(tags);
+  const score = typeof points === 'number' && Number.isFinite(points) && points > 0 ? points : undefined;
   const solution = split.solution?.props.children;
   const hasSolution = hasContent(solution);
   const typeLabel = QUESTION_TYPE_LABELS[questionType];
@@ -109,10 +113,11 @@ export function Question({
             {numberLabel ? (
               <span id={`question-${id}-label`} data-question-number="" aria-label={`第 ${numberLabel} 题`}>{numberLabel}</span>
             ) : null}
-            <span data-question-type-label="">{typeLabel}</span>
-            <BuiltinTags tags={builtinTags} />
+            <QuestionTypeTag type={questionType} label={typeLabel} points={score} />
+            <QuestionTagChips tags={builtinTags.type} />
             <QuestionUserTags />
           </div>
+          <QuestionSourceTrail tags={builtinTags.source} />
           <QuestionMarkActions />
         </div>
         <div data-exam-question-body="" className={cn('min-w-0', questionStemClassName)}>
@@ -128,6 +133,7 @@ export function Question({
             dialogTitle={dialogTitle}
             numberLabel={numberLabel}
             typeLabel={typeLabel}
+            points={score}
             tags={builtinTags}
           />
         ) : null}

@@ -13,7 +13,7 @@ import {
   type BlankSpec,
 } from '@/components/question/grading';
 import { Blank, Option, Solution } from '@/components/question/parts';
-import { buildGradingSpec, indexBlanks, parseQuestionTags, splitQuestion, tagTone } from '@/components/question/model';
+import { buildGradingSpec, indexBlanks, parseQuestionTags, splitQuestion } from '@/components/question/model';
 
 const text = (answer: string, extra: Partial<BlankSpec> = {}): BlankSpec => ({ answer, aliases: [], kind: 'text', ...extra });
 const math = (answer: string, extra: Partial<BlankSpec> = {}): BlankSpec => ({ answer, aliases: [], kind: 'math', ...extra });
@@ -107,22 +107,29 @@ describe('attempt evaluation', () => {
 
 describe('built-in tags', () => {
   it('splits a comma list or reads an array, with optional categories', () => {
-    expect(parseQuestionTags('2023 统考, 数据结构，易错、 易错')).toEqual([
-      { label: '2023 统考', tone: tagTone('2023 统考') },
-      { label: '数据结构', tone: tagTone('数据结构') },
-      { label: '易错', tone: tagTone('易错') },
+    expect(parseQuestionTags('2023 统考, 数据结构，易错、 易错')).toEqual({
+      type: [{ label: '易错', kind: 'type' }],
+      source: [{ label: '2023 统考', kind: 'source' }, { label: '数据结构', kind: 'source' }],
+      point: [],
+    });
+    expect(parseQuestionTags(['来源:2023 统考', '来源：模拟卷']).source).toEqual([
+      { label: '2023 统考', group: '来源', kind: 'source' },
+      { label: '模拟卷', group: '来源', kind: 'source' },
     ]);
-    expect(parseQuestionTags(['来源:2023 统考', '来源：模拟卷'])).toEqual([
-      { label: '2023 统考', group: '来源', tone: tagTone('来源') },
-      { label: '模拟卷', group: '来源', tone: tagTone('来源') },
-    ]);
-    expect(parseQuestionTags(undefined)).toEqual([]);
+    expect(parseQuestionTags(undefined)).toEqual({ type: [], source: [], point: [] });
   });
 
-  it('gives a tag the same colour everywhere', () => {
-    expect(tagTone('易错')).toBe(tagTone('易错'));
-    expect(tagTone('易错')).toBeGreaterThanOrEqual(0);
-    expect(tagTone('易错')).toBeLessThan(8);
+  it('files each tag under type, source or point by its category', () => {
+    const tags = parseQuestionTags('王道8套卷, 第4套, 计算机网络, 考点:VLAN广播域, 知识点：NAT, 难度:较难, 章节:网络层, 年份:2024');
+    expect(tags.source.map((tag) => tag.label)).toEqual(['王道8套卷', '第4套', '计算机网络', '网络层', '2024']);
+    expect(tags.point.map((tag) => tag.label)).toEqual(['VLAN广播域', 'NAT']);
+    expect(tags.type).toEqual([{ label: '较难', group: '难度', kind: 'type' }]);
+  });
+
+  it('keeps the same label apart across kinds and caps each kind', () => {
+    const tags = parseQuestionTags(['考点:栈', '栈', ...Array.from({ length: 20 }, (_, index) => `考点:点${index}`)]);
+    expect(tags.source).toEqual([{ label: '栈', kind: 'source' }]);
+    expect(tags.point).toHaveLength(12);
   });
 });
 

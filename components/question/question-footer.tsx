@@ -7,7 +7,7 @@ import { blankBadge } from './blank-field';
 import type { AttemptResult, BlankSpec, Evaluation, GradingSpec, QuestionType } from './grading';
 import { formatKey, selfGradeOf } from './grading';
 import { MathPreview } from './math-preview';
-import type { QuestionTag } from './model';
+import type { QuestionTags } from './model';
 import { useQuestionState } from './question-state';
 import { SelfGrade } from './self-grade';
 import { QuestionSolutionSheet } from './solution-sheet';
@@ -145,7 +145,8 @@ export type QuestionFooterProps = {
   dialogTitle: string;
   numberLabel: string | null;
   typeLabel: string;
-  tags: QuestionTag[];
+  points?: number;
+  tags: QuestionTags;
 };
 
 export function QuestionFooter({ showSolution, ...sheet }: QuestionFooterProps) {
