@@ -14,7 +14,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { MATH_INPUT_MAX_LENGTH } from '@/lib/math-expression';
-import { advanceFrom } from './blank-navigation';
+import { advanceFrom, stepFrom } from './blank-navigation';
 import type { QuestionState } from './question-state';
 
 const MathKeypad = lazy(() => import('./math-keypad').then((module) => ({ default: module.MathKeypad })));
@@ -23,10 +23,16 @@ const MathKeypad = lazy(() => import('./math-keypad').then((module) => ({ defaul
 export type MathEditor = {
   /** Replaces the selection with `text`; the caret ends `caretBack` characters before its end. */
   insert(text: string, caretBack?: number): void;
+  /** Puts the selection between `open` and `close` (caret after), or an empty pair with the caret inside. */
+  wrap(open: string, close: string): void;
+  /** A fraction bar; a selection becomes the numerator. */
+  fraction(): void;
   backspace(): void;
   move(delta: number): void;
   clear(): void;
   enter(): void;
+  /** Focuses the previous (-1) or next (1) blank of the question. */
+  step(delta: -1 | 1): void;
   close(): void;
 };
 
@@ -52,6 +58,7 @@ type MathBlankProps = {
   style: CSSProperties;
   question: QuestionState;
   index: number;
+  count: number;
   label: string;
   last: boolean;
   'aria-label': string;
@@ -68,7 +75,7 @@ let lastClosedAt = 0;
  * and tablets while the caret, selection and a hardware keyboard keep working;
  * the on-screen keypad (loaded on first focus) edits the same value.
  */
-export function MathBlank({ value, question, index, label, last, ...field }: MathBlankProps) {
+export function MathBlank({ value, question, index, count, label, last, ...field }: MathBlankProps) {
   const input = useRef<HTMLInputElement>(null);
   const caret = useRef<number | null>(null);
   const [open, setOpen] = useState(false);
@@ -98,7 +105,23 @@ export function MathBlank({ value, question, index, label, last, ...field }: Mat
     return {
       insert(text, caretBack = 0) {
         const { start, end } = selection();
+        // Typing a closing bracket in front of the one a template left steps over it.
+        if (text === ')' && start === end && value[start] === ')') {
+          write(value, start + 1);
+          return;
+        }
         write(value.slice(0, start) + text + value.slice(end), start + text.length - caretBack);
+      },
+      wrap(open, close) {
+        const { start, end } = selection();
+        const inner = value.slice(start, end);
+        const caret = start + open.length + inner.length + (inner ? close.length : 0);
+        write(value.slice(0, start) + open + inner + close + value.slice(end), caret);
+      },
+      fraction() {
+        const { start, end } = selection();
+        if (start === end) this.insert('/');
+        else this.wrap('(', ')/');
       },
       backspace() {
         const { start, end } = selection();
@@ -116,6 +139,9 @@ export function MathBlank({ value, question, index, label, last, ...field }: Mat
       clear() { write('', 0); },
       enter() {
         if (input.current) advanceFrom(input.current, question);
+      },
+      step(delta) {
+        if (input.current) stepFrom(input.current, delta);
       },
       close() { input.current?.blur(); setOpen(false); },
     };
@@ -174,6 +200,8 @@ export function MathBlank({ value, question, index, label, last, ...field }: Mat
               editor={editor}
               value={value}
               label={label}
+              index={index}
+              count={count}
               last={last}
               instant={instant}
               input={input}
