@@ -12,6 +12,7 @@ import {
   ModalHeader,
   ModalPane,
   ModalSplit,
+  ModalTag,
   ModalTags,
   ModalTitle,
   ModalToolbar,
@@ -39,12 +40,8 @@ import { cn } from '@/lib/utils';
 const trigger = cn(buttonVariants({ variant: 'secondary', size: 'lg' }), 'h-10 rounded-full px-4');
 const toolButton = 'size-8 rounded-full text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground';
 
-function Chip({ children, tone }: { children: ReactNode; tone?: string }) {
-  return (
-    <span data-question-tag="" data-tone={tone}>
-      <span>{children}</span>
-    </span>
-  );
+function Chip({ children }: { children: ReactNode }) {
+  return <ModalTag>{children}</ModalTag>;
 }
 
 function Paragraphs({ count, topic }: { count: number; topic: string }) {
@@ -109,10 +106,10 @@ function ToolbarDemo() {
           <ModalHeader>
             <ModalTitle>线性代数 · 第 3 章</ModalTitle>
             <ModalTags>
-              <Chip tone="3">矩阵</Chip>
-              <Chip tone="5">特征值</Chip>
-              <Chip tone="1">易错</Chip>
-              <Chip tone="7">2024 真题</Chip>
+              <Chip>矩阵</Chip>
+              <Chip>特征值</Chip>
+              <Chip>易错</Chip>
+              <Chip>2024 真题</Chip>
             </ModalTags>
             <ModalToolbar aria-label="操作">
               <Button variant="ghost" size="icon" className={cn(toolButton, starred && 'text-warning hover:text-warning')} aria-pressed={starred} aria-label="收藏" onClick={() => setStarred(!starred)}>
@@ -141,7 +138,7 @@ function SplitDemo() {
             <ModalTitle>题目与解析</ModalTitle>
             <ModalTags>
               <Chip>解答题</Chip>
-              <Chip tone="2">概率论</Chip>
+              <Chip>概率论</Chip>
             </ModalTags>
           </ModalHeader>
           <ModalSplit columns="minmax(0,0.9fr) minmax(0,1.1fr)">
@@ -188,7 +185,7 @@ function Page({ index }: { index: number }) {
       <ModalHeader>
         <ModalTitle>{page.title}</ModalTitle>
         <ModalTags>
-          <Chip tone={String(index + 1)}>第 {index + 1} 页</Chip>
+          <Chip>第 {index + 1} 页</Chip>
         </ModalTags>
       </ModalHeader>
       <ModalBody>
@@ -364,7 +361,7 @@ function StudyDemo() {
         <StudyCardHeader title={concept.term} titleMode="scrolled" />
         <StudyCardStage ratio={0.45}>
           <StudyCardAside>
-            <StudyCardHero title={concept.term} subtitle={concept.english} badge={<Chip tone="5">{concept.tag}</Chip>} />
+            <StudyCardHero title={concept.term} subtitle={concept.english} badge={<Chip>{concept.tag}</Chip>} />
             <StudyCardSection label="要点">
               <ul className="grid gap-2 text-[0.9375rem] leading-relaxed">
                 {concept.points.map((point, order) => (

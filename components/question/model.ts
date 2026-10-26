@@ -165,34 +165,57 @@ export function toChoiceOptions(options: ReactElement<OptionProps>[]): ChoiceOpt
 /* ---------------------------------------------------------------------------
  * Built-in question tags
  *
- *   tags="2023 统考, 数据结构, 易错"
- *   tags={["来源:2023 统考", "章节:栈与队列"]}
+ *   tags="王道8套卷, 第4套, 计算机网络, 考点:VLAN广播域, 易错"
+ *   tags={["来源:2023 统考", "章节:栈与队列", "考点:循环队列"]}
  *
- * Commas (, ， 、) separate tags. "分类:值" shows the category in a lighter
- * weight, and every tag of one category shares a colour.
+ * Commas (, ， 、) separate tags; "分类:值" names a category. Every tag is
+ * filed under one of three kinds, each drawn in its own shape:
+ *
+ *   type     traits of the question itself (易错, 难度:…), next to its type
+ *   source   where it comes from (book, paper, subject, chapter), shown as
+ *            one trail; bare tags without a known category land here
+ *   point    what it examines (考点:…), shown with the solution only
+ *
+ * A new kind is a new entry in QUESTION_TAG_KINDS plus its look in
+ * styles/question.css.
  * ------------------------------------------------------------------------- */
 
-export const QUESTION_TAG_LIMIT = 8;
+export type QuestionTagKind = 'type' | 'source' | 'point';
+
+export type QuestionTagKindSpec = {
+  /** Name of the kind, read out before its tags. */
+  label: string;
+  /** Categories that file a tag under this kind ("考点:…"). */
+  groups: readonly string[];
+  /** Bare tags that belong here without a category. */
+  keywords?: readonly string[];
+};
+
+export const QUESTION_TAG_KINDS: Record<QuestionTagKind, QuestionTagKindSpec> = {
+  type: {
+    label: '题型',
+    groups: ['题型', '难度', '标记', '特点'],
+    keywords: ['易错', '重点', '难点', '难题', '压轴', '高频', '必做', '经典', '基础', '拔高'],
+  },
+  source: { label: '来源', groups: ['来源', '出处', '试卷', '年份', '科目', '章节'] },
+  point: { label: '考点', groups: ['考点', '知识点', '考察点'] },
+};
+
+/** Where tags without a known category go. */
+export const DEFAULT_TAG_KIND: QuestionTagKind = 'source';
+
+/** At most this many tags of each kind. */
+export const QUESTION_TAG_LIMIT = 12;
 export const QUESTION_TAG_MAX_LENGTH = 32;
-export const TAG_TONES = 8;
 
 export type QuestionTag = {
   label: string;
   /** Category before a colon, if any. */
   group?: string;
-  /** Palette index, stable across pages. */
-  tone: number;
+  kind: QuestionTagKind;
 };
 
-/** FNV-1a; colours must not change between builds or devices. */
-export function tagTone(text: string): number {
-  let hash = 0x811c9dc5;
-  for (const char of text) {
-    hash ^= char.codePointAt(0)!;
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return (hash >>> 0) % TAG_TONES;
-}
+export type QuestionTags = Record<QuestionTagKind, QuestionTag[]>;
 
 export function splitTagList(value: unknown): string[] {
   const list = Array.isArray(value)
@@ -203,18 +226,30 @@ export function splitTagList(value: unknown): string[] {
   return list.map((item) => item.trim()).filter((item) => item !== '');
 }
 
-export function parseQuestionTags(value: unknown): QuestionTag[] {
+export function tagKindOf(label: string, group?: string): QuestionTagKind {
+  const kinds = Object.entries(QUESTION_TAG_KINDS) as [QuestionTagKind, QuestionTagKindSpec][];
+  const found = group
+    ? kinds.find(([, spec]) => spec.groups.includes(group))
+    : kinds.find(([, spec]) => spec.keywords?.includes(label));
+  return found?.[0] ?? DEFAULT_TAG_KIND;
+}
+
+export function emptyQuestionTags(): QuestionTags {
+  return { type: [], source: [], point: [] };
+}
+
+export function parseQuestionTags(value: unknown): QuestionTags {
   const seen = new Set<string>();
-  const tags: QuestionTag[] = [];
+  const tags = emptyQuestionTags();
   for (const item of splitTagList(value)) {
     const match = /^([^:：]{1,12})[:：]\s*(.+)$/u.exec(item);
     const group = match?.[1].trim();
     const label = (match?.[2] ?? item).trim();
-    const key = `${group ?? ''}\u0000${label}`;
-    if (!label || seen.has(key)) continue;
+    const kind = tagKindOf(label, group);
+    const key = `${kind}\u0000${label}`;
+    if (!label || seen.has(key) || tags[kind].length === QUESTION_TAG_LIMIT) continue;
     seen.add(key);
-    tags.push({ label, ...(group ? { group } : {}), tone: tagTone(group ?? label) });
-    if (tags.length === QUESTION_TAG_LIMIT) break;
+    tags[kind].push({ label, ...(group ? { group } : {}), kind });
   }
   return tags;
 }

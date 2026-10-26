@@ -18,8 +18,8 @@ import { formatKey, formatResponse, type GradingSpec, type QuestionType } from '
 import { QuestionMarkActions, QuestionMarksScope, QuestionUserTags, useMarks } from './marks/question-marks';
 import { NoteEditor } from './marks/note-editor';
 import { MathPreview } from './math-preview';
-import { BuiltinTags } from './question-tags';
-import type { QuestionTag } from './model';
+import { QuestionHeadTags, QuestionPointTags } from './question-tags';
+import type { QuestionTags } from './model';
 import { revealQuestion } from './page-questions';
 import { SelfGrade } from './self-grade';
 import { mirrorQuestion } from './question-mirror';
@@ -34,10 +34,12 @@ const QuestionLibraryDialog = lazy(() => import('./marks/library-dialog').then((
  * of the page that has a solution, opened on the question asked and stepped
  * through the others with the pager, ←/→ or a swipe.
  *
- *   header   number, type and tags; the reader's marks, the library and
- *            the pager in the toolbar (top right)
+ *   header   number; type and source on one capsule beside it (the
+ *            reader's tags with them); the reader's marks, the library
+ *            and the pager in the toolbar (top right)
  *   aside    the question (a read-only copy of the page's own rendering,
- *            the key revealed) on one solid colour that blocks against
+ *            the key revealed) and, now that the solution is open, its
+ *            knowledge points, on one solid colour that blocks against
  *            the white main pane (question.css); on desktop also the
  *            reader's note
  *   main     the reader's answer next to the correct one, the solution,
@@ -56,14 +58,6 @@ const QuestionLibraryDialog = lazy(() => import('./marks/library-dialog').then((
 // Portaled out of #docs-body: `docs-prose` gives it the page typography.
 const prose = 'prose docs-prose max-w-none min-w-0';
 const proseReset = '[&>:first-child]:mt-0 [&>:last-child]:mb-0';
-
-function Chip({ children }: { children: ReactNode }) {
-  return (
-    <span className="inline-flex h-6.5 items-center rounded-full bg-(--modal-glass) px-2.5 text-xs font-medium whitespace-nowrap text-foreground/78 tabular-nums">
-      {children}
-    </span>
-  );
-}
 
 /** Read-only copy of the question as rendered on the page. */
 function QuestionMirror({ questionId, state }: { questionId: string; state: QuestionState | null }) {
@@ -214,7 +208,8 @@ export type QuestionSolutionSheetProps = {
   dialogTitle: string;
   numberLabel: string | null;
   typeLabel: string;
-  tags: QuestionTag[];
+  points?: number;
+  tags: QuestionTags;
 };
 
 /*
@@ -223,7 +218,7 @@ export type QuestionSolutionSheetProps = {
  * a hundred of these, most never opened: until then each one only keeps its
  * entry in the page's deck current.
  */
-export function QuestionSolutionSheet({ buttonLabel, questionId, questionType, solution, dialogTitle, numberLabel, typeLabel, tags }: QuestionSolutionSheetProps) {
+export function QuestionSolutionSheet({ buttonLabel, questionId, questionType, solution, dialogTitle, numberLabel, typeLabel, points, tags }: QuestionSolutionSheetProps) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -232,8 +227,8 @@ export function QuestionSolutionSheet({ buttonLabel, questionId, questionType, s
   const marks = useMarks();
 
   const entry = useMemo<SolutionEntry>(() => ({
-    key, questionId, questionType, trigger: triggerRef, solution, dialogTitle, numberLabel, typeLabel, tags, state, marks,
-  }), [key, questionId, questionType, solution, dialogTitle, numberLabel, typeLabel, tags, state, marks]);
+    key, questionId, questionType, trigger: triggerRef, solution, dialogTitle, numberLabel, typeLabel, points, tags, state, marks,
+  }), [key, questionId, questionType, solution, dialogTitle, numberLabel, typeLabel, points, tags, state, marks]);
 
   useEffect(() => setSolutionEntry(entry), [entry]);
   useEffect(() => () => removeSolutionEntry(key), [key]);
@@ -322,13 +317,18 @@ function SolutionCard({ self, open, setOpen, triggerRef }: {
     >
       <EntryScope entry={entry}>
         <StudyCardHeader
-          title={entry.numberLabel ? `第 ${entry.numberLabel} 题` : entry.dialogTitle}
-          tags={(
+          title={entry.numberLabel ? (
             <>
-              <Chip>{entry.typeLabel}</Chip>
-              <BuiltinTags tags={entry.tags} />
-              <QuestionUserTags />
+              <span data-question-number="" aria-hidden="true">{entry.numberLabel}</span>
+              <span className="sr-only">第 {entry.numberLabel} 题</span>
             </>
+          ) : entry.dialogTitle}
+          tags={(
+            // One glass capsule for all of them: each blurred layer costs a pass on every scrolled frame.
+            <span data-tag-capsule="">
+              <QuestionHeadTags type={entry.questionType} typeLabel={entry.typeLabel} points={entry.points} tags={entry.tags} />
+              <QuestionUserTags />
+            </span>
           )}
           tagsProps={{ 'aria-label': '标签' }}
           actionsLabel="题目操作"
@@ -373,7 +373,8 @@ function SolutionCardBody({ entry, desktop, editingNote, setEditingNote }: {
   editingNote: boolean;
   setEditingNote: (editing: boolean) => void;
 }) {
-  const { questionId, state, solution } = entry;
+  const { questionId, state, solution, tags } = entry;
+  const points = tags.point;
   const spec = state?.spec ?? null;
   const solutionSection = (order: number) => (
     <StudyCardSection label={spec && spec.kind !== 'self' ? '解析' : '参考解答'} {...studyCardReveal(order)}>
@@ -388,7 +389,12 @@ function SolutionCardBody({ entry, desktop, editingNote, setEditingNote }: {
         <StudyCardSection label="题目" {...studyCardReveal(0)}>
           <QuestionMirror questionId={questionId} state={state} />
         </StudyCardSection>
-        {desktop ? <SheetNote editing={editingNote} setEditing={setEditingNote} order={1} /> : null}
+        {points.length ? (
+          <StudyCardSection label="考点" meta={`${points.length} 个`} {...studyCardReveal(1)}>
+            <QuestionPointTags tags={points} />
+          </StudyCardSection>
+        ) : null}
+        {desktop ? <SheetNote editing={editingNote} setEditing={setEditingNote} order={2} /> : null}
       </StudyCardAside>
 
       <StudyCardMain>

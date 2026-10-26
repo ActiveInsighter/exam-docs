@@ -217,14 +217,16 @@ describe('Question choices', () => {
     expect(markup.match(/data-blank-index=""/g)).toHaveLength(3);
   });
 
-  it('shows built-in tags as capsules in the header', () => {
+  it('shows type and source in the header and keeps knowledge points for the solution', () => {
     const markup = renderToStaticMarkup(
-      createElement(Question, { id: 'q7', type: 'essay', tags: '来源:2023 统考, 易错' }, createElement('p', null, '题干')),
+      createElement(Question, { id: 'q7', type: 'essay', points: 9, tags: '王道8套卷, 来源:第4套, 易错, 考点:VLAN' }, createElement('p', null, '题干')),
     );
 
-    expect(markup.match(/data-question-tag=""/g)).toHaveLength(2);
-    expect(markup).toContain('data-tag-group="">来源</span>');
-    expect(markup).toContain('>易错</span>');
+    expect(markup).toContain('data-type="essay"');
+    expect(markup).toContain('<span data-type-points="">9 分</span>');
+    expect(markup).toContain('data-question-tag="type" title="易错">易错</span>');
+    expect(markup.match(/data-trail-step=""/g)).toHaveLength(2);
+    expect(markup).not.toContain('VLAN');
   });
 
   it('prints the resolved number in front of the stem', () => {
