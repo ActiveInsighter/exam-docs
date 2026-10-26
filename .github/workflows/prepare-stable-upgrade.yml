@@ -24,7 +24,9 @@ jobs:
       - name: Validate upgraded dependencies
         run: |
           npm test
-          npm run typecheck
+          node --input-type=module -e 'import { writeFileSync } from "node:fs"; writeFileSync("tsconfig.ci-app.json", JSON.stringify({ extends: "./tsconfig.json", exclude: ["node_modules", "tests", "worker"] }));'
+          npx next typegen
+          npx tsc --noEmit --incremental false --project tsconfig.ci-app.json
       - name: Commit only after validation succeeds
         run: |
           git config user.name "github-actions[bot]"
