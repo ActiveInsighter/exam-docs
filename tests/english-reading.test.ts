@@ -49,7 +49,7 @@ describe('English reading composition', () => {
 
   it('marks the evidence of a question in the passage without changing its text', () => {
     const withEvidence = createElement(ExamArticle, { title: 'A familiar park', children:
-      createElement('p', null, 'Some walked. ', createElement(Evidence, { for: 'q1' }, 'Attention made the difference.')) });
+      createElement('p', null, 'Some walked. ', createElement(Evidence, { for: 'q1', children: 'Attention made the difference.' })) });
     const html = renderToStaticMarkup(createElement(EnglishReading, null, withEvidence, question('Why?', 'q1')));
     expect(html).toMatch(/<span[^>]*data-reading-evidence="q1"[^>]*>Attention made the difference\.<\/span>/);
     // Nothing is marked until the question is graded.

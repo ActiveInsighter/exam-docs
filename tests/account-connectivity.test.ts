@@ -2,11 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import { createSupabaseFetch } from '@/lib/supabase-fetch';
 import { accountErrorMessage } from '@/lib/account/errors';
-import worker from '../worker';
+import { gateway as worker } from '../worker/gateway';
 
 const project = 'https://hqtpzhefihdwllbqjeot.supabase.co';
 const gateway = 'https://exam.any1.tech/api/supabase';
-const env = { SUPABASE_URL: project, ASSETS: { fetch: vi.fn(() => new Response('static')) } };
+const env = { SUPABASE_URL: project, ASSETS: { fetch: vi.fn(async () => new Response('static')) } };
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -31,7 +31,8 @@ describe('same-origin account and question connectivity', () => {
     expect(new URL(requests[0].url).searchParams.get('redirect_to')).toBe('https://exam.any1.tech/docs/math/');
     expect((await requests[0].json()).email).toBe('test@example.com');
     expect(requests[0].headers.get('apikey')).toBe('sb_publishable_test');
-    expect(client.auth.storageKey).toBe('sb-hqtpzhefihdwllbqjeot-auth-token');
+    // `storageKey` is protected since supabase-js 2.118; element access still reads it.
+    expect(client.auth['storageKey']).toBe('sb-hqtpzhefihdwllbqjeot-auth-token');
   });
 
   it('streams the caller JWT and RPC body to the fixed project without forwarding site cookies or caching private data', async () => {
