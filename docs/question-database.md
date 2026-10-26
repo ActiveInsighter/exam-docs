@@ -174,9 +174,11 @@ node scripts/verify-question-storage-recovery-browser.mjs
 
 ```bash
 QUESTION_BROWSER_MODULES=/包含Playwright的目录 \
-DEPLOYMENT_URL=http://127.0.0.1:3000 \
+DEPLOYMENT_URL=http://localhost:3000 \
 node scripts/verify-question-database-browser.mjs
 ```
+
+默认使用 408 模拟题第 1 章的 `408-6dd520-002`（B 为正确选项）；`QUESTION_PAGE`、`QUESTION_ID` 可换成其他「B 对、A 错」的单选题。开发服务器须用 `localhost` 访问：Next 16 开发模式默认拒绝 `127.0.0.1` 来源的脚本请求，页面不会水合。
 
 `QUESTION_BROWSER_MODULES` 指向可解析 `playwright` 包的目录；应用需先启动。验证使用独立浏览器上下文，不会发送登录邮件。结果和截图默认写入 `.deploy-tmp/question-database-browser/`。
 

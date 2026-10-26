@@ -11,8 +11,9 @@ const require = process.env.QUESTION_BROWSER_MODULES
 const { chromium } = require('playwright');
 const base = (process.env.DEPLOYMENT_URL ?? 'http://127.0.0.1:3017').replace(/\/$/, '');
 const output = path.resolve(process.env.QUESTION_BROWSER_OUTPUT ?? '.deploy-tmp/question-database-browser');
-const url = `${base}/docs/english/`;
-const questionId = 'english-reading-001';
+// A single-choice question whose option B is correct (A is wrong).
+const url = `${base}${process.env.QUESTION_PAGE ?? '/docs/408/mock/01-8c139b6e/01-0387f115/'}`;
+const questionId = process.env.QUESTION_ID ?? '408-6dd520-002';
 const errors = [];
 const evidence = { deploymentUrl: base, startedAt: new Date().toISOString(), checks: [], errors, passed: false };
 await mkdir(output, { recursive: true });
