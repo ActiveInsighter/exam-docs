@@ -1,45 +1,37 @@
 import { IDBFactory } from 'fake-indexeddb';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
-  QuestionAnswerCache, QuestionDatabase, QuestionSyncEngine, namespaceForUser, questionKey,
-  type AnswerState, type QuestionIdentity, type QuestionSyncTransport, type SyncRequest, type SyncResponse,
+  QuestionAnswerCache, QuestionSession, questionKey,
+  type Outbox, type QuestionDatabase, type QuestionNamespace, type SyncChanges,
 } from '../lib/question-store';
+import {
+  ACCOUNT, FakeServer, draft, onCleanup, openDatabase as open, question, quota, runCleanup, submitted, tick as settle, until,
+} from './helpers/question-store';
 
-const ACCOUNT = namespaceForUser('11111111-1111-4111-8111-111111111111');
-const page = '/docs/math';
-const question = (questionId: string): QuestionIdentity => ({ documentPath: page, questionId, questionRevision: 'r1' });
-const draft = (text: string): AnswerState => ({ selected: [], values: [text], submitted: false, attempt: 0 });
-const submitted = (text: string, attempt = 1): AnswerState => ({ ...draft(text), submitted: true, attempt });
-const cleanup: (() => void)[] = [];
-const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
-
-async function open(factory = new IDBFactory(), name = crypto.randomUUID()) {
-  const db = await QuestionDatabase.open({ name, indexedDB: factory, broadcast: false });
-  cleanup.push(() => db.close());
-  return db;
+function recorder(): Outbox & { changes: Partial<SyncChanges>[]; held: Set<string> } {
+  const changes: Partial<SyncChanges>[] = [];
+  const held = new Set<string>();
+  return { changes, held, put: (value) => { changes.push(value); }, holds: (key) => held.has(key) };
 }
 
-function cacheFor(db: QuestionDatabase | null, draftDelayMs = 0) {
-  const cache = new QuestionAnswerCache(db, ACCOUNT, { draftDelayMs });
-  cleanup.push(() => cache.dispose());
+function cacheFor(db: QuestionDatabase | null, draftDelayMs = 0, outbox: Outbox | null = null, namespace: QuestionNamespace = ACCOUNT) {
+  const cache = new QuestionAnswerCache(db, namespace, { draftDelayMs, outbox });
+  onCleanup(() => cache.dispose());
   return cache;
 }
 
-async function until(check: () => boolean) {
-  for (let i = 0; i < 200 && !check(); i++) await settle();
-  expect(check()).toBe(true);
-}
-
-afterEach(() => { for (const close of cleanup.splice(0).reverse()) close(); });
+afterEach(runCleanup);
 
 describe('question answer memory cache', () => {
   it('fills every question of a page from one indexed read and then reads memory synchronously', async () => {
     const db = await open();
-    await db.save(ACCOUNT, question('q1'), draft('one'));
-    await db.save(ACCOUNT, question('q2'), submitted('two'), { submission: true });
-    const reads = vi.spyOn(db, 'listDocument');
+    const writer = cacheFor(db);
+    writer.write(question('q1'), draft('one'));
+    writer.write(question('q2'), submitted('two'), 'submit');
+    await until(async () => (await db.answers.listDocument(ACCOUNT, '/docs/math')).length === 2);
+    const reads = vi.spyOn(db.answers, 'listDocument');
     const cache = cacheFor(db);
-    const ids = ['q1', 'q2', 'q3'].map(question);
+    const ids = ['q1', 'q2', 'q3'].map((id) => question(id));
     for (const id of ids) cache.subscribe(id, () => {});
     expect(cache.read(ids[0]).ready).toBe(false);
     await until(() => ids.every((id) => cache.read(id).ready));
@@ -49,79 +41,95 @@ describe('question answer memory cache', () => {
     expect(cache.read(ids[0])).toBe(cache.read(ids[0]));
   });
 
-  it('shows a write immediately, persists it, and collapses queued drafts without losing submissions', async () => {
+  it('hands commits to the outbox after the local save and never uploads drafts', async () => {
     const db = await open();
-    const save = vi.spyOn(db, 'save');
+    const outbox = recorder();
+    const cache = cacheFor(db, 40, outbox);
+    const id = question();
+    cache.subscribe(id, () => {});
+    await until(() => cache.read(id).ready);
+    cache.write(id, draft('a'));
+    cache.write(id, draft('ab'));
+    expect(outbox.changes).toEqual([]);
+    cache.write(id, submitted('ab'), 'submit');
+    await until(() => outbox.changes.length === 1);
+    expect((await db.pending(ACCOUNT)).answers).toHaveLength(1);
+    expect(outbox.changes[0].answers?.[0].state).toEqual(submitted('ab'));
+    expect(outbox.changes[0].attempts?.[0]).toMatchObject({ state: submitted('ab') });
+    cache.write(id, { ...draft(''), values: [], attempt: 1 }, 'reset');
+    await until(() => outbox.changes.length === 2);
+    expect(outbox.changes[1]).toMatchObject({ answers: [{ state: { values: [], submitted: false } }], attempts: [] });
+    // Each write is strictly newer than the one before, so last-writer-wins keeps their order.
+    expect(Date.parse(outbox.changes[1].answers![0].updatedAt)).toBeGreaterThan(Date.parse(outbox.changes[0].answers![0].updatedAt));
+  });
+
+  it('gives guests no outbox even if one is passed', () => {
+    const outbox = recorder();
+    const cache = cacheFor(null, 0, outbox, 'guest');
+    cache.write(question(), submitted('x'), 'submit');
+    expect(outbox.changes).toEqual([]);
+  });
+
+  it('collapses queued drafts but never a commit, and stores the newest value', async () => {
+    const db = await open();
+    const save = vi.spyOn(db.answers, 'save');
     const cache = cacheFor(db);
-    const id = question('q1');
+    const id = question();
     cache.subscribe(id, () => {});
     await until(() => cache.read(id).ready);
     for (const text of ['a', 'ab', 'abc']) cache.write(id, draft(text));
-    cache.write(id, submitted('abc'), { submission: true });
+    cache.write(id, submitted('abc'), 'submit');
     cache.write(id, draft('x'));
     cache.write(id, draft('xy'));
     expect(cache.read(id).state.values).toEqual(['xy']);
     await until(() => save.mock.calls.length >= 4 && !cache.hasUnsaved());
     await settle();
     // "a" was already being written; "ab" collapsed into "abc"; "x" into "xy".
-    expect(save.mock.calls.map(([, , state, options]) => `${state.values[0]}${options?.submission ? '!' : ''}`)).toEqual(['a', 'abc', 'abc!', 'xy']);
-    expect((await db.get(ACCOUNT, id))?.state.values).toEqual(['xy']);
-    expect(await db.listAttempts(ACCOUNT)).toHaveLength(1);
+    expect(save.mock.calls.map(([, , write]) => `${write.state.values[0]}${write.committed ? '!' : ''}`)).toEqual(['a', 'abc', 'abc!', 'xy']);
+    expect((await db.answers.get(ACCOUNT, id))?.state.values).toEqual(['xy']);
+    expect(await db.answers.listAttempts(ACCOUNT)).toHaveLength(1);
   });
 
-  it('persists a burst of draft edits once after input pauses, and immediately on submit, hide or dispose', async () => {
+  it('persists a burst of drafts once after input pauses, and a commit immediately', async () => {
     const db = await open();
-    const save = vi.spyOn(db, 'save');
+    const save = vi.spyOn(db.answers, 'save');
     const cache = cacheFor(db, 40);
-    const id = question('q1');
+    const id = question();
     cache.subscribe(id, () => {});
     await until(() => cache.read(id).ready);
     for (const text of ['a', 'ab', 'abc']) cache.write(id, draft(text));
-    expect(cache.read(id).state.values).toEqual(['abc']);
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(save).not.toHaveBeenCalled();
     await until(() => save.mock.calls.length === 1);
-    await new Promise((resolve) => setTimeout(resolve, 60));
-    expect(save.mock.calls.map(([, , state]) => state.values[0])).toEqual(['abc']);
-
-    // A submission writes the waiting draft and itself without waiting.
     cache.write(id, draft('abcd'));
-    cache.write(id, submitted('abcd'), { submission: true });
+    cache.write(id, submitted('abcd'), 'submit');
     await until(() => save.mock.calls.length === 3);
-    expect(save.mock.calls.slice(1).map(([, , state, options]) => `${state.values[0]}${options?.submission ? '!' : ''}`)).toEqual(['abcd', 'abcd!']);
-
+    expect(save.mock.calls.map(([, , write]) => `${write.state.values[0]}${write.committed ? '!' : ''}`)).toEqual(['abc', 'abcd', 'abcd!']);
   });
 
   it('writes a waiting draft at once when the page is hidden or the cache is disposed', async () => {
     const db = await open();
-    const save = vi.spyOn(db, 'save');
+    const save = vi.spyOn(db.answers, 'save');
     const cache = cacheFor(db, 60_000);
-    const id = question('q1');
+    const id = question();
     cache.subscribe(id, () => {});
     await until(() => cache.read(id).ready);
-
-    // pagehide / visibilitychange call persistNow().
     cache.write(id, draft('hidden'));
     expect(save).not.toHaveBeenCalled();
     cache.persistNow();
     await until(() => save.mock.calls.length === 1 && !cache.hasUnsaved());
-    expect((await db.get(ACCOUNT, id))?.state.values).toEqual(['hidden']);
-
-    // Disposing (account switch) still writes the waiting draft to its own namespace.
     cache.write(id, draft('last'));
     cache.dispose();
-    await until(() => save.mock.calls.length === 2);
-    for (let i = 0; i < 20 && (await db.get(ACCOUNT, id))?.state.values[0] !== 'last'; i++) await settle();
-    expect((await db.get(ACCOUNT, id))?.state.values).toEqual(['last']);
+    await until(async () => (await db.answers.get(ACCOUNT, id))?.state.values[0] === 'last');
   });
 
-  it('keeps an unsaved answer in memory after a storage failure and persists it on retry', async () => {
+  it('keeps an unsaved draft in memory after a storage failure and stores it on retry', async () => {
     const db = await open();
-    const cache = cacheFor(db);
-    const id = question('q1');
+    const cache = cacheFor(db, 0, recorder());
+    const id = question();
     cache.subscribe(id, () => {});
     await until(() => cache.read(id).ready);
-    const failure = vi.spyOn(db, 'save').mockRejectedValueOnce(new DOMException('full', 'QuotaExceededError'));
+    const failure = vi.spyOn(db.answers, 'save').mockRejectedValueOnce(quota());
     cache.write(id, draft('keep me'));
     await until(() => cache.read(id).error !== null);
     expect(cache.read(id).error).toContain('存储空间不足');
@@ -130,41 +138,62 @@ describe('question answer memory cache', () => {
     failure.mockRestore();
     cache.retry(id);
     await until(() => cache.read(id).error === null && !cache.hasUnsaved());
-    expect((await db.get(ACCOUNT, id))?.state.values).toEqual(['keep me']);
+    expect((await db.answers.get(ACCOUNT, id))?.state.values).toEqual(['keep me']);
   });
 
-  it('refreshes only keys named by a sync change and never overwrites an unsaved local edit', async () => {
+  it('treats a commit the local database refused as safe once the cloud has it', async () => {
     const db = await open();
+    const outbox = recorder();
+    const cache = cacheFor(db, 0, outbox);
+    const id = question();
+    cache.subscribe(id, () => {});
+    await until(() => cache.read(id).ready);
+    vi.spyOn(db.answers, 'save').mockRejectedValue(quota());
+    outbox.held.add(questionKey(id));
+    cache.write(id, submitted('graded'), 'submit');
+    await until(() => cache.read(id).error !== null);
+    // The refused commit still went to the outbox.
+    expect(outbox.changes).toHaveLength(1);
+    expect(cache.read(id).error).toContain('正在同步到云端');
+    expect(cache.hasUnsaved()).toBe(true);
+    outbox.held.clear(); // acknowledged by the cloud
+    expect(cache.hasUnsaved()).toBe(false);
+  });
+
+  it('shows cloud rows straight away, last writer wins against what is shown', () => {
+    const cache = cacheFor(null);
+    const id = question();
+    cache.subscribe(id, () => {});
+    cache.write(id, draft('mine'));
+    cache.mergeRemote([{ ...id, state: submitted('older'), updatedAt: '2020-01-01T00:00:00Z' }]);
+    expect(cache.read(id).state.values).toEqual(['mine']);
+    cache.mergeRemote([{ ...id, state: submitted('newer'), updatedAt: new Date(Date.now() + 60_000).toISOString() }]);
+    expect(cache.read(id).state).toEqual(submitted('newer'));
+  });
+
+  it('refreshes only keys another tab changed and never this tab\'s own writes', async () => {
+    const factory = new IDBFactory();
+    const name = crypto.randomUUID();
+    const db = await open(factory, name, true);
+    const otherTab = await open(factory, name, true);
     const cache = cacheFor(db);
     const [first, second] = [question('q1'), question('q2')];
-    const notified = { q1: 0, q2: 0 };
-    cache.subscribe(first, () => { notified.q1++; });
-    cache.subscribe(second, () => { notified.q2++; });
+    cache.subscribe(first, () => {});
+    cache.subscribe(second, () => {});
     await until(() => cache.read(first).ready && cache.read(second).ready);
-    const many = vi.spyOn(db, 'getMany');
-    await db.apply(ACCOUNT, { receipts: [], attempts: [], cursor: '1', hasMore: false,
-      changes: [{ ...first, state: draft('remote'), version: 1, updatedAt: new Date().toISOString() }] });
-    await until(() => cache.read(first).state.values[0] === 'remote');
-    expect(many).toHaveBeenCalledWith(ACCOUNT, [questionKey(first)]);
-    expect(notified.q2).toBe(1); // only its initial load
-
-    // A pull that lands while a local write is queued must not roll back typing.
-    let release!: () => void;
-    const blocked = new Promise<void>((resolve) => { release = resolve; });
-    const save = db.save.bind(db);
-    vi.spyOn(db, 'save').mockImplementationOnce(async (...args) => { await blocked; return save(...args); });
-    cache.write(first, draft('typing'));
-    await db.apply(ACCOUNT, { receipts: [], attempts: [], cursor: '2', hasMore: false,
-      changes: [{ ...first, state: draft('stale'), version: 2, updatedAt: new Date().toISOString() }] });
-    await settle();
-    expect(cache.read(first).state.values).toEqual(['typing']);
-    release();
+    const many = vi.spyOn(db.answers, 'getMany');
+    cache.write(second, draft('mine'));
     await until(() => !cache.hasUnsaved());
+    await settle();
+    expect(many).not.toHaveBeenCalled();
+    await otherTab.answers.save(ACCOUNT, first, { state: draft('other tab'), updatedAt: new Date(Date.now() + 1000).toISOString(), committed: false });
+    await until(() => cache.read(first).state.values[0] === 'other tab');
+    expect(many).toHaveBeenCalledWith(ACCOUNT, [questionKey(first)]);
   });
 
   it('works without a browser database as a memory-only cache', () => {
     const cache = cacheFor(null);
-    const id = question('q1');
+    const id = question();
     expect(cache.read(id).ready).toBe(true);
     cache.write(id, draft('memory'));
     expect(cache.read(id).state.values).toEqual(['memory']);
@@ -172,77 +201,24 @@ describe('question answer memory cache', () => {
   });
 });
 
-describe('browser schema upgrade', () => {
-  it('upgrades a v1 database in place, keeping answers and outbox while restarting the sync cursor', async () => {
-    const factory = new IDBFactory();
-    const name = crypto.randomUUID();
-    await new Promise<void>((resolve, reject) => {
-      const opening = factory.open(name, 1);
-      opening.onupgradeneeded = () => {
-        const db = opening.result;
-        const records = db.createObjectStore('records', { keyPath: ['namespace', 'key'] });
-        const operations = db.createObjectStore('operations', { keyPath: 'operationId' });
-        const attempts = db.createObjectStore('attempts', { keyPath: ['namespace', 'attemptId'] });
-        const conflicts = db.createObjectStore('conflicts', { keyPath: ['namespace', 'conflictId'] });
-        const metadata = db.createObjectStore('metadata', { keyPath: ['namespace', 'key'] });
-        for (const store of [records, operations, attempts, conflicts]) store.createIndex('namespace', 'namespace');
-        operations.createIndex('question', ['namespace', 'key']);
-        const id = question('q1');
-        records.put({ ...id, namespace: ACCOUNT, key: questionKey(id), state: draft('v1 answer'), generation: 1, remoteVersion: 3, updatedAt: new Date().toISOString(), dirty: true });
-        operations.put({ ...id, namespace: ACCOUNT, key: questionKey(id), operationId: crypto.randomUUID(), state: draft('v1 answer'), generation: 1, baseVersion: 3, createdAt: new Date().toISOString(), inFlight: false });
-        metadata.put({ namespace: ACCOUNT, key: 'sync', value: { cursor: '17', lastSyncedAt: null, retryCount: 0, nextRetryAt: 0 } });
-      };
-      opening.onsuccess = () => { opening.result.close(); resolve(); };
-      opening.onerror = () => reject(opening.error);
-    });
-    const db = await open(factory, name);
-    expect((await db.metadata(ACCOUNT)).cursor).toBeNull();
-    expect((await db.listDocument(ACCOUNT, page)).map((record) => record.state.values[0])).toEqual(['v1 answer']);
-    expect(await db.stats(ACCOUNT)).toEqual({ pending: 1, conflicts: 0 });
-    expect((await db.batch(ACCOUNT, false))[0].baseVersion).toBe(3);
-  });
-});
-
-describe('realtime-driven sync engine', () => {
-  function server() {
-    let cursor = 0;
-    const requests: SyncRequest[] = [];
-    const transport: QuestionSyncTransport = {
-      async sync(input) {
-        requests.push(input);
-        const receipts = input.operations.map((operation) => {
-          cursor++;
-          return { operationId: operation.operationId, status: 'applied' as const,
-            record: { ...operation, state: operation.state, version: operation.baseVersion + 1, updatedAt: new Date().toISOString() } };
-        });
-        return { receipts, changes: [], attempts: [], cursor: String(cursor), hasMore: false } satisfies SyncResponse;
-      },
-    };
-    return { transport, requests, advance: () => String(++cursor) };
-  }
-
-  it('uploads a submission without waiting for the draft debounce', async () => {
+describe('question session', () => {
+  it('submits through the cache to the cloud and shows another device\'s answer after a pull', async () => {
     const db = await open();
-    const remote = server();
-    const sync = new QuestionSyncEngine(db, ACCOUNT, remote.transport, { online: () => true, debounceMs: 60_000, urgentMs: 0 });
-    cleanup.push(() => sync.stop());
-    sync.start();
-    await until(() => remote.requests.length === 1 && sync.status.phase === 'idle');
-    await db.save(ACCOUNT, question('q1'), draft('typing'));
-    await db.save(ACCOUNT, question('q1'), submitted('typing'), { submission: true });
-    await until(() => remote.requests.length === 2);
-    expect(remote.requests[1].operations.map((operation) => Boolean(operation.attempt))).toEqual([true]);
-  });
-
-  it('treats a CAS miss whose cloud row already equals the sent answer as a confirmation', async () => {
-    const db = await open();
-    const id = question('q1');
-    await db.save(ACCOUNT, id, draft('same'));
-    const [operation] = await db.batch(ACCOUNT);
-    await db.apply(ACCOUNT, { receipts: [{ operationId: operation.operationId, status: 'conflict',
-      record: { ...id, state: draft('same'), version: 4, updatedAt: new Date().toISOString() } }],
-    changes: [], attempts: [], cursor: '4', hasMore: false }, [operation]);
-    expect(await db.listConflicts(ACCOUNT)).toEqual([]);
-    expect(await db.get(ACCOUNT, id)).toMatchObject({ remoteVersion: 4, dirty: false });
+    const server = new FakeServer();
+    const session = new QuestionSession(db, ACCOUNT, { answers: { draftDelayMs: 0 }, sync: { urgentMs: 0 } });
+    onCleanup(() => session.dispose());
+    session.sync!.connect(server);
+    const [mine, theirs] = [question('mine'), question('theirs')];
+    session.answers.subscribe(mine, () => {});
+    session.answers.subscribe(theirs, () => {});
+    await until(() => session.answers.read(mine).ready && session.answers.read(theirs).ready);
+    session.answers.write(mine, draft('thinking'));
+    await settle();
+    session.answers.write(mine, submitted('final'), 'submit');
+    server.edit(submitted('from phone'), theirs);
+    await until(() => session.sync!.status.pending === 0 && server.answers.size === 2 && session.answers.read(theirs).state.values[0] === 'from phone');
+    expect(server.requests.flatMap((request) => request.changes.answers).map((row) => row.state.values[0])).not.toContain('thinking');
+    expect(session.answers.read(theirs).state).toEqual(submitted('from phone'));
+    expect((await db.pending(ACCOUNT)).answers).toEqual([]);
   });
 });

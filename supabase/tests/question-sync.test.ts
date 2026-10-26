@@ -8,22 +8,32 @@ import { createSupabaseTestDatabase, migrationNames, readMigration } from './pgl
 // objects are stubbed (see ./pglite.ts). No RPC or RLS implementation is mocked.
 const USER_A = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const USER_B = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
-const state = (value = 'A', submitted = false) => ({
-  selected: [value], values: [], submitted, attempt: submitted ? 1 : 0,
-});
-const operation = (overrides: Record<string, unknown> = {}) => ({
-  operationId: randomUUID(), documentPath: '/docs/math', questionId: 'q1',
-  questionRevision: 'sha256-content-v1', baseVersion: 0, state: state(), ...overrides,
-});
 
-type RecordState = { selected: string[]; values: string[]; submitted: boolean; attempt: number };
-type RemoteRecord = { documentPath: string; questionId: string; questionRevision: string; state: RecordState; version: number; updatedAt: string };
-type Response = {
-  receipts: { operationId: string; status: 'applied' | 'conflict'; record: RemoteRecord }[];
-  changes: RemoteRecord[];
-  attempts: { attemptId: string; state: RecordState; createdAt: string; receivedAt: string }[];
-  cursor: string; hasMore: boolean; reset: boolean;
+type State = { selected: string[]; values: string[]; submitted: boolean; attempt: number };
+type Answer = { documentPath: string; questionId: string; questionRevision: string; state: State; updatedAt: string };
+type Attempt = { documentPath: string; questionId: string; questionRevision: string; attemptId: string; state: State; createdAt: string };
+type Tag = { tagId: string; name: string; color: string; deleted: boolean; createdAt: string; updatedAt: string };
+type Mark = { documentPath: string; questionId: string; favorite: boolean; note: string; excerpt: string; tagIds: string[]; updatedAt: string };
+type Changes = { answers?: Answer[]; attempts?: Attempt[]; tags?: Tag[]; marks?: Mark[] };
+type Response = Required<Changes> & { merged: { from: string; to: string }[]; cursor: string; hasMore: boolean; reset: boolean };
+
+let clock = Date.parse('2026-10-26T08:00:00Z');
+const tick = () => new Date(clock += 1000).toISOString();
+const state = (value = 'A', submitted = false): State => ({ selected: [value], values: [], submitted, attempt: submitted ? 1 : 0 });
+const answer = (overrides: Partial<Answer> = {}): Answer => ({
+  documentPath: '/docs/math', questionId: 'q1', questionRevision: 'sha256-content-v1', state: state('A', true), updatedAt: tick(), ...overrides,
+});
+const attempt = (overrides: Partial<Attempt> = {}): Attempt => ({
+  documentPath: '/docs/math', questionId: 'q1', questionRevision: 'sha256-content-v1', attemptId: randomUUID(),
+  state: state('A', true), createdAt: tick(), ...overrides,
+});
+const tag = (overrides: Partial<Tag> = {}): Tag => {
+  const at = tick();
+  return { tagId: randomUUID(), name: '难题', color: 'red', deleted: false, createdAt: at, updatedAt: at, ...overrides };
 };
+const mark = (overrides: Partial<Mark> = {}): Mark => ({
+  documentPath: '/docs/math', questionId: 'q1', favorite: true, note: '', excerpt: '求极限', tagIds: [], updatedAt: tick(), ...overrides,
+});
 
 describe('question sync database contract', () => {
   let db: PGlite;
@@ -34,10 +44,10 @@ describe('question sync database contract', () => {
     await db.exec(`set role ${role}`);
   }
 
-  async function sync(operations: unknown[] = [], cursor = '0', limit = 100) {
+  async function sync(changes: Changes = {}, cursor = '0', limit = 100) {
     const result = await db.query<{ result: Response }>(
-      'select public.exam_sync_question_state($1::jsonb, $2::bigint, $3::integer) as result',
-      [JSON.stringify(operations), cursor, limit],
+      'select public.exam_sync($1::jsonb, $2::bigint, $3::integer) as result',
+      [JSON.stringify(changes), cursor, limit],
     );
     return result.rows[0].result;
   }
@@ -45,10 +55,10 @@ describe('question sync database contract', () => {
   async function counts() {
     await db.exec('reset role');
     const result = await db.query<Record<string, number>>(`select
-      (select count(*)::integer from exam_private.question_progress) as progress,
+      (select count(*)::integer from exam_private.question_progress) as answers,
       (select count(*)::integer from exam_private.question_attempts) as attempts,
-      (select count(*)::integer from exam_private.question_operations) as operations,
-      (select count(*)::integer from realtime.messages) as notifications`);
+      (select count(*)::integer from exam_private.question_tags) as tags,
+      (select count(*)::integer from exam_private.question_marks) as marks`);
     return result.rows[0];
   }
 
@@ -57,266 +67,186 @@ describe('question sync database contract', () => {
   }, 30_000);
 
   beforeEach(async () => {
-    await db.exec('reset role; truncate auth.users cascade; truncate realtime.messages');
+    await db.exec('reset role; truncate auth.users cascade');
     await db.query('insert into auth.users(id) values ($1), ($2)', [USER_A, USER_B]);
     await actor(USER_A);
   });
 
   afterAll(async () => { await db?.close(); });
 
-  it('applies once and returns the identical immutable receipt after a lost response', async () => {
-    const write = operation();
-    const first = await sync([write]);
-    expect(first.receipts[0]).toMatchObject({ operationId: write.operationId, status: 'applied', record: { version: 1, state: state() } });
-    expect(first).toMatchObject({ cursor: '1', hasMore: false, attempts: [] });
-    const retry = await sync([write], first.cursor);
-    expect(retry.receipts).toEqual(first.receipts);
-    expect(retry).toMatchObject({ cursor: '1', changes: [], attempts: [] });
-    expect(await counts()).toEqual({ progress: 1, attempts: 0, operations: 1, notifications: 1 });
+  it('keeps the newer answer of two devices and returns the current row for every answer sent', async () => {
+    const older = answer({ state: state('A', true) });
+    const newer = answer({ state: state('B', true) });
+    expect((await sync({ answers: [newer] })).answers.map((row) => row.state)).toEqual([state('B', true)]);
+    const late = await sync({ answers: [older] }, '1');
+    // The older write loses but the device learns the current answer.
+    expect(late.answers).toHaveLength(1);
+    expect(late.answers[0].state).toEqual(state('B', true));
+    expect(late.cursor).toBe('1');
+    // A retried write after a lost response is a no-op.
+    const retry = await sync({ answers: [newer] }, '1');
+    expect(retry).toMatchObject({ cursor: '1', hasMore: false });
+    expect(Date.parse(retry.answers[0].updatedAt)).toBe(Date.parse(newer.updatedAt));
+    expect(await counts()).toMatchObject({ answers: 1 });
   });
 
-  it('preserves an immutable submission even when progress has a CAS conflict', async () => {
-    const first = await sync([operation()]);
-    const submission = { attemptId: randomUUID(), state: state('B', true), createdAt: '2026-10-20T00:00:00.000Z' };
-    const conflicting = operation({ state: state('B'), attempt: submission });
-    const second = await sync([conflicting], first.cursor);
-    expect(second.receipts[0]).toMatchObject({ status: 'conflict', record: { version: 1, state: state('A') } });
-    expect(second).toMatchObject({ changes: [], cursor: '2', hasMore: false });
-    expect(second.attempts).toHaveLength(1);
-    expect(second.attempts[0]).toMatchObject({ attemptId: submission.attemptId, state: submission.state });
-    // A new resolution operation can reuse the same historical attempt, even
-    // when its chosen current state differs from that attempt's state.
-    const resolution = await sync([operation({ baseVersion: 1, state: state('C'), attempt: submission })], second.cursor);
-    expect(resolution.receipts[0]).toMatchObject({ status: 'applied', record: { version: 2, state: state('C') } });
-    expect(resolution.attempts).toEqual([]);
-    expect(await counts()).toEqual({ progress: 1, attempts: 1, operations: 3, notifications: 3 });
+  it('stores submissions once by id, independently of which answer is current', async () => {
+    const first = attempt({ state: state('A', true) });
+    await sync({ attempts: [first], answers: [answer({ state: state('A', true) })] });
+    const repeated = await sync({ attempts: [first] }, '2');
+    expect(repeated).toMatchObject({ cursor: '2', attempts: [] });
+    const fromOldDevice = attempt({ state: state('C', true), createdAt: '2026-01-01T00:00:00Z' });
+    const pulled = await sync({ attempts: [fromOldDevice], answers: [answer({ state: state('C', true), updatedAt: '2026-01-01T00:00:00Z' })] }, '2');
+    expect(pulled.attempts.map((row) => row.attemptId)).toEqual([fromOldDevice.attemptId]);
+    expect(pulled.answers[0].state).toEqual(state('A', true));
+    expect(await counts()).toMatchObject({ answers: 1, attempts: 2 });
   });
 
-  it('rejects reused operation and attempt UUIDs with changed contents', async () => {
-    const submission = { attemptId: randomUUID(), state: state('A', true), createdAt: '2026-10-20T00:00:00Z' };
-    const write = operation({ attempt: submission });
-    await sync([write]);
-    await expect(sync([{ ...write, state: state('B') }])).rejects.toMatchObject({ code: '22023' });
-    await expect(sync([operation({ baseVersion: 1, attempt: { ...submission, state: state('B', true) } })])).rejects.toMatchObject({ code: '22023' });
-    expect(await counts()).toEqual({ progress: 1, attempts: 1, operations: 1, notifications: 1 });
+  it('rejects drafts and zero-count submissions as attempts', async () => {
+    await expect(sync({ attempts: [attempt({ state: state('A') })] })).rejects.toThrow(/submitted/);
+    await expect(sync({ attempts: [attempt({ state: { ...state('A', true), attempt: 0 } })] })).rejects.toThrow(/submitted/);
   });
 
-  it('rejects draft states and zero-count submissions as immutable attempts', async () => {
-    const submission = { attemptId: randomUUID(), state: state('A'), createdAt: '2026-10-20T00:00:00Z' };
-    await expect(sync([operation({ attempt: submission })])).rejects.toMatchObject({ code: '22023' });
-    await expect(sync([operation({ attempt: {
-      ...submission, state: { ...state('A', true), attempt: 0 },
-    } })])).rejects.toMatchObject({ code: '22023' });
-    expect(await counts()).toEqual({ progress: 0, attempts: 0, operations: 0, notifications: 0 });
-  });
+  it('compacts the feed to the newest row of each answer and pages without skipping rewrites', async () => {
+    for (const text of ['one', 'two', 'three']) await sync({ answers: [answer({ state: state(text, true) })] });
+    await sync({ answers: [answer({ questionId: 'q2' })], tags: [tag()], marks: [mark()] });
+    const all = await sync({}, '0');
+    expect(all.answers.map((row) => `${row.questionId}:${row.state.selected[0]}`)).toEqual(['q1:three', 'q2:A']);
+    expect([all.tags.length, all.marks.length, all.hasMore]).toEqual([1, 1, false]);
 
-  it('compacts the feed to the newest state of each question and its attempts', async () => {
-    const submission = { attemptId: randomUUID(), state: state('C', true), createdAt: '2026-10-20T00:00:00Z' };
-    let page = await sync([
-      operation(), operation({ baseVersion: 1, state: state('B') }),
-      operation({ baseVersion: 2, state: state('C', true), attempt: submission }),
-    ], '0', 1);
-    expect(page.receipts.map((receipt) => receipt.record.version)).toEqual([1, 2, 3]);
-    const cursors = [page.cursor];
-    const versions = page.changes.map((record) => record.version);
-    const attemptIds = page.attempts.map((attempt) => attempt.attemptId);
-    while (page.hasMore) {
-      page = await sync([], page.cursor, 1);
-      cursors.push(page.cursor);
-      versions.push(...page.changes.map((record) => record.version));
-      attemptIds.push(...page.attempts.map((attempt) => attempt.attemptId));
+    const first = await sync({}, '0', 2);
+    expect(first.hasMore).toBe(true);
+    // q1 is rewritten while the reader is mid-feed: it moves to the end and is still read.
+    await actor(USER_A);
+    await sync({ answers: [answer({ state: state('four', true) })] }, first.cursor);
+    let cursor = first.cursor;
+    const later: Answer[] = [];
+    for (let page = 0; page < 5; page++) {
+      const next = await sync({}, cursor, 2);
+      later.push(...next.answers);
+      cursor = next.cursor;
+      if (!next.hasMore) break;
     }
-    // Superseded snapshots (versions 1 and 2) are never replayed.
-    expect(cursors).toEqual(['3', '4']);
-    expect(versions).toEqual([3]);
-    expect(attemptIds).toEqual([submission.attemptId]);
-    expect(await sync([], page.cursor, 1)).toMatchObject({ cursor: '4', changes: [], attempts: [], hasMore: false });
-  });
-
-  it('paginates without skipping a question rewritten while a reader is mid-feed', async () => {
-    await sync(['q1', 'q2', 'q3'].map((questionId) => operation({ questionId })));
-    let page = await sync([], '0', 1);
-    expect(page).toMatchObject({ cursor: '1', hasMore: true });
-    expect(page.changes.map((record) => record.questionId)).toEqual(['q1']);
-    // Another device rewrites q1 after this reader already consumed it.
-    await sync([operation({ questionId: 'q1', baseVersion: 1, state: state('Z') })]);
-    const seen = [];
-    while (page.hasMore) {
-      page = await sync([], page.cursor, 1);
-      seen.push(...page.changes.map((record) => `${record.questionId}@${record.version}`));
-    }
-    expect(seen).toEqual(['q2@1', 'q3@1', 'q1@2']);
-    expect(page.cursor).toBe('4');
+    expect(later.map((row) => row.state.selected[0])).toContain('four');
   });
 
   it('restarts the feed when the client cursor is ahead of the account', async () => {
-    await sync([operation()]);
-    const result = await sync([], '42');
-    expect(result).toMatchObject({ reset: true, cursor: '1', hasMore: false });
-    expect(result.changes).toHaveLength(1);
-    expect((await sync([], '1')).reset).toBe(false);
+    await sync({ answers: [answer()] });
+    expect(await sync({}, '999')).toMatchObject({ reset: true, cursor: '1', hasMore: false, answers: [{ questionId: 'q1' }] });
   });
 
-  it('pokes only the owner realtime topic after a committed change', async () => {
-    const first = await sync([operation()]);
-    await sync([], first.cursor);
+  it('folds a same-name tag created on another device and removes deleted tags from every question', async () => {
+    const original = tag({ name: 'Hard' });
+    await sync({ tags: [original], marks: [mark({ tagIds: [original.tagId] })] });
+    await actor(USER_A);
+    const twin = tag({ name: 'hard' });
+    const folded = await sync({ tags: [twin], marks: [mark({ questionId: 'q2', tagIds: [twin.tagId] })] }, '2');
+    expect(folded.merged).toEqual([{ from: twin.tagId, to: original.tagId }]);
+    expect(folded.marks.find((row) => row.questionId === 'q2')?.tagIds).toEqual([original.tagId]);
+
+    const deleted = await sync({ tags: [{ ...original, deleted: true, updatedAt: tick() }] }, folded.cursor);
+    expect(deleted.tags[0]).toMatchObject({ tagId: original.tagId, deleted: true });
+    expect(deleted.marks.map((row) => row.tagIds)).toEqual([[], []]);
+  });
+
+  it('drops unknown tag ids and caps future device clocks', async () => {
+    const saved = await sync({ marks: [mark({ tagIds: [randomUUID()], updatedAt: '2099-01-01T00:00:00Z' })] });
+    expect(saved.marks[0].tagIds).toEqual([]);
+    expect(Date.parse(saved.marks[0].updatedAt)).toBeLessThan(Date.parse('2099-01-01T00:00:00Z'));
+    expect((await sync({ marks: [mark({ favorite: false, updatedAt: new Date(Date.now() + 10 * 60_000).toISOString() })] }, saved.cursor)).marks[0].favorite).toBe(false);
+  });
+
+  it('isolates accounts and refuses anonymous callers and direct table access', async () => {
+    await sync({ answers: [answer()], attempts: [attempt()], tags: [tag()], marks: [mark()] });
+    await actor(USER_B);
+    expect(await sync()).toMatchObject({ answers: [], attempts: [], tags: [], marks: [], cursor: '0' });
+    await expect(db.query('select * from exam_private.question_progress')).rejects.toThrow(/permission denied/);
+    await expect(db.query("update exam_private.question_progress set state = '{}'")).rejects.toThrow(/permission denied/);
+    await actor(null);
+    await expect(sync()).rejects.toThrow(/Authentication required/);
+    await actor(null, 'anon');
+    await expect(sync()).rejects.toThrow(/permission denied/);
     await db.exec('reset role');
-    const messages = await db.query<{ topic: string; event: string; payload: { cursor: string }; private: boolean }>(
-      'select topic, event, payload, private from realtime.messages');
-    expect(messages.rows).toEqual([{ topic: `exam-sync:${USER_A}`, event: 'changed', payload: { cursor: '1' }, private: true }]);
-    await actor(USER_B);
-    await db.query("select set_config('realtime.topic', $1, false)", [`exam-sync:${USER_A}`]);
-    expect((await db.query('select * from realtime.messages')).rows).toEqual([]);
-    await actor(USER_A);
-    expect((await db.query('select * from realtime.messages')).rows).toHaveLength(1);
-    await db.query("select set_config('realtime.topic', '', false)");
-  });
-
-  it('prunes receipts older than 30 days and treats an expired retry as a fresh write', async () => {
-    const write = operation();
-    await sync([write]);
-    await db.exec("reset role; update exam_private.question_operations set received_at = now() - interval '31 days'");
-    await actor(USER_A);
-    const retry = await sync([write]);
-    // The expired UUID is new again; its stale base now conflicts with the row it created.
-    expect(retry.receipts[0]).toMatchObject({ status: 'conflict', record: { version: 1, state: state() } });
-    expect(await counts()).toMatchObject({ progress: 1, operations: 1 });
-  });
-
-  it('isolates accounts and rejects direct table reads and writes', async () => {
-    await sync([operation()]);
-    await actor(USER_B);
-    expect(await sync()).toMatchObject({ cursor: '0', changes: [], attempts: [] });
-    const own = await sync([operation({ state: state('B') })]);
-    expect(own.changes).toHaveLength(1);
-    expect(own.changes[0].state).toEqual(state('B'));
-    await expect(db.query('select * from exam_private.question_progress')).rejects.toMatchObject({ code: '42501' });
-    await expect(db.exec('update exam_private.question_progress set version = 99')).rejects.toMatchObject({ code: '42501' });
-    await actor(USER_A);
-    expect((await sync()).changes.map((record) => record.state)).toEqual([state('A')]);
+    expect((await db.query("select has_function_privilege('anon', 'public.exam_sync(jsonb,bigint,integer)', 'EXECUTE') as allowed")).rows)
+      .toEqual([{ allowed: false }]);
   });
 
   it('enforces owner RLS even if an administrator later grants SELECT', async () => {
-    await sync([operation()]);
+    await sync({ answers: [answer()] });
     await actor(USER_B);
-    await sync([operation({ state: state('B') })]);
-    await db.exec('reset role; grant select on all tables in schema exam_private to authenticated');
+    await sync({ answers: [answer({ questionId: 'other' })] });
+    await db.exec('reset role; grant select on exam_private.question_progress to authenticated');
     try {
       await actor(USER_A);
-      const rows = await db.query<{ user_id: string }>('select user_id from exam_private.question_progress');
-      expect(rows.rows.map((row) => row.user_id)).toEqual([USER_A]);
-      const receipts = await db.query<{ user_id: string }>('select user_id from exam_private.question_operations');
-      expect(receipts.rows.map((row) => row.user_id)).toEqual([USER_A]);
+      expect((await db.query('select question_id from exam_private.question_progress')).rows).toEqual([{ question_id: 'q1' }]);
     } finally {
-      await db.exec('reset role; revoke select on all tables in schema exam_private from authenticated');
+      await db.exec('reset role; revoke select on exam_private.question_progress from authenticated');
     }
   });
 
-  it('denies anonymous RPC calls and authenticated requests without a uid', async () => {
-    await actor(null, 'anon');
-    await expect(sync()).rejects.toMatchObject({ code: '42501' });
-    await actor(null);
-    await expect(sync()).rejects.toMatchObject({ code: '42501' });
+  it('bounds request sizes, identities, states and cursors and rolls back a failed batch', async () => {
+    await expect(sync({ answers: Array.from({ length: 201 }, (_, index) => answer({ questionId: `q${index}` })) })).rejects.toThrow(/at most 200/);
+    await expect(sync({ answers: [answer({ questionId: '' })] })).rejects.toThrow(/identity/);
+    await expect(sync({ answers: [{ ...answer(), extra: true } as Answer] })).rejects.toThrow(/Invalid answer/);
+    await expect(sync({ answers: [answer({ state: { ...state(), values: ['x'.repeat(8193)] } })] })).rejects.toThrow(/Invalid answer/);
+    await expect(sync({}, '-1')).rejects.toThrow(/cursor/);
+    await expect(db.query('select public.exam_sync($1::jsonb, 0, 100)', ['{"other": []}'])).rejects.toThrow(/object/);
+    await expect(sync({ answers: [answer({ questionId: 'kept?' }), answer({ questionId: '' })] })).rejects.toThrow();
+    expect(await counts()).toMatchObject({ answers: 0 });
   });
 
-  it('bounds batches, state sizes, identity lengths, and cursor inputs', async () => {
-    await expect(sync(Array.from({ length: 51 }, () => operation()))).rejects.toMatchObject({ code: '22023' });
-    await expect(sync([operation({ state: { ...state(), values: ['x'.repeat(16384)] } })])).rejects.toMatchObject({ code: '22023' });
-    await expect(sync([operation({ state: { ...state(), selected: [42] } })])).rejects.toMatchObject({ code: '22023' });
-    await expect(sync([operation({ state: { ...state(), attempt: 2147483648 } })])).rejects.toMatchObject({ code: '22023' });
-    await expect(sync([operation({ documentPath: 'x'.repeat(2049) })])).rejects.toMatchObject({ code: '22023' });
-    await expect(sync([], '-1')).rejects.toMatchObject({ code: '22023' });
-    await expect(sync([], '0', 501)).rejects.toMatchObject({ code: '22023' });
-    await expect(sync([operation({ irrelevant: 'x'.repeat(262144) })])).rejects.toMatchObject({ code: '22023' });
-    expect(await counts()).toEqual({ progress: 0, attempts: 0, operations: 0, notifications: 0 });
-  });
-
-  it('accepts the maximum supported attempt count consistently with the browser', async () => {
-    const result = await sync([operation({ state: { ...state(), attempt: 2147483647 } })]);
-    expect(result.receipts[0].record.state.attempt).toBe(2147483647);
-  });
-
-  it('rolls back the complete batch when a later operation is invalid', async () => {
-    await expect(sync([operation(), operation({ state: {} })])).rejects.toMatchObject({ code: '22023' });
-    expect(await counts()).toEqual({ progress: 0, attempts: 0, operations: 0, notifications: 0 });
-  });
-
-  it('allocates cursors transactionally, so a rollback leaves no sequence gap', async () => {
-    const write = operation();
-    await db.exec('begin');
-    expect((await sync([write])).cursor).toBe('1');
-    await db.exec('rollback');
-    const retry = await sync([write]);
-    expect(retry.cursor).toBe('1');
-    expect(retry.receipts[0].record.version).toBe(1);
-  });
-
-  it('keeps changed question revisions and long Unicode identities distinct', async () => {
-    const result = await sync([
-      operation(), operation({ questionRevision: 'sha256-content-v2' }),
-      operation({ documentPath: `/${'题'.repeat(2000)}`, questionId: '问'.repeat(200), questionRevision: '版'.repeat(128) }),
-    ]);
-    expect(result.receipts.map((receipt) => receipt.record.version)).toEqual([1, 1, 1]);
-    expect(await counts()).toMatchObject({ progress: 3, notifications: 1 });
-  });
-
-  it('accepts the maximum 50-operation batch and removes user data on account deletion', async () => {
-    const result = await sync(Array.from({ length: 50 }, (_, i) => operation({ questionId: `q${i}` })));
-    expect(result.receipts).toHaveLength(50);
-    expect(result.cursor).toBe('50');
-    await actor(USER_B);
-    await sync([operation({ state: state('B') })]);
+  it('allocates cursors transactionally and removes everything with the account', async () => {
+    await sync({ answers: [answer()] });
+    await expect(sync({ answers: [answer({ questionId: 'q2' }), answer({ questionId: '' })] })).rejects.toThrow();
+    await actor(USER_A);
+    expect((await sync({ answers: [answer({ questionId: 'q3' })] }, '1')).cursor).toBe('2');
+    await sync({ attempts: [attempt()], tags: [tag()], marks: [mark()] });
     await db.exec('reset role');
     await db.query('delete from auth.users where id = $1', [USER_A]);
-    expect(await counts()).toEqual({ progress: 1, attempts: 0, operations: 1, notifications: 2 });
+    expect(await counts()).toEqual({ answers: 0, attempts: 0, tags: 0, marks: 0 });
   });
 
   it('executes the cloud smoke script and rolls back every fixture', async () => {
     await db.exec('reset role');
     await db.exec(readFileSync(new URL('./cloud-smoke.sql', import.meta.url), 'utf8'));
-    expect(await counts()).toEqual({ progress: 0, attempts: 0, operations: 0, notifications: 0 });
+    expect(await counts()).toEqual({ answers: 0, attempts: 0, tags: 0, marks: 0 });
   });
 });
 
-describe('question sync v1 to v2 data migration', () => {
-  it('keeps every account answer, attempt and receipt while compacting the feed', async () => {
-    const db = await createSupabaseTestDatabase(1);
+describe('question sync v2 to v3 data migration', () => {
+  it('keeps every answer, attempt, tag and mark in one renumbered feed and removes the old API', async () => {
+    const db = await createSupabaseTestDatabase(3);
     try {
-      expect(migrationNames().length).toBeGreaterThan(1);
-      await db.query('insert into auth.users(id) values ($1), ($2)', [USER_A, USER_B]);
-      const run = async (user: string, operations: unknown[], cursor = '0') => {
+      await db.query('insert into auth.users(id) values ($1)', [USER_A]);
+      const as = async (sql: string, params: unknown[]) => {
         await db.exec('reset role');
-        await db.query('select set_config($1, $2, false)', ['request.jwt.claim.sub', user]);
+        await db.query('select set_config($1, $2, false)', ['request.jwt.claim.sub', USER_A]);
         await db.exec('set role authenticated');
-        return (await db.query<{ result: Response }>('select public.exam_sync_question_state($1::jsonb, $2::bigint, 100) as result',
-          [JSON.stringify(operations), cursor])).rows[0].result;
+        return (await db.query<{ result: Record<string, unknown> }>(sql, params)).rows[0].result;
       };
       const submission = { attemptId: randomUUID(), state: state('B', true), createdAt: '2026-10-20T00:00:00Z' };
-      const retried = operation();
-      await run(USER_A, [retried, operation({ baseVersion: 1, state: state('B', true), attempt: submission }), operation({ questionId: 'q2' })]);
-      await run(USER_B, [operation({ state: state('X') })]);
-      await db.exec('reset role');
-      for (const name of migrationNames().slice(1)) await db.exec(readMigration(name));
+      await as('select public.exam_sync_question_state($1::jsonb, 0, 100) as result', [JSON.stringify([
+        { operationId: randomUUID(), documentPath: '/docs/math', questionId: 'q1', questionRevision: 'r1', baseVersion: 0, state: state('B', true), attempt: submission },
+        { operationId: randomUUID(), documentPath: '/docs/math', questionId: 'q2', questionRevision: 'r1', baseVersion: 0, state: state('C') },
+      ])]);
+      const hard = tag();
+      await as('select public.exam_sync_question_annotations($1::jsonb, $2::jsonb, 0, 100) as result',
+        [JSON.stringify([hard]), JSON.stringify([mark({ tagIds: [hard.tagId], note: '易错' })])]);
 
-      // v1 wrote four events for USER_A; the three compacted rows are numbered after them.
-      const pulled = await run(USER_A, []);
-      expect(pulled).toMatchObject({ cursor: '7', hasMore: false, reset: false });
-      expect(pulled.changes.map((record) => `${record.questionId}@${record.version}`).sort()).toEqual(['q1@2', 'q2@1']);
-      expect(pulled.attempts.map((attempt) => attempt.attemptId)).toEqual([submission.attemptId]);
-      // A browser that already stored a v1 event-log cursor pulls every compacted row once.
-      for (const cursor of ['1', '2', '4']) {
-        const resumed = await run(USER_A, [], cursor);
-        expect(resumed).toMatchObject({ cursor: '7', reset: false });
-        expect(resumed.changes).toHaveLength(2);
-        expect(resumed.attempts).toHaveLength(1);
-      }
-      // A v1 receipt still answers a retried UUID instead of writing twice.
-      const retry = await run(USER_A, [retried]);
-      expect(retry.receipts[0]).toMatchObject({ status: 'applied', record: { version: 2 } });
-      expect(retry.cursor).toBe('7');
-      expect((await run(USER_B, [])).changes.map((record) => record.state)).toEqual([state('X')]);
       await db.exec('reset role');
-      expect((await db.query("select to_regclass('exam_private.question_events') as events")).rows).toEqual([{ events: null }]);
+      for (const name of migrationNames().slice(3)) await db.exec(readMigration(name));
+
+      const pulled = await as("select public.exam_sync('{}'::jsonb, 0, 100) as result", []) as unknown as Response;
+      expect(pulled.answers.map((row) => `${row.questionId}:${row.state.selected[0]}`).sort()).toEqual(['q1:B', 'q2:C']);
+      expect(pulled.attempts.map((row) => row.attemptId)).toEqual([submission.attemptId]);
+      expect(pulled.tags.map((row) => row.tagId)).toEqual([hard.tagId]);
+      expect(pulled.marks).toMatchObject([{ note: '易错', tagIds: [hard.tagId] }]);
+      expect(pulled).toMatchObject({ cursor: '5', hasMore: false });
+      await db.exec('reset role');
+      const gone = await db.query(`select to_regclass('exam_private.question_operations') as operations,
+        to_regclass('exam_private.question_annotation_heads') as heads,
+        to_regprocedure('public.exam_sync_question_state(jsonb,bigint,integer)') as v2`);
+      expect(gone.rows).toEqual([{ operations: null, heads: null, v2: null }]);
     } finally {
       await db.close();
     }

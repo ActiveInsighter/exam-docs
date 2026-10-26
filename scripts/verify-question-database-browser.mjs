@@ -11,8 +11,9 @@ const require = process.env.QUESTION_BROWSER_MODULES
 const { chromium } = require('playwright');
 const base = (process.env.DEPLOYMENT_URL ?? 'http://127.0.0.1:3017').replace(/\/$/, '');
 const output = path.resolve(process.env.QUESTION_BROWSER_OUTPUT ?? '.deploy-tmp/question-database-browser');
-const url = `${base}/docs/english/`;
-const questionId = 'english-reading-001';
+// A single-choice question whose option B is correct (A is wrong).
+const url = `${base}${process.env.QUESTION_PAGE ?? '/docs/408/mock/01-8c139b6e/01-0387f115/'}`;
+const questionId = process.env.QUESTION_ID ?? '408-6dd520-002';
 const errors = [];
 const evidence = { deploymentUrl: base, startedAt: new Date().toISOString(), checks: [], errors, passed: false };
 await mkdir(output, { recursive: true });
@@ -40,9 +41,9 @@ async function prepare(context) {
       opening.onerror = () => reject(opening.error);
       opening.onsuccess = () => {
         const db = opening.result;
-        if (!db.objectStoreNames.contains('records')) { db.close(); resolve({ records: [], attempts: [] }); return; }
-        const tx = db.transaction(['records', 'attempts'], 'readonly');
-        const records = tx.objectStore('records').getAll();
+        if (!db.objectStoreNames.contains('answers')) { db.close(); resolve({ records: [], attempts: [] }); return; }
+        const tx = db.transaction(['answers', 'attempts'], 'readonly');
+        const records = tx.objectStore('answers').getAll();
         const attempts = tx.objectStore('attempts').getAll();
         tx.oncomplete = () => { db.close(); resolve({ records: records.result, attempts: attempts.result }); };
         tx.onabort = () => { db.close(); reject(tx.error); };

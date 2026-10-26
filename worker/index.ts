@@ -6,8 +6,7 @@ const ENDPOINTS = new Map([
   ['/auth/v1/token', ['POST']],
   ['/auth/v1/user', ['GET']],
   ['/auth/v1/logout', ['POST']],
-  ['/rest/v1/rpc/exam_sync_question_state', ['POST']],
-  ['/rest/v1/rpc/exam_sync_question_annotations', ['POST']],
+  ['/rest/v1/rpc/exam_sync', ['POST']],
 ]);
 const FORWARDED_HEADERS = [
   'accept', 'apikey', 'authorization', 'content-type', 'x-client-info',
