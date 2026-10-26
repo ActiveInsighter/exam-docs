@@ -1,0 +1,215 @@
+/*
+ * MDX tabs (components/mdx/tabs.tsx): <Tabs> / <Tab> and code-fence tabs.
+ *
+ * The look is the official one on the flat theme: one continuous surface, a
+ * row of text tabs, the active one underlined. Only the switch is refined:
+ * the underline (the Base UI indicator) glides to the chosen tab, the new
+ * panel fades in from the side the reader moved toward, and the surface
+ * eases between the two panel heights so the page below never jumps.
+ *
+ * Motion lives here only. The component reads the root's `transition` for
+ * its height animation, and reduced motion zeroes every duration.
+ *
+ * Every selector is a data hook the component renders, so none of them
+ * depend on Fumadocs' class names.
+ */
+
+[data-doc-tabs] {
+  --doc-tabs-glide: 300ms;
+  --doc-tabs-enter: 240ms;
+  --doc-tabs-shift: 0.75rem;
+  /* Inset of the underline from its tab's edges (the code variant pads its tabs). */
+  --doc-tabs-underline-inset: 0px;
+
+  margin-block: 1rem;
+  overflow: clip;
+  border: 0;
+  border-radius: var(--ui-radius-surface);
+  background-color: var(--docs-code-block-background);
+  box-shadow: none;
+  /* Timing for the height animation (use-height-transition.ts); height stays auto. */
+  transition: height 300ms var(--ui-ease);
+}
+
+[data-slot='doc-tabs-content'] {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------------------------------------------------------------------------
+ * Tab list
+ * ------------------------------------------------------------------------- */
+
+[data-slot='doc-tabs-list'] {
+  position: relative;
+  display: flex;
+  gap: 0.875rem;
+  padding-inline: 1rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  color: var(--color-fd-secondary-foreground);
+}
+
+[data-slot='doc-tabs-list']::-webkit-scrollbar {
+  display: none;
+}
+
+[data-slot='doc-tabs-label'] {
+  margin-block: auto;
+  margin-inline-end: auto;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+[data-slot='doc-tabs-trigger'] {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+  padding-block: 0.5rem;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--ui-duration) var(--ui-ease);
+}
+
+[data-slot='doc-tabs-trigger']:hover {
+  color: var(--color-fd-accent-foreground);
+}
+
+[data-slot='doc-tabs-trigger'][data-active] {
+  color: var(--color-fd-primary);
+}
+
+[data-slot='doc-tabs-trigger']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+  border-radius: 0.25rem;
+}
+
+[data-slot='doc-tabs-trigger'][data-disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+[data-slot='doc-tabs-trigger'] svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+/*
+ * The underline. Base UI writes the active tab's box as --active-tab-*;
+ * moving it with `translate` keeps the glide on the compositor, and only its
+ * width, which differs between labels, is laid out.
+ */
+[data-slot='doc-tabs-indicator'] {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: calc(var(--active-tab-width) - 2 * var(--doc-tabs-underline-inset));
+  height: 1px;
+  translate: calc(var(--active-tab-left) + var(--doc-tabs-underline-inset)) 0;
+  background-color: var(--color-fd-primary);
+  transition:
+    translate var(--doc-tabs-glide) var(--ui-ease),
+    width var(--doc-tabs-glide) var(--ui-ease);
+}
+
+/* Until hydration measures the indicator, the active tab draws its own underline. */
+[data-slot='doc-tabs-indicator'][hidden] ~ [data-slot='doc-tabs-trigger'][data-active] {
+  border-bottom-color: var(--color-fd-primary);
+}
+
+/* Code-fence tabs keep their official, tighter list. */
+[data-doc-tabs][data-variant='code'] {
+  --doc-tabs-underline-inset: 0.5rem;
+}
+
+[data-variant='code'] [data-slot='doc-tabs-list'] {
+  gap: 0;
+  padding-inline: 0.5rem;
+}
+
+[data-variant='code'] [data-slot='doc-tabs-trigger'] {
+  padding: 0.375rem 0.5rem;
+}
+
+[data-variant='code'] [data-slot='doc-tabs-trigger'] svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/* ---------------------------------------------------------------------------
+ * Panels
+ * ------------------------------------------------------------------------- */
+
+[data-slot='doc-tabs-panel'] {
+  padding: 1rem;
+  font-size: 0.9375rem;
+  outline: none;
+  transition:
+    opacity var(--doc-tabs-enter) var(--ui-ease),
+    translate var(--doc-tabs-enter) var(--ui-ease);
+}
+
+[data-slot='doc-tabs-panel'] > :first-child {
+  margin-top: 0;
+}
+
+[data-slot='doc-tabs-panel'] > :last-child {
+  margin-bottom: 0;
+}
+
+[data-slot='doc-tabs-panel']:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+  border-radius: var(--ui-radius-surface);
+}
+
+/* Entering: a short fade from the side the reader moved toward. */
+[data-slot='doc-tabs-panel'][data-starting-style] {
+  opacity: 0;
+  translate: 0 0.25rem;
+}
+
+[data-slot='doc-tabs-panel'][data-starting-style][data-activation-direction='right'] {
+  translate: var(--doc-tabs-shift) 0;
+}
+
+[data-slot='doc-tabs-panel'][data-starting-style][data-activation-direction='left'] {
+  translate: calc(-1 * var(--doc-tabs-shift)) 0;
+}
+
+/* Leaving: gone at once, so the two panels never share the surface. */
+[data-slot='doc-tabs-panel'][data-ending-style] {
+  display: none;
+}
+
+/*
+ * A panel holding only a code block lets the code fill it edge to edge; the
+ * surface already paints the fill. The ids match the code-surface rules in
+ * app/global.css, which this has to outrank.
+ */
+[data-slot='doc-tabs-panel']:has(> figure.shiki:only-child) {
+  padding: 0;
+}
+
+:is(#docs-body, .docs-prose) [data-slot='doc-tabs-panel'] > figure.shiki:only-child {
+  width: 100%;
+  margin: 0 !important;
+  background: transparent !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-doc-tabs],
+  [data-slot='doc-tabs-indicator'],
+  [data-slot='doc-tabs-panel'] {
+    transition-duration: 0s;
+  }
+}
