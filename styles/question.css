@@ -1165,14 +1165,27 @@ input[data-question-blank][data-active] {
 
 /* ------------------------------------------------------------ math keypad */
 
+/*
+ * math-keypad.tsx. A tray docked to the bottom on phones, a floating panel on
+ * desktop: a calculator-like display, a toolbar (layers · clear · blank
+ * stepper · dismiss) and one 8-column key grid whose right column (delete,
+ * caret arrows, the tall enter key) is fixed across layers.
+ */
 [data-math-keypad] {
+  --key-gap: 0.375rem;
+  --key-height: 2.875rem;
+  --key-radius: 0.625rem;
   position: fixed;
   inset-inline: 0;
   bottom: 0;
   z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   padding: 0.5rem 0.5rem calc(0.5rem + env(safe-area-inset-bottom));
+  border-radius: 1.125rem 1.125rem 0 0;
   background: var(--exam-keypad);
-  box-shadow: 0 -12px 40px -16px rgb(0 0 0 / 25%), 0 -1px 0 color-mix(in oklch, var(--foreground) 8%, transparent);
+  box-shadow: 0 -16px 40px -20px rgb(0 0 0 / 30%), 0 -1px 0 var(--exam-keypad-edge);
   animation: exam-keypad-in 280ms cubic-bezier(0.32, 0.72, 0, 1);
   touch-action: manipulation;
   user-select: none;
@@ -1181,16 +1194,21 @@ input[data-question-blank][data-active] {
 
 @media (min-width: 768px) {
   [data-math-keypad] {
+    --key-height: 3rem;
     left: 50%;
     right: auto;
     bottom: 1rem;
-    width: 30rem;
+    width: 34rem;
     padding: 0.625rem;
-    border-radius: 1.25rem;
-    box-shadow: var(--ui-shadow-overlay), 0 0 0 1px color-mix(in oklch, var(--foreground) 8%, transparent);
+    border-radius: 1.375rem;
+    box-shadow: var(--ui-shadow-overlay), 0 0 0 1px var(--exam-keypad-edge);
     transform: translateX(-50%);
     animation-name: exam-keypad-in-desktop;
   }
+}
+
+@media (max-width: 359px) {
+  [data-math-keypad] { --key-gap: 0.25rem; padding-inline: 0.375rem; }
 }
 
 @keyframes exam-keypad-in {
@@ -1202,64 +1220,259 @@ input[data-question-blank][data-active] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-math-keypad] { animation: none; }
+  [data-math-keypad],
+  [data-keypad-grid] > * { animation: none !important; }
 }
 
-[data-keypad-grid] {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 0.375rem;
+/* Display: the typeset expression, like a calculator's screen. */
+[data-keypad-display] {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: 3.25rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 0.875rem;
+  background: var(--exam-keypad-display);
+  box-shadow: inset 0 0 0 1px var(--exam-keypad-edge);
+  transition: box-shadow 150ms linear;
 }
 
-[data-key] {
-  display: grid;
-  place-items: center;
-  height: 2.75rem;
-  border: 0;
-  border-radius: 0.75rem;
-  background: var(--exam-key);
-  box-shadow: 0 1px 0 color-mix(in oklch, var(--foreground) 10%, transparent);
-  color: var(--foreground);
-  font-family: KaTeX_Main, 'Times New Roman', var(--font-serif), serif;
-  font-size: 1.1875rem;
-  line-height: 1;
-  cursor: pointer;
-  transition: background-color 90ms linear, transform 90ms linear;
-  -webkit-tap-highlight-color: transparent;
+[data-keypad-display][data-invalid] {
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--destructive) 45%, transparent);
 }
 
-[data-key][data-variant='fn'] {
-  background: transparent;
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--foreground) 10%, transparent);
-  font-size: 0.9375rem;
+[data-keypad-label] {
+  flex-shrink: 0;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  background: var(--exam-key-fn);
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1.25rem;
 }
 
-[data-key][data-variant='op'] {
-  background: color-mix(in oklch, var(--foreground) 7%, var(--exam-key));
+[data-keypad-display] [data-math-preview] {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  font-size: 1.375rem;
+  text-align: right;
+  white-space: nowrap;
+  scrollbar-width: none;
 }
 
-[data-key][data-variant='control'] {
-  background: color-mix(in oklch, var(--foreground) 9%, var(--exam-keypad));
+[data-keypad-placeholder] {
+  color: var(--muted-foreground);
   font-family: var(--font-sans);
   font-size: 0.875rem;
 }
 
-[data-key][data-variant='primary'] {
-  background: var(--exam-key-accent);
-  color: var(--background);
-  font-family: var(--font-sans);
-  font-size: 0.9375rem;
-  font-weight: 600;
+[data-keypad-display] [data-math-error] {
+  display: inline-flex;
+  flex-shrink: 1;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-[data-key] svg { width: 1.125rem; height: 1.125rem; }
-[data-key][data-pressed],
-[data-key]:active { background: var(--exam-key-pressed); transform: scale(0.95); }
-[data-key][data-variant='primary'][data-pressed],
-[data-key][data-variant='primary']:active { background: color-mix(in oklch, var(--exam-key-accent) 80%, var(--background)); }
-[data-key]:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+[data-keypad-display] [data-math-error] svg { flex-shrink: 0; width: 0.875rem; height: 0.875rem; }
+
+/* Toolbar */
+[data-keypad-toolbar] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+[data-keypad-layers],
+[data-keypad-actions],
+[data-keypad-stepper] {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+[data-keypad-layers] {
+  padding: 0.1875rem;
+  border-radius: 0.75rem;
+  background: var(--exam-key-fn);
+}
+
+[data-keypad-tool] {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.25rem;
+  height: 2rem;
+  padding-inline: 0.625rem;
+  border: 0;
+  border-radius: 0.5625rem;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 120ms linear, color 120ms linear, transform 90ms linear;
+  -webkit-tap-highlight-color: transparent;
+}
+
+[data-keypad-layers] [data-keypad-tool] {
+  min-width: 3rem;
+  height: 1.875rem;
+  font-family: KaTeX_Main, 'Times New Roman', var(--font-serif), serif;
+  font-size: 0.9375rem;
+}
+
+[data-keypad-tool] svg { width: 1.125rem; height: 1.125rem; }
+[data-keypad-tool] var { font-style: italic; }
+[data-keypad-tool][aria-pressed='true'] {
+  background: var(--exam-key);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 12%), 0 0 0 1px var(--exam-keypad-edge);
+  color: var(--foreground);
+}
+[data-keypad-tool]:disabled { opacity: 0.35; cursor: default; }
+[data-keypad-tool][data-pressed] { transform: scale(0.94); }
+[data-keypad-tool]:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+
+@media (hover: hover) {
+  [data-keypad-tool]:not(:disabled, [aria-pressed='true']):hover { background: var(--exam-key-fn); color: var(--foreground); }
+}
+
+[data-keypad-stepper] {
+  gap: 0;
+  border-radius: 0.625rem;
+  background: var(--exam-key-fn);
+}
+
+[data-keypad-stepper] [data-keypad-tool] { min-width: 2rem; padding-inline: 0.375rem; }
+
+[data-keypad-stepper] > span {
+  min-width: 2rem;
+  color: var(--foreground);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+[data-keypad-stepper] i { margin-inline: 0.125em; color: var(--muted-foreground); font-style: normal; }
+
+/* Keys */
+[data-keypad-grid] {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-areas:
+    '. . . . . . . delete'
+    '. . . . . . . arrows'
+    '. . . . . . . enter'
+    '. . . . . . . enter';
+  grid-auto-rows: var(--key-height);
+  gap: var(--key-gap);
+}
+
+/* A short fade when the layer changes, so the swap reads as one. */
+[data-keypad-grid] > [data-key]:not([style]) {
+  animation: exam-key-in 140ms ease-out;
+}
+
+@keyframes exam-key-in {
+  from { opacity: 0; }
+}
+
+/* Gutter between the helpers and the digit pad on the 123 layer. */
+[data-keypad-grid][data-layer='main'] > [data-key]:nth-child(7n + 4):not([style]) {
+  margin-left: 0.25rem;
+}
+[data-keypad-grid][data-layer='main'] > [data-key]:nth-child(7n + 3):not([style]) {
+  margin-right: 0.25rem;
+}
+
+[data-key-pair] {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.1875rem;
+}
+
+[data-key] {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--key-radius);
+  background: var(--exam-key);
+  box-shadow: 0 1px 0 var(--exam-key-shadow), 0 0 0 0.5px var(--exam-keypad-edge);
+  color: var(--foreground);
+  font-family: KaTeX_Main, 'Times New Roman', var(--font-serif), serif;
+  font-size: 1.375rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 90ms linear, transform 90ms linear, box-shadow 90ms linear;
+  -webkit-tap-highlight-color: transparent;
+}
+
+[data-key][data-variant='op'] {
+  background: var(--exam-key-op);
+  font-size: 1.3125rem;
+}
+
+[data-key][data-variant='fn'] {
+  background: var(--exam-key-fn);
+  box-shadow: none;
+  font-size: 1.0625rem;
+}
+
+[data-keypad-grid][data-layer='functions'] [data-key][data-variant='fn'] {
+  font-size: 0.9375rem;
+}
+
+[data-key][data-variant='control'] {
+  background: var(--exam-key-control);
+  box-shadow: 0 1px 0 var(--exam-key-shadow);
+  color: var(--foreground);
+}
+
+[data-key][data-variant='primary'] {
+  grid-auto-flow: row;
+  align-content: center;
+  gap: 0.25rem;
+  background: var(--exam-key-accent);
+  box-shadow: 0 1px 0 var(--exam-key-shadow);
+  color: var(--exam-key-accent-fg);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+[data-key] svg { width: 1.25rem; height: 1.25rem; }
+[data-key][data-variant='primary'] svg { width: 1.375rem; height: 1.375rem; }
+
+[data-key][data-pressed] {
+  background: var(--exam-key-pressed);
+  box-shadow: none;
+  transform: translateY(1px) scale(0.96);
+}
+[data-key][data-variant='primary'][data-pressed] {
+  background: color-mix(in oklch, var(--exam-key-accent) 82%, var(--exam-keypad));
+}
+[data-key]:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; z-index: 1; }
+
+@media (hover: hover) {
+  [data-key]:not([data-pressed]):hover { filter: brightness(0.97); }
+  .dark [data-key]:not([data-pressed]):hover { filter: brightness(1.15); }
+}
 
 [data-key] var {
+  font-family: KaTeX_Math, KaTeX_Main, 'Times New Roman', serif;
+  font-size: 1.15em;
   font-style: italic;
 }
 
@@ -1268,32 +1481,59 @@ input[data-question-blank][data-active] {
   font-size: 0.62em;
   line-height: 0;
 }
-[data-key] sup { vertical-align: 0.7em; }
-[data-key] sub { vertical-align: -0.3em; }
+[data-key] sup { margin-left: 0.08em; vertical-align: 0.5em; }
+[data-key] sub { vertical-align: -0.35em; }
+
+[data-key-long] {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+@media (min-width: 768px) {
+  [data-key-long] { font-size: 0.875rem; }
+}
+
+/* ∛: the index sits in the crook of the radical. */
+[data-key-root] small {
+  margin-right: -0.3em;
+  font-size: 0.55em;
+  vertical-align: 0.75em;
+}
+
+/* The empty slot a template leaves for the reader to fill. */
+[data-key-box] {
+  display: inline-block;
+  width: 0.62em;
+  height: 0.78em;
+  border: 1.5px dashed color-mix(in oklch, currentColor 55%, transparent);
+  border-radius: 0.14em;
+  vertical-align: -0.08em;
+}
+
+sup > [data-key-box],
+sub > [data-key-box] { border-width: 1px; }
+
+[data-key-frac] {
+  display: inline-flex;
+  font-size: 0.8em;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2em;
+}
+
+[data-key-frac]::before {
+  content: '';
+  order: 1;
+  width: 1em;
+  border-top: 1.5px solid currentColor;
+}
+
+[data-key-frac] > [data-key-box]:last-child { order: 2; }
 
 /* Room below the page so the last blanks can scroll above the keypad. */
 html[data-keypad-open] body {
   padding-bottom: var(--exam-keypad-height, 0px);
-}
-
-[data-keypad-preview] {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-height: 2.75rem;
-  margin-bottom: 0.5rem;
-  padding: 0.25rem 0.375rem 0.25rem 0.75rem;
-  border-radius: 0.75rem;
-  background: var(--exam-key);
-}
-
-[data-keypad-preview] [data-math-preview] {
-  flex: 1;
-  min-width: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  scrollbar-width: none;
 }
 
 /* ------------------------------------------------------- maths rendering */
@@ -1344,6 +1584,10 @@ html[data-keypad-open] body {
   vertical-align: 0.55em;
   line-height: 0;
 }
+
+/* A fraction in an exponent keeps a readable size and clears the base. */
+[data-math-preview] sup:has(> [data-math-frac]) { vertical-align: 0.8em; }
+[data-math-preview] sup > [data-math-frac] { font-size: 1em; }
 
 [data-math-error] {
   color: var(--destructive);

@@ -60,7 +60,7 @@ export function BlankField({ answer, index, kind, placeholder }: BlankFieldProps
     <span className="inline whitespace-nowrap">
       {several ? <span data-blank-index="" aria-hidden="true">{index + 1}</span> : null}
       {kind === 'math' ? (
-        <MathBlank {...common} question={question} index={index} label={label} last={last} />
+        <MathBlank {...common} question={question} index={index} count={spec.blanks.length} label={label} last={last} />
       ) : (
         <input
           {...common}
