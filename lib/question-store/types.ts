@@ -1,4 +1,6 @@
 /** Browser storage and wire format intentionally contain answers, never answer keys. */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export type QuestionNamespace = 'guest' | `user:${string}`;
 
 export interface QuestionIdentity {
@@ -14,78 +16,36 @@ export interface AnswerState {
   attempt: number;
 }
 
-export interface RemoteQuestionRecord extends QuestionIdentity {
+/** A committed answer as the cloud stores it: last writer (by `updatedAt`) wins. */
+export interface RemoteAnswer extends QuestionIdentity {
   state: AnswerState;
-  version: number;
   updatedAt: string;
 }
 
-export interface QuestionRecord extends QuestionIdentity {
-  namespace: QuestionNamespace;
-  key: string;
-  state: AnswerState;
-  generation: number;
-  remoteVersion: number;
-  updatedAt: string;
-  dirty: boolean;
-}
-
-export interface AttemptPayload {
+/** One graded submission; immutable, identified by `attemptId`. */
+export interface RemoteAttempt extends QuestionIdentity {
   attemptId: string;
   state: AnswerState;
   createdAt: string;
 }
 
-export interface QuestionAttempt extends QuestionIdentity, AttemptPayload {
-  namespace: QuestionNamespace;
-  /** Used to make guest imports repeatable without changing the source history. */
-  sourceAttemptId?: string;
-}
-
-export interface RemoteAttempt extends QuestionIdentity, AttemptPayload {}
-
-export interface SyncOperation extends QuestionIdentity {
-  operationId: string;
-  state: AnswerState;
-  baseVersion: number;
-  attempt?: AttemptPayload;
-}
-
-export interface OutboxOperation extends SyncOperation {
-  namespace: QuestionNamespace;
-  key: string;
-  generation: number;
-  createdAt: string;
-  inFlight: boolean;
-}
-
-export interface QuestionConflict extends QuestionIdentity {
-  namespace: QuestionNamespace;
-  conflictId: string;
-  key: string;
-  localState: AnswerState;
-  remote: RemoteQuestionRecord;
-  createdAt: string;
-  resolvedAt?: string;
-  resolution?: 'local' | 'remote';
-}
-
-export interface SyncReceipt {
-  operationId: string;
-  status: 'applied' | 'conflict';
-  record: RemoteQuestionRecord;
+/** Everything a device uploads in one exchange, and everything it receives back. */
+export interface SyncChanges {
+  answers: RemoteAnswer[];
+  attempts: RemoteAttempt[];
+  tags: UserTag[];
+  marks: QuestionMark[];
 }
 
 export interface SyncRequest {
-  operations: SyncOperation[];
+  changes: SyncChanges;
   cursor: string | null;
   limit: number;
 }
 
-export interface SyncResponse {
-  receipts: SyncReceipt[];
-  changes: RemoteQuestionRecord[];
-  attempts: RemoteAttempt[];
+export interface SyncResponse extends SyncChanges {
+  /** A tag created on two devices with the same name: `from` was folded into `to`. */
+  merged: { from: string; to: string }[];
   cursor: string;
   hasMore: boolean;
   /** The server restarted the feed from zero because the sent cursor was ahead of the account. */
@@ -94,34 +54,28 @@ export interface SyncResponse {
 
 export interface QuestionSyncTransport {
   sync(request: SyncRequest): Promise<SyncResponse>;
-  /** Tags, favourites and notes; resolves null while the server does not offer them yet. */
-  syncAnnotations?(request: AnnotationSyncRequest): Promise<AnnotationSyncResponse | null>;
 }
 
 export interface DatabaseChange {
   namespace: QuestionNamespace;
-  kind: 'local' | 'sync';
-  /** Which data changed: answers (default) or the reader's tags, favourites and notes. */
-  scope?: 'answers' | 'annotations';
-  /** Question keys whose current record may have changed; absent means "any". */
+  scope: 'answers' | 'annotations';
+  /** Keys whose rows may have changed; absent means "any". */
   keys?: string[];
-  /** A submission or explicit choice that should reach the cloud without debounce. */
-  urgent?: boolean;
-}
-
-export interface SyncMetadata {
-  cursor: string | null;
-  lastSyncedAt: string | null;
-  retryCount: number;
-  nextRetryAt: number;
+  /** The tab that made the change. */
+  tab: string;
+  /**
+   * write: a cache stored what it already shows; sync: rows the engine already
+   * handed to this tab's caches; import: copied data no cache has seen.
+   */
+  origin: 'write' | 'sync' | 'import';
 }
 
 export type SyncPhase = 'local' | 'idle' | 'syncing' | 'offline' | 'error';
 
 export interface QuestionSyncStatus {
   phase: SyncPhase;
+  /** Committed changes not yet acknowledged by the cloud. */
   pending: number;
-  conflicts: number;
   lastSyncedAt: string | null;
   error: string | null;
 }
@@ -138,7 +92,7 @@ export interface QuestionSummary {
 
 export function namespaceForUser(userId?: string | null): QuestionNamespace {
   if (!userId) return 'guest';
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)) {
+  if (!UUID.test(userId)) {
     throw new Error('Invalid account identifier');
   }
   return `user:${userId.toLowerCase()}`;
@@ -173,12 +127,32 @@ export function validateState(state: AnswerState, maxBytes = 16384): void {
   if (new TextEncoder().encode(JSON.stringify(state)).length > maxBytes) throw new Error('Answer exceeds storage size limit');
 }
 
-export function validateRemote(record: RemoteQuestionRecord): void {
-  validateIdentity(record);
-  validateState(record.state);
-  // Version zero is the explicit missing-record snapshot in a CAS conflict receipt.
-  if (!Number.isSafeInteger(record.version) || record.version < 0 || !Number.isFinite(Date.parse(record.updatedAt))) {
-    throw new Error('Invalid remote question record');
+export const validTime = (value: unknown): value is string => typeof value === 'string' && Number.isFinite(Date.parse(value));
+
+/** Instants, not strings: the server spells timestamps differently. */
+export const compareTime = (left: string, right: string) => Date.parse(left) - Date.parse(right);
+
+/** Each write is strictly newer than the row it replaces, even within one millisecond. */
+export function nextTimestamp(previous?: string): string {
+  const last = previous ? Date.parse(previous) : 0;
+  return new Date(Math.max(Date.now(), Number.isFinite(last) ? last + 1 : 0)).toISOString();
+}
+
+export const emptyAnswer = (): AnswerState => ({ selected: [], values: [], submitted: false, attempt: 0 });
+
+export const isAnswered = (state: AnswerState) => state.selected.length > 0 || state.values.some((value) => value.trim() !== '');
+
+export function validateAnswer(answer: RemoteAnswer): void {
+  validateIdentity(answer);
+  validateState(answer.state);
+  if (!validTime(answer.updatedAt)) throw new Error('Invalid answer timestamp');
+}
+
+export function validateAttempt(attempt: RemoteAttempt): void {
+  validateIdentity(attempt);
+  validateState(attempt.state);
+  if (!UUID.test(attempt.attemptId) || !attempt.state.submitted || attempt.state.attempt < 1 || !validTime(attempt.createdAt)) {
+    throw new Error('Invalid submission attempt');
   }
 }
 
@@ -229,34 +203,6 @@ export interface QuestionMark extends MarkIdentity {
   updatedAt: string;
 }
 
-export interface StoredUserTag extends UserTag {
-  namespace: QuestionNamespace;
-  dirty: boolean;
-}
-
-export interface StoredQuestionMark extends QuestionMark {
-  namespace: QuestionNamespace;
-  key: string;
-  dirty: boolean;
-}
-
-export interface AnnotationSyncRequest {
-  tags: UserTag[];
-  marks: QuestionMark[];
-  cursor: string | null;
-  limit: number;
-}
-
-export interface AnnotationSyncResponse {
-  tags: UserTag[];
-  marks: QuestionMark[];
-  /** A tag created on two devices with the same name: `from` was folded into `to`. */
-  merged: { from: string; to: string }[];
-  cursor: string;
-  hasMore: boolean;
-  reset?: boolean;
-}
-
 export function markKey(identity: MarkIdentity): string {
   validateIdentity({ ...identity, questionRevision: 'mark' });
   return JSON.stringify([identity.documentPath, identity.questionId]);
@@ -270,8 +216,6 @@ export function isEmptyMark(mark: Pick<QuestionMark, 'favorite' | 'note' | 'tagI
   return !mark.favorite && mark.note.trim() === '' && mark.tagIds.length === 0;
 }
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 export function normalizeTagName(name: string): string {
   return name.normalize('NFKC').replace(/\s+/gu, ' ').trim();
 }
@@ -280,7 +224,7 @@ export function validateTag(tag: UserTag): void {
   const name = normalizeTagName(tag.name);
   if (!UUID.test(tag.tagId) || name !== tag.name || !name || [...name].length > ANNOTATION_LIMITS.tagName ||
     !(TAG_COLORS as readonly string[]).includes(tag.color) || typeof tag.deleted !== 'boolean' ||
-    !Number.isFinite(Date.parse(tag.updatedAt)) || !Number.isFinite(Date.parse(tag.createdAt))) {
+    !validTime(tag.updatedAt) || !validTime(tag.createdAt)) {
     throw new Error('Invalid tag');
   }
 }
@@ -291,7 +235,7 @@ export function validateMark(mark: QuestionMark): void {
     typeof mark.excerpt !== 'string' || mark.excerpt.length > ANNOTATION_LIMITS.excerpt ||
     !Array.isArray(mark.tagIds) || mark.tagIds.length > ANNOTATION_LIMITS.tagsPerQuestion ||
     mark.tagIds.some((id) => typeof id !== 'string' || !UUID.test(id)) || new Set(mark.tagIds).size !== mark.tagIds.length ||
-    !Number.isFinite(Date.parse(mark.updatedAt))) {
+    !validTime(mark.updatedAt)) {
     throw new Error('Invalid question mark');
   }
 }

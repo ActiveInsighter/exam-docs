@@ -11,7 +11,7 @@ import {
   useSyncExternalStore,
 } from 'react';
 import { usePathname } from 'next/navigation';
-import { PENDING_SNAPSHOT, QuestionAnswerCache, emptyAnswer } from '@/lib/question-store/cache';
+import { PENDING_SNAPSHOT, QuestionAnswerCache, emptyAnswer, type WriteKind } from '@/lib/question-store/cache';
 import type { AnswerState, QuestionIdentity } from '@/lib/question-store/types';
 import { useQuestionBatch } from './question-batch';
 import { useQuestionStorage } from './database-context';
@@ -103,9 +103,10 @@ export function QuestionProvider({
   if (ready && baseline.current === null) baseline.current = attempt;
   const fresh = submitted && baseline.current !== null && attempt > baseline.current;
 
-  const update = useCallback((next: AnswerState, submission = false) => {
+  // Drafts stay on this device; a submission or reset is committed and reaches the cloud.
+  const update = useCallback((next: AnswerState, kind: WriteKind = 'draft') => {
     current.current = next;
-    cache?.write(identity, next, { submission });
+    cache?.write(identity, next, kind);
   }, [cache, identity]);
 
   const retryStorage = useCallback(() => { cache?.retry(identity); }, [cache, identity]);
@@ -132,7 +133,7 @@ export function QuestionProvider({
       if (!ready || kind === 'blank' || current.current.submitted) return;
       const finish = instant && letters.length > 0;
       update({ ...current.current, selected: [...letters], submitted: finish,
-        attempt: current.current.attempt + (finish ? 1 : 0) }, finish);
+        attempt: current.current.attempt + (finish ? 1 : 0) }, finish ? 'submit' : 'draft');
     },
     [ready, kind, instant, update],
   );
@@ -150,12 +151,12 @@ export function QuestionProvider({
   const submit = useCallback(() => {
     const state = current.current;
     if (!ready || state.submitted || !isAnswered(spec, state.selected, state.values)) return;
-    update({ ...state, submitted: true, attempt: state.attempt + 1 }, true);
+    update({ ...state, submitted: true, attempt: state.attempt + 1 }, 'submit');
   }, [ready, spec, update]);
 
   const reset = useCallback(() => {
     if (!ready) return;
-    update({ ...emptyAnswer(), attempt: current.current.attempt });
+    update({ ...emptyAnswer(), attempt: current.current.attempt }, 'reset');
   }, [ready, update]);
 
   // The batch submits and resets through the same paths as the footer.

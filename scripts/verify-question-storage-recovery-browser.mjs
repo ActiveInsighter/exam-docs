@@ -14,14 +14,22 @@ const bundle = await build({
     resolveDir: process.cwd(), loader: 'tsx', contents: `
       import { createRoot } from 'react-dom/client';
       import { QuestionDatabase } from './lib/question-store/database';
-      import { QuestionAnswerCache } from './lib/question-store/cache';
+      import { QuestionSession } from './lib/question-store/session';
       import { QuestionProvider, useQuestionState } from './components/question/question-state';
       import { QuestionFooter } from './components/question/question-footer';
       const namespace = 'user:11111111-1111-4111-8111-111111111111';
       const identity = { documentPath: '/docs/storage-recovery', questionId: 'recovery', questionRevision: 'v1' };
       const database = await QuestionDatabase.open();
-      window.storage = { database, namespace, ready: true, cache: new QuestionAnswerCache(database, namespace) };
-      window.snapshot = async () => ({ record: await database.get(namespace, identity), attempts: await database.listAttempts(namespace) });
+      const session = new QuestionSession(database, namespace, { sync: { urgentMs: 0 } });
+      // A stand-in for public.exam_sync that remembers what reached the cloud.
+      window.cloud = { answers: [], attempts: [] };
+      window.connectCloud = () => session.sync.connect({ async sync({ changes, cursor }) {
+        window.cloud.answers.push(...changes.answers);
+        window.cloud.attempts.push(...changes.attempts);
+        return { answers: changes.answers, attempts: [], tags: [], marks: [], merged: [], cursor: cursor ?? '0', hasMore: false };
+      } });
+      window.storage = { database, namespace, ready: true, cache: session.answers, annotations: session.annotations };
+      window.snapshot = async () => ({ record: await database.answers.get(namespace, identity), attempts: await database.answers.listAttempts(namespace) });
       function Probe() {
         const state = useQuestionState();
         return <>
@@ -44,7 +52,7 @@ const bundle = await build({
       plugin.onResolve({ filter: /^\.\/database-context$/ }, () => ({ path: 'database-context', namespace: 'harness' }));
       plugin.onLoad({ filter: /.*/, namespace: 'harness' }, ({ path: name }) => ({ contents: name === 'navigation'
         ? `export const usePathname = () => '/docs/storage-recovery';`
-        : 'export const useQuestionDatabase = () => window.storage;' }));
+        : 'export const useQuestionDatabase = () => window.storage; export const useQuestionStorage = () => window.storage;' }));
     },
   }],
 });
@@ -79,11 +87,11 @@ try {
   await page.getByRole('button', { name: '重做', exact: true }).click();
   await page.waitForFunction(async () => !(await window.snapshot()).record.state.submitted);
   await page.evaluate(() => {
-    const add = IDBObjectStore.prototype.add;
-    window.restoreWrites = () => { IDBObjectStore.prototype.add = add; };
-    IDBObjectStore.prototype.add = function (...args) {
+    const put = IDBObjectStore.prototype.put;
+    window.restoreWrites = () => { IDBObjectStore.prototype.put = put; };
+    IDBObjectStore.prototype.put = function (...args) {
       if (this.name === 'attempts') throw new DOMException('Storage full', 'QuotaExceededError');
-      return add.apply(this, args);
+      return put.apply(this, args);
     };
   });
   await choose.click();
@@ -109,8 +117,26 @@ try {
   await page.getByText('回答正确', { exact: true }).waitFor();
   assert.deepEqual(await page.locator('output').textContent().then(JSON.parse), { selected: ['B'], attempt: 2, submitted: true, ready: true });
   assert.equal((await page.evaluate(() => window.snapshot())).attempts.length, 2);
-  assert.deepEqual(errors, []);
   console.log('PASS reload restores the saved answer without duplicating submission history');
+
+  // Signed in with a full disk: the submission still reaches the cloud, and leaving is not blocked.
+  await page.evaluate(() => window.connectCloud());
+  await page.getByRole('button', { name: '重做', exact: true }).click();
+  await page.waitForFunction(() => window.cloud.answers.some((answer) => !answer.state.submitted));
+  await page.evaluate(() => {
+    const put = IDBObjectStore.prototype.put;
+    IDBObjectStore.prototype.put = function (...args) {
+      if (this.name === 'attempts' || this.name === 'answers') throw new DOMException('Storage full', 'QuotaExceededError');
+      return put.apply(this, args);
+    };
+  });
+  await choose.click();
+  await page.getByRole('alert').filter({ hasText: '正在同步到云端' }).waitFor();
+  // Earlier commits waited for the cloud too; this one is the third attempt.
+  await page.waitForFunction(() => window.cloud.attempts.some((attempt) => attempt.state.attempt === 3) && window.cloud.answers.at(-1).state.submitted);
+  assert.equal(await page.evaluate(() => window.storage.cache.hasUnsaved()), false);
+  console.log('PASS a submission the full browser database refused still reaches the cloud');
+  assert.deepEqual(errors, []);
 } finally {
   await browser.close();
   await new Promise((resolve) => server.close(resolve));

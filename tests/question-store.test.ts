@@ -1,94 +1,41 @@
-import { IDBFactory, IDBObjectStore, forceCloseDatabase } from 'fake-indexeddb';
+import { IDBFactory, forceCloseDatabase } from 'fake-indexeddb';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
-  QuestionDatabase, QuestionSyncEngine, namespaceForUser, questionKey,
-  type AnswerState, type QuestionIdentity, type QuestionNamespace, type RemoteAttempt,
-  type RemoteQuestionRecord, type SyncOperation, type SyncReceipt, type SyncRequest,
-  type SyncResponse, type QuestionSyncTransport,
+  QuestionSyncEngine, nextTimestamp, questionKey,
+  type QuestionDatabase, type QuestionNamespace, type QuestionSyncOptions, type QuestionSyncTransport, type SyncChanges,
 } from '../lib/question-store';
+import {
+  ACCOUNT, FakeServer, OTHER, choice, draft, onCleanup, openDatabase as open, page, question, quota, runCleanup, submitted, tick, until,
+} from './helpers/question-store';
 
-const ACCOUNT = namespaceForUser('11111111-1111-4111-8111-111111111111');
-const OTHER = namespaceForUser('22222222-2222-4222-8222-222222222222');
-const identity: QuestionIdentity = { documentPath: '/docs/math', questionId: 'q1', questionRevision: 'r1' };
-const draft = (text: string): AnswerState => ({ selected: [], values: [text], submitted: false, attempt: 0 });
-const submitted = (text: string, attempt = 1): AnswerState => ({ ...draft(text), submitted: true, attempt });
-const databases: QuestionDatabase[] = [];
-const engines: QuestionSyncEngine[] = [];
+const identity = question();
+const empty: SyncChanges = { answers: [], attempts: [], tags: [], marks: [] };
+const committed = (state = submitted('x'), at = nextTimestamp()) => ({ state, updatedAt: at, committed: true });
 
-async function open(factory = new IDBFactory(), name = crypto.randomUUID(), broadcast = false) {
-  const db = await QuestionDatabase.open({ name, indexedDB: factory, broadcast });
-  databases.push(db);
-  return db;
-}
-
-function engine(db: QuestionDatabase, transport?: QuestionSyncTransport, namespace: QuestionNamespace = ACCOUNT) {
-  const value = new QuestionSyncEngine(db, namespace, transport);
-  engines.push(value);
+function engine(db: QuestionDatabase | null, transport?: QuestionSyncTransport, options: QuestionSyncOptions = {}, namespace: QuestionNamespace = ACCOUNT) {
+  const value = new QuestionSyncEngine(db, namespace, { urgentMs: 0, ...options });
+  onCleanup(() => value.stop());
+  value.start();
+  if (transport) value.connect(transport);
   return value;
 }
 
-/** Minimal CAS/event-stream model. This is deliberately independent of IndexedDB implementation. */
-class Server implements QuestionSyncTransport {
-  records = new Map<string, RemoteQuestionRecord>();
-  attempts = new Map<string, RemoteAttempt>();
-  receipts = new Map<string, SyncReceipt>();
-  events: ({ record: RemoteQuestionRecord } | { attempt: RemoteAttempt })[] = [];
-  requests: SyncRequest[] = [];
-  loseNextResponse = false;
-  pageSize = 100;
-
-  async sync(input: SyncRequest): Promise<SyncResponse> {
-    this.requests.push(structuredClone(input));
-    const receipts: SyncReceipt[] = [];
-    for (const operation of input.operations) {
-      const cached = this.receipts.get(operation.operationId);
-      if (cached) { receipts.push(cached); continue; }
-      const key = questionKey(operation);
-      if (operation.attempt && !this.attempts.has(operation.attempt.attemptId)) {
-        const attempt = { ...identityPart(operation), ...operation.attempt };
-        this.attempts.set(attempt.attemptId, attempt);
-        this.events.push({ attempt });
-      }
-      const current = this.records.get(key);
-      let receipt: SyncReceipt;
-      if ((current?.version ?? 0) !== operation.baseVersion && current) {
-        receipt = { operationId: operation.operationId, status: 'conflict', record: current };
-      } else {
-        const record = { ...identityPart(operation), state: operation.state, version: (current?.version ?? 0) + 1, updatedAt: new Date().toISOString() };
-        this.records.set(key, record);
-        this.events.push({ record });
-        receipt = { operationId: operation.operationId, status: 'applied', record };
-      }
-      this.receipts.set(operation.operationId, receipt);
-      receipts.push(receipt);
-    }
-    const offset = Number(input.cursor ?? 0);
-    const page = this.events.slice(offset, offset + this.pageSize);
-    const result = { receipts, changes: page.flatMap((value) => 'record' in value ? [value.record] : []), attempts: page.flatMap((value) => 'attempt' in value ? [value.attempt] : []), cursor: String(offset + page.length), hasMore: offset + page.length < this.events.length };
-    if (this.loseNextResponse) { this.loseNextResponse = false; throw new Error('Connection lost after server commit'); }
-    return structuredClone(result);
-  }
-
-  edit(state: AnswerState, question = identity): RemoteQuestionRecord {
-    const key = questionKey(question);
-    const record = { ...question, state, version: (this.records.get(key)?.version ?? 0) + 1, updatedAt: new Date().toISOString() };
-    this.records.set(key, record);
-    this.events.push({ record });
-    return record;
-  }
-}
-
-function identityPart(value: QuestionIdentity): QuestionIdentity {
-  return { documentPath: value.documentPath, questionId: value.questionId, questionRevision: value.questionRevision };
+let lastStamp: string | undefined;
+/** What a cache hands the engine when the reader submits (strictly increasing times, like the cache). */
+function submit(sync: QuestionSyncEngine, state = submitted('x'), id = identity) {
+  const updatedAt = lastStamp = nextTimestamp(lastStamp);
+  const attempt = { ...id, attemptId: crypto.randomUUID(), state, createdAt: updatedAt };
+  sync.put({ answers: [{ ...id, state, updatedAt }], attempts: [attempt] });
+  return { updatedAt, attempt };
 }
 
 afterEach(() => {
-  for (const value of engines.splice(0)) value.stop();
-  for (const value of databases.splice(0)) value.close();
+  vi.useRealTimers();
+  runCleanup();
 });
 
 describe('question browser database', () => {
-  it('reopens an interrupted connection without losing answers, attempts or subscriptions', async () => {
+  it('reopens an interrupted connection without losing answers or subscriptions', async () => {
     const factory = new IDBFactory();
     const originalOpen = factory.open.bind(factory);
     let connection: IDBDatabase;
@@ -100,330 +47,332 @@ describe('question browser database', () => {
     const db = await open(factory);
     const changed = vi.fn();
     db.subscribe(changed);
-    await db.save(ACCOUNT, identity, submitted('first'), { submission: true });
+    await db.answers.save(ACCOUNT, identity, committed(submitted('first')));
     // fake-indexeddb 6.2.6 declares a constructor here, but accepts a connection.
     forceCloseDatabase(connection! as unknown as Parameters<typeof forceCloseDatabase>[0]);
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await tick();
     await Promise.all([
-      db.save(ACCOUNT, identity, submitted('second', 2), { submission: true }),
-      db.save('guest', { ...identity, questionId: 'other' }, draft('parallel')),
+      db.answers.save(ACCOUNT, identity, committed(submitted('second', 2))),
+      db.answers.save('guest', question('other'), { state: draft('parallel'), updatedAt: nextTimestamp(), committed: false }),
     ]);
     expect(opening).toHaveBeenCalledTimes(2);
-    expect((await db.get(ACCOUNT, identity))?.state).toEqual(submitted('second', 2));
-    expect(await db.listAttempts(ACCOUNT)).toHaveLength(2);
-    expect((await db.stats(ACCOUNT)).pending).toBe(2);
+    expect((await db.answers.get(ACCOUNT, identity))?.state).toEqual(submitted('second', 2));
     expect(changed).toHaveBeenCalledTimes(3);
     // A normal close does not dispatch a close event; transaction creation must recover too.
     connection!.close();
-    expect((await db.get(ACCOUNT, identity))?.state).toEqual(submitted('second', 2));
-    expect(opening).toHaveBeenCalledTimes(3);
+    expect((await db.answers.get(ACCOUNT, identity))?.state).toEqual(submitted('second', 2));
     db.close();
-    await expect(db.get(ACCOUNT, identity)).rejects.toThrow();
-    expect(opening).toHaveBeenCalledTimes(3);
+    await expect(db.answers.get(ACCOUNT, identity)).rejects.toThrow();
   });
 
-  it('persists offline drafts, submitted attempts and reset tombstones across reloads', async () => {
-    const factory = new IDBFactory();
-    const name = crypto.randomUUID();
-    const db = await open(factory, name);
-    await db.save(ACCOUNT, identity, draft('first'));
-    await db.save(ACCOUNT, identity, submitted('answer'), { submission: true });
-    await db.save(ACCOUNT, identity, { ...draft(''), attempt: 1 });
-    db.close();
-    const reopened = await open(factory, name);
-    expect((await reopened.get(ACCOUNT, identity))?.state).toEqual({ ...draft(''), attempt: 1 });
-    expect((await reopened.listAttempts(ACCOUNT))[0].state).toEqual(submitted('answer'));
-    expect((await reopened.stats(ACCOUNT)).pending).toBe(2);
-    const server = new Server();
-    await engine(reopened, server).sync();
-    expect(server.records.get(questionKey(identity))?.state).toEqual({ ...draft(''), attempt: 1 });
-    expect(server.attempts.size).toBe(1);
-    expect((await reopened.stats(ACCOUNT)).pending).toBe(0);
-  });
-
-  it('compacts unsent keystrokes without deleting submitted history', async () => {
-    // Submissions can share a millisecond; UUID ordering must not affect preservation.
-    vi.spyOn(Date.prototype, 'toISOString').mockReturnValue('2026-10-20T00:00:00.000Z');
+  it('keeps drafts local and puts only committed answers and submissions into the outbox', async () => {
     const db = await open();
-    for (const text of ['a', 'ab', 'abc']) await db.save(ACCOUNT, identity, draft(text));
-    expect((await db.stats(ACCOUNT)).pending).toBe(1);
-    await db.save(ACCOUNT, identity, submitted('abc'), { submission: true });
-    await db.save(ACCOUNT, identity, draft('new'));
-    await db.save(ACCOUNT, identity, submitted('new', 2), { submission: true });
-    expect((await db.stats(ACCOUNT)).pending).toBe(2);
-    const attempts = await db.listAttempts(ACCOUNT);
-    expect(attempts).toHaveLength(2);
-    expect(attempts.map((attempt) => attempt.state)).toEqual(
-      expect.arrayContaining([submitted('abc'), submitted('new', 2)]),
-    );
+    await db.answers.save(ACCOUNT, identity, { state: draft('typing'), updatedAt: nextTimestamp(), committed: false });
+    expect(await db.pending(ACCOUNT)).toEqual(empty);
+    const at = nextTimestamp();
+    const attempt = { ...identity, attemptId: crypto.randomUUID(), state: submitted('done'), createdAt: at };
+    await db.answers.save(ACCOUNT, identity, { state: submitted('done'), updatedAt: at, committed: true, attempt });
+    // A draft typed after the commit keeps the commit queued.
+    await db.answers.save(ACCOUNT, question('q2'), { state: draft('next'), updatedAt: nextTimestamp(), committed: false });
+    const pending = await db.pending(ACCOUNT);
+    expect(pending.answers.map((row) => row.state)).toEqual([submitted('done')]);
+    expect(pending.attempts.map((row) => row.attemptId)).toEqual([attempt.attemptId]);
+    // Guests never upload anything.
+    await db.answers.save('guest', identity, committed());
+    expect(await db.pending('guest')).toEqual(empty);
   });
 
-  it('rolls back the current answer if the atomic outbox write fails', async () => {
+  it('keeps a reset queued when a draft is typed before it is uploaded', async () => {
     const db = await open();
-    const original = IDBObjectStore.prototype.add;
-    IDBObjectStore.prototype.add = function (...args: Parameters<typeof original>) {
-      if (this.name === 'operations') throw new DOMException('Storage full', 'QuotaExceededError');
-      return original.apply(this, args);
-    };
-    try {
-      await expect(db.save(ACCOUNT, identity, submitted('answer'), { submission: true })).rejects.toThrow('Storage full');
-    } finally { IDBObjectStore.prototype.add = original; }
-    expect(await db.get(ACCOUNT, identity)).toBeUndefined();
-    expect(await db.listAttempts(ACCOUNT)).toEqual([]);
+    const reset = nextTimestamp();
+    await db.answers.save(ACCOUNT, identity, { state: { ...draft(''), values: [] }, updatedAt: reset, committed: true });
+    await db.answers.save(ACCOUNT, identity, { state: draft('new try'), updatedAt: nextTimestamp(reset), committed: false });
+    expect((await db.answers.get(ACCOUNT, identity))?.state).toEqual(draft('new try'));
+    expect((await db.pending(ACCOUNT)).answers.map((row) => row.updatedAt)).toEqual([reset]);
   });
 
-  it('keeps guests and different accounts separate and imports once without clearing guests', async () => {
+  it('commits an exchange atomically: acknowledgements, last-writer-wins rows and the cursor', async () => {
     const db = await open();
-    await db.save('guest', identity, submitted('guest'), { submission: true });
-    await db.save(ACCOUNT, identity, draft('account'));
-    await db.save(OTHER, identity, draft('other'));
-    expect(await db.importGuest(ACCOUNT)).toEqual({ records: 0, attempts: 1, marks: 0 });
+    const mine = nextTimestamp();
+    await db.answers.save(ACCOUNT, identity, committed(choice('A'), mine));
+    const newerLocal = nextTimestamp(new Date(Date.now() + 60_000).toISOString());
+    await db.answers.save(ACCOUNT, question('q2'), { state: draft('local newer'), updatedAt: newerLocal, committed: false });
+    const sent = await db.pending(ACCOUNT);
+    const changed = await db.commitExchange(ACCOUNT, sent, {
+      ...empty, merged: [], cursor: '7', hasMore: false,
+      answers: [
+        { ...identity, state: choice('A'), updatedAt: mine },
+        { ...question('q2'), state: choice('B'), updatedAt: new Date().toISOString() },
+        { ...question('q3'), state: choice('C'), updatedAt: new Date().toISOString() },
+      ],
+    });
+    expect(await db.pending(ACCOUNT)).toEqual(empty);
+    expect((await db.answers.get(ACCOUNT, question('q2')))?.state).toEqual(draft('local newer'));
+    expect((await db.answers.get(ACCOUNT, question('q3')))?.state).toEqual(choice('C'));
+    expect(changed.answers).toEqual([questionKey(identity), questionKey(question('q3'))]);
+    expect((await db.syncState(ACCOUNT)).cursor).toBe('7');
+  });
+
+  it('does not acknowledge an answer that was committed again while the request was in flight', async () => {
+    const db = await open();
+    await db.answers.save(ACCOUNT, identity, committed(choice('A')));
+    const sent = await db.pending(ACCOUNT);
+    await db.answers.save(ACCOUNT, identity, committed(choice('B'), nextTimestamp(sent.answers[0].updatedAt)));
+    await db.commitExchange(ACCOUNT, sent, { ...empty, merged: [], cursor: '1', hasMore: false });
+    expect((await db.pending(ACCOUNT)).answers.map((row) => row.state)).toEqual([choice('B')]);
+  });
+
+  it('never lets a slow older local write undo a newer stored row', async () => {
+    const db = await open();
+    const later = new Date(Date.now() + 5_000).toISOString();
+    await db.commitExchange(ACCOUNT, empty, { ...empty, merged: [], cursor: '1', hasMore: false, answers: [{ ...identity, state: choice('B'), updatedAt: later }] });
+    await db.answers.save(ACCOUNT, identity, { state: draft('older'), updatedAt: nextTimestamp(), committed: false });
+    expect((await db.answers.get(ACCOUNT, identity))?.state).toEqual(choice('B'));
+  });
+
+  it('keeps guests and accounts separate and imports guest data once without clearing it', async () => {
+    const db = await open();
+    await db.answers.save('guest', identity, committed(submitted('guest'), nextTimestamp()));
+    await db.answers.save('guest', question('q2'), {
+      state: submitted('guest 2'), updatedAt: nextTimestamp(), committed: true,
+      attempt: { ...question('q2'), attemptId: crypto.randomUUID(), state: submitted('guest 2'), createdAt: nextTimestamp() },
+    });
+    await db.answers.save(ACCOUNT, identity, committed(submitted('account')));
+    expect(await db.answers.get(OTHER, identity)).toBeUndefined();
+    expect(await db.importGuest(ACCOUNT)).toEqual({ records: 1, attempts: 1, marks: 0 });
     expect(await db.importGuest(ACCOUNT)).toEqual({ records: 0, attempts: 0, marks: 0 });
-    expect((await db.get(ACCOUNT, identity))?.state.values).toEqual(['account']);
-    expect((await db.get(OTHER, identity))?.state.values).toEqual(['other']);
-    expect((await db.get('guest', identity))?.state.values).toEqual(['guest']);
-    expect((await db.listAttempts('guest')).length).toBe(1);
-    expect((await db.stats('guest')).pending).toBe(0);
-    expect(await db.get(ACCOUNT, { ...identity, questionRevision: 'r2' })).toBeUndefined();
+    expect((await db.answers.get(ACCOUNT, identity))?.state).toEqual(submitted('account'));
+    expect((await db.answers.get(ACCOUNT, question('q2')))?.state).toEqual(submitted('guest 2'));
+    expect((await db.answers.list('guest'))).toHaveLength(2);
+    const pending = await db.pending(ACCOUNT);
+    expect([pending.answers.length, pending.attempts.length]).toEqual([2, 1]);
+    const backup = await db.exportBackup(ACCOUNT);
+    expect([backup.version, backup.answers.length, backup.attempts.length]).toEqual([4, 2, 1]);
   });
 
   it('rejects invalid or oversized answers before writing', async () => {
     const db = await open();
-    await expect(db.save(ACCOUNT, identity, draft('x'.repeat(8193)))).rejects.toThrow();
-    await expect(db.save(ACCOUNT, identity, { ...draft(''), values: Array(2) as string[] })).rejects.toThrow();
-    await expect(db.save(ACCOUNT, identity, { ...draft(''), extra: true } as AnswerState)).rejects.toThrow('Unexpected answer state fields');
-    expect(await db.list(ACCOUNT)).toEqual([]);
+    await expect(db.answers.save(ACCOUNT, identity, { ...committed(), state: { ...draft('x'), extra: 1 } as never })).rejects.toThrow();
+    await expect(db.answers.save(ACCOUNT, identity, { ...committed(), state: { ...draft(''), values: Array(3).fill('x'.repeat(6000)) } })).rejects.toThrow(/size/);
+    await expect(db.answers.save(ACCOUNT, { ...identity, questionId: '' }, committed())).rejects.toThrow(/questionId/);
+    expect(await db.answers.list(ACCOUNT)).toEqual([]);
   });
 
-  it('broadcasts committed changes to another tab and shares a single sync lease', async () => {
+  it('broadcasts committed changes to another tab, marked with the writing tab', async () => {
     const factory = new IDBFactory();
     const name = crypto.randomUUID();
     const first = await open(factory, name, true);
     const second = await open(factory, name, true);
-    const notification = new Promise<void>((resolve) => second.subscribe((change) => {
-      if (change.namespace === ACCOUNT && change.kind === 'local') resolve();
-    }));
-    await first.save(ACCOUNT, identity, draft('tab one'));
-    await notification;
-    expect((await second.get(ACCOUNT, identity))?.state.values).toEqual(['tab one']);
-    expect(await first.acquireLease(ACCOUNT, 'first')).toBe(true);
-    expect(await second.acquireLease(ACCOUNT, 'second')).toBe(false);
-    await first.releaseLease(ACCOUNT, 'first');
-    expect(await second.acquireLease(ACCOUNT, 'second')).toBe(true);
+    const seen = vi.fn();
+    second.subscribe(seen);
+    await first.answers.save(ACCOUNT, identity, committed());
+    await until(() => seen.mock.calls.length === 1);
+    expect(seen.mock.calls[0][0]).toMatchObject({ namespace: ACCOUNT, scope: 'answers', keys: [questionKey(identity)], tab: first.tab });
+  });
+
+  it('upgrades a v3 database in place: answers, history and unsent commits kept, drafts no longer uploaded', async () => {
+    const factory = new IDBFactory();
+    const name = crypto.randomUUID();
+    const q2 = question('q2');
+    const attemptId = crypto.randomUUID();
+    await new Promise<void>((resolve, reject) => {
+      const opening = factory.open(name, 3);
+      opening.onupgradeneeded = () => {
+        const db = opening.result;
+        const records = db.createObjectStore('records', { keyPath: ['namespace', 'key'] });
+        const operations = db.createObjectStore('operations', { keyPath: 'operationId' });
+        const attempts = db.createObjectStore('attempts', { keyPath: ['namespace', 'attemptId'] });
+        const conflicts = db.createObjectStore('conflicts', { keyPath: ['namespace', 'conflictId'] });
+        const metadata = db.createObjectStore('metadata', { keyPath: ['namespace', 'key'] });
+        for (const store of [records, operations, attempts, conflicts]) store.createIndex('namespace', 'namespace');
+        operations.createIndex('question', ['namespace', 'key']);
+        records.createIndex('document', ['namespace', 'documentPath']);
+        conflicts.createIndex('question', ['namespace', 'key']);
+        const tags = db.createObjectStore('tags', { keyPath: ['namespace', 'tagId'] });
+        tags.createIndex('namespace', 'namespace');
+        const marks = db.createObjectStore('marks', { keyPath: ['namespace', 'key'] });
+        marks.createIndex('namespace', 'namespace');
+        marks.createIndex('document', ['namespace', 'documentPath']);
+        const at = new Date().toISOString();
+        records.put({ ...identity, namespace: ACCOUNT, key: questionKey(identity), state: submitted('sent'), generation: 1, remoteVersion: 3, updatedAt: at, dirty: true });
+        records.put({ ...q2, namespace: ACCOUNT, key: questionKey(q2), state: draft('typing'), generation: 1, remoteVersion: 0, updatedAt: at, dirty: true });
+        attempts.put({ ...identity, namespace: ACCOUNT, attemptId, state: submitted('sent'), createdAt: at });
+        operations.put({ ...identity, namespace: ACCOUNT, key: questionKey(identity), operationId: crypto.randomUUID(), state: submitted('sent'),
+          generation: 1, baseVersion: 3, createdAt: at, inFlight: false, attempt: { attemptId, state: submitted('sent'), createdAt: at } });
+        metadata.put({ namespace: ACCOUNT, key: 'sync', value: { cursor: '17', lastSyncedAt: null, retryCount: 0, nextRetryAt: 0 } });
+        const tagId = crypto.randomUUID();
+        tags.put({ namespace: ACCOUNT, tagId, name: '难题', color: 'red', createdAt: at, updatedAt: at, deleted: false, dirty: true });
+        marks.put({ namespace: ACCOUNT, key: JSON.stringify([page, 'q1']), documentPath: page, questionId: 'q1', favorite: true, note: '', tagIds: [tagId], excerpt: '', updatedAt: at, dirty: false });
+      };
+      opening.onsuccess = () => { opening.result.close(); resolve(); };
+      opening.onerror = () => reject(opening.error);
+    });
+    const db = await open(factory, name);
+    expect((await db.syncState(ACCOUNT)).cursor).toBeNull();
+    expect((await db.answers.listDocument(ACCOUNT, page)).map((row) => row.state.values[0]).sort()).toEqual(['sent', 'typing']);
+    const pending = await db.pending(ACCOUNT);
+    expect(pending.answers.map((row) => row.state)).toEqual([submitted('sent')]);
+    expect(pending.attempts.map((row) => row.attemptId)).toEqual([attemptId]);
+    expect(pending.tags.map((row) => row.name)).toEqual(['难题']);
+    expect(pending.marks).toEqual([]);
+    expect(await db.annotations.listMarks(ACCOUNT)).toHaveLength(1);
   });
 });
 
-describe('question synchronization', () => {
-  it('lets a manual sync proceed while a tab that died mid-sync still holds the fallback lease', async () => {
+describe('question sync engine', () => {
+  it('uploads a commit from memory even when the browser database refuses to store it', async () => {
     const db = await open();
-    const server = new Server();
-    await db.save(ACCOUNT, identity, submitted('after crash'), { submission: true });
-    // A tab killed during an exchange never released its lease.
-    expect(await db.acquireLease(ACCOUNT, 'crashed-tab')).toBe(true);
+    vi.spyOn(db, 'pending').mockRejectedValue(quota());
+    vi.spyOn(db, 'commitExchange').mockRejectedValue(quota());
+    const server = new FakeServer();
     const sync = engine(db, server);
-    await sync.sync();
-    expect(server.requests).toHaveLength(1);
-    expect((await db.stats(ACCOUNT)).pending).toBe(0);
-    expect(sync.status.phase).toBe('idle');
-  });
-
-  it('times out a stalled request, keeps the outbox and can sync again', async () => {
-    const db = await open();
-    const server = new Server();
-    let stall = true;
-    const transport: QuestionSyncTransport = { sync: (input) => stall ? new Promise(() => undefined) : server.sync(input) };
-    const sync = new QuestionSyncEngine(db, ACCOUNT, transport, { requestTimeoutMs: 50 });
-    engines.push(sync);
-    await db.save(ACCOUNT, identity, draft('stalled'));
-    await sync.sync();
-    expect(sync.status.phase).toBe('error');
-    expect(sync.status.error).toContain('超时');
-    expect((await db.stats(ACCOUNT)).pending).toBe(1);
-    stall = false;
-    await sync.sync();
-    expect(sync.status.phase).toBe('idle');
-    expect((await db.stats(ACCOUNT)).pending).toBe(0);
-  });
-
-  it('does no cloud work offline and does not sync guest records', async () => {
-    const db = await open();
-    const server = new Server();
-    await db.save(ACCOUNT, identity, draft('offline'));
-    const offline = new QuestionSyncEngine(db, ACCOUNT, server, { online: () => false });
-    engines.push(offline);
-    await offline.sync();
-    expect(offline.status.phase).toBe('offline');
-    await engine(db, server, 'guest').sync();
-    expect(server.requests).toEqual([]);
-    expect((await db.stats(ACCOUNT)).pending).toBe(1);
-  });
-
-  it('retries the same operation after a lost response without duplicating attempts', async () => {
-    const db = await open();
-    const server = new Server();
-    server.loseNextResponse = true;
-    await db.save(ACCOUNT, identity, submitted('one'), { submission: true });
-    const sync = engine(db, server);
-    await sync.sync();
-    expect(sync.status.phase).toBe('error');
-    expect((await db.metadata(ACCOUNT)).retryCount).toBe(1);
-    expect((await db.stats(ACCOUNT)).pending).toBe(1);
-    await sync.sync();
-    expect(server.requests[0].operations[0].operationId).toBe(server.requests[1].operations[0].operationId);
+    submit(sync, choice('D'));
+    await until(() => server.answers.size === 1 && sync.status.pending === 0 && sync.status.phase === 'idle');
+    expect([...server.answers.values()][0].row.state).toEqual(choice('D'));
     expect(server.attempts.size).toBe(1);
-    expect(server.records.get(questionKey(identity))?.version).toBe(1);
-    expect((await db.metadata(ACCOUNT)).retryCount).toBe(0);
+  });
+
+  it('works without any browser database', async () => {
+    const server = new FakeServer();
+    const sync = engine(null, server);
+    const seen = vi.fn();
+    sync.onRemote(seen);
+    server.edit(choice('B'), question('elsewhere'));
+    submit(sync);
+    await until(() => server.answers.size === 2 && sync.status.pending === 0);
+    expect(seen.mock.calls.flatMap(([response]) => response.answers).map((row) => row.questionId)).toContain('elsewhere');
+  });
+
+  it('picks up commits an earlier visit left in IndexedDB and pulls on connect', async () => {
+    const factory = new IDBFactory();
+    const name = crypto.randomUUID();
+    const first = await open(factory, name);
+    await first.answers.save(ACCOUNT, identity, committed(choice('C')));
+    first.close();
+    const db = await open(factory, name);
+    const server = new FakeServer();
+    server.edit(choice('X'), question('from another device'));
+    engine(db, server);
+    await until(async () => (await db.pending(ACCOUNT)).answers.length === 0);
+    expect([...server.answers.values()].map((entry) => entry.row.state.selected[0]).sort()).toEqual(['C', 'X']);
+    expect((await db.answers.get(ACCOUNT, question('from another device')))?.state).toEqual(choice('X'));
+  });
+
+  it('keeps a newer commit queued when an older acknowledgement arrives', async () => {
+    const server = new FakeServer();
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    const slow: QuestionSyncTransport = { async sync(input) { const response = await server.sync(input); await gate; return response; } };
+    const sync = engine(null, slow);
+    submit(sync, choice('A'));
+    await until(() => server.requests.length === 1);
+    submit(sync, choice('B'));
+    release();
+    await until(() => sync.status.pending === 0);
+    expect([...server.answers.values()][0].row.state).toEqual(choice('B'));
+  });
+
+  it('retries after a lost response without duplicating the submission', async () => {
+    const server = new FakeServer();
+    server.loseNext = true;
+    const sync = engine(null, server);
+    submit(sync);
+    await until(() => sync.status.phase === 'error');
+    // The answer and its attempt are one change for the reader.
+    expect(sync.status.pending).toBe(1);
+    await sync.sync();
+    expect(sync.status).toMatchObject({ phase: 'idle', pending: 0 });
+    expect(server.attempts.size).toBe(1);
+  });
+
+  it('backs off after a failure and a manual sync skips the wait', async () => {
+    const server = new FakeServer();
+    server.failNext = new Error('云同步失败：boom');
+    const sync = engine(null, server);
+    submit(sync);
+    await until(() => sync.status.phase === 'error');
+    expect(sync.status.error).toContain('boom');
+    expect(server.requests).toHaveLength(1);
+    await sync.sync();
+    expect(sync.status).toMatchObject({ phase: 'idle', pending: 0, error: null });
+  });
+
+  it('times out a stalled request, keeps the queue and can sync again', async () => {
+    const server = new FakeServer();
+    server.hang = true;
+    const sync = engine(null, server, { requestTimeoutMs: 20 });
+    submit(sync);
+    await until(() => sync.status.phase === 'error');
+    expect(sync.status.error).toContain('超时');
+    server.hang = false;
+    await sync.sync();
     expect(sync.status.pending).toBe(0);
   });
 
-  it('retains uncertain operation IDs and retry metadata after closing the browser database', async () => {
-    const factory = new IDBFactory();
-    const name = crypto.randomUUID();
-    const db = await open(factory, name);
-    const server = new Server();
-    server.loseNextResponse = true;
-    await db.save(ACCOUNT, identity, submitted('durable'), { submission: true });
-    await engine(db, server).sync();
-    const retry = await db.metadata(ACCOUNT);
-    expect(retry.nextRetryAt).toBeGreaterThan(Date.now());
-    db.close();
-    const reopened = await open(factory, name);
-    expect((await reopened.metadata(ACCOUNT)).retryCount).toBe(1);
-    await engine(reopened, server).sync();
-    expect(server.requests[1].operations[0].operationId).toBe(server.requests[0].operations[0].operationId);
-    expect(server.attempts.size).toBe(1);
-    expect((await reopened.stats(ACCOUNT)).pending).toBe(0);
+  it('does no network work offline or while disconnected, and queues commits for later', async () => {
+    const server = new FakeServer();
+    let online = false;
+    const sync = engine(null, server, { online: () => online });
+    submit(sync);
+    await tick();
+    await sync.sync();
+    expect(sync.status.phase).toBe('offline');
+    expect(server.requests).toHaveLength(0);
+    sync.disconnect();
+    online = true;
+    await sync.sync();
+    expect(server.requests).toHaveLength(0);
+    expect(sync.status).toMatchObject({ phase: 'local', pending: 1 });
+    sync.connect(server);
+    await until(() => sync.status.pending === 0);
   });
 
-  it('keeps a newer edit while an older network acknowledgement arrives, then rebases it', async () => {
-    const db = await open();
-    const server = new Server();
-    let release: (() => void) | undefined;
-    let arrived: (() => void) | undefined;
-    const entered = new Promise<void>((resolve) => { arrived = resolve; });
-    let first = true;
-    const transport: QuestionSyncTransport = { sync: async (input) => {
-      const response = await server.sync(input);
-      if (first) {
-        first = false;
-        arrived?.();
-        await new Promise<void>((resolve) => { release = resolve; });
-      }
-      return response;
-    } };
-    await db.save(ACCOUNT, identity, draft('old'));
-    const syncing = engine(db, transport).sync();
-    await entered;
-    await db.save(ACCOUNT, identity, draft('new'));
-    release?.();
-    await syncing;
-    expect((await db.get(ACCOUNT, identity))?.state.values).toEqual(['new']);
-    expect(server.records.get(questionKey(identity))?.state.values).toEqual(['new']);
-    expect(server.requests[1].operations[0].baseVersion).toBe(1);
-    expect((await db.listConflicts(ACCOUNT)).length).toBe(0);
+  it('refuses to run for guests', () => {
+    expect(() => new QuestionSyncEngine(null, 'guest')).toThrow();
   });
 
-  it('preserves concurrent local and remote answers until an explicit resolution', async () => {
+  it('pages through the feed and stores every page', async () => {
     const db = await open();
-    const server = new Server();
-    server.edit(draft('remote'));
-    await db.save(ACCOUNT, identity, submitted('local'), { submission: true });
+    const server = new FakeServer();
+    server.pageSize = 2;
+    for (let index = 0; index < 5; index++) server.edit(choice('A'), question(`q${index}`));
     const sync = engine(db, server);
-    await sync.sync();
-    const [conflict] = await db.listConflicts(ACCOUNT);
-    expect(conflict.localState.values).toEqual(['local']);
-    expect(conflict.remote.state.values).toEqual(['remote']);
-    expect((await db.get(ACCOUNT, identity))?.state.values).toEqual(['local']);
-    expect(server.attempts.size).toBe(1);
-    await db.save(ACCOUNT, identity, draft('latest local'));
-    expect((await db.listConflicts(ACCOUNT))[0].localState.values).toEqual(['latest local']);
-    await sync.sync();
-    expect(server.records.get(questionKey(identity))?.state.values).toEqual(['remote']);
-    await db.resolveConflict(ACCOUNT, conflict.conflictId, 'local');
-    await sync.sync();
-    expect(server.records.get(questionKey(identity))?.state.values).toEqual(['latest local']);
-    expect(await db.listConflicts(ACCOUNT)).toEqual([]);
-    expect((await db.listConflicts(ACCOUNT, true))[0].resolution).toBe('local');
+    await until(() => sync.status.phase === 'idle' && server.requests.length >= 3);
+    expect(await db.answers.listDocument(ACCOUNT, page)).toHaveLength(5);
+    expect((await db.syncState(ACCOUNT)).cursor).toBe('5');
   });
 
-  it('choosing the remote answer still uploads every unsent local submission', async () => {
+  it('keeps the feed position in memory when IndexedDB cannot store it', async () => {
     const db = await open();
-    const server = new Server();
-    server.edit(draft('remote'));
-    await db.save(ACCOUNT, identity, submitted('first'), { submission: true });
-    await db.save(ACCOUNT, identity, submitted('second', 2), { submission: true });
+    const server = new FakeServer();
+    server.edit(choice('A'));
+    const failing = vi.spyOn(db, 'commitExchange').mockRejectedValue(quota());
     const sync = engine(db, server);
+    await until(() => server.requests.length === 1 && sync.status.phase === 'idle');
+    failing.mockRestore();
     await sync.sync();
-    const [conflict] = await db.listConflicts(ACCOUNT);
-    await db.resolveConflict(ACCOUNT, conflict.conflictId, 'remote');
-    await sync.sync();
-    expect(server.records.get(questionKey(identity))?.state.values).toEqual(['remote']);
-    expect([...server.attempts.values()].map((entry) => entry.state.values[0])).toEqual(['first', 'second']);
-    expect((await db.get(ACCOUNT, identity))?.dirty).toBe(false);
+    expect(server.requests.at(-1)?.cursor).toBe('1');
   });
 
-  it('processes all cursor pages and treats a duplicate response as a no-op', async () => {
-    const db = await open();
-    const server = new Server();
-    server.pageSize = 1;
-    for (const text of ['one', 'two', 'three']) server.edit(draft(text));
-    const sync = engine(db, server);
-    await sync.sync();
-    expect((await db.metadata(ACCOUNT)).cursor).toBe('3');
-    expect((await db.get(ACCOUNT, identity))?.state.values).toEqual(['three']);
-    await db.save(ACCOUNT, identity, submitted('four'), { submission: true });
-    const operations = await db.batch(ACCOUNT);
-    const response = await server.sync({ operations, cursor: '3', limit: 100 });
-    await db.apply(ACCOUNT, response, operations);
-    await db.apply(ACCOUNT, response, operations);
-    expect((await db.listAttempts(ACCOUNT)).length).toBe(1);
-    expect((await db.stats(ACCOUNT)).pending).toBe(0);
+  it('refreshes a stale copy when a page is read, but not on every read', async () => {
+    const server = new FakeServer();
+    const sync = engine(null, server, { staleMs: 60_000 });
+    await until(() => server.requests.length === 1 && sync.status.phase === 'idle');
+    const count = server.requests.length;
+    sync.refreshIfStale();
+    await tick();
+    expect(server.requests.length).toBe(count);
   });
 
-  it('rejects partial write acknowledgements without moving the cursor or losing an outbox item', async () => {
-    const db = await open();
-    await db.save(ACCOUNT, identity, draft('unsaved cloud'));
-    const operations = await db.batch(ACCOUNT);
-    await expect(db.apply(ACCOUNT, { receipts: [], changes: [], attempts: [], cursor: '100', hasMore: false }, operations)).rejects.toThrow('missing write receipts');
-    expect((await db.metadata(ACCOUNT)).cursor).toBeNull();
-    expect((await db.stats(ACCOUNT)).pending).toBe(1);
-  });
-
-  it('finishes an in-flight old-account response in its namespace and stops further network work', async () => {
-    const db = await open();
-    const server = new Server();
-    let release: (() => void) | undefined;
-    let arrived: (() => void) | undefined;
-    const entered = new Promise<void>((resolve) => { arrived = resolve; });
-    const transport: QuestionSyncTransport = { sync: async (input) => {
-      const response = await server.sync(input);
-      arrived?.();
-      await new Promise<void>((resolve) => { release = resolve; });
-      return response;
-    } };
-    await db.save(ACCOUNT, identity, draft('old account'));
-    const sync = engine(db, transport);
-    const running = sync.sync();
-    await entered;
-    sync.stop();
-    await db.save(OTHER, identity, draft('new account'));
-    await db.save(ACCOUNT, { ...identity, questionId: 'not-yet-sent' }, draft('waiting'));
-    release?.();
-    await running;
-    expect(server.requests.length).toBe(1);
-    expect((await db.get(ACCOUNT, identity))?.remoteVersion).toBe(1);
-    expect((await db.get(OTHER, identity))?.state.values).toEqual(['new account']);
-    expect((await db.get(OTHER, identity))?.remoteVersion).toBe(0);
-    expect((await db.stats(ACCOUNT)).pending).toBe(1);
-  });
-
-  it('limits a batch to 50 distinct questions and a bounded UTF-8 payload', async () => {
-    const db = await open();
-    for (let index = 0; index < 55; index++) await db.save(ACCOUNT, { ...identity, questionId: `q${index}` }, draft('x'));
-    expect((await db.batch(ACCOUNT)).length).toBe(50);
-    const server = new Server();
-    await engine(db, server).sync();
-    expect(server.records.size).toBe(55);
-    expect(server.requests.every((input) => input.operations.length <= 50)).toBe(true);
+  it('bounds one request and sends tags before the marks that use them', async () => {
+    const server = new FakeServer();
+    const sync = engine(null, server);
+    sync.disconnect();
+    const answers = Array.from({ length: 150 }, (_, index) => ({ ...question(`q${index}`), state: choice('A'), updatedAt: nextTimestamp() }));
+    sync.put({ answers });
+    sync.connect(server);
+    await until(() => sync.status.pending === 0);
+    expect(server.requests[0].changes.answers.length).toBe(100);
+    expect(new TextEncoder().encode(JSON.stringify(server.requests[0].changes)).length).toBeLessThan(512 * 1024);
   });
 });

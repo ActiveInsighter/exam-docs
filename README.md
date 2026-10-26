@@ -55,18 +55,22 @@ question options and true / false buttons use it. See
 
 ## Question progress
 
-The custom question components save answers in browser IndexedDB, including
-drafts, submissions and resets. Browser storage is the first read/write path.
-Cloud sync is optional: without Supabase configuration, questions remain usable
-locally and make no question-sync requests. Cloudflare deployments route Auth
-and question RPC requests through the same-origin `/api/supabase` gateway, so
-the browser does not need to reach the Supabase hostname directly.
+The custom question components keep answers in browser IndexedDB and read them
+from a memory cache. Drafts (an option picked before grading, a blank being
+typed) stay on the device. Submissions, resets, favourites, tags and notes are
+written locally first and then uploaded to Supabase for signed-in readers, last
+writer wins. Uploads are queued in memory, so a submission still reaches the
+cloud when the browser refuses to store it (for example `QuotaExceededError`
+on a phone that is short of space). Cloud sync is optional: without Supabase
+configuration, questions remain usable locally and make no sync requests.
+Cloudflare deployments route Auth and the single `exam_sync` RPC through the
+same-origin `/api/supabase` gateway.
 
 To enable account sync, copy `.env.example` to `.env.local` and set
 `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Only public
 project configuration belongs in these variables. See the Chinese
 [database and sync guide](docs/question-database.md) for architecture, account
-isolation, conflicts, migrations, authentication and rollout steps.
+isolation, last-writer-wins rules, migrations, authentication and rollout steps.
 
 ## ZBSearch
 
@@ -141,7 +145,7 @@ Assets. `main` targets `exam-docs`; approved preview branches target the isolate
 - HTML, JS, CSS, Markdown downloads, the search manifest, category routers, and
   ZBSearch indexes are static files;
 - documentation search runs in the browser with ZBSearch;
-- a small Worker forwards only account endpoints and the question sync RPC to
+- a small Worker forwards only account endpoints and the `exam_sync` RPC to
   the configured Supabase project; it adds no privileged key and disables caching.
 
 Two settings keep client-side navigation from exhausting mobile browser memory

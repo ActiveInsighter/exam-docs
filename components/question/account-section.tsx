@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CloudOffIcon, DownloadIcon, FileInputIcon, LibraryBigIcon, RefreshCwIcon, TriangleAlertIcon } from 'lucide-react';
+import { CloudOffIcon, DownloadIcon, FileInputIcon, LibraryBigIcon, RefreshCwIcon } from 'lucide-react';
 import type { AccountMenuSection } from '@/components/account';
 import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import type { QuestionSummary } from '@/lib/question-store/types';
@@ -31,15 +31,16 @@ function relativeTime(iso: string | null): string | null {
 export function describeSync(context: QuestionDatabaseContext | null): { tone: Tone; text: string } | null {
   if (!context) return null;
   if (!context.ready) return { tone: 'muted', text: '正在读取本机答题记录…' };
-  if (context.error && !context.database) return { tone: 'error', text: '本机存储不可用，答案不会保存' };
+  if (context.error && !context.database) {
+    return { tone: 'error', text: context.user ? '本机存储不可用 · 提交仍同步到云端' : '本机存储不可用，答案不会保存' };
+  }
   if (!context.user) {
     return context.cachedAccount
       ? { tone: 'muted', text: '登录已过期 · 答案暂存本机' }
       : null;
   }
   const { status, engine } = context;
-  if (!engine) return { tone: 'busy', text: '正在连接云端…' };
-  if (status.conflicts) return { tone: 'warn', text: `${status.conflicts} 道题两端答案不同，待选择` };
+  if (!engine || status.phase === 'local') return { tone: 'busy', text: '正在连接云端…' };
   if (status.phase === 'offline') return { tone: 'muted', text: '离线 · 答案已保存在本机' };
   if (status.phase === 'error') return { tone: 'error', text: '同步失败 · 稍后自动重试' };
   if (status.phase === 'syncing') return { tone: 'busy', text: '正在同步…' };
@@ -99,8 +100,8 @@ function QuestionRecordsMenu() {
     let disposed = false;
     const refresh = () => {
       void Promise.all([
-        database.summary(namespace),
-        namespace === 'guest' ? Promise.resolve(null) : database.summary('guest'),
+        database.answers.summary(namespace),
+        namespace === 'guest' ? Promise.resolve(null) : database.answers.summary('guest'),
       ]).then(([own, guest]) => {
         if (disposed) return;
         setSummary(own);
@@ -134,18 +135,13 @@ function QuestionRecordsMenu() {
           {status.phase === 'offline' ? <CloudOffIcon className="ml-auto text-muted-foreground" /> : null}
         </DropdownMenuItem>
       ) : null}
-      {status.conflicts ? (
-        <DropdownMenuItem onClick={context.openConflicts} className="text-amber-700 dark:text-amber-400">
-          <TriangleAlertIcon />选择冲突答案
-          <span className="ml-auto rounded-full bg-amber-500/15 px-1.5 text-xs tabular-nums">{status.conflicts}</span>
-        </DropdownMenuItem>
-      ) : null}
       {signedIn && guestRecords > 0 ? (
         <DropdownMenuItem
           closeOnClick={false}
           disabled={!database}
           onClick={() => {
             void database?.importGuest(namespace).then((result) => {
+              void engine?.sync();
               setMessage(result.records || result.attempts || result.marks
                 ? `已导入 ${result.records} 道题、${result.attempts} 次提交、${result.marks} 条收藏与注释，未登录记录仍保留。`
                 : '未登录记录已全部导入过。');

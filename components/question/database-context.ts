@@ -14,16 +14,16 @@ export type QuestionDatabaseContext = {
   namespace: QuestionNamespace;
   user: AccountIdentity | null;
   cachedAccount: AccountIdentity | null;
+  /** The account's sync engine; null for guests. Connected only with a verified session. */
   engine: QuestionSyncEngine | null;
   status: QuestionSyncStatus;
   ready: boolean;
   error: string | null;
-  openConflicts(): void;
   /** Opens the overview of starred, tagged and annotated questions. */
   openLibrary(): void;
 };
 
-export const LOCAL_STATUS: QuestionSyncStatus = { phase: 'local', pending: 0, conflicts: 0, lastSyncedAt: null, error: null };
+export const LOCAL_STATUS: QuestionSyncStatus = { phase: 'local', pending: 0, lastSyncedAt: null, error: null };
 
 export const QuestionDatabaseContextValue = createContext<QuestionDatabaseContext | null>(null);
 

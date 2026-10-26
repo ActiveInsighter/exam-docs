@@ -1,31 +1,41 @@
-import { IDBFactory } from 'fake-indexeddb';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { QuestionAnswerCache, QuestionAnnotationCache, QuestionDatabase } from '../lib/question-store';
+import { QuestionAnnotationCache, QuestionAnswerCache } from '../lib/question-store';
+import { openDatabase, quota, runCleanup, tick, until, onCleanup } from './helpers/question-store';
 
 const id = (page: number, questionId = 'q1') => ({ documentPath: `/docs/page-${page}`, questionId, questionRevision: 'r1' });
 const draft = { selected: [], values: ['草稿'], submitted: false, attempt: 0 };
-const cleanup: (() => void)[] = [];
-const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
-async function until(check: () => boolean) {
-  for (let i = 0; i < 200 && !check(); i++) await tick();
-  expect(check()).toBe(true);
-}
+
 async function open() {
-  const db = await QuestionDatabase.open({ indexedDB: new IDBFactory(), name: crypto.randomUUID(), broadcast: false });
+  const db = await openDatabase();
   const answers = new QuestionAnswerCache(db, 'guest', { draftDelayMs: 10 });
   const marks = new QuestionAnnotationCache(db, 'guest');
-  cleanup.push(() => { answers.dispose(); marks.dispose(); db.close(); });
+  onCleanup(() => { answers.dispose(); marks.dispose(); });
   return { db, answers, marks };
 }
-afterEach(() => cleanup.splice(0).reverse().forEach((close) => close()));
+
+/** Writes through a separate cache, as an earlier visit would have. */
+async function seed(db: Awaited<ReturnType<typeof open>>['db'], identity: ReturnType<typeof id>, note?: string) {
+  const answers = new QuestionAnswerCache(db, 'guest', { draftDelayMs: 0 });
+  const marks = new QuestionAnnotationCache(db, 'guest');
+  answers.write(identity, draft);
+  if (note !== undefined) {
+    marks.subscribeMark(identity, () => {});
+    await until(() => marks.readMark(identity).ready);
+    await marks.updateMark(identity, { favorite: true, note });
+  }
+  await until(async () => Boolean(await db.answers.get('guest', identity)));
+  answers.dispose();
+  marks.dispose();
+}
+
+afterEach(runCleanup);
 
 describe('question cache page lifecycle', () => {
   it('releases saved pages and restores answers and notes when returning', async () => {
     const { db, answers, marks } = await open();
     for (let page = 0; page < 20; page++) {
       const identity = id(page);
-      await db.save('guest', identity, draft);
-      await db.annotations.updateMark('guest', identity, { favorite: true, note: `笔记 ${page}` });
+      await seed(db, identity, `笔记 ${page}`);
       const offAnswer = answers.subscribe(identity, () => {});
       const offMark = marks.subscribeMark(identity, () => {});
       await until(() => answers.read(identity).ready && marks.readMark(identity).ready);
@@ -43,8 +53,7 @@ describe('question cache page lifecycle', () => {
 
   it('loads questions subscribed after the first document read has completed', async () => {
     const { db, answers, marks } = await open();
-    await db.save('guest', id(0, 'later'), draft);
-    await db.annotations.updateMark('guest', id(0, 'later'), { favorite: true });
+    await seed(db, id(0, 'later'), '');
     answers.subscribe(id(0), () => {});
     marks.subscribeMark(id(0), () => {});
     await until(() => answers.read(id(0)).ready && marks.readMark(id(0)).ready);
@@ -60,19 +69,19 @@ describe('question cache page lifecycle', () => {
     const { db, answers } = await open();
     const off = answers.subscribe(id(0), () => {});
     await until(() => answers.read(id(0)).ready);
-    vi.spyOn(db, 'save').mockRejectedValueOnce(new DOMException('full', 'QuotaExceededError'));
+    vi.spyOn(db.answers, 'save').mockRejectedValueOnce(quota());
     answers.write(id(0), draft);
     off();
     await until(() => answers.hasUnsaved());
     expect(answers.read(id(0)).state).toEqual(draft);
     answers.retry(id(0));
     await until(() => !answers.hasUnsaved() && !answers.read(id(0)).ready);
-    expect((await db.get('guest', id(0)))?.state).toEqual(draft);
+    expect((await db.answers.get('guest', id(0)))?.state).toEqual(draft);
   });
 
   it('does not evict an entry during immediate unsubscribe/resubscribe (Strict Mode)', async () => {
     const { db, answers } = await open();
-    const read = vi.spyOn(db, 'listDocument');
+    const read = vi.spyOn(db.answers, 'listDocument');
     const off = answers.subscribe(id(0), () => {});
     await until(() => answers.read(id(0)).ready);
     off();

@@ -1,28 +1,32 @@
-import { QuestionDatabase } from './database';
-import { LEASE_MS } from './database';
-import { ANNOTATION_BATCH } from './annotations';
-import type { QuestionNamespace, QuestionSyncStatus, QuestionSyncTransport } from './types';
+import type { QuestionDatabase } from './database';
+import { OutboxQueue, type Outbox } from './outbox';
+import type { QuestionNamespace, QuestionSyncStatus, QuestionSyncTransport, SyncChanges, SyncResponse } from './types';
 
 export interface QuestionSyncOptions {
-  /** Quiet period after a draft edit before it is uploaded. */
-  debounceMs?: number;
-  /** Submissions and explicit choices are uploaded after this short batching delay. */
+  /** Committed changes are uploaded after this short batching delay. */
   urgentMs?: number;
+  /** Reading a page, focusing or showing the tab pulls when the last sync is older than this. */
   staleMs?: number;
   /** Upper bound for one network exchange; a hung request must not block later syncs. */
   requestTimeoutMs?: number;
+  /** Feed rows per page. */
+  pageSize?: number;
   online?: () => boolean;
 }
 
+/** Receives every cloud response before it is stored, so the page shows it even if IndexedDB fails. */
+export type RemoteListener = (response: SyncResponse) => void;
+
 const REQUEST_TIMEOUT_MS = 30_000;
-const LEASE_RETRY_MS = LEASE_MS + 500;
 /** A manual sync waits this long for another tab's exchange to finish. */
 const LOCK_WAIT_MS = 15_000;
+/** Pages per wake; a longer backlog continues right after. */
+const MAX_PAGES = 10;
 
 function withTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const expired = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new Error('云同步超时，答案已保存在本机，稍后自动重试。')), ms);
+    timer = setTimeout(() => reject(new Error('云同步超时，稍后自动重试。')), ms);
   });
   return Promise.race([work, expired]).finally(() => clearTimeout(timer));
 }
@@ -33,283 +37,307 @@ function webLocks(): LockManager | undefined {
     typeof AbortSignal.timeout === 'function' ? navigator.locks : undefined;
 }
 
+const backoff = (retries: number) => Math.min(60_000, 1000 * 2 ** Math.min(retries - 1, 6)) * (0.75 + Math.random() * 0.5);
+
 /**
- * A single bounded exchange loop. It wakes on edits and on browser lifecycle
- * events (focus, becoming visible, coming online); there is no idle polling
- * and no open socket. Every wake pulls through the cursor protocol, so other
- * devices' changes arrive the next time this page is used.
+ * Keeps one account's local data and the cloud in step.
+ *
+ * Pull: on connect, when a page is read, on focus, on becoming visible and on
+ * coming back online (each at most once per `staleMs` unless something is
+ * waiting), and after every upload. There is no idle polling and no socket.
+ *
+ * Push: committed changes (submissions, resets, tags, favourites, notes) are
+ * handed over in memory the moment they are made and sent after a short
+ * batching delay. Drafts are never uploaded. IndexedDB holds a durable copy of
+ * the queue for the next visit; the queue itself never depends on it.
+ *
+ * Every exchange is one RPC: the queued changes go up, the cloud's current
+ * rows for them and one page of the account's feed come back. Last writer
+ * wins everywhere, so a retried or overlapping exchange is harmless.
  */
-export class QuestionSyncEngine {
-  private readonly owner = crypto.randomUUID();
-  private readonly listeners = new Set<(status: QuestionSyncStatus) => void>();
+export class QuestionSyncEngine implements Outbox {
+  private readonly queue = new OutboxQueue();
+  private readonly statusListeners = new Set<(status: QuestionSyncStatus) => void>();
+  private readonly remoteListeners = new Set<RemoteListener>();
+  private transport: QuestionSyncTransport | null = null;
+  private current: QuestionSyncStatus = { phase: 'local', pending: 0, lastSyncedAt: null, error: null };
   private running: Promise<void> | null = null;
+  private runAgain = false;
   private timer: ReturnType<typeof setTimeout> | undefined;
-  private unsubscribe: (() => void) | undefined;
+  private dueAt = Infinity;
+  private retries = 0;
+  private retryAt = 0;
+  /** The feed position, kept here too in case IndexedDB cannot store it. */
+  private cursor: string | null = null;
+  private cursorVolatile = false;
   private started = false;
   private stopped = false;
-  private rescheduleAfterRun = false;
-  private current: QuestionSyncStatus;
 
   constructor(
-    private readonly database: QuestionDatabase,
+    private readonly database: QuestionDatabase | null,
     readonly namespace: QuestionNamespace,
-    private readonly transport?: QuestionSyncTransport,
     private readonly options: QuestionSyncOptions = {},
   ) {
-    this.current = { phase: transport && namespace !== 'guest' ? 'idle' : 'local', pending: 0, conflicts: 0, lastSyncedAt: null, error: null };
+    if (namespace === 'guest') throw new Error('Guests have nothing to sync');
   }
 
   get status(): QuestionSyncStatus { return this.current; }
 
   subscribe(listener: (status: QuestionSyncStatus) => void): () => void {
-    this.listeners.add(listener);
+    this.statusListeners.add(listener);
     listener(this.current);
-    return () => { this.listeners.delete(listener); };
+    return () => { this.statusListeners.delete(listener); };
+  }
+
+  onRemote(listener: RemoteListener): () => void {
+    this.remoteListeners.add(listener);
+    return () => { this.remoteListeners.delete(listener); };
   }
 
   private update(patch: Partial<QuestionSyncStatus>): void {
-    this.current = { ...this.current, ...patch };
-    for (const listener of this.listeners) listener(this.current);
+    const next = { ...this.current, ...patch, pending: this.queue.count };
+    if (next.phase === this.current.phase && next.pending === this.current.pending && next.error === this.current.error &&
+      next.lastSyncedAt === this.current.lastSyncedAt) return;
+    this.current = next;
+    for (const listener of this.statusListeners) listener(next);
   }
 
   private online(): boolean {
     return this.options.online?.() ?? (typeof navigator === 'undefined' || navigator.onLine !== false);
   }
 
-  private refreshing: Promise<void> | null = null;
-  private refreshQueued: Promise<void> | null = null;
-
-  /**
-   * Re-reads the pending/conflict counts. Every saved keystroke asks for one,
-   * so concurrent requests share the read in flight plus at most one queued
-   * behind it, instead of each starting its own IndexedDB transactions.
-   */
-  private refresh(): Promise<void> {
-    if (!this.refreshing) {
-      const read = this.readStatus().finally(() => { if (this.refreshing === read) this.refreshing = null; });
-      this.refreshing = read;
-      return read;
-    }
-    return this.refreshQueued ??= this.refreshing.catch(() => undefined).then(() => {
-      this.refreshQueued = null;
-      return this.refresh();
-    });
+  private idlePhase() {
+    return !this.transport ? 'local' as const : this.online() ? 'idle' as const : 'offline' as const;
   }
 
-  private async readStatus(): Promise<void> {
-    const [stats, metadata] = await Promise.all([this.database.stats(this.namespace), this.database.metadata(this.namespace)]);
-    if (!this.stopped) this.update({ ...stats, lastSyncedAt: metadata.lastSyncedAt });
+  /* ------------------------------ outbox ------------------------------ */
+
+  put(changes: Partial<SyncChanges>): void {
+    if (this.stopped || !this.queue.merge(changes)) return;
+    this.update({});
+    this.schedule(this.options.urgentMs ?? 300);
   }
 
-  private dueAt = Infinity;
-  private dueIsDebounce = false;
-
-  /**
-   * Keeps the earliest requested wake. A draft debounce restarts only another
-   * debounce, so continued typing never postpones an urgent upload or a pull.
-   */
-  private schedule(delay: number, debounce = false): void {
-    if (this.stopped || !this.started || !this.transport || this.namespace === 'guest') return;
-    const due = Date.now() + Math.max(0, delay);
-    if (due >= this.dueAt && !(debounce && this.dueIsDebounce)) return;
-    clearTimeout(this.timer);
-    this.dueAt = due;
-    this.dueIsDebounce = debounce;
-    this.timer = setTimeout(() => { this.dueAt = Infinity; void this.run(false); }, Math.max(0, delay));
+  holds(answerKey: string): boolean {
+    return this.queue.holds(answerKey);
   }
 
-  private readonly onOnline = () => { this.schedule(0); };
-  private readonly onOffline = () => {
-    clearTimeout(this.timer);
-    this.dueAt = Infinity;
-    this.update({ phase: 'offline' });
-  };
-  /** Leaving or hiding the page uploads waiting drafts now instead of after the debounce. */
-  private readonly onHide = () => {
-    if (document.visibilityState === 'hidden' && this.current.pending > 0) this.schedule(0);
-  };
-  private readonly onFocus = () => {
-    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
-    const last = this.current.lastSyncedAt ? Date.parse(this.current.lastSyncedAt) : 0;
-    if (Date.now() - last >= (this.options.staleMs ?? 60_000) || this.current.pending > 0) this.schedule(0);
-  };
+  /** Picks up what an earlier visit (or another tab) left waiting in IndexedDB. */
+  private async reloadPending(): Promise<void> {
+    if (!this.database) return;
+    try {
+      this.queue.merge(await this.database.pending(this.namespace));
+      this.update({});
+    } catch { /* The memory queue still holds this visit's changes. */ }
+  }
+
+  /* ----------------------------- lifecycle ---------------------------- */
 
   start(): void {
     if (this.started) return;
     this.started = true;
-    this.stopped = false;
-    this.unsubscribe = this.database.subscribe((change) => {
-      if (change.namespace !== this.namespace) return;
-      void this.refresh().catch((error: unknown) => this.update({ phase: 'error', error: String(error) }));
-      if (change.kind === 'local') {
-        if (this.running) this.rescheduleAfterRun = true;
-        if (change.urgent) this.schedule(this.options.urgentMs ?? 150);
-        else this.schedule(this.options.debounceMs ?? 800, true);
-      }
-    });
-    if (this.transport && this.namespace !== 'guest' && typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
       window.addEventListener('online', this.onOnline);
       window.addEventListener('offline', this.onOffline);
       window.addEventListener('focus', this.onFocus);
       window.addEventListener('pagehide', this.onHide);
-      document.addEventListener('visibilitychange', this.onFocus);
-      document.addEventListener('visibilitychange', this.onHide);
+      document.addEventListener('visibilitychange', this.onVisibility);
     }
-    void this.refresh().catch((error: unknown) => this.update({ phase: 'error', error: String(error) }));
+    void this.reloadPending();
+    void this.database?.syncState(this.namespace).then(({ cursor, lastSyncedAt }) => {
+      this.cursor ??= cursor;
+      if (!this.current.lastSyncedAt) this.update({ lastSyncedAt });
+    }, () => undefined);
+  }
+
+  /** Signed in with a verified session: start exchanging. */
+  connect(transport: QuestionSyncTransport): void {
+    if (this.stopped) return;
+    this.transport = transport;
+    this.update({ phase: this.idlePhase(), error: null });
     this.schedule(0);
+  }
+
+  /** The session ended; changes keep queueing for the next sign-in. */
+  disconnect(): void {
+    this.transport = null;
+    this.clearTimer();
+    this.update({ phase: 'local', error: null });
   }
 
   stop(): void {
     this.stopped = true;
-    this.started = false;
-    clearTimeout(this.timer);
-    this.dueAt = Infinity;
-    this.unsubscribe?.();
-    this.unsubscribe = undefined;
+    this.transport = null;
+    this.clearTimer();
+    this.statusListeners.clear();
+    this.remoteListeners.clear();
     if (typeof window !== 'undefined') {
       window.removeEventListener('online', this.onOnline);
       window.removeEventListener('offline', this.onOffline);
       window.removeEventListener('focus', this.onFocus);
       window.removeEventListener('pagehide', this.onHide);
-      document.removeEventListener('visibilitychange', this.onFocus);
-      document.removeEventListener('visibilitychange', this.onHide);
+      document.removeEventListener('visibilitychange', this.onVisibility);
     }
   }
 
-  /**
-   * Runs `work` while this tab is the account's only syncing tab. Returns false
-   * when another tab holds the turn. With Web Locks a crashed or killed tab
-   * can never block the others; the IndexedDB lease is a fallback for browsers
-   * without them and expires on its own. A manual sync waits briefly for the
-   * other tab, and without Web Locks proceeds anyway: every write carries an
-   * idempotent operation ID, so an overlapping exchange cannot duplicate data.
-   */
-  private async exclusive(force: boolean, work: () => Promise<void>): Promise<boolean> {
-    const locks = webLocks();
-    if (locks) {
-      const name = `exam-docs-question-sync:${this.namespace}`;
-      const options: LockOptions = force ? { signal: AbortSignal.timeout(LOCK_WAIT_MS) } : { ifAvailable: true };
-      try {
-        return await locks.request(name, options, async (lock) => {
-          if (!lock) return false;
-          await work();
-          return true;
-        });
-      } catch (error) {
-        if (error instanceof DOMException && (error.name === 'AbortError' || error.name === 'TimeoutError')) return false;
-        throw error;
-      }
-    }
-    const leased = await this.database.acquireLease(this.namespace, this.owner);
-    if (!leased && !force) return false;
-    try {
-      await work();
-    } finally {
-      if (leased) await this.database.releaseLease(this.namespace, this.owner).catch(() => undefined);
-    }
-    return true;
+  private stale(): boolean {
+    const last = this.current.lastSyncedAt ? Date.parse(this.current.lastSyncedAt) : 0;
+    return Date.now() - last >= (this.options.staleMs ?? 60_000);
   }
 
-  /** Explicit manual sync bypasses retry delay. Failures are reflected in status and remain durable. */
+  /** Reading a page: make sure the local copy is recent, without a request per page view. */
+  refreshIfStale(): void {
+    if (this.stale() || this.queue.size) this.schedule(0);
+  }
+
+  private readonly onOnline = () => { this.schedule(0); };
+  private readonly onOffline = () => {
+    this.clearTimer();
+    if (this.transport) this.update({ phase: 'offline' });
+  };
+  private readonly onFocus = () => {
+    if (typeof document === 'undefined' || document.visibilityState !== 'hidden') this.refreshIfStale();
+  };
+  /** Leaving or hiding the page sends what is waiting now instead of after the batching delay. */
+  private readonly onHide = () => { if (this.queue.size) this.schedule(0); };
+  private readonly onVisibility = () => {
+    if (document.visibilityState === 'hidden') this.onHide();
+    else this.refreshIfStale();
+  };
+
+  /* ----------------------------- exchange ----------------------------- */
+
+  private clearTimer(): void {
+    clearTimeout(this.timer);
+    this.timer = undefined;
+    this.dueAt = Infinity;
+  }
+
+  /** Keeps the earliest requested wake. */
+  private schedule(delay: number): void {
+    if (this.stopped || !this.transport) return;
+    const due = Date.now() + Math.max(0, delay);
+    if (due >= this.dueAt) return;
+    clearTimeout(this.timer);
+    this.dueAt = due;
+    this.timer = setTimeout(() => {
+      this.dueAt = Infinity;
+      void this.run(false);
+    }, Math.max(0, delay));
+  }
+
+  /** Manual sync: skips the retry delay and waits briefly for another tab's turn. */
   sync(): Promise<void> { return this.run(true); }
 
   private run(force: boolean): Promise<void> {
-    if (this.running) return this.running;
-    const work = this.exchange(force);
-    this.running = work;
-    void work.then(() => {
+    if (this.running) {
+      this.runAgain = true;
+      return this.running;
+    }
+    const work = this.exchange(force).finally(() => {
       this.running = null;
-      if (this.rescheduleAfterRun) {
-        this.rescheduleAfterRun = false;
-        this.schedule(this.options.urgentMs ?? 150);
+      if (this.runAgain) {
+        this.runAgain = false;
+        this.schedule(this.options.urgentMs ?? 300);
       }
-    }, () => { this.running = null; });
+    });
+    this.running = work;
     return work;
   }
 
   private async exchange(force: boolean): Promise<void> {
-    if (this.stopped) return;
-    if (!this.transport || this.namespace === 'guest') {
-      await this.refresh();
-      this.update({ phase: 'local' });
-      return;
-    }
+    if (this.stopped || !this.transport) return;
     if (!this.online()) {
       this.update({ phase: 'offline' });
-      await this.refresh();
+      return;
+    }
+    if (!force && this.retryAt > Date.now()) {
+      this.schedule(this.retryAt - Date.now());
       return;
     }
     try {
-      const meta = await this.database.metadata(this.namespace);
-      if (!force && meta.nextRetryAt > Date.now()) {
-        this.schedule(meta.nextRetryAt - Date.now());
-        return;
-      }
       const ran = await this.exclusive(force, () => this.exchangeLoop());
       if (!ran) {
-        // The other tab broadcasts committed results; a later wake covers anything it left.
-        this.schedule(webLocks() ? 5_000 : LEASE_RETRY_MS);
-        if (force && !this.stopped) this.update({ phase: 'error', error: '另一个标签页正在同步，请稍后再试。' });
-        await this.refresh();
+        // Another tab is exchanging for this account; come back shortly.
+        this.schedule(2_000);
+        if (force) this.update({ phase: 'error', error: '另一个标签页正在同步，请稍后再试。' });
       }
     } catch (error) {
-      if (!this.stopped) {
-        this.update({ phase: this.online() ? 'error' : 'offline', error: error instanceof Error ? error.message : String(error) });
-        try {
-          const nextRetryAt = await this.database.fail(this.namespace);
-          this.schedule(nextRetryAt - Date.now());
-          await this.refresh();
-        } catch (storageError) {
-          this.update({ phase: 'error', error: storageError instanceof Error ? storageError.message : String(storageError) });
-        }
-      }
+      if (this.stopped) return;
+      this.retries++;
+      this.retryAt = Date.now() + backoff(this.retries);
+      this.update({ phase: this.online() ? 'error' : 'offline', error: error instanceof Error ? error.message : String(error) });
+      this.schedule(this.retryAt - Date.now());
     }
   }
 
   /**
-   * Tags, favourites and notes ride the same wake, lock and backoff as the
-   * answers, through their own last-writer-wins exchange.
+   * One account syncs in one tab at a time. Web Locks are released by the
+   * browser if the holding tab dies; without them the tabs simply overlap,
+   * which last-writer-wins makes harmless.
    */
-  private async exchangeAnnotations(): Promise<void> {
-    const transport = this.transport!;
-    if (!transport.syncAnnotations) return;
-    const store = this.database.annotations;
-    for (let count = 0; count < 10; count++) {
-      if (this.stopped || !this.online()) return;
-      const sent = await store.batch(this.namespace);
-      const cursor = await store.cursor(this.namespace);
-      const response = await withTimeout(transport.syncAnnotations({ ...sent, cursor, limit: 200 }),
-        this.options.requestTimeoutMs ?? REQUEST_TIMEOUT_MS);
-      if (!response) return;
-      await store.apply(this.namespace, response, sent);
-      await this.refresh();
-      if (!response.hasMore && sent.marks.length < ANNOTATION_BATCH.marks) return;
+  private async exclusive(force: boolean, work: () => Promise<void>): Promise<boolean> {
+    const locks = webLocks();
+    if (!locks) {
+      await work();
+      return true;
     }
-    this.rescheduleAfterRun = true;
+    const options: LockOptions = force ? { signal: AbortSignal.timeout(LOCK_WAIT_MS) } : { ifAvailable: true };
+    try {
+      return await locks.request(`exam-docs-question-sync:${this.namespace}`, options, async (lock) => {
+        if (!lock) return false;
+        await work();
+        return true;
+      });
+    } catch (error) {
+      if (error instanceof DOMException && (error.name === 'AbortError' || error.name === 'TimeoutError')) return false;
+      throw error;
+    }
+  }
+
+  private async readCursor(): Promise<string | null> {
+    if (this.database && !this.cursorVolatile) {
+      try { return (await this.database.syncState(this.namespace)).cursor; } catch { /* fall back to memory */ }
+    }
+    return this.cursor;
   }
 
   private async exchangeLoop(): Promise<void> {
-    const transport = this.transport!;
     this.update({ phase: 'syncing', error: null });
-    // Bound one wake to 20 exchanges; very large backlogs continue in a later task.
-    for (let count = 0; count < 20; count++) {
-      if (this.stopped || !this.online()) break;
-      if (!webLocks()) await this.database.acquireLease(this.namespace, this.owner);
-      const metadata = await this.database.metadata(this.namespace);
-      const operations = await this.database.batch(this.namespace);
-      const response = await withTimeout(transport.sync({ operations, cursor: metadata.cursor, limit: 200 }),
+    await this.reloadPending();
+    for (let page = 0; page < MAX_PAGES; page++) {
+      const transport = this.transport;
+      if (this.stopped || !transport || !this.online()) break;
+      const sent = this.queue.take();
+      const cursor = await this.readCursor();
+      const response = await withTimeout(transport.sync({ changes: sent, cursor, limit: this.options.pageSize ?? 200 }),
         this.options.requestTimeoutMs ?? REQUEST_TIMEOUT_MS);
-      // A completed old-account request may safely commit only to its original namespace.
-      await this.database.apply(this.namespace, response, operations);
-      await this.refresh();
-      if (this.stopped) break;
-      if (!response.hasMore) {
-        const remaining = await this.database.batch(this.namespace, false);
-        if (!remaining.length) break;
+      // The response belongs to this account even if the reader switched meanwhile:
+      // storing it is still correct, showing it is not.
+      if (!this.stopped) {
+        this.queue.settle(sent);
+        for (const listener of this.remoteListeners) listener(response);
       }
-      if (count === 19) this.rescheduleAfterRun = true;
+      this.cursor = response.cursor;
+      try {
+        await this.database?.commitExchange(this.namespace, sent, response);
+        this.cursorVolatile = false;
+      } catch {
+        // Storage is full or broken: the page already shows the rows, and the cursor stays in memory.
+        this.cursorVolatile = true;
+      }
+      if (this.stopped) return;
+      this.retries = 0;
+      this.retryAt = 0;
+      this.update({ lastSyncedAt: new Date().toISOString() });
+      const sentNothing = !sent.answers.length && !sent.attempts.length && !sent.tags.length && !sent.marks.length;
+      // A queued row that can never fit a request must not keep the loop spinning.
+      if (!response.hasMore && (!this.queue.size || sentNothing)) {
+        this.update({ phase: this.idlePhase(), error: null });
+        return;
+      }
     }
-    await this.exchangeAnnotations();
-    if (!this.stopped) this.update({ phase: this.online() ? 'idle' : 'offline', error: null });
+    this.runAgain = true;
+    this.update({ phase: this.idlePhase() });
   }
 }

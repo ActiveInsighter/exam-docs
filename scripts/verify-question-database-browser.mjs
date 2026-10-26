@@ -40,9 +40,9 @@ async function prepare(context) {
       opening.onerror = () => reject(opening.error);
       opening.onsuccess = () => {
         const db = opening.result;
-        if (!db.objectStoreNames.contains('records')) { db.close(); resolve({ records: [], attempts: [] }); return; }
-        const tx = db.transaction(['records', 'attempts'], 'readonly');
-        const records = tx.objectStore('records').getAll();
+        if (!db.objectStoreNames.contains('answers')) { db.close(); resolve({ records: [], attempts: [] }); return; }
+        const tx = db.transaction(['answers', 'attempts'], 'readonly');
+        const records = tx.objectStore('answers').getAll();
         const attempts = tx.objectStore('attempts').getAll();
         tx.oncomplete = () => { db.close(); resolve({ records: records.result, attempts: attempts.result }); };
         tx.onabort = () => { db.close(); reject(tx.error); };

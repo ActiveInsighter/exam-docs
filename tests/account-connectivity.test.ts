@@ -23,9 +23,9 @@ describe('same-origin account and question connectivity', () => {
     });
     await client.auth.signInWithOtp({ email: 'test@example.com', options: { emailRedirectTo: 'https://exam.any1.tech/docs/math/' } });
     await client.auth.verifyOtp({ email: 'test@example.com', token: '123456', type: 'email' });
-    await client.rpc('exam_sync_question_state', { p_operations: [], p_cursor: '0', p_limit: 100 });
+    await client.rpc('exam_sync', { p_changes: {}, p_cursor: '0', p_limit: 100 });
     expect(requests.map(r => new URL(r.url).pathname)).toEqual([
-      '/api/supabase/auth/v1/otp', '/api/supabase/auth/v1/verify', '/api/supabase/rest/v1/rpc/exam_sync_question_state',
+      '/api/supabase/auth/v1/otp', '/api/supabase/auth/v1/verify', '/api/supabase/rest/v1/rpc/exam_sync',
     ]);
     expect(requests.every(r => new URL(r.url).origin === 'https://exam.any1.tech')).toBe(true);
     expect(new URL(requests[0].url).searchParams.get('redirect_to')).toBe('https://exam.any1.tech/docs/math/');
@@ -36,17 +36,17 @@ describe('same-origin account and question connectivity', () => {
 
   it('streams the caller JWT and RPC body to the fixed project without forwarding site cookies or caching private data', async () => {
     const upstream = vi.fn(async (request: Request) => {
-      expect(request.url).toBe(`${project}/rest/v1/rpc/exam_sync_question_state`);
+      expect(request.url).toBe(`${project}/rest/v1/rpc/exam_sync`);
       expect(request.headers.get('Authorization')).toBe('Bearer caller-jwt');
       expect(request.headers.get('apikey')).toBe('sb_publishable_test');
       expect(request.headers.has('Cookie')).toBe(false);
       expect(request.headers.has('X-Forwarded-Host')).toBe(false);
-      expect(await request.json()).toEqual({ p_operations: [] });
+      expect(await request.json()).toEqual({ p_changes: {} });
       return Response.json({ cursor: '1' }, { headers: { 'Set-Cookie': 'upstream=private', 'Cache-Control': 'public' } });
     });
     vi.stubGlobal('fetch', upstream);
-    const response = await worker.fetch(new Request(`${gateway}/rest/v1/rpc/exam_sync_question_state`, {
-      method: 'POST', headers: { Authorization: 'Bearer caller-jwt', apikey: 'sb_publishable_test', Cookie: 'site=private', Origin: 'https://exam.any1.tech', 'X-Forwarded-Host': 'evil.example' }, body: JSON.stringify({ p_operations: [] }),
+    const response = await worker.fetch(new Request(`${gateway}/rest/v1/rpc/exam_sync`, {
+      method: 'POST', headers: { Authorization: 'Bearer caller-jwt', apikey: 'sb_publishable_test', Cookie: 'site=private', Origin: 'https://exam.any1.tech', 'X-Forwarded-Host': 'evil.example' }, body: JSON.stringify({ p_changes: {} }),
     }), env);
     expect(await response.json()).toEqual({ cursor: '1' });
     expect(response.headers.get('Cache-Control')).toBe('no-store');
@@ -57,7 +57,7 @@ describe('same-origin account and question connectivity', () => {
 
   it('preserves Supabase authorization failures instead of granting access', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => Response.json({ code: 'PGRST301', message: 'JWT expired' }, { status: 401 })));
-    const response = await worker.fetch(new Request(`${gateway}/rest/v1/rpc/exam_sync_question_state`, { method: 'POST', body: '{}' }), env);
+    const response = await worker.fetch(new Request(`${gateway}/rest/v1/rpc/exam_sync`, { method: 'POST', body: '{}' }), env);
     expect(response.status).toBe(401);
     expect(await response.json()).toMatchObject({ code: 'PGRST301' });
   });
