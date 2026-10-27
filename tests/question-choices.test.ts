@@ -3,6 +3,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { getChoiceColumnCount, getChoiceDensity } from '@/components/question/choice-layout';
 import { Blank, Option, Question, Solution } from '@/components/question';
+import { parseQuestionTags } from '@/components/question/model';
+import { QuestionPointTags, QuestionSourceTrail } from '@/components/question/question-tags';
 
 describe('getChoiceDensity', () => {
   it('marks short options as compact so wide pages can use four columns', () => {
@@ -224,9 +226,21 @@ describe('Question choices', () => {
 
     expect(markup).toContain('data-type="essay"');
     expect(markup).toContain('<span data-type-points="">9 分</span>');
-    expect(markup).toContain('data-question-tag="type" title="易错">易错</span>');
-    expect(markup.match(/data-trail-step=""/g)).toHaveLength(2);
+    expect(markup).not.toContain('data-question-tag="type"');
+    expect(markup).toContain('王道8套卷第4套');
+    expect(markup.match(/data-trail-step=""/g)).toHaveLength(1);
     expect(markup).not.toContain('VLAN');
+  });
+
+  it('shortens legacy sources and keeps knowledge points separate', () => {
+    const tags = parseQuestionTags('来源:王道·卷一-Q01, 科目:数据结构, 章节:绪论, 考点:算法特征');
+    const source = renderToStaticMarkup(createElement(QuestionSourceTrail, { tags: tags.source }));
+    const points = renderToStaticMarkup(createElement(QuestionPointTags, { tags: tags.point }));
+    expect(source).toContain('王道·卷一');
+    expect(source).not.toContain('Q01');
+    expect(source).not.toContain('数据结构');
+    expect(source).not.toContain('绪论');
+    expect(points).toContain('算法特征');
   });
 
   it('prints the resolved number in front of the stem', () => {

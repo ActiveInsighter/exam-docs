@@ -15,7 +15,7 @@ import {
 } from './model';
 import { QuestionFooter } from './question-footer';
 import { QuestionProvider } from './question-state';
-import { QuestionSourceTrail, QuestionTagChips, QuestionTypeTag } from './question-tags';
+import { QuestionSourceTrail, QuestionTypeTag } from './question-tags';
 import { TrueFalse } from './true-false';
 
 export type QuestionProps = {
@@ -30,7 +30,7 @@ export type QuestionProps = {
   /**
    * Built-in tags, sorted into type traits, source and knowledge points
    * (model.ts): tags="王道8套卷, 第4套, 考点:VLAN, 易错". The header shows the
-   * first two; knowledge points appear with the solution.
+   * type and score plus the source; knowledge points appear with the solution.
    */
   tags?: string | readonly string[];
   /** Display number resolved by remarkQuestion (document order). */
@@ -52,7 +52,7 @@ function displayNumber(number: QuestionProps['number'], index: QuestionProps['in
 /**
  * One exercise, rendered as a card:
  *
- *   header   number · type, score, traits · the reader's tags
+ *   header   number · type, score · the reader's tags
  *            source trail                            ☆ tags note
  *   stem     MDX with options / true-false buttons / blanks in place
  *   footer   submit · grade · 查看解答
@@ -114,7 +114,6 @@ export function Question({
               <span id={`question-${id}-label`} data-question-number="" aria-label={`第 ${numberLabel} 题`}>{numberLabel}</span>
             ) : null}
             <QuestionTypeTag type={questionType} label={typeLabel} points={score} />
-            <QuestionTagChips tags={builtinTags.type} />
             <QuestionUserTags />
           </div>
           <QuestionSourceTrail tags={builtinTags.source} />
