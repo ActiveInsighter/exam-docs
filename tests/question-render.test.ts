@@ -8,6 +8,9 @@ import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { describe, expect, it } from 'vitest';
 import { Blank, Option, Question, Solution } from '@/components/question';
+import { Callout } from '@/components/mdx/callout';
+import { Tab, Tabs } from '@/components/mdx/tabs';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
 import { remarkQuestion } from '@/lib/remark-question';
 
 async function render(source: string, path = 'test.mdx') {
@@ -20,7 +23,7 @@ async function render(source: string, path = 'test.mdx') {
     },
   );
   return renderToStaticMarkup(
-    createElement(Content, { components: { Question, Option, Blank, Solution } }),
+    createElement(Content, { components: { Question, Option, Blank, Solution, Callout, Tab, Tabs, Step, Steps } }),
   );
 }
 
