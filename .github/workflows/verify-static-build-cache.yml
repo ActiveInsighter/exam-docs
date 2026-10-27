@@ -1,0 +1,46 @@
+name: Verify static build cache changes
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - 'scripts/prune-actions-caches.mjs'
+      - 'tests/**'
+      - 'package-lock.json'
+      - 'next.config.static.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      STATIC_DOCS_SHARD_COUNT: '8'
+      STATIC_DOCS_SHARD_INDEX: '0'
+      STATIC_DOCS_SKIP_SEARCH_BUILD: '1'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - name: Validate maintenance script syntax
+        run: node --check scripts/prune-actions-caches.mjs
+      - name: Restore dependency cache
+        id: modules
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node22-modules-v1-${{ hashFiles('package-lock.json') }}
+      - name: Install missing dependencies
+        if: steps.modules.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+      - name: Generate Fumadocs source
+        run: npm run postinstall
+      - name: Test cache/build invariants
+        run: npm test -- tests/deployment-workflows.test.ts tests/static-docs-build.test.ts tests/static-doc-shards.test.ts
+      - name: Build one representative docs shard without deploying
+        run: npm run build:static-docs
+      - name: Verify shard output
+        run: test -f .static-docs/docs/__next.docs.txt && test -d .static-docs/_next/static

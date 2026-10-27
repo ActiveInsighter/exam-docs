@@ -256,23 +256,48 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Refresh Fumadocs generated source
         run: npm run postinstall
-      - name: Restore weighted Next/Turbopack cache
-        uses: actions/cache@v5
+      # Cache keys rotate weekly instead of on every MDX edit. Turbopack
+      # tracks individual source changes; dependency/config changes rotate keys.
+      - name: Choose bounded cache generation
+        id: next-cache-week
+        shell: bash
+        run: echo "week=$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
+      - name: Restore reusable compiler cache
+        id: next-compiler-cache
+        uses: actions/cache/restore@v5
         with:
           path: .static-docs-stage/.next/cache
-          key: ${{ runner.os }}-weighted-search-${{ inputs.shards || '8' }}-shard-${{ matrix.shard }}-v2-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json', 'app/**', 'components/**', 'lib/**', 'scripts/**', 'content/docs/**') }}
+          key: ${{ runner.os }}-next-bounded-${{ inputs.shards || '8' }}-shard-${{ matrix.shard }}-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-${{ steps.next-cache-week.outputs.week }}
           restore-keys: |
-            ${{ runner.os }}-weighted-search-${{ inputs.shards || '8' }}-shard-${{ matrix.shard }}-v2-
-            ${{ runner.os }}-weighted-static-shard-${{ matrix.shard }}-v1-
-            ${{ runner.os }}-static-shard-${{ matrix.shard }}-v4-
-            ${{ runner.os }}-static-shard-${{ matrix.shard }}-v3-
-            ${{ runner.os }}-static-shard-${{ matrix.shard }}-v2-
-            ${{ runner.os }}-static-shard-${{ matrix.shard }}-v1-
+            ${{ runner.os }}-next-bounded-${{ inputs.shards || '8' }}-shard-${{ matrix.shard }}-v1-${{ hashFiles('package-lock.json', 'next.config.static.mjs', 'source.config.ts', 'tsconfig.json') }}-
       - name: Build weighted static shard
         shell: bash
         run: |
           set -euo pipefail
           /usr/bin/time -v npm run build:static-docs
+      - name: Measure compiler cache usefulness
+        id: next-cache-size
+        shell: bash
+        run: |
+          cache_path=.static-docs-stage/.next/cache
+          bytes=0
+          if [[ -d "$cache_path" ]]; then
+            bytes="$(du -sb "$cache_path" | cut -f1)"
+          fi
+          echo "compiler_cache_bytes=$bytes"
+          echo "Compiler cache bytes: $bytes; exact hit: ${{ steps.next-compiler-cache.outputs.cache-hit }}" >> "$GITHUB_STEP_SUMMARY"
+          if (( bytes > 0 && bytes <= 268435456 )); then
+            echo "save=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "save=false" >> "$GITHUB_OUTPUT"
+            echo "Compiler cache not saved (empty or > 256 MiB): avoid pushing bulky low-value data." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Save bounded compiler cache
+        if: ${{ steps.next-compiler-cache.outputs.cache-hit != 'true' && steps.next-cache-size.outputs.save == 'true' }}
+        uses: actions/cache/save@v5
+        with:
+          path: .static-docs-stage/.next/cache
+          key: ${{ steps.next-compiler-cache.outputs.cache-primary-key }}
       - name: Validate shard output
         shell: bash
         run: |

@@ -1,0 +1,36 @@
+name: Prune obsolete Actions caches
+on:
+  schedule:
+    - cron: '23 2 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Preview cleanup without deleting entries
+        type: boolean
+        default: false
+  workflow_run:
+    workflows: ['Deploy exam-docs to Cloudflare']
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: actions-cache-maintenance
+  cancel-in-progress: false
+jobs:
+  cleanup:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - name: Remove obsolete caches without touching the current cache family
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run == true }}
+        run: node scripts/prune-actions-caches.mjs

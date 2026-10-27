@@ -72,16 +72,21 @@ describe('static deployment workflows', () => {
     expect(workflow).not.toContain('test "${search_files}" =');
   });
 
-  it('restores reusable weighted shard caches without creating a cache for every workflow-only commit', async () => {
-    const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
-    const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
+  it('reuses bounded Next caches across MDX edits and cleans obsolete entries', async () => {
+    const workflow = await readFile(resolve(process.cwd(), '.github/workflows/deploy-cloudflare-worker-assets.yml'), 'utf8');
+    const start = workflow.indexOf('name: Choose bounded cache generation');
+    const end = workflow.indexOf('name: Build weighted static shard', start);
+    const cacheConfiguration = workflow.slice(start, end);
 
-    expect(workflow).toContain("-weighted-search-${{ inputs.shards || '8' }}-shard-${{ matrix.shard }}-v2-${{ hashFiles(");
-    expect(workflow).toContain("-weighted-search-${{ inputs.shards || '8' }}-shard-${{ matrix.shard }}-v2-");
-    expect(workflow).toContain('-weighted-static-shard-${{ matrix.shard }}-v1-');
-    expect(workflow).toContain('-static-shard-${{ matrix.shard }}-v4-');
-    expect(workflow).toContain('-static-shard-${{ matrix.shard }}-v3-');
-    expect(workflow).not.toContain("-weighted-search-${{ inputs.shards || '8' }}-shard-${{ matrix.shard }}-v2-${{ github.sha }}");
+    expect(cacheConfiguration).toContain('actions/cache/restore@v5');
+    expect(cacheConfiguration).toContain('-next-bounded-');
+    expect(cacheConfiguration).toContain('steps.next-cache-week.outputs.week');
+    expect(cacheConfiguration).not.toContain('content/docs/**');
+    expect(workflow).toContain('actions/cache/save@v5');
+    expect(workflow).toContain('bytes <= 268435456');
+    const maintenance = await readFile(resolve(process.cwd(), '.github/workflows/prune-actions-caches.yml'), 'utf8');
+    expect(maintenance).toContain('actions: write');
+    expect(maintenance).toContain('scripts/prune-actions-caches.mjs');
   });
 
   it('pins Wrangler and dry-runs only manual dispatches with deployment disabled', async () => {
