@@ -1,15 +1,15 @@
 ---
-title: "第二节 逆矩阵"
-description: "考研数学一高质量题库：幂零和矩阵多项式求逆、秩一更新、分块矩阵、Schur补与正交结构，精选真题与代表性变式。"
+title: 第二节 逆矩阵
+description: 线性代数核心题目｜幂零矩阵的有限级数求逆、低次多项式求逆、秩一投影与可逆性。
 ---
 
-本节从**结构识别、可逆性证明、构造逆矩阵**三个环节组织题目。凡是出现逆矩阵的式子，先核实可逆性，再保持矩阵乘法顺序进行变形；多项式、秩一及分块结构优先于直接高阶消元。
+原题顺序保留。本节的核心是**先构造逆，再证明可逆**：从 $A^k=O$、$f(A)=O$ 或外积 $uv^{\mathrm T}$ 的结构出发，可以避免机械计算高阶矩阵的伴随与行列式。
 
 ## 一、幂零条件与矩阵多项式求逆
 
-<Question id="math-1bd354-001" type="essay" number={false}>
+<Question id="core-la-inverse-1990-m3-01" type="essay" number="1" tags="来源:1990年数学三, 科目:线性代数, 考点:幂零矩阵的有限几何级数, 基础">
 
-【1990年数学三】 已知对于 $n$ 阶方阵 $A$，存在自然数 $k$，使得
+已知对于 $n$ 阶方阵 $A$，存在自然数 $k$，使得
 
 $$
 A^k=O.
@@ -19,164 +19,143 @@ $$
 
 <Solution>
 
-**答案：**
-
-$$
-(E-A)^{-1}=E+A+A^2+\cdots+A^{k-1}.
-$$
-
-**解析：** 利用有限等比恒等式：
-
-$$
-(E-A)(E+A+A^2+\cdots+A^{k-1})
-=E-A^k.
-$$
-
-由于
-
-$$
-A^k=O,
-$$
-
-所以
-
-$$
-E-A^k=E.
-$$
-
-同理，$A$ 的各次幂彼此可交换，因此
-
-$$
-(E+A+\cdots+A^{k-1})(E-A)=E.
-$$
-
-于是 $E-A$ 有双侧逆，故可逆，且
+**参考答案**
 
 $$
 \boxed{(E-A)^{-1}=E+A+A^2+\cdots+A^{k-1}}.
 $$
 
-**关键：** “幂零矩阵 $A$”出现时，$E\pm A$ 往往用有限几何级数直接求逆。
+**解析与证明过程**
 
-**模型识别：** 题设 $A^k=O$ 是幂零条件，优先尝试有限等比和，而不必求 $A$ 的元素或行列式。证明可逆的逻辑是先构造出逆矩阵，再认定它存在；同一个构造也适用于 $E+tA$（$t$ 为任意常数）：
+<Steps>
+  <Step>
+
+### 从数的等比和寻找矩阵恒等式
+
+对任意方阵 $A$，令 $S=E+A+\cdots+A^{k-1}$。依分配律和结合律，
 
 $$
-(E+tA)^{-1}=\sum_{j=0}^{k-1}(-tA)^j.
+\begin{aligned}
+(E-A)S
+&=(E+A+\cdots+A^{k-1})-(A+A^2+\cdots+A^k)\\
+&=E-A^k=E.
+\end{aligned}
 $$
 
-对于方阵，写出一侧逆已足够，但直接验证两侧更便于处理一般矩阵积的次序。
+</Step>
+  <Step>
+
+### 验证双侧逆
+
+$S$ 是 $A$ 的多项式，因此与 $A$ 可交换；同样计算得 $S(E-A)=E-A^k=E$。于是 $S$ 同时是左逆与右逆，$E-A$ 可逆。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="可直接迁移的通式">
+
+若 $N^k=O$，则对任意实数 $t$，
+
+$$
+(E+tN)^{-1}=\sum_{j=0}^{k-1}(-tN)^j.
+$$
+
+这是**有限和**，完全不涉及无穷级数的收敛条件；无须假设 $\|N\|<1$。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-1bd354-002" type="essay" number={false}>
+<Question id="core-la-inverse-zhangyu1000-02" type="essay" number="2" tags="来源:张宇1000题, 科目:线性代数, 考点:平移幂零与求逆">
 
-【张宇1000题】 设$A$是$n$阶矩阵，满足$(A-E)^5=0$，则$A^{-1}=$
+设 $A$ 是 $n$ 阶矩阵，满足 $(A-E)^5=O$，求 $A^{-1}$。
 
 <Solution>
 
-**答案：** $ E-(A-E)+(A-E)^2-(A-E)^3+(A-E)^4$
-
-**解析：** 令 $N=A-E$，则 $N^5=O$，而 $A=E+N$。因此
+**参考答案**
 
 $$
-(E+N)(E-N+N^2-N^3+N^4)=E+N^5=E.
+\boxed{A^{-1}=E-(A-E)+(A-E)^2-(A-E)^3+(A-E)^4}.
 $$
 
-这两个因子都是 $N$ 的多项式，可以交换，故右侧亦为 $E$，从而
+**解析与过程**
+
+令 $N=A-E$，则 $N^5=O$，而 $A=E+N$。题给**幂零的是 $A-E$，不是 $A$**。
+
+考虑有限交错和 $S=E-N+N^2-N^3+N^4$，则
 
 $$
-A^{-1}=E-(A-E)+(A-E)^2-(A-E)^3+(A-E)^4.
+(E+N)S=E+N^5=E.
 $$
 
-**母题变式：** 注意这题的幂零对象不是 $A$，而是 $A-E$。遇到 $(A-\lambda E)^m=O$ 时应先把 $A$ 写成 $\lambda E+N$；只要 $\lambda\ne0$，便能用有限几何级数构造 $A^{-1}$。切忌把 $(A-E)^5=O$ 误读为 $A^5=O$。
+因两因子都是 $N$ 的多项式，反向乘积也为 $E$，因此 $A$ 可逆且 $A^{-1}=S$。将 $N=A-E$ 代回即得结果。
+
+<Accordions>
+  <Accordion title="推广：若 $(A-\lambda E)^m=O$，什么时候能求逆？">
+
+设 $N=A-\lambda E$，$N^m=O$。当 $\lambda\ne0$ 时，
+
+$$
+A=\lambda\left(E+\frac{N}{\lambda}\right),\qquad
+A^{-1}=\frac1\lambda\sum_{j=0}^{m-1}\left(-\frac{N}{\lambda}\right)^j.
+$$
+
+当 $\lambda=0$ 时，$A$ 本身幂零；除非讨论零维特殊情形，它不可能是可逆的非零阶方阵。
+
+  </Accordion>
+</Accordions>
 
 </Solution>
-
 </Question>
 
-<Question id="math-1bd354-003" type="blank" number={false}>
+<Question id="core-la-inverse-2001-m1-03" type="blank" number="3" tags="来源:2001年数学一, 科目:线性代数, 考点:矩阵多项式因式分解, 重点">
 
-【2001年数学一】 设矩阵 $A$ 满足
-
-$$
-A^2+A-4E=O,
-$$
-
-则
+设矩阵 $A$ 满足 $A^2+A-4E=O$，则
 
 $$
 (A-E)^{-1}=
 $$
 
-<Blank answer="\frac12(A+2E)" kind="text" placeholder="输入文字或 LaTeX" />
-
-.
+<Blank answer="(A+2E)/2" kind="math" />。
 
 <Solution>
 
-**答案：**
+**答案：** $\boxed{(A-E)^{-1}=\frac12(A+2E)}$。
+
+**解析与过程**
+
+题目尚未告知 $A-E$ 可逆，**不能先写** $(A-E)^{-1}$ 参与约分。应由已知多项式关系构造逆矩阵：
 
 $$
-(A-E)^{-1}=\frac12(A+2E).
+\begin{aligned}
+(A-E)(A+2E)&=A^2+A-2E\\
+&=(A^2+A-4E)+2E=2E.
+\end{aligned}
 $$
 
-**解析：** 目标是构造矩阵 $B$，使
+由于 $A-E$、$A+2E$ 均为 $A$ 的多项式，二者可交换；所以反向乘积同为 $2E$。于是
 
 $$
-(A-E)B=E.
+(A-E)\frac{A+2E}{2}=\frac{A+2E}{2}(A-E)=E,
 $$
 
-由已知
+这同时证明了可逆性与逆矩阵表达式。
 
-$$
-A^2+A-4E=O
-$$
+<Callout type="idea" title="识别思路：在多项式恒等式里凑出目标因子">
 
-整理：
+想求 $(A-\lambda E)^{-1}$，可尝试把已知关系 $f(A)=O$ 整理为 $(A-\lambda E)g(A)=cE$，其中 $c\ne0$。此时 $c^{-1}g(A)$ 便是所求的逆矩阵。
 
-$$
-A^2+A-2E=2E.
-$$
-
-左边可以因式分解：
-
-$$
-(A-E)(A+2E)=2E.
-$$
-
-因此
-
-$$
-(A-E)\cdot\frac12(A+2E)=E.
-$$
-
-故
-
-$$
-\boxed{(A-E)^{-1}=\frac12(A+2E)}.
-$$
-
-**核心模型：** 已知低次矩阵多项式关系时，把待求逆矩阵与一个多项式相乘，凑成非零数量矩阵。这里 $(A-E)(A+2E)=2E$，同理反向乘积也等于 $2E$；因而逆矩阵存在。特别注意不能先假设 $A-E$ 可逆再去解它。
+</Callout>
 
 </Solution>
-
 </Question>
 
 ## 二、秩一更新、投影与伴随矩阵
 
-<Question id="math-1bd354-004" type="essay" number={false}>
+<Question id="core-la-inverse-1996-m1-04" type="essay" number="4" tags="来源:1996年数学一, 科目:线性代数, 考点:秩一外积与幂等矩阵, 重点">
 
-【1996年数学一】 设
-
-$$
-A=E-\xi\xi^{\mathrm T},
-$$
-
-其中 $E$ 是 $n$ 阶单位矩阵，$\xi$ 是 $n$ 维非零列向量。
-
-证明：
+设 $A=E-\xi\xi^{\mathrm T}$，其中 $E$ 是 $n$ 阶单位矩阵，$\xi$ 是 $n$ 维非零列向量。证明：
 
 （1）$A^2=A$ 的充要条件是 $\xi^{\mathrm T}\xi=1$；
 
@@ -184,75 +163,68 @@ $$
 
 <Solution>
 
-**答案：** 证明见解析。
+**参考答案**
 
-**解析：**
+（1）$\boxed{A^2=A\iff\xi^{\mathrm T}\xi=1}$；（2）$\boxed{A\text{ 不可逆}}$。
 
-### （1）证明充要条件
+**解析与证明过程**
 
-直接平方：
+<Steps>
+  <Step>
+
+### 用秩一结构化简 $A^2$
+
+记 $s=\xi^{\mathrm T}\xi$（标量）。因矩阵乘法满足结合律，
+
+$$
+(\xi\xi^{\mathrm T})^2=\xi(\xi^{\mathrm T}\xi)\xi^{\mathrm T}=s\xi\xi^{\mathrm T}.
+$$
+
+因此
 
 $$
 \begin{aligned}
-A^2
-&=(E-\xi\xi^{\mathrm T})^2\\
-&=E-2\xi\xi^{\mathrm T}+\xi(\xi^{\mathrm T}\xi)\xi^{\mathrm T}\\
-&=E-\bigl(2-\xi^{\mathrm T}\xi\bigr)\xi\xi^{\mathrm T}.
+A^2-A
+&=[E-2\xi\xi^{\mathrm T}+s\xi\xi^{\mathrm T}]-[E-\xi\xi^{\mathrm T}]\\
+&=(s-1)\xi\xi^{\mathrm T}.
 \end{aligned}
 $$
 
-而
+</Step>
+  <Step>
+
+### 严格证明充要性
+
+由于 $\xi\ne0$，外积 $\xi\xi^{\mathrm T}$ 不是零矩阵（至少一个非零分量对应正的对角元素）。所以 $(s-1)\xi\xi^{\mathrm T}=O$ 当且仅当 $s-1=0$，即 $\xi^{\mathrm T}\xi=1$。
+
+</Step>
+  <Step>
+
+### 构造零空间非零向量
+
+若 $s=1$，则
 
 $$
-A=E-\xi\xi^{\mathrm T}.
+A\xi=(E-\xi\xi^{\mathrm T})\xi=(1-s)\xi=0.
 $$
 
-所以
+因 $\xi\ne0$，方程 $Ax=0$ 有非零解，因此 $A$ 奇异。
 
-$$
-A^2=A
-$$
+</Step>
+</Steps>
 
-等价于
+<Callout type="idea" title="几何解释">
 
-$$
-(1-\xi^{\mathrm T}\xi)\xi\xi^{\mathrm T}=O.
-$$
+当 $\|\xi\|=1$ 时，$\xi\xi^{\mathrm T}$ 是向 $\operatorname{span}(\xi)$ 的正交投影，而 $A=E-\xi\xi^{\mathrm T}$ 是向 $\xi^\perp$ 的正交投影。它把 $\xi$ 送到零向量，所以必不可逆。
 
-由于 $\xi\ne0$，故 $\xi\xi^{\mathrm T}\ne O$，于是
-
-$$
-\boxed{\xi^{\mathrm T}\xi=1}.
-$$
-
-### （2）证明不可逆
-
-当 $\xi^{\mathrm T}\xi=1$ 时，
-
-$$
-A\xi
-=(E-\xi\xi^{\mathrm T})\xi
-=\xi-\xi(\xi^{\mathrm T}\xi)
-=0.
-$$
-
-而 $\xi\ne0$，所以齐次方程
-
-$$
-Ax=0
-$$
-
-存在非零解，故 $A$ 不可逆。
-
-**本题突破口：** 矩阵 $\xi\xi^{\mathrm T}$ 虽是 $n\times n$ 阶，但只需算一个标量 $s=\xi^{\mathrm T}\xi$，就有 $(\xi\xi^{\mathrm T})^2=s\xi\xi^{\mathrm T}$。当 $s=1$，$A$ 恰是沿 $\xi$ 方向为零、在 $\xi^\perp$ 上恒等的正交投影，因此必奇异。这里 $\xi\ne0$ 是从矩阵积等式推出标量为零的关键。
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-1bd354-005" type="single" number={false}>
+<Question id="core-la-inverse-2017-m1m3-05" type="single" number="5" tags="来源:2017年数学一、数学三, 科目:线性代数, 考点:投影特征值与可逆性, 基础">
 
-【2017年数学一、数学三】 设 $\alpha$ 为 $n$ 维单位列向量，$E$ 为 $n$ 阶单位矩阵，则（ ）。
+设 $\alpha$ 为 $n$ 维单位列向量，$E$ 为 $n$ 阶单位矩阵，则（ ）。
 
 <Option correct>$E-\alpha\alpha^{\mathrm T}$ 不可逆</Option>
 <Option>$E+\alpha\alpha^{\mathrm T}$ 不可逆</Option>
@@ -261,231 +233,219 @@ $$
 
 <Solution>
 
-因为 $\alpha$ 是单位向量，
+**解题结论：** 选 A。
+
+令 $P=\alpha\alpha^{\mathrm T}$，由于 $\alpha^{\mathrm T}\alpha=1$，可得 $P^2=P$。特别地
 
 $$
-\alpha^{\mathrm T}\alpha=1.
+(E-P)\alpha=\alpha-\alpha(\alpha^{\mathrm T}\alpha)=0.
 $$
 
-于是
+$\alpha$ 是非零向量，所以 $E-P$ 存在非零零空间向量，必不可逆。
+
+**其余选项为何可逆？** 对任意 $t\ne-1$，直接验证
 
 $$
-(E-\alpha\alpha^{\mathrm T})\alpha
-=\alpha-\alpha(\alpha^{\mathrm T}\alpha)
-=0.
+(E+tP)\left(E-\frac{t}{1+t}P\right)=E
 $$
 
-而 $\alpha\ne0$，所以 $E-\alpha\alpha^{\mathrm T}$ 的齐次方程存在非零解，故不可逆。
+（使用 $P^2=P$）。B、C、D 对应 $t=1,2,-2$，均不等于 $-1$，所以三者全部可逆。
 
-因此选 A。
+<Callout type="idea" title="秩一更新的核心判别">
 
-也可从特征值理解：$\alpha\alpha^{\mathrm T}$ 的特征值为 $1,0,\dots,0$，所以 $E-\alpha\alpha^{\mathrm T}$ 有零特征值。
+单位向量 $\alpha$ 对应的 $P=\alpha\alpha^{\mathrm T}$ 具有特征值 $1$（$\alpha$ 方向）和 $0$（其正交补方向）。因此 $E+tP$ 仅当 $1+t=0$ 时不可逆，与矩阵阶数无关。
 
-**快速排除：** 写 $P=\alpha\alpha^{\mathrm T}$，则 $P^2=P$。矩阵 $E+tP$ 在 $\alpha$ 上作用为 $1+t$ 倍，在与 $\alpha$ 正交的子空间上作用为原样；故当且仅当 $t=-1$ 时奇异。该结论也覆盖 $n=1$ 的情形。
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-1bd354-006" type="essay" number={false}>
+<Question id="core-la-inverse-lilin880-06" type="essay" number="6" tags="来源:李林880, 科目:线性代数, 考点:秩一扰动求逆, 重点">
 
-【李林880】 设 $\alpha, \beta$ 是 $n$ 维列向量，且 $\alpha^T \beta = 2$，证明：$A = E + \alpha \beta^T$ 可逆，并求 $A^{-1}$。
+设 $\alpha,\beta$ 是 $n$ 维列向量，且 $\alpha^{\mathrm T}\beta=2$。证明 $A=E+\alpha\beta^{\mathrm T}$ 可逆，并求 $A^{-1}$。
 
 <Solution>
 
-**答案：** $A$ 可逆，且 $A^{-1}=\dfrac{4E-A}{3}=E-\dfrac13\alpha\beta^T$。
-
-**解析：** 设 $U=\alpha\beta^{\mathrm T}$，则
+**参考答案**
 
 $$
-U^2=\alpha(\beta^{\mathrm T}\alpha)\beta^{\mathrm T}=2U.
+\boxed{A^{-1}=E-\frac13\alpha\beta^{\mathrm T}=\frac{4E-A}{3}}.
 $$
 
-所以
+**解析与证明过程**
+
+<Tabs items={['方法一：构造双侧逆','方法二：矩阵多项式']}>
+  <Tab value="方法一：构造双侧逆">
+
+记 $U=\alpha\beta^{\mathrm T}$。虽然 $U$ 是 $n$ 阶矩阵，但它的平方只涉及一个标量：
 
 $$
-A^2=(E+U)^2=E+4U=4A-3E,
+U^2=\alpha(\beta^{\mathrm T}\alpha)\beta^{\mathrm T}=2\alpha\beta^{\mathrm T}=2U.
 $$
 
-即 $A(4E-A)=3E$。两因子可交换，故 $A$ 可逆并且
+先尝试 $E+cU$ 作为逆。展开得
 
 $$
-\boxed{A^{-1}=\frac{4E-A}{3}=E-\frac13\alpha\beta^{\mathrm T}}.
+(E+U)(E+cU)=E+(1+c)U+cU^2=E+(1+3c)U.
 $$
 
-**第二种方法（秩一更新）：** 对 $\beta^{\mathrm T}\alpha=s$，寻找 $(E+\alpha\beta^{\mathrm T})^{-1}=E+c\alpha\beta^{\mathrm T}$，将乘积等于 $E$ 化为 $1+c+cs=0$，得 $c=-1/(1+s)$。因此当 $1+s\ne0$ 时
+取 $c=-\tfrac13$，上式恰等于 $E$。由于两因子均为 $U$ 的多项式，反向相乘也等于 $E$；因此 $A$ 可逆，逆矩阵如上。
+
+</Tab>
+  <Tab value="方法二：矩阵多项式">
+
+由 $U^2=2U$，计算
 
 $$
-(E+\alpha\beta^{\mathrm T})^{-1}=E-\frac{\alpha\beta^{\mathrm T}}{1+\beta^{\mathrm T}\alpha}.
+A^2=(E+U)^2=E+2U+U^2=E+4U=4A-3E.
 $$
 
-若 $1+s=0$，则 $(E+\alpha\beta^{\mathrm T})\alpha=0$ 且 $\alpha\ne0$，所以不可逆。因而 $1+s\ne0$ 还是充要条件。
+于是 $A(4E-A)=3E=(4E-A)A$。系数 $3\ne0$，直接得到
+
+$$
+A^{-1}=\frac{4E-A}{3}.
+$$
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="秩一更新的通用公式">
+
+设 $u,v$ 是同维列向量，则
+
+$$
+(E+uv^{\mathrm T})^{-1}=E-\frac{uv^{\mathrm T}}{1+v^{\mathrm T}u}
+$$
+
+成立的充要条件是 $1+v^{\mathrm T}u\ne0$。证明可以直接作乘积；若分母为零，则 $(E+uv^{\mathrm T})u=0$ 且此时 $u\ne0$，故矩阵不可逆。本题标量 $v^{\mathrm T}u=2$，所以分母是 $3$。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-1bd354-007" type="essay" number={false}>
+<Question id="core-la-inverse-2003-m3-07" type="blank" number="7" tags="来源:2003年数学三, 科目:线性代数, 考点:秩一矩阵与参数反求">
 
-【2003年数学三】 设 $n\ge2$，
-
-$$
-\alpha=(a,0,\cdots,0,a)^{\mathrm T},
-\qquad a<0,
-$$
-
-$E$ 为 $n$ 阶单位矩阵，
+设 $n\ge2$，$\alpha=(a,0,\ldots,0,a)^{\mathrm T}$，$a<0$，$E$ 为 $n$ 阶单位矩阵，且
 
 $$
-A=E-\alpha\alpha^{\mathrm T},
-\qquad
-B=E+\frac1a\alpha\alpha^{\mathrm T}.
+A=E-\alpha\alpha^{\mathrm T},\qquad B=E+\frac1a\alpha\alpha^{\mathrm T}.
 $$
 
-若 $A^{-1}=B$，求 $a$。
+若 $A^{-1}=B$，求 $a=$ <Blank answer="-1" kind="math" />。
 
 <Solution>
 
-**答案：** $-1$
+**答案：** $\boxed{a=-1}$。
 
-**解析：** 由 $A^{-1}=B$，有
+**解析与过程**
 
-$$
-AB=E.
-$$
+<Steps>
+  <Step>
 
-展开：
+### 将逆矩阵条件改为乘积恒等式
 
-$$
-(E-\alpha\alpha^{\mathrm T})
-\left(E+\frac1a\alpha\alpha^{\mathrm T}\right)=E.
-$$
-
-注意
+$A^{-1}=B$ 意味着 $AB=E$。设 $U=\alpha\alpha^{\mathrm T}$，则
 
 $$
-\alpha^{\mathrm T}\alpha=2a^2.
+U^2=\alpha(\alpha^{\mathrm T}\alpha)\alpha^{\mathrm T}=(2a^2)U.
 $$
 
-并且
+这里 $\alpha$ 的首、末元素各为 $a$；中间元素为 $0$，因此 $\alpha^{\mathrm T}\alpha=2a^2$。
+
+</Step>
+  <Step>
+
+### 展开并比较系数
 
 $$
-(\alpha\alpha^{\mathrm T})^2
-=\alpha(\alpha^{\mathrm T}\alpha)\alpha^{\mathrm T}
-=2a^2\alpha\alpha^{\mathrm T}.
+\begin{aligned}
+AB&=(E-U)\left(E+\frac1aU\right)\\
+&=E+\left(\frac1a-1\right)U-\frac1aU^2\\
+&=E+\left(\frac1a-1-2a\right)U.
+\end{aligned}
 $$
 
-所以乘积化为
+由于 $a<0$，向量 $\alpha\ne0$，故 $U\ne O$。要使 $AB=E$，系数必须为零：
 
 $$
-E+\left(-1+\frac1a-2a\right)\alpha\alpha^{\mathrm T}=E.
+\frac1a-1-2a=0\iff 2a^2+a-1=0\iff(2a-1)(a+1)=0.
 $$
 
-由于 $\alpha\ne0$，故
+解得 $a=\tfrac12$ 或 $a=-1$，由 $a<0$ 只能取 $-1$。
 
-$$
--1+\frac1a-2a=0.
-$$
+</Step>
+</Steps>
 
-乘以 $a$：
+**代回检查：** $a=-1$ 时，$U^2=2U$，且 $A=E-U,B=E-U$，所以 $AB=(E-U)^2=E-2U+2U=E$。这既核对了必要条件，也确认原逆矩阵关系成立。
 
-$$
-2a^2+a-1=0,
-$$
+<Callout type="warn" title="不能只算出行列式条件">
 
-即
+本题是**矩阵等式** $A^{-1}=B$，直接比较 $AB$ 的秩一项，比先计算 $|A|$ 更充分；同时，求得代数根后必须依据 $a<0$ 舍根。
 
-$$
-(2a-1)(a+1)=0.
-$$
-
-又 $a<0$，所以
-
-$$
-\boxed{a=-1}.
-$$
-
-**隐含条件与方法：** 这里两端各有一个 $a$，应按 $n\ge2$ 的向量记号理解，才能使用 $\alpha^{\mathrm T}\alpha=2a^2$；$a<0$ 也保证 $\alpha\ne0$，于是标量系数必须为零。核验得到 $a=-1$ 时 $1-\alpha^{\mathrm T}\alpha=-1\ne0$，所以 $A$ 的确可逆。推广时可直接用秩一更新的逆公式。
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-1bd354-008" type="blank" number={false}>
+<Question id="core-la-inverse-1995-m3-08" type="essay" number="8" tags="来源:1995年数学三, 科目:线性代数, 考点:伴随矩阵的逆, 基础">
 
-【1995年数学三】 设
-
-$$
-A=\begin{pmatrix}
-1&0&0\\
-2&2&0\\
-3&4&5
-\end{pmatrix},
-$$
-
-$A^*$ 是 $A$ 的伴随矩阵，则
+设
 
 $$
-(A^*)^{-1}=
+A=\begin{pmatrix}1&0&0\\2&2&0\\3&4&5\end{pmatrix},
 $$
 
-<Blank answer="\frac1{10} \begin{pmatrix} 1&amp;0&amp;0\\ 2&amp;2&amp;0\\ 3&amp;4&amp;5 \end{pmatrix}" kind="text" placeholder="输入文字或 LaTeX" />
-
-.
+$A^*$ 为 $A$ 的伴随矩阵，求 $(A^*)^{-1}$。
 
 <Solution>
 
-**答案：**
+**参考答案**
 
 $$
-(A^*)^{-1}
-=\frac1{10}
-\begin{pmatrix}
-1&0&0\\
-2&2&0\\
-3&4&5
-\end{pmatrix}.
+\boxed{(A^*)^{-1}=\frac1{10}\begin{pmatrix}1&0&0\\2&2&0\\3&4&5\end{pmatrix}}.
 $$
 
-**解析：** 由
+**解析与过程**
+
+第一步，**确定可逆性**。$A$ 为下三角阵，行列式是主对角线元素之积：
 
 $$
-AA^*=|A|E
+|A|=1\cdot2\cdot5=10\ne0.
 $$
 
-两边除以 $|A|$：
+因此 $A$ 与 $A^*$ 都可逆。第二步，利用定义恒等式
 
 $$
-\frac{A}{|A|}A^*=E.
+AA^*=A^*A=|A|E=10E.
 $$
 
-因此
+将右边除以 $10$，得到
 
 $$
-(A^*)^{-1}=\frac{A}{|A|}.
+A^*\left(\frac{A}{10}\right)=E=\left(\frac{A}{10}\right)A^*.
 $$
 
-本题 $A$ 为下三角矩阵，故
+所以 $(A^*)^{-1}=A/10$，最后代入题给 $A$ 即得答案。
+
+<Callout type="idea" title="必背关系与成立条件">
+
+若 $|A|\ne0$，则
 
 $$
-|A|=1\cdot2\cdot5=10.
+A^*=|A|A^{-1},\qquad (A^*)^{-1}=\frac{A}{|A|}.
 $$
 
-所以
+记住右式分母是 $|A|$，不是 $|A^*|$。给了三角矩阵时只需算对角元乘积，不必真的求出所有代数余子式。
 
-$$
-\boxed{(A^*)^{-1}=\frac1{10}A}.
-$$
-
-**模型提炼：** 对任意 $n$ 阶可逆矩阵 $A$，$A^*=|A|A^{-1}$，因而 $(A^*)^{-1}=A/|A|$。若 $|A|=0$ 则 $A^*$ 不可逆，不能直接套用。这里取三角阵对角线之积比展开伴随矩阵更快。
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-1bd354-009" type="single" number={false}>
+<Question id="core-la-inverse-2026-m3-q6-09" type="single" number="9" tags="来源:2026年数学三第6题, 科目:线性代数, 考点:伴随矩阵与秩, 难度:较难">
 
-【2026年数学三第6题】 设 $A$ 为三阶非零矩阵，$A^*$ 为 $A$ 的伴随矩阵。若 $A^*=-2A$，则 $A^2=$（ ）。
+设 $A$ 为三阶非零矩阵，$A^*$ 为 $A$ 的伴随矩阵。若 $A^*=-2A$，则 $A^2=$（ ）。
 
 <Option>$\operatorname{diag}(-4,-4,-4)$</Option>
 <Option>$\operatorname{diag}(-4,-4,4)$</Option>
@@ -494,88 +454,119 @@ $$
 
 <Solution>
 
-利用 $AA^*=|A|I$，得
+**解题结论：** 选 D，即 $\boxed{A^2=4E}$。
+
+**解析与过程**
+
+<Steps>
+  <Step>
+
+### 由伴随矩阵恒等式降阶
+
+$AA^*=|A|E$ 对任意方阵都成立。代入 $A^*=-2A$ 得
 
 $$
--2A^2=|A|I.
+-2A^2=|A|E.\tag{1}
 $$
 
-对 $A^*=-2A$ 两侧取行列式：三阶矩阵满足 $|A^*|=|A|^2$，故
+对 $A^*=-2A$ 取行列式（三阶）又有
 
 $$
-|A|^2=(-2)^3|A|=-8|A|.
+|A|^2=|A^*|=|-2A|=(-2)^3|A|=-8|A|.
 $$
 
-若 $|A|=0$，则 $A^2=0$。由于 $\operatorname{im}A\subseteq\ker A$（由 $A^2=O$），秩-零度定理给出 $2r(A)\le3$，故 $r(A)\le1$。又 $A\ne0$，所以 $r(A)=1$，三阶矩阵的所有二阶子式均为零，进而 $A^*=0$，与 $A^*=-2A\ne0$ 矛盾。因此 $|A|=-8$。
+故 $|A|(|A|+8)=0$，候选值为 $0$ 和 $-8$。
 
-代回得 $-2A^2=-8I$，即 $A^2=4I$。
+</Step>
+  <Step>
 
-**关键排除：** 行列式恒等式只能得到 $|A|=0$ 或 $-8$，不可直接舍去奇异分支。若 $|A|=0$，由 $AA^*=|A|E$ 得 $A^2=O$，于是 $r(A)\le1$；但三阶 $r(A)\le1$ 时 $A^*=O$，结合 $A^*=-2A$ 便强制 $A=O$，与题设矛盾。故 $|A|=-8$，$A^2=4E$，对应选项 D。
+### 严格排除 $|A|=0$
+
+若 $|A|=0$，式 (1) 变为 $A^2=O$，因而 $\operatorname{im}(A)\subseteq\ker(A)$。由秩—零度定理，
+
+$$
+r(A)\le3-r(A)\quad\Longrightarrow\quad r(A)\le1.
+$$
+
+三阶矩阵秩不超过 $1$ 时所有二阶子式均为零，故 $A^*=O$。但题给 $A^*=-2A$ 会进一步推出 $A=O$，与“$A$ 非零”矛盾。因此 $|A|\ne0$。
+
+</Step>
+  <Step>
+
+### 求出矩阵平方
+
+只能有 $|A|=-8$。代回式 (1)：
+
+$$
+-2A^2=-8E\quad\Longrightarrow\quad A^2=4E.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="先证非奇异，后才能约去行列式">
+
+单凭 $|A|^2=-8|A|$ **不能**直接除以 $|A|$；除法可能遗漏 $|A|=0$。本题利用 $A^2=O\Rightarrow r(A)\le1\Rightarrow A^*=O$ 排除了奇异分支，是关键论证。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
 ## 三、分块矩阵与抽象逆矩阵恒等式
 
-<Question id="math-1bd354-010" type="blank" number={false}>
+<Question id="core-la-inverse-1991-m3-10" type="essay" number="10" tags="来源:1991年数学三, 科目:线性代数, 考点:反对角分块矩阵求逆">
 
-【1991年数学三】 设 $A,B$ 为可逆矩阵，
+设 $A,B$ 为可逆矩阵，
 
 $$
-X=\begin{pmatrix}
-O&A\\
-B&O
-\end{pmatrix},
+X=\begin{pmatrix}O&A\\B&O\end{pmatrix},
 $$
 
-则 $X^{-1}=$ <Blank answer="\begin{pmatrix} O&amp;B^{-1}\\ A^{-1}&amp;O \end{pmatrix}" kind="text" placeholder="输入文字或 LaTeX" />。
+求 $X^{-1}$。
 
 <Solution>
 
-**答案：**
-
-$$
-X^{-1}=\begin{pmatrix}
-O&B^{-1}\\
-A^{-1}&O
-\end{pmatrix}.
-$$
-
-**解析：** 直接构造并验证即可：
-
-$$
-\begin{pmatrix}
-O&A\\
-B&O
-\end{pmatrix}
-\begin{pmatrix}
-O&B^{-1}\\
-A^{-1}&O
-\end{pmatrix}
-=
-\begin{pmatrix}
-AA^{-1}&O\\
-O&BB^{-1}
-\end{pmatrix}
-=E.
-$$
-
-反向相乘同样为 $E$，故
+**参考答案**
 
 $$
 \boxed{X^{-1}=\begin{pmatrix}O&B^{-1}\\A^{-1}&O\end{pmatrix}}.
 $$
 
-**突破口：** 这是反对角分块矩阵，不要误以为把 $A^{-1}$、$B^{-1}$ 放回原位置即可；因为两个块先后作用于不同坐标分量，求逆时上下位置必须对调。分块维度相容且 $A,B$ 均可逆是必要条件。
+**解析与过程**
+
+设 $A$ 为 $m$ 阶、$B$ 为 $n$ 阶，则 $X$ 的两个对角零块分别为 $m\times n$ 和 $n\times m$ 的相容尺寸，整体是 $m+n$ 阶方阵。构造候选矩阵
+
+$$
+Y=\begin{pmatrix}O&B^{-1}\\A^{-1}&O\end{pmatrix}.
+$$
+
+按块乘法，先验证
+
+$$
+XY=\begin{pmatrix}AA^{-1}&O\\O&BB^{-1}\end{pmatrix}=E_{m+n}.
+$$
+
+再验证
+
+$$
+YX=\begin{pmatrix}B^{-1}B&O\\O&A^{-1}A\end{pmatrix}=E_{m+n}.
+$$
+
+所以 $Y$ 确为逆矩阵。
+
+<Callout type="idea" title="反对角结构的正确记法">
+
+求逆时**反对角位置保持，但两个块必须对换并分别求逆**：右上由 $A$ 变成 $B^{-1}$，左下由 $B$ 变成 $A^{-1}$。与分块对角矩阵逐块求逆的规则不同。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-1bd354-011" type="essay" number={false}>
+<Question id="core-la-inverse-1994-m3-11" type="essay" number="11" tags="来源:1994年数学三, 科目:线性代数, 考点:循环置换矩阵的逆">
 
-【1994年数学三】 设
+设
 
 $$
 A=\begin{pmatrix}
@@ -584,290 +575,308 @@ A=\begin{pmatrix}
 \vdots&\vdots&\vdots&&\vdots\\
 0&0&0&\cdots&a_{n-1}\\
 a_n&0&0&\cdots&0
-\end{pmatrix},
+\end{pmatrix},\qquad a_i\ne0.
 $$
 
-其中 $a_i\ne0$，求 $A^{-1}$。
+求 $A^{-1}$。
 
 <Solution>
 
-**答案：**
+**参考答案**
 
 $$
-A^{-1}=\begin{pmatrix}
+\boxed{A^{-1}=\begin{pmatrix}
 0&0&\cdots&0&\frac1{a_n}\\
 \frac1{a_1}&0&\cdots&0&0\\
 0&\frac1{a_2}&\cdots&0&0\\
 \vdots&\vdots&&\vdots&\vdots\\
 0&0&\cdots&\frac1{a_{n-1}}&0
-\end{pmatrix}.
+\end{pmatrix}}.
 $$
 
-**解析：** $A$ 是“循环移位矩阵”与对角缩放的组合。
+**解析与过程**
 
-它把标准基向量按循环方式移动，并分别乘上 $a_i$。要逆转这一过程，只需反向移动并除以对应的 $a_i$。
+<Tabs items={['方法一：标准基追踪','方法二：循环幂恒等式']}>
+  <Tab value="方法一：标准基追踪">
 
-因此候选逆矩阵必须在相反的循环位置放置
-
-$$
-\frac1{a_1},\frac1{a_2},\dots,\frac1{a_n}.
-$$
-
-直接相乘可验证
+令 $e_1,\ldots,e_n$ 为标准基。由 $A$ 的列可直接读出
 
 $$
-AA^{-1}=A^{-1}A=E.
+Ae_1=a_ne_n,\qquad Ae_{j+1}=a_je_j\quad(1\le j<n).
 $$
 
-**统一模型：** 若 $Ae_{j+1}=a_je_j$（$1\le j<n$），$Ae_1=a_ne_n$，则 $A^{-1}e_j=a_j^{-1}e_{j+1}$（$j<n$）、$A^{-1}e_n=a_n^{-1}e_1$。该方法直接读出每列，避免在稀疏矩阵上进行冗长消元。还可由 $A^n=(a_1\cdots a_n)E$ 得出 $A^{-1}=A^{n-1}/(a_1\cdots a_n)$。
+为了满足 $AA^{-1}e_j=e_j$，应令
+
+$$
+A^{-1}e_j=\frac{1}{a_j}e_{j+1}\quad(1\le j<n),
+\qquad A^{-1}e_n=\frac1{a_n}e_1.
+$$
+
+将这些列依次摆放，就得到上面的逆矩阵。所有 $a_j\ne0$，因此各列定义有效，反向相乘也能恢复每个标准基向量。
+
+</Tab>
+  <Tab value="方法二：循环幂恒等式">
+
+作用 $n$ 次后，每个标准基向量都会沿着同一个循环走一圈，并恰好乘上全部 $a_j$，所以
+
+$$
+A^n=\left(\prod_{j=1}^n a_j\right)E.
+$$
+
+记 $c=\prod a_j\ne0$，则
+
+$$
+A\left(\frac{A^{n-1}}c\right)=E
+=\left(\frac{A^{n-1}}c\right)A.
+$$
+
+因此 $A^{-1}=A^{n-1}/c$；再利用稀疏结构可读出各位置的倒数元素。
+
+</Tab>
+</Tabs>
+
+**验算例子：** 对 $n=3$，$A=\begin{pmatrix}0&a_1&0\\0&0&a_2\\a_3&0&0\end{pmatrix}$，候选逆为 $\begin{pmatrix}0&0&1/a_3\\1/a_1&0&0\\0&1/a_2&0\end{pmatrix}$，两者乘积均为 $E_3$。
+
+<Callout type="warn" title="不要把循环位置移错">
+
+逆矩阵不是将原矩阵的非零元仅替换成倒数，而是**同时将循环方向反转**。按标准基逐列核对最可靠。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-1bd354-012" type="essay" number={false}>
+<Question id="core-la-inverse-1997-m3-12" type="essay" number="12" tags="来源:1997年数学三, 科目:线性代数, 考点:Schur补与可逆判定, 重点">
 
-【1997年数学三】 设 $A$ 为 $n$ 阶非奇异矩阵，$\alpha$ 为 $n$ 维列向量，$b$ 为常数。记
+设 $A$ 是 $n$ 阶非奇异矩阵，$\alpha$ 为 $n$ 维列向量，$b$ 为常数。记
 
 $$
-P=\begin{pmatrix}
-E&O\\
--\alpha^{\mathrm T}A^*&|A|
-\end{pmatrix},
+P=\begin{pmatrix}E&O\\-\alpha^{\mathrm T}A^*&|A|\end{pmatrix},
 \qquad
-Q=\begin{pmatrix}
-A&\alpha\\
-\alpha^{\mathrm T}&b
-\end{pmatrix}.
+Q=\begin{pmatrix}A&\alpha\\\alpha^{\mathrm T}&b\end{pmatrix}.
 $$
 
-（1）计算并化简 $PQ$；
-
-（2）证明：矩阵 $Q$ 可逆的充分必要条件是
-
-$$
-\alpha^{\mathrm T}A^{-1}\alpha\ne b.
-$$
+（1）计算并化简 $PQ$；（2）证明：$Q$ 可逆的充分必要条件为 $\alpha^{\mathrm T}A^{-1}\alpha\ne b$。
 
 <Solution>
 
-**答案：**
+**参考答案**
 
-（1）
+$$
+\boxed{PQ=\begin{pmatrix}A&\alpha\\O&|A|(b-\alpha^{\mathrm T}A^{-1}\alpha)\end{pmatrix}},
+$$
+
+且 $\boxed{Q\text{ 可逆}\iff b-\alpha^{\mathrm T}A^{-1}\alpha\ne0}$。
+
+**解析与证明过程**
+
+<Steps>
+  <Step>
+
+### 利用伴随恒等式消去左下块
+
+按照分块矩阵乘法，
 
 $$
 PQ=\begin{pmatrix}
 A&\alpha\\
-O&|A|\bigl(b-\alpha^{\mathrm T}A^{-1}\alpha\bigr)
+-\alpha^{\mathrm T}A^*A+|A|\alpha^{\mathrm T}&-\alpha^{\mathrm T}A^*\alpha+b|A|
 \end{pmatrix}.
 $$
 
-（2）证明见解析。
-
-**解析：**
-
-### （1）计算 $PQ$
-
-利用
+由于 $A^*A=|A|E$，左下块是 $O$；又由于 $A$ 可逆，$A^*=|A|A^{-1}$，右下块成为
 
 $$
-A^*A=|A|E,
-\qquad
-A^*=|A|A^{-1},
+|A|\left(b-\alpha^{\mathrm T}A^{-1}\alpha\right).
 $$
 
-有
+因此得到答案所示的上三角分块形式。
+
+</Step>
+  <Step>
+
+### 先核查左乘矩阵可逆
+
+$P$ 是分块下三角阵，故
+
+$$
+|P|=|E|\cdot|A|=|A|\ne0.
+$$
+
+所以 $P$ 可逆，$PQ$ 可逆当且仅当 $Q$ 可逆。不能在这一步省略 $P$ 的可逆性检查。
+
+</Step>
+  <Step>
+
+### 将可逆性归约为一个标量
 
 $$
 \begin{aligned}
-PQ
-&=
-\begin{pmatrix}
-E&O\\
--\alpha^{\mathrm T}A^*&|A|
-\end{pmatrix}
-\begin{pmatrix}
-A&\alpha\\
-\alpha^{\mathrm T}&b
-\end{pmatrix}\\
-&=
-\begin{pmatrix}
-A&\alpha\\
--\alpha^{\mathrm T}A^*A+|A|\alpha^{\mathrm T}
-&-\alpha^{\mathrm T}A^*\alpha+b|A|
-\end{pmatrix}\\
-&=
-\begin{pmatrix}
-A&\alpha\\
-O&|A|\bigl(b-\alpha^{\mathrm T}A^{-1}\alpha\bigr)
-\end{pmatrix}.
+|PQ|&=|A|\cdot\Bigl[|A|\bigl(b-\alpha^{\mathrm T}A^{-1}\alpha\bigr)\Bigr]\\
+&=|A|^2\bigl(b-\alpha^{\mathrm T}A^{-1}\alpha\bigr).
 \end{aligned}
 $$
 
-### （2）判定 $Q$ 是否可逆
+既然 $|A|\ne0$，则 $|PQ|\ne0$ 恰等价于 $b-\alpha^{\mathrm T}A^{-1}\alpha\ne0$，结论得证。
 
-因为 $A$ 非奇异，所以 $|A|\ne0$。同时
+</Step>
+</Steps>
 
-$$
-|P|=|A|\ne0,
-$$
+<Callout type="idea" title="分块矩阵的 Schur 补">
 
-因此 $P$ 可逆。
-
-于是
+对于可逆的方块 $A$，令 $M=\begin{pmatrix}A&U\\V&D\end{pmatrix}$，则
 
 $$
-Q\text{ 可逆}
-\iff PQ\text{ 可逆}.
+|M|=|A|\cdot|D-VA^{-1}U|.
 $$
 
-而 $PQ$ 是分块上三角矩阵，所以
+因此 $M$ 可逆当且仅当其 Schur 补 $D-VA^{-1}U$ 可逆。本题的 Schur 补恰是标量 $b-\alpha^{\mathrm T}A^{-1}\alpha$。
 
-$$
-|PQ|=|A|\cdot |A|\bigl(b-\alpha^{\mathrm T}A^{-1}\alpha\bigr).
-$$
-
-故
-
-$$
-|PQ|\ne0
-\iff
-b-\alpha^{\mathrm T}A^{-1}\alpha\ne0.
-$$
-
-即
-
-$$
-\boxed{Q\text{ 可逆}\iff \alpha^{\mathrm T}A^{-1}\alpha\ne b}.
-$$
-
-**方法提炼：** 这里的 $b-\alpha^{\mathrm T}A^{-1}\alpha$ 是 Schur 补。对于可逆的左上块 $A$，一般块阵 $\begin{pmatrix}A&U\\V&D\end{pmatrix}$ 可逆当且仅当 $D-VA^{-1}U$ 可逆；本题 $U=\alpha,V=\alpha^{\mathrm T},D=b$，所以化成了单个标量的非零判断。只在 $A$ 可逆时才可采用这一变形。
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-1bd354-013" type="blank" number={false}>
+<Question id="core-la-inverse-2000-m2-13" type="essay" number="13" tags="来源:2000年数学二, 科目:线性代数, 考点:凯莱变换与求逆, 重点">
 
-【2000年数学二】 设
-
-$$
-A=\begin{pmatrix}
-1&0&0&0\\
--2&3&0&0\\
-0&-4&5&0\\
-0&0&-6&7
-\end{pmatrix},
-$$
-
-$E$ 为四阶单位矩阵，且
+设
 
 $$
-B=(E+A)^{-1}(E-A),
+A=\begin{pmatrix}1&0&0&0\\-2&3&0&0\\0&-4&5&0\\0&0&-6&7\end{pmatrix},
 $$
 
-则
-
-$$
-(E+B)^{-1}=
-$$
-
-<Blank answer="\begin{pmatrix} 1&amp;0&amp;0&amp;0\\ -1&amp;2&amp;0&amp;0\\ 0&amp;-2&amp;3&amp;0\\ 0&amp;0&amp;-3&amp;4 \end{pmatrix}" kind="text" placeholder="输入文字或 LaTeX" />
-
-.
+$E$ 为四阶单位矩阵，且 $B=(E+A)^{-1}(E-A)$，求 $(E+B)^{-1}$。
 
 <Solution>
 
-**答案：**
+**参考答案**
 
 $$
-(E+B)^{-1}
-=\begin{pmatrix}
-1&0&0&0\\
--1&2&0&0\\
-0&-2&3&0\\
-0&0&-3&4
-\end{pmatrix}.
+\boxed{(E+B)^{-1}=\frac12(E+A)
+=\begin{pmatrix}1&0&0&0\\-1&2&0&0\\0&-2&3&0\\0&0&-3&4\end{pmatrix}}.
 $$
 
-**解析：** 由
+**解析与过程**
 
-$$
-B=(E+A)^{-1}(E-A)
-$$
+<Steps>
+  <Step>
 
-可得
+### 检查定义式有意义
+
+$E+A$ 是下三角阵，对角线为 $2,4,6,8$，故 $|E+A|=2\cdot4\cdot6\cdot8\ne0$。因此题设的 $(E+A)^{-1}$ 存在。
+
+</Step>
+  <Step>
+
+### 不计算 $B$，直接把 $E+B$ 合并
+
+把 $E$ 写成 $(E+A)^{-1}(E+A)$：
 
 $$
 \begin{aligned}
 E+B
-&=E+(E+A)^{-1}(E-A)\\
-&=(E+A)^{-1}\bigl[(E+A)+(E-A)\bigr]\\
+&=(E+A)^{-1}(E+A)+(E+A)^{-1}(E-A)\\
+&=(E+A)^{-1}[2E]\\
 &=2(E+A)^{-1}.
+\end{aligned}
+$$
+
+取逆时注意数乘与逆矩阵的次序，得到
+
+$$
+(E+B)^{-1}=\frac12(E+A).
+$$
+
+</Step>
+  <Step>
+
+### 代入题给矩阵
+
+$E+A$ 只需把主对角线上分别加 $1$，再把整个矩阵除以 $2$，得参考答案的矩阵。
+
+</Step>
+</Steps>
+
+**检验：** $(E+B)\cdot\frac12(E+A)=2(E+A)^{-1}\cdot\frac12(E+A)=E$。
+
+<Callout type="idea" title="优先化简表达式，后计算元素">
+
+对 $B=(E+A)^{-1}(E-A)$，要找 $(E+B)^{-1}$ 时，**不需要**先算出 $(E+A)^{-1}$ 的 16 个元素。识别 $E\pm A$ 的互补结构是本题真正的考点。
+
+</Callout>
+
+</Solution>
+</Question>
+
+<Question id="core-la-inverse-lilin880-14" type="essay" number="14" tags="来源:李林880, 科目:线性代数, 考点:逆矩阵之和与乘法次序">
+
+已知方阵 $A,B,A+B$ 均可逆，求 $(A^{-1}+B^{-1})^{-1}$。
+
+<Solution>
+
+**参考答案**
+
+$$
+\boxed{(A^{-1}+B^{-1})^{-1}=B(A+B)^{-1}A=A(A+B)^{-1}B}.
+$$
+
+**解析与过程**
+
+<Tabs items={['方法一：因式分解','方法二：核对两种表达式']}>
+  <Tab value="方法一：因式分解">
+
+直接计算
+
+$$
+\begin{aligned}
+A^{-1}(A+B)B^{-1}
+&=A^{-1}AB^{-1}+A^{-1}BB^{-1}\\
+&=B^{-1}+A^{-1}.
 \end{aligned}
 $$
 
 因此
 
 $$
-(E+B)^{-1}=\frac12(E+A).
-$$
-
-代入 $A$：
-
-$$
-\frac12(E+A)
-=\begin{pmatrix}
-1&0&0&0\\
--1&2&0&0\\
-0&-2&3&0\\
-0&0&-3&4
-\end{pmatrix}.
-$$
-
-**关键：** 出现 $(E+A)^{-1}(E-A)$ 时，先把 $E$ 也改写成带 $(E+A)^{-1}$ 的形式，通常能迅速合并。
-
-**考场快解：** $E+B=2(E+A)^{-1}$，所以直接反求得到 $(E+B)^{-1}=\tfrac12(E+A)$。$E+A$ 可逆不是附加猜测，而是 $B$ 的定义已保证。此法比先计算 $(E+A)^{-1}$ 再求其逆短得多。
-
-</Solution>
-
-</Question>
-
-<Question id="math-1bd354-014" type="essay" number={false}>
-
-【李林880】 已知方阵 $A, B, (A + B)$ 均可逆，求 $(A^{-1} + B^{-1})^{-1}$。
-
-<Solution>
-
-**答案：** $(A^{-1}+B^{-1})^{-1}=B(A+B)^{-1}A=A(A+B)^{-1}B$。
-
-**解析：** **突破口：先分解，再逆序求逆。** 按原有次序提取 $A^{-1}$ 与 $B^{-1}$：
-
-$$
 A^{-1}+B^{-1}=A^{-1}(A+B)B^{-1}.
 $$
 
-题设保证三因子均可逆，因此
+题设保证三个因子可逆，利用**乘积求逆要逆序**的法则：
 
 $$
-\boxed{(A^{-1}+B^{-1})^{-1}=B(A+B)^{-1}A}.
+[A^{-1}(A+B)B^{-1}]^{-1}=B(A+B)^{-1}A.
 $$
 
-又因为也可以分解成 $B^{-1}(A+B)A^{-1}$，所以
+</Tab>
+  <Tab value="方法二：核对两种表达式">
+
+同样可写为 $A^{-1}+B^{-1}=B^{-1}(A+B)A^{-1}$，故其逆也等于 $A(A+B)^{-1}B$。两者相等不是因为可以交换 $A,B$，而是由**同一个逆矩阵的唯一性**保证。
+
+还可以直接验证：
 
 $$
-B(A+B)^{-1}A=A(A+B)^{-1}B.
+\begin{aligned}
+&(A^{-1}+B^{-1})B(A+B)^{-1}A\\
+&=(A^{-1}B+E)(A+B)^{-1}A\\
+&=A^{-1}(A+B)(A+B)^{-1}A=E.
+\end{aligned}
 $$
 
-**易错点：** 不可把上述答案写成 $(A+B)^{-1}AB$，因为矩阵一般不交换；这里得到的两种形式相等是由同一个可逆矩阵的逆唯一性保证的，并非随意调换因子。题设中的 $(A+B)^{-1}$ 存在是结论成立的关键。
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="一般不能交换矩阵因子">
+
+错误写法如 $(A+B)^{-1}AB$ 或 $AB(A+B)^{-1}$，只有另有可交换前提时才可能成立。正确的顺序是 $B(A+B)^{-1}A$。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-1bd354-015" type="essay" number={false}>
+<Question id="core-la-inverse-lizhengyuan-15" type="essay" number="15" tags="来源:李正元, 科目:线性代数, 考点:推拉恒等式与Woodbury公式">
 
-【李正元】 设 $ A,B$ 均为 $ n$ 阶矩阵，$ E+AB$ 可逆，化简
+设 $A,B$ 均为 $n$ 阶矩阵，且 $E+AB$ 可逆，化简
 
 $$
 (E+BA)\left[E-B(E+AB)^{-1}A\right].
@@ -875,144 +884,260 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：** $\boxed{E}$。
+
+**解析与过程**
+
+<Steps>
+  <Step>
+
+### 找到关键的保序恒等式
+
+原表达式含 $E+BA$，而已知的是 $(E+AB)^{-1}$。二者之间有
 
 $$
-E.
+(E+BA)B=B+BAB=B(E+AB).
 $$
 
-**解析：** **跨节母题关联：** 本节复现该母题，训练重点由矩阵运算转为逆矩阵与恒等式的互相转化；比较直接乘法验证与逆变换的使用条件。
+这一步是由结合律推出，不要求 $AB=BA$。
 
-记 $M=(E+AB)^{-1}$。本题的突破口是下列保序恒等式：
+</Step>
+  <Step>
 
-$$
-(E+BA)B=B(E+AB).
-$$
+### 令逆矩阵作为整体，展开并消去
 
-由此
+设 $M=(E+AB)^{-1}$，则
 
 $$
 \begin{aligned}
-&(E+BA)[E-BMA]\\
+&(E+BA)(E-BMA)\\
 &=E+BA-(E+BA)BMA\\
 &=E+BA-B(E+AB)MA\\
-&=E+BA-BA=E.
+&=E+BA-BA\\
+&=E.
 \end{aligned}
 $$
 
-于是原式为 $E$；因为两因子都是同阶方阵且乘积为单位阵，也顺带证明 $E+BA$ 可逆，并得到
+其中倒数第二步利用了 $(E+AB)M=E$。
+
+</Step>
+</Steps>
+
+**由答案得到的额外结论：** 两个同阶方阵的积为 $E$，说明二者均可逆。因此仅由 $E+AB$ 可逆，就可推出 $E+BA$ 可逆，并得到
 
 $$
 \boxed{(E+BA)^{-1}=E-B(E+AB)^{-1}A}.
 $$
 
-**方法辨析：** 这是典型的推拉（push-through）恒等式，$A,B$ 自身不要求可逆，不能把 $BA$ 与 $AB$ 直接当作同一个矩阵；正确方法是把 $B$ 从左侧乘积中提取出来。
+<Callout type="idea" title="为什么本题不需要 A、B 可逆？">
+
+证明全过程只对 $E+AB$ 取逆，**没有**使用 $A^{-1}$ 或 $B^{-1}$。遇到 $AB$ 与 $BA$ 的组合，应寻找 $(E+BA)B=B(E+AB)$ 这样的乘法次序关系，而不是擅自交换两个矩阵。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-1bd354-016" type="essay" number={false}>
+<Question id="core-la-inverse-lilin880-16" type="essay" number="16" tags="来源:李林880, 科目:线性代数, 考点:分块正交矩阵, 考点:矩阵乘法">
 
-【李林880】 设分块矩阵 $P = \begin{pmatrix} A & C \\ O & B \end{pmatrix}$ 为正交矩阵，$A, B$ 分别是 $m$ 阶和 $n$ 阶方阵，证明：$A$ 与 $B$ 是正交矩阵。
+设分块矩阵
+
+$$
+P=\begin{pmatrix}A&C\\O&B\end{pmatrix}
+$$
+
+为正交矩阵，$A,B$ 分别为 $m$ 阶与 $n$ 阶方阵。证明：$A,B$ 均为正交矩阵。
 
 <Solution>
 
-**答案：** $A^TA=E_m$ 且 $B^TB=E_n$，所以 $A,B$ 均为正交矩阵。
+**参考答案：** $A^{\mathrm T}A=E_m$、$B^{\mathrm T}B=E_n$，因此 $A,B$ 均为正交矩阵；实际上还可以证明 $C=O$。
 
-**解析：** 由 $P^{\mathrm T}P=E_{m+n}$，分块相乘得到
+**解析与证明过程**
+
+<Steps>
+  <Step>
+
+### 从整体的正交性列出分块关系
+
+正交性的定义是 $P^{\mathrm T}P=E_{m+n}$。注意分块转置既要对每一块转置，也要交换非对角块的位置：
 
 $$
-\begin{pmatrix}
+P^{\mathrm T}=\begin{pmatrix}A^{\mathrm T}&O\\C^{\mathrm T}&B^{\mathrm T}\end{pmatrix}.
+$$
+
+故
+
+$$
+\begin{aligned}
+P^{\mathrm T}P
+&=\begin{pmatrix}
 A^{\mathrm T}A&A^{\mathrm T}C\\
 C^{\mathrm T}A&C^{\mathrm T}C+B^{\mathrm T}B
 \end{pmatrix}
-=
-\begin{pmatrix}E_m&O\\O&E_n\end{pmatrix}.
+=\begin{pmatrix}E_m&O\\O&E_n\end{pmatrix}.
+\end{aligned}
 $$
 
-因此 $A^{\mathrm T}A=E_m$，$A$ 可逆并且 $A^{\mathrm T}C=O$。左乘 $(A^{\mathrm T})^{-1}$ 得 $C=O$，余下的右下角等式化为 $B^{\mathrm T}B=E_n$，所以 $A,B$ 都是正交矩阵。
+分别比较左上、右上、右下块：
 
-**注意：** 一般分块上三角矩阵可逆并不能推出非对角块为零；这里关键的额外条件是整体矩阵正交。即使初看只需要证明 $A,B$ 正交，也应先把 $C=O$ 的逻辑补全。
+$$
+A^{\mathrm T}A=E_m,\qquad A^{\mathrm T}C=O,\qquad C^{\mathrm T}C+B^{\mathrm T}B=E_n.
+$$
+
+</Step>
+  <Step>
+
+### 先消去非对角块，再证明 B 正交
+
+由于 $A$ 是方阵且 $A^{\mathrm T}A=E_m$，因此 $A$ 可逆，$A^{\mathrm T}$ 也可逆。对 $A^{\mathrm T}C=O$ 左乘 $(A^{\mathrm T})^{-1}$，得 $C=O$。代入第三个关系：
+
+$$
+B^{\mathrm T}B=E_n.
+$$
+
+故 $A,B$ 都满足正交矩阵的定义，证毕。
+
+</Step>
+</Steps>
+
+<Accordions>
+  <Accordion title="另一种证明：直接比较 PPᵀ 的对角块">
+
+由于 $P$ 正交，$PP^{\mathrm T}=E_{m+n}$。其右下块立刻给出 $BB^{\mathrm T}=E_n$，左上块给出 $AA^{\mathrm T}+CC^{\mathrm T}=E_m$。据 $P^{\mathrm T}P=E$ 得 $A^{\mathrm T}A=E_m$、$C=0$ 后，得到 $AA^{\mathrm T}=E_m$。两套分块等式相互验证。
+
+  </Accordion>
+</Accordions>
+
+<Callout type="warn" title="不能由分块上三角直接推出 C=0">
+
+一般可逆的分块上三角矩阵，其上右块完全可以不为零；只有额外使用 $P^{\mathrm T}P=E$，才能由 $A^{\mathrm T}C=O$ 推出 $C=O$。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
 ## 四、正交、对合及逆矩阵的结构判定
 
-<Question id="math-1bd354-017" type="essay" number={false}>
+<Question id="core-la-inverse-lilin880-17" type="essay" number="17" tags="来源:李林880, 科目:线性代数, 考点:奇数阶正交矩阵, 考点:行列式不变量">
 
-【李林880】 设 $A$ 为 $2n + 1$ 阶正交矩阵，且 $|A| = 1$，证明：$A - E$ 不可逆。
+设 $A$ 为 $2n+1$ 阶正交矩阵，且 $|A|=1$。证明 $A-E$ 不可逆。
 
 <Solution>
 
-**答案：** $|A-E|=0$，故 $A-E$ 不可逆。
+**参考答案：** $\boxed{|A-E|=0}$，因此 $A-E$ 不可逆。
 
-**解析：** 令 $m=2n+1$，因为 $A$ 正交，故 $A^{\mathrm T}=A^{-1}$，且 $|A|=1$。利用行列式的转置不变性：
+**解析与证明过程**
+
+<Tabs items={['解法一：行列式变号','解法二：特征值结构']}>
+  <Tab value="解法一：行列式变号">
+
+设阶数 $m=2n+1$。由 $A^{\mathrm T}A=E$，得 $A^{-1}=A^{\mathrm T}$。又因 $|A|=1$，
 
 $$
 \begin{aligned}
 |A-E|
 &=|A|\,|E-A^{-1}|\\
 &=|E-A^{\mathrm T}|\\
+&=|(E-A)^{\mathrm T}|\\
 &=|E-A|\\
-&=(-1)^m|A-E|\\
-&=-|A-E|.
+&=(-1)^m|A-E|=-|A-E|.
 \end{aligned}
 $$
 
-因而 $|A-E|=0$，$A-E$ 不可逆。
+故 $2|A-E|=0$，即 $|A-E|=0$，从而不可逆。
 
-**核心识别：** “奇数阶 + 正交 + 行列式为 $1$”要想到特征值 $1$ 必出现。反过来，奇数阶行列式为 $-1$ 的正交矩阵必有特征值 $-1$，并非必有特征值 $1$。这里采用行列式对称技巧，完全不需要构造特征向量。
+**关键是两次使用特殊条件：** $|A|=1$ 用于消去行列式因子；$m$ 为奇数用于产生负号。
+
+</Tab>
+  <Tab value="解法二：特征值结构">
+
+实正交矩阵所有复特征值的模均为 $1$；非实特征值成共轭对，成对乘积为 $1$。实特征值只能是 $1$ 或 $-1$。因为 $A$ 是奇数阶，必有奇数个实特征值（按代数重数计）。又全部特征值的乘积是 $|A|=1$，所以特征值 $-1$ 出现的次数为偶数，从而 $1$ 至少出现一次。
+
+因此存在非零向量 $v$ 使 $Av=v$，也就是 $(A-E)v=0$；故 $A-E$ 奇异。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="奇数阶正交矩阵的成对结论">
+
+若奇数阶实正交矩阵的行列式为 $1$，则 $1$ 是特征值；若行列式为 $-1$，则 $-1$ 是特征值。对应的 $A-E$ 或 $A+E$ 必奇异。注意这两个结论不能互换。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-1bd354-018" type="essay" number={false}>
+<Question id="core-la-inverse-lilin880-18" type="essay" number="18" tags="来源:李林880, 科目:线性代数, 考点:对合矩阵, 考点:可逆性反证">
 
-【李林880】 设 $n$ 阶方阵 $A, B$ 满足 $A^2 = E, B^2 = E$, 且 $|A| + |B| = 0$, 证明: $A + B$ 不可逆.
+设 $n$ 阶方阵 $A,B$ 满足 $A^2=E$、$B^2=E$，且 $|A|+|B|=0$。证明 $A+B$ 不可逆。
 
 <Solution>
 
-**答案：** $|A+B|=0$，故 $A+B$ 不可逆。
+**参考答案：** $\boxed{|A+B|=0}$，故 $A+B$ 不可逆。
 
-**解析：** 已知 $A^2=B^2=E$，所以 $A,B$ 均可逆，且
+**解析与证明过程**
+
+<Tabs items={['解法一：行列式恒等变换','解法二：反证构造零向量']}>
+  <Tab value="解法一：行列式恒等变换">
+
+**第一步：确定行列式乘积的符号。** 由 $A^2=B^2=E$，
 
 $$
 |A|^2=|B|^2=1.
 $$
 
-题设 $|A|+|B|=0$ 给出 $|A||B|=-1$。注意严格保持矩阵乘法次序：
+又 $|A|+|B|=0$，故二者一正一负，$|A||B|=-1$。
+
+**第二步：寻找保持 $A+B$ 不变的乘积。** 利用结合律，但不交换 $A,B$ 的次序：
 
 $$
-A(A+B)B=A^2B+AB^2=B+A=A+B.
+\begin{aligned}
+A(A+B)B&=A^2B+AB^2\\
+&=B+A=A+B.
+\end{aligned}
 $$
 
-两端取行列式，有
+取行列式得到
 
 $$
-|A+B|=|A|\,|A+B|\,|B|=-|A+B|.
+|A+B|=|A|\,|A+B|\,|B|=-|A+B|,
 $$
 
-因此 $2|A+B|=0$，即 $A+B$ 不可逆。
+所以 $|A+B|=0$。
 
-**模型提炼：** 不必先尝试证明 $AB=-BA$（一般不成立）。对合矩阵 $A^2=E$、$B^2=E$ 与行列式异号，最短突破口是发现 $A(A+B)B=A+B$，再用行列式迫出零值。
+</Tab>
+  <Tab value="解法二：反证构造零向量">
+
+反设 $A+B$ 可逆。因为 $A^{-1}=A$、$B^{-1}=B$，
+
+$$
+A+B=A(E+AB),
+$$
+
+故 $E+AB$ 可逆。但 $AB$ 也是对合矩阵：
+
+$$
+(AB)^{-1}=B^{-1}A^{-1}=BA.
+$$
+
+更直接地从 $A(A+B)B=A+B$ 取行列式，得到 $|A||B|=1$（在 $|A+B|\ne0$ 的假设下方能约去）。这与 $|A||B|=-1$ 矛盾，所以 $A+B$ 不可逆。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="对合不等于 A、B 可以交换">
+
+$A^2=B^2=E$ 只说明它们各自是自己的逆，**不能**推断 $AB=BA$ 或 $AB=-BA$。解题必须保留 $A(A+B)B$ 的乘法顺序。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-1bd354-019" type="essay" number={false}>
+<Question id="core-la-inverse-lizhengyuan-19" type="essay" number="19" tags="来源:李正元, 科目:线性代数, 考点:反对称矩阵, 考点:Cayley变换">
 
-【李正元】 设 $ A$ 是 $ n$ 阶实反对称矩阵，证明 $ (E-A)(E+A)^{-1}$ 是正交矩阵。
-
-<Solution>
-
-**答案：**
-
-矩阵
+设 $A$ 是 $n$ 阶**实反对称矩阵**，证明
 
 $$
 R=(E-A)(E+A)^{-1}
@@ -1020,21 +1145,48 @@ $$
 
 是正交矩阵。
 
-**解析：** **第一步：逆矩阵存在性。** 设 $(E+A)x=0$，其中 $x$ 是实列向量。因为 $A^{\mathrm T}=-A$，标量 $x^{\mathrm T}Ax$ 满足
+<Solution>
+
+**参考答案：** $E+A$ 总是可逆，且 $\boxed{R^{\mathrm T}R=E}$，因此 $R$ 是正交矩阵。
+
+**解析与证明过程**
+
+<Steps>
+  <Step>
+
+### 先证明逆矩阵存在
+
+反对称性意味着 $A^{\mathrm T}=-A$。对任意实向量 $x$，由于 $x^{\mathrm T}Ax$ 是标量，
 
 $$
-x^{\mathrm T}Ax=(x^{\mathrm T}Ax)^{\mathrm T}=-x^{\mathrm T}Ax,
+x^{\mathrm T}Ax=(x^{\mathrm T}Ax)^{\mathrm T}=x^{\mathrm T}A^{\mathrm T}x=-x^{\mathrm T}Ax,
 $$
 
-故 $x^{\mathrm T}Ax=0$。将 $(E+A)x=0$ 左乘 $x^{\mathrm T}$，有 $x^{\mathrm T}x=0$，从而 $x=0$。故 $E+A$ 可逆。同理 $E-A$ 也可逆。
-
-**第二步：验证正交性。** 记 $R=(E-A)(E+A)^{-1}$。转置时逆矩阵与乘积均需倒序：
+所以 $x^{\mathrm T}Ax=0$。若 $(E+A)x=0$，左乘 $x^{\mathrm T}$ 得
 
 $$
-R^{\mathrm T}=\bigl[(E+A)^{\mathrm T}\bigr]^{-1}(E-A)^{\mathrm T}=(E-A)^{-1}(E+A).
+0=x^{\mathrm T}(E+A)x=x^{\mathrm T}x=\|x\|^2.
 $$
 
-由于 $E\pm A$ 是 $A$ 的多项式，二者可交换，其逆也可与它们交换，故
+在实数域，范数平方为零当且仅当 $x=0$。故 $\ker(E+A)=\{0\}$，$E+A$ 可逆。把 $A$ 换成 $-A$，同理 $E-A$ 也可逆。
+
+</Step>
+  <Step>
+
+### 严格计算转置并验证正交性
+
+先转置，牢记 $(UV)^{\mathrm T}=V^{\mathrm T}U^{\mathrm T}$：
+
+$$
+\begin{aligned}
+R^{\mathrm T}
+&=[(E+A)^{-1}]^{\mathrm T}(E-A)^{\mathrm T}\\
+&=[(E+A)^{\mathrm T}]^{-1}(E+A)\\
+&=(E-A)^{-1}(E+A).
+\end{aligned}
+$$
+
+又 $E+A$、$E-A$ 都是 $A$ 的多项式，因此可交换，且与彼此的逆也可交换。于是
 
 $$
 \begin{aligned}
@@ -1044,38 +1196,56 @@ R^{\mathrm T}R
 \end{aligned}
 $$
 
-所以 $R$ 为正交矩阵。
+正交性得证。
 
-**命题拓展：** 这是实反对称矩阵的 Cayley 变换。不能只写“乘积等于 $E$”而忽略 $E+A$ 的可逆性证明；实数域是 $x^{\mathrm T}x=0\Rightarrow x=0$ 成立的重要条件。
+</Step>
+</Steps>
+
+<Callout type="idea" title="Cayley 变换的知识迁移">
+
+实反对称矩阵 $A$ 的 Cayley 变换 $(E-A)(E+A)^{-1}$ 总为实正交矩阵。证明此类题通常分为两层：**先保证分母矩阵可逆，再验证 $R^{\mathrm T}R=E$**；顺序不可颠倒。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-1bd354-020" type="blank" number={false}>
+<Question id="core-la-inverse-lilin880-20" type="blank" number="20" tags="来源:李林880, 科目:线性代数, 考点:矩阵行和, 考点:特征向量">
 
-【李林880】 设 $A$ 是 $n$ 阶可逆矩阵， $A$ 的每行元素之和均为 $k$，则 $A^{-1}$ 的每行元素之和均为 <Blank answer="((1)/(k))" kind="math" />.
+设 $A$ 是 $n$ 阶可逆矩阵，$A$ 的每行元素之和均为 $k$，则 $A^{-1}$ 的每行元素之和均为 <Blank answer="1/k" kind="math" />。
 
 <Solution>
 
-**答案：** $\frac{1}{k}$
+**答案：** $\boxed{\dfrac1k}$，并且题设隐含 $k\ne0$。
 
-**解析：** 设 $\mathbf1=(1,\dots,1)^{\mathrm T}$。所有行元素之和均为 $k$，等价于
+**解析与过程**
 
-$$
-A\mathbf1=k\mathbf1.
-$$
-
-若 $k=0$，则 $A\mathbf1=0$，但 $\mathbf1\ne0$，与 $A$ 可逆矛盾。因此 $k\ne0$，左乘 $A^{-1}$ 得
+令全 $1$ 列向量 $e=(1,\ldots,1)^{\mathrm T}$。矩阵右乘 $e$ 时，所得第 $i$ 个分量正好是 $A$ 第 $i$ 行的元素和，所以原条件等价于
 
 $$
-A^{-1}\mathbf1=\frac1k\mathbf1.
+Ae=ke.
 $$
 
-这正表示 $A^{-1}$ 每行元素之和均为 $1/k$。
+由于 $e\ne0$ 且 $A$ 可逆，必须有 $k\ne0$，否则 $Ae=0$ 将给出非零核向量。现在左乘 $A^{-1}$：
 
-**方法提炼：** 把“每行元素之和”翻译为 $A\mathbf1$，本质是识别 $\mathbf1$ 为特征向量。若给的是每列元素之和，则改用 $\mathbf1^{\mathrm T}A=k\mathbf1^{\mathrm T}$。这种写法无需展开任意一个矩阵元。
+$$
+e=kA^{-1}e\quad\Longrightarrow\quad A^{-1}e=\frac1k e.
+$$
+
+这说明 $A^{-1}$ 的每一行元素之和均为 $1/k$。
+
+<Accordions>
+  <Accordion title="为什么这实际上是一道特征值题？">
+
+$Ae=ke$ 说明 $e$ 是 $A$ 的特征向量、$k$ 是对应非零特征值。可逆矩阵的逆作用在相同特征向量上时，特征值变为倒数：$A^{-1}e=k^{-1}e$。
+
+  </Accordion>
+  <Accordion title="若题目改成每列之和相等">
+
+每列元素和均为 $k$ 应写作 $e^{\mathrm T}A=ke^{\mathrm T}$，右乘 $A^{-1}$ 得 $e^{\mathrm T}A^{-1}=k^{-1}e^{\mathrm T}$，即逆矩阵每列和也为 $1/k$。
+
+  </Accordion>
+</Accordions>
 
 </Solution>
-
 </Question>

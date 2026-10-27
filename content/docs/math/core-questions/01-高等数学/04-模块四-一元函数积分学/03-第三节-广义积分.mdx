@@ -1,350 +1,241 @@
 ---
-title: "第三节 广义积分"
-description: "考研数学一精选：双端点审敛、参数范围、主项抵消、主值误区、无穷积分计算与综合模型"
+title: 第三节 广义积分
+description: 高等数学核心真题重构：双端点审敛、幂对数临界条件、渐近等价与无穷远主项消去。
 ---
 
-# 第三节 广义积分
+本节按**识别瑕点 → 局部等价 → 标准审敛判据 → 多端点取交集**来组织。含多个瑕点的广义积分需要各自收敛，不允许两个发散项通过“对称抵消”充当通常意义的收敛。
 
-这一节按题型的**判断突破口**组织：先定位无穷端点或有限瑕点，再选用等价比较、定量余项、必要的首项消去或微分方程积分法。保留近年真题及不同构造的高价值变式；练习题沿用原始材料中的来源标签，来源存在题干不一致或选项失真的题目不纳入。
+<Callout type="idea" title="先定位端点，再使用标准比较">
 
-**必要的定义辨析：** 含多个瑕点时，每个瑕点对应的积分必须独立收敛；对内点奇性作左右对称截断得到的柯西主值，不等于通常意义下的广义积分。判断题中如未另外说明，“极限存在”指有限实数极限。
+- 有限端点 $x\to0^+$：$\int_0^1x^{-p}dx$ 当且仅当 $p<1$ 收敛。
+- 无穷端点 $x\to\infty$：$\int_1^\infty x^{-p}dx$ 当且仅当 $p>1$ 收敛。
+- 临界对数：$\int^\infty\!dx/[x(\ln x)^q]$ 只在 $q>1$ 收敛；$\int_0^\delta x^{-p}|\ln x|^qdx$ 中对数一般不能挽救 $p>1$ 的幂发散。
+- 差式积分：先算首次**非零**渐近项，不能把每个发散项单独积分后再相减。
+
+</Callout>
 
 ## 模型：双端点、参数与临界指数
 
-<Question id="math-09d47c-001" type="single" number={false}>
+<Question id="math-core-gd-04-03-001" type="single" points={4} tags="来源:2010考研数一数二, 科目:高等数学, 考点:双端点审敛, 考点:对数奇性">
 
-**[2010年数学一、二·4分]** 设 $m, n$ 是正整数，则反常积分 $\int_0^1 \frac{\sqrt[m]{\ln^2(1 - x)}}{\sqrt[n]{x}} \,\mathrm{d}x$ 的收敛性（ \quad ）。
+设 $m,n$ 为正整数，则反常积分
 
-<Option>仅与 $m$ 的取值有关 \qquad</Option>
+$$
+\int_0^1\frac{\sqrt[m]{\ln^2(1-x)}}{\sqrt[n]{x}}\,dx
+$$
+
+的收敛性（ ）。
+
+<Option>仅与 $m$ 的取值有关</Option>
 <Option>仅与 $n$ 的取值有关</Option>
-<Option>与 $m, n$ 取值都有关 \qquad</Option>
-<Option correct>与 $m, n$ 取值都无关</Option>
+<Option>与 $m,n$ 的取值都有关</Option>
+<Option correct>与 $m,n$ 的取值都无关</Option>
 
 <Solution>
 
-需要分别考察 $x=0$ 与 $x=1$ 两个瑕点。
+**答案：D。** 对任意正整数 $m,n$，该积分都收敛。
 
-当 $x\to0^+$ 时，
-
-$$
-\ln(1-x)\sim-x,
-$$
-
-所以
+**第一步：分清两个端点。** 原式被积函数为非负函数
 
 $$
-\frac{\sqrt[m]{\ln^2(1-x)}}{\sqrt[n]{x}}
-\sim x^{\frac2m-\frac1n}.
+h(x)=x^{-1/n}|\ln(1-x)|^{2/m}.
 $$
 
-因为 $m,n$ 均为正整数，
+$x=0$ 时分母可能造成幂奇性，$x=1$ 时对数趋于无穷。必须分开判断。
+
+**第二步：在 $0$ 附近作等价。** $\ln(1-x)\sim-x$，故
 
 $$
-\frac2m-\frac1n>-1,
+h(x)\sim x^{2/m-1/n}\quad(x\to0^+).
 $$
 
-故在 $x=0$ 附近积分总是收敛。
+正整数条件意味着 $2/m>0$、$1/n\le1$，所以 $2/m-1/n>-1$，按瑕积分 $p$ 型判据收敛。
 
-当 $x\to1^-$ 时，令 $t=1-x$，则 $x^{-1/n}\to1$，只需考察
-
-$$
-\int_0^\delta |\ln t|^{2/m}\,\mathrm dt.
-$$
-
-令 $t=\mathrm e^{-u}$，可化为
+**第三步：在 $1$ 附近审敛。** 此时 $x^{-1/n}\to1$。令 $u=1-x$，再取 $u=e^{-t}$，得到等价问题
 
 $$
-\int_{-\ln\delta}^{+\infty}u^{2/m}\mathrm e^{-u}\,\mathrm du,
+\int_0^\varepsilon|\ln u|^{2/m}du
+=\int_{-\ln\varepsilon}^\infty t^{2/m}e^{-t}dt<\infty.
 $$
 
-该积分收敛。
+指数衰减足以压住有限次幂，因此在 $1$ 附近也收敛，两端合并得结论。
 
-因此无论 $m,n$ 取何正整数，原反常积分都收敛，故选
-
-$$
-\boxed{D}.
-$$
-
-**模型识别：** 两端均可能有奇性，不应只看分母的 $x^{-1/n}$；对数在 $x\to1^-$ 时虽趋于无穷，但与 $\mathrm e^{-u}$ 的乘积仍可积。
+<Callout type="warn" title="不要只看分母中的根号">对数函数 $|\ln(1-x)|^{2/m}$ 在 $x\to0$ 反而是正阶零点；它**减弱**了 $x^{-1/n}$ 的奇性，而在 $x\to1$ 的对数发散又是可积的。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-002" type="single" number={false}>
+<Question id="math-core-gd-04-03-002" type="single" points={4} tags="来源:2013考研数二, 科目:高等数学, 考点:双端点条件, 考点:对数幂积分">
 
-**[2013年数学二·4分]** 设函数 $f(x)=\begin{cases} \dfrac{1}{(x-1)^{\alpha-1}}, & 1 < x < e, \\ \dfrac{1}{x\ln^{\alpha+1}x}, & x \ge e, \end{cases}$ 若反常积分 $\int_{1}^{+\infty} f(x) dx$ 收敛，则（ ）。
+设
 
-<Option>$\alpha < -2$</Option>
-<Option>$\alpha > 2$</Option>
-<Option>$-2 < \alpha < 0$</Option>
-<Option correct>$0 < \alpha < 2$</Option>
+$$
+f(x)=\begin{cases}\dfrac1{(x-1)^{\alpha-1}},&1<x<e,\\[2mm]\dfrac1{x\ln^{\alpha+1}x},&x\ge e.\end{cases}
+$$
+
+若 $\int_1^\infty f(x)dx$ 收敛，则（ ）。
+
+<Option>$\alpha<-2$</Option>
+<Option>$\alpha>2$</Option>
+<Option>$-2<\alpha<0$</Option>
+<Option correct>$0<\alpha<2$</Option>
 
 <Solution>
 
-积分区间有两个需要考察的端点：$x=1^+$ 与 $x=+\infty$。
+**答案：D，$\boxed{0<\alpha<2}$。** 注意分段点 $x=e$ 不是瑕点，真正的审敛位置是 $1^+$ 和 $+\infty$。
 
-在 $x=1^+$ 附近，
-
-$$
-f(x)=(x-1)^{1-\alpha}.
-$$
-
-根据 $p$ 型瑕积分判别，
+**第一步：靠近 $x=1$。** 原式为 $(x-1)^{1-\alpha}$，而 $\int_0^\delta t^qdt$ 收敛当且仅当 $q>-1$，故
 
 $$
-\int_1^{1+\delta}(x-1)^{1-\alpha}\,\mathrm dx
+1-\alpha>-1\iff\alpha<2.
 $$
 
-收敛当且仅当
+**第二步：靠近无穷远。** 令 $u=\ln x$，$du=dx/x$，则
 
 $$
-1-\alpha>-1,
+\int_e^\infty\frac{dx}{x(\ln x)^{\alpha+1}}
+=\int_1^\infty\frac{du}{u^{\alpha+1}}.
 $$
 
-即
+这部分收敛当且仅当 $\alpha+1>1$，即 $\alpha>0$。
 
-$$
-\alpha<2.
-$$
-
-在 $+\infty$ 附近，
-
-$$
-f(x)=\frac1{x\ln^{\alpha+1}x}.
-$$
-
-经典积分
-
-$$
-\int^\infty\frac{\mathrm dx}{x(\ln x)^p}
-$$
-
-收敛当且仅当 $p>1$，故需
-
-$$
-\alpha+1>1,
-$$
-
-即 $\alpha>0$。
-
-两者同时成立得到
-
-$$
-0<\alpha<2.
-$$
-
-故选
-
-$$
-\boxed{D}.
-$$
-
-**方法选择：** 对每个瑕点分别写出严格的收敛区间，最终取交集；端点 $\alpha=0,2$ 均为对数级发散，不能取等号。
+**第三步：取条件交集。** 两部分**都要收敛**，因此 $0<\alpha<2$。$\alpha=0$ 在无穷端以 $1/(x\ln x)$ 发散；$\alpha=2$ 在左端以 $1/(x-1)$ 发散，两端均不能取等号。
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-003" type="single" number={false}>
+<Question id="math-core-gd-04-03-003" type="single" points={4} tags="来源:2016考研数一, 科目:高等数学, 考点:p型积分, 考点:双端点判别">
 
-**[2016年数学一·4分]** 若反常积分 $\int_{0}^{+\infty} \frac{1}{x^a(1+x)^b} dx$ 收敛，则（ ）。
+若反常积分
 
-<Option>$a < 1, b > 1$</Option>
-<Option>$a > 1, b > 1$</Option>
-<Option correct>$a < 1, a+b > 1$</Option>
-<Option>$a > 1, a+b > 1$</Option>
+$$
+\int_0^\infty\frac{dx}{x^a(1+x)^b}
+$$
+
+收敛，则（ ）。
+
+<Option>$a<1,\ b>1$</Option>
+<Option>$a>1,\ b>1$</Option>
+<Option correct>$a<1,\ a+b>1$</Option>
+<Option>$a>1,\ a+b>1$</Option>
 
 <Solution>
 
-分别考察 $x=0$ 与 $x=+\infty$。
+**答案：C，$\boxed{a<1,\ a+b>1}$。**
 
-当 $x\to0^+$ 时，$(1+x)^b\to1$，故
-
-$$
-\frac1{x^a(1+x)^b}\sim\frac1{x^a}.
-$$
-
-要使 $\int_0^1x^{-a}\,\mathrm dx$ 收敛，需要
+**第一步：在原点。** $1+x\to1$，因此
 
 $$
-a<1.
+\frac1{x^a(1+x)^b}\sim x^{-a}\quad(x\to0^+).
 $$
 
-当 $x\to+\infty$ 时，$(1+x)^b\sim x^b$，故
+由 $\int_0^1x^{-a}dx$ 判据得到 $a<1$。
+
+**第二步：在无穷远。** $(1+x)^b\sim x^b$ 对任何固定实数 $b$ 都成立，故
 
 $$
-\frac1{x^a(1+x)^b}\sim\frac1{x^{a+b}}.
+\frac1{x^a(1+x)^b}\sim x^{-(a+b)}\quad(x\to+\infty).
 $$
 
-要使无穷区间上的 $p$ 型积分收敛，需要
+无穷积分收敛需要 $a+b>1$。
 
-$$
-a+b>1.
-$$
+**第三步：区分必要且充分。** 由于被积函数恒正且在 $(0,\infty)$ 的其余部分连续，这两个局部条件合起来也保证整体收敛，并非只给出必要条件。
 
-因此收敛条件为
-
-$$
-a<1,\qquad a+b>1,
-$$
-
-故选
-
-$$
-\boxed{C}.
-$$
-
-**母题模型：** $\int_0^\infty x^{-a}(1+x)^{-b}\,\mathrm dx$ 的两端分别对应指数 $a$ 与 $a+b$；后者并非只由 $b$ 决定。
+<Callout type="idea" title="考场速记">在 $0$ 处看指数 $a$，在 $\infty$ 处看**合并指数** $a+b$；不能把两端条件都误写成对 $b$ 的限制。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-004" type="single" number={false}>
+<Question id="math-core-gd-04-03-004" type="single" points={5} tags="来源:2022考研数二, 科目:高等数学, 考点:对数零点, 考点:双端点审敛">
 
-**[2022年数学二·5分]** 设 $p$ 为常数, 若反常积分 $\int_{0}^{1} \frac{\ln x}{x^p (1-x)^{1-p}} \mathrm{d}x$ 收敛, 则 $p$ 的取值范围是( $\quad$ ).
+设 $p$ 为常数，若反常积分
 
-<Option correct>$(-1, 1)$</Option>
-<Option>$(-1, 2)$</Option>
-<Option>$(-\infty, 1)$</Option>
-<Option>$(-\infty, 2)$</Option>
+$$
+\int_0^1\frac{\ln x}{x^p(1-x)^{1-p}}\,dx
+$$
+
+收敛，则 $p$ 的取值范围为（ ）。
+
+<Option correct>$(-1,1)$</Option>
+<Option>$(-1,2)$</Option>
+<Option>$(-\infty,1)$</Option>
+<Option>$(-\infty,2)$</Option>
 
 <Solution>
 
-分别考察 $x=0^+$ 与 $x=1^-$。
+**答案：A，$\boxed{-1<p<1}$。** 被积函数在 $(0,1)$ 恒负，不涉及条件收敛与正负抵消的问题。
 
-当 $x\to0^+$ 时，$(1-x)^{1-p}\to1$，故被积函数与
-
-$$
-x^{-p}\ln x
-$$
-
-同阶。积分
+**第一步：$x\to0^+$。** 因 $(1-x)^{p-1}\to1$，被积函数的绝对值等价于 $x^{-p}|\ln x|$。对数幂的瑕积分
 
 $$
-\int_0^\delta x^{-p}|\ln x|\,\mathrm dx
+\int_0^\delta x^{-p}|\ln x|dx
 $$
 
-收敛当且仅当
+在 $p<1$ 时收敛、在 $p\ge1$ 时发散。
+
+**第二步：$x\to1^-$。** 关键不是把 $\ln x$ 当作非零常数，而是利用其一阶零点：
 
 $$
-p<1.
+\ln x\sim-(1-x),\qquad x^{-p}\to1.
 $$
 
-当 $x\to1^-$ 时，利用
+因此
 
 $$
-\ln x\sim-(1-x),
-\qquad x^p\to1,
+\frac{\ln x}{x^p(1-x)^{1-p}}\sim-(1-x)^p,
 $$
 
-可得
+于是右端收敛要求 $p>-1$。
 
-$$
-\frac{\ln x}{x^p(1-x)^{1-p}}
-\sim-(1-x)^p.
-$$
-
-故在 $x=1$ 附近收敛当且仅当
-
-$$
-p>-1.
-$$
-
-综合得到
-
-$$
--1<p<1.
-$$
-
-故选
-
-$$
-\boxed{A}.
-$$
-
-**易错点：** $\ln x$ 在 $x\to1^-$ 是一阶零点，会使 $1/(1-x)^{1-p}$ 的奇性降低一阶。比较必须使用被积函数的绝对值。
+**第三步：合并。** 两端分别要求 $p<1$ 和 $p>-1$，故为 $(-1,1)$。边界 $p=1$ 与 $p=-1$ 均有对数型发散，不取等号。
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-005" type="blank" number={false}>
+<Question id="math-core-gd-04-03-005" type="blank" points={5} tags="来源:2026考研数二数三, 科目:高等数学, 考点:双端点审敛, 考点:反正切渐近">
 
-**[2026年数学二、三·5分]** 设 $p$ 为常数, 若反常积分 $\int_{0}^{+\infty} \frac{\arctan x}{x^p (1+x)} \mathrm{d}x$ 收敛, 则 $p$ 的取值范围是<Blank answer="0&lt;p&lt;2" kind="text" />.
+设 $p$ 为常数，若反常积分
+
+$$
+\int_0^\infty\frac{\arctan x}{x^p(1+x)}\,dx
+$$
+
+收敛，则 $p$ 的范围为 <Blank answer="0<p<2" kind="text" />。
 
 <Solution>
 
-**答案：** $0<p<2$
+**答案：** $\boxed{0<p<2}$。
 
-**解析：** 分别考察 $x=0^+$ 与 $x=+\infty$。
-
-当 $x\to0^+$ 时，
+**第一步：原点处反正切是一阶零点。**
 
 $$
-\arctan x\sim x,
-\qquad 1+x\sim1,
+\arctan x\sim x,\qquad1+x\sim1\quad(x\to0^+),
 $$
 
-故
+所以被积函数等价于 $x^{1-p}$；原点附近收敛条件是 $1-p>-1$，即 $p<2$。
+
+**第二步：无穷远处反正切趋于非零常数。**
 
 $$
-\frac{\arctan x}{x^p(1+x)}\sim x^{1-p}.
+\arctan x\to\frac\pi2,\qquad 1+x\sim x\quad(x\to\infty).
 $$
 
-在 $0$ 附近收敛要求
+故被积函数等价于 $\dfrac\pi{2x^{p+1}}$，在无穷端收敛当且仅当 $p+1>1$，即 $p>0$。
 
-$$
-1-p>-1,
-$$
-
-即
-
-$$
-p<2.
-$$
-
-当 $x\to+\infty$ 时，
-
-$$
-\arctan x\to\frac\pi2,
-\qquad 1+x\sim x,
-$$
-
-故
-
-$$
-\frac{\arctan x}{x^p(1+x)}\sim\frac{\pi/2}{x^{p+1}}.
-$$
-
-在 $+\infty$ 处收敛要求
-
-$$
-p+1>1,
-$$
-
-即 $p>0$。
-
-综合得
-
-$$
-\boxed{0<p<2}.
-$$
-
-**变式方向：** 若 $\arctan x$ 换成在原点为 $r$ 阶零点、在无穷远趋于非零常数的函数，两端判别条件可分别由 $r-p>-1$、$p>0$ 给出。
+**第三步：取交集并检查临界点。** $p=0$ 时无穷端为 $c/x$ 发散；$p=2$ 时原点为 $1/x$ 发散。因此范围为开区间 $(0,2)$。
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-006" type="single" number={false}>
+<Question id="math-core-gd-04-03-006" type="single" tags="来源:张宇1000题, 科目:高等数学, 考点:正切端点奇性, 考点:对数零点">
 
-**[张宇1000题]** 设常数 $a,b$ 使反常积分
+设常数 $a,b$ 使反常积分
 
-$ \int_0^1\frac{\ln x}{x^a\left(\tan\frac\pi2x\right)^b}\,dx$
+$$
+\int_0^1\frac{\ln x}{x^a\left(\tan\frac{\pi x}{2}\right)^b}\,dx
+$$
 
-收敛，则
+收敛，则（ ）。
 
 <Option>$a+b>1$ 且 $b>-2$</Option>
 <Option correct>$a+b<1$ 且 $b>-2$</Option>
@@ -353,78 +244,87 @@ $ \int_0^1\frac{\ln x}{x^a\left(\tan\frac\pi2x\right)^b}\,dx$
 
 <Solution>
 
-当 $x\to0^+$ 时，
+**答案：B，$\boxed{a+b<1,\ b>-2}$。** 两端主项分别来自不同的三角渐近式。
 
-$ \tan\frac\pi2x\sim\frac\pi2x$，
+**第一步：$x\to0^+$。** $\tan(\pi x/2)\sim\pi x/2$，故原被积函数与非零常数倍的 $x^{-(a+b)}\ln x$ 等价。含一次对数因子的原点瑕积分收敛需要
 
-故被积函数等价于常数倍的
+$$
+a+b<1.
+$$
 
-$ x^{-(a+b)}\ln x$。
+**第二步：$x\to1^-$。** 取 $u=1-x\to0^+$，利用
 
-在 $0$ 附近收敛要求
+$$
+\tan\frac{\pi x}{2}=\cot\frac{\pi u}{2}\sim\frac2{\pi u},
+\qquad \ln x\sim-u.
+$$
 
-$ a+b<1$。
+另外 $x^{-a}\to1$，故被积函数等价于负的正常数乘 $u^{b+1}$，右端收敛需要 $b+1>-1$，即 $b>-2$。
 
-当 $x\to1^-$ 时，令 $u=1-x$，则
+**第三步：综合。** 条件必须同时满足，故选 B。注意临界 $b=-2$ 使右端行为是 $c/(1-x)$，不可取等号。
 
-$ \tan\frac\pi2x=\cot\frac\pi2u\sim\frac2{\pi u}$，
-
-且 $\ln x\sim-(1-x)=-u$。因此被积函数等价于常数倍的
-
-$ u^{b+1}$。
-
-在 $u=0$ 附近收敛要求
-
-$ b+1>-1$，即 $b>-2$。
-
-所以应满足 $a+b<1$ 且 $b>-2$。
-
-**关键判断：** $x\to1^-$ 时 $\tan(\pi x/2)$ 为一阶极点，但 $\ln x$ 同时是一阶零点，因此真实的端点幂次是 $b+1$ 而不是 $b$。
+<Callout type="warn" title="别漏掉对数的零点">$\ln x$ 在 $x\to1^-$ 不是发散项，而是 $-\!(1-x)$ 的一阶零点；这会为幂次额外增加 $1$。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-007" type="single" number={false}>
+<Question id="math-core-gd-04-03-007" type="single" tags="来源:张宇1000题, 科目:高等数学, 考点:幂对数临界型, 考点:端点换元">
 
-**[张宇1000题]** 设 $p,q$ 为正常数，若
+设 $p,q$ 为正常数，若
 
-$ \int_0^1\frac{dx}{x^p|\ln x|^q}$
+$$
+\int_0^1\frac{dx}{x^p|\ln x|^q}
+$$
 
-收敛，则
+收敛，则（ ）。
 
-<Option correct>$p<1,q<1$</Option>
-<Option>$p>1,q<1$</Option>
-<Option>$p<1,q>1$</Option>
-<Option>$p>1,q>1$</Option>
+<Option correct>$p<1,\ q<1$</Option>
+<Option>$p>1,\ q<1$</Option>
+<Option>$p<1,\ q>1$</Option>
+<Option>$p>1,\ q>1$</Option>
 
 <Solution>
 
-在 $x\to1^-$ 时，$|\ln x|\sim1-x$，故被积函数与 $ (1-x)^{-q}$ 同阶。该端点收敛要求
+**答案：A，$\boxed{p<1,\ q<1}$。** 此题同时有 $0$ 与 $1$ 两个瑕点，且端点对 $q$ 的限制方向不同。
 
-$ q<1$。
+<Tabs items={['方法一：原变量分别比较','方法二：统一换元']} defaultIndex={0}>
+<Tab value="方法一：原变量分别比较">
 
-在 $x\to0^+$ 时，令 $x=e^{-t}$，则
+在 $x\to1^-$ 时，$|\ln x|\sim1-x$、$x^{-p}\to1$，故被积函数等价于 $(1-x)^{-q}$；右端收敛当且仅当 $q<1$。
 
-$ dx=-e^{-t}dt$，
+在 $x\to0^+$ 时，先考察 $p<1$：令 $x=e^{-t}$，所得无穷尾积分 $\int^{\infty}e^{(p-1)t}t^{-q}dt$ 有指数衰减，必收敛。若 $p>1$，则指数增长导致发散；若 $p=1$，则尾积分变为 $\int^{\infty}t^{-q}dt$，要求 $q>1$，与前面 $q<1$ 矛盾。因此综合只能 $p<1,q<1$。
 
-积分尾部化为
+</Tab>
+<Tab value="方法二：统一换元">
 
-$ \int^{+\infty}e^{(p-1)t}t^{-q}\,dt$。
+直接令 $t=-\ln x$，$x=e^{-t}$、$dx=-e^{-t}dt$，则
 
-因 $q>0$，该积分在无穷远处收敛要求 $p<1$；若 $p=1$，则要求 $q>1$，但这与 $x=1$ 处所需的 $q<1$ 矛盾。
+$$
+\int_0^1\frac{dx}{x^p|\ln x|^q}
+=\int_0^\infty e^{(p-1)t}t^{-q}dt.
+$$
 
-故整体收敛必有 $p<1,q<1$。
+$t\to0^+$ 对应原来的 $x\to1^-$：被积函数与 $t^{-q}$ 等价，要求 $q<1$。
 
-**临界指数：** 令 $t=-\ln x$ 后同一积分在 $t\to0^+$ 与 $t\to\infty$ 出现两类不同的收敛限制；不能把一个端点的 $p$ 型条件套到另一端。
+$t\to\infty$ 对应原来的 $x\to0^+$：当 $p<1$ 时指数衰减保证收敛，当 $p>1$ 时指数增长必发散，而 $p=1$ 需 $q>1$，与第一条件冲突。
+
+</Tab>
+</Tabs>
+
+**解题重点：** “$p=1$ 时对数可补救幂临界积分”仅能补救**某一个端点**，不能保证双端点积分整体收敛。
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-008" type="single" number={false}>
+<Question id="math-core-gd-04-03-008" type="single" tags="来源:李林880, 科目:高等数学, 考点:对数双端点, 考点:临界参数">
 
-**[李林880]** 设积分 $I=\int_1^{+\infty} \frac{\mathrm{d}x}{x^p\ln^q x} (p>0, q>0)$ 收敛，则 ( ).
+设 $p>0,q>0$，反常积分
+
+$$
+I=\int_1^\infty\frac{dx}{x^p(\ln x)^q}
+$$
+
+收敛，则（ ）。
 
 <Option correct>$p>1$ 且 $q<1$</Option>
 <Option>$p>1$ 且 $q>1$</Option>
@@ -433,286 +333,308 @@ $ \int^{+\infty}e^{(p-1)t}t^{-q}\,dt$。
 
 <Solution>
 
-**解析：**
+**答案：A，$\boxed{p>1,\ q<1}$。**
 
-$$
-I = \int_1^{+\infty} \frac{\mathrm{d}x}{x^p \ln^q x} = \int_1^{\mathrm{e}} \frac{\mathrm{d}x}{x^p \ln^q x} + \int_{\mathrm{e}}^{+\infty} \frac{\mathrm{d}x}{x^p \ln^q x}
-$$
+**第一步：$x=1$ 处的对数零点。** 由于 $\ln x\sim x-1$、$x^p\to1$，被积函数等价于 $(x-1)^{-q}$，因此左端必须 $q<1$。
 
-因为 $\ln x = \ln[1 + (x - 1)] \sim x - 1 (x \to 1^+)$, 所以 $\lim_{x \to 1^+} \frac{\frac{1}{x^p \ln^q x}}{\frac{1}{(x - 1)^q}} = 1$, 从而 $\int_1^{\mathrm{e}} \frac{\mathrm{d}x}{x^p \ln^q x}$ 与 $\int_1^{\mathrm{e}} \frac{\mathrm{d}x}{(x - 1)^q}$
+**第二步：无穷端需要更强的幂衰减。** 对 $x\ge e$，若 $p>1$，则 $\ln x\ge1$，被积函数不超过 $x^{-p}$，故收敛。
 
-敛散性相同, 故当 $q < 1$ 时, $\int_1^{\mathrm{e}} \frac{\mathrm{d}x}{x^p \ln^q x}$ 收敛.
+若 $p=1$，令 $u=\ln x$，尾积分变为 $\int_1^\infty u^{-q}du$，要求 $q>1$，与左端 $q<1$ 冲突。若 $p<1$，取 $p<r<1$，有 $(\ln x)^q=o(x^{r-p})$，因而 $x^{-p}(\ln x)^{-q}$ 最终大于正倍数 $x^{-r}$，尾积分发散。
 
-当 $q < 1, p = 1$ 时, $\int_{\mathrm{e}}^{+\infty} \frac{\mathrm{d}x}{x \ln^q x} = \left. \frac{1}{1 - q} \ln^{1 - q} x \right|_{\mathrm{e}}^{+\infty} = \infty$, 故发散;
-
-当 $q < 1, p < 1$ 时, 对 $\forall p < a < 1$, $\lim_{x \to +\infty} \frac{\frac{1}{x^p \ln^q x}}{\frac{1}{x^a}} = +\infty$, 且 $\int_{\mathrm{e}}^{+\infty} \frac{\mathrm{d}x}{x^a}$ 发散, 故 $\int_{\mathrm{e}}^{+\infty} \frac{\mathrm{d}x}{x^p \ln^q x}$ 发散;
-
-当 $q < 1, p > 1$ 时, $\int_{\mathrm{e}}^{+\infty} \frac{\mathrm{d}x}{x^p \ln^q x} < \int_{\mathrm{e}}^{+\infty} \frac{\mathrm{d}x}{x^p}$, 故 $\int_{\mathrm{e}}^{+\infty} \frac{\mathrm{d}x}{x^p \ln^q x}$ 收敛.
-
-综上所述, 当 $p > 1, q < 1$ 时, 积分收敛, 选项 A 正确.
-
-**母题拓展：** 对 $\int_1^\infty x^{-p}(\ln x)^{-q}\,\mathrm dx$ 而言，$x=1$ 要求 $q<1$；这一前提下，$+\infty$ 又要求 $p>1$。
+**第三步：合并。** 只有 $p>1$ 与 $q<1$ 同时成立才收敛。
 
 </Solution>
-
 </Question>
 
 ## 模型：无穷远处的主项、消项与参数确定
 
-<Question id="math-09d47c-009" type="single" number={false}>
+<Question id="math-core-gd-04-03-009" type="single" tags="来源:李林880, 科目:高等数学, 考点:渐近展开, 考点:无穷远审敛">
 
-**[李林880]** 设反常积分 $\int_1^{+\infty} x^k \left( \mathrm{e}^{-\cos\frac{1}{x}} - \mathrm{e}^{-1} \right) \mathrm{d}x$ 收敛，则下列选项中正确的是 $(\quad)$。
+若反常积分
 
-<Option>$k > -1$</Option>
-<Option>$k < -1$</Option>
-<Option>$k > 1$</Option>
-<Option correct>$k < 1$</Option>
+$$
+\int_1^\infty x^k\left(e^{-\cos(1/x)}-e^{-1}\right)dx
+$$
+
+收敛，则（ ）。
+
+<Option>$k>-1$</Option>
+<Option>$k<-1$</Option>
+<Option>$k>1$</Option>
+<Option correct>$k<1$</Option>
 
 <Solution>
 
-**解析：**
+**答案：D，$\boxed{k<1}$。** 两个指数项常数部分相消，必须求首次非零项。
+
+**第一步：展开三角函数。** $x\to\infty$ 时 $1/x\to0$，有
 
 $$
-e^{-\cos\frac{1}{x}} - e^{-1} = e^{-1}\left(e^{-\cos\frac{1}{x} + 1} - 1\right).
+1-\cos\frac1x=\frac1{2x^2}+O(x^{-4}).
 $$
 
-当 $x \to +\infty$ 时, $e^{-1}\left(e^{-\cos\frac{1}{x} + 1} - 1\right)$ 与 $e^{-1}\left(1 - \cos\frac{1}{x}\right)$ 是等价无穷小, 又 $1 - \cos\frac{1}{x}$ 与 $\frac{1}{2x^2}$ 是等价无穷小, 则 $x^k\left(e^{-\cos\frac{1}{x}} - e^{-1}\right)$ 与 $\frac{1}{2ex^{2-k}}$ 是等价无穷小.
-当 $k < 1$ 时, $2 - k > 1$, 故 $\int_1^{+\infty} x^k\left(e^{-\cos\frac{1}{x}} - e^{-1}\right) \, \mathrm{d}x$ 收敛;
-当 $k \ge 1$ 时, $2 - k \leqslant 1$, $\frac{1}{2ex^{2-k}}$ 是阶数不高于 $\frac{1}{x}$ 的无穷小, 故 $\int_1^{+\infty} x^k\left(e^{-\cos\frac{1}{x}} - e^{-1}\right) \, \mathrm{d}x$ 发散.
-故选 D.
+**第二步：展开指数差。** 写作
 
-**注：** 结论：对于 $\int_a^{+\infty} \frac{1}{x^p} \, \mathrm{d}x \, (a > 0, p \text{为任意实数})$, 当 $p \leqslant 1$ 时, 发散; 当 $p > 1$ 时, 收敛于 $\frac{a^{1-p}}{p-1}$.
+$$
+e^{-\cos(1/x)}-e^{-1}
+=e^{-1}\left[e^{1-\cos(1/x)}-1\right].
+$$
 
-**突破口：** 被积函数的前两项常数相消；须展开到首次非零的 $x^{-2}$ 项，再与 $x^k$ 合并判别。
+因为 $e^u-1\sim u$（$u\to0$），故
+
+$$
+e^{-\cos(1/x)}-e^{-1}\sim\frac1{2e\,x^2}.
+$$
+
+**第三步：合并 $x^k$ 幂次。** 被积函数等价于 $\frac1{2e}x^{k-2}$，且在足够大的 $x$ 处为正。无穷积分 $\int_1^\infty x^s dx$ 收敛当且仅当 $s<-1$，于是 $k-2<-1$，即 $k<1$。
+
+<Callout type="warn" title="展开不能停在常数项">$e^{-\cos(1/x)}$ 与 $e^{-1}$ 均趋于同一个非零常数；先相减再找 $x^{-2}$ 主项。仅写两项各自有界不能判定差的积分。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-010" type="single" number={false}>
+<Question id="math-core-gd-04-03-010" type="single" tags="来源:李林880, 科目:高等数学, 考点:指数差渐近, 考点:幂对数尾积分">
 
-**[李林880]** 已知积分 $I = \int_2^{+\infty} \left(\mathrm{e}^{\frac{\ln x}{x^a}} - 1\right)\mathrm{d}x$ 收敛，则 $a$ 的取值范围为（ ）。
+若
 
-<Option>$(-\infty, 0)$</Option>
-<Option>$(0, 1]$</Option>
-<Option correct>$(1, +\infty)$</Option>
-<Option>$[1, +\infty)$</Option>
+$$
+I=\int_2^\infty\left(e^{\frac{\ln x}{x^a}}-1\right)dx
+$$
+
+收敛，则 $a$ 的范围为（ ）。
+
+<Option>$(-\infty,0)$</Option>
+<Option>$(0,1]$</Option>
+<Option correct>$(1,+\infty)$</Option>
+<Option>$[1,+\infty)$</Option>
 
 <Solution>
 
-**解析：** 当 $a \leqslant 0$ 时, $\lim_{x \to +\infty} \left(e^{\frac{\ln x}{x^a}} - 1\right) = +\infty$, 积分 $I$ 发散.
-当 $a > 0$ 时, $e^{\frac{\ln x}{x^a}} - 1 \sim \frac{\ln x}{x^a} (x \to +\infty)$.
-又当 $0 < a \leqslant 1$ 时, $\frac{\ln x}{x^a} > \frac{1}{x^a} (x \ge 3)$. 而 $\int_{3}^{+\infty} \frac{1}{x^a} \mathrm{d}x$ ($a \leqslant 1$) 发散, 故由反常积分的比较审敛法知, 积分 $I$ 发散.
-当 $a > 1$ 时, 取 $\xi > 0$, 使得 $a - \xi > 1$, 则 $\lim_{x \to +\infty} x^{a-\xi} \cdot \frac{\ln x}{x^a} = \lim_{x \to +\infty} \frac{\ln x}{x^\xi} = 0$.
-而 $\int_{2}^{+\infty} \frac{1}{x^{a-\xi}} \mathrm{d}x$ ($a - \xi > 1$) 收敛, 故积分 $I$ 收敛.
-综上所述, $a$ 的取值范围为 $(1, +\infty)$. 选项 C 正确.
+**答案：C，$\boxed{a>1}$。**
 
-**易错点：** $\mathrm e^u-1\sim u$ 仅当 $u\to0$；先确认 $a>0$ 才能使用，再用 $\ln x$ 的慢增长估计。
+**第一步：先检查指数是否趋于零。** 令 $u(x)=\ln x/x^a$。当 $a>0$ 时 $u(x)\to0$；当 $a=0$ 时 $u(x)=\ln x\to\infty$；当 $a<0$ 时增长更快。因此 $a\le0$ 时被积函数不趋于 $0$，积分必发散。
+
+**第二步：在 $a>0$ 的前提下等价。** 这时才可使用 $e^u-1\sim u$，得到
+
+$$
+e^{\frac{\ln x}{x^a}}-1\sim\frac{\ln x}{x^a}.
+$$
+
+**第三步：对幂对数尾积分审敛。** 若 $0<a\le1$，则在 $x\ge e$ 上 $\ln x\ge1$，从而 $\frac{\ln x}{x^a}\ge x^{-a}$，后者尾积分发散。
+
+若 $a>1$，取 $0<\varepsilon<a-1$，利用 $\ln x=o(x^\varepsilon)$，最终有 $\ln x/x^a\le Cx^{-(a-\varepsilon)}$，且 $a-\varepsilon>1$，故尾积分收敛。
+
+两类情形合并得 $a>1$。
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-011" type="single" number={false}>
+<Question id="math-core-gd-04-03-011" type="single" tags="来源:李林880, 科目:高等数学, 考点:主项消去, 考点:有理尾积分, 难度:较难">
 
-**[李林880]** 已知 $\int_1^{+\infty} \left(\frac{2x^2+ax+b}{2x^2+bx} - 1\right)\mathrm{d}x = 1\ (b > 0)$，则（ ）。
+已知
 
-<Option>$a = e - 1, b = e$</Option>
-<Option correct>$a = b = 2(e - 1)$</Option>
-<Option>$a = e, b = e - 1$</Option>
-<Option>$a = b = 2e - 1$</Option>
+$$
+\int_1^\infty\left(\frac{2x^2+ax+b}{2x^2+bx}-1\right)dx=1,
+\qquad b>0,
+$$
+
+则（ ）。
+
+<Option>$a=e-1,\ b=e$</Option>
+<Option correct>$a=b=2(e-1)$</Option>
+<Option>$a=e,\ b=e-1$</Option>
+<Option>$a=b=2e-1$</Option>
 
 <Solution>
 
-**解析：** 依题意, 有
+**答案：B，$\boxed{a=b=2(e-1)}$。** 先利用“积分有限”消去不能积的 $1/x$ 主项，再决定参数。
+
+**第一步：化简差式。**
 
 $$
-\int_{1}^{+\infty} \left(\frac{2x^2 + ax + b}{2x^2 + bx} - 1\right) \mathrm{d}x = \int_{1}^{+\infty} \frac{(a-b)x + b}{2x^2 + bx} \mathrm{d}x.
+\frac{2x^2+ax+b}{2x^2+bx}-1
+=\frac{(a-b)x+b}{2x^2+bx}.
 $$
 
-当 $a - b \neq 0$ 时, $\lim_{x \to +\infty} x \cdot \frac{(a-b)x + b}{2x^2 + bx} = \frac{a-b}{2} \neq 0$.
-由比较判别法, 知原反常积分发散, 而已知积分收敛, 故 $a - b = 0$, 于是有
+当 $a\ne b$ 时，
 
 $$
-1 = \int_{1}^{+\infty} \frac{b}{2x^2 + bx} \mathrm{d}x = \int_{1}^{+\infty} \left(\frac{1}{x} - \frac{2}{2x+b}\right) \mathrm{d}x = \left. \ln \frac{x}{2x+b} \right|_1^{+\infty} = \ln \frac{2+b}{2}.
+\lim_{x\to\infty}x\frac{(a-b)x+b}{2x^2+bx}=\frac{a-b}2\ne0.
 $$
 
-故 $a = b = 2(e-1)$. 选项 B 正确.
+即被积函数与非零常数乘 $1/x$ 等价，正负号最终固定，普通广义积分必发散。因此已知其为有限数 $1$ 强制要求 $a=b$。
 
-**突破口：** 积分值已知为有限数，应先强制消去无穷远处的 $1/x$ 项，得到 $a=b$；再做积分，避免无效的复杂分解。
-
-</Solution>
-
-</Question>
-
-<Question id="math-09d47c-012" type="single" number={false}>
-
-**[李林880]** 已知 $I=\int_0^{+\infty} \left(\frac{1}{\sqrt{x^2+4}}-\frac{a}{x+2}\right)\mathrm{d}x$ 收敛，则 ( ).
-
-<Option>$a=1, I=\ln 4$</Option>
-<Option>$a>1, I=\ln 2$</Option>
-<Option correct>$a=1, I=\ln 2$</Option>
-<Option>$a<1, I=\ln 4$</Option>
-
-<Solution>
-
-当 $x\to+\infty$ 时，
+**第二步：在 $a=b$ 下化为可积有理式。**
 
 $$
-\frac1{\sqrt{x^2+4}}-\frac a{x+2}=\frac{1-a}{x}+O(x^{-2}).
+\frac{(a-b)x+b}{2x^2+bx}
+=\frac{b}{x(2x+b)}=\frac1x-\frac2{2x+b}.
 $$
 
-若 $a\ne1$，$1/x$ 项未消去，广义积分按对数发散。故收敛的必要条件为 $a=1$。此时被积函数为 $O(x^{-2})$，因此也充分。
-
-令 $R>0$，则
+对上限先取有限值 $R>1$，再令其趋于无穷：
 
 $$
 \begin{aligned}
-I_R&=\int_0^R\left(\frac1{\sqrt{x^2+4}}-\frac1{x+2}\right)\,\mathrm dx\\
-&=\left[\ln\left(x+\sqrt{x^2+4}\right)-\ln(x+2)\right]_0^R\\
+1&=\lim_{R\to\infty}\left[\ln x-\ln(2x+b)\right]_1^R\\
+&=\ln\frac{b+2}{2}.
+\end{aligned}
+$$
+
+**第三步：求参数并检验。** 由 $e^1=(b+2)/2$ 得 $b=2(e-1)>0$，且 $a=b$。所得分式在 $x\ge1$ 连续并以 $O(x^{-2})$ 衰减，确实收敛，验证完毕。
+
+<Callout type="idea" title="先判敛散可省去无效计算">若不先令 $a=b$，分母展开会出现一个无法消除的对数发散项。利用广义积分已知有限的条件，反过来锁定参数，是这类题的核心策略。</Callout>
+
+</Solution>
+</Question>
+
+<Question id="math-core-gd-04-03-012" type="single" tags="来源:李林880, 考点:渐近消项, 考点:广义积分求值, 难度:中等">
+
+已知
+
+$$
+I=\int_0^{+\infty}\left(\frac1{\sqrt{x^2+4}}-\frac a{x+2}\right)\,dx
+$$
+
+收敛，则（ ）。
+
+<Option>$a=1,\ I=\ln4$</Option>
+<Option>$a>1,\ I=\ln2$</Option>
+<Option correct>$a=1,\ I=\ln2$</Option>
+<Option>$a<1,\ I=\ln4$</Option>
+
+<Solution>
+
+**答案：C。** $\boxed{a=1,\ I=\ln2}$。
+
+**第一步：用收敛性确定参数。** 当 $x\to+\infty$，
+
+$$
+\frac1{\sqrt{x^2+4}}=\frac1x+O(x^{-3}),\qquad
+\frac a{x+2}=\frac ax+O(x^{-2}),
+$$
+
+因此被积函数为 $\dfrac{1-a}{x}+O(x^{-2})$。若 $a\ne1$，则首项与 $1/x$ 同阶且最终同号，积分发散；故必须 $a=1$。此时余项为 $O(x^{-2})$，收敛性也已得到保证。
+
+**第二步：在共同截断区间内积分。** 对 $R>0$，
+
+$$
+\begin{aligned}
+I_R&=\int_0^R\left(\frac1{\sqrt{x^2+4}}-\frac1{x+2}\right)dx\\
+&=\left[\ln\bigl(x+\sqrt{x^2+4}\bigr)-\ln(x+2)\right]_0^R\\
 &=\ln\frac{R+\sqrt{R^2+4}}{R+2}.
 \end{aligned}
 $$
 
-因为 $\lim_{R\to+\infty}\frac{R+\sqrt{R^2+4}}{R+2}=2$，所以
+这里下限处的两个对数同为 $\ln2$，恰好相消。
 
-$$
-\boxed{a=1,\quad I=\ln2}.
-$$
+**第三步：取极限。** 因 $\dfrac{R+\sqrt{R^2+4}}{R+2}\to2$，故 $I=\ln2$。
 
-故选 C。
-
-**消项模型：** 两个分项都按 $1/x$ 发散，只有系数精准匹配才可能收敛；切忌将两个发散的积分分别取极限后相减。
+<Callout type="warn" title="不可分开计算两个发散积分">$\int_0^\infty dx/\sqrt{x^2+4}$ 与 $\int_0^\infty dx/(x+2)$ 各自发散。只允许**先在同一 $[0,R]$ 上合并**，最后对整个差式取极限。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-013" type="essay" number={false}>
+<Question id="math-core-gd-04-03-013" type="essay" tags="来源:原创, 考点:泰勒主项抵消, 考点:临界对数发散, 难度:较难">
 
-**[原创]** 设 $q\in\mathbb R$。判断广义积分
+设 $q\in\mathbb R$，判断广义积分
 
 $$
-I(q)=\int_1^{+\infty}x^q\left(\sqrt{1+\frac1{x^2}}-1-\frac1{2x^2}\right)\,\mathrm dx
+I(q)=\int_1^{+\infty}x^q\left(\sqrt{1+\frac1{x^2}}-1-\frac1{2x^2}\right)dx
 $$
 
 的敛散性，并讨论临界值 $q=3$ 时截断积分的渐近行为。
 
 <Solution>
 
-**答案：** 当且仅当 $q<3$ 收敛；$q=3$ 时 $\displaystyle\int_1^R(\cdots)\,\mathrm dx=-\frac18\ln R+O(1)$，趋于 $-\infty$。
-
-**解析：** **识别特征：** 根式减去了零阶和二阶项；判断尾部衰减必须展开到第一个未抵消项。
-
-令 $u=x^{-2}\to0^+$。泰勒公式给出
+**参考答案：** 当且仅当 $\boxed{q<3}$ 时收敛。若 $q=3$，则
 
 $$
-\sqrt{1+u}=1+\frac u2-\frac{u^2}{8}+O(u^3).
+\boxed{\int_1^R x^3\left(\sqrt{1+x^{-2}}-1-\tfrac12x^{-2}\right)dx
+=-\tfrac18\ln R+O(1)\to-\infty.}
+$$
+
+**第一步：确定首次未被消去的项。** 令 $u=x^{-2}$，利用根式展开
+
+$$
+\sqrt{1+u}=1+\frac u2-\frac{u^2}8+O(u^3),\qquad u\to0.
 $$
 
 因此
 
 $$
-\sqrt{1+\frac1{x^2}}-1-\frac1{2x^2}
-=-\frac1{8x^4}+O(x^{-6}),
+\sqrt{1+x^{-2}}-1-\tfrac12x^{-2}
+=-\frac1{8x^4}+O(x^{-6}).
 $$
 
-所以被积函数满足
+扣掉常数项与 $x^{-2}$ 项后，**首个非零项是 $-x^{-4}/8$**，不能仍用 $x^{-2}$ 判别。
+
+**第二步：与标准幂积分比较。** 乘以 $x^q$ 得
 
 $$
-x^q\left(\sqrt{1+\frac1{x^2}}-1-\frac1{2x^2}\right)
-\sim-\frac18x^{q-4}.
+x^q\left(\sqrt{1+x^{-2}}-1-\tfrac12x^{-2}\right)
+\sim-\tfrac18x^{q-4}.
 $$
 
-首项在充分大 $x$ 时非零且同号，故可用极限比较判别：$\int_1^{+\infty}x^{q-4}\,\mathrm dx$ 收敛当且仅当 $q-4<-1$，即 $q<3$。
+尾部积分收敛当且仅当 $q-4<-1$，即 $q<3$。在 $q\ge3$ 时被积函数最终为负且绝对值不可积，故发散向 $-\infty$。
 
-在临界值 $q=3$ 时，更精确地有
+**第三步：计算临界截断增长速度。** 取 $q=3$，
 
 $$
-x^3\left(\sqrt{1+\frac1{x^2}}-1-\frac1{2x^2}\right)
+x^3\left(\sqrt{1+x^{-2}}-1-\tfrac12x^{-2}\right)
 =-\frac1{8x}+O(x^{-3}).
 $$
 
-将其从 $1$ 积分到 $R$，得到
+其中误差项在 $[1,\infty)$ 可积，故截断积分恰有 $-\frac18\ln R+O(1)$ 的渐近式。
 
-$$
-I_R(3)=-\frac18\ln R+O(1)\to-\infty.
-$$
-
-**可迁移模型：** 如果把首个 $m$ 阶项消去，则收敛门槛由剩余首个非零幂次决定，而不由原函数的表面形式决定。
+<Callout type="idea" title="消项型积分的判断原则">先作足够阶的泰勒展开，找到**第一个不为零的幂次**；此时临界指数由剩余项决定。若临界出现 $C/x$，积分发散速度是 $C\ln R$。</Callout>
 
 </Solution>
-
 </Question>
 
 ## 模型：敛散性的逻辑、反例与积分定义
 
-<Question id="math-09d47c-014" type="single" number={false}>
+<Question id="math-core-gd-04-03-014" type="single" points={3} tags="来源:1995考研数三, 考点:内点瑕积分, 考点:柯西主值">
 
-**[1995年数学三·3分]** 下列广义积分发散的是（ \quad ）。
+下列广义积分发散的是（ ）。
 
-<Option correct>$\int_{-1}^1 \frac{1}{\sin x} \,\mathrm{d}x$ \qquad</Option>
-<Option>$\int_{-1}^1 \frac{1}{\sqrt{1 - x^2}} \,\mathrm{d}x$</Option>
-<Option>$\int_0^{+\infty} \mathrm{e}^{-x^2} \,\mathrm{d}x$ \qquad</Option>
-<Option>$\int_2^{+\infty} \frac{1}{x\ln^2 x} \,\mathrm{d}x$</Option>
+<Option correct>$\displaystyle\int_{-1}^1\frac{dx}{\sin x}$</Option>
+<Option>$\displaystyle\int_{-1}^1\frac{dx}{\sqrt{1-x^2}}$</Option>
+<Option>$\displaystyle\int_0^{+\infty}e^{-x^2}\,dx$</Option>
+<Option>$\displaystyle\int_2^{+\infty}\frac{dx}{x\ln^2x}$</Option>
 
 <Solution>
 
-逐项判断。
+**答案：A。** 题目问通常意义的广义积分，不是主值。
 
-A 项在 $x=0$ 处有无穷间断点，并且
+**A：发散。** $\sin x\sim x$（$x\to0$），故 $1/\sin x\sim1/x$。内点 $0$ 左右两侧的积分必须**分别具有有限极限**，但两侧均有对数发散。即使对称截断的柯西主值为 $0$，也不能判作收敛。
 
-$$
-\sin x\sim x\qquad(x\to0),
-$$
+**B：收敛。** $\int_{-1}^1(1-x^2)^{-1/2}dx=[\arcsin x]_{-1}^1=\pi$，两端是可积的平方根奇性。
 
-故
+**C：收敛。** $0\le e^{-x^2}\le e^{-x}$（$x\ge1$），且 $\int_1^\infty e^{-x}dx<\infty$；有限区间上连续。
 
-$$
-\frac1{\sin x}\sim\frac1x.
-$$
-
-因此左右两个广义积分分别发散。虽然其柯西主值可以为 $0$，但通常意义下的广义积分
+**D：收敛。** 令 $u=\ln x$，
 
 $$
-\int_{-1}^1\frac{\mathrm dx}{\sin x}
+\int_2^{\infty}\frac{dx}{x\ln^2x}=\int_{\ln2}^\infty u^{-2}du=\frac1{\ln2}.
 $$
 
-并不收敛。
+因此只有 A 发散。
 
-B 项
-
-$$
-\int_{-1}^1\frac{\mathrm dx}{\sqrt{1-x^2}}=\pi
-$$
-
-收敛。
-
-C 项中，$x\ge1$ 时有 $\mathrm e^{-x^2}\le\mathrm e^{-x}$，故由比较判别法收敛。
-
-D 项令 $u=\ln x$，化为
-
-$$
-\int_{\ln2}^{+\infty}\frac{\mathrm du}{u^2},
-$$
-
-收敛。
-
-因此发散的是 A。
-
-$$
-\boxed{A}
-$$
-
-**概念陷阱：** 对含内点奇性的积分，通常意义的广义积分要求从左右各自收敛，不能以对称截断的柯西主值代替。
+<Callout type="warn" title="广义积分与主值的定义不同">$\operatorname{PV}\int_{-1}^1 dx/\sin x=0$，仅表示指定方式下正负抵消；它**不能替代**左右两个瑕积分各自收敛的定义。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-015" type="single" number={false}>
+<Question id="math-core-gd-04-03-015" type="single" points={4} tags="来源:2016考研数二, 考点:指数换元, 考点:单侧瑕积分">
 
-**[2016年数学二·4分]** 反常积分 ① $\int_{-\infty}^{0} \frac{1}{x^2}e^{\frac{1}{x}} dx$，② $\int_{0}^{+\infty} \frac{1}{x^2}e^{\frac{1}{x}} dx$ 的敛散性为（ ）。
+反常积分
+
+$$
+\text{①}\ \int_{-\infty}^{0}\frac{e^{1/x}}{x^2}dx,
+\qquad\text{②}\ \int_{0}^{+\infty}\frac{e^{1/x}}{x^2}dx
+$$
+
+的敛散性为（ ）。
 
 <Option>①收敛，②收敛</Option>
 <Option correct>①收敛，②发散</Option>
@@ -721,60 +643,46 @@ $$
 
 <Solution>
 
-对积分 ①，令
+**答案：B。** ① 收敛且积分值为 $1$；② 发散。
+
+**共同突破口：**
 
 $$
-u=-\frac1x.
+\left(e^{1/x}\right)'=-\frac{e^{1/x}}{x^2},\qquad x\ne0.
 $$
 
-当 $x:-\infty\to0^-$ 时，$u:0^+\to+\infty$，且
+**先看负半轴。** 在 $[-R,-\varepsilon]$ 上积分后，令 $R\to\infty$、$\varepsilon\to0^+$，
 
 $$
-x=-\frac1u,
-\qquad
-\mathrm dx=\frac{\mathrm du}{u^2},
-\qquad
-\frac1{x^2}=u^2.
+\int_{-\infty}^{0}\frac{e^{1/x}}{x^2}dx
+=\left[-e^{1/x}\right]_{-\infty}^{0^-}=-(0-1)=1.
 $$
 
-于是
+**再看正半轴。** 对 $0<\varepsilon<R$，
 
 $$
-\int_{-\infty}^{0}\frac1{x^2}\mathrm e^{1/x}\,\mathrm dx
-=\int_0^{+\infty}\mathrm e^{-u}\,\mathrm du
-=1,
+\int_\varepsilon^R\frac{e^{1/x}}{x^2}dx
+=e^{1/\varepsilon}-e^{1/R}.
 $$
 
-故 ① 收敛。
+当 $\varepsilon\to0^+$，右边趋于 $+\infty$；故 ② 在原点右侧发散。
 
-对积分 ②，令 $u=1/x$，则
-
-$$
-\int_0^{+\infty}\frac1{x^2}\mathrm e^{1/x}\,\mathrm dx
-=\int_0^{+\infty}\mathrm e^u\,\mathrm du,
-$$
-
-该积分发散。
-
-因此 ① 收敛、② 发散，故选
-
-$$
-\boxed{B}.
-$$
-
-**快速解法：** 直接识别 $\left(\mathrm e^{1/x}\right)\prime=-x^{-2}\mathrm e^{1/x}$，并分别考察左右端点即可。
+**检查方向：** 对同一个 $e^{1/x}$，$x\to0^-$ 时趋于 $0$，$x\to0^+$ 时趋于 $+\infty$。决定结论的是奇点两侧的指数行为，而不是远端 $1/x^2$ 的衰减。
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-016" type="single" number={false}>
+<Question id="math-core-gd-04-03-016" type="single" points={5} tags="来源:2024考研数二, 考点:可积性逻辑, 考点:反例构造, 难度:较难">
 
-**[2024年数学二·5分]** 设非负函数 $f(x)$ 在 $[0, +\infty)$ 连续, 给出以下三个命题:
-①若 $\int_{0}^{+\infty} f^2(x) \mathrm{d}x$ 收敛, 则 $\int_{0}^{+\infty} f(x) \mathrm{d}x$ 收敛;
-②若存在 $p>1$, 使得 $\lim_{x \to +\infty} x^p f(x)$ 存在, 则 $\int_{0}^{+\infty} f(x) \mathrm{d}x$ 收敛;
-③若 $\int_{0}^{+\infty} f(x) \mathrm{d}x$ 收敛, 则存在 $p>1$, 使得 $\lim_{x \to +\infty} x^p f(x)$ 存在.
-其中真命题的个数为( $\quad$ ).
+设非负函数 $f(x)$ 在 $[0,+\infty)$ 上连续，给出三个命题：
+
+① 若 $\int_0^{+\infty}f^2(x)dx$ 收敛，则 $\int_0^{+\infty}f(x)dx$ 收敛；
+
+② 若存在 $p>1$，使 $\lim_{x\to+\infty}x^pf(x)$ 存在，则 $\int_0^{+\infty}f(x)dx$ 收敛；
+
+③ 若 $\int_0^{+\infty}f(x)dx$ 收敛，则存在 $p>1$，使 $\lim_{x\to+\infty}x^pf(x)$ 存在。
+
+其中真命题的个数为（ ）。
 
 <Option>0</Option>
 <Option correct>1</Option>
@@ -783,79 +691,57 @@ $$
 
 <Solution>
 
-逐个判断。
+**答案：B，仅②正确。**
 
-① 错。无穷区间上 $L^2$ 可积并不能推出 $L^1$ 可积。例如
-
-$$
-f(x)=\frac1{1+x}
-$$
-
-满足
+**① 假：平方可积不等于本身可积。** 反例 $f(x)=1/(1+x)$ 非负连续，
 
 $$
-\int_0^{+\infty}f^2(x)\,\mathrm dx<+\infty,
+\int_0^\infty f^2(x)dx=1<\infty,\qquad
+\int_0^\infty f(x)dx=\infty.
 $$
 
-但
+无穷区间的长度无限，不能把有限区间上常用的 $L^2\Rightarrow L^1$ 关系直接搬过来。
+
+**② 真：有限极限推出最终可比较。** 若 $x^pf(x)\to L\in\mathbb R$，则其在充分大 $x$ 时有界：存在 $C>0$，
 
 $$
-\int_0^{+\infty}f(x)\,\mathrm dx=+\infty.
+0\le f(x)\le\frac{C}{x^p},\qquad x\ge R_0.
 $$
 
-② 对。若存在 $p>1$ 使
+因 $p>1$，$\int_{R_0}^\infty x^{-p}dx$ 收敛；剩余有限区间上的 $f$ 连续，故原积分收敛。
+
+**③ 假：可积不保证任何更快的多项式衰减。** 取
 
 $$
-\lim_{x\to+\infty}x^pf(x)=L
+f(x)=\frac{1}{(x+2)[\ln(x+2)]^2}.
 $$
 
-存在，则对充分大的 $x$，$x^pf(x)$ 有界，即存在 $M>0$ 使
+令 $u=\ln(x+2)$ 可知其积分收敛；但对任何 $p>1$，
 
 $$
-0\le f(x)\le\frac{M}{x^p}.
+x^pf(x)\sim\frac{x^{p-1}}{(\ln x)^2}\longrightarrow+\infty,
 $$
 
-而 $p>1$ 时 $\int^\infty x^{-p}\mathrm dx$ 收敛，由比较判别法知原积分收敛。
+不可能存在有限极限。
 
-③ 错。例如
-
-$$
-f(x)=\frac1{(x+2)\ln^2(x+2)}
-$$
-
-非负连续且积分收敛，但对任意 $p>1$，
-
-$$
-x^pf(x)\sim\frac{x^{p-1}}{\ln^2x}\to+\infty,
-$$
-
-不存在有限极限。
-
-所以只有 1 个真命题，故选
-
-$$
-\boxed{B}.
-$$
-
-**通用反例：** 在无穷区间上，$L^2$ 可积一般不推出 $L^1$ 可积；积分可积也并不等价于某个预设的幂次衰减。
+<Callout type="idea" title="逻辑题核查方法">肯定命题使用可验证的比较判别；否定命题优先找**简单的幂函数或幂对数函数反例**，并逐项检查非负、连续等题设。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-017" type="single" number={false}>
+<Question id="math-core-gd-04-03-017" type="single" tags="来源:张宇1000题, 考点:有界导数, 考点:可积性反例, 难度:较难">
 
-**[张宇1000题]** 设非负函数 $f(x)$ 在 $[0,+\infty)$ 上具有有界导数，给出以下四个命题：
+设非负函数 $f(x)$ 在 $[0,+\infty)$ 上具有有界导数，给出四个命题：
 
-①若 $ \int_0^{+\infty}f^2(x)\,dx$ 收敛，则 $ \int_0^{+\infty}f(x)\,dx$ 收敛；
+① 若 $\int_0^\infty f^2(x)dx$ 收敛，则 $\int_0^\infty f(x)dx$ 收敛；
 
-②若 $ \int_0^{+\infty}f(x)\,dx$ 收敛，则 $ \int_0^{+\infty}f^2(x)\,dx$ 收敛；
+② 若 $\int_0^\infty f(x)dx$ 收敛，则 $\int_0^\infty f^2(x)dx$ 收敛；
 
-③若 $ \lim_{x\to+\infty}x^2f(x)$ 存在，则 $ \int_0^{+\infty}f(x)\,dx$ 收敛；
+③ 若 $\lim_{x\to\infty}x^2f(x)$ 存在，则 $\int_0^\infty f(x)dx$ 收敛；
 
-④若 $ \int_0^{+\infty}f(x)\,dx$ 收敛，则 $ \lim_{x\to+\infty}x^2f(x)$ 存在。
+④ 若 $\int_0^\infty f(x)dx$ 收敛，则 $\lim_{x\to\infty}x^2f(x)$ 存在。
 
-其中，真命题的个数为
+真命题的个数为（ ）。
 
 <Option>1</Option>
 <Option correct>2</Option>
@@ -864,610 +750,534 @@ $$
 
 <Solution>
 
-**答案：** B，即有两个真命题：②、③。
+**答案：B。** 正确的是②、③，共 2 个。
 
-**解析：** ① **错误。** 取 $f(x)=1/(1+x)$，它非负、导数有界，且 $\int_0^{+\infty}f^2(x)\,\mathrm dx<+\infty$，但 $\int_0^{+\infty}f(x)\,\mathrm dx$ 发散。
+**① 错误。** $f(x)=1/(1+x)$ 的导数 $-1/(1+x)^2$ 有界，且 $\int f^2<\infty$、$\int f=\infty$，直接否定①。
 
-② **正确。** 由 $|f'|\le M$ 得 $f$ 在 $[0,+\infty)$ 上一致连续。若 $f\ge0$ 且 $\int_0^{+\infty}f<+\infty$，则必有 $f(x)\to0$：否则存在 $\varepsilon>0$ 与趋于无穷的点列 $x_n$，使 $f(x_n)\ge\varepsilon$；一致连续性使这些点附近具有统一宽度的正面积区间，可取两两不交，和积分收敛矛盾。于是 $f$ 连续且最终趋零，故全域有界：$0\le f\le C$。因 $f^2\le Cf$，由比较判别法得 $\int_0^{+\infty}f^2<+\infty$。
+**② 正确。** 有界导数使 $f$ 成为一致连续函数。已知 $f\ge0$、$\int_0^\infty f<\infty$，可推出 $f(x)\to0$：若不然，存在 $\varepsilon>0$ 和 $x_n\to\infty$ 使 $f(x_n)\ge\varepsilon$，一致连续性保证每个 $x_n$ 邻域内有统一宽度且 $f\ge\varepsilon/2$，选取相互不交的这些区间，积分至少是无穷多个正定量之和，矛盾。因而 $f$ 在全半轴有界，记 $0\le f\le M$，则 $f^2\le Mf$，推出 $\int f^2<\infty$。
 
-③ **正确。** 若 $\lim_{x\to+\infty}x^2f(x)=L$（有限），则 $x^2f(x)$ 最终有界，因而 $f(x)\le C/x^2$，所以积分收敛。
+**③ 正确。** 若 $\lim x^2f(x)$ 为有限数，充分大时 $x^2f(x)\le C$，即 $f(x)\le C/x^2$；尾积分由 $p$ 型比较收敛。
 
-④ **错误。** 取一个 $C^1$ 紧支集函数
-
-$$
-\varphi(t)=\begin{cases}(1-t^2)^2,&|t|\le1,\\0,&|t|>1,\end{cases}
-$$
-
-并构造
+**④ 错误。** 需要一个“面积很小、偶尔有尖峰”的**有界导数**反例。令
 
 $$
-f(x)=\sum_{n=2}^{\infty}\frac1{n^2}\varphi\big(n^2(x-n)\big),\qquad x\ge0.
+\phi(t)=\begin{cases}(1-t^2)^2,&|t|\le1,\\0,&|t|>1,\end{cases}
+\qquad
+f(x)=\sum_{n=2}^{\infty}\frac1{n^2}\phi\!\left(n^2(x-n)\right).
 $$
 
-各峰支集 $[n-n^{-2},n+n^{-2}]$ 两两不交；峰高 $n^{-2}$，宽度 $2n^{-2}$，所以 $\int_0^{+\infty}f$ 可由 $C\sum n^{-4}$ 控制而收敛。每个峰的导数是 $\varphi'(n^2(x-n))$，故 $f'$ 有界且拼接处连续。但 $n^2f(n)=1$，峰间点 $x=n+1/2$ 上 $x^2f(x)=0$，故极限不存在。
+每个峰的支集为 $[n-n^{-2},n+n^{-2}]$，互不相交；峰高 $n^{-2}$、宽度 $O(n^{-2})$，故 $\int_0^\infty f=O(\sum n^{-4})<\infty$。峰导数为 $\phi'(n^2(x-n))$，其绝对值统一有界，且在拼接处为零。但 $n^2f(n)=1$，而在峰间 $x=n+1/2$ 时 $x^2f(x)=0$，因此 $x^2f(x)$ 没有极限。
 
-所以恰有②③两个真命题，选 $\boxed{B}$。
-
-**条件角色：** 导数有界给出一致连续性，可从 $\int f<\infty$ 推出 $f(x)\to0$ 并进一步推出 $\int f^2<\infty$；但不能保证 $x^2f(x)$ 有极限。
+<Callout type="warn" title="有界导数不是有界二阶导数">④ 的反例必须满足 $f'$ 有界。仅画出越来越高的窄尖峰，可能违反导数上界；上面选择“峰高与宽度同阶”，确保斜率控制。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-018" type="essay" number={false}>
+<Question id="math-core-gd-04-03-018" type="essay" tags="来源:原创, 考点:狄利克雷审敛, 考点:绝对与条件收敛, 难度:较难">
 
-**[原创]** 设实数 $p$，判定
+设 $p\in\mathbb R$。判定
 
 $$
-I(p)=\int_1^{+\infty}\frac{\sin x}{x^p}\,\mathrm dx
+I(p)=\int_1^{+\infty}\frac{\sin x}{x^p}\,dx
 $$
 
 何时绝对收敛、何时仅条件收敛、何时发散。
 
 <Solution>
 
-**答案：** $p>1$ 时绝对收敛；$0<p\le1$ 时条件收敛；$p\le0$ 时发散。
+**参考答案：** $\boxed{p>1\text{ 时绝对收敛； }0<p\le1\text{ 时条件收敛； }p\le0\text{ 时发散。}}$
 
-**解析：** **先判普通收敛性。** 当 $p>0$ 时，在 $[1,R]$ 上分部积分：
-
-$$
-\int_1^R\frac{\sin x}{x^p}\,\mathrm dx
-=\left[-\frac{\cos x}{x^p}\right]_1^R
--p\int_1^R\frac{\cos x}{x^{p+1}}\,\mathrm dx.
-$$
-
-边界项在 $R\to+\infty$ 时存在极限，后一积分因 $p+1>1$ 而绝对收敛，所以 $I(p)$ 收敛。
-
-若 $p\le0$，考虑 $J_n=[2n\pi+\pi/6,\,2n\pi+5\pi/6]$。在其上 $\sin x\ge1/2$，因此
+**第一步：判断普通收敛。** $p>0$ 时对 $[1,R]$ 分部积分：
 
 $$
-\int_{J_n}\frac{\sin x}{x^p}\,\mathrm dx
-\ge\frac12|J_n|=\frac\pi3>0\qquad(p\le0).
+\int_1^R x^{-p}\sin x\,dx
+=\left[-x^{-p}\cos x\right]_1^R
+-p\int_1^R x^{-p-1}\cos x\,dx.
 $$
 
-这违反广义积分收敛的柯西准则，故发散。
+由于 $R^{-p}\cos R\to0$，且 $\int_1^\infty x^{-p-1}|\cos x|dx$ 收敛，故原积分收敛。这也相当于使用狄利克雷判别法（$\sin x$ 的原函数有界、$x^{-p}$ 单调趋零）。
 
-**再判绝对收敛性。** 当 $p>1$，因 $|\sin x|\le1$，由 $p$ 型积分比较得绝对收敛。当 $0<p\le1$ 时，每个 $J_n$ 上 $|\sin x|\ge1/2$，且
+若 $p\le0$，在区间 $J_n=[2n\pi+\pi/6,\ 2n\pi+5\pi/6]$ 上 $\sin x\ge1/2$，而 $x^{-p}\ge1$（$x\ge1$），从而
 
 $$
-\int_{J_n}\frac{|\sin x|}{x^p}\,\mathrm dx
-\ge c n^{-p}
+\int_{J_n}\frac{\sin x}{x^p}dx\ge\frac12\cdot\frac{2\pi}3=\frac\pi3.
 $$
 
-（$n$ 足够大且 $c>0$ 与 $n$ 无关）。因 $\sum n^{-p}$ 发散，绝对值积分发散，只有条件收敛。
+这些区间均向无穷远移动，其积分不趋于零，违反广义积分的柯西准则，故发散。
 
-**模型辨析：** 非负函数可直接比较；振荡函数必须先看抵消（如分部积分或狄利克雷判别），随后再检验绝对值积分。不能仅由被积函数极限为零判断积分收敛。
+**第二步：判断绝对收敛。** $p>1$ 时，由 $|\sin x|\le1$，
+
+$$
+\int_1^\infty\frac{|\sin x|}{x^p}dx\le\int_1^\infty x^{-p}dx<\infty.
+$$
+
+当 $0<p\le1$ 时，仍用 $J_n$，对大 $n$ 存在与 $n$ 无关的 $c>0$ 使
+
+$$
+\int_{J_n}\frac{|\sin x|}{x^p}dx\ge c n^{-p}.
+$$
+
+由于 $\sum n^{-p}$ 在 $p\le1$ 时发散，故绝对值积分发散。结合第一步，得此范围内仅**条件收敛**。
+
+<Callout type="idea" title="振荡函数的审敛次序">先通过振荡抵消判断原积分，再对绝对值用非负函数比较；“原积分收敛”与“绝对值积分收敛”是两个不同问题。</Callout>
 
 </Solution>
-
 </Question>
 
 ## 模型：广义积分的精确计算与综合证明
 
-<Question id="math-09d47c-019" type="single" number={false}>
+<Question id="math-core-gd-04-03-019" type="single" points={4} tags="来源:2020考研数二, 考点:反三角换元, 考点:端点根式奇性">
 
-**[2020年数学二·4分]** $\int_{0}^{1} \frac{\arcsin\sqrt{x}}{\sqrt{x(1-x)}} dx = ($ ______ ).
+$$
+\int_0^1\frac{\arcsin\sqrt{x}}{\sqrt{x(1-x)}}\,dx
+$$
+
+的值为（ ）。
 
 <Option correct>$\dfrac{\pi^2}{4}$</Option>
 <Option>$\dfrac{\pi^2}{8}$</Option>
-<Option>$\dfrac{\pi}{4}$</Option>
-<Option>$\dfrac{\pi}{8}$</Option>
+<Option>$\dfrac\pi4$</Option>
+<Option>$\dfrac\pi8$</Option>
 
 <Solution>
 
-令
+**答案：A，$\boxed{\pi^2/4}$。**
+
+**第一步：在换元前检验瑕点。** 当 $x\to0^+$，$\arcsin\sqrt x\sim\sqrt x$，被积函数趋于 $1$；当 $x\to1^-$，分子趋于 $\pi/2$，被积函数为 $O((1-x)^{-1/2})$，两端可积。
+
+**第二步：用反三角函数整体换元。** 令 $t=\arcsin\sqrt x$，则
 
 $$
-t=\arcsin\sqrt{x},
-$$
-
-则
-
-$$
-\sqrt{x}=\sin t,
-\qquad x=\sin^2t,
-\qquad \mathrm dx=2\sin t\cos t\,\mathrm dt.
-$$
-
-又因为 $0\le x\le1$，故 $0\le t\le\frac\pi2$，且
-
-$$
+x=\sin^2t,\qquad dx=2\sin t\cos t\,dt,\qquad
 \sqrt{x(1-x)}=\sin t\cos t.
+$$
+
+原区间对应 $0\le t\le\pi/2$，故
+
+$$
+I=\int_0^{\pi/2}\frac{t}{\sin t\cos t}\,2\sin t\cos t\,dt
+=2\int_0^{\pi/2}t\,dt
+=\frac{\pi^2}4.
+$$
+
+**方法提炼：** $\arcsin\sqrt x$ 与 $\sqrt{x(1-x)}$ 同时出现时，优先使用 $x=\sin^2 t$；它一次消去反三角函数和根式分母。
+
+</Solution>
+</Question>
+
+<Question id="math-core-gd-04-03-020" type="blank" points={5} tags="来源:2021考研数三, 考点:内点瑕积分, 考点:绝对值分段">
+
+$$
+\int_{\sqrt5}^{5}\frac{x}{\sqrt{|x^2-9|}}\,dx
+$$
+
+的值为 <Blank answer="6" kind="math" />。
+
+<Solution>
+
+**答案：** $\boxed{6}$。
+
+**第一步：定位内点瑕点。** 在 $x=3$ 处分母为 $0$，且绝对值内部换号，所以必须拆成两个独立的单侧广义积分：
+
+$$
+I=\int_{\sqrt5}^3\frac{x}{\sqrt{9-x^2}}dx
++\int_3^5\frac{x}{\sqrt{x^2-9}}dx.
+$$
+
+两端在 $x=3$ 附近均为 $C|x-3|^{-1/2}$ 级别，均收敛。
+
+**第二步：分别利用根式的导数。**
+
+$$
+\int\frac{x}{\sqrt{9-x^2}}dx=-\sqrt{9-x^2}+C,
+\qquad
+\int\frac{x}{\sqrt{x^2-9}}dx=\sqrt{x^2-9}+C.
 $$
 
 因此
 
 $$
-\begin{aligned}
-I
-&=\int_0^{\pi/2}\frac{t}{\sin t\cos t}
-\cdot2\sin t\cos t\,\mathrm dt\\
-&=2\int_0^{\pi/2}t\,\mathrm dt\\
-&=\left[t^2\right]_0^{\pi/2}
-=\frac{\pi^2}{4}.
-\end{aligned}
+I=\bigl[-\sqrt{9-x^2}\bigr]_{\sqrt5}^3
++\bigl[\sqrt{x^2-9}\bigr]_3^5
+=2+4=6.
 $$
 
-故选
-
-$$
-\boxed{A}.
-$$
-
-**模型：** 遇到 $\arcsin\sqrt{x}$ 和 $\sqrt{x(1-x)}$ 同时出现时，应识别 $x=\sin^2t$ 的反向链式结构；换元还需检查端点可积性。
+<Callout type="warn" title="不要直接去掉绝对值">在 $x<3$ 时 $|x^2-9|=9-x^2$，在 $x>3$ 时 $|x^2-9|=x^2-9$。误用统一根式会造成非实表达式或符号错误。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-020" type="blank" number={false}>
+<Question id="math-core-gd-04-03-021" type="essay" points={10} tags="来源:2016考研数一, 考点:常系数微分方程, 考点:广义积分求值, 难度:较难">
 
-**[2021年数学三·5分]** $\int_{\sqrt{5}}^{5} \frac{x}{\sqrt{|x^2-9|}} \mathrm{d}x=$ <Blank answer="6" kind="math" />.
+设函数 $y(x)$ 满足
+
+$$
+y''+2y'+ky=0,\qquad 0<k<1.
+$$
+
+(1) 证明反常积分 $\displaystyle\int_0^{+\infty}y(x)\,dx$ 收敛；
+
+(2) 若 $y(0)=1$、$y'(0)=1$，求该积分的值。
 
 <Solution>
 
-**答案：** $6$
+**参考答案：** (1) 对任意解均绝对收敛；(2) $\boxed{\displaystyle\int_0^{+\infty}y(x)dx=\frac3k}$。
 
-**解析：** 因为 $x^2-9$ 在 $x=3$ 处变号，需要分段：
-
-$$
-I=\int_{\sqrt5}^{3}\frac{x}{\sqrt{9-x^2}}\,\mathrm dx
-+\int_3^5\frac{x}{\sqrt{x^2-9}}\,\mathrm dx.
-$$
-
-第一段有
-
-$$
-\int\frac{x}{\sqrt{9-x^2}}\,\mathrm dx
-=-\sqrt{9-x^2},
-$$
-
-故
-
-$$
-\int_{\sqrt5}^{3}\frac{x}{\sqrt{9-x^2}}\,\mathrm dx
-=2.
-$$
-
-第二段有
-
-$$
-\int\frac{x}{\sqrt{x^2-9}}\,\mathrm dx
-=\sqrt{x^2-9},
-$$
-
-故
-
-$$
-\int_3^5\frac{x}{\sqrt{x^2-9}}\,\mathrm dx
-=4.
-$$
-
-所以
-
-$$
-I=2+4=\boxed{6}.
-$$
-
-**易错点：** $x=3$ 是区间内部瑕点，必须先拆开两侧积分；绝对值改变根式符号，不能机械套用单一原函数。
-
-</Solution>
-
-</Question>
-
-<Question id="math-09d47c-021" type="essay" number={false}>
-
-**[2016年数学一·10分]** 设函数 $y(x)$ 满足方程 $y''+2y'+ky=0$，其中 $0 < k < 1$。
-
-(1) 证明：反常积分 $\int_{0}^{+\infty} y(x) dx$ 收敛；
-
-(2) 若 $y(0)=1, y'(0)=1$，求 $\int_{0}^{+\infty} y(x) dx$ 的值。
-
-<Solution>
-
-**答案：** (1) 对任意解均绝对收敛；(2) $\dfrac{3}{k}$
-
-**解析：** 特征方程为
-
-$$
-r^2+2r+k=0,
-$$
-
-其两根为
+**第一步：通过特征根判定所有解的衰减。** 特征方程 $r^2+2r+k=0$ 的根为
 
 $$
 r_{1,2}=-1\pm\sqrt{1-k}.
 $$
 
-因为 $0<k<1$，所以
+因 $0<k<1$，有 $0<\sqrt{1-k}<1$，故两根均为严格负数。因此
 
 $$
-0<\sqrt{1-k}<1,
+y(x)=C_1e^{r_1x}+C_2e^{r_2x}
 $$
 
-从而 $r_1,r_2$ 均为负数。因此通解
+的绝对值可由两个指数衰减项控制，从而 $\int_0^\infty|y(x)|dx<\infty$。同时 $y(x),y'(x)\to0$。
+
+**第二步：积分方程而不是先求待定常数。** 对有限区间 $[0,R]$ 积分：
 
 $$
-y=C_1\mathrm e^{r_1x}+C_2\mathrm e^{r_2x}
+[y'(R)-y'(0)]+2[y(R)-y(0)]
++k\int_0^R y(x)dx=0.
 $$
 
-指数衰减，于是 $y(x)$ 在 $[0,+\infty)$ 上绝对可积，故
+由第一步可合法令 $R\to\infty$；再使用 $y(0)=y'(0)=1$，得
 
 $$
-\int_0^{+\infty}y(x)\,\mathrm dx
+-1-2+k\int_0^\infty y(x)dx=0.
 $$
 
-收敛。
+解得积分值为 $3/k$。
 
-对第 (2) 问，由上述衰减性还有
-
-$$
-\lim_{x\to+\infty}y(x)=0,
-\qquad
-\lim_{x\to+\infty}y'(x)=0.
-$$
-
-记
-
-$$
-I=\int_0^{+\infty}y(x)\,\mathrm dx.
-$$
-
-将微分方程在 $[0,+\infty)$ 上积分：
-
-$$
-\int_0^{+\infty}y''\,\mathrm dx
-+2\int_0^{+\infty}y'\,\mathrm dx
-+kI=0.
-$$
-
-利用初值 $y(0)=1$、$y'(0)=1$，有
-
-$$
-\int_0^{+\infty}y''\,\mathrm dx=-1,
-\qquad
-\int_0^{+\infty}y'\,\mathrm dx=-1.
-$$
-
-故
-
-$$
--1-2+kI=0,
-$$
-
-从而
-
-$$
-\boxed{I=\frac3k}.
-$$
-
-**考场方法：** 求积分值不必解出待定常数；先由特征根判定指数衰减，再把微分方程在 $[0,R]$ 上积分并令 $R\to\infty$。
+<Callout type="idea" title="证明与计算的合理顺序">先证明 $y,y'$ 充分衰减，才能把无穷远边界项写为零；之后直接积分微分方程，比先解 $C_1,C_2$ 再逐项积分更简洁。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-022" type="blank" number={false}>
+<Question id="math-core-gd-04-03-022" type="blank" points={5} tags="来源:2024考研数三, 考点:部分分式, 考点:无穷积分计算">
 
-**[2024年数学三·5分]** $\int_{2}^{+\infty} \frac{5}{x^4+3x^2-4} \mathrm{d}x=$ <Blank answer="((1)/(2))ln 3-((pi)/(8))" kind="math" />.
+$$
+\int_2^{+\infty}\frac{5}{x^4+3x^2-4}\,dx
+$$
+
+的值为 <Blank answer="(1/2)ln 3-pi/8" kind="math" />。
 
 <Solution>
 
-**答案：** $\frac{1}{2}\ln 3-\frac{\pi}{8}$
+**答案：** $\boxed{\dfrac12\ln3-\dfrac\pi8}$。
 
-**解析：** 先因式分解：
-
-$$
-x^4+3x^2-4=(x^2-1)(x^2+4).
-$$
-
-作部分分式分解：
+**第一步：把四次式视为关于 $x^2$ 的二次式。**
 
 $$
-\frac5{(x^2-1)(x^2+4)}
+x^4+3x^2-4=(x^2-1)(x^2+4),
+\qquad
+\frac{5}{(x^2-1)(x^2+4)}
 =\frac1{x^2-1}-\frac1{x^2+4}.
 $$
 
-于是
+原积分在 $[2,\infty)$ 上无有限瑕点，而且被积函数为 $O(x^{-4})$，故收敛。
 
-$$
-I=\int_2^{+\infty}\frac{\mathrm dx}{x^2-1}
--\int_2^{+\infty}\frac{\mathrm dx}{x^2+4}.
-$$
-
-第一项
+**第二步：分别积分。** 对第一项，
 
 $$
 \begin{aligned}
-\int_2^{+\infty}\frac{\mathrm dx}{x^2-1}
-&=\frac12\left[\ln\frac{x-1}{x+1}\right]_2^{+\infty}\\
-&=\frac12\ln3.
+\int_2^\infty\frac{dx}{x^2-1}
+&=\left[\frac12\ln\frac{x-1}{x+1}\right]_2^\infty
+=\frac12\ln3.
 \end{aligned}
 $$
 
-第二项
+对第二项，
+
+$$
+\int_2^\infty\frac{dx}{x^2+4}
+=\left[\frac12\arctan\frac x2\right]_2^\infty
+=\frac12\left(\frac\pi2-\frac\pi4\right)=\frac\pi8.
+$$
+
+相减即得答案。
+
+**核对技巧：** 先因式分解、再检查分式差的分子是否确实为 $5$，可以避免部分分式中漏掉系数。
+
+</Solution>
+</Question>
+
+<Question id="math-core-gd-04-03-023" type="blank" points={5} tags="来源:2025考研数二数三, 考点:含参无穷积分, 考点:部分分式">
+
+设
+
+$$
+\int_1^{+\infty}\frac{a}{x(2x+a)}\,dx=\ln2,
+$$
+
+则 $a=$ <Blank answer="2" kind="math" />。
+
+<Solution>
+
+**答案：** $\boxed{a=2}$。
+
+**第一步：审查参数导致的奇点。** 当 $a<-2$，$x=-a/2>1$ 是区间内部极点；$a=-2$ 在左端 $x=1$ 有极点，均不满足题设的有限积分值。$a=0$ 时原积分为 $0$，也不符合。因此实际满足题设的参数只能在 $a>-2$ 且 $a\ne0$ 的范围内寻找。
+
+**第二步：分解并在共同上限上积分。**
+
+$$
+\frac{a}{x(2x+a)}=\frac1x-\frac2{2x+a},
+$$
+
+于是对 $R>1$，
+
+$$
+\int_1^R\frac{a}{x(2x+a)}dx
+=\left[\ln x-\ln(2x+a)\right]_1^R.
+$$
+
+因 $a>-2$ 保证 $2x+a>0$（$x\ge1$），可直接写为
+
+$$
+\lim_{R\to\infty}\left(\ln\frac R{2R+a}-\ln\frac1{2+a}\right)
+=\ln\frac{a+2}{2}.
+$$
+
+**第三步：解方程并验根。**
+
+$$
+\ln\frac{a+2}{2}=\ln2\iff a+2=4\iff a=2.
+$$
+
+$a=2$ 时被积函数在积分区间连续且为 $O(x^{-2})$，符合所有条件。
+
+<Callout type="warn" title="含参积分要先检查有无分母零点">直接求原函数并解方程，可能得到使原广义积分无定义的参数。此题得到 $2$ 后还应检验原式确实收敛。</Callout>
+
+</Solution>
+</Question>
+
+<Question id="math-core-gd-04-03-024" type="blank" points={5} tags="来源:2026考研数一, 考点:分部积分, 考点:对数增长">
+
+$$
+\int_1^{+\infty}\frac{\ln(1+x)}{x^2}\,dx
+$$
+
+的值为 <Blank answer="2ln 2" kind="math" />。
+
+<Solution>
+
+**答案：** $\boxed{2\ln2}$。
+
+**第一步：先确认无穷远可积。** $\ln(1+x)=o(x^{1/2})$，故被积函数最终小于某常数倍的 $x^{-3/2}$，积分收敛。
+
+**第二步：分部积分。** 在 $[1,R]$ 上取
+
+$$
+u=\ln(1+x),\quad dv=x^{-2}dx,
+\qquad du=\frac{dx}{1+x},\quad v=-\frac1x.
+$$
+
+得到
+
+$$
+\int_1^R\frac{\ln(1+x)}{x^2}dx
+=\left[-\frac{\ln(1+x)}x\right]_1^R
++\int_1^R\frac{dx}{x(1+x)}.
+$$
+
+因为 $\ln(1+R)/R\to0$，边界项趋于 $\ln2$。
+
+**第三步：对剩余有理式积分。**
+
+$$
+\int_1^\infty\frac{dx}{x(1+x)}
+=\left[\ln x-\ln(1+x)\right]_1^\infty
+=\ln2.
+$$
+
+合并得 $2\ln2$。
+
+**方法总结：** 对数函数配幂函数分母时，常取“对数作 $u$、负幂作 $dv$”，令分部后剩余的被积函数变为有理式。
+
+</Solution>
+</Question>
+
+<Question id="math-core-gd-04-03-025" type="blank" points={5} tags="来源:2021考研数二, 考点:偶函数, 考点:高斯型积分">
+
+$$
+\int_{-\infty}^{+\infty}|x|3^{-x^2}\,dx
+$$
+
+的值为 <Blank answer="1/ln 3" kind="math" />。
+
+<Solution>
+
+**答案：** $\boxed{\dfrac1{\ln3}}$。
+
+**第一步：偶函数化为正半轴。** $|x|3^{-x^2}$ 为偶函数，且 $3^{-x^2}=e^{-x^2\ln3}$，因此
+
+$$
+I=2\int_0^\infty xe^{-x^2\ln3}dx.
+$$
+
+**第二步：识别指数内部的导数。** 令 $u=x^2\ln3$，则 $du=2x\ln3\,dx$，从而
+
+$$
+I=\frac1{\ln3}\int_0^\infty e^{-u}du=\frac1{\ln3}.
+$$
+
+**审敛说明：** 在 $0$ 附近被积函数连续；无穷远由于 $e^{-x^2\ln3}$ 的超多项式衰减而可积。这里并**不**需要套用高斯积分 $\int e^{-x^2}dx$ 的结果。
+
+</Solution>
+</Question>
+
+<Question id="math-core-gd-04-03-026" type="blank" tags="来源:李林880, 考点:分部积分, 考点:对数比值, 难度:中等">
+
+$$
+\int_1^{+\infty}\frac1{\sqrt x}\ln\frac{x+1}{x}\,dx
+$$
+
+的值为 <Blank answer="pi-2ln 2" kind="math" />。
+
+<Solution>
+
+**答案：** $\boxed{\pi-2\ln2}$。
+
+**第一步：审敛。**
+
+$$
+\ln\frac{x+1}{x}=\ln\left(1+\frac1x\right)\sim\frac1x,
+$$
+
+故被积函数 $\sim x^{-3/2}$，从而无穷远处收敛。
+
+**第二步：分部积分保留整个对数差。** 取
+
+$$
+u=\ln\left(1+\frac1x\right),\quad dv=x^{-1/2}dx,
+\qquad du=-\frac{dx}{x(x+1)},\quad v=2\sqrt x.
+$$
+
+于是在 $[1,R]$ 上
 
 $$
 \begin{aligned}
-\int_2^{+\infty}\frac{\mathrm dx}{x^2+4}
-&=\frac12\left[\arctan\frac x2\right]_2^{+\infty}\\
-&=\frac\pi8.
+I_R
+&=\left[2\sqrt x\ln\left(1+\frac1x\right)\right]_1^R
++2\int_1^R\frac{dx}{\sqrt x(x+1)}.
 \end{aligned}
+$$
+
+因 $2\sqrt R\ln(1+1/R)\to0$，边界项趋于 $-2\ln2$。
+
+**第三步：根式换元。** 令 $x=t^2$，
+
+$$
+2\int_1^\infty\frac{dx}{\sqrt x(x+1)}
+=4\int_1^\infty\frac{dt}{t^2+1}
+=4\left(\frac\pi2-\frac\pi4\right)=\pi.
+$$
+
+故 $I=\pi-2\ln2$。
+
+<Callout type="warn" title="不能将对数比值随意拆成两个无穷积分">$\ln(x+1)-\ln x$ 是相消后才衰减到 $1/x$ 的整体；优先对 $\ln(1+1/x)$ 直接分部积分。</Callout>
+
+</Solution>
+</Question>
+
+<Question id="math-core-gd-04-03-027" type="blank" tags="来源:李林880, 考点:分部积分, 考点:狄利克雷积分">
+
+已知 $\displaystyle\int_0^{+\infty}\frac{\sin x}{x}\,dx=\frac\pi2$，则
+
+$$
+I=\int_0^{+\infty}\frac{\sin^2x}{x^2}\,dx
+$$
+
+的值为 <Blank answer="pi/2" kind="math" />。
+
+<Solution>
+
+**答案：** $\boxed{\dfrac\pi2}$。
+
+**第一步：核对两个端点。** 当 $x\to0^+$，$\sin^2x/x^2\to1$；当 $x\to\infty$，$0\le\sin^2x/x^2\le x^{-2}$。故积分绝对收敛。
+
+**第二步：在有限截断区间上分部积分。** 对 $0<\varepsilon<R$，取 $u=\sin^2x$、$dv=x^{-2}dx$，则
+
+$$
+\int_\varepsilon^R\frac{\sin^2x}{x^2}dx
+=\left[-\frac{\sin^2x}{x}\right]_\varepsilon^R
++\int_\varepsilon^R\frac{2\sin x\cos x}{x}dx.
+$$
+
+**第三步：证明边界项消失并换元。**
+
+$$
+\lim_{x\to0^+}\frac{\sin^2x}{x}=0,
+\qquad \lim_{R\to\infty}\frac{\sin^2R}{R}=0.
 $$
 
 因此
 
 $$
-\boxed{I=\frac12\ln3-\frac\pi8}.
+I=\int_0^\infty\frac{\sin 2x}{x}dx
+=\int_0^\infty\frac{\sin t}{t}dt=\frac\pi2,
 $$
 
-**计算突破口：** 将四次式视作关于 $x^2$ 的二次多项式，可立即分解，继而使用二次型的对数与反正切原函数。
+最后一步使用题设给定的狄利克雷积分数值。
+
+**解法逻辑：** 不需要假设 $\int_0^\infty\sin2x/x$ 绝对收敛；它的普通条件收敛已由题目给出的积分经正向线性换元保证。
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-023" type="blank" number={false}>
+<Question id="math-core-gd-04-03-028" type="blank" tags="来源:李正元练习题, 考点:端点奇性抵消, 考点:分部积分, 难度:中等">
 
-**[2025年数学二、三·5分]** 设 $\int_{1}^{+\infty} \frac{a}{x(2x+a)} \mathrm{d}x = \ln 2$, 则 $a=$ <Blank answer="2" kind="math" />.
+$$
+\int_0^{+\infty}\frac{1-e^{-x}}{\sqrt{x^3}}\,dx
+$$
+
+的值为 <Blank answer="2sqrt(pi)" kind="math" />。
 
 <Solution>
 
-**答案：** $2$
+**答案：** $\boxed{2\sqrt\pi}$。
 
-**解析：** 作部分分式分解：
+**第一步：必须先检查分部积分是否合法。** 在 $x\to0^+$ 时 $1-e^{-x}\sim x$，因此原被积函数 $\sim x^{-1/2}$；在 $x\to\infty$ 时 $1-e^{-x}\to1$，被积函数 $\sim x^{-3/2}$。两端都收敛。
 
-$$
-\frac{a}{x(2x+a)}
-=\frac1x-\frac2{2x+a}.
-$$
-
-因此
+**第二步：分部积分。** 取 $u=1-e^{-x}$、$dv=x^{-3/2}dx$，有
 
 $$
-\begin{aligned}
-I
-&=\left[\ln x-\ln(2x+a)\right]_1^{+\infty}\\
-&=\ln\frac12-\ln\frac1{a+2}\\
-&=\ln\frac{a+2}{2}.
-\end{aligned}
+du=e^{-x}dx,\qquad v=-2x^{-1/2}.
 $$
 
-由题意
+其中
 
 $$
-\ln\frac{a+2}{2}=\ln2,
+\lim_{x\to0^+}\frac{1-e^{-x}}{\sqrt x}=0,
+\qquad
+\lim_{x\to\infty}\frac{1-e^{-x}}{\sqrt x}=0,
 $$
 
-故
+边界项消失，得到
 
 $$
-\frac{a+2}{2}=2,
+I=2\int_0^\infty x^{-1/2}e^{-x}dx.
 $$
 
-从而
+**第三步：转为高斯积分。** 令 $x=t^2$，则 $x^{-1/2}dx=2dt$，于是
 
 $$
-\boxed{a=2}.
+I=4\int_0^\infty e^{-t^2}dt=2\sqrt\pi.
 $$
 
-**隐含条件：** 若 $a\le-2$，积分区间内可能有分母零点；对求得的 $a=2$ 仍须核对原积分定义。先在可定义区间内计算，再解参数方程。
+这里使用标准高斯积分 $\int_{-\infty}^\infty e^{-t^2}dt=\sqrt\pi$。
+
+<Callout type="idea" title="关键是原点消去了一级奇性">单独的 $x^{-3/2}$ 在 $0$ 附近不可积，但 $1-e^{-x}\sim x$ 使实际被积函数变成 $x^{-1/2}$，故该积分合法。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-024" type="blank" number={false}>
+<Question id="math-core-gd-04-03-029" type="essay" tags="来源:李正元练习题, 考点:乘积逆向求导, 考点:无穷端点极限">
 
-**[2026年数学一·5分]** $\int_{1}^{+\infty} \frac{\ln(1+x)}{x^2} \mathrm{d}x=$ <Blank answer="2ln 2" kind="math" />.
-
-<Solution>
-
-**答案：** $2\ln 2$
-
-**解析：** 分部积分，取
-
-$$
-u=\ln(1+x),\qquad \mathrm dv=\frac{\mathrm dx}{x^2}.
-$$
-
-则
-
-$$
-\mathrm du=\frac{\mathrm dx}{1+x},
-\qquad v=-\frac1x.
-$$
-
-于是
-
-$$
-\begin{aligned}
-I
-&=\left[-\frac{\ln(1+x)}x\right]_1^{+\infty}
-+\int_1^{+\infty}\frac{\mathrm dx}{x(1+x)}\\
-&=\ln2+
-\left[\ln x-\ln(1+x)\right]_1^{+\infty}\\
-&=\ln2+\ln2\\
-&=2\ln2.
-\end{aligned}
-$$
-
-故
-
-$$
-\boxed{2\ln2}.
-$$
-
-**策略：** 对数增长慢于 $x$，分部积分的无穷远边界项为零；再用部分分式，不需要特殊函数。
-
-</Solution>
-
-</Question>
-
-<Question id="math-09d47c-025" type="blank" number={false}>
-
-**[2021年数学二·5分]** $\int_{-\infty}^{+\infty} |x| 3^{-x^2} \mathrm{d}x=$ <Blank answer="((1)/(ln 3))" kind="math" />.
-
-<Solution>
-
-**答案：** $\frac{1}{\ln 3}$
-
-**解析：** 因为 $|x|3^{-x^2}$ 是偶函数，且
-
-$$
-3^{-x^2}=\mathrm e^{-x^2\ln3},
-$$
-
-所以
-
-$$
-I=2\int_0^{+\infty}x\mathrm e^{-x^2\ln3}\,\mathrm dx.
-$$
-
-令
-
-$$
-u=x^2\ln3,
-\qquad \mathrm du=2x\ln3\,\mathrm dx.
-$$
-
-则
-
-$$
-\begin{aligned}
-I
-&=\frac1{\ln3}\int_0^{+\infty}\mathrm e^{-u}\,\mathrm du\\
-&=\frac1{\ln3}.
-\end{aligned}
-$$
-
-故
-
-$$
-\boxed{\frac1{\ln3}}.
-$$
-
-**模型：** 偶函数折半并令 $u=x^2$，即可把高斯型指数积分化为指数函数的标准积分。
-
-</Solution>
-
-</Question>
-
-<Question id="math-09d47c-026" type="blank" number={false}>
-
-**[李林880]** $\int_{1}^{+\infty} \frac{1}{\sqrt{x}} \ln \frac{x+1}{x} \mathrm{d} x=$ <Blank answer="pi - 2ln 2" kind="math" />。
-
-<Solution>
-
-**答案：** $\pi - 2\ln 2$
-
-**解析：** 被积函数在无穷远处为 $O(x^{-3/2})$，因此原积分收敛。切忌把对数差拆成两个各自发散的无穷积分。
-
-取 $u=\ln(1+1/x)$、$\mathrm dv=x^{-1/2}\,\mathrm dx$，则 $\mathrm du=-[x(x+1)]^{-1}\,\mathrm dx$、$v=2\sqrt x$。由于
-
-$$
-\lim_{R\to+\infty}2\sqrt R\ln(1+1/R)=0,
-$$
-
-故
-
-$$
-\begin{aligned}
-I&=\left[2\sqrt x\ln(1+1/x)\right]_1^{+\infty}
-+2\int_1^{+\infty}\frac{\mathrm dx}{\sqrt x(x+1)}\\
-&=-2\ln2+4\int_1^{+\infty}\frac{\mathrm dt}{1+t^2}
-\qquad(t=\sqrt x)\\
-&=-2\ln2+4\left(\frac\pi2-\frac\pi4\right)
-=\boxed{\pi-2\ln2}.
-\end{aligned}
-$$
-
-**方法选择：** 含 $x^{-1/2}$ 的对数差，宜对整个对数比值分部积分，而非将两个各自发散的无穷积分单独处理。
-
-</Solution>
-
-</Question>
-
-<Question id="math-09d47c-027" type="blank" number={false}>
-
-**[李林880]** 已知 $\int_{0}^{+\infty} \frac{\sin x}{x} \mathrm{d} x=\frac{\pi}{2}$，则 $I=\int_{0}^{+\infty} \frac{\sin ^{2} x}{x^{2}} \mathrm{d} x=$ <Blank answer="((pi)/(2))" kind="math" />。
-
-<Solution>
-
-**答案：** $\frac{\pi}{2}$
-
-**解析：**
-
-$$
-I = \int_0^{+\infty} \frac{\sin^2 x}{x^2}\mathrm{d}x = -\int_0^{+\infty} \sin^2 x d\left(\frac{1}{x}\right)
-$$
-
-$$
-= -\left. \frac{\sin^2 x}{x} \right|_0^{+\infty} + \int_0^{+\infty} \frac{2\sin x \cos x}{x}\mathrm{d}x
-$$
-
-$$
-= \int_0^{+\infty} \frac{\sin 2x}{x}\mathrm{d}x \overset{2x=t}{=} \int_0^{+\infty} \frac{\sin t}{t}\mathrm{d}t = \frac{\pi}{2}.
-$$
-
-**边界条件：** 分部积分是在 $[\varepsilon,R]$ 上进行，必须证明 $\sin^2x/x$ 在 $\varepsilon\to0^+$ 与 $R\to+\infty$ 时均趋零。
-
-</Solution>
-
-</Question>
-
-<Question id="math-09d47c-028" type="blank" number={false}>
-
-**[李正元练习题]**
-
-$$
-\int_0^{+\infty}\frac{1-e^{-x}}{\sqrt{x^3}}\,dx=
-$$
-
-<Blank answer="2sqrt(pi)" kind="math" />
-
-.
-
-<Solution>
-
-**答案：**
-
-$$
-2\sqrt\pi.
-$$
-
-**解析：** 在 $x\to0^+$ 处，$1-\mathrm e^{-x}\sim x$，故被积函数等价于 $x^{-1/2}$；在 $+\infty$ 处，等价于 $x^{-3/2}$。两端都收敛，允许分部积分。
-
-令 $u=1-\mathrm e^{-x}$、$\mathrm dv=x^{-3/2}\,\mathrm dx$，则 $\mathrm du=\mathrm e^{-x}\,\mathrm dx$、$v=-2x^{-1/2}$。两端边界项因
-
-$$
-\lim_{x\to0^+}\frac{1-\mathrm e^{-x}}{\sqrt x}=0,\qquad
-\lim_{x\to+\infty}\frac{1-\mathrm e^{-x}}{\sqrt x}=0
-$$
-
-均为零。故
-
-$$
-I=2\int_0^{+\infty}x^{-1/2}\mathrm e^{-x}\,\mathrm dx.
-$$
-
-再令 $x=t^2$，得
-
-$$
-I=4\int_0^{+\infty}\mathrm e^{-t^2}\,\mathrm dt=2\sqrt\pi.
-$$
-
-末步使用经典高斯积分 $\int_{-\infty}^{+\infty}\mathrm e^{-t^2}\,\mathrm dt=\sqrt\pi$（可用平方后转为极坐标二重积分证明）。故答案 $\boxed{2\sqrt\pi}$。
-
-**边界审查：** 虽然 $x^{-3/2}$ 在原点不可积，但 $1-\mathrm e^{-x}\sim x$ 消去了一级奇性；分部积分须核对 $x=0$ 与 $+\infty$ 两端边界项。
-
-</Solution>
-
-</Question>
-
-<Question id="math-09d47c-029" type="essay" number={false}>
-
-**[李正元练习题]** 求无穷积分
+计算
 
 $$
 J=\int_1^{+\infty}\left[\ln\left(1+\frac1x\right)-\frac1{1+x}\right]dx.
@@ -1475,73 +1285,90 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：** $\boxed{J=1-\ln2}$。
 
-$$
-J=1-\ln2.
-$$
+**第一步：不要把两项分别积分到无穷远。** 二者均具有 $1/x$ 主项，单独的广义积分发散；但差式中的主项相消，原被积函数实际为 $O(x^{-2})$，因而收敛。
 
-**解析：** 注意到
+**第二步：寻找乘积导数。** 根据乘积法则，
 
 $$
 \frac d{dx}\left[x\ln\left(1+\frac1x\right)\right]
 =\ln\left(1+\frac1x\right)-\frac1{x+1}.
 $$
 
-因此对任意 $ b>1$，有
+所以有限截断积分为
 
 $$
-\begin{aligned}
-\int_1^b\left[\ln\left(1+\frac1x\right)-\frac1{1+x}\right]dx
-&=\left[x\ln\left(1+\frac1x\right)\right]_1^b\\
-&=b\ln\left(1+\frac1b\right)-\ln2.
-\end{aligned}
+J_R=\left[x\ln\left(1+\frac1x\right)\right]_1^R
+=R\ln\left(1+\frac1R\right)-\ln2.
 $$
 
-又
+**第三步：取无穷远极限。** 因 $\lim_{R\to\infty}R\ln(1+1/R)=1$，故 $J=1-\ln2$。
 
-$$
-\lim_{b\to+\infty}b\ln\left(1+\frac1b\right)=1,
-$$
-
-故
-
-$$
-J=1-\ln2.
-$$
-
-**核心模型：** 两个分项在无穷远处均呈 $1/x$ 级别，必须先合并（或识别乘积求导），不能拆成两个发散积分计算。
+<Callout type="idea" title="对相消后的组合整体逆向求导">看到 $\ln(1+1/x)$ 与 $1/(1+x)$ 的差，应优先尝试 $[x\ln(1+1/x)]'$，常可省掉繁琐的部分分式计算。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-09d47c-030" type="blank" number={false}>
+<Question id="math-core-gd-04-03-030" type="blank" tags="来源:李林880, 考点:指数积分, 考点:对数发散比值">
 
-**[李林880]** $\lim _{x \to 0^{+}} \frac{1}{\ln \frac{1}{x}} \int_{x}^{+\infty} \frac{\mathrm{e}^{-t}}{t} \mathrm{d} t=$ <Blank answer="1" kind="math" />。
+$$
+\lim_{x\to0^+}\frac{1}{\ln(1/x)}\int_x^{+\infty}\frac{e^{-t}}{t}\,dt
+$$
+
+的值为 <Blank answer="1" kind="math" />。
 
 <Solution>
 
-**答案：** 1
+**答案：** $\boxed{1}$。
 
-**解析：** 由 $\lim_{x\to +\infty} x^2 \cdot \frac{e^{-x}}{x} = \lim_{x\to +\infty} \frac{x}{e^x} = 0$, 知 $\int_a^{+\infty} \frac{e^{-t}}{t} \mathrm{d}t$ 收敛 $(a > 0)$, 从而
-
-$$
-\int_a^{+\infty} \frac{e^{-t}}{t} \mathrm{d}t = C \quad (\text{常数}),
-$$
-
-故
+**第一步：先剥离与下限无关的收敛尾部。** 固定 $a=1$。由于 $e^{-t}/t\le e^{-t}$（$t\ge1$），有
 
 $$
-\lim_{x\to 0^+} \frac{\int_a^{+\infty} \frac{e^{-t}}{t} \mathrm{d}t}{\ln \frac{1}{x}} = 0.
+C=\int_1^\infty\frac{e^{-t}}t\,dt<\infty.
 $$
 
+因此
+
 $$
-\lim_{x\to 0^+} \frac{1}{\ln \frac{1}{x}} \int_x^{+\infty} \frac{e^{-t}}{t} \mathrm{d}t = \lim_{x\to 0^+} \frac{\int_x^{+\infty} \frac{e^{-t}}{t} \mathrm{d}t}{\ln \frac{1}{x}} = \lim_{x\to 0^+} \frac{\int_x^{a} \frac{e^{-t}}{t} \mathrm{d}t + \int_a^{+\infty} \frac{e^{-t}}{t} \mathrm{d}t}{\ln \frac{1}{x}} = \lim_{x\to 0^+} \frac{\int_x^{a} \frac{e^{-t}}{t} \mathrm{d}t}{\ln \frac{1}{x}} \overset{\text{洛必达}\atop\text{法则}}{=} \lim_{x\to 0^+} \frac{-\frac{e^{-x}}{x}}{-\frac{1}{x}} = 1.
+\int_x^\infty\frac{e^{-t}}t\,dt
+=\int_x^1\frac{e^{-t}}t\,dt+C,
 $$
 
-**方法选择：** 先固定 $a>0$ 拆去收敛尾段，使分子分母均趋于无穷，再在有限区间的下端变量使用洛必达法则。
+而 $C/\ln(1/x)\to0$。
+
+**第二步：提取原点附近的对数主项。** 因 $e^{-t}=1+O(t)$，当 $t\to0^+$，
+
+$$
+\frac{e^{-t}}t=\frac1t+O(1).
+$$
+
+所以
+
+$$
+\int_x^1\frac{e^{-t}}t\,dt
+=\int_x^1\frac{dt}{t}+O(1)
+=\ln(1/x)+O(1).
+$$
+
+**第三步：取比值。** 原式即
+
+$$
+\frac{\ln(1/x)+O(1)}{\ln(1/x)}\to1.
+$$
+
+<Tabs items={['主项提取法','洛必达法']} defaultIndex={0}>
+<Tab value="主项提取法">
+
+核心是 $e^{-t}/t=1/t+O(1)$，积分后得到 $\ln(1/x)+O(1)$，可看清发散的主项来源。
+
+</Tab>
+<Tab value="洛必达法">
+
+令 $A(x)=\int_x^\infty e^{-t}t^{-1}dt$，当 $x\to0^+$，分子、分母都趋 $+\infty$；由下限求导，$A'(x)=-e^{-x}/x$，而 $[\ln(1/x)]'=-1/x$，故极限等于 $\lim_{x\to0^+}e^{-x}=1$。
+
+</Tab>
+</Tabs>
 
 </Solution>
-
 </Question>

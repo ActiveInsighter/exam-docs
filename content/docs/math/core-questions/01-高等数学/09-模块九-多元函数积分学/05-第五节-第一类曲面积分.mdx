@@ -1,1017 +1,1002 @@
 ---
-title: "第五节 第一类曲面积分"
-description: "考研数学一精选：曲面元与投影、对称与重心、球冠最值、质量与面积、多曲面拼接及母题变式"
+title: 第五节 第一类曲面积分
+description: 高等数学核心题目重构：曲面元与投影换元、空间对称性、球冠面积、薄壳质量及分片曲面积分。
 ---
 
-# 第五节 第一类曲面积分
-
-本节按 **图形曲面的投影换元 → 对称与几何平均 → 几何边界及球冠最值 → 组合曲面与高阶应用 → 原创变式** 组织。每道题明确来源，并着重解释曲面元的选择、投影区域、边界退化点的处理和答案校验。
-
-> 这里积分以无方向的 $dS$ 为面积元；外侧、内侧和上侧等定向对第一类曲面积分的值没有影响。与下一节第二类曲面积分中的有向面积元 $dy\,dz$ 等应严格区分。
+第一类曲面积分 $\iint_\Sigma f(x,y,z)\,\mathrm dS$ 以**面积微元**为权重，与曲面的法向取向无关。求解时依次核对：曲面是否单值、实际截取范围是什么、面积元是否含雅可比；若由几片曲面拼成，还应逐片相加。
 
 ## 一、图形曲面与投影换元：先认清曲面元
 
-<Question id="math-51754e-001" type="essay" number={false}>
+<Question id="math-core-gd-09-05-001" type="essay" tags="来源:1995考研数一, 科目:高等数学, 考点:锥面面积元, 考点:极坐标投影">
 
-**[1995年数学一]** 计算曲面积分 $\iint_{\Sigma}zdS$，其中 $\Sigma$ 为锥面 $z=\sqrt{x^2+y^2}$ 在柱体 $x^2+y^2\le 2x$ 内的部分。
+计算曲面积分 $\displaystyle\iint_{\Sigma}z\,\mathrm dS$，其中 $\Sigma$ 为锥面 $z=\sqrt{x^2+y^2}$ 在柱体 $x^2+y^2\le2x$ 内的部分。
 
 <Solution>
 
-**答案：** $\frac{32}{9}\sqrt{2}$
-
-**解析：** 锥面为
+**参考答案：**
 
 $$
-z=\sqrt{x^2+y^2}=r.
+\boxed{\iint_\Sigma z\,\mathrm dS=\frac{32\sqrt2}{9}}.
 $$
 
-它在 $xOy$ 面上的投影区域由柱面条件
+**第一步：将曲面化为 $z=z(x,y)$，确定投影。** 锥面上 $z=r=\sqrt{x^2+y^2}$，柱体条件在水平面的投影为
 
 $$
-x^2+y^2\le2x
+D:\ x^2+y^2\le2x
+\iff (x-1)^2+y^2\le1.
 $$
 
-给出。用极坐标表示：
+这是以 $(1,0)$ 为圆心的圆盘，**不是**原点为圆心的圆盘。
+
+**第二步：求正确的面积元。** 在锥顶以外，
 
 $$
-0\le r\le2\cos\theta,
-\qquad
--\frac\pi2\le\theta\le\frac\pi2.
+z_x=\frac{x}{\sqrt{x^2+y^2}},\qquad z_y=\frac{y}{\sqrt{x^2+y^2}},
 $$
 
-对曲面 $z=z(x,y)$，
+所以 $z_x^2+z_y^2=1$，从而
 
 $$
-dS=\sqrt{1+z_x^2+z_y^2}\,dxdy.
+\mathrm dS=\sqrt{1+z_x^2+z_y^2}\,\mathrm dx\,\mathrm dy
+=\sqrt2\,\mathrm dx\,\mathrm dy.
 $$
 
-由于 $z=r$，有
+锥顶的不可微性仅发生在面积为零的点上，不影响积分。
+
+**第三步：投影圆盘采用极坐标。** 令 $x=r\cos\theta,y=r\sin\theta$，则
 
 $$
-z_x^2+z_y^2=1,
+-\frac\pi2\le\theta\le\frac\pi2,
+\qquad 0\le r\le2\cos\theta.
 $$
 
-故
-
-$$
-dS=\sqrt2\,dxdy.
-$$
-
-于是
+积分为
 
 $$
 \begin{aligned}
-I
-&=\iint_\Sigma z\,dS\\
-&=\sqrt2\int_{-\pi/2}^{\pi/2}\int_0^{2\cos\theta}r\cdot r\,drd\theta\\
-&=\frac{8\sqrt2}{3}\int_{-\pi/2}^{\pi/2}\cos^3\theta\,d\theta\\
-&=\frac{8\sqrt2}{3}\cdot\frac43\\
-&=\boxed{\frac{32\sqrt2}{9}}.
+I&=\sqrt2\iint_Dr\,\mathrm dx\,\mathrm dy\\
+&=\sqrt2\int_{-\pi/2}^{\pi/2}\int_0^{2\cos\theta}r^2\,\mathrm dr\,\mathrm d\theta\\
+&=\frac{8\sqrt2}{3}\int_{-\pi/2}^{\pi/2}\cos^3\theta\,\mathrm d\theta\\
+&=\frac{8\sqrt2}{3}\cdot\frac43
+=\boxed{\frac{32\sqrt2}{9}}.
 \end{aligned}
 $$
 
-**模型价值：** 锥面 $z=r$ 的顶点不可微，但其为面积零的单点，不妨碍按去掉顶点后的图形曲面元积分。不要把柱体投影误写成以原点为心的圆盘。
+<Callout type="warn" title="两个不同的面积因子">$\sqrt2$ 来自**锥面图形面积元**，而极坐标中的额外 $r$ 来自**投影平面换元**。两者缺一不可。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-51754e-002" type="blank" number={false}>
+<Question id="math-core-gd-09-05-002" type="blank" tags="来源:2012考研数一, 科目:高等数学, 考点:平面曲面元, 考点:三角域矩">
 
-**[2012年数学一]** 设 $\Sigma=\{(x,y,z)\mid x+y+z=1, x\ge 0, y\ge 0, z\ge 0\}$，则 $\iint_{\Sigma}y^2dS=$ <Blank answer="((sqrt(3))/(12))" kind="math" />。
+设 $\Sigma=\{(x,y,z)\mid x+y+z=1,\ x\ge0,\ y\ge0,\ z\ge0\}$，则
+
+$$
+\iint_{\Sigma}y^2\,\mathrm dS=
+$$
+
+<Blank answer="sqrt(3)/12" kind="math" />。
 
 <Solution>
 
-**答案：** $\frac{\sqrt{3}}{12}$
+**答案：** $\boxed{\dfrac{\sqrt3}{12}}$。
 
-**解析：** 平面可写为
-
-$$
-z=1-x-y.
-$$
-
-其在 $xOy$ 面上的投影为三角形
+**第一步：确定被积曲面是平面三角形。** 由 $z=1-x-y$ 可知水平投影是
 
 $$
-D=\{(x,y):x\ge0,\ y\ge0,\ x+y\le1\}.
+D=\{(x,y):0\le y\le1,\ 0\le x\le1-y\}.
 $$
 
-曲面元为
+**第二步：把面积元化为平面面积元。** $z_x=z_y=-1$，故
 
 $$
-dS=\sqrt{1+z_x^2+z_y^2}\,dxdy
-=\sqrt3\,dxdy.
+\mathrm dS=\sqrt{1+(-1)^2+(-1)^2}\,\mathrm dx\,\mathrm dy
+=\sqrt3\,\mathrm dx\,\mathrm dy.
 $$
 
-因此
+**第三步：计算二次矩。**
 
 $$
 \begin{aligned}
-I
-&=\sqrt3\iint_Dy^2\,dxdy\\
-&=\sqrt3\int_0^1\int_0^{1-y}y^2\,dxdy\\
-&=\sqrt3\int_0^1y^2(1-y)dy\\
-&=\sqrt3\left(\frac13-\frac14\right)\\
-&=\boxed{\frac{\sqrt3}{12}}.
+I&=\sqrt3\int_0^1\int_0^{1-y}y^2\,\mathrm dx\,\mathrm dy\\
+&=\sqrt3\int_0^1y^2(1-y)\,\mathrm dy\\
+&=\sqrt3\left(\frac13-\frac14\right)
+=\boxed{\frac{\sqrt3}{12}}.
 \end{aligned}
 $$
 
-按当前题面是平面三角形积分，结果中不应出现 $\pi$。
-
-**模型价值：** 在三角形投影区域内计算单项式矩，优先用 $\int_0^1 y^m(1-y)\,dy$，可推广到更高次幂。
+**校验：** 投影三角形面积为 $1/2$，被积函数 $0\le y^2\le1$，因此积分应为小于 $\sqrt3/2$ 的正数，结果符合量级。这里完全没有圆形区域，不应得到含 $\pi$ 的结果。
 
 </Solution>
-
 </Question>
 
-<Question id="math-51754e-003" type="essay" number={false}>
+<Question id="math-core-gd-09-05-003" type="essay" tags="来源:1999考研数一, 科目:高等数学, 考点:切平面点面距离, 考点:椭球曲面元">
 
-**[1999年数学一]** 设 $S$ 为椭球面 $\dfrac{x^2}{2}+\dfrac{y^2}{2}+z^2=1$ 的上半部分，点 $P(x,y,z)\in S$，$\Pi$ 为 $S$ 在点 $P$ 处的切平面，$\rho(x,y,z)$ 为点 $O(0,0,0)$ 到平面 $\Pi$ 的距离，求 $\iint_S\dfrac{z}{\rho(x,y,z)}dS$。
+设 $S$ 为椭球面 $\dfrac{x^2}{2}+\dfrac{y^2}{2}+z^2=1$ 的上半部分，点 $P(x,y,z)\in S$，$\Pi$ 为 $S$ 在点 $P$ 处的切平面，$\rho(x,y,z)$ 为点 $O(0,0,0)$ 到平面 $\Pi$ 的距离，求
+
+$$
+\iint_S\frac{z}{\rho(x,y,z)}\,\mathrm dS.
+$$
 
 <Solution>
 
-**答案：** $\frac{3\pi}{2}$
+**参考答案：** $\boxed{\dfrac{3\pi}{2}}$。
 
-**解析：** 椭球面写为
-
-$$
-F(x,y,z)=\frac{x^2}{2}+\frac{y^2}{2}+z^2-1=0.
-$$
-
-在 $P(x,y,z)$ 处，法向量可取
+**第一步：先确定切平面和距离。** 设 $F=x^2/2+y^2/2+z^2-1$，则 $\nabla F=(x,y,2z)$。在椭球面上 $x^2+y^2+2z^2=2$，所以 $P$ 处切平面可写为
 
 $$
-\nabla F=(x,y,2z).
+xX+yY+2zZ=2.
 $$
 
-切平面方程为
+原点到切平面的距离为
 
 $$
-xX+yY+2zZ=2,
+\rho(x,y,z)=\frac{2}{\sqrt{x^2+y^2+4z^2}}.
 $$
 
-因为在椭球面上
+**第二步：求上半椭球的曲面元。** 写成图形
 
 $$
-x^2+y^2+2z^2=2.
+z=\sqrt{1-\frac{x^2+y^2}{2}},\qquad
+D:\ x^2+y^2\le2.
 $$
 
-所以原点到切平面的距离为
-
-$$
-\rho=\frac{2}{\sqrt{x^2+y^2+4z^2}}.
-$$
-
-上半椭球可写为
-
-$$
-z=\sqrt{1-\frac{x^2+y^2}{2}},
-$$
-
-其投影区域为
-
-$$
-D:x^2+y^2\le2.
-$$
-
-计算曲面元：
+在投影盘内部 $z>0$，有
 
 $$
 z_x=-\frac{x}{2z},\qquad z_y=-\frac{y}{2z},
 $$
 
-因此
+从而
 
 $$
-dS=\frac{\sqrt{x^2+y^2+4z^2}}{2z}\,dxdy.
+\mathrm dS
+=\sqrt{1+\frac{x^2+y^2}{4z^2}}\,\mathrm dx\,\mathrm dy
+=\frac{\sqrt{x^2+y^2+4z^2}}{2z}\,\mathrm dx\,\mathrm dy.
 $$
 
-于是
+**第三步：组合权函数，观察同一根号相乘。**
 
 $$
-\frac{z}{\rho}dS
-=\frac{x^2+y^2+4z^2}{4}\,dxdy.
+\frac{z}{\rho}\,\mathrm dS
+=\frac{x^2+y^2+4z^2}{4}\,\mathrm dx\,\mathrm dy.
 $$
 
-又由 $z^2=1-\frac{x^2+y^2}{2}$，令 $r^2=x^2+y^2$，得
+利用椭球约束 $z^2=1-(x^2+y^2)/2$，整理为
 
 $$
-\frac{x^2+y^2+4z^2}{4}=1-\frac{r^2}{4}.
+\frac{x^2+y^2+4z^2}{4}
+=1-\frac{x^2+y^2}{4}.
 $$
 
-故
+**第四步：在圆盘上积分。**
 
 $$
 \begin{aligned}
-I
-&=\int_0^{2\pi}\int_0^{\sqrt2}
-\left(1-\frac{r^2}{4}\right)r\,drd\theta\\
-&=\boxed{\frac{3\pi}{2}}.
+I&=\int_0^{2\pi}\int_0^{\sqrt2}\left(1-\frac{r^2}{4}\right)r\,\mathrm dr\,\mathrm d\theta\\
+&=2\pi\left[\frac{r^2}{2}-\frac{r^4}{16}\right]_0^{\sqrt2}\\
+&=2\pi\left(1-\frac14\right)
+=\boxed{\frac{3\pi}{2}}.
 \end{aligned}
 $$
 
-**模型价值：** 几何量（切平面距离）与曲面元中的同一法向量模长相消，是这类综合题的核心突破口；上半椭球在投影区域内部是单值图形，边界处的表达式可取积分极限。
+<Callout type="idea" title="几何因子与面积元相消">求切平面距离时出现的法向量模长，恰好也出现在隐式曲面的面积元中。先符号化简，通常比一开始就把椭球参数化更省力。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-51754e-004" type="essay" number={false}>
+<Question id="math-core-gd-09-05-004" type="essay" tags="来源:2010考研数一, 科目:高等数学, 考点:切平面垂直, 考点:隐式曲面积分">
 
-**[2010年数学一]** 设 $P$ 为椭球面 $S:x^2+y^2+z^2-yz=1$ 上的动点，若 $S$ 在点 $P$ 处的切平面与 $xOy$ 面垂直，求点 $P$ 的轨迹 $C$，并计算曲面积分 $I=\iint_{\Sigma}\dfrac{(x+\sqrt{3})|y-2z|}{\sqrt{4+y^2+z^2-4yz}}dS$，其中 $\Sigma$ 是椭球面 $S$ 位于曲线 $C$ 上方的部分。
+设 $P$ 为椭球面 $S:x^2+y^2+z^2-yz=1$ 上的动点，若 $S$ 在点 $P$ 处的切平面与 $xOy$ 面垂直，求点 $P$ 的轨迹 $C$，并计算
+
+$$
+I=\iint_{\Sigma}\frac{(x+\sqrt3)|y-2z|}{\sqrt{4+y^2+z^2-4yz}}\,\mathrm dS,
+$$
+
+其中 $\Sigma$ 是椭球面 $S$ 位于曲线 $C$ 上方的部分。
 
 <Solution>
 
-**答案：**
-
-(1)
+**参考答案：**
 
 $$
-\begin{cases}
-x^2+y^2+z^2-yz=1, \\
-2z-y=0
-\end{cases}
+\boxed{C:\begin{cases}x^2+y^2+z^2-yz=1,\\2z-y=0,\end{cases}}
+\qquad\boxed{I=2\pi}.
 $$
 
-(2) $2\pi$
-
-**解析：** 设
-
-$$
-F(x,y,z)=x^2+y^2+z^2-yz-1.
-$$
-
-则椭球面在点 $P$ 处的法向量为
+**第一步：用法向量判断切平面垂直。** 设 $F=x^2+y^2+z^2-yz-1$，则
 
 $$
 \nabla F=(2x,2y-z,2z-y).
 $$
 
-### (1) 求轨迹 $C$
+$xOy$ 面的法向量为 $(0,0,1)$。两平面垂直等价于法向量点积为零，因此 $F_z=2z-y=0$。结合椭球面原方程就得到轨迹 $C$。
 
-切平面与 $xOy$ 面垂直，等价于两平面的法向量互相垂直。$xOy$ 面的法向量为 $(0,0,1)$，故
-
-$$
-\nabla F\cdot(0,0,1)=2z-y=0.
-$$
-
-因此
+**第二步：识别轨迹同时是上、下图形片的分界。** 将 $F=0$ 视为关于 $z$ 的二次方程：
 
 $$
-\boxed{
-C:\begin{cases}
-x^2+y^2+z^2-yz=1,\\
-2z-y=0.
-\end{cases}}
+z^2-yz+(x^2+y^2-1)=0,
 $$
 
-### (2) 计算曲面积分
-
-曲线 $C$ 正是把椭球面分成相对于 $xOy$ 投影的上下两片的分界线。$\Sigma$ 为上方一片，可写成 $z=z(x,y)$，且
+所以
 
 $$
-2z-y\ge0.
+z_\pm(x,y)=\frac{y\pm\sqrt{4-4x^2-3y^2}}2.
 $$
 
-由隐函数曲面元公式
+对应的投影区域是椭圆
 
 $$
-dS=\frac{|\nabla F|}{|F_z|}\,dxdy
-=\frac{|\nabla F|}{|2z-y|}\,dxdy.
+D=\{(x,y):4x^2+3y^2\le4\}.
 $$
 
-又利用椭球方程可验证
+上片 $z_+$ 满足 $2z-y=\sqrt{4-4x^2-3y^2}\ge0$，恰是题设 $\Sigma$。
+
+**第三步：用隐式曲面元化简被积式。** 上片内部 $F_z\ne0$，因此
 
 $$
+\mathrm dS=\frac{|\nabla F|}{|F_z|}\,\mathrm dx\,\mathrm dy
+=\frac{|\nabla F|}{|2z-y|}\,\mathrm dx\,\mathrm dy.
+$$
+
+在椭球面上，由 $4x^2=4-4y^2-4z^2+4yz$，可得
+
+$$
+\begin{aligned}
 |\nabla F|^2
-=4x^2+5y^2+5z^2-8yz
-=4+y^2+z^2-4yz.
+&=4x^2+(2y-z)^2+(2z-y)^2\\
+&=4+y^2+z^2-4yz.
+\end{aligned}
 $$
 
-因此原被积式恰好化为
+所以积分权函数中的分子、分母与曲面元**完全抵消**：
 
 $$
-\frac{(x+\sqrt3)|y-2z|}{|\nabla F|}dS
-=(x+\sqrt3)dxdy.
+\frac{(x+\sqrt3)|y-2z|}{|\nabla F|}\,\mathrm dS
+=(x+\sqrt3)\,\mathrm dx\,\mathrm dy.
 $$
 
-把椭球方程视为关于 $z$ 的二次方程：
+**第四步：对椭圆盘用奇偶性。** $D$ 关于 $y$ 轴对称，$\iint_Dx\,\mathrm dx\,\mathrm dy=0$。椭圆半轴为 $1$ 和 $2/\sqrt3$，面积为 $2\pi/\sqrt3$，故
 
 $$
-z^2-yz+x^2+y^2-1=0.
+I=\sqrt3\operatorname{area}(D)
+=\sqrt3\cdot\frac{2\pi}{\sqrt3}
+=\boxed{2\pi}.
 $$
 
-存在实根的条件为
-
-$$
-y^2-4(x^2+y^2-1)\ge0,
-$$
-
-即投影区域
-
-$$
-D:4x^2+3y^2\le4.
-$$
-
-于是
-
-$$
-I=\iint_D(x+\sqrt3)dxdy.
-$$
-
-由于 $D$ 关于 $y$ 轴对称，$\iint_Dx\,dxdy=0$。椭圆 $D$ 的半轴为 $1$ 与 $\frac2{\sqrt3}$，故
-
-$$
-S_D=\frac{2\pi}{\sqrt3}.
-$$
-
-因此
-
-$$
-I=\sqrt3\,S_D=\boxed{2\pi}.
-$$
-
-**模型价值：** 对隐曲面 $F(x,y,z)=0$，图形面积元在 $F_z\neq0$ 处满足 $dS=|\nabla F|\,dx\,dy/|F_z|$；本题恰利用被积权函数抵消分母，投影边界 $F_z=0$ 为面积零。
+<Callout type="warn" title="隐式曲面分片条件">$\mathrm dS=|\nabla F|\,\mathrm dx\,\mathrm dy/|F_z|$ 必须在 $F_z\ne0$ 的图形片上使用。这里 $F_z=0$ 恰是两片相接的边界曲线；其面积为零，可通过分片及积分极限处理。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-51754e-005" type="essay" number={false}>
+<Question id="math-core-gd-09-05-005" type="essay" tags="来源:2019考研数一, 科目:高等数学, 考点:最大方向导数, 考点:旋转抛物面面积">
 
-**[2019年数学一]** 设 $a, b$ 为实数, 函数 $z = 2 + ax^2 + by^2$ 在点 $(3, 4)$ 处的方向导数中, 沿方向 $l = -3\mathbf{i} - 4\mathbf{j}$ 的方向导数最大, 最大值为 $10$. 求:
-(1) $a, b$;
-(2) 曲面 $z = 2 + ax^2 + by^2$ ($z \ge 0$) 的面积.
+设 $a,b$ 为实数，函数 $z=2+ax^2+by^2$ 在点 $(3,4)$ 处的方向导数中，沿方向 $l=-3\mathbf i-4\mathbf j$ 的方向导数最大，最大值为 $10$。求：
+
+（1）$a,b$；
+
+（2）曲面 $z=2+ax^2+by^2$（$z\ge0$）的面积。
 
 <Solution>
 
-**答案：** (1) $a=b=-1$ (2) $\frac{13}{3}\pi$
-
-**解析：** 函数
+**参考答案：**
 
 $$
-z=2+ax^2+by^2
+\boxed{a=b=-1},\qquad\boxed{S=\frac{13\pi}{3}}.
 $$
 
-的梯度为
+**（1）利用“最大方向导数 = 梯度的模”。** 梯度为
 
 $$
-\nabla z=(2ax,2by).
+\nabla z=(2ax,2by),\qquad \nabla z(3,4)=(6a,8b).
 $$
 
-在 $(3,4)$ 处
-
-$$
-\nabla z=(6a,8b).
-$$
-
-方向
-
-$$
-l=-3\mathbf i-4\mathbf j
-$$
-
-的单位向量为
-
-$$
-\mathbf e_l=\left(-\frac35,-\frac45\right).
-$$
-
-方向导数在梯度方向上取得最大值，且最大值等于梯度的模。题设说沿 $l$ 的方向导数最大且最大值为 $10$，故
+题给方向向量是 $(-3,-4)$，其单位化结果为 $\boldsymbol e_l=(-3/5,-4/5)$。因为函数在该方向的方向导数取最大值 $10$，说明**梯度与该单位向量同向且模长为 $10$**，即
 
 $$
 (6a,8b)=10\left(-\frac35,-\frac45\right)=(-6,-8).
 $$
 
-于是
+因此 $\boxed{a=-1,b=-1}$。
+
+**（2）先由 $z\ge0$ 确定真正的曲面片。** 代回可得
 
 $$
-\boxed{a=b=-1}.
+z=2-x^2-y^2\ge0
+\quad\Longleftrightarrow\quad
+D:\ x^2+y^2\le2.
 $$
 
-此时曲面为
+曲面导数为 $z_x=-2x,z_y=-2y$，故
 
 $$
-z=2-x^2-y^2,
-\qquad z\ge0,
+\mathrm dS=\sqrt{1+4x^2+4y^2}\,\mathrm dx\,\mathrm dy.
 $$
 
-其投影为圆盘
-
-$$
-x^2+y^2\le2.
-$$
-
-曲面元
-
-$$
-dS=\sqrt{1+4x^2+4y^2}\,dxdy.
-$$
-
-用极坐标：
+换用极坐标：
 
 $$
 \begin{aligned}
-S
-&=\int_0^{2\pi}\int_0^{\sqrt2}r\sqrt{1+4r^2}\,drd\theta\\
-&=2\pi\cdot\frac18\int_1^9u^{1/2}du\\
-&=\frac\pi6\left(9^{3/2}-1\right)\\
-&=\boxed{\frac{13\pi}{3}}.
+S&=2\pi\int_0^{\sqrt2}r\sqrt{1+4r^2}\,\mathrm dr\\
+&=\frac\pi4\int_1^9u^{1/2}\,\mathrm du\qquad(u=1+4r^2)\\
+&=\frac\pi6(9^{3/2}-1)
+=\boxed{\frac{13\pi}{3}}.
 \end{aligned}
 $$
 
-**模型价值：** “最大方向导数”等于梯度模长，且最大方向为梯度方向；先确定参数，再根据非负约束 $z\ge0$ 找曲面投影域。
+**检查：** 投影圆盘面积为 $2\pi$；曲面面积元 $\sqrt{1+4r^2}\ge1$，因此曲面面积必须大于 $2\pi$，所得 $13\pi/3$ 满足这一必要条件。
 
 </Solution>
-
 </Question>
 
 ## 二、曲面对称、质心与平移：不要忽略面积权
 
-<Question id="math-51754e-006" type="single" number={false}>
+<Question id="math-core-gd-09-05-006" type="single" tags="来源:2000考研数一, 科目:高等数学, 考点:球面对称性, 考点:曲面积分奇偶性">
 
-**[2000年数学一]** 设 $S:x^2+y^2+z^2=a^2(z\ge 0)$，$S_1$ 为 $S$ 在第一象限中的部分，则有 $(\quad)$。
+设 $S:x^2+y^2+z^2=a^2$（$z\ge0$），$S_1$ 为 $S$ 在第一象限中的部分，则有（ ）。
 
-<Option>$\iint_S xdS=4\iint_{S_1} xdS$</Option>
-<Option>$\iint_S ydS=4\iint_{S_1} ydS$</Option>
-<Option correct>$\iint_S zdS=4\iint_{S_1} zdS$</Option>
-<Option>$\iint_S xyzdS=4\iint_{S_1} xyzdS$</Option>
+<Option>$\displaystyle\iint_S x\,\mathrm dS=4\iint_{S_1}x\,\mathrm dS$</Option>
+<Option>$\displaystyle\iint_S y\,\mathrm dS=4\iint_{S_1}y\,\mathrm dS$</Option>
+<Option correct>$\displaystyle\iint_S z\,\mathrm dS=4\iint_{S_1}z\,\mathrm dS$</Option>
+<Option>$\displaystyle\iint_S xyz\,\mathrm dS=4\iint_{S_1}xyz\,\mathrm dS$</Option>
 
 <Solution>
 
-上半球面 $S$ 关于平面 $x=0$、$y=0$ 都对称。
+**答案：C。**
 
-因此
+**第一步：明确第一象限部分的含义。** 上半球满足 $z\ge0$，$S_1$ 是其中 $x\ge0,y\ge0$ 的那一块。通过 $x\mapsto-x$、$y\mapsto-y$ 两次反射，可将整个上半球划分为四块全等曲面；反射不改变 $\mathrm dS$。
 
-$$
-\iint_Sx\,dS=0,
-\qquad
-\iint_Sy\,dS=0,
-$$
-
-而第一象限部分 $S_1$ 上 $x,y>0$，故 A、B 均不成立。
-
-对函数 $z$，由于 $z\ge0$ 且关于 $x,y$ 的符号变化不变，上半球面恰可由四个关于 $xOz$、$yOz$ 对称的全等部分组成，所以
+**第二步：不是所有被积函数都能乘以 4。** 在两种反射下，$z$ 的取值不变，因此四块积分完全相等：
 
 $$
-\iint_Sz\,dS=4\iint_{S_1}z\,dS.
+\iint_Sz\,\mathrm dS=4\iint_{S_1}z\,\mathrm dS.
 $$
 
-因此 C 正确。
-
-至于 $xyz$，在 $S$ 上关于 $x$ 或 $y$ 反射会变号，故
+而 $x$ 关于 $x=0$ 反射变号，$y$ 关于 $y=0$ 反射变号，$xyz$ 在任一反射中都变号，所以
 
 $$
-\iint_Sxyz\,dS=0,
+\iint_Sx\,\mathrm dS=
+\iint_Sy\,\mathrm dS=
+\iint_Sxyz\,\mathrm dS=0.
 $$
 
-而 $S_1$ 上积分为正，所以 D 错误。
+但在 $S_1$ 的内部，上述三个函数均为正（忽略零面积边界），其积分大于零，故 A、B、D 均不成立。
 
-故选
-
-$$
-\boxed{\mathrm C}.
-$$
-
-**模型价值：** 反射使面积元不变；被积函数在反射下不变才能按片数直接倍乘，若被积函数变号则常为零。
+<Callout type="idea" title="对称倍乘的充要检查">划成四块全等区域只说明**面积相同**；积分能否直接乘 4，还必须检查被积函数在对应反射下是否保持不变。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-51754e-007" type="blank" number={false}>
+<Question id="math-core-gd-09-05-007" type="blank" tags="来源:2007考研数一, 科目:高等数学, 考点:分片平面曲面积分, 考点:八面体对称">
 
-**[2007年数学一]** 设曲面 $\Sigma:|x|+|y|+|z|=1$，则 $\iint_{\Sigma}(x+|y|)dS=$ <Blank answer="((4)/(3))sqrt(3)" kind="math" />。
+设曲面 $\Sigma:|x|+|y|+|z|=1$，则
+
+$$
+\iint_\Sigma(x+|y|)\,\mathrm dS=
+$$
+
+<Blank answer="4sqrt(3)/3" kind="math" />。
 
 <Solution>
 
-**答案：** $\frac{4}{3}\sqrt{3}$
+**答案：** $\boxed{\dfrac{4\sqrt3}{3}}$。
 
-**解析：** 由曲面对称性，函数 $x$ 在关于平面 $x=0$ 对称的两部分上互相抵消，因此
-
-$$
-\iint_\Sigma x\,dS=0.
-$$
-
-所以只需计算
+**第一步：先消去奇函数。** 曲面是一个以原点为中心的正八面体边界，在 $x\mapsto-x$ 下保持不变，因此
 
 $$
-\iint_\Sigma |y|\,dS.
+\iint_\Sigma x\,\mathrm dS=0.
 $$
 
-八个卦限中的三角形面全等，且 $|y|$ 在对称变换下取相同数值。因此只算第一象限平面
+于是原积分等于 $\iint_\Sigma|y|\,\mathrm dS$。
+
+**第二步：八个面完全对称，只算一个。** 在 $x,y,z\ge0$ 中，曲面片为 $z=1-x-y$，其水平投影为
 
 $$
-x+y+z=1,
-\qquad x,y,z\ge0,
+D:\ x\ge0,\ y\ge0,\ x+y\le1.
 $$
 
-再乘 $8$。
-
-写成
+面积微元
 
 $$
-z=1-x-y,
+\mathrm dS=\sqrt{1+(-1)^2+(-1)^2}\,\mathrm dx\,\mathrm dy
+=\sqrt3\,\mathrm dx\,\mathrm dy.
 $$
 
-有
+在第一卦限 $|y|=y$，故这一面的积分是
 
 $$
-dS=\sqrt{1+(-1)^2+(-1)^2}\,dxdy=\sqrt3\,dxdy.
-$$
-
-投影区域为
-
-$$
-D:x\ge0,\ y\ge0,\ x+y\le1.
-$$
-
-故第一象限部分积分为
-
-$$
-\sqrt3\int_0^1\int_0^{1-y}y\,dxdy
-=\sqrt3\int_0^1y(1-y)dy
+\sqrt3\int_0^1\int_0^{1-y}y\,\mathrm dx\,\mathrm dy
+=\sqrt3\int_0^1y(1-y)\,\mathrm dy
 =\frac{\sqrt3}{6}.
 $$
 
-总积分为
+八个面中 $|y|$ 经坐标反射保持同值，因此
 
 $$
-8\cdot\frac{\sqrt3}{6}
+I=8\cdot\frac{\sqrt3}{6}
 =\boxed{\frac{4\sqrt3}{3}}.
 $$
 
-**模型价值：** 对由多个平面面片组成的封闭曲面，先用对称性消去奇函数，再只在一个代表面上求二维投影积分。
+**另一种快速理解：** 八面体各面面积是 $\sqrt3/2$；在第一卦限三角面上，线性坐标 $y$ 的平均值是三个顶点 $y$ 坐标的平均数 $(0+1+0)/3=1/3$，故每面贡献 $\sqrt3/6$。
 
 </Solution>
-
 </Question>
 
-<Question id="math-51754e-008" type="essay" number={false}>
+<Question id="math-core-gd-09-05-008" type="essay" tags="来源:李林880, 科目:高等数学, 考点:球面平移, 考点:球面线性函数">
 
-**[李林880]** 设球面 $S:(x-a)^2+(y-b)^2+(z-c)^2=1$（$a,b,c>0$），求
+设球面 $S:(x-a)^2+(y-b)^2+(z-c)^2=1$（$a,b,c>0$），求
 
 $$
-\iint_S(x+y+z)\,dS.
+\iint_S(x+y+z)\,\mathrm dS.
 $$
 
 <Solution>
 
-**答案：** $\boxed{4\pi(a+b+c)}$
+**参考答案：** $\boxed{4\pi(a+b+c)}$。
 
-**解析：** **突破口：** 以球心为原点作平移，而不是直接写球面坐标的三个分量。
-
-令 $u=x-a$、$v=y-b$、$w=z-c$，新球面为 $u^2+v^2+w^2=1$。球面上的反射对称性给出
+**方法一：平移并用对称性。** 令
 
 $$
-\iint_Su\,dS=\iint_Sv\,dS=\iint_Sw\,dS=0.
+u=x-a,\qquad v=y-b,\qquad w=z-c.
 $$
 
-因整个单位球面面积为 $4\pi$，故
+球面化为 $u^2+v^2+w^2=1$，面积元在平移后不变；被积函数变为 $a+b+c+u+v+w$。
+
+单位球面关于三个坐标平面分别对称，因此
 
 $$
-\iint_S(x+y+z)\,dS=(a+b+c)\iint_SdS
+\iint_Su\,\mathrm dS
+=\iint_Sv\,\mathrm dS
+=\iint_Sw\,\mathrm dS=0.
+$$
+
+单位球面积是 $4\pi$，故
+
+$$
+\iint_S(x+y+z)\,\mathrm dS
+=(a+b+c)\,4\pi
 =\boxed{4\pi(a+b+c)}.
 $$
 
-**模型迁移：** 在以 $C$ 为球心、半径 $r$ 的球面上，任何线性函数的面积平均值就是它在球心的函数值。
+**方法二：面积平均值定理。** 球面是中心对称曲面，成对的球面点 $\boldsymbol r$ 与 $2\boldsymbol C-\boldsymbol r$ 的线性函数值之和恒为 $2f(\boldsymbol C)$，故其面积平均值等于球心 $\boldsymbol C=(a,b,c)$ 处的函数值。直接得 $I=4\pi f(\boldsymbol C)$。
+
+<Callout type="info" title="推广到半径 $R$ 的球面">对整个球面 $|\boldsymbol r-\boldsymbol C|=R$，若 $f$ 是任意仿射函数，则 $\iint_S f\,\mathrm dS=4\pi R^2f(\boldsymbol C)$。这个结论不可直接推广到一般非线性函数。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-51754e-009" type="essay" number={false}>
+<Question id="math-core-gd-09-05-009" type="essay" tags="来源:李林880, 科目:高等数学, 考点:平面截面, 考点:圆盘奇函数">
 
-**[李林880]** 设曲面 $S$ 为平面 $x+y+z=4$ 被柱面 $x^2+y^2=1$ 截得的部分，计算
+设曲面 $S$ 为平面 $x+y+z=4$ 被柱面 $x^2+y^2=1$ 截得的部分，计算
 
 $$
-I=\iint_S z\,dS.
+I=\iint_S z\,\mathrm dS.
 $$
 
 <Solution>
 
-**答案：** $\boxed{4\sqrt3\pi}$
+**参考答案：** $\boxed{4\sqrt3\pi}$。
 
-**解析：** **突破口：** 借助对称性，投影圆盘中的一次项积分均为零。
-
-取 $z=4-x-y$，投影 $D:x^2+y^2\le1$，则 $z_x=z_y=-1$，
+**第一步：以斜平面为图形曲面。** 因 $z=4-x-y$，$z_x=z_y=-1$，所以
 
 $$
-dS=\sqrt{1+z_x^2+z_y^2}\,dx\,dy=\sqrt3\,dx\,dy.
+\mathrm dS=\sqrt{1+z_x^2+z_y^2}\,\mathrm dx\,\mathrm dy
+=\sqrt3\,\mathrm dx\,\mathrm dy.
 $$
 
-由 $\iint_Dx\,dxdy=\iint_Dy\,dxdy=0$，可得
+柱面的内部对应水平投影圆盘 $D:x^2+y^2\le1$。
+
+**第二步：分离常数和奇函数项。**
 
 $$
-I=\sqrt3\iint_D(4-x-y)\,dxdy
-=\boxed{4\sqrt3\pi}.
+\begin{aligned}
+I&=\sqrt3\iint_D(4-x-y)\,\mathrm dx\,\mathrm dy\\
+&=4\sqrt3\operatorname{area}(D)
+-\sqrt3\iint_Dx\,\mathrm dx\,\mathrm dy
+-\sqrt3\iint_Dy\,\mathrm dx\,\mathrm dy.
+\end{aligned}
 $$
 
-**易错点：** 斜平面上的面积不等于其水平投影面积，不能遗漏 $\sqrt3$。
+圆盘对 $x=0$、$y=0$ 均对称，两个一次矩积分为零，$\operatorname{area}(D)=\pi$。因此
+
+$$
+I=\boxed{4\sqrt3\pi}.
+$$
+
+**易错辨析：** $\iint_D z\,\mathrm dx\,\mathrm dy=4\pi$ 是**投影平面积分**，还需乘斜平面的面积伸长因子 $\sqrt3$，才是题目中的曲面积分。
 
 </Solution>
-
 </Question>
 
-<Question id="math-51754e-010" type="essay" number={false}>
+<Question id="math-core-gd-09-05-010" type="essay" tags="来源:李林880, 科目:高等数学, 考点:薄壳质量, 考点:球面约束化简">
 
-**[李林880]** 设密度为 $\rho=x^2+y^2+z^2$ 的薄球壳
+设密度为 $\rho=x^2+y^2+z^2$ 的薄球壳
 
 $$
 S:x^2+y^2+z^2=2x,
 $$
 
-求其质量 $M=\iint_S\rho\,dS$。
+求其质量 $M=\iint_S\rho\,\mathrm dS$。
 
 <Solution>
 
-**答案：** $\boxed{8\pi}$
+**参考答案：** $\boxed{M=8\pi}$。
 
-**解析：** **突破口：** 球心不是原点，但球面约束把二次型直接化成一次函数。
-
-配方得 $S:(x-1)^2+y^2+z^2=1$，并且沿球面有 $\rho=2x$。由于 $x=(x-1)+1$，按关于球心的对称性
+**第一步：先看曲面本身。** 将球面配方为
 
 $$
-\iint_S(x-1)\,dS=0.
+(x-1)^2+y^2+z^2=1,
 $$
 
-所以质量
+可知它是球心 $(1,0,0)$、半径 $1$ 的**整个球面**，面积为 $4\pi$。
+
+**第二步：利用曲面约束简化密度。** 由于沿球面 $x^2+y^2+z^2=2x$，于是
 
 $$
-M=2\iint_S x\,dS
-=2\iint_S[(x-1)+1]\,dS
-=2\cdot4\pi=\boxed{8\pi}.
+\rho=2x=2[(x-1)+1].
 $$
 
-**方法提炼：** 优先利用曲面方程化简密度，再检查球心平移后的奇函数；不必对曲面进行复杂参数化。
-
-</Solution>
-
-</Question>
-
-<Question id="math-51754e-011" type="essay" number={false}>
-
-**[张宇1000题]** 设 $m>0$，球冠 $\Sigma:x^2+y^2+z^2=m$ 且 $z\ge\sqrt m/3$，计算
-
-$$
-I=\iint_\Sigma\left(|x|y+\frac1z\right)dS.
-$$
-
-<Solution>
-
-**答案：** $\boxed{2\pi\sqrt m\ln3}$
-
-**解析：** **突破口：** 不必对 $|x|$ 分片；关于 $y=0$ 的反射已使 $|x|y$ 的曲面积分为零。
-
-令 $R=\sqrt m$，用球面参数
-
-$$
-(x,y,z)=(R\sin\varphi\cos\theta,R\sin\varphi\sin\theta,R\cos\varphi),
-$$
-
-其中 $0\le\theta\le2\pi$，$0\le\varphi\le\arccos(1/3)$，且 $dS=R^2\sin\varphi\,d\varphi\,d\theta$。因此
+球面关于 $x=1$ 反射对称，故 $\iint_S(x-1)\,\mathrm dS=0$，因此
 
 $$
 \begin{aligned}
-I&=2\pi R\int_0^{\arccos(1/3)}\tan\varphi\,d\varphi\\
-&=-2\pi R\left[\ln\cos\varphi\right]_0^{\arccos(1/3)}\\
-&=\boxed{2\pi\sqrt m\ln3}.
+M&=2\iint_S[(x-1)+1]\,\mathrm dS\\
+&=2\cdot(0+4\pi)
+=\boxed{8\pi}.
 \end{aligned}
 $$
 
-**定理条件：** 本题球冠满足 $z\ge R/3>0$，所以 $1/z$ 在整个曲面上连续，不涉及广义曲面积分。
+**物理解释：** $\rho$ 是球面点到原点距离的平方。其球面平均值为 $2$，因此质量等于平均密度 $2$ 乘面积 $4\pi$。
+
+<Callout type="idea" title="先在曲面上约束降阶">题目给了球面方程，本身就提供 $x^2+y^2+z^2=2x$。先将二次密度转成线性函数，再利用球心对称性，往往比直接建立球坐标积分简单得多。</Callout>
 
 </Solution>
+</Question>
 
+<Question id="math-core-gd-09-05-011" type="essay" tags="来源:张宇1000题, 科目:高等数学, 考点:球冠曲面积分, 考点:反射消项">
+
+设 $m>0$，球冠 $\Sigma:x^2+y^2+z^2=m$ 且 $z\ge\sqrt m/3$，计算
+
+$$
+I=\iint_\Sigma\left(|x|y+\frac1z\right)\,\mathrm dS.
+$$
+
+<Solution>
+
+**参考答案：** $\boxed{2\pi\sqrt m\ln3}$。
+
+**第一步：先利用反射对称性。** 球冠在 $y\mapsto-y$ 下不变，$|x|y$ 随之变号而 $\mathrm dS$ 不变，故
+
+$$
+\iint_\Sigma|x|y\,\mathrm dS=0.
+$$
+
+不必费力处理 $|x|$ 的分段，剩余 $I=\iint_\Sigma z^{-1}\,\mathrm dS$。
+
+<Tabs items={['方法一：以高度 $z$ 参数化（推荐）','方法二：标准球坐标']}>
+<Tab value="方法一：以高度 $z$ 参数化（推荐）">
+
+令 $R=\sqrt m$。对半径为 $R$ 的球面，设
+
+$$
+(x,y,z)=\bigl(\sqrt{R^2-z^2}\cos\theta,\sqrt{R^2-z^2}\sin\theta,z\bigr).
+$$
+
+球面带的面积元为 $\mathrm dS=R\,\mathrm d\theta\,\mathrm dz$，其中 $0\le\theta\le2\pi$，$R/3\le z\le R$。于是
+
+$$
+\begin{aligned}
+I&=R\int_0^{2\pi}\!\mathrm d\theta\int_{R/3}^R\frac{\mathrm dz}{z}\\
+&=2\pi R\ln\frac{R}{R/3}
+=\boxed{2\pi\sqrt m\ln3}.
+\end{aligned}
+$$
+
+</Tab>
+<Tab value="方法二：标准球坐标">
+
+取
+
+$$
+x=R\sin\varphi\cos\theta,\quad y=R\sin\varphi\sin\theta,\quad z=R\cos\varphi,
+$$
+
+且 $0\le\varphi\le\arccos(1/3)$。球面元为 $R^2\sin\varphi\,\mathrm d\varphi\,\mathrm d\theta$，从而
+
+$$
+\begin{aligned}
+I&=2\pi R\int_0^{\arccos(1/3)}\frac{\sin\varphi}{\cos\varphi}\,\mathrm d\varphi\\
+&=-2\pi R\ln\cos\varphi\big|_0^{\arccos(1/3)}\\
+&=\boxed{2\pi R\ln3}.
+\end{aligned}
+$$
+
+</Tab>
+</Tabs>
+
+**条件检查：** $z\ge R/3>0$，所以 $1/z$ 在整片球冠上连续；并不存在 $z\to0$ 的不可积奇点。
+
+</Solution>
 </Question>
 
 ## 三、几何限制与球冠最值：先把曲面切分正确
 
-<Question id="math-51754e-012" type="essay" number={false}>
+<Question id="math-core-gd-09-05-012" type="essay" tags="来源:1989考研数一, 科目:高等数学, 考点:两球相交, 考点:球冠面积最值">
 
-**[1989年数学一]** 设半径为 $R$ 的球面 $\Sigma$ 的球心在定球面 $x^2+y^2+z^2=a^2(a>0)$ 上，问：当 $R$ 为何值时，球面 $\Sigma$ 在定球面内部的那部分的面积最大？
+设半径为 $R$ 的球面 $\Sigma$ 的球心在定球面 $x^2+y^2+z^2=a^2$（$a>0$）上，问：当 $R$ 为何值时，球面 $\Sigma$ 在定球面内部的那部分的面积最大？
 
 <Solution>
 
-**答案：** $R=\frac{4a}{3}$
+**参考答案：** $\boxed{R=\dfrac{4a}{3}}$。
 
-**解析：** 设定球面球心为 $O$，半径为 $a$；球面 $\Sigma$ 的球心为 $C$，半径为 $R$。由题意
+**第一步：先明确变化的两个球。** 设定球心为 $O$、半径为 $a$；动球面 $\Sigma$ 的球心为 $C$、半径为 $R$。已知 $OC=a$ 固定。
 
-$$
-OC=a.
-$$
-
-两球相交时，公共圆所在平面到球心 $C$ 的距离为
+两球有公共圆时，设球上 $P$ 是公共圆上的点，则 $OP=a$、$CP=R$、$OC=a$。设公共圆所在平面到 $C$ 沿 $C\to O$ 方向的距离为 $d$。由两球方程相减，或在三角形 $OCP$ 中使用余弦关系，可得
 
 $$
-d=\frac{OC^2+R^2-a^2}{2OC}
+d=\frac{OC^2+CP^2-OP^2}{2OC}
+=\frac{a^2+R^2-a^2}{2a}
 =\frac{R^2}{2a}.
 $$
 
-$\Sigma$ 落在定球面内部的部分是一个球冠，其高为
+当 $0<R<2a$ 时，两球相交成圆，$\Sigma$ 落在定球内部的部分为一个球冠，其高为
 
 $$
-h=R-d=R-\frac{R^2}{2a}.
+h=R-d=R-\frac{R^2}{2a}>0.
 $$
 
-因此球冠面积
+**第二步：使用球冠面积公式。** 半径为 $R$、高为 $h$ 的球冠面积为 $2\pi Rh$，故
 
 $$
-S(R)=2\pi Rh
-=2\pi R^2-\frac{\pi}{a}R^3,
-\qquad 0<R<2a.
+S(R)=2\pi R\left(R-\frac{R^2}{2a}\right)
+=2\pi R^2-\frac\pi a R^3,
+\quad 0<R<2a.
 $$
 
-求导得
+若 $R\ge2a$，定球全部位于动球内部或与其相切，但动球**球面本身**在定球内部的部分面积为零；因此只须在 $0<R<2a$ 内优化。
+
+**第三步：求全局最大值。**
 
 $$
 S'(R)=4\pi R-\frac{3\pi}{a}R^2
 =\pi R\left(4-\frac{3R}{a}\right).
 $$
 
-除 $R=0$ 外，驻点为
+对 $R>0$，当 $R<4a/3$ 时导数为正，当 $R>4a/3$ 时为负，因此在
 
 $$
-R=\frac{4a}{3}.
+\boxed{R=\frac{4a}{3}}
 $$
 
-且该点处面积取得最大值。因此
+处唯一取得最大值。
 
-$$
-\boxed{R=\frac{4a}{3}}.
-$$
-
-**模型价值：** 双球交叠问题的关键不是投影二重积分，而是先识别被选球面上的球冠高。分界面距离球心的距离是 $R^2/(2a)$，且只有 $0<R<2a$ 时存在正面积；在临界半径外不能沿用球冠公式。
+<Callout type="idea" title="先判球冠存在的几何范围">公式 $S=2\pi Rh$ 中的 $h$ 不能在不相交时继续套用。先由 $h>0$ 找到 $0<R<2a$，再求导，才是完整的几何最优化过程。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-51754e-013" type="essay" number={false}>
+<Question id="math-core-gd-09-05-013" type="essay" tags="来源:2017考研数一, 科目:高等数学, 考点:曲线投影, 考点:锥面薄壳质量">
 
-**[2017年数学一]** 设薄壳曲面 $S$ 是圆锥面 $z=\sqrt{x^2+y^2}$ 被柱面 $z^2=2x$ 所割下的有限部分，其上任一点的密度为 $\mu=9\sqrt{x^2+y^2+z^2}$，记圆锥面与柱面的交线为 $C$.求：
+设薄壳曲面 $S$ 是圆锥面 $z=\sqrt{x^2+y^2}$ 被柱面 $z^2=2x$ 所割下的有限部分，其上任一点的密度为 $\mu=9\sqrt{x^2+y^2+z^2}$，记圆锥面与柱面的交线为 $C$。求：
 
-(1) $C$ 在 $xOy$ 面上的投影曲线的方程；
-(2) $S$ 的质量 $M$。
+（1）$C$ 在 $xOy$ 面上的投影曲线的方程；
+
+（2）$S$ 的质量 $M$。
 
 <Solution>
 
-**答案：**
-
-(1)
+**参考答案：**
 
 $$
-\begin{cases}
-x^2+y^2=2x, \\
-z=0
-\end{cases}
+\boxed{C\text{ 的投影}:\begin{cases}x^2+y^2=2x,\\z=0,\end{cases}}
+\qquad\boxed{M=64}.
 $$
 
-(2) $64$
-
-**解析：** 在圆锥面上
+**（1）消去 $z$，再附加目标平面方程。** 在圆锥面上 $z=\sqrt{x^2+y^2}=r$、$z^2=x^2+y^2$，代入柱面 $z^2=2x$ 得
 
 $$
-z=\sqrt{x^2+y^2}=r.
+x^2+y^2=2x
+\iff (x-1)^2+y^2=1.
 $$
 
-柱面条件 $z^2=2x$ 代入后得到交线在 $xOy$ 面上的投影：
+这是投影所在圆柱面的方程；要写出**投影曲线**，还必须加上 $z=0$。
+
+**（2）质量积分首先是曲面积分，不是三重积分。** 圆锥 $z=r$ 在锥顶以外满足 $z_x^2+z_y^2=1$，所以
 
 $$
-r^2=2x,
+\mathrm dS=\sqrt2\,\mathrm dx\,\mathrm dy.
 $$
 
-即
+又沿圆锥 $x^2+y^2+z^2=2r^2$，故密度
 
 $$
-\boxed{x^2+y^2=2x}.
+\mu=9\sqrt{2r^2}=9\sqrt2\,r.
 $$
 
-若写成空间投影曲线，则还应加 $z=0$。
+相乘得到 $\mu\,\mathrm dS=18r\,\mathrm dx\,\mathrm dy$。
 
-圆锥面的曲面元为
-
-$$
-dS=\sqrt2\,dxdy.
-$$
-
-密度
+**第三步：确定投影区域并计算质量。** 截得有限锥面片在水平面的投影是圆盘
 
 $$
-\mu=9\sqrt{x^2+y^2+z^2}
-=9\sqrt2\,r.
+D:x^2+y^2\le2x.
 $$
 
-因此
+用极坐标写成 $-\pi/2\le\theta\le\pi/2$，$0\le r\le2\cos\theta$，则
 
 $$
-\mu\,dS=18r\,dxdy.
+\begin{aligned}
+M&=18\int_{-\pi/2}^{\pi/2}\int_0^{2\cos\theta}r^2\,\mathrm dr\,\mathrm d\theta\\
+&=18\cdot\frac83\int_{-\pi/2}^{\pi/2}\cos^3\theta\,\mathrm d\theta\\
+&=48\cdot\frac43
+=\boxed{64}.
+\end{aligned}
 $$
 
-投影区域是圆
+**核对：** 本题与 1995 年锥面题的投影盘相同，所用圆锥面积元也相同；但本题被积的是密度 $9\sqrt2r$，所以最终质量并非该题积分值的简单常数倍，须连面积元一起核对。
+
+</Solution>
+</Question>
+
+<Question id="math-core-gd-09-05-014" type="essay" tags="来源:李林880, 科目:高等数学, 考点:锥面奇偶性, 考点:极坐标高次矩">
+
+设 $a>0$，上圆锥面 $S:z=\sqrt{x^2+y^2}$ 由柱面 $x^2+y^2=2ax$ 截得有限部分。计算
 
 $$
-x^2+y^2\le2x,
+I=\iint_S(x^2y+yz^2+z^2x)\,\mathrm dS.
 $$
 
-极坐标下为
+<Solution>
+
+**参考答案：** $\boxed{2\sqrt2\pi a^5}$。
+
+**第一步：先看投影对称性，不要立即展开三项积分。** 在 $S$ 上有 $z=r$，$\mathrm dS=\sqrt2\,\mathrm dx\,\mathrm dy$，投影圆盘为
+
+$$
+D:x^2+y^2\le2ax
+\iff (x-a)^2+y^2\le a^2.
+$$
+
+该圆盘关于 $x$ 轴对称。$x^2y$ 和 $yz^2$ 在 $y\mapsto-y$ 下变号，所以它们的曲面积分均为零。因此
+
+$$
+I=\iint_Sxz^2\,\mathrm dS
+=\sqrt2\iint_Dx(x^2+y^2)\,\mathrm dx\,\mathrm dy.
+$$
+
+**第二步：确定极坐标积分限。** 取 $x=r\cos\theta$，$y=r\sin\theta$，则
 
 $$
 -\frac\pi2\le\theta\le\frac\pi2,
-\qquad
-0\le r\le2\cos\theta.
+\qquad0\le r\le2a\cos\theta.
 $$
 
-故质量
-
-$$
-\begin{aligned}
-M
-&=18\int_{-\pi/2}^{\pi/2}\int_0^{2\cos\theta}r^2\,drd\theta\\
-&=48\int_{-\pi/2}^{\pi/2}\cos^3\theta\,d\theta\\
-&=48\cdot\frac43\\
-&=\boxed{64}.
-\end{aligned}
-$$
-
-**模型价值：** 薄壳质量始终是 $\iint_S\mu\,dS$，切勿错用体积元 $dV$；圆锥上的距离 $\sqrt{x^2+y^2+z^2}=\sqrt2r$。
-
-</Solution>
-
-</Question>
-
-<Question id="math-51754e-014" type="essay" number={false}>
-
-**[李林880]** 设 $a>0$，上圆锥面 $S:z=\sqrt{x^2+y^2}$ 由柱面 $x^2+y^2=2ax$ 截得有限部分。计算
-
-$$
-I=\iint_S(x^2y+yz^2+z^2x)\,dS.
-$$
-
-<Solution>
-
-**答案：** $\boxed{2\sqrt2\pi a^5}$
-
-**解析：** **突破口：** 先由 $y\mapsto-y$ 消去含 $y$ 的两项，再用极坐标计算唯一剩余的积分。
-
-沿 $S$ 有 $z=r$、$dS=\sqrt2\,dxdy$（锥顶是面积零点）。区域 $D:x^2+y^2\le2ax$ 关于 $x$ 轴对称，因而
-
-$$
-\iint_Sx^2y\,dS=\iint_Syz^2\,dS=0.
-$$
-
-取 $x=r\cos\theta$、$y=r\sin\theta$，
-
-$$
--\frac\pi2\le\theta\le\frac\pi2,\qquad 0\le r\le2a\cos\theta.
-$$
-
-故
+被积项与雅可比相乘后成为 $\sqrt2r^4\cos\theta$，故
 
 $$
 \begin{aligned}
-I&=\sqrt2\iint_D xr^2\,dxdy\\
-&=\sqrt2\int_{-\pi/2}^{\pi/2}\int_0^{2a\cos\theta}r^4\cos\theta\,dr\,d\theta\\
-&=\frac{32\sqrt2 a^5}{5}\int_{-\pi/2}^{\pi/2}\cos^6\theta\,d\theta\\
-&=\frac{32\sqrt2 a^5}{5}\cdot\frac{5\pi}{16}
-=\boxed{2\sqrt2\pi a^5}.
+I&=\sqrt2\int_{-\pi/2}^{\pi/2}\int_0^{2a\cos\theta}r^4\cos\theta\,\mathrm dr\,\mathrm d\theta\\
+&=\frac{32\sqrt2 a^5}{5}\int_{-\pi/2}^{\pi/2}\cos^6\theta\,\mathrm d\theta.
 \end{aligned}
 $$
 
-**易错点：** 面积元已有一个 $\sqrt2$，但极坐标仍需另乘雅可比因子 $r$。
-
-</Solution>
-
-</Question>
-
-<Question id="math-51754e-015" type="essay" number={false}>
-
-**[李林880]** 半径为 $R>0$ 的球面 $x^2+y^2+z^2=R^2$ 在柱体 $x^2+y^2\le Rx$ 内的面积记作 $S_1$；柱面 $x^2+y^2=Rx$ 在球体内部的面积记作 $S_2$。求 $S_1/S_2$。
-
-<Solution>
-
-**答案：** $\boxed{(\pi-2)/2}$
-
-**解析：** **模型识别：** 互相穿插的两个曲面，投影或参数化方式必须各选各的。不能把两者投到同一平面后认为面积相同。
-
-球面上半片的曲面元为
+**第三步：计算偶次余弦积分。** 使用降幂公式或递推式
 
 $$
-dS=\frac{R}{\sqrt{R^2-r^2}}\,r\,dr\,d\theta.
-$$
-
-柱体内的极坐标约束为 $-\pi/2\le\theta\le\pi/2$、$0\le r\le R\cos\theta$。上下半球对称，于是
-
-$$
-\begin{aligned}
-S_1&=2R\int_{-\pi/2}^{\pi/2}\int_0^{R\cos\theta}\frac{r}{\sqrt{R^2-r^2}}\,dr\,d\theta\\
-&=2R^2\int_{-\pi/2}^{\pi/2}(1-|\sin\theta|)\,d\theta\\
-&=2R^2(\pi-2).
-\end{aligned}
-$$
-
-对柱面改用轴向参数化
-
-$$
-(x,y,z)=\left(\frac R2(1+\cos t),\frac R2\sin t,z\right),\quad0\le t\le2\pi.
-$$
-
-其 $dS=(R/2)\,dt\,dz$；球体约束给 $|z|\le R\sin(t/2)$（所取参数范围使正弦非负），故
-
-$$
-S_2=\int_0^{2\pi}\frac R2\cdot 2R\sin(t/2)\,dt=4R^2.
+\int_{-\pi/2}^{\pi/2}\cos^6\theta\,\mathrm d\theta
+=\frac{5\pi}{16},
 $$
 
 所以
 
 $$
-\boxed{\frac{S_1}{S_2}=\frac{\pi-2}{2}}.
+I=\frac{32\sqrt2 a^5}{5}\cdot\frac{5\pi}{16}
+=\boxed{2\sqrt2\pi a^5}.
 $$
 
-**方法对照：** 球面片用水平投影，圆柱面片则用周向角与高度参数；不能误把面积元当成相同。
+<Callout type="warn" title="次数核对">$xz^2=xr^2=r^3\cos\theta$，再乘极坐标雅可比 $r$ 才是 $r^4\cos\theta$；若把 $r$ 漏掉，量纲会从 $a^5$ 错变成 $a^4$。</Callout>
 
 </Solution>
+</Question>
 
+<Question id="math-core-gd-09-05-015" type="essay" tags="来源:李林880, 科目:高等数学, 考点:球柱相交, 考点:两曲面面积比">
+
+半径为 $R>0$ 的球面 $x^2+y^2+z^2=R^2$ 在柱体 $x^2+y^2\le Rx$ 内的面积记作 $S_1$；柱面 $x^2+y^2=Rx$ 在球体内部的面积记作 $S_2$。求 $S_1/S_2$。
+
+<Solution>
+
+**参考答案：** $\boxed{\dfrac{S_1}{S_2}=\dfrac{\pi-2}{2}}$。
+
+**第一步：确认两块曲面完全不同。** $S_1$ 是被圆柱截取的**球面片**，$S_2$ 是被球体截取的**圆柱侧面片**。即使相交曲线相同，它们的面积元也不能互换。
+
+<Tabs items={['计算 $S_1$：球面投影','计算 $S_2$：圆柱参数化']}>
+<Tab value="计算 $S_1$：球面投影">
+
+柱体条件在水平面投影为 $D:x^2+y^2\le Rx$。取极坐标，
+
+$$
+-\frac\pi2\le\theta\le\frac\pi2,
+\qquad 0\le r\le R\cos\theta.
+$$
+
+球上半片为 $z=\sqrt{R^2-r^2}$，对应面积元 $\mathrm dS=\dfrac R{\sqrt{R^2-r^2}}\,r\,\mathrm dr\,\mathrm d\theta$；下半球对称，须再乘 $2$：
+
+$$
+\begin{aligned}
+S_1&=2R\int_{-\pi/2}^{\pi/2}\int_0^{R\cos\theta}\frac r{\sqrt{R^2-r^2}}\,\mathrm dr\,\mathrm d\theta\\
+&=2R^2\int_{-\pi/2}^{\pi/2}\bigl(1-|\sin\theta|\bigr)\,\mathrm d\theta\\
+&=\boxed{2R^2(\pi-2)}.
+\end{aligned}
+$$
+
+上式用到 $\sqrt{1-\cos^2\theta}=|\sin\theta|$，**绝对值不可省**。
+
+</Tab>
+<Tab value="计算 $S_2$：圆柱参数化">
+
+把柱面配方为 $(x-R/2)^2+y^2=(R/2)^2$。参数化为
+
+$$
+(x,y,z)=\left(\frac R2(1+\cos t),\frac R2\sin t,z\right),
+\qquad0\le t\le2\pi.
+$$
+
+它的曲面元是 $\mathrm dS=\dfrac R2\,\mathrm dt\,\mathrm dz$。
+
+沿柱面 $x^2+y^2=Rx=\dfrac{R^2}{2}(1+\cos t)=R^2\cos^2(t/2)$。再施加球体约束 $x^2+y^2+z^2\le R^2$，得到
+
+$$
+|z|\le R\sqrt{1-\cos^2(t/2)}=R\sin(t/2),
+$$
+
+因为 $t\in[0,2\pi]$ 时 $\sin(t/2)\ge0$。
+
+于是
+
+$$
+\begin{aligned}
+S_2&=\int_0^{2\pi}\frac R2\left(2R\sin\frac t2\right)\,\mathrm dt\\
+&=R^2\int_0^{2\pi}\sin\frac t2\,\mathrm dt
+=\boxed{4R^2}.
+\end{aligned}
+$$
+
+</Tab>
+</Tabs>
+
+**最后求比值：**
+
+$$
+\boxed{\frac{S_1}{S_2}=
+\frac{2R^2(\pi-2)}{4R^2}=\frac{\pi-2}{2}}.
+$$
+
+**方法总结：** 球面片宜采用上下图形投影；圆柱面片宜直接用周向角度与高度参数。两者最后的 $R^2$ 相消，说明面积比与绝对半径无关。
+
+</Solution>
 </Question>
 
 ## 四、由多块曲面拼接成封闭薄壳
 
-<Question id="math-51754e-016" type="essay" number={false}>
+<Question id="math-core-gd-09-05-016" type="essay" tags="来源:李林880, 科目:高等数学, 考点:封闭曲面分片, 考点:柱侧面参数化">
 
-**[李林880]** 设 $R>0$，$S$ 为由圆柱面 $x^2+y^2=R^2$、底面 $z=0$ 与斜平面 $z=R+x$ 围成的立体的完整边界曲面。计算
+设 $R>0$，$S$ 为由圆柱面 $x^2+y^2=R^2$、底面 $z=0$ 与斜平面 $z=R+x$ 围成的立体的完整边界曲面。计算
 
 $$
-I=\iint_S z\,dS.
+I=\iint_Sz\,\mathrm dS.
 $$
 
 <Solution>
 
-**答案：** $\boxed{\pi R^3(\sqrt2+\tfrac32)}$
-
-**解析：** **突破口：** 第一类曲面积分具有可加性，分别计算斜顶、底面和柱侧面。因 $R+x\ge0$，三部分确实围成有界立体。
-
-记三部分为 $S_{\mathrm{top}},S_{\mathrm{bottom}},S_{\mathrm{side}}$。顶面是 $z=R+x$，曲面元为 $\sqrt2\,dxdy$，所以
+**参考答案：**
 
 $$
-\iint_{S_{\mathrm{top}}}z\,dS
-=\sqrt2\iint_{x^2+y^2\le R^2}(R+x)\,dxdy
-=\sqrt2\pi R^3.
+\boxed{I=\pi R^3\left(\sqrt2+\frac32\right)}.
 $$
 
-底面恒有 $z=0$，贡献为 $0$。侧面参数化为 $x=R\cos t$、$y=R\sin t$，$0\le z\le R(1+\cos t)$，面积元是 $R\,dt\,dz$，因此
+**第一步：把封闭曲面完整拆成三片。** 立体可写为
+
+$$
+\Omega=\{(x,y,z):x^2+y^2\le R^2,\ 0\le z\le R+x\}.
+$$
+
+因为圆盘内 $x\ge-R$，故 $R+x\ge0$，体域确实有定义。边界 $S$ 包括顶面 $S_t$、底面 $S_b$ 和圆柱侧面 $S_c$。第一类曲面积分具有可加性：
+
+$$
+I=\iint_{S_t}z\,\mathrm dS+\iint_{S_b}z\,\mathrm dS+\iint_{S_c}z\,\mathrm dS.
+$$
+
+**第二步：顶面 $z=R+x$。** 其梯度为 $z_x=1,z_y=0$，因此 $\mathrm dS=\sqrt2\,\mathrm dx\,\mathrm dy$。在投影圆盘 $D:x^2+y^2\le R^2$ 上，$x$ 为奇函数，得
 
 $$
 \begin{aligned}
-\iint_{S_{\mathrm{side}}}z\,dS
-&=R\int_0^{2\pi}\int_0^{R(1+\cos t)}z\,dz\,dt\\
-&=\frac{R^3}{2}\int_0^{2\pi}(1+\cos t)^2\,dt\\
-&=\frac{3\pi R^3}{2}.
+I_t&=\sqrt2\iint_D(R+x)\,\mathrm dx\,\mathrm dy\\
+&=\sqrt2\,R\cdot\pi R^2
+=\boxed{\sqrt2\pi R^3}.
 \end{aligned}
 $$
 
-合并三块得 $I=\boxed{\pi R^3(\sqrt2+3/2)}$。
+**第三步：底面 $z=0$。** 此处被积函数恒为零，故 $I_b=0$；注意这不表示底面的面积为零。
 
-**易错点：** 顶面与侧面均须计入；底面虽面积非零但 $z=0$，漏掉侧面会损失主要贡献。
+**第四步：圆柱侧面参数化。** 取
+
+$$
+x=R\cos t,\qquad y=R\sin t,\qquad
+0\le z\le R(1+\cos t),\qquad0\le t\le2\pi.
+$$
+
+侧面面积元为 $\mathrm dS=R\,\mathrm dt\,\mathrm dz$，于是
+
+$$
+\begin{aligned}
+I_c&=R\int_0^{2\pi}\int_0^{R(1+\cos t)}z\,\mathrm dz\,\mathrm dt\\
+&=\frac{R^3}{2}\int_0^{2\pi}(1+\cos t)^2\,\mathrm dt\\
+&=\frac{R^3}{2}\left(2\pi+0+\pi\right)
+=\boxed{\frac32\pi R^3}.
+\end{aligned}
+$$
+
+因此
+
+$$
+I=I_t+I_b+I_c
+=\boxed{\pi R^3\left(\sqrt2+\frac32\right)}.
+$$
+
+<Callout type="warn" title="题目说完整边界曲面">薄壳的曲面积分不是立体内部的体积分，也不是只在顶面求积分。侧面虽然是竖直曲面，仍要计入，且其上界 $z=R(1+\cos t)$ 随角度变化。</Callout>
 
 </Solution>
-
 </Question>
 
 ## 五、原创迁移：参数、权函数与临界条件
 
-<Question id="math-51754e-017" type="essay" number={false}>
+<Question id="math-core-gd-09-05-017" type="essay" tags="来源:原创, 科目:高等数学, 考点:球面广义积分, 考点:参数收敛阈值">
 
-**[原创]** 设 $R>0$、$p>-1$，上半球面 $\Sigma_R:x^2+y^2+z^2=R^2$（$z\ge0$），求 $I_p=\iint_{\Sigma_R}z^p\,dS$，并讨论 $p\le-1$ 时的收敛性。
+设 $R>0$、$p>-1$，上半球面 $\Sigma_R:x^2+y^2+z^2=R^2$（$z\ge0$），求 $I_p=\iint_{\Sigma_R}z^p\,\mathrm dS$，并讨论 $p\le-1$ 时的收敛性。
 
 <Solution>
 
-**答案：** $\boxed{I_p=2\pi R^{p+2}/(p+1)\quad(p>-1)}$；$p\le-1$ 时发散。
-
-**解析：** **突破口：** 不论 $p$ 是否整数，都先用球面纬度参数寻找赤道附近的可积性。
-
-球坐标 $z=R\cos\varphi$，$0\le\varphi\le\pi/2$，$0\le\theta\le2\pi$，且 $dS=R^2\sin\varphi\,d\varphi\,d\theta$。由此
+**参考答案：**
 
 $$
-I_p=2\pi R^{p+2}\int_0^{\pi/2}(\cos\varphi)^p\sin\varphi\,d\varphi.
+\boxed{I_p=\frac{2\pi R^{p+2}}{p+1}\ (p>-1)};
+\qquad \boxed{p\le-1\text{ 时发散}}.
 $$
 
-以 $u=\cos\varphi$，原积分化为 $2\pi R^{p+2}\int_0^1u^p\,du$。该广义积分当且仅当 $p>-1$ 收敛，于是
+**第一步：判断危险边界。** 球面半径为 $R$，而 $z^p$ 在 $z=0$ 的赤道附近可能无界（特别是 $p<0$）。因此即使赤道本身面积为零，也必须检查其邻域是否可积。
+
+**第二步：以球面极角参数化。** 取
 
 $$
-\boxed{I_p=\frac{2\pi R^{p+2}}{p+1}},\qquad p>-1.
+(x,y,z)=(R\sin\varphi\cos\theta,R\sin\varphi\sin\theta,R\cos\varphi),
 $$
 
-$p\le-1$ 时在赤道 $z=0$ 附近发散。$p=0$ 时结果退化为上半球面积 $2\pi R^2$，可作为自检。
+其中 $0\le\theta\le2\pi$、$0\le\varphi\le\pi/2$。注意本题积分在**二维球面**上，所以
 
-**重要变式：** 把球冠下边界移至 $z=h>0$ 时，对任意实数 $p$ 被积函数在球冠上连续，此时没有赤道奇性。
+$$
+\mathrm dS=R^2\sin\varphi\,\mathrm d\varphi\,\mathrm d\theta,
+$$
+
+而不是体积元 $\rho^2\sin\varphi\,\mathrm d\rho\,\mathrm d\varphi\,\mathrm d\theta$。
+
+**第三步：通过一元广义积分判断敛散。** 在赤道附近先以 $\varphi\le\pi/2-\varepsilon$ 截断，再令 $\varepsilon\to0^+$：
+
+$$
+\begin{aligned}
+I_p&=2\pi R^{p+2}\int_0^{\pi/2}(\cos\varphi)^p\sin\varphi\,\mathrm d\varphi\\
+&=2\pi R^{p+2}\int_0^1 u^p\,\mathrm du,\qquad u=\cos\varphi.
+\end{aligned}
+$$
+
+$\int_0^1u^p\,\mathrm du$ 当且仅当 $p>-1$ 收敛，此时值为 $1/(p+1)$；$p=-1$ 是对数发散，$p<-1$ 是幂次发散，故得所求结论。
+
+<Callout type="info" title="快速检验及推广">取 $p=0$ 得 $I_0=2\pi R^2$，恰好为上半球面积。若将下边界改成球冠 $z\ge h>0$，则 $z^p$ 对所有实数 $p$ 均有界，不再有赤道奇性。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-51754e-018" type="essay" number={false}>
+<Question id="math-core-gd-09-05-018" type="essay" tags="来源:原创, 科目:高等数学, 考点:椭球面面积元, 考点:隐函数投影公式">
 
-**[原创]** 设 $a,b,c>0$，上半椭球面
+设 $a,b,c>0$，上半椭球面
 
 $$
 \Sigma:\quad\frac{x^2}{a^2}+\frac{y^2}{b^2}+\frac{z^2}{c^2}=1,\quad z\ge0.
@@ -1020,45 +1005,56 @@ $$
 计算
 
 $$
-I=\iint_\Sigma\frac{z}{\sqrt{x^2/a^4+y^2/b^4+z^2/c^4}}\,dS.
+I=\iint_\Sigma\frac{z}{\sqrt{x^2/a^4+y^2/b^4+z^2/c^4}}\,\mathrm dS.
 $$
 
 <Solution>
 
-**答案：** $\boxed{\pi abc^2}$
+**参考答案：** $\boxed{I=\pi abc^2}$。
 
-**解析：** **母题突破口：** 分母是椭球面梯度模长的一半。不要直接参数化椭球面；先判断曲面元能否抵消复杂权函数。
-
-令
+**第一步：识别曲面法向量。** 令
 
 $$
 F(x,y,z)=\frac{x^2}{a^2}+\frac{y^2}{b^2}+\frac{z^2}{c^2}-1.
 $$
 
-在上半椭球的内部图形（$z>0$）有
+于是
 
 $$
-F_z=\frac{2z}{c^2},\qquad
+\nabla F=2\left(\frac{x}{a^2},\frac{y}{b^2},\frac{z}{c^2}\right),\qquad
 |\nabla F|=2\sqrt{\frac{x^2}{a^4}+\frac{y^2}{b^4}+\frac{z^2}{c^4}}.
 $$
 
-故
+原被积函数的分母正好是法向量模长的一半，这是应当优先考虑投影曲面元的信号。
+
+**第二步：用隐函数投影公式简化。** 在 $z>0$ 的上半椭球面上，$F_z=2z/c^2>0$，故
 
 $$
-dS=\frac{|\nabla F|}{|F_z|}\,dxdy
-=\frac{c^2}{z}\sqrt{\frac{x^2}{a^4}+\frac{y^2}{b^4}+\frac{z^2}{c^4}}\,dxdy.
+\mathrm dS=\frac{|\nabla F|}{|F_z|}\,\mathrm dx\,\mathrm dy
+=\frac{c^2}{z}\sqrt{\frac{x^2}{a^4}+\frac{y^2}{b^4}+\frac{z^2}{c^4}}\,\mathrm dx\,\mathrm dy.
 $$
 
-整个被积式因此恰等于 $c^2\,dxdy$。投影区域为 $D:x^2/a^2+y^2/b^2\le1$，面积 $\pi ab$，所以
+与题设权函数相乘后恰有
 
 $$
-I=c^2\iint_Ddxdy=\boxed{\pi abc^2}.
+\frac{z}{\sqrt{x^2/a^4+y^2/b^4+z^2/c^4}}\,\mathrm dS
+=c^2\,\mathrm dx\,\mathrm dy.
 $$
 
-赤道处 $F_z=0$，但对应的边界面积为零，以上运算可先在 $z\ge\varepsilon$ 的球冠上执行，再让 $\varepsilon\to0^+$；原被积函数在整个椭球面上有界。
+**第三步：只需计算水平投影面积。** 椭球的上半片在 $xOy$ 面上的投影是
 
-**命题价值：** 把“切平面法向量的模长”和“第一类曲面积分投影”联系起来，是 1999 年数学一母题的参数化推广。
+$$
+D:\quad\frac{x^2}{a^2}+\frac{y^2}{b^2}\le1,
+$$
+
+面积为 $\pi ab$。因此
+
+$$
+I=c^2\iint_D\mathrm dx\,\mathrm dy
+=c^2\cdot\pi ab=\boxed{\pi abc^2}.
+$$
+
+<Callout type="idea" title="为何赤道不影响计算">在赤道 $z=0$，图形曲面元含 $1/z$，但它与被积函数中的 $z$ 严格抵消。可先限制 $z\ge\varepsilon>0$ 再取极限；赤道本身在曲面上是面积零的曲线。</Callout>
 
 </Solution>
-
 </Question>

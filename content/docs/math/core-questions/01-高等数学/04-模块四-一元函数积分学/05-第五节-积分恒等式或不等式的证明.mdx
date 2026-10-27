@@ -1,861 +1,1233 @@
 ---
-title: "第五节 积分恒等式或不等式的证明"
-description: "考研数学一精选：积分变换与恒等式、单调性和符号、分部积分构造、柯西不等式、凸性估计与误差界"
+title: 第五节 积分恒等式或不等式的证明
+description: 高等数学核心真题重构：定积分对称变换、周期性、换序恒等式、积分比较和不等式证明。
 ---
 
-# 第五节 积分恒等式或不等式的证明
-
-本节以**先识别积分结构，再选择证明工具**为主线：对于等式，关注积分变量变换、对称与周期、变限求导和积分次序；对于不等式，优先判断被积函数的符号、单调性、端点条件以及能否构造非负积分。以下仅保留模型具有互补性、条件可核验的真题与代表性习题。所有证明题均给出完整推导；“原创”题明确标注，不与真实真题混同。
+本节重点不是套用定积分公式，而是将**证明目标变成可利用的结构**：平移积分窗口对应周期性；嵌套积分对应分部积分或更换积分次序；积分平均值的估计对应原函数的值域。每题先给明确结论，再展示有效的证明链条。
 
 ## 一、对称变换、周期性与积分恒等式
 
-<Question id="math-e0cafb-001" type="essay" number={false}>
+<Question id="math-core-gd-04-05-001" type="essay" points={8} tags="来源:1988考研数二, 考点:对称差商, 考点:积分极限, 考点:平均值估计">
 
-**[1988年数学二·8分]** 设 $f$ 在 $\mathbb R$ 上有连续导数，且 $m\le f(x)\le M$。证明并求出：
+设 $f$ 在 $\mathbb R$ 上具有连续导数，且 $m\le f(x)\le M$。证明并求出：
 
-（1）$\displaystyle\lim_{a\to0^+}\frac1{4a^2}\int_{-a}^{a}[f(t+a)-f(t-a)]\,\mathrm dt$；
-
-（2）对任意 $a>0$ 和 $x\in\mathbb R$，
+(1)
 
 $$
-\left|\frac1{2a}\int_{-a}^{a}f(t)\,\mathrm dt-f(x)\right|\le M-m.
+\lim_{a\to0^+}\frac1{4a^2}\int_{-a}^a[f(t+a)-f(t-a)]\,dt;
+$$
+
+(2) 对任意 $a>0$、$x\in\mathbb R$，证明
+
+$$
+\left|\frac1{2a}\int_{-a}^af(t)\,dt-f(x)\right|\le M-m.
 $$
 
 <Solution>
 
-**答案：** （1）$f'(0)$；（2）不等式成立。
+**参考答案：** 第一问的极限为 $\boxed{f'(0)}$；第二问的估计对所有 $a>0$、$x\in\mathbb R$ 均成立。
 
-**解析：** **突破口：**（1）先平移积分区间，使被积函数变成对称差；（2）将积分平均值与函数值都置于同一个值域区间。
+<Tabs items={['第(1)问：平移换元法','第(1)问：二重积分法']} defaultIndex={0}>
+<Tab value="第(1)问：平移换元法">
 
-（1）分别令 $u=t+a$ 和 $u=t-a$，得
-
-$$
-\int_{-a}^{a}[f(t+a)-f(t-a)]\,\mathrm dt
-=\int_0^{2a}[f(u)-f(-u)]\,\mathrm du.
-$$
-
-由 $f$ 在零点可导，$f(u)-f(-u)=2uf'(0)+o(u)$（$u\to0^+$），于是
+分别对两项令 $u=t+a$ 与 $u=t-a$，得到
 
 $$
-\begin{aligned}
-\frac1{4a^2}\int_0^{2a}[f(u)-f(-u)]\,\mathrm du
-&=\frac1{4a^2}\left(4a^2f'(0)+o(a^2)\right)\\
-&\longrightarrow f'(0).
-\end{aligned}
+\int_{-a}^a[f(t+a)-f(t-a)]dt
+=\int_0^{2a}f(u)du-\int_{-2a}^0f(u)du
+=\int_0^{2a}[f(u)-f(-u)]du.
 $$
 
-（2）因为 $a>0$，对 $m\le f(t)\le M$ 在 $[-a,a]$ 上积分并除以 $2a$，得到
+因 $f$ 在 $0$ 可导，$f(u)=f(0)+f'(0)u+o(u)$ 且 $f(-u)=f(0)-f'(0)u+o(u)$，所以
 
 $$
-m\le\frac1{2a}\int_{-a}^{a}f(t)\,\mathrm dt\le M.
+f(u)-f(-u)=2uf'(0)+o(u).
 $$
 
-又 $m\le f(x)\le M$，两数之差的绝对值至多为 $M-m$，即得结论。
+由 $\int_0^{2a}o(u)du=o(a^2)$，
 
-**模型提炼：** 对称差积分的最低非零阶由奇部 $f(u)-f(-u)$ 决定；“平均值减函数值”的粗估计先用值域即可，无须导数界。
+$$
+\frac1{4a^2}\int_0^{2a}[f(u)-f(-u)]du
+=\frac{f'(0)}{4a^2}\int_0^{2a}2u\,du+o(1)
+\longrightarrow f'(0).
+$$
+
+</Tab>
+<Tab value="第(1)问：二重积分法">
+
+用牛顿—莱布尼茨公式，$f(t+a)-f(t-a)=\int_{t-a}^{t+a}f'(u)du$。当 $a\to0^+$ 时，积分区域内所有 $u$ 满足 $|u|\le2a$。由 $f'$ 在原点连续，记 $\varepsilon(a)=\max_{|u|\le2a}|f'(u)-f'(0)|\to0$，可得
+
+$$
+\left|\int_{-a}^a[f(t+a)-f(t-a)]dt-4a^2f'(0)\right|
+\le4a^2\varepsilon(a).
+$$
+
+除以 $4a^2$ 即得所求极限。此法直接解释归一化系数 $4a^2$ 来源于积分区域面积。
+
+</Tab>
+</Tabs>
+
+**第(2)问：在同一数值区间内比较。** 对 $m\le f(t)\le M$ 在 $[-a,a]$ 上积分，并除以正数 $2a$，得到
+
+$$
+m\le A_a:=\frac1{2a}\int_{-a}^af(t)dt\le M.
+$$
+
+同时对任意 $x$ 都有 $m\le f(x)\le M$。两个同处区间 $[m,M]$ 的数，其差的绝对值不超过区间长度：
+
+$$
+|A_a-f(x)|\le M-m.
+$$
+
+<Callout type="idea" title="两问的估计尺度不同">第一问由导数在一点的局部线性近似控制，除以 $a^2$ 后仍有有限极限；第二问只用函数值的全局上下界，不需要任何导数估计。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-e0cafb-002" type="essay" number={false}>
+<Question id="math-core-gd-04-05-002" type="essay" tags="来源:张宇1000题, 考点:周期函数, 考点:平移积分, 考点:充要条件">
 
-**[张宇1000题]** 设 $f$ 在 $\mathbb R$ 上连续，$T>0$。证明：$f$ 以 $T$ 为周期的充分必要条件是
+设 $f$ 在 $\mathbb R$ 上连续，$T>0$。证明：$f$ 以 $T$ 为周期的充分必要条件是
 
 $$
-\int_a^{a+T}f(x)\,\mathrm dx
+\int_a^{a+T}f(x)\,dx
 $$
 
 与 $a\in\mathbb R$ 无关。
 
 <Solution>
 
-**答案：** 该条件与 $f(a+T)=f(a)$ 对所有 $a$ 成立等价。
-
-**解析：** **关键构造：** 对平移窗口的积分求导。令 $F(a)=\int_a^{a+T}f(x)\,\mathrm dx$。因 $f$ 连续，由牛顿—莱布尼茨公式，
+**参考结论：**
 
 $$
-F'(a)=f(a+T)-f(a).
+\boxed{\int_a^{a+T}f(x)dx\ \text{与}\ a\ \text{无关}
+\iff f(a+T)=f(a)\quad(\forall a\in\mathbb R)}.
 $$
 
-若 $f$ 以 $T$ 为周期，则 $F'(a)=0$，故 $F$ 在实轴上恒为常数；反之，若 $F$ 与 $a$ 无关，则 $F'(a)=0$，即 $f(a+T)=f(a)$，故 $T$ 为 $f$ 的周期。
+**构造移动积分窗口。** 令
 
-**易错点：** “周期为 $T$”只要求 $T$ 是一个正周期，不要求最小正周期；若 $f$ 不连续，不能未经说明地逐点使用变限积分求导。
+$$
+H(a)=\int_a^{a+T}f(x)\,dx.
+$$
+
+由 $f$ 连续，变上、下限积分求导公式适用，且
+
+$$
+H'(a)=f(a+T)\cdot1-f(a)\cdot1=f(a+T)-f(a).
+$$
+
+**充分性（周期推出恒定）。** 若 $f(a+T)=f(a)$ 对所有 $a$ 成立，则 $H'(a)=0$，故 $H$ 在整个实轴上为常数，即任意长度为 $T$ 的窗口内积分相同。
+
+**必要性（积分恒定推出周期）。** 若 $H(a)$ 与 $a$ 无关，则 $H'(a)=0$。代入上述等式得
+
+$$
+f(a+T)-f(a)=0\qquad(\forall a),
+$$
+
+这正说明 $T$ 是 $f$ 的正周期。
+
+**易错点：** 题目只要求 $T$ 为**一个正周期**，不要求它是最小正周期；逆向推导依赖 $f$ 连续，因而移动积分可逐点求导。
 
 </Solution>
-
 </Question>
 
-<Question id="math-e0cafb-003" type="essay" number={false}>
+<Question id="math-core-gd-04-05-003" type="essay" tags="来源:张宇1000题, 考点:积分恒等式, 考点:分部积分, 考点:积分换序">
 
-**[张宇1000题]** 设 $f$ 在 $\mathbb R$ 上连续，证明对任意实数 $x$ 有
+设 $f$ 在 $\mathbb R$ 上连续。证明对**任意实数** $x$，有
 
 $$
-\int_0^x\left[\int_0^t f(u)\,\mathrm du\right]\mathrm dt
-=\int_0^x(x-t)f(t)\,\mathrm dt.
+\int_0^x\left[\int_0^t f(u)du\right]dt
+=\int_0^x(x-t)f(t)dt.
 $$
 
 <Solution>
 
-**答案：** 恒等式成立（包括 $x<0$）。
+**参考结论：** 所给等式对一切 $x\in\mathbb R$ 成立，包括 $x<0$ 时的有向积分。
 
-**解析：** 设 $F(t)=\int_0^t f(u)\,\mathrm du$，则 $F'(t)=f(t)$、$F(0)=0$。分部积分给出
+<Tabs items={['方法一：分部积分（适用于任意实数 x）','方法二：三角区域换序（x≥0）']} defaultIndex={0}>
+<Tab value="方法一：分部积分（适用于任意实数 x）">
+
+令 $F(t)=\int_0^tf(u)du$，则 $F'(t)=f(t)$、$F(0)=0$。对外层积分分部：
 
 $$
 \begin{aligned}
-\int_0^xF(t)\,\mathrm dt
-&=[tF(t)]_0^x-\int_0^xtF'(t)\,\mathrm dt\\
-&=x\int_0^xf(t)\,\mathrm dt-\int_0^xtf(t)\,\mathrm dt\\
-&=\int_0^x(x-t)f(t)\,\mathrm dt.
+\int_0^xF(t)dt
+&=[tF(t)]_0^x-\int_0^xtF'(t)dt\\
+&=x\int_0^xf(t)dt-\int_0^xtf(t)dt\\
+&=\int_0^x(x-t)f(t)dt.
 \end{aligned}
 $$
 
-**方法选择：** 二重嵌套积分可“先分部积分以降维”，也可在 $x\ge0$ 时交换三角区域 $0\le u\le t\le x$ 的积分次序。分部积分法的优点是自动兼容 $x<0$ 的定向积分。
+积分上下限即使逆序，分部积分公式仍然成立，因此无需再讨论 $x<0$。
 
-</Solution>
+</Tab>
+<Tab value="方法二：三角区域换序（x≥0）">
 
-</Question>
-
-<Question id="math-e0cafb-004" type="essay" number={false}>
-
-**[张宇1000题]** 设 $f$ 在 $[0,1]$ 上连续，证明
+当 $x\ge0$，积分区域为 $0\le u\le t\le x$。因为 $f$ 连续，可交换积分次序：
 
 $$
-\int_0^1\left[\int_{x^2}^{\sqrt{x}}f(t)\,\mathrm dt\right]\mathrm dx
-=\int_0^1(\sqrt{x}-x^2)f(x)\,\mathrm dx.
+\begin{aligned}
+\int_0^x\int_0^tf(u)du\,dt
+&=\int_0^x\int_u^xf(u)dt\,du\\
+&=\int_0^x(x-u)f(u)du.
+\end{aligned}
+$$
+
+换名变量即为右式。若要处理 $x<0$，需正确处理有向积分，直接采用方法一更稳妥。
+
+</Tab>
+</Tabs>
+
+**推广：** 同样的思路还能推出
+
+$$
+\int_0^x\frac{(x-t)^{n-1}}{(n-1)!}f(t)dt
+$$
+
+是 $f$ 的 $n$ 重积分的一种卷积表示；本题即 $n=2$ 的情况。
+
+</Solution>
+</Question>
+
+<Question id="math-core-gd-04-05-004" type="essay" tags="来源:张宇1000题, 考点:二重积分换序, 考点:积分区域, 考点:反函数界限">
+
+设 $f$ 在 $[0,1]$ 上连续。证明
+
+$$
+\int_0^1\left[\int_{x^2}^{\sqrt x}f(t)dt\right]dx
+=\int_0^1(\sqrt x-x^2)f(x)dx.
 $$
 
 <Solution>
 
-**答案：** 所给二重积分恒等式成立。
+**参考结论：** 等式成立；左侧积分区域在交换次序后，对固定 $t\in[0,1]$ 的宽度恰为 $\sqrt t-t^2$。
 
-**解析：** **几何突破口：** 对 $0\le x\le1$，有 $x^2\le\sqrt{x}$。固定 $t$ 后，条件 $x^2\le t\le\sqrt{x}$ 等价于 $t^2\le x\le\sqrt t$，故改变积分次序直接得到
+<Tabs items={['方法一：直接变换积分区域','方法二：复合原函数分部积分']} defaultIndex={0}>
+<Tab value="方法一：直接变换积分区域">
+
+**第一步：写出区域。** 因 $0\le x\le1$，有 $x^2\le\sqrt x$。左侧为区域
+
+$$
+D=\{(x,t):0\le x\le1,\quad x^2\le t\le\sqrt x\}
+$$
+
+上对函数 $f(t)$ 的二重积分。
+
+**第二步：把不等式反解为 $x$ 的范围。** 对固定 $0\le t\le1$，
+
+$$
+x^2\le t\ \Longleftrightarrow\ x\le\sqrt t,
+\qquad
+t\le\sqrt x\ \Longleftrightarrow\ x\ge t^2.
+$$
+
+所以同一区域又可写为 $0\le t\le1$、$t^2\le x\le\sqrt t$。
+
+**第三步：交换积分次序。** 因 $f$ 连续，换序合法：
 
 $$
 \begin{aligned}
-\int_0^1\int_{x^2}^{\sqrt x}f(t)\,\mathrm dt\,\mathrm dx
-&=\int_0^1\int_{t^2}^{\sqrt t}f(t)\,\mathrm dx\,\mathrm dt\\
-&=\int_0^1(\sqrt t-t^2)f(t)\,\mathrm dt.
+\int_0^1\int_{x^2}^{\sqrt x}f(t)dt\,dx
+&=\int_0^1\int_{t^2}^{\sqrt t}f(t)dx\,dt\\
+&=\int_0^1(\sqrt t-t^2)f(t)dt,
 \end{aligned}
 $$
 
-换名哑变量即为待证等式。
+与所需右侧只差哑变量的名称。
 
-**另一方法（分部积分）：** 令 $F(u)=\int_0^uf(t)\,\mathrm dt$，则左端为 $\int_0^1F(\sqrt x)\,\mathrm dx-\int_0^1F(x^2)\,\mathrm dx$。分别令 $x=u^2$ 和 $u=x^2$，得 $2\int_0^1uF(u)\,\mathrm du-\frac12\int_0^1u^{-1/2}F(u)\,\mathrm du$。两项各分部积分，边界项 $F(1)$ 抵消，余下 $\int_0^1(\sqrt u-u^2)f(u)\,\mathrm du$。其中 $u^{-1/2}F(u)=O(\sqrt u)$，零点处积分、分部积分均合法。
+</Tab>
+<Tab value="方法二：复合原函数分部积分">
 
-**模型提炼：** 上下限都是自变量函数的嵌套积分，先画出或代数确定积分区域，再考虑换序；不必计算原函数。
+令 $F(u)=\int_0^uf(t)dt$，有 $F'=f$、$F(0)=0$。左端写作
+
+$$
+I=\int_0^1F(\sqrt x)dx-\int_0^1F(x^2)dx.
+$$
+
+分别令 $x=u^2$ 和 $u=x^2$，得到
+
+$$
+I=2\int_0^1uF(u)du-\frac12\int_0^1u^{-1/2}F(u)du.
+$$
+
+前一项分部积分得 $[u^2F(u)]_0^1-\int_0^1u^2f(u)du$；后一项因 $d\sqrt u=\frac12u^{-1/2}du$，分部积分得 $[\sqrt uF(u)]_0^1-\int_0^1\sqrt u\,f(u)du$。两个端点项均为 $F(1)$，相消后即
+
+$$
+I=\int_0^1(\sqrt u-u^2)f(u)du.
+$$
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="积分区域法是首选">处理 $\int\!\int_{g(x)}^{h(x)}f(t)dt\,dx$ 时，先把上下限写成二维不等式，再固定 $t$ 求出 $x$ 的取值区间；这往往比硬套变限求导更直接。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-e0cafb-005" type="essay" number={false}>
+<Question id="math-core-gd-04-05-005" type="essay" tags="来源:李正元练习题, 考点:对称换元, 考点:倍角公式, 考点:瑕积分">
 
-**[李正元练习题]** 证明以下三个积分关系（端点处积分均按广义积分理解）：
+证明以下三个积分关系（端点积分按广义积分理解）：
 
 $$
 \begin{aligned}
-&\int_0^{\pi/2}\ln(\sin x)\,\mathrm dx
-=\int_0^{\pi/2}\ln(\cos x)\,\mathrm dx,\\
-&\int_0^{\pi/2}\ln(\sin2x)\,\mathrm dx
-=\int_0^{\pi/2}\ln(\sin x)\,\mathrm dx,\\
-&\int_0^{\pi/2}\ln(\sin x)\,\mathrm dx=-\frac\pi2\ln2.
+&\int_0^{\pi/2}\ln(\sin x)\,dx=\int_0^{\pi/2}\ln(\cos x)\,dx,\\
+&\int_0^{\pi/2}\ln(\sin 2x)\,dx=\int_0^{\pi/2}\ln(\sin x)\,dx,\\
+&\int_0^{\pi/2}\ln(\sin x)\,dx=-\frac\pi2\ln2.
 \end{aligned}
 $$
 
 <Solution>
 
-**答案：** 三个关系均成立，积分的公共值为 $-\frac\pi2\ln2$。
+**答案：三个恒等式全部成立；前两式中的积分均为 $\boxed{-\frac\pi2\ln2}$。**
 
-**解析：** **突破口：** 折叠对称积分与二倍角公式配合。由于 $\ln\sin x$ 在 $0$ 附近与 $\ln x$ 同阶，其瑕点积分收敛；$\ln\cos x$ 在 $\pi/2$ 附近同理。
+<Steps>
+<Step>
 
-令 $I=\int_0^{\pi/2}\ln\sin x\,\mathrm dx$。代换 $x=\pi/2-t$ 得
+### 先检查广义积分收敛
+
+$x\to0^+$ 时，$\sin x\sim x$，因而 $\ln\sin x=\ln x+o(1)$；$\int_0^\delta|\ln x|dx<\infty$。$x\to(\pi/2)^-$ 时，$\cos x\sim\pi/2-x$，所以第二种对数也可积。$\ln(\sin 2x)$ 在两个端点都具有同类可积奇性。因此以下代换、拆分均可先截断后取极限。
+
+</Step>
+<Step>
+
+### 用反射换元证明第一个等式
+
+记 $I=\int_0^{\pi/2}\ln(\sin x)dx$。令 $t=\pi/2-x$，则
 
 $$
-I=\int_0^{\pi/2}\ln\cos t\,\mathrm dt.
+I=\int_0^{\pi/2}\ln\left(\sin\left(\frac\pi2-t\right)\right)dt
+=\int_0^{\pi/2}\ln(\cos t)dt.
 $$
 
-再令 $u=2x$，并用 $\sin(\pi-u)=\sin u$，
+</Step>
+<Step>
 
-$$
-\int_0^{\pi/2}\ln\sin2x\,\mathrm dx
-=\frac12\int_0^\pi\ln\sin u\,\mathrm du=I.
-$$
+### 用二倍角代换证明第二个等式
 
-另一方面，$\sin2x=2\sin x\cos x$ 对 $0<x<\pi/2$ 成立，因此
+令 $u=2x$，利用 $\sin(\pi-u)=\sin u$，得
 
 $$
 \begin{aligned}
-I&=\int_0^{\pi/2}[\ln2+\ln\sin x+\ln\cos x]\,\mathrm dx\\
+\int_0^{\pi/2}\ln(\sin2x)dx
+&=\frac12\int_0^\pi\ln(\sin u)du\\
+&=\frac12\cdot2\int_0^{\pi/2}\ln(\sin u)du=I.
+\end{aligned}
+$$
+
+</Step>
+<Step>
+
+### 把三个积分联立求值
+
+在 $(0,\pi/2)$，$\sin2x=2\sin x\cos x>0$，因此
+
+$$
+\begin{aligned}
+I&=\int_0^{\pi/2}\ln(\sin2x)dx\\
+&=\frac\pi2\ln2+\int_0^{\pi/2}\ln(\sin x)dx+\int_0^{\pi/2}\ln(\cos x)dx\\
 &=\frac\pi2\ln2+2I.
 \end{aligned}
 $$
 
-移项得 $I=-\frac\pi2\ln2$。
+解得 $\boxed{I=-\frac\pi2\ln2}$。
 
-**易错点：** 瑕积分变换应先截去端点再取极限；不能把 $\ln\sin0$ 当作有限函数值直接代入。
+</Step>
+</Steps>
+
+<Callout type="idea" title="结构识别">对称换元给出两个未知积分相等；二倍角公式给出含 $\ln2$ 的线性关系。遇到求不出初等原函数的定积分，优先尝试这种“造方程求积分值”的方法。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-e0cafb-006" type="essay" number={false}>
+<Question id="math-core-gd-04-05-006" type="essay" tags="来源:张宇1000题, 考点:倒数换元, 考点:四次有理积分, 考点:反正切">
 
-**[张宇1000题]** 证明
+证明
 
 $$
-\int_0^{+\infty}\frac{\mathrm dx}{1+x^4}
-=\int_0^{+\infty}\frac{x^2\,\mathrm dx}{1+x^4}
-=\frac{\pi}{2\sqrt2}.
+\int_0^{+\infty}\frac{dx}{1+x^4}=
+\int_0^{+\infty}\frac{x^2\,dx}{1+x^4}=
+\frac\pi{2\sqrt2}.
 $$
 
 <Solution>
 
-**答案：** 两个积分均为 $\dfrac{\sqrt2\pi}{4}$。
+**答案：** 两积分相等，公共值为 $\boxed{\pi/(2\sqrt2)}$。
 
-**解析：** 两积分在 $0$ 处有限、无穷远处分别按 $x^{-4}$ 与 $x^{-2}$ 衰减，故收敛。令
+<Tabs items={['方法一：倒数换元与配方','方法二：直接拆分四次式']} defaultIndex={0}>
+<Tab value="方法一：倒数换元与配方">
 
-$$
-I_0=\int_0^\infty\frac{\mathrm dx}{1+x^4},\qquad
-I_2=\int_0^\infty\frac{x^2\,\mathrm dx}{1+x^4}.
-$$
+**第一步：证明两个积分收敛并相等。** 记 $I_0=\int_0^\infty(1+x^4)^{-1}dx$、$I_2=\int_0^\infty x^2(1+x^4)^{-1}dx$。二者在 $0$ 附近有界，无穷远分别为 $O(x^{-4})$ 与 $O(x^{-2})$，都绝对收敛。
 
-在 $I_0$ 中作倒数代换 $x=1/t$，得到
+在 $I_0$ 中令 $x=1/t$，注意积分方向反转：
 
 $$
-I_0=\int_0^\infty\frac{t^2\,\mathrm dt}{1+t^4}=I_2.
+I_0=\int_\infty^0\frac{-t^{-2}\,dt}{1+t^{-4}}
+=\int_0^\infty\frac{t^2\,dt}{1+t^4}=I_2.
 $$
 
-因
+**第二步：加起来化简。** 因 $I_0=I_2$，
 
 $$
-\frac{1+x^2}{1+x^4}=\frac12\left(
-\frac1{x^2+\sqrt2x+1}+\frac1{x^2-\sqrt2x+1}
-\right),
+2I_0=\int_0^\infty\frac{1+x^2}{x^4+1}dx.
 $$
 
-故
+利用 $x^4+1=(x^2+\sqrt2x+1)(x^2-\sqrt2x+1)$ 和
+
+$$
+\frac{1+x^2}{1+x^4}=\frac12\left(\frac1{x^2+\sqrt2x+1}+\frac1{x^2-\sqrt2x+1}\right),
+$$
+
+两二次式分别配方为 $(x\pm1/\sqrt2)^2+1/2$。于是
 
 $$
 \begin{aligned}
-2I_0&=\frac12\int_0^\infty\left[\frac1{(x+1/\sqrt2)^2+1/2}
-+\frac1{(x-1/\sqrt2)^2+1/2}\right]\mathrm dx\\
-&=\frac1{\sqrt2}\left[\arctan(\sqrt2x+1)+\arctan(\sqrt2x-1)\right]_0^\infty\\
-&=\frac\pi{\sqrt2}.
+2I_0
+&=\frac1{\sqrt2}\big[\arctan(\sqrt2x+1)+\arctan(\sqrt2x-1)\big]_{0}^{\infty}\\
+&=\frac1{\sqrt2}(\pi-0)=\frac\pi{\sqrt2}.
 \end{aligned}
 $$
 
 故 $I_0=I_2=\pi/(2\sqrt2)$。
 
-**模型提炼：** 若分母具有倒数对称性 $x\mapsto1/x$，先找可互换的两类积分，再把它们相加化为易分解的有理函数。
+</Tab>
+<Tab value="方法二：直接拆分四次式">
+
+可以从 $I_0=I_2$ 起步，也可以直接对有理函数作部分分式分解：
+
+$$
+\frac1{x^4+1}
+=\frac{x/(2\sqrt2)+1/2}{x^2+\sqrt2x+1}
++\frac{-x/(2\sqrt2)+1/2}{x^2-\sqrt2x+1}.
+$$
+
+把两个一次分子各拆为分母导数与常数，得到对数项和反正切项。取 $x=0$、$x\to\infty$ 后，对数项相消，反正切项给出同样的 $\pi/(2\sqrt2)$。考场中优先采用方法一，因为倒数对称性可以少做一半计算。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="代换的积分限">$x\mapsto1/x$ 将 $0^+$ 与 $+\infty$ 互换，必须同时改变积分上下限；不能只变换分式而忽略 $dx=-dt/t^2$。</Callout>
 
 </Solution>
-
 </Question>
 
 ## 二、符号与单调性：直接比较及分部积分
 
-<Question id="math-e0cafb-007" type="essay" number={false}>
+<Question id="math-core-gd-04-05-007" type="essay" points={6} tags="来源:1993考研数二, 考点:导数有界, 考点:积分估计, 考点:最佳常数">
 
-**[1993年数学二·6分]** 设 $a>0$，$f'$ 在 $[0,a]$ 上连续，$f(0)=0$。记 $M=\max_{0\le x\le a}|f'(x)|$。证明
+设 $a>0$，$f'$ 在 $[0,a]$ 上连续，$f(0)=0$。记 $M=\max_{0\le x\le a}|f'(x)|$。证明
 
 $$
-\left|\int_0^a f(x)\,\mathrm dx\right|\le\frac{Ma^2}{2}.
+\left|\int_0^a f(x)dx\right|\le\frac{Ma^2}{2}.
 $$
 
 <Solution>
 
-**答案：** 不等式成立，常数 $\frac12$ 为最优。
+**结论：** $\boxed{\left|\int_0^af(x)dx\right|\le Ma^2/2}$，且常数 $1/2$ 最优。
 
-**解析：** 由 $f(0)=0$ 和微积分基本定理，$f(x)=\int_0^xf'(t)\,\mathrm dt$，因此
-
-$$
-|f(x)|\le\int_0^x|f'(t)|\,\mathrm dt\le Mx.
-$$
-
-积分并取绝对值得
+**第一步：由导数界控制函数值。** $f(0)=0$，故对 $0\le x\le a$，
 
 $$
-\left|\int_0^a f(x)\,\mathrm dx\right|
-\le\int_0^a|f(x)|\,\mathrm dx
-\le M\int_0^ax\,\mathrm dx=\frac{Ma^2}{2}.
+f(x)=\int_0^xf'(t)dt,\qquad |f(x)|\le\int_0^x|f'(t)|dt\le Mx.
 $$
 
-取 $f(x)=Mx$（$M\ge0$）时等号成立，故系数不能降低。
+**第二步：积分得到面积界。**
 
-**模型提炼：** 已知函数在端点取零且导数有界，先转化为 $|f(x)|\le M|x-a|$ 型的距离估计，然后积分；比直接使用积分中值定理更能体现最优常数。
+$$
+\left|\int_0^af(x)dx\right|\le\int_0^a|f(x)|dx\le M\int_0^ax\,dx=\boxed{\frac{Ma^2}{2}}.
+$$
+
+**第三步：验证最优性。** 当 $f(x)=cx$、$c\ne0$ 时，$M=|c|$，且 $|\int_0^acx\,dx|=Ma^2/2$；等号可达，因而不能把 $1/2$ 统一换成更小常数。
+
+<Callout type="idea" title="通用模板">端点值已知、导数有界：先由微积分基本定理获得 $|f(x)-f(0)|\le Mx$，再积分；若区间起点改成 $b$，使用到该点的距离。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-e0cafb-008" type="essay" number={false}>
+<Question id="math-core-gd-04-05-008" type="essay" points={9} tags="来源:1994考研数二, 考点:单调性, 考点:积分平均, 考点:双重积分">
 
-**[1994年数学二·9分]** 设 $f$ 在 $[0,1]$ 上连续且单调不增。证明对任意 $0<\lambda<1$，有
+设 $f$ 在 $[0,1]$ 上连续且单调不增。证明对任意 $0<\lambda<1$，有
 
 $$
-\int_0^\lambda f(x)\,\mathrm dx
-\ge\lambda\int_0^1f(x)\,\mathrm dx.
+\int_0^\lambda f(x)dx\ge\lambda\int_0^1f(x)dx.
 $$
 
 <Solution>
 
-**答案：** 不等式成立；若 $f$ 严格递减，则为严格不等式。
+**结论：** 不等式对一切 $0<\lambda<1$ 成立；若 $f$ 严格递减则严格大于。
 
-**解析：** **方法一（区间平均值）：** 单调不增给出
+<Tabs items={['方法一：比较两段平均值','方法二：非负二重积分']} defaultIndex={0}>
+<Tab value="方法一：比较两段平均值">
+
+记 $A=\int_0^\lambda f(x)dx$、$B=\int_\lambda^1f(x)dx$。因 $f$ 单调不增，
 
 $$
-\frac1\lambda\int_0^\lambda f(x)\,\mathrm dx\ge f(\lambda)
-\ge\frac1{1-\lambda}\int_\lambda^1 f(x)\,\mathrm dx.
+\frac A\lambda\ge f(\lambda)\ge\frac B{1-\lambda}.
 $$
 
-设前后两个积分为 $A,B$，则 $(1-\lambda)A\ge\lambda B$，即 $A\ge\lambda(A+B)$，得证。
+乘以正数 $\lambda(1-\lambda)$，得 $(1-\lambda)A\ge\lambda B$，即
 
-**方法二（对称成双重积分）：** 两边作差并整理：
+$$
+A\ge\lambda(A+B)=\lambda\int_0^1f(x)dx.
+$$
+
+这种证明**不要求 $f(x)\ge0$**，只使用左右子区间的平均值关系。
+
+</Tab>
+<Tab value="方法二：非负二重积分">
+
+目标差为
 
 $$
 \begin{aligned}
-(1-\lambda)\int_0^\lambda f(x)\,\mathrm dx
--\lambda\int_\lambda^1 f(t)\,\mathrm dt
-=\int_0^\lambda\int_\lambda^1[f(x)-f(t)]\,\mathrm dt\,\mathrm dx\ge0.
+\int_0^\lambda f-\lambda\int_0^1f
+&=(1-\lambda)\int_0^\lambda f(x)dx-\lambda\int_\lambda^1f(t)dt\\
+&=\int_0^\lambda\int_\lambda^1[f(x)-f(t)]dt\,dx.
 \end{aligned}
 $$
 
-**易错点：** 不必假设 $f\ge0$；比较平均值只依赖单调性，与函数的正负无关。严格递减时，双重积分内核严格为正。
+因 $x\le\lambda\le t$，由单调不增有 $f(x)\ge f(t)$，所以最后的二重积分非负。严格递减时，在区域内部被积函数严格为正，积分亦严格为正。
+
+</Tab>
+</Tabs>
+
+**等号何时成立？** $f$ 连续单调不增时，若该差等于零，则任意 $x<\lambda<t$ 均有 $f(x)=f(t)$，进而 $f$ 在 $[0,1]$ 上恒为常数。反之常函数显然取等号。
 
 </Solution>
-
 </Question>
 
-<Question id="math-e0cafb-009" type="essay" number={false}>
+<Question id="math-core-gd-04-05-009" type="essay" points={8} tags="来源:2004考研数三, 考点:积分比较, 考点:分部积分, 考点:累积占优">
 
-**[2004年数学三·8分]** 设 $f,g$ 在 $[a,b]$ 上连续，且对任意 $x\in[a,b]$ 有
+设 $f,g$ 在 $[a,b]$ 上连续，且任意 $x\in[a,b]$ 满足
 
 $$
-\int_a^xf(t)\,\mathrm dt\ge\int_a^xg(t)\,\mathrm dt,
-\qquad \int_a^bf(t)\,\mathrm dt=\int_a^bg(t)\,\mathrm dt.
+\int_a^xf(t)dt\ge\int_a^xg(t)dt,\qquad
+\int_a^bf(t)dt=\int_a^bg(t)dt.
 $$
 
-证明：$\displaystyle\int_a^bxf(x)\,\mathrm dx\le\int_a^bxg(x)\,\mathrm dx$。
+证明
+
+$$
+\int_a^bxf(x)dx\le\int_a^bxg(x)dx.
+$$
 
 <Solution>
 
-**答案：** 不等式成立。
+**结论：** $\boxed{\int_a^bx[f(x)-g(x)]dx\le0}$。
 
-**解析：** **关键构造：** 定义累计差 $F(x)=\int_a^x[f(t)-g(t)]\,\mathrm dt$。由题意 $F(x)\ge0$ 且 $F(a)=F(b)=0$，同时 $F'(x)=f(x)-g(x)$。
+**第一步：把积分条件变为非负原函数。** 定义
 
-对积分差分部积分：
+$$
+H(x)=\int_a^x[f(t)-g(t)]dt.
+$$
+
+题设正好给出 $H(x)\ge0$（$a\le x\le b$），且 $H(a)=H(b)=0$；连续性保证 $H'=f-g$。
+
+**第二步：对加权积分分部积分。**
 
 $$
 \begin{aligned}
-\int_a^bx[f(x)-g(x)]\,\mathrm dx
-&=\int_a^bxF'(x)\,\mathrm dx\\
-&=[xF(x)]_a^b-\int_a^bF(x)\,\mathrm dx\\
-&=-\int_a^bF(x)\,\mathrm dx\le0.
+\int_a^bx[f(x)-g(x)]dx
+&=\int_a^bxH'(x)dx\\
+&=[xH(x)]_a^b-\int_a^bH(x)dx\\
+&=-\int_a^bH(x)dx\le0.
 \end{aligned}
 $$
 
-**重要拓展：** 若 $w$ 为 $[a,b]$ 上连续可导的非减函数，同样有
+这正是待证不等式。
 
-$$
-\int_a^bw(x)[f(x)-g(x)]\,\mathrm dx
-=-\int_a^bw'(x)F(x)\,\mathrm dx\le0.
-$$
+**第三步：理解等号。** 因 $H$ 连续非负，$\int H=0$ 当且仅当 $H\equiv0$，亦即 $f\equiv g$。
 
-这说明“累计积分占优 + 总量相同”可推出对任意非减权重的逆向加权不等式。**总量相同这一端点条件不可随意删去。**
+<Callout type="idea" title="推广到递增权函数">若 $w\in C^1[a,b]$ 且 $w'\ge0$，同样有 $\int_a^bw(x)(f-g)dx=-\int_a^bw'(x)H(x)dx\le0$。这类题最关键的不是直接比较 $f,g$，而是利用其**累计积分差**。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-e0cafb-010" type="essay" number={false}>
+<Question id="math-core-gd-04-05-010" type="essay" points={8} tags="来源:2005考研数三, 考点:分部积分, 考点:单调函数, 考点:乘积求导">
 
-**[2005年数学三·8分]** 设 $f,g$ 在 $[0,1]$ 上连续可导，$f(0)=0$，并且 $f'(x)\ge0$、$g'(x)\ge0$。证明任意 $a\in[0,1]$ 有
+设 $f,g\in C^1[0,1]$，$f(0)=0$，且 $f'(x)\ge0$、$g'(x)\ge0$。证明对任意 $a\in[0,1]$，有
 
 $$
-\int_0^ag(x)f'(x)\,\mathrm dx
-+\int_0^1f(x)g'(x)\,\mathrm dx\ge f(a)g(1).
+\int_0^ag(x)f'(x)dx+\int_0^1f(x)g'(x)dx\ge f(a)g(1).
 $$
 
 <Solution>
 
-**答案：** 不等式成立。
+**结论：** 题设不等式对每个 $a\in[0,1]$ 成立。
 
-**解析：** **突破口：** 两个交叉导数积分暗示乘积求导 $(fg)'=f'g+fg'$。分部积分第一项，利用 $f(0)=0$ 得
+<Steps>
+<Step>
 
-$$
-\int_0^ag(x)f'(x)\,\mathrm dx=f(a)g(a)-\int_0^af(x)g'(x)\,\mathrm dx.
-$$
+### 第一步：先把交叉导数配成 $d(fg)$
 
-于是左端等于
-
-$$
-f(a)g(a)+\int_a^1f(x)g'(x)\,\mathrm dx.
-$$
-
-因 $f'\ge0$，对 $x\in[a,1]$ 有 $f(x)\ge f(a)$，又 $g'\ge0$，故
+由 $f(0)=0$，第一项分部积分得
 
 $$
-\int_a^1f(x)g'(x)\,\mathrm dx
-\ge f(a)\int_a^1g'(x)\,\mathrm dx=f(a)[g(1)-g(a)].
+\int_0^agf'=[fg]_0^a-\int_0^afg'
+=f(a)g(a)-\int_0^afg'.
 $$
 
-相加即为所证。
+故待证左端恰等于
 
-**模型提炼：** 出现 $f'g$ 与 $fg'$ 的组合，优先使用分部积分统一到同一变量区间，再使用单调性比较。不能在不知道 $g'$ 符号时把 $f(x)$ 换为 $f(a)$。
+$$
+f(a)g(a)+\int_a^1f(x)g'(x)dx.
+$$
+
+</Step>
+<Step>
+
+### 第二步：在后半区间利用单调性
+
+由 $f'\ge0$，$x\in[a,1]$ 时 $f(x)\ge f(a)$；由 $g'\ge0$，可以同乘不等号而不反向：
+
+$$
+\int_a^1f(x)g'(x)dx\ge f(a)\int_a^1g'(x)dx=f(a)[g(1)-g(a)].
+$$
+
+与 $f(a)g(a)$ 相加，恰得 $f(a)g(1)$。
+
+</Step>
+</Steps>
+
+**等号判别：** 两边之差为 $\int_a^1[f(x)-f(a)]g'(x)dx\ge0$。等号当且仅当这个连续非负函数在 $[a,1]$ 上恒为零。
 
 </Solution>
-
 </Question>
+<Question id="math-core-gd-04-05-011" type="essay" tags="来源:张宇1000题, 考点:端点零值, 考点:总变差, 考点:最优常数">
 
-<Question id="math-e0cafb-011" type="essay" number={false}>
-
-**[张宇1000题]** 设 $f\in C^1[a,b]$，$a<b$，且 $f(a)=f(b)=0$。证明对一切 $x\in(a,b)$ 有
+设 $f\in C^1[a,b]$，$a<b$，且 $f(a)=f(b)=0$。证明对一切 $x\in(a,b)$，有
 
 $$
-|f(x)|\le\frac12\int_a^b|f'(t)|\,\mathrm dt.
+|f(x)|\le\frac12\int_a^b|f'(t)|dt.
 $$
 
 <Solution>
 
-**答案：** 不等式成立，常数 $\tfrac12$ 不能改小。
+**答案：** 估计式成立，且前面的 $\boxed{1/2}$ 是不能降低的最优系数。
 
-**解析：** 从左右两个端点分别用微积分基本定理：
-
-$$
-f(x)=\int_a^xf'(t)\,\mathrm dt,
-\qquad f(x)=-\int_x^bf'(t)\,\mathrm dt.
-$$
-
-故
+**第一步：从左右两个零端点分别表达 $f(x)$。**
 
 $$
-|f(x)|\le\min\left\{\int_a^x|f'|,\ \int_x^b|f'|\right\}
-\le\frac12\int_a^b|f'(t)|\,\mathrm dt.
+f(x)=\int_a^xf'(t)dt=-\int_x^bf'(t)dt.
 $$
 
-例如 $f(t)=(t-a)(b-t)$，在其最大点 $x=(a+b)/2$ 处，$f$ 先增后减，总变差恰为 $2f(x)$，故达到等号，$1/2$ 是最优系数。
+由三角不等式，设 $A=\int_a^x|f'|$、$B=\int_x^b|f'|$，就有
 
-**模型提炼：** 两端均为零时，同一函数值可从两侧的积分表示，各得一个上界；取最小值后再用 $\min(A,B)\le(A+B)/2$。
+$$
+|f(x)|\le A,\qquad |f(x)|\le B.
+$$
+
+**第二步：合并两个上界。**
+
+$$
+|f(x)|\le\min(A,B)\le\frac{A+B}{2}
+=\boxed{\frac12\int_a^b|f'(t)|dt}.
+$$
+
+**第三步：证明常数最优。** 取 $f(t)=(t-a)(b-t)$。它从 $a$ 单调上升至中点 $c=(a+b)/2$，再下降至 $b$，且在中点取正的最大值 $H=f(c)$。因此
+
+$$
+\int_a^b|f'(t)|dt=[f(c)-f(a)]+[f(c)-f(b)]=2H.
+$$
+
+在 $x=c$ 有 $|f(c)|=\frac12\int|f'|$，取到等号。
+
+<Callout type="idea" title="为什么出现 $1/2$？">函数从零上升到高度 $H$，再返回零，至少产生 $2H$ 的总变差。两侧各自控制一次，是本题最有力的结构。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-e0cafb-012" type="essay" number={false}>
+<Question id="math-core-gd-04-05-012" type="essay" tags="来源:李林880, 考点:严格凹函数, 考点:弦线比较, 考点:积分估计">
 
-**[李林880]** 设 $f$ 在 $[a,b]$ 上二阶可导，$a<b$，并且 $f(a)=f(b)=0$、$f''(x)<0$（$a<x<b$）。证明对任意 $x\in(a,b)$，
+设 $f$ 在 $[a,b]$ 上二阶可导，$a<b$，并且 $f(a)=f(b)=0$、$f''(x)<0$（$a<x<b$）。证明对任意 $x\in(a,b)$，
 
 $$
-0<f(x)<\frac{2}{b-a}\int_a^bf(t)\,\mathrm dt.
+0<f(x)<\frac{2}{b-a}\int_a^bf(t)dt.
 $$
 
 <Solution>
 
-**答案：** 两个严格不等式均成立。
+**答案：** $\boxed{0<f(x)<\dfrac{2}{b-a}\int_a^bf(t)dt}$ 对一切内部点严格成立。
 
-**解析：** **突破口：** $f''<0$ 表示严格凹函数，图像严格位于任意弦的上方。首先，连接 $(a,0)$ 与 $(b,0)$ 的弦是零函数，因此对 $x\in(a,b)$，$f(x)>0$。
+<Steps>
+<Step>
 
-固定 $x\in(a,b)$。在 $[a,x]$ 上，连接 $(a,0)$ 和 $(x,f(x))$ 的弦低于函数；在 $[x,b]$ 上，连接 $(x,f(x))$ 和 $(b,0)$ 的弦也低于函数。即
+### 第一步：用严格凹性证明 $f(x)>0$
+
+$f''<0$ 意味着 $f$ 严格凹：曲线在两端点连成的弦的上方。端点均为零，故对 $a<x<b$，
 
 $$
-f(t)>\begin{cases}
- \dfrac{t-a}{x-a}f(x),&a<t<x,\\
- \dfrac{b-t}{b-x}f(x),&x<t<b.
- \end{cases}
+f(x)>\frac{b-x}{b-a}f(a)+\frac{x-a}{b-a}f(b)=0.
 $$
 
-分别积分并相加，
+</Step>
+<Step>
+
+### 第二步：过 $(x,f(x))$ 与左右零端点分别画弦
+
+固定内部点 $x$。对于 $a<t<x$，严格凹性给出
+
+$$
+f(t)>\frac{t-a}{x-a}f(x).
+$$
+
+对于 $x<t<b$，严格凹性给出
+
+$$
+f(t)>\frac{b-t}{b-x}f(x).
+$$
+
+这里是两段不同的弦：左段连 $(a,0)$、$(x,f(x))$，右段连 $(x,f(x))$、$(b,0)$，不要错误地只用整段零弦。
+
+</Step>
+<Step>
+
+### 第三步：积分得到三角形面积下界
 
 $$
 \begin{aligned}
-\int_a^bf(t)\,\mathrm dt
-&>\frac{x-a}{2}f(x)+\frac{b-x}{2}f(x)\\
-&=\frac{b-a}{2}f(x).
+\int_a^bf(t)dt
+&>f(x)\left[\frac1{x-a}\int_a^x(t-a)dt+\frac1{b-x}\int_x^b(b-t)dt\right]\\
+&=f(x)\left(\frac{x-a}2+\frac{b-x}2\right)
+=\frac{b-a}2f(x).
 \end{aligned}
 $$
 
-于是 $f(x)<\frac{2}{b-a}\int_a^bf(t)\,\mathrm dt$。
+两边同乘 $2/(b-a)>0$，即得所证严格上界。
 
-**模型提炼：** 二阶导数的符号可转为“图像与弦的位置”以估计积分；无需寻找最大点，也不需要对 $f$ 再积分求原函数。
+</Step>
+</Steps>
+
+**方法理解：** 图像下方由两段弦拼成的三角形，底边长 $b-a$、高 $f(x)$；真实曲线严格高于它，故积分面积严格大于三角形面积。
 
 </Solution>
-
 </Question>
 
 ## 三、柯西不等式、矩条件与有界导数
 
-<Question id="math-e0cafb-013" type="essay" number={false}>
+<Question id="math-core-gd-04-05-013" type="essay" tags="来源:李正元练习题, 考点:积分柯西不等式, 考点:平方非负, 考点:等号条件">
 
-**[李正元练习题]** 设 $f,g$ 在 $[a,b]$ 上连续，证明
-
-$$
-\left[\int_a^bf(x)g(x)\,\mathrm dx\right]^2
-\le\left[\int_a^bf^2(x)\,\mathrm dx\right]
-\left[\int_a^bg^2(x)\,\mathrm dx\right].
-$$
-
-<Solution>
-
-**答案：** 积分形式的柯西—施瓦茨不等式成立。
-
-**解析：** 若 $\int_a^bg^2=0$，由连续性知 $g\equiv0$，结论显然。否则对任意实数 $\lambda$，
+设 $f,g$ 在 $[a,b]$ 上连续。证明
 
 $$
-0\le\int_a^b[f(x)-\lambda g(x)]^2\,\mathrm dx
-=A-2\lambda B+\lambda^2C,
-$$
-
-其中 $A=\int f^2$、$B=\int fg$、$C=\int g^2>0$。取使二次式最小的 $\lambda=B/C$，得到 $0\le A-B^2/C$，即 $B^2\le AC$。
-
-**等号条件：** 若 $g\not\equiv0$，等号成立当且仅当存在常数 $\lambda$ 使 $f(x)=\lambda g(x)$ 对所有 $x\in[a,b]$ 成立。连续性可将“几乎处处”提升为“处处”。
-
-**模型提炼：** 目标式为两个平方积分的乘积时，先考虑构造 $\int(f-\lambda g)^2\ge0$，将证明转化为一元二次式的判别式。
-
-</Solution>
-
-</Question>
-
-<Question id="math-e0cafb-014" type="essay" number={false}>
-
-**[张宇1000题]** 设 $f\in C^1[a,b]$，$a<b$，且 $f(a)=0$。证明
-
-$$
-\int_a^bf^2(x)\,\mathrm dx
-\le\frac{(b-a)^2}{2}\int_a^b[f'(x)]^2\,\mathrm dx.
+\left[\int_a^bf(x)g(x)dx\right]^2
+\le\left[\int_a^bf^2(x)dx\right]\left[\int_a^bg^2(x)dx\right].
 $$
 
 <Solution>
 
-**答案：** 不等式成立。
+**答案：** 积分形式的柯西—施瓦茨不等式成立；等号当且仅当 $f,g$ 线性相关（含零函数情形）。
 
-**解析：** 由 $f(a)=0$，有 $f(x)=\int_a^xf'(t)\,\mathrm dt$。对每个 $x\in[a,b]$ 应用柯西—施瓦茨不等式：
+<Tabs items={['方法一：构造非负二次式','方法二：最优常数投影']} defaultIndex={0}>
+<Tab value="方法一：构造非负二次式">
 
-$$
-f^2(x)\le (x-a)\int_a^x[f'(t)]^2\,\mathrm dt
-\le (x-a)\int_a^b[f'(t)]^2\,\mathrm dt.
-$$
+记 $A=\int_a^bf^2$，$B=\int_a^bfg$，$C=\int_a^bg^2$。如果 $C=0$，由连续性，$g\equiv0$，故 $B=0$，结论成立。
 
-在 $x\in[a,b]$ 上积分，得到
+若 $C>0$，对任意实数 $\lambda$，
 
 $$
-\int_a^bf^2(x)\,\mathrm dx
-\le\left(\int_a^b(x-a)\,\mathrm dx\right)
-\int_a^b[f'(t)]^2\,\mathrm dt
-=\frac{(b-a)^2}{2}\int_a^b[f'(t)]^2\,\mathrm dt.
+0\le\int_a^b(f-\lambda g)^2dx=A-2B\lambda+C\lambda^2.
 $$
 
-**方法评价：** 此法只需一次柯西不等式和一次积分，系数便于记忆，但不声称是最优常数；若要求最优常数，则需进一步研究端点条件及变分问题。
+一个开口向上的二次多项式对一切 $\lambda$ 非负，其判别式必须非正，因而
+
+$$
+(-2B)^2-4AC\le0\quad\Longrightarrow\quad\boxed{B^2\le AC}.
+$$
+
+</Tab>
+<Tab value="方法二：最优常数投影">
+
+仍令 $C>0$，选择 $\lambda_0=B/C$，令 $\int(f-\lambda g)^2$ 取最小值，则
+
+$$
+0\le\int_a^b\left(f-\frac BCg\right)^2dx=A-\frac{B^2}{C}.
+$$
+
+两边乘 $C>0$ 即得到 $B^2\le AC$。这就是将 $f$ 沿 $g$ 方向作最佳平方逼近的代数原理。
+
+</Tab>
+</Tabs>
+
+**等号条件：** 当 $C>0$ 时，等号意味着 $\int(f-\lambda_0 g)^2=0$。被积函数连续非负，因而 $f(x)=\lambda_0g(x)$ 在整个 $[a,b]$ 上成立。若 $g\equiv0$，也显然取等号。
 
 </Solution>
-
 </Question>
 
-<Question id="math-e0cafb-015" type="essay" number={false}>
+<Question id="math-core-gd-04-05-014" type="essay" tags="来源:张宇1000题, 考点:积分柯西不等式, 考点:端点零值, 考点:能量估计">
 
-**[李林880]** 设 $f\in C[a,b]$，$a<b$，且
+设 $f\in C^1[a,b]$，$a<b$，且 $f(a)=0$。证明
 
 $$
-\int_a^bf(x)\,\mathrm dx=0,
-\qquad\int_a^bx f(x)\,\mathrm dx=0.
+\int_a^bf^2(x)dx\le\frac{(b-a)^2}{2}\int_a^b[f'(x)]^2dx.
+$$
+
+<Solution>
+
+**答案：** $\boxed{\int_a^bf^2\le\frac{(b-a)^2}{2}\int_a^b(f')^2}$。
+
+**第一步：以端点零值消去常数。** 由微积分基本定理，
+
+$$
+f(x)=\int_a^xf'(t)dt.
+$$
+
+**第二步：对每个固定 $x$ 使用积分柯西不等式。**
+
+$$
+\begin{aligned}
+f^2(x)&=\left(\int_a^x1\cdot f'(t)dt\right)^2\\
+&\le\left(\int_a^x1^2dt\right)\left(\int_a^x[f'(t)]^2dt\right)\\
+&\le(x-a)\int_a^b[f'(t)]^2dt.
+\end{aligned}
+$$
+
+**第三步：对 $x$ 再积分。**
+
+$$
+\begin{aligned}
+\int_a^bf^2(x)dx
+&\le\int_a^b(x-a)dx\cdot\int_a^b[f'(t)]^2dt\\
+&=\frac{(b-a)^2}{2}\int_a^b[f'(t)]^2dt.
+\end{aligned}
+$$
+
+<Callout type="idea" title="常数含义">这个证明得到的是一个方便使用的有效系数 $1/2$，但并非相应单端零值问题的最佳系数。若题目额外要求最优常数，须另作更精细分析，不能仅凭此解法判断最佳性。</Callout>
+
+</Solution>
+</Question>
+
+<Question id="math-core-gd-04-05-015" type="essay" tags="来源:李林880, 考点:双矩条件, 考点:罗尔中值定理, 考点:多个零点">
+
+设 $f\in C[a,b]$，$a<b$，且
+
+$$
+\int_a^bf(x)dx=0,\qquad \int_a^bx f(x)dx=0.
 $$
 
 证明至少存在两个不同的 $\xi_1,\xi_2\in(a,b)$ 满足 $f(\xi_1)=f(\xi_2)=0$。
 
 <Solution>
 
-**答案：** 至少存在两个互异的内部零点。
+**结论：** $\boxed{\exists\ a<\xi_1<\xi_2<b:\ f(\xi_1)=f(\xi_2)=0}$。
 
-**解析：** **突破口：** 将两个积分条件转化为原函数同时满足“三点为零”。定义
+<Steps>
+<Step>
 
-$$
-F(x)=\int_a^xf(t)\,\mathrm dt.
-$$
+### 第一步：把函数积分构造为有两个端点零值的原函数
 
-则 $F(a)=F(b)=0$。由分部积分，
-
-$$
-0=\int_a^bxf(x)\,\mathrm dx
-=[xF(x)]_a^b-\int_a^bF(x)\,\mathrm dx
-=-\int_a^bF(x)\,\mathrm dx.
-$$
-
-因 $F$ 连续且积分为零，存在 $c\in(a,b)$ 满足 $F(c)=0$：若 $F\equiv0$，任取 $c$；否则 $F$ 必在内部取到正、负值，介值定理保证内部零点。
-
-于是 $F(a)=F(c)=F(b)=0$。分别在 $[a,c]$ 和 $[c,b]$ 上应用罗尔定理，存在
+令 $F(x)=\int_a^xf(t)dt$。由连续性，$F\in C^1[a,b]$、$F'=f$，并且
 
 $$
-a<\xi_1<c<\xi_2<b,
-\qquad f(\xi_1)=F'(\xi_1)=0,
-\quad f(\xi_2)=F'(\xi_2)=0.
+F(a)=0,\qquad F(b)=\int_a^bf=0.
 $$
 
-**模型提炼：** 函数的前两个矩 $\int f$、$\int xf$ 同时为零，采用“构造一次原函数 + 分部积分 + 两次罗尔”证明多个零点，比直接猜测符号变化更稳健。
+</Step>
+<Step>
+
+### 第二步：用第一矩条件再制造一个内部零点
+
+对 $\int_a^bxf(x)dx=\int_a^bxF'(x)dx$ 分部积分，
+
+$$
+0=[xF(x)]_a^b-\int_a^bF(x)dx=-\int_a^bF(x)dx.
+$$
+
+若 $F\equiv0$，则 $f\equiv0$，结论显然。否则连续的 $F$ 积分为零，必在区间上取正值与负值（若仅同号则积分不能为零）；由介值定理存在 $c\in(a,b)$ 使 $F(c)=0$。
+
+</Step>
+<Step>
+
+### 第三步：左右各用一次罗尔定理
+
+现在 $F(a)=F(c)=F(b)=0$。在 $[a,c]$ 上存在 $\xi_1\in(a,c)$ 使 $F'(\xi_1)=0$；在 $[c,b]$ 上存在 $\xi_2\in(c,b)$ 使 $F'(\xi_2)=0$。
+
+由 $F'=f$，得 $f(\xi_1)=f(\xi_2)=0$，且 $\xi_1<c<\xi_2$，故两点必不同。
+
+</Step>
+</Steps>
+
+**思路总结：** 两个矩条件不是直接要求 $f$ 有两个零点，而是先保证原函数有三个零点，再应用两次罗尔定理。构造层级不能颠倒。
 
 </Solution>
-
 </Question>
 
-<Question id="math-e0cafb-016" type="essay" number={false}>
+<Question id="math-core-gd-04-05-016" type="essay" tags="来源:李正元练习题, 考点:函数平均值, 考点:总变差, 考点:一致估计">
 
-**[李正元练习题]** 设 $f\in C^1[a,b]$，$a<b$。证明
+设 $f\in C^1[a,b]$，$a<b$。证明
 
 $$
-\max_{x\in[a,b]}|f(x)|
-\le\frac1{b-a}\left|\int_a^bf(x)\,\mathrm dx\right|
-+\int_a^b|f'(x)|\,\mathrm dx.
+\max_{x\in[a,b]}|f(x)|\le\frac1{b-a}\left|\int_a^bf(x)dx\right|+\int_a^b|f'(x)|dx.
 $$
 
 <Solution>
 
-**答案：** 不等式成立。
+**答案：** $\boxed{\|f\|_\infty\le|\bar f|+\int_a^b|f'|}$，其中 $\bar f=\frac1{b-a}\int_a^bf$。
 
-**解析：** **突破口：** 用平均值代替未知基准点，将函数值和积分平均值比较。定义 $\overline f=\frac1{b-a}\int_a^bf(t)\,\mathrm dt$。对任意 $x\in[a,b]$，
+**第一步：用区间平均值作为统一参照。** 令 $\bar f=\frac1{b-a}\int_a^bf(t)dt$，则对任何 $x\in[a,b]$，
 
 $$
-\begin{aligned}
-|f(x)-\overline f|
-&=\left|\frac1{b-a}\int_a^b[f(x)-f(t)]\,\mathrm dt\right|\\
-&\le\frac1{b-a}\int_a^b\left|\int_t^x f'(u)\,\mathrm du\right|\mathrm dt\\
-&\le\frac1{b-a}\int_a^b\int_a^b|f'(u)|\,\mathrm du\,\mathrm dt\\
-&=\int_a^b|f'(u)|\,\mathrm du.
-\end{aligned}
+f(x)-\bar f=\frac1{b-a}\int_a^b[f(x)-f(t)]dt.
 $$
 
-由三角不等式 $|f(x)|\le|\overline f|+|f(x)-\overline f|$，再对 $x$ 取最大值得结论。
+**第二步：用总变差控制与平均值的偏差。** 牛顿—莱布尼茨公式给出
 
-**模型提炼：** $\|f\|_\infty$ 可由“平均值的大小 + 全区间变差”控制；如果题目没有给出 $f(a)$ 或 $f(b)$，选择积分平均值作为锚点尤其有效。
+$$
+|f(x)-f(t)|=\left|\int_t^xf'(u)du\right|\le\int_a^b|f'(u)|du.
+$$
+
+将其代入上一式，并注意区间长度为 $b-a$，得
+
+$$
+|f(x)-\bar f|\le\frac1{b-a}\int_a^b\int_a^b|f'(u)|du\,dt=\int_a^b|f'(u)|du.
+$$
+
+**第三步：取最大值。** $|f(x)|\le|\bar f|+|f(x)-\bar f|$，上述上界与 $x$ 无关，因此在 $[a,b]$ 上取最大值即得所证。
+
+**拓展：** 如果已知 $\int_a^bf=0$，就得到简明结论 $\max|f|\le\int_a^b|f'|$；若已知某个函数值为零，还可选择该点作为锚点。
 
 </Solution>
-
 </Question>
-
 ## 四、凸性、梯形公式与数值积分误差
 
-<Question id="math-e0cafb-017" type="essay" number={false}>
+<Question id="math-core-gd-04-05-017" type="essay" tags="来源:李林880, 考点:严格凸性, 考点:赫尔米特不等式, 考点:积分平均值">
 
-**[李林880]** 设 $f$ 在 $[a,b]$ 上二阶可导，$a<b$，且 $f''(x)>0$（$a<x<b$）。证明
+设 $f$ 在 $[a,b]$ 上二阶可导，$a<b$，且 $f''(x)>0$（$a<x<b$）。证明
 
 $$
-f\!\left(\frac{a+b}{2}\right)
-<\frac1{b-a}\int_a^bf(x)\,\mathrm dx
-<\frac{f(a)+f(b)}2.
+f\!\left(\frac{a+b}{2}\right)<\frac1{b-a}\int_a^bf(x)dx<\frac{f(a)+f(b)}2.
 $$
 
 <Solution>
 
-**答案：** 两个严格不等式成立。
+**结论：** $\boxed{f((a+b)/2)<\frac1{b-a}\int_a^bf<\frac{f(a)+f(b)}2}$，两侧均为严格不等式。
 
-**解析：** **核心特征：** $f''>0$ 意味着严格凸性，切线在下、弦在上。令 $m=(a+b)/2$。
+<Tabs items={['方法一：切线和弦线','方法二：对称点配对']} defaultIndex={0}>
+<Tab value="方法一：切线和弦线">
 
-由严格凸性，对于 $x\ne m$，有
+令 $m=(a+b)/2$。由 $f''>0$，$f$ 严格凸，任一切线位于函数图像严格下方；在 $x\ne m$ 时，
 
 $$
 f(x)>f(m)+f'(m)(x-m).
 $$
 
-将其在 $[a,b]$ 上积分，利用 $\int_a^b(x-m)\,\mathrm dx=0$，得
+两边在 $[a,b]$ 上积分，线性项由对称性消失：
 
 $$
-\int_a^bf(x)\,\mathrm dx>(b-a)f(m).
+\int_a^bf(x)dx>(b-a)f(m)+f'(m)\int_a^b(x-m)dx=(b-a)f(m).
 $$
 
-另一方面，对 $a<x<b$，令 $\theta=(x-a)/(b-a)$，严格凸性给出
+**上界：** 对任何 $a<x<b$，严格凸性保证图像在端点弦线下方：
 
 $$
-f(x)<(1-\theta)f(a)+\theta f(b).
+f(x)<\frac{b-x}{b-a}f(a)+\frac{x-a}{b-a}f(b).
 $$
 
-积分后得到
+积分并计算两个三角形权重的积分都等于 $(b-a)/2$，得到
 
 $$
-\int_a^bf(x)\,\mathrm dx
-<\frac{b-a}{2}[f(a)+f(b)].
+\int_a^bf(x)dx<\frac{b-a}{2}[f(a)+f(b)].
 $$
 
-两式除以 $b-a>0$ 即证。若 $f''<0$，两侧不等号全部反向。
+两边分别除以正数 $b-a$，即得。
 
-**模型提炼：** 这是一组可用于估计积分均值的上、下界：中点函数值、积分平均值、两端函数值平均值。注意严格性来自 $f''$ 严格同号，而非仅 $f''\ge0$。
+</Tab>
+<Tab value="方法二：对称点配对">
+
+对 $x\in(a,m)$，$x$ 与 $a+b-x$ 关于 $m$ 对称，严格凸性给出
+
+$$
+2f(m)<f(x)+f(a+b-x).
+$$
+
+对 $x\in(a,m)$ 积分，得 $(b-a)f(m)<\int_a^bf$。
+
+同理，严格凸性及弦线不等式分别给出
+
+$$
+f(x)<\frac{b-x}{b-a}f(a)+\frac{x-a}{b-a}f(b),
+$$
+
+$$
+f(a+b-x)<\frac{x-a}{b-a}f(a)+\frac{b-x}{b-a}f(b).
+$$
+
+两式相加为 $f(x)+f(a+b-x)<f(a)+f(b)$，再对半区间积分，便得右侧严格上界。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="重要结论">这就是严格凸函数的 Hermite–Hadamard 积分估计。若 $f''<0$，两个不等号均反向；若仅 $f''\ge0$，通常只能保证非严格不等式。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-e0cafb-018" type="essay" number={false}>
+<Question id="math-core-gd-04-05-018" type="essay" tags="来源:李林880, 考点:梯形求积公式, 考点:分部积分, 考点:误差最优界">
 
-**[李林880]** 设 $f\in C^2[a,b]$，$a<b$。
+设 $f\in C^2[a,b]$，$a<b$。
 
-（1）证明
-
-$$
-\int_a^bf(x)\,\mathrm dx
-=\frac{b-a}{2}[f(a)+f(b)]
-+\frac12\int_a^b(x-a)(x-b)f''(x)\,\mathrm dx.
-$$
-
-（2）若 $M=\max_{x\in[a,b]}|f''(x)|$，证明
+(1) 证明
 
 $$
-\left|\int_a^bf(x)\,\mathrm dx-\frac{b-a}{2}[f(a)+f(b)]\right|
+\int_a^bf(x)dx=\frac{b-a}{2}[f(a)+f(b)]
++\frac12\int_a^b(x-a)(x-b)f''(x)dx.
+$$
+
+(2) 若 $M=\max_{x\in[a,b]}|f''(x)|$，证明
+
+$$
+\left|\int_a^bf(x)dx-\frac{b-a}{2}[f(a)+f(b)]\right|
 \le\frac{M(b-a)^3}{12}.
 $$
 
 <Solution>
 
-**答案：** （1）恒等式成立；（2）上界成立且常数 $\tfrac1{12}$ 最优。
+**答案：** (1) 梯形公式及其精确余项恒等式成立；(2) 误差上界为 $\boxed{M(b-a)^3/12}$，常数 $1/12$ 最优。
 
-**解析：** **突破口：** 梯形公式误差由二阶导数控制，应构造在端点消失的二次核 $p(x)=(x-a)(x-b)$。
+<Steps>
+<Step>
 
-两次分部积分给出
+### 第一步：构造边界为零的二次核
+
+令 $P(x)=(x-a)(x-b)$，则
+
+$$
+P(a)=P(b)=0,\qquad P'(x)=2x-a-b,\qquad P''(x)=2.
+$$
+
+由于两端零值，与 $f''$ 配对积分时第一次分部积分的边界项恰好消失。
+
+</Step>
+<Step>
+
+### 第二步：两次分部积分证明恒等式
 
 $$
 \begin{aligned}
-\int_a^bp(x)f''(x)\,\mathrm dx
-&=-\int_a^b(2x-a-b)f'(x)\,\mathrm dx\\
-&=-[(2x-a-b)f(x)]_a^b+2\int_a^bf(x)\,\mathrm dx\\
-&=-(b-a)[f(a)+f(b)]+2\int_a^bf(x)\,\mathrm dx.
+\int_a^bP(x)f''(x)dx
+&=[P(x)f'(x)]_a^b-\int_a^bP'(x)f'(x)dx\\
+&=-[(2x-a-b)f(x)]_a^b+2\int_a^bf(x)dx\\
+&=-(b-a)[f(a)+f(b)]+2\int_a^bf(x)dx.
 \end{aligned}
 $$
 
-整理即得（1）。在 $[a,b]$ 上，$(x-a)(b-x)\ge0$，由（1）可得
+移项并除以 $2$，恰得第 (1) 问公式。
+
+</Step>
+<Step>
+
+### 第三步：取绝对值并计算核的积分
+
+因为 $P(x)\le0$（$a\le x\le b$），
 
 $$
 \begin{aligned}
-\left|\int_a^bf-\frac{b-a}2[f(a)+f(b)]\right|
-&\le\frac M2\int_a^b(x-a)(b-x)\,\mathrm dx\\
+\left|\int_a^bf-\frac{b-a}{2}[f(a)+f(b)]\right|
+&=\frac12\left|\int_a^bP(x)f''(x)dx\right|\\
+&\le\frac M2\int_a^b(x-a)(b-x)dx\\
 &=\frac M2\cdot\frac{(b-a)^3}{6}
-=\frac{M(b-a)^3}{12}.
+=\boxed{\frac{M(b-a)^3}{12}}.
 \end{aligned}
 $$
 
-若 $f(x)=\frac M2 x^2$，则 $f''\equiv M$，误差绝对值正好为 $M(b-a)^3/12$；因此 $1/12$ 不可减小。
+</Step>
+<Step>
 
-**模型提炼：** 误差估计先找“在边界处为零”的核函数，使分部积分的边界项消失；若积分核符号固定，就可以直接得到最佳系数。
+### 第四步：验证常数不能改善
+
+取 $f(x)=\frac M2x^2$，则 $f''(x)\equiv M$，二次核符号不变，前面取绝对值和使用 $|f''|\le M$ 均取等号，误差恰为 $M(b-a)^3/12$。所以这就是最佳通用系数。
+
+</Step>
+</Steps>
+
+**记忆法：** 梯形公式的余项由二次导数决定，并对应二次核 $\frac12(x-a)(x-b)$；对凸函数，因核为负，梯形面积高估真实曲边积分。
 
 </Solution>
-
 </Question>
 
-<Question id="math-e0cafb-019" type="essay" number={false}>
+<Question id="math-core-gd-04-05-019" type="essay" tags="来源:李正元练习题, 考点:黎曼和误差, 考点:Lipschitz条件, 考点:最佳常数">
 
-**[李正元练习题]** 设 $f$ 在 $[0,1]$ 上满足
+设 $f$ 在 $[0,1]$ 上满足
 
 $$
 |f(x)-f(y)|\le M|x-y|\quad(x,y\in[0,1]),\qquad M>0.
 $$
 
-证明：对任意正整数 $n$，
+证明对任意正整数 $n$，
 
 $$
-\left|\int_0^1f(x)\,\mathrm dx-\frac1n\sum_{k=1}^nf\left(\frac kn\right)\right|
-\le\frac M{2n}.
+\left|\int_0^1f(x)dx-\frac1n\sum_{k=1}^nf\left(\frac kn\right)\right|
+\le\frac{M}{2n}.
 $$
 
 <Solution>
 
-**答案：** 误差上界 $M/(2n)$ 成立，并且是最优的。
+**答案：** 右端点黎曼和的误差满足 $\boxed{|E_n|\le M/(2n)}$，且常数 $1/2$ 最优。
 
-**解析：** **突破口：** 将黎曼和拆成每个小区间的右端点近似误差。令 $x_k=k/n$，则
+**第一步：将误差拆到每个小区间。** 令 $x_k=k/n$，则
 
 $$
 \begin{aligned}
-&\left|\int_0^1f(x)\,\mathrm dx-\frac1n\sum_{k=1}^nf(x_k)\right|\\
-&=\left|\sum_{k=1}^n\int_{x_{k-1}}^{x_k}[f(x)-f(x_k)]\,\mathrm dx\right|\\
-&\le\sum_{k=1}^n\int_{x_{k-1}}^{x_k}M(x_k-x)\,\mathrm dx
-=n\cdot\frac M{2n^2}=\frac M{2n}.
+E_n
+&=\int_0^1f(x)dx-\frac1n\sum_{k=1}^nf(x_k)\\
+&=\sum_{k=1}^n\int_{x_{k-1}}^{x_k}[f(x)-f(x_k)]dx.
 \end{aligned}
 $$
 
-取 $f(x)=Mx$ 时，误差为 $-M/(2n)$，其绝对值恰取该上界。
-
-**模型提炼：** 给出 Lipschitz 约束而要求积分—求和误差时，关键是逐区间控制函数值与采样点的差；不同采样位置会改变误差系数。
-
-</Solution>
-
-</Question>
-
-<Question id="math-e0cafb-020" type="essay" number={false}>
-
-**[原创]** 设 $f\in C^2[0,1]$，满足 $f(0)=f(1)=0$，且 $|f''(x)|\le M$（$M>0$）。证明最佳估计
+**第二步：逐区间利用 Lipschitz 条件。** $x\in[x_{k-1},x_k]$ 时，$|x-x_k|=x_k-x$，故
 
 $$
-\left|\int_0^1 f(x)\,\mathrm dx\right|\le\frac M{12},
+\left|\int_{x_{k-1}}^{x_k}[f(x)-f(x_k)]dx\right|
+\le M\int_{x_{k-1}}^{x_k}(x_k-x)dx=\frac{M}{2n^2}.
+$$
+
+对 $k=1,\dots,n$ 求和，得到
+
+$$
+|E_n|\le n\cdot\frac{M}{2n^2}=\frac M{2n}.
+$$
+
+**第三步：检验最优性。** 取 $f(x)=Mx$。由于
+
+$$
+\int_0^1Mx\,dx=\frac M2,\qquad
+\frac1n\sum_{k=1}^nM\frac kn=\frac M2+\frac M{2n},
+$$
+
+误差为 $E_n=-M/(2n)$，恰达到估计上界。
+
+<Callout type="idea" title="方法迁移">误差阶由每个小区间的宽度 $1/n$ 决定：每段误差 $O(1/n^2)$，累计 $n$ 段是 $O(1/n)$。换成中点采样或增加二阶导数条件，通常可以得到更高阶精度。</Callout>
+
+</Solution>
+</Question>
+
+<Question id="math-core-gd-04-05-020" type="essay" tags="来源:原创, 考点:二阶导数有界, 考点:最佳积分上界, 考点:比较函数">
+
+设 $f\in C^2[0,1]$，$f(0)=f(1)=0$，且 $|f''(x)|\le M$（$M>0$）。证明最佳估计
+
+$$
+\left|\int_0^1f(x)dx\right|\le\frac M{12},
 $$
 
 并说明何时可取等号。
 
 <Solution>
 
-**答案：** 上界为 $M/12$；例如 $f(x)=\pm\frac M2x(1-x)$ 时等号成立。
+**答案：** $\boxed{\left|\int_0^1f\right|\le M/12}$，仅当 $\boxed{f(x)=\pm\frac M2x(1-x)}$ 时能取等号。
 
-**解析：** **母题变式：** 在“端点零值 + 导数控制”模型中，将一阶导数上界换成二阶导数上界，寻找最佳二次比较函数。
+<Tabs items={['方法一：上下比较抛物线','方法二：复用梯形误差恒等式']} defaultIndex={0}>
+<Tab value="方法一：上下比较抛物线">
 
-设 $q(x)=\frac M2x(1-x)$，则 $q(0)=q(1)=0$ 且 $q''=-M$。因为 $|f''|\le M$，
-
-$$
-(q-f)''=-M-f''\le0,
-\qquad(q+f)''=-M+f''\le0.
-$$
-
-两函数都是凹函数，且端点均为零，因此在 $[0,1]$ 上非负。由此
+**第一步：构造恰好满足二阶导数极值的抛物线。** 令
 
 $$
--q(x)\le f(x)\le q(x).
+q(x)=\frac M2x(1-x),\qquad q(0)=q(1)=0,\quad q''(x)=-M.
 $$
 
-积分并计算
+由 $-M\le f''\le M$，有
 
 $$
-\int_0^1q(x)\,\mathrm dx
-=\frac M2\int_0^1x(1-x)\,\mathrm dx=\frac M{12},
+(q-f)''=-M-f''\le0,\qquad(q+f)''=-M+f''\le0.
 $$
 
-所以 $|\int_0^1 f|\le M/12$。当 $f=q$ 或 $f=-q$ 时等号成立，故上界最优。
+两函数 $q-f$、$q+f$ 都是凹函数且在 $0$ 和 $1$ 处为零。因此其图像位于零弦上方：
 
-**另一条捷径：** 直接对上一题的梯形误差恒等式取 $a=0,b=1$，并用 $f(0)=f(1)=0$，立即得到相同界限。此方法最适合考场快速识别。
+$$
+q(x)-f(x)\ge0,\qquad q(x)+f(x)\ge0,
+$$
+
+也就是 $-q(x)\le f(x)\le q(x)$。
+
+**第二步：积分求上界。**
+
+$$
+\left|\int_0^1f(x)dx\right|\le\int_0^1q(x)dx
+=\frac M2\int_0^1x(1-x)dx=\boxed{\frac M{12}}.
+$$
+
+**第三步：等号。** 取 $f=q$ 或 $f=-q$ 即达到上界。反过来，若积分等号成立，由连续非负函数 $q\mp f$ 的积分为零知 $f\equiv\pm q$，故等号函数也被完全刻画。
+
+</Tab>
+<Tab value="方法二：复用梯形误差恒等式">
+
+前题已证，当 $a=0,b=1$ 时，
+
+$$
+\int_0^1f(x)dx=\frac{f(0)+f(1)}2+\frac12\int_0^1x(x-1)f''(x)dx.
+$$
+
+代入 $f(0)=f(1)=0$，并利用 $|f''|\le M$，得
+
+$$
+\left|\int_0^1f\right|
+\le\frac M2\int_0^1x(1-x)dx=\frac M{12}.
+$$
+
+取 $f''\equiv\pm M$，结合两个零端点解得 $f(x)=\mp\frac M2x(1-x)$，确实能达到上界。
+
+</Tab>
+</Tabs>
+
+**解题提示：** 已知两端零值和二阶导数界，最佳上界对应一条高度受控的抛物线，而不是仅靠 $|f'|\le M$（题目并没有给出这一条件）。
 
 </Solution>
-
 </Question>
 
 ## 五、振荡积分的统一估计
 
-<Question id="math-e0cafb-021" type="essay" number={false}>
+<Question id="math-core-gd-04-05-021" type="essay" tags="来源:李正元练习题, 考点:振荡积分, 考点:分部积分, 考点:统一上界">
 
-**[李正元练习题]** 证明：对任意正整数 $n$ 和任意 $p>0$，
+证明对任意正整数 $n$ 和任意 $p>0$，
 
 $$
-\left|\int_n^{n+p}\sin(x^2)\,\mathrm dx\right|\le\frac1n.
+\left|\int_n^{n+p}\sin(x^2)dx\right|\le\frac1n.
 $$
 
 <Solution>
 
-**答案：** 上界 $1/n$ 对所有 $p>0$ 同时成立。
+**答案：** 对所有 $n\in\mathbb N^+$ 和 $p>0$，均有 $\boxed{\left|\int_n^{n+p}\sin(x^2)dx\right|\le1/n}$，上界与 $p$ 无关。
 
-**解析：** **突破口：** $\sin(x^2)$ 虽然变号频繁，但其相位导数 $2x$ 不为零。利用 $\mathrm d(\cos x^2)=-2x\sin(x^2)\,\mathrm dx$，进行分部积分：
+<Steps>
+<Step>
+
+### 第一步：利用相位 $x^2$ 的导数做分部积分
+
+因 $\frac{d}{dx}\cos(x^2)=-2x\sin(x^2)$，可写
+
+$$
+\sin(x^2)dx=-\frac1{2x}d\big(\cos(x^2)\big).
+$$
+
+因此
+
+$$
+\int_n^{n+p}\sin(x^2)dx
+=-\left[\frac{\cos(x^2)}{2x}\right]_n^{n+p}
+-\frac12\int_n^{n+p}\frac{\cos(x^2)}{x^2}dx.
+$$
+
+此处 $n\ge1$，分母始终非零。
+
+</Step>
+<Step>
+
+### 第二步：分别估计边界项和余项
+
+由 $|\cos(x^2)|\le1$，
 
 $$
 \begin{aligned}
-\int_n^{n+p}\sin(x^2)\,\mathrm dx
-&=-\left[\frac{\cos(x^2)}{2x}\right]_n^{n+p}
--\frac12\int_n^{n+p}\frac{\cos(x^2)}{x^2}\,\mathrm dx.
+\left|\int_n^{n+p}\sin(x^2)dx\right|
+&\le\frac1{2n}+\frac1{2(n+p)}+\frac12\int_n^{n+p}\frac{dx}{x^2}\\
+&=\frac1{2n}+\frac1{2(n+p)}+\frac12\left(\frac1n-\frac1{n+p}\right)\\
+&=\boxed{\frac1n}.
 \end{aligned}
 $$
 
-据此，
+</Step>
+</Steps>
 
-$$
-\begin{aligned}
-\left|\int_n^{n+p}\sin(x^2)\,\mathrm dx\right|
-&\le\frac1{2n}+\frac1{2(n+p)}+\frac12\int_n^{n+p}\frac{\mathrm dx}{x^2}\\
-&=\frac1{2n}+\frac1{2(n+p)}
-+\frac12\left(\frac1n-\frac1{n+p}\right)
-=\frac1n.
-\end{aligned}
-$$
+**为什么不直接估计绝对值积分？** $\big|\int\sin(x^2)\big|\le\int|\sin(x^2)|dx\le p$，这个界依赖区间长度 $p$；分部积分利用正负振荡的抵消，才能得到独立于 $p$ 的统一上界。
 
-**模型提炼：** 对振荡积分 $\int_a^b\sin\phi(x)\,\mathrm dx$，若 $\phi'$ 不为零，可把正弦写成另一三角函数的导数除以 $\phi'$；边界项与 $1/\phi'$ 的变差共同控制积分。不能仅由 $|\sin\phi|\le1$ 得到这里与 $p$ 无关的估计。
+<Callout type="idea" title="可迁移的振荡积分技巧">遇到 $\int_a^b\sin\phi(x)dx$ 且 $\phi'(x)$ 远离零时，优先写成 $-\frac1{\phi'(x)}d(\cos\phi(x))$；由端点项与 $1/\phi'$ 的变差控制积分。</Callout>
 
 </Solution>
-
 </Question>

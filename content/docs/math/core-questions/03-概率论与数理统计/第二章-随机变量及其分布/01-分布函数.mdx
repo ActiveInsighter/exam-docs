@@ -1,22 +1,21 @@
 ---
-title: "第一节 分布函数"
-description: "考研数学一精选题：分布函数判别与右连续、跳跃概率、连续与离散混合、分布变换、随机序和联合分布函数。"
+title: 第一节 分布函数
+description: 概率论与数理统计核心题目｜分布函数的合法性、右连续、点概率、密度与离散分布构造。
 ---
 
-本节以 **分布函数合法性 → 跳跃与点概率 → 密度积分及随机变量变换 → 条件混合与联合分布** 为主线，保留原目录中的重要真题并精选不同模型的高质量变式。做题时先判断随机变量属于离散、连续还是混合型，再决定采用跳幅、积分、事件反推或全概率；**分布函数始终是 $P(X\le x)$，端点的等号不能随意交换。**
+本节沿用原资料的题目与专题顺序。分布函数 $F(x)=P(X\le x)$ 必须**单调不减、右连续，且两端极限分别为 $0$ 与 $1$**。点质量对应左跳跃，连续型随机变量没有点质量，但没有点质量不代表一定存在概率密度。
 
 ## 一、分布函数的合法性、连接条件与点概率
 
-<Question id="math-4ff162-001" type="blank" number={false}>
+<Question id="core-pr-cdf-1989-m3-01" type="blank" number="1" tags="来源:1989年数学三, 科目:概率论与数理统计, 考点:分布函数右连续性, 考点:区间概率">
 
-【1989年数学三】 设随机变量 $X$ 的分布函数为
+设随机变量 $X$ 的分布函数为
 
 $$
-F(x)=
-\begin{cases}
-0, & x<0,\\
-A\sin x, & 0\le x\le \dfrac{\pi}{2},\\
-1, & x>\dfrac{\pi}{2},
+F(x)=\begin{cases}
+0,&x<0,\\
+A\sin x,&0\le x\le\dfrac{\pi}{2},\\
+1,&x>\dfrac{\pi}{2},
 \end{cases}
 $$
 
@@ -24,65 +23,51 @@ $$
 
 <Solution>
 
-**答案：** $A=1$，$P\left\{|X|<\dfrac{\pi}{6}\right\}=\dfrac12$
+**答案：** $\boxed{A=1,\quad P(|X|<\pi/6)=\frac12}$。
 
-**解析：** **模型识别与突破口：** 分段定义的分布函数包含待定系数，优先定位分段连接点的右连续条件，而不是直接求导或积分。
+<Steps>
+  <Step>
 
-分布函数必须右连续。特别地，在 $x=\dfrac{\pi}{2}$ 处应满足
+### 使用连接点的右连续条件
 
-$$
-F\left(\frac{\pi}{2}\right)
-=F\left(\frac{\pi}{2}+0\right).
-$$
-
-由题给表达式，
+分布函数在每一点均右连续。在 $x=\pi/2$，题目给定
 
 $$
-F\left(\frac{\pi}{2}\right)
-=A\sin\frac{\pi}{2}=A,
+F(\pi/2)=A\sin(\pi/2)=A,
 $$
 
-而当 $x>\dfrac{\pi}{2}$ 时 $F(x)=1$，故
+而右极限由第三段决定，等于 $1$。因此必须有 $A=1$。回代后第二段 $\sin x$ 单调不减，所有分布函数公理均满足。
 
-$$
-F\left(\frac{\pi}{2}+0\right)=1.
-$$
+</Step>
+  <Step>
 
-因此
+### 确定区间端点有无点概率
 
-$$
-A=1.
-$$
-
-再求概率。因为 $-\dfrac{\pi}{6}<0$，所以
-
-$$
-F\left(-\frac{\pi}{6}\right)=0.
-$$
-
-又由于此处分布函数连续，端点没有概率质量，故
+事件 $|X|<\pi/6$ 等价于 $-\pi/6<X<\pi/6$。此处分布函数在两端点连续，故
 
 $$
 \begin{aligned}
-P\left\{|X|<\frac{\pi}{6}\right\}
-&=P\left\{-\frac{\pi}{6}<X<\frac{\pi}{6}\right\}\\
-&=F\left(\frac{\pi}{6}\right)-F\left(-\frac{\pi}{6}\right)\\
-&=\sin\frac{\pi}{6}-0\\
-&=\frac12.
+P(|X|<\pi/6)
+&=F(\pi/6)-F(-\pi/6)\\
+&=\sin(\pi/6)-0=\boxed{\frac12}.
 \end{aligned}
 $$
 
-**关键：**遇到含未知参数的分布函数，优先检查右连续性以及 $F(-\infty)=0$、$F(+\infty)=1$。
+</Step>
+</Steps>
 
-**方法提炼与辨析：** 在给定端点的函数值必须等于右极限；计算开区间概率时还要辨认端点是否有点质量。
+<Callout type="warn" title="开放区间要注意左极限">
+
+一般有 $P(a<X<b)=F(b-)-F(a)$，其中 $F(b-)=\lim_{x\uparrow b}F(x)$；本题因为 $F$ 在 $b=\pi/6$ 连续，才可直接写成 $F(b)-F(a)$。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-4ff162-002" type="single" number={false}>
+<Question id="core-pr-cdf-1998-m3-02" type="single" number="2" tags="来源:1998年数学三, 科目:概率论与数理统计, 考点:分布函数凸组合, 基础">
 
-【1998年数学三】 设 $F_1(x)$ 与 $F_2(x)$ 分别为随机变量 $X_1$ 与 $X_2$ 的分布函数。为使
+设 $F_1(x)$、$F_2(x)$ 分别为随机变量 $X_1$、$X_2$ 的分布函数。为使
 
 $$
 F(x)=aF_1(x)-bF_2(x)
@@ -97,79 +82,76 @@ $$
 
 <Solution>
 
-**模型识别与突破口：** “两个分布函数的线性组合是否仍为分布函数”首先检查无穷远端点极限，再判断非降与右连续。
+**解题结论：** 选 A。
 
-任何分布函数都满足
-
-$$
-\lim_{x\to+\infty}F(x)=1.
-$$
-
-而
+**第一道检验：分布函数的终值必须为 1。** 因 $F_1(+\infty)=F_2(+\infty)=1$，故
 
 $$
-\lim_{x\to+\infty}F_1(x)
-=\lim_{x\to+\infty}F_2(x)=1,
+\lim_{x\to+\infty}F(x)=a-b=1
 $$
 
-所以必须有
+是必要条件。四个选项中只有 A 满足 $a-b=3/5-(-2/5)=1$。
+
+**第二道检验：必要条件还不够，须证明单调性。** 代入 A 项可得
 
 $$
-1=\lim_{x\to+\infty}F(x)=a-b.
+F(x)=\frac35F_1(x)+\frac25F_2(x).
 $$
 
-逐项检查：
+两个权重均非负且和为 1，所以 $F$ 是分布函数的**凸组合**：非降、右连续，两端极限为 0 与 1，全都满足。
 
-$$
-\frac35-\left(-\frac25\right)=1,
-$$
+<Accordions>
+  <Accordion title="为什么不能只检查 $a-b=1$？">
 
-只有 A 满足这一必要条件。
+系数和为 1 只能保证最右端极限正确；若某个权重为负，函数可能出现下降，违反分布函数单调不减性。可记住充分判据：$F=\sum_iw_iF_i$ 且 $w_i\ge0$、$\sum_iw_i=1$，则 $F$ 必为合法分布函数。
 
-并且在 A 中
-
-$$
-F(x)=\frac35F_1(x)+\frac25F_2(x),
-$$
-
-是两个分布函数的非负加权和，权重之和为 $1$，因此确为分布函数。
-
-故选 A。
-
-**方法提炼与辨析：** 对任意两个分布函数，非负系数且总和为 1 的凸组合必是分布函数；如果允许负系数，单靠系数和为 1 通常不足。
+  </Accordion>
+</Accordions>
 
 </Solution>
-
 </Question>
 
-<Question id="math-4ff162-003" type="single" number={false}>
+<Question id="core-pr-cdf-lilin880-03" type="single" number="3" tags="来源:李林880, 科目:概率论与数理统计, 考点:分布函数四条基本性质, 易错">
 
-【李林880】 下列函数中, 可作为某一随机变量的分布函数的是 $(\quad)$.
+下列函数中，可作为某一随机变量的分布函数的是（ ）。
 
-<Option>$F(x) = \frac{1}{1 + x^2}$</Option>
-<Option correct>$F(x) = \frac{1}{\pi} \arctan x + \frac{1}{2}$</Option>
-<Option>$F(x) = \begin{cases} \frac{1}{2}(1 - \mathrm{e}^{-x}), & x > 0, \\ 0, & x \leqslant 0 \end{cases}$</Option>
-<Option>$F(x) = \int_{-\infty}^{x} f(t)\mathrm{d}t$, 且 $\int_{-\infty}^{+\infty} f(t)\mathrm{d}t = 1$</Option>
+<Option>$F(x)=\dfrac{1}{1+x^2}$</Option>
+<Option correct>$F(x)=\dfrac1\pi\arctan x+\dfrac12$</Option>
+<Option>$F(x)=\begin{cases}\dfrac12(1-e^{-x}),&x>0,\\0,&x\le0\end{cases}$</Option>
+<Option>$F(x)=\displaystyle\int_{-\infty}^{x}f(t)\,\mathrm dt$，且 $\displaystyle\int_{-\infty}^{+\infty}f(t)\,\mathrm dt=1$</Option>
 
 <Solution>
 
-**模型识别与突破口：** 对候选函数逐项检查非降、右连续和两端极限；密度积分表示式仍须约束被积函数非负。
+**解题结论：** 选 B，它是标准柯西分布的分布函数。
 
-$F(x)$ 要成为某一随机变量的分布函数, 必满足以下三个条件:
-① $0 \leqslant F(x) \leqslant 1, F(+\infty)=1, F(-\infty)=0$;
-② $F(x)$ 是单调不减函数;
-③ $F(x)$ 右连续, 即 $\lim _{x \to a^+} F(x)=F(a)$.
-只有 B 满足以上三个条件, 而选项 A 和 C 中 $F(x)$ 不满足 $F(+\infty)=1$, 选项 D 中 $F(x)$ 不一定单调不减, 故选 B.
+| 选项 | 检查结果 | 原因 |
+| --- | --- | --- |
+| A | 不成立 | $x\to-\infty$ 时极限为 $0$，$x\to+\infty$ 时极限也为 $0$，而且不是非降函数。 |
+| B | **成立** | 导数为 $1/[\pi(1+x^2)]>0$，连续；两端极限分别为 $0$ 和 $1$。 |
+| C | 不成立 | $x\to+\infty$ 时只趋于 $1/2$，没有达到必须的总概率 $1$。 |
+| D | 不一定成立 | 仅有 $\int f=1$ 不保证 $f\ge0$；在 $f<0$ 的区间上，积分函数会下降。 |
 
-**方法提炼与辨析：** D 只给出积分总量为 1，没有要求 $f\ge0$，积分函数可能下降；B 为柯西分布的分布函数。
+**详细验证 B：**
+
+$$
+F'(x)=\frac{1}{\pi(1+x^2)}>0,\qquad
+F(-\infty)=0,\quad F(+\infty)=1.
+$$
+
+由于 $\arctan x$ 连续，$F$ 也右连续。故符合所有条件。
+
+<Callout type="idea" title="密度积分式的两个必要条件">
+
+如果题目改为 $F(x)=\int_{-\infty}^x f(t)\,dt$ 且 **$f(t)\ge0$ 几乎处处**、$\int_{-\infty}^{+\infty}f(t)dt=1$，那么这种形式必为合法分布函数。原题 D 缺少的是非负性，而不是归一化。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-4ff162-004" type="single" number={false}>
+<Question id="core-pr-cdf-lilin880-04" type="single" number="4" tags="来源:李林880, 科目:概率论与数理统计, 考点:原子概率与分布函数跳跃, 重点">
 
-【李林880】 设 $X$ 是随机变量, 对任意实数 $x$, $P\{X=x\}=0$ 的充分必要条件是 $(\quad)$.
+设 $X$ 是随机变量。对任意实数 $x$ 都有 $P\{X=x\}=0$ 的充分必要条件是（ ）。
 
 <Option>$X$ 的概率密度 $f(x)$ 是连续函数</Option>
 <Option correct>$X$ 的分布函数 $F(x)$ 是连续函数</Option>
@@ -178,19 +160,34 @@ $F(x)$ 要成为某一随机变量的分布函数, 必满足以下三个条件:
 
 <Solution>
 
-**模型识别与突破口：** 核心是单点质量与分布函数左跳幅相等，而非“存在光滑密度”。
+**解题结论：** 选 B。
 
-$F(x)=P\{X \leqslant x\}$, 对任意实数 $x, F(x+0)=F(x)$ (右连续). 又 $P\{X=x\}=F(x)-F(x-0)$, 故 $P\{X=x\}=0 \Longleftrightarrow F(x)-F(x-0)=0 \Longleftrightarrow F(x-0)=F(x) \Longleftrightarrow F(x)$ 在 $x$ 处连续. 选项 B 正确.
+**核心恒等式：分布函数跳跃高度等于点概率。** 对任意实数 $x_0$，
 
-**方法提炼与辨析：** “无原子”对应分布函数处处连续，但不一定存在密度；可有连续奇异分布。
+$$
+\begin{aligned}
+P(X=x_0)
+&=P(X\le x_0)-P(X<x_0)\\
+&=F(x_0)-F(x_0-).
+\end{aligned}
+$$
+
+而分布函数本身在每点**右连续**；因此 $F$ 在 $x_0$ 连续，恰好等价于其左极限等于本点值，也等价于 $P(X=x_0)=0$。要求“对所有实数 $x_0$ 都成立”，便等价于 $F$ **处处连续**。
+
+**其余选项说明：** A 的条件过强：某些具有连续分布函数的随机变量不存在密度，更谈不上密度连续。C 的离散分布通常有正概率质量点。D 的“非离散”范围太宽，混合分布可能同时含连续部分和若干概率原子。
+
+<Callout type="warn" title="连续分布函数不等于有密度">
+
+本题只推出分布函数处处连续；存在连续奇异分布（如 Cantor 分布），其分布函数连续却不能写为某个可积密度的积分。不要把“无点质量”错误升级为“必为连续型密度分布”。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-4ff162-005" type="single" number={false}>
+<Question id="core-pr-cdf-2002-m1-05" type="single" number="5" tags="来源:2002年数学一, 科目:概率论与数理统计, 考点:极值随机变量的分布函数, 基础">
 
-【2002年数学一】 设 $X_1$ 和 $X_2$ 是任意两个相互独立的连续型随机变量，它们的概率密度分别为 $f_1(x)$ 和 $f_2(x)$，分布函数分别为 $F_1(x)$ 和 $F_2(x)$，则（ ）。
+设 $X_1,X_2$ 是任意两个**相互独立的连续型随机变量**，其概率密度分别为 $f_1(x),f_2(x)$，分布函数分别为 $F_1(x),F_2(x)$，则（ ）。
 
 <Option>$f_1(x)+f_2(x)$ 必为某一随机变量的概率密度</Option>
 <Option>$f_1(x)f_2(x)$ 必为某一随机变量的概率密度</Option>
@@ -199,68 +196,64 @@ $F(x)=P\{X \leqslant x\}$, 对任意实数 $x, F(x+0)=F(x)$ (右连续). 又 $P\
 
 <Solution>
 
-**模型识别与突破口：** 选项分别涉及密度归一化与分布函数的乘积，切勿混淆“函数非负”和“积分为 1”。
+**解题结论：** 选 D。
 
-逐项判断。
+<Steps>
+  <Step>
 
-A 中虽然 $f_1(x)+f_2(x)\ge0$，但
+### 用最大值随机变量解释乘积
 
-$$
-\int_{-\infty}^{+\infty}[f_1(x)+f_2(x)]\,dx=1+1=2,
-$$
-
-不满足概率密度积分为 $1$ 的条件。
-
-B 也不一定成立。例如可取两个支撑区间互不重叠的概率密度，此时
+令 $Y=\max(X_1,X_2)$。则
 
 $$
-f_1(x)f_2(x)\equiv0,
+\{Y\le x\}=\{X_1\le x\}\cap\{X_2\le x\}.
 $$
 
-积分不可能等于 $1$。
-
-C 中
+由独立性可得
 
 $$
-\lim_{x\to+\infty}[F_1(x)+F_2(x)]=2,
+F_Y(x)=P(Y\le x)=F_1(x)F_2(x),
 $$
 
-不满足分布函数在 $+\infty$ 处极限为 $1$ 的条件。
+所以选项 D 不仅形式合法，而且对应一个**具体的随机变量**。
 
-D 中 $F_1(x)F_2(x)$ 单调不减、右连续，并且
+</Step>
+  <Step>
+
+### 从归一化与单调性排除干扰项
+
+A：$\int(f_1+f_2)=2$，不是密度。B：乘积虽非负，但积分不一定为 1；例如两个密度的支持集互不相交，乘积恒为零。C：$F_1(+\infty)+F_2(+\infty)=2$，不是分布函数。
+
+</Step>
+</Steps>
+
+<Accordions>
+  <Accordion title="推广：多个独立随机变量的最大值与最小值">
+
+若 $X_1,\ldots,X_n$ 相互独立，则
 
 $$
-\lim_{x\to-\infty}F_1(x)F_2(x)=0,
-\qquad
-\lim_{x\to+\infty}F_1(x)F_2(x)=1.
+F_{\max_iX_i}(x)=\prod_{i=1}^nF_i(x),\qquad
+F_{\min_iX_i}(x)=1-\prod_{i=1}^n[1-F_i(x)].
 $$
 
-因此它可以作为某一随机变量的分布函数。事实上，在 $X_1,X_2$ 独立时，它正是 $\max(X_1,X_2)$ 的分布函数：
+第二式使用的是事件 $\{\min_iX_i>x\}=\bigcap_i\{X_i>x\}$。这两个公式是顺序统计量的常用入口。
 
-$$
-P\{\max(X_1,X_2)\le x\}
-=P(X_1\le x,X_2\le x)
-=F_1(x)F_2(x).
-$$
-
-故选 D。
-
-**方法提炼与辨析：** 独立性给出 $F_{\max(X_1,X_2)}(x)=F_1(x)F_2(x)$；即使原随机变量不独立，$F_1F_2$ 作为函数仍满足分布函数公理，但不能直接用作原二者最大值的分布函数。
+  </Accordion>
+</Accordions>
 
 </Solution>
-
 </Question>
 
-<Question id="math-4ff162-006" type="single" number={false}>
+<Question id="core-pr-cdf-2010-m1m3-06" type="single" number="6" tags="来源:2010年数学一、数学三, 科目:概率论与数理统计, 考点:离散连续混合分布, 考点:单点概率">
 
-【2010年数学一、数学三】 设随机变量 $X$ 的分布函数
+设随机变量 $X$ 的分布函数
 
 $$
-F(x)=
-\begin{cases}
-0, & x<0,\\
-\dfrac12, & 0\le x<1,\\
-1-e^{-x}, & x\ge1,
+F(x)=\begin{cases}
+0,&x<0,\\
+\dfrac12,&0\le x<1,\\
+1-e^{-x},&x\ge1,
 \end{cases}
 $$
 
@@ -273,687 +266,810 @@ $$
 
 <Solution>
 
-**模型识别与突破口：** 分段连续函数在接缝处可以有跳跃；单点概率由“该点函数值减左极限”给出。
+**解题结论：** 选 C，$\boxed{P(X=1)=\frac12-e^{-1}}$。
 
-随机变量在某一点的概率等于分布函数在该点的跳跃大小：
+<Steps>
+  <Step>
 
-$$
-P\{X=x_0\}=F(x_0)-F(x_0-0).
-$$
+### 先写出点概率的定义，而不是直接求导
 
-本题在 $x=1$ 处，
-
-$$
-F(1)=1-e^{-1},
-$$
-
-而左极限为
+任意随机变量都满足
 
 $$
-F(1-0)=\frac12.
+P(X=x_0)=F(x_0)-F(x_0-).
 $$
 
-所以
+注意是**本点的函数值减左极限**，与连续型密度积分无关。
+
+</Step>
+  <Step>
+
+### 计算 $x=1$ 两侧的函数值
+
+题给 $F(1)=1-e^{-1}$，而 $F(1-)=1/2$。所以
 
 $$
-P\{X=1\}
-=F(1)-F(1-0)
-=1-e^{-1}-\frac12
-=\frac12-e^{-1}.
+P(X=1)=\left(1-e^{-1}\right)-\frac12=\frac12-e^{-1}.
 $$
 
-故选 C。
+</Step>
+</Steps>
 
-**关键：**分布函数有跳跃意味着随机变量在该点有正概率质量；跳跃高度就是该点概率。
+<Callout type="idea" title="该分布不是纯连续型">
 
-**方法提炼与辨析：** 这里 $x=0$ 也有概率质量 $1/2$，$x=1$ 另有质量 $1/2-e^{-1}$；连续部分的总质量为 $e^{-1}$，三部分合为 1。
+$P(X=0)=F(0)-F(0-)=1/2$，$P(X=1)=1/2-e^{-1}$；在 $x>1$ 上还有密度 $f(x)=e^{-x}$，其总概率为 $\int_1^{\infty}e^{-x}dx=e^{-1}$。三部分之和恰好为 1。这是理解**离散—连续混合分布**的一个典型例子。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-4ff162-007" type="essay" number={false}>
+<Question id="core-pr-cdf-lilin880-07" type="essay" number="7" tags="来源:李林880, 科目:概率论与数理统计, 考点:连续分布函数拼接, 考点:反正弦分布">
 
-【李林880】 设连续型随机变量 $X$ 的分布函数为
+设连续型随机变量 $X$ 的分布函数为
 
 $$
-F(x)=\begin{cases} 0, & x\leqslant-a, \\ k_1+k_2\arcsin\frac{x}{a}, & -a<x\leqslant a, \\ 1, & x>a, \end{cases}
+F(x)=\begin{cases}
+0,&x\le-a,\\
+k_1+k_2\arcsin\dfrac{x}{a},&-a<x\le a,\\
+1,&x>a,
+\end{cases}\qquad a>0.
 $$
 
-其中 $a>0$。求：
-$(I)$ 常数 $k_1,k_2$ 的值；
-$(II)$ $X$ 的概率密度；
-$(III)$ $P\left\{|X|<\frac{a}{2}\right\}$。
+求：（I）常数 $k_1,k_2$；（II）$X$ 的概率密度；（III）$P\left\{|X|<\dfrac a2\right\}$。
 
 <Solution>
 
-**答案：** $(I)\;k_1=\frac12,\ k_2=\frac1\pi;\quad (II)\;f_X(x)=\begin{cases}\frac1{\pi\sqrt{a^2-x^2}},&|x|<a,\\0,&|x|\ge a;\end{cases}\quad (III)\;\frac13$
-
-**解析：** **模型识别与突破口：** 连续型条件迫使两端点无跳跃，两个连接条件即为待定系数方程。
-
-(I) 由分布函数 $F(x)$ 的性质, 有
+**参考答案**
 
 $$
-F(-a+0) = F(-a), F(a+0) = F(a),
+\boxed{k_1=\frac12,\quad k_2=\frac1\pi};\qquad
+\boxed{f_X(x)=\begin{cases}\dfrac1{\pi\sqrt{a^2-x^2}},&|x|<a,\\0,&|x|\ge a;\end{cases}}
 $$
 
-得 $k_1 = \frac{1}{2}, k_2 = \frac{1}{\pi}$.
+$$
+\boxed{P(|X|<a/2)=\frac13}.
+$$
 
-(II) $f(x)=F'(x)=\begin{cases} \frac{1}{\pi\sqrt{a^2-x^2}}, & |x|<a, \\ 0, & |x|\geqslant a. \end{cases}$
+**解析与过程**
 
-(III) $P\left\{|X|<\frac{a}{2}\right\}=P\left\{-\frac{a}{2}<X<\frac{a}{2}\right\}=F\left(\frac{a}{2}\right)-F\left(-\frac{a}{2}\right)$
-$=\frac{1}{2}+\frac{1}{\pi}\arcsin\frac{1}{2}-\left[\frac{1}{2}+\frac{1}{\pi}\arcsin\left(-\frac{1}{2}\right)\right]=\frac{1}{3}.$
+<Steps>
+  <Step>
 
-**方法提炼与辨析：** 求密度时仅在区间内部求导；端点取何密度值不影响分布。该反正弦型密度在两端可以无界但仍可积。
+### 用两端拼接条件求两个参数
+
+因为 $X$ 是连续型随机变量，分布函数处处连续，特别在 $-a$、$a$ 无跳跃。由于 $\arcsin(-1)=-\pi/2$、$\arcsin(1)=\pi/2$，得到
+
+$$
+\begin{cases}
+k_1-\dfrac{\pi}2k_2=0,\\
+k_1+\dfrac{\pi}2k_2=1.
+\end{cases}
+$$
+
+相加得 $k_1=1/2$，相减得 $k_2=1/\pi$。
+
+</Step>
+  <Step>
+
+### 在开区间内求导获得密度
+
+当 $|x|<a$ 时，
+
+$$
+\frac{d}{dx}\arcsin\frac xa
+=\frac1{\sqrt{1-(x/a)^2}}\cdot\frac1a
+=\frac1{\sqrt{a^2-x^2}},
+$$
+
+这里使用了 $a>0$。因此
+
+$$
+f_X(x)=F'(x)=\frac1{\pi\sqrt{a^2-x^2}},\quad |x|<a,
+$$
+
+其余位置密度可取为 $0$。端点处密度的取值不影响概率。
+
+</Step>
+  <Step>
+
+### 利用分布函数求区间概率
+
+$X$ 在 $\pm a/2$ 无点质量，故
+
+$$
+\begin{aligned}
+P(|X|<a/2)
+&=F(a/2)-F(-a/2)\\
+&=\frac1\pi\left[\arcsin\frac12-\arcsin\left(-\frac12\right)\right]\\
+&=\frac1\pi\left(\frac\pi6+\frac\pi6\right)=\frac13.
+\end{aligned}
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="密度可以无界，但仍可积">
+
+$f_X(x)$ 在 $x\to\pm a$ 时趋于无穷大，并不妨碍它作为概率密度：积分的总面积为 $F(a)-F(-a)=1$。判定密度要看非负与**总积分为 1**，不能要求处处有界。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
 ## 二、离散跳跃与连续—离散混合分布
 
-<Question id="math-4ff162-008" type="essay" number={false}>
+<Question id="core-pr-cdf-1987-m3-08" type="essay" number="8" tags="来源:1987年数学三, 科目:概率论与数理统计, 考点:离散分布函数的构造, 基础">
 
-【1987年数学三】 已知随机变量 $X$ 的概率分布为
+已知随机变量 $X$ 的概率分布为
 
 $$
-P\{X=1\}=0.2,\qquad
-P\{X=2\}=0.3,\qquad
-P\{X=3\}=0.5,
+P\{X=1\}=0.2,\qquad P\{X=2\}=0.3,\qquad P\{X=3\}=0.5.
 $$
 
 试写出 $X$ 的分布函数。
 
 <Solution>
 
-**答案：**
+**参考答案**
 
 $$
-F(x)=
-\begin{cases}
-0, & x<1,\\
-0.2, & 1\le x<2,\\
-0.5, & 2\le x<3,\\
-1, & x\ge3.
-\end{cases}
+\boxed{F(x)=\begin{cases}
+0,&x<1,\\
+0.2,&1\le x<2,\\
+0.5,&2\le x<3,\\
+1,&x\ge3.
+\end{cases}}
 $$
 
-**解析：** **模型识别与突破口：** 从离散概率分布构造分布函数，是对所有满足 $X\le x$ 的取值做累加。
+**解析与过程**
 
-按定义
+按定义，$F(x)=P(X\le x)$。随机变量只在 $1,2,3$ 处有正概率质量，所以按 $x$ 穿过跳点的顺序累加：
 
-$$
-F(x)=P\{X\le x\}.
-$$
+| $x$ 的范围 | 被计入事件 $\{X\le x\}$ 的取值 | 累计概率 |
+| --- | --- | --- |
+| $x<1$ | 无 | $0$ |
+| $1\le x<2$ | 只有 $1$ | $0.2$ |
+| $2\le x<3$ | $1,2$ | $0.2+0.3=0.5$ |
+| $x\ge3$ | $1,2,3$ | $0.2+0.3+0.5=1$ |
 
-由于 $X$ 只可能取 $1,2,3$ 三个值，逐段累加概率即可。
+**检查：** 该函数非降、右连续；从 $x=1,2,3$ 处发生的三个跳跃，其高度分别是 $0.2,0.3,0.5$，恰好对应题给概率，且总和为 1。
 
-当 $x<1$ 时，没有可能取值满足 $X\le x$，故
+<Callout type="warn" title="跳点应计入右侧取值">
 
-$$
-F(x)=0.
-$$
+由于定义使用的是 $X\le x$，在 $x=1$ 的函数值已经是 $0.2$，在 $x=2$ 的函数值已经是 $0.5$。阶梯函数的区间不能写成 $1<x\le2$ 等错误方向。
 
-当 $1\le x<2$ 时，只包含 $X=1$：
-
-$$
-F(x)=P(X=1)=0.2.
-$$
-
-当 $2\le x<3$ 时，包含 $X=1,2$：
-
-$$
-F(x)=0.2+0.3=0.5.
-$$
-
-当 $x\ge3$ 时，所有可能取值都计入：
-
-$$
-F(x)=0.2+0.3+0.5=1.
-$$
-
-因此得到上述阶梯型分布函数。
-
-**方法提炼与辨析：** 每一个跳点均采用左开右闭的定义习惯：$F(x)=P(X\le x)$，不能在 $x=1,2,3$ 处漏掉等号。
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-4ff162-009" type="blank" number={false}>
+<Question id="core-pr-cdf-1991-m3-09" type="essay" number="9" tags="来源:1991年数学三, 科目:概率论与数理统计, 考点:阶梯分布函数反求概率律">
 
-【1991年数学三】 设随机变量 $X$ 的分布函数为
+设随机变量 $X$ 的分布函数为
 
 $$
-F(x)=P\{X\le x\}=
-\begin{cases}
-0, & x<-1,\\
-0.4, & -1\le x<1,\\
-0.8, & 1\le x<3,\\
-1, & x\ge3.
+F(x)=P\{X\le x\}=\begin{cases}
+0,&x<-1,\\
+0.4,&-1\le x<1,\\
+0.8,&1\le x<3,\\
+1,&x\ge3.
 \end{cases}
 $$
 
-则 $X$ 的概率分布为 <Blank answer="\begin{array}{c|ccc} X &amp; -1 &amp; 1 &amp; 3\\ \hline P &amp; 0.4 &amp; 0.4 &amp; 0.2 \end{array}" kind="text" placeholder="输入文字或 LaTeX" />。
+求 $X$ 的概率分布。
 
 <Solution>
 
-**答案：**
+**参考答案**
 
 $$
-\begin{array}{c|ccc}
-X & -1 & 1 & 3\\ \hline
-P & 0.4 & 0.4 & 0.2
-\end{array}
+\boxed{\begin{array}{c|ccc}
+X&-1&1&3\\\hline
+P&0.4&0.4&0.2
+\end{array}}
 $$
 
-**解析：** **模型识别与突破口：** 阶梯分布函数所有跳点就是离散型随机变量的取值点，跳幅是对应质量。
+**解析与过程**
 
-这个分布函数在各区间内都是常数，因此随机变量只在分布函数的跳跃点取值。
-
-离散型随机变量在点 $x_0$ 的概率等于跳跃高度：
+分布函数定义为 $F(x)=P(X\le x)$。在离散型情形，**阶梯函数的每个跳跃点是一个可能取值，跳跃高度就是该点的概率**：
 
 $$
-P\{X=x_0\}=F(x_0)-F(x_0-0).
+P(X=x_0)=F(x_0)-F(x_0-0).
 $$
 
-在 $x=-1$ 处，
+逐个检查全部跳点：
 
-$$
-P(X=-1)=0.4-0=0.4.
-$$
+| 跳点 $x_0$ | $F(x_0-0)$ | $F(x_0)$ | $P(X=x_0)$ |
+| --- | --- | --- | --- |
+| $-1$ | $0$ | $0.4$ | $0.4$ |
+| $1$ | $0.4$ | $0.8$ | $0.4$ |
+| $3$ | $0.8$ | $1$ | $0.2$ |
 
-在 $x=1$ 处，
+其它位置两侧没有跳跃，单点概率为零。最终概率 $0.4+0.4+0.2=1$，且各项非负，构成合法的离散型概率律。
 
-$$
-P(X=1)=0.8-0.4=0.4.
-$$
+<Callout type="warn" title="取值点由跳跃决定，而非区间端点平均分配">
 
-在 $x=3$ 处，
+$x=-1,1,3$ 才是此题的三个随机取值。区间内 $F(x)$ 恒定，并不意味着随机变量在这些区间上均匀分布；恰恰表示区间内没有概率质量。
 
-$$
-P(X=3)=1-0.8=0.2.
-$$
-
-故概率分布为
-
-$$
-\begin{array}{c|ccc}
-X & -1 & 1 & 3\\ \hline
-P & 0.4 & 0.4 & 0.2.
-\end{array}
-$$
-
-**方法提炼与辨析：** 反推概率律时要检查质量均非负并且总和为 1；平坦区间不意味着有均匀密度。
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-4ff162-010" type="blank" number={false}>
+<Question id="core-pr-cdf-lizhengyuan-10" type="essay" number="10" tags="来源:李正元, 科目:概率论与数理统计, 考点:离散变量函数分布, 重点">
 
-【李正元】 设离散型随机变量 $ X$ 的分布函数
+设离散型随机变量 $X$ 的分布函数为
 
 $$
 F(x)=\begin{cases}
 0,&x<-1,\\
 0.4,&-1\le x<0,\\
 0.7,&0\le x<1,\\
-1,&x\ge1,
+1,&x\ge1.
 \end{cases}
 $$
 
-则随机变量 $ |X|$ 的分布函数为 <Blank answer="F_{|X|}(y)= \begin{cases} 0,&amp;y&lt;0,\\ 0.3,&amp;0\le y&lt;1,\\ 1,&amp;y\ge1. \end{cases}" kind="text" placeholder="输入文字或 LaTeX" />。
+求随机变量 $|X|$ 的分布函数。
 
 <Solution>
 
-**答案：**
+**参考答案**
 
 $$
-F_{|X|}(y)=
-\begin{cases}
+\boxed{F_{|X|}(y)=\begin{cases}
 0,&y<0,\\
 0.3,&0\le y<1,\\
 1,&y\ge1.
-\end{cases}
+\end{cases}}
 $$
 
-**解析：** **模型识别与突破口：** 先对 $X$ 的阶梯分布函数逐跳求质量，再按映射 $x\mapsto|x|$ 合并原像点。
+**解析与过程**
 
-分布函数在各跳跃点的跳跃大小等于对应点的概率。由题给 $ F(x)$ 可得
+<Steps>
+  <Step>
 
-$$
-P\{X=-1\}=F(-1)-F(-1-)=0.4,
-$$
+### 先还原 $X$ 的概率律
 
-$$
-P\{X=0\}=F(0)-F(0-)=0.7-0.4=0.3,
-$$
+逐个计算跳幅：
 
 $$
-P\{X=1\}=F(1)-F(1-)=1-0.7=0.3.
+\begin{aligned}
+P(X=-1)&=0.4-0=0.4,\\
+P(X=0)&=0.7-0.4=0.3,\\
+P(X=1)&=1-0.7=0.3.
+\end{aligned}
 $$
 
-因此
+</Step>
+  <Step>
+
+### 映射后的相同取值需要合并概率
+
+令 $Y=|X|$。因为 $|-1|=|1|=1$ 且 $|0|=0$，所以
 
 $$
-P\{|X|=0\}=P\{X=0\}=0.3,
+P(Y=0)=0.3,\qquad P(Y=1)=0.4+0.3=0.7.
 $$
 
+这一步是最容易漏算的：$X$ 的两个不同取值被绝对值映射到同一个 $Y$ 值。
+
+</Step>
+  <Step>
+
+### 按累计概率写分布函数
+
+$y<0$ 时无可能取值；$0\le y<1$ 时只有 $Y=0$ 计入；$y\ge1$ 时两个取值均计入，由此得到参考答案。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="一般的离散映射法">
+
+当 $Y=g(X)$ 时，对于每个可能值 $y$，先用
+
 $$
-P\{|X|=1\}=P\{X=-1\}+P\{X=1\}=0.4+0.3=0.7.
+P(Y=y)=\sum_{x:g(x)=y}P(X=x)
 $$
 
-故 $ |X|$ 只可能取 $ 0,1$，其分布函数为
+**合并所有原像的概率质量**，再对新取值从小到大累计，即可得到 $F_Y$。这是处理绝对值、平方、截断等离散变换的通法。
 
-$$
-F_{|X|}(y)=P\{|X|\le y\}
-=
-\begin{cases}
-0,&y<0,\\
-0.3,&0\le y<1,\\
-1,&y\ge1.
-\end{cases}
-$$
-
-**方法提炼与辨析：** 当多个 $X$ 的取值映到同一新值时，质量必须相加；不能简单写 $F_{|X|}(y)=F_X(y)$。
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-4ff162-011" type="essay" number={false}>
+<Question id="core-pr-cdf-1997-m3-11" type="essay" number="11" tags="来源:1997年数学三, 科目:概率论与数理统计, 考点:离散与连续混合分布, 难度:较难">
 
-【1997年数学三】 假设随机变量 $X$ 的绝对值不大于 $1$，且
+假设随机变量 $X$ 满足 $|X|\le1$，且
 
 $$
 P\{X=-1\}=\frac18,\qquad P\{X=1\}=\frac14.
 $$
 
-在事件 $\{-1<X<1\}$ 出现的条件下，$X$ 在 $(-1,1)$ 内的任一子区间上取值的条件概率与该子区间长度成正比。试求 $X$ 的分布函数
-
-$$
-F(x)=P\{X\le x\}.
-$$
+在事件 $\{-1<X<1\}$ 发生的条件下，$X$ 在 $(-1,1)$ 内的任一子区间上取值的条件概率与该子区间长度成正比。试求 $F(x)=P(X\le x)$。
 
 <Solution>
 
-**答案：**
+**参考答案**
 
 $$
-F(x)=
-\begin{cases}
-0, & x<-1,\\
-\dfrac{5x+7}{16}, & -1\le x<1,\\
-1, & x\ge1.
-\end{cases}
+\boxed{F(x)=\begin{cases}
+0,&x<-1,\\
+\dfrac{5x+7}{16},&-1\le x<1,\\
+1,&x\ge1.
+\end{cases}}
 $$
 
-**解析：** **模型识别与突破口：** 端点各有点质量，内部在给定事件下服从均匀分布，是典型“离散 + 绝对连续”混合模型。
+**解析与过程**
 
-先求落在内部区间的概率：
+<Steps>
+  <Step>
 
-$$
-P(-1<X<1)=1-\frac18-\frac14=\frac58.
-$$
+### 先拆清分布的三部分
 
-由题意，在已知 $-1<X<1$ 的条件下，$X$ 在 $(-1,1)$ 上均匀分布。因此对 $-1<x<1$，
-
-$$
-P(-1<X\le x\mid -1<X<1)=\frac{x+1}{2}.
-$$
-
-于是
+事件 $\{X=-1\}$ 的概率为 $1/8$，事件 $\{X=1\}$ 的概率为 $1/4$。因此内部事件 $H=\{-1<X<1\}$ 的概率是
 
 $$
-P(-1<X\le x)=\frac58\cdot\frac{x+1}{2}=\frac{5x+5}{16}.
+P(H)=1-\frac18-\frac14=\frac58.
 $$
 
-再把 $x=-1$ 处的点概率加入：
+条件 $H$ 下，区间内的概率正比于长度，所以 $X\mid H$ 在 $(-1,1)$ 上均匀分布，条件密度为 $1/2$。
+
+</Step>
+  <Step>
+
+### 在中间区间求累计概率
+
+当 $-1\le x<1$，累计概率包含 $-1$ 处点质量，以及内部 $(-1,x]$ 的连续质量。由于
 
 $$
-F(x)=P(X=-1)+P(-1<X\le x)
-=\frac18+\frac{5x+5}{16}
-=\frac{5x+7}{16}.
-$$
-
-两端分别为 $F(x)=0$（$x<-1$）和 $F(x)=1$（$x\ge1$）。
-
-**关键：**这是“离散点质量 + 连续均匀部分”的混合型分布，不能把整个 $[-1,1]$ 直接当作均匀分布。
-
-**方法提炼与辨析：** 分布函数在 $-1$ 与 $1$ 处的跳幅分别为 $1/8$ 与 $1/4$。在 $x=1-$ 时只有 $3/4$，不能将内部连续部分一直延伸到 1 作为总质量。
-
-</Solution>
-
-</Question>
-
-<Question id="math-4ff162-012" type="essay" number={false}>
-
-【2002年数学三】 假设一设备开机后无故障工作的时间 $X$ 服从指数分布，平均无故障工作的时间 $E(X)$ 为 $5$ 小时。设备定时开机，出现故障时自动关机，而在无故障的情况下工作 $2$ 小时便关机。试求该设备每天开机无故障工作的时间 $Y$ 的分布函数 $F_Y(y)$。
-
-<Solution>
-
-**答案：**
-
-$$
-F_Y(y)=
-\begin{cases}
-0, & y<0,\\
-1-e^{-y/5}, & 0\le y<2,\\
-1, & y\ge2.
-\end{cases}
-$$
-
-**解析：** **模型识别与突破口：** 发生故障即停机，定时两小时也停机，实际时长应先建模为 $Y=\min(X,2)$。
-
-每天实际工作的时间由故障时间 $X$ 和定时关机时间 $2$ 共同决定，因此
-
-$$
-Y=\min(X,2).
-$$
-
-又因为指数分布均值为 $1/\lambda$，所以
-
-$$
-\lambda=\frac1{E(X)}=\frac15.
-$$
-
-当 $y<0$ 时显然 $F_Y(y)=0$；当 $y\ge2$ 时，由于 $Y\le2$ 恒成立，所以 $F_Y(y)=1$。
-
-对 $0\le y<2$，事件 $\{Y\le y\}$ 等价于 $\{X\le y\}$，故
-
-$$
-F_Y(y)=P(X\le y)=1-e^{-y/5}.
-$$
-
-注意 $Y$ 在 $y=2$ 处有一个点概率，大小为
-
-$$
-P(Y=2)=P(X\ge2)=e^{-2/5},
-$$
-
-因此分布函数在 $2$ 处发生跳跃。
-
-**方法提炼与辨析：** 即使 $X$ 有连续密度，截断后 $Y$ 也在 2 小时处积聚点质量 $e^{-2/5}$；不能把 $(0,2)$ 上的密度归一化成 1。
-
-</Solution>
-
-</Question>
-
-## 三、由密度与随机映射构造分布函数
-
-<Question id="math-4ff162-013" type="blank" number={false}>
-
-【1990年数学一】 已知随机变量 $X$ 的概率密度函数
-
-$$
-f(x)=\frac12e^{-|x|},\qquad -\infty<x<+\infty,
-$$
-
-则 $X$ 的概率分布函数 $F(x)=$ <Blank answer="\begin{cases} \dfrac12e^x, &amp; x&lt;0,\\ 1-\dfrac12e^{-x}, &amp; x\ge0. \end{cases}" kind="text" placeholder="输入文字或 LaTeX" />。
-
-<Solution>
-
-**答案：**
-
-$$
-F(x)=
-\begin{cases}
-\dfrac12e^x, & x<0,\\
-1-\dfrac12e^{-x}, & x\ge0.
-\end{cases}
-$$
-
-**解析：** **模型识别与突破口：** 密度含绝对值，应在 $0$ 处分段；密度对称也给出 $F(0)=1/2$ 以便校验。
-
-由连续型随机变量分布函数的定义，
-
-$$
-F(x)=\int_{-\infty}^{x}f(t)\,dt.
-$$
-
-因为密度中含有绝对值，要按 $x$ 的正负分段。
-
-当 $x<0$ 时，$|t|=-t$，于是
-
-$$
-\begin{aligned}
-F(x)
-&=\int_{-\infty}^{x}\frac12e^t\,dt\\
-&=\frac12e^x.
-\end{aligned}
-$$
-
-当 $x\ge0$ 时，需要跨过 $0$ 分段积分：
-
-$$
-\begin{aligned}
-F(x)
-&=\int_{-\infty}^{0}\frac12e^t\,dt
- +\int_{0}^{x}\frac12e^{-t}\,dt\\
-&=\frac12+\frac12(1-e^{-x})\\
-&=1-\frac12e^{-x}.
-\end{aligned}
-$$
-
-所以
-
-$$
-F(x)=
-\begin{cases}
-\dfrac12e^x, & x<0,\\
-1-\dfrac12e^{-x}, & x\ge0.
-\end{cases}
-$$
-
-**关键：**密度含 $|x|$ 时，计算分布函数必须在绝对值变号点处分段。
-
-**方法提炼与辨析：** 积分所得两段应在 $0$ 处连续，且各端满足 $F(-\infty)=0,F(+\infty)=1$。
-
-</Solution>
-
-</Question>
-
-<Question id="math-4ff162-014" type="essay" number={false}>
-
-【1995年数学三】 已知随机变量 $X$ 和 $Y$ 的联合概率密度为
-
-$$
-f(x,y)=
-\begin{cases}
-4xy, & 0\le x\le1,\ 0\le y\le1,\\
-0, & \text{其他}.
-\end{cases}
-$$
-
-求 $X$ 和 $Y$ 的联合分布函数 $F(x,y)$。
-
-<Solution>
-
-**答案：**
-
-$$
-F(x,y)=
-\begin{cases}
-0, & x<0\text{ 或 }y<0,\\
-x^2y^2, & 0\le x\le1,\ 0\le y\le1,\\
-y^2, & x>1,\ 0\le y\le1,\\
-x^2, & 0\le x\le1,\ y>1,\\
-1, & x>1,\ y>1.
-\end{cases}
-$$
-
-**解析：** **模型识别与突破口：** 二维分布函数是联合密度在左下矩形上的累积积分；先画出正方形支撑集，再分类截断区域。
-
-按定义
-
-$$
-F(x,y)=P(X\le x,Y\le y).
-$$
-
-密度只在单位正方形 $[0,1]\times[0,1]$ 内非零，因此要根据 $(x,y)$ 与该正方形的相对位置分段。
-
-当 $x<0$ 或 $y<0$ 时，积分区域与密度的支撑集没有交集，故 $F(x,y)=0$。
-
-当 $0\le x\le1,0\le y\le1$ 时，
-
-$$
-F(x,y)=\int_0^x\int_0^y4st\,dt\,ds=x^2y^2.
-$$
-
-当 $x>1,0\le y\le1$ 时，$X$ 方向已经覆盖全部支撑区间：
-
-$$
-F(x,y)=\int_0^1\int_0^y4st\,dt\,ds=y^2.
-$$
-
-同理，当 $0\le x\le1,y>1$ 时，$F(x,y)=x^2$；当 $x>1,y>1$ 时，全部概率都已包含，故 $F(x,y)=1$。
-
-**关键：**二维分布函数的分段，本质上是在求矩形 $(-\infty,x]\times(-\infty,y]$ 与密度支撑区域的交集面积积分。
-
-**方法提炼与辨析：** 本题 $f(x,y)=(2x)(2y)$ 在 $[0,1]^2$ 上可分解为边缘密度乘积，因此还能验证 $F(x,y)=F_X(x)F_Y(y)$。
-
-</Solution>
-
-</Question>
-
-<Question id="math-4ff162-015" type="essay" number={false}>
-
-【李林880】 设随机变量 $X$ 服从参数为 $\lambda$ 的指数分布，记 $Y = \max\left(X, \frac{1}{X}\right)$，求 $Y$ 的分布函数.
-
-<Solution>
-
-**答案：** $F_Y(y)=\begin{cases}0,&y<1,\\e^{-\lambda/y}-e^{-\lambda y},&y\ge1.\end{cases}$
-
-**解析：** **模型识别与突破口：** 非单调变换 $Y=\max(X,1/X)$ 不宜套单调变量替换公式；从 $\{Y\le y\}$ 出发列同时成立的不等式。
-
-依题设, $X$ 的概率密度为
-
-$$
-f(x) = \begin{cases} \lambda e^{-\lambda x}, & x > 0, \\ 0, & x \leqslant 0. \end{cases}
-$$
-
-$P\{X > 0\} = 1, P\{X \leqslant 0\} = 0$, 则 $Y$ 的分布函数为
-
-$$
-F_Y(y) = P\{Y \leqslant y\} = P\left\{\max\left(X, \frac{1}{X}\right) \leqslant y\right\}
-$$
-
-$$
-= P\left\{X \leqslant y, \frac{1}{X} \leqslant y, X > 0\right\}.
-$$
-
-当 $y \leqslant 0$ 时, $F_Y(y) = 0$;
-当 $0 < y < 1$ 时, 事件 $\left\{\frac{1}{X} \leqslant y, X > 0\right\} = \left\{\frac{1}{y} \leqslant X, X > 0\right\} = \left\{\frac{1}{y} \leqslant X\right\}$. 由于 $\{X \leqslant y\}$ 与 $\left\{\frac{1}{X} \leqslant y, X > 0\right\}$ 不能同时发生, 故 $F_Y(y) = 0$;
-当 $y \geqslant 1$ 时,
-
-$$
-F_Y(y) = P\left\{X \leqslant y, \frac{1}{y} \leqslant X, X > 0\right\} = P\left\{\frac{1}{y} \leqslant X \leqslant y\right\}
-$$
-
-$$
-= \int_{\frac{1}{y}}^{y} \lambda e^{-\lambda x} \mathrm{d}x = e^{-\frac{\lambda}{y}} - e^{-\lambda y}.
+P(-1<X\le x\mid H)=\frac{x+1}{2},
 $$
 
 故
 
 $$
-F_Y(y) = \begin{cases} e^{-\frac{\lambda}{y}} - e^{-\lambda y}, & y \geqslant 1, \\ 0, & y < 1. \end{cases}
-$$
-
-**方法提炼与辨析：** 支撑集为 $[1,+\infty)$，在 $y=1$ 处 $F_Y(1)=0$，无原子；验算 $\lim_{y\to\infty}F_Y(y)=1$。
-
-</Solution>
-
-</Question>
-
-<Question id="math-4ff162-016" type="essay" number={false}>
-
-【2003年数学三】 设随机变量 $X$ 的概率密度为
-
-$$
-f(x)=
-\begin{cases}
-\dfrac{1}{3\sqrt[3]{x^2}}, & x\in[1,8],\\
-0, & \text{其他}.
-\end{cases}
-$$
-
-$F(x)$ 是 $X$ 的分布函数，求随机变量 $Y=F(X)$ 的分布函数。
-
-<Solution>
-
-**答案：**
-
-设 $G(y)=P(Y\le y)$，则
-
-$$
-G(y)=
-\begin{cases}
-0, & y<0,\\
-y, & 0\le y<1,\\
-1, & y\ge1.
-\end{cases}
-$$
-
-即 $Y\sim U(0,1)$。
-
-**解析：** **模型识别与突破口：** 看到 $Y=F(X)$ 且 $F$ 连续，优先想到概率积分变换，但仍应在本题具体分布上推导。
-
-先求 $X$ 的分布函数。对 $1\le x\le8$，
-
-$$
-F(x)=\int_1^x\frac{1}{3t^{2/3}}\,dt
-=\sqrt[3]{x}-1.
-$$
-
-于是
-
-$$
-F(x)=
-\begin{cases}
-0, & x<1,\\
-\sqrt[3]{x}-1, & 1\le x\le8,\\
-1, & x>8.
-\end{cases}
-$$
-
-因此 $Y=F(X)=\sqrt[3]{X}-1$，其取值范围为 $[0,1]$。
-
-对 $0\le y<1$，
-
-$$
 \begin{aligned}
-G(y)
-&=P(F(X)\le y)\\
-&=P(\sqrt[3]{X}-1\le y)\\
-&=P(X\le(y+1)^3)\\
-&=F((y+1)^3)=y.
+F(x)&=P(X=-1)+P(H)P(-1<X\le x\mid H)\\
+&=\frac18+\frac58\cdot\frac{x+1}{2}\\
+&=\frac{5x+7}{16}.
 \end{aligned}
 $$
 
-故得到上式。
+当 $x<-1$ 时 $F(x)=0$；当 $x\ge1$ 时，由 $|X|\le1$，有 $F(x)=1$。
 
-**关键：**连续型随机变量的分布函数若连续，则概率积分变换给出 $F(X)\sim U(0,1)$；本题也可直接引用这一结论。
+</Step>
+  <Step>
 
-**方法提炼与辨析：** 在一般连续分布下 $F(X)\sim U(0,1)$，无需假设密度处处正或分布函数全局严格递增；若 $X$ 的分布有原子，此结论一般不成立。
+### 检查端点的跳跃与归一化
+
+$$
+F(-1)=\frac18,\quad F(-1-0)=0;
+\qquad F(1-0)=\frac{12}{16}=\frac34,\quad F(1)=1.
+$$
+
+故两端跳幅分别为 $1/8$、$1/4$，完全符合题设。内部连续部分质量为 $5/8$，三部分总和恰为 $1$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="条件均匀不等于原分布均匀">
+
+$X$ **在给定进入 $(-1,1)$ 的条件下**才均匀；原分布在端点仍有正概率质量。若直接使用均匀分布 $U(-1,1)$ 的分布函数，会漏掉两端的跳跃。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-4ff162-017" type="single" number={false}>
+<Question id="core-pr-cdf-2002-m3-12" type="essay" number="12" tags="来源:2002年数学三, 科目:概率论与数理统计, 考点:截断指数分布与点质量, 重点">
 
-【张宇1000题】 设随机变量$X \sim N(0,1)$，则与$Y=\begin{cases}X,&|X| \leq 1\\-X,&|X|>1\end{cases}$同分布的是( )
+设备开机后无故障工作的时间 $X$ 服从指数分布，平均无故障工作的时间 $E(X)=5$ 小时。设备出现故障时自动关机，若无故障则工作 $2$ 小时后定时关机。求每天实际工作时间 $Y$ 的分布函数 $F_Y(y)$。
+
+<Solution>
+
+**参考答案**
+
+$$
+\boxed{F_Y(y)=\begin{cases}
+0,&y<0,\\
+1-e^{-y/5},&0\le y<2,\\
+1,&y\ge2.
+\end{cases}}
+$$
+
+**解析与过程**
+
+<Steps>
+  <Step>
+
+### 将停机机制翻译为随机变量变换
+
+故障时间是 $X$，定时关机时间是 $2$，**谁先到就停止**，所以
+
+$$
+Y=\min(X,2).
+$$
+
+由指数分布均值 $E(X)=1/\lambda=5$，确定参数 $\lambda=1/5$，于是
+
+$$
+F_X(x)=\begin{cases}0,&x<0,\\1-e^{-x/5},&x\ge0.\end{cases}
+$$
+
+</Step>
+  <Step>
+
+### 按阈值分段求 $F_Y$
+
+- 若 $y<0$，由于工作时长非负，概率为 $0$。
+- 若 $0\le y<2$，则 $\{\min(X,2)\le y\}=\{X\le y\}$，因此 $F_Y(y)=1-e^{-y/5}$。
+- 若 $y\ge2$，$Y$ 恒不超过 $2$，因此 $F_Y(y)=1$。
+
+</Step>
+  <Step>
+
+### 判定定时关机点的原子概率
+
+恰好工作满两小时意味着 $X\ge2$，所以
+
+$$
+P(Y=2)=P(X\ge2)=e^{-2/5}.
+$$
+
+另一方面 $F_Y(2-0)=1-e^{-2/5}$、$F_Y(2)=1$，两者之差也正是 $e^{-2/5}$，与停机机制吻合。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="连续变量经过截断后可能产生离散质量">
+
+$X$ 原本连续，但 $Y=\min(X,2)$ 把所有 $X\ge2$ 的样本**压缩到同一个值 $2$**，因此 $Y$ 是混合型分布。切勿将 $0<y<2$ 的连续密度重新归一化为总积分 $1$；剩余质量位于 $y=2$。
+
+</Callout>
+
+</Solution>
+</Question>
+
+## 三、由密度与随机映射构造分布函数
+
+<Question id="core-pr-cdf-1990-m1-13" type="essay" number="13" tags="来源:1990年数学一, 科目:概率论与数理统计, 考点:含绝对值密度的积分">
+
+随机变量 $X$ 的概率密度函数为
+
+$$
+f(x)=\frac12e^{-|x|},\qquad -\infty<x<+\infty.
+$$
+
+求 $X$ 的分布函数 $F(x)$。
+
+<Solution>
+
+**参考答案**
+
+$$
+\boxed{F(x)=\begin{cases}
+\dfrac12e^x,&x<0,\\
+1-\dfrac12e^{-x},&x\ge0.
+\end{cases}}
+$$
+
+**解析与过程**
+
+分布函数是密度从负无穷到 $x$ 的积分：$F(x)=\int_{-\infty}^x f(t)\,dt$。由于 $|t|$ 在 $t=0$ 处改变表达式，必须分段。
+
+<Tabs items={['方法一：直接分段积分','方法二：利用分布对称性']}>
+  <Tab value="方法一：直接分段积分">
+
+当 $x<0$ 时，积分区间全在负半轴，$|t|=-t$，因而
+
+$$
+F(x)=\int_{-\infty}^x\frac12e^t\,dt=\frac12e^x.
+$$
+
+当 $x\ge0$，分成负半轴与正半轴：
+
+$$
+\begin{aligned}
+F(x)&=\int_{-\infty}^0\frac12e^t\,dt+\int_0^x\frac12e^{-t}\,dt\\
+&=\frac12+\frac12(1-e^{-x})=1-\frac12e^{-x}.
+\end{aligned}
+$$
+
+</Tab>
+  <Tab value="方法二：利用分布对称性">
+
+密度满足 $f(-x)=f(x)$，因此 $X$ 关于 $0$ 对称，有 $F(0)=1/2$。对 $x\ge0$，也可先算右尾概率：
+
+$$
+P(X>x)=\int_x^{+\infty}\frac12e^{-t}\,dt=\frac12e^{-x}.
+$$
+
+故 $F(x)=1-\frac12e^{-x}$。对 $x<0$ 使用 $F(x)=1-F(-x)$（分布连续且关于零对称）得到 $F(x)=\frac12e^x$。
+
+</Tab>
+</Tabs>
+
+**必要校验：** 两段在 $x=0$ 都等于 $1/2$，函数非降且 $F(-\infty)=0,F(+\infty)=1$。对两段求导均还原原密度。
+
+<Callout type="idea" title="对称的双指数分布">
+
+该密度又称拉普拉斯分布的标准形式。识别对称性可以帮助检查分段积分，但最终仍应给出左右两段的明确公式。
+
+</Callout>
+
+</Solution>
+</Question>
+
+<Question id="core-pr-cdf-1995-m3-14" type="essay" number="14" tags="来源:1995年数学三, 科目:概率论与数理统计, 考点:二维联合分布函数, 重点">
+
+随机变量 $X,Y$ 的联合概率密度为
+
+$$
+f(x,y)=\begin{cases}
+4xy,&0\le x\le1,\;0\le y\le1,\\
+0,&\text{其他}.
+\end{cases}
+$$
+
+求 $X,Y$ 的联合分布函数 $F(x,y)$。
+
+<Solution>
+
+**参考答案**
+
+$$
+\boxed{F(x,y)=\begin{cases}
+0,&x<0\text{ 或 }y<0,\\
+x^2y^2,&0\le x\le1,\;0\le y\le1,\\
+y^2,&x>1,\;0\le y\le1,\\
+x^2,&0\le x\le1,\;y>1,\\
+1,&x>1,\;y>1.
+\end{cases}}
+$$
+
+**解析与过程**
+
+<Steps>
+  <Step>
+
+### 画清概率密度的支撑区域
+
+只有单位正方形 $[0,1]\times[0,1]$ 内密度不为零。联合分布函数的定义是
+
+$$
+F(x,y)=P(X\le x,Y\le y)
+=\int_{-\infty}^{x}\int_{-\infty}^{y}f(s,t)\,dt\,ds.
+$$
+
+即用左下矩形 $(-\infty,x]\times(-\infty,y]$ 去截取支撑正方形。若 $x<0$ 或 $y<0$，截取区域没有面积，$F(x,y)=0$。
+
+</Step>
+  <Step>
+
+### 两个坐标都在支撑区间内
+
+当 $0\le x,y\le1$，
+
+$$
+\begin{aligned}
+F(x,y)&=\int_0^x\int_0^y4st\,dt\,ds\\
+&=\left(\int_0^x2s\,ds\right)\left(\int_0^y2t\,dt\right)=x^2y^2.
+\end{aligned}
+$$
+
+</Step>
+  <Step>
+
+### 一个或两个上限已经覆盖整个支撑
+
+若 $x>1,0\le y\le1$，$X$ 方向积分上限应截在 $1$，故 $F(x,y)=1^2y^2=y^2$；同理 $0\le x\le1,y>1$ 时 $F(x,y)=x^2$；两者均大于 $1$ 时 $F(x,y)=1$。
+
+</Step>
+</Steps>
+
+**检验与提升：**
+
+$$
+f(x,y)=\underbrace{2x\mathbf1_{[0,1]}(x)}_{f_X(x)}\;
+\underbrace{2y\mathbf1_{[0,1]}(y)}_{f_Y(y)}.
+$$
+
+因此 $X,Y$ 独立；其边缘分布函数为 $F_X(x)=0,x^2,1$（按 $x<0,0\le x\le1,x>1$ 分段），$F_Y$ 类似，所得结果也可统一写成 $F(x,y)=F_X(x)F_Y(y)$。
+
+<Callout type="warn" title="联合分布函数不是双重积分到 x、y 后只写一段">
+
+必须处理 $x<0$、$y<0$、$x>1$、$y>1$ 的情形。积分限一旦超过密度支撑区间，正确做法是**截断在边界**，而不是继续代入 $x^2y^2$。
+
+</Callout>
+
+</Solution>
+</Question>
+
+<Question id="core-pr-cdf-lilin880-15" type="essay" number="15" tags="来源:李林880, 科目:概率论与数理统计, 考点:非单调函数的分布, 难度:较难">
+
+设随机变量 $X$ 服从参数为 $\lambda$（$\lambda>0$）的指数分布，记
+
+$$
+Y=\max\left(X,\frac1X\right).
+$$
+
+求 $Y$ 的分布函数。
+
+<Solution>
+
+**参考答案**
+
+$$
+\boxed{F_Y(y)=\begin{cases}
+0,&y<1,\\
+e^{-\lambda/y}-e^{-\lambda y},&y\ge1.
+\end{cases}}
+$$
+
+**解析与过程**
+
+<Steps>
+  <Step>
+
+### 先由取值范围确定分段点
+
+指数分布保证 $X>0$ 几乎必然。对任意 $x>0$，$\max(x,1/x)\ge1$，因此 $Y\ge1$，从而 $F_Y(y)=0$（$y<1$）。
+
+</Step>
+  <Step>
+
+### 把最大值不等式翻译成两个条件
+
+当 $y\ge1$，
+
+$$
+\begin{aligned}
+\{Y\le y\}
+&=\left\{X\le y,\ \frac1X\le y\right\}\\
+&=\left\{\frac1y\le X\le y\right\}.
+\end{aligned}
+$$
+
+注意这里是不等式**同时成立**；当 $y<1$ 时，下限 $1/y$ 大于上限 $y$，正好解释了事件为何不可能发生。
+
+</Step>
+  <Step>
+
+### 用指数分布的尾概率求区间概率
+
+$X$ 的密度是 $f_X(x)=\lambda e^{-\lambda x}$（$x>0$），所以
+
+$$
+\begin{aligned}
+F_Y(y)
+&=\int_{1/y}^{y}\lambda e^{-\lambda x}\,dx\\
+&=\left[-e^{-\lambda x}\right]_{1/y}^{y}\\
+&=e^{-\lambda/y}-e^{-\lambda y},\qquad y\ge1.
+\end{aligned}
+$$
+
+</Step>
+</Steps>
+
+**核验：** $F_Y(1)=e^{-\lambda}-e^{-\lambda}=0$，且 $\lim_{y\to\infty}F_Y(y)=1-0=1$；导数在 $y>1$ 时非负，符合分布函数性质。
+
+<Callout type="idea" title="最大值、最小值先求事件，不要盲套变换密度公式">
+
+遇到 $Y=\max(g(X),h(X))$，先写 $\{Y\le y\}=\{g(X)\le y,h(X)\le y\}$。非单调函数的原像区间常比 Jacobian 密度变换更容易处理。
+
+</Callout>
+
+</Solution>
+</Question>
+
+<Question id="core-pr-cdf-2003-m3-16" type="essay" number="16" tags="来源:2003年数学三, 科目:概率论与数理统计, 考点:概率积分变换, 重点">
+
+设随机变量 $X$ 的概率密度为
+
+$$
+f(x)=\begin{cases}
+\dfrac1{3\sqrt[3]{x^2}},&x\in[1,8],\\
+0,&\text{其他}.
+\end{cases}
+$$
+
+$F(x)$ 是 $X$ 的分布函数。求随机变量 $Y=F(X)$ 的分布函数。
+
+<Solution>
+
+**参考答案**
+
+$$
+\boxed{F_Y(y)=\begin{cases}
+0,&y<0,\\
+y,&0\le y<1,\\
+1,&y\ge1.
+\end{cases}}
+$$
+
+即 $\boxed{Y\sim U(0,1)}$。
+
+**解析与过程**
+
+<Tabs items={['方法一：本题直接推导','方法二：概率积分变换定理']}>
+  <Tab value="方法一：本题直接推导">
+
+先求原分布函数。对 $1\le x\le8$，
+
+$$
+F(x)=\int_1^x\frac1{3t^{2/3}}\,dt
+=\bigl[t^{1/3}\bigr]_1^x=x^{1/3}-1.
+$$
+
+补上两端：$F(x)=0$（$x<1$），$F(x)=1$（$x>8$）。由于 $X\in[1,8]$ 几乎必然，
+
+$$
+Y=F(X)=X^{1/3}-1\in[0,1].
+$$
+
+当 $0\le y<1$ 时，
+
+$$
+\begin{aligned}
+P(Y\le y)
+&=P(X^{1/3}-1\le y)\\
+&=P(X\le(1+y)^3)\\
+&=F((1+y)^3)=y.
+\end{aligned}
+$$
+
+区间外分别为 $0$ 和 $1$，即参考答案。
+
+</Tab>
+  <Tab value="方法二：概率积分变换定理">
+
+对连续分布函数 $F$，随机变量 $F(X)$ 服从 $U(0,1)$。本题 $X$ 具有密度，$F$ 连续，因此可直接得到 $F_Y(y)=y$（$0\le y\le1$）。
+
+但考场书写建议附上一行本题的 $F(x)=x^{1/3}-1$（$1\le x\le8$），证明此处连续且能够直接应用定理。
+
+</Tab>
+</Tabs>
+
+**归一化检查：**
+
+$$
+\int_1^8\frac1{3x^{2/3}}\,dx=\bigl[x^{1/3}\bigr]_1^8=2-1=1.
+$$
+
+原密度合法；新分布函数非降、连续，在 $y=0,1$ 处与两侧一致。
+
+<Callout type="warn" title="定理要求原分布函数连续">
+
+如果原 $X$ 具有跳跃点，则 $F(X)$ 一般**不**服从均匀分布。此题用到了原 $X$ 连续型这一前提，而不是见到 $F(X)$ 就一概判定均匀。
+
+</Callout>
+
+</Solution>
+</Question>
+
+<Question id="core-pr-cdf-zhangyu1000-17" type="single" number="17" tags="来源:张宇1000题, 科目:概率论与数理统计, 考点:正态对称与保分布变换">
+
+设随机变量 $X\sim N(0,1)$，并定义
+
+$$
+Y=\begin{cases}X,&|X|\le1,\\-X,&|X|>1.\end{cases}
+$$
+
+则与 $Y$ 同分布的是（ ）。
 
 <Option correct>$X$</Option>
 <Option>$2X$</Option>
-<Option>$\frac{X+Y}{2}$</Option>
+<Option>$\dfrac{X+Y}{2}$</Option>
 <Option>$X+Y$</Option>
 
 <Solution>
 
-**模型识别与突破口：** 非单调分段变换在关于原点对称的区域内进行镜像，利用正态分布对称性判断保分布。
+**解题结论：** 选 A，即 $\boxed{Y\overset{d}=X\sim N(0,1)}$。
+
+**解析与过程**
 
 标准正态密度
 
@@ -961,146 +1077,156 @@ $$
 \varphi(x)=\frac1{\sqrt{2\pi}}e^{-x^2/2}
 $$
 
-关于原点对称，即$\varphi(-x)=\varphi(x)$。
+满足 $\varphi(-x)=\varphi(x)$。变换 $Y$ 在 $[-1,1]$ 内保持 $X$ 不动，在两侧尾部则将 $x$ 映射到 $-x$，恰好交换两个关于原点对称的尾部。
 
-变换$Y$的作用是：当$|X|\le1$时保持不变，当$|X|>1$时把$X$关于原点反射。由于标准正态分布关于原点完全对称，这种反射不会改变概率分布。
+对 $|y|<1$，$Y=y$ 的原像（在密度意义下）是 $X=y$，所以该区间 $Y$ 的密度为 $\varphi(y)$；对 $|y|>1$，$Y=y$ 的原像是 $X=-y$，导数绝对值为 $1$，故密度为 $\varphi(-y)=\varphi(y)$。分界点 $\pm1$ 的概率为 $0$，不会产生额外的点质量。
 
-更具体地，对$|y|<1$，$Y=y$只能由$X=y$产生；对$y>1$，$Y=y$由$X=-y$产生；对$y<-1$，$Y=y$由$X=-y$产生。因此各处密度均为
+因此 $Y$ 的密度在整条实数轴上仍等于 $\varphi$，所以 $Y\sim N(0,1)$，选 A。
 
-$$
-\varphi(y).
-$$
+<Callout type="idea" title="分段镜像为什么能保持分布？">
 
-所以
+这里不仅需要原分布关于零对称，还需要**进行镜像的区域本身也关于零对称**：$\{|x|>1\}$ 在映射 $x\mapsto-x$ 下不变。若只翻转正尾而不翻转负尾，结论一般不再成立。
 
-$$
-Y\sim N(0,1),
-$$
-
-即$Y$与$X$同分布，选A。
-
-**方法提炼与辨析：** 并非任意分段变换都保分布；这里 $|X|>1$ 的区域关于原点对称，密度 $\varphi(x)$ 也是偶函数，且分界点没有原子。
+</Callout>
 
 </Solution>
-
 </Question>
 
 ## 四、条件混合、分布函数比较与近年综合题
 
-<Question id="math-4ff162-018" type="single" number={false}>
+<Question id="core-pr-cdf-zhangyu1000-18" type="single" number="18" tags="来源:张宇1000题, 科目:概率论与数理统计, 考点:条件分布与混合分布">
 
-【张宇1000题】 设随机变量$X$的概率分布为$P\{X=1\}=a$，$P\{X=2\}=1-a$。在给定$X=i$的条件下，随机变量$Y$服从均匀分布$U(0,i)$，$i=1,2$，且当$0 \leq y<1$时，$Y$的分布函数为$F_Y(y)=\frac{2}{3}y$，则$a=$( )
+设随机变量 $X$ 的概率分布为 $P(X=1)=a$、$P(X=2)=1-a$。在给定 $X=i$ 的条件下，$Y\sim U(0,i)$，$i=1,2$。已知当 $0\le y<1$ 时，$Y$ 的分布函数为 $F_Y(y)=\frac23y$，求 $a=$（ ）。
 
-<Option correct>$\frac{1}{3}$</Option>
-<Option>$\frac{2}{3}$</Option>
-<Option>$\frac{1}{2}$</Option>
-<Option>$\frac{1}{4}$</Option>
-
-<Solution>
-
-**模型识别与突破口：** 已知条件分布与一个区间上的边缘 CDF，用全概率先写 CDF 的混合表达式，系数比较得先验概率。
-
-对$0\le y<1$，由全概率公式，
-
-$$
-F_Y(y)
-=P\{Y\le y\mid X=1\}P\{X=1\}
-+P\{Y\le y\mid X=2\}P\{X=2\}.
-$$
-
-因
-
-$$
-Y\mid(X=1)\sim U(0,1),\qquad
-Y\mid(X=2)\sim U(0,2),
-$$
-
-故
-
-$$
-F_Y(y)=ay+(1-a)\frac y2
-=\frac{1+a}{2}y.
-$$
-
-题设给出
-
-$$
-F_Y(y)=\frac23y,
-$$
-
-因此
-
-$$
-\frac{1+a}{2}=\frac23,
-$$
-
-解得
-
-$$
-a=\frac13.
-$$
-
-故选A。
-
-**方法提炼与辨析：** 全区间的 $F_Y(y)$ 在 $1\le y<2$ 会改变表达式，不能把 $2y/3$ 延伸到全部实数。
-
-</Solution>
-
-</Question>
-
-<Question id="math-4ff162-019" type="single" number={false}>
-
-【张宇1000题】 设$X,Y$分别服从参数为$n,m$的泊松分布，且$n>m$，$F_X(x),F_Y(y)$分别是$X,Y$的分布函数，$-\infty<z<+\infty$，则( )
-
-<Option>$P\{X \geq Y\}=1$</Option>
-<Option>$P\{X \leq Y\}=1$</Option>
-<Option>$F_X(z) \geq F_Y(z)$</Option>
-<Option correct>$F_X(z) \leq F_Y(z)$</Option>
+<Option correct>$\dfrac13$</Option>
+<Option>$\dfrac23$</Option>
+<Option>$\dfrac12$</Option>
+<Option>$\dfrac14$</Option>
 
 <Solution>
 
-**模型识别与突破口：** 比较不同参数的泊松分布函数属于随机序问题：参数增大使右尾变重，故 CDF 应减小。
+**解题结论：** 选 A，即 $\boxed{a=\frac13}$。
 
-泊松分布关于参数具有随机单调性：参数越大，分布整体越向右移动。
+**解析与过程**
 
-可作如下构造：设
-
-$$
-Y_0\sim P(m),\qquad Z\sim P(n-m),
-$$
-
-且$Y_0,Z$相互独立，则
+**先识别分层原因。** $X$ 决定 $Y$ 的条件均匀分布的区间长度，所以对任意 $y$，应按 $X=1$ 与 $X=2$ 两类使用全概率公式：
 
 $$
-Y_0+Z\sim P(n).
+F_Y(y)=P(Y\le y\mid X=1)P(X=1)+P(Y\le y\mid X=2)P(X=2).
 $$
 
-因此可以令$X_0=Y_0+Z$，使$X_0\ge Y_0$几乎处处成立。于是对任意实数$z$，
+在题设指定的 $0\le y<1$ 上，两个条件分布都处于各自的线性增长区间：
 
 $$
-\{X_0\le z\}\subseteq\{Y_0\le z\},
+P(Y\le y\mid X=1)=y,
+\qquad P(Y\le y\mid X=2)=\frac y2.
 $$
 
-从而
+于是
 
 $$
-F_X(z)=P\{X_0\le z\}\le P\{Y_0\le z\}=F_Y(z).
+F_Y(y)=ay+(1-a)\frac y2=\frac{1+a}{2}y.
 $$
 
-故选D。注意题目并未给定原随机变量$X,Y$之间的联合分布，所以不能由边缘分布直接断言$P\{X\ge Y\}=1$。
+和题给的 $\frac23y$ 比较系数（可取任意 $0<y<1$ 并约去 $y$），得到
 
-**方法提炼与辨析：** 构造的 $X_0=Y_0+Z$ 是同分布的“耦合副本”，不表示题给 $X,Y$ 必满足 $X\ge Y$，否则会错误排除 D。
+$$
+\frac{1+a}{2}=\frac23\quad\Longrightarrow\quad a=\frac13.
+$$
+
+**完整分布的核对：** 当 $a=1/3$ 时，
+
+$$
+F_Y(y)=\begin{cases}
+0,&y<0,\\
+\frac23y,&0\le y<1,\\
+\frac13+\frac13y,&1\le y<2,\\
+1,&y\ge2.
+\end{cases}
+$$
+
+该函数在 $1,2$ 处连续，且终点达到 $1$，符合混合分布结构。
+
+<Callout type="warn" title="不要把题设的一段公式外推到 y≥1">
+
+$Y\mid X=1$ 的分布函数在 $y=1$ 后就已经等于 $1$，不再是 $y$；只有 $Y\mid X=2$ 在 $1\le y<2$ 仍是 $y/2$。若把 $\frac23y$ 延伸到 $y\ge1$，就会破坏分布函数的取值范围。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-4ff162-020" type="essay" number={false}>
+<Question id="core-pr-cdf-zhangyu1000-19" type="single" number="19" tags="来源:张宇1000题, 科目:概率论与数理统计, 考点:泊松随机序, 考点:分布函数比较">
 
-【2020年数学一】 设随机变量 $X_1,X_2,X_3$ 相互独立，其中 $X_1$ 与 $X_2$ 均服从标准正态分布，$X_3$ 的概率分布为
+设 $X,Y$ 分别服从参数为 $n,m$ 的泊松分布，且 $n>m$。$F_X(z),F_Y(z)$ 分别为其分布函数，$-\infty<z<+\infty$，则（ ）。
+
+<Option>$P\{X\ge Y\}=1$</Option>
+<Option>$P\{X\le Y\}=1$</Option>
+<Option>$F_X(z)\ge F_Y(z)$</Option>
+<Option correct>$F_X(z)\le F_Y(z)$</Option>
+
+<Solution>
+
+**解析：** 正确选项 D。泊松分布参数增大，随机变量趋于取更大的值，因此“取值不超过 $z$”的概率变小。但**比较分布**不等于能直接比较题中 $X,Y$ 的每一次取值。
+
+<Tabs items={['解法一：泊松叠加耦合','解法二：比较泊松 CDF']}>
+  <Tab value="解法一：泊松叠加耦合">
+
+构造相互独立的 $Y_0\sim\operatorname{Pois}(m)$ 和 $Z\sim\operatorname{Pois}(n-m)$，令 $X_0=Y_0+Z$。由泊松分布的可加性，
 
 $$
-P\{X_3=0\}=P\{X_3=1\}=\frac12,
+X_0\sim\operatorname{Pois}(m+n-m)=\operatorname{Pois}(n).
+$$
+
+又 $Z\ge0$，故每个样本点上 $X_0\ge Y_0$。因此
+
+$$
+\{X_0\le z\}\subseteq\{Y_0\le z\}.
+$$
+
+对任意实数 $z$ 取概率，即
+
+$$
+F_X(z)=P(X_0\le z)\le P(Y_0\le z)=F_Y(z).
+$$
+
+这里 $X_0,Y_0$ 是我们**构造的同分布副本**，足以证明边缘 CDF 的大小关系。
+
+</Tab>
+  <Tab value="解法二：比较泊松 CDF">
+
+对非负整数 $k$，若 $W_\lambda\sim\operatorname{Pois}(\lambda)$，其分布函数为
+
+$$
+G_k(\lambda)=P(W_\lambda\le k)=e^{-\lambda}\sum_{j=0}^k\frac{\lambda^j}{j!}.
+$$
+
+对参数求导，利用相邻项抵消：
+
+$$
+G_k'(\lambda)=-e^{-\lambda}\frac{\lambda^k}{k!}<0\quad(\lambda>0).
+$$
+
+故 $n>m$ 时 $G_k(n)<G_k(m)$；当 $z<0$，两者的 CDF 均为 $0$，结论仍成立。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="不能由边缘分布确定 P(X≥Y)=1">
+
+题目没有规定 $X,Y$ 的联合分布，它们**不一定**满足 $X\ge Y$。耦合仅说明“可以找到一对同边缘分布的变量使大小关系几乎处处成立”，并非给定变量自身就有该性质。
+
+</Callout>
+
+</Solution>
+</Question>
+
+<Question id="core-pr-cdf-2020-m1-20" type="essay" number="20" tags="来源:2020年数学一, 科目:概率论与数理统计, 考点:混合联合分布, 考点:独立性">
+
+设随机变量 $X_1,X_2,X_3$ 相互独立，其中 $X_1,X_2$ 均服从标准正态分布，$X_3$ 的概率分布为
+
+$$
+P(X_3=0)=P(X_3=1)=\frac12,
 $$
 
 且
@@ -1109,77 +1235,106 @@ $$
 Y=X_3X_1+(1-X_3)X_2.
 $$
 
-（1）求二维随机变量 $(X_1,Y)$ 的分布函数，结果用标准正态分布函数 $\Phi(x)$ 表示；
+（1）求二维随机变量 $(X_1,Y)$ 的分布函数，用标准正态分布函数 $\Phi$ 表示；
 
-（2）证明随机变量 $Y$ 服从标准正态分布。
+（2）证明 $Y$ 服从标准正态分布。
 
 <Solution>
 
-**答案：**
-
-（1）
+**参考答案**
 
 $$
-F(x,y)=\frac12\Phi(x)\Phi(y)+\frac12\Phi(\min\{x,y\}).
+\boxed{F_{X_1,Y}(x,y)=\frac12\Phi(x)\Phi(y)+\frac12\Phi(\min\{x,y\})};
 $$
 
-（2）$Y\sim N(0,1)$。
+$$
+\boxed{F_Y(y)=\Phi(y),\quad Y\sim N(0,1)}.
+$$
 
-**解析：** **模型识别与突破口：** 混合开关变量 $X_3$ 决定 $Y$ 究竟等于 $X_1$ 还是 $X_2$，应对 $X_3=0,1$ 条件分类。
+**解析与完整过程**
 
-按 $X_3$ 的两种取值分类。
+<Steps>
+  <Step>
 
-当 $X_3=0$ 时，$Y=X_2$；当 $X_3=1$ 时，$Y=X_1$。因此
+### 识别开关变量 X₃ 对 Y 的影响
+
+由定义，$X_3=0$ 时 $Y=X_2$，$X_3=1$ 时 $Y=X_1$。两个情况互斥且覆盖整个样本空间，分别占 $1/2$。要计算联合 CDF，必须对**两个开关状态**分类，而不是假设 $X_1,Y$ 独立。
+
+</Step>
+  <Step>
+
+### 分别求两种状态下的联合概率
+
+按定义
+
+$$
+F_{X_1,Y}(x,y)=P(X_1\le x,\,Y\le y).
+$$
+
+当 $X_3=0$ 时，$Y=X_2$，由 $X_1,X_2,X_3$ 相互独立，
+
+$$
+P(X_3=0,X_1\le x,X_2\le y)=\frac12\Phi(x)\Phi(y).
+$$
+
+当 $X_3=1$ 时，$Y=X_1$，两个不等式作用于**同一个**随机变量：
 
 $$
 \begin{aligned}
-F(x,y)
-&=P(X_1\le x,Y\le y)\\
-&=P(X_3=0,X_1\le x,X_2\le y)
- +P(X_3=1,X_1\le x,X_1\le y).
+&P(X_3=1,X_1\le x,X_1\le y)\\
+&=\frac12P(X_1\le\min\{x,y\})
+=\frac12\Phi(\min\{x,y\}).
 \end{aligned}
 $$
 
-利用独立性，
+两项相加得到第一问的答案。
 
-$$
-P(X_3=0,X_1\le x,X_2\le y)
-=\frac12\Phi(x)\Phi(y),
-$$
+</Step>
+  <Step>
 
-而
+### 求 Y 的边缘 CDF 并识别分布
 
-$$
-P(X_3=1,X_1\le x,X_1\le y)
-=\frac12\Phi(\min\{x,y\}).
-$$
-
-所以得到联合分布函数。
-
-再令 $x\to+\infty$，得到 $Y$ 的边缘分布函数：
+令 $x\to+\infty$，$\Phi(x)\to1$，$\min\{x,y\}=y$（对固定 $y$ 足够大的 $x$），故
 
 $$
 \begin{aligned}
 F_Y(y)
-&=\lim_{x\to+\infty}F(x,y)\\
-&=\frac12\Phi(y)+\frac12\Phi(y)\\
-&=\Phi(y).
+&=\lim_{x\to+\infty}F_{X_1,Y}(x,y)\\
+&=\frac12\Phi(y)+\frac12\Phi(y)=\Phi(y).
 \end{aligned}
 $$
 
-故 $Y\sim N(0,1)$。
+这正是标准正态分布的 CDF，因此 $Y\sim N(0,1)$，证毕。
 
-**另一思路：**$Y$ 是“以相同概率从 $X_1$ 和 $X_2$ 中随机选一个”，而二者本来就同为标准正态分布，所以混合后分布不变。
+</Step>
+</Steps>
 
-**方法提炼与辨析：** $(X_1,Y)$ 不是独立的：在 $X_3=1$ 时 $Y=X_1$，联合分布存在对角线上的概率质量；因此不能只写 $\Phi(x)\Phi(y)$。
+<Accordions>
+  <Accordion title="第二问的快解：同分布的随机混合">
+
+直接按 $X_3=0,1$ 条件分类：
+
+$$
+P(Y\le y)=\frac12P(X_2\le y)+\frac12P(X_1\le y)=\Phi(y).
+$$
+
+这个方法无需先完成第一问，体现“随机选择两个同分布变量之一，不改变边缘分布”的结论，前提是开关变量独立于被选变量。
+
+  </Accordion>
+</Accordions>
+
+<Callout type="warn" title="Y 正态不意味着 (X₁,Y) 独立或二维正态">
+
+在 $X_3=1$ 的情形（概率 $1/2$），有 $Y=X_1$，所以联合分布在直线 $y=x$ 上有正概率。若错误写成 $F_{X_1,Y}=\Phi(x)\Phi(y)$，就会遗漏这部分概率。联合分布不能仅由两个边缘都正态而断定为独立正态。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-4ff162-021" type="single" number={false}>
+<Question id="core-pr-cdf-2026-m1-21" type="single" number="21" tags="来源:2026年数学一第9题, 科目:概率论与数理统计, 考点:CDF仿射变换, 考点:标准化">
 
-【2026年数学一·第9题】 设连续型随机变量 $X$ 的分布函数为 $F(x)$，随机变量 $Y$ 的分布函数为 $F(ay+b)$。已知 $E(X)=\mu$、$D(X)=\sigma^2$（$\sigma>0$），且 $E(Y)=0$、$D(Y)=1$，则（ ）。
+设连续型随机变量 $X$ 的分布函数为 $F(x)$，随机变量 $Y$ 的分布函数为 $F(ay+b)$。已知 $E(X)=\mu$、$D(X)=\sigma^2$（$\sigma>0$），且 $E(Y)=0$、$D(Y)=1$，则（ ）。
 
 <Option correct>$a=\sigma,\ b=\mu$</Option>
 <Option>$a=\sigma,\ b=-\mu$</Option>
@@ -1188,30 +1343,33 @@ $$
 
 <Solution>
 
-**模型识别与突破口：** 不要仅凭字母位置猜标准化；由 $F(ay+b)$ 精确读出随机变量对应 $(X-b)/a$，并先证明 $a>0$。
+**解析：** 正确选项 A。关键不是背诵“减均值、除标准差”，而是**准确读出 $F(ay+b)$ 代表哪个变量的分布函数**。
 
-因为 $F(ay+b)$ 是分布函数，且 $F$ 非退化，所以应有 $a>0$。
+**第一步：确定 $a$ 的符号。** $X$ 的方差 $\sigma^2>0$，所以它不是常量，$F$ 是非平凡的非减函数。若 $a<0$，$F(ay+b)$ 随 $y$ 非增，并且两端极限颠倒，不能作为 CDF；若 $a=0$ 则函数为常数，同样不满足 CDF 的两端极限。因此 $a>0$。
 
-由
+**第二步：转换为线性标准化。** 由于 $a>0$，
 
 $$
-P(Y\le y)=F(ay+b)=P(X\le ay+b)=P\left(\frac{X-b}{a}\le y\right),
+F(ay+b)=P(X\le ay+b)=P\left(\frac{X-b}{a}\le y\right).
 $$
 
-知 $Y$ 与 $(X-b)/a$ 同分布。因此
+故 $Y$ 与 $(X-b)/a$ **同分布**，所以
 
 $$
 E(Y)=\frac{\mu-b}{a}=0\quad\Rightarrow\quad b=\mu,
 $$
 
 $$
-D(Y)=\frac{\sigma^2}{a^2}=1\quad\Rightarrow\quad a=\sigma\quad(a>0).
+D(Y)=\frac{\sigma^2}{a^2}=1\quad\Rightarrow\quad a^2=\sigma^2.
 $$
 
-故选 A。**辨析：** 这是随机变量标准化 $Y=(X-\mu)/\sigma$ 的分布函数写法。
+结合 $a>0$、$\sigma>0$，得 $a=\sigma$，选 A。
 
-**方法提炼与辨析：** 只有 $a=\sigma,b=\mu$ 同时使均值 0、方差 1，且保持分布函数单调不减。
+<Callout type="idea" title="CDF 标准化的通用写法">
+
+若 $Z=(X-\mu)/\sigma$，则 $F_Z(z)=F_X(\sigma z+\mu)$。注意 **CDF 变量 $z$ 内的系数是 $\sigma$，不是 $1/\sigma$**；后者出现在随机变量本身的标准化公式中。
+
+</Callout>
 
 </Solution>
-
 </Question>
