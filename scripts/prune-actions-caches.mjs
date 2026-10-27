@@ -41,6 +41,15 @@ for (const entry of caches) {
   if (!groups.has(f)) groups.set(f, []);
   groups.get(f).push(entry);
 }
+// Only retire the previous cache generation after a successful production
+// run has created at least four modern shard caches on main. Legacy keys are
+// no longer restored by the production build, so retaining them wastes quota.
+const modernMainShards = new Set(
+  caches
+    .filter(c => c.ref === 'refs/heads/main' && /-next-bounded-\d+-shard-\d+-v\d+-/.test(c.key))
+    .map(c => c.key.match(/-next-bounded-\d+-shard-(\d+)-v\d+-/)[1]),
+);
+const safeToRetireLegacy = modernMainShards.size >= 4;
 const now = Date.now();
 const ageHours = x => (now - Date.parse(x.last_accessed_at || x.created_at)) / 3600000;
 const createdHours = x => (now - Date.parse(x.created_at)) / 3600000;
@@ -50,7 +59,18 @@ for (const entries of groups.values()) {
   entries.sort((a, b) => last(b) - last(a));
   for (let i = 0; i < entries.length; i++) {
     const c = entries[i];
-    // A 24-hour grace period protects new cache uploads and active builds.
+    // The new production workflow no longer reads weighted-search/static-shard
+    // keys. Once a modern cache generation exists, reclaim replaced main keys
+    // immediately, but never touch an upload from the last hour.
+    const replacedMain = safeToRetireLegacy && c.ref === 'refs/heads/main';
+    const legacyMain = replacedMain &&
+      /-(?:weighted-search-\d+-shard-|weighted-static-shard-|static-shard-)/.test(c.key);
+    const obsoleteSearch = replacedMain && i > 0 && c.key.includes('-static-search-');
+    if (createdHours(c) >= 1 && (legacyMain || obsoleteSearch)) {
+      selected.set(c.id, c);
+      continue;
+    }
+    // Other cache families retain the original, conservative grace period.
     if (ageHours(c) < 36 || createdHours(c) < 24) continue;
     const legacy = /-(?:weighted-search-\d+-shard-|weighted-static-shard-|static-shard-)/.test(c.key);
     const stalePr = c.ref.startsWith('refs/pull/') && ageHours(c) >= 72;
