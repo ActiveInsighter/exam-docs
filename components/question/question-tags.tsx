@@ -1,4 +1,3 @@
-import { Fragment } from 'react';
 import type { QuestionType } from './grading';
 import { QUESTION_TAG_KINDS, type QuestionTag, type QuestionTags } from './model';
 
@@ -7,8 +6,8 @@ import { QUESTION_TAG_KINDS, type QuestionTag, type QuestionTags } from './model
  * state: a page renders a hundred question headers. Looks live in
  * styles/question.css under the data attributes set here.
  *
- *   type     outlined chip with the type's icon, the score, then traits
- *   source   one trail, book › paper › subject › chapter, truncating
+ *   type     outlined chip with the type's icon and score
+ *   source   a concise paper or book name
  *   point    knowledge-point chips with a common icon, shown with the solution
  */
 
@@ -40,20 +39,16 @@ export function QuestionTagChips({ tags }: { tags: readonly QuestionTag[] }) {
  * wraps. Narrow rows fold the middle steps into "…" (styles/question.css).
  */
 export function QuestionSourceTrail({ tags }: { tags: readonly QuestionTag[] }) {
-  if (tags.length === 0) return null;
-  const path = tags.map((tag) => tag.label).join(' › ');
+  const sources = tags.filter((tag) => !['科目', '章节'].includes(tag.group ?? ''));
+  if (sources.length === 0) return null;
+  const first = sources[0].label;
+  const paper = first === '王道8套卷' && /^第\d+套$/u.test(sources[1]?.label ?? '')
+    ? `${first}${sources[1].label}`
+    : first.replace(/^(王道·卷[一二三四五六七八]|竟成·模拟[一二三四五六七八])-(?:Q)?\d+$/u, '$1');
   return (
-    <span data-source-trail="" title={path}>
-      <span className="sr-only">{QUESTION_TAG_KINDS.source.label}：{path}</span>
-      {tags.map((tag, index) => (
-        <Fragment key={tag.label}>
-          {/* Stands in for the folded middle steps; hidden until a row is narrow. */}
-          {index === 1 && tags.length > 2 ? <span data-trail-step="" data-trail-more="" aria-hidden="true">…</span> : null}
-          <span data-trail-step="" data-trail-edge={index === 0 || index === tags.length - 1 ? '' : undefined} aria-hidden="true">
-            {tag.label}
-          </span>
-        </Fragment>
-      ))}
+    <span data-source-trail="" title={paper}>
+      <span className="sr-only">{QUESTION_TAG_KINDS.source.label}：{paper}</span>
+      <span data-trail-step="" data-trail-edge="" aria-hidden="true">{paper}</span>
     </span>
   );
 }
@@ -72,7 +67,7 @@ export function QuestionPointTags({ tags }: { tags: readonly QuestionTag[] }) {
   );
 }
 
-/** What a question header shows: type, score and traits, then the source. Points wait for the solution. */
+/** The header shows type, score and source. Points wait for the solution. */
 export function QuestionHeadTags({ type, typeLabel, points, tags }: {
   type: QuestionType;
   typeLabel: string;
@@ -82,7 +77,6 @@ export function QuestionHeadTags({ type, typeLabel, points, tags }: {
   return (
     <>
       <QuestionTypeTag type={type} label={typeLabel} points={points} />
-      <QuestionTagChips tags={tags.type} />
       <QuestionSourceTrail tags={tags.source} />
     </>
   );
