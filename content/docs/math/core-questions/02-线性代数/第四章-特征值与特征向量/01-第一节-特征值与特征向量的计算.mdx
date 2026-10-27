@@ -1,748 +1,637 @@
 ---
-title: "第一节 特征值与特征向量的计算"
-description: "考研数学一高质量精选：特征值计算、低秩与秩一矩阵、特征向量的变换、矩阵多项式、循环向量、幂零链及近年综合题。"
+title: 第一节 特征值与特征向量的计算
+description: 考研数学核心题目·线性代数：特征值与特征向量的计算、基下表示及特征多项式。
 ---
-
-按 **特征值识别与计算 → 秩一与投影结构 → 特征向量的映射 → 特征值驱动的矩阵幂与循环基 → 近年综合与证明** 编排。各题保留必要条件、来源和完整推导，避免相同模型无差别重复。
 
 ## 一、直接计算与基底识别：特征多项式、已知特征向量及实根
 
-<Question id="math-f19600-001" type="essay" number={false}>
+<Question id="core-la-eig-1987m3-01" type="essay" number="1" tags="来源:1987年数学三, 科目:线性代数, 考点:实特征值, 考点:特征向量">
 
-【1987年数学三】 求矩阵
+求矩阵
 
 $$
-A=
-\begin{pmatrix}
--3&-1&2\\
-0&-1&4\\
--1&0&1
-\end{pmatrix}
+A=\begin{pmatrix}-3&-1&2\\0&-1&4\\-1&0&1\end{pmatrix}
 $$
 
-的实特征值及对应的特征向量。
+的**实特征值**及对应的特征向量。
 
 <Solution>
 
-**答案：**
-
-唯一的实特征值为
+**参考答案：** 唯一实特征值为 $\boxed{\lambda=1}$；对应的所有非零实特征向量为
 
 $$
-\lambda=1,
+\boxed{x=k(0,2,1)^T,\quad k\in\mathbb R\setminus\{0\}.}
 $$
 
-其对应的全部非零实特征向量为
+<Steps>
+  <Step title="特征多项式分解，区分实根与复根">
+
+按 $\det(\lambda I-A)$ 展开：
 
 $$
-k(0,2,1)^T,\qquad k\ne0.
+\begin{aligned}
+\det(\lambda I-A)
+&=\begin{vmatrix}\lambda+3&1&-2\\0&\lambda+1&-4\\1&0&\lambda-1\end{vmatrix}\\
+&=(\lambda-1)(\lambda^2+4\lambda+5)\\
+&=(\lambda-1)[(\lambda+2)^2+1].
+\end{aligned}
 $$
 
-**解析：** **识别与突破：** 题目限定实特征值。先因式分解特征多项式，再排除无实根的二次因子；求特征向量时必须剔除零向量。
+对实数 $\lambda$，第二个因子严格为正，因此仅 $\lambda=1$ 为实特征值。其余两个特征值为 $-2\pm i$，不是本题要求的实特征值。
 
-计算特征多项式：
+  </Step>
+  <Step title="代入实特征值求对应特征空间">
 
-$$
-|\lambda E-A|
-=
-\begin{vmatrix}
-\lambda+3&1&-2\\
-0&\lambda+1&-4\\
-1&0&\lambda-1
-\end{vmatrix}
-=(\lambda-1)(\lambda^2+4\lambda+5).
-$$
-
-其中
+解 $(A-I)x=0$，等价于
 
 $$
-\lambda^2+4\lambda+5=(\lambda+2)^2+1>0
+(I-A)x=\begin{pmatrix}4&1&-2\\0&2&-4\\1&0&0\end{pmatrix}x=0.
 $$
 
-对实数 $\lambda$ 恒成立，所以唯一的实特征值是
+由第三行得 $x_1=0$；第二行得 $x_2=2x_3$；第一行自动成立。令 $x_3=k$，得 $x=k(0,2,1)^T$。取 $k\ne0$ 才是特征向量；$k=0$ 是零向量，不能称为特征向量。
 
-$$
-\lambda=1.
-$$
+  </Step>
+</Steps>
 
-求对应特征向量，解
-
-$$
-(E-A)x=0.
-$$
-
-有
-
-$$
-E-A=
-\begin{pmatrix}
-4&1&-2\\
-0&2&-4\\
-1&0&0
-\end{pmatrix}
-\sim
-\begin{pmatrix}
-1&0&0\\
-0&1&-2\\
-0&0&0
-\end{pmatrix}.
-$$
-
-于是
-
-$$
-x_1=0,\qquad x_2=2x_3.
-$$
-
-令 $x_3=k$，得到
-
-$$
-x=k(0,2,1)^T,
-$$
-
-其中特征向量要求非零，所以 $k\ne0$。
+<Callout type="idea" title="实矩阵也可能有非实特征值">奇数阶实矩阵至少有一个实特征值，但未必所有特征值都为实数。题目明确要求“实特征值”时，不能把复根也列作实答案。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-002" type="blank" number={false}>
+<Question id="core-la-eig-2017m2-02" type="blank" number="2" tags="来源:2017年数学二, 科目:线性代数, 考点:特征向量方程, 考点:含参矩阵">
 
-【2017年数学二】 设矩阵 $A = \begin{pmatrix} 4 & 1 & -2 \\ 1 & 2 & a \\ 3 & 1 & -1 \end{pmatrix}$ 的一个特征向量为 $\begin{pmatrix} 1 \\ 1 \\ 2 \end{pmatrix}$，则 $a=$<Blank answer="-1" kind="math" />.
+设矩阵
+
+$$
+A=\begin{pmatrix}4&1&-2\\1&2&a\\3&1&-1\end{pmatrix}
+$$
+
+的一个特征向量为 $(1,1,2)^T$，则 $a=$ <Blank answer="-1" kind="math" />。
 
 <Solution>
 
-**答案：** $-1$
+**答案：** $\boxed{a=-1}$。
 
-**解析：** **解题切入：** 已知特征向量时直接代入 $Av=\lambda v$，选择不含未知参数的分量先确定 $\lambda$。
+<Steps>
+  <Step title="直接利用 Av=λv，无需计算行列式">
 
-设给出的特征向量
-
-$$
-v=(1,1,2)^T
-$$
-
-对应特征值为 $\lambda$。由 $Av=\lambda v$，先看第一行：
+设 $v=(1,1,2)^T$ 对应特征值 $\lambda$，则
 
 $$
-4+1-4=1=\lambda,
+Av=\begin{pmatrix}4+1-4\\1+2+2a\\3+1-2\end{pmatrix}
+=\begin{pmatrix}1\\3+2a\\2\end{pmatrix}
+=\lambda\begin{pmatrix}1\\1\\2\end{pmatrix}.
 $$
 
-故 $\lambda=1$。
+第一分量给 $\lambda=1$，于是第二分量满足 $3+2a=1$，得 $a=-1$。第三分量恰为 $2=2\lambda$，与求得特征值相容。
 
-再看第二行：
+  </Step>
+</Steps>
 
-$$
-1+2+2a=1,
-$$
-
-所以
-
-$$
-2a=-2,
-\qquad a=-1.
-$$
-
-第三行此时给出 $3+1-2=2=2\lambda$，与 $\lambda=1$ 一致。
+**高效解题法：** 给定特征向量时，优先从不含参数的分量读出 $\lambda$，然后利用含参数的分量反求未知量，通常无需展开 $\det(\lambda I-A)$。
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-003" type="blank" number={false}>
+<Question id="core-la-eig-2008m1-03" type="blank" number="3" tags="来源:2008年数学一, 科目:线性代数, 考点:相似矩阵, 考点:基下线性变换">
 
-【2008年数学一】 设 $A$ 为二阶矩阵，$\boldsymbol{\alpha}_1, \boldsymbol{\alpha}_2$ 为线性无关的二维列向量，$A\boldsymbol{\alpha}_1 = \mathbf{0}, A\boldsymbol{\alpha}_2 = 2\boldsymbol{\alpha}_1 + \boldsymbol{\alpha}_2$，则 $A$ 的非零特征值为<Blank answer="1" kind="math" />.
+设 $A$ 为二阶矩阵，$\alpha_1,\alpha_2$ 为线性无关的二维列向量，满足
+
+$$
+A\alpha_1=\mathbf0,\qquad A\alpha_2=2\alpha_1+\alpha_2.
+$$
+
+则 $A$ 的非零特征值为 <Blank answer="1" kind="math" />。
 
 <Solution>
 
-**答案：** 1
+**答案：** $\boxed{1}$。
 
-**解析：** **突破口：** 给定的线性无关向量组本身就是基。将 $A\alpha_j$ 的展开系数逐列排列，即得一个相似的上三角矩阵。
+<Steps>
+  <Step title="把已知作用关系改写为一个相似矩阵">
 
-由于 $\alpha_1,\alpha_2$ 线性无关，可把它们作为一组基。由
-
-$$
-A\alpha_1=0,
-\qquad
-A\alpha_2=2\alpha_1+\alpha_2,
-$$
-
-可知 $A$ 在基 $(\alpha_1,\alpha_2)$ 下的矩阵为
+由于 $\alpha_1,\alpha_2$ 线性无关，$P=(\alpha_1,\alpha_2)$ 可逆。矩阵对两列的作用可一次写成
 
 $$
-\begin{pmatrix}
-0&2\\
-0&1
-\end{pmatrix}.
+AP=(A\alpha_1,A\alpha_2)
+=(\alpha_1,\alpha_2)\begin{pmatrix}0&2\\0&1\end{pmatrix}
+=PT.
 $$
 
-它是上三角矩阵，因此特征值就是对角元 $0,1$。故 $A$ 的非零特征值为
+于是 $P^{-1}AP=T$，其中 $T=\begin{pmatrix}0&2\\0&1\end{pmatrix}$。
 
-$$
-1.
-$$
+  </Step>
+  <Step title="相似矩阵同谱，上三角矩阵直接读对角元">
+
+因为 $A$ 与 $T$ 相似，特征值相同；而 $T$ 上三角，对角元就是特征值 $0,1$。所以唯一非零特征值是 $1$。
+
+  </Step>
+</Steps>
+
+**易错点：** $A\alpha_2=2\alpha_1+\alpha_2$ 不等于 $A\alpha_2=\alpha_2$，所以 $\alpha_2$ **本身未必是**特征向量。不过基下矩阵为上三角，仍可直接读出特征值。
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-004" type="single" number={false}>
+<Question id="core-la-eig-2017m2-04" type="single" number="4" tags="来源:2017年数学二, 科目:线性代数, 考点:相似对角化, 考点:特征向量">
 
-【2017年数学二】 设 $A$ 为三阶矩阵，$P = (\boldsymbol{\alpha}_1, \boldsymbol{\alpha}_2, \boldsymbol{\alpha}_3)$ 为可逆矩阵，使 $P^{-1}AP = \begin{pmatrix} 0 & & \\ & 1 & \\ & & 2 \end{pmatrix}$，则 $A(\boldsymbol{\alpha}_1 + \boldsymbol{\alpha}_2 + \boldsymbol{\alpha}_3) = (\quad )$.
+设 $A$ 为三阶矩阵，$P=(\alpha_1,\alpha_2,\alpha_3)$ 可逆，且
 
-<Option>$\boldsymbol{\alpha}_1 + \boldsymbol{\alpha}_2$</Option>
-<Option correct>$\boldsymbol{\alpha}_2 + 2\boldsymbol{\alpha}_3$</Option>
-<Option>$\boldsymbol{\alpha}_2 + \boldsymbol{\alpha}_3$</Option>
-<Option>$\boldsymbol{\alpha}_1 + 2\boldsymbol{\alpha}_2$</Option>
+$$
+P^{-1}AP=\begin{pmatrix}0&0&0\\0&1&0\\0&0&2\end{pmatrix}.
+$$
+
+则 $A(\alpha_1+\alpha_2+\alpha_3)=$（ ）。
+
+<Option>$\alpha_1+\alpha_2$</Option>
+<Option correct>$\alpha_2+2\alpha_3$</Option>
+<Option>$\alpha_2+\alpha_3$</Option>
+<Option>$\alpha_1+2\alpha_2$</Option>
 
 <Solution>
 
-**模型：** $AP=P\Lambda$ 按列展开就是 $A\alpha_i=\lambda_i\alpha_i$；对向量和再应用线性性。
+**答案：B。** $\boxed{\alpha_2+2\alpha_3}$。
 
-由
+<Steps>
+<Step title="从相似关系读出矩阵对三个基向量的作用">
 
-$$
-P^{-1}AP=\operatorname{diag}(0,1,2),
-\qquad P=(\alpha_1,\alpha_2,\alpha_3),
-$$
-
-可知 $P$ 的三列就是 $A$ 的三个特征向量，即
+由 $P^{-1}AP=D$ 两边依次左乘 $P$，得 $AP=PD$。按列比较：
 
 $$
-A\alpha_1=0,
-\qquad
-A\alpha_2=\alpha_2,
-\qquad
-A\alpha_3=2\alpha_3.
+A\alpha_1=0,\qquad A\alpha_2=\alpha_2,\qquad A\alpha_3=2\alpha_3.
 $$
 
-利用线性性，
+因此 $\alpha_1,\alpha_2,\alpha_3$ 分别是对应特征值 $0,1,2$ 的非零特征向量。
+
+</Step>
+<Step title="利用矩阵运算的线性性直接求值">
 
 $$
+\begin{aligned}
 A(\alpha_1+\alpha_2+\alpha_3)
-=0+\alpha_2+2\alpha_3.
+&=A\alpha_1+A\alpha_2+A\alpha_3\\
+&=\alpha_2+2\alpha_3.
+\end{aligned}
 $$
 
-故选 **B**。
+</Step>
+</Steps>
+
+**解题技巧：** 给出 $P^{-1}AP=D$ 和 $P$ 的列向量时，最省计算的第一步是改写为 $AP=PD$，而不是先求 $A=PDP^{-1}$。
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-005" type="blank" number={false}>
+<Question id="core-la-eig-2018m2-05" type="blank" number="5" tags="来源:2018年数学二, 科目:线性代数, 考点:基下表示, 考点:实特征值">
 
-【2018年数学二】 设 $A$ 为三阶矩阵，$\boldsymbol{\alpha}_1, \boldsymbol{\alpha}_2, \boldsymbol{\alpha}_3$ 为线性无关的向量组，若 $A\boldsymbol{\alpha}_1 = 2\boldsymbol{\alpha}_1 + \boldsymbol{\alpha}_2 + \boldsymbol{\alpha}_3, A\boldsymbol{\alpha}_2 = \boldsymbol{\alpha}_2 + 2\boldsymbol{\alpha}_3, A\boldsymbol{\alpha}_3 = -\boldsymbol{\alpha}_2 + \boldsymbol{\alpha}_3$，则 $A$ 的实特征值为<Blank answer="2" kind="math" />.
+设 $A$ 为三阶矩阵，$\alpha_1,\alpha_2,\alpha_3$ 线性无关，若
+
+$$
+\begin{aligned}
+A\alpha_1&=2\alpha_1+\alpha_2+\alpha_3,\\
+A\alpha_2&=\alpha_2+2\alpha_3,\\
+A\alpha_3&=-\alpha_2+\alpha_3,
+\end{aligned}
+$$
+
+则 $A$ 的实特征值为 <Blank answer="2" kind="math" />。
 
 <Solution>
 
-**答案：** 2
+**答案：** $\boxed{2}$（唯一实特征值）。
 
-**解析：** **模型：** 利用线性无关向量建立坐标表示；分块下三角矩阵的特征多项式是对角块特征多项式的乘积。无需误将复特征值当作实数。
+<Steps>
+<Step title="把三个向量构成的基转换为坐标矩阵">
 
-以线性无关向量组 $(\alpha_1,\alpha_2,\alpha_3)$ 为基。由题设，$A$ 在这组基下的矩阵为
-
-$$
-B=
-\begin{pmatrix}
-2&0&0\\
-1&1&-1\\
-1&2&1
-\end{pmatrix}.
-$$
-
-$A$ 与 $B$ 相似，所以特征值相同。由于 $B$ 为分块下三角结构，
+因三个向量线性无关，令 $P=(\alpha_1,\alpha_2,\alpha_3)$，$P$ 可逆。每一列 $A\alpha_j$ 的展开系数组成
 
 $$
-|\lambda E-B|
-=(\lambda-2)
-\begin{vmatrix}
-\lambda-1&1\\
--2&\lambda-1
-\end{vmatrix}
-=(\lambda-2)\big[(\lambda-1)^2+2\big].
+AP=P\begin{pmatrix}2&0&0\\1&1&-1\\1&2&1\end{pmatrix}=:PC,
 $$
 
-后二次因子无实根，因此唯一实特征值为
+即 $A$ 与 $C$ 相似，具有完全相同的特征值。
+
+</Step>
+<Step title="利用分块三角结构分解特征多项式">
 
 $$
-2.
+\begin{aligned}
+\det(\lambda I-C)
+&=(\lambda-2)\begin{vmatrix}\lambda-1&1\\-2&\lambda-1\end{vmatrix}\\
+&=(\lambda-2)[(\lambda-1)^2+2].
+\end{aligned}
 $$
+
+因为 $[(\lambda-1)^2+2]>0$ 对所有实数 $\lambda$ 成立，所以只有 $\lambda=2$ 是实根。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="只有实特征值不等于只有一个特征值">完整复特征值为 $2,1+i\sqrt2,1-i\sqrt2$。题目只问**实**特征值，因此填写 $2$。把列展开系数写成“行”会造成转置错误。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-006" type="blank" number={false}>
+<Question id="core-la-eig-2026m1-06" type="blank" number="6" tags="来源:2026年数学一, 科目:线性代数, 考点:特征值最值, 考点:参数分类">
 
-【2026年数学一】 设矩阵
+设矩阵
 
 $$
-A=\begin{pmatrix}1&0&0\\2&a&2\\0&2&a\end{pmatrix},\qquad B=\begin{pmatrix}a&-1&-1\\-1&2&1\\-1&-1&a\end{pmatrix}.
+A=\begin{pmatrix}1&0&0\\2&a&2\\0&2&a\end{pmatrix},\qquad
+B=\begin{pmatrix}a&-1&-1\\-1&2&1\\-1&-1&a\end{pmatrix}.
 $$
 
-设 $m(X)$ 表示三阶矩阵 $X$ 的实特征值中的最大值。若 $m(A)<m(B)$，则 $a$ 的取值范围为 <Blank answer="(-\infty,0)" kind="text" placeholder="输入文字或 LaTeX" />。
+记 $m(X)$ 为三阶矩阵 $X$ 的所有**实特征值中的最大值**。若 $m(A)<m(B)$，则 $a$ 的取值范围为 <Blank answer="(-inf,0)" kind="text" />。
 
 <Solution>
 
-**答案：** $(-\infty,0)$
+**答案：** $\boxed{a<0}$，即 $(-\infty,0)$。
 
-**解析：** **识别与突破：** 本题只比较实特征值的最大者；先确定两矩阵的全部特征值，再按两个分段最大值函数求严格不等式。
+<Steps>
+<Step title="分别求出所有实特征值">
 
-计算特征多项式：
-
-$$
-|\lambda I-A|=(\lambda-1)(\lambda-a-2)(\lambda-a+2),
-$$
+对 $A$ 沿第一行展开：
 
 $$
-|\lambda I-B|=(\lambda-a-1)(\lambda-2)(\lambda-a+1).
+\det(\lambda I-A)=(\lambda-1)[(\lambda-a)^2-4]
+=(\lambda-1)(\lambda-a-2)(\lambda-a+2).
 $$
 
-所以
+对 $B$ 计算并因式分解：
 
 $$
-m(A)=\max\{1,a+2\},\qquad m(B)=\max\{2,a+1\}.
+\det(\lambda I-B)=(\lambda-2)(\lambda-a-1)(\lambda-a+1).
 $$
 
-对 $a$ 分段比较：
+故两个矩阵的特征值均为实数，并且
 
-- 当 $a<-1$ 时，$m(A)=1$，$m(B)=2$，成立。
-- 当 $-1\le a<1$ 时，$m(A)=a+2$，$m(B)=2$，故须有 $a<0$。
-- 当 $a\ge1$ 时，$m(A)=a+2$，$m(B)=a+1$，不成立。
+$$
+m(A)=\max\{1,a+2\},\quad m(B)=\max\{2,a+1\}.
+$$
 
-综上 $a\in(-\infty,0)$。
+</Step>
+<Step title="在最大值函数改变分支的位置分段比较">
 
-**技巧：** 求最大实特征值只需比较全部实特征值，而不必对两个矩阵做相似对角化。
+由 $1=a+2$ 得分界点 $a=-1$；由 $2=a+1$ 得分界点 $a=1$。
+
+- $a<-1$：$m(A)=1<m(B)=2$，均满足。
+- $-1\le a<1$：$m(A)=a+2$、$m(B)=2$，必须且只须 $a<0$。
+- $a\ge1$：$m(A)=a+2>a+1=m(B)$，不满足。
+
+合并得 $a<0$。在 $a=0$ 时两个最大值均为 $2$，严格不等号不成立。
+
+</Step>
+</Steps>
+
+**容易失分的地方：** 不能简单比较 $a+2$ 和 $a+1$ 而忽视常数特征值 $1,2$；“最大特征值”本质上是分段函数。
 
 </Solution>
-
 </Question>
 
 ## 二、秩一矩阵、平方零与正交投影
 
-<Question id="math-f19600-007" type="essay" number={false}>
+<Question id="core-la-eig-1998m3-07" type="essay" number="7" tags="来源:1998年数学三, 科目:线性代数, 考点:秩一矩阵, 考点:幂零矩阵, 考点:特征子空间">
 
-【1998年数学三】 设向量
+设非零向量 $\alpha=(a_1,\ldots,a_n)^T$、$\beta=(b_1,\ldots,b_n)^T$ 满足 $\alpha^T\beta=0$。令 $n$ 阶矩阵 $A=\alpha\beta^T$。
 
-$$
-\alpha=(a_1,a_2,\cdots,a_n)^T,
-\qquad
-\beta=(b_1,b_2,\cdots,b_n)^T
-$$
-
-都是非零向量，且满足
-
-$$
-\alpha^T\beta=0.
-$$
-
-记 $n$ 阶矩阵
-
-$$
-A=\alpha\beta^T.
-$$
-
-求：
-
-（1）$A^2$；
-
-（2）矩阵 $A$ 的特征值和特征向量。
+（1）求 $A^2$；（2）求 $A$ 的全部特征值、特征向量。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（1）
+（1）$\boxed{A^2=O}$。
 
-$$
-A^2=O.
-$$
-
-（2）$A$ 的全部特征值均为
+（2）唯一特征值为 $\boxed{\lambda=0}$（代数重数 $n$）。**全部非零特征向量**为
 
 $$
-\lambda=0
+\boxed{\{x\in\mathbb R^n:\beta^Tx=0,\ x\ne0\}.}
 $$
 
-（$n$ 重根）。属于 $\lambda=0$ 的全部特征向量就是满足
+若 $b_1\ne0$，其特征子空间的一组基可取 $v_j=b_je_1-b_1e_j$（$j=2,\ldots,n$）。
+
+<Steps>
+<Step title="外积平方化为一个标量乘以原矩阵">
+
+因为实数内积满足 $\beta^T\alpha=(\alpha^T\beta)^T=0$，
 
 $$
-\beta^Tx=0,
-\qquad x\ne0
+A^2=(\alpha\beta^T)(\alpha\beta^T)
+=\alpha(\beta^T\alpha)\beta^T=O.
 $$
 
-的向量。
+注意 $A\ne O$，因为两向量均非零，故这是一个**非零的平方零矩阵**。
 
-若不妨设 $b_1\ne0$，可取其特征子空间的一组基础解系
+</Step>
+<Step title="利用 A²=0 限定特征值">
 
-$$
-\xi_1=(-b_2,b_1,0,\cdots,0)^T,
-$$
-
-$$
-\xi_2=(-b_3,0,b_1,\cdots,0)^T,
-$$
+若 $Ax=\lambda x$ 且 $x\ne0$，则
 
 $$
-\cdots,
+0=A^2x=\lambda^2x
+\quad\Longrightarrow\quad\lambda=0.
 $$
 
-$$
-\xi_{n-1}=(-b_n,0,\cdots,0,b_1)^T.
-$$
+所有特征值都是 $0$，其总代数重数为 $n$。
 
-因此全部特征向量为
-
-$$
-k_1\xi_1+\cdots+k_{n-1}\xi_{n-1},
-$$
-
-其中 $k_1,\ldots,k_{n-1}$ 不全为零。
-
-**解析：** **模型：** 先将外积矩阵平方，发现 $A^2=0$，再由 $Ax=0$ 转换为唯一的标量约束；注意“唯一特征值为零”不等于“所有非零向量都是特征向量”。
-
-（1）由
+</Step>
+<Step title="从 Ax=0 直接写出完整特征子空间">
 
 $$
-\alpha^T\beta=0
+Ax=\alpha(\beta^Tx)=0
+\quad\Longleftrightarrow\quad\beta^Tx=0,
 $$
 
-转置可得
+等价理由是 $\alpha\ne0$。该线性方程有 $n-1$ 个自由度。若 $b_1\ne0$，向量 $v_j=b_je_1-b_1e_j$ 满足 $\beta^Tv_j=0$，且在第 $j$ 个坐标上的系数为 $-b_1\ne0$，因此彼此独立；它们恰好构成一组基。特征向量须排除零向量。
 
-$$
-\beta^T\alpha=0.
-$$
+</Step>
+</Steps>
 
-所以
-
-$$
-A^2
-=(\alpha\beta^T)(\alpha\beta^T)
-=\alpha(\beta^T\alpha)\beta^T
-=O.
-$$
-
-（2）若 $\lambda$ 是 $A$ 的特征值，$\xi\ne0$ 是对应特征向量，则
-
-$$
-A\xi=\lambda\xi.
-$$
-
-两边再左乘 $A$：
-
-$$
-A^2\xi=\lambda A\xi=\lambda^2\xi.
-$$
-
-而 $A^2=O$，故
-
-$$
-\lambda^2\xi=0.
-$$
-
-由于 $\xi\ne0$，只能有
-
-$$
-\lambda=0.
-$$
-
-因此矩阵的全部特征值都是 $0$。
-
-求特征向量就是解
-
-$$
-Ax=0.
-$$
-
-由于
-
-$$
-Ax=\alpha(\beta^Tx),
-$$
-
-而 $\alpha\ne0$，所以
-
-$$
-Ax=0
-\Longleftrightarrow
-\beta^Tx=0.
-$$
-
-这是一条非零线性方程，解空间维数为 $n-1$。若 $b_1\ne0$，即可取答案所列的基础解系；若 $b_1=0$，只需换取 $\beta$ 中任意一个非零分量作主元即可。
+<Callout type="warn" title="代数重数与几何重数不同">$A$ 只有零特征值，但特征空间维数为 $n-1$（$n\ge2$），不等于 $n$；因此 $A$ 不是零矩阵，也**不能相似对角化**。这里由两个非零正交向量的存在已隐含 $n\ge2$。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-008" type="blank" number={false}>
+<Question id="core-la-eig-1999m1-08" type="blank" number="8" tags="来源:1999年数学一, 科目:线性代数, 考点:全一矩阵, 考点:谱分解">
 
-【1999年数学一】 设 $n$ 阶矩阵 $A$ 的元素全为 $1$，则 $A$ 的 $n$ 个特征值是 <Blank answer="n,\qquad 0,\qquad 0,\ldots,0" kind="text" placeholder="输入文字或 LaTeX" />。
+设 $n$ 阶矩阵 $A$ 的全部元素均为 $1$，则 $A$ 的 $n$ 个特征值（计重数）为 ____。
+
+<Blank answer="n,0,...,0" kind="text" />
 
 <Solution>
 
-**答案：**
+**答案：** $\boxed{n,\underbrace{0,\ldots,0}_{n-1\text{ 个}}}$。
+
+<Steps>
+<Step title="识别全一矩阵的秩一外积结构">
+
+设 $e=(1,\ldots,1)^T$，则 $A=ee^T$，所以
 
 $$
-n,\qquad 0,\qquad 0,\ldots,0,
+Ae=e(e^Te)=ne.
 $$
 
-其中 $0$ 为 $n-1$ 重特征值。
+于是 $e$ 是特征值 $n$ 的特征向量。
 
-**解析：** **模型：** 全 $1$ 矩阵可写为 $ee^T$。沿 $e$ 与垂直于 $e$ 的方向分别作用，直接得到全部谱信息及其重数。
+</Step>
+<Step title="在与 e 正交的空间上求出剩余特征值">
 
-令
+对任意 $x$ 满足 $e^Tx=\sum_{i=1}^n x_i=0$，都有 $Ax=e(e^Tx)=0$。因此 $\ker A=e^\perp$ 的维数为 $n-1$，可取 $n-1$ 个独立零特征向量。
 
-$$
-e=(1,1,\ldots,1)^T.
-$$
+$\mathbb R^n=\operatorname{span}\{e\}\oplus e^\perp$，共有 $n$ 个独立特征向量，故谱完整，答案如上。
 
-因为矩阵 $A$ 每一行全为 $1$，所以
+</Step>
+</Steps>
 
-$$
-Ae=ne.
-$$
-
-因此
-
-$$
-\lambda=n
-$$
-
-是一个特征值。
-
-另一方面，$A$ 的所有行都相同，所以
-
-$$
-r(A)=1.
-$$
-
-因此零空间维数为
-
-$$
-n-r(A)=n-1,
-$$
-
-也就是说，$\lambda=0$ 的特征子空间维数为 $n-1$。故 $0$ 至少是 $n-1$ 重特征值。
-
-矩阵一共只有 $n$ 个特征值（计重数），所以全部特征值为
-
-$$
-n,0,\ldots,0.
-$$
+**扩展：** $A^2=nA$。当 $n=1$ 时零特征值不存在，只有 $1$；上述记号“$n-1$ 个零”仍然适用。
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-009" type="blank" number={false}>
+<Question id="core-la-eig-2009m1-09" type="blank" number="9" tags="来源:2009年数学一, 科目:线性代数, 考点:外积矩阵, 考点:非零特征值">
 
-【2009年数学一】 若三维列向量 $\boldsymbol{\alpha}, \boldsymbol{\beta}$ 满足 $\boldsymbol{\alpha}^{\mathrm{T}}\boldsymbol{\beta} = 2$，则 $\boldsymbol{\beta}\boldsymbol{\alpha}^{\mathrm{T}}$ 的非零特征值为<Blank answer="2" kind="math" />.
+若三维列向量 $\alpha,\beta$ 满足 $\alpha^T\beta=2$，则 $\beta\alpha^T$ 的非零特征值为 <Blank answer="2" kind="math" />。
 
 <Solution>
 
-**答案：** 2
+**答案：** $\boxed{2}$。
 
-**解析：** **模型：** $uv^T$ 的迹和唯一可能的非零特征值均为 $v^Tu$；此题不需要展开三阶行列式。
+<Steps>
+<Step title="直接用给定内积构造特征向量">
 
-令 $M=\beta\alpha^T$。由 $\alpha^T\beta=2$，有
-
-$$
-M\beta=\beta\alpha^T\beta
-=2\beta.
-$$
-
-所以 $2$ 是 $M$ 的特征值。又 $M=\beta\alpha^T$ 是秩不超过 $1$ 的矩阵，而 $\alpha^T\beta=2\neq0$，故 $r(M)=1$，至多只有一个非零特征值。
-
-因此其非零特征值就是
+令 $M=\beta\alpha^T$。由 $\alpha^T\beta=2\ne0$ 知 $\beta\ne0$，而且
 
 $$
-2.
+M\beta=\beta(\alpha^T\beta)=2\beta.
 $$
 
-也可直接用秩一矩阵性质：$uv^T$ 的唯一非零特征值为 $v^Tu$。
+所以 $2$ 为特征值。
+
+</Step>
+<Step title="通过秩限制确保没有其他非零特征值">
+
+因为 $M$ 是外积，$r(M)=1$，所以 $\dim\ker M=2$，即零特征值至少具有两个独立特征向量。再加上对应 $2$ 的 $\beta$，已取得三个独立特征方向，故特征值是 $2,0,0$。
+
+</Step>
+</Steps>
+
+**记忆方法：** 对外积 $uv^T$，非零特征值（若有）等于 $v^Tu=\operatorname{tr}(uv^T)$。若 $v^Tu=0$，仍可能 $uv^T\ne0$，不能误说整个矩阵为零。
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-010" type="blank" number={false}>
+<Question id="core-la-eig-2009m3-10" type="blank" number="10" tags="来源:2009年数学三, 科目:线性代数, 考点:相似不变量, 考点:秩一谱">
 
-【2009年数学三】 设 $\boldsymbol{\alpha} = (1, 1, 1)^{\mathrm{T}}, \boldsymbol{\beta} = (1, 0, k)^{\mathrm{T}}$，若矩阵 $\boldsymbol{\alpha}\boldsymbol{\beta}^{\mathrm{T}}$ 相似于 $\begin{pmatrix} 3 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{pmatrix}$，则 $k=$<Blank answer="2" kind="math" />.
+设 $\alpha=(1,1,1)^T$、$\beta=(1,0,k)^T$。若矩阵 $\alpha\beta^T$ 相似于
+
+$$
+\begin{pmatrix}3&0&0\\0&0&0\\0&0&0\end{pmatrix},
+$$
+
+则 $k=$ <Blank answer="2" kind="math" />。
 
 <Solution>
 
-**答案：** $k=2$
+**答案：** $\boxed{k=2}$。
 
-**解析：** **突破口：** 先用 $\operatorname{tr}(A)=\beta^T\alpha$ 算非零谱值，再利用相似矩阵特征多项式相同；这里 $k$ 的确定与特征向量选取无关。
+<Steps>
+<Step title="相似矩阵的迹相等，外积迹可直接计算">
 
-矩阵 $\alpha\beta^T$ 为秩一矩阵，其唯一可能的非零特征值为
-
-$$
-\beta^T\alpha.
-$$
-
-这里
+相似矩阵的迹不变。对外积有 $\operatorname{tr}(\alpha\beta^T)=\beta^T\alpha$，因此
 
 $$
-\beta^T\alpha=(1,0,k)
-\begin{pmatrix}1\\1\\1\end{pmatrix}=1+k.
+1+k=\beta^T\alpha=\operatorname{tr}(\alpha\beta^T)
+=\operatorname{tr}[\operatorname{diag}(3,0,0)]=3.
 $$
 
-题设说明 $\alpha\beta^T$ 与
+解得 $k=2$。
 
-$$
-\operatorname{diag}(3,0,0)
-$$
+</Step>
+<Step title="核验 k=2 确实满足相似条件">
 
-相似，所以二者特征值相同，非零特征值必须为 $3$。因此
+当 $k=2$ 时，$\beta^T\alpha=3\ne0$。于是 $\alpha$ 是对应特征值 $3$ 的向量，$\ker\beta^T$ 是二维零特征空间。二者直和为 $\mathbb R^3$，故矩阵可相似对角化为 $\operatorname{diag}(3,0,0)$，题设条件确实可满足。
 
-$$
-1+k=3,
-$$
+</Step>
+</Steps>
 
-解得
-
-$$
-k=2.
-$$
+**技巧：** 题目只是求参数，优先使用相似不变量（迹、行列式、秩、特征多项式），无需显式构造相似变换矩阵。
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-011" type="essay" number={false}>
+<Question id="core-la-eig-lilin880-11" type="essay" number="11" tags="来源:李林880, 科目:线性代数, 考点:秩一矩阵, 考点:相似对角化, 考点:特征子空间">
 
-【李林880】 设 $n\ge2$，$\alpha,\beta$ 为 $n$ 维非零实列向量，$A=\alpha\beta^T$。
+设 $n\ge2$，$\alpha,\beta$ 为 $n$ 维非零实列向量，$A=\alpha\beta^T$。
 
-（1）求 $A$ 的全部特征值（含重数）和相应特征子空间；
+（1）求 $A$ 的全部特征值（含重数）及相应特征子空间；
 
-（2）给出 $A$ 可相似对角化的充分必要条件，并在可对角化时构造相应可逆矩阵 $P$。
+（2）求 $A$ 可相似对角化的充分必要条件，并在可对角化时构造可逆矩阵 $P$。
 
 <Solution>
 
-**答案：**
-
-记 $s=\beta^T\alpha$，则特征多项式为 $\lambda^{n-1}(\lambda-s)$。若 $s\ne0$，其特征值为 $s$（一次）与 $0$（$n-1$ 次），对应空间分别为 $\operatorname{span}\{\alpha\}$、$\ker\beta^T$；若 $s=0$，唯一特征值为 $0$（$n$ 重），特征空间为 $\ker\beta^T$。
-
-$A$ **可相似对角化当且仅当** $s\ne0$。此时任取 $\ker\beta^T$ 的基 $v_2,\ldots,v_n$，则 $P=(\alpha,v_2,\ldots,v_n)$ 可逆，且 $P^{-1}AP=\operatorname{diag}(s,0,\ldots,0)$。
-
-**解析：** **核心模型：** 对外积矩阵优先计算 $A^2$、秩与核，而非展开 $n$ 阶特征行列式。由于
+**参考答案：** 记 $s=\beta^T\alpha$，则
 
 $$
-A^2=\alpha(\beta^T\alpha)\beta^T=sA,\qquad r(A)=1,
+\boxed{\det(\lambda I-A)=\lambda^{n-1}(\lambda-s).}
 $$
 
-零空间 $\ker A=\{x: \beta^Tx=0\}$ 维数为 $n-1$。而 $A\alpha=s\alpha$。若 $s\ne0$，向量 $\alpha\notin\ker\beta^T$，所以 $\alpha$ 与核的一组基共同构成 $n$ 个无关的特征向量。
+- 若 $s\ne0$，特征值为 $s$（一次）和 $0$（$n-1$ 次）；对应特征子空间为 $E_s=\operatorname{span}\{\alpha\}$、$E_0=\ker\beta^T$。
+- 若 $s=0$，唯一特征值为 $0$（$n$ 重），其特征子空间为 $E_0=\ker\beta^T$（维数 $n-1$）。
 
-若 $s=0$，$A^2=0$ 而 $A\ne0$。唯一特征值为 $0$，几何重数为 $n-1$，小于其代数重数 $n$，所以不可相似对角化。
+$$
+\boxed{A\text{ 可相似对角化}\iff \beta^T\alpha\ne0.}
+$$
 
-**可计算构造：** 若 $b_1\ne0$，可选 $v_j=b_j e_1-b_1 e_j$（$j=2,\ldots,n$），于是 $\beta^Tv_j=0$，且 $v_2,\ldots,v_n$ 无关；若 $b_1=0$，改取任一非零分量作主元即可。
+当 $s\ne0$ 时，任取 $\ker\beta^T$ 的基 $v_2,\ldots,v_n$，令 $P=(\alpha,v_2,\ldots,v_n)$，则 $P^{-1}AP=\operatorname{diag}(s,0,\ldots,0)$。
 
-**易错点：** $s=0$ 时“只有零特征值”不意味着 $A=0$；本题 $A$ 始终秩为 $1$。
+<Steps>
+<Step title="用外积的秩与平方关系确定特征多项式">
+
+$A$ 为非零外积，所以 $r(A)=1$，其核满足
+
+$$
+\ker A=\{x:\beta^Tx=0\},\qquad \dim\ker A=n-1.
+$$
+
+另一方面，
+
+$$
+A\alpha=\alpha(\beta^T\alpha)=s\alpha,
+\qquad A^2=sA.
+$$
+
+所以 $\alpha$ 是特征值 $s$ 对应的非零向量。若 $s\ne0$，$0$ 的几何重数已达 $n-1$，再加上 $s$ 特征值；若 $s=0$，$A^2=0$，特征值全为 $0$。两种情况可统一写成 $\lambda^{n-1}(\lambda-s)$。
+
+</Step>
+<Step title="判定何时有 n 个独立特征向量">
+
+当 $s\ne0$ 时，$\alpha\notin\ker\beta^T$，于是 $\operatorname{span}\{\alpha\}\oplus\ker\beta^T=\mathbb R^n$，可以选出一组特征向量基，故可对角化。
+
+当 $s=0$ 时，$A^2=0$ 但 $A\ne0$。假如可对角化，所有特征值均为 $0$，则对角矩阵只能是零矩阵，迫使 $A=0$，矛盾。故不可对角化。
+
+</Step>
+<Step title="构造 P 并验证其可逆性">
+
+取满足 $\beta^Tv_j=0$ 的 $n-1$ 个线性无关向量 $v_2,\ldots,v_n$。因为 $\beta^T\alpha=s\ne0$，$\alpha$ 不可能属于它们张成的空间；故 $P=(\alpha,v_2,\ldots,v_n)$ 可逆。按列计算 $AP=P\operatorname{diag}(s,0,\ldots,0)$，得到指定的相似对角化。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="构造零特征空间的基">若 $\beta$ 的第 $j$ 个分量 $b_j\ne0$，则对每个 $i\ne j$ 取 $v_i=b_i e_j-b_j e_i$，这些向量独立且均满足 $\beta^Tv_i=0$；由此可具体组成 $P$。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-012" type="essay" number={false}>
+<Question id="core-la-eig-zhangyu1000-12" type="essay" number="12" tags="来源:张宇1000题, 科目:线性代数, 考点:正交投影, 考点:秩一矩阵求逆">
 
-【张宇1000题】 设
+设
 
 $$
 A=E-\frac{3}{\alpha^T\alpha}\alpha\alpha^T,
 $$
 
-其中 $E$ 是 $n$ 阶单位矩阵、$\alpha$ 为 $n$ 维非零实列向量。
+其中 $E$ 为 $n$ 阶单位矩阵、$\alpha$ 为非零实列向量。
 
-（1）求 $A^2,A^{-1}$；（2）验证 $\alpha$ 是 $A$ 的特征向量并求特征值，另指出 $A$ 在 $\alpha^\perp$ 上的作用。
-
-<Solution>
-
-**答案：**
-
-$$
-A^2=E+\frac{3}{\alpha^T\alpha}\alpha\alpha^T,\qquad
-A^{-1}=E-\frac{3}{2\alpha^T\alpha}\alpha\alpha^T.
-$$
-
-$A\alpha=-2\alpha$；$A$ 对 $\alpha^\perp$ 上任意向量均作用为恒等。
-
-**解析：** **突破口：** 识别秩一正交投影
-
-$$
-P=\frac{\alpha\alpha^T}{\alpha^T\alpha},\qquad P^2=P.
-$$
-
-于是 $A=E-3P$，从而
-
-$$
-A^2=E-6P+9P^2=E+3P.
-$$
-
-由于 $P\alpha=\alpha$，且 $Px=0$ 对所有 $x\in\alpha^\perp$ 成立，故 $A$ 沿 $\alpha$ 方向的特征值为 $-2$，在 $\alpha^\perp$ 上的特征值为 $1$。两个特征值均非零，因此 $A$ 可逆。
-
-直接寻找 $A^{-1}=E+cP$，由
-
-$$
-(E-3P)(E+cP)=E+(-3-2c)P
-$$
-
-可得 $c=-\frac32$，即答案所给形式。也可借助恒等式 $(E+tP)^{-1}=E-\frac{t}{1+t}P$（$t\ne-1$）。
-
-**模型迁移：** 对 $aE+bP$ 且 $P^2=P$，只需沿 $\operatorname{im}P$ 与 $\ker P$ 分别观察作用，就能确定特征值和可逆条件。
-
-</Solution>
-
-</Question>
-
-<Question id="math-f19600-013" type="single" number={false}>
-
-【2024年数学一】 (24-1 5分)设 $\boldsymbol{A}$ 是秩为 2 的三阶矩阵, $\boldsymbol{\alpha}$ 是满足 $\boldsymbol{A}\boldsymbol{\alpha}=\mathbf{0}$ 的非零向量, 若对满足 $\boldsymbol{\beta}^{\mathrm{T}}\boldsymbol{\alpha}=0$ 的任意向量 $\boldsymbol{\beta}$, 均有 $\boldsymbol{A}\boldsymbol{\beta}=\boldsymbol{\beta}$, 则 ( ).
-
-<Option correct>$\boldsymbol{A}^3$ 的迹为 2</Option>
-<Option>$\boldsymbol{A}^3$ 的迹为 5</Option>
-<Option>$\boldsymbol{A}^2$ 的迹为 8</Option>
-<Option>$\boldsymbol{A}^2$ 的迹为 9</Option>
+（1）求 $A^2,A^{-1}$；（2）说明 $\alpha$ 是 $A$ 的特征向量并求其特征值，同时指出 $A$ 在 $\alpha^\perp$ 上的作用。
 
 <Solution>
 
-**模型：** $\mathbb R^3=\operatorname{span}\{\alpha\}\oplus\alpha^\perp$，在两互补子空间上分别乘以 $0$、$1$，识别为秩为 $2$ 的正交投影。
-
-由 $A\alpha=0$ 且 $\alpha\neq0$，可知 $\alpha$ 是特征值 $0$ 的特征向量。
-
-又对任意满足 $\beta^T\alpha=0$ 的向量 $\beta$，都有
+**参考答案：**
 
 $$
-A\beta=\beta.
+\boxed{A^2=E+\frac3{\alpha^T\alpha}\alpha\alpha^T},
+\qquad
+\boxed{A^{-1}=E-\frac3{2\alpha^T\alpha}\alpha\alpha^T}.
 $$
 
-所有与 $\alpha$ 正交的向量组成二维子空间 $\alpha^\perp$，因此 $\lambda=1$ 的特征子空间至少为二维。结合 $r(A)=2$，三维空间可分解为
+$\alpha$ 对应特征值 $\boxed{-2}$；$A$ 在 $\alpha^\perp$ 上是恒等变换，对应特征值为 $1$（若 $n>1$）。
+
+<Steps>
+<Step title="识别投影算子，先求 A²">
+
+记 $Q=\alpha\alpha^T/(\alpha^T\alpha)$，由于 $\alpha\ne0$ 且 $\alpha^T\alpha>0$，定义合法。直接验证
 
 $$
-\mathbb R^3=\operatorname{span}\{\alpha\}\oplus\alpha^\perp,
+Q^2=\frac{\alpha(\alpha^T\alpha)\alpha^T}{(\alpha^T\alpha)^2}=Q.
 $$
 
-故 $A$ 的三个特征值为
+因此 $A=E-3Q$，从而
 
 $$
-0,1,1.
+A^2=(E-3Q)^2=E-6Q+9Q^2=E+3Q.
 $$
 
-于是 $A^3$ 的特征值为 $0,1,1$，其迹为
+</Step>
+<Step title="构造逆矩阵并验证乘积为单位阵">
+
+设逆矩阵形如 $E+cQ$。则
 
 $$
-\operatorname{tr}(A^3)=0+1+1=2.
+(E-3Q)(E+cQ)=E+(c-3-3c)Q=E+(-3-2c)Q.
 $$
 
-故选 **A**。
+令 $-3-2c=0$，得 $c=-3/2$。故
+
+$$
+A^{-1}=E-\frac32Q
+=E-\frac3{2\alpha^T\alpha}\alpha\alpha^T.
+$$
+
+因为两矩阵均为 $Q$ 的多项式，左右乘积一致，也都是 $E$。
+
+</Step>
+<Step title="将整个空间沿 α 与其正交补分解">
+
+$Q\alpha=\alpha$，所以 $A\alpha=(1-3)\alpha=-2\alpha$。若 $x\in\alpha^\perp$，即 $\alpha^Tx=0$，则 $Qx=0$，故 $Ax=x$。这直接解释了 $A$ 可逆：所有特征值 $-2,1$ 都非零。
+
+</Step>
+</Steps>
+
+**举一反三：** 对任意投影 $Q^2=Q$，当 $t\ne-1$ 时 $(E+tQ)^{-1}=E-\frac{t}{1+t}Q$。沿像空间与核空间讨论，比一般高阶矩阵求逆更快。
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-014" type="single" number={false}>
+<Question id="core-la-eig-2024m1-13" type="single" number="13" tags="来源:2024年数学一, 科目:线性代数, 考点:正交投影, 考点:迹与特征值">
 
-【2026年数学二、2026年数学三】 设三阶矩阵 $A,B$ 满足 $AB+BA=A^2+B^2$，且 $A\ne B$。下列结论**错误**的是（ ）。
+设 $A$ 为秩为 $2$ 的三阶矩阵，$\alpha$ 为满足 $A\alpha=0$ 的非零向量。若对所有满足 $\beta^T\alpha=0$ 的向量 $\beta$，均有 $A\beta=\beta$，则（ ）。
+
+<Option correct>$A^3$ 的迹为 $2$</Option>
+<Option>$A^3$ 的迹为 $5$</Option>
+<Option>$A^2$ 的迹为 $8$</Option>
+<Option>$A^2$ 的迹为 $9$</Option>
+
+<Solution>
+
+**答案：A。** $\boxed{\operatorname{tr}(A^3)=2}$，事实上 $A^2=A^3=A$。
+
+<Steps>
+<Step title="按照给定的两个不变子空间确定线性变换">
+
+由 $A\alpha=0$，$\operatorname{span}\{\alpha\}$ 上的向量均被映为零。另一方面，$\alpha^\perp$ 是二维子空间；对其中任意 $\beta$ 都有 $A\beta=\beta$，所以 $A$ 在此空间上恒等。
+
+</Step>
+<Step title="分解 R³ 并计算各幂的迹">
+
+因为 $\alpha\ne0$，有直和分解
+
+$$
+\mathbb R^3=\operatorname{span}\{\alpha\}\oplus\alpha^\perp.
+$$
+
+选取 $\alpha$ 及 $\alpha^\perp$ 的一组基后，$A$ 的矩阵表示为 $\operatorname{diag}(0,1,1)$。所以 $A^2$ 和 $A^3$ 的表示仍为 $\operatorname{diag}(0,1,1)$，其迹均为 $2$。选 A。
+
+</Step>
+</Steps>
+
+**本质：** $A$ 就是投影到 $\alpha^\perp$ 上的正交投影，能写成 $A=E-\frac{\alpha\alpha^T}{\alpha^T\alpha}$；这个结构还可直接验证 $A^2=A$。
+
+</Solution>
+</Question>
+
+<Question id="core-la-eig-2026m23-14" type="single" number="14" tags="来源:2026年数学二、数学三, 科目:线性代数, 考点:平方零矩阵, 考点:特征空间维数">
+
+设三阶矩阵 $A,B$ 满足 $AB+BA=A^2+B^2$，且 $A\ne B$。下列结论**错误**的是（ ）。
 
 <Option>$(A-B)^3=O$</Option>
 <Option>$A-B$ 只有零特征值</Option>
@@ -751,31 +640,51 @@ $$
 
 <Solution>
 
-**识别与突破：** 先发现 $(A-B)^2=0$。三阶非零平方零矩阵秩必为 $1$，故零特征子空间恰为二维。
+**答案：D。** 实际上 $A-B$ 的特征空间恰为二维，存在**两个**线性无关的特征向量。
 
-移项并合并可得
+<Steps>
+<Step title="将非交换乘积识别为完全平方">
+
+移项时务必保留 $AB$ 与 $BA$ 两项：
 
 $$
 A^2-AB-BA+B^2=(A-B)^2=O.
 $$
 
-令 $C=A-B\ne0$，则 $C^2=0$。由此可知 $C^3=0$ 且 $C$ 只有零特征值，所以 A、B 正确。
+记 $C=A-B$，则题设意味着 $C\ne O$ 且 $C^2=O$，所以 $C^3=O$，A 正确。
 
-若 $A,B$ 都为对角矩阵，$C$ 也是对角矩阵，$C^2=0$ 将推出 $C=0$，与 $A\ne B$ 矛盾，因此 C 正确。
+</Step>
+<Step title="确定特征值及零空间维数">
 
-D 错误：由 $0=r(C^2)\ge2r(C)-3$ 及 $C\ne0$，得 $r(C)=1$。因此 $\dim\ker C=3-1=2$，$C$ 恰有两个线性无关的特征向量。
+若 $Cv=\lambda v$ 且 $v\ne0$，则 $C^2v=\lambda^2v=0$，故 $\lambda=0$。B 正确。
 
-例如取 $C=\begin{pmatrix}0&1&0\\0&0&0\\0&0&0\end{pmatrix}$，则 $C^2=0$，且 $\ker C=\operatorname{span}(e_1,e_3)$。令 $A=C,B=O$ 即得到一个直观例子。
+由 $\operatorname{Im}C\subseteq\ker C$，有
+
+$$
+r(C)\le\dim\ker C=3-r(C),
+\qquad 2r(C)\le3.
+$$
+
+但 $C\ne0$，故 $r(C)=1$，进而 $\dim\ker C=2$。由于全部特征值是零，**所有特征向量恰是非零核向量**；一组特征空间基有两个向量，所以 D 错误。
+
+</Step>
+<Step title="排除同时为对角矩阵的可能">
+
+若 $A,B$ 都是对角矩阵，则 $C$ 也对角。对角矩阵满足 $C^2=O$ 时所有对角元平方为零，只能 $C=O$，违背 $A\ne B$。C 正确。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="代数重数与几何重数不能混淆">$0$ 的代数重数为 $3$，特征空间维数却为 $2$。这意味着 $C$ 不可对角化，并非“只有一个特征向量”。特征向量本身总有无穷多个，这类题说的数量是**最大线性无关个数**。</Callout>
 
 </Solution>
-
 </Question>
 
 ## 三、伴随变换、相似坐标及特征向量构造
 
-<Question id="math-f19600-015" type="essay" number={false}>
+<Question id="core-la-eig-1989m1-15" type="essay" number="15" tags="来源:1989年数学一, 科目:线性代数, 考点:逆矩阵的谱, 考点:伴随矩阵特征值">
 
-【1989年数学一】 假设 $\lambda$ 为 $n$ 阶可逆矩阵 $A$ 的一个特征值，证明：
+设 $\lambda$ 为 $n$ 阶可逆矩阵 $A$ 的一个特征值。证明：
 
 （1）$\dfrac1\lambda$ 为 $A^{-1}$ 的特征值；
 
@@ -783,220 +692,217 @@ D 错误：由 $0=r(C^2)\ge2r(C)-3$ 及 $C\ne0$，得 $r(C)=1$。因此 $\dim\ke
 
 <Solution>
 
-**答案：**
+**参考答案：** 两个结论均成立，并且可取 $A$ 属于 $\lambda$ 的**同一个非零特征向量**作为 $A^{-1}$ 与 $A^*$ 的相应特征向量。
 
-（1）$\dfrac1\lambda$ 是 $A^{-1}$ 的特征值；
+<Steps>
+<Step title="明确可逆性的作用">
 
-（2）$\dfrac{|A|}{\lambda}$ 是 $A^*$ 的特征值。
+存在 $v\ne0$ 使 $Av=\lambda v$。由于 $|A|\ne0$，矩阵没有零特征值，因此 $\lambda\ne0$；后续的除法合法。
 
-**解析：** **模型：** 可逆矩阵的逆、伴随矩阵共享原特征向量，特征值分别作倒数变换和按行列式缩放。条件 $|A|\ne0$ 不可略。
+</Step>
+<Step title="证明逆矩阵的特征值是倒数">
 
-因为 $\lambda$ 是 $A$ 的特征值，所以存在非零向量 $\alpha$，使
-
-$$
-A\alpha=\lambda\alpha.
-$$
-
-又因为 $A$ 可逆，所以 $\lambda\ne0$。
-
-（1）两边左乘 $A^{-1}$：
+左乘 $A^{-1}$ 得 $v=\lambda A^{-1}v$，从而
 
 $$
-\alpha=\lambda A^{-1}\alpha,
+\boxed{A^{-1}v=\frac1\lambda v.}
 $$
 
-即
+向量 $v$ 非零，故 $1/\lambda$ 确实是特征值，而不仅是一个形式上的系数。
+
+</Step>
+<Step title="利用伴随矩阵与逆矩阵的关系">
+
+由 $AA^*=|A|I$ 及 $A$ 可逆，
 
 $$
-A^{-1}\alpha=\frac1\lambda\alpha.
+A^*=|A|A^{-1}.
 $$
 
-故 $\dfrac1\lambda$ 是 $A^{-1}$ 的特征值。
-
-（2）由
+所以
 
 $$
-A^{-1}=\frac{A^*}{|A|}
+\boxed{A^*v=\frac{|A|}{\lambda}v.}
 $$
 
-可得
+这即证明第二问。
 
-$$
-\frac{A^*}{|A|}\alpha=\frac1\lambda\alpha.
-$$
+</Step>
+</Steps>
 
-两边乘 $|A|$：
-
-$$
-A^*\alpha=\frac{|A|}{\lambda}\alpha.
-$$
-
-因此 $\dfrac{|A|}{\lambda}$ 是 $A^*$ 的特征值。
+**考点迁移：** 若 $p(A)$ 是矩阵多项式，则 $p(A)v=p(\lambda)v$；本题的 $A^{-1}$ 与伴随矩阵属于可逆情况下的有理函数型谱映射。若 $A$ 奇异，不得直接套用 $A^*=|A|A^{-1}$。
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-016" type="single" number={false}>
+<Question id="core-la-eig-2002m3-16" type="single" number="16" tags="来源:2002年数学三, 科目:线性代数, 考点:相似变换, 考点:转置的特征向量">
 
-【2002年数学三】 设 $A$ 是 $n$ 阶实对称矩阵，$P$ 是 $n$ 阶可逆矩阵，已知 $n$ 阶列向量 $\boldsymbol{\alpha}$ 是 $A$ 的属于特征值 $\lambda$ 的特征向量，则矩阵 $(P^{-1}AP)^{\mathrm{T}}$ 属于特征值 $\lambda$ 的特征向量是（ ）.
+设 $A$ 是 $n$ 阶实对称矩阵，$P$ 是 $n$ 阶可逆矩阵。已知 $\alpha$ 是 $A$ 属于特征值 $\lambda$ 的特征向量，则矩阵 $(P^{-1}AP)^T$ 属于 $\lambda$ 的特征向量是（ ）。
 
-<Option>$P^{-1}\boldsymbol{\alpha}$</Option>
-<Option correct>$P^{\mathrm{T}}\boldsymbol{\alpha}$</Option>
-<Option>$P\boldsymbol{\alpha}$</Option>
-<Option>$(P^{-1})^{\mathrm{T}}\boldsymbol{\alpha}$</Option>
+<Option>$P^{-1}\alpha$</Option>
+<Option correct>$P^T\alpha$</Option>
+<Option>$P\alpha$</Option>
+<Option>$(P^{-1})^T\alpha$</Option>
 
 <Solution>
 
-**易错点：** 相似变换加转置后，特征向量不是 $P^{-1}\alpha$，而是 $P^T\alpha$。关键额外条件是 $A^T=A$。
+**答案：B。** $\boxed{P^T\alpha}$。
 
-记
+<Steps>
+<Step title="先正确转置三矩阵的乘积">
 
-$$
-B=(P^{-1}AP)^T=P^TA^T(P^{-1})^T.
-$$
-
-因为 $A$ 是实对称矩阵，$A^T=A$，所以
+矩阵转置使乘法顺序倒置：
 
 $$
-B=P^TA(P^{-1})^T.
+M=(P^{-1}AP)^T=P^TA^T(P^{-1})^T=P^TA(P^T)^{-1},
 $$
 
-已知 $A\alpha=\lambda\alpha$，两边左乘 $P^T$：
+最后一步使用了 $A^T=A$ 以及 $(P^{-1})^T=(P^T)^{-1}$。
+
+</Step>
+<Step title="将原特征向量变为新矩阵的特征向量">
+
+由 $A\alpha=\lambda\alpha$，
 
 $$
-P^TA\alpha=\lambda P^T\alpha.
+\begin{aligned}
+M(P^T\alpha)
+&=P^TA(P^T)^{-1}P^T\alpha\\
+&=P^TA\alpha
+=\lambda P^T\alpha.
+\end{aligned}
 $$
 
-又
+$P$ 可逆且 $\alpha\ne0$，故 $P^T\alpha\ne0$，满足特征向量定义。
 
-$$
-B(P^T\alpha)=P^TA(P^{-1})^TP^T\alpha=P^TA\alpha,
-$$
+</Step>
+</Steps>
 
-故
-
-$$
-B(P^T\alpha)=\lambda P^T\alpha.
-$$
-
-所以所求特征向量为 $P^T\alpha$，选 **B**。
+<Callout type="idea" title="牢记变换方向">如果 $M=S^{-1}AS$，旧特征向量 $\alpha$ 要变成 $S^{-1}\alpha$。本题实际写成 $M=(P^T)A(P^T)^{-1}$，对应的 $S=(P^T)^{-1}$，因此得到 $P^T\alpha$。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-017" type="essay" number={false}>
+<Question id="core-la-eig-2003m1-17" type="essay" number="17" tags="来源:2003年数学一, 科目:线性代数, 考点:伴随矩阵谱映射, 考点:特征向量相似变换">
 
-【2003年数学一】 设矩阵 $A = \begin{pmatrix} 3 & 2 & 2 \\ 2 & 3 & 2 \\ 2 & 2 & 3 \end{pmatrix}, P = \begin{pmatrix} 0 & 1 & 0 \\ 1 & 0 & 1 \\ 0 & 0 & 1 \end{pmatrix}$，$B = P^{-1}A^*P$，求 $B+2E$ 的特征值与特征向量，其中 $A^*$ 为 $A$ 的伴随矩阵，$E$ 为三阶单位矩阵.
+设
+
+$$
+A=\begin{pmatrix}3&2&2\\2&3&2\\2&2&3\end{pmatrix},\quad
+P=\begin{pmatrix}0&1&0\\1&0&1\\0&0&1\end{pmatrix},\quad
+B=P^{-1}A^*P,
+$$
+
+其中 $A^*$ 为伴随矩阵，$E$ 为三阶单位矩阵。求 $B+2E$ 的全部特征值及对应特征向量。
 
 <Solution>
 
-**答案：** $\lambda_1=\lambda_2=9$, 特征向量为 $k_1(-1,1,0)^{\mathrm{T}}+k_2(-2,0,1)^{\mathrm{T}}, k_1, k_2$ 不全为零; $\lambda_3=3$, 特征向量为 $k_3(0,1,1)^{\mathrm{T}}, k_3$ 为非零常数
-
-**解析：** **模型：** $A=I+2ee^T$ 的双特征空间结构 → 伴随的谱映射 → 相似变换下的特征向量映射。仅写出特征值不足以完成本题。
-
-矩阵
+**参考答案：** 特征值为 $\boxed{3,9,9}$，对应全部非零特征向量分别是
 
 $$
-A=\begin{pmatrix}3&2&2\\2&3&2\\2&2&3\end{pmatrix}
-=E+2J,
+\begin{cases}
+\lambda=3:\quad x=k(0,1,1)^T,\quad k\ne0;\\[2mm]
+\lambda=9:\quad x=s(-1,1,0)^T+t(-2,0,1)^T,
+\quad(s,t)\ne(0,0).
+\end{cases}
 $$
 
-其中 $J$ 为全 $1$ 矩阵。于是 $A$ 的特征值为
+<Steps>
+<Step title="用全一矩阵构造两个互补特征空间">
+
+记 $e=(1,1,1)^T$，则 $A=I+2ee^T$。由于 $e^Te=3$，
 
 $$
-7,\ 1,\ 1,
+Ae=(1+2\times3)e=7e.
 $$
 
-其中 $\lambda=7$ 对应 $(1,1,1)^T$，$\lambda=1$ 的特征子空间为
+对任意 $v$ 满足 $e^Tv=0$，有 $Av=v$。因此 $A$ 的谱为 $7,1,1$，其中 $7$ 的特征空间是 $\operatorname{span}\{e\}$，$1$ 的特征空间是 $\{v:v_1+v_2+v_3=0\}$。
+
+</Step>
+<Step title="从 A 转到 A*+2E，处理伴随与平移">
+
+$|A|=7$，所以 $A^*=7A^{-1}$。在原来两个特征方向上的特征值分别变为
 
 $$
-x_1+x_2+x_3=0.
+7/7=1,\qquad 7/1=7.
 $$
 
-又 $|A|=7$，故伴随矩阵 $A^*=|A|A^{-1}$ 的特征值为
+加上 $2I$ 后，特征值分别为 $3$（一重）、$9$（二重），对应的特征空间保持不变。
+
+</Step>
+<Step title="将特征向量经 P 的逆映射回 B+2E">
+
+有
 
 $$
-1,\ 7,\ 7.
+B+2I=P^{-1}(A^*+2I)P.
 $$
 
-因此 $A^*+2E$ 的特征值为
+因此若 $v$ 为 $A^*+2I$ 的特征向量，则 $x=P^{-1}v$ 为 $B+2I$ 的特征向量。
+
+对 $\lambda=3$，解 $Px=e$ 得 $x=(0,1,1)^T$；对 $\lambda=9$，条件是 $e^TPx=0$。由于
 
 $$
-3,\ 9,\ 9.
+Px=(x_2,x_1+x_3,x_3)^T,
 $$
 
-而
+故 $x_1+x_2+2x_3=0$，取基础解向量 $(-1,1,0)^T$ 与 $(-2,0,1)^T$，得答案。
 
-$$
-B+2E=P^{-1}(A^*+2E)P,
-$$
+</Step>
+</Steps>
 
-所以特征值不变；若 $v$ 是 $A^*+2E$ 的特征向量，则 $P^{-1}v$ 是 $B+2E$ 的对应特征向量。计算可得：
-
-- $\lambda=3$：特征向量为 $k_3(0,1,1)^T$；
-- $\lambda=9$：特征向量为 $k_1(-1,1,0)^T+k_2(-2,0,1)^T$，其中 $k_1,k_2$ 不全为零。
+**易错点：** 相似变换保持特征值，却**不保持坐标形式的特征向量**；必须乘 $P^{-1}$。重特征值 $9$ 对应二维空间，应给出两个线性无关方向，不能只取一个向量。
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-018" type="blank" number={false}>
+<Question id="core-la-eig-2021m1-18" type="blank" number="18" tags="来源:2021年数学一, 科目:线性代数, 考点:伴随矩阵行和, 考点:特征向量">
 
-【2021年数学一】 设 $A = (a_{ij})$ 为三阶矩阵，$A_{ij}$ 为代数余子式，若 $A$ 的每一行之和均为 $2$, $|A| = 3$，则 $A_{11} + A_{21} + A_{31} = $<Blank answer="((3)/(2))" kind="math" />.
+设 $A=(a_{ij})$ 是三阶矩阵，$A_{ij}$ 表示其代数余子式。若 $A$ 的每一行元素之和均为 $2$，且 $|A|=3$，则
+
+$$
+A_{11}+A_{21}+A_{31}=
+$$
+
+<Blank answer="3/2" kind="math" />。
 
 <Solution>
 
-**答案：** $\frac{3}{2}$
+**答案：** $\boxed{\frac32}$。
 
-**解析：** **突破口：** 行和恒定得到 $Ae=2e$，随即 $A^*e=\frac{|A|}{2}e$；所求余子式是伴随矩阵“第一行”的和，不是第一列。
+<Steps>
+<Step title="由各行和构造天然特征向量">
 
-令
+设 $e=(1,1,1)^T$，每行之和为 $2$ 等价于 $Ae=2e$。因为 $|A|=3\ne0$，可得 $A^{-1}e=\frac12e$。
 
-$$
-e=(1,1,1)^T.
-$$
+</Step>
+<Step title="将目标余子式看成伴随矩阵第一行的和">
 
-因为 $A$ 的每一行元素之和均为 $2$，所以
-
-$$
-Ae=2e,
-$$
-
-即 $2$ 是 $A$ 的一个特征值，$e$ 为对应特征向量。
-
-又 $|A|=3\neq0$，故 $A$ 可逆，且
+伴随矩阵按代数余子式**转置**排列：$(A^*)_{ij}=A_{ji}$。因此
 
 $$
-A^*=|A|A^{-1}=3A^{-1}.
+(A^*e)_1=A_{11}+A_{21}+A_{31}.
 $$
 
-由 $Ae=2e$ 得
+又 $A^*=|A|A^{-1}$，所以
 
 $$
-A^{-1}e=\frac12e,
+A^*e=3A^{-1}e=\frac32e.
 $$
 
-从而
+取第一个分量即得目标值。
 
-$$
-A^*e=\frac32e.
-$$
+</Step>
+</Steps>
 
-$A^*$ 的第一行正是 $(A_{11},A_{21},A_{31})$，因此第一行元素之和为 $\frac32$，即
-
-$$
-A_{11}+A_{21}+A_{31}=\frac32.
-$$
+**检查方向：** 题目求的是“第一列余子式之和”，恰对应 **伴随矩阵的第一行之和**。直接把 $A_{ij}$ 当作伴随矩阵同位置元素，会把行列方向弄反。
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-019" type="essay" number={false}>
+<Question id="core-la-eig-2025m1-19" type="essay" number="19" tags="来源:2025年数学一, 科目:线性代数, 考点:重特征值, 考点:广义特征向量链">
 
-【2025年数学一】 设矩阵
+设矩阵
 
 $$
 A=\begin{pmatrix}0&-1&2\\-1&0&2\\-1&-1&a\end{pmatrix},
@@ -1010,405 +916,312 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：** （1）$\boxed{a=3}$。
 
-（1）$a=3$。
-
-（2）令 $c_1,c_2\in\mathbb R$，$k\in\mathbb R\setminus\{0\}$，则
+（2）所有满足条件的非零向量对恰为
 
 $$
-\beta=k\begin{pmatrix}1\\1\\1\end{pmatrix},\quad
-\alpha=c_1\begin{pmatrix}2\\0\\1\end{pmatrix}+c_2\begin{pmatrix}0\\2\\1\end{pmatrix}+\begin{pmatrix}-k\\0\\0\end{pmatrix}.
+\boxed{\begin{aligned}
+\beta&=k(1,1,1)^T,\quad k\in\mathbb R\setminus\{0\},\\
+\alpha&=(-k,0,0)^T+s(2,0,1)^T+t(0,2,1)^T,
+\quad s,t\in\mathbb R.
+\end{aligned}}
 $$
 
-**解析：** **突破口：** 连续两式相减并消元，化为 $(A-I)\alpha=\beta$、$(A-I)\beta=0$；先判重根参数，再证明这组一阶方程的充要性。
+<Steps>
+<Step title="重根条件通过特征多项式求参数">
 
-先求特征多项式：
+展开得
 
 $$
-\det(\lambda I-A)=(\lambda-1)\big[\lambda^2+(1-a)\lambda-a+4\big].
+\det(\lambda I-A)=(\lambda-1)[\lambda^2+(1-a)\lambda+4-a].
 $$
 
-由于 $\lambda=1$ 为重根，代入方括号得 $6-2a=0$，所以 $a=3$。
+既然 $1$ 是重根，方括号在 $\lambda=1$ 时也必须为零：
 
-用 $A^2\alpha=A(A\alpha)$ 消去 $\alpha$：
+$$
+1+(1-a)+4-a=6-2a=0,
+$$
+
+故 $a=3$。代入后特征多项式实际为 $(\lambda-1)^3$。
+
+</Step>
+<Step title="把二次作用关系化成一条广义特征向量链">
+
+令 $N=A-I$。第一式是 $N\alpha=\beta$，由第二式与 $A\alpha=\alpha+\beta$ 可得
 
 $$
 A^2\alpha=A(\alpha+\beta)=\alpha+\beta+A\beta=\alpha+2\beta,
 $$
 
-从而 $(A-I)\beta=0$，且 $(A-I)\alpha=\beta$。
-
-当 $a=3$ 时，$(A-I)$ 三行完全相同，均为 $(-1,-1,2)$。于是
+故 $A\beta=\beta$，也就是 $N\beta=0$。因此充要条件为
 
 $$
--\beta_1-\beta_2+2\beta_3=0,
+N\alpha=\beta\ne0,\qquad N\beta=0.
 $$
 
-且要使 $(A-I)\alpha=\beta$ 有解，必须 $\beta=k(1,1,1)^T$。解
+</Step>
+<Step title="利用 N 的秩一结构给出全部向量对">
+
+$a=3$ 时
 
 $$
--\alpha_1-\alpha_2+2\alpha_3=k
+N=\begin{pmatrix}-1&-1&2\\-1&-1&2\\-1&-1&2\end{pmatrix}
+=e(-1,-1,2),\qquad e=(1,1,1)^T.
 $$
 
-即得到答案所示通解。注意 $k\ne0$ 保证 $\beta$ 非零。
-
-**充分性核验：** 对所列 $\alpha,\beta$，有 $(A-I)\alpha=\beta$，而 $(A-I)\beta=0$；因此 $A\alpha=\alpha+\beta$，并且
+于是 $N\alpha$ 必与 $e$ 共线，所以 $\beta=ke$，且 $k\ne0$。要求 $N\alpha=ke$ 等价于单一线性约束
 
 $$
-A^2\alpha=A(\alpha+\beta)=\alpha+\beta+\beta=\alpha+2\beta.
+-\alpha_1-\alpha_2+2\alpha_3=k.
 $$
 
-同时 $k\ne0$ 保证 $\beta\ne0$，也保证 $\alpha\ne0$（否则 $(A-I)\alpha=0$）。故给出的就是全部合法非零向量对。
+取特解 $(-k,0,0)^T$；齐次方程的两组独立解为 $(2,0,1)^T$ 和 $(0,2,1)^T$，得到答案列出的 $\alpha$。
+
+</Step>
+<Step title="证明所有解均已覆盖">
+
+注意 $Ne=e(-1-1+2)=0$，故所列 $\beta$ 满足 $N\beta=0$；而所列 $\alpha$ 使 $N\alpha=ke=\beta$。由上一步充要关系，原题两等式均成立。$k\ne0$ 同时确保 $\beta\ne0$ 与 $\alpha\ne0$，因此解集完整。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="重根与 Jordan 链的连接">本题不是只求普通特征向量：$\beta$ 属于 $\ker(A-I)$，而 $\alpha$ 是满足 $(A-I)\alpha=\beta$ 的广义特征向量。以 $N$ 的秩一分解进行求解，比直接计算 $A^2$ 省去大量运算。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-020" type="essay" number={false}>
+<Question id="core-la-eig-lilin880-20" type="essay" number="20" tags="来源:李林880, 科目:线性代数, 考点:特征向量链, 考点:伴随矩阵行列式">
 
-【李林880】 设 $\alpha_1\ne0$ 是三阶矩阵 $A$ 关于特征值 $\lambda\ne0$ 的特征向量，又有三维列向量 $\alpha_2,\alpha_3$ 满足
+设 $\alpha_1\ne0$ 是三阶矩阵 $A$ 关于特征值 $\lambda\ne0$ 的特征向量，又有三维列向量 $\alpha_2,\alpha_3$ 满足
 
 $$
 (\lambda E-A)\alpha_2=\alpha_1,\qquad
 (\lambda E-A)\alpha_3=\alpha_2.
 $$
 
-（1）证明 $\alpha_1,\alpha_2,\alpha_3$ 线性无关；（2）求 $|A+A^*|$，其中 $A^*$ 是伴随矩阵。
+（1）证明 $\alpha_1,\alpha_2,\alpha_3$ 线性无关；（2）求 $|A+A^*|$，其中 $A^*$ 为伴随矩阵。
 
 <Solution>
 
-**答案：** （1）$\alpha_1,\alpha_2,\alpha_3$ 线性无关；（2）$|A+A^*|=(\lambda+\lambda^2)^3$。
-
-**解析：** **突破口：** 把 $(\lambda E-A)$ 记为 $T$，对线性关系连续施加 $T^2,T$，即可逐层剥离系数。
-
-假设 $c_1\alpha_1+c_2\alpha_2+c_3\alpha_3=0$。由于
+**参考答案：** （1）三向量线性无关；（2）
 
 $$
-T\alpha_1=0,\quad T\alpha_2=\alpha_1,\quad T\alpha_3=\alpha_2,
+\boxed{|A+A^*|=(\lambda+\lambda^2)^3=\lambda^3(1+\lambda)^3.}
 $$
 
-先施加 $T^2$ 得 $c_3\alpha_1=0$，故 $c_3=0$；再施加 $T$ 得 $c_2\alpha_1=0$，故 $c_2=0$；最后 $c_1=0$。故 $P=(\alpha_1,\alpha_2,\alpha_3)$ 可逆。
+<Steps>
+<Step title="用算子逐次作用剥离线性关系的系数">
 
-按列计算作用得到
+令 $T=\lambda I-A$。已知 $T\alpha_1=0$，$T\alpha_2=\alpha_1$，$T\alpha_3=\alpha_2$。若
+
+$$
+c_1\alpha_1+c_2\alpha_2+c_3\alpha_3=0,
+$$
+
+先施加 $T^2$ 得 $c_3\alpha_1=0$，所以 $c_3=0$；再施加 $T$ 得 $c_2\alpha_1=0$，所以 $c_2=0$；最后 $c_1\alpha_1=0$，所以 $c_1=0$。故 $P=(\alpha_1,\alpha_2,\alpha_3)$ 可逆。
+
+</Step>
+<Step title="把 A 写成链基下的上三角矩阵">
+
+由 $A\alpha_1=\lambda\alpha_1$、$A\alpha_2=\lambda\alpha_2-\alpha_1$、$A\alpha_3=\lambda\alpha_3-\alpha_2$，得
 
 $$
 P^{-1}AP=
-\begin{pmatrix}
-\lambda&-1&0\\0&\lambda&-1\\0&0&\lambda
-\end{pmatrix}=:J,
+J=\begin{pmatrix}\lambda&-1&0\\0&\lambda&-1\\0&0&\lambda\end{pmatrix},
 \qquad |A|=\lambda^3.
 $$
 
-因 $\lambda\ne0$，$A$ 可逆，且 $A^*=|A|A^{-1}$，于是
+</Step>
+<Step title="伴随矩阵只改变上三角对角元，计算行列式">
+
+因为 $\lambda\ne0$，$A$ 可逆且 $A^*=\lambda^3A^{-1}$。在同一组基下
 
 $$
 P^{-1}(A+A^*)P=J+\lambda^3J^{-1}.
 $$
 
-右边是上三角矩阵，对角元全为 $\lambda+\lambda^2$，因此其行列式为 $(\lambda+\lambda^2)^3$。
+$J^{-1}$ 仍上三角，其对角元全为 $1/\lambda$，故右侧对角元均为 $\lambda+\lambda^2$。上三角行列式等于对角元之积，因此得到答案。
 
-**模型提炼：** 长度为 $3$ 的链相当于一个上三角块；矩阵多项式及可逆时的伴随矩阵在该基下仍为上三角，不必求 $A$ 的具体元素。
+</Step>
+</Steps>
+
+**边界检查：** $\lambda=-1$ 时结果为 $0$，意味着 $A+A^*$ 奇异，这不是计算失败；$\lambda$ 只要求非零，并未排除 $-1$。
 
 </Solution>
-
 </Question>
 
 ## 四、循环向量、线性递推及多项式谱映射
 
-<Question id="math-f19600-021" type="essay" number={false}>
+<Question id="core-la-eig-1990m3-21" type="essay" number="21" tags="来源:1990年数学三, 科目:线性代数, 考点:异特征值向量无关, 考点:特征向量线性组合">
 
-【1990年数学三】 设 $A$ 是 $n$ 阶矩阵，$\lambda_1$ 和 $\lambda_2$ 是 $A$ 的两个不同的特征值，$\alpha_1,\alpha_2$ 分别是属于 $\lambda_1$ 和 $\lambda_2$ 的特征向量。试证明 $\alpha_1+\alpha_2$ 不是 $A$ 的特征向量。
+设 $A$ 为 $n$ 阶矩阵，$\lambda_1\ne\lambda_2$ 是其两个特征值，$\alpha_1,\alpha_2$ 分别为相应特征向量。证明 $\alpha_1+\alpha_2$ 不是 $A$ 的特征向量。
 
 <Solution>
 
-**答案：** $\alpha_1+\alpha_2$ 不是 $A$ 的特征向量。
+**参考答案：** $\boxed{\alpha_1+\alpha_2\text{ 不是 }A\text{ 的特征向量}}$。
 
-**解析：** **突破口：** 不必求具体矩阵；利用不同特征值对应特征向量的线性无关性，把向量等式还原成系数条件。
+<Steps>
+<Step title="先说明两个特征向量线性无关">
 
-用反证法。
-
-假设 $\alpha_1+\alpha_2$ 是 $A$ 的特征向量，对应特征值为 $\lambda$，则
-
-$$
-A(\alpha_1+\alpha_2)=\lambda(\alpha_1+\alpha_2).
-$$
-
-另一方面，由
+若 $\alpha_2=c\alpha_1$，则
 
 $$
-A\alpha_1=\lambda_1\alpha_1,
-\qquad
-A\alpha_2=\lambda_2\alpha_2,
+\lambda_2\alpha_2=A\alpha_2=cA\alpha_1=c\lambda_1\alpha_1
+=\lambda_1\alpha_2.
 $$
 
-有
+因 $\alpha_2\ne0$，推出 $\lambda_1=\lambda_2$，矛盾。所以 $\alpha_1,\alpha_2$ 线性无关，其和也非零。
+
+</Step>
+<Step title="假设和仍为特征向量并比较系数">
+
+若存在 $\lambda$ 使
 
 $$
-A(\alpha_1+\alpha_2)
-=\lambda_1\alpha_1+\lambda_2\alpha_2.
+A(\alpha_1+\alpha_2)=\lambda(\alpha_1+\alpha_2),
 $$
 
-两式相减：
+由原特征向量关系，得到
 
 $$
-(\lambda-\lambda_1)\alpha_1
-+(\lambda-\lambda_2)\alpha_2=0.
+(\lambda_1-\lambda)\alpha_1+(\lambda_2-\lambda)\alpha_2=0.
 $$
 
-由于 $\lambda_1\ne\lambda_2$，属于不同特征值的特征向量 $\alpha_1,\alpha_2$ 线性无关，因此必须
+线性无关要求两个系数均为零，即 $\lambda_1=\lambda=\lambda_2$，与已知矛盾，命题得证。
 
-$$
-\lambda=\lambda_1,
-\qquad
-\lambda=\lambda_2,
-$$
+</Step>
+</Steps>
 
-这与 $\lambda_1\ne\lambda_2$ 矛盾。
-
-故 $\alpha_1+\alpha_2$ 不是 $A$ 的特征向量。
+**一般结论：** 对互异特征值对应的非零特征向量 $\alpha_i$，若一个线性组合包含至少两个不同特征值方向且相应系数非零，就不可能仍是特征向量。反之同一特征值下的向量线性组合仍属于同一特征空间（若组合非零）。
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-022" type="essay" number={false}>
+<Question id="core-la-eig-2000m1-22" type="essay" number="22" tags="来源:2000年数学一, 科目:线性代数, 考点:状态转移矩阵, 考点:特征分解递推">
 
-【2000年数学一】 某试验性生产线每年一月份进行熟练工与非熟练工的人数统计，然后将 $\dfrac16$ 熟练工支援其他生产部门，其缺额由新招收的非熟练工补齐；新、老非熟练工经过培训及实践至年终考核有 $\dfrac25$ 成为熟练工。设第 $n$ 年一月份统计的熟练工和非熟练工所占百分比分别为 $x_n,y_n$，记成向量
+某试验性生产线每年一月份统计熟练工与非熟练工人数，随后将 $\frac16$ 的熟练工调往其他部门，其缺额由新招收的非熟练工补齐；新、老非熟练工经过培训和实践，到年终有 $\frac25$ 成为熟练工。设第 $n$ 年年初两类人员的比例分别为 $x_n,y_n$。
 
-$$
-\begin{pmatrix}x_n\\y_n\end{pmatrix}.
-$$
+（1）建立 $\binom{x_{n+1}}{y_{n+1}}=A\binom{x_n}{y_n}$，写出 $A$；
 
-（1）求
+（2）验证 $\eta_1=(4,1)^T,\eta_2=(-1,1)^T$ 是 $A$ 的两个线性无关的特征向量，并求相应特征值；
 
-$$
-\begin{pmatrix}x_{n+1}\\y_{n+1}\end{pmatrix}
-$$
-
-与
-
-$$
-\begin{pmatrix}x_n\\y_n\end{pmatrix}
-$$
-
-的关系式，并写成矩阵形式
-
-$$
-\begin{pmatrix}x_{n+1}\\y_{n+1}\end{pmatrix}
-=A
-\begin{pmatrix}x_n\\y_n\end{pmatrix};
-$$
-
-（2）验证
-
-$$
-\eta_1=\begin{pmatrix}4\\1\end{pmatrix},
-\qquad
-\eta_2=\begin{pmatrix}-1\\1\end{pmatrix}
-$$
-
-是 $A$ 的两个线性无关的特征向量，并求相应的特征值；
-
-（3）当
-
-$$
-\begin{pmatrix}x_1\\y_1\end{pmatrix}
-=
-\begin{pmatrix}\frac12\\\frac12\end{pmatrix}
-$$
-
-时，求
-
-$$
-\begin{pmatrix}x_{n+1}\\y_{n+1}\end{pmatrix}.
-$$
+（3）已知 $(x_1,y_1)^T=(\frac12,\frac12)^T$，求 $(x_{n+1},y_{n+1})^T$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（1）
+（1）$\displaystyle\boxed{A=\begin{pmatrix}\frac9{10}&\frac25\\\frac1{10}&\frac35\end{pmatrix}}$。
 
-$$
-A=
-\begin{pmatrix}
-\frac9{10}&\frac25\\
-\frac1{10}&\frac35
-\end{pmatrix}.
-$$
+（2）$\eta_1,\eta_2$ 对应的特征值分别为 $\boxed{1,\frac12}$。
 
-（2）
+（3）对 $n\ge0$，
 
 $$
-\lambda_1=1,
-\qquad
-\lambda_2=\frac12.
+\boxed{\begin{pmatrix}x_{n+1}\\y_{n+1}\end{pmatrix}
+=\frac1{10}\begin{pmatrix}8-3\cdot2^{-n}\\2+3\cdot2^{-n}\end{pmatrix}.}
 $$
 
-（3）由递推关系计算得
+<Steps>
+<Step title="分别计算留下的熟练工与培训后的新熟练工">
+
+第 $n$ 年离岗后剩余熟练工比例为 $\frac56x_n$；调离所需补招加上原有非熟练工，使待培训人数比例为 $\frac16x_n+y_n$。故
 
 $$
-\begin{pmatrix}x_{n+1}\\y_{n+1}\end{pmatrix}
-=\frac1{10}
-\begin{pmatrix}
-8-3\left(\frac12\right)^n\\
-2+3\left(\frac12\right)^n
-\end{pmatrix}.
-$$
-
-**解析：** **突破口：** 先建立“分流—补员—培训”的状态转移关系，再利用两条给定特征方向写出 $A^n$ 对初始状态的作用。先验算每年两类人数比例之和保持为 $1$。
-
-（1）年初熟练工中有 $\dfrac16x_n$ 被调走，所以留下
-
-$$
-\frac56x_n.
-$$
-
-调走熟练工造成的缺额由非熟练工补齐，因此年内需要培训的非熟练工总量为
-
-$$
-\frac16x_n+y_n.
-$$
-
-其中 $\dfrac25$ 到年终成为熟练工，$\dfrac35$ 仍为非熟练工。所以
-
-$$
-x_{n+1}
-=\frac56x_n+\frac25\left(\frac16x_n+y_n\right)
-=\frac9{10}x_n+\frac25y_n,
-$$
-
-$$
-y_{n+1}
-=\frac35\left(\frac16x_n+y_n\right)
+\begin{aligned}
+x_{n+1}&=\frac56x_n+\frac25\left(\frac16x_n+y_n\right)
+=\frac9{10}x_n+\frac25y_n,\\
+y_{n+1}&=\frac35\left(\frac16x_n+y_n\right)
 =\frac1{10}x_n+\frac35y_n.
+\end{aligned}
 $$
 
-因此
+矩阵各列元素之和为 $1$，也从结构上保证 $x_{n+1}+y_{n+1}=x_n+y_n=1$。
+
+</Step>
+<Step title="利用两条给定特征方向完成谱分解">
+
+直接乘矩阵可得
 
 $$
-A=
-\begin{pmatrix}
-\frac9{10}&\frac25\\
-\frac1{10}&\frac35
-\end{pmatrix}.
+A\eta_1=(4,1)^T=\eta_1,
+\qquad A\eta_2=\frac12(-1,1)^T=\frac12\eta_2.
 $$
 
-（2）直接计算：
+两向量显然不成比例，构成 $\mathbb R^2$ 的一组基，因此后续状态可沿两个方向分别乘以 $1^n$、$(1/2)^n$。
+
+</Step>
+<Step title="先拆初始状态，再施加 A 的 n 次幂">
+
+求系数 $c_1,c_2$，使
 
 $$
-A\eta_1
-=
-\begin{pmatrix}
-\frac9{10}&\frac25\\
-\frac1{10}&\frac35
-\end{pmatrix}
-\begin{pmatrix}4\\1\end{pmatrix}
-=
-\begin{pmatrix}4\\1\end{pmatrix}
-=\eta_1,
+\binom{1/2}{1/2}=c_1\binom41+c_2\binom{-1}{1}.
 $$
 
-故 $\eta_1$ 对应
+联立 $4c_1-c_2=1/2$、$c_1+c_2=1/2$，得 $c_1=1/5,c_2=3/10$，从而
 
 $$
-\lambda_1=1.
+\binom{x_{n+1}}{y_{n+1}}=A^n\binom{1/2}{1/2}
+=\frac15\eta_1+\frac3{10}\left(\frac12\right)^n\eta_2.
 $$
 
-又
+展开即得答案中的两项式。
 
-$$
-A\eta_2
-=
-\begin{pmatrix}
-\frac9{10}&\frac25\\
-\frac1{10}&\frac35
-\end{pmatrix}
-\begin{pmatrix}-1\\1\end{pmatrix}
-=
-\frac12
-\begin{pmatrix}-1\\1\end{pmatrix}
-=\frac12\eta_2,
-$$
+</Step>
+</Steps>
 
-故
-
-$$
-\lambda_2=\frac12.
-$$
-
-（3）由于 $\eta_1,\eta_2$ 线性无关，矩阵 $A$ 可对角化。将初始向量写成
-
-$$
-\begin{pmatrix}\frac12\\\frac12\end{pmatrix}
-=\frac15\eta_1+\frac3{10}\eta_2.
-$$
-
-于是
-
-$$
-\begin{pmatrix}x_{n+1}\\y_{n+1}\end{pmatrix}
-=A^n
-\begin{pmatrix}\frac12\\\frac12\end{pmatrix}
-=
-\frac15\eta_1+
-\frac3{10}\left(\frac12\right)^n\eta_2.
-$$
-
-整理为
-
-$$
-\begin{pmatrix}x_{n+1}\\y_{n+1}\end{pmatrix}
-=\frac1{10}
-\begin{pmatrix}
-8-3\left(\frac12\right)^n\\
-2+3\left(\frac12\right)^n
-\end{pmatrix}.
-$$
-
-原答案页在该末式的排版中未显示整体因子 $\frac1{10}$；由其前面的矩阵幂推导和百分比总和恒为 $1$ 可确认应保留此因子。
+<Callout type="info" title="必须带上整体因子 1/10">代入 $n=0$ 得 $\binom{1/2}{1/2}$；两分量之和始终为 $1$，且 $n\to\infty$ 后比例趋于 $\binom{4/5}{1/5}$。漏写 $1/10$ 会使总比例错误地变成 $10$。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-023" type="blank" number={false}>
+<Question id="core-la-eig-2018m1-23" type="blank" number="23" tags="来源:2018年数学一, 科目:线性代数, 考点:不同特征值, 考点:矩阵幂的特征值">
 
-【2018年数学一】 二阶矩阵 $A$ 有两个不同特征值，$\boldsymbol{\alpha}_1, \boldsymbol{\alpha}_2$ 是 $A$ 的线性无关的特征向量，$A^2(\boldsymbol{\alpha}_1 + \boldsymbol{\alpha}_2) = (\boldsymbol{\alpha}_1 + \boldsymbol{\alpha}_2), |A| = $<Blank answer="-1" kind="math" />.
+二阶矩阵 $A$ 有两个不同的特征值，$\alpha_1,\alpha_2$ 是对应的线性无关特征向量。若
+
+$$
+A^2(\alpha_1+\alpha_2)=\alpha_1+\alpha_2,
+$$
+
+则 $|A|=$ <Blank answer="-1" kind="math" />。
 
 <Solution>
 
-**答案：** $-1$
+**答案：** $\boxed{-1}$。
 
-**解析：** **易错点：** 从 $A^2v=v$ 只能推出相关特征值满足 $\lambda_i^2=1$；还必须用“两特征值不同”排除同号，才能确定行列式。
+<Steps>
+<Step title="由 A² 作用比较两个独立特征方向">
 
-设 $\alpha_1,\alpha_2$ 分别对应不同特征值 $\lambda_1,\lambda_2$。则
-
-$$
-A^2(\alpha_1+\alpha_2)
-=\lambda_1^2\alpha_1+\lambda_2^2\alpha_2.
-$$
-
-题设给出该式等于 $\alpha_1+\alpha_2$。由于不同特征值的特征向量线性无关，故
+设 $A\alpha_j=\lambda_j\alpha_j$（$j=1,2$）。由题意，
 
 $$
-\lambda_1^2=\lambda_2^2=1.
+(\lambda_1^2-1)\alpha_1+(\lambda_2^2-1)\alpha_2=0.
 $$
 
-又 $\lambda_1\neq\lambda_2$，所以两个特征值只能是 $1,-1$。因此
+因 $\alpha_1,\alpha_2$ 无关，两个系数必须分别为零：$\lambda_1^2=\lambda_2^2=1$。
+
+</Step>
+<Step title="结合特征值互异求行列式">
+
+$\lambda_j\in\{-1,1\}$，又 $\lambda_1\ne\lambda_2$，故它们恰为 $1$ 与 $-1$。二阶矩阵行列式是两个特征值之积：
 
 $$
-|A|=\lambda_1\lambda_2=-1.
+|A|=\lambda_1\lambda_2=1\times(-1)=-1.
 $$
+
+</Step>
+</Steps>
+
+**易错点：** $A^2v=v$ 并不意味着 $Av=v$；$A$ 也可能沿某个方向反向。不能据此误推两个特征值全为 $1$。
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-024" type="essay" number={false}>
+<Question id="core-la-eig-lilin880-24" type="essay" number="24" tags="来源:李林880, 科目:线性代数, 考点:循环向量, 考点:相似变换与行列式">
 
-【李林880】 设 $A$ 为三阶矩阵，$\alpha$ 为三维列向量，$P=(\alpha,A\alpha,A^2\alpha)$ 可逆，并且
+设 $A$ 为三阶矩阵，$\alpha$ 为三维列向量，$P=(\alpha,A\alpha,A^2\alpha)$ 可逆，并且
 
 $$
 A^3\alpha+2A^2\alpha=3A\alpha.
@@ -1418,37 +1231,50 @@ $$
 
 <Solution>
 
-**答案：** $|A+E|=-4$。
+**参考答案：** $\boxed{|A+E|=-4}$。
 
-**解析：** **识别：** 已知循环向量组 $\alpha,A\alpha,A^2\alpha$ 线性无关，立即把它们作为一组基，不必求出 $A$ 的每个元素。
+<Steps>
+<Step title="用循环向量作基，避免计算原矩阵的九个元素">
 
-由 $AP=(A\alpha,A^2\alpha,3A\alpha-2A^2\alpha)$ 得
-
-$$
-P^{-1}AP=
-\begin{pmatrix}
-0&0&0\\
-1&0&3\\
-0&1&-2
-\end{pmatrix}=C.
-$$
-
-因此
+由 $P$ 可逆，$\alpha,A\alpha,A^2\alpha$ 线性无关，是三维空间的一组基。改写已知条件为
 
 $$
-|A+E|=|P^{-1}(A+E)P|=|C+E|
-=\begin{vmatrix}1&0&0\\1&1&3\\0&1&-1\end{vmatrix}=-4.
+A^3\alpha=3A\alpha-2A^2\alpha.
 $$
 
-**模型提炼：** $A^3\alpha=c_0\alpha+c_1A\alpha+c_2A^2\alpha$ 时，在循环向量基下，$A$ 的末列为 $(c_0,c_1,c_2)^T$；题设的 $P$ 可逆保证该表示确为相似，而不只是列向量恒等式。
+计算 $AP$ 的三列：
+
+$$
+AP=(A\alpha,A^2\alpha,3A\alpha-2A^2\alpha)
+=P\begin{pmatrix}0&0&0\\1&0&3\\0&1&-2\end{pmatrix}.
+$$
+
+因此 $A$ 相似于右侧的循环基表示矩阵 $C$。
+
+</Step>
+<Step title="将 A+E 同时变换到循环基中计算">
+
+由 $P^{-1}(A+E)P=C+E$，相似矩阵行列式相同，故
+
+$$
+\begin{aligned}
+|A+E|&=|C+E|\\
+&=\begin{vmatrix}1&0&0\\1&1&3\\0&1&-1\end{vmatrix}\\
+&=1\cdot(-1-3)=\boxed{-4}.
+\end{aligned}
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="遇到循环向量：读列比求逆更快">一般若 $P=(\alpha,A\alpha,\ldots,A^{n-1}\alpha)$ 可逆，且 $A^n\alpha=\sum_{j=0}^{n-1}c_jA^j\alpha$，则 $P^{-1}AP$ 的前 $n-1$ 列为移位列，最后一列是 $(c_0,\ldots,c_{n-1})^T$。无需显式求 $P^{-1}$。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-025" type="essay" number={false}>
+<Question id="core-la-eig-lilin880-25" type="essay" number="25" tags="来源:李林880, 科目:线性代数, 考点:范德蒙德行列式, 考点:循环基与秩">
 
-【李林880】 设三阶矩阵 $A$ 有三个互不相同的特征值 $\lambda_1,\lambda_2,\lambda_3$，对应的非零特征向量为 $\alpha_1,\alpha_2,\alpha_3$。令 $\beta=\alpha_1+\alpha_2+\alpha_3$。
+设三阶矩阵 $A$ 有三个互不相同的特征值 $\lambda_1,\lambda_2,\lambda_3$，其对应的非零特征向量为 $\alpha_1,\alpha_2,\alpha_3$，令 $\beta=\alpha_1+\alpha_2+\alpha_3$。
 
 （1）证明 $\beta,A\beta,A^2\beta$ 线性无关；
 
@@ -1456,57 +1282,123 @@ $$
 
 <Solution>
 
-**答案：** （1）线性无关；（2）$r(A-E)=2$。
+**参考答案：**
 
-**解析：** **模型识别：** 不同特征值给出 Vandermonde 行列式，是“由一根循环向量构造全空间基”的标准突破口。
+（1）$\beta,A\beta,A^2\beta$ 线性无关。
 
-设 $c_0\beta+c_1A\beta+c_2A^2\beta=0$，按 $\alpha_i$ 展开得到
+（2）$\boxed{r(A-E)=2}$。
 
-$$
-\sum_{i=1}^3(c_0+c_1\lambda_i+c_2\lambda_i^2)\alpha_i=0.
-$$
+<Steps>
+<Step title="以特征向量为基，得到范德蒙德系数矩阵">
 
-不同特征值的特征向量无关，因此二次多项式 $c_0+c_1t+c_2t^2$ 有三个不同的根 $\lambda_1,\lambda_2,\lambda_3$，只可能是零多项式，即 $c_0=c_1=c_2=0$。
-
-由（1）知 $P=(\beta,A\beta,A^2\beta)$ 可逆，结合 $A^3\beta=A\beta$，得
+因 $\lambda_1,\lambda_2,\lambda_3$ 互异，$\alpha_1,\alpha_2,\alpha_3$ 线性无关。依次展开：
 
 $$
-P^{-1}AP=
-\begin{pmatrix}
-0&0&0\\
-1&0&1\\
-0&1&0
-\end{pmatrix}=:C.
+\begin{aligned}
+\beta&=\alpha_1+\alpha_2+\alpha_3,\\
+A\beta&=\lambda_1\alpha_1+\lambda_2\alpha_2+\lambda_3\alpha_3,\\
+A^2\beta&=\lambda_1^2\alpha_1+\lambda_2^2\alpha_2+\lambda_3^2\alpha_3.
+\end{aligned}
 $$
 
-故 $r(A-E)=r(C-E)$。由于 $C$ 的特征多项式为 $t(t-1)(t+1)$，$\lambda=1$ 是单特征值，所以 $\dim\ker(C-E)=1$、$r(C-E)=2$。
+故
 
-**快速解法：** $A^3\beta=A\beta$ 且 $P$ 是基，说明 $A^3=A$；三个互异特征值恰为 $-1,0,1$，立即得到 $r(A-E)=2$。
+$$
+(\beta,A\beta,A^2\beta)
+=(\alpha_1,\alpha_2,\alpha_3)
+\begin{pmatrix}1&\lambda_1&\lambda_1^2\\1&\lambda_2&\lambda_2^2\\1&\lambda_3&\lambda_3^2\end{pmatrix}.
+$$
+
+第二个因子的行列式为 $\prod_{i<j}(\lambda_j-\lambda_i)\ne0$。两个因子均可逆，因而题设三个循环向量线性无关。
+
+</Step>
+<Step title="用循环基把一个向量等式提升为矩阵恒等式">
+
+令 $P=(\beta,A\beta,A^2\beta)$。由第（1）问，$P$ 可逆；由 $A^3\beta=A\beta$，
+
+$$
+P^{-1}AP=\begin{pmatrix}0&0&0\\1&0&1\\0&1&0\end{pmatrix}=:C.
+$$
+
+因此
+
+$$
+\det(tE-C)=t(t-1)(t+1),
+$$
+
+所以 $A$ 的三个特征值恰为 $-1,0,1$，互异，且 $1$ 的特征空间为一维：$\dim\ker(A-E)=1$。
+
+由秩—零度定理，$r(A-E)=3-1=\boxed2$。
+
+</Step>
+</Steps>
+
+<Tabs items={['方法一：范德蒙德','方法二：特征值逐点约束']}>
+<Tab value="方法一：范德蒙德">
+
+从 $(\beta,A\beta,A^2\beta)$ 的相似矩阵 $C$ 读取特征多项式，得 $0,1,-1$ 三个不同特征值，故 $r(A-E)=2$。
+
+</Tab>
+<Tab value="方法二：特征值逐点约束">
+
+直接展开 $A^3\beta-A\beta=0$：
+
+$$
+\sum_{i=1}^3(\lambda_i^3-\lambda_i)\alpha_i=0.
+$$
+
+利用 $\alpha_i$ 无关，得到 $\lambda_i(\lambda_i-1)(\lambda_i+1)=0$。三个 $\lambda_i$ 又互异，因而恰好为 $-1,0,1$。其中 $\lambda=1$ 是单根，$r(A-E)=2$。
+
+</Tab>
+</Tabs>
+
+<Callout type="info" title="循环向量法与谱多项式法如何选择">第（1）问若要直接证明线性无关，范德蒙德最可靠；第（2）问已知特征向量组成一组基，使用 $A^3\beta=A\beta$ 逐系数比较更省计算。两法结论一致。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-f19600-026" type="essay" number={false}>
+<Question id="core-la-eig-lizhengyuan-26" type="essay" number="26" tags="来源:李正元, 科目:线性代数, 考点:矩阵多项式, 考点:实对称矩阵特征值">
 
-【李正元】 设 $A$ 为三阶实对称矩阵，$r(A)=2$，且满足 $A^2+5A=O$。求 $A$ 的全部特征值（计重数）。
+设 $A$ 为三阶实对称矩阵，$r(A)=2$，并且
+
+$$
+A^2+5A=O.
+$$
+
+求 $A$ 的全部特征值（计重数）。
 
 <Solution>
 
-**答案：** $-5,-5,0$。
+**参考答案：** $\boxed{-5,-5,0}$。
 
-**解析：** **突破口：** 先由矩阵多项式方程锁定候选特征值，再由秩锁定零特征值的几何重数，最后用实对称性保证代数重数等于几何重数。
+<Steps>
+<Step title="将矩阵恒等式作用到任一特征向量">
 
-若 $A\xi=\lambda\xi$ 且 $\xi\ne0$，则
+取 $A$ 的任一特征值 $\lambda$ 及对应的非零特征向量 $v$，则
 
 $$
-(A^2+5A)\xi=(\lambda^2+5\lambda)\xi=0,
+0=(A^2+5A)v=(\lambda^2+5\lambda)v.
 $$
 
-从而 $\lambda\in\{0,-5\}$。又 $r(A)=2$，故 $\dim\ker A=1$。因为 $A$ 是实对称矩阵，必正交相似对角化，$0$ 的代数重数恰为 $1$；余下两个特征值只能都是 $-5$。
+故 $\lambda(\lambda+5)=0$，所有特征值只能在 $\{0,-5\}$ 中。
 
-**条件辨析：** 一般矩阵仅凭 $r(A)=2$ 不能断言零特征值代数重数为 $1$。本题可由“实对称可对角化”推出；事实上此题 $t(t+5)$ 无重根，也能直接推出 $A$ 可对角化，是另一种证明途径。
+</Step>
+<Step title="由秩确定零特征值的重数">
+
+$A$ 为三阶，$r(A)=2$，因此
+
+$$
+\dim\ker A=3-2=1.
+$$
+
+又 $A$ 为实对称矩阵，必正交相似对角化，所以零特征值的代数重数等于几何重数，均为 $1$。其余两个特征值只能都是 $-5$。
+
+因此全部特征值（含重数）为 $\boxed{0,-5,-5}$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="高阶通法">更一般地，若矩阵满足 $p(A)=O$ 且 $p$ 无重根，则其最小多项式也无重根，矩阵必可对角化。本题 $p(t)=t(t+5)$ 无重根，实际上不依赖实对称性也能推出可对角化。</Callout>
 
 </Solution>
-
 </Question>

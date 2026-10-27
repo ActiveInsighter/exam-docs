@@ -43,7 +43,12 @@ describe('Graduate mathematics core questions', () => {
         for (const [, question] of questions) {
           expect(question, page).toMatch(/<Solution>\s*\S[\s\S]*<\/Solution>/u);
           for (const [, , payload] of question.matchAll(/<(Solution|Option)(?: correct)?>([\s\S]*?)<\/\1>/gu)) {
-            expect(markdown, `${page}: downloadable answer, explanation or option`).toContain(payload.trim());
+            // Rich solutions interleave prose and formulas with Steps, Tabs and
+            // Callout wrappers, which the Markdown download intentionally removes.
+            for (const line of payload.split(/\r?\n/u).map((line) => line.trim())
+              .filter((line) => line && !/<\/?[A-Z]/u.test(line))) {
+              expect(markdown, `${page}: downloadable answer, explanation or option`).toContain(line);
+            }
           }
         }
         total += questions.length;

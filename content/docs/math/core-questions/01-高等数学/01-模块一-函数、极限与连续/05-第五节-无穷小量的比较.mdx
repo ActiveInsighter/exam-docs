@@ -1,19 +1,15 @@
 ---
-title: "第五节 无穷小量的比较"
-description: "数一核心模型：主阶提取、等价无穷小、变限积分、little-o 运算、递推速率与综合变式"
+title: 第五节 无穷小量的比较
+description: 高等数学核心题目：无穷小阶数、等价关系、变限积分与小 o 运算。
 ---
 
-# 第五节 无穷小量的比较
-
-本节精选真实真题与教材中有方法互补价值的题目，按“先锁定首个非零项，再比较比值”的思路编排。等价关系必须核查极限为 $1$；若比值为非零常数且不为 $1$，仅能判定同阶。针对变限积分、含震荡因子与递推数列，强调适用条件和关键估计。
+无穷小量比较的核心不是“都趋于零”，而是精确找到**首个非零主项**。若 $\alpha(x)\sim c x^p$、$\beta(x)\sim d x^q$（$cd\ne0$），则由指数 $p,q$ 判断阶数；只有在 $p=q$ 且 $c=d$ 时，才有 $\alpha\sim\beta$。
 
 ## 模型一：首项提取与阶数判别
 
-这类题先识别差式中的抵消项，再判断 $x^p$ 的指数和非零系数。
+<Question id="math-core-gd-01-05-001" type="single" points={3} tags="来源:1992考研数三, 科目:高等数学, 考点:无穷小阶数, 考点:泰勒展开">
 
-<Question id="math-cb2216-001" type="single" number={false}>
-
-**[1992-3-3 分]** 当 $x\to 0$ 时，下列四个无穷小量中，比其他三个更高阶的无穷小量是（ ）。
+当 $x\to0$ 时，下列四个无穷小量中，比其他三个更高阶的无穷小量是（ ）。
 
 <Option>$x^2$</Option>
 <Option>$1-\cos x$</Option>
@@ -22,104 +18,90 @@ description: "数一核心模型：主阶提取、等价无穷小、变限积分
 
 <Solution>
 
-**模型识别与突破口：** 多个初等函数的首项均为二阶，而 $x-\tan x$ 的二阶项消失；先找主阶而非直接代入。
+**正确选项：D。** A、B、C 都是二阶无穷小，D 是三阶无穷小。
 
-分别求四个无穷小的主阶：
-
-$$
-1-\cos x\sim\frac{x^2}{2},
-$$
+**先找各量的首个非零项：**
 
 $$
-\sqrt{1-x^2}-1
-=\frac{-x^2}{\sqrt{1-x^2}+1}
-\sim-\frac{x^2}{2},
+\begin{aligned}
+\text{A}:\quad &x^2;\\
+\text{B}:\quad &1-\cos x=\frac{x^2}{2}+O(x^4);\\
+\text{C}:\quad &\sqrt{1-x^2}-1=-\frac{x^2}{2}+O(x^4);\\
+\text{D}:\quad &x-\tan x=-\frac{x^3}{3}+O(x^5).
+\end{aligned}
 $$
 
-而
+因此 A、B、C 与 $x^2$ 同阶，而
 
 $$
-\tan x=x+\frac{x^3}{3}+o(x^3),
+\lim_{x\to0}\frac{x-\tan x}{x^2}
+=\lim_{x\to0}\left(-\frac{x}{3}+O(x^3)\right)=0.
 $$
 
-故
+D 比其余三项高一阶。
+
+<Callout type="idea" title="不展开根式也能判阶">
+
+利用有理化
 
 $$
-x-\tan x\sim-\frac{x^3}{3}.
+\sqrt{1-x^2}-1=-\frac{x^2}{\sqrt{1-x^2}+1}\sim-\frac{x^2}{2}.
 $$
 
-所以 A、B、C 都是 $x^2$ 阶，而 D 是 $x^3$ 阶。$x^3$ 比 $x^2$ 高阶，因此选 D。
+负号不会改变阶数；所谓“高阶”比较的是相对于另一量**趋于零的快慢**。
 
-**易错提醒：** 最高阶指趋零最快；$x-\tan x\sim-\frac{x^3}{3}$ 的系数为负，阶数仍是三。
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-cb2216-002" type="single" number={false}>
+<Question id="math-core-gd-01-05-002" type="single" points={4} tags="来源:2007考研数一、数二、数三, 科目:高等数学, 考点:等价无穷小, 考点:系数比较">
 
-**[2007-1,2,3-4 分]** 当 $x\to 0^+$ 时，与 $\sqrt{x}$ 等价的无穷小量是（ ）。
+当 $x\to0^+$ 时，与 $\sqrt x$ 等价的无穷小量是（ ）。
 
-<Option>$1-e^{\sqrt{x}}$</Option>
-<Option correct>$\ln\frac{1+x}{1-\sqrt{x}}$</Option>
-<Option>$\sqrt{1+\sqrt{x}}-1$</Option>
-<Option>$1-\cos\sqrt{x}$</Option>
+<Option>$1-e^{\sqrt x}$</Option>
+<Option correct>$\ln\dfrac{1+x}{1-\sqrt x}$</Option>
+<Option>$\sqrt{1+\sqrt x}-1$</Option>
+<Option>$1-\cos\sqrt x$</Option>
 
 <Solution>
 
-**模型识别与突破口：** 对数商先化成 $\ln(1+u)$；由于 $u\to0$，判断其首项为 $\sqrt x$。
+**正确选项：B。** “等价”必须满足与 $\sqrt x$ 的比值趋于 **$1$**，不能只看阶数相同。
 
-逐项与 $\sqrt x$ 比较。
+对各项提取主项：
 
-A：
+| 选项 | 当 $x\to0^+$ 时的主项 | 除以 $\sqrt x$ 的极限 |
+| --- | --- | --- |
+| A | $1-e^{\sqrt x}\sim-\sqrt x$ | $-1$ |
+| B | $\ln(1+x)-\ln(1-\sqrt x)=\sqrt x+x+O(x)$ | $1$ |
+| C | $\sqrt{1+\sqrt x}-1\sim\frac12\sqrt x$ | $\frac12$ |
+| D | $1-\cos\sqrt x\sim\frac x2$ | $0$ |
 
-$$
-1-e^{\sqrt x}\sim-\sqrt x,
-$$
-
-比值趋于 $-1$，不是等价无穷小。
-
-B：
+特别看 B：由 $\ln(1+u)=u+O(u^2)$，
 
 $$
 \begin{aligned}
 \ln\frac{1+x}{1-\sqrt x}
 &=\ln(1+x)-\ln(1-\sqrt x)\\
-&\sim x+\sqrt x\\
-&\sim\sqrt x.
+&=x+O(x^2)+\sqrt x+O(x)\\
+&=\sqrt x+O(x).
 \end{aligned}
 $$
 
-所以 B 与 $\sqrt x$ 等价。
+由于 $x=o(\sqrt x)$，所以 B 与 $\sqrt x$ 等价。
 
-C：
+<Callout type="warn" title="等价与同阶不要混淆">
 
-$$
-\sqrt{1+\sqrt x}-1\sim\frac12\sqrt x,
-$$
+A 和 C 与 $\sqrt x$ **同阶但不等价**；D 则是它的高阶无穷小。遇到“与谁等价”，检验的数值是 $1$，而不是任意非零常数。
 
-只是同阶而不等价。
-
-D：
-
-$$
-1-\cos\sqrt x\sim\frac{x}{2},
-$$
-
-是 $\sqrt x$ 的高阶无穷小。
-
-故选 B。
-
-**易错提醒：** 当 $x\to0^+$ 时，$1-e^{\sqrt x}\sim-\sqrt x$，符号不同不等价。
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-cb2216-003" type="single" number={false}>
+<Question id="math-core-gd-01-05-003" type="single" points={4} tags="来源:2013考研数二, 科目:高等数学, 考点:隐函数无穷小, 考点:反三角函数">
 
-**[2013-2-4 分]** 设 $\cos x - 1 = x\sin\alpha(x)$, 其中 $|\alpha(x)| < \frac{\pi}{2}$, 则当 $x \to 0$ 时, $\alpha(x)$ 是
-(   ).
+设 $\cos x-1=x\sin\alpha(x)$，其中 $|\alpha(x)|<\frac\pi2$。则当 $x\to0$ 时，$\alpha(x)$ 是（ ）。
 
 <Option>比 $x$ 高阶的无穷小</Option>
 <Option>比 $x$ 低阶的无穷小</Option>
@@ -128,297 +110,321 @@ $$
 
 <Solution>
 
-**模型识别与突破口：** 已知 $\sin\alpha(x)$ 的首项；利用取值限制 $|\alpha(x)|<\pi/2$，才能反推出 $\alpha(x)\to0$。
-
-由题设
+**正确选项：C。** 有
 
 $$
-\sin\alpha(x)=\frac{\cos x-1}{x}.
+\boxed{\lim_{x\to0}\frac{\alpha(x)}x=-\frac12}.
 $$
 
-当 $x\to0$ 时，
+**第一步：先证明 $\alpha(x)\to0$。** 对 $x\ne0$，由原式
 
 $$
-\frac{\cos x-1}{x}
-\sim-\frac{x}{2}\to0.
+\sin\alpha(x)=\frac{\cos x-1}{x}
+=-\frac x2+O(x^3)\longrightarrow0.
 $$
 
-又因为
+条件 $|\alpha(x)|<\pi/2$ 非常关键：在此范围内反正弦函数恰好恢复原角，
 
 $$
-|\alpha(x)|<\frac\pi2,
+\alpha(x)=\arcsin\left(\frac{\cos x-1}{x}\right)\longrightarrow0.
 $$
 
-且 $\sin\alpha(x)\to0$，所以 $\alpha(x)\to0$。于是可以使用
+**第二步：计算与 $x$ 的比值。** 现在才能使用 $\sin\alpha\sim\alpha$：
 
 $$
-\sin\alpha(x)\sim\alpha(x).
+\frac{\alpha(x)}x
+=\frac{\alpha(x)}{\sin\alpha(x)}
+\cdot\frac{\cos x-1}{x^2}
+\longrightarrow1\cdot\left(-\frac12\right)
+=-\frac12.
 $$
 
-从而
+极限是非零有限常数，但不是 $1$，所以与 $x$ 同阶但不等价。
+
+<Callout type="warn" title="隐藏条件不能省略">
+
+仅有 $\sin\alpha(x)\to0$，一般不能推断 $\alpha(x)\to0$，因为角度可能接近其他整数倍的 $\pi$，甚至随 $x$ 振荡。本题的 $(-\pi/2,\pi/2)$ 限制消除了歧义。
+
+</Callout>
+
+</Solution>
+</Question>
+
+<Question id="math-core-gd-01-05-004" type="single" points={4} tags="来源:2016考研数二, 科目:高等数学, 考点:分数幂阶数, 考点:主项比较">
+
+设
 
 $$
-\alpha(x)
-\sim\sin\alpha(x)
-\sim-\frac{x}{2}.
+a_1=x(\cos\sqrt x-1),\quad
+a_2=\sqrt x\ln(1+\sqrt[3]x),\quad
+a_3=\sqrt[3]{1+x}-1.
+$$
+
+当 $x\to0^+$ 时，按从低阶到高阶排列是（ ）。
+
+<Option>$a_1,a_2,a_3$</Option>
+<Option correct>$a_2,a_3,a_1$</Option>
+<Option>$a_2,a_1,a_3$</Option>
+<Option>$a_3,a_2,a_1$</Option>
+
+<Solution>
+
+**正确选项：B。** 三个量的主阶依次为 $x^2$、$x^{5/6}$、$x$。
+
+分别提取非零主项：
+
+$$
+\begin{aligned}
+a_1&=x(\cos\sqrt x-1)
+\sim x\left(-\frac{(\sqrt x)^2}{2}\right)
+=-\frac12x^2,\\[3pt]
+a_2&=\sqrt x\ln(1+x^{1/3})
+\sim x^{1/2}x^{1/3}=x^{5/6},\\[3pt]
+a_3&=(1+x)^{1/3}-1\sim\frac x3.
+\end{aligned}
+$$
+
+对于 $x\to0^+$，$0<x<1$ 时，幂指数越大，趋零越快。指数大小顺序是
+
+$$
+\frac56<1<2,
+$$
+
+因此从**低阶**到**高阶**是
+
+$$
+\boxed{a_2,\ a_3,\ a_1}.
+$$
+
+<Callout type="idea" title="遇到多重根式先做指数算术">
+
+对 $\sqrt{x}\ln(1+\sqrt[3]x)$，先得 $\ln(1+x^{1/3})\sim x^{1/3}$，再相乘，阶数为 $\frac12+\frac13=\frac56$。既要记录**指数**，也不要漏掉主项的**非零系数**。
+
+</Callout>
+
+</Solution>
+</Question>
+
+<Question id="math-core-gd-01-05-005" type="single" points={5} tags="来源:2025考研数三, 科目:高等数学, 考点:等价无穷小, 考点:复合函数">
+
+当 $x\to0^+$ 时，下列无穷小中，与 $x$ 等价的是（ ）。
+
+<Option>$e^{-\sin x}-1$</Option>
+<Option>$\sqrt{1+x}-\cos x$</Option>
+<Option correct>$1-\cos\sqrt{2x}$</Option>
+<Option>$1-\dfrac{\ln(1+x)}x$</Option>
+
+<Solution>
+
+**正确选项：C。** 四项与 $x$ 的比值依次趋于 $-1,\frac12,1,\frac12$。
+
+**逐项比较，不跳过系数：**
+
+$$
+\begin{aligned}
+\text{A}:\quad &e^{-\sin x}-1\sim-\sin x\sim-x;\\
+\text{B}:\quad &\sqrt{1+x}-\cos x\\
+&=(\sqrt{1+x}-1)+(1-\cos x)
+=\frac x2+O(x^2);\\
+\text{C}:\quad &1-\cos\sqrt{2x}
+\sim\frac{(\sqrt{2x})^2}{2}=x;\\
+\text{D}:\quad &1-\frac{\ln(1+x)}x\\
+&=1-\left(1-\frac x2+O(x^2)\right)
+=\frac x2+O(x^2).
+\end{aligned}
+$$
+
+只有 C 满足 $\displaystyle\lim_{x\to0^+}\frac{\text{选项表达式}}x=1$。
+
+<Callout type="warn" title="对有减法的等价代换保持警惕">
+
+不能直接把 $\sqrt{1+x}$、$\cos x$ 都换为 $1$ 后相减，也不能将 $\ln(1+x)\sim x$ 代入 $1-\ln(1+x)/x$ 便断言结果是 $0$。**差式中低阶项抵消时，必须多保留一阶。**
+
+</Callout>
+
+</Solution>
+</Question>
+
+<Question id="math-core-gd-01-05-006" type="single" tags="来源:张宇1000题, 科目:高等数学, 考点:同阶与等价, 考点:指数复合">
+
+当 $x\to0$ 时，$e-e^{\cos x}$ 是 $\sqrt[3]{1+x^2}-1$ 的（ ）。
+
+<Option>高阶无穷小</Option>
+<Option>低阶无穷小</Option>
+<Option correct>同阶但非等价无穷小</Option>
+<Option>等价无穷小</Option>
+
+<Solution>
+
+**正确选项：C。** 两者同为 $x^2$ 阶，但比值是 $\frac{3e}{2}$，不等于 $1$。
+
+将第一个差式提出常数 $e$：
+
+$$
+\begin{aligned}
+e-e^{\cos x}
+&=e\left(1-e^{\cos x-1}\right)\\
+&\sim -e(\cos x-1)
+\sim\frac e2x^2.
+\end{aligned}
+$$
+
+第二个量直接使用二项式的一阶展开：
+
+$$
+(1+x^2)^{1/3}-1\sim\frac{x^2}{3}.
 $$
 
 因此
 
 $$
-\frac{\alpha(x)}x\to-\frac12.
+\lim_{x\to0}
+\frac{e-e^{\cos x}}{\sqrt[3]{1+x^2}-1}
+=\frac{e/2}{1/3}=\frac{3e}{2}.
 $$
 
-二者同阶但不等价，故选 C。
+<Callout type="idea" title="判断三种关系的统一标准">
 
-**易错提醒：** 若忽略反三角函数的主值范围，$\sin\alpha\to0$ 不能保证 $\alpha\to0$。
+极限比值为 $0$：分子是分母的高阶无穷小；为非零有限数：两者同阶；为 $1$：还可进一步称为等价无穷小。本题是**同阶但非等价**。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-cb2216-004" type="single" number={false}>
+<Question id="math-core-gd-01-05-007" type="blank" tags="来源:张宇1000题, 科目:高等数学, 考点:对数差, 考点:三阶无穷小">
 
-**[2016-2-4 分]** 设 $a_1 = x(\cos\sqrt{x} - 1)$, $a_2 = \sqrt{x}\ln(1 + \sqrt[3]{x})$, $a_3 = \sqrt[3]{x+1} - 1$. 当 $x \to 0^+$ 时, 以上 3 个无穷小量按照从低阶到高阶的排序是(   ):
-
-<Option>$a_1, a_2, a_3$</Option>
-<Option correct>$a_2, a_3, a_1$</Option>
-<Option>$a_2, a_1, a_3$</Option>
-<Option>$a_3, a_2, a_1$</Option>
+当 $x\to0$ 时，$\displaystyle\ln\frac{2+x}{2+\sin x}$ 与 $x^n$ 为同阶无穷小，则 $n=$ <Blank answer="3" kind="math" />。
 
 <Solution>
 
-**模型识别与突破口：** 三个量分别转为 $x^2,x^{5/6},x$ 的主项，再按指数由小到大排序。
+**答案：** $\boxed{n=3}$。
 
-分别求三个无穷小的主阶。
-
-对 $a_1$：
+**第一步：将对数商化为 $\ln(1+u)$。**
 
 $$
-\cos\sqrt x-1\sim-\frac{x}{2},
+\ln\frac{2+x}{2+\sin x}
+=\ln\left(1+\frac{x-\sin x}{2+\sin x}\right).
 $$
 
-所以
+**第二步：判断括号内小量的阶数。** 由
 
 $$
-a_1=x(\cos\sqrt x-1)\sim-\frac12x^2.
+x-\sin x=\frac{x^3}{6}+O(x^5),\qquad
+2+\sin x\to2,
 $$
 
-对 $a_2$：
+得到
 
 $$
-\ln(1+\sqrt[3]x)\sim x^{1/3},
+\frac{x-\sin x}{2+\sin x}\sim\frac{x^3}{12}.
+$$
+
+**第三步：对数等价替换。** 因括号中小量趋于 $0$，可使用 $\ln(1+u)\sim u$，故
+
+$$
+\boxed{\ln\frac{2+x}{2+\sin x}\sim\frac{x^3}{12}}.
+$$
+
+它与 $x^3$ 同阶，与 $x^n$ 同阶只能取 $n=3$。
+
+<Callout type="idea" title="差式优先合并再展开">
+
+$\ln(2+x)$ 和 $\ln(2+\sin x)$ 各自有常数项与一次项。先写为 $\ln\!\left(1+\frac{x-\sin x}{2+\sin x}\right)$，将“相消到三阶”的结构直接显露出来，比机械展开两个对数更稳健。
+
+</Callout>
+
+</Solution>
+</Question>
+
+## 模型二：变上限积分与嵌套复合
+
+变限积分的基本主项法是：若 $h(t)=c t^p+o(t^p)$（$p>-1$），且 $u(x)\to0^+$，则在适用的同号区间内
+
+$$
+\int_0^{u(x)}h(t)\,\mathrm dt
+=\frac{c}{p+1}\,u(x)^{p+1}+o\!\left(u(x)^{p+1}\right).
+$$
+
+务必**先对积分变量 $t$ 求主项，再把变上限 $u(x)$ 代入**；对双侧极限还要检查积分主项的符号与实数定义。
+
+<Question id="math-core-gd-01-05-008" type="single" points={3} tags="来源:1993考研数一, 科目:高等数学, 考点:变上限积分, 考点:同阶无穷小">
+
+设
+
+$$
+f(x)=\int_0^{\sin x}\sin(t^2)\,\mathrm dt,
+\qquad g(x)=x^3+x^4.
+$$
+
+则当 $x\to0$ 时，$f(x)$ 是 $g(x)$ 的（ ）。
+
+<Option>等价无穷小</Option>
+<Option correct>同阶但非等价无穷小</Option>
+<Option>高阶无穷小</Option>
+<Option>低阶无穷小</Option>
+
+<Solution>
+
+**正确选项：B。** 因为
+
+$$
+\boxed{\lim_{x\to0}\frac{f(x)}{g(x)}=\frac13}.
+$$
+
+**第一步：求被积函数主项。** 当 $t\to0$ 时
+
+$$
+\sin(t^2)=t^2+O(t^6).
+$$
+
+对变上限 $u=\sin x$ 积分，得到
+
+$$
+\begin{aligned}
+f(x)&=\int_0^{\sin x}\bigl(t^2+O(t^6)\bigr)\,\mathrm dt\\
+&=\frac{\sin^3x}{3}+O\bigl(|\sin x|^7\bigr).
+\end{aligned}
+$$
+
+**第二步：代入上限的首项。** 由于 $\sin x\sim x$，可得
+
+$$
+f(x)=\frac{x^3}{3}+o(x^3).
+$$
+
+另一方面，
+
+$$
+g(x)=x^3(1+x)\sim x^3.
 $$
 
 故
 
 $$
-a_2\sim x^{1/2}x^{1/3}=x^{5/6}.
+\frac{f(x)}{g(x)}
+=\frac{x^3/3+o(x^3)}{x^3(1+x)}\longrightarrow\frac13.
 $$
 
-对 $a_3$：
+<Callout type="warn" title="积分不会保留原被积函数的阶数">
 
-$$
-(1+x)^{1/3}-1\sim\frac{x}{3}.
-$$
+$\sin(t^2)$ 是 $t^2$ 阶；积分 $\int_0^u\sin(t^2)\,\mathrm dt$ 却是 $u^3$ 阶。再用 $u=\sin x\sim x$，最终才得到 $x^3$ 阶。**阶数相同但系数为 $1/3$，不能选“等价”。**
 
-因此三者的阶分别为
-
-$$
-a_2:\ x^{5/6},\qquad a_3:\ x,\qquad a_1:\ x^2.
-$$
-
-当 $x\to0^+$ 时，幂次越小，无穷小阶越低。因此从低阶到高阶为
-
-$$
-a_2,\ a_3,\ a_1.
-$$
-
-故选 B。
-
-**易错提醒：** 当 $x\to0^+$，无穷小的幂次越大阶数越高；$\sqrt[3]{1+x}-1$ 的主项为 $x/3$。
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-cb2216-005" type="single" number={false}>
+<Question id="math-core-gd-01-05-009" type="single" points={3} tags="来源:1997考研数三, 科目:高等数学, 考点:复合变限积分, 考点:高阶无穷小">
 
-**[2025-3-5 分]** 当 $x \to 0^+$ 时，下列无穷小中，与 $x$ 等价的是（ ）。
-
-<Option>$e^{-\sin x}-1$</Option>
-<Option>$\sqrt{x+1}-\cos x$</Option>
-<Option correct>$1-\cos\sqrt{2x}$</Option>
-<Option>$1-\frac{\ln(1+x)}{x}$</Option>
-
-<Solution>
-
-**模型识别与突破口：** 逐项提取与 $x$ 相比的首项，尤其注意根式/对数的系数以及指数函数的负号。
-
-逐项使用等价无穷小。
-
-A：
+设
 
 $$
-e^{-\sin x}-1\sim-\sin x\sim-x,
+f(x)=\int_0^{1-\cos x}\sin(t^2)\,\mathrm dt,
+\qquad g(x)=\frac{x^5}{5}+\frac{x^6}{6}.
 $$
 
-与 $x$ 的比值趋于 $-1$，不等价。
-
-B：
-
-$$
-\sqrt{1+x}-1\sim\frac x2,
-$$
-
-且 $1-\cos x=O(x^2)$，所以
-
-$$
-\sqrt{1+x}-\cos x
-=(\sqrt{1+x}-1)+(1-\cos x)
-\sim\frac x2.
-$$
-
-不与 $x$ 等价。
-
-C：
-
-$$
-1-\cos\sqrt{2x}
-\sim\frac{(\sqrt{2x})^2}{2}=x,
-$$
-
-所以与 $x$ 等价。
-
-D：由
-
-$$
-\ln(1+x)=x-\frac{x^2}{2}+o(x^2),
-$$
-
-得
-
-$$
-1-\frac{\ln(1+x)}x
-=\frac x2+o(x),
-$$
-
-也不与 $x$ 等价。
-
-故选 C。
-
-**易错提醒：** 无穷小同阶但系数不为 1 时仍不等价；当 $x\to0^+$ 时 $1-\cos\sqrt{2x}\sim x$。
-
-</Solution>
-
-</Question>
-
-<Question id="math-cb2216-006" type="single" number={false}>
-
-**[张宇1000题]** 当 $ x\to0$ 时，$ e-e^{\cos x}$ 是 $ \sqrt[3]{1+x^{2}}-1$ 的（）
-
-<Option>高阶无穷小</Option>
-<Option>低阶无穷小</Option>
-<Option correct>同阶但非等价无穷小</Option>
-<Option>等价无穷小</Option>
-
-<Solution>
-
-**模型识别与突破口：** 两项都是二阶无穷小，分别提取首项常数，判别比值是否为 1。
-
-当 $ x\to0$ 时，
-
-$ e-e^{\cos x}=e\bigl(1-e^{\cos x-1}\bigr)\sim \frac e2x^2$，
-
-而
-
-$ \sqrt[3]{1+x^2}-1\sim\frac13x^2$。
-
-两者之比趋于 $ \frac{3e}{2}\ne1$，所以二者同阶但不等价。
-
-**易错提醒：** $e-e^{\cos x}$ 的主项是正的 $ex^2/2$，不要误写成负号。
-
-</Solution>
-
-</Question>
-
-<Question id="math-cb2216-007" type="essay" number={false}>
-
-**[张宇1000题]** 设 $ x\to0$ 时，$ \ln\frac{2+x}{2+\sin x}$ 与 $ x^{n}$ 为同阶无穷小，则 $ n=$
-
-<Solution>
-
-**答案：** $ 3$
-
-**解析：** **模型识别与突破口：** 先利用对数商变形，使隐蔽的 $x-\sin x$ 显现，再代入三阶泰勒项。
-
-利用 $ \ln(1+u)\sim u$，有
-
-$ \ln\frac{2+x}{2+\sin x}=\ln\left(1+\frac{x-\sin x}{2+\sin x}\right)\sim\frac{x-\sin x}{2}\sim\frac{x^3}{12}$。
-
-故它与 $ x^3$ 同阶，所以 $ n=3$。
-
-**易错提醒：** 直接分开展开两个对数更繁琐，且容易漏掉一阶、二阶抵消。
-
-</Solution>
-
-</Question>
-
-## 模型二：变上限积分与嵌套复合
-
-先对被积函数提取主项，再完成积分，最后代入可能含 $x^2$、$\sqrt x$ 或 $1-\cos x$ 的变上限。
-
-<Question id="math-cb2216-008" type="single" number={false}>
-
-**[1993-1-3 分]** 设 $f(x)=\int_0^{\sin x}\sin(t^2)\mathrm{d}t$，$g(x)=x^3+x^4$，则当 $x\to 0$ 时，$f(x)$ 是 $g(x)$ 的（ ）。
-
-<Option>等价无穷小</Option>
-<Option correct>同阶但非等价无穷小</Option>
-<Option>高阶无穷小</Option>
-<Option>低阶无穷小</Option>
-
-<Solution>
-
-**模型识别与突破口：** 积分上限为 $\sin x$，且被积函数 $\sin(t^2)\sim t^2$；使用变上限积分的主项法。
-
-当 $t\to0$ 时，
-
-$$
-\sin(t^2)\sim t^2.
-$$
-
-又 $\sin x\sim x$，因此
-
-$$
-f(x)=\int_0^{\sin x}\sin(t^2)\,\mathrm dt
-\sim\int_0^{\sin x}t^2\,\mathrm dt
-=\frac{\sin^3x}{3}
-\sim\frac{x^3}{3}.
-$$
-
-同时
-
-$$
-g(x)=x^3+x^4\sim x^3.
-$$
-
-于是
-
-$$
-\lim_{x\to0}\frac{f(x)}{g(x)}=\frac13.
-$$
-
-该极限非零有限但不等于 $1$，所以二者同阶但不等价，选 B。
-
-**易错提醒：** 不能把变上限积分直接当作被积函数，积分会使主阶再增加一阶；答案要求比值为 1 才称等价。
-
-</Solution>
-
-</Question>
-
-<Question id="math-cb2216-009" type="single" number={false}>
-
-**[1997-3-3 分]** 设 $f(x)=\int_0^{1-\cos x}\sin t^2\mathrm{d}t$，$g(x)=\frac{x^5}{5}+\frac{x^6}{6}$，则当 $x\to 0$ 时，$f(x)$ 是 $g(x)$ 的（ ）。
+则当 $x\to0$ 时，$f(x)$ 是 $g(x)$ 的（ ）。
 
 <Option>低阶无穷小</Option>
 <Option correct>高阶无穷小</Option>
@@ -427,55 +433,62 @@ $$
 
 <Solution>
 
-**模型识别与突破口：** 复合上限 $1-\cos x=O(x^2)$，被积函数为 $O(t^2)$，用上下限的幂次相乘判断六阶。
+**正确选项：B。** $f(x)$ 为 $x^6$ 阶，$g(x)$ 为 $x^5$ 阶，因此 $f(x)=o(g(x))$。
 
-当 $t\to0$ 时，
-
-$$
-\sin(t^2)\sim t^2.
-$$
-
-又
+**第一步：先完成积分主项。** 当 $u\to0$ 时，
 
 $$
-1-\cos x\sim\frac{x^2}{2},
+\int_0^u\sin(t^2)\,\mathrm dt
+=\frac{u^3}{3}+O(u^7).
 $$
 
-故
+**第二步：识别上限本身的阶。**
+
+$$
+u(x)=1-\cos x=\frac{x^2}{2}+O(x^4).
+$$
+
+因而
 
 $$
 \begin{aligned}
 f(x)
-&=\int_0^{1-\cos x}\sin(t^2)\,\mathrm dt\\
-&\sim\int_0^{1-\cos x}t^2\,\mathrm dt\\
-&=\frac13(1-\cos x)^3\\
-&\sim\frac{x^6}{24}.
+&\sim\frac13\,[1-\cos x]^3\\
+&\sim\frac13\left(\frac{x^2}{2}\right)^3
+=\frac{x^6}{24}.
 \end{aligned}
 $$
 
-另一方面，
+**第三步：计算比较比值。** 由 $g(x)=x^5(\frac15+\frac x6)\sim\frac{x^5}{5}$，
 
 $$
-g(x)=\frac{x^5}{5}+\frac{x^6}{6}\sim\frac{x^5}{5}.
+\frac{f(x)}{g(x)}
+\sim\frac{x^6/24}{x^5/5}
+=\frac{5x}{24}\longrightarrow0.
 $$
 
-因此
+因此 $\boxed{f(x)=o(g(x))}$。
 
-$$
-\frac{f(x)}{g(x)}\sim\frac{5}{24}x\to0.
-$$
+<Callout type="idea" title="阶数口算规则">
 
-所以 $f(x)$ 是 $g(x)$ 的高阶无穷小，选 B。
+若 $h(t)\sim t^p$，$u(x)\sim c x^q$，则 $\int_0^{u(x)}h(t)\,\mathrm dt$ 通常为 $x^{q(p+1)}$ 阶。本题 $p=2,q=2$，所以是 $x^6$ 阶。
 
-**易错提醒：** 不要把 $\sin(t^2)$ 误当 $\sin^2t$；两者虽同阶，此题应先说明被积函数在 $t=0$ 的主项。
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-cb2216-010" type="single" number={false}>
+<Question id="math-core-gd-01-05-010" type="single" points={3} tags="来源:1999考研数二, 科目:高等数学, 考点:积分局部主项, 考点:幂指函数">
 
-**[1999-2-3 分]** 设 $\alpha(x)=\int_0^{5x}\frac{\sin t}{t}\mathrm{d}t$，$\beta(x)=\int_0^{\sin x}(1+t)^{\frac{1}{t}}\mathrm{d}t$，则当 $x\to 0$ 时，$\alpha(x)$ 是 $\beta(x)$ 的（ ）。
+设
+
+$$
+\alpha(x)=\int_0^{5x}\frac{\sin t}{t}\,\mathrm dt,
+\qquad
+\beta(x)=\int_0^{\sin x}(1+t)^{1/t}\,\mathrm dt.
+$$
+
+则当 $x\to0$ 时，$\alpha(x)$ 是 $\beta(x)$ 的（ ）。
 
 <Option>高阶无穷小</Option>
 <Option>低阶无穷小</Option>
@@ -484,193 +497,168 @@ $$
 
 <Solution>
 
-**模型识别与突破口：** 两个积分的被积函数都可在零点连续延拓，积分主项由端点长度与零点函数值决定。
+**正确选项：C。** 比值趋于 $\boxed{5/e}$，故两者同阶但不等价。
 
-先看 $\alpha(x)$。由于
+本题的两个被积函数都在 $t=0$ 处有**有限的非零极限**。若 $h(t)\to h(0)\ne0$ 且 $u(x)\to0$，则
 
 $$
-\frac{\sin t}{t}\to1,
+\int_0^{u(x)}h(t)\,\mathrm dt\sim h(0)u(x).
 $$
 
-故
+这可由连续性及积分中值定理（或变限积分的导数）证明。
+
+**处理 $\alpha$：** 把 $\sin t/t$ 在 $t=0$ 连续延拓为 $1$，则
 
 $$
 \alpha(x)=\int_0^{5x}\frac{\sin t}{t}\,\mathrm dt\sim5x.
 $$
 
-再看 $\beta(x)$。当 $t\to0$ 时，
+**处理 $\beta$：** 因为
 
 $$
-(1+t)^{1/t}\to e,
+\lim_{t\to0}(1+t)^{1/t}
+=\exp\left(\lim_{t\to0}\frac{\ln(1+t)}{t}\right)=e,
 $$
 
-且 $\sin x\sim x$，因此
+可连续延拓被积函数，且 $\sin x\sim x$，所以
 
 $$
-\beta(x)
-=\int_0^{\sin x}(1+t)^{1/t}\,\mathrm dt
-\sim e\sin x
-\sim ex.
-$$
-
-于是
-
-$$
-\lim_{x\to0}\frac{\alpha(x)}{\beta(x)}=\frac5e.
-$$
-
-该极限非零有限且不等于 $1$，所以二者同阶但不等价，选 C。
-
-**易错提醒：** $(1+t)^{1/t}$ 在 $t=0$ 只按极限连续延拓，极限为 $e$；同阶不等于等价。
-
-</Solution>
-
-</Question>
-
-<Question id="math-cb2216-011" type="single" number={false}>
-
-**[2004-1,2-4 分]** 把 $x\to 0^+$ 时的无穷小量 $\alpha=\int_0^x\cos t^2\mathrm{d}t$，$\beta=\int_0^{x^2}\tan\sqrt{t}\mathrm{d}t$，$\gamma=\int_0^{\sqrt{x}}\sin t^3\mathrm{d}t$ 排列起来，使排在后面的是前一个的高阶无穷小，则正确的排列次序是（ ）。
-
-<Option>$\alpha, \beta, \gamma$</Option>
-<Option correct>$\alpha, \gamma, \beta$</Option>
-<Option>$\beta, \alpha, \gamma$</Option>
-<Option>$\beta, \gamma, \alpha$</Option>
-
-<Solution>
-
-**模型识别与突破口：** 分别先求被积函数主项，再将非线性上限代入原函数的首项，比较 $x,x^2,x^3$。
-
-分别确定三个无穷小的阶。
-
-对 $\alpha$，因为 $\cos t^2\to1$，所以
-
-$$
-\alpha=\int_0^x\cos t^2\,\mathrm dt\sim x.
-$$
-
-对 $\beta$，当 $t\to0^+$ 时
-
-$$
-\tan\sqrt t\sim\sqrt t,
+\beta(x)\sim e\sin x\sim ex.
 $$
 
 故
 
 $$
-\beta\sim\int_0^{x^2}\sqrt t\,\mathrm dt
-=\frac23x^3.
+\boxed{\lim_{x\to0}\frac{\alpha(x)}{\beta(x)}=\frac5e}\ne1.
 $$
 
-对 $\gamma$，有
+<Callout type="idea" title="常数主项乘区间长度">
 
-$$
-\sin t^3\sim t^3,
-$$
+在短区间上若被积函数趋向非零常数 $c$，积分的主项就是 $c\times$ **有向区间长度**。即便 $x<0$、上限为负，这个公式仍可适用；无须把积分拆成复杂的原函数。
 
-所以
-
-$$
-\gamma\sim\int_0^{\sqrt x}t^3\,\mathrm dt
-=\frac14x^2.
-$$
-
-因此三者的阶依次为
-
-$$
-x,\qquad x^2,\qquad x^3.
-$$
-
-若要求“后一个是前一个的高阶无穷小”，排列应为
-
-$$
-\alpha,\ \gamma,\ \beta.
-$$
-
-故选 B。
-
-**易错提醒：** 不能把 $\int_0^{x^2}\sqrt t\,dt$ 错算为 $O(x^2)$，它是 $O(x^3)$。
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-cb2216-012" type="single" number={false}>
+<Question id="math-core-gd-01-05-011" type="single" points={4} tags="来源:2004考研数一、数二, 科目:高等数学, 考点:积分阶数排序, 考点:复合上限">
 
-**[2020-1,2-4 分]** 当 $x \to 0^+$ 时, 下列无穷小量中最高阶的是(   ).
+将 $x\to0^+$ 时的三个无穷小量
 
-<Option>$\int_0^x (e^{t^2} - 1)\mathrm{d}t$</Option>
-<Option>$\int_0^x \ln(1 + \sqrt[3]{t^3})\mathrm{d}t$</Option>
-<Option>$\int_0^{\sin x} \sin t^2 \mathrm{d}t$</Option>
-<Option correct>$\int_0^{1 - \cos x} \sqrt{\sin^3 t}\mathrm{d}t$</Option>
+$$
+\alpha=\int_0^x\cos(t^2)\,\mathrm dt,\quad
+\beta=\int_0^{x^2}\tan\sqrt t\,\mathrm dt,\quad
+\gamma=\int_0^{\sqrt x}\sin(t^3)\,\mathrm dt
+$$
+
+排列，使后一个是前一个的高阶无穷小，正确顺序为（ ）。
+
+<Option>$\alpha,\beta,\gamma$</Option>
+<Option correct>$\alpha,\gamma,\beta$</Option>
+<Option>$\beta,\alpha,\gamma$</Option>
+<Option>$\beta,\gamma,\alpha$</Option>
 
 <Solution>
 
-**模型识别与突破口：** 比较变限积分时先识别上限的阶，选项 D 是“上限二阶 × 被积函数 $t^{3/2}$”的双重复合。
+**正确选项：B。** 三者分别是 $x$、$x^3$、$x^2$ 阶，故顺序 $\boxed{\alpha,\gamma,\beta}$。
 
-分别求各项的主阶。
-
-A：
+**对 $\alpha$：** $\cos(t^2)\to1$，故
 
 $$
-e^{t^2}-1\sim t^2,
+\alpha=\int_0^x\cos(t^2)\,\mathrm dt\sim x.
 $$
 
-所以
+**对 $\beta$：** 在 $t\to0^+$ 时，$\tan\sqrt t\sim\sqrt t$，于是
 
 $$
-\int_0^x(e^{t^2}-1)\,\mathrm dt\sim\frac{x^3}{3}.
+\beta\sim\int_0^{x^2}t^{1/2}\,\mathrm dt
+=\frac23(x^2)^{3/2}=\frac23x^3.
 $$
 
-B：因 $t\ge0$，$\sqrt[3]{t^3}=t$，故
+这里利用了 $x>0$，因此 $(x^2)^{3/2}=x^3$。
+
+**对 $\gamma$：** $\sin(t^3)\sim t^3$，故
 
 $$
-\int_0^x\ln(1+t)\,\mathrm dt\sim\int_0^xt\,\mathrm dt=\frac{x^2}{2}.
+\gamma\sim\int_0^{\sqrt x}t^3\,\mathrm dt
+=\frac14(\sqrt x)^4=\frac14x^2.
 $$
 
-C：
+综合为
 
-$$
-\sin t^2\sim t^2,\qquad \sin x\sim x,
-$$
+| 无穷小 | 主项 | 阶数 |
+| --- | --- | --- |
+| $\alpha$ | $x$ | 一阶 |
+| $\gamma$ | $x^2/4$ | 二阶 |
+| $\beta$ | $2x^3/3$ | 三阶 |
 
-所以
+从低阶到高阶按指数递增排列，即 $\alpha,\gamma,\beta$。
 
-$$
-\int_0^{\sin x}\sin t^2\,\mathrm dt\sim\frac{x^3}{3}.
-$$
+<Callout type="warn" title="不要忽视积分上限的幂次">
 
-D：当 $t\to0^+$ 时，
+$\int_0^{x^2}\sqrt t\,\mathrm dt$ 的主项不是 $x^{3/2}$，而是 $(x^2)^{3/2}=x^3$；$\int_0^{\sqrt x}t^3\,\mathrm dt$ 则是 $(\sqrt x)^4=x^2$。**先积分再代入上限**可以避免混淆。
+
+</Callout>
+
+</Solution>
+</Question>
+
+<Question id="math-core-gd-01-05-012" type="single" points={4} tags="来源:2020考研数一、数二, 科目:高等数学, 考点:高阶变限积分, 考点:分数幂">
+
+当 $x\to0^+$ 时，下列无穷小量中最高阶的是（ ）。
+
+<Option>$\displaystyle\int_0^x(e^{t^2}-1)\,\mathrm dt$</Option>
+<Option>$\displaystyle\int_0^x\ln(1+\sqrt[3]{t^3})\,\mathrm dt$</Option>
+<Option>$\displaystyle\int_0^{\sin x}\sin(t^2)\,\mathrm dt$</Option>
+<Option correct>$\displaystyle\int_0^{1-\cos x}\sqrt{\sin^3 t}\,\mathrm dt$</Option>
+
+<Solution>
+
+**正确选项：D。** A、C 是三阶，B 是二阶，D 是**五阶无穷小**。
+
+逐项求主项时，要把**被积函数的阶数**和**积分上限的阶数**分开考虑。
+
+| 选项 | 被积函数主项 | 积分主项 | 阶数 |
+| --- | --- | --- | --- |
+| A | $e^{t^2}-1\sim t^2$ | $\frac{x^3}{3}$ | $x^3$ |
+| B | $\ln(1+\sqrt[3]{t^3})=\ln(1+t)\sim t$ | $\frac{x^2}{2}$ | $x^2$ |
+| C | $\sin(t^2)\sim t^2$ | $\frac{\sin^3x}{3}\sim\frac{x^3}{3}$ | $x^3$ |
+| D | $\sqrt{\sin^3t}\sim t^{3/2}$ | $\frac25(1-\cos x)^{5/2}$ | $x^5$ |
+
+**重点说明 D 的两层变换。** 当 $t\to0^+$ 时 $\sin t>0$，
 
 $$
 \sqrt{\sin^3t}=(\sin t)^{3/2}\sim t^{3/2}.
 $$
 
-又
+先对 $t$ 积分：
 
 $$
-1-\cos x\sim\frac{x^2}{2},
+\int_0^u\sqrt{\sin^3t}\,\mathrm dt\sim\frac25u^{5/2}.
 $$
 
-于是
+再用 $u=1-\cos x\sim x^2/2$，得到
 
 $$
 \int_0^{1-\cos x}\sqrt{\sin^3t}\,\mathrm dt
-\sim\frac25(1-\cos x)^{5/2}
+\sim\frac25\left(\frac{x^2}{2}\right)^{5/2}
+=\frac{x^5}{5\cdot2^{3/2}}.
 $$
 
-是 $x^5$ 阶无穷小。
+主项系数非零，所以 D 是五阶，阶数最高。
 
-因此 A、C 为 $x^3$ 阶，B 为 $x^2$ 阶，D 为 $x^5$ 阶，最高阶的是 D。
+<Callout type="idea" title="快速判断复合积分的阶数">
 
-**易错提醒：** 指数为分数时必须兼顾方向：此题 $x\to0^+$ 保证所有积分上限附近实数定义。
+$h(t)\sim t^p$，$u(x)\sim c x^q$ 时，积分的阶为 $q(p+1)$。D 中 $p=3/2$，$q=2$，于是 $2(3/2+1)=5$。这条规则是快速筛选，完整解答仍应说明定义域和非零主系数。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-cb2216-013" type="single" number={false}>
+<Question id="math-core-gd-01-05-013" type="single" points={5} tags="来源:2021考研数二、数三, 科目:高等数学, 考点:积分等价, 考点:高阶无穷小">
 
-**[2021-2,3-5 分]** 当 $x \to 0$ 时, $\int_0^{x^2} (e^{t^3} - 1)\mathrm{d}t$ 是 $x^7$ 的(   ).
+当 $x\to0$ 时，$\displaystyle\int_0^{x^2}(e^{t^3}-1)\,\mathrm dt$ 是 $x^7$ 的（ ）。
 
 <Option>低阶无穷小</Option>
 <Option>等价无穷小</Option>
@@ -679,148 +667,185 @@ $$
 
 <Solution>
 
-**模型识别与突破口：** 先把 $e^{t^3}-1$ 化为 $t^3$，再把积分上限 $x^2$ 代入四次原函数。
+**正确选项：C。** 积分主项是 $x^8/4$，比 $x^7$ 高一阶。
 
-当 $t\to0$ 时，
-
-$$
-e^{t^3}-1\sim t^3.
-$$
-
-因此
+**第一步：求被积函数主项。** 当 $t\to0$ 时，
 
 $$
+e^{t^3}-1=t^3+O(t^6).
+$$
+
+**第二步：将上限 $x^2$ 代入积分。** 由于 $x^2\ge0$，
+
+$$
+\begin{aligned}
 \int_0^{x^2}(e^{t^3}-1)\,\mathrm dt
-\sim\int_0^{x^2}t^3\,\mathrm dt
-=\frac{x^8}{4}.
+&=\int_0^{x^2}\bigl(t^3+O(t^6)\bigr)\,\mathrm dt\\
+&=\frac{(x^2)^4}{4}+O((x^2)^7)\\
+&=\frac{x^8}{4}+O(x^{14}).
+\end{aligned}
 $$
 
-与 $x^7$ 比较：
+**第三步：与 $x^7$ 做比值。**
 
 $$
 \frac{\int_0^{x^2}(e^{t^3}-1)\,\mathrm dt}{x^7}
-\sim\frac{x}{4}\to0.
+=\frac x4+O(x^7)\longrightarrow0.
 $$
 
-所以该积分是 $x^7$ 的高阶无穷小，选 C。
+所以是 $x^7$ 的**高阶无穷小**。
 
-**易错提醒：** 积分主项是 $x^8/4$，不是 $x^6/4$；题目比较对象为 $x^7$。
+<Callout type="warn" title="不要把上限的平方丢掉">
+
+$\int_0^u t^3\,\mathrm dt=u^4/4$。本题 $u=x^2$，因此结果是 $x^8/4$，而非 $x^4/4$ 或 $x^6/4$。要比较的量是 $x^7$，不是 $x^8$。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-cb2216-014" type="single" number={false}>
+<Question id="math-core-gd-01-05-014" type="single" tags="来源:张宇1000题, 科目:高等数学, 考点:指数差式, 考点:高阶积分">
 
-**[张宇1000题]** 设当 $ x\to0$ 时，$ \int_{0}^{x}(e^{t\cos t^{2}}-e^{t})dt$ 与 $ ax^{b}$ 是等价无穷小量，则 $ (a,b)=$（）
+当 $x\to0$ 时，若
 
-<Option>$ (-\frac{1}{6},3)$</Option>
-<Option>$ (-\frac{1}{24},4)$</Option>
-<Option>$ (-\frac{1}{2},5)$</Option>
-<Option correct>$ (-\frac{1}{12},6)$</Option>
+$$
+\int_0^x\left(e^{t\cos(t^2)}-e^t\right)\,\mathrm dt
+\sim ax^b,
+$$
+
+则 $(a,b)=$（ ）。
+
+<Option>$\left(-\frac16,3\right)$</Option>
+<Option>$\left(-\frac1{24},4\right)$</Option>
+<Option>$\left(-\frac12,5\right)$</Option>
+<Option correct>$\left(-\frac1{12},6\right)$</Option>
 
 <Solution>
 
-**模型识别与突破口：** 指数项相减前应先提出 $e^t$；其指数差由 $t\cos(t^2)-t$ 决定，精确到五阶。
+**正确选项：D。** $\boxed{a=-1/12,\ b=6}$。
 
-由
+**第一步：从指数差而非指数函数本身入手。** 令
 
-$ \cos t^2=1-\frac12t^4+o(t^4)$，
+$$
+\delta(t)=t\cos(t^2)-t=t\bigl(\cos(t^2)-1\bigr).
+$$
 
-得
+由于
 
-$ t\cos t^2=t-\frac12t^5+o(t^5)$。
+$$
+\cos(t^2)-1=-\frac{t^4}{2}+O(t^8),
+$$
 
-故
+所以
 
-$ e^{t\cos t^2}-e^t=e^t\left(e^{-t^5/2+o(t^5)}-1\right)\sim-\frac12t^5$。
+$$
+\delta(t)=-\frac{t^5}{2}+O(t^9).
+$$
 
-积分得
+**第二步：提出公共因子。**
 
-$ \int_0^x(e^{t\cos t^2}-e^t)dt\sim-\frac1{12}x^6$，
+$$
+\begin{aligned}
+e^{t\cos(t^2)}-e^t
+&=e^t\bigl(e^{\delta(t)}-1\bigr)\\
+&\sim 1\cdot\delta(t)\\
+&\sim-\frac{t^5}{2}.
+\end{aligned}
+$$
 
-所以 $ (a,b)=\left(-\frac1{12},6\right)$。
+这里 $e^t\to1$，且 $e^u-1\sim u$（$u\to0$）。
 
-**易错提醒：** 若把 $\cos(t^2)-1$ 误写成 $O(t^2)$，会把六阶误判为四阶。
+**第三步：积分得到六阶主项。**
+
+$$
+\int_0^x\left(e^{t\cos(t^2)}-e^t\right)\,\mathrm dt
+\sim-\frac12\int_0^xt^5\,\mathrm dt
+=-\frac{x^6}{12}.
+$$
+
+所以 $(a,b)=\boxed{(-1/12,6)}$。
+
+<Callout type="idea" title="复合指数差的稳定处理顺序">
+
+对于 $e^{u(t)}-e^{v(t)}$ 且 $u(t)-v(t)\to0$，先写成 $e^{v(t)}(e^{u(t)-v(t)}-1)$。当 $e^{v(t)}\to1$ 时，整个差式与 $u(t)-v(t)$ 等价，通常可以省去大量展开。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
 ## 模型三：等价关系的逻辑、反例与振荡扰动
 
-求商判别最可靠；差、平方和高次项常产生真假命题，必须特别关注双侧定义及震荡量的有界性。
+小 $o$ 不是一个具体函数，而是满足某种极限条件的**函数类记号**。判别运算规则时，可统一设 $r(x)=o(x^p)$，再写 $r(x)=x^p\varepsilon(x)$，其中 $\varepsilon(x)\to0$。
 
-<Question id="math-cb2216-015" type="single" number={false}>
+<Question id="math-core-gd-01-05-015" type="single" points={4} tags="来源:2013考研数三, 科目:高等数学, 考点:little-o运算, 考点:反例判断">
 
-**[2013-3-4 分]** 当 $x \to 0$ 时, 用 $o(x)$ 表示比 $x$ 高阶的无穷小, 则下列式子中错误的是
-(   ).
+当 $x\to0$ 时，用 $o(x)$ 表示比 $x$ 高阶的无穷小，则下列式子中**错误**的是（ ）。
 
-<Option>$x \cdot o(x^2) = o(x^3)$</Option>
-<Option>$o(x) \cdot o(x^2) = o(x^3)$</Option>
-<Option>$o(x^2) + o(x^2) = o(x^2)$</Option>
-<Option correct>$o(x) + o(x^2) = o(x^2)$</Option>
+<Option>$x\cdot o(x^2)=o(x^3)$</Option>
+<Option>$o(x)\cdot o(x^2)=o(x^3)$</Option>
+<Option>$o(x^2)+o(x^2)=o(x^2)$</Option>
+<Option correct>$o(x)+o(x^2)=o(x^2)$</Option>
 
 <Solution>
 
-**模型识别与突破口：** 把 $o(x^p)$ 写成 $x^p\varepsilon(x)$，其中 $\varepsilon(x)\to0$，按定义逐项判别。
+**正确选项：D。** A、B、C 是正确的小 $o$ 运算规则；D 把较弱条件 $o(x)$ 错写成了较强条件 $o(x^2)$。
 
-利用高阶无穷小的定义逐项判断。
-
-A：若 $u=o(x^2)$，则
+**逐项用定义检验：** 令 $u(x)=o(x)$、$v(x)=o(x^2)$，即
 
 $$
-\frac{x u}{x^3}=\frac{u}{x^2}\to0,
+\frac{u(x)}x\to0,
+\qquad\frac{v(x)}{x^2}\to0.
 $$
 
-故 $x\cdot o(x^2)=o(x^3)$，正确。
+- **A 正确：** $\displaystyle\frac{xv(x)}{x^3}=\frac{v(x)}{x^2}\to0$，故 $x\,o(x^2)=o(x^3)$。
+- **B 正确：** $\displaystyle\frac{u(x)v(x)}{x^3}=\frac{u(x)}x\cdot\frac{v(x)}{x^2}\to0$。
+- **C 正确：** 若 $v_1,v_2=o(x^2)$，则 $\displaystyle\frac{v_1+v_2}{x^2}\to0+0=0$。
+- **D 错误：** 虽然 $o(x^2)\subset o(x)$，但反过来并不成立。两个小量之和只保证属于 $o(x)$，一般不能提高到 $o(x^2)$。
 
-B：若 $u=o(x)$、$v=o(x^2)$，则
-
-$$
-\frac{uv}{x^3}
-=\frac{u}{x}\frac{v}{x^2}\to0,
-$$
-
-正确。
-
-C：两个 $o(x^2)$ 相加仍为 $o(x^2)$，正确。
-
-D：$o(x)$ 未必是 $o(x^2)$。例如
+**构造一个明确反例：** 取
 
 $$
-u=|x|^{3/2}\qquad(x\to0),
+u(x)=|x|^{3/2},\qquad v(x)\equiv0.
 $$
 
-则 $u=o(x)$，但
+则
 
 $$
-\frac{u}{x^2}=\frac1{\sqrt{|x|}}\to+\infty.
+\frac{u(x)}x=\operatorname{sgn}(x)\sqrt{|x|}\longrightarrow0,
 $$
 
-所以 $o(x)+o(x^2)$ 一般只能保证仍为 $o(x)$，不能保证是 $o(x^2)$。
+因而 $u=o(x)$；但是
 
-故错误的是 D。
+$$
+\frac{u(x)+v(x)}{x^2}
+=\frac1{\sqrt{|x|}}\longrightarrow+\infty,
+$$
 
-**易错提醒：** $o(x)$ 与 $o(x^2)$ 的关系是从更强到更弱，反向不能推；反例需在零点双侧有定义。
+所以 $u+v\ne o(x^2)$，D 被否定。
+
+<Callout type="idea" title="牢记“高阶包含于低阶”">
+
+当 $x\to0$ 时，$o(x^2)$ 中的函数**一定**是 $o(x)$，反之却未必；故 $o(x)+o(x^2)$ 的共同可保证精度只有 $o(x)$。做小 $o$ 判断题，可优先检验有无**把低阶误差强行升级为高阶误差**的选项。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-cb2216-016" type="single" number={false}>
+<Question id="math-core-gd-01-05-016" type="single" points={5} tags="来源:2022考研数二、数三, 科目:高等数学, 考点:等价无穷小, 考点:little-o运算, 易错">
 
-**[2022-2,3-5 分]** 当 $x \to 0$ 时, $\alpha(x), \beta(x)$ 是非零无穷小量, 给出以下四个命题:
+当 $x\to0$ 时，$\alpha(x),\beta(x)$ 是非零无穷小量。判断以下命题：
 
-(1) 若 $\alpha(x) \sim \beta(x)$, 则 $\alpha^2(x) \sim \beta^2(x)$;
+(1) 若 $\alpha(x)\sim\beta(x)$，则 $\alpha^2(x)\sim\beta^2(x)$；
 
-(2) 若 $\alpha^2(x) \sim \beta^2(x)$, 则 $\alpha(x) \sim \beta(x)$;
+(2) 若 $\alpha^2(x)\sim\beta^2(x)$，则 $\alpha(x)\sim\beta(x)$；
 
-(3) 若 $\alpha(x) \sim \beta(x)$, 则 $\alpha(x) - \beta(x) = o(\alpha(x))$;
+(3) 若 $\alpha(x)\sim\beta(x)$，则 $\alpha(x)-\beta(x)=o(\alpha(x))$；
 
-(4) 若 $\alpha(x) - \beta(x) = o(\alpha(x))$, 则 $\alpha(x) \sim \beta(x)$.
+(4) 若 $\alpha(x)-\beta(x)=o(\alpha(x))$，则 $\alpha(x)\sim\beta(x)$。
 
-其中正确的序号是 $(\quad)$.
+其中正确的序号是（ ）。
 
 <Option>(1)(3)</Option>
 <Option>(1)(4)</Option>
@@ -829,142 +854,93 @@ $$
 
 <Solution>
 
-**模型识别与突破口：** 等价关系只规定比值趋于 1，判断乘方、差及反向结论最好统一写成比值。
+**正确选项：C，即 (1)、(3)、(4) 正确，(2) 错误。**
 
-由等价无穷小的定义逐项判断。
+**统一判定工具：** $\alpha\sim\beta$ 的定义是 $\alpha/\beta\to1$；$r=o(\alpha)$ 的定义是 $r/\alpha\to0$。把四个命题都改写成比值，便不会被符号迷惑。
 
-(1) 若 $\alpha\sim\beta$，则
+| 命题 | 比值判定 | 结论 |
+| --- | --- | --- |
+| (1) | $\displaystyle\frac{\alpha^2}{\beta^2}=\left(\frac\alpha\beta\right)^2\to1$ | 正确 |
+| (2) | $\alpha^2/\beta^2\to1$ 仅限制比值的平方，不能排除负号 | 错误 |
+| (3) | $\displaystyle\frac{\alpha-\beta}{\alpha}=1-\frac\beta\alpha\to0$ | 正确 |
+| (4) | $\displaystyle1-\frac\beta\alpha\to0\Rightarrow\frac\beta\alpha\to1$ | 正确 |
 
-$$
-\frac{\alpha^2}{\beta^2}
-=\left(\frac\alpha\beta\right)^2\to1,
-$$
-
-故正确。
-
-(2) 反之不成立。例如取 $\alpha=-\beta$，则
+**关键反例：** 在 (2) 中取 $\alpha(x)=x$，$\beta(x)=-x$。它们均为非零无穷小，且 $\alpha^2=\beta^2$，但
 
 $$
-\alpha^2=\beta^2,
+\frac{\alpha(x)}{\beta(x)}=-1\not\to1.
 $$
 
-但
+对 (4)，从 $\beta/\alpha\to1$ 可知其在充分靠近零的去心邻域内不为零，于是取倒数得到 $\alpha/\beta\to1$，反向推理也成立。
+
+<Callout type="idea" title="等价无穷小的两种常用等价表述">
+
+在 $\alpha,\beta$ 最终非零的前提下，以下三条相互等价：
 
 $$
-\frac\alpha\beta=-1\ne1.
+\alpha\sim\beta
+\quad\Longleftrightarrow\quad
+\alpha-\beta=o(\alpha)
+\quad\Longleftrightarrow\quad
+\alpha-\beta=o(\beta).
 $$
 
-故错误。
+但是“平方等价”只保留绝对值的相对信息，并不保留符号。
 
-(3) 若 $\alpha\sim\beta$，则
-
-$$
-\frac{\alpha-\beta}{\alpha}
-=1-\frac\beta\alpha\to0,
-$$
-
-所以
-
-$$
-\alpha-\beta=o(\alpha),
-$$
-
-正确。
-
-(4) 若
-
-$$
-\alpha-\beta=o(\alpha),
-$$
-
-则
-
-$$
-1-\frac\beta\alpha\to0,
-$$
-
-即 $\beta/\alpha\to1$，从而 $\alpha/\beta\to1$，故 $\alpha\sim\beta$，正确。
-
-所以正确的是 (1)(3)(4)，选 C。
-
-**易错提醒：** 平方后会丢失符号；$\alpha^2\sim\beta^2$ 并不能排除 $\alpha/\beta\to-1$。
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-cb2216-017" type="single" number={false}>
+<Question id="math-core-gd-01-05-017" type="single" points={5} tags="来源:2025考研数二, 科目:高等数学, 考点:高阶无穷小, 考点:等价替换">
 
-**[2025-2-5 分]** 设函数 $f(x), g(x)$ 在 $x=0$ 的某去心邻域内有定义且恒不为零, 若当 $x \to 0$ 时, $f(x)$ 是 $g(x)$ 的高阶无穷小, 则当 $x \to 0$ 时, 有 $(\quad)$.
+设 $f(x),g(x)$ 在 $x=0$ 的某去心邻域内有定义且恒不为零。若当 $x\to0$ 时，$f(x)$ 是 $g(x)$ 的高阶无穷小，则当 $x\to0$ 时，有（ ）。
 
-<Option>$f(x) + g(x) = o(g(x))$</Option>
-<Option>$f(x)g(x) = o(f^2(x))$</Option>
+<Option>$f(x)+g(x)=o(g(x))$</Option>
+<Option>$f(x)g(x)=o(f^2(x))$</Option>
 <Option correct>$f(x)=o(e^{g(x)}-1)$</Option>
 <Option>$f(x)=o(g^2(x))$</Option>
 
 <Solution>
 
-**模型识别与突破口：** 把条件 $f=o(g)$ 转为比值，将 $e^g-1$ 用等价关系替换为 $g$，用反例排除过强结论。
+**正确选项：C。** 题设的精确信息是 $g(x)\to0$ 且 $f(x)/g(x)\to0$，也就是 $f=o(g)$。
 
-“$f(x)$ 是 $g(x)$ 的高阶无穷小”意味着
-
-$$
-\frac{f(x)}{g(x)}\to0,
-$$
-
-且 $g(x)\to0$。
-
-逐项判断：
-
-A：
+**第一步：判定 C。** 当 $g(x)\to0$ 时，指数函数满足
 
 $$
-\frac{f+g}{g}=\frac fg+1\to1,
-$$
-
-所以 $f+g$ 与 $g$ 等价，而不是 $o(g)$。
-
-B：
-
-$$
-\frac{fg}{f^2}=\frac gf,
-$$
-
-由 $f/g\to0$ 不能得到该比值趋于 $0$。
-
-C：因为 $g\to0$，有
-
-$$
-e^{g(x)}-1\sim g(x).
+\frac{e^{g(x)}-1}{g(x)}\longrightarrow1.
 $$
 
 因此
 
 $$
+\begin{aligned}
 \frac{f(x)}{e^{g(x)}-1}
-=\frac{f(x)}{g(x)}\cdot\frac{g(x)}{e^{g(x)}-1}
-\to0\cdot1=0.
+&=\frac{f(x)}{g(x)}\cdot\frac{g(x)}{e^{g(x)}-1}\\
+&\longrightarrow0\cdot1=0.
+\end{aligned}
 $$
 
-故
+这恰是 C 的定义，无须另求 $f,g$ 的具体表达式。
 
-$$
-f(x)=o(e^{g(x)}-1).
-$$
+**第二步：排除其余选项。**
 
-D 也不能保证。例如令 $g(x)=x^2$、$f(x)=|x|^3$，则 $f/g=|x|\to0$，而 $f/g^2=1/|x|\to+\infty$。
+- **A：** $\displaystyle\frac{f+g}{g}=1+\frac fg\to1$，所以 $f+g\sim g$，反而不是 $o(g)$。
+- **B：** $\displaystyle\frac{fg}{f^2}=\frac gf$，而 $f/g\to0$ 并不使 $g/f\to0$。
+- **D：** 从 $f=o(g)$ 无法增加到 $f=o(g^2)$。例如令 $g(x)=x^2$、$f(x)=x^3$（$x\ne0$），则 $f/g=x\to0$，但 $f/g^2=1/x$ 不趋零。
 
-所以选 C。
+<Callout type="warn" title="高阶无穷小不能随意升级">
 
-**易错提醒：** $f=o(g)$ 并不蕴涵 $f=o(g^2)$；二者的主次关系不能凭“都很小”判断。
+$g^2$ 比 $g$ 更小。已知 $f$ 比 $g$ 高阶，仍未说明 $f$ 比 $g^2$ 高阶；要推出后一结论，必须额外证明 $f/g^2\to0$。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-cb2216-018" type="single" number={false}>
+<Question id="math-core-gd-01-05-018" type="single" tags="来源:张宇1000题, 科目:高等数学, 考点:幂指型展开, 考点:振荡项, 易错">
 
-**[张宇1000题]** 当 $ x\to0$ 时，$ (3+2\tan x)^{x}-3^{x}$ 是 $ 3\sin^{2}x+x^{3}\cos\frac{1}{x}$ 的（）
+当 $x\to0$ 时，$(3+2\tan x)^x-3^x$ 是 $3\sin^2x+x^3\cos\dfrac1x$ 的（ ）。
 
 <Option>高阶无穷小</Option>
 <Option>低阶无穷小</Option>
@@ -973,35 +949,65 @@ D 也不能保证。例如令 $g(x)=x^2$、$f(x)=|x|^3$，则 $f/g=|x|\to0$，�
 
 <Solution>
 
-**模型识别与突破口：** 先将非整数幂 $a(x)^x$ 写成指数，分子提取 $x^2$，分母振荡项只是 $o(x^2)$。
+**正确选项：D。** 两个表达式的主项分别为 $\frac23x^2$ 和 $3x^2$，比值极限为 $\frac29$。
 
-设
+**第一步：处理分子中的幂差。** 在零点附近 $3+2\tan x>0$，可以把它写成以 $3^x$ 为公共因子的指数差：
 
-$ A=(3+2\tan x)^x,\qquad B=3^x$。
+$$
+\begin{aligned}
+(3+2\tan x)^x-3^x
+&=3^x\!\left[\left(1+\frac23\tan x\right)^x-1\right]\\
+&=3^x\!\left[\exp\!\left(x\ln\left(1+\frac23\tan x\right)\right)-1\right].
+\end{aligned}
+$$
 
-则
+由于 $\tan x=x+O(x^3)$，有
 
-$ A-B=3^x\left\{\exp\left[x\ln\left(1+\frac23\tan x\right)\right]-1\right\}\sim\frac23x^2$。
+$$
+\ln\left(1+\frac23\tan x\right)=\frac23x+O(x^2),
+$$
 
-另一方面
+从而指数 $x\ln(1+\frac23\tan x)=\frac23x^2+O(x^3)\to0$。结合 $e^u-1\sim u$ 和 $3^x\to1$，得
 
-$ 3\sin^2x+x^3\cos\frac1x=3x^2+o(x^2)$。
+$$
+(3+2\tan x)^x-3^x=\frac23x^2+o(x^2).
+$$
 
-两者之比趋于 $ \frac29\ne1$，所以同阶但不等价。
+**第二步：把振荡项降阶。**
 
-**易错提醒：** $\cos(1/x)$ 没有极限，但 $x^3\cos(1/x)=o(x^2)$，不能据此断定总比值不存在。
+$$
+3\sin^2x=3x^2+o(x^2),\qquad
+\left|x^3\cos\frac1x\right|\le |x|^3=o(x^2).
+$$
+
+因此分母是 $3x^2+o(x^2)$；即使 $\cos(1/x)$ 本身不收敛，也不会影响二阶主项。
+
+**第三步：取比值。**
+
+$$
+\lim_{x\to0}
+\frac{(3+2\tan x)^x-3^x}{3\sin^2x+x^3\cos(1/x)}
+=\frac{2/3}{3}=\boxed{\frac29}.
+$$
+
+由于该极限存在、非零且不等于 $1$，故同阶但不等价。
+
+<Callout type="idea" title="遇见有界振荡因子">
+
+只要 $h(x)$ 有界，就有 $x^3h(x)=o(x^2)$。比较阶数时，可先判断振荡项是否低于目标主阶，而不是尝试计算振荡函数自己的极限。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
 ## 模型四：递推速率及跨章节主阶方法
 
-通过递推估计、对数展开或由微分方程的初值确定首个非零导数，将比较转化为可证明的主阶。
+有递推关系的两组无穷小序列，必须比较其**相对下降速度**，而不是只求各自的极限。涉及微分方程时，优先由初值确定最低阶非零导数，通常无须求完整通解。
 
-<Question id="math-cb2216-019" type="single" number={false}>
+<Question id="math-core-gd-01-05-019" type="single" points={5} tags="来源:2023考研数二, 科目:高等数学, 考点:递推数列, 考点:衰减速率">
 
-**[2023-2-5 分]** 设数列 $\{x_n\}, \{y_n\}$ 满足 $x_1 = y_1 = \frac{1}{2}$, $x_{n+1} = \sin x_n$, $y_{n+1} = y_n^2$, 当 $n \to \infty$ 时, $(\quad)$.
+设数列 $\{x_n\},\{y_n\}$ 满足 $x_1=y_1=\dfrac12$，$x_{n+1}=\sin x_n$，$y_{n+1}=y_n^2$。当 $n\to\infty$ 时（ ）。
 
 <Option>$x_n$ 是 $y_n$ 的高阶无穷小</Option>
 <Option correct>$y_n$ 是 $x_n$ 的高阶无穷小</Option>
@@ -1010,112 +1016,117 @@ $ 3\sin^2x+x^3\cos\frac1x=3x^2+o(x^2)$。
 
 <Solution>
 
-**模型识别与突破口：** 递推数列比较衰减快慢：平方递推产生双指数下降，正弦递推只需构造一个指数型下界。
+**正确选项：B。** 两个序列均趋于 $0$，但 $y_n$ 的衰减速度远快于 $x_n$，且 $\displaystyle\lim_{n\to\infty}\frac{y_n}{x_n}=0$。
 
-先看两个数列的极限。由于 $0<x_1=1/2<\pi/2$，且对 $x>0$ 有 $\sin x<x$，所以
-
-$$
-0<x_{n+1}<x_n,
-$$
-
-从而 $x_n\to0$。另一方面，
+**第一步：明确两个序列的极限。** 因 $0<\sin t<t$（$0<t\le\frac12$），可得
 
 $$
-y_n=\left(\frac12\right)^{2^{n-1}}\to0.
+0<x_{n+1}<x_n\le\frac12.
 $$
 
-下面比较二者的阶。对 $0<t\le1/2$，有一个很粗但足够的估计
+因此 $x_n$ 递减且有下界 $0$，存在极限 $L\ge0$；由 $L=\sin L$ 只能得到 $L=0$。
+
+而平方递推可以直接求通项：
 
 $$
-\sin t>\frac t2.
+y_n=\left(\frac12\right)^{2^{n-1}}=2^{-2^{n-1}}\longrightarrow0.
 $$
 
-因此
+**第二步：给 $x_n$ 找一个容易比较的下界。** 对 $0<t\le\frac12$，有 $\sin t\ge t/2$。故
 
 $$
-x_{n+1}>\frac{x_n}{2},
+x_{n+1}=\sin x_n\ge\frac{x_n}{2},
 $$
 
-递推得到
+由归纳法
 
 $$
-x_n\ge\frac1{2^n}.
+x_n\ge\frac{1}{2^n}\qquad(n\ge1).
 $$
 
-所以
+**第三步：夹逼比值。**
 
 $$
 0<\frac{y_n}{x_n}
-\le2^n\left(\frac12\right)^{2^{n-1}}
-=2^{n-2^{n-1}}\to0.
+\le 2^n\cdot2^{-2^{n-1}}
+=2^{n-2^{n-1}}\longrightarrow0.
 $$
 
-故
+因为指数 $n-2^{n-1}\to-\infty$，夹逼可知 $y_n=o(x_n)$。
 
-$$
-y_n=o(x_n).
-$$
+<Callout type="idea" title="不必精确求出慢序列的通项">
 
-也就是说，$y_n$ 是 $x_n$ 的高阶无穷小，选 B。
+此题只需证明正弦递推的 $x_n$ **至少**像 $2^{-n}$ 那样大，就足以与双指数衰减的 $y_n$ 比较。能够完成比较的粗界，常常比复杂的渐近公式更有效。
 
-**易错提醒：** 不能只证明 $x_n\to0,y_n\to0$ 就判断高阶；必须证 $y_n/x_n\to0$。
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-cb2216-020" type="single" number={false}>
+<Question id="math-core-gd-01-05-020" type="single" tags="来源:李正元练习题, 科目:高等数学, 考点:数列展开, 考点:同阶与等价">
 
-**[李正元练习题]** 当 $ n\to\infty$ 时，$ \left(1+\frac1n\right)^n-e$ 是 $ \frac1n$ 的
+当 $n\to\infty$ 时，$\left(1+\dfrac1n\right)^n-e$ 是 $\dfrac1n$ 的（ ）。
 
-<Option>高阶无穷小；</Option>
-<Option>低阶无穷小；</Option>
-<Option>等价无穷小；</Option>
-<Option correct>同阶但非等价无穷小。</Option>
+<Option>高阶无穷小</Option>
+<Option>低阶无穷小</Option>
+<Option>等价无穷小</Option>
+<Option correct>同阶但非等价无穷小</Option>
 
 <Solution>
 
-**模型识别与突破口：** 经典数列 $1^\infty$ 的首项为 $e$，但这里比的是差值，必须求出 $1/n$ 级修正。
+**正确选项：D。** 两者的比值趋于 $-\dfrac e2$，不是 $1$。
 
-由展开式
-
-$$
-n\ln\left(1+\frac1n\right)
-=1-\frac1{2n}+O\left(\frac1{n^2}\right),
-$$
-
-得
+注意不能仅凭 $(1+1/n)^n\to e$ 来判断**差值的阶**。令
 
 $$
-\left(1+\frac1n\right)^n
-=e\left[1-\frac1{2n}+O\left(\frac1{n^2}\right)\right].
+u_n=\left(1+\frac1n\right)^n.
+$$
+
+先对底数取对数，并保留一阶修正：
+
+$$
+\begin{aligned}
+\ln u_n
+&=n\ln\left(1+\frac1n\right)\\
+&=n\left(\frac1n-\frac1{2n^2}+O(n^{-3})\right)\\
+&=1-\frac1{2n}+O(n^{-2}).
+\end{aligned}
+$$
+
+再指数还原：
+
+$$
+\begin{aligned}
+u_n
+&=e\exp\left(-\frac1{2n}+O(n^{-2})\right)\\
+&=e\left(1-\frac1{2n}+O(n^{-2})\right),
+\end{aligned}
 $$
 
 所以
 
 $$
-\left(1+\frac1n\right)^n-e
-=-\frac{e}{2n}+O\left(\frac1{n^2}\right),
+\left(1+\frac1n\right)^n-e=-\frac e{2n}+O(n^{-2}).
 $$
 
-并且
+由此
 
 $$
-\lim_{n\to\infty}
-\frac{(1+1/n)^n-e}{1/n}=-\frac e2.
+\lim_{n\to\infty}\frac{(1+1/n)^n-e}{1/n}=-\frac e2.
 $$
 
-比值为非零有限常数但不等于 $ 1$，故二者同阶但不等价。
+<Callout type="warn" title="求差值，要比求极限多留一阶">
 
-**易错提醒：** 仅套 $(1+1/n)^n\to e$ 只能得到趋零，不能确定差值的阶数和系数。
+若两个量都趋于 $e$，将它们各自换成 $e$ 后做减法只会得到 $0$，无法说明真实差值的阶数。必须先求出共同极限之后的**首个修正项**。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-cb2216-021" type="single" number={false}>
+<Question id="math-core-gd-01-05-021" type="single" tags="来源:李林880, 科目:高等数学, 考点:微分方程, 考点:泰勒主项">
 
-**[李林880]** 设 $y=y(x)$ 是方程 $y''+2y'+y=\mathrm{e}^{3x}$ 的解，且满足 $y(0)=y'(0)=0$，则当 $x\to 0$ 时，与 $y(x)$ 为等价无穷小的是（ ）。
+设 $y=y(x)$ 是微分方程 $y''+2y'+y=e^{3x}$ 的解，且 $y(0)=y'(0)=0$。则当 $x\to0$ 时，与 $y(x)$ 为等价无穷小的是（ ）。
 
 <Option>$\sin x^2$</Option>
 <Option>$\sin x$</Option>
@@ -1124,89 +1135,118 @@ $$
 
 <Solution>
 
-**模型识别与突破口：** 微分方程只用于获取 $y(0),y'(0),y''(0)$，不必求出通解，直接确定二阶主项。
+**正确选项：D。** 初值和方程给出 $y(x)\sim\dfrac{x^2}{2}$，而 $\ln\sqrt{1+x^2}\sim\dfrac{x^2}{2}$。
 
-**解析：** 依题设, 有
-
-$$
-\lim_{x \to 0} y(x) = y(0) = 0, \quad \lim_{x \to 0} y'(x) = y'(0) = 0,
-$$
+**第一步：由方程求出最低阶非零导数。** 代入 $x=0$：
 
 $$
-\lim_{x \to 0} y''(x) = \lim_{x \to 0} [e^{3x} - 2y'(x) - y(x)] = 1,
+\begin{aligned}
+y''(0)&=e^0-2y'(0)-y(0)\\
+&=1.
+\end{aligned}
 $$
 
+已知 $y(0)=y'(0)=0$。右端 $e^{3x}-2y'(x)-y(x)$ 在零点附近连续，因此 $y''$ 连续，可在零点使用二阶泰勒公式：
+
 $$
-\begin{aligned} \text{故 } \lim_{x \to 0} \frac{\ln\sqrt{1+x^2}}{y(x)} &= \lim_{x \to 0} \frac{\frac{1}{2}\ln(1+x^2)}{y(x)} = \lim_{x \to 0} \frac{1}{2} \frac{x^2}{y(x)} \\ &= \frac{1}{2} \lim_{x \to 0} \frac{2x}{y'(x)} = \frac{1}{2} \lim_{x \to 0} \frac{2}{y''(x)} = \frac{1}{2} \times 2 = 1. \end{aligned}
+y(x)=y(0)+y'(0)x+\frac{y''(0)}2x^2+o(x^2)
+=\frac{x^2}{2}+o(x^2).
 $$
 
-选项 D 正确。
+**第二步：计算选项主项。**
 
-**易错提醒：** $\sin(x^2)$ 与 $\ln(1+x^2)$ 的首项都是 $x^2$，而 $y(x)\sim x^2/2$。
+| 选项 | 零点附近的首项 | 与 $y(x)$ 的比值极限 |
+| --- | --- | --- |
+| A：$\sin(x^2)$ | $x^2$ | $2$ |
+| B：$\sin x$ | $x$ | 比值不趋有限数 |
+| C：$\ln(1+x^2)$ | $x^2$ | $2$ |
+| D：$\ln\sqrt{1+x^2}$ | $\frac12\ln(1+x^2)\sim\frac{x^2}{2}$ | $1$ |
+
+因此 D 才与 $y(x)$ 等价。
+
+<Callout type="idea" title="微分方程题不一定需要求通解">
+
+若只问解函数在初值点附近的阶数，先用方程和初始条件计算 $y(0),y'(0),y''(0),\ldots$；找到**首个非零导数**即可写出泰勒主项。
+
+</Callout>
 
 </Solution>
-
 </Question>
 
 ## 模型五：原创综合变式——消项后的首非零阶
 
-<Question id="math-cb2216-022" type="essay" number={false}>
+<Question id="math-core-gd-01-05-022" type="essay" tags="来源:原创变式, 科目:高等数学, 考点:高阶消项, 考点:变限积分">
 
-**[原创]** 设
+设
 
 $$
-F(x)=\int_0^x\left(e^{t^2}-1-t^2\right)\,\mathrm dt,\qquad
-G(x)=(1-\cos x)^2\sin x.
+F(x)=\int_0^x\bigl(e^{t^2}-1-t^2\bigr)\,\mathrm dt,
+\qquad G(x)=(1-\cos x)^2\sin x.
 $$
 
 求 $\displaystyle\lim_{x\to0}\frac{F(x)}{G(x)}$，并判定 $F(x)$ 与 $G(x)$ 的无穷小阶数关系。
 
 <Solution>
 
-**答案：** $\displaystyle\frac25$；同阶但不等价。
-
-**解析：** **模型识别与突破口：** 指数函数减去常数项与二阶项，首个非零项升至四阶；再积分升为五阶。分母的平方余弦差同样产生五阶。
-
-由泰勒公式，当 $t\to0$ 时，
+**参考答案：**
 
 $$
-e^{t^2}=1+t^2+\frac{t^4}{2}+O(t^6),
+\boxed{\lim_{x\to0}\frac{F(x)}{G(x)}=\frac25}.
 $$
 
-故
+两个函数均为五阶无穷小，**同阶但不等价**。
 
-$$
-F(x)=\int_0^x\left(\frac{t^4}{2}+O(t^6)\right)\,\mathrm dt
-=\frac{x^5}{10}+O(x^7).
-$$
+<Steps>
+  <Step>
 
-另一方面，
+  ### 找出积分被积函数的首个非零项
 
-$$
-1-\cos x=\frac{x^2}{2}+O(x^4),\qquad
-\sin x=x+O(x^3),
-$$
+  由于 $e^{t^2}$ 的常数项与二阶项被题目明确减去，必须保留到四阶：
 
-所以
+  $$
+  e^{t^2}=1+t^2+\frac{t^4}{2}+O(t^6).
+  $$
 
-$$
-G(x)=\left(\frac{x^2}{2}+O(x^4)\right)^2(x+O(x^3))
-=\frac{x^5}{4}+O(x^7).
-$$
+  因而
 
-从而
+  $$
+  F(x)=\int_0^x\left(\frac{t^4}{2}+O(t^6)\right)\mathrm dt
+  =\frac{x^5}{10}+O(x^7).
+  $$
 
-$$
-\lim_{x\to0}\frac{F(x)}{G(x)}
-=\frac{1/10}{1/4}=\boxed{\frac25}.
-$$
+  </Step>
+  <Step>
 
-比值为非零有限常数，但不是 $1$，故两者同阶而不等价。
+  ### 计算分母的五阶主项
 
-**考场方法对照：** 也可将分子、分母分别除以 $x^5$ 求极限；不宜在积分内部直接用 $e^{t^2}-1\sim t^2$，因为已减去 $t^2$，该等价替换会丢失决定答案的四阶项。
+  利用 $1-\cos x=\frac{x^2}{2}+O(x^4)$、$\sin x=x+O(x^3)$，得
 
-**变式方向：** 把 $e^{t^2}-1-t^2$ 改为 $e^{t^2}-1-t^2-\frac{t^4}{2}$ 时，首项将由四阶升至六阶，与原 $G(x)$ 比较变成高阶无穷小。
+  $$
+  G(x)=\left(\frac{x^2}{2}+O(x^4)\right)^2(x+O(x^3))
+  =\frac{x^5}{4}+O(x^7).
+  $$
+
+  </Step>
+  <Step>
+
+  ### 取比值并判定关系
+
+  $$
+  \frac{F(x)}{G(x)}
+  =\frac{\frac1{10}+O(x^2)}{\frac14+O(x^2)}
+  \longrightarrow\frac25.
+  $$
+
+  因为 $\frac25\ne0$ 且 $\frac25\ne1$，所以是同阶无穷小，而不是等价无穷小。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="不能在差式中直接使用等价替换">
+
+若只把 $e^{t^2}-1$ 替换成 $t^2$，再减去题目中的 $t^2$，会错误地把主项消成零。差式发生抵消后，应重新展开到**首个不为零的阶**。
+
+</Callout>
 
 </Solution>
-
 </Question>

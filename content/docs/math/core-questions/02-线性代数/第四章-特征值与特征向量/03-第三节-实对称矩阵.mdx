@@ -1,387 +1,274 @@
 ---
-title: "第三节 实对称矩阵"
-description: "考研数学一精选：正交谱分解、特征子空间重建、含参正交对角化、低秩投影、伴随矩阵、Gram–Schmidt 正交化与综合模型。"
+title: 第三节 实对称矩阵
+description: 线性代数核心题目；正交谱分解、投影矩阵、含参对角化与实对称矩阵的幂。
 ---
-
-本节按 **谱重建 → 含参正交对角化 → 谱定理及逆命题 → 投影与矩阵多项式 → 正交化** 的破题逻辑组织。所列真题取自原始分类目录；练习题保留原资料中的独立模型，强调完整解答而非机械计算。
 
 ## 一、谱与正交投影：由已知特征方向重建矩阵
 
-<Question id="math-424c54-001" type="essay" number={false}>
+<Question id="core-la-symmetric-1995m1-01" type="essay" number="1" tags="来源:1995年数学一, 科目:线性代数, 考点:正交谱分解, 考点:投影矩阵">
 
-【1995年数学一】 设三阶实对称矩阵 $A$ 的特征值为 $\lambda_1=-1,\lambda_2=\lambda_3=1$，对应于 $\lambda_1$ 的特征向量为
-
-$$
-\xi_1=(0,1,1)^T,
-$$
-
-求 $A$.
+设三阶实对称矩阵 $A$ 的特征值为 $\lambda_1=-1,\lambda_2=\lambda_3=1$，对应于 $\lambda_1$ 的特征向量为 $\xi_1=(0,1,1)^T$。求 $A$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
-A=\begin{pmatrix}1&0&0\\0&0&-1\\0&-1&0\end{pmatrix}.
+\boxed{A=\begin{pmatrix}1&0&0\\0&0&-1\\0&-1&0\end{pmatrix}}.
 $$
 
-**解析：** **模型识别与突破口：** 二重特征值对应二维正交补，无须构造其两组特征向量；用一个单位特征方向即可写出矩阵。
+<Tabs items={['方法一：正交投影一步还原','方法二：直接构造正交特征基']}>
+<Tab value="方法一：正交投影一步还原">
 
-因为 $A$ 为实对称矩阵，不同特征值对应的特征向量正交。将 $\xi_1$ 单位化：
+<Steps>
+<Step title="利用实对称性确定两块正交特征空间">
 
-$$
-u=\frac1{\sqrt2}(0,1,1)^T.
-$$
-
-$u$ 对应特征值 $-1$，而与 $u$ 正交的二维子空间全部对应特征值 $1$。
-
-因此可直接用谱分解写成
+因为 $A$ 为实对称矩阵，对应不同特征值的特征子空间互相正交。令
 
 $$
-A=1\cdot E+(-1-1)uu^T=E-2uu^T.
+u=\frac{\xi_1}{\|\xi_1\|}=\frac1{\sqrt2}(0,1,1)^T.
 $$
 
-又
+$\operatorname{span}\{u\}$ 上的特征值是 $-1$，其二维正交补上则全部为 $1$。
+
+</Step>
+<Step title="用投影矩阵重建算子">
+
+对任意 $x$，分解 $x=uu^Tx+(E-uu^T)x$，从而
 
 $$
-2uu^T=
-\begin{pmatrix}
-0&0&0\\
-0&1&1\\
-0&1&1
-\end{pmatrix},
+Ax=-uu^Tx+(E-uu^T)x=(E-2uu^T)x.
 $$
 
-故
+因此
 
 $$
-A=
-\begin{pmatrix}
-1&0&0\\
-0&0&-1\\
-0&-1&0
-\end{pmatrix}.
+A=E-2uu^T=E-\begin{pmatrix}0&0&0\\0&1&1\\0&1&1\end{pmatrix},
 $$
 
-这一题不必把另外两个特征向量具体求出来；重特征值对应整个正交补空间时，用投影矩阵最快。
+化简即答案。
 
-**方法检验与易错点：** 这里之所以可确定整个 $A$，关键是给出了特征值的全部重数且 $A$ 实对称；对一般不可对角化矩阵不能照搬。
+</Step>
+</Steps>
+
+</Tab>
+<Tab value="方法二：直接构造正交特征基">
+
+取 $u_1=(0,1,1)^T/\sqrt2$（特征值 $-1$），$u_2=(1,0,0)^T$ 和 $u_3=(0,1,-1)^T/\sqrt2$（二者都对应 $1$）。令 $Q=(u_1,u_2,u_3)$，则 $Q^TQ=E$，并且
+
+$$
+A=Q\operatorname{diag}(-1,1,1)Q^T.
+$$
+
+展开可得到相同的数值矩阵。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="重根矩阵的一条特征方向就够了">若实对称矩阵所有其余特征值都相同，设对应一个单根特征值 $\lambda$ 的单位向量为 $u$，其余特征值为 $\mu$，则直接写 $A=\mu E+(\lambda-\mu)uu^T$。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-424c54-002" type="essay" number={false}>
+<Question id="core-la-symmetric-1997m3-02" type="essay" number="2" tags="来源:1997年数学三, 科目:线性代数, 考点:正交特征向量, 考点:谱重建">
 
-【1997年数学三】 设三阶实对称矩阵 $A$ 的特征值是 $1,2,3$，矩阵 $A$ 的属于特征值 $1,2$ 的特征向量分别是
+设三阶实对称矩阵 $A$ 的特征值是 $1,2,3$，已知对应于特征值 $1,2$ 的特征向量分别为
 
 $$
-\alpha_1=(-1,-1,1)^T,\qquad
-\alpha_2=(1,-2,-1)^T.
+\alpha_1=(-1,-1,1)^T,\qquad \alpha_2=(1,-2,-1)^T.
 $$
 
-（1）求 $A$ 的属于特征值 $3$ 的特征向量；
-
-（2）求矩阵 $A$.
+（1）求属于特征值 $3$ 的全部特征向量；（2）求矩阵 $A$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（1）属于特征值 $3$ 的特征向量为
-
-$$
-\alpha_3=k(1,0,1)^T,\qquad k\ne0.
-$$
-
-（2）
+（1）$\boxed{\alpha_3=k(1,0,1)^T\ (k\ne0)}$；（2）
 
 $$
-A=\frac16
-\begin{pmatrix}
-13&-2&5\\
--2&10&2\\
-5&2&13
-\end{pmatrix}.
+\boxed{A=\frac16\begin{pmatrix}13&-2&5\\-2&10&2\\5&2&13\end{pmatrix}}.
 $$
 
-**解析：** **模型识别与突破口：** 不同特征值的特征向量两两正交；先解一维正交补，再用谱分解还原矩阵。
+<Steps>
+<Step title="利用不同特征值的正交性补出第三个方向">
 
-实对称矩阵的不同特征值对应特征向量正交。设
-
-$$
-\alpha_3=(x,y,z)^T,
-$$
-
-则应满足
+设 $v=(x,y,z)^T$ 属于特征值 $3$，由于 $A=A^T$，应有
 
 $$
-\alpha_3^T\alpha_1=0,
-\qquad
-\alpha_3^T\alpha_2=0.
+v^T\alpha_1=-x-y+z=0,\qquad
+v^T\alpha_2=x-2y-z=0.
 $$
 
-即
+两式相加得到 $y=0$，再得 $z=x$。所以对应特征空间为 $\operatorname{span}\{(1,0,1)^T\}$，特征向量必须非零。
+
+</Step>
+<Step title="逐个计算长度，写出正交单位特征向量">
 
 $$
-\begin{cases}
--x-y+z=0,\\
-x-2y-z=0.
-\end{cases}
+u_1=\frac{(-1,-1,1)^T}{\sqrt3},\qquad
+u_2=\frac{(1,-2,-1)^T}{\sqrt6},\qquad
+u_3=\frac{(1,0,1)^T}{\sqrt2}.
 $$
 
-解得 $y=0,z=x$，故可取
+三个单位向量两两正交，组成正交矩阵 $Q=(u_1,u_2,u_3)$。
+
+</Step>
+<Step title="由正交对角化还原原矩阵">
 
 $$
-\alpha_3=(1,0,1)^T.
+A=Q\operatorname{diag}(1,2,3)Q^T
+=u_1u_1^T+2u_2u_2^T+3u_3u_3^T.
 $$
 
-将三个特征向量单位化：
+逐项计算三个外积，合并得到顶部数值矩阵。可反向核验 $A\alpha_1=\alpha_1$、$A\alpha_2=2\alpha_2$、$A(1,0,1)^T=3(1,0,1)^T$。
 
-$$
-u_1=\frac1{\sqrt3}(-1,-1,1)^T,
-\quad
-u_2=\frac1{\sqrt6}(1,-2,-1)^T,
-\quad
-u_3=\frac1{\sqrt2}(1,0,1)^T.
-$$
+</Step>
+</Steps>
 
-令 $Q=(u_1,u_2,u_3)$，则 $Q$ 为正交矩阵，且
-
-$$
-Q^TAQ=\operatorname{diag}(1,2,3).
-$$
-
-于是
-
-$$
-A=Q\operatorname{diag}(1,2,3)Q^T,
-$$
-
-具体地，$\alpha_1^T\alpha_1=3$、$\alpha_2^T\alpha_2=6$、$\alpha_3^T\alpha_3=2$，故
-
-$$
-A=\frac{\alpha_1\alpha_1^T}{3}+\frac{2\alpha_2\alpha_2^T}{6}+\frac{3\alpha_3\alpha_3^T}{2}
-=\frac16\begin{pmatrix}13&-2&5\\-2&10&2\\5&2&13\end{pmatrix}.
-$$
-
-**方法检验与易错点：** 采用 $A=\sum_i\lambda_i u_i u_i^T$ 时 $u_i$ 必须单位化；未经单位化不得直接使用 $\alpha_i\alpha_i^T$。
+<Callout type="warn" title="不能漏掉单位化的分母">若使用未单位化的特征向量 $\alpha_i$，谱分解必须写成 $A=\sum_i\lambda_i\alpha_i\alpha_i^T/(\alpha_i^T\alpha_i)$，不能直接相加原始外积。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-424c54-003" type="essay" number={false}>
+<Question id="core-la-symmetric-2006m123-03" type="essay" number="3" tags="来源:2006年数学一二三, 科目:线性代数, 考点:行和特征值, 考点:正交对角化, 考点:矩阵多项式">
 
-【2006年数学一、数学二、数学三】 设三阶实对称矩阵 $A$ 的各行元素之和均为 $3$，向量
+三阶实对称矩阵 $A$ 的各行元素之和均为 $3$。向量 $\alpha_1=(-1,2,-1)^T$、$\alpha_2=(0,-1,1)^T$ 是方程组 $Ax=0$ 的两个解。
 
-$$
-\alpha_1=(-1,2,-1)^T,\qquad
-\alpha_2=(0,-1,1)^T
-$$
-
-是线性方程组 $Ax=0$ 的两个解.
-
-（1）求 $A$ 的特征值与特征向量；
-
-（2）求正交矩阵 $Q$ 和对角矩阵 $\Lambda$，使得 $Q^TAQ=\Lambda$；
-
-（3）求 $A$ 及 $\left(A-\frac32E\right)^6$，其中 $E$ 为三阶单位矩阵.
+（1）求 $A$ 的特征值与特征向量；（2）求正交矩阵 $Q$ 及对角矩阵 $\Lambda$，使 $Q^TAQ=\Lambda$；（3）求 $A$ 与 $\left(A-\frac32E\right)^6$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（1）特征值为 $3,0,0$。对应可取
-
-$$
-\lambda=3:\ k(1,1,1)^T;
-$$
-
-$$
-\lambda=0:\ k_1\alpha_1+k_2\alpha_2,
-\quad k_1,k_2\text{ 不全为 }0.
-$$
+（1）特征值为 $3,0,0$；对应 $3$ 的全部特征向量是 $k(1,1,1)^T$（$k\ne0$），对应 $0$ 的全部特征向量是 $k_1\alpha_1+k_2\alpha_2$（$k_1,k_2$ 不全为零）。
 
 （2）可取
 
 $$
-Q=\begin{pmatrix}
+\boxed{Q=\begin{pmatrix}
 \frac1{\sqrt3}&-\frac1{\sqrt6}&-\frac1{\sqrt2}\\
 \frac1{\sqrt3}&\frac2{\sqrt6}&0\\
 \frac1{\sqrt3}&-\frac1{\sqrt6}&\frac1{\sqrt2}
-\end{pmatrix},
-\qquad
-\Lambda=\operatorname{diag}(3,0,0).
+\end{pmatrix}},\quad
+\boxed{\Lambda=\operatorname{diag}(3,0,0)}.
 $$
 
 （3）
 
 $$
-A=\begin{pmatrix}1&1&1\\1&1&1\\1&1&1\end{pmatrix},
+\boxed{A=\begin{pmatrix}1&1&1\\1&1&1\\1&1&1\end{pmatrix}},\qquad
+\boxed{\left(A-\frac32E\right)^6=\frac{729}{64}E}.
 $$
 
-$$
-\left(A-\frac32E\right)^6=\left(\frac32\right)^6E=\frac{729}{64}E.
-$$
+<Steps>
+<Step title="行和锁定非零特征方向，两个齐次解给出二重零根">
 
-**解析：** **模型识别与突破口：** 行和相同给定一条特征方向，两个独立零空间向量给定核的维数；用正交投影比逐项列方程更快。
+令 $e=(1,1,1)^T$。各行和均为 $3$，故 $Ae=3e$。又 $A\alpha_1=A\alpha_2=0$，且 $\alpha_1,\alpha_2$ 线性无关，因此零空间至少二维。三阶矩阵的全部特征值恰为 $3,0,0$，零空间为 $\operatorname{span}\{\alpha_1,\alpha_2\}$。
 
-各行元素之和均为 $3$，因此
+</Step>
+<Step title="在零空间内正交化，构造 Q">
 
-$$
-A(1,1,1)^T=3(1,1,1)^T,
-$$
-
-故 $3$ 是一个特征值。
-
-又 $\alpha_1,\alpha_2$ 是 $Ax=0$ 的两个线性无关解，所以它们都是属于特征值 $0$ 的特征向量，并且 $0$ 的几何重数至少为 $2$。三阶矩阵因此恰有特征值
+$e\perp\alpha_1, e\perp\alpha_2$。先单位化 $e$ 与 $\alpha_1$：
 
 $$
-3,0,0.
+u_1=\frac{e}{\sqrt3},\quad u_2=\frac{(-1,2,-1)^T}{\sqrt6}.
 $$
 
-由于 $A$ 实对称，不同特征值的特征空间正交。把 $(1,1,1)^T$、$\alpha_1$ 以及在零特征空间中与 $\alpha_1$ 正交的向量单位化，即可得到答案中的 $Q$。
+再在零空间中选择与 $u_2$ 正交的 $u_3=(-1,0,1)^T/\sqrt2$。直接计算三个单位向量两两正交，故 $Q=(u_1,u_2,u_3)$ 满足 $Q^TQ=E$，且 $Q^TAQ=\Lambda$。
 
-进一步，由谱分解
-
-$$
-A=Q\Lambda Q^T.
-$$
-
-因为只有特征值 $3$ 对应的单位特征向量
+</Step>
+<Step title="谱分解重建 A，再一次性计算六次幂">
 
 $$
-u=\frac1{\sqrt3}(1,1,1)^T
+A=Q\Lambda Q^T=3u_1u_1^T=ee^T,
 $$
 
-贡献非零项，所以
+这正是全 $1$ 矩阵。对于 $A-\frac32E$，其三个特征值分别为 $\frac32,-\frac32,-\frac32$。因此在同一正交基下，其六次幂对角元全为 $(3/2)^6$，得到 $\frac{729}{64}E$。
 
-$$
-A=3uu^T=
-\begin{pmatrix}1&1&1\\1&1&1\\1&1&1\end{pmatrix}.
-$$
+</Step>
+</Steps>
 
-矩阵 $A-\frac32E$ 的特征值为
-
-$$
-\frac32,-\frac32,-\frac32.
-$$
-
-六次方后三个特征值都变为 $(3/2)^6$，故
-
-$$
-\left(A-\frac32E\right)^6=\frac{729}{64}E.
-$$
-
-**方法检验与易错点：** 这也说明实对称秩一矩阵可写成 $\lambda uu^T$（$u$ 为单位向量）；对六次幂无需真的乘六次。
+<Callout type="idea" title="矩阵多项式按谱逐点运算">对于实对称矩阵 $A=Q\operatorname{diag}(\lambda_i)Q^T$，恒有 $p(A)=Q\operatorname{diag}(p(\lambda_i))Q^T$。不必真正做高次矩阵乘法。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-424c54-004" type="essay" number={false}>
+<Question id="core-la-symmetric-2011m123-04" type="essay" number="4" tags="来源:2011年数学一二三, 科目:线性代数, 考点:对称矩阵, 考点:特征值重建">
 
-【2011年数学一、数学二、数学三】 $A$ 为三阶实对称矩阵，$A$ 的秩为 $2$，即 $r(A)=2$，且
+$A$ 为三阶实对称矩阵，且 $r(A)=2$，满足
 
 $$
-A\begin{pmatrix}
-1&1\\
-0&0\\
--1&1
-\end{pmatrix}
-=
-\begin{pmatrix}
--1&1\\
-0&0\\
-1&1
-\end{pmatrix}.
+A\begin{pmatrix}1&1\\0&0\\-1&1\end{pmatrix}
+=\begin{pmatrix}-1&1\\0&0\\1&1\end{pmatrix}.
 $$
 
-（1）求 $A$ 的特征值与特征向量；
-
-（2）求矩阵 $A$.
+（1）求 $A$ 的特征值和相应特征向量；（2）求 $A$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（1）特征值为 $-1,1,0$，可取对应特征向量
+（1）$\lambda=-1,1,0$，对应特征空间依次为
 
 $$
-\alpha_1=(1,0,-1)^T,
-\quad
-\alpha_2=(1,0,1)^T,
-\quad
-\alpha_3=(0,1,0)^T.
+\operatorname{span}\{(1,0,-1)^T\},\quad
+\operatorname{span}\{(1,0,1)^T\},\quad
+\operatorname{span}\{(0,1,0)^T\}.
 $$
 
 （2）
 
 $$
-A=\begin{pmatrix}0&0&1\\0&0&0\\1&0&0\end{pmatrix}.
+\boxed{A=\begin{pmatrix}0&0&1\\0&0&0\\1&0&0\end{pmatrix}}.
 $$
 
-**解析：** **模型识别与突破口：** 按列拆解 $A(\alpha,\beta)=(\mu\alpha,\nu\beta)$，结合秩给出第三个特征值，并由正交补补齐谱。
+<Steps>
+<Step title="按列拆开题目给出的矩阵等式">
 
-把矩阵等式按列拆开：
-
-$$
-A\begin{pmatrix}1\\0\\-1\end{pmatrix}
-=\begin{pmatrix}-1\\0\\1\end{pmatrix}
-=-\begin{pmatrix}1\\0\\-1\end{pmatrix},
-$$
-
-所以
+记 $v_1=(1,0,-1)^T$、$v_2=(1,0,1)^T$。题目意味着
 
 $$
-\alpha_1=(1,0,-1)^T
+Av_1=(-1,0,1)^T=-v_1,\quad Av_2=(1,0,1)^T=v_2.
 $$
 
-是特征值 $-1$ 的特征向量。
+所以 $-1$、$1$ 是特征值，$v_1,v_2$ 为各自的非零特征向量。
 
-同理
+</Step>
+<Step title="用秩与正交性补出第三个特征方向">
 
-$$
-A\begin{pmatrix}1\\0\\1\end{pmatrix}
-=\begin{pmatrix}1\\0\\1\end{pmatrix},
-$$
-
-故
+由于 $r(A)=2$，零空间维数为 $1$，所以 $0$ 是第三个特征值。实对称性保证零特征向量与 $v_1,v_2$ 都正交；解
 
 $$
-\alpha_2=(1,0,1)^T
+x^Tv_1=x_1-x_3=0,\quad x^Tv_2=x_1+x_3=0
 $$
 
-对应特征值 $1$。
+得 $x_1=x_3=0$，因此取 $v_3=(0,1,0)^T$。
 
-由于 $r(A)=2$，必有一个零特征值。又 $A$ 实对称，不同特征值的特征向量正交，因此零特征值对应的特征向量必须同时与 $\alpha_1,\alpha_2$ 正交，可取
+</Step>
+<Step title="根据三个特征方向恢复 A">
 
-$$
-\alpha_3=(0,1,0)^T.
-$$
-
-将三组特征信息合成，或直接利用
+三个单位化方向构成正交基。矩阵在 $v_1$ 方向乘 $-1$，在 $v_2$ 方向乘 $1$，在 $v_3$ 方向为零，因此
 
 $$
-A=P\operatorname{diag}(-1,1,0)P^{-1},
+A=-\frac{v_1v_1^T}{2}+\frac{v_2v_2^T}{2}
+=\begin{pmatrix}0&0&1\\0&0&0\\1&0&0\end{pmatrix}.
 $$
 
-可得
+可反代验证矩阵秩为 $2$ 且满足原列等式。
 
-$$
-A=\begin{pmatrix}0&0&1\\0&0&0\\1&0&0\end{pmatrix}.
-$$
+</Step>
+</Steps>
 
-**方法检验与易错点：** 从 $r(A)=2$ 得到零特征值的几何重数是 $1$；结合实对称性才保证正交特征基。
+<Callout type="idea" title="实对称矩阵的信息如何拼接">已知一部分特征向量时，可先从矩阵方程提取特征值，再由秩补齐零根，最后利用各特征子空间正交构造完整正交基。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-424c54-005" type="essay" number={false}>
 
-【李正元】 设三阶实对称矩阵 $A$ 的秩为 $2$，$6$ 是其二重特征值，且
+<Question id="core-la-symmetric-lizhengyuan-05" type="essay" number="5" tags="来源:李正元, 科目:线性代数, 考点:实对称矩阵, 考点:正交投影">
+
+设三阶实对称矩阵 $A$ 的秩为 $2$，$6$ 是其二重特征值，且
 
 $$
 \alpha_1=(1,1,0)^T,\qquad \alpha_2=(2,1,1)^T,\qquad \alpha_3=(-1,2,-3)^T
@@ -391,482 +278,445 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
-A=\begin{pmatrix}4&2&2\\2&4&-2\\2&-2&4\end{pmatrix}.
+\boxed{A=\begin{pmatrix}4&2&2\\2&4&-2\\2&-2&4\end{pmatrix}}.
 $$
 
-**解析：** **模型识别与突破口：** 二重非零特征值加秩 $2$ 决定谱为 $(6,6,0)$；先找到零特征空间，利用“单位阵减正交投影”直接恢复 $A$。
+<Steps>
+<Step title="第一步：用秩与重数锁定全部特征值">
 
-给定向量虽有三个，但满足 $-5\alpha_1+3\alpha_2+\alpha_3=0$，其中 $\alpha_1,\alpha_2$ 线性无关，因此它们张成二维的 $6$ 特征空间。
+$A$ 是三阶实对称矩阵，可以正交对角化。已知 $6$ 为二重特征值且 $r(A)=2$，故零空间维数为 $3-2=1$。因此完整的特征值（计重数）必为 $6,6,0$。
 
-由 $r(A)=2$ 知 $0$ 也是一个特征值。设 $A\beta=0$，实对称性给出
+验证 $\alpha_1,\alpha_2$ 不成比例，所以它们恰好张成二维特征空间 $E_6$。第三个向量是冗余信息，事实上 $\alpha_3=5\alpha_1-3\alpha_2$。
 
-$$
-\beta^T\alpha_1=\beta^T\alpha_2=0.
-$$
+</Step>
+<Step title="第二步：求与 6 特征空间正交的零特征方向">
 
-解
-
-$$
-\begin{cases}x+y=0,\\2x+y+z=0\end{cases}
-$$
-
-得 $\beta=(1,-1,-1)^T$。$A$ 在 $\beta^\perp$ 上乘以 $6$，在 $\operatorname{span}\{\beta\}$ 上为零，故
+实对称矩阵的不同特征子空间正交。设 $u=(u_1,u_2,u_3)^T$ 是零特征空间的非零向量，则
 
 $$
-A=6\left(E-\frac{\beta\beta^T}{\beta^T\beta}\right)
-=6E-2\begin{pmatrix}1&-1&-1\\-1&1&1\\-1&1&1\end{pmatrix}
-=\begin{pmatrix}4&2&2\\2&4&-2\\2&-2&4\end{pmatrix}.
+\alpha_1^Tu=0,\quad\alpha_2^Tu=0
+\iff\begin{cases}u_1+u_2=0,\\2u_1+u_2+u_3=0.\end{cases}
 $$
 
-由构造可见 $A^T=A$、$r(A)=2$，且三个给定向量均满足 $A\alpha_i=6\alpha_i$，所以条件充分。
+可取 $u=(1,-1,-1)^T$，且 $u^Tu=3$。它的正交补正好是 $E_6$。
 
-**方法提炼：** 具有特征值 $c$（$n-1$ 重）与 $0$（一重）的实对称矩阵，当 $u$ 张成零特征空间时，$A=c(E-uu^T/(u^Tu))$。
+</Step>
+<Step title="第三步：用谱投影直接恢复矩阵">
+
+沿 $u$ 的投影为 $P_0=uu^T/(u^Tu)$；投影到 $E_6=u^\perp$ 的矩阵为 $E-P_0$。因此
+
+$$
+\begin{aligned}
+A&=6(E-P_0)+0P_0\\
+&=6E-\frac6{3}\begin{pmatrix}1&-1&-1\\-1&1&1\\-1&1&1\end{pmatrix}\\
+&=\begin{pmatrix}4&2&2\\2&4&-2\\2&-2&4\end{pmatrix}.
+\end{aligned}
+$$
+
+此矩阵确为实对称阵，$Au=0$，并对每个 $\alpha_i$ 都有 $A\alpha_i=6\alpha_i$；零、非零特征子空间维数分别为 $1,2$，所以秩确为 $2$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="高效模板：缺少一个特征方向时用投影">若实对称矩阵的谱为 $c$（$n-1$ 重）和 $0$（一重），且 $u$ 是零特征方向，则无需求全部特征向量，直接写 $A=c\left(E-uu^T/(u^Tu)\right)$。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-424c54-006" type="essay" number={false}>
+<Question id="core-la-symmetric-lilin880-06" type="essay" number="6" tags="来源:李林880, 科目:线性代数, 考点:伴随矩阵, 考点:正交特征空间">
 
-【李林880】 设 $3$ 阶实对称矩阵 $A$ 的特征值为 $1,2,-1$，对应于前两个特征值的特征向量分别为 $\alpha_1=(2,3,-1)^T$ 和 $\alpha_2=(1,a,2a)^T$。$A^*$ 为 $A$ 的伴随矩阵。求 $(A^*-2E)x=0$ 的通解。
+设三阶实对称矩阵 $A$ 的特征值为 $1,2,-1$，对应于前两个特征值的特征向量分别为
+
+$$
+\alpha_1=(2,3,-1)^T,\qquad\alpha_2=(1,a,2a)^T.
+$$
+
+$A^*$ 为 $A$ 的伴随矩阵，求方程组 $(A^*-2E)x=0$ 的通解。
 
 <Solution>
 
-**答案：**
+**参考答案：** $a=-2$，方程组的通解为
 
 $$
-x=k(2,-1,1)^T,\qquad k\in\mathbb R.
+\boxed{x=k(2,-1,1)^T,\quad k\in\mathbb R}.
 $$
 
-**解析：** **模型识别与突破口：** 先把伴随矩阵的特征值变回原矩阵特征值：$A^*=|A|A^{-1}$；目标是求 $A$ 的 $-1$ 特征空间，而不必求出 $A$ 的九个元素。
+<Steps>
+<Step title="第一步：利用不同特征值对应方向正交，先确定 a">
 
-由于 $|A|=1\cdot2\cdot(-1)=-2\ne0$，$A$ 可逆，且对于 $A\xi=\lambda\xi$，有
-
-$$
-A^*\xi=|A|A^{-1}\xi=\frac{-2}{\lambda}\xi.
-$$
-
-因此 $A^*$ 对应特征值 $2$ 的特征向量，正是 $A$ 对应特征值 $-1$ 的特征向量。
-
-由实对称矩阵不同特征值的特征向量正交，先得
+已知 $A$ 为实对称阵，且 $1\ne2$，因此
 
 $$
-\alpha_1^T\alpha_2=2+3a-2a=2+a=0,
-\qquad a=-2.
+0=\alpha_1^T\alpha_2=2+3a-2a=2+a,
 $$
 
-设目标特征向量为 $x=(x_1,x_2,x_3)^T$，则
+解得 $a=-2$，即 $\alpha_2=(1,-2,-4)^T$。
+
+</Step>
+<Step title="第二步：把伴随方程组转成 A 的特征方程">
+
+$|A|=1\cdot2\cdot(-1)=-2\ne0$，所以
 
 $$
-\begin{cases}
-2x_1+3x_2-x_3=0,\\
-x_1-2x_2-4x_3=0.
-\end{cases}
+A^*=|A|A^{-1}=-2A^{-1}.
 $$
 
-解得 $x=k(2,-1,1)^T$。由于 $A$ 的三个特征值 $1,2,-1$ 互不相同，该解空间恰为一维。
+若 $Av=\lambda v$，则 $A^*v=(-2/\lambda)v$。要求 $A^*x=2x$，其非零解正是 $A$ 关于 $\lambda=-1$ 的特征向量，**不是**关于 $\lambda=2$ 的特征向量。
 
-**方法提炼：** 对可逆矩阵有 $A^*=|A|A^{-1}$；若题目给实对称性和部分特征向量，通常优先用正交补恢复缺失方向。
+</Step>
+<Step title="第三步：求缺失的正交特征方向">
+
+因为 $-1$ 与 $1,2$ 都不同，目标向量 $x=(x_1,x_2,x_3)^T$ 必同时正交于前两个特征向量：
+
+$$
+\begin{cases}2x_1+3x_2-x_3=0,\\x_1-2x_2-4x_3=0.\end{cases}
+$$
+
+由第一式 $x_3=2x_1+3x_2$，代入第二式得 $-7x_1-14x_2=0$，所以 $x_1=-2x_2$、$x_3=-x_2$。令 $x_2=-k$，可得 $x=k(2,-1,1)^T$。齐次方程组包含零解，故 $k$ 可以为 $0$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="特征向量与线性方程组通解不是同一种答案">问“全部特征向量”应规定 $k\ne0$；本题问 $(A^*-2E)x=0$ 的通解，应当**保留零向量**，故 $k\in\mathbb R$。</Callout>
 
 </Solution>
-
 </Question>
 
 ## 二、参数、线性方程组与正交对角化
 
-<Question id="math-424c54-007" type="essay" number={false}>
+<Question id="core-la-symmetric-1996m3-07" type="essay" number="7" tags="来源:1996年数学三, 科目:线性代数, 考点:分块特征值, 考点:正交对角化">
 
-【1996年数学三】 设矩阵
+设
 
 $$
-A=\begin{pmatrix}
-0&1&0&0\\
-1&0&0&0\\
-0&0&y&1\\
-0&0&1&2
-\end{pmatrix}.
+A=\begin{pmatrix}0&1&0&0\\1&0&0&0\\0&0&y&1\\0&0&1&2\end{pmatrix}.
 $$
 
-（1）已知 $A$ 的一个特征值为 $3$，试求 $y$；
-
-（2）求可逆矩阵 $P$，使 $(AP)^T(AP)$ 为对角矩阵.
+（1）已知 $A$ 的一个特征值为 $3$，求 $y$；（2）求可逆矩阵 $P$，使 $(AP)^T(AP)$ 为对角矩阵。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（1）$y=2$；
+（1）$\boxed{y=2}$。
 
-（2）例如可取正交矩阵
-
-$$
-P=\frac1{\sqrt2}
-\begin{pmatrix}
-1&1&0&0\\
-1&-1&0&0\\
-0&0&1&1\\
-0&0&1&-1
-\end{pmatrix},
-$$
-
-此时
+（2）可取正交矩阵
 
 $$
-(AP)^T(AP)=\operatorname{diag}(1,1,9,1).
+\boxed{P=\frac1{\sqrt2}\begin{pmatrix}1&1&0&0\\1&-1&0&0\\0&0&1&1\\0&0&1&-1\end{pmatrix}},
 $$
 
-**解析：** **模型识别与突破口：** 已知某个特征值时优先利用分块结构反求参数；$A^TA$ 的正交对角化等价于利用 $A$ 的正交特征向量。
+此时 $(AP)^T(AP)=\operatorname{diag}(1,1,9,1)$。
 
-矩阵 $A$ 是两个 $2\times2$ 对称块的直和。第一个块
+<Steps>
+<Step title="第一步：将四阶矩阵拆成两个二阶对称块">
 
-$$
-\begin{pmatrix}0&1\\1&0\end{pmatrix}
-$$
-
-的特征值为 $1,-1$。
-
-第二个块为
+写成 $A=\operatorname{diag}(C_1,C_2)$，其中
 
 $$
-C=\begin{pmatrix}y&1\\1&2\end{pmatrix}.
+C_1=\begin{pmatrix}0&1\\1&0\end{pmatrix},\qquad C_2=\begin{pmatrix}y&1\\1&2\end{pmatrix}.
 $$
 
-已知 $3$ 是 $A$ 的特征值，而它不是第一个块的特征值，所以必须是 $C$ 的特征值：
+$C_1$ 的特征值是 $1,-1$；既然 $3$ 是 $A$ 的特征值，它必须属于第二块。
+
+</Step>
+<Step title="第二步：在第二块代入特征值 3 求 y">
 
 $$
-\det(3E-C)=
-\begin{vmatrix}3-y&-1\\-1&1\end{vmatrix}
-=2-y=0.
+0=|3E_2-C_2|=\begin{vmatrix}3-y&-1\\-1&1\end{vmatrix}=2-y,
 $$
 
-故
+故 $y=2$。此时 $C_2=\begin{pmatrix}2&1\\1&2\end{pmatrix}$ 的两条正交特征方向为 $(1,1)^T,(1,-1)^T$，特征值分别为 $3,1$。
 
-$$
-y=2.
-$$
+</Step>
+<Step title="第三步：把每个对称块的单位特征向量作为列">
 
-此时第二个块为
-
-$$
-\begin{pmatrix}2&1\\1&2\end{pmatrix},
-$$
-
-特征值为 $3,1$。由于 $A$ 为实对称矩阵，可取一组标准正交特征向量作为 $P$ 的列。答案中的 $P$ 对应特征值顺序 $1,-1,3,1$，于是
+$C_1$ 对应单位特征向量 $\tfrac1{\sqrt2}(1,1)^T,\tfrac1{\sqrt2}(1,-1)^T$，特征值为 $1,-1$。将这两对向量按原四维坐标补零，得到答案中的正交矩阵 $P$，使
 
 $$
 AP=P\operatorname{diag}(1,-1,3,1).
 $$
 
-因为 $P^TP=E$，所以
+所以
 
 $$
-(AP)^T(AP)=\operatorname{diag}(1,1,9,1),
+(AP)^T(AP)=\operatorname{diag}(1,-1,3,1)^2
+=\operatorname{diag}(1,1,9,1).
 $$
 
-确为对角矩阵。
+</Step>
+</Steps>
 
-**方法检验与易错点：** $(AP)^T(AP)=P^TA^TAP$，因此也可直接对称化 $A^TA$；本题选 $A$ 的单位特征向量更快捷。
+<Callout type="idea" title="为什么不是直接找 A 的逆矩阵">$(AP)^T(AP)=P^TA^TAP$，正是在求 $A^TA$ 的正交对角化。由于本题 $A$ 自身实对称，选用 $A$ 的标准正交特征基即可一并对角化 $A^TA=A^2$。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-424c54-008" type="essay" number={false}>
+<Question id="core-la-symmetric-2001m3-08" type="essay" number="8" tags="来源:2001年数学三, 科目:线性代数, 考点:方程组相容, 考点:正交对角化">
 
-【2001年数学三】 设矩阵
+设
 
 $$
-A=\begin{pmatrix}1&1&a\\1&a&1\\a&1&1\end{pmatrix},
-\qquad
-\beta=\begin{pmatrix}1\\1\\-2\end{pmatrix},
+A=\begin{pmatrix}1&1&a\\1&a&1\\a&1&1\end{pmatrix},\qquad\beta=(1,1,-2)^T.
 $$
 
-已知线性方程组 $Ax=\beta$ 有解但不唯一，试求：
-
-（1）$a$ 的值；
-
-（2）正交矩阵 $Q$，使 $Q^TAQ$ 为对角矩阵.
+已知 $Ax=\beta$ 有解但不唯一。（1）求 $a$；（2）求正交矩阵 $Q$，使 $Q^TAQ$ 为对角矩阵。
 
 <Solution>
 
-**答案：**
-
-（1）$a=-2$；
-
-（2）可取
+**参考答案：**
 
 $$
-Q=\begin{pmatrix}
+\boxed{a=-2},\qquad
+\boxed{Q=\begin{pmatrix}
 \frac1{\sqrt3}&\frac1{\sqrt2}&-\frac1{\sqrt6}\\
 \frac1{\sqrt3}&0&\frac2{\sqrt6}\\
 \frac1{\sqrt3}&-\frac1{\sqrt2}&-\frac1{\sqrt6}
-\end{pmatrix}.
+\end{pmatrix}},
 $$
 
-**解析：** **模型识别与突破口：** “有解但不唯一”应写成 $r(A)=r(A,\beta)<n$；奇异参数只是候选，必须逐个验证相容性。
+且 $Q^TAQ=\operatorname{diag}(0,3,-3)$。
 
-方程组有解但不唯一，说明
+<Steps>
+<Step title="第一步：先按秩条件找奇异参数">
 
-$$
-r(A)=r(A,\beta)<3,
-$$
-
-所以 $|A|=0$。
-
-计算可得
+非齐次组有解但不唯一，等价于 $r(A)=r(A,\beta)<3$。所以必须 $|A|=0$。直接按第一行展开或分解得
 
 $$
-|A|=-(a-1)^2(a+2),
+|A|=-(a-1)^2(a+2)=0,
 $$
 
-故 $a=1$ 或 $a=-2$。
+因此 $a=1$ 或 $a=-2$。注意这一步**仅得到候选参数**。
 
-当 $a=1$ 时，$A$ 的三行完全相同，其列空间由 $(1,1,1)^T$ 张成，而
+</Step>
+<Step title="第二步：检查右端 β 是否属于 A 的列空间">
 
-$$
-\beta=(1,1,-2)^T
-$$
+若 $a=1$，$A$ 为全 $1$ 矩阵，其列空间只有 $\operatorname{span}\{(1,1,1)^T\}$，而 $\beta=(1,1,-2)^T$ 不属于这个空间，故无解，排除。
 
-不在该列空间中，方程无解，排除。因此
-
-$$
-a=-2.
-$$
-
-此时
+若 $a=-2$，矩阵
 
 $$
-A=\begin{pmatrix}1&1&-2\\1&-2&1\\-2&1&1\end{pmatrix}.
+A=\begin{pmatrix}1&1&-2\\1&-2&1\\-2&1&1\end{pmatrix}
 $$
 
-可求得一组两两正交的特征向量
+满足 $A(1,1,1)^T=0$，故秩至多 $2$；左上二阶子式 $-3\ne0$，故秩为 $2$。又 $\beta$ 的分量和为 $0$，与零特征向量 $(1,1,1)^T$ 正交。由于实对称矩阵的像空间等于核的正交补，方程组相容，且有一个自由变量。因此 $a=-2$ 满足题意。
+
+</Step>
+<Step title="第三步：求单位特征向量组成 Q">
+
+容易验得
 
 $$
-(1,1,1)^T,
-\quad
-(1,0,-1)^T,
-\quad
-(-1,2,-1)^T.
+A(1,1,1)^T=0,
+\quad A(1,0,-1)^T=3(1,0,-1)^T,
+\quad A(-1,2,-1)^T=-3(-1,2,-1)^T.
 $$
 
-单位化后依次作列，即得答案中的正交矩阵 $Q$。对应特征值分别为 $0,3,-3$，故
+三向量两两正交，范数分别为 $\sqrt3,\sqrt2,\sqrt6$。单位化并按顺序作列，正是所列 $Q$；由于 $Q^TQ=E$，得到 $Q^TAQ=\operatorname{diag}(0,3,-3)$。
 
-$$
-Q^TAQ=\operatorname{diag}(0,3,-3).
-$$
+</Step>
+</Steps>
 
-**方法检验与易错点：** 只令 $|A|=0$ 会错误保留 $a=1$；检验 $r(A,\beta)$ 才能确保右端属于列空间。
+<Callout type="warn" title="行列式等于零并不等于非齐次方程组有无穷多解">$|A|=0$ 只保证齐次方程有非零解。还必须验 $r(A)=r(A,\beta)$，这正是本题需要排除 $a=1$ 的原因。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-424c54-009" type="essay" number={false}>
+<Question id="core-la-symmetric-2010m23-09" type="essay" number="9" tags="来源:2010年数学二三, 科目:线性代数, 考点:含参实对称矩阵, 考点:已知特征向量">
 
-【2010年数学二、数学三】 设
+设
 
 $$
 A=\begin{pmatrix}0&-1&4\\-1&3&a\\4&a&0\end{pmatrix},
 $$
 
-正交矩阵 $Q$ 使得 $Q^TAQ$ 为对角矩阵，若 $Q$ 的第 $1$ 列为
-
-$$
-\frac1{\sqrt6}(1,2,1)^T,
-$$
-
-求 $a,Q$.
+正交矩阵 $Q$ 使 $Q^TAQ$ 为对角矩阵。若 $Q$ 的第 $1$ 列为 $\frac1{\sqrt6}(1,2,1)^T$，求 $a,Q$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
-a=-1,
-$$
-
-可取
-
-$$
-Q=\begin{pmatrix}
+\boxed{a=-1},\qquad
+\boxed{Q=\begin{pmatrix}
 \frac1{\sqrt6}&-\frac1{\sqrt2}&\frac1{\sqrt3}\\
 \frac2{\sqrt6}&0&-\frac1{\sqrt3}\\
 \frac1{\sqrt6}&\frac1{\sqrt2}&\frac1{\sqrt3}
-\end{pmatrix}.
+\end{pmatrix}},
 $$
 
-**解析：** **模型识别与突破口：** 对称阵正交对角化矩阵的每一列必为单位特征向量；已知一列可由 $Av=\lambda v$ 反求参数。
+对应 $Q^TAQ=\operatorname{diag}(2,-4,5)$。
 
-$Q$ 的第一列是 $A$ 的单位特征向量，因此
+<Steps>
+<Step title="第一步：已知 Q 的一列，就已知 A 的一条特征方向">
 
-$$
-A\begin{pmatrix}1\\2\\1\end{pmatrix}
-=\lambda\begin{pmatrix}1\\2\\1\end{pmatrix}.
-$$
-
-左边为
+因为 $Q$ 正交且 $Q^TAQ$ 为对角阵，$Q$ 的每列都是 $A$ 的单位特征向量。令 $v=(1,2,1)^T$，则 $Av=\lambda v$。实际相乘：
 
 $$
-\begin{pmatrix}
-2\\
-5+a\\
-4+2a
-\end{pmatrix}.
+Av=(2,\,5+a,\,4+2a)^T.
 $$
 
-由第一分量得 $\lambda=2$。再比较第二、三分量：
+对比第一分量，$\lambda=2$；再由 $5+a=2\lambda=4$ 及 $4+2a=\lambda=2$，均得 $a=-1$。
+
+</Step>
+<Step title="第二步：寻找与第一列正交的两条特征方向">
+
+代回 $a=-1$，取
 
 $$
-5+a=4,
-\qquad
-4+2a=2,
+u_2=(-1,0,1)^T,\qquad \nu_3=(1,-1,1)^T.
 $$
 
-均得到
+逐一检验 $Au_2=-4u_2$、$Au_3=5u_3$；并且 $v,u_2,u_3$ 两两正交。
+
+</Step>
+<Step title="第三步：单位化并按特征值顺序排成矩阵">
+
+$\|v\|=\sqrt6$、$\|u_2\|=\sqrt2$、$\|u_3\|=\sqrt3$，故令 $Q=(v/\sqrt6,u_2/\sqrt2,u_3/\sqrt3)$。这样 $Q^TQ=E$ 且
 
 $$
-a=-1.
+AQ=Q\operatorname{diag}(2,-4,5),
 $$
 
-代入后求得另外两个特征值对应的特征向量，可取
+所求成立。各特征向量允许整体乘 $-1$，因此 $Q$ 并不唯一。
 
-$$
-(-1,0,1)^T,
-\qquad
-(1,-1,1)^T.
-$$
+</Step>
+</Steps>
 
-它们与 $(1,2,1)^T$ 两两正交。分别单位化并按列排列，就得到答案中的正交矩阵 $Q$。
-
-**方法检验与易错点：** 注意 $P$ 的特征向量列与对应对角元必须同序；特征值所对应向量还可以整体变号。
+<Callout type="idea" title="参数先于完整特征多项式">当题目已给正交对角化矩阵的一列时，直接使用 $Av=\lambda v$ 通常比先算三阶特征行列式更短，也更能避免参数分支。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-424c54-010" type="essay" number={false}>
+<Question id="core-la-symmetric-zhangyu-10" type="essay" number="10" tags="来源:张宇1000题, 科目:线性代数, 考点:行和与迹, 考点:正交谱分解">
 
-【张宇1000题】 设三阶实对称矩阵 $A$ 的各行元素之和与对角线元素之和均为 $2$，且
+三阶实对称矩阵 $A$ 的各行元素之和与对角线元素之和均为 $2$，且 $\alpha=(2,1,0)^T$、$\beta=(0,1,2)^T$ 是方程组
 
 $$
-\alpha=(2,1,0)^T,\qquad \beta=(0,1,2)^T
+(A-E)x=(1,1,1)^T
 $$
 
-是 $(A-E)x=(1,1,1)^T$ 的两个解。求 $A$。
+的两个解。求 $A$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
-A=\begin{pmatrix}1&1&0\\1&0&1\\0&1&1\end{pmatrix}.
+\boxed{A=\begin{pmatrix}1&1&0\\1&0&1\\0&1&1\end{pmatrix}}.
 $$
 
-**解析：** **模型识别与突破口：** “行和”确定一个特征对；“两非齐次解之差”给出另一个特征对；“迹”确定第三个特征值。接着借助实对称性找到第三个特征方向。
+<Steps>
+<Step title="第一步：从行和与非齐次解之差提取两条特征方向">
 
-记 $e=(1,1,1)^T$。行和为 $2$，故 $Ae=2e$。由 $\alpha,\beta$ 均满足 $(A-E)x=e$，有
+令 $e=(1,1,1)^T$。行和为 $2$ 意味着 $Ae=2e$。
+
+两特解同满足 $(A-E)x=e$，相减得到 $(A-E)(\alpha-\beta)=0$。因为 $\alpha-\beta=2(1,0,-1)^T$，故令 $v=(1,0,-1)^T$，有 $Av=v$。两条特征方向对应的特征值分别为 $2,1$。
+
+</Step>
+<Step title="第二步：利用迹求第三个特征值，再用正交性求方向">
+
+$\operatorname{tr}A=2$ 是三个特征值之和，所以第三个特征值 $\lambda_3=2-2-1=-1$。实对称性保证对应特征向量 $w$ 同时垂直于 $e$ 和 $v$。解
 
 $$
-(A-E)(\alpha-\beta)=0.
+w_1+w_2+w_3=0,\quad w_1-w_3=0
 $$
 
-而 $\alpha-\beta=2(1,0,-1)^T$，令 $v=(1,0,-1)^T$，便有 $Av=v$。
+可取 $w=(1,-2,1)^T$，三向量互相正交。
 
-又 $\operatorname{tr}(A)=2$，已知的两个特征值为 $2,1$ 且不同，故第三个特征值为 $2-2-1=-1$。利用正交性，可取与 $e,v$ 都正交的特征向量 $w=(1,-2,1)^T$。于是
+</Step>
+<Step title="第三步：从投影分解重建 A">
+
+对应方向范数平方为 $e^Te=3$、$v^Tv=2$、$w^Tw=6$。实对称谱分解给出
 
 $$
-A=2\frac{ee^T}{e^Te}+\frac{vv^T}{v^Tv}-\frac{ww^T}{w^Tw}
-=\frac23ee^T+\frac12vv^T-\frac16ww^T
-=\begin{pmatrix}1&1&0\\1&0&1\\0&1&1\end{pmatrix}.
+\begin{aligned}
+A&=2\frac{ee^T}{3}+1\frac{vv^T}{2}-1\frac{ww^T}{6}\\
+&=\begin{pmatrix}1&1&0\\1&0&1\\0&1&1\end{pmatrix}.
+\end{aligned}
 $$
 
-最后验证：它的各行和及迹均为 $2$，并且 $(A-E)\alpha=(A-E)\beta=e$，满足全部条件。
+核查行和均为 $2$、迹为 $2$；$(A-E)\alpha=(1,1,1)^T$ 且 $(A-E)\beta=(1,1,1)^T$，所有题设均满足。
 
-**方法提炼：** 对称矩阵题若同时出现“行和—迹—线性方程组多个解”，先转化为几条互相正交的特征方向，无须设置六个未知对称元素。
+</Step>
+</Steps>
+
+<Callout type="idea" title="三种信息对应三类操作">“每行之和”意味着全 $1$ 向量是特征向量；“同一非齐次组的两个解”意味着两解之差是齐次解；“对角线元素之和”提供特征值总和。</Callout>
 
 </Solution>
-
 </Question>
 
 ## 三、谱定理及其逆命题：相似、秩和结构判定
 
-<Question id="math-424c54-011" type="essay" number={false}>
+<Question id="core-la-symmetric-2002m1-11" type="essay" number="11" tags="来源:2002年数学一, 科目:线性代数, 考点:相似与特征多项式, 考点:谱定理">
 
-【2002年数学一】 设 $A,B$ 为同阶方阵.
+设 $A,B$ 为同阶方阵。
 
-（1）如果 $A,B$ 相似，试证 $A,B$ 的特征多项式相等；
-
-（2）举一个二阶方阵的例子说明（1）的逆命题不成立；
-
-（3）当 $A,B$ 均为实对称矩阵时，试证（1）的逆命题成立.
+（1）若 $A,B$ 相似，证明其特征多项式相等；（2）举一个二阶矩阵反例，说明逆命题一般不成立；（3）当 $A,B$ 均为实对称矩阵时，证明逆命题成立。
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：** （1）相似必有相同特征多项式；（2）零矩阵和非零平方零矩阵给出反例；（3）**两个同阶实对称矩阵若特征多项式相同，则必相似**。
 
-**解析：** **模型识别与突破口：** 一般矩阵的特征多项式只给出代数重数；实对称矩阵自动正交可对角化，因而同谱等价于相似。
+<Steps>
+<Step title="第一问：从相似定义计算特征行列式">
 
-（1）若 $A\sim B$，则存在可逆矩阵 $P$ 使
-
-$$
-B=P^{-1}AP.
-$$
-
-于是
+若 $B=P^{-1}AP$ 且 $P$ 可逆，则
 
 $$
-\lambda E-B
-=P^{-1}(\lambda E-A)P,
+\lambda E-B=P^{-1}(\lambda E-A)P.
 $$
 
-取行列式得
+两端取行列式，利用 $|P^{-1}||P|=1$，得到
 
 $$
 |\lambda E-B|=|\lambda E-A|.
 $$
 
-故特征多项式相等。
+此式对任意 $\lambda$ 成立，故特征多项式相等，特征值及代数重数完全一致。
 
-（2）可取
+</Step>
+<Step title="第二问：同谱并不能排除不同的幂零结构">
 
-$$
-A=\begin{pmatrix}0&0\\0&0\end{pmatrix},
-\qquad
-B=\begin{pmatrix}0&1\\0&0\end{pmatrix}.
-$$
-
-二者的特征多项式均为 $\lambda^2$，但 $A=0$，若与 $B$ 相似则必有 $B=0$，矛盾，所以二者不相似。
-
-（3）若 $A,B$ 都是实对称矩阵，且特征多项式相同，则它们的全部特征值连同代数重数完全相同。由实对称矩阵谱定理，存在正交矩阵 $Q_1,Q_2$ 使
+取
 
 $$
-Q_1^TAQ_1=\Lambda,
-\qquad
-Q_2^TBQ_2=\Lambda,
+A=\begin{pmatrix}0&0\\0&0\end{pmatrix},\qquad B=\begin{pmatrix}0&1\\0&0\end{pmatrix}.
 $$
 
-其中 $\Lambda$ 可按同样顺序排列特征值。因此
+两者特征多项式同为 $\lambda^2$，但 $r(A)=0$、$r(B)=1$；相似变换保持秩，故 $A$ 不可能与 $B$ 相似。也可说明：零矩阵只能与自身相似。
+
+</Step>
+<Step title="第三问：实对称性补足了可对角化的充分条件">
+
+假设 $A,B$ 都是实对称矩阵且同谱。由谱定理，存在正交矩阵 $Q_A,Q_B$ 使
 
 $$
-A\sim\Lambda\sim B,
+Q_A^TAQ_A=\Lambda_A,\qquad Q_B^TBQ_B=\Lambda_B.
 $$
 
-从而 $A\sim B$。
+由于全部特征值及重数相同，可以调整特征向量的排列，使两对角阵为同一 $\Lambda$。因此
 
-关键区别是：一般矩阵还须检查各特征空间的维数；实对称矩阵的代数重数与几何重数相等，故特征值及其重数已完全决定相似类。
+$$
+A=Q_A\Lambda Q_A^T,\quad B=Q_B\Lambda Q_B^T.
+$$
 
-**方法检验与易错点：** 一般矩阵即使特征值和重数相同也可能不相似；反例使用零矩阵与非零幂零矩阵最直接。
+令 $P=Q_AQ_B^T$，便有 $P^TAP=B$；$P$ 正交，所以 $A,B$ 不仅相似，而且**正交相似**。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="同谱与相似之间缺的是什么">对于一般矩阵，特征多项式只给出代数重数；还要考虑各特征空间维数等结构信息。实对称矩阵自动具有完整正交特征基，才可从同谱直接推出相似。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-424c54-012" type="single" number={false}>
+<Question id="core-la-symmetric-2010m123-12" type="single" number="12" tags="来源:2010年数学一二三, 科目:线性代数, 考点:矩阵多项式, 考点:秩与重数">
 
-【2010年数学一、数学二、数学三】 设 $A$ 为四阶实对称矩阵，且 $A^2+A=O$，若 $A$ 的秩为 $3$，则 $A$ 相似于（ ）.
+设 $A$ 为四阶实对称矩阵，且 $A^2+A=O$、$r(A)=3$，则 $A$ 相似于（ ）。
 
 <Option>$\operatorname{diag}(1,1,1,0)$</Option>
 <Option>$\operatorname{diag}(1,1,-1,0)$</Option>
@@ -875,51 +725,35 @@ $$
 
 <Solution>
 
-**模型识别与突破口：** 实对称矩阵可正交对角化，矩阵方程给出特征值候选；秩决定零特征值的重数。
+**答案：** D，$\operatorname{diag}(-1,-1,-1,0)$。
 
-由
+<Steps>
+<Step title="由矩阵方程确定所有可能的特征值">
 
-$$
-A^2+A=O
-$$
-
-可知任一特征值 $\lambda$ 满足
+若 $Av=\lambda v$ 且 $v\ne0$，将 $v$ 代入 $A^2+A=O$ 得 $(\lambda^2+\lambda)v=0$，故
 
 $$
-\lambda^2+\lambda=0,
+\lambda(\lambda+1)=0\quad\Longrightarrow\quad\lambda\in\{0,-1\}.
 $$
 
-即
+</Step>
+<Step title="由秩与实对称性确定重数">
 
-$$
-\lambda=0\quad\text{或}\quad-1.
-$$
+$r(A)=3$，所以 $\dim\ker A=4-3=1$。$A$ 实对称，必可正交对角化；于是 $0$ 的代数重数也是 $1$，其余三个特征值只能为 $-1$。
 
-又 $r(A)=3$，因此零特征值的几何重数为
+因此 $A\sim\operatorname{diag}(-1,-1,-1,0)$，选择 D。
 
-$$
-\dim N(A)=4-3=1.
-$$
+</Step>
+</Steps>
 
-因为 $A$ 为实对称矩阵，必可对角化，所以零特征值的代数重数也为 $1$，其余三个特征值只能都是 $-1$。
-
-故
-
-$$
-A\sim\operatorname{diag}(-1,-1,-1,0),
-$$
-
-选 **D**。
-
-**方法检验与易错点：** 即使不加实对称条件，本题因 $t(t+1)$ 无重根也能推出可对角化；考试中用已知“实对称”即可直接说明。
+<Callout type="idea" title="为什么不必计算任何矩阵元素">多项式恒等式限制特征值候选，秩限制零特征值的数量，实对称性确保可对角化。事实上 $t(t+1)$ 无重因子，单凭该多项式关系就可得到可对角化。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-424c54-013" type="single" number={false}>
+<Question id="core-la-symmetric-zhangyu-13" type="single" number="13" tags="来源:张宇1000题, 科目:线性代数, 考点:谱定理逆命题, 考点:正交特征基">
 
-【张宇1000题】 设 $A$ 为三阶实矩阵。判断“$A$ 为实对称矩阵”是“$A$ 有三个两两正交的实特征向量”的何种条件。
+设 $A$ 为三阶实矩阵。判断“$A$ 为实对称矩阵”是“$A$ 有三个两两正交的实特征向量”的何种条件。
 
 <Option>充分但非必要</Option>
 <Option>必要但非充分</Option>
@@ -928,140 +762,110 @@ $$
 
 <Solution>
 
-**模型识别与突破口：** 谱定理不仅能用于“对称推出正交特征基”，反过来“存在完整实正交特征基”也迫使矩阵对称。
+**答案：** C，充分必要条件。
 
-若 $A^T=A$，由实对称矩阵谱定理，存在三个两两正交且非零的实特征向量，因此条件充分。
+<Tabs items={['充分性：实对称推出正交特征基','必要性：正交特征基推出实对称']}>
+<Tab value="充分性：实对称推出正交特征基">
 
-反过来，设 $v_1,v_2,v_3$ 是三个两两正交的非零实特征向量。正交性保证它们线性无关，单位化后构成正交矩阵 $Q$，且
+由实对称矩阵的谱定理，存在正交矩阵 $Q$ 使 $Q^TAQ=\Lambda$，$\Lambda$ 为实对角阵。因此 $Q$ 的三列就是两两正交的非零实特征向量，命题充分。
+
+</Tab>
+<Tab value="必要性：正交特征基推出实对称">
+
+设给定三向量 $v_i$ 两两正交且非零。归一化后构成三阶正交矩阵 $Q$，满足
 
 $$
-Q^{-1}AQ=Q^TAQ=\operatorname{diag}(\lambda_1,\lambda_2,\lambda_3),
+AQ=Q\Lambda,\qquad\Lambda=\operatorname{diag}(\lambda_1,\lambda_2,\lambda_3).
 $$
 
-右端为实对角矩阵（因为 $A,v_i$ 均为实）。因此
+由于 $A$、$v_i$ 都为实数，$\lambda_i$ 为实数。故 $A=Q\Lambda Q^T$，从而
 
 $$
-A=Q\operatorname{diag}(\lambda_1,\lambda_2,\lambda_3)Q^T,
+A^T=(Q\Lambda Q^T)^T=Q\Lambda^TQ^T=A.
 $$
 
-转置得 $A^T=A$，即条件也必要，选 C。
+所以该性质也必要。
 
-**易错点：** “有三个线性无关的特征向量”仅推出一般相似对角化；此题是两两正交且可组成整个三维空间，才能推出实对称性。
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="不要把线性无关偷换成正交">三个线性无关的实特征向量仅证明可相似对角化；必须有**完整的正交特征基**，才可推出实矩阵对称。</Callout>
 
 </Solution>
-
 </Question>
 
 ## 四、矩阵多项式、伴随矩阵与投影结构
 
-<Question id="math-424c54-014" type="essay" number={false}>
+<Question id="core-la-symmetric-2007m123-14" type="essay" number="14" tags="来源:2007年数学一二三, 科目:线性代数, 考点:特征值多项式, 考点:正交投影">
 
-【2007年数学一、数学二、数学三】 设三阶实对称矩阵 $A$ 的特征值 $\lambda_1=1,\lambda_2=2,\lambda_3=-2$，
-
-$$
-\alpha_1=(1,-1,1)^T
-$$
-
-是 $A$ 的属于 $\lambda_1$ 的一个特征向量，记
+三阶实对称矩阵 $A$ 的特征值依次为 $1,2,-2$，其中 $\alpha_1=(1,-1,1)^T$ 是 $\lambda=1$ 的一个特征向量。记
 
 $$
-B=A^5-4A^3+E,
+B=A^5-4A^3+E.
 $$
 
-其中 $E$ 为三阶单位矩阵.
-
-（1）验证 $\alpha_1$ 是矩阵 $B$ 的特征向量，并求 $B$ 的全部特征值与特征向量；
-
-（2）求矩阵 $B$.
+（1）验证 $\alpha_1$ 是 $B$ 的特征向量，求 $B$ 的所有特征值与特征向量；（2）求 $B$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（1）$B$ 的特征值为 $-2,1,1$。其中
-
-$$
-\lambda=-2:\ k\alpha_1,\ k\ne0;
-$$
+（1）$B$ 的特征值为 $-2,1,1$；属于 $-2$ 的全部非零特征向量为 $k(1,-1,1)^T\ (k\ne0)$，属于 $1$ 的全部非零特征向量为满足
 
 $$
-\lambda=1:\ k_2\alpha_2+k_3\alpha_3,
+x_1-x_2+x_3=0,\qquad x\ne0
 $$
 
-可取
-
-$$
-\alpha_2=(-1,0,1)^T,\qquad
-\alpha_3=(1,1,0)^T,
-$$
-
-且 $k_2,k_3$ 不全为 $0$。
+的向量（例如 $\operatorname{span}\{(-1,0,1)^T,(1,1,0)^T\}\setminus\{0\}$）。
 
 （2）
 
 $$
-B=\begin{pmatrix}0&1&-1\\1&0&1\\-1&1&0\end{pmatrix}.
+\boxed{B=\begin{pmatrix}0&1&-1\\1&0&1\\-1&1&0\end{pmatrix}}.
 $$
 
-**解析：** **模型识别与突破口：** 先把矩阵多项式作用到各特征值；当两个不同特征值在多项式下合并时，新特征空间是原空间的直和。
+<Steps>
+<Step title="第一步：把多项式作用到每个原特征值">
 
-设多项式
-
-$$
-p(t)=t^5-4t^3+1.
-$$
-
-若 $A\xi=\lambda\xi$，则
+记 $p(t)=t^5-4t^3+1$。若 $Av=\lambda v$，则 $p(A)v=p(\lambda)v$。计算得到
 
 $$
-B\xi=p(A)\xi=p(\lambda)\xi.
+p(1)=-2,\qquad p(2)=1,\qquad p(-2)=1.
 $$
 
-因此 $A$ 的特征向量同时也是 $B$ 的特征向量，而对应特征值由 $p(\lambda)$ 给出。
+因此 $B\alpha_1=-2\alpha_1$，完成验证；其余两条原本对应 $2,-2$ 的特征方向，都在 $B$ 中合并为特征值 $1$。
 
-计算：
+</Step>
+<Step title="第二步：利用正交性写出完整的两个特征空间">
 
-$$
-p(1)=-2,
-\qquad
-p(2)=1,
-\qquad
-p(-2)=1.
-$$
+$A$ 的三个特征值互不相同且 $A$ 实对称，所以其三个特征方向互相正交。由多项式谱映射，$B$ 的 $-2$ 特征空间为 $\operatorname{span}\{\alpha_1\}$；$B$ 的 $1$ 特征空间为 $\alpha_1^\perp$，也就是 $x_1-x_2+x_3=0$。
 
-故 $B$ 的特征值为 $-2,1,1$，其中 $\alpha_1$ 对应 $-2$。
+可取 $v_2=(-1,0,1)^T$ 与 $v_3=(1,1,0)^T$ 作为后一空间的一组基。注意它们是 **$B$ 的特征向量**，不必分别也是 $A$ 的特征向量。
 
-由于 $A$ 实对称，属于 $2,-2$ 的两个特征向量都与 $\alpha_1$ 正交。因此 $B$ 的 $\lambda=1$ 特征空间就是
+</Step>
+<Step title="第三步：利用重特征空间的投影重建 B">
+
+单位向量 $u=\alpha_1/\sqrt3$。$B$ 在 $u$ 方向作用为 $-2$，在 $u^\perp$ 上作用为 $1$，故
 
 $$
-\alpha_1^\perp.
+\begin{aligned}
+B&=-2uu^T+(E-uu^T)\\
+&=E-3uu^T=E-\alpha_1\alpha_1^T\\
+&=\begin{pmatrix}0&1&-1\\1&0&1\\-1&1&0\end{pmatrix}.
+\end{aligned}
 $$
 
-可取其中两个线性无关向量
+</Step>
+</Steps>
 
-$$
-\alpha_2=(-1,0,1)^T,
-\quad
-\alpha_3=(1,1,0)^T.
-$$
-
-再将 $u=\alpha_1/\sqrt3$ 单位化。$B$ 在 $u$ 方向的特征值为 $-2$，在 $u^\perp$ 上为 $1$，故
-
-$$
-B=E-3uu^T=E-\alpha_1\alpha_1^T,
-$$
-
-展开即得答案中的矩阵。
-
-**方法检验与易错点：** 多项式映射后两个特征值可能“并根”，此时不能把 $B$ 的特征值 $1$ 当作单一一维特征空间。
+<Callout type="idea" title="不同原特征值可能映射到同一个新特征值">求 $p(A)$ 的特征空间时，不仅代入 $p(\lambda_i)$，还要检查是否出现 $p(\lambda_i)=p(\lambda_j)$；合并后其特征空间是相应原特征空间的直和。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-424c54-015" type="essay" number={false}>
+<Question id="core-la-symmetric-lilin-15" type="essay" number="15" tags="来源:李林880, 科目:线性代数, 考点:正交特征方向, 考点:相似对角化">
 
-【李林880】 设 $\alpha,\beta$ 为三维实单位列向量，且 $\alpha^T\beta=0$，令
+设 $\alpha,\beta$ 为三维实单位列向量，且 $\alpha^T\beta=0$，令
 
 $$
 A=\alpha\beta^T+\beta\alpha^T.
@@ -1075,55 +879,68 @@ $$
 
 <Solution>
 
-**答案：**
-
-$A$ 可正交对角化，且
+**参考答案：** $A$ 不仅可以相似对角化，而且可以正交对角化。题给 $P$ 可逆，且
 
 $$
-P^{-1}AP=\operatorname{diag}(0,1,-1).
+\boxed{P^{-1}AP=\operatorname{diag}(0,1,-1)}.
 $$
 
-**解析：** **模型识别与突破口：** 这不是求特征多项式的题；$A$ 在两维空间 $\operatorname{span}\{\alpha,\beta\}$ 上交换两个基方向，在其正交补上为零。
+<Steps>
+<Step title="第一步：求 A 对两个已知正交方向的作用">
 
-因为 $\alpha^T\beta=0$、$\|\alpha\|=\|\beta\|=1$，直接有
+利用 $\alpha^T\alpha=\beta^T\beta=1$ 和 $\alpha^T\beta=0$，分别计算
 
 $$
-A\alpha=\beta,\qquad A\beta=\alpha,
+A\alpha=\alpha(\beta^T\alpha)+\beta(\alpha^T\alpha)=\beta,
 $$
 
-所以
+$$
+A\beta=\alpha(\beta^T\beta)+\beta(\alpha^T\beta)=\alpha.
+$$
+
+相加、相减可得
 
 $$
 A(\alpha+\beta)=\alpha+\beta,\qquad
 A(\beta-\alpha)=-(\beta-\alpha).
 $$
 
-另外，任何与 $\alpha,\beta$ 正交的非零向量对应特征值 $0$。这三条互相正交的方向张成 $\mathbb R^3$，故 $A$ 可正交对角化。
+因此 $\alpha+\beta$、$\beta-\alpha$ 分别是特征值 $1,-1$ 的特征向量。
 
-还须检查题给 $P$ 的第一列是否与后两列独立。由 $A\gamma=0$，分别左乘 $\alpha^T,\beta^T$ 得
+</Step>
+<Step title="第二步：证明核空间方向 γ 与上述方向互补">
 
-$$
-\beta^T\gamma=\alpha^TA\gamma=0,\qquad
-\alpha^T\gamma=\beta^TA\gamma=0.
-$$
-
-因此 $\gamma\perp\alpha,\beta$，且 $\gamma\ne0$，与非零正交的 $\alpha+\beta$、$\beta-\alpha$ 组成三条独立方向，故 $P$ 可逆。按列关系
+由 $A\gamma=0$，左乘 $\alpha^T$ 与 $\beta^T$：
 
 $$
-AP=P\operatorname{diag}(0,1,-1),
+\alpha^TA\gamma=\beta^T\gamma=0,\qquad
+\beta^TA\gamma=\alpha^T\gamma=0.
 $$
 
-两边左乘 $P^{-1}$ 得所求。
+所以 $\gamma$ 同时垂直于 $\alpha,\beta$。又因 $\gamma\ne0$、$\alpha,\beta$ 是正交单位向量，三条方向 $\gamma,\alpha+\beta,\beta-\alpha$ 均非零、两两正交，故线性无关；这同时证明 $P$ 可逆。
 
-**易错点：** $P$ 不必是正交矩阵；本题只能直接断言 $P^{-1}AP$ 对角化，不能写成 $P^TAP$。
+</Step>
+<Step title="第三步：按 P 的列次序组装相似矩阵">
+
+三列向量对应特征值依次为 $0,1,-1$，所以
+
+$$
+AP=(0,2(\alpha+\beta),-(\beta-\alpha))=P\operatorname{diag}(0,1,-1).
+$$
+
+左乘 $P^{-1}$ 得结论。由于 $A^T=A$，也可独立利用实对称谱定理说明它可正交对角化。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="相似对角化不要求 P 正交">题中 $P$ 的列虽然彼此正交，但长度不一定全为 $1$，因此只能直接写 $P^{-1}AP$，不可无条件将 $P^{-1}$ 改成 $P^T$。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-424c54-016" type="essay" number={false}>
+<Question id="core-la-symmetric-lilin-16" type="essay" number="16" tags="来源:李林880, 科目:线性代数, 考点:正交投影, 考点:伴随矩阵行列式">
 
-【李林880】 设 $\alpha_1,\ldots,\alpha_k$ 是 $n$ 维两两正交的单位实列向量（$1<k\le n$），令
+设 $\alpha_1,\ldots,\alpha_k$ 是 $n$ 维两两正交的单位实列向量（$1<k\le n$），令
 
 $$
 A=\sum_{i=1}^k\alpha_i\alpha_i^T.
@@ -1133,43 +950,54 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
-|(A+E)^*|=2^{k(n-1)}.
+\boxed{|(A+E)^*|=2^{k(n-1)}}.
 $$
 
-**解析：** **模型识别与突破口：** 不直接展开高阶伴随阵。先识别 $A$ 是秩为 $k$ 的正交投影，再用特征值求 $|A+E|$。
+<Steps>
+<Step title="第一步：认出 A 为 k 维子空间上的正交投影">
 
-记 $U=(\alpha_1,\ldots,\alpha_k)$，则 $U^TU=I_k$、$A=UU^T$，于是
-
-$$
-A^2=UU^TUU^T=U(U^TU)U^T=A,
-$$
-
-且 $r(A)=k$：因为 $AU=U$，故 $r(A)\ge k$；由 $A=UU^T$ 又有 $r(A)\le k$。
-
-所以 $A$ 有 $k$ 个特征值 $1$ 与 $n-k$ 个特征值 $0$。$A+E$ 的特征值为 $2$（$k$ 重）、$1$（$n-k$ 重），因此
+记 $U=(\alpha_1,\ldots,\alpha_k)$，由两两正交且单位化有 $U^TU=E_k$。于是
 
 $$
-|A+E|=2^k\ne0.
+A=UU^T,\qquad A^2=U(U^TU)U^T=A.
 $$
 
-对任意 $n$ 阶矩阵 $M$，有 $|M^*|=|M|^{n-1}$。取 $M=A+E$ 即得
+对 $x\in\operatorname{span}\{\alpha_i\}$，$Ax=x$；对 $x\perp\alpha_i\ (1\le i\le k)$，$Ax=0$。所以 $A$ 的特征值为 $1$（$k$ 重）及 $0$（$n-k$ 重）。
+
+</Step>
+<Step title="第二步：计算 A+E 的行列式">
+
+将全部特征值加 $1$，可知 $A+E$ 的特征值是 $2$（$k$ 重）和 $1$（$n-k$ 重），故
 
 $$
-|(A+E)^*|=(2^k)^{n-1}=2^{k(n-1)}.
+|A+E|=2^k\cdot1^{n-k}=2^k\ne0.
 $$
 
-**方法提炼：** $U^TU=I_k\Rightarrow UU^T$ 为正交投影，遇到它的幂、逆或伴随行列式，优先分解空间 $\operatorname{Im}U\oplus(\operatorname{Im}U)^\perp$。
+</Step>
+<Step title="第三步：使用伴随行列式公式">
+
+对任意 $n$ 阶可逆矩阵 $M$，$M^*=|M|M^{-1}$，两边取行列式得
+
+$$
+|M^*|=|M|^n|M^{-1}|=|M|^{n-1}.
+$$
+
+取 $M=A+E$ 即得 $|(A+E)^*|=(2^k)^{n-1}=2^{k(n-1)}$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="投影的谱一步确定各种矩阵函数">若 $P^2=P$ 且 $r(P)=k$，则 $P$ 的特征值只能是 $0,1$，因而 $|E+tP|=(1+t)^k$。本题对应 $t=1$，再结合伴随公式即可。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-424c54-017" type="essay" number={false}>
+<Question id="core-la-symmetric-zhangyu-17" type="essay" number="17" tags="来源:张宇1000题, 科目:线性代数, 考点:核空间正交补, 考点:幂等投影">
 
-【张宇1000题】 设 $A$ 为三阶实对称矩阵，$\operatorname{tr}(A)=1$，且 $Ax=0$ 的通解为
+设 $A$ 为三阶实对称矩阵，$\operatorname{tr}(A)=1$，且 $Ax=0$ 的通解为
 
 $$
 x=k_1(-2,1,0)^T+k_2(-3,0,1)^T.
@@ -1179,43 +1007,52 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：** 对所有正整数 $n$，
 
 $$
-A^n=A=\frac1{14}\begin{pmatrix}1&2&3\\2&4&6\\3&6&9\end{pmatrix}
-\quad(n=1,2,\ldots).
+\boxed{A^n=A=\frac1{14}\begin{pmatrix}1&2&3\\2&4&6\\3&6&9\end{pmatrix}}.
 $$
 
-**解析：** **模型识别与突破口：** 两个零空间方向直接确定非零特征方向；迹为 $1$ 决定唯一的非零特征值，从而 $A$ 是正交投影。
+<Steps>
+<Step title="第一步：由零空间维数确定谱">
 
-$\dim\ker A=2$，故 $r(A)=1$，零特征值的几何重数为 $2$。实对称矩阵可对角化，剩余的特征值由迹给出 $\lambda=1$。
+给出的两个基础解向量线性无关，故 $\dim\ker A=2$，于是 $r(A)=1$。因为 $A$ 实对称，可正交对角化，零特征值为二重根；唯一剩余特征值等于矩阵的迹 $1$。
 
-设对应单位特征向量为 $u$。它应与所有 $Ax=0$ 的解正交，因此
+</Step>
+<Step title="第二步：由核空间的正交补确定非零特征方向">
 
-$$
--2u_1+u_2=0,\qquad -3u_1+u_3=0.
-$$
-
-取 $v=(1,2,3)^T$，则 $u=v/\sqrt{14}$。谱分解表明
+实对称矩阵的不同特征空间互相正交。设属于特征值 $1$ 的向量 $v=(v_1,v_2,v_3)^T$，则
 
 $$
-A=1\cdot uu^T=\frac{vv^T}{v^Tv}
-=\frac1{14}\begin{pmatrix}1&2&3\\2&4&6\\3&6&9\end{pmatrix}.
+-2v_1+v_2=0,\qquad -3v_1+v_3=0.
 $$
 
-于是 $A^2=A$，归纳得 $A^n=A$（$n\ge1$）。若包括 $n=0$，则另有 $A^0=E$。
+取 $v=(1,2,3)^T$，其平方范数 $v^Tv=14$。因此属于非零特征值 $1$ 的单位特征向量为 $u=v/\sqrt{14}$。
 
-**方法提炼：** 实对称秩一矩阵 $A$ 的唯一非零特征值为 $\operatorname{tr}(A)$；给出 $\ker A$ 后可直接求一维的正交补，避免求系数矩阵。
+</Step>
+<Step title="第三步：写投影公式并利用幂等性">
+
+$A$ 在 $u$ 方向取特征值 $1$，在其正交补取特征值 $0$，因此
+
+$$
+A=uu^T=\frac1{14}\begin{pmatrix}1&2&3\\2&4&6\\3&6&9\end{pmatrix}.
+$$
+
+又 $A^2=(uu^T)(uu^T)=u(u^Tu)u^T=A$，故对一切 $n\ge1$ 均有 $A^n=A$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="幂次 n=0 单独处理">题目只要求正整数幂。若改问 $n=0$，则 $A^0=E$，不能把 $A^n=A$ 误推广到零次幂。</Callout>
 
 </Solution>
-
 </Question>
 
 ## 五、正交化与投影系数
 
-<Question id="math-424c54-018" type="single" number={false}>
+<Question id="core-la-symmetric-2021m1-18" type="single" number="18" tags="来源:2021年数学一, 科目:线性代数, 考点:Gram-Schmidt, 考点:正交投影系数">
 
-【2021年数学一】 已知
+已知
 
 $$
 \alpha_1=\begin{pmatrix}1\\0\\1\end{pmatrix},\quad
@@ -1232,63 +1069,58 @@ $$
 \beta_3=\alpha_3-l_1\beta_1-l_2\beta_2.
 $$
 
-若 $\beta_1,\beta_2,\beta_3$ 两两正交，则 $l_1,l_2$ 依次为（ ）.
+若 $\beta_1,\beta_2,\beta_3$ 两两正交，则 $l_1,l_2$ 依次为（ ）。
 
-<Option correct>$\frac52,\frac12$</Option>
-<Option>$-\frac52,\frac12$</Option>
-<Option>$\frac52,-\frac12$</Option>
-<Option>$-\frac52,-\frac12$</Option>
+<Option correct>$\dfrac52,\dfrac12$</Option>
+<Option>$-\dfrac52,\dfrac12$</Option>
+<Option>$\dfrac52,-\dfrac12$</Option>
+<Option>$-\dfrac52,-\dfrac12$</Option>
 
 <Solution>
 
-**模型识别与突破口：** 逐步 Gram–Schmidt 正交化，投影系数的分母应为当前正交基向量的平方范数而非原向量范数。
+**答案：** A，$(l_1,l_2)=(5/2,1/2)$。
 
-这是 Gram-Schmidt 正交化中的投影系数。
+<Steps>
+<Step title="第一步：先计算第一轮正交化所需的 l">
 
-先由 $\beta_1\perp\beta_2$：
-
-$$
-0=\beta_1^T\beta_2
-=\beta_1^T\alpha_2-l\beta_1^T\beta_1,
-$$
-
-所以
+由 $\beta_2\perp\beta_1$，得
 
 $$
-l=\frac{\alpha_2^T\beta_1}{\beta_1^T\beta_1}
-=\frac2{2}=1.
+0=\beta_1^T(\alpha_2-l\beta_1)
+\Longrightarrow l=\frac{\alpha_2^T\beta_1}{\beta_1^T\beta_1}
+=\frac{1+1}{1+1}=1.
 $$
 
-故
+因此 $\beta_1=(1,0,1)^T$、$\beta_2=(0,2,0)^T$，它们确实正交。
 
-$$
-\beta_2=\alpha_2-\beta_1=(0,2,0)^T.
-$$
+</Step>
+<Step title="第二步：分别对两个已经正交的方向求投影系数">
 
-再由 $\beta_3\perp\beta_1$：
+因为 $\beta_3=\alpha_3-l_1\beta_1-l_2\beta_2$，两两正交要求
 
 $$
 l_1=\frac{\alpha_3^T\beta_1}{\beta_1^T\beta_1}
-=\frac{3+2}{2}=\frac52.
+=\frac{3+2}{2}=\frac52,
 $$
-
-由 $\beta_3\perp\beta_2$：
 
 $$
 l_2=\frac{\alpha_3^T\beta_2}{\beta_2^T\beta_2}
 =\frac{2}{4}=\frac12.
 $$
 
-因此
+代回后 $\beta_3=(0,0,0)^T$？并非如此：
 
 $$
-(l_1,l_2)=\left(\frac52,\frac12\right),
+\beta_3=(3,1,2)^T-\frac52(1,0,1)^T-\frac12(0,2,0)^T
+=\left(\frac12,0,-\frac12\right)^T,
 $$
 
-选 **A**。
+所以 $\beta_3$ 非零且与前两向量正交。选 A。
 
-**方法检验与易错点：** $l=1$ 也是所需中间量，不能把 $l$ 错认成题目最终所求的 $l_1$。
+</Step>
+</Steps>
+
+<Callout type="idea" title="投影系数要用已经正交化的向量">Gram–Schmidt 第二轮须对 $\beta_1,\beta_2$ 取投影，不能误把分母写成原向量 $\alpha_2$ 的平方范数；$l=1$ 是中间结果，题目只问 $l_1,l_2$。</Callout>
 
 </Solution>
-
 </Question>

@@ -1,15 +1,13 @@
 ---
-title: "第三节 正定二次型"
-description: "考研数学一高质量题库：正定判别、含参退化、平方和满秩、Schur补、谱约束、正定平方根与Rayleigh商。"
+title: 第三节 正定二次型
+description: 线性代数核心题目：Sylvester 判别法、正定参数区间、半正定边界。
 ---
-
-本节以 **判别正定的必要充分条件 → 谱与运算结构 → Gram 矩阵和平方和 → 分块与优化综合** 为主线。所有题目均附完整答案、识别要点及关键证明；原资料存在等价判别差异时，严格区分正定、半正定及合同与相似。
 
 ## 一、参数正定与边界：Sylvester、谱和双边二次型约束
 
-<Question id="math-3a6e65-001" type="essay" number={false}>
+<Question id="core-la-positive-1991m3-01" type="essay" number="1" tags="来源:1991年数学三, 科目:线性代数, 考点:Sylvester判别法, 考点:正定参数范围">
 
-【1991年数学三】 考虑二次型
+考虑二次型
 
 $$
 f=x_1^2+4x_2^2+4x_3^2+2\lambda x_1x_2-2x_1x_3+4x_2x_3.
@@ -19,147 +17,101 @@ $$
 
 <Solution>
 
-**答案：** $-2<\lambda<1$。
+**参考答案：** $-2<\lambda<1$。
 
-**解析：** **模型识别与突破口：** 三元含参正定二次型首选 Sylvester 判别法：按顺序计算一阶、二阶、三阶顺序主子式，最后求条件交集。
+<Steps>
+<Step title="把混合项的一半填入对称矩阵">
 
-二次型矩阵为
-
-$$
-A=\begin{pmatrix}
-1&\lambda&-1\\
-\lambda&4&2\\
--1&2&4
-\end{pmatrix}.
-$$
-
-判断实对称矩阵正定，使用顺序主子式判别法最直接。
-
-各阶顺序主子式为
+$f=x^TAx$，其中
 
 $$
-\Delta_1=1>0,
+A=\begin{pmatrix}1&\lambda&-1\\\lambda&4&2\\-1&2&4\end{pmatrix}.
 $$
 
-$$
-\Delta_2=
-\begin{vmatrix}
-1&\lambda\\
-\lambda&4
-\end{vmatrix}
-=4-\lambda^2,
-$$
-
-以及
+这是实对称矩阵，二次型正定当且仅当 $A$ 的各阶**顺序主子式**均严格大于零。
+</Step>
+<Step title="依次计算三个顺序主子式">
 
 $$
-\Delta_3=|A|=-4\lambda^2-4\lambda+8
-=-4(\lambda-1)(\lambda+2).
+\Delta_1=1,\qquad
+\Delta_2=\begin{vmatrix}1&\lambda\\\lambda&4\end{vmatrix}=4-\lambda^2.
 $$
 
-正定要求
+三阶行列式按第一行展开：
 
 $$
-\Delta_1>0,\quad \Delta_2>0,\quad \Delta_3>0.
+\Delta_3=|A|=8-4\lambda-4\lambda^2=-4(\lambda+2)(\lambda-1).
 $$
-
-其中
-
-$$
-\Delta_2>0\Longleftrightarrow -2<\lambda<2,
-$$
+</Step>
+<Step title="联立不等式并检验边界">
 
 $$
-\Delta_3>0\Longleftrightarrow -2<\lambda<1.
+\Delta_2>0\iff-2<\lambda<2,\qquad
+\Delta_3>0\iff-2<\lambda<1.
 $$
 
-取交集得到
-
-$$
--2<\lambda<1.
-$$
-
-**解题关键：** 参数型正定二次型优先考虑“各阶顺序主子式均大于 $0$”，通常比完整求特征值更快。
-
-**方法提炼与易错点：** 仅算三阶行列式大于零不是正定的充分条件。特别注意端点 $\lambda=-2,1$ 均使行列式为零，必须严格排除。
-
+与 $\Delta_1=1>0$ 合并，得 $-2<\lambda<1$。当 $\lambda=-2$ 或 $1$ 时 $\Delta_3=0$，矩阵奇异，不可能正定；故两个端点均须剔除。
+</Step>
+</Steps>
+<Callout type="warn" title="仅有行列式为正还不够">三元正定对称矩阵必须同时满足 $\Delta_1>0,\Delta_2>0,\Delta_3>0$；只检查 $\det A>0$ 可能漏掉两个负特征值。</Callout>
 </Solution>
-
 </Question>
 
-<Question id="math-3a6e65-002" type="essay" number={false}>
+<Question id="core-la-positive-1997m3-02" type="blank" number="2" tags="来源:1997年数学三, 科目:线性代数, 考点:正定二次型判别">
 
-【1997年数学三】 若二次型
+若二次型
 
 $$
 f(x_1,x_2,x_3)=2x_1^2+x_2^2+x_3^2+2x_1x_2+t x_2x_3
 $$
 
-是正定二次型，则 $t$ 的范围是 $\quad\quad$。
+是正定二次型，则 $t$ 的范围是 <Blank answer="(-sqrt(2),sqrt(2))" kind="text" />。
 
 <Solution>
 
 **答案：** $-\sqrt2<t<\sqrt2$。
 
-**解析：** **模型识别与突破口：** 题目只含一个参数进入非对角元；前两阶顺序主子式恒正，最后一阶行列式立即给出参数区间。
+<Steps>
+<Step title="正确处理没有 2 的混合项系数">
 
-二次型对应矩阵为
-
-$$
-A=\begin{pmatrix}
-2&1&0\\
-1&1&\dfrac t2\\
-0&\dfrac t2&1
-\end{pmatrix}.
-$$
-
-使用顺序主子式判别：
+交叉项 $t x_2x_3$ 在对称矩阵中对应 $a_{23}=a_{32}=t/2$，因此
 
 $$
-\Delta_1=2>0,
+A=\begin{pmatrix}2&1&0\\1&1&t/2\\0&t/2&1\end{pmatrix}.
+$$
+</Step>
+<Step title="计算 Sylvester 判据所需的主子式">
+
+$$
+\Delta_1=2>0,\qquad
+\Delta_2=\begin{vmatrix}2&1\\1&1\end{vmatrix}=1>0,
 $$
 
 $$
-\Delta_2=
-\begin{vmatrix}2&1\\1&1\end{vmatrix}=1>0,
+\Delta_3=|A|=2\left(1-\frac{t^2}{4}\right)-1=1-\frac{t^2}{2}.
 $$
+</Step>
+<Step title="解决最后一个严格不等式">
+
+前两个条件恒成立，因此正定等价于
 
 $$
-\Delta_3=|A|=1-\frac{t^2}{2}.
+1-\frac{t^2}{2}>0\iff t^2<2\iff-\sqrt2<t<\sqrt2.
 $$
 
-因此正定的唯一额外条件为
-
-$$
-1-\frac{t^2}{2}>0,
-$$
-
-即
-
-$$
-t^2<2.
-$$
-
-所以
-
-$$
--\sqrt2<t<\sqrt2.
-$$
-
-**方法提炼与易错点：** 交叉项 $t x_2x_3$ 在二次型矩阵中对应 $a_{23}=a_{32}=t/2$，切勿错写为 $t$。
-
+两个端点使行列式为零，对应退化的半正定边界，而不是正定。
+</Step>
+</Steps>
+<Callout type="idea" title="考场快速判断">当含参矩阵的前两阶顺序主子式恒正时，只需分析最后一阶行列式；但仍必须说明前两阶已经满足条件。</Callout>
 </Solution>
-
 </Question>
 
-<Question id="math-3a6e65-003" type="single" number={false}>
+<Question id="core-la-positive-2025m3-03" type="single" number="3" tags="来源:2025年数学三, 科目:线性代数, 考点:行列式二次型, 考点:Sylvester判别">
 
-【2025年数学三】 **第7题（选择题）**
-
-设
+**第7题（选择题）** 设
 
 $$
-A=\begin{pmatrix}1&2\\-2&-a\end{pmatrix},\quad B=\begin{pmatrix}1&0\\1&a\end{pmatrix}.
+A=\begin{pmatrix}1&2\\-2&-a\end{pmatrix},\qquad B=\begin{pmatrix}1&0\\1&a\end{pmatrix}.
 $$
 
 若二次型 $f(x,y)=|xA+yB|$ 正定，则 $a$ 的取值范围为（ ）。
@@ -171,61 +123,64 @@ $$
 
 <Solution>
 
-**答案：** B，$2-\sqrt3<a<2+\sqrt3$。
+**答案：B，** $\boxed{2-\sqrt3<a<2+\sqrt3}$。
 
-**解析：** **模型识别与突破口：** “矩阵线性组合的行列式”本质是二元二次型；先准确展开 $|xA+yB|$，再按顺序主子式判断正定。
+<Steps>
+<Step title="先把行列式转换为二元二次型">
 
-计算
+题给的 $A,B$ 本身不需要正定，真正要研究的是 $f(x,y)$。先计算
 
 $$
-xA+yB=\begin{pmatrix}x+y&2x\\-2x+y&a(y-x)\end{pmatrix},
+xA+yB=\begin{pmatrix}x+y&2x\\-2x+y&a(y-x)\end{pmatrix}.
 $$
 
-从而
+故
 
 $$
 \begin{aligned}
-f(x,y)&=\det(xA+yB)\\
-&=a(x+y)(y-x)-2x(-2x+y)\\
+f(x,y)&=a(x+y)(y-x)-2x(-2x+y)\\
 &=(4-a)x^2-2xy+ay^2.
 \end{aligned}
 $$
 
-这是实对称系数矩阵
+它对应的**实对称**矩阵为
 
 $$
-H(a)=\begin{pmatrix}4-a&-1\\-1&a\end{pmatrix}
+H(a)=\begin{pmatrix}4-a&-1\\-1&a\end{pmatrix}.
 $$
+</Step>
+<Step title="用两个顺序主子式判正定">
 
-对应的二元二次型。由 Sylvester 判别法，正定当且仅当
-
-$$
-4-a>0,\qquad\det H(a)=a(4-a)-1>0.
-$$
-
-后一条件等价于
+由 Sylvester 判别法，$H(a)$ 正定等价于
 
 $$
-(a-2)^2<3\quad\Longleftrightarrow\quad 2-\sqrt3<a<2+\sqrt3.
+4-a>0,\qquad \det H(a)=a(4-a)-1>0.
 $$
 
-这一区间自动满足 $a<4$，故所求区间即上述区间，选 B。端点时行列式为零，为半正定而非正定。
+第二个条件整理为
 
-**方法提炼与易错点：** 不要误把原矩阵 $A,B$ 各自的正定性当作条件：它们不一定对称；需要研究的是展开得到的二次型系数矩阵。
+$$
+(a-2)^2<3\iff2-\sqrt3<a<2+\sqrt3.
+$$
+
+此区间中的 $a<2+\sqrt3<4$，自动满足第一个条件。因此选 B。
+</Step>
+</Steps>
+
+<Callout type="warn" title="正定的是哪个矩阵？">不要对题中的 $A$ 或 $B$ 直接使用正定判别法。先展开 $\det(xA+yB)$，再对其二次型系数矩阵进行判断；两端点因行列式为零均须排除。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-3a6e65-004" type="single" number={false}>
+<Question id="core-la-positive-zhangyu-04" type="single" number="4" tags="来源:张宇1000题, 科目:线性代数, 考点:等相关矩阵, 考点:特征值判正定">
 
-【张宇1000题】 二次型
+二次型
 
 $$
 f(x_1,x_2,x_3)=\sum_{i=1}^3x_i^2+\sum_{1\le i<j\le3}2ax_ix_j
 $$
 
-正定的充要条件为( ).
+正定的充要条件为（ ）。
 
 <Option>$a>0$</Option>
 <Option>$0<a<1$</Option>
@@ -234,720 +189,548 @@ $$
 
 <Solution>
 
-**答案：** D，$-\frac12<a<1$。
+**答案：D，** $\boxed{-\frac12<a<1}$。
 
-**解析：** **模型识别与突破口：** “全 $1$ 矩阵 + 单位矩阵”使特征值分成全一方向与正交补，能快速判定等相关型含参正定矩阵。
+<Steps>
+<Step title="识别全一矩阵的谱结构">
 
-二次型矩阵为
-
-$$
-A(a)=\begin{pmatrix}1&a&a\\a&1&a\\a&a&1\end{pmatrix}=(1-a)I+aJ,
-$$
-
-其中 $J=\mathbf1\mathbf1^T$ 为三阶全 $1$ 矩阵。沿 $\mathbf1=(1,1,1)^T$ 方向，$J$ 的特征值为 $3$；在 $\mathbf1^\perp$ 上，$J$ 的特征值为 $0$（重数 $2$）。因此 $A$ 的谱为
+令 $e=(1,1,1)^T$，$J=ee^T$，则二次型矩阵为
 
 $$
-1+2a,\qquad1-a,\qquad1-a.
+A=\begin{pmatrix}1&a&a\\a&1&a\\a&a&1\end{pmatrix}=(1-a)E+aJ.
 $$
 
-因 $A$ 为实对称矩阵，严格正定的充要条件是
+因为 $Je=3e$，而 $J$ 在二维子空间 $e^\perp$ 上为零，所以 $A$ 的三个特征值是
 
 $$
-1+2a>0,\qquad1-a>0,
+\lambda_1=1+2a,\qquad\lambda_2=\lambda_3=1-a.
+$$
+</Step>
+<Step title="让全部特征值严格大于零">
+
+实对称矩阵正定当且仅当全部特征值为正，故
+
+$$
+1+2a>0,\qquad1-a>0
+\quad\Longleftrightarrow\quad-\frac12<a<1.
 $$
 
-即 $-\frac12<a<1$，故选 D。
+这里 $a=-1/2$ 使 $e$ 方向退化，而 $a=1$ 使整个 $e^\perp$ 方向退化，均不正定。
+</Step>
+</Steps>
 
-**推广：** $n$ 阶等对角、等非对角矩阵 $(d-c)I+cJ$ 正定，当且仅当 $d-c>0$ 且 $d+(n-1)c>0$。
-
-**方法提炼与易错点：** 三阶 $A=(1-a)I+aJ$ 的两种特征值有不同重数，端点 $a=-\frac12,1$ 分别使不同子空间出现零特征值。
+<Callout type="idea" title="一般的 n 阶结论">对角元为 $d$、其余元素全为 $c$ 的 $n$ 阶实对称矩阵，特征值为 $d+(n-1)c$（一重）和 $d-c$（$n-1$ 重）。正定只需令二者均严格为正。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-3a6e65-005" type="single" number={false}>
+<Question id="core-la-positive-lilin-05" type="single" number="5" tags="来源:李林880, 科目:线性代数, 考点:Rayleigh商, 考点:双边正定不等式">
 
-【李林880】 设实矩阵 $A=\begin{pmatrix} a & a-1 \\ a-1 & a-1 \end{pmatrix}$，若对任意的 2 维非零实列向量 $X$，都有 $|X^TAX|<|X^TX|$，则 $a$ 的取值范围为 ( )。
+设实矩阵
 
-<Option correct>$(\frac{1}{3},1)$</Option>
+$$
+A=\begin{pmatrix}a&a-1\\a-1&a-1\end{pmatrix}.
+$$
+
+若对任意二维非零实列向量 $X$，都有 $|X^TAX|<|X^TX|$，则 $a$ 的取值范围为（ ）。
+
+<Option correct>$(\frac13,1)$</Option>
 <Option>$(-1,1)$</Option>
 <Option>$(-1,0]$</Option>
-<Option>$(\frac{1}{3},1]$</Option>
+<Option>$(\frac13,1]$</Option>
 
 <Solution>
 
-**模型识别与突破口：** 绝对值型 Rayleigh 商约束可化成一对严格正定不等式 $-I<A<I$，再分别作顺序主子式判断。
+**答案：A，** $\boxed{\frac13<a<1}$。
 
-依题设，对 $\forall X \neq 0$，有 $|X^{\mathrm{T}}AX| < |X^{\mathrm{T}}X|$，而 $X^{\mathrm{T}}X > 0$，故
+<Steps>
+<Step title="把绝对值条件拆成两项正定性">
 
-$$
--X^{\mathrm{T}}X < X^{\mathrm{T}}AX < X^{\mathrm{T}}X.
-$$
-
-由 $-X^{\mathrm{T}}X < X^{\mathrm{T}}AX$，知 $X^{\mathrm{T}}(A + E)X > 0$。又 $A + E$ 是 $2$ 阶实对称矩阵，故 $A + E$ 是正定矩阵。
-
-同理, 由 $X^{\mathrm{T}}AX < X^{\mathrm{T}}X$, 知 $X^{\mathrm{T}}(E-A)X > 0$, 故 $E-A$ 是正定矩阵.
-因 $A+E = \begin{pmatrix} a+1 & a-1 \\ a-1 & a \end{pmatrix}$, $E-A = \begin{pmatrix} 1-a & 1-a \\ 1-a & 2-a \end{pmatrix}$, 故
+对任意 $X\ne0$，恒有 $X^TX>0$，因此题设等价于
 
 $$
-\begin{cases}
-a+1 > 0, \\
-|A+E| = 3a-1 > 0,
-\end{cases}
-\quad
-\begin{cases}
-1-a > 0, \\
-|E-A| = 1-a > 0,
-\end{cases}
+-X^TX<X^TAX<X^TX.
 $$
 
-即 $a > \frac{1}{3}$ 且 $a < 1$, $a \in \left(\frac{1}{3}, 1\right)$. 选项 A 正确.
+即对一切非零 $X$ 均有
 
-**方法提炼与易错点：** 双边不等式是严格的，故参数端点必须排除；题干中的 $|x^Tx|=x^Tx$ 是因为 $x
-e0$。
+$$
+X^T(E+A)X>0,\qquad X^T(E-A)X>0.
+$$
+
+所以充要条件是 $E+A$ 与 $E-A$ **同时正定**。
+</Step>
+<Step title="分别应用二阶 Sylvester 判别法">
+
+$$
+E+A=\begin{pmatrix}a+1&a-1\\a-1&a\end{pmatrix},\qquad
+E-A=\begin{pmatrix}1-a&1-a\\1-a&2-a\end{pmatrix}.
+$$
+
+它们的行列式依次为
+
+$$
+|E+A|=3a-1,\qquad |E-A|=1-a.
+$$
+
+前者正定要求 $a+1>0$ 与 $3a-1>0$，得 $a>1/3$；后者正定要求 $1-a>0$，得 $a<1$。联立得到选项 A。
+</Step>
+</Steps>
+
+<Callout type="idea" title="谱判别的等价说法">因为 $A$ 实对称，$|X^TAX|<X^TX$ 对所有 $X\ne0$ 成立，当且仅当 $A$ 的所有特征值都处于 $(-1,1)$。这与 $-E<A<E$ 完全等价。</Callout>
 
 </Solution>
-
 </Question>
 
 ## 二、正定矩阵的谱、平移及构造性闭包
 
-<Question id="math-3a6e65-006" type="essay" number={false}>
+<Question id="core-la-positive-1991m1-06" type="essay" number="6" tags="来源:1991年数学一, 科目:线性代数, 考点:正定谱, 考点:行列式估计">
 
-【1991年数学一】 设 $A$ 为 $n$ 阶正定矩阵，$E$ 是 $n$ 阶单位矩阵，证明 $A+E$ 的行列式大于 $1$。
-
-<Solution>
-
-**答案：** $|A+E|>1$。
-
-**解析：** **模型识别与突破口：** 正定矩阵的谱全部严格大于零；与单位矩阵相加让每个特征值加 $1$，可直接估计行列式。
-
-因为 $A$ 为实对称正定矩阵，所以存在正交矩阵 $Q$，使
-
-$$
-Q^TAQ=\Lambda=\operatorname{diag}(\lambda_1,\lambda_2,\ldots,\lambda_n),
-$$
-
-且
-
-$$
-\lambda_i>0\qquad(i=1,2,\ldots,n).
-$$
-
-于是
-
-$$
-Q^T(A+E)Q=\Lambda+E
-=\operatorname{diag}(\lambda_1+1,\ldots,\lambda_n+1).
-$$
-
-正交变换不改变行列式，因此
-
-$$
-|A+E|=\prod_{i=1}^n(\lambda_i+1).
-$$
-
-由于每个 $\lambda_i>0$，所以每个 $\lambda_i+1>1$，从而
-
-$$
-|A+E|>1.
-$$
-
-**另一种理解：** $A+E$ 的特征值就是 $\lambda_i+1$。正定矩阵 $A$ 的全部特征值都为正，因此 $A+E$ 的全部特征值都大于 $1$，它们的乘积自然大于 $1$。
-
-**方法提炼与易错点：** 正定性比行列式大于零强得多；仅由 $|A|>0$ 不能推出 $|I+A|>1$。对任意 $t>0$，还能得到 $|tI+A|>t^n$。
-
-</Solution>
-
-</Question>
-
-<Question id="math-3a6e65-007" type="essay" number={false}>
-
-【1992年数学三】 设 $A,B$ 分别为 $m$ 阶、$n$ 阶正定矩阵，试判定分块矩阵
-
-$$
-C=\begin{pmatrix}
-A&O\\
-O&B
-\end{pmatrix}
-$$
-
-是否为正定矩阵。
+设 $A$ 为 $n$ 阶正定矩阵，$E$ 是 $n$ 阶单位矩阵，证明 $|A+E|>1$。
 
 <Solution>
 
-**答案：** $C$ 为正定矩阵。
+**结论：** $\boxed{|A+E|>1}$。
 
-**解析：** **模型识别与突破口：** 分块对角矩阵的正定性是两个子块的正定性之“且”；最短证明是把二次型拆成两块。
+<Steps>
+<Step title="用正交对角化表达正定矩阵">
 
-由于 $A,B$ 都是正定矩阵，所以它们都是实对称矩阵，从而 $C$ 也是实对称矩阵。
+$A$ 正定，故实对称且存在正交矩阵 $Q$ 使
 
-任取非零向量
-
-$$
-z=\begin{pmatrix}x\\y\end{pmatrix}\ne0,
-$$
-
-其中 $x\in\mathbb R^m$，$y\in\mathbb R^n$。则
-
-$$
-z^TCz
-=\begin{pmatrix}x^T&y^T\end{pmatrix}
-\begin{pmatrix}A&O\\O&B\end{pmatrix}
-\begin{pmatrix}x\\y\end{pmatrix}
-=x^TAx+y^TBy.
-$$
-
-因为 $z\ne0$，所以 $x,y$ 不可能同时为零。又因为 $A,B$ 正定，故只要对应向量非零，就有
-
-$$
-x^TAx>0\quad\text{或}\quad y^TBy>0.
-$$
-
-因此恒有
-
-$$
-z^TCz>0.
-$$
-
-所以 $C$ 为正定矩阵。
-
-**补充：** 分块对角矩阵的特征值就是各对角块特征值的并集。由于 $A,B$ 的特征值全为正，也可立即得到 $C$ 正定。
-
-**方法提炼与易错点：** 注意 $x,y$ 不必同时非零，只需拼接向量非零，则两项中至少有一项严格正。这个事实不能直接扩展到含非零交叉块的矩阵。
-
-</Solution>
-
-</Question>
-
-<Question id="math-3a6e65-008" type="essay" number={false}>
-
-【1998年数学三】 设矩阵
-
-$$
-A=\begin{pmatrix}
-1&0&1\\
-0&2&0\\
-1&0&1
-\end{pmatrix},
-$$
-
-矩阵 $B=(kE+A)^2$，其中 $k$ 为实数，$E$ 为单位矩阵。求对角矩阵 $\Lambda$，使 $B$ 与 $\Lambda$ 相似，并求 $k$ 为何值时，$B$ 为正定矩阵。
-
-<Solution>
-
-**答案：**
-
-$$
-\Lambda=\operatorname{diag}\bigl((k+2)^2,(k+2)^2,k^2\bigr),
-$$
-
-且 $k\ne-2,
- k\ne0$ 时 $B$ 正定。
-
-**解析：** **模型识别与突破口：** 与其展开 $(kI+A)^2$，不如先看 $A$ 的谱，再对特征值应用函数 $u\mapsto(k+u)^2$。
-
-先求 $A$ 的特征值：
-
-$$
-|\lambda E-A|
-=\begin{vmatrix}
-\lambda-1&0&-1\\
-0&\lambda-2&0\\
--1&0&\lambda-1
-\end{vmatrix}
-=\lambda(\lambda-2)^2.
-$$
-
-所以 $A$ 的特征值为
-
-$$
-2,2,0.
-$$
-
-因此 $kE+A$ 的特征值为
-
-$$
-k+2,k+2,k,
-$$
-
-进而
-
-$$
-B=(kE+A)^2
-$$
-
-的特征值为
-
-$$
-(k+2)^2,(k+2)^2,k^2.
-$$
-
-又因为 $A$ 是实对称矩阵，所以 $B$ 也是实对称矩阵，可相似对角化为
-
-$$
-\Lambda=\operatorname{diag}\bigl((k+2)^2,(k+2)^2,k^2\bigr).
-$$
-
-实对称矩阵 $B$ 正定，当且仅当其所有特征值均大于 $0$。因此要求
-
-$$
-(k+2)^2>0,\qquad k^2>0,
-$$
-
-即
-
-$$
-k\ne-2,\qquad k\ne0.
-$$
-
-**方法提炼与易错点：** $B$ 虽始终半正定，却可能不可逆；平方的特征值严格正必须排除 $k=0$ 和 $k=-2$ 两处零点，不能仅说“平方恒非负”。
-
-</Solution>
-
-</Question>
-
-<Question id="math-3a6e65-009" type="essay" number={false}>
-
-【2002年数学三】 设 $A$ 为三阶实对称矩阵，且满足
-
-$$
-A^2+2A=O,
-$$
-
-已知 $A$ 的秩 $r(A)=2$。
-
-（1）求 $A$ 的全部特征值；
-
-（2）当 $k$ 为何值时，矩阵 $A+kE$ 为正定矩阵？（其中 $E$ 为三阶单位矩阵。）
-
-<Solution>
-
-**答案：**
-
-（1）$-2,-2,0$；
-
-（2）$k>2$。
-
-**解析：** **模型识别与突破口：** 矩阵多项式先把特征值锁定在 $0,-2$，随后利用秩判定非零特征值的重数，最后整体平移谱。
-
-设 $\lambda$ 是 $A$ 的任一特征值，对应特征向量为 $\alpha\ne0$，则
-
-$$
-A\alpha=\lambda\alpha.
-$$
-
-由
-
-$$
-A^2+2A=O
-$$
-
-作用在 $\alpha$ 上，得
-
-$$
-(A^2+2A)\alpha=(\lambda^2+2\lambda)\alpha=0.
-$$
-
-由于 $\alpha\ne0$，所以
-
-$$
-\lambda(\lambda+2)=0.
-$$
-
-故 $A$ 的特征值只能取
-
-$$
-0,-2.
-$$
-
-又因为 $A$ 为实对称矩阵，所以可正交对角化，并且
-
-$$
-r(A)=2
-$$
-
-说明非零特征值共有两个（计重数）。因此三阶矩阵 $A$ 的全部特征值为
-
-$$
--2,-2,0.
-$$
-
-于是 $A+kE$ 的特征值分别为
-
-$$
-k-2,k-2,k.
-$$
-
-要使 $A+kE$ 正定，全部特征值都必须大于 $0$，即
-
-$$
-k-2>0,\qquad k>0.
-$$
-
-所以
-
-$$
-k>2.
-$$
-
-**方法提炼与易错点：** 这里用秩判定特征值重数依赖 $A$ 为实对称，故可对角化；一般矩阵中零特征值的几何重数与代数重数未必相等。
-
-</Solution>
-
-</Question>
-
-<Question id="math-3a6e65-010" type="essay" number={false}>
-
-【2010年数学一】 已知二次型
-
-$$
-f(x_1,x_2,x_3)=x^TAx
-$$
-
-在正交变换 $x=Qy$ 下的标准形为
-
-$$
-y_1^2+y_2^2,
-$$
-
-且 $Q$ 的第三列为
-
-$$
-\left(\frac{\sqrt2}{2},0,\frac{\sqrt2}{2}\right)^T.
-$$
-
-（1）求矩阵 $A$；
-
-（2）证明 $A+E$ 为正定矩阵，其中 $E$ 为三阶单位矩阵。
-
-<Solution>
-
-**答案：** （1）$A=\begin{pmatrix}\frac12&0&-\frac12\\0&1&0\\-\frac12&0&\frac12\end{pmatrix}$；（2）$A+E$ 正定。
-
-**解析：** **模型识别与突破口：** 已知谱为 $1,1,0$，故 $A$ 是投影到零特征空间正交补的矩阵：$A=I-uu^T$，只需第三列 $u$ 即可恢复整张矩阵。
-
-**第一问：从零特征向量直接构造矩阵。** 由正交标准形 $\operatorname{diag}(1,1,0)$ 可知 $A$ 为秩 $2$ 的实对称正交投影矩阵。记已知第三列为
-
-$$
-u=\frac1{\sqrt2}(1,0,1)^T,
-$$
-
-这是零特征值对应的单位特征向量。因此 $A$ 在 $\nu^\perp$ 上是恒等映射，在 $\operatorname{span}\{\nu\}$ 上是零映射，必有
-
-$$
-A=E-\nu\nu^T=\begin{pmatrix}\frac12&0&-\frac12\\0&1&0\\-\frac12&0&\frac12\end{pmatrix}.
-$$
-
-**第二问：谱平移。** $A$ 的特征值为 $1,1,0$，故 $A+E$ 的特征值为 $2,2,1$，全为正，且 $A+E$ 实对称，因此正定。
-
-**另一种证明：** 对任意非零 $x$，
-
-$$
-x^T(A+E)x=x^T(E-\nu\nu^T)x+\|x\|^2
-=\bigl(\|x\|^2-(\nu^Tx)^2\bigr)+\|x\|^2>0,
-$$
-
-因为 Cauchy–Schwarz 不等式给出 $(\nu^Tx)^2\le\|x\|^2$。
-
-**方法提炼与易错点：** 求 $A$ 不需要唯一确定重特征值 $1$ 的两条特征向量；$1$-特征空间内改变正交基不会改变投影矩阵。
-
-</Solution>
-
-</Question>
-
-<Question id="math-3a6e65-011" type="essay" number={false}>
-
-【李正元】 若 $ A$ 是 $ n$ 阶正定矩阵，证明 $ A^{-1},A^\ast$ 也是正定矩阵。
-
-<Solution>
-
-**答案：** $A^{-1}$ 与 $A^*$ 均为正定矩阵。
-
-**解析：** **模型识别与突破口：** 正定矩阵在求逆与伴随两类操作下仍正定；一条证明路线是特征值正且倒数仍正，另一条是利用二次型。
-
-$A$ 正定意味着 $A=A^T$ 且各特征值 $\lambda_1,\ldots,\lambda_n$ 严格为正，因而 $A$ 可逆，且 $\det A=\prod_i\lambda_i>0$。
-
-先用正交谱分解 $A=Q\operatorname{diag}(\lambda_1,\ldots,\lambda_n)Q^T$ 得
-
-$$
-A^{-1}=Q\operatorname{diag}(\lambda_1^{-1},\ldots,\lambda_n^{-1})Q^T.
-$$
-
-它仍实对称，全部特征值 $\lambda_i^{-1}>0$，故正定。
-
-利用伴随矩阵公式（本题 $A$ 已可逆）
-
-$$
-A^*=(\det A)A^{-1},
-$$
-
-因 $\det A>0$，又知正数倍正定矩阵仍正定，故 $A^*$ 也正定。
-
-**纯二次型证明：** 对非零 $x$ 令 $y=A^{-1}x\ne0$，则 $x^TA^{-1}x=y^TAy>0$；再乘以 $\det A>0$ 即得伴随矩阵的结论。
-
-**方法提炼与易错点：** 伴随矩阵恒等式 $A^*=\det(A)A^{-1}$ 依赖 $A$ 可逆，本题先由正定性保证。
-
-</Solution>
-
-</Question>
-
-<Question id="math-3a6e65-012" type="essay" number={false}>
-
-【张宇1000题】 设
-
-$$
-A=\begin{bmatrix}1&1&0\\0&1&1\\1&0&1\end{bmatrix},
-$$
-
-$A^TA=B^2$，其中$B$为正定矩阵。
-(1)求$B$；
-(2)证明存在正交矩阵$C$，使得$A=CB$，并求$C$。
-
-<Solution>
-
-**答案：**
-
-（1）$B=\begin{pmatrix}\frac43&\frac13&\frac13\\\frac13&\frac43&\frac13\\\frac13&\frac13&\frac43\end{pmatrix}$；
-
-（2）$C=\begin{pmatrix}\frac23&\frac23&-\frac13\\-\frac13&\frac23&\frac23\\\frac23&-\frac13&\frac23\end{pmatrix}$，且 $C^TC=I$、$A=CB$。
-
-**解析：** **模型识别与突破口：** 由 $A^TA=B^2$ 且 $B$ 正定锁定唯一正定平方根 $B=(A^TA)^{1/2}$；随即 $C=AB^{-1}$ 必正交，是极分解的矩阵运算模型。
-
-**第一问：由谱确定正定平方根。** 直接计算
-
-$$
-A^TA=\begin{pmatrix}2&1&1\\1&2&1\\1&1&2\end{pmatrix}=I+J,
-$$
-
-其中 $J$ 为三阶全 $1$ 矩阵，满足 $J^2=3J$。设 $B=I+cJ$，则
-
-$$
-B^2=I+(2c+3c^2)J.
-$$
-
-令 $2c+3c^2=1$，得 $c=\frac13$ 或 $c=-1$。当 $c=\frac13$ 时，$B$ 的特征值为 $2,1,1$，严格正定；当 $c=-1$ 时，沿 $\mathbf1$ 方向特征值为 $-2$，非正定，须排除。
-
-故题目所求的唯一**正定平方根**为
-
-$$
-B=I+\frac13J=\begin{pmatrix}\frac43&\frac13&\frac13\\\frac13&\frac43&\frac13\\\frac13&\frac13&\frac43\end{pmatrix}.
-$$
-
-**第二问：构造正交因子。** 由于 $B$ 可逆且 $B^2=A^TA$，令
-
-$$
-C=AB^{-1},\qquad B^{-1}=I-\frac16J.
-$$
-
-于是
-
-$$
-C^TC=B^{-1}A^TAB^{-1}=B^{-1}B^2B^{-1}=I,
-$$
-
-且 $A=CB$。展开得
-
-$$
-C=\begin{pmatrix}\frac23&\frac23&-\frac13\\-\frac13&\frac23&\frac23\\\frac23&-\frac13&\frac23\end{pmatrix},
-$$
-
-满足要求。注意 $A$ 本身并不对称，故不能对 $A$ 直接套用实对称矩阵正定判别法。
-
-**方法提炼与易错点：** 仅验证 $B^2=A^TA$ 还不足以认定它是题目指定的 $B$；必须同时验证 $B$ 为实对称正定。
-
-</Solution>
-
-</Question>
-
-## 三、平方和、零空间与满列秩模型
-
-<Question id="math-3a6e65-013" type="essay" number={false}>
-
-【1999年数学一】 设 $A$ 为 $m$ 阶实对称矩阵且正定，$B$ 为 $m\times n$ 实矩阵，$B^T$ 为 $B$ 的转置矩阵。试证：$B^TAB$ 为正定矩阵的充分必要条件是 $B$ 的秩 $r(B)=n$。
-
-<Solution>
-
-**答案：** $B^TAB$ 正定 $\Longleftrightarrow r(B)=n$。
-
-**解析：** **模型识别与突破口：** 识别 $B^TAB$ 为正定矩阵在列空间上的限制。关键恒等式是 $x^TB^TABx=(Bx)^TA(Bx)$。
-
-先注意
-
-$$
-(B^TAB)^T=B^TA^TB=B^TAB,
-$$
-
-所以 $B^TAB$ 是 $n$ 阶实对称矩阵。
-
-**必要性：** 若 $B^TAB$ 正定，则对任意非零 $x\in\mathbb R^n$，都有
-
-$$
-x^TB^TABx=(Bx)^TA(Bx)>0.
-$$
-
-因此不可能出现非零 $x$ 使 $Bx=0$。也就是说齐次方程组
-
-$$
-Bx=0
-$$
-
-只有零解，所以 $B$ 的列向量线性无关，
-
-$$
-r(B)=n.
-$$
-
-**充分性：** 若 $r(B)=n$，则 $Bx=0$ 只有零解。因此对任意 $x\ne0$，都有
-
-$$
-Bx\ne0.
-$$
-
-又因为 $A$ 正定，故
-
-$$
-(Bx)^TA(Bx)>0.
-$$
-
-从而
-
-$$
-x^TB^TABx>0.
-$$
-
-所以 $B^TAB$ 正定。
-
-**核心等式：**
-
-$$
-x^TB^TABx=(Bx)^TA(Bx).
-$$
-
-它把 $B^TAB$ 的正定性直接转化为 $A$ 的正定性与 $B$ 是否满列秩。
-
-**方法提炼与易错点：** $B$ 是 $m\times n$，满列秩要求 $n\le m$。若 $n>m$，无论 $A$ 多么正定，$B^TAB$ 都不可能正定。
-
-</Solution>
-
-</Question>
-
-<Question id="math-3a6e65-014" type="essay" number={false}>
-
-【1999年数学三】 设 $A$ 为 $m\times n$ 实矩阵，$E$ 为 $n$ 阶单位矩阵。已知矩阵
-
-$$
-B=\lambda E+A^TA,
-$$
-
-试证：当 $\lambda>0$ 时，矩阵 $B$ 为正定矩阵。
-
-<Solution>
-
-**答案：** 当 $\lambda>0$ 时，$B$ 为正定矩阵。
-
-**解析：** **模型识别与突破口：** 正则化矩阵 $\lambda I+A^TA$：任何矩阵的 Gram 矩阵半正定，加正数倍单位矩阵即可获得严格正定。
-
-首先
-
-$$
-B^T=(\lambda E+A^TA)^T
-=\lambda E+A^TA=B,
-$$
-
-所以 $B$ 为实对称矩阵。
-
-任取非零向量 $x\in\mathbb R^n$，则
-
-$$
-\begin{aligned}
-x^TBx
-&=x^T(\lambda E+A^TA)x\\
-&=\lambda x^Tx+x^TA^TAx\\
-&=\lambda\|x\|^2+\|Ax\|^2.
-\end{aligned}
-$$
-
-由于 $x\ne0$ 且 $\lambda>0$，有
-
 $$
-\lambda\|x\|^2>0,
+Q^TAQ=\operatorname{diag}(\lambda_1,\ldots,\lambda_n),\qquad \lambda_i>0.
 $$
+</Step>
+<Step title="单位矩阵只把每个特征值加一">
 
-而
+由 $Q^TEQ=E$，可得
 
 $$
-\|Ax\|^2\ge0.
+Q^T(A+E)Q=\operatorname{diag}(1+\lambda_1,\ldots,1+\lambda_n).
 $$
 
 因此
 
 $$
-x^TBx>0.
+|A+E|=\prod_{i=1}^n(1+\lambda_i)>1,
 $$
 
-故 $B$ 为正定矩阵。
+因为每一个乘数都严格大于 $1$，命题得证。
+</Step>
+</Steps>
 
-**关键认识：** $A^TA$ 总是半正定；在它上面加上 $\lambda E$（$\lambda>0$），会把所有特征值整体至少抬高 $\lambda$，于是得到正定矩阵。
-
-**方法提炼与易错点：** 应明确 $\lambda>0$ 是“对任意 $A$ 的充分条件”，不是给定 $A$ 时的必要条件；若 $A$ 满列秩，还可允许某些非正 $\lambda$。
+<Callout type="idea" title="推广">对任意 $t>0$，同理有 $\det(tE+A)=\prod_i(t+\lambda_i)>t^n$。仅知道 $\det A>0$ 并不足以推得原结论。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-3a6e65-015" type="essay" number={false}>
+<Question id="core-la-positive-1992m3-07" type="essay" number="7" tags="来源:1992年数学三, 科目:线性代数, 考点:分块正定矩阵, 考点:二次型定义">
 
-【2000年数学三】 设有 $n$ 元实二次型
+设 $A,B$ 分别为 $m$ 阶、$n$ 阶正定矩阵。判定分块矩阵
 
 $$
-f(x_1,x_2,\ldots,x_n)
-=(x_1+a_1x_2)^2+(x_2+a_2x_3)^2+\cdots+(x_{n-1}+a_{n-1}x_n)^2+(x_n+a_nx_1)^2,
+C=\begin{pmatrix}A&O\\O&B\end{pmatrix}
 $$
 
-其中 $a_i\,(i=1,2,\ldots,n)$ 为实数。试问：当 $a_1,a_2,\ldots,a_n$ 满足什么条件时，二次型 $f$ 为正定二次型？
+是否正定。
+
+<Solution>
+
+**结论：** $\boxed{C\text{ 为正定矩阵}}$。
+
+<Steps>
+<Step title="先保证对称性">
+
+由 $A^T=A$、$B^T=B$，得 $C^T=C$，具备正定矩阵应有的对称性。
+</Step>
+<Step title="用任意非零分块向量检验正定">
+
+任取 $z=(x^T,y^T)^T\ne0$，其中 $x\in\mathbb R^m$、$y\in\mathbb R^n$，则
+
+$$
+z^TCz=x^TAx+y^TBy.
+$$
+
+两项均非负；因为 $z\ne0$，$x,y$ 至少有一个非零，而相应的正定二次型严格大于零，故 $z^TCz>0$。
+</Step>
+</Steps>
+
+<Callout type="idea" title="充要条件">实对称分块对角矩阵 $\operatorname{diag}(A,B)$ 正定，当且仅当其每个对角块都正定。反向证明只需分别取 $z=(x,0)^T$ 与 $z=(0,y)^T$。</Callout>
+
+</Solution>
+</Question>
+
+<Question id="core-la-positive-1998m3-08" type="essay" number="8" tags="来源:1998年数学三, 科目:线性代数, 考点:矩阵多项式谱, 考点:正定条件">
+
+设矩阵
+
+$$
+A=\begin{pmatrix}1&0&1\\0&2&0\\1&0&1\end{pmatrix},
+$$
+
+$B=(kE+A)^2$，其中 $k$ 为实数，$E$ 为单位矩阵。求对角矩阵 $\Lambda$，使 $B$ 与 $\Lambda$ 相似，并求 $k$ 为何值时 $B$ 为正定矩阵。
 
 <Solution>
 
 **答案：**
 
 $$
-a_1a_2\cdots a_n\ne(-1)^n.
+\boxed{\Lambda=\operatorname{diag}((k+2)^2,(k+2)^2,k^2)},
 $$
 
-**解析：** **模型识别与突破口：** 循环平方和正定性并非由每项非负自动得到，而应检查平方和全部为零是否只可能是零向量。
-
-由于 $f$ 是若干平方项之和，所以对任意 $x$ 都有
-
 $$
-f(x)\ge0.
+\boxed{k\in\mathbb R\setminus\{-2,0\}}.
 $$
 
-因此要使 $f$ 正定，只需保证
+<Steps>
+<Step title="先求 A 的谱，不展开 B">
+
+原矩阵中间方向对应特征值 $2$；在 $x_1,x_3$ 子空间上的 $2\times2$ 块为 $\begin{pmatrix}1&1\\1&1\end{pmatrix}$，特征值为 $2,0$。故
 
 $$
-f(x)=0
+\operatorname{spec}(A)=\{2,2,0\}.
 $$
+</Step>
+<Step title="利用多项式在特征值上的作用">
 
-只有零解。
-
-因为平方和等于零当且仅当每个平方项都等于零，所以需要考察方程组
-
-$$
-\begin{cases}
-x_1+a_1x_2=0,\\
-x_2+a_2x_3=0,\\
-\qquad\vdots\\
-x_{n-1}+a_{n-1}x_n=0,\\
-x_n+a_nx_1=0.
-\end{cases}
-$$
-
-其系数矩阵为
+若 $Aq=\lambda q$，则 $(kE+A)^2q=(k+\lambda)^2q$。$A$ 实对称，可正交对角化，所以
 
 $$
-B=\begin{pmatrix}
+B\sim\Lambda=\operatorname{diag}((k+2)^2,(k+2)^2,k^2).
+$$
+</Step>
+<Step title="找出严格正定的准确范围">
+
+$B$ 实对称，且上述三个特征值都是平方。因此 $B$ 始终**半正定**；严格正定还要求 $(k+2)^2>0$ 和 $k^2>0$，即 $k\ne-2$ 且 $k\ne0$。
+</Step>
+</Steps>
+
+<Callout type="warn" title="半正定不等于正定">形如 $M^TM$ 的矩阵自动半正定；只有当 $M$ 没有非零核向量时才正定。本题 $B=(kE+A)^T(kE+A)$，故正定性等价于 $kE+A$ 可逆。</Callout>
+
+</Solution>
+</Question>
+
+
+<Question id="core-la-positive-2002m3-09" type="essay" number="9" tags="来源:2002年数学三, 科目:线性代数, 考点:矩阵多项式, 考点:平移正定">
+
+设 $A$ 为三阶实对称矩阵，满足
+
+$$
+A^2+2A=O,
+$$
+
+且 $r(A)=2$。（1）求 $A$ 的全部特征值；（2）当 $k$ 为何值时，$A+kE$ 为正定矩阵？
+
+<Solution>
+
+**答案：**（1）$\boxed{-2,-2,0}$；（2）$\boxed{k>2}$。
+
+<Steps>
+<Step title="把矩阵方程作用到特征向量上">
+
+取 $Aq=\lambda q$（$q\ne0$），则
+
+$$
+0=(A^2+2A)q=(\lambda^2+2\lambda)q,
+$$
+
+所以 $\lambda(\lambda+2)=0$，即特征值只能是 $0$ 与 $-2$。
+</Step>
+<Step title="通过秩固定各特征值重数">
+
+由于 $A$ 是实对称矩阵，零特征值的代数重数等于其特征空间维数 $3-r(A)=1$。其余两个特征值只能为 $-2$，故谱为 $(-2,-2,0)$。
+</Step>
+<Step title="平移后逐项检查正号">
+
+$A+kE$ 仍实对称，特征值为 $k-2,k-2,k$，严格正定当且仅当
+
+$$
+k-2>0,\qquad k>0\iff k>2.
+$$
+</Step>
+</Steps>
+
+<Callout type="idea" title="一题两步">多项式方程限制“特征值可能取什么”，秩决定“每个值有几个”；加 $kE$ 再把所有特征值平移 $k$。</Callout>
+
+</Solution>
+</Question>
+
+<Question id="core-la-positive-2010m1-10" type="essay" number="10" tags="来源:2010年数学一, 科目:线性代数, 考点:正交投影, 考点:正定性证明">
+
+已知二次型 $f=x^TAx$ 在正交变换 $x=Qy$ 下的标准形为
+
+$$
+y_1^2+y_2^2,
+$$
+
+且 $Q$ 的第三列为 $\left(\frac{\sqrt2}{2},0,\frac{\sqrt2}{2}\right)^T$。
+
+（1）求矩阵 $A$；（2）证明 $A+E$ 为正定矩阵。
+
+<Solution>
+
+**答案：**
+
+$$
+\boxed{A=\begin{pmatrix}\frac12&0&-\frac12\\0&1&0\\-\frac12&0&\frac12\end{pmatrix}};
+\qquad A+E\text{ 正定}.
+$$
+
+<Steps>
+<Step title="由标准形识别正交投影">
+
+因为 $Q^TAQ=\operatorname{diag}(1,1,0)$，$A$ 在第三列方向的特征值为零，在它的正交补上恒等。令
+
+$$
+u=\frac1{\sqrt2}(1,0,1)^T,
+$$
+
+则 $u^Tu=1$，$uu^T$ 是投影到 $\operatorname{span}\{u\}$ 的矩阵，所以
+
+$$
+A=E-uu^T=\begin{pmatrix}\frac12&0&-\frac12\\0&1&0\\-\frac12&0&\frac12\end{pmatrix}.
+$$
+</Step>
+<Step title="用最小特征值判正定">
+
+$A$ 的特征值为 $1,1,0$，故 $A+E$ 的特征值为 $2,2,1$，全部严格大于零，因此 $A+E$ 正定。
+</Step>
+</Steps>
+
+<Callout type="idea" title="不求其余特征向量的原因">二重特征值 $1$ 对应的正交基并不唯一，但投影到其二维特征空间的矩阵唯一，即 $E-uu^T$。</Callout>
+
+</Solution>
+</Question>
+
+<Question id="core-la-positive-lizhengyuan-11" type="essay" number="11" tags="来源:李正元, 科目:线性代数, 考点:正定矩阵求逆, 考点:伴随矩阵">
+
+若 $A$ 是 $n$ 阶正定矩阵，证明 $A^{-1}$、$A^*$ 也都是正定矩阵。
+
+<Solution>
+
+**结论：** $\boxed{A^{-1}>0,\quad A^*>0}$（按实对称正定的矩阵序理解）。
+
+<Tabs items={['法一：二次型法','法二：特征值法']}>
+<Tab value="法一：二次型法">
+
+<Steps>
+<Step title="由正定保证可逆、行列式为正">
+
+$A$ 正定蕴含 $A=A^T$、$\det A>0$，所以 $A^{-1}$ 存在且对称。
+</Step>
+<Step title="将逆矩阵二次型变回 A">
+
+对任意 $x\ne0$，令 $y=A^{-1}x\ne0$。由 $x=Ay$ 与 $A=A^T$，
+
+$$
+x^TA^{-1}x=(Ay)^Ty=y^TAy>0.
+$$
+
+因此 $A^{-1}$ 正定。
+</Step>
+<Step title="处理伴随矩阵">
+
+因为 $A^*=(\det A)A^{-1}$，而 $\det A>0$，故 $A^*$ 也是正定矩阵。
+</Step>
+</Steps>
+
+</Tab>
+<Tab value="法二：特征值法">
+
+由正交谱分解 $A=Q\operatorname{diag}(\lambda_i)Q^T$，$\lambda_i>0$；于是
+
+$$
+A^{-1}=Q\operatorname{diag}(1/\lambda_i)Q^T,
+$$
+
+全部特征值为正。又 $A^*=(\prod_j\lambda_j)A^{-1}$，其特征值为 $\prod_{j\ne i}\lambda_j>0$，故也正定。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="先说明可逆">使用 $A^*=|A|A^{-1}$ 前必须确保 $A$ 可逆；这里严格正定保证所有特征值正，从而行列式非零。</Callout>
+
+</Solution>
+</Question>
+
+<Question id="core-la-positive-zhangyu-12" type="essay" number="12" tags="来源:张宇1000题, 科目:线性代数, 考点:正定平方根, 考点:极分解">
+
+设
+
+$$
+A=\begin{pmatrix}1&1&0\\0&1&1\\1&0&1\end{pmatrix},\qquad A^TA=B^2,
+$$
+
+其中 $B$ 为正定矩阵。（1）求 $B$；（2）证明存在正交矩阵 $C$，使 $A=CB$，并求 $C$。
+
+<Solution>
+
+**答案：**
+
+$$
+\boxed{B=\begin{pmatrix}\frac43&\frac13&\frac13\\\frac13&\frac43&\frac13\\\frac13&\frac13&\frac43\end{pmatrix}},
+\qquad
+\boxed{C=\frac13\begin{pmatrix}2&2&-1\\-1&2&2\\2&-1&2\end{pmatrix}}.
+$$
+
+<Steps>
+<Step title="把 AᵀA 识别成单位阵加全一阵">
+
+直接乘得
+
+$$
+A^TA=\begin{pmatrix}2&1&1\\1&2&1\\1&1&2\end{pmatrix}=E+J,
+$$
+
+其中 $J$ 是三阶全一矩阵，满足 $J^2=3J$。
+</Step>
+<Step title="求唯一正定平方根 B">
+
+尝试 $B=E+tJ$，则 $B^2=E+(2t+3t^2)J$，所以
+
+$$
+3t^2+2t-1=0\iff t=\frac13\text{ 或 }-1.
+$$
+
+当 $t=1/3$ 时，$B$ 的特征值为 $2,1,1$，均为正；当 $t=-1$ 时特征值为 $-2,1,1$，不是正定。故唯一正定平方根是
+
+$$
+B=E+\frac13J.
+$$
+</Step>
+<Step title="构造 C 并严格验证正交性">
+
+利用 $J^2=3J$ 可得
+
+$$
+B^{-1}=E-\frac16J.
+$$
+
+令 $C=AB^{-1}$，展开即得答案中的矩阵。它满足
+
+$$
+C^TC=B^{-1}A^TAB^{-1}=B^{-1}B^2B^{-1}=E,
+$$
+
+并且 $CB=A$，故 $C$ 确为所需正交矩阵。
+</Step>
+</Steps>
+
+<Callout type="idea" title="极分解的基本模型">只要 $A$ 可逆，就能令 $B=(A^TA)^{1/2}$ 为唯一正定平方根，再定义 $C=AB^{-1}$，得到 $A=CB$ 且 $C$ 正交。</Callout>
+
+</Solution>
+</Question>
+
+## 三、平方和、零空间与满列秩模型
+
+<Question id="core-la-positive-1999m1-13" type="essay" number="13" tags="来源:1999年数学一, 科目:线性代数, 考点:Gram矩阵, 考点:满列秩">
+
+设 $A$ 为 $m$ 阶实对称正定矩阵，$B$ 为 $m\times n$ 实矩阵。证明：$B^TAB$ 为正定矩阵的充分必要条件是 $r(B)=n$。
+
+<Solution>
+
+**结论：**
+
+$$
+\boxed{B^TAB\text{ 正定}\quad\Longleftrightarrow\quad r(B)=n}.
+$$
+
+<Steps>
+<Step title="找到将两个对象联系起来的恒等式">
+
+$B^TAB$ 是 $n$ 阶实对称矩阵，且对任意 $x\in\mathbb R^n$，
+
+$$
+x^TB^TABx=(Bx)^TA(Bx).
+$$
+
+因为 $A$ 正定，右侧严格大于零当且仅当 $Bx\ne0$。
+</Step>
+<Step title="证充分性：列满秩排除零方向">
+
+如果 $r(B)=n$，则 $Bx=0$ 仅有零解，任意 $x\ne0$ 都有 $Bx\ne0$。因此 $(Bx)^TA(Bx)>0$，即 $B^TAB$ 正定。
+</Step>
+<Step title="证必要性：正定不允许非零核向量">
+
+反之，若 $B^TAB$ 正定，但 $r(B)<n$，则存在 $x\ne0$ 使 $Bx=0$，导致 $x^TB^TABx=0$，矛盾。所以必须 $r(B)=n$。
+</Step>
+</Steps>
+
+<Callout type="idea" title="维数推论">若 $n>m$，$m\times n$ 的矩阵无法列满秩，故不论 $A$ 多么正定，$B^TAB$ 都不可能正定。</Callout>
+
+</Solution>
+</Question>
+
+<Question id="core-la-positive-1999m3-14" type="essay" number="14" tags="来源:1999年数学三, 科目:线性代数, 考点:Gram矩阵, 考点:正则化正定">
+
+设 $A$ 为 $m\times n$ 实矩阵，$E$ 为 $n$ 阶单位矩阵。已知
+
+$$
+B=\lambda E+A^TA.
+$$
+
+证明：当 $\lambda>0$ 时，矩阵 $B$ 正定。
+
+<Solution>
+
+**结论：** 对任意实矩阵 $A$、任意 $\lambda>0$，$\boxed{\lambda E+A^TA\text{ 正定}}$。
+
+<Steps>
+<Step title="核查对称性">
+
+$$
+B^T=(\lambda E+A^TA)^T=\lambda E+A^TA=B.
+$$
+</Step>
+<Step title="写成两个非负项的和">
+
+任意取 $x\in\mathbb R^n\setminus\{0\}$，则
+
+$$
+\begin{aligned}
+x^TBx&=\lambda x^Tx+x^TA^TAx\\
+&=\lambda\|x\|^2+\|Ax\|^2.
+\end{aligned}
+$$
+
+因为 $\lambda>0$ 且 $x\ne0$，第一项严格正；第二项非负，所以整个式子严格大于零，从而 $B$ 正定。
+</Step>
+</Steps>
+
+<Callout type="idea" title="广泛使用的正则化">$A^TA$ 总是半正定；加上 $\lambda E$，$\lambda>0$，可以消除原矩阵的零特征方向。这里 $\lambda>0$ 是对**所有** $A$ 都有效的充分条件，不必对固定 $A$ 都是必要条件。</Callout>
+
+</Solution>
+</Question>
+
+
+<Question id="core-la-positive-2000m3-15" type="essay" number="15" tags="来源:2000年数学三, 科目:线性代数, 考点:循环平方和, 考点:行列式非退化">
+
+设 $n$ 元实二次型
+
+$$
+\begin{aligned}
+f(x_1,\ldots,x_n)={}&(x_1+a_1x_2)^2+(x_2+a_2x_3)^2+\cdots\\
+&+(x_{n-1}+a_{n-1}x_n)^2+(x_n+a_nx_1)^2,
+\end{aligned}
+$$
+
+其中 $a_i$（$1\le i\le n$）为实数。问 $a_1,\ldots,a_n$ 满足什么条件时 $f$ 正定？
+
+<Solution>
+
+**答案：**
+
+$$
+\boxed{a_1a_2\cdots a_n\ne(-1)^n}.
+$$
+
+<Steps>
+<Step title="平方和正定转化为系数矩阵可逆">
+
+记 $x=(x_1,\ldots,x_n)^T$，
+
+$$
+M=\begin{pmatrix}
 1&a_1&0&\cdots&0\\
 0&1&a_2&\cdots&0\\
 \vdots&&\ddots&\ddots&\vdots\\
@@ -956,187 +739,234 @@ a_n&0&\cdots&0&1
 \end{pmatrix}.
 $$
 
-这个方程组只有零解，当且仅当
+则 $f(x)=\|Mx\|^2\ge0$。要对所有 $x\ne0$ 严格大于零，恰好要求 $Mx=0$ 仅有零解，即 $\det M\ne0$。
+</Step>
+<Step title="计算循环矩阵的行列式">
+
+该矩阵按每行选取非零元作行列式展开，只有两类贡献：全部选主对角线，得到 $1$；全部选环上的 $a_i$，对应一个 $n$-循环置换，符号为 $(-1)^{n-1}$。所以
 
 $$
-|B|\ne0.
+\det M=1+(-1)^{n-1}\prod_{i=1}^n a_i.
 $$
 
-而
+因此
 
 $$
-|B|=1+(-1)^{n-1}a_1a_2\cdots a_n.
+\det M\ne0\iff\prod_{i=1}^na_i\ne(-1)^n.
 $$
 
-所以
+这给出正定的充分必要条件。
+</Step>
+</Steps>
 
-$$
-|B|\ne0
-\Longleftrightarrow
-a_1a_2\cdots a_n\ne(-1)^n.
-$$
-
-因此所求条件为
-
-$$
-\boxed{a_1a_2\cdots a_n\ne(-1)^n}.
-$$
-
-**另一种写法：** 令上述系数矩阵为 $B$，则
-
-$$
-f(x)=\|Bx\|^2=x^TB^TBx.
-$$
-
-故 $f$ 正定等价于 $B$ 可逆，仍得到同一条件。
-
-**方法提炼与易错点：** 若系数乘积命中退化条件，能构造非零零点；因此该条件既必要又充分。特定 $a_i=0$ 情况也被行列式公式完整覆盖。
+<Callout type="warn" title="平方和只能直接保证半正定">$f$ 的每一项都是平方，并不能排除非零的公共零点；本题必须通过循环线性方程组的唯一解条件确定**严格**正定性。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-3a6e65-016" type="single" number={false}>
+<Question id="core-la-positive-zhangyu-16" type="single" number="16" tags="来源:张宇1000题, 科目:线性代数, 考点:平方和正定, 考点:循环约束">
 
-【张宇1000题】 下列二次型中，属于正定二次型的是( ).
+下列二次型中，属于正定二次型的是（ ）。
 
-<Option>$ f_1=(x_1-x_2)^2+(x_2-x_3)^2+(x_3-x_4)^2+(x_4-x_1)^2$</Option>
-<Option>$ f_2=(x_1+x_2)^2+(x_2+x_3)^2+(x_3+x_4)^2+(x_4+x_1)^2$</Option>
-<Option>$ f_3=(x_1-x_2)^2+(x_2+x_3)^2+(x_3-x_4)^2+(x_4+x_1)^2$</Option>
-<Option correct>$ f_4=(x_1-x_2)^2+(x_2+x_3)^2+(x_3+x_4)^2+(x_4+x_1)^2$</Option>
+<Option>$f_1=(x_1-x_2)^2+(x_2-x_3)^2+(x_3-x_4)^2+(x_4-x_1)^2$</Option>
+<Option>$f_2=(x_1+x_2)^2+(x_2+x_3)^2+(x_3+x_4)^2+(x_4+x_1)^2$</Option>
+<Option>$f_3=(x_1-x_2)^2+(x_2+x_3)^2+(x_3-x_4)^2+(x_4+x_1)^2$</Option>
+<Option correct>$f_4=(x_1-x_2)^2+(x_2+x_3)^2+(x_3+x_4)^2+(x_4+x_1)^2$</Option>
 
 <Solution>
 
-**模型识别与突破口：** 连续四条边上的符号选择决定约束是否相容：正定当且仅当四个一次式的公共核是零空间。
+**答案：D。**
 
-四个选项均为四个实一次式的平方和，判正定等价于这些一次式的公共零点只有原点。
+<Steps>
+<Step title="抓住统一判据：所有平方同时为零时只能取零向量">
 
-A：取 $(1,1,1,1)^T$，四个差都为零，故不正定。
+四个选项均是平方和，所以都半正定。只有当对应线性式组成的齐次方程组没有非零解时，才严格正定。
+</Step>
+<Step title="前三项直接构造非零零点">
 
-B：取 $(1,-1,1,-1)^T$，四个相邻和均为零，故不正定。
+- A：取 $x=(1,1,1,1)^T$，全部相邻差为零。
+- B：取 $x=(1,-1,1,-1)^T$，全部相邻和为零。
+- C：取 $x=(1,1,-1,-1)^T$，四个平方项也都为零。
 
-C：四个等式依次给出 $x_1=x_2$、$x_2=-x_3$、$x_3=x_4$、$x_4=-x_1$；可取非零解 $(1,1,-1,-1)^T$，故不正定。
+这三项均存在非零向量使二次型等于零，故都不正定。
+</Step>
+<Step title="验证 D 的零空间只含零向量">
 
-D：若平方和为零，则必须有
+$ f_4(x)=0 $ 要求
 
 $$
 x_1=x_2,\quad x_2=-x_3,\quad x_3=-x_4,\quad x_4=-x_1.
 $$
 
-前三式推出 $x_4=x_2=x_1$，第四式迫使 $x_1=0$，从而所有分量皆零，故 D 正定。
+前三式推出 $x_4=x_2=x_1$，第四式再给 $x_1=-x_1$，所以 $x_1=0$，其他分量也都为零。因此 $f_4$ 严格正定。
+</Step>
+</Steps>
 
-**矩阵法：** 对 D 的线性式系数矩阵
-
-$$
-M=\begin{pmatrix}1&-1&0&0\\0&1&1&0\\0&0&1&1\\1&0&0&1\end{pmatrix}
-$$
-
-有 $\det M=2\ne0$，因此 $M^TM$ 正定。
-
-**方法提炼与易错点：** 不能以“全是平方项”为理由选择任何一项；奇偶环的符号结构控制零向量之外的公共零点。
+<Callout type="idea" title="无须展开四元二次型">循环平方和题最容易的思路是检查各线性式的公共核；找反例时直接给一个非零向量，比计算所有特征值更快。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-3a6e65-017" type="essay" number={false}>
+<Question id="core-la-positive-zhangyu-17" type="essay" number="17" tags="来源:张宇1000题, 科目:线性代数, 考点:Vandermonde矩阵, 考点:Gram正定">
 
-【张宇1000题】 设
+设
 
 $$
-A=\begin{bmatrix}
+A=\begin{pmatrix}
 1&1&1&\cdots&1\\
 1&2&3&\cdots&s\\
 1&2^2&3^2&\cdots&s^2\\
 \vdots&\vdots&\vdots&&\vdots\\
 1&2^{n-1}&3^{n-1}&\cdots&s^{n-1}
-\end{bmatrix},
+\end{pmatrix},
 $$
 
-其中$s,n$是正整数。证明$A^TA$是实对称矩阵，并讨论$A^TA$的正定性。
+其中 $s,n$ 为正整数。证明 $A^TA$ 是实对称矩阵，并讨论其正定性。
 
 <Solution>
 
-**答案：** $A^TA$ 总是实对称半正定；它正定当且仅当 $s\le n$。
-
-**解析：** **模型识别与突破口：** Vandermonde 型矩阵转置乘积的正定性等价于列满秩；最终是节点互异时的矩阵秩公式。
-
-矩阵 $A$ 有 $n$ 行、$s$ 列，所以 $A^TA$ 为 $s$ 阶实对称矩阵。对任意 $x\in\mathbb R^s$，
+**答案：** $A^TA$ 对任意 $n,s$ 都实对称、半正定；
 
 $$
-x^TA^TAx=\|Ax\|^2\ge0.
+\boxed{A^TA\text{ 正定}\iff s\le n}.
 $$
 
-因此它总是半正定，而且它严格正定当且仅当 $\ker A=\{0\}$，即 $\operatorname{rank}A=s$。
+<Steps>
+<Step title="从矩阵乘积立即判断对称与半正定">
 
-由于节点 $1,2,\ldots,s$ 两两不同，Vandermonde 型矩阵满足
-
-$$
-\operatorname{rank}A=\min\{n,s\}.
-$$
-
-证明这一秩公式：若 $s\le n$，取前 $s$ 行组成的 $s\times s$ Vandermonde 子矩阵，行列式为
+$A$ 是 $n\times s$ 实矩阵，故
 
 $$
-\prod_{1\le i<j\le s}(j-i)\ne0,
+(A^TA)^T=A^TA,
+\qquad x^TA^TAx=\|Ax\|^2\ge0.
 $$
 
-所以列满秩；若 $s>n$，取前 $n$ 列组成的 $n\times n$ Vandermonde 子矩阵可逆，故满行秩为 $n<s$，存在非零核向量。故正定恰当且仅当 $s\le n$。
+要使不等号对每个 $x\ne0$ 都严格成立，就必须 $\ker A=\{0\}$，等价于 $r(A)=s$。
+</Step>
+<Step title="利用互异节点证明 Vandermonde 矩阵的秩">
 
-**方法提炼与易错点：** 条件是 $s\le n$，而不是 $s<n$；取 $s=n$ 时方阵为可逆 Vandermonde 矩阵。
+当 $s\le n$ 时，取 $A$ 的前 $s$ 行得到 $s\times s$ 的 Vandermonde 子矩阵，其行列式为
+
+$$
+\prod_{1\le i<j\le s}(j-i)\ne0.
+$$
+
+因此 $r(A)=s$，所以 $A^TA$ 正定。
+
+当 $s>n$ 时，$r(A)\le n<s$，必有非零 $x$ 使 $Ax=0$，从而 $x^TA^TAx=0$，不可能正定。
+</Step>
+</Steps>
+
+<Callout type="idea" title="维数边界">$s=n$ 时也正定，因为这是可逆 Vandermonde 方阵；条件为 $s\le n$，不是 $s<n$。互异节点使 $r(A)=\min(n,s)$。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-3a6e65-018" type="essay" number={false}>
+<Question id="core-la-positive-lilin-18" type="essay" number="18" tags="来源:李林880, 科目:线性代数, 考点:正交矩阵参数, 考点:正定分解">
 
-【李林880】 设二次型 $f(x_1,x_2,x_3)=x^TAx(A^T=A)$ 经正交变换 $x=Qy$ 化为 $by_2^2+c^2y_3^2$，其中 $Q=\frac{1}{\sqrt{2}}\begin{pmatrix}1&0&a\\0&c&0\\b&0&1\end{pmatrix}$ $(b>0,c>0)$。求：
+设二次型 $f(x_1,x_2,x_3)=x^TAx$（$A^T=A$）经正交变换 $x=Qy$ 化为 $by_2^2+c^2y_3^2$，其中
 
-(I) $a,b,c$ 的值及矩阵 $A$；
+$$
+Q=\frac1{\sqrt2}\begin{pmatrix}1&0&a\\0&c&0\\b&0&1\end{pmatrix},\qquad b>0,\ c>0.
+$$
 
-(II) 可逆矩阵 $P$，使得 $A+E=P^TP$。
+求：（I）$a,b,c$ 的值及矩阵 $A$；（II）可逆矩阵 $P$，使得 $A+E=P^TP$。
 
 <Solution>
 
-**答案：** D，$a$ 为任意实数。
-
-**解析：** **模型识别与突破口：** 每项平方非负，严格正定等价于三个一次式的系数矩阵可逆；参数不必求每个顺序主子式。
-
-设
+**答案：**
 
 $$
-M(a)=\begin{pmatrix}1&2&1\\-1&a-4&2\\2&1&a\end{pmatrix},\qquad x=(x_1,x_2,x_3)^T.
+\boxed{a=-1,\quad b=1,\quad c=\sqrt2},
 $$
 
-三项平方和恰为 $f(x)=\|M(a)x\|^2$，故 $f$ 正定当且仅当 $M(a)$ 可逆。展开得
+$$
+\boxed{A=\begin{pmatrix}1&0&-1\\0&1&0\\-1&0&1\end{pmatrix}},
+\qquad
+\boxed{P=\begin{pmatrix}\sqrt2&0&-1/\sqrt2\\0&\sqrt2&0\\0&0&\sqrt{3/2}\end{pmatrix}}.
+$$
+
+<Steps>
+<Step title="用 Q 的列向量正交、单位来锁定参数">
+
+由于 $Q$ 为正交矩阵，其第一列和第二列的长度各为 $1$，故
 
 $$
-\det M(a)=a^2-4a+13=(a-2)^2+9>0
+\frac{1+b^2}{2}=1\Longrightarrow b=1\quad(b>0),
 $$
 
-对所有实数 $a$ 成立。因此 $M(a)x=0$ 只有零解，任意非零 $x$ 都有 $f(x)>0$，选 D。
+$$
+\frac{c^2}{2}=1\Longrightarrow c=\sqrt2\quad(c>0).
+$$
 
-注意“各平方项的系数不全为零”远远不够，必须是这些一次式只有**零公共解**。
+第一、三列正交要求
 
-**方法提炼与易错点：** 尽管 $a^2-4a+13$ 对所有实数都大于零，仍需展示完整因式配方并说明 $\det M
-e0$ 导致只有零公共解。
+$$
+\frac{a+b}{2}=0\Longrightarrow a=-1.
+$$
+
+此时第三列长度也为 $1$，全部正交条件满足。因而
+
+$$
+Q=\begin{pmatrix}
+1/\sqrt2&0&-1/\sqrt2\\
+0&1&0\\
+1/\sqrt2&0&1/\sqrt2
+\end{pmatrix}.
+$$
+</Step>
+<Step title="按给定标准形恢复 A 的完整矩阵">
+
+正交变换给出
+
+$$
+Q^TAQ=\operatorname{diag}(0,b,c^2)=\operatorname{diag}(0,1,2).
+$$
+
+所以
+
+$$
+A=Q\operatorname{diag}(0,1,2)Q^T
+=\begin{pmatrix}1&0&-1\\0&1&0\\-1&0&1\end{pmatrix}.
+$$
+
+这个 $A$ 的特征值为 $0,1,2$，与所给标准形一致。
+</Step>
+<Step title="构造 A+E 的 Cholesky 平方和分解">
+
+$$
+A+E=\begin{pmatrix}2&0&-1\\0&2&0\\-1&0&2\end{pmatrix}.
+$$
+
+取上三角矩阵
+
+$$
+P=\begin{pmatrix}\sqrt2&0&-1/\sqrt2\\0&\sqrt2&0\\0&0&\sqrt{3/2}\end{pmatrix}.
+$$
+
+直接相乘得到
+
+$$
+P^TP=\begin{pmatrix}2&0&-1\\0&2&0\\-1&0&2\end{pmatrix}=A+E.
+$$
+
+并且 $\det P=\sqrt6\ne0$，所以 $P$ 可逆，符合题意。
+</Step>
+</Steps>
+
+<Callout type="warn" title="原解析曾与题干错位">此题的关键是先用**正交矩阵的列约束**确定 $a,b,c$，再由 $Q^TAQ$ 恢复 $A$。求 $P$ 时不是对 $A$ 直接开方，而是分解严格正定的 $A+E$。</Callout>
 
 </Solution>
-
 </Question>
 
 ## 四、分块消元、边框行列式与广义 Rayleigh 商
 
-<Question id="math-3a6e65-019" type="essay" number={false}>
+<Question id="core-la-positive-2005m3-19" type="essay" number="19" tags="来源:2005年数学三, 科目:线性代数, 考点:Schur补, 考点:分块合同">
 
-【2005年数学三】 设
+设
 
 $$
-D=\begin{pmatrix}
-A&C\\
-C^T&B
-\end{pmatrix}
+D=\begin{pmatrix}A&C\\C^T&B\end{pmatrix}
 $$
 
 为正定矩阵，其中 $A,B$ 分别为 $m$ 阶、$n$ 阶对称矩阵，$C$ 为 $m\times n$ 矩阵。
@@ -1144,127 +974,83 @@ $$
 （1）计算 $P^TDP$，其中
 
 $$
-P=\begin{pmatrix}
-E_m&-A^{-1}C\\
-O&E_n
-\end{pmatrix};
+P=\begin{pmatrix}E_m&-A^{-1}C\\O&E_n\end{pmatrix};
 $$
 
-（2）利用（1）的结果判断矩阵 $B-C^TA^{-1}C$ 是否为正定矩阵，并证明你的结论。
+（2）判断 $B-C^TA^{-1}C$ 是否正定，并证明。
 
 <Solution>
 
 **答案：**
 
-（1）
-
 $$
-P^TDP=\begin{pmatrix}
-A&O\\
-O&B-C^TA^{-1}C
-\end{pmatrix};
+\boxed{P^TDP=\begin{pmatrix}A&O\\O&B-C^TA^{-1}C\end{pmatrix}},
 $$
 
-（2）$B-C^TA^{-1}C$ 为正定矩阵。
+且 $\boxed{B-C^TA^{-1}C\text{ 正定}}$。
 
-**解析：** **模型识别与突破口：** 分块正定矩阵利用分块合同消元，把交叉块归入 Schur 补；这是比直接展开高阶行列式更可复用的构造。
+<Steps>
+<Step title="先证明 A 的逆矩阵确实存在">
 
-由于 $D$ 正定，所以其主子矩阵 $A$ 也正定，从而 $A$ 可逆。又因为 $A$ 对称，故
-
-$$
-(A^{-1})^T=A^{-1}.
-$$
-
-于是
+$D$ 正定，取任意 $x\ne0$ 和分块向量 $z=(x^T,0)^T$，则
 
 $$
-P^T=\begin{pmatrix}
-E_m&O\\
--C^TA^{-1}&E_n
-\end{pmatrix}.
+x^TAx=z^TDz>0.
 $$
 
-先计算
+因此主子块 $A$ 正定，特别地可逆且 $A^{-1}$ 对称。
+</Step>
+<Step title="右乘 P 消除右上交叉块">
 
 $$
-DP=
-\begin{pmatrix}
-A&C\\
-C^T&B
-\end{pmatrix}
-\begin{pmatrix}
-E_m&-A^{-1}C\\
-O&E_n
-\end{pmatrix}
-=
-\begin{pmatrix}
-A&O\\
-C^T&B-C^TA^{-1}C
-\end{pmatrix}.
+DP=\begin{pmatrix}A&C\\C^T&B\end{pmatrix}
+\begin{pmatrix}E_m&-A^{-1}C\\O&E_n\end{pmatrix}
+=\begin{pmatrix}A&O\\C^T&B-C^TA^{-1}C\end{pmatrix}.
 $$
+</Step>
+<Step title="再左乘 Pᵀ 得到分块对角式">
 
-再左乘 $P^T$：
+因
 
 $$
-P^TDP
-=
-\begin{pmatrix}
-A&O\\
-O&B-C^TA^{-1}C
-\end{pmatrix}.
-$$
-
-因为
-
-$$
-|P|=1\ne0,
-$$
-
-所以 $P$ 可逆。矩阵 $P^TDP$ 与 $D$ 合同；$D$ 正定，因此 $P^TDP$ 也正定。
-
-任取 $y\ne0$，令
-
-$$
-z=\begin{pmatrix}0\\y\end{pmatrix}\ne0.
-$$
-
-则
-
-$$
-\begin{aligned}
-z^T(P^TDP)z
-&=y^T(B-C^TA^{-1}C)y>0.
-\end{aligned}
-$$
-
-所以对任意 $y\ne0$ 都有
-
-$$
-y^T(B-C^TA^{-1}C)y>0.
+P^T=\begin{pmatrix}E_m&O\\-C^TA^{-1}&E_n\end{pmatrix},
 $$
 
 故
 
 $$
-B-C^TA^{-1}C
+P^TDP=\begin{pmatrix}A&O\\O&B-C^TA^{-1}C\end{pmatrix}.
+$$
+</Step>
+<Step title="利用可逆合同保持正定性">
+
+$P$ 为分块上三角矩阵，对角块均为单位阵，故可逆。$D$ 正定意味着 $P^TDP$ 正定。对任意 $y\ne0$，取 $z=(0,y^T)^T$，即有
+
+$$
+y^T(B-C^TA^{-1}C)y=z^TP^TDPz>0.
 $$
 
-为正定矩阵。
+因此 Schur 补 $B-C^TA^{-1}C$ 严格正定。
+</Step>
+</Steps>
 
-**关键结构：** 这里通过合同变换把分块正定矩阵消元成分块对角矩阵，$B-C^TA^{-1}C$ 就是常见的 Schur 补。
-
-**方法提炼与易错点：** $A^{-1}$ 的存在须先由原矩阵 $D$ 正定推出 $A$ 正定，不能把题目中出现 $A^{-1}$ 当作无需证明的前提。
+<Callout type="idea" title="Schur 补判别法">对于实对称块矩阵 $\begin{pmatrix}A&C\\C^T&B\end{pmatrix}$，当 $A>0$ 时，整体正定当且仅当 $B-C^TA^{-1}C>0$。这一结论源于上面的可逆合同消元。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-3a6e65-020" type="single" number={false}>
+<Question id="core-la-positive-lilin-20" type="single" number="20" tags="来源:李林880, 科目:线性代数, 考点:边框行列式, 考点:伴随矩阵正定">
 
-【李林880】 已知 $A=\begin{pmatrix} 1-a & a \\ a & a \end{pmatrix}, X=(x_1,x_2)^T$，二次型
+已知
 
 $$
-f(x_1,x_2)=\begin{vmatrix} A & X \\ -X^T & 0 \end{vmatrix}
+A=\begin{pmatrix}1-a&a\\a&a\end{pmatrix},\qquad X=(x_1,x_2)^T,
+$$
+
+二次型
+
+$$
+f(x_1,x_2)=\begin{vmatrix}A&X\\-X^T&0\end{vmatrix}.
 $$
 
 则 $A$ 正定是 $f(x_1,x_2)$ 正定的（ ）。
@@ -1276,105 +1062,127 @@ $$
 
 <Solution>
 
-**答案：** C，充分必要条件（均等价于 $0<a<\frac12$）。
+**答案：C，** 两个条件都等价于 $\boxed{0<a<\frac12}$。
 
-**解析：** **模型识别与突破口：** 带一个向量的边框行列式 $\det\begin{pmatrix}A&x\\-x^T&0\end{pmatrix}=x^T\operatorname{adj}(A)x$，即使 $A$ 不可逆也成立。
+<Steps>
+<Step title="识别边框行列式的二次型矩阵">
 
-**先识别边框行列式。** 对任意二阶方阵 $A$ 和二维向量 $x$，按最后一行（或分块伴随恒等式）展开，有
-
-$$
-\det\begin{pmatrix}A&x\\-x^T&0\end{pmatrix}=x^T\operatorname{adj}(A)x.
-$$
-
-本题
+把三阶行列式按最后一行展开（这一等式不要求 $A$ 可逆），得
 
 $$
-\operatorname{adj}(A)=\begin{pmatrix}a&-a\\-a&1-a\end{pmatrix},
+f(X)=X^TA^*X,
 $$
 
-故
+其中
 
 $$
-f(x_1,x_2)=ax_1^2-2ax_1x_2+(1-a)x_2^2.
+A^*=\begin{pmatrix}a&-a\\-a&1-a\end{pmatrix}.
 $$
 
-使用 Sylvester 判别法，$A$ 正定当且仅当
+故 $f(x_1,x_2)=ax_1^2-2ax_1x_2+(1-a)x_2^2$。
+</Step>
+<Step title="分别判断 A 与 A* 何时正定">
+
+$A$ 的前两个顺序主子式为
 
 $$
-1-a>0,\qquad\det A=a(1-2a)>0,
+1-a,\qquad |A|=a(1-2a).
 $$
 
-解得 $0<a<\frac12$。而 $f$ 正定当且仅当
+因此 $A$ 正定当且仅当 $1-a>0$、$a(1-2a)>0$，即 $0<a<1/2$。
+
+$A^*$ 的前两个顺序主子式为
 
 $$
-a>0,\qquad\det\operatorname{adj}(A)=a(1-2a)>0,
+a,\qquad |A^*|=a(1-2a),
 $$
 
-同样得到 $0<a<\frac12$。所以二者等价，选 C。
+因此 $f$ 正定亦当且仅当 $0<a<1/2$。两者互为充分必要条件，选 C。
+</Step>
+</Steps>
 
-**构造性说明：** 对二维实对称矩阵，取正交矩阵 $J=\begin{pmatrix}0&-1\\1&0\end{pmatrix}$，则 $\operatorname{adj}(A)=J^TAJ$。因此两矩阵合同，二者正定性相同；这也解释了为何结论不依赖于本题的具体参数计算。
-
-**方法提炼与易错点：** 只有矩阵阶数为 $2$ 时，伴随矩阵与原矩阵的正定性可以用简单的正交置换直接等价；一般阶数不能未经证明照搬。
+<Callout type="idea" title="二维结构解释">对任意二维实对称矩阵 $A$，有 $A^*=J^TAJ$，其中 $J=\begin{pmatrix}0&-1\\1&0\end{pmatrix}$ 是正交矩阵，故 $A^*$ 与 $A$ 正交合同，具有同样的正定性；并非偶然算出同一参数区间。</Callout>
 
 </Solution>
-
 </Question>
 
-<Question id="math-3a6e65-021" type="essay" number={false}>
+<Question id="core-la-positive-zhangyu-21" type="essay" number="21" tags="来源:张宇1000题, 科目:线性代数, 考点:Cholesky分解, 考点:广义Rayleigh商">
 
-【张宇1000题】 设二次型
+设二次型
 
 $$
 f(x_1,x_2)=x_1^2-4x_1x_2+4x_2^2,
 $$
 
-$g(x_1,x_2)$的二次型矩阵为
+$g(x_1,x_2)$ 的二次型矩阵为
 
 $$
-B=\begin{bmatrix}1&-1\\-1&2\end{bmatrix}.
+B=\begin{pmatrix}1&-1\\-1&2\end{pmatrix}.
 $$
 
-(1)是否存在可逆矩阵$D$，使$B=D^TD$？若存在，求$D$；
-(2)求$ \max_{x\neq0}\frac{f(x)}{g(x)}$。
+（1）是否存在可逆矩阵 $D$ 使 $B=D^TD$？若存在，求 $D$；（2）求
+
+$$
+\max_{x\ne0}\frac{f(x)}{g(x)}.
+$$
 
 <Solution>
 
-**答案：** （1）可取 $D=\begin{pmatrix}1&-1\\0&1\end{pmatrix}$；（2）最大值为 $2$，在任意 $x=(0,t)^T$（$t\ne0$）处取得。
-
-**解析：** **模型识别与突破口：** 分母二次型为正定时，可分解为 $\|Dx\|^2$，从而广义 Rayleigh 商转成一个普通内积的 Cauchy–Schwarz 最优化题。
-
-**（1）分母的平方和结构。**
+**答案：**
 
 $$
-g(x)=x^TBx=(x_1-x_2)^2+x_2^2,
+\boxed{D=\begin{pmatrix}1&-1\\0&1\end{pmatrix}},
+\qquad\boxed{\max_{x\ne0}\frac{f(x)}{g(x)}=2},
 $$
 
-所以
+在任意 $x=(0,t)^T$、$t\ne0$ 处取等号。
+
+<Tabs items={['法一：平方和与柯西不等式','法二：广义特征值']}>
+<Tab value="法一：平方和与柯西不等式">
+
+<Steps>
+<Step title="对 g 完全平方，构造 D">
 
 $$
-B=D^TD,\qquad D=\begin{pmatrix}1&-1\\0&1\end{pmatrix},\qquad\det D=1\ne0.
+g(x)=x^TBx=x_1^2-2x_1x_2+2x_2^2=(x_1-x_2)^2+x_2^2.
 $$
 
-于是 $B$ 正定，对任意非零 $x$，$g(x)>0$，目标比值合法。
+令 $D=\begin{pmatrix}1&-1\\0&1\end{pmatrix}$，有 $g(x)=\|Dx\|^2$，所以 $B=D^TD$ 且 $|D|=1\ne0$。特别地，对一切 $x\ne0$ 均有 $g(x)>0$。
+</Step>
+<Step title="代入新坐标把商化成简单比值">
 
-**（2）代换后用 Cauchy–Schwarz。** 令 $u=x_1-x_2$，$v=x_2$，它们是相互独立的新坐标，且
-
-$$
-f(x)=(x_1-2x_2)^2=(u-v)^2,\qquad g(x)=u^2+v^2.
-$$
-
-因此
+令 $u=x_1-x_2$、$v=x_2$，则
 
 $$
-\frac{f(x)}{g(x)}=\frac{(u-v)^2}{u^2+v^2}\le\frac{(1^2+(-1)^2)(u^2+v^2)}{u^2+v^2}=2.
+\frac{f(x)}{g(x)}=\frac{(x_1-2x_2)^2}{(x_1-x_2)^2+x_2^2}
+=\frac{(u-v)^2}{u^2+v^2}.
+$$
+</Step>
+<Step title="用柯西不等式给出上界与等号条件">
+
+$$
+(u-v)^2\le(1^2+(-1)^2)(u^2+v^2)=2(u^2+v^2).
 $$
 
-等号当且仅当 $(u,v)=t(1,-1)$，$t\ne0$，即 $x_1=u+v=0$，$x_2=v=-t$。故最大值为 $2$。
+故比值不超过 $2$。等号当且仅当 $(u,v)=t(1,-1)$、$t\ne0$，即 $x_1=u+v=0$、$x_2=v\ne0$。所以上界能取到，最大值为 $2$。
+</Step>
+</Steps>
 
-**另一解（广义特征值）：** $A=\begin{pmatrix}1&-2\\-2&4\end{pmatrix}$，有 $\det(A-\lambda B)=\lambda(\lambda-2)$；因 $B$ 正定，广义 Rayleigh 商最大值为最大广义特征值 $2$。
+</Tab>
+<Tab value="法二：广义特征值">
 
-**方法提炼与易错点：** 除了给出最大值，须指出取等号的非零方向；分母必须先证严格正定，否则商未必处处有定义。
+$f$ 的二次型矩阵为 $F=\begin{pmatrix}1&-2\\-2&4\end{pmatrix}$。由于 $B$ 正定，广义 Rayleigh 商的最大值是 $\det(F-\lambda B)=0$ 的最大实根。计算
+
+$$
+\det(F-\lambda B)=\lambda(\lambda-2),
+$$
+
+根为 $0,2$，故最大值为 $2$。代入 $\lambda=2$，$\ker(F-2B)$ 为 $\operatorname{span}\{(0,1)^T\}$，得到同一取等号方向。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="分母需要先证明严格为正">只有确认 $B$ 正定，才能对所有非零 $x$ 讨论商 $f/g$ 并使用广义 Rayleigh 商结论；若分母可能为零，不能照搬极值公式。</Callout>
 
 </Solution>
-
 </Question>
