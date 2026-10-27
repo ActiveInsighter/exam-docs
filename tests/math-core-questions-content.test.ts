@@ -46,7 +46,8 @@ describe('Graduate mathematics core questions', () => {
             // Rich solutions interleave prose and formulas with Steps, Tabs and
             // Callout wrappers, which the Markdown download intentionally removes.
             for (const line of payload.split(/\r?\n/u).map((line) => line.trim())
-              .filter((line) => line && !/<\/?[A-Z]/u.test(line))) {
+              .map((line) => line.replace(/<\/?(?:Steps?|Tabs?|Callout|Accordions?)\b(?:[^"'<>]|"[^"]*"|'[^']*')*>/gu, '').trim())
+              .filter(Boolean)) {
               expect(markdown, `${page}: downloadable answer, explanation or option`).toContain(line);
             }
           }
