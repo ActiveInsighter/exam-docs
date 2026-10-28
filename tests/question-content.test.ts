@@ -1,6 +1,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { relative, resolve } from 'node:path';
 import remarkMdx from 'remark-mdx';
+import remarkGfm from 'remark-gfm';
 import remarkParse from 'remark-parse';
 import remarkMath from 'remark-math';
 import { unified } from 'unified';
@@ -8,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { getQuestionProblems, type QuestionNode } from '@/lib/remark-question';
 
 const docsRoot = resolve(process.cwd(), 'content', 'docs');
-const parser = unified().use(remarkParse).use(remarkMdx).use(remarkMath);
+const parser = unified().use(remarkParse).use(remarkMdx).use(remarkMath).use(remarkGfm);
 
 async function collectFiles(directory: string, extension: string): Promise<string[]> {
   const entries = await readdir(directory, { withFileTypes: true });
