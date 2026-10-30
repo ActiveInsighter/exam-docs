@@ -1,9 +1,11 @@
-import { source } from '@/lib/source';
+import type { source } from '@/lib/source';
+import { renderStaticMarkdown } from '../scripts/static-docs-markdown.mjs';
 
 export async function getLLMText(page: (typeof source)['$inferPage']) {
-  const processed = await page.data.getText('processed');
-
-  return `# ${page.data.title} (${page.url})
-
-${processed}`;
+  // Processed MDX has already discarded component props such as tags/answers.
+  // Use the same raw-source converter as the static .md downloads.
+  return renderStaticMarkdown(await page.data.getText('raw'), {
+    title: page.data.title,
+    url: page.url,
+  });
 }

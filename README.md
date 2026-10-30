@@ -134,6 +134,12 @@ of the current page. The source loader sets `defaultOpen: false` for every folde
 16.17.5 respects that explicit preference; review the workaround on upgrades.
 Readers can expand and collapse folders normally.
 
+## Markdown for AI
+
+Markdown downloads and the development LLM endpoint preserve question IDs,
+question types, built-in tags, points, numbering, answers and explanations.
+Multiline component props are supported. See [the export format](docs/markdown-export.md).
+
 ## Deployment
 
 The current deployment workflow,
