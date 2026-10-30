@@ -1,7 +1,7 @@
 # 面向 AI 的 Markdown 导出
 
 静态站点的 `/docs/example.md` 下载、复制 Markdown 功能与开发环境的
-`/llms.mdx/docs/…` 接口共用 `scripts/static-docs-markdown.mjs`。转换器读取原始 MDX，
+`/llms.mdx/docs/…` 接口共用 `lib/markdown-export.mjs`。转换器读取原始 MDX，
 先把题目属性转为正文，再清理组件外壳，避免在处理后的文本中丢失元数据。
 
 ## 题目格式
@@ -40,8 +40,9 @@ B. 3
 
 ## 维护与验证
 
-- `scripts/question-markdown.mjs`：题目及说明组件属性到 Markdown 正文的转换。
-- `scripts/static-docs-markdown.mjs`：静态文件路径、frontmatter 清理和通用组件外壳清理。
+- `lib/question-markdown.mjs`：题目及说明组件属性到 Markdown 正文的转换。
+- `lib/markdown-export.mjs`：frontmatter 与组件外壳清理；随应用源码一起进入隔离构建目录。
+- `scripts/static-docs-markdown.mjs`：静态文件路径、文件读取及共用转换器的入口。
 - `lib/get-llm-text.ts`：通过 `getText('raw')` 复用静态转换器。
 - `tests/question-markdown.test.ts`：元数据、多行属性、答案、代码示例和两个导出入口一致性的回归测试。
 

@@ -1,5 +1,5 @@
 import type { source } from '@/lib/source';
-import { renderStaticMarkdown } from '../scripts/static-docs-markdown.mjs';
+import { renderStaticMarkdown } from './markdown-export.mjs';
 
 export async function getLLMText(page: (typeof source)['$inferPage']) {
   // Processed MDX has already discarded component props such as tags/answers.

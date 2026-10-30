@@ -1,3 +1,6 @@
+import { execFileSync } from 'node:child_process';
+import { cp, mkdtemp, rm } from 'node:fs/promises';
+import path from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { renderStaticMarkdown } from '../scripts/static-docs-markdown.mjs';
 import { getLLMText } from '../lib/get-llm-text';
@@ -143,6 +146,22 @@ describe('question Markdown export', () => {
     expect(result).toContain('**标签：** 来源:真题');
     expect(result).toContain('```c\nint x = 1;\n```');
     expect(result).not.toContain('<Question');
+  });
+
+  it('runs from an isolated application lib directory without build scripts', async () => {
+    const stage = await mkdtemp(path.join(process.cwd(), '.markdown-export-test-'));
+    try {
+      await cp(path.join(process.cwd(), 'lib'), path.join(stage, 'lib'), { recursive: true });
+      const result = execFileSync(process.execPath, ['--input-type=module', '-e', [
+        "import { renderStaticMarkdown } from './lib/markdown-export.mjs';",
+        "const raw = '<Question id=\"stage\" type=\"essay\" tags=\"来源:真题\">正文</Question>';",
+        "console.log(await renderStaticMarkdown(raw, { title: '练习', url: '/docs/practice' }));",
+      ].join('\n')], { cwd: stage, encoding: 'utf8' });
+      expect(result).toContain('**题目 ID：** stage');
+      expect(result).toContain('**标签：** 来源:真题');
+    } finally {
+      await rm(stage, { recursive: true, force: true });
+    }
   });
 
   it('serves the same metadata-rich Markdown through the LLM route and static exporter', async () => {
