@@ -1,0 +1,781 @@
+---
+title: 第三节 实对称矩阵
+description: 2027数学一模拟卷分类练习；正交谱分解、秩一投影、正交对角化与高次幂
+---
+
+# 第四章 特征值与特征向量 · 第三节 实对称矩阵
+
+> 对应[考研核心题目·第四章第三节](https://exam.any1.tech/docs/math/core-questions/02-1c0ed78f/s-2f4fd62c/03-105a9e1c/)。本节收录需要**实对称性、不同特征空间正交及正交相似对角化**作为核心工具的题，不与“二次型标准形”重复入库。
+
+## 一、正交特征空间与 Rayleigh 商
+
+### 题目 1｜限制在正交补上的 Rayleigh 商最大值
+
+- **来源：**张宇八套卷·第二套·选择题第7题（5分）
+- **原题 ID：**`math-6178b5-007`
+- **主考点：**实对称谱分解；条件极值；特征向量正交
+- **原卷：**[查看原题](https://exam.any1.tech/docs/math/exam/zhangyu-8-sets-2027/02-aa037b79/)
+
+设 $f(x_1,x_2,x_3)=x^TAx$，$A=A^T$ 为三阶矩阵，特征值为 $\lambda_1>\lambda_2>\lambda_3$，对应特征向量分别为 $\xi_1,\xi_2,\xi_3$。若 $x^Tx=1$、$x^T\xi_1=0$，则 $f$ 的最大值为（　）。
+
+A. $\lambda_1$　B. $\lambda_2$　C. $\lambda_1+\lambda_2$　D. $\lambda_2+\lambda_3$
+
+<details>
+<summary>查看答案与解析</summary>
+
+
+**答案：B，$\boxed{\lambda_2}$。**
+
+将三个特征向量单位化为正交基 $q_i$，设 $x=Qy$，$Q=(q_1,q_2,q_3)$。由于 $x^T\xi_1=0$，$y_1=0$。由单位长度得到 $y_2^2+y_3^2=1$。所以
+
+
+$$
+f=\lambda_2y_2^2+\lambda_3y_3^2\le\lambda_2(y_2^2+y_3^2)=\lambda_2.
+$$
+
+
+取 $x=\pm q_2$ 达到最大值。
+
+**核心：**在单位球上优化二次型，最大值是最大特征值；若额外要求与该最大特征方向正交，最优值下降为该正交补上的最大特征值。
+
+</details>
+
+
+### 题目 2｜实对称矩阵的特征向量正交化并构造指定对角矩阵
+
+- **来源：**张宇八套卷·第四套·解答题第21题（12分）
+- **原题 ID：**`math-ed4edb-021`
+- **主考点：**谱定理；施密特正交化；矩阵函数 Gram 矩阵
+- **原卷：**[查看原题](https://exam.any1.tech/docs/math/exam/zhangyu-8-sets-2027/04-a93b04a2/)
+
+已知 $1,1,-1$ 是三阶实对称矩阵 $A$ 的三个特征值，
+
+
+$$
+\eta_1=(1,1,1)^T,\qquad \eta_2=(2,2,1)^T
+$$
+
+
+是特征值 $1$ 的特征向量。
+
+（1）求 $A$ 的属于特征值 $-1$ 的特征向量。
+
+（2）求可逆矩阵 $P$，使 $(AP+P)^T(AP+P)$ 为对角矩阵。
+
+<details>
+<summary>查看答案与解析</summary>
+
+
+**（1）答案：**$\boxed{k(-1,1,0)^T\ (k\ne0)}$。实对称矩阵不同特征值的特征向量正交；设 $v=(x,y,z)^T$ 属于 $-1$，则
+
+
+$$
+x+y+z=0,\qquad 2x+2y+z=0\implies z=0,\ y=-x.
+$$
+
+
+
+**（2）答案：**可取正交矩阵
+
+
+$$
+\boxed{P=\begin{pmatrix}
+1/\sqrt3&1/\sqrt6&-1/\sqrt2\\
+1/\sqrt3&1/\sqrt6&1/\sqrt2\\
+1/\sqrt3&-2/\sqrt6&0
+\end{pmatrix}}.
+$$
+
+
+在特征值1的二维特征子空间内对 $\eta_1,\eta_2$ 进行施密特正交化：
+
+
+$$
+\eta_2-\frac{\eta_1^T\eta_2}{\eta_1^T\eta_1}\eta_1
+=\frac13(1,1,-2)^T.
+$$
+
+
+标准化后以三个单位列向量构造 $P$，则 $P^TP=E$、$AP=P\operatorname{diag}(1,1,-1)$。因此
+
+
+$$
+(AP+P)^T(AP+P)=\operatorname{diag}(2,2,0)^2
+=\boxed{\operatorname{diag}(4,4,0)}.
+$$
+
+
+
+**辨析：**同一特征值的特征向量不一定已经正交，构造**正交矩阵**时必须在同一特征子空间内部正交化。
+
+</details>
+
+
+## 二、谱分解与秩一结构：由方程组或特征信息反推矩阵
+
+### 题目 3｜秩一更新与已知特征方向重建实对称矩阵
+
+- **来源：**李永乐六套卷·模拟二·解答题第21题（12分）
+- **原题 ID：**`liyongle-2027-s2-q21`
+- **主考点：**实对称矩阵秩一投影；迹/行列式；矩阵平方
+- **原卷：**[查看原题](https://exam.any1.tech/docs/math/exam/s-cf996fa8/liyongle-02/)
+
+设 $A$ 为三阶实对称矩阵，满足 $r(A-2E)=1$、$|A|=18$，且
+
+
+$$
+A(1,0,0)^T=(17/6,\ 5/6,\ 5/6)^T.
+$$
+
+
+（1）求 $A$ 的特征值；（2）求 $A^2$。
+
+<details>
+<summary>查看答案与解析</summary>
+
+
+**答案：**特征值 $\boxed{2,2,9/2}$，且
+
+
+$$
+\boxed{A^2=4E+\frac{65}{12}\begin{pmatrix}1&1&1\\1&1&1\\1&1&1\end{pmatrix}}.
+$$
+
+
+
+$r(A-2E)=1$ 说明特征值2的特征空间为二维；第三个特征值 $\lambda$ 满足 $2\cdot2\lambda=18$，故 $\lambda=9/2$。
+
+令 $J$ 为三阶全1矩阵，$H=A-2E$。题给 $H$ 第一列为 $(5/6)(1,1,1)^T$。由于 $H$ 实对称且秩1，所有列与第一列共线，再借助第一行即可确定
+
+
+$$
+A=2E+\frac56J.
+$$
+
+
+利用 $J^2=3J$，有
+
+
+$$
+A^2=4E+\frac{10}{3}J+\frac{25}{36}(3J)=4E+\frac{65}{12}J.
+$$
+
+
+
+</details>
+
+
+### 题目 4｜由非齐次方程通解反求实对称矩阵并计算100次幂
+
+- **来源：**李永乐六套卷·模拟四·解答题第21题（12分）
+- **原题 ID：**`liyongle-2027-s4-q21`
+- **主考点：**核空间正交补；谱投影；矩阵高次幂
+- **原卷：**[查看原题](https://exam.any1.tech/docs/math/exam/s-cf996fa8/liyongle-04/)
+
+设 $A$ 为三阶实对称矩阵，$\operatorname{tr}(A)=3$。非齐次方程组 $Ax=b$ 的通解为
+
+
+$$
+x=k_1\begin{pmatrix}1\\1\\0\end{pmatrix}+k_2\begin{pmatrix}0\\1\\1\end{pmatrix}+\begin{pmatrix}1\\0\\0\end{pmatrix},
+\qquad k_1,k_2\in\mathbb R.
+$$
+
+
+（1）求 $A,b$；（2）求 $(A-2E)^{100}$。
+
+<details>
+<summary>查看答案与解析</summary>
+
+
+**答案：**
+
+
+$$
+\boxed{A=\begin{pmatrix}1&-1&1\\-1&1&-1\\1&-1&1\end{pmatrix},\quad b=(1,-1,1)^T.}
+$$
+
+
+
+
+$$
+\boxed{(A-2E)^{100}=2^{100}E+\frac{1-2^{100}}3A.}
+$$
+
+
+
+通解表明 $\ker A=\operatorname{span}\{(1,1,0)^T,(0,1,1)^T\}$，维数2，故 $r(A)=1$。对称性说明像空间是零空间的正交补，其方向可取 $u=(1,-1,1)^T$。唯一非零特征值等于迹3，所以
+
+
+$$
+A=3\frac{uu^T}{u^Tu}=uu^T,\qquad b=A(1,0,0)^T=u.
+$$
+
+
+
+令 $P_0=A/3$，则 $P_0^2=P_0$。于是
+
+
+$$
+A-2E=P_0-2(E-P_0),\qquad
+(A-2E)^{100}=P_0+2^{100}(E-P_0).
+$$
+
+
+代回即可。**注意：**不能把 $A-2E$ 的 100 次幂当成 $A^{100}-(2E)^{100}$。
+
+</details>
+
+
+### 题目 5｜三组已知特征向量的正交条件与谱重建
+
+- **来源：**汤家凤八套卷·第八套·填空题第15题（5分）
+- **原题 ID：**`tangjiafeng-2027-s8-q15`
+- **主考点：**实对称谱分解；参数 k；三重正交投影
+- **原卷：**[查看原题](https://exam.any1.tech/docs/math/exam/s-cf996fa8/tangjiafeng-08/)
+
+设 $A$ 为三阶实对称矩阵，$\xi_1=(k,-k,1)^T$ 是 $Ax=0$ 的非零解，$\xi_2=(k,2,1)^T$ 是 $(2E-A)x=0$ 的一个非零解，且 $|E+A|=0$，则矩阵 $A=$ ____。
+
+<details>
+<summary>查看答案与解析</summary>
+
+
+**答案：**
+
+
+$$
+\boxed{A=\frac16\begin{pmatrix}-1&4&5\\4&8&4\\5&4&-1\end{pmatrix}}.
+$$
+
+
+
+$\xi_1$ 与 $\xi_2$ 分别属于不同特征值0、2，实对称性给出正交条件
+
+
+$$
+(k,-k,1)\cdot(k,2,1)=k^2-2k+1=(k-1)^2=0\implies k=1.
+$$
+
+
+故取 $u_0=(1,-1,1)^T$，$u_2=(1,2,1)^T$。$|E+A|=0$ 又给出特征值 $-1$；与前二者正交的方向可取 $u_{-1}=(-1,0,1)^T$。由谱分解
+
+
+$$
+A=2\frac{u_2u_2^T}{u_2^Tu_2}-\frac{u_{-1}u_{-1}^T}{u_{-1}^Tu_{-1}}
+=\frac13\begin{pmatrix}1&2&1\\2&4&2\\1&2&1\end{pmatrix}-\frac12\begin{pmatrix}1&0&-1\\0&0&0\\-1&0&1\end{pmatrix}.
+$$
+
+
+化简即答案。零特征方向在谱和式中的系数是0，无需单独计算对应投影。
+
+</details>
+
+
+## 三、高维外积矩阵的正交标准形
+
+### 题目 6｜四阶秩二实对称矩阵的正交对角化
+
+- **来源：**汤家凤八套卷·第七套·解答题第21题（12分）
+- **原题 ID：**`tangjiafeng-2027-s7-q21`
+- **主考点：**外积矩阵；正交特征基；四阶标准形
+- **原卷：**[查看原题](https://exam.any1.tech/docs/math/exam/s-cf996fa8/tangjiafeng-07/)
+
+设列向量
+
+
+$$
+\alpha=(1,0,-1,1)^T,\quad \beta=(0,1,1,1)^T,\quad
+A=\alpha\alpha^T+2\beta\beta^T.
+$$
+
+
+求正交矩阵 $Q$，使二次型 $x^TAx$ 经 $x=Qy$ 化为标准形，并写出标准形。
+
+<details>
+<summary>查看答案与解析</summary>
+
+
+**答案：**可取
+
+
+$$
+\boxed{Q=\frac1{\sqrt3}\begin{pmatrix}1&0&1&-1\\0&1&-1&-1\\-1&1&1&0\\1&1&0&1\end{pmatrix}},\quad
+\boxed{x^TAx=3y_1^2+6y_2^2}.
+$$
+
+
+
+$\alpha^T\beta=0$，且 $\|\alpha\|^2=\|\beta\|^2=3$，故 $A\alpha=3\alpha$、$A\beta=6\beta$。而 $r(A)=2$，其余两个特征值为0。
+
+零特征空间由 $\alpha^T v=\beta^T v=0$ 决定，可选取两条互相正交的零特征向量
+
+
+$$
+\gamma_1=(1,-1,1,0)^T,\qquad \gamma_2=(-1,-1,0,1)^T,
+$$
+
+
+模长均为 $\sqrt3$。以 $\alpha,\beta,\gamma_1,\gamma_2$ 的单位化向量为列组成 $Q$，则 $Q^TQ=E_4$，$Q^TAQ=\operatorname{diag}(3,6,0,0)$，从而标准形如上。
+
+</details>
+
+## 方法索引
+
+对于实对称矩阵 $A$，可以在实数域选正交矩阵 $Q$，使 $A=Q\Lambda Q^T$。若 $u_i$ 是互相正交的非零特征向量且构成一组基，则
+
+
+$$
+A=\sum_i\lambda_i\frac{u_iu_i^T}{u_i^Tu_i}.
+$$
+
+
+由特征方向恢复矩阵、计算高次幂与优化 $x^TAx$ 时，优先使用该谱投影公式；不要机械展开高阶行列式。
+
+## 补录专题｜秩一矩阵的正交对角化与奇异值
+
+### 题目 7｜秩一矩阵的 AᵀA 与八次幂
+
+- **来源：**李林六套卷·第一套·解答第21题（12分）
+- **原题 ID：**`lilin-2027-s1-q21`
+- **主考点：**实对称矩阵AᵀA；奇异值；正交化
+- **原卷出处：**[查看原题](https://exam.any1.tech/docs/math/exam/s-cf996fa8/lilin-01/)
+
+设
+
+
+$$
+A=\begin{pmatrix}1&-\tfrac12&-\tfrac12\\1&-\tfrac12&-\tfrac12\\-2&1&1\end{pmatrix}.
+$$
+
+
+（Ⅰ）求正交矩阵 $Q=(\alpha_1,\alpha_2,\alpha_3)$ 使 $Q^{-1}A^{\mathrm T}AQ=\operatorname{diag}(\lambda_1,\lambda_2,\lambda_3)$，其中 $\lambda_1\ge\lambda_2\ge\lambda_3$。
+
+（Ⅱ）若正交矩阵 $P=(\beta_1,\beta_2,\beta_3)$ 满足 $\beta_1=(1/\sqrt{\lambda_1})A\alpha_1$，求 $(P^{-1}AQ)^8$。
+
+<details>
+<summary>查看答案与解析</summary>
+
+
+**答案：**$\lambda_1=9,\lambda_2=\lambda_3=0$，可取
+
+
+$$
+\boxed{Q=\begin{pmatrix}\frac2{\sqrt6}&0&\frac1{\sqrt3}\\-\frac1{\sqrt6}&\frac1{\sqrt2}&\frac1{\sqrt3}\\-\frac1{\sqrt6}&-\frac1{\sqrt2}&\frac1{\sqrt3}\end{pmatrix}},
+\qquad\boxed{(P^{-1}AQ)^8=\operatorname{diag}(6561,0,0)}.
+$$
+
+
+**（Ⅰ）**令 $u=(1,1,-2)^{\mathrm T}$、$w=(2,-1,-1)^{\mathrm T}$，有 $A=\tfrac12uw^{\mathrm T}$，所以
+
+
+$$
+A^{\mathrm T}A=\tfrac14w(u^{\mathrm T}u)w^{\mathrm T}=\tfrac32ww^{\mathrm T}.
+$$
+
+
+因为 $\lVert u\rVert^2=\lVert w\rVert^2=6$，唯一非零特征值是 $\tfrac32\cdot6=9$，其单位特征向量是 $\alpha_1=w/\sqrt6$。取 $w$ 的正交补中的 $\alpha_2=(0,1,-1)^{\mathrm T}/\sqrt2$、$\alpha_3=(1,1,1)^{\mathrm T}/\sqrt3$ 即得上式。
+
+**（Ⅱ）**$A\alpha_1=3u/\sqrt6$，所以 $\beta_1=u/\sqrt6$。其余两列 $A\alpha_2=A\alpha_3=0$，从而 $AQ=(3\beta_1,0,0)$。任意题设允许的正交矩阵 $P$ 都满足
+
+
+$$
+P^{-1}AQ=\operatorname{diag}(3,0,0).
+$$
+
+
+八次幂即得。**迁移：**若矩阵是秩一外积 $uw^{\mathrm T}$，不应盲目展开 $A^{\mathrm T}A$ 的全部行列式。
+
+</details>
+
+
+## 补录专题｜特征子空间、投影与正交标准形
+
+### 题目 8｜由伴随矩阵特征向量恢复二次型并正交对角化
+
+- **来源：**李林六套卷·第二套·解答第21题（12分）
+- **原题 ID：**`lilin-2027-s2-q21`
+- **主考点：**实对称矩阵与伴随；正交特征基
+- **原卷出处：**[查看原题](https://exam.any1.tech/docs/math/exam/s-cf996fa8/lilin-02/)
+
+二次型 $f=x^{\mathrm T}Ax=2x_1^2+2x_2^2+ax_3^2+2x_1x_2+2x_1x_3+2x_2x_3$，其中 $A^{\mathrm T}=A,r(A)=3$。$\alpha=(1,b,1)^{\mathrm T}$ 满足 $(\lambda E-A^*)\alpha=0$，$b\ne1$。
+
+（Ⅰ）求 $a,b,\lambda$；（Ⅱ）构造正交变换 $x=Qy$ 使 $g(x)=x^{\mathrm T}(A-A^*)x$ 化为标准形。
+
+<details>
+<summary>查看答案与解析</summary>
+
+
+**答案：**$\boxed{a=2,b=-2,\lambda=4}$，$\boxed{g=3y_1^2-3y_2^2-3y_3^2}$，可取
+
+
+$$
+Q=\begin{pmatrix}\frac1{\sqrt3}&\frac1{\sqrt2}&\frac1{\sqrt6}\\\frac1{\sqrt3}&-\frac1{\sqrt2}&\frac1{\sqrt6}\\\frac1{\sqrt3}&0&-\frac2{\sqrt6}\end{pmatrix}.
+$$
+
+
+由 $A^*\alpha=\lambda\alpha$、$AA^*=\lvert A\rvert E$ 和 $A$ 可逆，知 $A\alpha=\mu\alpha$ 且 $\mu=\lvert A\rvert/\lambda$。比较
+
+
+$$
+A\alpha=\begin{pmatrix}3+b\\2+2b\\1+b+a\end{pmatrix}=\mu\begin{pmatrix}1\\b\\1\end{pmatrix}
+$$
+
+
+先得 $a=2$，再得 $(b-1)(b+2)=0$。排除 $b=1$，有 $b=-2,\mu=1$。此时 $A=E+J$，其中 $J$ 为全一矩阵，$\det A=4$，故 $\lambda=4$。
+
+利用 $J^2=3J$ 算得 $A^*=4E-J$，从而
+
+
+$$
+A-A^*=-3E+2J.
+$$
+
+
+沿 $(1,1,1)$ 方向的特征值为 $3$，在平面 $x_1+x_2+x_3=0$ 上的特征值为 $-3$。将这两个特征子空间分别标准正交化，构成上列 $Q$，即有 $Q^{\mathrm T}(A-A^*)Q=\operatorname{diag}(3,-3,-3)$。
+
+**高价值方法：**用 $A^*$ 的特征向量先恢复 $A$ 的特征向量，比直接展开伴随矩阵高效。
+
+</details>
+
+### 题目 9｜相互正交单位向量构造的对称矩阵与完整正交基
+
+- **来源：**李永乐六套卷·模拟五·解答第21题（12分）
+- **原题 ID：**`liyongle-2027-s5-q21`
+- **主考点：**正交特征基；二次型标准形；外积
+- **原卷出处：**[查看原题](https://exam.any1.tech/docs/math/exam/s-cf996fa8/liyongle-05/)
+
+$\alpha,\beta$ 是三维实单位向量，$\alpha^{\mathrm T}\beta=0$，令
+
+
+$$
+A=\alpha\beta^{\mathrm T}+\beta\alpha^{\mathrm T}+2E.
+$$
+
+
+（1）证明 $A$ 实对称；（2）写出 $x^{\mathrm T}Ax$ 的正交标准形；（3）若 $\alpha=\tfrac13(1,2,2)^{\mathrm T}$、$\beta=\tfrac13(2,1,-2)^{\mathrm T}$，求一个对应正交矩阵 $Q$。
+
+<details>
+<summary>查看答案与解析</summary>
+
+
+**答案：**$\boxed{f=3y_1^2+y_2^2+2y_3^2}$；可取
+
+
+$$
+\boxed{Q=\begin{pmatrix}\frac1{\sqrt2}&-\frac1{3\sqrt2}&\frac23\\\frac1{\sqrt2}&\frac1{3\sqrt2}&-\frac23\\0&\frac4{3\sqrt2}&\frac13\end{pmatrix}}.
+$$
+
+
+（1）由 $(\alpha\beta^{\mathrm T})^{\mathrm T}=\beta\alpha^{\mathrm T}$，显然 $A^{\mathrm T}=A$。
+
+（2）直接代入：$A\alpha=2\alpha+\beta$，$A\beta=\alpha+2\beta$，故
+
+
+$$
+A(\alpha+\beta)=3(\alpha+\beta),\quad A(\alpha-\beta)=\alpha-\beta.
+$$
+
+
+再任选单位向量 $\gamma\perp\alpha,\beta$，有 $A\gamma=2\gamma$。因此对应特征值是 $3,1,2$。
+
+（3）标准化得到列向量
+
+
+$$
+q_1=\frac{(1,1,0)^{\mathrm T}}{\sqrt2},\quad q_2=\frac{(-1,1,4)^{\mathrm T}}{3\sqrt2},\quad q_3=\frac{(2,-2,1)^{\mathrm T}}3.
+$$
+
+
+则 $Q=(q_1,q_2,q_3)$ 正交，且 $Q^{\mathrm T}AQ=\operatorname{diag}(3,1,2)$。**迁移：**包含 $\alpha\beta^{\mathrm T}+\beta\alpha^{\mathrm T}$ 的实对称矩阵，先测试 $\alpha\pm\beta$ 再做剩余正交补。
+
+</details>
+
+### 题目 10｜AB=B 的特征空间与实对称投影矩阵
+
+- **来源：**汤家凤八套卷·第五套·选择第7题（5分）
+- **原题 ID：**`tangjiafeng-2027-s5-q07`
+- **主考点：**投影矩阵；实对称；列空间
+- **原卷出处：**[查看原题](https://exam.any1.tech/docs/math/exam/s-cf996fa8/tangjiafeng-05/)
+
+设二次型 $f(x)=x^{\mathrm T}Ax$ 的对应矩阵为实对称矩阵 $A$，且 $B=AB$，其中
+
+
+$$
+B=\begin{pmatrix}2&-1&-1\\-1&1&0\\a&0&1\end{pmatrix},\quad A\ne E,\quad r(A)<3.
+$$
+
+
+则 $A$ 等于（　）。
+
+A. $\frac13\begin{pmatrix}2&1&-1\\1&2&-1\\-1&-1&2\end{pmatrix}$
+
+B. $\frac13\begin{pmatrix}2&-1&1\\-1&2&-1\\1&-1&2\end{pmatrix}$
+
+C. $\frac13\begin{pmatrix}2&1&1\\1&2&-1\\1&-1&2\end{pmatrix}$
+
+D. $\frac13\begin{pmatrix}2&-1&-1\\-1&2&-1\\-1&-1&2\end{pmatrix}$
+
+<details>
+<summary>查看答案与解析</summary>
+
+
+**答案：D。**由 $(E-A)B=O$ 且 $A\ne E$，$B$ 必奇异，故 $\det B=a+1=0$，即 $a=-1$。此时 $r(B)=2$，其列空间恰为
+
+
+$$
+H=\{x\in\mathbb R^3:x_1+x_2+x_3=0\}.
+$$
+
+
+$AB=B$ 表明 $A$ 在 $H$ 上作用为恒等。由于 $A$ 是实对称矩阵，$H^\perp=\operatorname{span}\{u\}$（$u=(1,1,1)^{\mathrm T}$）也为不变子空间。$r(A)<3$ 强迫该方向的特征值为 $0$，于是 $A$ 正是向平面 $H$ 的**正交投影**：
+
+
+$$
+\boxed{A=E-\frac{uu^{\mathrm T}}{u^{\mathrm T}u}=\frac13\begin{pmatrix}2&-1&-1\\-1&2&-1\\-1&-1&2\end{pmatrix}}.
+$$
+
+
+**校勘：**原卷以“二次型的矩阵”为前提，默认 $A$ 取对称代表矩阵；若允许任意非对称 $A$，这些条件不足以唯一确定其值。
+
+</details>
+
+### 题目 11｜A²=2A 与非齐次通解共同确定正交投影
+
+- **来源：**汤家凤八套卷·第七套·选择第6题（5分）
+- **原题 ID：**`tangjiafeng-2027-s7-q06`
+- **主考点：**实对称矩阵投影；核空间；非齐次方程组
+- **原卷出处：**[查看原题](https://exam.any1.tech/docs/math/exam/s-cf996fa8/tangjiafeng-07/)
+
+设 $A$ 为三阶实对称矩阵，$A^2=2A$，方程组 $Ax=b$ 的通解为
+
+
+$$
+x=k\begin{pmatrix}-1\\1\\0\end{pmatrix}+\begin{pmatrix}1\\2\\-1\end{pmatrix},\qquad k\in\mathbb R.
+$$
+
+
+则（　）。
+
+A. $A=\begin{pmatrix}1&1&0\\1&1&0\\0&0&2\end{pmatrix}$，$b=(3,3,-2)^{\mathrm T}$
+
+B. $A=\begin{pmatrix}1&-1&0\\-1&1&0\\0&0&2\end{pmatrix}$，$b=(3,3,-2)^{\mathrm T}$
+
+C. $A=\begin{pmatrix}1&1&0\\1&1&0\\0&0&2\end{pmatrix}$，$b=(1,2,-1)^{\mathrm T}$
+
+D. $A=\begin{pmatrix}1&-1&0\\-1&1&0\\0&0&2\end{pmatrix}$，$b=(1,2,-1)^{\mathrm T}$
+
+<details>
+<summary>查看答案与解析</summary>
+
+
+**答案：A。**齐次解方向 $u=(-1,1,0)^{\mathrm T}$ 张成 $\ker A$，其维数为 1。又 $A^2=2A$ 说明特征值只可能是 $0$ 和 $2$。$A$ 实对称，故在 $\ker A$ 的正交补上等于 $2E$：
+
+
+$$
+A=2\left(E-\frac{uu^{\mathrm T}}{u^{\mathrm T}u}\right)=\boxed{\begin{pmatrix}1&1&0\\1&1&0\\0&0&2\end{pmatrix}}.
+$$
+
+
+再利用通解中的特解 $x_0=(1,2,-1)^{\mathrm T}$，得
+
+
+$$
+b=Ax_0=\boxed{(3,3,-2)^{\mathrm T}}.
+$$
+
+
+**做题路线：**由“通解”读出 $\ker A$，由 $A^2=2A$ 固定特征值，由实对称性确定正交分解。这比逐一检验选项更稳健。
+
+</details>
+
+
+## 四、列正交、正交投影与 Rayleigh 商（来源遗漏补录）
+
+
+### 题目补录｜张宇八套卷·第二套·选择第5题（5分）
+
+- **来源：**张宇八套卷·第二套·选择第5题（5分）
+- **原题 ID：**`math-6178b5-005`
+- **主考点：**列正交与正交投影；像与核的正交分解
+- **原卷出处：**[查看原卷](https://exam.any1.tech/docs/math/exam/zhangyu-8-sets-2027/02-aa037b79/)
+
+设 $A$ 是 $3\times2$ 矩阵，且 $A^{\mathrm T}A=E$，$\alpha$ 为 3 维非零列向量，$\beta=AA^{\mathrm T}\alpha$，则以下结论：
+
+① $A$ 的列向量正交；② $Ax=\beta$ 无解；③ $A^{\mathrm T}\alpha=A^{\mathrm T}\beta$；④ $\beta$ 与 $\alpha-\beta$ 正交。
+
+所有正确结论的序号为（　）。
+
+A. ①③。
+
+B. ②④。
+
+C. ①②③。
+
+D. ①③④。
+
+<details>
+<summary>查看答案与解析</summary>
+
+
+**答案：D（①③④）。**记 $P=AA^{\mathrm T}$。由 $A^{\mathrm T}A=E$ 得
+
+
+$$
+P^{\mathrm T}=P,\qquad P^2=A(A^{\mathrm T}A)A^{\mathrm T}=P.
+$$
+
+
+因此 $P$ 为 $A$ 的列空间上的**正交投影**。
+
+① $A^{\mathrm T}A=E$ 表示两列实际上**标准正交**，故正确。
+
+② $\beta=A(A^{\mathrm T}\alpha)$，取 $x=A^{\mathrm T}\alpha$ 就是 $Ax=\beta$ 的一组解，故错误。
+
+③
+
+
+$$
+A^{\mathrm T}\beta=A^{\mathrm T}AA^{\mathrm T}\alpha=A^{\mathrm T}\alpha.
+$$
+
+
+④ 利用对称幂等性，
+
+
+$$
+\beta^{\mathrm T}(\alpha-\beta)=\alpha^{\mathrm T}P(E-P)\alpha
+=\alpha^{\mathrm T}(P-P^2)\alpha=0.
+$$
+
+
+**举一反三：**矩阵 $P$ 满足 $P^{\mathrm T}=P,P^2=P$，即表示正交投影；$P\alpha$ 与 $(E-P)\alpha$ 必然正交，且二者之和是 $\alpha$。
+
+</details>
+
+
+### 题目补录｜张宇八套卷·第四套·选择第6题（5分）
+
+- **来源：**张宇八套卷·第四套·选择第6题（5分）
+- **原题 ID：**`math-ed4edb-006`
+- **主考点：**实对称矩阵特征值；Rayleigh 商极值
+- **原卷出处：**[查看原卷](https://exam.any1.tech/docs/math/exam/zhangyu-8-sets-2027/04-a93b04a2/)
+
+设 3 阶实对称矩阵 $A$ 的各行元素之和均为 $2$，其主对角线元素之和为 $5$，$r(A)=2$，则二次型
+
+
+$$
+f(x_1,x_2,x_3)=x^{\mathrm T}Ax
+$$
+
+
+在条件
+
+
+$$
+x_1^2+x_2^2+x_3^2=1
+$$
+
+
+下的最大值为（　）。
+
+A. $\dfrac15$。
+
+B. $\dfrac12$。
+
+C. $2$。
+
+D. $3$。
+
+<details>
+<summary>查看答案与解析</summary>
+
+
+**答案：D，$\boxed3$。** $r(A)=2$ 给出特征值 $0$。各行和均为 $2$，故
+
+
+$$
+A(1,1,1)^{\mathrm T}=2(1,1,1)^{\mathrm T},
+$$
+
+
+于是 $2$ 也是特征值。由迹等于特征值之和，第三个特征值为 $5-0-2=3$。
+
+实对称矩阵可正交对角化：存在正交 $Q$，使 $Q^{\mathrm T}AQ=\operatorname{diag}(0,2,3)$。令 $x=Qy$，则 $\|y\|=\|x\|=1$，从而
+
+
+$$
+x^{\mathrm T}Ax=2y_2^2+3y_3^2\le3(y_1^2+y_2^2+y_3^2)=3.
+$$
+
+
+取第三个单位特征向量时等号可达。
+
+**原理：**$A=A^{\mathrm T}$ 时，单位球面上 $x^{\mathrm T}Ax$ 的最大值就是 $A$ 的最大特征值；不需要构造矩阵 $A$ 的具体各个元素。
+
+</details>
+
+
+### 题目补录｜汤家凤八套卷·第一套·解答第21题（12分）
+
+- **来源：**汤家凤八套卷·第一套·解答第21题（12分）
+- **原题 ID：**`tangjiafeng-2027-s1-q21`
+- **主考点：**实对称伴随矩阵；投影谱分解；正定矩阵平方根
+- **原卷出处：**[查看原卷](https://exam.any1.tech/docs/math/exam/s-cf996fa8/tangjiafeng-01/)
+
+设 $A$ 为三阶实对称矩阵，二次型 $x^{\mathrm T}A^*x$ 经正交变换化为
+
+
+$$
+-y_1^2-2y_2^2+2y_3^2,
+$$
+
+
+且 $(2E+A)x=0$ 的通解为
+
+
+$$
+x=k\begin{pmatrix}-1\\0\\1\end{pmatrix},
+\qquad B=A^2+E.
+$$
+
+
+（1）求矩阵 $B$；（2）证明存在可逆矩阵 $C$，使得 $B=C^2$。
+
+<details>
+<summary>查看答案与解析</summary>
+
+
+**答案：**
+
+
+$$
+\boxed{B=\frac12\begin{pmatrix}7&0&-3\\0&4&0\\-3&0&7\end{pmatrix}}.
+$$
+
+
+令 $v=(-1,0,1)^{\mathrm T}$，已知 $Av=-2v$；而 $A^*$ 的三个特征值是 $-1,-2,2$，故 $(\det A)^2=\det A^*=4$。由于 $A$ 可逆且有特征值 $-2$，$\det A=-2$ 会给出 $A$ 的特征值 $2,1,-1$，与 $-2$ 冲突。因此 $\det A=2$；由 $A^*=(\det A)A^{-1}$ 得 $A$ 的特征值为 $-2,-1,1$。
+
+所以 $B=A^2+E$ 的特征值是 $5,2,2$。由于 $A$ 实对称，$v$ 是 $B$ 的 $5$-特征向量，而其正交补是 $2$-特征子空间。记投影
+
+
+$$
+P_v=\frac{vv^{\mathrm T}}{v^{\mathrm T}v}
+=\frac12\begin{pmatrix}1&0&-1\\0&0&0\\-1&0&1\end{pmatrix}.
+$$
+
+
+于是 $B=5P_v+2(E-P_v)=2E+3P_v$，直接给出所求矩阵。
+
+**构造平方根：**
+
+
+$$
+C=\sqrt5\,P_v+\sqrt2\,(E-P_v).
+$$
+
+
+由 $P_v^2=P_v$、$P_v(E-P_v)=O$，有 $C^2=5P_v+2(E-P_v)=B$。而 $C$ 的特征值为 $\sqrt5,\sqrt2,\sqrt2$，均非零，所以 $C$ 可逆。
+
+**技巧：**已知对称矩阵的特征值以及某个单特征值的特征方向，优先写**谱投影公式**，不必手求正交矩阵的各列。
+
+</details>
+
