@@ -15,7 +15,7 @@ import { PENDING_SNAPSHOT, QuestionAnswerCache, emptyAnswer, type WriteKind } fr
 import type { AnswerState, QuestionIdentity } from '@/lib/question-store/types';
 import { useQuestionBatch } from './question-batch';
 import { useQuestionStorage } from './database-context';
-import { evaluateAttempt, isAnswered, type Evaluation, type GradingSpec } from './grading';
+import { type BlankGrade, evaluateAttempt, gradeBlank as autoGradeBlank, isAnswered, withBlankGrade, type Evaluation, type GradingSpec } from './grading';
 
 /*
  * Per-question client state. The options, blanks, footer and solution sheet
@@ -51,6 +51,12 @@ export type QuestionState = {
   setValue: (index: number, value: string) => void;
   submit: () => void;
   reset: () => void;
+  /**
+   * Blank questions, once submitted: the reader's own grade for one blank,
+   * or null to go back to the automatic one. Kept with the answer and
+   * synced, without counting as another attempt.
+   */
+  gradeBlank: (index: number, grade: BlankGrade | null) => void;
 };
 
 const QuestionContext = createContext<QuestionState | null>(null);
@@ -154,6 +160,16 @@ export function QuestionProvider({
     update({ ...state, submitted: true, attempt: state.attempt + 1 }, 'submit');
   }, [ready, spec, update]);
 
+  const gradeBlank = useCallback((index: number, grade: BlankGrade | null) => {
+    const state = current.current;
+    if (!ready || spec.kind !== 'blank' || !state.submitted || !spec.blanks[index]) return;
+    // Agreeing with the checker is no override at all.
+    const auto = autoGradeBlank(state.values[index] ?? '', spec.blanks[index]) === 'correct' ? 'correct' : 'incorrect';
+    const selected = withBlankGrade(state.selected, index, grade === auto ? null : grade);
+    if (selected.join() === state.selected.join()) return;
+    update({ ...state, selected }, 'regrade');
+  }, [ready, spec, update]);
+
   const reset = useCallback(() => {
     if (!ready) return;
     update({ ...emptyAnswer(), attempt: current.current.attempt }, 'reset');
@@ -193,7 +209,8 @@ export function QuestionProvider({
     setValue,
     submit,
     reset,
-  }), [spec, identity, selected, values, submitted, evaluation, attempt, fresh, answered, canSubmit, deferred, ready, storageError, retryStorage, select, setValue, submit, reset]);
+    gradeBlank,
+  }), [spec, identity, selected, values, submitted, evaluation, attempt, fresh, answered, canSubmit, deferred, ready, storageError, retryStorage, select, setValue, submit, reset, gradeBlank]);
 
   return <QuestionContext.Provider value={value}>{children}</QuestionContext.Provider>;
 }

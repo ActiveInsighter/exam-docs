@@ -15,6 +15,7 @@ import {
 import { createPortal } from 'react-dom';
 import { MATH_INPUT_MAX_LENGTH } from '@/lib/math-expression';
 import { advanceFrom, stepFrom } from './blank-navigation';
+import { deleteBackward, type EditResult, insertFraction, insertText, moveCaret, type Selection, wrapSelection } from './math-editing';
 import type { QuestionState } from './question-state';
 
 const MathKeypad = lazy(() => import('./math-keypad').then((module) => ({ default: module.MathKeypad })));
@@ -36,20 +37,7 @@ export type MathEditor = {
   close(): void;
 };
 
-/** Function openers removed as one unit by backspace: "sin(" not "(". */
-const TOKEN_BEFORE_CARET = /(?:arcsin|arccos|arctan|sinh|cosh|tanh|sqrt|cbrt|sin|cos|tan|cot|sec|csc|abs|exp|log|ln|lg|√|∛)\($/u;
-
-export function deleteBackward(value: string, start: number, end: number): { value: string; caret: number } {
-  if (start !== end) return { value: value.slice(0, start) + value.slice(end), caret: start };
-  if (start === 0) return { value, caret: 0 };
-  const before = value.slice(0, start);
-  const token = TOKEN_BEFORE_CARET.exec(before)?.[0];
-  const from = start - (token?.length ?? 1);
-  // An empty pair "(|)" goes away together.
-  const removedOpen = (token ?? before.at(-1) ?? '').endsWith('(');
-  const to = removedOpen && value[start] === ')' ? start + 1 : start;
-  return { value: value.slice(0, from) + value.slice(to), caret: from };
-}
+export { deleteBackward } from './math-editing';
 
 type MathBlankProps = {
   value: string;
@@ -65,6 +53,7 @@ type MathBlankProps = {
   'aria-invalid'?: boolean;
   'data-feedback': string;
   'data-fresh'?: string;
+  'data-manual'?: string;
 };
 
 /** When focus moves straight from one maths blank to the next, the keypad does not slide in again. */
@@ -97,44 +86,23 @@ export function MathBlank({ value, question, index, count, label, last, ...field
   }, [question, index, value]);
 
   const editor = useMemo<MathEditor>(() => {
-    const selection = () => {
+    const selection = (): Selection => {
       const element = input.current;
       const start = element?.selectionStart ?? value.length;
       return { start, end: element?.selectionEnd ?? start };
     };
+    const apply = (result: EditResult) => write(result.value, result.caret);
     return {
-      insert(text, caretBack = 0) {
-        const { start, end } = selection();
-        // Typing a closing bracket in front of the one a template left steps over it.
-        if (text === ')' && start === end && value[start] === ')') {
-          write(value, start + 1);
-          return;
-        }
-        write(value.slice(0, start) + text + value.slice(end), start + text.length - caretBack);
-      },
-      wrap(open, close) {
-        const { start, end } = selection();
-        const inner = value.slice(start, end);
-        const caret = start + open.length + inner.length + (inner ? close.length : 0);
-        write(value.slice(0, start) + open + inner + close + value.slice(end), caret);
-      },
-      fraction() {
-        const { start, end } = selection();
-        if (start === end) this.insert('/');
-        else this.wrap('(', ')/');
-      },
+      insert(text, caretBack = 0) { apply(insertText(value, selection(), text, caretBack)); },
+      wrap(open, close) { apply(wrapSelection(value, selection(), open, close)); },
+      fraction() { apply(insertFraction(value, selection())); },
       backspace() {
         const { start, end } = selection();
-        const next = deleteBackward(value, start, end);
-        write(next.value, next.caret);
+        apply(deleteBackward(value, start, end));
       },
       move(delta) {
-        const element = input.current;
-        if (!element) return;
-        const { start, end } = selection();
-        const base = start === end ? start : delta < 0 ? start : end;
-        const position = Math.min(value.length, Math.max(0, base + (start === end ? delta : 0)));
-        element.setSelectionRange(position, position);
+        const position = moveCaret(value, selection(), delta);
+        input.current?.setSelectionRange(position, position);
       },
       clear() { write('', 0); },
       enter() {

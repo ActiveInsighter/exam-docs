@@ -29,7 +29,8 @@ export { emptyAnswer } from './types';
  * a queued or failed write stay until it is persisted.
  */
 
-export type WriteKind = 'draft' | 'submit' | 'reset';
+/** draft: local only · submit: committed with an attempt record · reset, regrade: committed, no new attempt. */
+export type WriteKind = 'draft' | 'submit' | 'reset' | 'regrade';
 
 export interface AnswerSnapshot {
   state: AnswerState;

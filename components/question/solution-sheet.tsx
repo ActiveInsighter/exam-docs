@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/study-card';
 import { cn } from '@/lib/utils';
 import { blankBadge } from './blank-field';
+import { BlankGradeSwitch } from './blank-grade';
 import { formatKey, formatResponse, type GradingSpec, type QuestionType } from './grading';
 import { QuestionMarkActions, QuestionMarksScope, QuestionUserTags, useMarks } from './marks/question-marks';
 import { NoteEditor } from './marks/note-editor';
@@ -125,17 +126,17 @@ function AnswerSummary({ spec, state }: { spec: GradingSpec; state: QuestionStat
           const verdict = submitted?.evaluation?.blanks[index];
           const yours = submitted?.values[index]?.trim();
           return (
-            <li key={index} className={cn(tile, 'flex-wrap bg-(--ui-fill)', verdict && verdict !== 'correct' && 'bg-destructive/8')}>
+            <li key={index} data-answer-row="" className={cn(tile, 'flex-wrap items-center gap-y-2 bg-(--ui-fill)', verdict && verdict !== 'correct' && 'bg-destructive/8')}>
               {spec.blanks.length > 1 ? <span className="text-muted-foreground">{blankBadge(index)}</span> : null}
               <span className="text-sm text-success">答案</span>
-              <span className="text-lg font-semibold">
+              <span className="min-w-0 text-lg font-semibold break-words">
                 {blank.kind === 'math' ? <MathPreview text={blank.answer} /> : blank.answer}
               </span>
               {submitted ? (
-                <span className="ml-auto inline-flex items-center gap-2">
+                <span className="ml-auto inline-flex min-w-0 flex-wrap items-center justify-end gap-2">
                   <span className="text-sm text-muted-foreground">你填</span>
-                  <span className="font-medium break-all">{yours ? (blank.kind === 'math' ? <MathPreview text={yours} /> : yours) : '—'}</span>
-                  <Verdict correct={verdict === 'correct'} />
+                  <span className="min-w-0 font-medium break-all">{yours ? (blank.kind === 'math' ? <MathPreview text={yours} /> : yours) : '—'}</span>
+                  <BlankGradeSwitch question={submitted} index={index} />
                 </span>
               ) : null}
             </li>

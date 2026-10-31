@@ -1,7 +1,8 @@
 'use client';
 
-import { CircleAlertIcon, CircleCheckIcon, CircleXIcon, ClockIcon, RotateCcwIcon } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { CircleAlertIcon, CircleCheckIcon, CircleXIcon, ClockIcon, GavelIcon, RotateCcwIcon } from 'lucide-react';
+import { type ReactNode, useState } from 'react';
+import { ManualGradePanel } from './blank-grade';
 import { Button } from '@/components/ui/button';
 import { blankBadge } from './blank-field';
 import type { AttemptResult, BlankSpec, Evaluation, GradingSpec, QuestionType } from './grading';
@@ -24,6 +25,11 @@ const ICONS: Record<AttemptResult, ReactNode> = {
 /** Words for a result: "少选" for a subset of a multiple answer, "部分正确" for blanks. */
 export function describeResult(spec: GradingSpec, evaluation: Evaluation, selected: readonly string[]): string {
   if (spec.kind === 'self') return `自评 · ${selfGradeOf(selected[0])?.label ?? '错误'}`;
+  const words = describeGrade(spec, evaluation, selected);
+  return evaluation.manual?.some(Boolean) ? `${words} · 已改判` : words;
+}
+
+function describeGrade(spec: GradingSpec, evaluation: Evaluation, selected: readonly string[]): string {
   if (evaluation.result === 'correct') return '回答正确';
   if (evaluation.result === 'incorrect') return '回答错误';
   if (spec.kind === 'choice') {
@@ -152,6 +158,10 @@ export type QuestionFooterProps = {
 export function QuestionFooter({ showSolution, ...sheet }: QuestionFooterProps) {
   const state = useQuestionState();
   const status = useAttemptStatus();
+  const [grading, setGrading] = useState(false);
+  const gradable = state?.spec.kind === 'blank' && state.submitted && !!state.evaluation;
+  // Closed again once the answer is reset.
+  if (grading && !gradable) setGrading(false);
   return (
     <div data-question-footer="" data-attempt-result={status}>
       <div role="status" aria-live="polite" data-footer-status="">
@@ -165,6 +175,19 @@ export function QuestionFooter({ showSolution, ...sheet }: QuestionFooterProps) 
       </div>
       {/* Redo sits with 查看解答 so the grade line stays one unit when the footer wraps. */}
       <div data-footer-actions="">
+        {gradable ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-expanded={grading}
+            data-pressed={grading ? '' : undefined}
+            className="h-8 gap-1.5 rounded-full px-3 text-[0.8125rem] text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground has-data-[icon=inline-start]:pl-2.5 data-pressed:bg-(--ui-fill) data-pressed:text-foreground"
+            onClick={() => setGrading(!grading)}
+          >
+            <GavelIcon data-icon="inline-start" />
+            手动判分
+          </Button>
+        ) : null}
         {state?.submitted && state.evaluation ? (
           <Button variant="ghost" size="sm" className="h-8 gap-1.5 rounded-full px-3 text-[0.8125rem] text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground has-data-[icon=inline-start]:pl-2.5" onClick={state.reset}>
             <RotateCcwIcon data-icon="inline-start" />
@@ -173,6 +196,7 @@ export function QuestionFooter({ showSolution, ...sheet }: QuestionFooterProps) 
         ) : null}
         {showSolution ? <QuestionSolutionSheet {...sheet} /> : null}
       </div>
+      {gradable && grading ? <ManualGradePanel question={state} /> : null}
     </div>
   );
 }
