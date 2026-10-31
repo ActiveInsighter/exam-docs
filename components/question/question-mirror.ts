@@ -1,4 +1,4 @@
-import { prettyMath } from '@/lib/math-expression';
+import { typesetMath } from './math-preview';
 import type { BlankVerdict, GradingSpec } from './grading';
 
 /*
@@ -30,7 +30,8 @@ function blankChip(text: string, feedback: string, kind: string | undefined) {
   chip.dataset.questionBlank = '';
   chip.dataset.feedback = feedback;
   if (kind) chip.dataset.kind = kind;
-  chip.textContent = kind === 'math' ? prettyMath(text) : text;
+  if (kind === 'math') chip.append(typesetMath(text));
+  else chip.textContent = text;
   return chip;
 }
 

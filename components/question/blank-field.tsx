@@ -53,6 +53,7 @@ export function BlankField({ answer, index, kind, placeholder }: BlankFieldProps
     placeholder,
     'data-feedback': verdict,
     'data-fresh': question.fresh ? '' : undefined,
+    'data-manual': question.evaluation?.manual?.[index] ? '' : undefined,
     style: { width: blankWidth(answer, value) },
   } as const;
 

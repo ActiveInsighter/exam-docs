@@ -160,10 +160,7 @@ export function gradeBlanks(
 ): { result: AttemptResult; verdicts: readonly BlankVerdict[]; correct: readonly boolean[] } {
   const verdicts = specs.map((spec, index) => gradeBlank(values[index] ?? '', spec));
   const correct = verdicts.map((verdict) => verdict === 'correct');
-  const hits = correct.filter(Boolean).length;
-  const result: AttemptResult =
-    hits === specs.length ? 'correct' : hits > 0 ? 'partial' : 'incorrect';
-  return { result, verdicts, correct };
+  return { result: resultOf(verdicts), verdicts, correct };
 }
 
 /** True once the reader has entered or picked anything. */
@@ -175,9 +172,47 @@ export function isAnswered(spec: GradingSpec, selected: readonly string[], value
 
 export type Evaluation = {
   result: AttemptResult;
-  /** Per blank, for blank questions. */
+  /** Per blank, for blank questions: the reader's own grade where given, else the automatic one. */
   blanks: readonly BlankVerdict[];
+  /** Per blank, true where the reader overrode the automatic grade. */
+  manual?: readonly boolean[];
 };
+
+/*
+ * Manual grading of blanks. After submitting, the reader may mark a blank
+ * right or wrong themselves (an equivalent form the checker cannot prove, a
+ * text answer worded differently). A blank question has no options, so its
+ * `selected` list carries these grades, one token per overridden blank; the
+ * stored and synced record keeps its usual shape.
+ */
+export type BlankGrade = 'correct' | 'incorrect';
+
+const BLANK_GRADE = /^blank:(\d{1,2}):(correct|incorrect)$/u;
+
+export const blankGradeToken = (index: number, grade: BlankGrade) => `blank:${index}:${grade}`;
+
+/** The reader's grade for each blank, if any, from a blank question's `selected`. */
+export function readBlankGrades(selected: readonly string[], count: number): (BlankGrade | undefined)[] {
+  const grades: (BlankGrade | undefined)[] = Array.from({ length: count }, () => undefined);
+  for (const token of selected) {
+    const match = BLANK_GRADE.exec(token);
+    if (!match) continue;
+    const index = Number(match[1]);
+    if (index < count) grades[index] = match[2] as BlankGrade;
+  }
+  return grades;
+}
+
+/** `selected` with blank `index` graded `grade`, or back to the automatic grade with null. */
+export function withBlankGrade(selected: readonly string[], index: number, grade: BlankGrade | null): string[] {
+  const others = selected.filter((token) => !token.startsWith(`blank:${index}:`));
+  return grade ? [...others, blankGradeToken(index, grade)].sort() : others;
+}
+
+function resultOf(verdicts: readonly BlankVerdict[]): AttemptResult {
+  const hits = verdicts.filter((verdict) => verdict === 'correct').length;
+  return hits === verdicts.length ? 'correct' : hits > 0 ? 'partial' : 'incorrect';
+}
 
 export function evaluateAttempt(
   spec: GradingSpec,
@@ -191,7 +226,11 @@ export function evaluateAttempt(
       return { result: gradeChoice(selected, [booleanLetter(spec.answer)]), blanks: [] };
     case 'blank': {
       const graded = gradeBlanks(values, spec.blanks);
-      return { result: graded.result, blanks: graded.verdicts };
+      const grades = readBlankGrades(selected, spec.blanks.length);
+      if (!grades.some(Boolean)) return { result: graded.result, blanks: graded.verdicts };
+      const blanks = graded.verdicts.map((verdict, index) => grades[index] ?? verdict);
+      const manual = grades.map((grade, index) => grade !== undefined && grade !== graded.verdicts[index]);
+      return { result: resultOf(blanks), blanks, manual };
     }
     case 'self':
       return { result: selfGradeOf(selected[0])?.result ?? 'incorrect', blanks: [] };

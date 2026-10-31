@@ -21,6 +21,9 @@ import {
 import { parseMath } from '@/lib/math-expression';
 import type { MathEditor } from './math-blank';
 import { MathPreview } from './math-preview';
+import { releaseRoom, reserveRoom, revealField } from './keypad-room';
+
+const DESKTOP = '(min-width: 768px)';
 
 /*
  * On-screen maths keypad, shared by every maths blank (only the focused one
@@ -171,15 +174,6 @@ function ToolButton({ label, run, children, ...rest }: { label: string; run: () 
   );
 }
 
-/** The element that scrolls the page: the docs panel on desktop, the document on phones. */
-function scrollerOf(element: HTMLElement): Element {
-  for (let node = element.parentElement; node; node = node.parentElement) {
-    const { overflowY } = getComputedStyle(node);
-    if ((overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight) return node;
-  }
-  return document.scrollingElement ?? document.documentElement;
-}
-
 export function MathKeypad({
   editor,
   value,
@@ -209,26 +203,39 @@ export function MathKeypad({
   const error = parsed && !parsed.ok ? parsed.error : null;
   const back = layer === 'main' ? undefined : () => setLayer('main');
 
-  // Reserve room below the page for the keypad and keep the field above it.
+  // Reserve room below the content for the keypad and keep the field clear of it.
   useLayoutEffect(() => {
     const element = root.current;
-    if (!element) return;
-    const html = document.documentElement;
-    const measure = () => element.getBoundingClientRect().height;
-    html.style.setProperty('--exam-keypad-height', `${Math.ceil(measure())}px`);
     const field = input.current;
-    const rect = field?.getBoundingClientRect();
-    const limit = window.innerHeight - measure() - 24;
-    if (field && rect && rect.bottom > limit) {
-      scrollerOf(field).scrollBy({ top: rect.bottom - limit, behavior: instant ? 'auto' : 'smooth' });
-    }
-    html.dataset.keypadOpen = '';
-    const observer = new ResizeObserver(() => html.style.setProperty('--exam-keypad-height', `${Math.ceil(measure())}px`));
+    if (!element || !field) return;
+    // Desktop: centred over the question rather than the window, clear of the sidebar.
+    const place = () => {
+      if (!window.matchMedia(DESKTOP).matches) {
+        element.style.removeProperty('--keypad-x');
+        return;
+      }
+      const card = (field.closest('[data-exam-question]') ?? field).getBoundingClientRect();
+      const half = element.offsetWidth / 2;
+      const x = Math.min(window.innerWidth - half - 12, Math.max(half + 12, card.left + card.width / 2));
+      element.style.setProperty('--keypad-x', `${Math.round(x)}px`);
+    };
+    // Measured from the layout, not the box, which is still sliding in.
+    const top = () => window.innerHeight - element.offsetHeight - (parseFloat(getComputedStyle(element).bottom) || 0);
+    place();
+    reserveRoom(field, window.innerHeight - top());
+    revealField(field, top(), !instant);
+    let height = element.offsetHeight;
+    const observer = new ResizeObserver(() => {
+      if (element.offsetHeight === height) return;
+      height = element.offsetHeight;
+      reserveRoom(field, window.innerHeight - top());
+    });
     observer.observe(element);
+    window.addEventListener('resize', place);
     return () => {
       observer.disconnect();
-      delete html.dataset.keypadOpen;
-      html.style.removeProperty('--exam-keypad-height');
+      window.removeEventListener('resize', place);
+      releaseRoom();
     };
   }, [input, instant]);
 
