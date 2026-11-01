@@ -27,4 +27,20 @@ describe('documentation route paths', () => {
     expect(getShortDocSlugPath('intro.mdx')).toBe('intro');
     expect(getShortDocSlugPath('math/past-exams/index.mdx')).toBe('math/past-exams');
   });
+
+  it('preserves published mock paper URLs after grouping by series', () => {
+    for (const [folder, prefix, count] of [
+      ['lilin-6-sets-2027', 'lilin', 6],
+      ['liyongle-6-sets-2027', 'liyongle', 6],
+      ['tangjiafeng-8-sets-2027', 'tangjiafeng', 8],
+    ] as const) {
+      expect(getShortDocSlugPath(`math/exam/${folder}/index.mdx`)).toBe(`math/exam/${folder}`);
+      for (let number = 1; number <= count; number += 1) {
+        const padded = String(number).padStart(2, '0');
+        expect(getShortDocSlugPath(`math/exam/${folder}/${padded}-卷一.mdx`)).toBe(
+          getShortDocSlugPath(`math/exam/数学模拟题1028/${prefix}-${padded}.mdx`),
+        );
+      }
+    }
+  });
 });
