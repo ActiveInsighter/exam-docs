@@ -11,10 +11,12 @@
  * It has to stay cheap on a page with ~10k DOM nodes: the 2 s heartbeat writes
  * only a small separate key, DOM-wide reads run at most every 10 s while
  * visible, the trail is rewritten once per task that logs something, and no
- * more than four uploads are in flight. For 30 s after boot and after each
- * return to the page it keeps a denser trail (timer lag, a one-at-a-time
- * requestAnimationFrame probe, pending and failed uploads) to tell a stuck
- * renderer from stuck JavaScript or a dead network stack.
+ * more than four uploads are in flight. Uploads use keepalive only while the
+ * page is hidden; otherwise they give up after 15 s and record the timeout.
+ * For 30 s after boot and after each return to the page it keeps a denser
+ * trail (timer lag, a one-at-a-time requestAnimationFrame probe, pending and
+ * failed uploads, online state) to tell a stuck renderer from stuck
+ * JavaScript or a dead network stack.
  *
  * Remove with lib/diagnostics.ts and the migration's table once the crash is
  * understood.
@@ -47,7 +49,8 @@ const SOURCE = String.raw`(function () {
   var RECORD_KEY = PREFIX + sid, BEAT_KEY = RECORD_KEY + ':b';
   var record = { sid: sid, start: t0, path: location.pathname, clean: false, hidden: null, ev: [] };
   var queue = [], flushTimer = 0, sent = 0, dirty = false, saveQueued = false;
-  var inflight = 0, netFail = 0, lastOk = null;
+  var inflight = 0, netFail = 0, lastOk = null, reqId = 0, pend = {}, slowLogged = 0;
+  var Abort = w.AbortController, TIMEOUT = 15000, conn = navigator.connection;
 
   function now() { return Date.now() - t0; }
   function save() {
@@ -74,10 +77,19 @@ const SOURCE = String.raw`(function () {
     if (record.ev.length > MAX_EVENTS) record.ev.splice(0, record.ev.length - MAX_EVENTS);
     saveSoon();
   }
-  function failed(status) {
+  // "type/effectiveType/rtt/downlink", e.g. "wifi/4g/50/10"; null where the Network Information API is missing.
+  function network() { return conn ? (conn.type || '') + '/' + (conn.effectiveType || '') + '/' + conn.rtt + '/' + conn.downlink : null; }
+  function pendingMs() {
+    var t = now(), age = null;
+    for (var id in pend) if (age === null || t - pend[id] > age) age = t - pend[id];
+    return age;
+  }
+  // status: HTTP status, 0 for a network error, 'timeout' when we gave up waiting.
+  function failed(status, ms, keep) {
     netFail++;
     // Local only: queueing it would only add to what cannot be sent.
-    if (netFail === 1 || netFail % 10 === 0) remember([now(), 'send-fail', { n: netFail, status: status, pending: inflight }]);
+    if (netFail <= 3 || netFail % 10 === 0) remember([now(), 'send-fail', { n: netFail, status: status, ms: ms, keepalive: keep,
+      pending: inflight, online: navigator.onLine, network: network() }]);
   }
   function send(kind, session, events) {
     try {
@@ -89,14 +101,26 @@ const SOURCE = String.raw`(function () {
         else events.splice(0, drop);
         body = JSON.stringify({ p_session: session, p_kind: kind, p_events: events });
       }
-      var request = fetch(ENDPOINT, { method: 'POST', keepalive: true, credentials: 'omit',
-        headers: { apikey: KEY, 'content-type': 'application/json' }, body: body });
-      inflight++;
+      // keepalive only when the page may be going away. Otherwise a plain request that gives up after
+      // 15 s, so a wedged connection shows as a timeout, and ArkWeb's keepalive path is not involved.
+      var keep = d.visibilityState === 'hidden', ctrl = !keep && Abort ? new Abort() : null;
+      var id = ++reqId, start = now(), timer = 0;
+      var init = { method: 'POST', keepalive: keep, credentials: 'omit',
+        headers: { apikey: KEY, 'content-type': 'application/json' }, body: body };
+      if (ctrl) init.signal = ctrl.signal;
+      var request = fetch(ENDPOINT, init);
+      inflight++; pend[id] = start;
+      if (ctrl) timer = setTimeout(function () { ctrl.abort(); }, TIMEOUT);
+      var settle = function () { inflight--; delete pend[id]; clearTimeout(timer); return now() - start; };
       return request.then(function (response) {
-        inflight--;
-        if (response.ok) lastOk = now(); else failed(response.status);
+        var ms = settle();
+        if (!response.ok) failed(response.status, ms, keep);
+        else {
+          lastOk = now();
+          if (ms > 5000 && slowLogged++ < 20) remember([now(), 'send-slow', { ms: ms, keepalive: keep }]);
+        }
         return response.ok;
-      }, function () { inflight--; failed(0); return false; });
+      }, function () { var ms = settle(); failed(ctrl && ctrl.signal.aborted ? 'timeout' : 0, ms, keep); return false; });
     } catch (e) {}
     return Promise.resolve(false);
   }
@@ -159,7 +183,8 @@ const SOURCE = String.raw`(function () {
     path: location.pathname.slice(0, 200), nav: nav.type || null, ua: ua.slice(0, 300),
     vw: w.innerWidth, vh: w.innerHeight, dpr: w.devicePixelRatio, dm: navigator.deviceMemory || null,
     cores: navigator.hardwareConcurrency || null, heapLimit: mem ? Math.round(mem.jsHeapSizeLimit / 1048576) : null,
-    signedIn: signedIn, lsKB: Math.round(lsChars / 512), history: history.length, scrollY: Math.round(w.scrollY)
+    signedIn: signedIn, lsKB: Math.round(lsChars / 512), history: history.length, scrollY: Math.round(w.scrollY),
+    online: navigator.onLine, network: network()
   }, true);
   try {
     if (navigator.storage && navigator.storage.estimate) navigator.storage.estimate().then(safe(function (s) {
@@ -236,7 +261,8 @@ const SOURCE = String.raw`(function () {
     var m = P.memory, b = {
       t: t, vis: d.visibilityState, path: location.pathname, lag: lag, frame: frameState(),
       heap: m ? Math.round(m.usedJSHeapSize / 1048576) : null, heapTotal: m ? Math.round(m.totalJSHeapSize / 1048576) : null,
-      long: longTasks, longMs: Math.round(longMs), pending: inflight, failed: netFail, lastOk: lastOk
+      long: longTasks, longMs: Math.round(longMs), pending: inflight, pendingMs: pendingMs(), failed: netFail, lastOk: lastOk,
+      online: navigator.onLine, network: network()
     };
     if (metrics) for (var name in metrics) b[name] = metrics[name];
     try { ls.setItem(BEAT_KEY, JSON.stringify(b)); } catch (e) {}
@@ -245,7 +271,8 @@ const SOURCE = String.raw`(function () {
       probeFrame();
     }
     // Keep a dense local trail around boot and returns, where the browser has been dying.
-    if (burst) remember([t, 'tick', { lag: lag, frame: b.frame, pending: inflight, failed: netFail, long: longTasks }]);
+    if (burst) remember([t, 'tick', { lag: lag, frame: b.frame, pending: inflight, pendingMs: b.pendingMs, failed: netFail,
+      long: longTasks, online: b.online }]);
     if (report) { queue.push([t, 'beat', b]); flush(); }
   }
   setInterval(safe(function () { beat(false); }), 2000);
@@ -277,6 +304,15 @@ const SOURCE = String.raw`(function () {
     probeFrame(away);
     beat(true);
   }));
+  // Whether the device lost or changed its network around a return to the page.
+  w.addEventListener('online', safe(function () { log('online', { network: network() }, true); }));
+  w.addEventListener('offline', safe(function () { log('offline', { network: network() }, true); }));
+  var changes = 0;
+  try {
+    if (conn && conn.addEventListener) conn.addEventListener('change', safe(function () {
+      if (changes++ < 40) log('network', { network: network(), online: navigator.onLine });
+    }));
+  } catch (e) {}
   d.addEventListener('freeze', safe(function () { log('freeze', null, true); }));
   d.addEventListener('resume', safe(function () { log('resume'); }));
   w.addEventListener('pageshow', safe(function (e) { if (e.persisted) { record.clean = false; log('pageshow-bfcache'); } }));
