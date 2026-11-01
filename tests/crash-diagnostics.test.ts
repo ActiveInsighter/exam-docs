@@ -13,7 +13,8 @@ function scriptSource(): string {
 }
 
 /** Runs the inline script against a minimal browser and returns what it posted. */
-function run(userAgent: string, search = '', storage = new Map<string, string>(), fail = false) {
+function run(userAgent: string, search = '', storage = new Map<string, string>(), fail: boolean | 'hang' = false,
+  requestAnimationFrame?: (callback: () => void) => number) {
   const posts: { url: string; body: { p_session: string; p_kind: string; p_events: [number, string, unknown][] } }[] = [];
   const localStorage = {
     get length() { return storage.size; },
@@ -26,7 +27,7 @@ function run(userAgent: string, search = '', storage = new Map<string, string>()
   let heartbeat: (() => void) | undefined;
   let keypadOpen = false;
   const window: { __examDiag?: (type: string, data?: unknown, urgent?: boolean) => void } & Record<string, unknown> = {
-    ...listeners(), localStorage, innerWidth: 412, innerHeight: 915, devicePixelRatio: 3, scrollY: 0,
+    ...listeners(), localStorage, innerWidth: 412, innerHeight: 915, devicePixelRatio: 3, scrollY: 0, requestAnimationFrame,
   };
   const document = {
     ...listeners(), visibilityState: 'visible', readyState: 'loading',
@@ -36,6 +37,7 @@ function run(userAgent: string, search = '', storage = new Map<string, string>()
   };
   const fetch = vi.fn(async (url: string, init: RequestInit) => {
     posts.push({ url, body: JSON.parse(String(init.body)) });
+    if (fail === 'hang') return new Promise<Response>(() => {});
     if (fail) throw new Error('offline');
     return new Response(null, { status: 204 });
   });
@@ -144,7 +146,68 @@ describe('temporary crash diagnostics', () => {
     const result = run(HARMONY_UA);
     result.openKeypad();
     result.beat();
-    const record = JSON.parse(result.storage.get(`exam-diag:v1:${result.posts[0].body.p_session}`)!);
-    expect(record.beat.keypad).toBe(true);
+    const beat = JSON.parse(result.storage.get(`exam-diag:v1:${result.posts[0].body.p_session}:b`)!);
+    expect(beat.keypad).toBe(true);
+  });
+
+  it('keeps the heartbeat in its own key and reports it, with its data, for a visit that was cut off', async () => {
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://example.supabase.co');
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_test');
+    const clock = vi.spyOn(Date, 'now');
+    let time = 1_000_000;
+    clock.mockImplementation(() => time);
+    const first = run(HARMONY_UA);
+    const session = first.posts[0].body.p_session;
+    await Promise.resolve();
+    const trail = first.storage.get(`exam-diag:v1:${session}`);
+    // Past the dense first 30 s, a heartbeat leaves the trail alone.
+    time += 70_000;
+    first.beat();
+    await Promise.resolve();
+    expect(first.storage.get(`exam-diag:v1:${session}`)).toBe(trail);
+    clock.mockRestore();
+    const beat = JSON.parse(first.storage.get(`exam-diag:v1:${session}:b`)!);
+    expect(beat).toMatchObject({ vis: 'visible', dom: 10, pending: 0, failed: 0, lastOk: 0 });
+
+    first.storage.set(`exam-diag:v1:${session}`, JSON.stringify({ ...JSON.parse(trail!), start: Date.now() - 120_000 }));
+    const second = run(HARMONY_UA, '', first.storage);
+    const previous = second.posts.find((post) => post.body.p_kind === 'previous');
+    expect(previous?.body.p_events[0][2]).toMatchObject({ lastBeat: { dom: 10 } });
+  });
+
+  it('reports a frame that never comes while timers still run', () => {
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://example.supabase.co');
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_test');
+    const frames: (() => void)[] = [];
+    const clock = vi.spyOn(Date, 'now');
+    let time = 1_000_000;
+    clock.mockImplementation(() => time);
+    const result = run(HARMONY_UA, '', new Map(), false, (callback) => frames.push(callback));
+    result.beat();
+    expect(frames).toHaveLength(1);
+    time += 2000;
+    result.beat();
+    expect(frames).toHaveLength(1);
+    time += 2000;
+    result.beat();
+    const stall = result.posts.flatMap((post) => post.body.p_events).find(([, type]) => type === 'frame-stall');
+    expect(stall?.[2]).toMatchObject({ ms: 4000 });
+    clock.mockRestore();
+  });
+
+  it('caps uploads in flight when requests hang, and records failures locally', async () => {
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://example.supabase.co');
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_test');
+    const hung = run(HARMONY_UA, '', new Map(), 'hang');
+    for (let i = 0; i < 10; i++) hung.window.__examDiag?.('urgent', i, true);
+    expect(hung.posts).toHaveLength(4);
+
+    const offline = run(HARMONY_UA, '', new Map(), true);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    offline.beat();
+    const session = offline.posts[0].body.p_session;
+    const record = JSON.parse(offline.storage.get(`exam-diag:v1:${session}`)!);
+    expect(record.ev.some(([, type]: [number, string]) => type === 'send-fail')).toBe(true);
+    expect(JSON.parse(offline.storage.get(`exam-diag:v1:${session}:b`)!)).toMatchObject({ failed: 1, pending: 0 });
   });
 });
