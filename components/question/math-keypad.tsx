@@ -18,6 +18,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { diag } from '@/lib/diagnostics';
 import { parseMath } from '@/lib/math-expression';
 import type { MathEditor } from './math-blank';
 import { MathPreview } from './math-preview';
@@ -202,6 +203,11 @@ export function MathKeypad({
   const parsed = value.trim() ? parseMath(value) : null;
   const error = parsed && !parsed.ok ? parsed.error : null;
   const back = layer === 'main' ? undefined : () => setLayer('main');
+
+  useEffect(() => {
+    diag('keypad-open', { blank: index });
+    return () => diag('keypad-close', { blank: index });
+  }, [index]);
 
   // Reserve room below the content for the keypad and keep the field clear of it.
   useLayoutEffect(() => {

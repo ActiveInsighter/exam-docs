@@ -151,11 +151,20 @@ Assets. `main` targets `exam-docs`; approved preview branches target the isolate
 - HTML, JS, CSS, Markdown downloads, the search manifest, category routers, and
   ZBSearch indexes are static files;
 - documentation search runs in the browser with ZBSearch;
-- a small Worker forwards only account endpoints and the `exam_sync` RPC to
-  the configured Supabase project; it adds no privileged key and disables caching.
+- a small Worker forwards only account endpoints and the `exam_sync` RPC (plus,
+  temporarily, the write-only `exam_client_log` crash diagnostics RPC) to the
+  configured Supabase project; it adds no privileged key and disables caching.
 
-Two settings keep client-side navigation from exhausting mobile browser memory
+Three settings keep client-side navigation from exhausting mobile browser memory
 (they caused the HarmonyOS Huawei browser to crash after a few page switches):
+
+- `scripts/patch-next-bfcache-size.mjs` (postinstall) charges each entry of
+  Next's back/forward cache 8 MiB instead of 100 bytes. A question page's
+  segment keeps its whole Flight response alive (5–14 MB, mostly pre-rendered
+  KaTeX strings held as Blink buffers, invisible in the JS heap figure), and at
+  100 bytes the 50 MB router LRU never evicted, so every visited page stayed
+  in memory: about +7 MB per page switch. `scripts/verify-next-bfcache-patch.mjs`
+  fails a static build whose client chunks still carry the old size.
 
 - Every static response sends `Speculation-Rules: "/speculation-rules.json"`, an
   empty rule set (`scripts/prepare-cloudflare-static-assets.mjs`). Cloudflare
