@@ -1,9 +1,19 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { useEffect, type ReactNode } from 'react';
 import { AccountProvider } from '@/components/account';
 import { QuestionDatabaseProvider } from '@/components/question/database-provider';
 import { SearchProvider } from '@/components/search-provider';
+import { diag } from '@/lib/diagnostics';
+
+/** Temporary crash diagnostics: hydration and client-side navigations. */
+function DiagnosticsMilestones() {
+  const pathname = usePathname();
+  useEffect(() => { diag('hydrated', { at: Math.round(performance.now()) }, true); }, []);
+  useEffect(() => { diag('route', { path: pathname }); }, [pathname]);
+  return null;
+}
 
 /**
  * Site-wide client providers, shared by app/layout.tsx and the static build
@@ -12,6 +22,7 @@ import { SearchProvider } from '@/components/search-provider';
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <AccountProvider>
+      <DiagnosticsMilestones />
       {/* Answers are cached and synced site-wide, so the account menu shows them on every page. */}
       <QuestionDatabaseProvider>
         <SearchProvider>{children}</SearchProvider>
