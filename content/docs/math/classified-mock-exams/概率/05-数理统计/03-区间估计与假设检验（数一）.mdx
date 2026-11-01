@@ -1,0 +1,323 @@
+---
+title: "第三节 区间估计与假设检验（数一）"
+description: "考研数学一1031版模拟卷数理统计分类题库 · 第三节 区间估计与假设检验（数一） · 原题MDX组件原样保留"
+---
+
+# 第三节 区间估计与假设检验（数一）
+
+> 参照：[考研核心题目 · 概率论与数理统计 · 第三节 区间估计与假设检验（数一）](https://exam.any1.tech/docs/math/core-questions/03-611e560f/s-6a68da01/03-b5427ca2/)。同一道原题仅依主要考查目标收录一次；`<Question>`、`<Option>`、`<Blank>`、`<Solution>` 组件及其内部的题目、选项、图片、解析完全保留。
+
+题目按解题主方法组织，便于同类训练。可先独立完成每题，再展开原卷自带的解析。
+
+## 一、枢轴量构造与有限样本精确置信区间
+
+### 李林六套卷 · 第6套 · 第22题
+
+<Question id="classified-1031-lilin-2027-s6-q22" type="essay" points={12} tags="来源:李林六套卷, 试卷:第六套, 科目:数学一, 考点:最大似然估计与置信区间, 难度:中等">
+
+设总体 $X\sim U[0,\theta]$，$X_1,X_2,\ldots,X_n$ 为来自总体 $X$ 的简单随机样本。
+
+（I）求 $\theta$ 的最大似然估计量 $\hat\theta$，并说明 $\hat\theta$ 是否为 $\theta$ 的无偏估计量。
+
+（II）记 $X_{(n)}=\max(X_1,\ldots,X_n)$，取 $T=X_{(n)}/\theta$ 为枢轴量。判断下列区间是否为 $\theta$ 的置信水平为 $1-\alpha$（$0<\alpha<1$）的置信区间：
+
+$$
+\left(
+\frac{X_{(n)}}{\sqrt[n]{1-\alpha/2}},
+\frac{X_{(n)}}{\sqrt[n]{\alpha/2}}
+\right).
+$$
+
+<Solution>
+
+**参考答案：**
+
+- （I）$\boxed{\hat\theta=X_{(n)}}$，**不是**无偏估计，因为 $E(\hat\theta)=\dfrac{n}{n+1}\theta$。
+- （II）**是**，该区间对所有 $\theta>0$ 的覆盖概率恰为 $1-\alpha$。
+
+<Steps>
+  <Step>
+
+  ### （I）写出似然函数并求极大值
+
+  样本联合密度为
+
+  $$
+  L(\theta)=\prod_{i=1}^n\frac1\theta\mathbf 1_{[0,\theta]}(X_i)
+  =\theta^{-n}\mathbf 1_{\{\theta\ge X_{(n)}\}},\qquad\theta>0.
+  $$
+
+  对固定样本，当 $\theta\ge X_{(n)}$ 时，$\theta^{-n}$ 严格递减，最大值在可行范围左端取得，故
+
+  $$
+  \boxed{\hat\theta_{\mathrm{MLE}}=X_{(n)}}.
+  $$
+
+  </Step>
+  <Step>
+
+  ### （I）计算期望，判断有偏性
+
+  对 $0\le x\le\theta$，最大次序统计量满足
+
+  $$
+  F_{X_{(n)}}(x)=P(X_1\le x,\ldots,X_n\le x)
+  =\left(\frac x\theta\right)^n.
+  $$
+
+  因此其密度与期望为
+
+  $$
+  f_{X_{(n)}}(x)=\frac{nx^{n-1}}{\theta^n},\qquad
+  E(X_{(n)})=\int_0^\theta x\frac{nx^{n-1}}{\theta^n}\,\mathrm dx
+  =\frac n{n+1}\theta.
+  $$
+
+  故偏差为 $E(\hat\theta)-\theta=-\theta/(n+1)<0$。如果需要无偏估计，可使用 $\dfrac{n+1}{n}X_{(n)}$。
+
+  </Step>
+  <Step>
+
+  ### （II）构造不依赖未知参数的分布
+
+  令 $T=X_{(n)}/\theta$。由上式，$0\le t\le1$ 时
+
+  $$
+  P(T\le t)=P(X_{(n)}\le\theta t)=t^n.
+  $$
+
+  即 $T$ 的分布函数为 $F_T(t)=t^n$（$0\le t\le1$），不含 $\theta$。
+
+  取两端各 $\alpha/2$ 的分位点
+
+  $$
+  a=\left(\frac\alpha2\right)^{1/n},\qquad
+  b=\left(1-\frac\alpha2\right)^{1/n},
+  $$
+
+  则 $0<a<b<1$，且
+
+  $$
+  P(a<T<b)=b^n-a^n
+  =\left(1-\frac\alpha2\right)-\frac\alpha2=1-\alpha.
+  $$
+
+  由于 $\theta>0$，将 $a<X_{(n)}/\theta<b$ 等价变形为
+
+  $$
+  \frac{X_{(n)}}b<\theta<\frac{X_{(n)}}a.
+  $$
+
+  这正是题设的区间，故其置信水平确为 $1-\alpha$。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="端点顺序">
+
+由 $a<b$，对正数取倒数会反向，即 $1/b<1/a$；区间左端必须对应较大的分位点 $b$。不能将 $T$ 错当成均匀分布：其分布函数是 $t^n$，而不是 $t$（$n=1$ 除外）。
+
+</Callout>
+
+</Solution>
+</Question>
+
+## 二、原假设、拒绝域与第一类错误
+
+### 张宇8套卷 · 第3套 · 第10题
+
+<Question id="classified-1031-math-66038b-010" type="single" number={false}>
+
+**10.**
+
+设两组数据分别来自两个方差相同且相互独立的正态总体
+
+$$
+X\sim N(\mu_1,\sigma^2),\qquad
+Y\sim N(\mu_2,\sigma^2).
+$$
+
+现检验两组数据的均值有无显著差异，且犯第一类错误的概率为 $\alpha$，则应
+
+<Option>在置信度为 $1-\alpha$ 下，检验 $H_0:\mu_1\ne\mu_2$；$H_1:\mu_1=\mu_2$。</Option>
+<Option>在置信度为 $1-\dfrac\alpha2$ 下，检验 $H_0:\mu_1\ne\mu_2$；$H_1:\mu_1=\mu_2$。</Option>
+<Option correct>在置信度为 $1-\alpha$ 下，检验 $H_0:\mu_1=\mu_2$；$H_1:\mu_1\ne\mu_2$。</Option>
+<Option>在置信度为 $1-\dfrac\alpha2$ 下，检验 $H_0:\mu_1=\mu_2$；$H_1:\mu_1\ne\mu_2$。</Option>
+
+<Solution>
+
+第一类错误的概率 $\alpha$ 就是显著性水平，因此置信度为
+
+$$
+1-\alpha.
+$$
+
+题目要检验“两总体均值有无显著差异”，应将“无显著差异”作为原假设，将“有显著差异”作为备择假设，即
+
+$$
+H_0:\mu_1=\mu_2,
+\qquad
+H_1:\mu_1\ne\mu_2.
+$$
+
+故选（C）。
+
+</Solution>
+
+</Question>
+
+### 张宇8套卷 · 第8套 · 第10题
+
+<Question id="classified-1031-math-56d40c-010" type="single" number={false}>
+
+**10.**
+
+设总体
+
+$$
+X\sim N(\mu,\sigma^2),
+$$
+
+其中 $\mu,\sigma$ 均未知，对于假设检验问题
+
+$$
+H_0:\sigma^2\le8,\qquad H_1:\sigma^2>8,
+$$
+
+给定显著性水平 $\alpha=0.05$。对于一个容量为 25 的样本，计算得样本方差 $s^2=14$，已知
+
+$$
+\chi^2_{0.05}(24)=36.415,
+$$
+
+则检验结果为
+
+<Option>接受 $H_0$，可能会犯第一类错误。</Option>
+<Option>接受 $H_0$，可能会犯第二类错误。</Option>
+<Option correct>拒绝 $H_0$，可能会犯第一类错误。</Option>
+<Option>拒绝 $H_0$，可能会犯第二类错误。</Option>
+
+<Solution>
+
+当总体均值 $\mu$ 未知时，检验
+
+$$
+H_0:\sigma^2\le\sigma_0^2,
+\qquad
+H_1:\sigma^2>\sigma_0^2
+$$
+
+使用统计量
+
+$$
+\chi^2=\frac{(n-1)S^2}{\sigma_0^2},
+$$
+
+其在临界情形下服从自由度为 $n-1$ 的卡方分布。
+
+本题
+
+$$
+n=25,\qquad s^2=14,\qquad \sigma_0^2=8,
+$$
+
+故
+
+$$
+\chi^2=\frac{24\times14}{8}=42.
+$$
+
+因为
+
+$$
+42>\chi^2_{0.05}(24)=36.415,
+$$
+
+所以拒绝 $H_0$。拒绝真实的 $H_0$ 时所犯的是第一类错误。
+
+故选 C。
+
+</Solution>
+
+</Question>
+
+## 三、置信区间与检验效能、第二类错误
+
+### 李永乐六套卷 · 第3套 · 第9题
+
+<Question id="classified-1031-liyongle-2027-s3-q09" type="single" points={5} tags="来源:李永乐六套卷, 试卷:模拟三, 科目:数学一, 考点:正态总体区间估计与第二类错误, 难度:较难">
+
+设总体 $X\sim N(\mu,4)$，其中 $\mu$ 未知。从中独立抽取两个简单随机样本，样本量分别为 $16$ 和 $64$。容量为 $16$ 的样本给出的 $\mu$ 的置信度为 $1-\alpha$ 的双侧置信区间长度为 $2$。利用容量为 $64$ 的样本，在显著性水平 $\alpha$ 下检验
+
+$$
+H_0:\mu=5,\qquad H_1:\mu\ne5.
+$$
+
+当实际 $\mu=6$ 时，犯第二类错误的概率为（　）。其中 $\Phi$ 为标准正态分布函数。
+
+<Option>$\Phi(2)$</Option>
+<Option correct>$\Phi(6)-\Phi(2)$</Option>
+<Option>$\Phi(4)-\Phi(2)$</Option>
+<Option>$1-\Phi(2)$</Option>
+
+<Solution>
+
+**答案：B，$\boxed{\Phi(6)-\Phi(2)}$。**
+
+<Steps>
+  <Step>
+
+  ### 由置信区间长度确定临界值
+
+  总体标准差 $\sigma=2$ 已知，双侧正态置信区间的长度为
+
+  $$
+  L=2z_{1-\alpha/2}\frac\sigma{\sqrt{n}}.
+  $$
+
+  代入 $n=16$ 与 $L=2$ 得
+
+  $$
+  2=2z_{1-\alpha/2}\frac24\quad\Longrightarrow\quad z_{1-\alpha/2}=2.
+  $$
+
+  </Step>
+  <Step>
+
+  ### 写出接受域
+
+  对容量为 $64$ 的第二组样本，用 $\overline X_{64}$ 记其样本均值，标准误为 $2/\sqrt{64}=1/4$。在 $H_0$ 下，检验统计量为
+
+  $$
+  Z=\frac{\overline X_{64}-5}{1/4}=4(\overline X_{64}-5).
+  $$
+
+  双侧检验不拒绝 $H_0$ 的条件为 $|Z|\le2$，等价于
+
+  $$
+  4.5\le\overline X_{64}\le5.5.
+  $$
+
+  </Step>
+  <Step>
+
+  ### 在真实均值为 $6$ 时计算概率
+
+  在 $\mu=6$ 下，$\overline X_{64}\sim N(6,1/16)$，故第二类错误概率为
+
+  $$
+  \begin{aligned}
+  \beta(6)
+  &=P_{\mu=6}(4.5\le\overline X_{64}\le5.5)\\
+  &=\Phi\!\left(\frac{5.5-6}{1/4}\right)
+    -\Phi\!\left(\frac{4.5-6}{1/4}\right)\\
+  &=\Phi(-2)-\Phi(-6)\\
+  &=\boxed{\Phi(6)-\Phi(2)}.
+  \end{aligned}
+  $$
+
+  </Step>
+</Steps>
+
+</Solution>
+</Question>
