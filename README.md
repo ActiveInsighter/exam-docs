@@ -180,11 +180,29 @@ Three settings keep client-side navigation from exhausting mobile browser memory
 
 The browser also releases saved answer/mark cache entries when their last
 subscriber leaves (pending or failed answer writes remain until persisted).
+`postinstall` patches both Next 16.4.3 client runtimes so each router
+back/forward cache entry is charged 8 MiB instead of 100 bytes. This conservative
+estimate makes the shared 50 MiB LRU evict old Flight responses; returning to an
+evicted page fetches its static RSC payload again. The static build rejects client
+chunks that still contain the old entry size, and the compiler cache epoch has
+been bumped. Review the patch when upgrading Next.
 Search parses and queries shards sequentially in short-lived Web Workers;
 completion, replacement, closing, hiding and a 30-second timeout terminate the
 worker and release parsed indexes. Search failures can be retried in place.
 See [the performance and HarmonyOS investigation](reports/performance-harmony-2026-10-23.md)
 for measurements and the remaining device-verification limit.
+
+Temporary crash diagnostics run before hydration on HarmonyOS/ArkWeb/Huawei
+browsers and post lifecycle milestones through the same-origin
+`exam_client_log` RPC. They include answer-read/restoration phases, errors,
+keypad/dialog activity and bounded heartbeats, without collecting answer values
+or query parameters. Unfinished visits are retained locally and uploaded again
+on the next visit; a failed replay remains for retry, within a five-visit limit.
+`?diag=1` enables diagnostics on other browsers; `?diag=0` persistently disables
+them on that browser until `?diag=1` is used. The private diagnostics table is
+unreadable by browser roles. See [the follow-up measurements and diagnostic
+procedure](reports/harmony-navigation-diagnostics-2026-11-01.md). The device-only
+answer-restoration crash still requires an ArkWeb reproduction and its logs.
 
 The static output retains its EdgeOne-compatible routing metadata. Supabase
 Auth and database RPCs are reached through the same-origin Worker when cloud sync

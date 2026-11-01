@@ -31,7 +31,7 @@ export async function patchNextBfcacheSize() {
   }
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   await patchNextBfcacheSize();
   console.log(`[next] Back/forward cache entries charged ${BFCACHE_ENTRY_BYTES} bytes.`);
 }
