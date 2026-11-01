@@ -3,7 +3,7 @@
  * kills some pages outright, sometimes again on every restore, and leaves no
  * log. This inline script runs first in <head>, before the page is parsed or
  * any bundle loads, on that engine only (or anywhere with ?diag=1; ?diag=0
- * turns the override off). It keeps a trail of the visit in localStorage and
+ * disables it). It keeps a trail of the visit in localStorage and
  * posts it to exam_private.client_diagnostics as it goes; a trail that was
  * cut off is sent again, whole, on the next visit. Components add milestones
  * through lib/diagnostics.ts.
@@ -23,13 +23,14 @@ const SOURCE = String.raw`(function () {
   var w = window, d = document, ls, P = performance;
   try { ls = w.localStorage; ls.length; } catch (e) { return; }
   var ua = navigator.userAgent || '';
-  var force = false;
+  var override = null;
   try {
-    if (/[?&]diag=0/.test(location.search)) ls.removeItem('exam-diag:force');
-    if (/[?&]diag=1/.test(location.search)) ls.setItem('exam-diag:force', '1');
-    force = ls.getItem('exam-diag:force') === '1';
+    var param = new URLSearchParams(location.search).get('diag');
+    if (param === '0' || param === '1') ls.setItem('exam-diag:force', param);
+    override = ls.getItem('exam-diag:force');
   } catch (e) {}
-  if (!force && !/OpenHarmony|HarmonyOS|ArkWeb|HuaweiBrowser/i.test(ua)) return;
+  if (override === '0' || (override !== '1' && !/OpenHarmony|HarmonyOS|ArkWeb|HuaweiBrowser/i.test(ua))) return;
+  if (w.__examDiag) return;
 
   var PREFIX = 'exam-diag:v1:', INDEX = PREFIX + 'index', MAX_EVENTS = 150;
   var t0 = Date.now();
@@ -41,15 +42,22 @@ const SOURCE = String.raw`(function () {
   function save() { try { ls.setItem(PREFIX + sid, JSON.stringify(record)); } catch (e) {} }
   function send(kind, session, events) {
     try {
+      events = events.slice();
       var body = JSON.stringify({ p_session: session, p_kind: kind, p_events: events });
-      if (body.length > 30000) body = JSON.stringify({ p_session: session, p_kind: kind, p_events: events.slice(-30) });
-      fetch(ENDPOINT, { method: 'POST', keepalive: true, credentials: 'omit',
-        headers: { apikey: KEY, 'content-type': 'application/json' }, body: body }).catch(function () {});
+      while (new Blob([body]).size > 30000 && events.length) {
+        events.splice(kind === 'previous' && events.length > 1 ? 1 : 0, 1);
+        body = JSON.stringify({ p_session: session, p_kind: kind, p_events: events });
+      }
+      return fetch(ENDPOINT, { method: 'POST', keepalive: true, credentials: 'omit',
+        headers: { apikey: KEY, 'content-type': 'application/json' }, body: body })
+        .then(function (response) { return response.ok; }, function () { return false; });
     } catch (e) {}
+    return Promise.resolve(false);
   }
   function flush() {
     clearTimeout(flushTimer); flushTimer = 0;
-    if (!queue.length || sent >= 280) return;
+    if (sent >= 280) { queue = []; return; }
+    if (!queue.length) return;
     sent++;
     var batch = queue; queue = [];
     send('live', sid, batch);
@@ -60,12 +68,13 @@ const SOURCE = String.raw`(function () {
     if (record.ev.length > MAX_EVENTS) record.ev.splice(0, record.ev.length - MAX_EVENTS);
     save();
     queue.push(entry);
+    if (queue.length > MAX_EVENTS) queue.splice(0, queue.length - MAX_EVENTS);
     if (urgent) flush(); else if (!flushTimer) flushTimer = setTimeout(flush, 1500);
   }
   function safe(fn) { return function () { try { return fn.apply(this, arguments); } catch (e) {} }; }
   w.__examDiag = safe(function (type, data, urgent) { log(type, data, urgent); });
 
-  // Visits that never reached pagehide: the browser killed them.
+  // Missing pagehide may mean a killed renderer or an OS-discarded tab.
   try {
     var index = JSON.parse(ls.getItem(INDEX) || '[]'), keep = [];
     for (var i = 0; i < index.length; i++) {
@@ -76,13 +85,17 @@ const SOURCE = String.raw`(function () {
       // Another tab still beating: leave it alone.
       if (!prev.clean && t0 - seen < 6000) { keep.push(index[i]); continue; }
       if (!prev.clean) {
+        keep.push(index[i]);
         send('previous', prev.sid, [[0, 'cut-off', { path: prev.path, start: prev.start, lastBeat: prev.beat,
-          hiddenAt: prev.hidden, sinceLastBeat: t0 - seen }]].concat(prev.ev.slice(-100)));
+          hiddenAt: prev.hidden, sinceLastBeat: t0 - seen }]].concat(prev.ev.slice(-100)))
+          .then((function (key) { return function (ok) { if (ok) { try { ls.removeItem(key); } catch (e) {} } }; })(PREFIX + index[i]));
+      } else {
+        ls.removeItem(PREFIX + index[i]);
       }
-      ls.removeItem(PREFIX + index[i]);
     }
     keep.push(sid);
-    ls.setItem(INDEX, JSON.stringify(keep.slice(-5)));
+    while (keep.length > 5) ls.removeItem(PREFIX + keep.shift());
+    ls.setItem(INDEX, JSON.stringify(keep));
   } catch (e) { try { ls.setItem(INDEX, JSON.stringify([sid])); } catch (e2) {} }
 
   var mem = P.memory, nav = (P.getEntriesByType && P.getEntriesByType('navigation')[0]) || {};
@@ -95,7 +108,7 @@ const SOURCE = String.raw`(function () {
     }
   } catch (e) {}
   log('boot', {
-    url: (location.pathname + location.search).slice(0, 200), nav: nav.type || null, ua: ua.slice(0, 300),
+    path: location.pathname.slice(0, 200), nav: nav.type || null, ua: ua.slice(0, 300),
     vw: w.innerWidth, vh: w.innerHeight, dpr: w.devicePixelRatio, dm: navigator.deviceMemory || null,
     cores: navigator.hardwareConcurrency || null, heapLimit: mem ? Math.round(mem.jsHeapSizeLimit / 1048576) : null,
     signedIn: signedIn, lsKB: Math.round(lsChars / 512), history: history.length, scrollY: Math.round(w.scrollY)

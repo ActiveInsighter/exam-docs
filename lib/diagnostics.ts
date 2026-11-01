@@ -6,5 +6,8 @@ type DiagnosticsSink = (type: string, data?: unknown, urgent?: boolean) => void;
 
 export function diag(type: string, data?: unknown, urgent = false): void {
   if (typeof window === 'undefined') return;
-  (window as Window & { __examDiag?: DiagnosticsSink }).__examDiag?.(type, data, urgent);
+  // Diagnostics must never prevent an answer write or a React effect.
+  try {
+    (window as Window & { __examDiag?: DiagnosticsSink }).__examDiag?.(type, data, urgent);
+  } catch { /* Best effort only. */ }
 }
