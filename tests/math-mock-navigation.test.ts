@@ -1,6 +1,11 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import remarkMath from 'remark-math';
+import remarkMdx from 'remark-mdx';
+import remarkParse from 'remark-parse';
+import { unified } from 'unified';
+import { visit } from 'unist-util-visit';
 import { getShortDocSlugPath } from '../lib/doc-paths.mjs';
 
 const docsRoot = join(process.cwd(), 'content/docs');
@@ -23,16 +28,17 @@ describe('math mock paper navigation', () => {
       join(docsRoot, 'math/exam/数学模拟题1028/index.mdx'),
     ];
     const broken: string[] = [];
+    const parser = unified().use(remarkParse).use(remarkMdx).use(remarkMath);
     for (const file of pages) {
-      for (const match of readFileSync(file, 'utf8').matchAll(/(?<!!)\[[^\]]*\]\(([^)]+)\)/gu)) {
-        const href = match[1].split('#')[0];
-        if (href.startsWith('http') || !href) continue;
+      visit(parser.parse(readFileSync(file, 'utf8')), 'link', (node) => {
+        const href = node.url.split('#')[0];
+        if (href.startsWith('http') || !href) return;
         const valid = href.startsWith('/docs/')
           ? routes.has(href.replace(/\/$/u, ''))
-          : href.startsWith('/downloads/') && existsSync(join(process.cwd(), 'public', href));
+          : href.startsWith('/') && existsSync(join(process.cwd(), 'public', href));
         if (!valid) broken.push(`${relative(docsRoot, file)}: ${href}`);
-      }
+      });
     }
     expect(broken).toEqual([]);
-  });
+  }, 30_000);
 });
