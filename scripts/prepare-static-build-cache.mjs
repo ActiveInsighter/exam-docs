@@ -2,7 +2,8 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const CACHE_EPOCH = 'study-layout-v3';
+// v4: compiled client code must pick up the postinstall Next bfcache patch.
+const CACHE_EPOCH = 'study-layout-v4';
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(scriptDirectory, '..');
 const cacheRoot = path.join(projectRoot, '.static-docs-stage', '.next', 'cache');

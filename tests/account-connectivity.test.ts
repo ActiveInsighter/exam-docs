@@ -55,6 +55,22 @@ describe('same-origin account and question connectivity', () => {
     expect(upstream).toHaveBeenCalledOnce();
   });
 
+  it('forwards the temporary crash diagnostics RPC with the publishable key only', async () => {
+    const upstream = vi.fn(async (request: Request) => {
+      expect(request.url).toBe(`${project}/rest/v1/rpc/exam_client_log`);
+      expect(request.headers.get('apikey')).toBe('sb_publishable_test');
+      expect(request.headers.has('Authorization')).toBe(false);
+      return new Response(null, { status: 204 });
+    });
+    vi.stubGlobal('fetch', upstream);
+    const response = await worker.fetch(new Request(`${gateway}/rest/v1/rpc/exam_client_log`, {
+      method: 'POST', headers: { apikey: 'sb_publishable_test', 'content-type': 'application/json', Origin: 'https://exam.any1.tech' },
+      body: JSON.stringify({ p_session: 'abcdefgh', p_kind: 'live', p_events: [] }),
+    }), env);
+    expect(response.status).toBe(204);
+    expect(upstream).toHaveBeenCalledOnce();
+  });
+
   it('preserves Supabase authorization failures instead of granting access', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => Response.json({ code: 'PGRST301', message: 'JWT expired' }, { status: 401 })));
     const response = await worker.fetch(new Request(`${gateway}/rest/v1/rpc/exam_sync`, { method: 'POST', body: '{}' }), env);

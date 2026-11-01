@@ -7,6 +7,8 @@ const ENDPOINTS = new Map([
   ['/auth/v1/user', ['GET']],
   ['/auth/v1/logout', ['POST']],
   ['/rest/v1/rpc/exam_sync', ['POST']],
+  // Temporary crash diagnostics (supabase/migrations/20261101085408_client_diagnostics.sql).
+  ['/rest/v1/rpc/exam_client_log', ['POST']],
 ]);
 const FORWARDED_HEADERS = [
   'accept', 'apikey', 'authorization', 'content-type', 'x-client-info',

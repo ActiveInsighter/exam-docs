@@ -5,6 +5,7 @@ import { useAccount, useAccountMenuSection } from '@/components/account';
 import { QuestionDatabase, QuestionSession } from '@/lib/question-store';
 import { namespaceForUser, type QuestionSyncStatus } from '@/lib/question-store/types';
 import { createQuestionTransport, getQuestionSupabaseClient } from '@/lib/question-supabase';
+import { diag } from '@/lib/diagnostics';
 import { questionAccountSection } from './account-section';
 import { LOCAL_STATUS, QuestionDatabaseContextValue, QuestionStorageContext, type QuestionDatabaseContext, type QuestionStorage } from './database-context';
 
@@ -33,14 +34,17 @@ export function QuestionDatabaseProvider({ children }: { children: ReactNode }) 
   useEffect(() => {
     let disposed = false;
     let opened: QuestionDatabase | undefined;
+    const started = performance.now();
     void QuestionDatabase.open().then((db) => {
       opened = db;
+      diag('db-open', { ms: Math.round(performance.now() - started) });
       if (disposed) return db.close();
       setDatabase(db);
       setLocalReady(true);
       // Ask the browser not to evict the reader's answers under storage pressure (best effort).
       void navigator.storage?.persist?.().catch(() => undefined);
-    }).catch(() => {
+    }).catch((reason: unknown) => {
+      diag('db-open-failed', { ms: Math.round(performance.now() - started), error: String(reason).slice(0, 200) }, true);
       if (!disposed) {
         setError('浏览器数据库无法打开，答案只保留在当前页面；登录后提交的答案仍会同步到云端。');
         setLocalReady(true);
