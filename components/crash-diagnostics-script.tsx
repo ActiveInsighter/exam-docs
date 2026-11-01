@@ -8,6 +8,14 @@
  * cut off is sent again, whole, on the next visit. Components add milestones
  * through lib/diagnostics.ts.
  *
+ * It has to stay cheap on a page with ~10k DOM nodes: the 2 s heartbeat writes
+ * only a small separate key, DOM-wide reads run at most every 10 s while
+ * visible, the trail is rewritten once per task that logs something, and no
+ * more than four uploads are in flight. For 30 s after boot and after each
+ * return to the page it keeps a denser trail (timer lag, a one-at-a-time
+ * requestAnimationFrame probe, pending and failed uploads) to tell a stuck
+ * renderer from stuck JavaScript or a dead network stack.
+ *
  * Remove with lib/diagnostics.ts and the migration's table once the crash is
  * understood.
  */
@@ -32,41 +40,80 @@ const SOURCE = String.raw`(function () {
   if (override === '0' || (override !== '1' && !/OpenHarmony|HarmonyOS|ArkWeb|HuaweiBrowser/i.test(ua))) return;
   if (w.__examDiag) return;
 
-  var PREFIX = 'exam-diag:v1:', INDEX = PREFIX + 'index', MAX_EVENTS = 150;
+  var PREFIX = 'exam-diag:v1:', INDEX = PREFIX + 'index', MAX_EVENTS = 150, MAX_BYTES = 30000, MAX_INFLIGHT = 4;
   var t0 = Date.now();
   var sid = (t0.toString(36) + Math.random().toString(36).slice(2, 10)).replace(/[^a-z0-9]/g, '').slice(0, 24);
-  var record = { sid: sid, start: t0, path: location.pathname, clean: false, hidden: null, ev: [], beat: null };
-  var queue = [], flushTimer = 0, sent = 0;
+  // The trail is rewritten only when an event is added; the 2 s heartbeat goes to its own small key.
+  var RECORD_KEY = PREFIX + sid, BEAT_KEY = RECORD_KEY + ':b';
+  var record = { sid: sid, start: t0, path: location.pathname, clean: false, hidden: null, ev: [] };
+  var queue = [], flushTimer = 0, sent = 0, dirty = false, saveQueued = false;
+  var inflight = 0, netFail = 0, lastOk = null;
 
   function now() { return Date.now() - t0; }
-  function save() { try { ls.setItem(PREFIX + sid, JSON.stringify(record)); } catch (e) {} }
+  function save() {
+    saveQueued = false;
+    if (!dirty) return;
+    dirty = false;
+    try { ls.setItem(RECORD_KEY, JSON.stringify(record)); } catch (e) {}
+  }
+  // Events logged in one task (answers read, restored, ...) share one write, still before the task ends.
+  function saveSoon() {
+    dirty = true;
+    if (!saveQueued) { saveQueued = true; Promise.resolve().then(save); }
+  }
+  function forget(id) { try { ls.removeItem(PREFIX + id); ls.removeItem(PREFIX + id + ':b'); } catch (e) {} }
+  // UTF-8 size, over-counting astral characters; only measured when the length alone cannot rule it out.
+  function tooBig(body) {
+    if (body.length * 3 <= MAX_BYTES) return false;
+    var n = body.length;
+    for (var i = 0; i < body.length; i++) { var c = body.charCodeAt(i); if (c > 127) n += c > 2047 ? 2 : 1; }
+    return n > MAX_BYTES;
+  }
+  function remember(entry) {
+    record.ev.push(entry);
+    if (record.ev.length > MAX_EVENTS) record.ev.splice(0, record.ev.length - MAX_EVENTS);
+    saveSoon();
+  }
+  function failed(status) {
+    netFail++;
+    // Local only: queueing it would only add to what cannot be sent.
+    if (netFail === 1 || netFail % 10 === 0) remember([now(), 'send-fail', { n: netFail, status: status, pending: inflight }]);
+  }
   function send(kind, session, events) {
     try {
       events = events.slice();
       var body = JSON.stringify({ p_session: session, p_kind: kind, p_events: events });
-      while (new Blob([body]).size > 30000 && events.length) {
-        events.splice(kind === 'previous' && events.length > 1 ? 1 : 0, 1);
+      while (tooBig(body) && events.length) {
+        var drop = Math.max(1, events.length >> 2);
+        if (kind === 'previous' && events.length > 1) events.splice(1, Math.min(drop, events.length - 1));
+        else events.splice(0, drop);
         body = JSON.stringify({ p_session: session, p_kind: kind, p_events: events });
       }
-      return fetch(ENDPOINT, { method: 'POST', keepalive: true, credentials: 'omit',
-        headers: { apikey: KEY, 'content-type': 'application/json' }, body: body })
-        .then(function (response) { return response.ok; }, function () { return false; });
+      var request = fetch(ENDPOINT, { method: 'POST', keepalive: true, credentials: 'omit',
+        headers: { apikey: KEY, 'content-type': 'application/json' }, body: body });
+      inflight++;
+      return request.then(function (response) {
+        inflight--;
+        if (response.ok) lastOk = now(); else failed(response.status);
+        return response.ok;
+      }, function () { inflight--; failed(0); return false; });
     } catch (e) {}
     return Promise.resolve(false);
   }
   function flush() {
     clearTimeout(flushTimer); flushTimer = 0;
+    save();
     if (sent >= 280) { queue = []; return; }
     if (!queue.length) return;
+    // A wedged network stack keeps requests pending; do not pile more on, retry later.
+    if (inflight >= MAX_INFLIGHT) { flushTimer = setTimeout(flush, 4000); return; }
     sent++;
     var batch = queue; queue = [];
     send('live', sid, batch);
   }
   function log(type, data, urgent) {
     var entry = [now(), String(type).slice(0, 40), data === undefined ? null : data];
-    record.ev.push(entry);
-    if (record.ev.length > MAX_EVENTS) record.ev.splice(0, record.ev.length - MAX_EVENTS);
-    save();
+    remember(entry);
     queue.push(entry);
     if (queue.length > MAX_EVENTS) queue.splice(0, queue.length - MAX_EVENTS);
     if (urgent) flush(); else if (!flushTimer) flushTimer = setTimeout(flush, 1500);
@@ -79,22 +126,23 @@ const SOURCE = String.raw`(function () {
     var index = JSON.parse(ls.getItem(INDEX) || '[]'), keep = [];
     for (var i = 0; i < index.length; i++) {
       var raw = ls.getItem(PREFIX + index[i]);
-      if (!raw) continue;
-      var prev = JSON.parse(raw);
-      var seen = prev.start + (prev.beat ? prev.beat.t : 0);
+      if (!raw) { forget(index[i]); continue; }
+      var prev = JSON.parse(raw), beatRaw = ls.getItem(PREFIX + index[i] + ':b');
+      var last = beatRaw ? JSON.parse(beatRaw) : prev.beat || null;
+      var seen = prev.start + (last ? last.t : 0);
       // Another tab still beating: leave it alone.
       if (!prev.clean && t0 - seen < 6000) { keep.push(index[i]); continue; }
       if (!prev.clean) {
         keep.push(index[i]);
-        send('previous', prev.sid, [[0, 'cut-off', { path: prev.path, start: prev.start, lastBeat: prev.beat,
+        send('previous', prev.sid, [[0, 'cut-off', { path: prev.path, start: prev.start, lastBeat: last,
           hiddenAt: prev.hidden, sinceLastBeat: t0 - seen }]].concat(prev.ev.slice(-100)))
-          .then((function (key) { return function (ok) { if (ok) { try { ls.removeItem(key); } catch (e) {} } }; })(PREFIX + index[i]));
+          .then((function (id) { return function (ok) { if (ok) forget(id); }; })(index[i]));
       } else {
-        ls.removeItem(PREFIX + index[i]);
+        forget(index[i]);
       }
     }
     keep.push(sid);
-    while (keep.length > 5) ls.removeItem(PREFIX + keep.shift());
+    while (keep.length > 5) forget(keep.shift());
     ls.setItem(INDEX, JSON.stringify(keep));
   } catch (e) { try { ls.setItem(INDEX, JSON.stringify([sid])); } catch (e2) {} }
 
@@ -119,37 +167,88 @@ const SOURCE = String.raw`(function () {
     }), function () {});
   } catch (e) {}
 
-  var longTasks = 0, longMs = 0, logged = 0, beats = 0;
-  try {
-    new PerformanceObserver(safe(function (list) {
-      list.getEntries().forEach(function (e) {
-        longTasks++; longMs += e.duration;
-        if (e.duration > 300 && logged++ < 40) log('long-task', { ms: Math.round(e.duration), at: Math.round(e.startTime) });
-      });
-    })).observe({ type: 'longtask', buffered: true });
-  } catch (e) {}
-  try {
-    new PerformanceObserver(safe(function (list) {
-      list.getEntries().forEach(function (e) { log(e.name, { at: Math.round(e.startTime) }); });
-    })).observe({ type: 'paint', buffered: true });
-  } catch (e) {}
-
-  function beat() {
-    beats++;
-    var m = P.memory;
-    var b = {
-      t: now(), heap: m ? Math.round(m.usedJSHeapSize / 1048576) : null, heapTotal: m ? Math.round(m.totalJSHeapSize / 1048576) : null,
-      dom: d.getElementsByTagName('*').length, y: Math.round(w.scrollY), h: d.documentElement.scrollHeight,
-      vis: d.visibilityState, path: location.pathname, long: longTasks, longMs: Math.round(longMs),
-      keypad: !!d.querySelector('[data-math-keypad]'),
-      answered: d.querySelectorAll('[data-attempt-result]:not([data-attempt-result="idle"])').length
-    };
-    record.beat = b;
-    save();
-    // Every 4 s for the first minute, then every 30 s.
-    if (b.t < 60000 ? beats % 2 === 0 : beats % 15 === 0) { queue.push([b.t, 'beat', b]); flush(); }
+  var types = (w.PerformanceObserver && PerformanceObserver.supportedEntryTypes) || [];
+  var hasLoaf = types.indexOf('long-animation-frame') >= 0;
+  function observe(type, each, options) {
+    try {
+      var o = { type: type, buffered: true };
+      for (var name in options) o[name] = options[name];
+      new PerformanceObserver(safe(function (list) { list.getEntries().forEach(each); })).observe(o);
+    } catch (e) {}
   }
-  setInterval(safe(beat), 2000);
+  function ms(x) { return Math.round(x); }
+  var longTasks = 0, longMs = 0, logged = 0, frames = 0, inputs = 0, lastInput = 0;
+  observe('longtask', function (e) {
+    longTasks++; longMs += e.duration;
+    if (!hasLoaf && e.duration > 300 && logged++ < 40) log('long-task', { ms: ms(e.duration), at: ms(e.startTime) });
+  });
+  // A long frame also covers style, layout and paint, which a long task misses.
+  observe('long-animation-frame', function (e) {
+    if (e.duration <= 300 || frames++ >= 40) return;
+    var end = e.startTime + e.duration, s = e.scripts && e.scripts[0];
+    log('long-frame', { ms: ms(e.duration), at: ms(e.startTime), blocking: ms(e.blockingDuration || 0),
+      layout: e.styleAndLayoutStart ? ms(end - e.styleAndLayoutStart) : 0, render: e.renderStart ? ms(end - e.renderStart) : 0,
+      script: s ? String(s.invoker || s.sourceURL || '').slice(-80) : null });
+  });
+  // Taps the page took long to answer: what a "frozen" page feels like. One entry per interaction.
+  observe('event', function (e) {
+    if (e.duration < 300 || !e.interactionId || e.interactionId === lastInput || inputs++ >= 30) return;
+    lastInput = e.interactionId;
+    log('slow-input', { name: e.name, ms: ms(e.duration), at: ms(e.startTime),
+      delay: ms(e.processingStart - e.startTime), handlers: ms(e.processingEnd - e.processingStart) });
+  }, { durationThreshold: 300 });
+  observe('paint', function (e) { log(e.name, { at: ms(e.startTime) }); });
+
+  // Frame probe: one requestAnimationFrame at a time. Timers that keep firing while
+  // frames stop mean rendering (not JavaScript) is stuck.
+  var raf = w.requestAnimationFrame, frameGen = 0, frameAsked = null, frameMs = null, stalled = false;
+  function probeFrame(resumeAway) {
+    if (!raf || frameAsked !== null) return;
+    var gen = frameGen, asked = frameAsked = now();
+    stalled = false;
+    raf.call(w, safe(function () {
+      if (gen !== frameGen) return;
+      var wait = now() - asked;
+      frameAsked = null; frameMs = wait;
+      if (resumeAway !== undefined) log('resume-frame', { ms: wait, away: resumeAway });
+      else if (stalled || wait > 1000) log('frame-late', { ms: wait }, stalled);
+    }));
+  }
+  function frameState() { return frameAsked !== null ? -(now() - frameAsked) : frameMs; }
+
+  var els = d.getElementsByTagName('*'), metrics = null, metricsAt = 0;
+  // DOM-wide reads (and scrollHeight, which forces layout) run while visible, at most every 10 s.
+  function measure() {
+    return { dom: els.length, y: Math.round(w.scrollY), h: d.documentElement.scrollHeight,
+      keypad: !!d.querySelector('[data-math-keypad]'),
+      answered: d.querySelectorAll('[data-attempt-result]:not([data-attempt-result="idle"])').length };
+  }
+  var beats = 0, lastTick = 0, burstUntil = 30000;
+  function beat(light) {
+    beats++;
+    var t = now(), visible = d.visibilityState === 'visible';
+    var lag = visible && lastTick ? t - lastTick - 2000 : null;
+    lastTick = visible ? t : 0;
+    // Uploads every 6 s for 30 s after boot and after each return to the page, then every 30 s;
+    // the 2 s ticks in between stay in the local trail.
+    var burst = visible && t < burstUntil, report = !light && (burst ? beats % 3 === 0 : beats % 15 === 0);
+    if (visible && !light && (!metrics || t - metricsAt >= 10000)) { metrics = measure(); metricsAt = t; }
+    var m = P.memory, b = {
+      t: t, vis: d.visibilityState, path: location.pathname, lag: lag, frame: frameState(),
+      heap: m ? Math.round(m.usedJSHeapSize / 1048576) : null, heapTotal: m ? Math.round(m.totalJSHeapSize / 1048576) : null,
+      long: longTasks, longMs: Math.round(longMs), pending: inflight, failed: netFail, lastOk: lastOk
+    };
+    if (metrics) for (var name in metrics) b[name] = metrics[name];
+    try { ls.setItem(BEAT_KEY, JSON.stringify(b)); } catch (e) {}
+    if (visible) {
+      if (frameAsked !== null && !stalled && t - frameAsked > 3000) { stalled = true; log('frame-stall', { ms: t - frameAsked, pending: inflight }, true); }
+      probeFrame();
+    }
+    // Keep a dense local trail around boot and returns, where the browser has been dying.
+    if (burst) remember([t, 'tick', { lag: lag, frame: b.frame, pending: inflight, failed: netFail, long: longTasks }]);
+    if (report) { queue.push([t, 'beat', b]); flush(); }
+  }
+  setInterval(safe(function () { beat(false); }), 2000);
 
   w.addEventListener('error', safe(function (e) {
     var t = e.target;
@@ -161,16 +260,27 @@ const SOURCE = String.raw`(function () {
     var r = e.reason;
     log('rejection', { msg: String(r && r.message || r).slice(0, 300), stack: r && r.stack ? String(r.stack).slice(0, 1200) : null }, true);
   }));
-  d.addEventListener('readystatechange', safe(function () { log('ready-' + d.readyState, { dom: d.getElementsByTagName('*').length }); }));
-  w.addEventListener('load', safe(function () { log('load', { dom: d.getElementsByTagName('*').length }, true); }));
+  d.addEventListener('readystatechange', safe(function () { log('ready-' + d.readyState, { dom: els.length }); }));
+  w.addEventListener('load', safe(function () { log('load', { dom: els.length }, true); }));
   d.addEventListener('visibilitychange', safe(function () {
-    if (d.visibilityState === 'hidden') record.hidden = now();
-    log('visibility', d.visibilityState, d.visibilityState === 'hidden');
+    var t = now();
+    frameGen++; frameAsked = null;
+    if (d.visibilityState === 'hidden') {
+      record.hidden = t;
+      log('visibility', 'hidden', true);
+      return;
+    }
+    var away = record.hidden === null ? null : t - record.hidden;
+    burstUntil = t + 30000; lastTick = 0;
+    // Sent at once: whether it arrives shows whether the network still works after the return.
+    log('visibility', 'visible', true);
+    probeFrame(away);
+    beat(true);
   }));
   d.addEventListener('freeze', safe(function () { log('freeze', null, true); }));
   d.addEventListener('resume', safe(function () { log('resume'); }));
   w.addEventListener('pageshow', safe(function (e) { if (e.persisted) { record.clean = false; log('pageshow-bfcache'); } }));
-  w.addEventListener('pagehide', safe(function (e) { record.clean = true; log('pagehide', { persisted: e.persisted }, true); save(); }));
+  w.addEventListener('pagehide', safe(function (e) { record.clean = true; log('pagehide', { persisted: e.persisted }, true); }));
 })();`;
 
 export function CrashDiagnosticsScript() {
