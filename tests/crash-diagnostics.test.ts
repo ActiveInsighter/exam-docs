@@ -15,7 +15,8 @@ function scriptSource(): string {
 /** Runs the inline script against a minimal browser and returns what it posted. */
 function run(userAgent: string, search = '', storage = new Map<string, string>(), fail: boolean | 'hang' = false,
   requestAnimationFrame?: (callback: () => void) => number) {
-  const posts: { url: string; body: { p_session: string; p_kind: string; p_events: [number, string, unknown][] } }[] = [];
+  const posts: { url: string; keepalive?: boolean; body: { p_session: string; p_kind: string; p_events: [number, string, unknown][] } }[] = [];
+  const timers: (() => void)[] = [];
   const localStorage = {
     get length() { return storage.size; },
     key: (index: number) => [...storage.keys()][index] ?? null,
@@ -28,6 +29,7 @@ function run(userAgent: string, search = '', storage = new Map<string, string>()
   let keypadOpen = false;
   const window: { __examDiag?: (type: string, data?: unknown, urgent?: boolean) => void } & Record<string, unknown> = {
     ...listeners(), localStorage, innerWidth: 412, innerHeight: 915, devicePixelRatio: 3, scrollY: 0, requestAnimationFrame,
+    AbortController,
   };
   const document = {
     ...listeners(), visibilityState: 'visible', readyState: 'loading',
@@ -36,18 +38,26 @@ function run(userAgent: string, search = '', storage = new Map<string, string>()
     querySelector: () => keypadOpen ? {} : null,
   };
   const fetch = vi.fn(async (url: string, init: RequestInit) => {
-    posts.push({ url, body: JSON.parse(String(init.body)) });
-    if (fail === 'hang') return new Promise<Response>(() => {});
+    posts.push({ url, keepalive: init.keepalive, body: JSON.parse(String(init.body)) });
+    if (fail === 'hang') {
+      return new Promise<Response>((_, reject) => init.signal?.addEventListener('abort', () => reject(new Error('aborted'))));
+    }
     if (fail) throw new Error('offline');
     return new Response(null, { status: 204 });
   });
   new Function('window', 'document', 'navigator', 'location', 'history', 'performance', 'fetch', 'setInterval', 'setTimeout', 'clearTimeout', 'PerformanceObserver',
     scriptSource())(
-    window, document, { userAgent }, { pathname: '/docs/math/', search }, { length: 1 },
+    window, document,
+    { userAgent, onLine: true, connection: { type: 'wifi', effectiveType: '4g', rtt: 50, downlink: 10, addEventListener: () => {} } },
+    { pathname: '/docs/math/', search }, { length: 1 },
     { getEntriesByType: () => [{ type: 'reload' }] }, fetch,
-    (callback: () => void) => { heartbeat = callback; return 0; }, () => 0, () => {}, undefined,
+    (callback: () => void) => { heartbeat = callback; return 0; },
+    (callback: () => void) => { timers.push(callback); return timers.length; }, () => {}, undefined,
   );
-  return { posts, storage, window, beat: () => heartbeat?.(), openKeypad: () => { keypadOpen = true; } };
+  return {
+    posts, storage, window, timers, beat: () => heartbeat?.(), openKeypad: () => { keypadOpen = true; },
+    hide: () => { document.visibilityState = 'hidden'; },
+  };
 }
 
 beforeEach(() => vi.stubEnv('NEXT_PUBLIC_SUPABASE_PROXY_PATH', ''));
@@ -209,5 +219,29 @@ describe('temporary crash diagnostics', () => {
     const record = JSON.parse(offline.storage.get(`exam-diag:v1:${session}`)!);
     expect(record.ev.some(([, type]: [number, string]) => type === 'send-fail')).toBe(true);
     expect(JSON.parse(offline.storage.get(`exam-diag:v1:${session}:b`)!)).toMatchObject({ failed: 1, pending: 0 });
+  });
+
+  it('uses keepalive only while hidden, and gives up on a hung upload after 15 s', async () => {
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://example.supabase.co');
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_test');
+    const result = run(HARMONY_UA, '', new Map(), 'hang');
+    expect(result.posts[0].keepalive).toBe(false);
+    const session = result.posts[0].body.p_session;
+    result.beat();
+    expect(JSON.parse(result.storage.get(`exam-diag:v1:${session}:b`)!)).toMatchObject({
+      pending: 1, pendingMs: expect.any(Number), online: true, network: 'wifi/4g/50/10',
+    });
+
+    // The boot upload's 15 s timer is the first one scheduled.
+    result.timers[0]();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const record = JSON.parse(result.storage.get(`exam-diag:v1:${session}`)!);
+    expect(record.ev.find(([, type]: [number, string]) => type === 'send-fail')?.[2]).toMatchObject({
+      status: 'timeout', keepalive: false, online: true, network: 'wifi/4g/50/10',
+    });
+
+    result.hide();
+    result.window.__examDiag?.('leaving', null, true);
+    expect(result.posts.at(-1)?.keepalive).toBe(true);
   });
 });
