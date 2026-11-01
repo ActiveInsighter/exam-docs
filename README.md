@@ -195,8 +195,8 @@ for measurements and the remaining device-verification limit.
 Temporary crash diagnostics run before hydration on HarmonyOS/ArkWeb/Huawei
 browsers and post lifecycle milestones through the same-origin
 `exam_client_log` RPC. They include answer-read/restoration phases, errors,
-keypad/dialog activity and bounded heartbeats, without collecting answer values
-or query parameters. Unfinished visits are retained locally and uploaded again
+keypad/dialog activity and bounded heartbeats. Answer values are excluded and
+the boot URL records only its path. Unfinished visits are retained locally and uploaded again
 on the next visit; a failed replay remains for retry, within a five-visit limit.
 `?diag=1` enables diagnostics on other browsers; `?diag=0` persistently disables
 them on that browser until `?diag=1` is used. The private diagnostics table is

@@ -141,7 +141,7 @@ const SOURCE = String.raw`(function () {
       t: now(), heap: m ? Math.round(m.usedJSHeapSize / 1048576) : null, heapTotal: m ? Math.round(m.totalJSHeapSize / 1048576) : null,
       dom: d.getElementsByTagName('*').length, y: Math.round(w.scrollY), h: d.documentElement.scrollHeight,
       vis: d.visibilityState, path: location.pathname, long: longTasks, longMs: Math.round(longMs),
-      keypad: d.documentElement.hasAttribute('data-keypad-open'),
+      keypad: !!d.querySelector('[data-math-keypad]'),
       answered: d.querySelectorAll('[data-attempt-result]:not([data-attempt-result="idle"])').length
     };
     record.beat = b;

@@ -23,6 +23,8 @@ function run(userAgent: string, search = '', storage = new Map<string, string>()
     removeItem: (key: string) => { storage.delete(key); },
   };
   const listeners = () => ({ addEventListener: () => {} });
+  let heartbeat: (() => void) | undefined;
+  let keypadOpen = false;
   const window: { __examDiag?: (type: string, data?: unknown, urgent?: boolean) => void } & Record<string, unknown> = {
     ...listeners(), localStorage, innerWidth: 412, innerHeight: 915, devicePixelRatio: 3, scrollY: 0,
   };
@@ -30,6 +32,7 @@ function run(userAgent: string, search = '', storage = new Map<string, string>()
     ...listeners(), visibilityState: 'visible', readyState: 'loading',
     documentElement: { scrollHeight: 1000, hasAttribute: () => false },
     getElementsByTagName: () => ({ length: 10 }), querySelectorAll: () => ({ length: 0 }),
+    querySelector: () => keypadOpen ? {} : null,
   };
   const fetch = vi.fn(async (url: string, init: RequestInit) => {
     posts.push({ url, body: JSON.parse(String(init.body)) });
@@ -39,9 +42,10 @@ function run(userAgent: string, search = '', storage = new Map<string, string>()
   new Function('window', 'document', 'navigator', 'location', 'history', 'performance', 'fetch', 'setInterval', 'setTimeout', 'clearTimeout', 'PerformanceObserver',
     scriptSource())(
     window, document, { userAgent }, { pathname: '/docs/math/', search }, { length: 1 },
-    { getEntriesByType: () => [{ type: 'reload' }] }, fetch, () => 0, () => 0, () => {}, undefined,
+    { getEntriesByType: () => [{ type: 'reload' }] }, fetch,
+    (callback: () => void) => { heartbeat = callback; return 0; }, () => 0, () => {}, undefined,
   );
-  return { posts, storage, window };
+  return { posts, storage, window, beat: () => heartbeat?.(), openKeypad: () => { keypadOpen = true; } };
 }
 
 beforeEach(() => vi.stubEnv('NEXT_PUBLIC_SUPABASE_PROXY_PATH', ''));
@@ -132,5 +136,15 @@ describe('temporary crash diagnostics', () => {
   it('does not let a broken diagnostics sink interrupt application code', () => {
     vi.stubGlobal('window', { __examDiag: () => { throw new Error('storage failed'); } });
     expect(() => diag('answer', { kind: 'submit' })).not.toThrow();
+  });
+
+  it('includes the mounted math keypad in its saved heartbeat', () => {
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://example.supabase.co');
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_test');
+    const result = run(HARMONY_UA);
+    result.openKeypad();
+    result.beat();
+    const record = JSON.parse(result.storage.get(`exam-diag:v1:${result.posts[0].body.p_session}`)!);
+    expect(record.beat.keypad).toBe(true);
   });
 });
