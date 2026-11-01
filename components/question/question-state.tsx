@@ -15,6 +15,7 @@ import { PENDING_SNAPSHOT, QuestionAnswerCache, emptyAnswer, type WriteKind } fr
 import type { AnswerState, QuestionIdentity } from '@/lib/question-store/types';
 import { useQuestionBatch } from './question-batch';
 import { useQuestionStorage } from './database-context';
+import { diag } from '@/lib/diagnostics';
 import { type BlankGrade, evaluateAttempt, gradeBlank as autoGradeBlank, isAnswered, withBlankGrade, type Evaluation, type GradingSpec } from './grading';
 
 /*
@@ -111,6 +112,7 @@ export function QuestionProvider({
 
   // Drafts stay on this device; a submission or reset is committed and reaches the cloud.
   const update = useCallback((next: AnswerState, kind: WriteKind = 'draft') => {
+    if (kind !== 'draft') diag('answer', { kind, question: identity.questionId });
     current.current = next;
     cache?.write(identity, next, kind);
   }, [cache, identity]);

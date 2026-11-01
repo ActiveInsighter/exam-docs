@@ -12,6 +12,7 @@ import {
   DialogPortal,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { diag } from "@/lib/diagnostics"
 import { cn } from "@/lib/utils"
 
 /*
@@ -181,6 +182,13 @@ function ModalRoot({
   const [stack] = React.useState(createModalStack)
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen)
   const open = openProp ?? uncontrolledOpen
+
+  // Temporary crash diagnostics.
+  React.useEffect(() => {
+    if (!open) return
+    diag("modal-open")
+    return () => diag("modal-close")
+  }, [open])
 
   React.useImperativeHandle(actionsRef, () => ({
     close: () => actions.current?.close(),
