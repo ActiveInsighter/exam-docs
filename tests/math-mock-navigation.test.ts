@@ -21,6 +21,7 @@ describe('math mock paper navigation', () => {
     const routes = new Set(documents(docsRoot).map((file) => `/docs/${getShortDocSlugPath(relative(docsRoot, file))}`));
     const pages = [
       ...documents(join(docsRoot, 'math/classified-mock-exams')),
+      ...documents(join(docsRoot, 'math/exam/zhangyu-8-sets-2027')),
       ...documents(join(docsRoot, 'math/exam/lilin-6-sets-2027')),
       ...documents(join(docsRoot, 'math/exam/liyongle-6-sets-2027')),
       ...documents(join(docsRoot, 'math/exam/tangjiafeng-8-sets-2027')),
