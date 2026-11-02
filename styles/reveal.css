@@ -1,32 +1,36 @@
 /*
  * Click-to-fill ripple for Button and TileButton (components/ui/button.tsx).
  * A button with `revealed` set carries data-reveal="on" | "off"; its
- * ::before is an ink layer: a radial gradient centred on the press point.
+ * ::before is an ink layer: a radial gradient centred on the press point,
+ * with a soft, feathered edge rather than a hard one.
  *
- *   picking      the ink spreads from the press point until it covers the
- *                button (its outer edge grows: --reveal-on 0 → 1)
- *   un-picking   the button's own background spreads from the new press
- *                point, wiping the ink away (a hole grows in the ink:
- *                --reveal-hole 0 → 1)
+ *   picking      the ink blooms out from the press point until it covers
+ *                the button (its outer edge grows: --reveal-on 0 → 1),
+ *                gaining strength in the first moments
+ *   un-picking   the ink clears outward from the new press point (a soft
+ *                hole grows: --reveal-hole 0 → 1) while the whole layer
+ *                fades, so the last of it melts away instead of lingering
+ *                as a sliver at the far edge
  *
- * Both are an outward ripple from where the reader touched, so a toggle
- * reads the same both ways and never shrinks back into a point. The hole is
- * genuinely see-through, so the "background" that spreads is whatever the
- * button stands on (a tile's surface, the question card's plate).
+ * Both directions start where the reader touched and move outward; neither
+ * shrinks back into a point. The hole is genuinely see-through, so what
+ * spreads is whatever the button stands on (a tile's surface, the question
+ * card's plate).
  *
- *   --reveal-color   the ink (default: a light wash of the text colour)
- *   --reveal-x/-y    ripple centre; written by the button on pointer press,
- *                    else the centre (a stylesheet may set another default)
- *   --reveal-inset   keeps the layer inside an inset ring (tiles: 1.5px)
+ *   --reveal-color    the ink (default: a light wash of the text colour)
+ *   --reveal-x/-y     ripple centre; written by the button on pointer press,
+ *                     else the centre (a stylesheet may set another default)
+ *   --reveal-inset    keeps the layer inside an inset ring (tiles: 1.5px)
+ *   --reveal-feather  width of the soft edge, in the gradient's own units
  *
  * The static state is set by data-reveal; the motion only by
  * data-reveal-motion="in" | "out", which the button sets when `revealed`
  * actually changes. A button mounted filled (a restored answer, the solution
  * card's copy) therefore shows its fill at once instead of replaying it.
  *
- * Edges are measured in the gradient's own `farthest-corner` units, so 100%
- * is exactly "covers the box" from any press point, at any size, at every
- * frame. Only the ::before's own registered properties animate, so a ripple
+ * Edges are measured in `farthest-corner` units, so 100% is exactly "covers
+ * the box" from any press point, at any size, at every frame. Only the
+ * ::before's own registered properties and its opacity animate, so a ripple
  * restyles one pseudo-element and never the button's content.
  *
  * In the components layer, so utilities and component stylesheets win.
@@ -52,8 +56,9 @@
 
 @layer components {
   [data-reveal] {
-    --reveal-in-duration: 520ms;
-    --reveal-out-duration: 500ms;
+    --reveal-in-duration: 540ms;
+    --reveal-out-duration: 460ms;
+    --reveal-feather: 28%;
   }
 
   [data-reveal]::before {
@@ -64,22 +69,22 @@
     border-radius: inherit;
     /*
      * Clear inside the hole, ink between the hole and the outer edge, clear
-     * outside it. Each edge has 1px to antialias in; at 0 nothing shows, at 1
-     * every pixel of the box is covered (outer) or cleared (hole).
+     * outside it; each edge fades over --reveal-feather. At 0 nothing shows;
+     * at 1 every pixel of the box is covered (outer) or cleared (hole).
      */
     background: radial-gradient(
       circle farthest-corner at var(--reveal-x, 50%) var(--reveal-y, 50%),
-      transparent calc(var(--reveal-hole) * (100% + 2px) - 1px),
-      var(--reveal-ink) calc(var(--reveal-hole) * (100% + 2px)),
-      var(--reveal-ink) calc(var(--reveal-on) * (100% + 1px) - 1px),
-      transparent calc(var(--reveal-on) * (100% + 1px))
+      transparent calc(var(--reveal-hole) * (100% + var(--reveal-feather)) - var(--reveal-feather)),
+      var(--reveal-ink) calc(var(--reveal-hole) * (100% + var(--reveal-feather))),
+      var(--reveal-ink) calc(var(--reveal-on) * (100% + var(--reveal-feather)) - var(--reveal-feather)),
+      transparent calc(var(--reveal-on) * (100% + var(--reveal-feather)))
     );
     pointer-events: none;
     /*
-     * Off, the ink keeps the colour it had while it is wiped away, and clears
-     * only once the wipe is done: the state that turned it off (a reset,
-     * another pick) has already changed --reveal-color, which must not
-     * repaint the ink on its way out.
+     * Off, the ink keeps the colour it had while it clears, and only then
+     * becomes transparent: the state that turned it off (a reset, another
+     * pick) has already changed --reveal-color, which must not repaint the
+     * ink on its way out.
      */
     --reveal-on: 0;
     --reveal-hole: 0;
@@ -91,27 +96,29 @@
   [data-reveal='on']::before {
     --reveal-on: 1;
     --reveal-ink: var(--reveal-color, color-mix(in oklch, currentColor 12%, transparent));
-    transition: --reveal-ink 180ms var(--ui-ease);
+    transition: --reveal-ink 220ms var(--ui-ease);
   }
 
-  /* Spreads like ink: quick off the press point, settling at the edges. */
+  /* Blooms out: quick off the press point, slowing as it reaches the edges. */
   [data-reveal-motion='in']::before {
-    animation: reveal-in var(--reveal-in-duration) cubic-bezier(0.22, 0.75, 0.2, 1);
+    animation: reveal-in var(--reveal-in-duration) cubic-bezier(0.2, 0.65, 0.25, 1);
   }
 
-  /* The background ripples out the same way, a touch quicker: letting go is lighter than picking. */
+  /* Clears outward and fades together, a little quicker: letting go is lighter than picking. */
   [data-reveal-motion='out']::before {
-    animation: reveal-out var(--reveal-out-duration) cubic-bezier(0.33, 0.55, 0.2, 1);
+    animation: reveal-out var(--reveal-out-duration) cubic-bezier(0.25, 0.55, 0.3, 1);
   }
 
   @keyframes reveal-in {
-    from { --reveal-on: 0; }
-    to { --reveal-on: 1; }
+    from { --reveal-on: 0; opacity: 0.55; }
+    45% { opacity: 1; }
+    to { --reveal-on: 1; opacity: 1; }
   }
 
   @keyframes reveal-out {
-    from { --reveal-on: 1; --reveal-hole: 0; }
-    to { --reveal-on: 1; --reveal-hole: 1; }
+    from { --reveal-on: 1; --reveal-hole: 0; opacity: 1; }
+    55% { opacity: 0.7; }
+    to { --reveal-on: 1; --reveal-hole: 1; opacity: 0; }
   }
 
   @media (prefers-reduced-motion: reduce) {

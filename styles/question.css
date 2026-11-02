@@ -31,7 +31,7 @@
   /* The blog sets its prose in serif; questions keep the interface face. */
   font-family: var(--font-sans);
   margin-block: 1.25rem;
-  padding: 0.875rem 0.875rem 0.75rem;
+  padding: 0.75rem 0.875rem 0.625rem;
   border-radius: var(--exam-card-radius);
   /* A sheen over the header end of the plate, and a hairline edge. */
   background:
@@ -64,7 +64,7 @@
 
 @media (min-width: 640px) {
   [data-exam-question] {
-    padding: 1.125rem 1.375rem 1rem;
+    padding: 0.875rem 1.25rem 0.75rem;
   }
 }
 
@@ -116,8 +116,8 @@
   grid-template-areas: 'meta trail actions';
   align-items: start;
   gap: 0.375rem 0.75rem;
-  margin-bottom: 0.875rem;
-  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
   background-image: var(--rule);
   background-position: left bottom;
 }
@@ -154,90 +154,42 @@
 }
 
 /*
- * Header tiers, from strongest to quietest, each in its own shape so they
- * never read as one row of look-alike capsules:
+ * Header tiers, from strongest to quietest, all in the card's own neutral
+ * ink so the stem and the graded options carry the only colour:
  *
- *   number   a raised ink key-cap (squircle, gradient, top highlight)
- *   type     an outlined neutral chip with the type's icon and score;
- *            traits (易错…) beside it, outlined in their accent
- *   source   no chip at all: a trail of plain text behind a book icon
- *
- * Colour is only ever an icon or a hairline (one accent per kind, tokens
- * --exam-*-accent), never a fill, so a long row stays calm.
+ *   number   a filled squircle, the figure set in Outfit
+ *   type     a hairline chip with the type's icon and score
+ *   source   no chip at all: plain text behind a book icon
  */
 [data-question-number] {
-  --number-bg: var(--exam-number-bg);
-  --number-fg: var(--exam-number-fg);
-  position: relative;
   display: inline-grid;
   place-items: center;
-  min-width: 1.875rem;
-  height: 1.875rem;
-  padding-inline: 0.5rem;
-  border-radius: 0.625rem;
-  /* A gloss over a solid fill, so the colour can change smoothly when graded. */
-  background-color: var(--number-bg);
-  background-image: linear-gradient(180deg, var(--exam-number-gloss), transparent 70%);
-  box-shadow:
-    inset 0 1px 0 var(--exam-number-highlight),
-    inset 0 0 0 1px var(--exam-number-edge),
-    0 1px 2px var(--exam-number-shadow),
-    0 3px 8px -3px var(--exam-number-shadow);
-  color: var(--number-fg);
+  min-width: 1.75rem;
+  height: 1.75rem;
+  padding-inline: 0.4375rem;
+  border-radius: 0.5625rem;
+  background: var(--exam-number-bg);
+  box-shadow: inset 0 0 0 1px var(--exam-number-edge);
+  color: var(--exam-number-fg);
   font-family: var(--font-outfit), var(--font-sans);
   font-size: 0.9375rem;
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
-  margin-inline-end: 0.125rem;
-  transition: background-color 320ms var(--ui-ease), color 320ms var(--ui-ease);
-}
-
-/* Answered, not graded yet: a small dot on the cap's corner. */
-[data-question-number]::after {
-  content: '';
-  position: absolute;
-  top: -0.1875rem;
-  right: -0.1875rem;
-  width: 0.5625rem;
-  height: 0.5625rem;
-  border-radius: 999px;
-  background: var(--exam-type-accent, var(--foreground));
-  box-shadow: 0 0 0 2px var(--exam-card);
-  opacity: 0;
-  transform: scale(0.3);
-  transition: opacity 180ms var(--ui-ease), transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-[data-question-number][data-result='draft']::after {
-  opacity: 1;
-  transform: none;
-}
-
-/* Graded: the cap takes the result's colour, so progress reads down the page. */
-[data-question-number][data-result='correct'] { --number-bg: var(--success); --number-fg: var(--success-foreground); }
-[data-question-number][data-result='incorrect'] { --number-bg: var(--destructive); --number-fg: var(--destructive-foreground); }
-[data-question-number][data-result='partial'] { --number-bg: var(--warning); --number-fg: var(--warning-foreground); }
-
-@media (prefers-reduced-motion: no-preference) {
-  [data-question-number][data-fresh]:not([data-result='draft']) {
-    animation: exam-pop 520ms var(--ui-ease) 120ms;
-  }
+  letter-spacing: -0.01em;
 }
 
 [data-question-type-label] {
   --type-icon: none;
-  --accent: var(--exam-type-accent, var(--exam-type-fg));
   display: inline-flex;
   align-items: center;
   gap: 0.3125rem;
   height: 1.5rem;
   padding-inline: 0.4375rem 0.5625rem;
   border-radius: 0.5rem;
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--accent) 20%, transparent);
-  background: color-mix(in oklch, var(--accent) 9%, transparent);
-  color: color-mix(in oklch, var(--accent) 62%, var(--foreground));
+  box-shadow: inset 0 0 0 1px var(--exam-type-ring);
+  background: var(--exam-type-bg);
+  color: var(--exam-type-fg);
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1;
@@ -250,21 +202,10 @@
   flex-shrink: 0;
   width: 0.8125rem;
   height: 0.8125rem;
-  background: var(--accent);
+  background: currentColor;
+  opacity: 0.75;
   mask: var(--type-icon) center / contain no-repeat;
 }
-
-/* One accent per type, also lent to the number's "answered" dot. */
-[data-exam-question][data-question-type='single'],
-[data-question-type-label][data-type='single'] { --exam-type-accent: var(--exam-type-single); }
-[data-exam-question][data-question-type='multiple'],
-[data-question-type-label][data-type='multiple'] { --exam-type-accent: var(--exam-type-multiple); }
-[data-exam-question][data-question-type='boolean'],
-[data-question-type-label][data-type='boolean'] { --exam-type-accent: var(--exam-type-boolean); }
-[data-exam-question][data-question-type='blank'],
-[data-question-type-label][data-type='blank'] { --exam-type-accent: var(--exam-type-blank); }
-[data-exam-question][data-question-type='essay'],
-[data-question-type-label][data-type='essay'] { --exam-type-accent: var(--exam-type-essay); }
 
 /* Icons (lucide circle-dot / square-check-big / pen-line / text-cursor-input; a check and a cross for true / false). */
 [data-question-type-label][data-type='single'] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Ccircle cx='12' cy='12' r='3.5' fill='black'/%3E%3C/svg%3E"); }
@@ -289,7 +230,7 @@
   content: '';
   width: 1px;
   height: 0.6875rem;
-  background: color-mix(in oklch, var(--accent) 30%, transparent);
+  background: var(--exam-type-ring);
 }
 
 [data-question-actions] {
@@ -534,9 +475,9 @@
   --marker: 1.75rem;
   display: grid;
   grid-template-columns: repeat(var(--choice-cols-measured, var(--choice-cols, 1)), minmax(0, 1fr));
-  gap: 0.75rem 0.625rem;
+  gap: 0.625rem;
   width: 100%;
-  margin-block: 1rem 0.25rem;
+  margin-block: 0.875rem 0.25rem;
 }
 
 /* Fallback columns until measured (and in the solution sheet's copy). */
@@ -655,10 +596,9 @@
   font-weight: 400;
   line-height: 1;
   transition:
-    background-color 200ms var(--ui-ease),
-    box-shadow 200ms var(--ui-ease),
-    color 200ms var(--ui-ease),
-    transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    background-color 260ms var(--ui-ease),
+    box-shadow 260ms var(--ui-ease),
+    color 260ms var(--ui-ease);
 }
 
 [data-multiple] [data-choice-marker] {
@@ -674,64 +614,119 @@
 }
 
 /*
- * The corner badge: the tick that marks a picked option of a
- * multiple-answer question while answering, and after grading a tick or a
- * cross on the reader's own picks. The letter itself is never covered, so
- * "you picked B, the key is C" stays readable on the options. A
- * pseudo-element with an image, not a DOM node: a long page has hundreds of
- * options.
+ * Result tones. Every graded colour on an option is one hue per result
+ * (--tone: correct, incorrect, missed), mixed at a few shared strengths
+ * (tokens in styles/tokens/components.css), so fills, edges, letters, badges
+ * and tabs always agree with each other and only the hue changes:
+ *
+ *   fill   the option's ink               --exam-tone-fill
+ *   soft   the letter's disc, badges, tabs --exam-tone-soft
+ *   line   edges and rings                --exam-tone-line
+ *   ink    letters, icons, tab text       --exam-tone-ink
+ *
+ * The letter disc is a step deeper than the option's fill, never solid, so
+ * a graded option stays as calm as the rest of the card.
  */
-[data-choice-marker]::after,
-[data-boolean-glyph]::after {
+[data-feedback='correct'],
+[data-feedback='answer'] { --tone: var(--exam-tone-correct); }
+[data-feedback='incorrect'],
+[data-feedback='invalid'],
+[data-feedback='empty'] { --tone: var(--exam-tone-incorrect); }
+[data-feedback='missed'] { --tone: var(--exam-tone-missed); }
+
+:is([data-exam-choice-option], [data-boolean-option]):is([data-feedback='correct'], [data-feedback='incorrect'], [data-feedback='missed']) {
+  --reveal-color: color-mix(in oklch, var(--tone) var(--exam-tone-fill), transparent);
+  --tile-ring: color-mix(in oklch, var(--tone) var(--exam-tone-line), transparent);
+}
+
+/* The key the reader did not pick: the same green, half as strong. */
+:is([data-exam-choice-option], [data-boolean-option])[data-feedback='answer'] {
+  --reveal-color: color-mix(in oklch, var(--tone) calc(var(--exam-tone-fill) / 2), transparent);
+  --tile-ring: color-mix(in oklch, var(--tone) var(--exam-tone-line), transparent);
+}
+
+:is([data-feedback='correct'], [data-feedback='incorrect'], [data-feedback='missed'], [data-feedback='answer'])
+  :is([data-choice-marker], [data-boolean-glyph]) {
+  background: color-mix(in oklch, var(--tone) var(--exam-tone-soft), transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--tone) var(--exam-tone-line), transparent);
+  color: color-mix(in oklch, var(--tone) var(--exam-tone-ink), var(--foreground));
+}
+
+/* While answering: the picked option is the one solid thing on the card. */
+[data-exam-choice-option][data-feedback='selected'] {
+  --tile-ring: var(--exam-choice-ring-strong);
+  --tile-ring-width: 1.5px;
+}
+[data-feedback='selected'] [data-choice-marker] {
+  background: var(--foreground);
+  box-shadow: none;
+  color: var(--background);
+}
+
+/* Options not involved in the result recede. */
+[data-exam-choice-option][data-feedback='dimmed'],
+[data-boolean-option][data-feedback='dimmed'] {
+  --tile-ring: var(--exam-choice-outline-faint);
+}
+:is([data-exam-choice-option], [data-boolean-option])[data-feedback='dimmed'] > * {
+  opacity: 0.5;
+  transition: opacity 260ms var(--ui-ease);
+}
+
+/*
+ * The verdict on the reader's own picks: a small tick or cross on the
+ * letter's corner, in the same soft tone as the disc (::before the disc,
+ * ::after the mark, so the mark takes the theme's tone without baked-in
+ * colours). The letter itself is never covered, so "you picked B, the key
+ * is C" stays readable on the options. Pseudo-elements, not DOM nodes: a
+ * long page has hundreds of options.
+ */
+:is([data-choice-marker], [data-boolean-glyph])::before,
+:is([data-choice-marker], [data-boolean-glyph])::after {
   content: '';
   position: absolute;
   right: -0.3125rem;
   bottom: -0.3125rem;
-  width: 0.9375rem;
-  height: 0.9375rem;
+  width: 1rem;
+  height: 1rem;
   border-radius: 999px;
-  background: var(--badge-bg, var(--background)) var(--badge-icon, none) center / 0.5625rem no-repeat;
-  box-shadow: 0 0 0 2px var(--exam-card);
   opacity: 0;
-  transform: scale(0.4);
-  transition: opacity 160ms var(--ui-ease), transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: scale(0.5);
+  transition: opacity 200ms var(--ui-ease), transform 320ms cubic-bezier(0.34, 1.4, 0.64, 1);
+  pointer-events: none;
 }
 
-[data-multiple] [data-feedback='selected'] [data-choice-marker] {
-  --badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+:is([data-choice-marker], [data-boolean-glyph])::before {
+  /* Opaque, so the disc's edge does not show through it. */
+  background: color-mix(in oklch, var(--tone, var(--foreground)) calc(var(--exam-tone-soft) + 12%), var(--exam-card));
 }
 
-.dark [data-multiple] [data-feedback='selected'] [data-choice-marker] {
-  --badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fafafa' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+:is([data-choice-marker], [data-boolean-glyph])::after {
+  background: color-mix(in oklch, var(--tone, var(--foreground)) var(--exam-tone-ink), var(--foreground));
+  mask: var(--verdict-icon, none) center / 0.5625rem no-repeat;
 }
 
-[data-feedback='correct'] :is([data-choice-marker], [data-boolean-glyph]) {
-  --badge-bg: var(--success);
-  --badge-icon: var(--exam-badge-check);
-}
+[data-feedback='correct'] { --verdict-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E"); }
+[data-feedback='incorrect'],
+[data-feedback='invalid'],
+[data-feedback='empty'] { --verdict-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M7 7l10 10M17 7L7 17'/%3E%3C/svg%3E"); }
 
-[data-feedback='incorrect'] :is([data-choice-marker], [data-boolean-glyph]) {
-  --badge-bg: var(--destructive);
-  --badge-icon: var(--exam-badge-cross);
-}
-
-[data-multiple] [data-feedback='selected'] [data-choice-marker]::after,
-[data-feedback='correct'] :is([data-choice-marker], [data-boolean-glyph])::after,
-[data-feedback='incorrect'] :is([data-choice-marker], [data-boolean-glyph])::after {
+:is([data-feedback='correct'], [data-feedback='incorrect']) :is([data-choice-marker], [data-boolean-glyph])::before,
+:is([data-feedback='correct'], [data-feedback='incorrect']) :is([data-choice-marker], [data-boolean-glyph])::after {
   opacity: 1;
   transform: none;
 }
 
 /* Graded badges land a beat after the fill starts, so the eye follows press → fill → verdict. */
-[data-fresh][data-feedback='correct'] :is([data-choice-marker], [data-boolean-glyph])::after,
-[data-fresh][data-feedback='incorrect'] :is([data-choice-marker], [data-boolean-glyph])::after {
-  transition-delay: 160ms;
+[data-fresh]:is([data-feedback='correct'], [data-feedback='incorrect']) :is([data-choice-marker], [data-boolean-glyph])::before,
+[data-fresh]:is([data-feedback='correct'], [data-feedback='incorrect']) :is([data-choice-marker], [data-boolean-glyph])::after {
+  transition-delay: 180ms;
 }
 
 /*
- * "漏选" / "正确答案": a tab sitting on the option's top edge, outlined solid. It takes no inline space, so it never
- * covers the option text, however narrow the column (the option grid is
- * measured without it).
+ * "漏选" / "正确答案": a tab sitting on the option's top edge. It takes no
+ * inline space, so it never covers the option text, however narrow the
+ * column (the option grid is measured without it).
  */
 [data-choice-note],
 [data-boolean-option][data-feedback='answer']::after {
@@ -743,10 +738,10 @@
   align-items: center;
   height: 1.125rem;
   padding-inline: 0.4375rem;
-  border: 1px solid var(--exam-note-correct-line);
   border-radius: 999px;
-  background: var(--exam-note-correct-bg);
-  color: var(--exam-note-correct-fg);
+  background: color-mix(in oklch, var(--tone) calc(var(--exam-tone-soft) + 4%), var(--exam-card));
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--tone) var(--exam-tone-line), transparent);
+  color: color-mix(in oklch, var(--tone) var(--exam-tone-ink), var(--foreground));
   font-family: var(--font-sans);
   font-size: 0.6875rem;
   font-weight: 600;
@@ -755,11 +750,15 @@
   white-space: nowrap;
   pointer-events: none;
   transform: translateY(-50%);
-  animation: exam-note-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both 140ms;
+  animation: exam-note-in 300ms var(--ui-ease) both 160ms;
+}
+
+@keyframes exam-fade-in {
+  from { opacity: 0; }
 }
 
 @keyframes exam-note-in {
-  from { opacity: 0; transform: translateY(-20%) scale(0.85); }
+  from { opacity: 0; transform: translateY(-30%); }
 }
 
 /* Option letters quoted elsewhere (the key under a graded question, the
@@ -772,121 +771,43 @@
   letter-spacing: 0.06em;
 }
 
-/* --- states --- */
-
-[data-exam-choice-option][data-feedback='selected'] {
-  --tile-ring: var(--exam-choice-ring-strong);
-  --tile-ring-width: 1.5px;
-}
-[data-feedback='selected'] [data-choice-marker] {
-  background: var(--foreground);
-  box-shadow: none;
-  color: var(--background);
-  transform: scale(1.06);
-}
-
-[data-exam-choice-option][data-feedback='correct'] {
-  --reveal-color: var(--exam-choice-correct-fill);
-  --tile-ring: var(--exam-correct-ring);
-  --tile-ring-width: 1.5px;
-}
-[data-feedback='correct'] [data-choice-marker] {
-  background: var(--success);
-  box-shadow: none;
-  color: var(--success-foreground);
-}
-
-[data-exam-choice-option][data-feedback='incorrect'] {
-  --reveal-color: var(--exam-choice-incorrect-fill);
-  --tile-ring: var(--exam-incorrect-ring);
-}
-[data-feedback='incorrect'] [data-choice-marker] {
-  background: var(--destructive);
-  box-shadow: none;
-  color: var(--destructive-foreground);
-}
-
-/* A key option the reader did not pick in a multiple-answer question: amber. */
-[data-exam-choice-option][data-feedback='missed'] {
-  --reveal-color: var(--exam-choice-missed-fill);
-  --tile-ring: var(--exam-missed-ring);
-  --tile-ring-width: 1.5px;
-}
-[data-feedback='missed'] [data-choice-marker] {
-  background: color-mix(in oklch, var(--warning) 20%, transparent);
-  box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--warning) 80%, transparent);
-  color: color-mix(in oklch, var(--warning) 62%, var(--foreground));
-}
-[data-feedback='missed'] [data-choice-note] {
-  border-color: var(--exam-note-missed-line);
-  background: var(--exam-note-missed-bg);
-  color: var(--exam-note-missed-fg);
-}
-
-/* The key of a single-answer question the reader missed, or the revealed key. */
-[data-exam-choice-option][data-feedback='answer'] {
-  --reveal-color: var(--exam-choice-answer-fill);
-  --tile-ring: var(--exam-correct-ring);
-  --tile-ring-width: 1.5px;
-}
-[data-feedback='answer'] [data-choice-marker] {
-  background: color-mix(in oklch, var(--success) 14%, transparent);
-  box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--success) 70%, transparent);
-  color: color-mix(in oklch, var(--success) 85%, var(--foreground));
-}
-/* Options not involved in the result recede: a fainter outline, faded content. */
-[data-exam-choice-option][data-feedback='dimmed'],
-[data-boolean-option][data-feedback='dimmed'] {
-  --tile-ring: var(--exam-choice-outline-faint);
-}
-[data-exam-choice-option][data-feedback='dimmed'] > * {
-  opacity: 0.48;
-  transition: opacity 220ms var(--ui-ease);
-}
-
 /*
  * Grading motion plays on the marker only, never on the whole option. An
  * animated transform hands the tile to the compositor at its sub-pixel
  * position; when the animation ends the browser paints it again snapped to
- * the pixel grid, so the ring, the text and the ink all jump in one frame:
- * the flash at the end of the fill. A 1.75rem disc carries the same cue
- * without that seam.
+ * the pixel grid, so the ring, the text and the ink all jump in one frame.
+ * A 1.75rem disc carries the same cue without that seam. Small and short:
+ * the verdict is the colour, the motion only points at it.
  */
 @media (prefers-reduced-motion: no-preference) {
-  [data-exam-choice-option][data-feedback='correct'][data-fresh] [data-choice-marker] {
-    animation: exam-pop 480ms var(--ui-ease) 40ms;
+  [data-fresh][data-feedback='correct'] :is([data-choice-marker], [data-boolean-glyph]) {
+    animation: exam-pop 460ms var(--ui-ease) 60ms;
   }
-  [data-exam-choice-option][data-feedback='incorrect'][data-fresh] [data-choice-marker] {
-    animation: exam-shake 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97) 60ms;
+  [data-fresh][data-feedback='incorrect'] :is([data-choice-marker], [data-boolean-glyph]) {
+    animation: exam-shake 380ms cubic-bezier(0.36, 0.07, 0.19, 0.97) 80ms;
   }
-  [data-exam-choice-option][data-feedback='missed'][data-fresh] [data-choice-marker] {
-    animation: exam-nudge 900ms var(--ui-ease) 200ms;
+  [data-exam-choice-option][data-fresh][data-feedback='missed'] [data-choice-marker] {
+    animation: exam-pop 460ms var(--ui-ease) 200ms;
   }
 }
 
 @keyframes exam-pop {
-  35% { transform: scale(1.2); }
-  70% { transform: scale(0.96); }
+  40% { transform: scale(1.12); }
 }
 
-/* Blanks, which carry no ink layer, still shake as a whole. */
+/* Blanks, which carry no ink layer, shake as a whole. */
 @keyframes exam-shake {
-  20% { transform: translateX(-4px); }
-  40% { transform: translateX(4px); }
-  60% { transform: translateX(-2.5px); }
-  80% { transform: translateX(1.5px); }
-}
-
-@keyframes exam-nudge {
-  0%, 100% { transform: scale(1); }
-  30% { transform: scale(1.14); }
-  60% { transform: scale(0.96); }
+  20% { transform: translateX(-3px); }
+  40% { transform: translateX(3px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(1px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   [data-choice-marker],
-  [data-choice-marker]::after,
-  [data-boolean-glyph]::after,
+  [data-boolean-glyph],
+  :is([data-choice-marker], [data-boolean-glyph])::before,
+  :is([data-choice-marker], [data-boolean-glyph])::after,
   [data-choice-letter] {
     transition-duration: 1ms !important;
     transition-delay: 0s !important;
@@ -900,12 +821,11 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.625rem;
   max-width: 26rem;
-  margin-block: 1rem 0.25rem;
+  margin-block: 0.875rem 0.25rem;
 }
 
 /* Tiles too (TileButton); the fill spreads from the press, else the centre. */
 [data-boolean-option] {
-  --accent: var(--foreground);
   justify-content: center;
   gap: 0.5rem;
   height: 3rem;
@@ -914,9 +834,6 @@
   font-weight: 550;
 }
 
-[data-boolean-option][data-value='true'] { --accent: var(--success); }
-[data-boolean-option][data-value='false'] { --accent: var(--destructive); }
-
 [data-boolean-glyph] {
   position: relative;
   display: grid;
@@ -924,9 +841,9 @@
   width: 1.625rem;
   height: 1.625rem;
   border-radius: 999px;
-  box-shadow: inset 0 0 0 1.5px var(--exam-marker-ring);
+  box-shadow: inset 0 0 0 1px var(--exam-marker-ring);
   color: var(--muted-foreground);
-  transition: background-color 200ms var(--ui-ease), color 200ms var(--ui-ease), box-shadow 200ms var(--ui-ease), transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: background-color 260ms var(--ui-ease), color 260ms var(--ui-ease), box-shadow 260ms var(--ui-ease);
 }
 
 /* The mark draws itself in when graded. */
@@ -945,55 +862,19 @@
   height: 0.875rem;
   fill: none;
   stroke: currentColor;
-  stroke-width: 3;
+  stroke-width: 2.75;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 @media (hover: hover) {
   [data-boolean-option][data-feedback='idle']:not([aria-disabled='true']):hover [data-boolean-glyph] {
-    box-shadow: inset 0 0 0 1.5px var(--accent);
-    color: var(--accent);
+    background: var(--exam-marker-hover);
+    color: var(--foreground);
   }
 }
 
-[data-boolean-option][data-feedback='correct'] {
-  --reveal-color: var(--exam-choice-correct-fill);
-  --tile-ring: var(--exam-correct-ring);
-  --tile-ring-width: 1.5px;
-}
-[data-boolean-option][data-feedback='incorrect'] {
-  --reveal-color: var(--exam-choice-incorrect-fill);
-  --tile-ring: var(--exam-incorrect-ring);
-}
-[data-boolean-option][data-feedback='answer'] {
-  --reveal-color: var(--exam-choice-answer-fill);
-  --tile-ring: var(--exam-correct-ring);
-  --tile-ring-width: 1.5px;
-}
 [data-boolean-option][data-feedback='answer']::after { content: '正确答案'; }
-[data-boolean-option][data-feedback='dimmed'] > * { opacity: 0.48; }
-
-[data-boolean-option][data-feedback='correct'] [data-boolean-glyph] {
-  background: var(--success);
-  box-shadow: none;
-  color: var(--success-foreground);
-  transform: scale(1.08);
-}
-[data-boolean-option][data-feedback='incorrect'] [data-boolean-glyph] {
-  background: var(--destructive);
-  box-shadow: none;
-  color: var(--destructive-foreground);
-}
-[data-boolean-option][data-feedback='answer'] [data-boolean-glyph] {
-  box-shadow: inset 0 0 0 1.5px var(--success);
-  color: var(--success);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  [data-boolean-option][data-feedback='correct'][data-fresh] [data-boolean-glyph] { animation: exam-pop 480ms var(--ui-ease) 40ms; }
-  [data-boolean-option][data-feedback='incorrect'][data-fresh] [data-boolean-glyph] { animation: exam-shake 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97) 60ms; }
-}
 
 /* ----------------------------------------------------------------- blanks */
 
@@ -1034,22 +915,13 @@ input[data-question-blank][data-active] {
   caret-color: var(--foreground);
 }
 
-[data-question-blank][data-feedback='correct'] {
-  --blank-line: var(--success);
-  background: var(--exam-correct-tint);
-  color: color-mix(in oklch, var(--success) 75%, var(--foreground));
-}
-[data-question-blank][data-feedback='incorrect'],
-[data-question-blank][data-feedback='invalid'],
-[data-question-blank][data-feedback='empty'] {
-  --blank-line: var(--destructive);
-  background: var(--exam-incorrect-tint);
-  color: color-mix(in oklch, var(--destructive) 80%, var(--foreground));
+/* Graded blanks take the result tones (see the options above). */
+[data-question-blank]:is([data-feedback='correct'], [data-feedback='incorrect'], [data-feedback='invalid'], [data-feedback='empty'], [data-feedback='answer']) {
+  --blank-line: color-mix(in oklch, var(--tone) 70%, transparent);
+  background: color-mix(in oklch, var(--tone) var(--exam-tone-fill), var(--ui-panel));
+  color: color-mix(in oklch, var(--tone) var(--exam-tone-ink), var(--foreground));
 }
 [data-question-blank][data-feedback='answer'] {
-  --blank-line: var(--success);
-  background: var(--exam-answer-tint);
-  color: var(--success);
   font-weight: 600;
 }
 
@@ -1101,22 +973,17 @@ span[data-question-blank][data-kind='math'] {
 [data-blank-slot]:is([data-feedback='correct'], [data-feedback='incorrect'], [data-feedback='invalid'], [data-feedback='empty'])::after {
   content: '';
   display: inline-block;
-  width: 1rem;
-  height: 1rem;
-  margin-inline: -0.0625rem 0.25rem;
-  border-radius: 999px;
-  vertical-align: -0.1875rem;
-  background: var(--destructive) var(--exam-badge-cross) center / 0.625rem no-repeat;
-}
-
-[data-blank-slot][data-feedback='correct']::after {
-  background-color: var(--success);
-  background-image: var(--exam-badge-check);
+  width: 0.875rem;
+  height: 0.875rem;
+  margin-inline: 0 0.25rem;
+  vertical-align: -0.125rem;
+  background: color-mix(in oklch, var(--tone) var(--exam-tone-ink), var(--foreground));
+  mask: var(--verdict-icon) center / contain no-repeat;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   [data-blank-slot][data-fresh]::after {
-    animation: exam-note-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both 120ms;
+    animation: exam-fade-in 320ms var(--ui-ease) both 120ms;
   }
 }
 
@@ -1133,8 +1000,8 @@ span[data-question-blank][data-kind='math'] {
   align-items: center;
   gap: 0.625rem 0.75rem;
   min-height: 2rem;
-  margin-top: 1rem;
-  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
   background-image: var(--rule);
   background-position: left top;
 }
@@ -1158,6 +1025,14 @@ span[data-question-blank][data-kind='math'] {
   [data-submit-hint] {
     display: none;
   }
+}
+
+/* An empty answer: the submit button waits as a quiet outline rather than a grey block. */
+[data-submit-answer]:disabled {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--exam-choice-outline);
+  color: var(--muted-foreground);
+  opacity: 1;
 }
 
 [data-footer-actions] {
@@ -1185,10 +1060,14 @@ span[data-question-blank][data-kind='math'] {
   white-space: nowrap;
 }
 [data-result-pill] svg { width: 1rem; height: 1rem; flex-shrink: 0; }
-[data-result-pill] { box-shadow: inset 0 0 0 1px color-mix(in oklch, currentColor 16%, transparent); }
-[data-result-pill='correct'] { background: color-mix(in oklch, var(--success) 13%, transparent); color: color-mix(in oklch, var(--success) 88%, var(--foreground)); }
-[data-result-pill='incorrect'] { background: color-mix(in oklch, var(--destructive) 11%, transparent); color: color-mix(in oklch, var(--destructive) 90%, var(--foreground)); }
-[data-result-pill='partial'] { background: color-mix(in oklch, var(--warning) 18%, transparent); color: color-mix(in oklch, var(--warning) 62%, var(--foreground)); }
+[data-result-pill] { box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--tone) calc(var(--exam-tone-line) * 0.6), transparent); }
+[data-result-pill='correct'] { --tone: var(--exam-tone-correct); }
+[data-result-pill='incorrect'] { --tone: var(--exam-tone-incorrect); }
+[data-result-pill='partial'] { --tone: var(--exam-tone-missed); }
+[data-result-pill] {
+  background: color-mix(in oklch, var(--tone) var(--exam-tone-fill), transparent);
+  color: color-mix(in oklch, var(--tone) var(--exam-tone-ink), var(--foreground));
+}
 
 /*
  * Self-grade (essays): three quiet capsules on the plate, each taking its
@@ -1216,9 +1095,9 @@ span[data-question-blank][data-kind='math'] {
   transition: background-color 180ms var(--ui-ease), box-shadow 180ms var(--ui-ease), color 180ms var(--ui-ease), scale 160ms var(--ui-ease);
 }
 [data-self-grade] button svg { width: 0.9375rem; height: 0.9375rem; flex-shrink: 0; color: var(--grade); opacity: 0.85; }
-[data-self-grade] button[data-grade='correct'] { --grade: var(--success); }
-[data-self-grade] button[data-grade='partial'] { --grade: var(--warning); }
-[data-self-grade] button[data-grade='incorrect'] { --grade: var(--destructive); }
+[data-self-grade] button[data-grade='correct'] { --grade: var(--exam-tone-correct); }
+[data-self-grade] button[data-grade='partial'] { --grade: var(--exam-tone-missed); }
+[data-self-grade] button[data-grade='incorrect'] { --grade: var(--exam-tone-incorrect); }
 [data-self-grade] button:active:not(:disabled) { scale: 0.96; }
 [data-self-grade] button:disabled { cursor: default; opacity: 0.5; }
 @media (hover: hover) {
@@ -1253,7 +1132,7 @@ span[data-question-blank][data-kind='math'] {
   background: var(--ui-fill);
 }
 [data-blank-grade] button {
-  --grade: var(--success);
+  --grade: var(--exam-tone-correct);
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -1267,7 +1146,7 @@ span[data-question-blank][data-kind='math'] {
   cursor: pointer;
   transition: background-color 160ms var(--ui-ease), color 160ms var(--ui-ease), box-shadow 160ms var(--ui-ease), scale 140ms var(--ui-ease);
 }
-[data-blank-grade] button[data-grade='incorrect'] { --grade: var(--destructive); }
+[data-blank-grade] button[data-grade='incorrect'] { --grade: var(--exam-tone-incorrect); }
 [data-blank-grade] button svg { width: 0.8125rem; height: 0.8125rem; flex-shrink: 0; }
 /* Not graded yet (self-grading): both halves quiet, a touch firmer than the track. */
 [data-blank-grade][data-unset] button { color: color-mix(in oklch, var(--foreground) 72%, transparent); }
@@ -1317,8 +1196,8 @@ span[data-question-blank][data-kind='math'] {
   height: 1.75rem;
   padding-inline: 0.5625rem 0.6875rem;
   border-radius: 999px;
-  background: color-mix(in oklch, var(--success) 10%, transparent);
-  color: color-mix(in oklch, var(--success) 80%, var(--foreground));
+  background: color-mix(in oklch, var(--exam-tone-correct) 10%, transparent);
+  color: color-mix(in oklch, var(--exam-tone-correct) 80%, var(--foreground));
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -1329,7 +1208,7 @@ span[data-question-blank][data-kind='math'] {
 [data-grade-all]:disabled { cursor: default; opacity: 0.5; }
 [data-grade-all]:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 @media (hover: hover) {
-  [data-grade-all]:hover:not(:disabled) { background: color-mix(in oklch, var(--success) 16%, transparent); }
+  [data-grade-all]:hover:not(:disabled) { background: color-mix(in oklch, var(--exam-tone-correct) 16%, transparent); }
 }
 
 /* Self-grading rows: the key (typeset) and, if any, what was typed. */
@@ -1338,8 +1217,8 @@ span[data-question-blank][data-kind='math'] {
   border-radius: 0.625rem;
   transition: background-color 200ms var(--ui-ease);
 }
-[data-mode='self'] li[data-graded='correct'] { background: color-mix(in oklch, var(--success) 7%, transparent); }
-[data-mode='self'] li[data-graded='incorrect'] { background: color-mix(in oklch, var(--destructive) 6%, transparent); }
+[data-mode='self'] li[data-graded='correct'] { background: color-mix(in oklch, var(--exam-tone-correct) 7%, transparent); }
+[data-mode='self'] li[data-graded='incorrect'] { background: color-mix(in oklch, var(--exam-tone-incorrect) 6%, transparent); }
 
 [data-manual-grade-key],
 [data-manual-grade-typed] {
@@ -1356,7 +1235,7 @@ span[data-question-blank][data-kind='math'] {
   font-size: 0.75rem;
   font-weight: 500;
 }
-[data-manual-grade-key] [data-manual-grade-label] { color: color-mix(in oklch, var(--success) 80%, var(--foreground)); }
+[data-manual-grade-key] [data-manual-grade-label] { color: color-mix(in oklch, var(--exam-tone-correct) 80%, var(--foreground)); }
 [data-manual-grade-progress] {
   margin: 0.5rem 0 0;
   color: var(--muted-foreground);
@@ -1394,8 +1273,8 @@ span[data-question-blank][data-kind='math'] {
 [data-manual-grade-note] {
   padding: 0.0625rem 0.4375rem;
   border-radius: 999px;
-  background: color-mix(in oklch, var(--warning) 16%, transparent);
-  color: color-mix(in oklch, var(--warning) 62%, var(--foreground));
+  background: color-mix(in oklch, var(--exam-tone-missed) 16%, transparent);
+  color: color-mix(in oklch, var(--exam-tone-missed) 62%, var(--foreground));
   font-size: 0.6875rem;
   font-weight: 600;
 }
@@ -1415,18 +1294,18 @@ span[data-question-blank][data-kind='math'] {
   min-height: 1.75rem;
   padding: 0.125rem 0.625rem;
   border-radius: 0.625rem;
-  background: color-mix(in oklch, var(--success) 9%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--success) 22%, transparent);
+  background: color-mix(in oklch, var(--exam-tone-correct) 9%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--exam-tone-correct) 22%, transparent);
   font-size: 0.9375rem;
 }
 [data-result-key] { align-items: center; }
 
 @media (prefers-reduced-motion: no-preference) {
-  [data-result-pill] { animation: exam-pill-in 360ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+  [data-result-pill] { animation: exam-pill-in 320ms var(--ui-ease); }
 }
 
 @keyframes exam-pill-in {
-  from { opacity: 0; transform: scale(0.8); }
+  from { opacity: 0; transform: translateX(-0.25rem); }
 }
 
 /* ------------------------------------------------------------------ note */

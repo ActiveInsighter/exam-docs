@@ -14,7 +14,6 @@ import {
   toChoiceOptions,
 } from './model';
 import { QuestionFooter } from './question-footer';
-import { QuestionNumber } from './question-number';
 import { QuestionProvider } from './question-state';
 import { QuestionSourceTrail, QuestionTypeTag } from './question-tags';
 import { TrueFalse } from './true-false';
@@ -111,7 +110,9 @@ export function Question({
       >
         <div data-question-header="">
           <div data-question-meta="">
-            {numberLabel ? <QuestionNumber questionId={id} label={numberLabel} /> : null}
+            {numberLabel ? (
+              <span id={`question-${id}-label`} data-question-number="" aria-label={`第 ${numberLabel} 题`}>{numberLabel}</span>
+            ) : null}
             <QuestionTypeTag type={questionType} label={typeLabel} points={score} />
             <QuestionUserTags />
           </div>
