@@ -361,15 +361,15 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
-          if [[ "${STATIC_DOCS_SHARD_INDEX}" == '0' ]]; then
-            node scripts/upload-cloudflare-assets.mjs .static-docs --worker "${CLOUDFLARE_WORKER_NAME}"
-          else
-            # Upload exactly this shard's contribution to the merged package; shard 0
-            # owns the shared chunks, the docs entry/layout and the Markdown exports.
+          # Distribute identical _next/static chunks across all shard runners.
+          # The final Wrangler deploy still fills in any missing uploads.
+          if [[ "${STATIC_DOCS_SHARD_INDEX}" != '0' ]]; then
+            # Only shard 0 owns shared root/Markdown entries.
             rm -f .static-docs/docs/index.html .static-docs/docs/__next.docs.txt
             find .static-docs/docs -type f -name '*.md' -delete
-            node scripts/upload-cloudflare-assets.mjs .static-docs/docs --worker "${CLOUDFLARE_WORKER_NAME}"
           fi
+          node scripts/upload-cloudflare-assets.mjs .static-docs --worker "${CLOUDFLARE_WORKER_NAME}" \
+            --shard-index "${STATIC_DOCS_SHARD_INDEX}" --shard-count "${STATIC_DOCS_SHARD_COUNT}"
 
   deploy:
     name: Merge and deploy Worker Static Assets
