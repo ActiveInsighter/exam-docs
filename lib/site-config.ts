@@ -33,6 +33,10 @@ export function getRootMetadata(): Metadata {
       template: `%s | ${siteConfig.name}`,
     },
     description: siteConfig.description,
+    icons: {
+      icon: [{ url: '/icon.svg', type: 'image/svg+xml', sizes: 'any' }],
+      shortcut: [{ url: '/icon.svg', type: 'image/svg+xml' }],
+    },
     openGraph: {
       type: 'website',
       locale: siteConfig.locale,

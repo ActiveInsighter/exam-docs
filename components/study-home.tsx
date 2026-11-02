@@ -4,6 +4,7 @@ import { TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/ui/ta
 import { homeSubjects } from '@/lib/study-home-content';
 import { StudyRhythm } from './study-home-rhythm';
 import { StudyPreviewTabs } from './study-preview-tabs';
+import { SiteIcon } from './site-icon';
 
 const subjectIcons = { math: Calculator, computer: Network, english: Languages, politics: Globe2, code: Code2 };
 
@@ -39,7 +40,7 @@ export function StudyHome() {
                   return <TabsTrigger key={subject.id} value={subject.id} aria-label={subject.name} className="study-preview-tab"><Icon aria-hidden="true" /><span className="study-tab-name">{subject.name}</span><span className="study-tab-short">{subject.shortName}</span><ChevronRight aria-hidden="true" /></TabsTrigger>;
                 })}
               </TabsList>
-              <div className="study-preview-sidebar-note"><span className="study-brand-mark" aria-hidden="true"><BookOpen /></span><span>学过的，<br />慢慢成为自己的。</span></div>
+              <div className="study-preview-sidebar-note"><span className="study-brand-mark" aria-hidden="true"><SiteIcon size={19} /></span><span>学过的，<br />慢慢成为自己的。</span></div>
             </aside>
             {homeSubjects.map((subject) => (
               <TabsContent key={subject.id} value={subject.id} className="study-preview-content">
@@ -71,7 +72,7 @@ export function StudyHome() {
         <Link href="/docs/math/" className="study-button study-button-primary">打开学习资料<ArrowRight aria-hidden="true" /></Link>
       </section>
       <footer className="study-home-footer">
-        <span><BookOpen aria-hidden="true" />考研学习</span>
+        <span><SiteIcon size={18} />考研学习</span>
         <nav aria-label="更多资源"><Link href="/blog/">学习笔记<ArrowUpRight aria-hidden="true" /></Link><a href="/llms.txt">全部文档目录<ArrowUpRight aria-hidden="true" /></a><a href="https://fumadocs.dev" target="_blank" rel="noreferrer">Built with Fumadocs<ArrowUpRight aria-hidden="true" /></a></nav>
       </footer>
     </div>
