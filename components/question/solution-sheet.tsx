@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/study-card';
 import { cn } from '@/lib/utils';
 import { blankBadge } from './blank-field';
-import { BlankGradeSwitch } from './blank-grade';
+import { BlankGradeSwitch, BlankSelfGradeSwitch } from './blank-grade';
 import { formatKey, formatResponse, type GradingSpec, type QuestionType } from './grading';
 import { QuestionMarkActions, QuestionMarksScope, QuestionUserTags, useMarks } from './marks/question-marks';
 import { NoteEditor } from './marks/note-editor';
@@ -137,6 +137,12 @@ function AnswerSummary({ spec, state }: { spec: GradingSpec; state: QuestionStat
                   <span className="text-sm text-muted-foreground">你填</span>
                   <span className="min-w-0 font-medium break-all">{yours ? (blank.kind === 'math' ? <MathPreview text={yours} /> : yours) : '—'}</span>
                   <BlankGradeSwitch question={submitted} index={index} />
+                </span>
+              ) : state && state.ready && !state.deferred ? (
+                // Not answered on the page: grade yourself against the key, as with an essay.
+                <span className="ml-auto inline-flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">自评</span>
+                  <BlankSelfGradeSwitch question={state} index={index} />
                 </span>
               ) : null}
             </li>

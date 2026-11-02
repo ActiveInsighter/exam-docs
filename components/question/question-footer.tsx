@@ -1,8 +1,8 @@
 'use client';
 
-import { CircleAlertIcon, CircleCheckIcon, CircleXIcon, ClockIcon, GavelIcon, RotateCcwIcon } from 'lucide-react';
+import { CircleAlertIcon, CircleCheckIcon, CircleXIcon, ClockIcon, GavelIcon, ListChecksIcon, RotateCcwIcon } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
-import { ManualGradePanel } from './blank-grade';
+import { ManualGradePanel, SelfGradePanel } from './blank-grade';
 import { Button } from '@/components/ui/button';
 import { blankBadge } from './blank-field';
 import type { AttemptResult, BlankSpec, Evaluation, GradingSpec, QuestionType } from './grading';
@@ -26,6 +26,7 @@ const ICONS: Record<AttemptResult, ReactNode> = {
 export function describeResult(spec: GradingSpec, evaluation: Evaluation, selected: readonly string[]): string {
   if (spec.kind === 'self') return `自评 · ${selfGradeOf(selected[0])?.label ?? '错误'}`;
   const words = describeGrade(spec, evaluation, selected);
+  if (evaluation.self) return `自评 · ${words.replace(/^回答/u, '')}`;
   return evaluation.manual?.some(Boolean) ? `${words} · 已改判` : words;
 }
 
@@ -78,8 +79,10 @@ function SubmitHint() {
   return <>{selected.length ? `已选 ${selected.length} 项` : '可多选，选出全部正确项后提交'}</>;
 }
 
+const quietAction = 'h-8 gap-1.5 rounded-full px-3 text-[0.8125rem] text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground has-data-[icon=inline-start]:pl-2.5 aria-expanded:bg-(--ui-fill-active) aria-expanded:text-foreground';
+
 /** Left side of the footer: submit step while answering, the grade afterwards. */
-function AttemptView() {
+function AttemptView({ selfGrading, onSelfGrading }: { selfGrading: boolean; onSelfGrading: () => void }) {
   const question = useQuestionState();
   if (!question) return null;
   const { spec, submitted, evaluation, attempt, canSubmit, submit, selected, deferred, answered } = question;
@@ -105,11 +108,18 @@ function AttemptView() {
     }
     if (!needsSubmit) return null;
     return (
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <Button size="sm" disabled={!canSubmit} onClick={submit} className="h-8 rounded-full px-4">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
+        <Button size="sm" disabled={!canSubmit} onClick={submit} data-submit-answer="" className="h-8 rounded-full px-4">
           提交答案
         </Button>
-        <span className="text-[0.8125rem] text-muted-foreground"><SubmitHint /></span>
+        {spec.kind === 'blank' ? (
+          // Formulas can be awkward to type: grade against the key instead, like an essay.
+          <Button variant="ghost" size="sm" aria-expanded={selfGrading} onClick={onSelfGrading} data-self-grade-toggle="" className={quietAction}>
+            <ListChecksIcon data-icon="inline-start" />
+            对答案自评
+          </Button>
+        ) : null}
+        <span data-submit-hint="" className="text-[0.8125rem] text-muted-foreground"><SubmitHint /></span>
       </div>
     );
   }
@@ -159,13 +169,17 @@ export function QuestionFooter({ showSolution, ...sheet }: QuestionFooterProps) 
   const state = useQuestionState();
   const status = useAttemptStatus();
   const [grading, setGrading] = useState(false);
-  const gradable = state?.spec.kind === 'blank' && state.submitted && !!state.evaluation;
-  // Closed again once the answer is reset.
+  const [selfGrading, setSelfGrading] = useState(false);
+  const blank = state?.spec.kind === 'blank';
+  const gradable = blank && !!state?.submitted && !!state.evaluation;
+  const selfGradable = blank && !state?.submitted && !state?.deferred;
+  // Each panel closes once its moment has passed (reset, or self-graded and submitted).
   if (grading && !gradable) setGrading(false);
+  if (selfGrading && !selfGradable) setSelfGrading(false);
   return (
     <div data-question-footer="" data-attempt-result={status}>
       <div role="status" aria-live="polite" data-footer-status="">
-        <AttemptView />
+        <AttemptView selfGrading={selfGrading} onSelfGrading={() => setSelfGrading(!selfGrading)} />
         {state?.storageError ? (
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <p role="alert" className="text-sm text-destructive">{state.storageError}</p>
@@ -180,8 +194,7 @@ export function QuestionFooter({ showSolution, ...sheet }: QuestionFooterProps) 
             variant="ghost"
             size="sm"
             aria-expanded={grading}
-            data-pressed={grading ? '' : undefined}
-            className="h-8 gap-1.5 rounded-full px-3 text-[0.8125rem] text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground has-data-[icon=inline-start]:pl-2.5 data-pressed:bg-(--ui-fill) data-pressed:text-foreground"
+            className={quietAction}
             onClick={() => setGrading(!grading)}
           >
             <GavelIcon data-icon="inline-start" />
@@ -189,7 +202,7 @@ export function QuestionFooter({ showSolution, ...sheet }: QuestionFooterProps) 
           </Button>
         ) : null}
         {state?.submitted && state.evaluation ? (
-          <Button variant="ghost" size="sm" className="h-8 gap-1.5 rounded-full px-3 text-[0.8125rem] text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground has-data-[icon=inline-start]:pl-2.5" onClick={state.reset}>
+          <Button variant="ghost" size="sm" className={quietAction} onClick={state.reset}>
             <RotateCcwIcon data-icon="inline-start" />
             {state.spec.kind === 'self' ? '重新自评' : '重做'}
           </Button>
@@ -197,6 +210,7 @@ export function QuestionFooter({ showSolution, ...sheet }: QuestionFooterProps) 
         {showSolution ? <QuestionSolutionSheet {...sheet} /> : null}
       </div>
       {gradable && grading ? <ManualGradePanel question={state} /> : null}
+      {selfGradable && selfGrading ? <SelfGradePanel question={state} /> : null}
     </div>
   );
 }

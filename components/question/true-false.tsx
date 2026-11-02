@@ -29,8 +29,9 @@ function moveFocus(event: KeyboardEvent<HTMLDivElement>) {
 
 /**
  * A true / false question: two large tile buttons, graded on click. The
- * pick fills green or red from where it was pressed; picking the wrong one
- * also fills the right one in green.
+ * pick fills green or red from where it was pressed, its mark kept and a
+ * tick or cross badged on its corner; picking the wrong one also fills the
+ * right one in green.
  */
 export function TrueFalse() {
   const question = useQuestionState();
@@ -58,11 +59,9 @@ export function TrueFalse() {
             revealed={feedback !== 'idle' && feedback !== 'dimmed'}
             onClick={() => { if (!locked) question.select([choice.letter]); }}
           >
-            {/* The option's own mark; after grading, a tick or a cross for the reader's pick. */}
+            {/* The option's own mark stays; after grading a corner badge says whether the pick was right (CSS). */}
             <span data-boolean-glyph="" aria-hidden="true">
               <svg viewBox="0 0 24 24" data-boolean-icon="value">{choice.icon}</svg>
-              <svg viewBox="0 0 24 24" data-boolean-icon="correct"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
-              <svg viewBox="0 0 24 24" data-boolean-icon="incorrect"><path d="M7 7l10 10" /><path d="M17 7L7 17" /></svg>
             </span>
             {choice.label}
           </TileButton>

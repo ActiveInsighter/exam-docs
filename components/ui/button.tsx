@@ -44,18 +44,26 @@ const buttonVariants = cva(
 
 /*
  * Click-to-fill (radial colour reveal). A button given `revealed` carries an
- * ink layer in --reveal-color that, when `revealed` turns true, spreads as a
- * circle from the point the button was pressed until it covers the button,
- * and draws back into the latest press point when it turns false. Keyboard
- * presses spread from the default origin (--reveal-x / --reveal-y, the centre
- * unless a stylesheet moves it). The layer and its motion are CSS
- * (styles/reveal.css), which also sizes the circle; this only records the
- * press point, written straight on the element so a press re-renders nothing.
+ * ink layer in --reveal-color. When `revealed` turns true the ink spreads as
+ * a circle from the point the button was pressed until it covers the button;
+ * when it turns false the button's own background spreads the same way from
+ * the new press point, wiping the ink away. Both directions are an outward
+ * ripple from where the reader touched, so picking and un-picking feel like
+ * one gesture rather than a fill followed by a shrink.
+ *
+ * Keyboard presses spread from the default origin (--reveal-x / --reveal-y,
+ * the centre unless a stylesheet moves it). The layer and its motion are CSS
+ * (styles/reveal.css); this records the press point (written straight on the
+ * element, so a press re-renders nothing) and which way the last change
+ * went (data-reveal-motion), so only real changes animate: a button mounted
+ * filled (a restored answer) shows its fill at once.
  */
 type RevealProps = {
   /** true fills the button, false empties it; leave unset for no fill layer. */
   revealed?: boolean
 }
+
+type RevealMotion = "in" | "out"
 
 const revealVars = ["--reveal-x", "--reveal-y"] as const
 
@@ -74,16 +82,32 @@ function clearRevealOrigin(element: HTMLElement) {
   for (const name of revealVars) element.style.removeProperty(name)
 }
 
-/** Pointer and click handlers that keep the fill's origin on the press point. */
+/**
+ * The direction of the latest change of `revealed`, derived while rendering
+ * (no effect, no extra commit): undefined until it first changes.
+ */
+function useRevealMotion(revealed: boolean | undefined): RevealMotion | undefined {
+  const [seen, setSeen] = React.useState(revealed)
+  const [motion, setMotion] = React.useState<RevealMotion | undefined>(undefined)
+  if (seen !== revealed) {
+    setSeen(revealed)
+    setMotion(revealed === undefined || seen === undefined ? undefined : revealed ? "in" : "out")
+  }
+  return motion
+}
+
+/** Pointer, click and animation handlers that keep the ripple on the press point. */
 function revealHandlers<
   P extends React.PointerEvent<HTMLElement>,
   C extends React.MouseEvent<HTMLElement>,
+  A extends React.AnimationEvent<HTMLElement>,
 >(
   revealed: boolean | undefined,
   onPointerDown: ((event: P) => void) | undefined,
-  onClick: ((event: C) => void) | undefined
+  onClick: ((event: C) => void) | undefined,
+  onAnimationEnd: ((event: A) => void) | undefined
 ) {
-  if (revealed === undefined) return { onPointerDown, onClick }
+  if (revealed === undefined) return { onPointerDown, onClick, onAnimationEnd }
   return {
     onPointerDown: (event: P) => {
       recordRevealOrigin(event)
@@ -93,6 +117,13 @@ function revealHandlers<
       // detail 0: Enter or Space, not a pointer.
       if (event.detail === 0) clearRevealOrigin(event.currentTarget)
       onClick?.(event)
+    },
+    onAnimationEnd: (event: A) => {
+      // A finished ripple is dropped, so re-showing a hidden ancestor never replays it.
+      if (event.target === event.currentTarget && event.animationName.startsWith("reveal-")) {
+        event.currentTarget.removeAttribute("data-reveal-motion")
+      }
+      onAnimationEnd?.(event)
     },
   }
 }
@@ -108,14 +139,17 @@ function Button({
   revealed,
   onPointerDown,
   onClick,
+  onAnimationEnd,
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants> & RevealProps) {
+  const motion = useRevealMotion(revealed)
   return (
     <ButtonPrimitive
       data-slot="button"
       data-reveal={revealState(revealed)}
+      data-reveal-motion={motion}
       className={cn(buttonVariants({ variant, size, className }), revealed !== undefined && "relative isolate")}
-      {...revealHandlers(revealed, onPointerDown, onClick)}
+      {...revealHandlers(revealed, onPointerDown, onClick, onAnimationEnd)}
       {...props}
     />
   )
@@ -126,7 +160,7 @@ function Button({
  * is more than a label (it wraps, aligns left and may hold formulas or
  * images). A quiet surface lifted by a hairline ring and a soft shadow; it
  * brightens on hover, gives on press, and with `revealed` fills from the
- * press point. Colours are --tile-* tokens (styles/tokens/components.css),
+ * press point (and is wiped clean from the press point when un-picked). Colours are --tile-* tokens (styles/tokens/components.css),
  * which a stylesheet can override per state, e.g. --tile-ring for a
  * coloured outline and --reveal-color for the fill.
  *
@@ -159,14 +193,17 @@ function TileButton({
   revealed,
   onPointerDown,
   onClick,
+  onAnimationEnd,
   ...props
 }: ButtonPrimitive.Props & Omit<VariantProps<typeof tileVariants>, "interactive"> & RevealProps) {
+  const motion = useRevealMotion(revealed)
   return (
     <ButtonPrimitive
       data-slot="tile-button"
       data-reveal={revealState(revealed)}
+      data-reveal-motion={motion}
       className={cn(tileVariants({ size, className }))}
-      {...revealHandlers(revealed, onPointerDown, onClick)}
+      {...revealHandlers(revealed, onPointerDown, onClick, onAnimationEnd)}
       {...props}
     />
   )

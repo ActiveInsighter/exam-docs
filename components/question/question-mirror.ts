@@ -41,6 +41,8 @@ export function mirrorQuestion(questionId: string, state: MirrorState): HTMLElem
   const copy = source.cloneNode(true) as HTMLElement;
   copy.querySelectorAll('[id]').forEach((element) => element.removeAttribute('id'));
   copy.querySelectorAll('[data-fresh]').forEach((element) => element.removeAttribute('data-fresh'));
+  // A copy shows the state as it is; a ripple still running on the page must not replay in it.
+  copy.querySelectorAll('[data-reveal-motion]').forEach((element) => element.removeAttribute('data-reveal-motion'));
   copy.querySelectorAll<HTMLElement>('[data-exam-choice-group]').forEach((group) => group.style.removeProperty('--choice-cols-measured'));
   copy.querySelectorAll<HTMLElement>('button, input, [tabindex]').forEach((element) => {
     element.tabIndex = -1;
@@ -72,7 +74,8 @@ export function mirrorQuestion(questionId: string, state: MirrorState): HTMLElem
       const holder = document.createElement('span');
       holder.className = 'inline-flex flex-wrap items-baseline gap-1';
       if (submitted && verdict === 'correct') {
-        holder.append(blankChip(state.values[index] ?? '', 'correct', blank.kind));
+        // Self-graded without typing: the key stands for what the reader worked out.
+        holder.append(blankChip(state.values[index]?.trim() || blank.answer, 'correct', blank.kind));
       } else {
         if (submitted && state.values[index]?.trim()) {
           const wrong = blankChip(state.values[index], 'incorrect', blank.kind);
