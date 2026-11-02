@@ -1,37 +1,33 @@
 /*
  * Click-to-fill ripple for Button and TileButton (components/ui/button.tsx).
- * Two layers, both radial gradients centred on the press point:
+ * One layer, the button's ::before: a radial gradient centred on the press
+ * point, with a narrow soft edge.
  *
- *   ::before  the fill. Picking spreads it from the press point until it
- *             covers the button (--reveal-on 0 → 1); un-picking clears it
- *             outward from the new press point (a hole grows: --reveal-hole
- *             0 → 1), fading in its last stretch so nothing lingers at the
- *             far edge. Its state comes from data-reveal="on" | "off".
- *   ::after   the wave: on a press that changes the fill, a soft ring of
- *             the same ink races out from the finger and fades. It is what
- *             makes both directions read as a ripple, and the only part
- *             that is not the resting state.
+ *   picking      the fill spreads from the press point until it covers the
+ *                button (its outer edge grows: --reveal-on 0 → 1)
+ *   un-picking   the fill clears from the new press point the same way (a
+ *                hole grows: --reveal-hole 0 → 1), easing out of sight over
+ *                its last stretch so no sliver lingers at the far edge
  *
- * Both start where the reader touched and move outward; nothing shrinks back
- * into a point. The hole is genuinely see-through, so what spreads in
- * un-picking is whatever the button stands on (a tile's surface, the
- * question card's plate).
+ * The two are mirror images: same curve, same pace, both moving outward from
+ * where the reader touched, so a toggle reads as one gesture in either
+ * direction and nothing ever shrinks back into a point. The hole is
+ * genuinely see-through, so un-picking uncovers whatever the button stands
+ * on (a tile's surface, the question card's plate). The colour is the fill's
+ * own, at full strength from the first frame; no other colour takes part.
  *
- *   --reveal-color    the ink (default: a light wash of the text colour)
+ *   --reveal-color    the fill (default: a light wash of the text colour)
  *   --reveal-x/-y     centre; written by the button on pointer press, else
  *                     the centre (a stylesheet may set another default)
- *   --reveal-inset    keeps the layers inside an inset ring (tiles: 1.5px)
- *   --reveal-feather  width of the fill's soft edge, in gradient units
+ *   --reveal-inset    keeps the layer inside an inset ring (tiles: 1.5px)
  *
  * Motion only plays on data-reveal-motion="in" | "out", which the button
- * sets when `revealed` actually changes, and the wave only with
- * data-reveal-press, which it sets for a pointer press. A button mounted
- * filled (a restored answer, the solution card's copy) shows its fill at
- * once; a keyboard toggle spreads from the default centre without a wave.
+ * sets when `revealed` actually changes: a button mounted filled (a restored
+ * answer, the solution card's copy) shows its fill at once.
  *
  * Edges are measured in `farthest-corner` units, so 100% is exactly "covers
  * the box" from any press point, at any size, at every frame. Only the
- * pseudo-elements' registered properties and opacity animate, so a ripple
+ * pseudo-element's registered properties and opacity animate, so a ripple
  * never restyles the button's content.
  *
  * In the components layer, so utilities and component stylesheets win.
@@ -49,12 +45,6 @@
   initial-value: 0;
 }
 
-@property --reveal-wave {
-  syntax: '<number>';
-  inherits: false;
-  initial-value: 0;
-}
-
 @property --reveal-ink {
   syntax: '<color>';
   inherits: false;
@@ -63,10 +53,10 @@
 
 @layer components {
   [data-reveal] {
-    --reveal-in-duration: 560ms;
-    --reveal-out-duration: 520ms;
-    --reveal-wave-duration: 640ms;
-    --reveal-feather: 16%;
+    --reveal-duration: 500ms;
+    --reveal-ease: cubic-bezier(0.25, 0.7, 0.3, 1);
+    /* Width of each soft edge, in the gradient's own units. */
+    --reveal-edge: 9%;
   }
 
   [data-reveal]::before {
@@ -76,49 +66,45 @@
     z-index: -1;
     border-radius: inherit;
     /*
-     * Clear inside the hole, ink between the hole and the outer edge, clear
-     * outside it; each edge softens over --reveal-feather. At 0 nothing
-     * shows; at 1 every pixel is covered (outer) or cleared (hole).
+     * Clear inside the hole, fill between the hole and the outer edge,
+     * clear outside it. At 0 nothing shows; at 1 every pixel is covered
+     * (outer) or uncovered (hole).
      */
     background: radial-gradient(
       circle farthest-corner at var(--reveal-x, 50%) var(--reveal-y, 50%),
-      transparent calc(var(--reveal-hole) * (100% + var(--reveal-feather)) - var(--reveal-feather)),
-      var(--reveal-ink) calc(var(--reveal-hole) * (100% + var(--reveal-feather))),
-      var(--reveal-ink) calc(var(--reveal-on) * (100% + var(--reveal-feather)) - var(--reveal-feather)),
-      transparent calc(var(--reveal-on) * (100% + var(--reveal-feather)))
+      transparent calc(var(--reveal-hole) * (100% + var(--reveal-edge)) - var(--reveal-edge)),
+      var(--reveal-ink) calc(var(--reveal-hole) * (100% + var(--reveal-edge))),
+      var(--reveal-ink) calc(var(--reveal-on) * (100% + var(--reveal-edge)) - var(--reveal-edge)),
+      transparent calc(var(--reveal-on) * (100% + var(--reveal-edge)))
     );
     pointer-events: none;
     /*
-     * Off, the ink keeps the colour it had while it clears, and only then
-     * becomes transparent: the state that turned it off (a reset, another
-     * pick) has already changed --reveal-color, which must not repaint the
-     * ink on its way out.
+     * Off, the fill keeps its colour while it clears and only then turns
+     * transparent: the state that turned it off (a reset, another pick) has
+     * already changed --reveal-color, which must not repaint it on its way
+     * out.
      */
     --reveal-on: 0;
     --reveal-hole: 0;
     --reveal-ink: transparent;
-    transition: --reveal-ink 0s linear var(--reveal-out-duration);
+    transition: --reveal-ink 0s linear var(--reveal-duration);
   }
 
-  /* The colour cross-fades when a filled button changes state (picked → graded). */
+  /* A filled button changing state (picked → graded) cross-fades its colour. */
   [data-reveal='on']::before {
     --reveal-on: 1;
     --reveal-ink: var(--reveal-color, color-mix(in oklch, currentColor 12%, transparent));
-    transition: --reveal-ink 220ms var(--ui-ease);
+    transition: --reveal-ink 240ms var(--ui-ease);
   }
 
-  /*
-   * Spreads quickly off the press point and settles at the edges, at full
-   * strength from the first frame: fading the colour in while the circle
-   * grows would leave only a faint smudge to see.
-   */
+  /* Spreading, the colour is there from the first frame: fading it in as well would leave a smudge. */
   [data-reveal-motion='in']::before {
-    animation: reveal-in var(--reveal-in-duration) cubic-bezier(0.22, 0.7, 0.2, 1);
+    animation: reveal-in var(--reveal-duration) var(--reveal-ease);
     transition: none;
   }
 
   [data-reveal-motion='out']::before {
-    animation: reveal-out var(--reveal-out-duration) cubic-bezier(0.3, 0.6, 0.25, 1);
+    animation: reveal-out var(--reveal-duration) var(--reveal-ease);
   }
 
   @keyframes reveal-in {
@@ -128,39 +114,8 @@
 
   @keyframes reveal-out {
     from { --reveal-on: 1; --reveal-hole: 0; opacity: 1; }
-    60% { opacity: 1; }
+    65% { opacity: 1; }
     to { --reveal-on: 1; --reveal-hole: 1; opacity: 0; }
-  }
-
-  /*
-   * The wave: a soft ring of the same ink, a little stronger, racing out
-   * from the press point past the edges while it fades. Hollow, so it marks
-   * the press without re-filling what un-picking clears; over the spreading
-   * fill it runs just ahead of the fill's edge. Held invisible at its end
-   * until the button drops the attributes.
-   */
-  [data-reveal-press][data-reveal-motion]::after {
-    --reveal-wave-ink: var(--reveal-color, color-mix(in oklch, currentColor 12%, transparent));
-    content: '';
-    position: absolute;
-    inset: var(--reveal-inset, 0px);
-    z-index: -1;
-    border-radius: inherit;
-    background: radial-gradient(
-      circle farthest-corner at var(--reveal-x, 50%) var(--reveal-y, 50%),
-      transparent calc(var(--reveal-wave) * 120% - 40%),
-      var(--reveal-wave-ink) calc(var(--reveal-wave) * 120% - 16%),
-      var(--reveal-wave-ink) calc(var(--reveal-wave) * 120% - 8%),
-      transparent calc(var(--reveal-wave) * 120%)
-    );
-    pointer-events: none;
-    animation: reveal-wave var(--reveal-wave-duration) cubic-bezier(0.25, 0.6, 0.3, 1) both;
-  }
-
-  @keyframes reveal-wave {
-    from { --reveal-wave: 0.08; opacity: 1; }
-    50% { opacity: 1; }
-    to { --reveal-wave: 1; opacity: 0; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -170,13 +125,8 @@
       transition-delay: 0s;
     }
 
-    [data-reveal-motion]::before,
-    [data-reveal-press][data-reveal-motion]::after {
+    [data-reveal-motion]::before {
       animation: none;
-    }
-
-    [data-reveal-press][data-reveal-motion]::after {
-      content: none;
     }
   }
 }

@@ -46,10 +46,9 @@ const buttonVariants = cva(
  * Click-to-fill (radial colour reveal). A button given `revealed` carries an
  * ink layer in --reveal-color. When `revealed` turns true the ink spreads as
  * a circle from the point the button was pressed until it covers the button;
- * when it turns false the ink clears outward from the new press point. A
- * pointer press that changes the fill also sends a wave of the same ink out
- * from the finger. Both directions are an outward ripple from where the
- * reader touched, so picking and un-picking feel like one gesture rather
+ * when it turns false the ink clears outward from the new press point, the
+ * mirror image of filling. Both directions are an outward ripple from where
+ * the reader touched, so picking and un-picking feel like one gesture rather
  * than a fill followed by a shrink.
  *
  * Keyboard presses spread from the default origin (--reveal-x / --reveal-y,
@@ -81,25 +80,6 @@ function recordRevealOrigin(event: React.PointerEvent<HTMLElement>) {
 
 function clearRevealOrigin(element: HTMLElement) {
   for (const name of revealVars) element.style.removeProperty(name)
-}
-
-/*
- * A pointer press may start the wave (styles/reveal.css) if it changes the
- * fill. The mark is dropped when the wave ends, or shortly after a press
- * that changed nothing (a locked option), so a later change made elsewhere
- * (a reset) never waves from a stale press.
- */
-const pressTimers = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>()
-
-function markRevealPress(element: HTMLElement) {
-  clearTimeout(pressTimers.get(element))
-  element.setAttribute("data-reveal-press", "")
-  pressTimers.set(element, setTimeout(() => element.removeAttribute("data-reveal-press"), 900))
-}
-
-function clearRevealPress(element: HTMLElement) {
-  clearTimeout(pressTimers.get(element))
-  element.removeAttribute("data-reveal-press")
 }
 
 /**
@@ -134,20 +114,14 @@ function revealHandlers<
       onPointerDown?.(event)
     },
     onClick: (event: C) => {
-      // detail 0: Enter or Space, not a pointer: spread from the default centre, no wave.
-      if (event.detail === 0) {
-        clearRevealOrigin(event.currentTarget)
-        clearRevealPress(event.currentTarget)
-      } else {
-        markRevealPress(event.currentTarget)
-      }
+      // detail 0: Enter or Space, not a pointer: spread from the default centre.
+      if (event.detail === 0) clearRevealOrigin(event.currentTarget)
       onClick?.(event)
     },
     onAnimationEnd: (event: A) => {
       // A finished ripple is dropped, so re-showing a hidden ancestor never replays it.
-      if (event.target === event.currentTarget) {
-        if (event.animationName === "reveal-wave") clearRevealPress(event.currentTarget)
-        else if (event.animationName.startsWith("reveal-")) event.currentTarget.removeAttribute("data-reveal-motion")
+      if (event.target === event.currentTarget && event.animationName.startsWith("reveal-")) {
+        event.currentTarget.removeAttribute("data-reveal-motion")
       }
       onAnimationEnd?.(event)
     },
@@ -186,7 +160,8 @@ function Button({
  * is more than a label (it wraps, aligns left and may hold formulas or
  * images). A quiet surface lifted by a hairline ring and a soft shadow; it
  * brightens on hover, gives on press, and with `revealed` fills from the
- * press point (and is wiped clean from the press point when un-picked). Colours are --tile-* tokens (styles/tokens/components.css),
+ * press point (and clears from it when un-picked). Colours are --tile-*
+ * tokens (styles/tokens/components.css),
  * which a stylesheet can override per state, e.g. --tile-ring for a
  * coloured outline and --reveal-color for the fill.
  *
