@@ -30,7 +30,7 @@ const PLANS = [
 function TilesDemo() {
   const [plan, setPlan] = useState<string>('year');
   return (
-    <DemoFrame caption="TileButton + revealed：选中项的底色从点击位置以圆形扩散铺满，取消时按钮原背景从这次点击的位置同样扩散、擦去填充；键盘（方向键、空格）选择时从中心扩散。">
+    <DemoFrame caption="TileButton + revealed：选中项的底色从点击位置以圆形扩散铺满，取消时底色从这次点击的位置向外清开；键盘（方向键、空格）选择时从中心扩散。">
       <div role="radiogroup" aria-label="套餐" className="grid gap-2.5 sm:grid-cols-3">
         {PLANS.map((item) => {
           const picked = plan === item.id;
@@ -64,17 +64,19 @@ function TilesDemo() {
   );
 }
 
+// The question card's result tones (styles/tokens/components.css), at the strengths it uses.
+const tone = (name: string, strength: string) => `color-mix(in oklch, var(--exam-tone-${name}) var(--exam-tone-${strength}), transparent)`;
 const TONES = [
-  { label: '正确', color: 'var(--exam-correct-tint)', ring: 'var(--exam-correct-ring)' },
-  { label: '错误', color: 'var(--exam-incorrect-tint)', ring: 'var(--exam-incorrect-ring)' },
-  { label: '漏选', color: 'var(--exam-missed-tint)', ring: 'var(--exam-missed-ring)' },
+  { label: '正确', color: tone('correct', 'fill'), ring: tone('correct', 'line') },
+  { label: '错误', color: tone('incorrect', 'fill'), ring: tone('incorrect', 'line') },
+  { label: '漏选', color: tone('missed', 'fill'), ring: tone('missed', 'line') },
 ] as const;
 
 /** Any colour: set --reveal-color (and --tile-ring) per state. */
 function TonesDemo() {
   const [on, setOn] = useState<Record<string, boolean>>({});
   return (
-    <DemoFrame caption="填充颜色由 --reveal-color 决定，描边由 --tile-ring 决定：题目组件就是按判分结果切换这两个变量。再点同一块，原背景会从点击处扩散回来。">
+    <DemoFrame caption="填充颜色由 --reveal-color 决定，描边由 --tile-ring 决定：题目组件就是按判分结果切换这两个变量。再点同一块，底色会从点击处向外清开。">
       <div className="grid gap-2.5 sm:grid-cols-3">
         {TONES.map((tone) => {
           const active = Boolean(on[tone.label]);

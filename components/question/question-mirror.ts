@@ -43,6 +43,7 @@ export function mirrorQuestion(questionId: string, state: MirrorState): HTMLElem
   copy.querySelectorAll('[data-fresh]').forEach((element) => element.removeAttribute('data-fresh'));
   // A copy shows the state as it is; a ripple still running on the page must not replay in it.
   copy.querySelectorAll('[data-reveal-motion]').forEach((element) => element.removeAttribute('data-reveal-motion'));
+  copy.querySelectorAll('[data-reveal-press]').forEach((element) => element.removeAttribute('data-reveal-press'));
   copy.querySelectorAll<HTMLElement>('[data-exam-choice-group]').forEach((group) => group.style.removeProperty('--choice-cols-measured'));
   copy.querySelectorAll<HTMLElement>('button, input, [tabindex]').forEach((element) => {
     element.tabIndex = -1;
