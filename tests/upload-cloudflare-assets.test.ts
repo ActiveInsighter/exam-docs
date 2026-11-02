@@ -74,6 +74,41 @@ describe('wrangler-compatible asset identity', () => {
       size: 7,
     });
   });
+  it('distributes identical static chunks once across all shards without dropping docs', async () => {
+    mkdirSync(path.join(root, '_next/static/chunks'), { recursive: true });
+    for (let i = 0; i < 24; i += 1) {
+      writeFileSync(path.join(root, '_next/static/chunks', `chunk-${i}.js`), `chunk-${i}`);
+    }
+    writeFileSync(path.join(root, 'favicon.ico'), 'icon');
+
+    const { manifest: complete } = await buildAssetManifest(root);
+    const sharedPaths = Object.keys(complete).filter((key) => key.startsWith('/_next/static/'));
+    const parts = await Promise.all(
+      Array.from({ length: 8 }, (_, shardIndex) => buildAssetManifest(root, { shardIndex, shardCount: 8 })),
+    );
+    const counts = new Map<string, number>();
+    for (const { manifest } of parts) {
+      for (const key of Object.keys(manifest).filter((key) => key.startsWith('/_next/static/'))) {
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+        expect(manifest[key]).toEqual(complete[key]);
+      }
+    }
+    expect([...counts.keys()].sort()).toEqual(sharedPaths.sort());
+    expect([...counts.values()].every((count) => count === 1)).toBe(true);
+    expect(parts[0].manifest['/favicon.ico']).toEqual(complete['/favicon.ico']);
+    expect(parts[0].manifest['/docs/intro.md']).toEqual(complete['/docs/intro.md']);
+    for (const { manifest } of parts.slice(1)) {
+      expect(manifest['/favicon.ico']).toBeUndefined();
+      expect(manifest['/docs/intro.md']).toBeUndefined();
+      expect(manifest['/docs/intro/index.html']).toEqual(complete['/docs/intro/index.html']);
+    }
+  });
+
+  it('rejects invalid shard configurations', async () => {
+    await expect(buildAssetManifest(root, { shardIndex: 8, shardCount: 8 })).rejects.toThrow(RangeError);
+    await expect(buildAssetManifest(root, { shardIndex: 0, shardCount: 0 })).rejects.toThrow(RangeError);
+  });
+
 });
 
 describe('uploadAssets', () => {
