@@ -33,7 +33,11 @@
   margin-block: 1.25rem;
   padding: 0.875rem 0.875rem 0.75rem;
   border-radius: var(--exam-card-radius);
-  background: var(--exam-card);
+  /* A sheen over the header end of the plate, and a hairline edge. */
+  background:
+    linear-gradient(180deg, var(--exam-card-sheen), transparent 5.5rem),
+    var(--exam-card);
+  box-shadow: inset 0 0 0 1px var(--exam-card-ring);
   /* Long pages: skip layout and paint of cards far off screen. */
   content-visibility: auto;
   contain-intrinsic-size: auto 18rem;
@@ -75,8 +79,20 @@
 }
 
 @keyframes exam-card-target {
-  0%, 30% { box-shadow: 0 0 0 2px color-mix(in oklch, var(--foreground) 22%, transparent); }
-  100% { box-shadow: 0 0 0 2px transparent; }
+  0%, 30% { box-shadow: inset 0 0 0 1px var(--exam-card-ring), 0 0 0 2px color-mix(in oklch, var(--foreground) 22%, transparent); }
+  100% { box-shadow: inset 0 0 0 1px var(--exam-card-ring), 0 0 0 2px transparent; }
+}
+
+/*
+ * Perforations: a dashed rule tears the header and the footer off the stem,
+ * like the sections of an answer sheet. Drawn as a background so the dash
+ * length is ours, not the browser's border pattern.
+ */
+[data-question-header],
+[data-question-footer] {
+  --rule: linear-gradient(90deg, var(--exam-rule) 0 0.25rem, transparent 0.25rem 0.5rem);
+  background-repeat: repeat-x;
+  background-size: 0.5rem 1px;
 }
 
 /* Container for the option grid's fallback columns. */
@@ -101,6 +117,9 @@
   align-items: start;
   gap: 0.375rem 0.75rem;
   margin-bottom: 0.875rem;
+  padding-bottom: 0.75rem;
+  background-image: var(--rule);
+  background-position: left bottom;
 }
 
 [data-question-meta] {
@@ -147,19 +166,24 @@
  * --exam-*-accent), never a fill, so a long row stays calm.
  */
 [data-question-number] {
+  --number-bg: var(--exam-number-bg);
+  --number-fg: var(--exam-number-fg);
+  position: relative;
   display: inline-grid;
   place-items: center;
   min-width: 1.875rem;
   height: 1.875rem;
   padding-inline: 0.5rem;
   border-radius: 0.625rem;
-  background: linear-gradient(180deg, var(--exam-number-top), var(--exam-number-bottom));
+  /* A gloss over a solid fill, so the colour can change smoothly when graded. */
+  background-color: var(--number-bg);
+  background-image: linear-gradient(180deg, var(--exam-number-gloss), transparent 70%);
   box-shadow:
     inset 0 1px 0 var(--exam-number-highlight),
     inset 0 0 0 1px var(--exam-number-edge),
     0 1px 2px var(--exam-number-shadow),
     0 3px 8px -3px var(--exam-number-shadow);
-  color: var(--exam-number-fg);
+  color: var(--number-fg);
   font-family: var(--font-outfit), var(--font-sans);
   font-size: 0.9375rem;
   font-weight: 650;
@@ -167,19 +191,53 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
   margin-inline-end: 0.125rem;
+  transition: background-color 320ms var(--ui-ease), color 320ms var(--ui-ease);
+}
+
+/* Answered, not graded yet: a small dot on the cap's corner. */
+[data-question-number]::after {
+  content: '';
+  position: absolute;
+  top: -0.1875rem;
+  right: -0.1875rem;
+  width: 0.5625rem;
+  height: 0.5625rem;
+  border-radius: 999px;
+  background: var(--exam-type-accent, var(--foreground));
+  box-shadow: 0 0 0 2px var(--exam-card);
+  opacity: 0;
+  transform: scale(0.3);
+  transition: opacity 180ms var(--ui-ease), transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+[data-question-number][data-result='draft']::after {
+  opacity: 1;
+  transform: none;
+}
+
+/* Graded: the cap takes the result's colour, so progress reads down the page. */
+[data-question-number][data-result='correct'] { --number-bg: var(--success); --number-fg: var(--success-foreground); }
+[data-question-number][data-result='incorrect'] { --number-bg: var(--destructive); --number-fg: var(--destructive-foreground); }
+[data-question-number][data-result='partial'] { --number-bg: var(--warning); --number-fg: var(--warning-foreground); }
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-question-number][data-fresh]:not([data-result='draft']) {
+    animation: exam-pop 520ms var(--ui-ease) 120ms;
+  }
 }
 
 [data-question-type-label] {
   --type-icon: none;
+  --accent: var(--exam-type-accent, var(--exam-type-fg));
   display: inline-flex;
   align-items: center;
   gap: 0.3125rem;
   height: 1.5rem;
   padding-inline: 0.4375rem 0.5625rem;
   border-radius: 0.5rem;
-  box-shadow: inset 0 0 0 1px var(--exam-type-ring);
-  background: var(--exam-type-bg);
-  color: var(--exam-type-fg);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--accent) 20%, transparent);
+  background: color-mix(in oklch, var(--accent) 9%, transparent);
+  color: color-mix(in oklch, var(--accent) 62%, var(--foreground));
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1;
@@ -192,10 +250,21 @@
   flex-shrink: 0;
   width: 0.8125rem;
   height: 0.8125rem;
-  background: currentColor;
-  opacity: 0.8;
+  background: var(--accent);
   mask: var(--type-icon) center / contain no-repeat;
 }
+
+/* One accent per type, also lent to the number's "answered" dot. */
+[data-exam-question][data-question-type='single'],
+[data-question-type-label][data-type='single'] { --exam-type-accent: var(--exam-type-single); }
+[data-exam-question][data-question-type='multiple'],
+[data-question-type-label][data-type='multiple'] { --exam-type-accent: var(--exam-type-multiple); }
+[data-exam-question][data-question-type='boolean'],
+[data-question-type-label][data-type='boolean'] { --exam-type-accent: var(--exam-type-boolean); }
+[data-exam-question][data-question-type='blank'],
+[data-question-type-label][data-type='blank'] { --exam-type-accent: var(--exam-type-blank); }
+[data-exam-question][data-question-type='essay'],
+[data-question-type-label][data-type='essay'] { --exam-type-accent: var(--exam-type-essay); }
 
 /* Icons (lucide circle-dot / square-check-big / pen-line / text-cursor-input; a check and a cross for true / false). */
 [data-question-type-label][data-type='single'] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Ccircle cx='12' cy='12' r='3.5' fill='black'/%3E%3C/svg%3E"); }
@@ -220,7 +289,7 @@
   content: '';
   width: 1px;
   height: 0.6875rem;
-  background: var(--exam-type-ring);
+  background: color-mix(in oklch, var(--accent) 30%, transparent);
 }
 
 [data-question-actions] {
@@ -605,37 +674,58 @@
 }
 
 /*
- * Feedback icons and the multiple-answer tick are pseudo-elements with
- * mask images, not DOM nodes: a long page has hundreds of options.
+ * The corner badge: the tick that marks a picked option of a
+ * multiple-answer question while answering, and after grading a tick or a
+ * cross on the reader's own picks. The letter itself is never covered, so
+ * "you picked B, the key is C" stays readable on the options. A
+ * pseudo-element with an image, not a DOM node: a long page has hundreds of
+ * options.
  */
-[data-choice-marker]::before {
+[data-choice-marker]::after,
+[data-boolean-glyph]::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background: currentColor;
-  mask: var(--choice-icon, none) center / 0.9375rem no-repeat;
-  opacity: 0;
-  clip-path: inset(0 100% 0 0);
-}
-
-/* Small check that marks a picked option of a multiple-answer question. */
-[data-multiple] [data-choice-marker]::after {
-  content: '';
-  position: absolute;
-  right: -0.25rem;
-  bottom: -0.25rem;
-  width: 0.875rem;
-  height: 0.875rem;
+  right: -0.3125rem;
+  bottom: -0.3125rem;
+  width: 0.9375rem;
+  height: 0.9375rem;
   border-radius: 999px;
-  background: var(--background) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 0.5625rem no-repeat;
-  box-shadow: 0 0 0 1.5px var(--exam-choice-active);
+  background: var(--badge-bg, var(--background)) var(--badge-icon, none) center / 0.5625rem no-repeat;
+  box-shadow: 0 0 0 2px var(--exam-card);
   opacity: 0;
   transform: scale(0.4);
-  transition: opacity 160ms var(--ui-ease), transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: opacity 160ms var(--ui-ease), transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.dark [data-multiple] [data-choice-marker]::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fafafa' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+[data-multiple] [data-feedback='selected'] [data-choice-marker] {
+  --badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+}
+
+.dark [data-multiple] [data-feedback='selected'] [data-choice-marker] {
+  --badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fafafa' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+}
+
+[data-feedback='correct'] :is([data-choice-marker], [data-boolean-glyph]) {
+  --badge-bg: var(--success);
+  --badge-icon: var(--exam-badge-check);
+}
+
+[data-feedback='incorrect'] :is([data-choice-marker], [data-boolean-glyph]) {
+  --badge-bg: var(--destructive);
+  --badge-icon: var(--exam-badge-cross);
+}
+
+[data-multiple] [data-feedback='selected'] [data-choice-marker]::after,
+[data-feedback='correct'] :is([data-choice-marker], [data-boolean-glyph])::after,
+[data-feedback='incorrect'] :is([data-choice-marker], [data-boolean-glyph])::after {
+  opacity: 1;
+  transform: none;
+}
+
+/* Graded badges land a beat after the fill starts, so the eye follows press → fill → verdict. */
+[data-fresh][data-feedback='correct'] :is([data-choice-marker], [data-boolean-glyph])::after,
+[data-fresh][data-feedback='incorrect'] :is([data-choice-marker], [data-boolean-glyph])::after {
+  transition-delay: 160ms;
 }
 
 /*
@@ -693,10 +783,6 @@
   box-shadow: none;
   color: var(--background);
   transform: scale(1.06);
-}
-[data-feedback='selected'] [data-choice-marker]::after {
-  opacity: 1;
-  transform: scale(1);
 }
 
 [data-exam-choice-option][data-feedback='correct'] {
@@ -758,21 +844,6 @@
   transition: opacity 220ms var(--ui-ease);
 }
 
-/* Feedback icons replace the letter. */
-[data-feedback='correct'] [data-choice-letter],
-[data-feedback='incorrect'] [data-choice-letter] {
-  opacity: 0;
-  transform: scale(0.5);
-}
-[data-feedback='correct'] [data-choice-marker] { --choice-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E"); }
-[data-feedback='incorrect'] [data-choice-marker] { --choice-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M7 7l10 10M17 7L7 17'/%3E%3C/svg%3E"); }
-[data-feedback='correct'] [data-choice-marker]::before,
-[data-feedback='incorrect'] [data-choice-marker]::before {
-  opacity: 1;
-  clip-path: inset(0 0 0 0);
-  transition: clip-path 340ms cubic-bezier(0.65, 0, 0.35, 1) 80ms;
-}
-
 /*
  * Grading motion plays on the marker only, never on the whole option. An
  * animated transform hands the tile to the compositor at its sub-pixel
@@ -814,10 +885,11 @@
 
 @media (prefers-reduced-motion: reduce) {
   [data-choice-marker],
-  [data-choice-marker]::before,
   [data-choice-marker]::after,
+  [data-boolean-glyph]::after,
   [data-choice-letter] {
     transition-duration: 1ms !important;
+    transition-delay: 0s !important;
   }
 }
 
@@ -846,6 +918,7 @@
 [data-boolean-option][data-value='false'] { --accent: var(--destructive); }
 
 [data-boolean-glyph] {
+  position: relative;
   display: grid;
   place-items: center;
   width: 1.625rem;
@@ -856,17 +929,8 @@
   transition: background-color 200ms var(--ui-ease), color 200ms var(--ui-ease), box-shadow 200ms var(--ui-ease), transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-[data-boolean-icon]:not([data-boolean-icon='value']),
-[data-boolean-option][data-feedback='correct'] [data-boolean-icon='value'],
-[data-boolean-option][data-feedback='incorrect'] [data-boolean-icon='value'] {
-  display: none;
-}
-[data-boolean-option][data-feedback='correct'] [data-boolean-icon='correct'],
-[data-boolean-option][data-feedback='incorrect'] [data-boolean-icon='incorrect'] {
-  display: block;
-}
-[data-boolean-option][data-feedback='correct'] [data-boolean-icon] path,
-[data-boolean-option][data-feedback='incorrect'] [data-boolean-icon] path {
+/* The mark draws itself in when graded. */
+[data-boolean-option][data-fresh]:is([data-feedback='correct'], [data-feedback='incorrect']) [data-boolean-icon] path {
   stroke-dasharray: 24;
   animation: exam-draw-from 360ms cubic-bezier(0.65, 0, 0.35, 1) both 60ms;
 }
@@ -1030,6 +1094,32 @@ span[data-question-blank][data-kind='math'] {
   vertical-align: 0.15em;
 }
 
+/*
+ * A graded blank says right or wrong with a small mark after it too, not by
+ * colour alone (and the solution card's chips keep theirs).
+ */
+[data-blank-slot]:is([data-feedback='correct'], [data-feedback='incorrect'], [data-feedback='invalid'], [data-feedback='empty'])::after {
+  content: '';
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  margin-inline: -0.0625rem 0.25rem;
+  border-radius: 999px;
+  vertical-align: -0.1875rem;
+  background: var(--destructive) var(--exam-badge-cross) center / 0.625rem no-repeat;
+}
+
+[data-blank-slot][data-feedback='correct']::after {
+  background-color: var(--success);
+  background-image: var(--exam-badge-check);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-blank-slot][data-fresh]::after {
+    animation: exam-note-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both 120ms;
+  }
+}
+
 /* --------------------------------------------------------------- footer */
 
 /*
@@ -1043,7 +1133,10 @@ span[data-question-blank][data-kind='math'] {
   align-items: center;
   gap: 0.625rem 0.75rem;
   min-height: 2rem;
-  margin-top: 1.125rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  background-image: var(--rule);
+  background-position: left top;
 }
 
 /* A single-answer question without a solution: nothing to show yet. */
@@ -1058,6 +1151,13 @@ span[data-question-blank][data-kind='math'] {
 
 [data-footer-status]:empty {
   flex-basis: 0;
+}
+
+/* Narrow cards keep submit, self-grade and 查看解答 on one row; the keyboard hint is the first to go. */
+@container exam-card (width < 34rem) {
+  [data-submit-hint] {
+    display: none;
+  }
 }
 
 [data-footer-actions] {
@@ -1084,7 +1184,8 @@ span[data-question-blank][data-kind='math'] {
   font-weight: 600;
   white-space: nowrap;
 }
-[data-result-pill] svg { width: 0.9375rem; height: 0.9375rem; flex-shrink: 0; }
+[data-result-pill] svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+[data-result-pill] { box-shadow: inset 0 0 0 1px color-mix(in oklch, currentColor 16%, transparent); }
 [data-result-pill='correct'] { background: color-mix(in oklch, var(--success) 13%, transparent); color: color-mix(in oklch, var(--success) 88%, var(--foreground)); }
 [data-result-pill='incorrect'] { background: color-mix(in oklch, var(--destructive) 11%, transparent); color: color-mix(in oklch, var(--destructive) 90%, var(--foreground)); }
 [data-result-pill='partial'] { background: color-mix(in oklch, var(--warning) 18%, transparent); color: color-mix(in oklch, var(--warning) 62%, var(--foreground)); }
@@ -1164,10 +1265,13 @@ span[data-question-blank][data-kind='math'] {
   font-weight: 550;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color 160ms var(--ui-ease), color 160ms var(--ui-ease), box-shadow 160ms var(--ui-ease);
+  transition: background-color 160ms var(--ui-ease), color 160ms var(--ui-ease), box-shadow 160ms var(--ui-ease), scale 140ms var(--ui-ease);
 }
 [data-blank-grade] button[data-grade='incorrect'] { --grade: var(--destructive); }
 [data-blank-grade] button svg { width: 0.8125rem; height: 0.8125rem; flex-shrink: 0; }
+/* Not graded yet (self-grading): both halves quiet, a touch firmer than the track. */
+[data-blank-grade][data-unset] button { color: color-mix(in oklch, var(--foreground) 72%, transparent); }
+[data-blank-grade] button:active:not(:disabled) { scale: 0.95; }
 [data-blank-grade] button[aria-pressed='true'] {
   background: color-mix(in oklch, var(--grade) 15%, var(--ui-panel));
   box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--grade) 45%, transparent);
@@ -1184,7 +1288,79 @@ span[data-question-blank][data-kind='math'] {
   padding: 0.75rem 0.875rem;
   border-radius: 0.875rem;
   background: var(--exam-choice);
-  box-shadow: inset 0 0 0 1px var(--exam-choice-ring);
+  box-shadow: inset 0 0 0 1px var(--exam-choice-ring), var(--tile-shadow);
+  transform-origin: top center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-manual-grade] { animation: exam-panel-in 260ms var(--ui-ease); }
+}
+
+@keyframes exam-panel-in {
+  from { opacity: 0; transform: translateY(-0.375rem) scale(0.985); }
+}
+
+[data-manual-grade-head] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+}
+[data-manual-grade-head] > [data-manual-grade-hint] { margin: 0; }
+
+[data-grade-all] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  height: 1.75rem;
+  padding-inline: 0.5625rem 0.6875rem;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--success) 10%, transparent);
+  color: color-mix(in oklch, var(--success) 80%, var(--foreground));
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 160ms var(--ui-ease), scale 160ms var(--ui-ease);
+}
+[data-grade-all] svg { width: 0.875rem; height: 0.875rem; }
+[data-grade-all]:active:not(:disabled) { scale: 0.96; }
+[data-grade-all]:disabled { cursor: default; opacity: 0.5; }
+[data-grade-all]:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+@media (hover: hover) {
+  [data-grade-all]:hover:not(:disabled) { background: color-mix(in oklch, var(--success) 16%, transparent); }
+}
+
+/* Self-grading rows: the key (typeset) and, if any, what was typed. */
+[data-mode='self'] li {
+  padding: 0.375rem 0.25rem 0.375rem 0.5rem;
+  border-radius: 0.625rem;
+  transition: background-color 200ms var(--ui-ease);
+}
+[data-mode='self'] li[data-graded='correct'] { background: color-mix(in oklch, var(--success) 7%, transparent); }
+[data-mode='self'] li[data-graded='incorrect'] { background: color-mix(in oklch, var(--destructive) 6%, transparent); }
+
+[data-manual-grade-key],
+[data-manual-grade-typed] {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.375rem;
+  margin-inline-end: 0.875rem;
+}
+[data-manual-grade-key] { font-weight: 600; }
+[data-manual-grade-typed] { color: var(--muted-foreground); }
+[data-manual-grade-label] {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+[data-manual-grade-key] [data-manual-grade-label] { color: color-mix(in oklch, var(--success) 80%, var(--foreground)); }
+[data-manual-grade-progress] {
+  margin: 0.5rem 0 0;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
 }
 [data-manual-grade-hint] {
   margin: 0 0 0.5rem;
@@ -1234,8 +1410,16 @@ span[data-question-blank][data-kind='math'] {
   color: var(--muted-foreground);
 }
 [data-result-key] > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.125rem 0.625rem;
+  border-radius: 0.625rem;
+  background: color-mix(in oklch, var(--success) 9%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--success) 22%, transparent);
   font-size: 0.9375rem;
 }
+[data-result-key] { align-items: center; }
 
 @media (prefers-reduced-motion: no-preference) {
   [data-result-pill] { animation: exam-pill-in 360ms cubic-bezier(0.34, 1.56, 0.64, 1); }

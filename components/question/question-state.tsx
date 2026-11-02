@@ -16,7 +16,17 @@ import type { AnswerState, QuestionIdentity } from '@/lib/question-store/types';
 import { useQuestionBatch } from './question-batch';
 import { useQuestionStorage } from './database-context';
 import { diag } from '@/lib/diagnostics';
-import { type BlankGrade, evaluateAttempt, gradeBlank as autoGradeBlank, isAnswered, withBlankGrade, type Evaluation, type GradingSpec } from './grading';
+import {
+  BLANK_SELF_TOKEN,
+  type BlankGrade,
+  evaluateAttempt,
+  gradeBlank as autoGradeBlank,
+  isAnswered,
+  readBlankGrades,
+  withBlankGrade,
+  type Evaluation,
+  type GradingSpec,
+} from './grading';
 
 /*
  * Per-question client state. The options, blanks, footer and solution sheet
@@ -58,6 +68,12 @@ export type QuestionState = {
    * synced, without counting as another attempt.
    */
   gradeBlank: (index: number, grade: BlankGrade | null) => void;
+  /**
+   * Blank questions, while answering: grade blank `index` against the key
+   * (对答案自评), or several at once. Once every blank has a grade the
+   * question is submitted with them, whether or not anything was typed.
+   */
+  selfGradeBlanks: (grades: ReadonlyMap<number, BlankGrade>) => void;
 };
 
 const QuestionContext = createContext<QuestionState | null>(null);
@@ -172,6 +188,21 @@ export function QuestionProvider({
     update({ ...state, selected }, 'regrade');
   }, [ready, spec, update]);
 
+  const selfGradeBlanks = useCallback((grades: ReadonlyMap<number, BlankGrade>) => {
+    const state = current.current;
+    if (!ready || spec.kind !== 'blank' || state.submitted || deferred) return;
+    let selected = state.selected.filter((token) => token !== BLANK_SELF_TOKEN);
+    for (const [index, grade] of grades) {
+      if (spec.blanks[index]) selected = withBlankGrade(selected, index, grade);
+    }
+    const complete = readBlankGrades(selected, spec.blanks.length).every(Boolean);
+    if (!complete) {
+      update({ ...state, selected });
+      return;
+    }
+    update({ ...state, selected: [...selected, BLANK_SELF_TOKEN].sort(), submitted: true, attempt: state.attempt + 1 }, 'submit');
+  }, [ready, spec, deferred, update]);
+
   const reset = useCallback(() => {
     if (!ready) return;
     update({ ...emptyAnswer(), attempt: current.current.attempt }, 'reset');
@@ -212,7 +243,8 @@ export function QuestionProvider({
     submit,
     reset,
     gradeBlank,
-  }), [spec, identity, selected, values, submitted, evaluation, attempt, fresh, answered, canSubmit, deferred, ready, storageError, retryStorage, select, setValue, submit, reset, gradeBlank]);
+    selfGradeBlanks,
+  }), [spec, identity, selected, values, submitted, evaluation, attempt, fresh, answered, canSubmit, deferred, ready, storageError, retryStorage, select, setValue, submit, reset, gradeBlank, selfGradeBlanks]);
 
   return <QuestionContext.Provider value={value}>{children}</QuestionContext.Provider>;
 }

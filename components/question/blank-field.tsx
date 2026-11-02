@@ -58,7 +58,7 @@ export function BlankField({ answer, index, kind, placeholder }: BlankFieldProps
   } as const;
 
   return (
-    <span className="inline whitespace-nowrap">
+    <span className="inline whitespace-nowrap" data-blank-slot="" data-feedback={verdict} data-fresh={question.fresh ? '' : undefined}>
       {several ? <span data-blank-index="" aria-hidden="true">{index + 1}</span> : null}
       {kind === 'math' ? (
         <MathBlank {...common} question={question} index={index} count={spec.blanks.length} label={label} last={last} />

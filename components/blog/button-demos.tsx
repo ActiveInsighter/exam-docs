@@ -30,7 +30,7 @@ const PLANS = [
 function TilesDemo() {
   const [plan, setPlan] = useState<string>('year');
   return (
-    <DemoFrame caption="TileButton + revealed：选中项的底色从点击位置以圆形扩散铺满，取消时收回到最近一次按下的位置；键盘（方向键、空格）选择时从中心扩散。">
+    <DemoFrame caption="TileButton + revealed：选中项的底色从点击位置以圆形扩散铺满，取消时按钮原背景从这次点击的位置同样扩散、擦去填充；键盘（方向键、空格）选择时从中心扩散。">
       <div role="radiogroup" aria-label="套餐" className="grid gap-2.5 sm:grid-cols-3">
         {PLANS.map((item) => {
           const picked = plan === item.id;
@@ -74,7 +74,7 @@ const TONES = [
 function TonesDemo() {
   const [on, setOn] = useState<Record<string, boolean>>({});
   return (
-    <DemoFrame caption="填充颜色由 --reveal-color 决定，描边由 --tile-ring 决定：题目组件就是按判分结果切换这两个变量。点同一块可再次收回。">
+    <DemoFrame caption="填充颜色由 --reveal-color 决定，描边由 --tile-ring 决定：题目组件就是按判分结果切换这两个变量。再点同一块，原背景会从点击处扩散回来。">
       <div className="grid gap-2.5 sm:grid-cols-3">
         {TONES.map((tone) => {
           const active = Boolean(on[tone.label]);

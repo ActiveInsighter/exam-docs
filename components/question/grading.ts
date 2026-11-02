@@ -176,6 +176,8 @@ export type Evaluation = {
   blanks: readonly BlankVerdict[];
   /** Per blank, true where the reader overrode the automatic grade. */
   manual?: readonly boolean[];
+  /** Blank questions graded by the reader against the key instead of by typing (自评). */
+  self?: boolean;
 };
 
 /*
@@ -190,6 +192,17 @@ export type BlankGrade = 'correct' | 'incorrect';
 const BLANK_GRADE = /^blank:(\d{1,2}):(correct|incorrect)$/u;
 
 export const blankGradeToken = (index: number, grade: BlankGrade) => `blank:${index}:${grade}`;
+
+/*
+ * Self-grading a blank question (对答案自评): some answers are formulas too
+ * awkward to type, so the reader may compare their own working with the key
+ * and grade each blank like an essay, without entering anything. Their grades
+ * are the same per-blank tokens; this marker records that the submission was
+ * graded that way, so it reads "自评" rather than "已改判".
+ */
+export const BLANK_SELF_TOKEN = 'blank:self';
+
+export const isSelfGraded = (selected: readonly string[]) => selected.includes(BLANK_SELF_TOKEN);
 
 /** The reader's grade for each blank, if any, from a blank question's `selected`. */
 export function readBlankGrades(selected: readonly string[], count: number): (BlankGrade | undefined)[] {
@@ -227,10 +240,12 @@ export function evaluateAttempt(
     case 'blank': {
       const graded = gradeBlanks(values, spec.blanks);
       const grades = readBlankGrades(selected, spec.blanks.length);
-      if (!grades.some(Boolean)) return { result: graded.result, blanks: graded.verdicts };
+      const self = isSelfGraded(selected);
+      if (!grades.some(Boolean)) return { result: graded.result, blanks: graded.verdicts, ...(self ? { self } : {}) };
       const blanks = graded.verdicts.map((verdict, index) => grades[index] ?? verdict);
-      const manual = grades.map((grade, index) => grade !== undefined && grade !== graded.verdicts[index]);
-      return { result: resultOf(blanks), blanks, manual };
+      // A self-graded blank is the reader's grade by design, not a correction of the checker.
+      const manual = grades.map((grade, index) => !self && grade !== undefined && grade !== graded.verdicts[index]);
+      return { result: resultOf(blanks), blanks, manual, ...(self ? { self } : {}) };
     }
     case 'self':
       return { result: selfGradeOf(selected[0])?.result ?? 'incorrect', blanks: [] };

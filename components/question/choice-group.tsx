@@ -49,7 +49,10 @@ export function isFilled(feedback: ChoiceFeedback) {
 
 const NOTES: Partial<Record<ChoiceFeedback, string>> = { missed: '漏选', answer: '正确答案' };
 
-/** The letter in its ring; feedback icons and the tick are CSS pseudo-elements. */
+/**
+ * The letter in its disc. It stays after grading (the disc takes the
+ * result's colour); the tick or cross is a corner badge drawn by CSS.
+ */
 function Marker({ label }: { label: string }) {
   return (
     <span data-choice-marker="" aria-hidden="true">

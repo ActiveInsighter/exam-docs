@@ -2,6 +2,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import {
+  BLANK_SELF_TOKEN,
   blankGradeToken,
   evaluateAttempt,
   readBlankGrades,
@@ -11,6 +12,7 @@ import {
 } from '@/components/question/grading';
 import { deleteBackward, insertFraction, insertText, moveCaret, wrapSelection } from '@/components/question/math-editing';
 import { MathPreview } from '@/components/question/math-preview';
+import { describeResult } from '@/components/question/question-footer';
 
 const at = (position: number) => ({ start: position, end: position });
 
@@ -73,6 +75,19 @@ describe('manual grading of blanks', () => {
     const failed = evaluateAttempt(spec, [blankGradeToken(0, 'incorrect'), blankGradeToken(1, 'incorrect')], values);
     expect(failed.result).toBe('incorrect');
     expect(failed.manual).toEqual([false, true]);
+  });
+
+  it('grades a self-graded question from the reader’s grades alone, typed or not', () => {
+    const selected = [BLANK_SELF_TOKEN, blankGradeToken(0, 'correct'), blankGradeToken(1, 'incorrect')].sort();
+    const graded = evaluateAttempt(spec, selected, []);
+    expect(graded).toEqual({ result: 'partial', blanks: ['correct', 'incorrect'], manual: [false, false], self: true });
+    expect(describeResult(spec, graded, selected)).toBe('自评 · 部分正确 · 1/2 空');
+
+    const all = [BLANK_SELF_TOKEN, blankGradeToken(0, 'correct'), blankGradeToken(1, 'correct')].sort();
+    expect(describeResult(spec, evaluateAttempt(spec, all, []), all)).toBe('自评 · 正确');
+    // The marker never reads as a grade of its own.
+    expect(readBlankGrades([BLANK_SELF_TOKEN], 2)).toEqual([undefined, undefined]);
+    expect(withBlankGrade(all, 1, null)).toContain(BLANK_SELF_TOKEN);
   });
 });
 
