@@ -91,7 +91,7 @@ TCP 位于 <Blank answer="传输层" />，建立连接需要 <Blank answer="3" /
 
     const math = await render(doc('math/core-questions/01-高等数学/01-模块一-函数、极限与连续/02-第二节-极限的基本性质.mdx'));
     expect(math).toContain('data-question-type="boolean"');
-    expect(math).toContain('data-question-type="essay"');
+    expect(math).toContain('data-question-type="single"');
     expect(math).toContain('katex');
 
     const english = await render(doc('english/index.mdx'), 'english.mdx').catch((error) => String(error));

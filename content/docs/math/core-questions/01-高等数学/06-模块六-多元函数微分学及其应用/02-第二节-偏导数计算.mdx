@@ -1,1091 +1,1218 @@
 ---
-title: 第二节 偏导数计算
-description: 高等数学核心题目重构：复合函数与隐函数的一阶、二阶偏导计算，重视计算点与链式法则的完整映射。
+title: "第二节 偏导数计算"
+description: "考研数学真题分类：模块六：多元函数微分学及其应用"
 ---
 
-本节先从**复合映射在同一点的导数关系**出发，再逐步进入二阶复合、隐函数及偏微分方程。对含多层嵌套的函数，先建立中间变量与基点的对应关系，按链式法则逐层计算，不将不同参数值映射到的点误作同一点。
+<Question id="core-1102-math-4b8ca9-003" type="essay" points={6} tags="来源:1988年考研数学一, 科目:高等数学, 章节:偏导数计算, 考点:欧拉齐次函数定理与二阶偏导">
 
-## 一、复合函数的链式法则与全微分：从一阶到嵌套二阶
-
-<Question id="math-core-gd-06-02-001" type="essay" points={6} tags="来源:2001考研数一, 考点:复合函数链式法则, 考点:嵌套求导">
-
-设函数 $z=f(x,y)$ 在点 $(1,1)$ 处可微，且
+ 设 $u = yf\left(\frac{x}{y}\right) + xg\left(\frac{y}{x}\right)$ ，其中函数 $f, g$ 具有二阶连续偏导数，求
 
 $$
-f(1,1)=1,\qquad f_x(1,1)=2,\qquad f_y(1,1)=3,
-$$
-
-$\varphi(x)=f\bigl(x,f(x,x)\bigr)$。求
-
-$$
-\left.\frac{\mathrm d}{\mathrm dx}\varphi^3(x)\right|_{x=1}.
+x \frac{\partial^2 u}{\partial x^2} + y \frac{\partial^2 u}{\partial x \partial y}
 $$
 
 <Solution>
 
-**参考答案：$\boxed{51}$。**
+**参考答案：** $\boxed{xu_{xx}+yu_{xy}=0}$（在 $x\ne0$、$y\ne0$ 的定义域内）。
 
-**第一步：分离最内层复合函数。** 设
+**解题思路：** 两项都是一次齐次函数，无须逐项对 $f,g$ 求二阶导数。先用欧拉齐次函数定理，再对所得恒等式求导。
 
-$$
-h(x)=f(x,x),\qquad \varphi(x)=f\bigl(x,h(x)\bigr).
-$$
+<Tabs items={['方法一：欧拉定理', '方法二：直接校验']} defaultIndex={0}>
+  <Tab value="方法一：欧拉定理">
 
-由已知 $h(1)=f(1,1)=1$。因为 $f$ 在 $(1,1)$ 可微，沿曲线 $(x,x)$ 的链式法则在 $x=1$ 成立，故
+    对任意正数 $\lambda$，有
 
-$$
-h'(1)=f_x(1,1)\cdot1+f_y(1,1)\cdot1=2+3=5.
-$$
+    $$
+    \begin{aligned}
+    u(\lambda x,\lambda y)
+    &=\lambda y f\!\left(\frac{x}{y}\right)
+      +\lambda x g\!\left(\frac{y}{x}\right)\\
+    &=\lambda u(x,y).
+    \end{aligned}
+    $$
 
-**第二步：再求外层 $\varphi$ 的导数。**
+    因而 $u$ 是一次齐次函数，欧拉公式给出
 
-$$
-\varphi'(1)=f_x\bigl(1,h(1)\bigr)
-+f_y\bigl(1,h(1)\bigr)h'(1)
-=2+3\cdot5=17.
-$$
+    $$
+    xu_x+yu_y=u.
+    $$
 
-同时 $\varphi(1)=f(1,h(1))=f(1,1)=1$。
+    对 $x$ 求偏导（$y$ 固定），得到
 
-**第三步：对三次幂使用一元链式法则。**
+    $$
+    u_x+xu_{xx}+yu_{yx}=u_x,
+    $$
 
-$$
-\left.(\varphi^3)'\right|_{x=1}
-=3\varphi(1)^2\varphi'(1)=3\cdot1^2\cdot17
-=\boxed{51}.
-$$
+    即 $xu_{xx}+yu_{yx}=0$。二阶连续性保证 $u_{yx}=u_{xy}$，所求为 $0$。
 
-<Callout type="idea" title="嵌套求导采用“由内向外”的顺序">
+  </Tab>
+  <Tab value="方法二：直接校验">
 
-将 $f(x,f(x,x))$ 看成两次函数复合：先算 $h=f(x,x)$ 的值与导数，再把它代入外层 $f(x,h)$，最后处理 $\varphi^3$。题目只给出 $(1,1)$ 的一阶信息，整个解答也只需要这些数据。
+    分别考虑 $u_1=yf(x/y)$ 和 $u_2=xg(y/x)$。对 $u_1$，令 $t=x/y$，有
+
+    $$
+    (u_1)_{xx}=\frac{f''(t)}y,
+    \qquad (u_1)_{xy}=-\frac{x}{y^2}f''(t).
+    $$
+
+    所以 $x(u_1)_{xx}+y(u_1)_{xy}=0$。对 $u_2$，令 $s=y/x$，得
+
+    $$
+    (u_2)_{xx}=\frac{y^2}{x^3}g''(s),
+    \qquad (u_2)_{xy}=-\frac{y}{x^2}g''(s),
+    $$
+
+    同样 $x(u_2)_{xx}+y(u_2)_{xy}=0$；相加即得结论。
+
+  </Tab>
+</Tabs>
+
+<Callout type="idea" title="考试常用的快速识别">
+
+形如 $y^k f(x/y)$、$x^k g(y/x)$ 的表达式是 $k$ 次齐次函数。题目要求的是同阶微分算子时，优先使用欧拉定理及其求导式，避免繁琐的链式法则。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-06-02-002" type="single" points={5} tags="来源:2021考研数一数二数三, 考点:链式法则, 考点:曲线导数反求">
+<Question id="core-1102-math-4b8ca9-008" type="blank" points={3} tags="来源:1991年考研数学一, 科目:高等数学, 章节:偏导数计算, 考点:隐函数求导与全微分">
 
-设函数 $f(x,y)$ 可微，且
-
-$$
-f(x+1,e^x)=x(x+1)^2,
-\qquad f(x,x^2)=2x^2\ln x,
-$$
-
-则 $\mathrm df(1,1)=$（ ）。
-
-<Option>$\mathrm dx+\mathrm dy$</Option>
-<Option>$\mathrm dx-\mathrm dy$</Option>
-<Option correct>$\mathrm dy$</Option>
-<Option>$-\mathrm dy$</Option>
+ 由方程 $xyz+\sqrt{x^2+y^2+z^2}=\sqrt{2}$ 所确定的函数 $z=z(x,y)$ 在点 $(1, 0, -1)$ 处的全微分 $\mathrm{d}z=$ <Blank answer="dx - sqrt(2)dy" kind="math" />。
 
 <Solution>
 
-**答案：C，$\mathrm df(1,1)=\mathrm dy$。**
+**参考答案：** $\boxed{\mathrm dz=\mathrm dx-\sqrt2\,\mathrm dy}$。
 
-**第一步：确定两条参数曲线何时经过 $(1,1)$。** $f(x+1,e^x)$ 在参数 $x=0$ 时取值点 $(1,1)$；$f(x,x^2)$ 在参数 $x=1$ 时取值点 $(1,1)$。因此两条等式需要**分别在不同参数值处求导**。
+<Steps>
+  <Step>
 
-**第二步：用第一条关系得到第一条线性方程。** 设 $u=x+1,v=e^x$，求导：
+    ### 构造隐函数并检查适用条件
 
-$$
-f_u(x+1,e^x)+e^x f_v(x+1,e^x)
-=(x+1)^2+2x(x+1).
-$$
+    令
 
-令参数 $x=0$，得到
+    $$
+    F(x,y,z)=xyz+\sqrt{x^2+y^2+z^2}-\sqrt2.
+    $$
 
-$$
-f_x(1,1)+f_y(1,1)=1.\tag{1}
-$$
+    在 $(1,0,-1)$ 处，$F=0$，且平方根内为 $2>0$；稍后算得 $F_z=-1/\sqrt2\ne0$，所以隐函数定理保证附近可解出 $z=z(x,y)$。
 
-**第三步：用第二条关系得到第二条线性方程。** 对 $f(x,x^2)=2x^2\ln x$ 求导：
+  </Step>
+  <Step>
 
-$$
-f_x(x,x^2)+2x f_y(x,x^2)
-=4x\ln x+2x.
-$$
+    ### 计算三个偏导数
 
-在 $x=1$ 处，
+    记 $R=\sqrt{x^2+y^2+z^2}$，则
 
-$$
-f_x(1,1)+2f_y(1,1)=2.\tag{2}
-$$
+    $$
+    F_x=yz+\frac xR,\quad
+    F_y=xz+\frac yR,\quad
+    F_z=xy+\frac zR.
+    $$
 
-**第四步：联立求出梯度。** 两式相减得 $f_y(1,1)=1$，再代入（1）得到 $f_x(1,1)=0$。因此
+    在指定点 $R=\sqrt2$，故
 
-$$
-\boxed{\mathrm df(1,1)=0\,\mathrm dx+1\,\mathrm dy=\mathrm dy}.
-$$
+    $$
+    F_x=\frac1{\sqrt2},\qquad
+    F_y=-1,\qquad
+    F_z=-\frac1{\sqrt2}.
+    $$
 
-<Callout type="warn" title="参数值不同，映射到的同一点相同">
+  </Step>
+  <Step>
 
-这类题的关键是把参数 $x=0$ 与参数 $x=1$ 对应的空间点都认成 $(1,1)$。只有先完成这一步，才能把两次求导得到的方程联立求 $f_x(1,1),f_y(1,1)$。
+    ### 用全微分恒等式解出 dz
 
-</Callout>
+    从 $F(x,y,z(x,y))\equiv0$ 得
 
-</Solution>
-</Question>
+    $$
+    F_x\,\mathrm dx+F_y\,\mathrm dy+F_z\,\mathrm dz=0.
+    $$
 
-<Question id="math-core-gd-06-02-003" type="blank" points={5} tags="来源:2024考研数一, 考点:二阶复合求导, 考点:梯度与Hessian">
+    因此
 
-设 $f(u,v)$ 具有二阶连续偏导数，
+    $$
+    \mathrm dz=-\frac{F_x\,\mathrm dx+F_y\,\mathrm dy}{F_z}
+    =\mathrm dx-\sqrt2\,\mathrm dy.
+    $$
 
-$$
-\left.\mathrm df\right|_{(1,1)}=3\,\mathrm du+4\,\mathrm dv,
-\qquad y=f(\cos x,1+x^2),
-$$
+  </Step>
+</Steps>
 
-则 $\left.\dfrac{\mathrm d^2y}{\mathrm dx^2}\right|_{x=0}=$ <Blank answer="5" kind="math" />。
+<Callout type="warn" title="隐函数求导的符号检查">
 
-<Solution>
-
-**答案：$\boxed{5}$。**
-
-**第一步：从已知全微分读取梯度。**
-
-$$
-f_u(1,1)=3,\qquad f_v(1,1)=4.
-$$
-
-令 $u(x)=\cos x$、$v(x)=1+x^2$，则 $u(0)=v(0)=1$，与已知梯度的基点吻合。
-
-**第二步：写出完整的二阶链式法则。** 一次求导为
-
-$$
-y'=f_u(u,v)u'+f_v(u,v)v'.
-$$
-
-再求导并利用混合偏导连续可交换：
-
-$$
-y''=f_{uu}(u')^2+2f_{uv}u'v'+f_{vv}(v')^2
-+f_u u''+f_v v''.
-$$
-
-**第三步：在指定点判断哪些项自动消失。**
-
-$$
-u'(0)=-\sin0=0,\quad v'(0)=2\cdot0=0,
-\quad u''(0)=-\cos0=-1,\quad v''(0)=2.
-$$
-
-所以前面的二阶偏导三项全部为零，不需要知道 Hessian 的具体数值。只剩
-
-$$
-y''(0)=f_u(1,1)(-1)+f_v(1,1)\cdot2
-=-3+8=\boxed5.
-$$
-
-<Callout type="idea" title="链式法则的向量形式">
-
-沿曲线 $X(x)=(u(x),v(x))$，有 $y''=X'^{\!T}H_fX'+\nabla f\cdot X''$。当计算点 $X'(0)=0$ 时，Hessian 二次型自动消失，只需梯度与内层二阶导的内积；这就是本题只提供 $df$ 仍能求 $y''$ 的原因。
+必须保留 $-\frac{F_x\,dx+F_y\,dy}{F_z}$ 前面的负号；本题 $F_z$ 自身为负，两处负号会相互抵消。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-06-02-004" type="blank" points={5} tags="来源:2026考研数二, 考点:全微分, 考点:复合函数求导">
+<Question id="core-1102-math-4b8ca9-015" type="essay" points={5} tags="来源:1995年考研数学一, 科目:高等数学, 章节:偏导数计算, 考点:多层复合函数与隐式求导">
 
-已知函数 $f(x,y)$ 可微，且 $\mathrm df(0,0)=\pi\,\mathrm dx+3\,\mathrm dy$。记 $g(x)=f(\ln x,\sin\pi x)$，则 $g'(1)=$ <Blank answer="-2pi" kind="math" />。
-
-<Solution>
-
-**答案：$\boxed{-2\pi}$。**
-
-**第一步：把全微分改写成偏导数值。** 由于 $f$ 在原点可微，
-
-$$
-f_x(0,0)=\pi,\qquad f_y(0,0)=3.
-$$
-
-**第二步：确认复合函数在 $x=1$ 时落在哪个点。** 令 $u(x)=\ln x$、$v(x)=\sin\pi x$，则
-
-$$
-u(1)=0,\quad v(1)=0;\qquad
-u'(1)=1,\quad v'(1)=\pi\cos\pi=-\pi.
-$$
-
-由链式法则，
-
-$$
-\begin{aligned}
-g'(1)&=f_x(u(1),v(1))u'(1)+f_y(u(1),v(1))v'(1)\\
-&=\pi\cdot1+3\cdot(-\pi)=\boxed{-2\pi}.
-\end{aligned}
-$$
-
-<Callout type="idea" title="复合求导的两项检查">
-
-先核对内层函数的**值**，确保外层偏导数所用的基点正确；再核对内层函数的**导数**。特别注意 $\frac{d}{dx}\sin(\pi x)=\pi\cos(\pi x)$，且 $\cos\pi=-1$。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-06-02-005" type="blank" points={4} tags="来源:2019考研数一, 考点:复合求导, 考点:微分算子消项">
-
-设函数 $f(u)$ 可导，$z=f(\sin y-\sin x)+xy$，则
-
-$$
-\frac1{\cos x}\frac{\partial z}{\partial x}
-+\frac1{\cos y}\frac{\partial z}{\partial y}=
-$$
-
-<Blank answer="x/cos(y)+y/cos(x)" kind="math" />。（设 $\cos x\cos y\ne0$。）
-
-<Solution>
-
-**答案：$\boxed{\dfrac{x}{\cos y}+\dfrac{y}{\cos x}}$。**
-
-**第一步：把未知函数统一写成一个中间变量。** 令 $u=\sin y-\sin x$。把另一个变量固定后应用链式法则，得到
-
-$$
-z_x=-\cos x\,f'(u)+y,\qquad
-z_y=\cos y\,f'(u)+x.
-$$
-
-**第二步：按题给系数组合偏导数。**
-
-$$
-\begin{aligned}
-\frac{z_x}{\cos x}+\frac{z_y}{\cos y}
-&=-f'(u)+\frac{y}{\cos x}+f'(u)+\frac{x}{\cos y}\\
-&=\boxed{\frac{y}{\cos x}+\frac{x}{\cos y}}.
-\end{aligned}
-$$
-
-<Callout type="idea" title="先看算子是否湮灭复合变量">
-
-若把 $L=(\cos x)^{-1}\partial_x+(\cos y)^{-1}\partial_y$ 看作整体，则 $L(\sin y-\sin x)=-1+1=0$。于是 $L[f(u)]=f'(u)Lu=0$，只需计算 $L(xy)$。这是处理“任意可导 $f$”题的快速方法。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-06-02-006" type="blank" tags="来源:李林880, 考点:变限积分, 考点:全微分">
-
-设 $g(x)$ 连续，$g(2)=1$，
-
-$$
-f(x,y)=\int_0^{\sqrt{x^2+y^2}}t\,g(x^2+y^2-t^2)\,\mathrm dt,
-$$
-
-则 $\left.\mathrm df\right|_{(1,1)}=$ <Blank answer="dx+dy" kind="text" />。
-
-<Solution>
-
-**答案：$\boxed{\mathrm dx+\mathrm dy}$。**
-
-**第一步：识别 $t\,\mathrm dt$ 及 $t^2$ 共同出现的换元结构。** 记 $R=x^2+y^2$，令 $u=R-t^2$，则 $\mathrm du=-2t\,\mathrm dt$。积分上下限分别对应 $u=R$ 和 $u=0$，所以
-
-$$
-\begin{aligned}
-f(x,y)&=-\frac12\int_R^0g(u)\,\mathrm du
-=\frac12\int_0^{x^2+y^2}g(u)\,\mathrm du.
-\end{aligned}
-$$
-
-这里 $g$ 连续，因而可用微积分基本定理；无需假设 $g$ 可导。
-
-**第二步：求复合函数的全微分。**
-
-$$
-\mathrm df=\frac12g(R)\,\mathrm dR
-=\frac12g(R)(2x\,\mathrm dx+2y\,\mathrm dy).
-$$
-
-即 $f_x=xg(R)$、$f_y=yg(R)$。在 $(1,1)$ 处，$R=2$，且 $g(2)=1$，故
-
-$$
-\boxed{\left.\mathrm df\right|_{(1,1)}=\mathrm dx+\mathrm dy}.
-$$
-
-<Callout type="idea" title="为什么不直接用莱布尼茨公式？">
-
-原式的被积函数与上限都依赖 $x,y$，直接求偏导会产生上下限项和参数积分项。先把它化为 $\frac12\int_0^R g(u)\,du$，能将题目一次性降为单变量复合，计算更短，也更不易漏项。
-
-</Callout>
-
-</Solution>
-</Question>
-
-## 二、二阶复合、混合偏导与积分上限
-
-<Question id="math-core-gd-06-02-007" type="essay" points={8} tags="来源:2003考研数三, 考点:拉普拉斯算子, 考点:二阶复合函数">
-
-设 $f(u,v)$ 具有二阶连续偏导数，且
-
-$$
-\frac{\partial^2f}{\partial u^2}+\frac{\partial^2f}{\partial v^2}=1.
-$$
-
-令 $g(x,y)=f\left(xy,\frac{x^2-y^2}{2}\right)$，求 $\dfrac{\partial^2g}{\partial x^2}+\dfrac{\partial^2g}{\partial y^2}$。
-
-<Solution>
-
-**参考答案：$\boxed{g_{xx}+g_{yy}=x^2+y^2}$。**
-
-**第一步：梳理内层变量及其导数。** 记 $u=xy$、$v=(x^2-y^2)/2$，那么
-
-$$
-\begin{array}{c|cccccc}
-&u_x&u_y&v_x&v_y&u_{xx}+u_{yy}&v_{xx}+v_{yy}\\\hline
-\text{数值}&y&x&x&-y&0&1-1=0
-\end{array}
-$$
-
-特别留意两个关键恒等式：
-
-$$
-u_xv_x+u_yv_y=yx+x(-y)=0,
-$$
-
-$$
-u_x^2+u_y^2=v_x^2+v_y^2=x^2+y^2.
-$$
-
-**第二步：展开二阶链式法则并相加。** 两个方向分别有
-
-$$
-\begin{aligned}
-g_{xx}&=f_{uu}u_x^2+2f_{uv}u_xv_x+f_{vv}v_x^2+f_u u_{xx}+f_vv_{xx},\\
-g_{yy}&=f_{uu}u_y^2+2f_{uv}u_yv_y+f_{vv}v_y^2+f_u u_{yy}+f_vv_{yy}.
-\end{aligned}
-$$
-
-相加后，混合项的系数为 $2(u_xv_x+u_yv_y)=0$，一阶导数项的系数分别是 $u_{xx}+u_{yy}=0$、$v_{xx}+v_{yy}=0$。因此
-
-$$
-\begin{aligned}
-g_{xx}+g_{yy}
-&=(x^2+y^2)f_{uu}+(x^2+y^2)f_{vv}\\
-&=(x^2+y^2)(f_{uu}+f_{vv})
-=\boxed{x^2+y^2}.
-\end{aligned}
-$$
-
-<Callout type="idea" title="三组抵消是本题核心">
-
-对于映射 $(x,y)\mapsto(u,v)$，有 $\nabla u\cdot\nabla v=0$、$|\nabla u|=|\nabla v|$、$\Delta u=\Delta v=0$。它们分别消去混合 Hessian 项、统一二阶纯偏导项的系数、消去一阶偏导项。题给 $f_{uu}+f_{vv}=1$ 才能在最后一步直接代入。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-06-02-008" type="essay" points={9} tags="来源:2011考研数一数二, 考点:混合偏导, 考点:极值必要条件">
-
-设 $z=f(xy,yg(x))$，其中 $f$ 具有二阶连续偏导数，$g$ 可导且在 $x=1$ 处取得极值 $g(1)=1$。求
-
-$$
-\left.\frac{\partial^2z}{\partial x\partial y}\right|_{(1,1)}.
-$$
+ 设 $u=f(x,y,z)$，$\varphi(x^2,\mathrm{e}^y,z)=0$，$y=\sin x$，其中 $f,\varphi$ 都具有一阶连续偏导数，且 $\frac{\partial\varphi}{\partial z}\neq 0$，求 $\frac{\mathrm{d}u}{\mathrm{d}x}$。
 
 <Solution>
 
 **参考答案：**
 
 $$
-\boxed{\left.z_{xy}\right|_{(1,1)}=f_u(1,1)+f_{uu}(1,1)+f_{uv}(1,1)}.
+\boxed{\frac{\mathrm du}{\mathrm dx}
+=f_1'+f_2'\cos x
+-\frac{f_3'}{\varphi_3'}
+\left(2x\varphi_1'+e^y\cos x\,\varphi_2'\right)}.
 $$
 
-**第一步：从极值条件提取能够使用的信息。** $g$ 在 $x=1$ 可导且取极值，故由费马定理
+其中 $f_i'$ 在 $(x,y,z)$ 处取值，$\varphi_i'$ 在 $(x^2,e^y,z)$ 处取值，且最后令 $y=\sin x$。
 
-$$
-g'(1)=0,\qquad g(1)=1.
-$$
+<Steps>
+  <Step>
 
-并**不能**由此推出 $g''(1)=0$，而且题目也没有假设 $g$ 二阶可导。
+    ### 理清嵌套变量依赖关系
 
-**第二步：先沿 $x$ 求偏导，再沿 $y$ 求偏导。** 令 $u=xy$、$v=yg(x)$，则 $u_x=y$、$v_x=yg'(x)$，所以
+    $x$ 是自变量；$y(x)=\sin x$；方程 $\varphi(x^2,e^{y(x)},z(x))=0$ 确定 $z(x)$；最终 $u(x)=f(x,y(x),z(x))$。
 
-$$
-z_x=yf_u(u,v)+yg'(x)f_v(u,v).
-$$
+    记中间量 $s=x^2$、$t=e^y$，则 $s'=2x$、$t'=e^y\cos x$。
 
-对 $y$ 求导时，$x$ 固定，$g(x)$ 和 $g'(x)$ 均视为常数；且 $u_y=x$、$v_y=g(x)$。于是
+  </Step>
+  <Step>
 
-$$
-\begin{aligned}
-z_{xy}={}&f_u+y\bigl(xf_{uu}+g(x)f_{uv}\bigr)\\
-&+g'(x)f_v+yg'(x)\bigl(xf_{vu}+g(x)f_{vv}\bigr).
-\end{aligned}
-$$
+    ### 先对隐式约束求出 z'
 
-**第三步：最后代入 $(1,1)$。** 该点的 $(u,v)=(1,1)$，且 $g'(1)=0$，所有含 $g'$ 的项消失，从而得到
+    对 $\varphi(s(x),t(x),z(x))\equiv0$ 用链式法则：
 
-$$
-\boxed{z_{xy}(1,1)=f_u(1,1)+f_{uu}(1,1)+f_{uv}(1,1)}.
-$$
+    $$
+    2x\varphi_1'+e^y\cos x\,\varphi_2'+\varphi_3'z'=0.
+    $$
 
-<Callout type="warn" title="求混合偏导时不要误求 $g''$">
+    因 $\varphi_3'\ne0$，故
 
-若先求 $z_x$ 再求 $y$，整个计算只需要 $g$ 的一阶导数。选对求导顺序可以避免对已知条件之外的 $g''$ 作无根据的假设。$f_{uv}$ 可交换是因为题设给出了二阶连续偏导数。
+    $$
+    z'=-\frac{2x\varphi_1'+e^y\cos x\,\varphi_2'}{\varphi_3'}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 再对外层函数求全导数
+
+    $$
+    \frac{\mathrm du}{\mathrm dx}
+    =f_1'\cdot1+f_2'\cdot y'+f_3'\cdot z'
+    =f_1'+f_2'\cos x+f_3'z'.
+    $$
+
+    将上一步 $z'$ 代入即可得到盒中答案。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="双层链式法则的记号">
+
+$\varphi_2'$ 对应的是第二个**自变量 $e^y$**，因此贡献 $e^y\cos x$；不能漏掉外层指数函数求导的因子 $e^y$。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-06-02-009" type="essay" points={10} tags="来源:2017考研数一数二, 考点:二阶复合求导">
+<Question id="core-1102-math-4b8ca9-017" type="essay" points={8} tags="来源:1996年考研数学一, 科目:高等数学, 章节:偏导数计算, 考点:变量代换与二阶偏微分算子">
 
-设 $f(u,v)$ 具有二阶连续偏导数，$y=f(e^x,\cos x)$，求 $\left.y'\right|_{x=0}$ 与 $\left.y''\right|_{x=0}$。
+ 设变换
+
+$$
+\begin{cases} u=x-2y, \\ v=x+ay \end{cases}
+$$
+
+可把方程 $6\frac{\partial^2 z}{\partial x^2}+\frac{\partial^2 z}{\partial x \partial y}-\frac{\partial^2 z}{\partial y^2}=0$ 化简为 $\frac{\partial^2 z}{\partial u \partial v}=0$，求常数 $a$，其中 $z=z(x,y)$ 有二阶连续的偏导数。
+
+<Solution>
+
+**参考答案：** $\boxed{a=3}$，此时原方程等价于 $25z_{uv}=0$。
+
+<Steps>
+  <Step>
+
+    ### 把原坐标的微分算子变换到 (u,v)
+
+    由 $u=x-2y$、$v=x+ay$，有
+
+    $$
+    \partial_x=\partial_u+\partial_v,
+    \qquad \partial_y=-2\partial_u+a\partial_v.
+    $$
+
+    这里将 $z$ 视为新坐标下的函数，利用二阶连续偏导数可交换混合求导次序。
+
+  </Step>
+  <Step>
+
+    ### 展开三个二阶偏导数
+
+    $$
+    \begin{aligned}
+    z_{xx}&=z_{uu}+2z_{uv}+z_{vv},\\
+    z_{xy}&=-2z_{uu}+(a-2)z_{uv}+az_{vv},\\
+    z_{yy}&=4z_{uu}-4az_{uv}+a^2z_{vv}.
+    \end{aligned}
+    $$
+
+    代入 $6z_{xx}+z_{xy}-z_{yy}=0$，$z_{uu}$ 的系数为 $6-2-4=0$，其余项为
+
+    $$
+    (10+5a)z_{uv}+(6+a-a^2)z_{vv}=0.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 消去 z_vv 并排除退化变换
+
+    要化成 $z_{uv}=0$，需 $6+a-a^2=0$，得到 $a=3$ 或 $a=-2$。但变换雅可比行列式是
+
+    $$
+    J=\frac{\partial(u,v)}{\partial(x,y)}
+    =\begin{vmatrix}1&-2\\1&a\end{vmatrix}=a+2.
+    $$
+
+    $a=-2$ 时 $J=0$ 且 $u=v$，无法作为两个独立的新变量；只能取 $a=3$。此时 $10+5a=25\ne0$，原式变为 $25z_{uv}=0$。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="消去多余项还要核对变换可逆">
+
+代数方程得到两个根时，必须再检查变量变换的雅可比是否为零；只有非退化变换才能把原偏微分方程真正等价地改写为新坐标方程。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-018" type="essay" points={6} tags="来源:1996年考研数学三, 科目:高等数学, 章节:偏导数计算, 考点:积分隐函数求导与对称消元">
+
+ 设函数 $z=f(u)$，方程 $u=\varphi(u)+\int_y^x p(t)\mathrm{d}t$ 确定 $u$ 是 $x,y$ 的函数，其中 $f(u),\varphi(u)$ 可微；$p(t),\varphi'(u)$ 连续，且 $\varphi'(u)\neq 1$。求 $p(y)\frac{\partial z}{\partial x}+p(x)\frac{\partial z}{\partial y}$。
+
+<Solution>
+
+**参考答案：** $\boxed{p(y)z_x+p(x)z_y=0}$。
+
+<Steps>
+  <Step>
+
+    ### 将积分方程看成隐式约束
+
+    设
+
+    $$
+    H(x,y,u)=u-\varphi(u)-\int_y^x p(t)\,\mathrm dt=0.
+    $$
+
+    由于 $H_u=1-\varphi'(u)\ne0$，隐函数定理保证 $u=u(x,y)$ 在相应点附近可微。
+
+  </Step>
+  <Step>
+
+    ### 分别对 x 与 y 求偏导数
+
+    用变限积分求导公式：
+
+    $$
+    (1-\varphi'(u))u_x=p(x),\qquad
+    (1-\varphi'(u))u_y=-p(y).
+    $$
+
+    因此
+
+    $$
+    u_x=\frac{p(x)}{1-\varphi'(u)},\qquad
+    u_y=-\frac{p(y)}{1-\varphi'(u)}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 用链式法则形成对称抵消
+
+    $z=f(u)$，所以 $z_x=f'(u)u_x$、$z_y=f'(u)u_y$。于是
+
+    $$
+    \begin{aligned}
+    p(y)z_x+p(x)z_y
+    &=\frac{f'(u)}{1-\varphi'(u)}
+      \bigl[p(y)p(x)-p(x)p(y)\bigr]\\
+    &=0.
+    \end{aligned}
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="变上限积分的端点符号">
+
+$\partial_x\int_y^xp(t)\,dt=p(x)$，而 $\partial_y\int_y^xp(t)\,dt=-p(y)$。这“一正一负”是组合表达式恰好抵消的关键。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-019" type="essay" points={7} tags="来源:1997年考研数学一, 科目:高等数学, 章节:偏导数计算, 考点:复合函数拉普拉斯算子与方程">
+
+ 设 $f(u)$ 具有二阶连续导数，而 $z=f(\mathrm{e}^x\sin y)$ 满足方程 $\frac{\partial^2 z}{\partial x^2}+\frac{\partial^2 z}{\partial y^2}=\mathrm{e}^{2x}z$，求 $f(u)$。
+
+<Solution>
+
+**参考答案：** $\boxed{f(u)=C_1e^u+C_2e^{-u}}$，其中 $C_1,C_2$ 为常数。
+
+<Steps>
+  <Step>
+
+    ### 选取复合函数的中间变量
+
+    令 $u=e^x\sin y$，则
+
+    $$
+    u_x=u,\quad u_{xx}=u,
+    \qquad u_y=e^x\cos y,\quad u_{yy}=-u.
+    $$
+
+    观察到 $u_{xx}+u_{yy}=0$，且
+
+    $$
+    u_x^2+u_y^2=e^{2x}(\sin^2y+\cos^2y)=e^{2x}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 使用二阶复合函数的拉普拉斯公式
+
+    对 $z=f(u(x,y))$，
+
+    $$
+    z_{xx}+z_{yy}
+    =f''(u)(u_x^2+u_y^2)
+     +f'(u)(u_{xx}+u_{yy})
+    =e^{2x}f''(u).
+    $$
+
+    题设给出 $z_{xx}+z_{yy}=e^{2x}z=e^{2x}f(u)$，由 $e^{2x}>0$ 可约去，得到
+
+    $$
+    f''(u)-f(u)=0.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 解常系数微分方程并验证
+
+    特征方程 $\lambda^2-1=0$，根为 $\lambda=\pm1$，故
+
+    $$
+    f(u)=C_1e^u+C_2e^{-u}.
+    $$
+
+    对该函数有 $f''=f$，代回上一步的恒等式即满足原偏微分方程。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="识别拉普拉斯复合结构">
+
+记住 $\Delta f(u)=f''(u)|\nabla u|^2+f'(u)\Delta u$；当 $u$ 自身是调和函数，即 $\Delta u=0$ 时，中间的一阶导数项自动消失。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-023" type="essay" points={5} tags="来源:1999年考研数学一, 科目:高等数学, 章节:偏导数计算, 考点:二元隐式方程组与一元导数">
+
+ 设 $y = y(x), z = z(x)$ 是由方程 $z = xf(x+y)$ 和 $F(x, y, z) = 0$ 所确定的函数，其中 $f$ 和 $F$ 分别具有一阶连续导数和一阶连续偏导数，求 $\frac{\mathrm{d}z}{\mathrm{d}x}$。
+
+<Solution>
+
+**参考答案：** 在 $F_y+xf'(x+y)F_z\ne0$ 的常规隐函数条件下，
+
+$$
+\boxed{\frac{\mathrm dz}{\mathrm dx}
+=\frac{\bigl[f(x+y)+xf'(x+y)\bigr]F_y
+-xf'(x+y)F_x}{F_y+xf'(x+y)F_z}}.
+$$
+
+其中 $F_x,F_y,F_z$ 都在 $(x,y,z)$ 处取值。
+
+<Steps>
+  <Step>
+
+    ### 对第一条约束求全导数
+
+    令 $s=x+y$。由 $z=xf(s)$，注意 $s'=1+y'$，故
+
+    $$
+    z'=f(s)+xf'(s)(1+y')
+    =\underbrace{\bigl(f(s)+xf'(s)\bigr)}_{A}
+     +\underbrace{xf'(s)}_{B}y'.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 对第二条约束求全导数
+
+    $F(x,y,z)=0$ 给出
+
+    $$
+    F_x+F_yy'+F_zz'=0.
+    $$
+
+    代入 $z'=A+By'$，得到
+
+    $$
+    (F_y+BF_z)y'=-(F_x+AF_z).
+    $$
+
+  </Step>
+  <Step>
+
+    ### 解二元线性方程组并消元
+
+    在 $F_y+BF_z\ne0$ 时，
+
+    $$
+    \begin{aligned}
+    z'&=A+B\frac{-F_x-AF_z}{F_y+BF_z}\\
+    &=\frac{A(F_y+BF_z)-B(F_x+AF_z)}{F_y+BF_z}\\
+    &=\frac{AF_y-BF_x}{F_y+BF_z}.
+    \end{aligned}
+    $$
+
+    将 $A=f+xf'$、$B=xf'$ 代入即为盒中结果。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="分子含 F_x，不是 F_z">
+
+计算过程中 $ABF_z$ 两项完全抵消，剩下的是 $AF_y-BF_x$。若直接背诵繁杂的最终公式，容易把最后一项的下标写错。另需核查隐函数系统的雅可比 $F_y+xf'F_z\ne0$，题干虽说“确定函数”，但除法公式须在该非零条件下使用。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-026" type="essay" points={6} tags="来源:2001年考研数学一, 科目:高等数学, 章节:偏导数计算, 考点:嵌套复合函数与高阶链式法则">
+
+ 设函数 $z = f(x, y)$ 在点 $(1, 1)$ 处可微，且 $f(1, 1) = 1, \left.\frac{\partial f}{\partial x}\right|_{(1, 1)} = 2, \left.\frac{\partial f}{\partial y}\right|_{(1, 1)} = 3, \varphi(x) = f(x, f(x, x))$。求 $\left.\frac{\mathrm{d}}{\mathrm{d}x}\varphi^3(x)\right|_{x=1}$。
+
+<Solution>
+
+**参考答案：** $\boxed{51}$。
+
+<Steps>
+  <Step>
+
+    ### 拆解双层嵌套函数
+
+    令 $h(x)=f(x,x)$，则 $\varphi(x)=f(x,h(x))$。由已知 $f(1,1)=1$，立即有
+
+    $$
+    h(1)=1,\qquad \varphi(1)=f(1,h(1))=1.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 求内层函数在 x=1 处的导数
+
+    因 $f$ 在 $(1,1)$ 可微，沿 $(x,x)$ 的方向求导得到
+
+    $$
+    h'(1)=f_x(1,1)\cdot1+f_y(1,1)\cdot1=2+3=5.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 再求外层导数
+
+    $\varphi(x)=f(x,h(x))$，在 $x=1$ 处根据链式法则：
+
+    $$
+    \varphi'(1)=f_x(1,1)+f_y(1,1)h'(1)
+    =2+3\times5=17.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 最后对三次幂求导
+
+    题目中的 $\varphi^3(x)$ 是 $[\varphi(x)]^3$，不是三阶导数。因此
+
+    $$
+    \left.\frac{\mathrm d}{\mathrm dx}[\varphi(x)]^3\right|_{x=1}
+    =3\varphi^2(1)\varphi'(1)=3\cdot1^2\cdot17
+    =\boxed{51}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="只需在指定点可微">
+
+题设只保证 $f$ 在 $(1,1)$ 可微，严格推导时只在 $x=1$ 用链式法则即可，不应擅自假定 $f_x,f_y$ 在整个邻域连续。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-027" type="essay" points={5} tags="来源:2001年考研数学三, 科目:高等数学, 章节:偏导数计算, 考点:变限积分隐函数与复合求导">
+
+ 设 $u=f(x,y,z)$ 有连续的一阶偏导数，又函数 $y=y(x)$ 及 $z=z(x)$ 分别由下列两式确定：$\mathrm{e}^{xy}-xy=2$ 和 $\mathrm{e}^{x}=\int_0^{x-z}\frac{\sin t}{t}\mathrm{d}t$，求 $\frac{\mathrm{d}u}{\mathrm{d}x}$。
+
+<Solution>
+
+**参考答案：** 在所给方程确定可微函数的常规点（特别是 $\sin(x-z)\ne0$）有
+
+$$
+\boxed{\frac{\mathrm du}{\mathrm dx}
+=f_1'-\frac yx f_2'
++\left(1-\frac{e^x(x-z)}{\sin(x-z)}\right)f_3'}.
+$$
+
+其中 $f_i'$ 在 $(x,y,z)$ 处取值。
+
+<Steps>
+  <Step>
+
+    ### 先写外层链式法则
+
+    $u=f(x,y(x),z(x))$，所以
+
+    $$
+    \frac{\mathrm du}{\mathrm dx}=f_1'+f_2'y'+f_3'z'.
+    $$
+
+    问题转化为分别求 $y'$ 和 $z'$。
+
+  </Step>
+  <Step>
+
+    ### 用隐函数方程求 y'
+
+    对 $e^{xy}-xy=2$ 求导：
+
+    $$
+    (e^{xy}-1)(y+xy')=0.
+    $$
+
+    因 $xy=0$ 时左端原方程为 $1\ne2$，所以在解曲线上 $xy\ne0$；又 $e^{xy}-1\ne0$。由此
+
+    $$
+    y+xy'=0,\qquad \boxed{y'=-\frac yx}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 用变上限积分公式求 z'
+
+    设 $H(s)=\int_0^s\frac{\sin t}{t}\,\mathrm dt$，其中 $t=0$ 处将 integrand 连续延拓为 $1$，于是 $H'(s)=\sin s/s$（$s=0$ 时取极限值 $1$）。题设是 $e^x=H(x-z)$，求导得
+
+    $$
+    e^x=\frac{\sin(x-z)}{x-z}(1-z').
+    $$
+
+    在 $\sin(x-z)\ne0$ 的常规点解得
+
+    $$
+    \boxed{z'=1-\frac{e^x(x-z)}{\sin(x-z)}}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 代回总导数
+
+    将前两步的 $y',z'$ 一同代入链式法则，得到盒中答案。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="分母为零的临界点须另外检查">
+
+若 $x-z=k\pi$（非零整数 $k$），则 $H'(x-z)=0$，而 $e^x>0$，对隐函数恒等式求导会矛盾，因而不能在该点把 $z$ 当作可微函数来使用上式。$x-z=0$ 时 $H(0)=0$，也不满足 $e^x=H(0)$。所以公式应理解为在满足隐函数求导条件的解分支上成立。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-029" type="essay" points={8} tags="来源:2003年考研数学三, 科目:高等数学, 章节:偏导数计算, 考点:二元变量代换与拉普拉斯算子">
+
+ 设 $f(u, v)$ 具有二阶连续偏导数，且满足 $\frac{\partial^2 f}{\partial u^2} + \frac{\partial^2 f}{\partial v^2} = 1$，又 $g(x, y) = f\left[xy, \frac{1}{2}(x^2 - y^2)\right]$，求 $\frac{\partial^2 g}{\partial x^2} + \frac{\partial^2 g}{\partial y^2}$。
+
+<Solution>
+
+**参考答案：** $\boxed{g_{xx}+g_{yy}=x^2+y^2}$。
+
+<Steps>
+  <Step>
+
+    ### 写出变量替换及其一阶、二阶导数
+
+    令 $u=xy$、$v=(x^2-y^2)/2$。则
+
+    $$
+    \begin{aligned}
+    &u_x=y,\quad u_y=x,\quad u_{xx}=u_{yy}=0,\\
+    &v_x=x,\quad v_y=-y,\quad v_{xx}=1,\quad v_{yy}=-1.
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 二阶链式法则逐项展开
+
+    写 $f_u,f_v,f_{uu},f_{uv},f_{vv}$ 表示在 $(u,v)$ 处的各阶偏导。对 $x$ 求两次偏导得
+
+    $$
+    g_{xx}=y^2f_{uu}+2xyf_{uv}+x^2f_{vv}+f_v.
+    $$
+
+    对 $y$ 求两次偏导得
+
+    $$
+    g_{yy}=x^2f_{uu}-2xyf_{uv}+y^2f_{vv}-f_v.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 利用对称抵消及已知方程
+
+    两式相加后，混合项 $\pm2xyf_{uv}$ 和一阶项 $\pm f_v$ 同时抵消：
+
+    $$
+    \begin{aligned}
+    g_{xx}+g_{yy}
+    &=(x^2+y^2)f_{uu}+(x^2+y^2)f_{vv}\\
+    &=(x^2+y^2)(f_{uu}+f_{vv})\\
+    &=\boxed{x^2+y^2}.
+    \end{aligned}
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="二次映射下的拉普拉斯算子">
+
+该映射满足 $\nabla u\cdot\nabla v=0$、$|\nabla u|^2=|\nabla v|^2=x^2+y^2$，且 $\Delta u=\Delta v=0$。因此也可直接识别 $\Delta_{x,y}g=(x^2+y^2)\Delta_{u,v}f$，与逐项计算完全一致。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-031" type="essay" points={10} tags="来源:2004年考研数学二, 科目:高等数学, 章节:偏导数计算, 考点:二元复合函数二阶混合偏导">
+
+ 设 $z = f(x^2 - y^2, e^{xy})$，其中 $f$ 具有连续二阶偏导数，求 $\frac{\partial z}{\partial x}, \frac{\partial z}{\partial y}, \frac{\partial^2 z}{\partial x \partial y}$。
+
+<Solution>
+
+**参考答案**：以下各偏导数中的 $f_1,f_2,f_{ij}$ 均在 $(u,v)=(x^2-y^2,e^{xy})$ 处取值。
+
+$$
+\boxed{z_x=2xf_1+ye^{xy}f_2,\qquad z_y=-2yf_1+xe^{xy}f_2}
+$$
+
+$$
+\boxed{\begin{aligned}
+z_{xy}={}&-4xyf_{11}+2(x^2-y^2)e^{xy}f_{12}\\
+&+xye^{2xy}f_{22}+e^{xy}(1+xy)f_2.
+\end{aligned}}
+$$
+
+<Steps>
+  <Step>
+
+    ### 用中间变量隔离复合结构
+
+    记 $u=x^2-y^2$，$v=e^{xy}$。其一阶导数为
+
+    $$
+    u_x=2x,\quad u_y=-2y,\quad v_x=ye^{xy},\quad v_y=xe^{xy}.
+    $$
+
+    因而一阶链式法则 $z_x=f_1u_x+f_2v_x$、$z_y=f_1u_y+f_2v_y$ 直接给出上述一阶偏导。
+
+  </Step>
+  <Step>
+
+    ### 对 $z_x$ 求 $y$ 偏导，应用乘积法则
+
+    注意 $f_1$、$f_2$ 仍然依赖于 $y$：
+
+    $$
+    \begin{aligned}
+    (f_1)_y&=f_{11}u_y+f_{12}v_y=-2yf_{11}+xe^{xy}f_{12},\\
+    (f_2)_y&=f_{21}u_y+f_{22}v_y=-2yf_{21}+xe^{xy}f_{22}.
+    \end{aligned}
+    $$
+
+    对 $z_x=2xf_1+ye^{xy}f_2$ 求偏导：
+
+    $$
+    \begin{aligned}
+    z_{xy}={}&2x(-2yf_{11}+xe^{xy}f_{12})\\
+    &+e^{xy}(1+xy)f_2\\
+    &+ye^{xy}(-2yf_{21}+xe^{xy}f_{22}).
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 合并混合偏导项
+
+    因为 $f$ 二阶偏导连续，$f_{21}=f_{12}$，所以两项 $f_{12}$ 的系数合并为
+
+    $$
+    2x^2e^{xy}-2y^2e^{xy}=2(x^2-y^2)e^{xy}.
+    $$
+
+    其余项原样保留，即得最终结果。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="高频漏项">
+
+对 $ye^{xy}f_2$ 求导时，$\partial_y(ye^{xy})=e^{xy}(1+xy)$；**不能漏掉** $e^{xy}f_2$，也不能忘记 $f_2$ 本身的复合求导。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-033" type="single" points={4} tags="来源:2005年考研数学一、二, 科目:高等数学, 章节:偏导数计算, 考点:变限积分求导与二阶偏导关系">
+
+ 设函数 $u(x, y) = \varphi(x+y) + \varphi(x-y) + \int_{x-y}^{x+y} \psi(t)\mathrm{d}t$，其中函数 $\varphi$ 具有二阶导数，$\psi$ 具有一阶导数，则必有（　）。
+
+<Option>$\frac{\partial^2 u}{\partial x^2} = -\frac{\partial^2 u}{\partial y^2}$</Option>
+<Option correct>$\frac{\partial^2 u}{\partial x^2} = \frac{\partial^2 u}{\partial y^2}$</Option>
+<Option>$\frac{\partial^2 u}{\partial x \partial y} = -\frac{\partial^2 u}{\partial y^2}$</Option>
+<Option>$\frac{\partial^2 u}{\partial x \partial y} = \frac{\partial^2 u}{\partial x^2}$</Option>
+
+<Solution>
+
+**正确选项：B**。恒有 $\boxed{u_{xx}=u_{yy}}$。
+
+<Steps>
+  <Step>
+
+    ### 化去变上、下限积分
+
+    取 $\Psi'(t)=\psi(t)$。根据牛顿—莱布尼茨公式，
+
+    $$
+    \int_{x-y}^{x+y}\psi(t)\,\mathrm dt
+    =\Psi(x+y)-\Psi(x-y).
+    $$
+
+    故令 $A(t)=\varphi(t)+\Psi(t)$、$B(t)=\varphi(t)-\Psi(t)$，原式简化为
+
+    $$
+    u(x,y)=A(x+y)+B(x-y).
+    $$
+
+  </Step>
+  <Step>
+
+    ### 对两个变量分别求两次偏导
+
+    $$
+    \begin{aligned}
+    u_x&=A'(x+y)+B'(x-y),\\
+    u_{xx}&=A''(x+y)+B''(x-y);\\
+    u_y&=A'(x+y)-B'(x-y),\\
+    u_{yy}&=A''(x+y)+B''(x-y).
+    \end{aligned}
+    $$
+
+    于是 $u_{xx}=u_{yy}$，而 $u_{xy}=A''(x+y)-B''(x-y)$ 通常并不等于二者。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="快速识别：一维波动方程型">
+
+任何具有二阶导数的 $A(x+y)+B(x-y)$ 都满足 $u_{xx}-u_{yy}=0$。考试中看到 $x+y$、$x-y$ 两个变量，优先尝试这一拆分。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-034" type="single" points={4} tags="来源:2005年考研数学一, 科目:高等数学, 章节:偏导数计算, 考点:隐函数存在定理与偏导条件">
+
+ 设三元方程 $xy-z\ln y+\mathrm{e}^{xz}=1$，根据隐函数存在定理，存在点 $(0,1,1)$ 的一个邻域，在此邻域内该方程 $(\quad)$。
+
+<Option>只能确定一个具有连续偏导数的隐函数 $z=z(x,y)$</Option>
+<Option>可确定两个具有连续偏导数的隐函数 $y=y(x,z)$ 和 $z=z(x,y)$</Option>
+<Option>可确定两个具有连续偏导数的隐函数 $x=x(y,z)$ 和 $z=z(x,y)$</Option>
+<Option correct>可确定两个具有连续偏导数的隐函数 $x=x(y,z)$ 和 $y=y(x,z)$</Option>
+
+<Solution>
+
+**正确选项：D**。可分别确定 $\boxed{x=x(y,z)}$ 与 $\boxed{y=y(x,z)}$。
+
+<Steps>
+  <Step>
+
+    ### 先确认所给点位于曲面上
+
+    令 $F(x,y,z)=xy-z\ln y+e^{xz}-1$。由于 $y>0$ 才能定义 $\ln y$，在点 $(0,1,1)$ 附近可取满足 $y>0$ 的开邻域。又
+
+    $$
+    F(0,1,1)=0\cdot1-1\cdot\ln1+e^0-1=0.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 分别计算三个方向的偏导数
+
+    $$
+    \begin{aligned}
+    F_x&=y+ze^{xz},&F_x(0,1,1)&=2\ne0,\\
+    F_y&=x-\frac{z}{y},&F_y(0,1,1)&=-1\ne0,\\
+    F_z&=-\ln y+xe^{xz},&F_z(0,1,1)&=0.
+    \end{aligned}
+    $$
+
+    按隐函数存在定理，$F_x\ne0$ 保证局部可解出 $x=x(y,z)$；$F_y\ne0$ 保证局部可解出 $y=y(x,z)$。它们均具有连续偏导数。
+
+  </Step>
+  <Step>
+
+    ### 解释为何不能选含 $z=z(x,y)$ 的项
+
+    $F_z=0$ 时，**隐函数存在定理的充分条件不满足**，因而不能据此保证存在可微的 $z=z(x,y)$。更进一步，若有这样一个 $C^1$ 函数，则对 $x$ 求导应满足 $F_x+F_zz_x=0$，在该点将成为 $2=0$，产生矛盾，所以该点附近不可能存在题目所要求的 $C^1$ 解支。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="先验点，再验偏导">
+
+应用隐函数定理要先有 $F(x_0,y_0,z_0)=0$，再查看所选因变量对应的偏导是否非零；不能仅凭式中出现了某个变量就断言可以局部解出它。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-037" type="essay" points={12} tags="来源:2006年考研数学一、二, 科目:高等数学, 章节:偏导数计算, 考点:径向调和函数与常微分方程">
+
+ 设函数 $f(u)$ 在 $(0, +\infty)$ 内具有二阶导数，且 $z = f(\sqrt{x^2+y^2})$ 满足等式 $\frac{\partial^2 z}{\partial x^2} + \frac{\partial^2 z}{\partial y^2} = 0$。
+
+(1) 验证 $f''(u) + \frac{f'(u)}{u} = 0$；
+
+(2) 若 $f(1) = 0, f'(1) = 1$，求函数 $f(u)$ 的表达式。
 
 <Solution>
 
 **参考答案：**
 
 $$
-\boxed{y'(0)=f_u(1,1)},\qquad \boxed{y''(0)=f_{uu}(1,1)+f_u(1,1)-f_v(1,1)}.
+\boxed{f''(u)+\frac{f'(u)}u=0\quad(u>0)},\qquad
+\boxed{f(u)=\ln u}.
 $$
 
-**第一步：整理复合关系。** 令 $u=e^x$，$v=\cos x$，则 $x=0$ 时
+<Steps>
+  <Step>
 
-$$
-u(0)=v(0)=1,\quad u'(0)=u''(0)=1,\quad v'(0)=0,\ v''(0)=-1.
-$$
+    ### 计算径向变量的导数
 
-**第二步：一阶求导。**
+    记 $r=\sqrt{x^2+y^2}>0$，$z=f(r)$。利用链式法则：
 
-$$
-y'=f_u(u,v)u'+f_v(u,v)v'=e^xf_u(u,v)-\sin x\,f_v(u,v).
-$$
+    $$
+    z_x=f'(r)\frac xr,\qquad z_y=f'(r)\frac yr.
+    $$
 
-所以 $y'(0)=f_u(1,1)$。
+    对 $x,y$ 分别继续求导，得
 
-**第三步：二阶求导。**
+    $$
+    \begin{aligned}
+    z_{xx}&=f''(r)\frac{x^2}{r^2}+f'(r)\left(\frac1r-\frac{x^2}{r^3}\right),\\
+    z_{yy}&=f''(r)\frac{y^2}{r^2}+f'(r)\left(\frac1r-\frac{y^2}{r^3}\right).
+    \end{aligned}
+    $$
 
-$$
-y''=f_{uu}(u')^2+2f_{uv}u'v'+f_{vv}(v')^2+f_uu''+f_vv''.
-$$
+  </Step>
+  <Step>
 
-在 $x=0$ 时 $v'=0$，含 $f_{uv},f_{vv}$ 的项全部消失，因此
+    ### 两式相加并化为一元微分方程
 
-$$
-\boxed{y''(0)=f_{uu}(1,1)+f_u(1,1)-f_v(1,1)}.
-$$
+    利用 $x^2+y^2=r^2$：
 
-<Callout type="idea" title="二阶链式法则的省算技巧">
+    $$
+    \begin{aligned}
+    z_{xx}+z_{yy}
+    &=f''(r)\frac{x^2+y^2}{r^2}
+    +f'(r)\left(\frac2r-\frac{x^2+y^2}{r^3}\right)\\
+    &=f''(r)+\frac{f'(r)}r=0.
+    \end{aligned}
+    $$
 
-先列出内层变量在所求点的一阶、二阶导数，再决定哪些 Hessian 项为零。若先把二阶复合式完全展开，容易把本来不必计算的混合项带进答案。
+    因 $r$ 能取遍 $(0,+\infty)$，所以对任意 $u>0$ 都有 $f''(u)+f'(u)/u=0$。
+
+  </Step>
+  <Step>
+
+    ### 积分并利用初始条件
+
+    将方程乘以 $u>0$：
+
+    $$
+    uf''(u)+f'(u)=[uf'(u)]'=0.
+    $$
+
+    因此 $uf'(u)=C_1$，再积分得 $f(u)=C_1\ln u+C_2$。由 $f'(1)=1$ 得 $C_1=1$；由 $f(1)=0$ 得 $C_2=0$。最终 $f(u)=\ln u$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="二维径向拉普拉斯算子">
+
+若 $z=f(r)$，$r=\sqrt{x^2+y^2}$，则 $\Delta z=f''(r)+r^{-1}f'(r)$。该公式只在 $r>0$ 处直接成立；本题并未要求在原点定义 $f(r)$。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-06-02-010" type="blank" points={4} tags="来源:2020考研数一, 考点:变限积分, 考点:混合偏导">
+<Question id="core-1102-math-4b8ca9-042" type="essay" points={10} tags="来源:2008年考研数学三, 科目:高等数学, 章节:偏导数计算, 考点:隐函数二阶求导与复合表达式">
 
-设 $f(x,y)=\displaystyle\int_0^{xy}e^{xt^2}\,\mathrm dt$，则 $\left.\dfrac{\partial^2f}{\partial x\partial y}\right|_{(1,1)}=$ <Blank answer="4e" kind="math" />。
+ 设 $z = z(x, y)$ 是由方程 $x^2 + y^2 - z = \varphi(x+y+z)$ 所确定的函数，其中 $\varphi$ 具有二阶导数且 $\varphi' \neq -1$。
+(1) 求 $\mathrm{d}z$；
+
+(2) 记 $u(x, y) = \frac{1}{x-y}\left(\frac{\partial z}{\partial x} - \frac{\partial z}{\partial y}\right)$，求 $\frac{\partial u}{\partial x}$。
 
 <Solution>
 
-**答案：$\boxed{4e}$。**
-
-**第一步：先对 $y$ 求偏导。** 被积函数 $e^{xt^2}$ 不含 $y$，只需处理上限 $xy$：
+**参考答案**：设 $s=x+y+z(x,y)$，以下 $\varphi',\varphi''$ 均在 $s$ 处取值。
 
 $$
-f_y=e^{x(xy)^2}\frac{\partial(xy)}{\partial y}=xe^{x^3y^2}.
-$$
-
-**第二步：对 $x$ 求导。**
-
-$$
-\begin{aligned}
-f_{xy}&=\frac{\partial}{\partial x}\left(xe^{x^3y^2}\right)\\
-&=e^{x^3y^2}+xe^{x^3y^2}\cdot3x^2y^2\\
-&=e^{x^3y^2}(1+3x^3y^2).
-\end{aligned}
-$$
-
-令 $x=y=1$，得 $f_{xy}(1,1)=e(1+3)=\boxed{4e}$。
-
-<Callout type="warn" title="先选求导顺序">
-
-若先求 $f_x$，上限与被积函数均依赖 $x$，必须同时使用莱布尼茨公式的边界项和参数项。由于被积函数不含 $y$，先求 $f_y$ 最简单；被积函数的光滑性保证本题可交换求导顺序。
-
-</Callout>
-
-</Solution>
-</Question>
-
-## 三、隐函数的全微分及二阶求导
-
-<Question id="math-core-gd-06-02-011" type="blank" points={3} tags="来源:1991考研数一, 考点:隐函数全微分">
-
-由 $xyz+\sqrt{x^2+y^2+z^2}=\sqrt2$ 所确定的函数 $z=z(x,y)$，在点 $(1,0,-1)$ 处有 $\mathrm dz=$ <Blank answer="dx-sqrt(2)dy" kind="text" />。
-
-<Solution>
-
-**答案：$\boxed{\mathrm dz=\mathrm dx-\sqrt2\,\mathrm dy}$。**
-
-令 $F(x,y,z)=xyz+\sqrt{x^2+y^2+z^2}-\sqrt2$，则
-
-$$
-F_x=yz+\frac{x}{\sqrt{x^2+y^2+z^2}},\quad F_y=xz+\frac{y}{\sqrt{x^2+y^2+z^2}},\quad F_z=xy+\frac{z}{\sqrt{x^2+y^2+z^2}}.
-$$
-
-在 $(1,0,-1)$ 处，$F=0$，且
-
-$$
-F_x=\frac1{\sqrt2},\qquad F_y=-1,\qquad F_z=-\frac1{\sqrt2}\ne0.
-$$
-
-隐函数定理保证 $z$ 可在此点附近表示为 $z(x,y)$，由 $\mathrm dF=0$，
-
-$$
-\begin{aligned}
-\mathrm dz&=-\frac{F_x\,\mathrm dx+F_y\,\mathrm dy}{F_z}\\
-&=-\frac{\frac1{\sqrt2}\,\mathrm dx-\mathrm dy}{-\frac1{\sqrt2}}
-=\boxed{\mathrm dx-\sqrt2\,\mathrm dy}.
-\end{aligned}
-$$
-
-<Callout type="idea" title="独立偏导与隐式导数的区别">
-
-计算 $F_x,F_y,F_z$ 时把 $x,y,z$ 当作三个独立变量；写 $F_x+F_zz_x=0$ 时才让 $z$ 随 $x,y$ 变化。求值前先检验 $F_z\ne0$。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-06-02-012" type="essay" points={10} tags="来源:2008考研数三, 考点:隐函数求导, 考点:链式法则">
-
-设 $z=z(x,y)$ 由
-
-$$
-x^2+y^2-z=\varphi(x+y+z)
-$$
-
-确定，其中 $\varphi$ 具有二阶导数且 $\varphi'\ne-1$。（1）求 $\mathrm dz$；（2）设
-
-$$
-u(x,y)=\frac{z_x-z_y}{x-y}\quad(x\ne y),
-$$
-
-求 $u_x$。
-
-<Solution>
-
-**参考答案：** 设 $s=x+y+z$，记 $\varphi',\varphi''$ 均在 $s$ 处取值，则
-
-$$
-\boxed{\mathrm dz=\frac{(2x-\varphi')\,\mathrm dx+(2y-\varphi')\,\mathrm dy}{1+\varphi'}},
+\boxed{\mathrm dz=\frac{2x-\varphi'}{1+\varphi'}\,\mathrm dx+
+\frac{2y-\varphi'}{1+\varphi'}\,\mathrm dy}
 $$
 
 $$
 \boxed{u_x=-\frac{2\varphi''(1+2x)}{(1+\varphi')^3}}.
 $$
 
-**第一步：对隐式关系作全微分。** 由 $s=x+y+z$，
+<Steps>
+  <Step>
 
-$$
-2x\,\mathrm dx+2y\,\mathrm dy-\mathrm dz
-=\varphi'(s)(\mathrm dx+\mathrm dy+\mathrm dz).
-$$
+    ### 隐式求出 $z_x$ 与 $z_y$
 
-把 $\mathrm dz$ 移到一边并使用 $1+\varphi'\ne0$，得到
+    将题设写成 $x^2+y^2-z=\varphi(s)$。对 $x$ 求偏导，得到
 
-$$
-\mathrm dz=\frac{2x-\varphi'}{1+\varphi'}\,\mathrm dx
-+\frac{2y-\varphi'}{1+\varphi'}\,\mathrm dy.
-$$
+    $$
+    2x-z_x=\varphi'(s)(1+z_x).
+    $$
 
-**第二步：先化简 $u$。**
+    对 $y$ 同理得到 $2y-z_y=\varphi'(s)(1+z_y)$。利用 $1+\varphi'(s)\ne0$ 分别解得
 
-$$
-z_x-z_y=\frac{2(x-y)}{1+\varphi'(s)},
-\qquad u=\frac2{1+\varphi'(s)}\ (x\ne y).
-$$
+    $$
+    z_x=\frac{2x-\varphi'}{1+\varphi'},\qquad
+    z_y=\frac{2y-\varphi'}{1+\varphi'}.
+    $$
 
-**第三步：计算内部变量的偏导，再用链式法则。**
+    把它们代入 $\mathrm dz=z_x\mathrm dx+z_y\mathrm dy$ 即得第（1）问。
 
-$$
-s_x=1+z_x=1+\frac{2x-\varphi'}{1+\varphi'}=\frac{1+2x}{1+\varphi'}.
-$$
+  </Step>
+  <Step>
 
-因此
+    ### 先约去 $x-y$，避免直接二阶求导
 
-$$
-\begin{aligned}
-u_x&=-\frac{2\varphi''(s)}{[1+\varphi'(s)]^2}\,s_x\\
-&=\boxed{-\frac{2\varphi''(s)(1+2x)}{[1+\varphi'(s)]^3}}.
-\end{aligned}
-$$
+    当 $x\ne y$ 时，
 
-<Callout type="idea" title="先做差，避免对复杂商求导">
+    $$
+    z_x-z_y=\frac{2(x-y)}{1+\varphi'},
+    \qquad u=\frac{z_x-z_y}{x-y}=\frac2{1+\varphi'(s)}.
+    $$
 
-$z_x,z_y$ 的分母相同，先相减会直接出现 $x-y$；题中 $u$ 原本仅在 $x\ne y$ 定义，化简式虽然能延拓到对角线，但不能不加说明地变更原定义域。
+    这样将复杂的二阶偏导运算化成了一次复合函数求导。
+
+  </Step>
+  <Step>
+
+    ### 用链式法则计算 $u_x$
+
+    $$
+    u_x=-\frac{2\varphi''(s)s_x}{[1+\varphi'(s)]^2},
+    \qquad s_x=1+z_x
+    =\frac{1+2x}{1+\varphi'(s)}.
+    $$
+
+    代入即可得到上述答案。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="原定义域与连续延拓">
+
+题目中 $u=(z_x-z_y)/(x-y)$ 只在 $x\ne y$ 处直接有定义；化简后的 $2/(1+\varphi')$ 可在条件允许时延拓到 $x=y$。若问原始函数的偏导，则应在其原定义域内理解结果。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-06-02-013" type="blank" points={4} tags="来源:2015考研数一数三, 考点:隐函数全微分">
+<Question id="core-1102-math-4b8ca9-043" type="blank" points={4} tags="来源:2009年考研数学一, 科目:高等数学, 章节:偏导数计算, 考点:复合函数链式法则求混合偏导">
 
-若 $z=z(x,y)$ 由 $e^z+xyz+x+\cos x=2$ 确定，则 $\left.\mathrm dz\right|_{(0,1)}=$ <Blank answer="-dx" kind="text" />。
+ 设函数 $f(u, v)$ 具有二阶连续偏导数，$z = f(x, xy)$，则 $\frac{\partial^2 z}{\partial x \partial y} =$ <Blank answer="xf_{12}&#x27;&#x27; + f_2&#x27; + xyf_{22}&#x27;&#x27;" kind="text" />。
 
 <Solution>
 
-**答案：$\boxed{-\mathrm dx}$。**
-
-**第一步：从原方程求出基点的 $z$。** 在 $(x,y)=(0,1)$ 处有 $e^z+1=2$，故 $z=0$。
-
-**第二步：构造零水平集并计算独立偏导。** 令
+**参考答案**：设 $f_i=\partial f/\partial u_i$、$f_{ij}=\partial^2 f/(\partial u_i\partial u_j)$，并均在 $(x,xy)$ 处取值，则
 
 $$
-F(x,y,z)=e^z+xyz+x+\cos x-2.
+\boxed{z_{xy}=f_2+xf_{12}+xyf_{22}}.
 $$
 
-则
+<Steps>
+  <Step>
 
-$$
-F_x=yz+1-\sin x,\quad F_y=xz,\quad F_z=e^z+xy.
-$$
+    ### 选择求导顺序
 
-在 $(0,1,0)$ 处，$F_x=1$、$F_y=0$、$F_z=1\ne0$。
+    令 $u=x$、$v=xy$。因为 $u_y=0$、$v_y=x$，先对 $y$ 求偏导最省项：
 
-**第三步：使用隐函数求导公式。**
+    $$
+    z_y=f_1u_y+f_2v_y=xf_2(x,xy).
+    $$
 
-$$
-\boxed{\left.\mathrm dz\right|_{(0,1)}
-=-\frac{F_x\,\mathrm dx+F_y\,\mathrm dy}{F_z}
-=-\mathrm dx}.
-$$
+  </Step>
+  <Step>
 
-<Callout type="warn" title="不能直接把平面点当作三维点">
+    ### 对 $x$ 再求一次偏导
 
-题目指定 $(0,1)$ 是两个自变量的取值，必须先解出 $z(0,1)=0$，再代入各个偏导数。本题 $F_z=1$ 也保证了隐函数局部存在。
+    $$
+    \begin{aligned}
+    z_{yx}&=f_2+x\frac{\partial}{\partial x}f_2(x,xy)\\
+    &=f_2+x(f_{21}\cdot1+f_{22}\cdot y)\\
+    &=f_2+xf_{12}+xyf_{22}.
+    \end{aligned}
+    $$
+
+    由于题设保证二阶偏导连续，$z_{xy}=z_{yx}$ 且 $f_{21}=f_{12}$，因此得到答案。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="先对简单变量求导">
+
+二元复合函数的混合偏导有两种求导顺序。选取能让某个中间变量偏导为零的方向，通常能减少运算量和漏项风险。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-06-02-014" type="blank" points={4} tags="来源:2018考研数二, 考点:隐函数一阶求导">
+<Question id="core-1102-math-4b8ca9-044" type="essay" points={10} tags="来源:2009年考研数学二, 科目:高等数学, 章节:偏导数计算, 考点:三元复合函数全微分与二阶偏导">
 
-函数 $z=z(x,y)$ 由 $\ln z+e^{z-1}=xy$ 确定，则 $\left.z_x\right|_{(2,\frac12)}=$ <Blank answer="1/4" kind="math" />。
+ 设 $z=f(x+y, x-y, xy)$, 其中 $f$ 具有二阶连续偏导数, 求 $\mathrm{d}z$ 与 $\frac{\partial^2 z}{\partial x \partial y}$。
 
 <Solution>
 
-**答案：$\boxed{\frac14}$。**
-
-**第一步：求计算点上的 $z$ 值。** $x=2,y=\frac12$ 时 $xy=1$。原式成为 $\ln z+e^{z-1}=1$；显然 $z=1$ 满足，且左端在 $z>0$ 上严格递增，故该值唯一。
-
-**第二步：使用隐函数公式。** 定义
+**参考答案**：令 $f_i,f_{ij}$ 在 $(u,v,w)=(x+y,x-y,xy)$ 处取值，则
 
 $$
-F(x,y,z)=\ln z+e^{z-1}-xy,
+\boxed{\mathrm dz=(f_1+f_2+yf_3)\,\mathrm dx+(f_1-f_2+xf_3)\,\mathrm dy}.
 $$
 
-则 $F_x=-y$、$F_z=\frac1z+e^{z-1}$。因此
-
 $$
-z_x=-\frac{F_x}{F_z}=\frac{y}{1/z+e^{z-1}}.
+\boxed{z_{xy}=f_{11}-f_{22}+(x+y)f_{13}+(x-y)f_{23}+xyf_{33}+f_3}.
 $$
 
-代入 $(x,y,z)=(2,\frac12,1)$ 得
+<Steps>
+  <Step>
 
-$$
-\boxed{z_x=\frac{1/2}{1+1}=\frac14}.
-$$
+    ### 列出全部中间变量
 
-<Callout type="idea" title="隐函数求值的固定顺序">
+    $u=x+y$，$v=x-y$，$w=xy$，则
 
-先用 $(x,y)$ 求出 $z$，确认 $F_z\ne0$，再计算 $-F_x/F_z$。本题有 $z>0$ 的对数定义域，也不能略去。
+    $$
+    \begin{array}{c|ccc}
+     &u&v&w\\\hline
+    \partial_x&1&1&y\\
+    \partial_y&1&-1&x
+    \end{array}
+    $$
 
-</Callout>
+    因此 $z_x=f_1+f_2+yf_3$、$z_y=f_1-f_2+xf_3$，并由全微分公式写出第一个答案。
 
-</Solution>
-</Question>
+  </Step>
+  <Step>
 
-<Question id="math-core-gd-06-02-015" type="blank" points={5} tags="来源:2021考研数二, 考点:隐函数求导, 考点:反正切">
+    ### 将 $z_x$ 逐项对 $y$ 求偏导
 
-函数 $z=z(x,y)$ 由 $(x+1)z+y\ln z-\arctan(2xy)=1$ 确定，则 $\left.z_x\right|_{(0,2)}=$ <Blank answer="1" kind="math" />。
+    $$
+    \begin{aligned}
+    (f_1)_y&=f_{11}-f_{12}+xf_{13},\\
+    (f_2)_y&=f_{21}-f_{22}+xf_{23},\\
+    (yf_3)_y&=f_3+y(f_{31}-f_{32}+xf_{33}).
+    \end{aligned}
+    $$
 
-<Solution>
+    三式相加得到含全部二阶偏导的 $z_{xy}$。
 
-**答案：$\boxed1$。**
+  </Step>
+  <Step>
 
-**第一步：确定基点。** 在 $(x,y)=(0,2)$ 处有 $z+2\ln z=1$。$z=1$ 满足且 $1+2/z>0$，因此唯一对应 $z=1$。
+    ### 用二阶连续偏导消去交叉重复项
 
-**第二步：写出 $F_x$ 和 $F_z$。** 令
+    $f_{21}=f_{12}$，$f_{31}=f_{13}$，$f_{32}=f_{23}$，故 $f_{12}$ 抵消，$f_{13}$ 系数成为 $x+y$，$f_{23}$ 系数成为 $x-y$。得到盒中结果。
 
-$$
-F(x,y,z)=(x+1)z+y\ln z-\arctan(2xy)-1.
-$$
+  </Step>
+</Steps>
 
-计算独立偏导数时，
+<Callout type="warn" title="乘积项带来的单独一阶偏导">
 
-$$
-F_x=z-\frac{2y}{1+4x^2y^2},\qquad F_z=x+1+\frac yz.
-$$
-
-在 $(0,2,1)$ 处有 $F_x=1-4=-3$，$F_z=1+2=3\ne0$。
-
-**第三步：应用隐式求导。**
-
-$$
-\boxed{z_x=-\frac{F_x}{F_z}=-\frac{-3}{3}=1}.
-$$
-
-<Callout type="warn" title="不要把 $y$ 随 $x$ 变化">
-
-求偏导 $z_x$ 时 $y$ 固定，$\arctan(2xy)$ 的 $x$ 偏导为 $2y/(1+4x^2y^2)$；错误地再对 $y$ 求导会造成额外项。
+$\partial_y(yf_3)=f_3+y(f_3)_y$，其中单独的 $f_3$ 是最容易被遗漏的一项。写完二阶结果后可通过检验特殊函数 $f(u,v,w)=w$ 来检查：此时 $z=xy$，应有 $z_{xy}=1$。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-06-02-016" type="blank" points={5} tags="来源:2023考研数二, 考点:二阶隐函数求导">
+<Question id="core-1102-math-4b8ca9-046" type="single" points={4} tags="来源:2010年考研数学一、二, 科目:高等数学, 章节:偏导数计算, 考点:隐函数齐次性与欧拉定理">
 
-函数 $z=z(x,y)$ 由 $e^z+xz=2x-y$ 确定，则 $\left.z_{xx}\right|_{(1,1)}=$ <Blank answer="-3/2" kind="math" />。
-
-<Solution>
-
-**答案：$\boxed{-\frac32}$。**
-
-**第一步：确定 $z$ 与 $z_x$。** 令 $F=e^z+xz-2x+y$。在 $x=y=1$ 时，$e^z+z=1$，故 $z=0$。计算
-
-$$
-F_x=z-2,\qquad F_z=e^z+x.
-$$
-
-在 $(1,1,0)$ 处，$F_x=-2$、$F_z=2\ne0$，所以
-
-$$
-z_x=-\frac{F_x}{F_z}=1.
-$$
-
-**第二步：对隐式等式再求一次 $x$ 导数。** 由 $F_x+F_zz_x=0$，沿固定 $y$ 的曲线求导：
-
-$$
-F_{xx}+2F_{xz}z_x+F_{zz}(z_x)^2+F_zz_{xx}=0.
-$$
-
-此处 $F_{xx}=0$、$F_{xz}=1$、$F_{zz}=e^z=1$，因此
-
-$$
-0+2\cdot1\cdot1+1\cdot1^2+2z_{xx}=0.
-$$
-
-得到 $\boxed{z_{xx}(1,1)=-\frac32}$。
-
-<Callout type="idea" title="二阶隐函数公式中的系数 2">
-
-$F_{xz}$ 出现两次：一次来自对 $F_x$ 的隐式导数，另一次来自对 $F_zz_x$ 的导数。完整公式是 $F_{xx}+2F_{xz}z_x+F_{zz}z_x^2+F_zz_{xx}=0$。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-06-02-017" type="essay" points={12} tags="来源:2024考研数三, 考点:隐函数二阶求导, 考点:拉普拉斯算子">
-
-函数 $z=z(x,y)$ 由 $z+e^x-y\ln(1+z^2)=0$ 确定。求
-
-$$
-\left.\left(z_{xx}+z_{yy}\right)\right|_{(0,0)}.
-$$
-
-<Solution>
-
-**参考答案：$\boxed{-1-2\ln2}$。**
-
-**第一步：求基点与一阶偏导。** 令 $F(x,y,z)=z+e^x-y\ln(1+z^2)$。$x=y=0$ 时 $z+1=0$，故 $z=-1$。又
-
-$$
-F_x=e^x,\quad F_y=-\ln(1+z^2),\quad F_z=1-\frac{2yz}{1+z^2}.
-$$
-
-在 $(0,0,-1)$ 处 $F_z=1\ne0$，故隐函数局部存在，且
-
-$$
-z_x=-\frac{F_x}{F_z}=-1,\qquad
-z_y=-\frac{F_y}{F_z}=\ln2.
-$$
-
-**第二步：计算 $z_{xx}$。** 对 $F_x+F_zz_x=0$ 再求 $x$ 导数：
-
-$$
-F_{xx}+2F_{xz}z_x+F_{zz}z_x^2+F_zz_{xx}=0.
-$$
-
-在该点，$F_{xx}=1$、$F_{xz}=0$、$F_{zz}=0$，所以 $z_{xx}=-1$。
-
-**第三步：计算 $z_{yy}$。** 同理，
-
-$$
-F_{yy}+2F_{yz}z_y+F_{zz}z_y^2+F_zz_{yy}=0.
-$$
-
-此时 $F_{yy}=0$，并且
-
-$$
-F_{yz}=-\frac{2z}{1+z^2}=1,\qquad F_{zz}=0.
-$$
-
-所以 $z_{yy}=-2\ln2$。两者相加得到
-
-$$
-\boxed{z_{xx}(0,0)+z_{yy}(0,0)=-1-2\ln2}.
-$$
-
-<Callout type="idea" title="同一个隐函数，不同方向的二阶项可能完全不同">
-
-本题 $F_{xz}=0$ 而 $F_{yz}=1$，且 $z_x\ne z_y$。虽然最终求和，仍应分别写出两个方向的二阶隐函数公式，不能只算一个再乘二。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-06-02-018" type="single" points={5} tags="来源:2025考研数二, 考点:隐函数求导, 考点:积分上下限">
-
-函数 $z=z(x,y)$ 由
-
-$$
-z+\ln z-\int_y^x e^{-t^2}\,\mathrm dt=0
-$$
-
-确定，则 $z_x+z_y=$（ ）。
-
-<Option correct>$\dfrac{z}{z+1}(e^{-x^2}-e^{-y^2})$</Option>
-<Option>$\dfrac{z}{z+1}(e^{-x^2}+e^{-y^2})$</Option>
-<Option>$-\dfrac{z}{z+1}(e^{-x^2}-e^{-y^2})$</Option>
-<Option>$-\dfrac{z}{z+1}(e^{-x^2}+e^{-y^2})$</Option>
-
-<Solution>
-
-**答案：A。**
-
-**第一步：处理 $x$ 方向的上限。** 因为 $z>0$，可对方程求偏导：
-
-$$
-\left(1+\frac1z\right)z_x-e^{-x^2}=0
-\quad\Longrightarrow\quad
-z_x=\frac{z}{z+1}e^{-x^2}.
-$$
-
-**第二步：处理 $y$ 方向的下限。** 由 $\partial_y\int_y^x e^{-t^2}\,dt=-e^{-y^2}$，且原方程积分项前有负号，
-
-$$
-\left(1+\frac1z\right)z_y+e^{-y^2}=0
-\quad\Longrightarrow\quad
-z_y=-\frac{z}{z+1}e^{-y^2}.
-$$
-
-**第三步：相加。**
-
-$$
-\boxed{z_x+z_y=\frac{z}{z+1}(e^{-x^2}-e^{-y^2})}.
-$$
-
-<Callout type="warn" title="下限与积分前负号会叠加">
-
-变限积分对下限求导本身出现负号，而原方程的积分整体又带负号；两者抵消，使 $y$ 方向的隐式求导等式出现 $+e^{-y^2}$。$z>0$ 且 $1+1/z>0$ 保证求导合法。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-06-02-019" type="single" points={5} tags="来源:2026考研数一数二数三, 考点:隐函数求导, 考点:导数消项">
-
-设函数 $z=z(x,y)$ 由 $x-az=e^{y+az}$（$a\ne0$）确定，则（ ）。
-
-<Option correct>$z_x-z_y=\dfrac1a$</Option>
-<Option>$z_x+z_y=\dfrac1a$</Option>
-<Option>$z_x-z_y=-\dfrac1a$</Option>
-<Option>$z_x+z_y=-\dfrac1a$</Option>
-
-<Solution>
-
-**答案：A，$\boxed{z_x-z_y=1/a}$。**
-
-**第一步：用一个符号表示指数因子。** 令 $E=e^{y+az}>0$。原方程变为 $x-az=E$。
-
-对 $x$ 求偏导，
-
-$$
-1-az_x=aEz_x
-\quad\Longrightarrow\quad
-z_x=\frac1{a(1+E)}.
-$$
-
-对 $y$ 求偏导，
-
-$$
--az_y=E(1+az_y)
-\quad\Longrightarrow\quad
-z_y=-\frac{E}{a(1+E)}.
-$$
-
-**第二步：计算题目指定的组合。**
-
-$$
-\boxed{z_x-z_y=\frac{1+E}{a(1+E)}=\frac1a}.
-$$
-
-<Callout type="idea" title="利用变量替换读出答案">
-
-也可设 $w=y+az$。题设成为 $x+y-w=e^w$，即 $w+e^w=x+y$。故 $w$ 只依赖 $x+y$，于是 $w_x=w_y$，即 $az_x=1+az_y$，立刻得到 $z_x-z_y=1/a$。这种方法无需分别算出两个偏导数。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-06-02-020" type="essay" tags="来源:李正元练习题, 考点:隐函数求导, 考点:二阶复合链式法则">
-
-设 $z=f(x,y,u)$，其中 $f$ 具有二阶连续偏导数，$u=u(x,y)$ 由
-
-$$
-u^5-5xy+5u=1
-$$
-
-确定，求 $\dfrac{\partial z}{\partial x}$ 与 $\dfrac{\partial^2z}{\partial x^2}$。
-
-<Solution>
-
-**参考答案：** 下面 $f$ 的各偏导数均在 $(x,y,u(x,y))$ 处取值，
-
-$$
-\boxed{z_x=f_x+\frac{y}{1+u^4}f_u},
-$$
-
-$$
-\boxed{z_{xx}=f_{xx}+\frac{2y}{1+u^4}f_{xu}
-+\frac{y^2}{(1+u^4)^2}f_{uu}
--\frac{4y^2u^3}{(1+u^4)^3}f_u}.
-$$
-
-**第一步：先求内层隐函数的导数。** 令 $G=u^5-5xy+5u-1$，则 $G_u=5(1+u^4)>0$。因此 $u$ 可以局部确定为可微函数，且
-
-$$
-5(1+u^4)u_x-5y=0
-\quad\Longrightarrow\quad
-\boxed{u_x=\frac{y}{1+u^4}}.
-$$
-
-对这个公式再求一次 $x$ 偏导（$y$ 固定）：
-
-$$
-\begin{aligned}
-u_{xx}&=-y(1+u^4)^{-2}\cdot4u^3u_x\\
-&=\boxed{-\frac{4y^2u^3}{(1+u^4)^3}}.
-\end{aligned}
-$$
-
-**第二步：求外层 $z$ 的一阶偏导。** 对 $z=f(x,y,u(x,y))$，沿 $x$ 方向有
-
-$$
-z_x=f_x+f_uu_x=f_x+\frac{y}{1+u^4}f_u.
-$$
-
-**第三步：求二阶偏导。** 分别对两项用链式法则，
-
-$$
-\begin{aligned}
-z_{xx}&=(f_x)_x+(f_uu_x)_x\\
-&=f_{xx}+f_{xu}u_x+(f_{ux}+f_{uu}u_x)u_x+f_uu_{xx}\\
-&=f_{xx}+2f_{xu}u_x+f_{uu}u_x^2+f_uu_{xx}.
-\end{aligned}
-$$
-
-最后代入 $u_x,u_{xx}$，便得到答案中所列的完整表达式。
-
-<Callout type="warn" title="复合二阶导含四种项">
-
-$z_{xx}$ 中除了 $f_{xx}$ 和 $f_{uu}u_x^2$，还必须包括两个交叉项合成的 $2f_{xu}u_x$，以及来自隐函数曲率的 $f_uu_{xx}$。外层 $f$ 依赖 $x,y,u$ 三个参数，求 $x$ 偏导时才固定 $y$。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-06-02-021" type="essay" tags="来源:张宇1000题, 考点:积分隐函数, 考点:混合偏导数">
-
-方程
-
-$$
-2z-e^z+1+\int_y^{x^2}\sin(t^2)\,\mathrm dt=0
-$$
-
-在 $(x_0,y_0,z_0)=(1,1,0)$ 附近确定隐函数 $z=z(x,y)$。求 $\left.z_{xy}\right|_{(1,1)}$。
-
-<Solution>
-
-**参考答案：$\boxed{-2\sin^2 1}$。**
-
-**第一步：写出三变量方程并检查隐函数条件。** 定义
-
-$$
-F(x,y,z)=2z-e^z+1+\int_y^{x^2}\sin(t^2)\,\mathrm dt.
-$$
-
-在 $(1,1,0)$ 处积分上下限相同，因此 $F=0$。又
-
-$$
-F_z=2-e^z=1\ne0,
-$$
-
-故隐函数局部存在。
-
-**第二步：求一阶隐函数导数。** 根据变限积分求导，
-
-$$
-F_x=2x\sin(x^4),\qquad F_y=-\sin(y^2),\qquad F_z=2-e^z.
-$$
-
-在指定点有
-
-$$
-z_x=-\frac{F_x}{F_z}=-2\sin1,
-\qquad z_y=-\frac{F_y}{F_z}=\sin1.
-$$
-
-**第三步：对方程作混合求导。** 由 $F_x+F_zz_x=0$，对 $y$ 求偏导：
-
-$$
-F_{xy}+F_{xz}z_y+(F_{zy}+F_{zz}z_y)z_x+F_zz_{xy}=0.
-$$
-
-本题 $F_{xy}=F_{xz}=F_{zy}=0$，$F_{zz}=-e^z=-1$；因此
-
-$$
-0-z_xz_y+z_{xy}=0,
-\quad\Longrightarrow\quad
-z_{xy}=z_xz_y.
-$$
-
-代入一阶导数得到
-
-$$
-\boxed{z_{xy}(1,1)=(-2\sin1)(\sin1)=-2\sin^21}.
-$$
-
-<Callout type="idea" title="积分部分在 $x,y$ 上可分离">
-
-$\int_y^{x^2}\sin(t^2)dt$ 可写成“关于 $x$ 的函数减去关于 $y$ 的函数”，所以 $F_{xy}=0$。非零混合偏导完全来自 $-e^z$ 的非线性复合效应；不能看到积分部分混合导数为零就判定 $z_{xy}=0$。
-
-</Callout>
-
-</Solution>
-</Question>
-
-## 四、齐次函数、欧拉算子及算子消项
-
-<Question id="math-core-gd-06-02-022" type="single" points={4} tags="来源:2010考研数一数二, 考点:齐次函数, 考点:欧拉公式">
-
-函数 $z=z(x,y)$ 由方程 $F\left(\frac yx,\frac zx\right)=0$ 确定，其中 $F$ 可微，且 $F_2'\ne0$，则 $xz_x+yz_y=$（ ）。
+ 设函数 $z=z(x, y)$, 由方程 $F\left(\frac{y}{x}, \frac{z}{x}\right)=0$ 确定, 其中 $F$ 为可微函数, 且 $F_2' \neq 0$, 则 $x \frac{\partial z}{\partial x} + y \frac{\partial z}{\partial y} = (\quad)$。
 
 <Option>$x$</Option>
 <Option correct>$z$</Option>
@@ -1094,993 +1221,2412 @@ $\int_y^{x^2}\sin(t^2)dt$ 可写成“关于 $x$ 的函数减去关于 $y$ 的�
 
 <Solution>
 
-**答案：B，$\boxed{xz_x+yz_y=z}$。**
-
-**方法一：直接隐函数求导。** 记 $u=y/x$、$v=z/x$（原式要求 $x\ne0$）。对 $x$ 求偏导：
+**正确选项：B。**
 
 $$
--yF_1'+(xz_x-z)F_2'=0.\tag{1}
+\boxed{xz_x+yz_y=z}.
 $$
 
-对 $y$ 求偏导：
+<Tabs items={['方法一：隐式求导','方法二：齐次函数']} defaultIndex={0}>
+  <Tab value="方法一：隐式求导">
 
-$$
-F_1'+z_yF_2'=0.\tag{2}
-$$
+    设 $p=y/x$、$q=z/x$，且 $x\ne0$。原方程为 $F(p,q)=0$。对 $x$（固定 $y$）求偏导：
 
-将式（2）乘以 $y$，代入式（1）消去 $F_1'$，得到
+    $$
+    -\frac y{x^2}F_1+\frac{xz_x-z}{x^2}F_2=0,
+    \quad -yF_1+(xz_x-z)F_2=0.\tag{1}
+    $$
 
-$$
-(xz_x+yz_y-z)F_2'=0.
-$$
+    对 $y$（固定 $x$）求偏导：
 
-因 $F_2'\ne0$，故 $xz_x+yz_y=z$。
+    $$
+    \frac1xF_1+\frac{z_y}xF_2=0
+    \quad\Longrightarrow\quad F_1=-z_yF_2.\tag{2}
+    $$
 
-**方法二：利用一次齐次函数的欧拉公式。** 由 $F(u,v)=0$ 且 $F_2'\ne0$，可以在某个局部解支上写成 $v=h(u)$。因此
+    将（2）代入（1），得 $(xz_x+yz_y-z)F_2=0$。因 $F_2\ne0$，故 $xz_x+yz_y=z$。
 
-$$
-z=xh\left(\frac yx\right).
-$$
+  </Tab>
+  <Tab value="方法二：齐次函数">
 
-当 $(x,y)$ 按相同比例 $\lambda$ 缩放时，$z$ 也相应乘以 $\lambda$，所以 $z$ 是一次齐次函数，欧拉公式直接给出 $xz_x+yz_y=z$。
+    设 $q=z/x$，则由 $F(y/x,q)=0$ 且 $F_2\ne0$，局部存在一元函数 $q=h(y/x)$。所以
 
-<Callout type="idea" title="何时可用齐次性秒解">
+    $$
+    z=xh\!\left(\frac yx\right).
+    $$
 
-题干中出现 $y/x,z/x$ 或只由变量比值构成的隐式关系时，优先检查能否把 $z$ 写成 $xh(y/x)$；但应在 $x\ne0$ 且隐函数局部成立的解支上讨论，不能无条件跨越不同解支。
+    于是对任意允许的正数 $t$，有 $z(tx,ty)=t z(x,y)$，说明 $z$ 是一次齐次函数。欧拉齐次函数定理立即给出
+
+    $$
+    xz_x+yz_y=1\cdot z.
+    $$
+
+  </Tab>
+</Tabs>
+
+<Callout type="idea" title="从比例型隐式方程识别齐次性">
+
+看见 $F(y/x,z/x)=0$，优先判断 $z=xh(y/x)$。这比直接求 $z_x$、$z_y$ 的完整表达式更快。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-06-02-023" type="blank" points={4} tags="来源:2019考研数二, 考点:加权齐次函数, 考点:偏微分算子">
+<Question id="core-1102-math-4b8ca9-047" type="essay" points={11} tags="来源:2010年考研数学二, 科目:高等数学, 章节:偏导数计算, 考点:偏微分算子变换与方程化简">
 
-设函数 $f(u)$ 可导，$z=yf\left(\frac{y^2}{x}\right)$，则 $2xz_x+yz_y=$ <Blank answer="z" kind="math" />。（$x\ne0$。）
-
-<Solution>
-
-**答案：$\boxed z$。**
-
-**方法一：按链式法则计算。** 令 $u=y^2/x$，则
+设函数 $u=f(x, y)$ 具有二阶连续偏导数, 且满足等式
 
 $$
-z_x=yf'(u)\left(-\frac{y^2}{x^2}\right)
-=-\frac{y^3}{x^2}f'(u),
+4 \frac{\partial^2 u}{\partial x^2} + 12 \frac{\partial^2 u}{\partial x \partial y} + 5 \frac{\partial^2 u}{\partial y^2} = 0
 $$
 
-$$
-z_y=f(u)+yf'(u)\frac{2y}{x}
-=f(u)+\frac{2y^2}{x}f'(u).
-$$
-
-于是
-
-$$
-\begin{aligned}
-2xz_x+yz_y
-&=-\frac{2y^3}{x}f'(u)+yf(u)+\frac{2y^3}{x}f'(u)\\
-&=\boxed{yf(u)=z}.
-\end{aligned}
-$$
-
-**方法二：加权齐次性。** 定义一阶算子 $D=2x\partial_x+y\partial_y$，则
-
-$$
-D\left(\frac{y^2}{x}\right)=0,\qquad Dy=y.
-$$
-
-故由乘积法则
-
-$$
-Dz=(Dy)f(u)+yf'(u)Du=yf(u)=z.
-$$
-
-<Callout type="idea" title="不同变量有不同缩放权重">
-
-在缩放 $(x,y)\mapsto(\lambda^2x,\lambda y)$ 下，比值 $y^2/x$ 不变，而前置因子 $y$ 乘以 $\lambda$。因此 $z$ 是权重 $(2,1)$ 下的一次齐次函数，对应的欧拉算子正是 $2x\partial_x+y\partial_y$。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-06-02-024" type="single" points={5} tags="来源:2022考研数一, 考点:欧拉齐次函数, 考点:反求函数">
-
-设 $f(u)$ 可导，$z=xyf\!\left(\frac yx\right)$。若
-
-$$
-x\frac{\partial z}{\partial x}+y\frac{\partial z}{\partial y}
-=y^2(\ln y-\ln x),
-$$
-
-则（ ）。
-
-<Option>$f(1)=\frac12,\ f'(1)=0$</Option>
-<Option correct>$f(1)=0,\ f'(1)=\frac12$</Option>
-<Option>$f(1)=\frac12,\ f'(1)=1$</Option>
-<Option>$f(1)=0,\ f'(1)=1$</Option>
-
-<Solution>
-
-**答案：B，$\boxed{f(1)=0,\ f'(1)=\frac12}$。**
-
-**第一步：看齐次次数，而不是立即展开偏导。** 因为 $y/x$ 对 $(x,y)$ 是零次齐次量，故
-
-$$
-z(\lambda x,\lambda y)=\lambda^2z(x,y).
-$$
-
-由二次齐次函数的欧拉公式，
-
-$$
-xz_x+yz_y=2z=2xyf\!\left(\frac yx\right).
-$$
-
-**第二步：将二元恒等式化成一元方程。** 题设对数要求 $x,y>0$，记 $u=y/x>0$。则
-
-$$
-2xyf(u)=y^2\ln u
-\quad\Longrightarrow\quad
-2f(u)=u\ln u.
-$$
-
-所以
-
-$$
-f(u)=\frac{u\ln u}{2},\qquad
-f'(u)=\frac{\ln u+1}{2}.
-$$
-
-令 $u=1$ 即得 $f(1)=0,f'(1)=1/2$。
-
-<Callout type="idea" title="齐次函数题的快捷入口">
-
-若未知函数只出现在变量比值内，先问整体齐次次数，再用 $xz_x+yz_y=kz$，往往可以绕开链式求导的多项抵消。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-06-02-025" type="essay" points={12} tags="来源:2025考研数一, 考点:齐次函数, 考点:二阶偏导, 考点:欧拉算子">
-
-函数 $f(u)$ 在 $(0,+\infty)$ 内具有二阶导数，记 $g(x,y)=f\!\left(\frac xy\right)$。若
-
-$$
-x^2g_{xx}+xyg_{xy}+y^2g_{yy}=1,
-$$
-
-且 $g(x,x)=1$、$\left.g_x\right|_{(x,x)}=\frac2x$，求 $f(u)$。
+确定 $a, b$ 的值, 使等式在变换 $\xi = x + ay, \eta = x + by$ 下化简为 $\frac{\partial^2 u}{\partial \xi \partial \eta} = 0$。
 
 <Solution>
 
 **参考答案：**
 
 $$
-\boxed{f(u)=\frac12(\ln u)^2+2\ln u+1,\qquad u>0.}
+\boxed{(a,b)=\left(-2,-\frac25\right)\quad\text{或}\quad\left(-\frac25,-2\right)}.
 $$
 
-**方法一：逐项链式求导。** 令 $u=x/y$（故 $y\ne0$、$u>0$），先求一阶导：
+<Steps>
+  <Step>
 
-$$
-g_x=\frac{f'(u)}y,\qquad g_y=-\frac u y f'(u).
-$$
+    ### 写出新坐标下的微分算子
 
-进一步，
+    令 $\xi=x+ay$、$\eta=x+by$，把同一函数写成 $U(\xi,\eta)=u(x,y)$。则
 
-$$
-\begin{aligned}
-g_{xx}&=\frac{f''(u)}{y^2},\\
-g_{xy}&=-\frac{uf''(u)+f'(u)}{y^2},\\
-g_{yy}&=\frac{u^2f''(u)+2uf'(u)}{y^2}.
-\end{aligned}
-$$
+    $$
+    \partial_x=\partial_\xi+\partial_\eta,
+    \qquad\partial_y=a\partial_\xi+b\partial_\eta.
+    $$
 
-代入题给组合式，并用 $x=uy$：
+    因 $a,b$ 为常数，进一步得到
 
-$$
-\begin{aligned}
-1&=u^2f''-u(uf''+f')+u^2f''+2uf'\\
- &=u^2f''+uf'=u(uf')'.
-\end{aligned}
-$$
+    $$
+    \begin{aligned}
+    u_{xx}&=U_{\xi\xi}+2U_{\xi\eta}+U_{\eta\eta},\\
+    u_{xy}&=aU_{\xi\xi}+(a+b)U_{\xi\eta}+bU_{\eta\eta},\\
+    u_{yy}&=a^2U_{\xi\xi}+2abU_{\xi\eta}+b^2U_{\eta\eta}.
+    \end{aligned}
+    $$
 
-因而
+  </Step>
+  <Step>
 
-$$
-(uf')'=\frac1u
-\quad\Longrightarrow\quad
-uf'=\ln u+C_1.
-$$
+    ### 令两个纯二阶偏导系数为零
 
-再次积分：
+    把上式代入 $4u_{xx}+12u_{xy}+5u_{yy}=0$，整理得
 
-$$
-f(u)=\frac12(\ln u)^2+C_1\ln u+C_2.
-$$
+    $$
+    (4+12a+5a^2)U_{\xi\xi}
+    +[8+12(a+b)+10ab]U_{\xi\eta}
+    +(4+12b+5b^2)U_{\eta\eta}=0.
+    $$
 
-**用两条条件分别确定两个常数。** 在 $x=y>0$ 时 $u=1$，故 $g(x,x)=f(1)=1$，于是 $C_2=1$。又
+    为仅剩混合偏导，令
 
-$$
-g_x(x,x)=\frac{f'(1)}x=\frac2x
-\quad\Longrightarrow\quad f'(1)=2,
-$$
+    $$
+    5a^2+12a+4=0,\qquad5b^2+12b+4=0.
+    $$
 
-而 $uf'(u)=\ln u+C_1$，故 $C_1=2$。
+    因 $5t^2+12t+4=(5t+2)(t+2)$，故 $a,b\in\{-\frac25,-2\}$。
 
-**方法二：利用零次齐次性质压缩计算。** 记 $D=x\partial_x+y\partial_y$，由于 $g(x,y)=f(x/y)$ 是零次齐次函数，$Dg=0$。将 $Dg=0$ 分别对 $x,y$ 求导：
+  </Step>
+  <Step>
 
-$$
-\begin{cases}
-xg_{xx}+yg_{xy}=-g_x,\\
-xg_{xy}+yg_{yy}=-g_y.
-\end{cases}
-$$
+    ### 排除退化变换并验证系数非零
 
-由此可将原算子化为 $x^2g_{xx}+xyg_{xy}+y^2g_{yy}=-xg_x+ y^2g_{yy}$；再用 $g_y=-uf'/y$ 即可化回 $u^2f''+uf'=1$。这一思路突出题目与齐次性之间的关系。
+    坐标变换的雅可比行列式是
 
-<Callout type="warn" title="二阶欧拉算子的系数要看准">
+    $$
+    \frac{\partial(\xi,\eta)}{\partial(x,y)}
+    =\begin{vmatrix}1&a\\1&b\end{vmatrix}=b-a.
+    $$
 
-$D^2g-Dg=x^2g_{xx}+2xyg_{xy}+y^2g_{yy}$，但本题 $g_{xy}$ 前只有 **$xy$**，不能把原式直接替换为 $D^2g-Dg$。
+    必须有 $a\ne b$，故两根只能分别赋给 $a,b$。此时混合项系数
+
+    $$
+    8+12(a+b)+10ab=-\frac{64}{5}\ne0,
+    $$
+
+    原方程确实等价于 $U_{\xi\eta}=0$。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="不能令两个参数取相同的根">
+
+若 $a=b$，则 $\xi=\eta$，新坐标不独立，不是合法的二维变量变换，即使形式上纯二阶项系数消失也不能视为所需化简。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-06-02-026" type="essay" tags="来源:张宇1000题, 考点:二阶欧拉算子, 考点:齐次函数">
+<Question id="core-1102-math-4b8ca9-048" type="blank" points={4} tags="来源:2011年考研数学一, 科目:高等数学, 章节:偏导数计算, 考点:变上限积分函数的二阶偏导">
 
-设 $f(u,v)$ 具有二阶连续偏导数，函数
-
-$$
-g(x,y)=xy-f\!\left(\frac yx,\frac xy\right),
-$$
-
-求 $x^2g_{xx}+2xyg_{xy}+y^2g_{yy}$（$xy\ne0$）。
+ 设函数 $F(x, y) = \int_0^{xy} \frac{\sin t}{1+t^2} \mathrm{d}t$, 则 $\left.\frac{\partial^2 F}{\partial x^2}\right|_{(0,2)} =$ <Blank answer="4" kind="math" />。
 
 <Solution>
 
-**参考答案：$\boxed{2xy}$。**
+**参考答案：**$\boxed{F_{xx}(0,2)=4}$。
 
-**第一步：利用缩放识别齐次部分。** 设
+<Steps>
+  <Step>
 
-$$
-D=x\partial_x+y\partial_y.
-$$
+    ### 将变上限积分视为一元复合函数
 
-由于 $y/x$、$x/y$ 均在 $(x,y)\mapsto(\lambda x,\lambda y)$ 下不变，
+    令 $H(s)=\int_0^s\frac{\sin t}{1+t^2}\,\mathrm dt$，则 $F(x,y)=H(xy)$，并且
 
-$$
-D\left[f\!\left(\frac yx,\frac xy\right)\right]=0.
-$$
+    $$
+    H'(s)=\frac{\sin s}{1+s^2}.
+    $$
 
-而 $D(xy)=2xy$，因此
+    因 $y$ 在对 $x$ 求偏导时固定，
 
-$$
-Dg=2xy,\qquad D^2g=D(2xy)=4xy.
-$$
+    $$
+    F_x=yH'(xy),\qquad F_{xx}=y^2H''(xy).
+    $$
 
-**第二步：注意算子平方要对系数求导。**
+  </Step>
+  <Step>
 
-$$
-\begin{aligned}
-D^2g
-&=x\partial_x(xg_x+yg_y)+y\partial_y(xg_x+yg_y)\\
-&=x^2g_{xx}+2xyg_{xy}+y^2g_{yy}+xg_x+yg_y.
-\end{aligned}
-$$
+    ### 只计算所需点的导数
 
-所以
+    $$
+    H''(s)=\frac{(1+s^2)\cos s-2s\sin s}{(1+s^2)^2},
+    \qquad H''(0)=1.
+    $$
 
-$$
-\boxed{x^2g_{xx}+2xyg_{xy}+y^2g_{yy}=D^2g-Dg=2xy}.
-$$
+    于是 $F_{xx}(0,2)=2^2\cdot H''(0)=4$。
 
-<Callout type="idea" title="二阶欧拉恒等式">
+  </Step>
+</Steps>
 
-若 $h$ 是 $k$ 次齐次函数，则 $Dh=kh$，进而 $D^2h-Dh=k(k-1)h$。题目中的 $f(y/x,x/y)$ 是零次齐次，$xy$ 是二次齐次，分开处理最省力。
+<Callout type="idea" title="无需显式积分">
+
+求变上限积分函数的导数，应先使用微积分基本定理。这里积分原函数的闭式表达并不需要求出。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-## 五、由微分或偏微分反求函数
+<Question id="core-1102-math-4b8ca9-049" type="essay" points={9} tags="来源:2011年考研数学一、二, 科目:高等数学, 章节:偏导数计算, 考点:复合函数二阶偏导与极值条件">
 
-<Question id="math-core-gd-06-02-027" type="single" points={5} tags="来源:2022考研数二数三, 考点:变上限积分, 考点:偏导关系">
-
-设函数 $f(t)$ 连续，令
-
-$$
-F(x,y)=\int_0^{x-y}(x-y-t)f(t)\,\mathrm dt,
-$$
-
-则（ ）。
-
-<Option>$F_x=F_y,\ F_{xx}=F_{yy}$</Option>
-<Option>$F_x=F_y,\ F_{xx}=-F_{yy}$</Option>
-<Option correct>$F_x=-F_y,\ F_{xx}=F_{yy}$</Option>
-<Option>$F_x=-F_y,\ F_{xx}=-F_{yy}$</Option>
-
-<Solution>
-
-**答案：C，$\boxed{F_x=-F_y,\ F_{xx}=F_{yy}}$。**
-
-**第一步：把公共变量单独抽出。** 令 $s=x-y$，定义
-
-$$
-H(s)=\int_0^s(s-t)f(t)\,\mathrm dt.
-$$
-
-由 $f$ 连续，利用变上限求导公式：
-
-$$
-H'(s)=\int_0^sf(t)\,\mathrm dt,\qquad H''(s)=f(s).
-$$
-
-**第二步：一元复合求导。** 因 $F(x,y)=H(x-y)$，所以
-
-$$
-F_x=H'(s),\quad F_y=-H'(s),
-$$
-
-$$
-F_{xx}=H''(s)=f(s),\qquad
-F_{yy}=H''(s)=f(s).
-$$
-
-于是两项一阶偏导相反，两项二阶纯偏导相等。
-
-<Callout type="idea" title="只依赖 $x-y$ 的函数">
-
-更一般地，对任意二阶可导的一元函数 $H$，$F(x,y)=H(x-y)$ 都满足 $F_x+F_y=0$ 和 $F_{xx}=F_{yy}$；题目中的积分表达式主要用于保证 $H$ 具有所需的光滑性。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-06-02-028" type="blank" tags="来源:李林880, 考点:全微分, 考点:势函数">
-
-设 $z(x,y)$ 的全微分为
-
-$$
-\mathrm dz=(x^2+2xy-y^2)\,\mathrm dx+(x^2-2xy-y^2)\,\mathrm dy,
-$$
-
-则 $z(x,y)=$ <Blank answer="x^3/3+x^2*y-x*y^2-y^3/3+C" kind="math" />。
-
-<Solution>
-
-**答案：**
-
-$$
-\boxed{z(x,y)=\frac{x^3}{3}+x^2y-xy^2-\frac{y^3}{3}+C}.
-$$
-
-**第一步：先验全微分的相容性。** 记
-
-$$
-P=x^2+2xy-y^2,\qquad Q=x^2-2xy-y^2.
-$$
-
-计算 $P_y=2x-2y$ 与 $Q_x=2x-2y$，相等，因此符合势函数的必要条件。
-
-**第二步：对 $x$ 积分时留出关于 $y$ 的自由函数。**
-
-$$
-z_x=P\quad\Longrightarrow\quad
-z=\frac{x^3}{3}+x^2y-xy^2+\phi(y).
-$$
-
-求 $y$ 偏导并与已知 $Q$ 比较：
-
-$$
-z_y=x^2-2xy+\phi'(y)=x^2-2xy-y^2,
-$$
-
-故 $\phi'(y)=-y^2$，即 $\phi(y)=-y^3/3+C$。
-
-<Callout type="warn" title="偏积分的常数不是普通常数">
-
-只对 $x$ 积分时，所谓“积分常数”可以依赖于尚未积分的变量 $y$，必须先写成 $\phi(y)$，然后用另一条偏导条件确定。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-06-02-029" type="blank" tags="来源:李林880, 考点:高阶偏导, 考点:部分分式">
-
-设 $z=\dfrac{2x}{x^2-y^2}$，则
-
-$$
-\left.\frac{\partial^n z}{\partial y^n}\right|_{(2,1)}=
-$$
-
-<Blank answer="n!*(1+(-1)^n/3^(n+1))" kind="math" />。（$n$ 为非负整数。）
-
-<Solution>
-
-**答案：**
-
-$$
-\boxed{\left.\frac{\partial^nz}{\partial y^n}\right|_{(2,1)}=n!\left(1+\frac{(-1)^n}{3^{n+1}}\right)}.
-$$
-
-**第一步：做部分分式拆分。** 对 $x\ne\pm y$，
-
-$$
-\frac{2x}{(x-y)(x+y)}=\frac1{x-y}+\frac1{x+y}.
-$$
-
-**第二步：固定 $x$，分别求 $n$ 阶 $y$ 导。**
-
-$$
-\frac{\partial^n}{\partial y^n}(x-y)^{-1}=n!(x-y)^{-n-1},
-$$
-
-$$
-\frac{\partial^n}{\partial y^n}(x+y)^{-1}=(-1)^nn!(x+y)^{-n-1}.
-$$
-
-所以
-
-$$
-\frac{\partial^nz}{\partial y^n}
-=n!\left[\frac1{(x-y)^{n+1}}+\frac{(-1)^n}{(x+y)^{n+1}}\right].
-$$
-
-令 $x=2,y=1$，则 $x-y=1,x+y=3$，得到答案。
-
-**核验：** $n=0$ 时公式给出 $1+1/3=4/3$，与原函数 $z(2,1)=4/3$ 相符。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-06-02-030" type="essay" tags="来源:李正元练习题, 考点:二阶偏微分方程, 考点:边界条件">
-
-设 $z=f(x,y)$ 满足
-
-$$
-f_{yy}=2x,\qquad f(x,1)=0,\qquad
-\left.\frac{\partial f}{\partial y}\right|_{(x,0)}=\sin x.
-$$
-
-求 $f(x,y)$。
+ 设函数 $z=f(xy, yg(x))$, 其中函数 $f$ 具有二阶连续偏导数, 函数 $g(x)$ 可导且在 $x=1$ 处取得极值 $g(1)=1$, 求 $\left.\frac{\partial^2 z}{\partial x \partial y}\right|_{(1,1)}$。
 
 <Solution>
 
 **参考答案：**
 
 $$
-\boxed{f(x,y)=x(y^2-1)+(y-1)\sin x}.
+\boxed{z_{xy}(1,1)=f_1(1,1)+f_{11}(1,1)+f_{12}(1,1)}.
 $$
 
-**第一步：两次对 $y$ 积分。** 把 $x$ 当作常数，得
+<Steps>
+  <Step>
 
-$$
-f_y(x,y)=2xy+A(x),
-$$
+    ### 先使用极值点的必要条件
 
-$$
-f(x,y)=xy^2+A(x)y+B(x).
-$$
+    函数 $g$ 在 $x=1$ 处可导且取极值，所以由费马引理 $g'(1)=0$。再结合题设 $g(1)=1$，这些条件将使大量项在最后消失。
 
-其中 $A(x)$、$B(x)$ 是两次偏积分产生的未知函数。
+  </Step>
+  <Step>
 
-**第二步：依次使用两条边界信息。** 因 $f_y(x,0)=A(x)=\sin x$，故
+    ### 对复合函数求一次 $x$ 偏导
 
-$$
-f(x,y)=xy^2+y\sin x+B(x).
-$$
+    令 $u=xy$，$v=yg(x)$，则 $z=f(u,v)$，从而
 
-再代入 $f(x,1)=0$：
+    $$
+    z_x=yf_1(u,v)+yg'(x)f_2(u,v).
+    $$
 
-$$
-x+\sin x+B(x)=0
-\Longrightarrow B(x)=-x-\sin x.
-$$
+    注意两个偏导函数都要在点 $(u,v)$ 取值，而非直接在 $(x,y)$ 处取值。
 
-**第三步：反验。**
+  </Step>
+  <Step>
 
-$$
-f_{yy}=2x,\quad f(x,1)=0,\quad f_y(x,0)=\sin x.
-$$
+    ### 对 $y$ 求导，再代入 $(1,1)$
 
-三条条件均成立。
+    因 $u_y=x$、$v_y=g(x)$，
 
-<Callout type="idea" title="二阶偏微分方程的积分自由度">
+    $$
+    \begin{aligned}
+    z_{xy}={}&f_1+y\bigl(xf_{11}+g(x)f_{12}\bigr)\\
+    &+g'(x)f_2+yg'(x)\bigl(xf_{21}+g(x)f_{22}\bigr).
+    \end{aligned}
+    $$
 
-$\partial_y^2 f=H(x,y)$ 两次偏积分后，需要两条独立的关于 $y$ 的初值或边界信息才能确定积分自由函数；本题所给的 $f(x,1)$ 和 $f_y(x,0)$ 正好各确定一个。
+    代入 $x=y=1$，此时 $(u,v)=(1,1)$ 且 $g'(1)=0$，所有含 $g'(1)$ 的项均为零，得到盒中答案。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="极值点条件不能过早替换为常数">
+
+先推导一般点的混合偏导，再令 $x=y=1$。若一开始把 $g(x)$ 直接写成 $1$，可能误丢求导中本应出现的 $g'(x)$ 项。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-06-02-031" type="blank" tags="来源:张宇1000题, 考点:混合偏导积分, 考点:边界反求">
+<Question id="core-1102-math-4b8ca9-050" type="essay" points={10} tags="来源:2011年考研数学三, 科目:高等数学, 章节:偏导数计算, 考点:二阶复合函数与驻点条件">
 
-函数 $f(x,y)$ 具有二阶连续偏导数，且
-
-$$
-f_{xy}(x,y)=1,\qquad f(0,y)=\sin y,\qquad f(x,0)=\sin x.
-$$
-
-则 $f\!\left(\frac\pi2,\frac\pi2\right)=$ <Blank answer="pi^2/4+2" kind="math" />。
-
-<Solution>
-
-**答案：$\boxed{\dfrac{\pi^2}{4}+2}$。**
-
-**第一步：把混合偏导还原为函数。** 由 $f_{xy}=1$，先对 $y$ 积分得 $f_x=y+A(x)$；再对 $x$ 积分得
-
-$$
-f(x,y)=xy+P(x)+Q(y).
-$$
-
-也可以直接记住：$f_{xy}=1$ 的通解为一个特解 $xy$ 加两个任意一元函数。
-
-**第二步：边界条件决定 $P+Q$。**
-
-$$
-P(0)+Q(y)=\sin y,
-\qquad P(x)+Q(0)=\sin x.
-$$
-
-两式分别取 $x=0$、$y=0$，得 $P(0)+Q(0)=f(0,0)=0$。从而
-
-$$
-P(x)+Q(y)=\sin x+\sin y.
-$$
-
-故 $f(x,y)=xy+\sin x+\sin y$，代入 $x=y=\pi/2$ 得结果。
-
-**反验：** $f_{xy}=1$，并且沿两坐标轴代入均回到题设边界函数。
-
-</Solution>
-</Question>
-
-## 六、二阶偏微分方程的坐标变换
-
-<Question id="math-core-gd-06-02-032" type="essay" points={8} tags="来源:1996考研数一, 考点:坐标变换, 考点:偏微分算子, 考点:雅可比">
-
-设变换
-
-$$
-\begin{cases}u=x-2y,\\ v=x+ay\end{cases}
-$$
-
-可把微分方程
-
-$$
-6z_{xx}+z_{xy}-z_{yy}=0
-$$
-
-化为 $z_{uv}=0$。已知 $z=z(x,y)$ 具有二阶连续偏导数，求 $a$。
-
-<Solution>
-
-**参考答案：$\boxed{a=3}$。**
-
-**第一步：把偏微分算子变成新坐标的算子。** 记新坐标下的同一函数为 $w(u,v)=z(x,y)$。则
-
-$$
-\partial_x=\partial_u+\partial_v,
-\qquad \partial_y=-2\partial_u+a\partial_v.
-$$
-
-因此
-
-$$
-\begin{aligned}
-z_{xx}&=w_{uu}+2w_{uv}+w_{vv},\\
-z_{xy}&=-2w_{uu}+(a-2)w_{uv}+aw_{vv},\\
-z_{yy}&=4w_{uu}-4aw_{uv}+a^2w_{vv}.
-\end{aligned}
-$$
-
-**第二步：比较各项系数。**
-
-$$
-6z_{xx}+z_{xy}-z_{yy}
-=(10+5a)w_{uv}+(6+a-a^2)w_{vv}.
-$$
-
-$w_{uu}$ 项自动消失。要只剩 $w_{uv}$，必须有
-
-$$
-6+a-a^2=0
-\quad\Longrightarrow\quad (a-3)(a+2)=0.
-$$
-
-**第三步：剔除不可逆变换。** 雅可比行列式为
-
-$$
-\frac{\partial(u,v)}{\partial(x,y)}
-=\begin{vmatrix}1&-2\\1&a\end{vmatrix}=a+2.
-$$
-
-若 $a=-2$，则 $u=v$，不是两个独立的新坐标，不能把方程化成二维的 $w_{uv}=0$。只可取 $a=3$；这时原算子化为 $25w_{uv}$，与目标方程等价。
-
-<Callout type="warn" title="系数消失还不等于合法的坐标变换">
-
-解参数时必须同时满足 **非目标二阶项的系数为零** 与 **坐标变换的雅可比非零**，否则容易把退化的 $a=-2$ 也误选进去。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-06-02-033" type="essay" points={12} tags="来源:2006考研数一数二, 考点:径向拉普拉斯, 考点:常微分方程">
-
-函数 $f(u)$ 在 $(0,+\infty)$ 内具有二阶导数，且
-
-$$
-z=f\!\left(\sqrt{x^2+y^2}\right),\qquad z_{xx}+z_{yy}=0.
-$$
-
-（1）验证 $f''(u)+\dfrac{f'(u)}u=0$；（2）若 $f(1)=0$、$f'(1)=1$，求 $f(u)$。
-
-<Solution>
-
-**参考答案：**
-
-（1）$\boxed{f''(u)+f'(u)/u=0}$，$u>0$；（2）$\boxed{f(u)=\ln u}$。
-
-**（1）按径向变量展开两个二阶偏导。** 令 $r=\sqrt{x^2+y^2}>0$。因为 $r_x=x/r$、$r_y=y/r$，
-
-$$
-z_x=f'(r)\frac xr,
-\qquad
-z_{xx}=f''(r)\frac{x^2}{r^2}+f'(r)\left(\frac1r-\frac{x^2}{r^3}\right).
-$$
-
-同理
-
-$$
-z_{yy}=f''(r)\frac{y^2}{r^2}+f'(r)\left(\frac1r-\frac{y^2}{r^3}\right).
-$$
-
-相加时 $x^2+y^2=r^2$，所以
-
-$$
-\begin{aligned}
-z_{xx}+z_{yy}
-&=f''(r)\frac{x^2+y^2}{r^2}
-+f'(r)\left(\frac2r-\frac{x^2+y^2}{r^3}\right)\\
-&=f''(r)+\frac{f'(r)}r.
-\end{aligned}
-$$
-
-题设拉普拉斯算子为零，且 $r$ 可取任意正值，故结论成立。
-
-**（2）把二阶方程降成一个全导数。**
-
-$$
-f''(u)+\frac{f'(u)}u=0
-\iff
-(uf'(u))'=0.
-$$
-
-积分得 $uf'(u)=C_1$，进而
-
-$$
-f(u)=C_1\ln u+C_2.
-$$
-
-从 $f'(1)=1$ 得 $C_1=1$，从 $f(1)=0$ 得 $C_2=0$。
-
-<Callout type="idea" title="径向调和函数的经典形式">
-
-在二维平面，径向函数 $z=f(r)$ 满足 $\Delta z=f''(r)+f'(r)/r$；其非恒定调和解呈 $\ln r$ 形式，而不是 $1/r$。公式仅在 $r>0$ 时适用。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-06-02-034" type="essay" points={12} tags="来源:2024考研数二, 考点:二阶偏微分方程, 考点:线性坐标变换, 考点:边界求函数">
-
-已知 $f(u,v)$ 具有二阶连续偏导数，且 $g(x,y)=f(2x+y,3x-y)$ 满足
-
-$$
-g_{xx}+g_{xy}-6g_{yy}=1.
-$$
-
-（1）求 $f_{uv}$；（2）若 $f_u(u,0)=ue^{-u}$、$f(0,v)=\dfrac{v^2}{50}-1$，求 $f(u,v)$。
+ 已知函数 $f(u, v)$ 具有连续的二阶偏导数, $f(1, 1)=2$ 是 $f(u, v)$ 的极值, $z=f[x+y, f(x, y)]$, 求 $\left.\frac{\partial^2 z}{\partial x \partial y}\right|_{(1,1)}$。
 
 <Solution>
 
 **参考答案：**
 
 $$
-\boxed{f_{uv}=\frac1{25}},
-\qquad
+\boxed{z_{xy}(1,1)=f_{11}(2,2)+f_2(2,2)f_{12}(1,1)}.
+$$
+
+<Steps>
+  <Step>
+
+    ### 分清内层与外层函数的取值点
+
+    令 $u=x+y$、$v=f(x,y)$，外层 $z=f(u,v)$。在 $(x,y)=(1,1)$ 时，
+
+    $$
+    u=2,\qquad v=f(1,1)=2.
+    $$
+
+    由于 $f$ 在 $(1,1)$ 取得极值，且一阶偏导存在，所以
+
+    $$
+    f_1(1,1)=f_2(1,1)=0.
+    $$
+
+    注意该结论仅适用于**内层的点 $(1,1)$**，不能据此断言 $f_1(2,2)=f_2(2,2)=0$。
+
+  </Step>
+  <Step>
+
+    ### 先对 $x$ 求偏导
+
+    $$
+    z_x=f_1(u,v)u_x+f_2(u,v)v_x
+    =f_1(u,v)+f_2(u,v)f_1(x,y).
+    $$
+
+  </Step>
+  <Step>
+
+    ### 再对 $y$ 求导并化简
+
+    根据 $u_y=1$、$v_y=f_2(x,y)$，
+
+    $$
+    \begin{aligned}
+    z_{xy}={}&f_{11}(u,v)+f_{12}(u,v)f_2(x,y)\\
+    &+\bigl[f_{21}(u,v)+f_{22}(u,v)f_2(x,y)\bigr]f_1(x,y)\\
+    &+f_2(u,v)f_{12}(x,y).
+    \end{aligned}
+    $$
+
+    代入 $(1,1)$ 后所有含 $f_1(1,1)$ 或 $f_2(1,1)$ 的项消失，仅剩
+
+    $$
+    f_{11}(2,2)+f_2(2,2)f_{12}(1,1).
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="嵌套同名函数须标注求值点">
+
+可以记作 $f_{ij}^{\mathrm{out}}$ 与 $f_{ij}^{\mathrm{in}}$ 辅助区分。此题考点不在求导公式本身，而在外层点 $(2,2)$、内层点 $(1,1)$ 的严格区分。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-052" type="blank" points={4} tags="来源:2012年考研数学二, 科目:高等数学, 章节:偏导数计算, 考点:复合函数与一阶微分算子恒等式">
+
+ 设 $z=f\left(\ln x + \frac{1}{y}\right)$, 其中函数 $f(u)$ 可微, 则 $x \frac{\partial z}{\partial x} + y^2 \frac{\partial z}{\partial y} =$ <Blank answer="0" kind="math" />。
+
+<Solution>
+
+**参考答案：**$\boxed{xz_x+y^2z_y=0}$（$x>0$、$y\ne0$）。
+
+<Steps>
+  <Step>
+
+    ### 识别单变量复合结构
+
+    设 $s=\ln x+1/y$，则 $z=f(s)$。依次求偏导：
+
+    $$
+    z_x=f'(s)\frac1x,\qquad z_y=-f'(s)\frac1{y^2}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 按题目所给系数组合
+
+    $$
+    xz_x+y^2z_y
+    =x\frac{f'(s)}x-y^2\frac{f'(s)}{y^2}
+    =f'(s)-f'(s)=0.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="微分算子的作用方向">
+
+算子 $L=x\partial_x+y^2\partial_y$ 作用在中间变量 $s$ 上有 $Ls=1-1=0$，因而 $L[f(s)]=f'(s)Ls=0$。这是一阶偏微分恒等式的快速判断法。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-053" type="single" points={4} tags="来源:2013年考研数学二, 科目:高等数学, 章节:偏导数计算, 考点:乘积复合函数的偏导组合">
+
+ 设函数 $z=\frac{y}{x}f(xy)$，其中函数 $f$ 可微，则 $\frac{x}{y}\frac{\partial z}{\partial x}+\frac{\partial z}{\partial y}=(\quad)$。
+
+<Option correct>$2yf'(xy)$</Option>
+<Option>$-2yf'(xy)$</Option>
+<Option>$\frac{2}{x}f(xy)$</Option>
+<Option>$-\frac{2}{x}f(xy)$</Option>
+
+<Solution>
+
+**正确选项：A。**
+
+$$
+\boxed{\frac{x}{y}z_x+z_y=2yf'(xy)}\qquad(x\ne0,\ y\ne0).
+$$
+
+<Steps>
+  <Step>
+
+    ### 同时使用乘积法则与链式法则
+
+    记 $t=xy$，则 $z=(y/x)f(t)$。对 $x$ 求偏导（$y$ 固定）：
+
+    $$
+    z_x=-\frac{y}{x^2}f(t)+\frac{y}{x}\,f'(t)\,y
+    =-\frac{y}{x^2}f(t)+\frac{y^2}{x}f'(t).
+    $$
+
+    对 $y$ 求偏导（$x$ 固定）：
+
+    $$
+    z_y=\frac1x f(t)+\frac yx f'(t)\,x
+    =\frac1x f(t)+yf'(t).
+    $$
+
+  </Step>
+  <Step>
+
+    ### 观察题目指定的线性组合
+
+    $$
+    \begin{aligned}
+    \frac xy z_x+z_y
+    &=-\frac1x f(t)+yf'(t)+\frac1x f(t)+yf'(t)\\
+    &=2yf'(t)=2yf'(xy).
+    \end{aligned}
+    $$
+
+    原函数项 $f(t)$ 刚好抵消，只剩导函数项。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="不要漏掉变量限制">
+
+题式本身含 $y/x$ 及 $x/y$，所以在表达式有意义的地方需有 $x\ne0$、$y\ne0$；它们是运算前提，而不是额外的待求结论。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-055" type="essay" points={10} tags="来源:2014年考研数学一、二、三, 科目:高等数学, 章节:偏导数计算, 考点:复合函数拉普拉斯算子与微分方程">
+
+ 设函数 $f(u)$ 具有二阶连续偏导数, $z=f(\mathrm{e}^x \cos y)$ 满足 $\frac{\partial^2 z}{\partial x^2} + \frac{\partial^2 z}{\partial y^2} = (4z + \mathrm{e}^x \cos y)\mathrm{e}^{2x}$, 若 $f(0)=0, f'(0)=0$, 求 $f(u)$ 的表达式。
+
+<Solution>
+
+**参考答案：**
+
+$$
+\boxed{f(u)=\frac{e^{2u}-e^{-2u}}{16}-\frac u4}.
+$$
+
+<Steps>
+  <Step>
+
+    ### 识别特殊中间变量的拉普拉斯算子
+
+    设 $s=e^x\cos y$，$z=f(s)$。则
+
+    $$
+    s_x=s,\quad s_{xx}=s,\quad
+    s_y=-e^x\sin y,\quad s_{yy}=-s.
+    $$
+
+    二阶链式法则给出
+
+    $$
+    \begin{aligned}
+    z_{xx}&=f''(s)s_x^2+f'(s)s_{xx},\\
+    z_{yy}&=f''(s)s_y^2+f'(s)s_{yy}.
+    \end{aligned}
+    $$
+
+    由于 $s_{xx}+s_{yy}=0$、$s_x^2+s_y^2=e^{2x}$，两式相加恰好化为
+
+    $$
+    z_{xx}+z_{yy}=e^{2x}f''(s).
+    $$
+
+  </Step>
+  <Step>
+
+    ### 将偏微分方程化为常系数 ODE
+
+    由题设 $z_{xx}+z_{yy}=[4z+e^x\cos y]e^{2x}$，代入 $z=f(s)$，得到
+
+    $$
+    e^{2x}f''(s)=e^{2x}[4f(s)+s].
+    $$
+
+    因 $e^{2x}>0$ 且 $s=e^x\cos y$ 能取遍实数，故
+
+    $$
+    f''(u)-4f(u)=u\qquad(u\in\mathbb R).
+    $$
+
+  </Step>
+  <Step>
+
+    ### 解非齐次方程并确定常数
+
+    对应齐次方程的特征根为 $\lambda=\pm2$，因此
+
+    $$
+    f_h(u)=C_1e^{2u}+C_2e^{-2u}.
+    $$
+
+    取线性特解 $f_p(u)=Au+B$，代入得 $-4(Au+B)=u$，故 $A=-1/4$、$B=0$。通解为
+
+    $$
+    f(u)=C_1e^{2u}+C_2e^{-2u}-\frac u4.
+    $$
+
+    由 $f(0)=0$ 得 $C_1+C_2=0$；由 $f'(0)=0$ 得 $2C_1-2C_2=1/4$。解得
+
+    $$
+    C_1=\frac1{16},\qquad C_2=-\frac1{16},
+    $$
+
+    即为答案。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="运算主线：多元转一元">
+
+关键不是直接展开所有二阶导数，而是抓住 $s_{xx}+s_{yy}=0$ 与 $s_x^2+s_y^2=e^{2x}$。代换后就变成熟悉的二阶常系数非齐次微分方程。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-056" type="blank" points={4} tags="来源:2014年考研数学二, 科目:高等数学, 章节:偏导数计算, 考点:指数隐函数与全微分">
+
+ 设函数 $z=z(x, y)$ 由方程 $\mathrm{e}^{2yz} + x + y^2 + z = \frac{7}{4}$ 确定的函数, 则 $\left.\mathrm{d}z\right|_{\left(\frac{1}{2}, \frac{1}{2}\right)} =$ <Blank answer="-((1)/(2))(dx + dy)" kind="math" />。
+
+<Solution>
+
+**参考答案：**
+
+$$
+\boxed{\left.\mathrm dz\right|_{(1/2,1/2)}=-\frac12\mathrm dx-\frac12\mathrm dy}.
+$$
+
+<Steps>
+  <Step>
+
+    ### 先求对应的 $z$ 值
+
+    令 $F(x,y,z)=e^{2yz}+x+y^2+z-7/4$。在 $x=y=1/2$ 处，原式化为
+
+    $$
+    e^z+z=1.
+    $$
+
+    $z=0$ 满足方程；且 $e^z+z$ 严格递增，所以这就是唯一的对应值。故基点为 $(1/2,1/2,0)$。
+
+  </Step>
+  <Step>
+
+    ### 隐函数定理与全微分
+
+    $$
+    \begin{aligned}
+    F_x&=1,\\
+    F_y&=2ze^{2yz}+2y,\\
+    F_z&=2ye^{2yz}+1.
+    \end{aligned}
+    $$
+
+    代入基点，得到 $F_x=1,F_y=1,F_z=2\ne0$，所以局部可求出 $z=z(x,y)$，且
+
+    $$
+    \mathrm dz=-\frac{F_x\mathrm dx+F_y\mathrm dy}{F_z}
+    =-\frac12(\mathrm dx+\mathrm dy).
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="注意求的是点处的全微分">
+
+$\mathrm dz$ 是包含 $\mathrm dx,\mathrm dy$ 的线性表达式；不能只把 $z_x$、$z_y$ 的两个数值作为最终答案。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-057" type="blank" points={4} tags="来源:2015年考研数学一、三, 科目:高等数学, 章节:偏导数计算, 考点:隐函数全微分与特殊点代入">
+
+ 若 $z = z(x,y)$ 由方程 $e^z + xyz + x + \cos x = 2$ 确定，则 $\mathrm{d}z\bigl|_{(0,1)} =$ <Blank answer="-dx" kind="math" />
+
+<Solution>
+
+**参考答案：**
+
+$$
+\boxed{\left.\mathrm dz\right|_{(0,1)}=-\mathrm dx}.
+$$
+
+<Steps>
+  <Step>
+
+    ### 求隐函数的基点高度
+
+    令 $F(x,y,z)=e^z+xyz+x+\cos x-2$。代入 $(x,y)=(0,1)$：
+
+    $$
+    e^z+0+0+1-2=0\quad\Longrightarrow\quad e^z=1,
+    $$
+
+    故 $z=0$。
+
+  </Step>
+  <Step>
+
+    ### 计算隐函数各方向导数
+
+    $$
+    F_x=yz+1-\sin x,\quad F_y=xz,\quad F_z=e^z+xy.
+    $$
+
+    在 $(0,1,0)$ 处，$F_x=1$、$F_y=0$、$F_z=1\ne0$。由 $F_x+F_z z_x=0$、$F_y+F_z z_y=0$ 得
+
+    $$
+    z_x(0,1)=-1,\qquad z_y(0,1)=0.
+    $$
+
+    所以 $\mathrm dz=z_x\mathrm dx+z_y\mathrm dy=-\mathrm dx$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="先代点再化简">
+
+含 $xyz$、$\cos x$ 的隐函数看似复杂，但在 $x=0$ 时很多项消失。先确定 $z(0,1)$，再计算三项 $F_x,F_y,F_z$，比直接解出 $z$ 更快。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-059" type="single" points={4} tags="来源:2015年考研数学二, 科目:高等数学, 章节:偏导数计算, 考点:变量变换的反向偏导计算">
+
+ 设函数 $f(u,v)$ 满足 $f\left(x+y, \frac{y}{x}\right) = x^2 - y^2$，则 $\left.\frac{\partial f}{\partial u}\right|_{u=1, v=1}$，$\left.\frac{\partial f}{\partial v}\right|_{u=1, v=1}$ 依次是 ( ).
+
+<Option>$\frac{1}{2}, 0$ \quad</Option>
+<Option>$0, \frac{1}{2}$ \quad</Option>
+<Option>$-\frac{1}{2}, 0$ \quad</Option>
+<Option correct>$0, -\frac{1}{2}$</Option>
+
+<Solution>
+
+**正确选项：D。**
+
+$$
+\boxed{f_u(1,1)=0,\qquad f_v(1,1)=-\frac12}.
+$$
+
+<Tabs items={['方法一：反向链式法则','方法二：显式表示 f']} defaultIndex={0}>
+  <Tab value="方法一：反向链式法则">
+
+    令 $u=x+y$、$v=y/x$。要使 $(u,v)=(1,1)$，解
+
+    $$
+    x+y=1,\qquad y=x\quad\Longrightarrow\quad x=y=\frac12.
+    $$
+
+    原恒等式 $f(u,v)=x^2-y^2$ 分别对 $x,y$ 求偏导：
+
+    $$
+    \begin{aligned}
+    f_u-f_v\frac y{x^2}&=2x,\\
+    f_u+f_v\frac1x&=-2y.
+    \end{aligned}
+    $$
+
+    在 $x=y=1/2$ 代入，得 $f_u-2f_v=1$、$f_u+2f_v=-1$。相加、相减即得 $f_u=0$、$f_v=-1/2$。
+
+  </Tab>
+  <Tab value="方法二：显式表示 f">
+
+    由 $y=vx$，$u=x(1+v)$，在 $v$ 近 $1$ 处有
+
+    $$
+    x=\frac{u}{1+v},\qquad y=\frac{uv}{1+v}.
+    $$
+
+    因而
+
+    $$
+    f(u,v)=x^2-y^2
+    =\frac{u^2(1-v^2)}{(1+v)^2}
+    =u^2\frac{1-v}{1+v}.
+    $$
+
+    直接微分：
+
+    $$
+    f_u=2u\frac{1-v}{1+v},\qquad
+    f_v=-\frac{2u^2}{(1+v)^2}.
+    $$
+
+    在 $(u,v)=(1,1)$ 代入，仍得 $0,-1/2$。
+
+  </Tab>
+</Tabs>
+
+<Callout type="warn" title="求值坐标不是同一组">
+
+要求的是 $(u,v)=(1,1)$ 处的偏导，而链式法则使用的是 $(x,y)=(1/2,1/2)$。两种坐标的基点不应混淆。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-060" type="blank" points={4} tags="来源:2016年考研数学一、三, 科目:高等数学, 章节:偏导数计算, 考点:含未知函数的隐式全微分">
+
+ 设函数 $f(u,v)$ 可微，$z = z(x,y)$ 由方程 $(x+1)z - y^2 = x^2 f(x-z, y)$ 确定，则 $\mathrm{d}z\bigl|_{(0,1)} =$ <Blank answer="-dx + 2dy" kind="math" /> .
+
+<Solution>
+
+**参考答案：**
+
+$$
+\boxed{\left.\mathrm dz\right|_{(0,1)}=-\mathrm dx+2\mathrm dy}.
+$$
+
+<Steps>
+  <Step>
+
+    ### 先定位基点并验证可解性
+
+    令 $F(x,y,z)=(x+1)z-y^2-x^2f(x-z,y)$。在 $(x,y)=(0,1)$ 时有 $F(0,1,z)=z-1$，故 $z=1$。
+
+    注意 $F_z=(x+1)+x^2 f_1(x-z,y)$，在 $(0,1,1)$ 处等于 $1\ne0$，因此存在局部可微隐函数 $z=z(x,y)$。
+
+  </Step>
+  <Step>
+
+    ### 对 $x$ 求偏导，利用 $x^2$ 的消失性质
+
+    方程两边求导：
+
+    $$
+    z+(x+1)z_x=2xf(x-z,y)
+    +x^2f_1(x-z,y)(1-z_x).
+    $$
+
+    在 $(x,y,z)=(0,1,1)$，右侧两项均为零，左侧为 $1+z_x$，因此 $z_x=-1$。
+
+  </Step>
+  <Step>
+
+    ### 对 $y$ 求偏导并写全微分
+
+    对 $y$ 求偏导得到
+
+    $$
+    (x+1)z_y-2y=x^2[-f_1(x-z,y)z_y+f_2(x-z,y)].
+    $$
+
+    在基点处右侧为零，所以 $z_y-2=0$，得 $z_y=2$。于是
+
+    $$
+    \mathrm dz=z_x\mathrm dx+z_y\mathrm dy=-\mathrm dx+2\mathrm dy.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="零因子简化法">
+
+虽然未知函数 $f$ 的具体形式完全没有给出，但右端整体乘以 $x^2$；在 $x=0$ 时，原式和其一阶偏导中的 $f$ 项全部消失，因此答案与 $f$ 的具体表达式无关。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-062" type="essay" points={10} tags="来源:2017年考研数学一、二, 科目:高等数学, 章节:偏导数计算, 考点:多元复合函数的二阶链式法则">
+
+ 设函数 $f(u,v)$ 具有二阶连续偏导数，$y = f(e^x, \cos x)$，求
+
+$$
+\left.\frac{\mathrm{d}y}{\mathrm{d}x}\right|_{x=0}, \left.\frac{\mathrm{d}^2 y}{\mathrm{d}x^2}\right|_{x=0} .
+$$
+
+<Solution>
+
+**参考答案**：所有 $f_i,f_{ij}$ 均在 $(u,v)=(1,1)$ 处取值。
+
+$$
+\boxed{y'(0)=f_1(1,1)},\qquad
+\boxed{y''(0)=f_{11}(1,1)+f_1(1,1)-f_2(1,1)}.
+$$
+
+<Steps>
+  <Step>
+
+    ### 设中间变量并求导数
+
+    令 $u=e^x$、$v=\cos x$，则
+
+    $$
+    \begin{aligned}
+    u'&=e^x,&u''&=e^x,\\
+    v'&=-\sin x,&v''&=-\cos x.
+    \end{aligned}
+    $$
+
+    记 $y=f(u,v)$。一阶链式法则：
+
+    $$
+    y'=f_1(u,v)u'+f_2(u,v)v'.
+    $$
+
+    在 $x=0$ 处，$(u,v)=(1,1)$，$u'=1$、$v'=0$，故 $y'(0)=f_1(1,1)$。
+
+  </Step>
+  <Step>
+
+    ### 二阶链式法则
+
+    对上式再次求导：
+
+    $$
+    \begin{aligned}
+    y''={}&f_{11}(u')^2+2f_{12}u'v'+f_{22}(v')^2\\
+    &+f_1u''+f_2v''.
+    \end{aligned}
+    $$
+
+    该式利用了 $f_{12}=f_{21}$，由二阶连续偏导保证。
+
+  </Step>
+  <Step>
+
+    ### 代入 $x=0$ 消去多数交叉项
+
+    此时 $u'=u''=1$，$v'=0$，$v''=-1$，故含 $u'v'$ 和 $(v')^2$ 的项都为零：
+
+    $$
+    y''(0)=f_{11}(1,1)+f_1(1,1)-f_2(1,1).
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="二阶导数不仅有二阶偏导项">
+
+必须包含 $f_1u''+f_2v''$。只写 Hessian 产生的 $f_{11}(u')^2+2f_{12}u'v'+f_{22}(v')^2$，将漏掉最终的 $f_1-f_2$。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-063" type="blank" points={4} tags="来源:2017年考研数学二、三, 科目:高等数学, 章节:偏导数计算, 考点:由全微分反求二元函数">
+
+ 设 $f(x,y)$ 具有一阶连续偏导数，且
+
+$$
+\mathrm{d}f(x,y) = y e^y \mathrm{d}x + x(1+y)e^y \mathrm{d}y, f(0,0) = 0,
+$$
+
+则 $f(x,y) =$ <Blank answer="xye^y" kind="math" /> .
+
+<Solution>
+
+**参考答案：** $\boxed{f(x,y)=xye^y}$。
+
+**思路：** 全微分给出的两个系数分别是 $f_x$ 与 $f_y$；先对一个变量积分，再利用另一偏导确定“积分常数函数”。
+
+<Steps>
+  <Step>
+
+    ### 从 $\mathrm df$ 读取偏导
+
+    由 $\mathrm df=f_x\,\mathrm dx+f_y\,\mathrm dy$，可知
+
+    $$
+    f_x(x,y)=ye^y,\qquad f_y(x,y)=x(1+y)e^y.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 沿 $x$ 积分，保留关于 $y$ 的任意函数
+
+    把 $y$ 当作常数，对 $f_x$ 关于 $x$ 积分：
+
+    $$
+    f(x,y)=xye^y+C(y).
+    $$
+
+    其中 $C(y)$ **不能直接写成常数**。对 $y$ 求导：
+
+    $$
+    f_y=x(e^y+ye^y)+C'(y)=x(1+y)e^y+C'(y).
+    $$
+
+    与已知的 $f_y$ 比较，得到 $C'(y)=0$，所以 $C(y)=C$。
+
+  </Step>
+  <Step>
+
+    ### 用定点值确定常数并验算
+
+    $f(0,0)=C=0$，故
+
+    $$
+    \boxed{f(x,y)=xye^y}.
+    $$
+
+    反向检查：$\mathrm d(xye^y)=ye^y\,\mathrm dx+x(1+y)e^y\,\mathrm dy$，完全符合题设。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="另一种快速识别">
+
+题给微分式可直接识别为 $\mathrm d(xye^y)$。但遇到不容易识别的题，采用“积分一个偏导，再匹配另一个偏导”的方法更稳妥。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-064" type="blank" points={4} tags="来源:2018年考研数学二, 科目:高等数学, 章节:偏导数计算, 考点:对数与指数隐函数偏导数">
+
+ 设函数 $z=z(x,y)$ 由方程 $\ln z+\mathrm{e}^{z-1}=xy$ 确定，则 $\left.\frac{\partial z}{\partial x}\right|_{(2,\frac12)}=$ <Blank answer="((1)/(4))" kind="math" />。
+
+<Solution>
+
+**参考答案：** $\boxed{z_x(2,\tfrac12)=\tfrac14}$。
+
+<Steps>
+  <Step>
+
+    ### 先求该点的函数值 $z$
+
+    将 $(x,y)=(2,\tfrac12)$ 代入 $\ln z+e^{z-1}=xy$：
+
+    $$
+    \ln z+e^{z-1}=1.
+    $$
+
+    $z=1$ 满足方程。且 $z>0$ 时，$\frac{\mathrm d}{\mathrm dz}(\ln z+e^{z-1})=\frac1z+e^{z-1}>0$，故该解唯一。
+
+  </Step>
+  <Step>
+
+    ### 构造隐函数并求偏导
+
+    令 $F(x,y,z)=\ln z+e^{z-1}-xy$。在所求点，
+
+    $$
+    F_z=\frac1z+e^{z-1}=2\ne0,
+    $$
+
+    因此可对 $F(x,y,z(x,y))=0$ 关于 $x$ 求导，**固定 $y$**：
+
+    $$
+    \left(\frac1z+e^{z-1}\right)z_x-y=0,
+    \qquad z_x=\frac{y}{\frac1z+e^{z-1}}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 代入数值
+
+    $$
+    \boxed{z_x(2,\tfrac12)=\frac{1/2}{1+1}=\frac14}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="隐函数题的计算顺序">
+
+先用原方程确定 $z$ 的值，再求 $z_x$；不能只把 $(x,y)$ 代入求导表达式而忽略其中的 $z$。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-065" type="blank" points={4} tags="来源:2019年考研数学一, 科目:高等数学, 章节:偏导数计算, 考点:组合偏导数与复合函数消元">
+
+ 设函数 $f(u)$ 可导，$z = f(\sin y - \sin x) + xy$，则 $\frac{1}{\cos x} \cdot \frac{\partial z}{\partial x} + \frac{1}{\cos y} \cdot \frac{\partial z}{\partial y} =$ <Blank answer="((x)/(cos y)) + ((y)/(cos x))" kind="math" /> .
+
+<Solution>
+
+**参考答案：** 在 $\cos x\cos y\ne0$ 的范围内，
+
+$$
+\boxed{\frac{z_x}{\cos x}+\frac{z_y}{\cos y}=\frac{y}{\cos x}+\frac{x}{\cos y}}.
+$$
+
+<Steps>
+  <Step>
+
+    ### 引入共同的内层函数
+
+    设 $u=\sin y-\sin x$。则 $u_x=-\cos x$、$u_y=\cos y$，原式成为 $z=f(u)+xy$。
+
+  </Step>
+  <Step>
+
+    ### 分别使用链式法则
+
+    $$
+    \begin{aligned}
+    z_x&=f'(u)(-\cos x)+y,\\
+    z_y&=f'(u)\cos y+x.
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 按题目指定的权重相加
+
+    $$
+    \begin{aligned}
+    \frac{z_x}{\cos x}+\frac{z_y}{\cos y}
+    &=\left[-f'(u)+\frac{y}{\cos x}\right]
+      +\left[f'(u)+\frac{x}{\cos y}\right]\\
+    &=\boxed{\frac{y}{\cos x}+\frac{x}{\cos y}}.
+    \end{aligned}
+    $$
+
+    未知函数的导数项恰好相消，不必也不能进一步假设 $f$ 的形式。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="消去未知函数的思路">
+
+组合偏导题常把链式法则产生的同一个 $f'(u)$ 设计成相反系数。先写 $u_x,u_y$，再寻找能抵消这些项的线性组合。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-066" type="blank" points={4} tags="来源:2019年考研数学二, 科目:高等数学, 章节:偏导数计算, 考点:加权欧拉齐次函数定理">
+
+ 设函数 $f(u)$ 可导，$z = y f\left(\frac{y^2}{x}\right)$，则 $2x \frac{\partial z}{\partial x} + y \frac{\partial z}{\partial y} =$ <Blank answer="z" kind="math" /> .
+
+<Solution>
+
+**参考答案：** $\boxed{2xz_x+yz_y=z}$（$x\ne0$）。
+
+**核心观察：** 比值 $y^2/x$ 在非等比例缩放 $(x,y)\mapsto(\lambda^2x,\lambda y)$ 下保持不变。
+
+<Tabs items={['方法一：加权齐次性', '方法二：直接求偏导']} defaultIndex={0}>
+  <Tab value="方法一：加权齐次性">
+
+    对 $\lambda>0$，
+
+    $$
+    z(\lambda^2x,\lambda y)
+    =\lambda y f\!\left(\frac{(\lambda y)^2}{\lambda^2x}\right)
+    =\lambda z(x,y).
+    $$
+
+    对 $\lambda$ 求导，在 $\lambda=1$ 处使用链式法则：
+
+    $$
+    2xz_x+yz_y=z.
+    $$
+
+    所以所求表达式即 $\boxed{z}$。
+
+  </Tab>
+  <Tab value="方法二：直接求偏导">
+
+    设 $u=y^2/x$，有 $u_x=-y^2/x^2$、$u_y=2y/x$，因此
+
+    $$
+    \begin{aligned}
+    z_x&=-\frac{y^3}{x^2}f'(u),\\
+    z_y&=f(u)+\frac{2y^2}{x}f'(u).
+    \end{aligned}
+    $$
+
+    相加得
+
+    $$
+    \begin{aligned}
+    2xz_x+yz_y&=-\frac{2y^3}{x}f'(u)+yf(u)+\frac{2y^3}{x}f'(u)\\
+    &=yf(u)=z.
+    \end{aligned}
+    $$
+
+  </Tab>
+</Tabs>
+
+<Callout type="warn" title="不要误用普通齐次性">
+
+在普通的 $(x,y)\mapsto(\lambda x,\lambda y)$ 下，$y^2/x$ 会发生改变。本题适用的是**权重为 $(2,1)$ 的加权欧拉公式**，不是 $xz_x+yz_y=z$。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-067" type="essay" points={11} tags="来源:2019年考研数学二, 科目:高等数学, 章节:偏导数计算, 考点:高阶偏微分算子变量变换">
+
+ 已知函数 $u(x,y)$ 满足 $2\frac{\partial^2 u}{\partial x^2} - 2\frac{\partial^2 u}{\partial y^2} + 3\frac{\partial u}{\partial y} + 3\frac{\partial u}{\partial x} = 0$，求 $a,b$ 的值，使得在变换 $u(x,y) = v(x,y) e^{ax+by}$ 之下，上述等式可化为函数 $v(x,y)$ 的不含一阶偏导数的等式.
+
+<Solution>
+
+**参考答案：** $\boxed{a=-\tfrac34,\quad b=\tfrac34}$；代入后方程实际化为 $\boxed{v_{xx}-v_{yy}=0}$。
+
+**思路：** 指数换元使微分算子发生平移，把变换后的 $v_x,v_y$ 系数设为零即可。
+
+<Steps>
+  <Step>
+
+    ### 分别展开一阶和二阶偏导
+
+    令 $E=e^{ax+by}$，则 $u=Ev$，且 $E\ne0$。用乘积法则：
+
+    $$
+    \begin{aligned}
+    u_x&=E(v_x+av), &u_y&=E(v_y+bv),\\
+    u_{xx}&=E(v_{xx}+2av_x+a^2v),\\
+    u_{yy}&=E(v_{yy}+2bv_y+b^2v).
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 代入原方程、按导数阶数收集
+
+    原方程 $2u_{xx}-2u_{yy}+3u_x+3u_y=0$ 约去 $E$ 后成为
+
+    $$
+    \begin{aligned}
+    2v_{xx}-2v_{yy}&+(4a+3)v_x+(-4b+3)v_y\\
+    &+(2a^2-2b^2+3a+3b)v=0.
+    \end{aligned}
+    $$
+
+    **只需消除一阶偏导数**，不必预先要求零阶项也消失。
+
+  </Step>
+  <Step>
+
+    ### 令一阶偏导的系数为零
+
+    $$
+    \begin{cases}
+    4a+3=0,\\
+    -4b+3=0,
+    \end{cases}
+    \qquad\Longrightarrow\qquad
+    \boxed{a=-\frac34,\quad b=\frac34}.
+    $$
+
+    此时 $2a^2-2b^2+3a+3b=0$，故变换后确实只剩 $2v_{xx}-2v_{yy}=0$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="运算规律">
+
+当 $u=e^{ax+by}v$ 时，作用在 $u$ 上的 $\partial_x$、$\partial_y$ 分别等效于作用在 $v$ 上的 $\partial_x+a$、$\partial_y+b$。这是指数代换消去一阶项的简洁记法。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-068" type="essay" points={10} tags="来源:2019年考研数学三, 科目:高等数学, 章节:偏导数计算, 考点:二阶偏导数线性组合与变量代换">
+
+ 已知 $f(u,v)$ 具有二阶连续偏导数，且
+
+$$
+g(x,y) = xy - f(x+y, x-y),
+$$
+
+求
+
+$$
+\frac{\partial^2 g}{\partial x^2} + \frac{\partial^2 g}{\partial x\partial y} + \frac{\partial^2 g}{\partial y^2} .
+$$
+
+<Solution>
+
+**参考答案：** 设 $f_{uu},f_{vv}$ 均在 $(u,v)=(x+y,x-y)$ 处取值，则
+
+$$
+\boxed{g_{xx}+g_{xy}+g_{yy}=1-3f_{uu}(u,v)-f_{vv}(u,v)}.
+$$
+
+<Steps>
+  <Step>
+
+    ### 先建立变量对应关系
+
+    令 $u=x+y$、$v=x-y$，于是 $u_x=u_y=v_x=1$，$v_y=-1$。注意 $g(x,y)=xy-f(u,v)$，求导时不能漏掉 $xy$。
+
+  </Step>
+  <Step>
+
+    ### 由一阶链式法则求二阶偏导
+
+    首先
+
+    $$
+    g_x=y-f_u-f_v,\qquad g_y=x-f_u+f_v.
+    $$
+
+    再分别求导，并利用 $f_{uv}=f_{vu}$：
+
+    $$
+    \begin{aligned}
+    g_{xx}&=-f_{uu}-2f_{uv}-f_{vv},\\
+    g_{xy}&=1-f_{uu}+f_{vv},\\
+    g_{yy}&=-f_{uu}+2f_{uv}-f_{vv}.
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 合并并验证抵消
+
+    三式相加，混合偏导的系数 $-2+0+2=0$，得到
+
+    $$
+    \boxed{g_{xx}+g_{xy}+g_{yy}=1-3f_{uu}-f_{vv}}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="链式法则的两处易错点">
+
+其一，$g_{xy}$ 中含 $xy$ 的混合偏导为 $1$；其二，$f$ 的二阶偏导在 $(x+y,x-y)$ 处取值，不能直接写作在 $(x,y)$ 处取值。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-069" type="blank" points={4} tags="来源:2020年考研数学一, 科目:高等数学, 章节:偏导数计算, 考点:积分号下求导与变上限复合">
+
+ 设函数 $f(x,y)=\int_0^{xy}\mathrm{e}^{xt^2}\mathrm{d}t$，则 $\left.\frac{\partial^2 f}{\partial x\partial y}\right|_{(1,1)}=$ <Blank answer="4e" kind="math" />。
+
+<Solution>
+
+**参考答案：** $\boxed{f_{xy}(1,1)=4e}$。
+
+<Steps>
+  <Step>
+
+    ### 选择更省事的求导顺序
+
+    对 $y$ 求偏导时，积分核 $e^{xt^2}$ **不含 $y$**，仅上限 $xy$ 依赖 $y$。根据变上限积分求导公式，
+
+    $$
+    f_y(x,y)=e^{x(xy)^2}\cdot\frac{\partial(xy)}{\partial y}
+    =xe^{x^3y^2}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 对 $f_y$ 再求 $x$ 偏导
+
+    使用乘积法则和指数函数的链式法则：
+
+    $$
+    \begin{aligned}
+    f_{xy}(x,y)
+    &=\frac{\partial}{\partial x}(xe^{x^3y^2})\\
+    &=e^{x^3y^2}+x\,e^{x^3y^2}(3x^2y^2)\\
+    &=e^{x^3y^2}(1+3x^3y^2).
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 代入 $(1,1)$
+
+    $$
+    \boxed{f_{xy}(1,1)=e(1+3)=4e}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="变限积分的偏导次序">
+
+若先对 $x$ 求导，还要额外处理指数核内的 $x$，积分号内求导和上限求导会同时出现。由于混合偏导在本题中可交换，先求 $y$ 导数明显更简洁。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-071" type="single" points={5} tags="来源:2021年考研数学一、二、三, 科目:高等数学, 章节:偏导数计算, 考点:两条函数曲线约束与全微分">
+
+ 设函数 $f(x,y)$ 可微, 且 $f(x+1,e^x)=x(x+1)^2, f(x,x^2)=2x^2\ln x$, 则 $\mathrm{d}f(1,1)=($ $\quad$).
+
+<Option>$\mathrm{d}x+\mathrm{d}y$</Option>
+<Option>$\mathrm{d}x-\mathrm{d}y$</Option>
+<Option correct>$\mathrm{d}y$</Option>
+<Option>$-\mathrm{d}y$</Option>
+
+<Solution>
+
+**正确选项：C。** $\boxed{\mathrm df(1,1)=\mathrm dy}$。
+
+**思路：** 两条参数曲线都经过 $(1,1)$，分别沿曲线求导，得到关于 $f_x(1,1)$、$f_y(1,1)$ 的二元线性方程组。
+
+<Steps>
+  <Step>
+
+    ### 使用第一条曲线建立一个方程
+
+    已知 $f(t+1,e^t)=t(t+1)^2$。当 $t=0$，自变量为 $(1,1)$。对 $t$ 求导：
+
+    $$
+    f_x(t+1,e^t)+e^t f_y(t+1,e^t)
+    =(t+1)^2+2t(t+1).
+    $$
+
+    令 $t=0$，得到
+
+    $$
+    f_x(1,1)+f_y(1,1)=1.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 使用第二条曲线建立另一个方程
+
+    $f(t,t^2)=2t^2\ln t$（$t>0$）。在 $t=1$ 时也经过 $(1,1)$。求导得
+
+    $$
+    f_x(t,t^2)+2t f_y(t,t^2)=4t\ln t+2t.
+    $$
+
+    令 $t=1$，得到
+
+    $$
+    f_x(1,1)+2f_y(1,1)=2.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 联立并写出全微分
+
+    两式相减得 $f_y(1,1)=1$，继而 $f_x(1,1)=0$。因此
+
+    $$
+    \mathrm df(1,1)=f_x(1,1)\,\mathrm dx+f_y(1,1)\,\mathrm dy
+    =\boxed{\mathrm dy}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="区分曲线参数和函数自变量">
+
+两条等式中的参数取值分别是 $t=0$ 和 $t=1$，不可在同一个参数值上代入。沿参数曲线求导须乘对应切向量的分量，不能把右侧导数直接认成 $f_x$。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-072" type="blank" points={5} tags="来源:2021年考研数学二, 科目:高等数学, 章节:偏导数计算, 考点:含对数函数的隐式求导">
+
+ 设函数 $z=z(x,y)$ 由方程 $(x+1)z+y\ln z-\arctan(2xy)=1$ 确定, 则 $\left.\frac{\partial z}{\partial x}\right|_{(0,2)}=$ <Blank answer="1" kind="math" />.
+
+<Solution>
+
+**参考答案：** $\boxed{z_x(0,2)=1}$。
+
+<Steps>
+  <Step>
+
+    ### 由原方程确定 $z(0,2)$
+
+    把 $(x,y)=(0,2)$ 代入，得 $z+2\ln z=1$。显然 $z=1$ 满足；且函数 $z+2\ln z$ 在 $z>0$ 时严格递增，故解唯一。
+
+  </Step>
+  <Step>
+
+    ### 构造隐函数并求出两项偏导
+
+    令
+
+    $$
+    F(x,y,z)=(x+1)z+y\ln z-\arctan(2xy)-1.
+    $$
+
+    其中求 $F_x$ 时把 $z$ 当作独立变量：
+
+    $$
+    F_x=z-\frac{2y}{1+4x^2y^2},
+    \qquad F_z=x+1+\frac{y}{z}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 应用隐函数求导公式并计算
+
+    在 $(0,2,1)$ 处，$F_x=1-4=-3$、$F_z=1+2=3\ne0$，故
+
+    $$
+    \boxed{z_x(0,2)=-\frac{F_x}{F_z}=-\frac{-3}{3}=1}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="求导时勿遗漏反正切函数链式项">
+
+$\frac{\partial}{\partial x}\arctan(2xy)=\frac{2y}{1+(2xy)^2}$；原方程前带负号，故 $F_x$ 中应为负的这一项。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-073" type="single" points={5} tags="来源:2022年考研数学一, 科目:高等数学, 章节:偏导数计算, 考点:欧拉齐次函数定理确定未知函数">
+
+ 设 $f(u)$ 可导, $z=xyf\left(\frac{y}{x}\right)$, 若 $x\frac{\partial z}{\partial x}+y\frac{\partial z}{\partial y}=y^2(\ln y-\ln x)$, 则 $($ $\quad$).
+
+<Option>$f(1)=\frac{1}{2}, f'(1)=0$</Option>
+<Option correct>$f(1)=0, f'(1)=\frac{1}{2}$</Option>
+<Option>$f(1)=\frac{1}{2}, f'(1)=1$</Option>
+<Option>$f(1)=0, f'(1)=1$</Option>
+
+<Solution>
+
+**正确选项：B。** $\boxed{f(1)=0,\quad f'(1)=\tfrac12}$。
+
+<Tabs items={['方法一：欧拉齐次函数定理', '方法二：直接偏导消元']} defaultIndex={0}>
+  <Tab value="方法一：欧拉齐次函数定理">
+
+    在 $x>0,y>0$ 的题设定义域内，令 $t=y/x$，则 $z=xyf(t)$。同时放大 $x,y$ 为 $\lambda x,\lambda y$ 时，$t$ 不变，$z$ 变成 $\lambda^2 z$。因此 $z$ 是二次齐次函数，
+
+    $$
+    xz_x+yz_y=2z=2xyf(t).
+    $$
+
+    与题设 $y^2(\ln y-\ln x)=y^2\ln t$ 比较：
+
+    $$
+    2xyf(t)=y^2\ln t.
+    $$
+
+    用 $y=tx$ 并约去 $x^2t$，得 $f(t)=\tfrac12 t\ln t$。所以
+
+    $$
+    f(1)=0,\qquad f'(t)=\tfrac12(\ln t+1),\qquad \boxed{f'(1)=\tfrac12}.
+    $$
+
+  </Tab>
+  <Tab value="方法二：直接偏导消元">
+
+    设 $t=y/x$，有 $t_x=-t/x$、$t_y=1/x$，因此
+
+    $$
+    \begin{aligned}
+    z_x&=yf(t)-ytf'(t),\\
+    z_y&=xf(t)+yf'(t).
+    \end{aligned}
+    $$
+
+    合并得
+
+    $$
+    xz_x+yz_y=2xyf(t),
+    $$
+
+    其中 $f'(t)$ 项抵消，再用题设右端求得 $f(t)=\tfrac12t\ln t$，结论相同。
+
+  </Tab>
+</Tabs>
+
+<Callout type="idea" title="优先识别齐次次数">
+
+表达式 $x^ay^b f(y/x)$ 是 $(a+b)$ 次齐次函数。本题无需从头完整求出 $z_x,z_y$，直接使用欧拉公式能节约计算量。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-074" type="single" points={5} tags="来源:2022年考研数学二、三, 科目:高等数学, 章节:偏导数计算, 考点:变限积分与一阶二阶偏导">
+
+ 设函数 $f(t)$ 连续, 令 $F(x,y)=\int_{0}^{x-y} (x-y-t)f(t)\mathrm{d}t$, 则 $($ $\quad$).
+
+<Option>$\frac{\partial F}{\partial x}=\frac{\partial F}{\partial y}, \frac{\partial^2 F}{\partial x^2}=\frac{\partial^2 F}{\partial y^2}$</Option>
+<Option>$\frac{\partial F}{\partial x}=\frac{\partial F}{\partial y}, \frac{\partial^2 F}{\partial x^2}=-\frac{\partial^2 F}{\partial y^2}$</Option>
+<Option correct>$\frac{\partial F}{\partial x}=-\frac{\partial F}{\partial y}, \frac{\partial^2 F}{\partial x^2}=\frac{\partial^2 F}{\partial y^2}$</Option>
+<Option>$\frac{\partial F}{\partial x}=-\frac{\partial F}{\partial y}, \frac{\partial^2 F}{\partial x^2}=-\frac{\partial^2 F}{\partial y^2}$</Option>
+
+<Solution>
+
+**正确选项：C。** $\boxed{F_x=-F_y,\quad F_{xx}=F_{yy}}$。
+
+<Steps>
+  <Step>
+
+    ### 把二元函数化为一元复合函数
+
+    记 $s=x-y$，设
+
+    $$
+    \Phi(s)=\int_0^s(s-t)f(t)\,\mathrm dt.
+    $$
+
+    于是 $F(x,y)=\Phi(x-y)$，函数只依赖于差 $x-y$。
+
+  </Step>
+  <Step>
+
+    ### 求一阶、二阶偏导并比较符号
+
+    根据链式法则，
+
+    $$
+    F_x=\Phi'(s),\qquad F_y=-\Phi'(s),
+    $$
+
+    进而
+
+    $$
+    F_{xx}=\Phi''(s),\qquad F_{yy}=\Phi''(s).
+    $$
+
+    因此 $F_x=-F_y$ 且 $F_{xx}=F_{yy}$，应选 C。
+
+  </Step>
+  <Step>
+
+    ### 验证二阶导数存在
+
+    由含参变限积分求导公式，
+
+    $$
+    \begin{aligned}
+    \Phi'(s)&=(s-s)f(s)+\int_0^s f(t)\,\mathrm dt
+    =\int_0^s f(t)\,\mathrm dt,\\
+    \Phi''(s)&=f(s).
+    \end{aligned}
+    $$
+
+    已知 $f$ 连续，故上述二阶导数存在，且 $F_{xx}=F_{yy}=f(x-y)$。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="一阶负号与二阶正号">
+
+因为 $s_y=-1$，$F_y=-\Phi'(s)$；再对 $y$ 求导还要乘一次 $s_y=-1$，两个负号相消，所以二阶偏导相等。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-075" type="blank" points={5} tags="来源:2023年考研数学二, 科目:高等数学, 章节:偏导数计算, 考点:隐函数二阶偏导数计算">
+
+ 设函数 $z=z(x,y)$ 由 $e^z+xz=2x-y$ 确定, 则 $\left.\frac{\partial^2 z}{\partial x^2}\right|_{(1,1)}=$ <Blank answer="-((3)/(2))" kind="math" />.
+
+<Solution>
+
+**参考答案：** $\boxed{z_{xx}(1,1)=-\tfrac32}$。
+
+**思路：** 先由原方程求出对应 $z$，再按固定 $y$ 的原则连续隐式求导两次。
+
+<Steps>
+  <Step>
+
+    ### 确定 $z(1,1)$ 并验证可求导性
+
+    令 $F=e^z+xz-2x+y$。在 $(x,y)=(1,1)$ 时，原方程成为
+
+    $$
+    e^z+z=1,
+    $$
+
+    $z=0$ 为解。因为 $F_z=e^z+x$，在 $(1,1,0)$ 处 $F_z=2\ne0$，可以由隐函数定理局部确定可微函数。
+
+  </Step>
+  <Step>
+
+    ### 求一阶偏导
+
+    从 $F_x+F_z z_x=0$ 得
+
+    $$
+    (z-2)+(e^z+x)z_x=0,
+    \qquad z_x=\frac{2-z}{e^z+x}.
+    $$
+
+    代入 $(1,1,0)$：$z_x(1,1)=2/2=1$。
+
+  </Step>
+  <Step>
+
+    ### 再求一次 $x$ 导数
+
+    对 $z-2+(e^z+x)z_x=0$ 求导，
+
+    $$
+    z_x+(e^z z_x+1)z_x+(e^z+x)z_{xx}=0.
+    $$
+
+    整理为
+
+    $$
+    2z_x+e^z z_x^2+(e^z+x)z_{xx}=0.
+    $$
+
+    在 $(1,1,0)$ 处代入 $z_x=1$，即 $2+1+2z_{xx}=0$，所以
+
+    $$
+    \boxed{z_{xx}(1,1)=-\frac32}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="二阶隐函数公式">
+
+对 $F(x,y,z(x,y))=0$ 而言，固定 $y$ 时也可直接使用
+
+$$
+F_{xx}+2F_{xz}z_x+F_{zz}z_x^2+F_z z_{xx}=0.
+$$
+
+这里 $F$ 的下标表示把 $x,y,z$ 视为**独立变量**求偏导；该公式能有效避免反复使用商法则。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-076" type="single" points={5} tags="来源:2023年考研数学三, 科目:高等数学, 章节:偏导数计算, 考点:绝对值函数与偏导数定义">
+
+ 已知函数 $f(x,y)=\ln(y+|x\sin y|)$, 则 $($ $\quad$).
+
+<Option correct>$\left.\frac{\partial f}{\partial x}\right|_{(0,1)}$ 不存在, $\left.\frac{\partial f}{\partial y}\right|_{(0,1)}$ 存在</Option>
+<Option>$\left.\frac{\partial f}{\partial x}\right|_{(0,1)}$ 存在, $\left.\frac{\partial f}{\partial y}\right|_{(0,1)}$ 不存在</Option>
+<Option>$\left.\frac{\partial f}{\partial x}\right|_{(0,1)}, \left.\frac{\partial f}{\partial y}\right|_{(0,1)}$ 均存在</Option>
+<Option>$\left.\frac{\partial f}{\partial x}\right|_{(0,1)}, \left.\frac{\partial f}{\partial y}\right|_{(0,1)}$ 均不存在</Option>
+
+<Solution>
+
+**正确选项：A。** $\boxed{f_x(0,1)\text{ 不存在},\quad f_y(0,1)=1}$。
+
+<Steps>
+  <Step>
+
+    ### 确认所讨论点附近函数有定义
+
+    $f(x,y)=\ln(y+|x\sin y|)$，在 $(0,1)$ 处对数真数为 $1>0$，因此可在该点附近沿坐标方向讨论偏导数。
+
+  </Step>
+  <Step>
+
+    ### 固定 $y=1$，按定义检查 $f_x(0,1)$
+
+    设 $c=|\sin1|=\sin1>0$，则
+
+    $$
+    \frac{f(h,1)-f(0,1)}h
+    =\frac{\ln(1+c|h|)}h.
+    $$
+
+    利用 $\lim_{t\to0}\ln(1+t)/t=1$：
+
+    $$
+    \begin{aligned}
+    \lim_{h\to0^+}\frac{\ln(1+ch)}h&=c,\\
+    \lim_{h\to0^-}\frac{\ln(1-ch)}h&=-c.
+    \end{aligned}
+    $$
+
+    左右极限不一致，故 $f_x(0,1)$ 不存在。
+
+  </Step>
+  <Step>
+
+    ### 固定 $x=0$，计算 $f_y(0,1)$
+
+    在 $y>0$ 的邻域，$f(0,y)=\ln y$，因此
+
+    $$
+    f_y(0,1)=\left.\frac1y\right|_{y=1}=1.
+    $$
+
+    一不存在、一存在，故选 A。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="绝对值的尖点只影响相关方向">
+
+不可因为 $|x\sin y|$ 在 $x=0$ 处含绝对值就断言两个偏导都不存在。偏导数要分别固定另一个自变量，用单变量定义独立判断。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-077" type="blank" points={5} tags="来源:2023年考研数学三, 科目:高等数学, 章节:偏导数计算, 考点:全微分还原与反三角函数">
+
+ 已知函数 $f(x,y)$ 满足 $\mathrm{d}f(x,y)=\frac{x\mathrm{d}y-y\mathrm{d}x}{x^2+y^2}$, $f(1,1)=\frac{\pi}{4}$, 则 $f(\sqrt{3},3)=$ <Blank answer="((pi)/(3))" kind="math" />.
+
+<Solution>
+
+**参考答案：** $\boxed{f(\sqrt3,3)=\tfrac\pi3}$。
+
+<Steps>
+  <Step>
+
+    ### 把微分式拆成偏导系数
+
+    $$
+    \mathrm df=-\frac{y}{x^2+y^2}\,\mathrm dx
+    +\frac{x}{x^2+y^2}\,\mathrm dy.
+    $$
+
+    观察分母 $x^2+y^2$，联想到角函数 $\arctan(y/x)$ 的微分。
+
+  </Step>
+  <Step>
+
+    ### 识别原函数（在 $x>0$ 的区域）
+
+    对 $\theta=\arctan(y/x)$ 使用链式法则：
+
+    $$
+    \begin{aligned}
+    \theta_x&=\frac1{1+(y/x)^2}\left(-\frac{y}{x^2}\right)=-\frac{y}{x^2+y^2},\\
+    \theta_y&=\frac1{1+(y/x)^2}\frac1x=\frac{x}{x^2+y^2}.
+    \end{aligned}
+    $$
+
+    因此在包含两个给定点的区域 $x>0$ 内，
+
+    $$
+    f(x,y)=\arctan\frac yx+C.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 使用给定值与目标点求值
+
+    由 $f(1,1)=\pi/4$ 得 $C=0$。于是
+
+    $$
+    f(\sqrt3,3)=\arctan\frac3{\sqrt3}
+    =\arctan\sqrt3=\boxed{\frac\pi3}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="反正切角度函数有定义域限制">
+
+$\arctan(y/x)$ 只适合 $x\ne0$ 的局部表达式；若要求在整个 $\mathbb R^2\setminus\{(0,0)\}$ 上构造单值的全局原函数，则该微分形式不能全局恰当积分。本题两点都在 $x>0$，采用这一支即可。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-078" type="blank" points={5} tags="来源:2024年考研数学一, 科目:高等数学, 章节:偏导数计算, 考点:多元复合函数二阶导数特值">
+
+ 设函数 $f(u,v)$ 具有二阶连续偏导数, $\left.\mathrm{d}f\right|_{(1,1)}=3\mathrm{d}u+4\mathrm{d}v$, $y=f(\cos x,1+x^2)$, 则 $\left.\frac{\mathrm{d}^2 y}{\mathrm{d}x^2}\right|_{x=0}=$ <Blank answer="5" kind="math" />.
+
+<Solution>
+
+**参考答案：** $\boxed{y''(0)=5}$。
+
+<Steps>
+  <Step>
+
+    ### 从全微分读出已知偏导数
+
+    给出 $\left.\mathrm df\right|_{(1,1)}=3\,\mathrm du+4\,\mathrm dv$，因此
+
+    $$
+    f_u(1,1)=3,\qquad f_v(1,1)=4.
+    $$
+
+    令 $u(x)=\cos x$、$v(x)=1+x^2$，则 $y(x)=f(u(x),v(x))$。
+
+  </Step>
+  <Step>
+
+    ### 写完整的二阶链式法则
+
+    $$
+    \begin{aligned}
+    y'&=f_u u'+f_v v',\\
+    y''&=f_{uu}(u')^2+2f_{uv}u'v'+f_{vv}(v')^2\\
+    &\quad+f_u u''+f_v v''.
+    \end{aligned}
+    $$
+
+    其中各偏导在 $(u(x),v(x))$ 处取值。
+
+  </Step>
+  <Step>
+
+    ### 在 $x=0$ 代入，二阶偏导自动消失
+
+    $$
+    \begin{aligned}
+    (u,v)|_0&=(1,1),\\
+    (u',v')|_0&=(0,0),\\
+    (u'',v'')|_0&=(-1,2).
+    \end{aligned}
+    $$
+
+    所有含 $u'$ 或 $v'$ 的二阶偏导项均为零，故
+
+    $$
+    \boxed{y''(0)=3(-1)+4(2)=5}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="优先检查内层变量的一阶导数">
+
+当全部内层函数的一阶导数在目标点为零时，复合函数的二阶导数只剩一阶偏导与内层二阶导数的组合；无需知道 $f_{uu},f_{uv},f_{vv}$ 的值。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-079" type="essay" points={12} tags="来源:2024年考研数学二, 科目:高等数学, 章节:偏导数计算, 考点:二阶算子变换与边界条件求函数">
+
+ 已知 $f(u,v)$ 具有二阶连续偏导数, 且 $g(x,y)=f(2x+y,3x-y)$ 满足 $\frac{\partial^2 g}{\partial x^2}+\frac{\partial^2 g}{\partial x\partial y}-6\frac{\partial^2 g}{\partial y^2}=1$.
+
+(1)求 $\frac{\partial^2 f}{\partial u\partial v}$;
+
+(2) 若 $\frac{\partial f(u, 0)}{\partial u} = ue^{-u}$, $f(0, v) = \frac{1}{50} v^2 - 1$, 求 $f(u, v)$ 的表达式.
+
+<Solution>
+
+**参考答案：**
+
+$$
+\boxed{f_{uv}(u,v)=\frac1{25}},\qquad
 \boxed{f(u,v)=\frac{uv}{25}-(u+1)e^{-u}+\frac{v^2}{50}}.
 $$
 
-**（1）用微分算子代换，避免重复写冗长链式公式。** 令 $u=2x+y,\ v=3x-y$，则
+<Steps>
+  <Step>
 
-$$
-\partial_x=2\partial_u+3\partial_v,
-\qquad\partial_y=\partial_u-\partial_v.
-$$
+    ### 把 $(x,y)$ 的求导算子转为 $(u,v)$ 的求导算子
 
-展开：
+    令 $u=2x+y$、$v=3x-y$。由链式法则，
 
-$$
-\begin{aligned}
-g_{xx}&=4f_{uu}+12f_{uv}+9f_{vv},\\
-g_{xy}&=2f_{uu}+f_{uv}-3f_{vv},\\
-g_{yy}&=f_{uu}-2f_{uv}+f_{vv}.
-\end{aligned}
-$$
+    $$
+    \partial_x=2\partial_u+3\partial_v,\qquad
+    \partial_y=\partial_u-\partial_v.
+    $$
 
-故
+    因为 $f$ 的二阶偏导连续，可以交换混合偏导的顺序，得到
 
-$$
-g_{xx}+g_{xy}-6g_{yy}
-=(4+2-6)f_{uu}+(12+1+12)f_{uv}+(9-3-6)f_{vv}
-=25f_{uv}.
-$$
+    $$
+    \begin{aligned}
+    g_{xx}&=4f_{uu}+12f_{uv}+9f_{vv},\\
+    g_{xy}&=2f_{uu}+f_{uv}-3f_{vv},\\
+    g_{yy}&=f_{uu}-2f_{uv}+f_{vv}.
+    \end{aligned}
+    $$
 
-原方程给出 $f_{uv}=1/25$。
+  </Step>
+  <Step>
 
-**（2）两次积分，依次恢复自由函数。** 先对 $v$ 积分：
+    ### 利用二阶算子的特殊组合消元
 
-$$
-f_u(u,v)=\frac v{25}+A(u).
-$$
+    代入 $g_{xx}+g_{xy}-6g_{yy}$，分别合并系数：
 
-由 $f_u(u,0)=ue^{-u}$，得 $A(u)=ue^{-u}$。再对 $u$ 积分：
+    $$
+    \begin{aligned}
+    f_{uu}:&\quad4+2-6=0,\\
+    f_{uv}:&\quad12+1+12=25,\\
+    f_{vv}:&\quad9-3-6=0.
+    \end{aligned}
+    $$
 
-$$
-f(u,v)=\frac{uv}{25}-(u+1)e^{-u}+B(v).
-$$
+    因此 $25f_{uv}=1$，于是 $\boxed{f_{uv}=\tfrac1{25}}$。
 
-利用 $f(0,v)=v^2/50-1$，得 $B(v)=v^2/50$，遂得答案。
+  </Step>
+  <Step>
 
-**检查：** $f_{uv}=1/25$；取 $v=0$ 求 $u$ 偏导回到 $ue^{-u}$；取 $u=0$ 回到 $v^2/50-1$。
+    ### 积分并使用 $v=0$ 上的边界条件
 
-</Solution>
-</Question>
+    先对 $v$ 积分：
 
-<Question id="math-core-gd-06-02-035" type="essay" tags="来源:李正元练习题, 考点:变量代换, 考点:微分算子因式分解">
+    $$
+    f_u(u,v)=\frac{v}{25}+\varphi(u).
+    $$
 
-作自变量与因变量变换
+    由 $f_u(u,0)=ue^{-u}$ 可知 $\varphi(u)=ue^{-u}$，故
 
-$$
-u=x+y,\qquad v=x-y,\qquad w=xy-z,
-$$
+    $$
+    f(u,v)=\frac{uv}{25}+\int ue^{-u}\,\mathrm du+\psi(v)
+    =\frac{uv}{25}-(u+1)e^{-u}+\psi(v).
+    $$
 
-将
+  </Step>
+  <Step>
 
-$$
-z_{xx}+2z_{xy}+z_{yy}=0
-$$
+    ### 使用 $u=0$ 上的边界条件确定剩余函数
 
-变换为 $w$ 关于 $u,v$ 的偏微分方程，其中 $z$ 有连续二阶偏导数。
+    将 $u=0$ 代入，得到
 
-<Solution>
+    $$
+    -1+\psi(v)=f(0,v)=\frac{v^2}{50}-1,
+    $$
 
-**参考答案：$\boxed{w_{uu}=\dfrac12}$。**
+    即 $\psi(v)=\tfrac{v^2}{50}$。综上，
 
-**第一步：把原算子因式分解。**
+    $$
+    \boxed{f(u,v)=\frac{uv}{25}-(u+1)e^{-u}+\frac{v^2}{50}}.
+    $$
 
-$$
-z_{xx}+2z_{xy}+z_{yy}=(\partial_x+\partial_y)^2z.
-$$
+    验算：$f_{uv}=1/25$，$f_u(u,0)=ue^{-u}$，$f(0,v)=v^2/50-1$，三条件全部满足。
 
-因为 $u=x+y,v=x-y$，
+  </Step>
+</Steps>
 
-$$
-\partial_x=\partial_u+\partial_v,
-\qquad\partial_y=\partial_u-\partial_v,
-$$
+<Callout type="warn" title="混合偏导积分的任意函数">
 
-于是 $\partial_x+\partial_y=2\partial_u$，原方程变为 $4z_{uu}=0$。
-
-**第二步：不能漏掉因变量的变换。** 由 $w=xy-z$ 得
-
-$$
-z=xy-w=\frac{(u+v)(u-v)}4-w(u,v)
-=\frac{u^2-v^2}4-w(u,v).
-$$
-
-所以
-
-$$
-z_{uu}=\frac12-w_{uu}.
-$$
-
-代回 $4z_{uu}=0$，得到 $w_{uu}=1/2$。
-
-<Callout type="warn" title="因变量代换可能产生非齐次项">
-
-若只做 $u,v$ 坐标变换，会错写成 $w_{uu}=0$。题目同时规定 $w=xy-z$，其中 $xy$ 的二阶导数贡献了右端 $1/2$。
+对 $f_{uv}$ 积分后必须保留单变量函数 $\varphi(u)$、$\psi(v)$；不能把它们简化成数字常数，否则将失去利用两条边界条件确定函数的自由度。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-## 七、原创变式：把多种求导模型连接起来
+<Question id="core-1102-math-4b8ca9-080" type="essay" points={12} tags="来源:2024年考研数学三, 科目:高等数学, 章节:偏导数计算, 考点:隐函数二阶偏导数与方程求值">
 
-<Question id="math-core-gd-06-02-036" type="essay" tags="来源:原创, 考点:隐函数定理, 考点:积分上下限, 考点:混合二阶导">
-
-设 $z=z(x,y)>0$ 在原点附近由方程
-
-$$
-z+\ln z=\int_y^x e^{t^2}\,\mathrm dt+xy
-$$
-
-确定。求 $z(0,0)$、$z_x(0,0)$、$z_y(0,0)$ 及 $z_{xy}(0,0)$。
+ 函数 $z=z(x,y)$ 由 $z+\mathrm{e}^{x}-y\ln(1+z^2)=0$ 确定，求 $\left.\left(\frac{\partial^2 z}{\partial x^2}+\frac{\partial^2 z}{\partial y^2}\right)\right|_{(0,0)}$。
 
 <Solution>
 
-**参考答案：** 记 $\omega$ 为方程 $\omega e^\omega=1$ 的唯一正根，即 $\omega=W(1)\approx0.567143$。则
+**参考答案：** $\boxed{z_{xx}(0,0)+z_{yy}(0,0)=-1-2\ln2}$。
 
-$$
-\boxed{\begin{aligned}
-z(0,0)&=\omega,\\
-z_x(0,0)&=\frac\omega{1+\omega},\\
-z_y(0,0)&=-\frac\omega{1+\omega},\\
-z_{xy}(0,0)&=\frac{\omega^2(\omega+2)}{(1+\omega)^3}.
-\end{aligned}}
-$$
+<Steps>
+  <Step>
 
-**第一步：先严格确定原点对应的隐函数值。** 令
+    ### 定位隐函数上的点并确认局部可解
 
-$$
-H(z)=z+\ln z,\quad A(x,y)=\int_y^x e^{t^2}\,\mathrm dt+xy.
-$$
+    设 $F(x,y,z)=z+e^x-y\ln(1+z^2)$。在 $x=y=0$ 时，方程为 $z+1=0$，故 $z_0=-1$。
 
-在 $(x,y)=(0,0)$ 时，$A(0,0)=0$，所以正确的方程为
+    $$
+    F_z=1-\frac{2yz}{1+z^2},\qquad F_z(0,0,-1)=1\ne0.
+    $$
 
-$$
-z_0+\ln z_0=0
-\iff z_0 e^{z_0}=1.
-$$
+    因而隐函数在该点附近可求导。
 
-$H'(z)=1+1/z>0$（$z>0$），故有且只有一个正根 $z_0=\omega$。且 $H'(\omega)\ne0$，隐函数在该点附近光滑。
+  </Step>
+  <Step>
 
-**第二步：一阶求导时牢记积分上下限的符号。**
+    ### 先求 $z_x,z_y$ 以供二阶公式使用
 
-$$
-H'(z)z_x=e^{x^2}+y,
-\qquad H'(z)z_y=-e^{y^2}+x.
-$$
+    $$
+    F_x=e^x,\qquad F_y=-\ln(1+z^2).
+    $$
 
-因此在原点有
+    由 $F_x+F_z z_x=0$ 与 $F_y+F_z z_y=0$，在 $(0,0,-1)$ 得
 
-$$
-\frac{1+\omega}{\omega}z_x=1,
-\qquad \frac{1+\omega}{\omega}z_y=-1,
-$$
+    $$
+    \boxed{z_x=-1,\qquad z_y=\ln2}.
+    $$
 
-由此得到参考答案中的两项一阶导数。
+  </Step>
+  <Step>
 
-**第三步：再求混合二阶偏导。** 对 $H'(z)z_x=e^{x^2}+y$ 关于 $y$ 求导：
+    ### 求 $z_{xx}$
 
-$$
-H''(z)z_yz_x+H'(z)z_{xy}=1,
-$$
+    隐式二阶公式为
 
-其中 $H''(z)=-1/z^2$。在原点代入
+    $$
+    F_{xx}+2F_{xz}z_x+F_{zz}z_x^2+F_z z_{xx}=0.
+    $$
 
-$$
--\frac1{\omega^2}\left(-\frac{\omega^2}{(1+\omega)^2}\right)
-+\frac{1+\omega}{\omega}z_{xy}=1.
-$$
+    在该点 $F_{xx}=1$，$F_{xz}=0$，$F_{zz}=0$，$F_z=1$。所以
 
-于是
+    $$
+    \boxed{z_{xx}(0,0)=-1}.
+    $$
 
-$$
-z_{xy}=\frac\omega{1+\omega}\left(1-\frac1{(1+\omega)^2}\right)
-=\frac{\omega^2(\omega+2)}{(1+\omega)^3}.
-$$
+  </Step>
+  <Step>
 
-<Callout type="warn" title="原始参考答案的关键错误：误把 $z(0,0)$ 当作 1">
+    ### 求 $z_{yy}$ 并合并
 
-原资料给出 $z(0,0)=1$、$z_x=1/2$、$z_y=-1/2$、$z_{xy}=3/8$，但 **$1+\ln1=1\ne0$**，并不满足原点的原方程。这里严格按题干重新计算，不能直接沿用原答案。$W(1)$ 表示 Lambert $W$ 函数在 1 处的值；也可只用“$\omega$ 是 $\omega+\ln\omega=0$ 的正根”来表述。
+    类似地，
+
+    $$
+    F_{yy}+2F_{yz}z_y+F_{zz}z_y^2+F_z z_{yy}=0.
+    $$
+
+    此处 $F_{yy}=0$，
+
+    $$
+    F_{yz}=-\frac{2z}{1+z^2},\qquad F_{yz}(0,0,-1)=1.
+    $$
+
+    因此 $2\ln2+z_{yy}=0$，即 $z_{yy}=-2\ln2$。最终
+
+    $$
+    \boxed{z_{xx}+z_{yy}=-1-2\ln2}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="别把 $F_{yz}$ 当作零">
+
+虽然 $F$ 关于 $y$ 为一次式，但 $F_y=-\ln(1+z^2)$ 仍依赖于 $z$，故 $F_{yy}=0$ 不代表 $F_{yz}=0$。计算 $z_{yy}$ 时的 $2F_{yz}z_y$ 是关键项。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-06-02-037" type="essay" tags="来源:原创, 考点:偏微分算子, 考点:特征坐标, 考点:边界条件">
+<Question id="core-1102-math-4b8ca9-081" type="essay" points={12} tags="来源:2025年考研数学一, 科目:高等数学, 章节:偏导数计算, 考点:齐次函数二阶方程与常微分方程">
 
-二阶连续可微函数 $z=z(x,y)$ 满足
-
-$$
-2z_{xx}+z_{xy}-z_{yy}=9e^{x+2y},
-$$
-
-并在两条直线上满足
+ 函数 $f(u)$ 在区间 $(0, +\infty)$ 内具有二阶导数，记 $g(x, y) = f\left(\frac{x}{y}\right)$, 若 $g(x, y)$ 满足
 
 $$
-z(x,x)=0,\qquad \left.z(x,y)\right|_{x+2y=0}=x-y.
+x^2 \frac{\partial^2 g}{\partial x^2} + xy \frac{\partial^2 g}{\partial x \partial y} + y^2 \frac{\partial^2 g}{\partial y^2} = 1
 $$
 
-求 $z(x,y)$，并验证它满足全部条件。
+且 $g(x, x) = 1$, $\left.\frac{\partial g}{\partial x}\right|_{(x, x)} = \frac{2}{x}$, 求 $f(u)$.
 
 <Solution>
 
-**参考答案：**
+**参考答案：** 对 $u>0$，
 
 $$
-\boxed{z(x,y)=(x-y)e^{x+2y}}.
+\boxed{f(u)=\frac12(\ln u)^2+2\ln u+1}.
 $$
 
-**第一步：因式分解算子，找到合适坐标。**
+<Steps>
+  <Step>
 
-$$
-2\partial_{xx}+\partial_{xy}-\partial_{yy}
-=(\partial_x+\partial_y)(2\partial_x-\partial_y).
-$$
+    ### 设 $u=x/y$ 并计算必要偏导
 
-令 $u=x+2y,\ v=x-y$，则雅可比行列式
+    在 $x/y>0$（$y\ne0$）的定义域内，$g(x,y)=f(u)$，其中
 
-$$
-\det\frac{\partial(u,v)}{\partial(x,y)}
-=\begin{vmatrix}1&2\\1&-1\end{vmatrix}=-3\ne0.
-$$
+    $$
+    u_x=\frac1y,\qquad u_y=-\frac u y.
+    $$
 
-取 $w(u,v)=z(x,y)$，有
+    由链式法则，
 
-$$
-\partial_x=\partial_u+\partial_v,
-\quad \partial_y=2\partial_u-\partial_v.
-$$
+    $$
+    \begin{aligned}
+    g_{xx}&=\frac{f''(u)}{y^2},\\
+    g_{xy}&=-\frac{f'(u)+u f''(u)}{y^2},\\
+    g_{yy}&=\frac{2uf'(u)+u^2f''(u)}{y^2}.
+    \end{aligned}
+    $$
 
-于是
+  </Step>
+  <Step>
 
-$$
-\partial_x+\partial_y=3\partial_u,
-\qquad 2\partial_x-\partial_y=3\partial_v,
-$$
+    ### 把偏微分方程变为常微分方程
 
-故原方程化为 $9w_{uv}=9e^u$，即
+    代入 $x=uy$ 并合并：
 
-$$
-w_{uv}=e^u.
-$$
+    $$
+    \begin{aligned}
+    x^2g_{xx}+xyg_{xy}+y^2g_{yy}
+    &=u^2f''-u(f'+uf'')+2uf'+u^2f''\\
+    &=u^2f''+uf'=1.
+    \end{aligned}
+    $$
 
-**第二步：两次积分，保留两个自由函数。**
+    于是
 
-$$
-w_u=ve^u+A'(u)
-\quad\Longrightarrow\quad
-w(u,v)=ve^u+A(u)+B(v).
-$$
+    $$
+    u(uf')'=1,\qquad (uf')'=\frac1u.
+    $$
 
-**第三步：边界条件恰好对应 $u=0$ 与 $v=0$。**
+  </Step>
+  <Step>
 
-$x=y$ 等价于 $v=0$，且此时 $u=3x$ 可取任意实数。故
+    ### 两次积分得到含常数的解
 
-$$
-w(u,0)=A(u)+B(0)=0
-\Longrightarrow A(u)\equiv -B(0).
-$$
+    因为 $u>0$，
 
-而 $x+2y=0$ 等价于 $u=0$，题设要求 $w(0,v)=v$。代入得
+    $$
+    uf'(u)=\ln u+C_1,\qquad
+    f(u)=\frac12(\ln u)^2+C_1\ln u+C_2.
+    $$
 
-$$
-v+A(0)+B(v)=v
-\Longrightarrow B(v)\equiv -A(0).
-$$
+  </Step>
+  <Step>
 
-因此 $A+B\equiv0$，所以 $w(u,v)=ve^u$，还原为 $z=(x-y)e^{x+2y}$。
+    ### 由对角线条件确定积分常数
 
-**回代验证：** 因 $w_{uv}=e^u$，原偏微分算子作用于 $z$ 等于 $9e^{x+2y}$；在 $x=y$ 时 $z=0$，在 $x+2y=0$ 时指数等于 $1$，有 $z=x-y$。
+    $g(x,x)=f(1)=1$，故 $C_2=1$。又 $g_x=f'(u)/y$，在 $y=x\ne0$ 时 $u=1$，于是
 
-<Callout type="idea" title="带两条直线条件的二阶方程">
+    $$
+    \frac{f'(1)}x=\frac2x\quad\Longrightarrow\quad f'(1)=2.
+    $$
 
-寻找使二阶算子分解为 $\partial_{uv}$ 的特征坐标后，两条直线条件往往变成 $u=0$、$v=0$ 的“轴上边界条件”，正好决定积分时产生的两个自由一元函数。
+    而 $f'(1)=C_1$，所以 $C_1=2$。得到
+
+    $$
+    \boxed{f(u)=\frac12\ln^2u+2\ln u+1}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="算子与比例变量的配合">
+
+当未知函数只依赖 $x/y$ 时，二阶偏导组合常能化成 $u^2f''+uf'$。把它识别为 $u(uf')'$ 后只需积分两次，且对角线 $x=y$ 正好对应 $u=1$。
 
 </Callout>
 
 </Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-082" type="single" points={5} tags="来源:2025年考研数学二, 科目:高等数学, 章节:偏导数计算, 考点:变限积分隐函数的一阶偏导组合">
+
+ 设函数 $z = z(x, y)$ 由 $z + \ln z - \int_{y}^{x} e^{-t^2} dt = 0$ 确定，则 $\frac{\partial z}{\partial x} + \frac{\partial z}{\partial y} = ( \quad ).$
+
+<Option correct>$\frac{z}{z + 1} (e^{-x^2} - e^{-y^2})$</Option>
+<Option>$\frac{z}{z + 1} (e^{-x^2} + e^{-y^2})$</Option>
+<Option>$-\frac{z}{z + 1} (e^{-x^2} - e^{-y^2})$</Option>
+<Option>$-\frac{z}{z + 1} (e^{-x^2} + e^{-y^2})$</Option>
+
+<Solution>
+
+**正确选项：A。**
+
+$$
+\boxed{z_x+z_y=\frac{z}{z+1}\left(e^{-x^2}-e^{-y^2}\right)}.
+$$
+
+<Steps>
+  <Step>
+
+    ### 设隐函数并明确上、下限的求导符号
+
+    令
+
+    $$
+    F(x,y,z)=z+\ln z-\int_y^x e^{-t^2}\,\mathrm dt=0,
+    $$
+
+    其中 $z>0$，故 $F_z=1+1/z>0$，隐函数局部存在且可求导。
+
+  </Step>
+  <Step>
+
+    ### 对 $x$ 求偏导
+
+    固定 $y$，上限为 $x$，所以
+
+    $$
+    \left(1+\frac1z\right)z_x-e^{-x^2}=0
+    \quad\Longrightarrow\quad
+    \boxed{z_x=\frac z{z+1}e^{-x^2}}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 对 $y$ 求偏导并合并
+
+    对下限 $y$ 求导本身带负号，原积分项前又带负号，因而出现正号：
+
+    $$
+    \left(1+\frac1z\right)z_y+e^{-y^2}=0
+    \quad\Longrightarrow\quad
+    z_y=-\frac z{z+1}e^{-y^2}.
+    $$
+
+    两式相加得到选项 A 的表达式。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="变限积分的符号表">
+
+$\partial_x\int_y^x h(t)\,\mathrm dt=h(x)$，而 $\partial_y\int_y^x h(t)\,\mathrm dt=-h(y)$。若积分号前还有负号，需要再反转一次。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-083" type="blank" points={5} tags="来源:2025年考研数学三, 科目:高等数学, 章节:偏导数计算, 考点:含参数变限积分的隐函数二阶求导">
+
+ 已知函数 $z = z(x, y)$ 由 $z + \ln z - \int_{y}^{x} x e^{-t^2} dt = 1$ 确定，则 $\left.\frac{\partial^2 z}{\partial x^2}\right|_{(1, 1)} =$ <Blank answer="((1)/(8e^2))" kind="math" />.
+
+<Solution>
+
+**参考答案：** $\boxed{z_{xx}(1,1)=\tfrac1{8e^2}}$。
+
+**思路：** 积分号内 $x$ 是额外参数；把含参积分写成 $x$ 乘变限积分后，再对隐函数连续求导两次。
+
+<Steps>
+  <Step>
+
+    ### 先分离积分参数，确定 $z(1,1)$
+
+    设 $A(x,y)=\int_y^x e^{-t^2}\,\mathrm dt$，则原方程为
+
+    $$
+    z+\ln z-xA(x,y)=1.
+    $$
+
+    在 $x=y=1$ 时，$A(1,1)=0$，于是 $z+\ln z=1$。由于 $z>0$ 且 $1+1/z>0$，解唯一，为 $z(1,1)=1$。
+
+  </Step>
+  <Step>
+
+    ### 对 $x$ 求导得到 $z_x$
+
+    注意 $A_x=e^{-x^2}$，所以
+
+    $$
+    \left(1+\frac1z\right)z_x=A+xA_x=A+xe^{-x^2}.
+    $$
+
+    代入 $(x,y,z)=(1,1,1)$：
+
+    $$
+    2z_x=e^{-1}\quad\Longrightarrow\quad\boxed{z_x(1,1)=\frac1{2e}}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 再求 $x$ 导数，留意乘积与隐函数链式项
+
+    上式左侧导数为
+
+    $$
+    -\frac{z_x^2}{z^2}+\left(1+\frac1z\right)z_{xx}.
+    $$
+
+    右侧导数为
+
+    $$
+    \begin{aligned}
+    \frac{\partial}{\partial x}(A+xe^{-x^2})
+    &=e^{-x^2}+e^{-x^2}-2x^2e^{-x^2}\\
+    &=2(1-x^2)e^{-x^2}.
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 代入目标点并求值
+
+    在 $(1,1)$ 处右侧为零，且 $z=1$，故
+
+    $$
+    -z_x^2+2z_{xx}=0.
+    $$
+
+    因而
+
+    $$
+    \boxed{z_{xx}(1,1)=\frac12\left(\frac1{2e}\right)^2=\frac1{8e^2}}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="与普通变限积分题的区别">
+
+这里 $\int_y^x x e^{-t^2}\,\mathrm dt=x\int_y^x e^{-t^2}\,\mathrm dt$，求 $x$ 导数时既有乘数 $x$ 的导数，又有上限 $x$ 的导数。只保留后一项将得到错误结果。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-4b8ca9-084" type="single" points={5} tags="来源:2026年考研数学一、二、三, 科目:高等数学, 章节:偏导数计算, 考点:指数隐函数求导与导数差">
+
+ 设函数 $z = z(x, y)$ 由方程 $x - az = e^{y + az}$, ($a \neq 0$) 确定，则( $\quad$).
+
+<Option correct>$\frac{\partial z}{\partial x} - \frac{\partial z}{\partial y} = \frac{1}{a}$</Option>
+<Option>$\frac{\partial z}{\partial x} + \frac{\partial z}{\partial y} = \frac{1}{a}$</Option>
+<Option>$\frac{\partial z}{\partial x} - \frac{\partial z}{\partial y} = -\frac{1}{a}$</Option>
+<Option>$\frac{\partial z}{\partial x} + \frac{\partial z}{\partial y} = -\frac{1}{a}$</Option>
+
+<Solution>
+
+**正确选项：A。** 即 $\boxed{z_x-z_y=\dfrac1a}$。
+
+**核心思路：** 对隐式方程分别关于 $x,y$ 求偏导，将同一个指数项记为 $E$，利用两式相减抵消指数项。
+
+<Steps>
+  <Step>
+
+    ### 确认隐函数可求导
+
+    令 $F(x,y,z)=x-az-e^{y+az}$。因为 $a\ne0$，且
+
+    $$
+    F_z=-a(1+e^{y+az})\ne0,
+    $$
+
+    所以由隐函数定理，在方程所定义的点附近 $z=z(x,y)$ 可微。
+
+  </Step>
+  <Step>
+
+    ### 分别求两个偏导数
+
+    记 $E=e^{y+az}>0$。对 $x$ 求偏导时令 $y$ 固定，有
+
+    $$
+    1-az_x=aEz_x
+    \quad\Longrightarrow\quad z_x=\frac{1}{a(1+E)}.
+    $$
+
+    对 $y$ 求偏导时令 $x$ 固定，有
+
+    $$
+    -az_y=E(1+az_y)
+    \quad\Longrightarrow\quad z_y=-\frac{E}{a(1+E)}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 相减得到恒等式
+
+    $$
+    z_x-z_y=\frac{1+E}{a(1+E)}=\boxed{\frac1a}.
+    $$
+
+    注意该结论不依赖具体的 $x,y$，也不要求 $a$ 为正。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="快捷解法：直接消去未知函数偏导">
+
+从 $x-az=E$ 分别求导，得到 $1=a(1+E)z_x$ 和 $E=-a(1+E)z_y$；两式合并立即得到 $a(z_x-z_y)=1$。这类题通常不需要显式解出 $z$。
+
+</Callout>
+
+</Solution>
+
 </Question>

@@ -29,7 +29,7 @@ export const homeSubjects: readonly HomeSubject[] = [
     previewDescription: '按真题、核心题目与模拟题组织训练，回到具体题目检验每一处知识。',
     sections: [
       { title: '数学真题', description: '按章节与题型回顾历年考点。', href: '/docs/math/past-exams/' },
-      { title: '考研核心题目', description: '集中训练值得反复掌握的题目。', href: '/docs/math/core-questions/' },
+      { title: '真题核心题目', description: '集中训练值得反复掌握的题目。', href: '/docs/math/core-questions/' },
       { title: '数学模拟题', description: '用成套试题检验综合解题能力。', href: '/docs/math/exam/' },
     ],
     formula: '∫ f(x) dx = F(x) + C',

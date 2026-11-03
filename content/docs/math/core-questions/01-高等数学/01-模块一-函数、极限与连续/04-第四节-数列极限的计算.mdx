@@ -1,1689 +1,635 @@
 ---
-title: 第四节 数列极限的计算
-description: 高等数学核心题目：数列根式差、幂指型极限、切线模型及含参积分的极限。
+title: "第四节 数列极限的计算"
+description: "考研数学真题分类：模块一：函数、极限与连续"
 ---
 
-本节按原题库的模型顺序整理。求数列极限时，优先识别**有理化、幂指型取对数、几何模型转化、积分代换**等结构；不要直接将各个发散部分分别取极限。
+<Question id="core-1102-math-8c46a4-006" type="essay" points={5} tags="来源:1996年考研数学一, 科目:高等数学, 章节:数列极限的计算, 考点:递推数列的单调有界性">
 
-## 模型一：结构化数列极限——有理化、幂指、变量代换
-
-<Question id="math-core-gd-01-04-001" type="blank" points={3} tags="来源:1990考研数三, 考点:根式有理化, 考点:数列极限">
-
-$\displaystyle\lim_{n\to\infty}\left(\sqrt{n+3\sqrt n}-\sqrt{n-\sqrt n}\right)=$ <Blank answer="2" kind="math" />。
+设 $x_1=10, x_{n+1}=\sqrt{6+x_n}\ (n=1,2,\cdots)$，试证数列 $\{x_n\}$ 极限存在，并求此极限。
 
 <Solution>
 
-**答案：** $\boxed{2}$。
+**结论：** 数列单调递减且有下界，$\displaystyle\boxed{\lim_{n\to\infty}x_n=3}$。
 
-**第一步：识别不定式。** 两个根式都与 $\sqrt n$ 同阶，属于 $\infty-\infty$ 型。必须先合并，不能分别取极限。
+<Steps>
+  <Step>
 
-**第二步：乘以共轭式有理化。**
+    ### 观察递推并寻找固定点
 
-$$
-\begin{aligned}
-&\sqrt{n+3\sqrt n}-\sqrt{n-\sqrt n}\\
-&=\frac{(n+3\sqrt n)-(n-\sqrt n)}{\sqrt{n+3\sqrt n}+\sqrt{n-\sqrt n}}\\
-&=\frac{4\sqrt n}{\sqrt{n+3\sqrt n}+\sqrt{n-\sqrt n}}.
-\end{aligned}
-$$
+    首项 $x_1=10$，且 $x_2=\sqrt{6+10}=4$。设极限可能为 $L\ge0$，由固定点方程
 
-**第三步：提出最高阶因子。** 在分母提取 $\sqrt n$，原式化为
+    $$
+    L=\sqrt{6+L}\iff L^2-L-6=0
+    \iff(L-3)(L+2)=0,
+    $$
 
-$$
-\frac4{\sqrt{1+3/\sqrt n}+\sqrt{1-1/\sqrt n}}
-\longrightarrow\frac4{1+1}=\boxed{2}.
-$$
+    猜测极限为 $3$。**但不能在尚未证明收敛时直接取极限**，下一步要验证单调有界。
 
-<Callout type="idea" title="一眼判断根式差量级">
+  </Step>
+  <Step>
 
-若 $u_n,v_n\sim n$ 且 $u_n-v_n$ 为 $\sqrt n$ 阶，则 $\sqrt{u_n}-\sqrt{v_n}=\frac{u_n-v_n}{\sqrt{u_n}+\sqrt{v_n}}$ 往往是常数阶。**差式优先有理化，再判阶。**
+    ### 证明区间 $(3,+\infty)$ 不变且数列严格下降
+
+    若 $x_n>3$，则 $x_{n+1}=\sqrt{6+x_n}>3$。同时
+
+    $$
+    \begin{aligned}
+    x_{n+1}<x_n
+    &\iff 6+x_n<x_n^2\\
+    &\iff(x_n-3)(x_n+2)>0,
+    \end{aligned}
+    $$
+
+    后者由 $x_n>3$ 保证。由 $x_1=10>3$ 归纳得
+
+    $$
+    3<x_{n+1}<x_n\quad(n\ge1).
+    $$
+
+  </Step>
+  <Step>
+
+    ### 使用单调有界定理，再求极限
+
+    数列递减且下界为 $3$，故收敛到某 $L\ge3$。现在才可以对递推式取极限：
+
+    $$
+    L=\sqrt{6+L}\implies L\in\{3,-2\}.
+    $$
+
+    由 $L\ge3$ 排除 $-2$，得到 $\boxed{L=3}$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="递推数列三步法">
+
+先求**候选不动点**，再通过 $x_{n+1}-x_n$ 的符号及不变区间证明**单调有界**，最后用递推式确定极限；顺序不可颠倒。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-01-04-002" type="essay" points={3} tags="来源:1994考研数二, 考点:幂指数列极限, 考点:对数导数">
+<Question id="core-1102-math-8c46a4-007" type="essay" points={6} tags="来源:1998年考研数学一, 科目:高等数学, 章节:数列极限的计算, 考点:变形黎曼和与夹逼定理">
 
-计算
-
-$$
-\lim_{n\to\infty}\tan^n\left(\frac\pi4+\frac2n\right).
-$$
+求 $\lim_{n\to\infty}\left\{\frac{\sin\frac{\pi}{n}}{n+1}+\frac{\sin\frac{2\pi}{n}}{n+\frac{1}{2}}+\cdots+\frac{\sin\pi}{n+\frac{1}{n}}\right\}$。
 
 <Solution>
 
-**参考答案：** $\boxed{e^4}$。
+**答案：** $\displaystyle\boxed{\frac2\pi}$。
 
-**解题入口：** 底数 $\tan(\pi/4+2/n)\to1$，指数 $n\to\infty$，属于 $1^\infty$ 型。取对数将幂变为乘积，所需信息只是底数的**一阶增量**。
+<Tabs items={['方法一：夹逼为标准黎曼和（推荐）','方法二：一致误差估计']} defaultIndex={0}>
+  <Tab value="方法一：夹逼为标准黎曼和（推荐）">
 
-<Tabs items={['解法一：对数与导数','解法二：正切和角公式']} defaultIndex={0}>
-  <Tab value="解法一：对数与导数">
+    <Steps>
+      <Step>
 
-  设 $h(t)=\ln\tan(\pi/4+t)$。在 $t=0$ 附近正切为正，$h$ 可导，且
+        ### 写成求和式并提取 $1/n$
 
-  $$
-  h(0)=0,\qquad
-  h'(t)=\frac{\sec^2(\pi/4+t)}{\tan(\pi/4+t)}.
-  $$
+        注意原式中第 $k$ 项的分母是 $n+1/k$：
 
-  因此 $h'(0)=2$，由导数定义
+        $$
+        S_n=\sum_{k=1}^n\frac{\sin(k\pi/n)}{n+1/k}
+        =\frac1n\sum_{k=1}^n\frac{\sin(k\pi/n)}{1+1/(nk)}.
+        $$
 
-  $$
-  h(t)=2t+o(t)\quad(t\to0).
-  $$
+      </Step>
+      <Step>
 
-  记原表达式为 $Y_n>0$，则
+        ### 估计与标准黎曼和之间的夹逼界
 
-  $$
-  \ln Y_n=n\,h(2/n)
-  =n\left(\frac4n+o(1/n)\right)\longrightarrow4.
-  $$
+        由 $1\le k\le n$，
 
-  所以 $Y_n\to\boxed{e^4}$。
+        $$
+        \frac1{1+1/n}\le\frac1{1+1/(nk)}\le1.
+        $$
 
-</Tab>
-  <Tab value="解法二：正切和角公式">
+        同时 $\sin(k\pi/n)\ge0$，故令
 
-  使用 $\tan(\pi/4+t)=\frac{1+\tan t}{1-\tan t}$，令 $t=2/n$。因 $\tan t=t+O(t^3)$，有
+        $$
+        T_n=\frac1n\sum_{k=1}^n\sin\frac{k\pi}{n},
+        $$
 
-  $$
-  \tan\left(\frac\pi4+\frac2n\right)
-  =\frac{1+2/n+O(n^{-3})}{1-2/n+O(n^{-3})}
-  =1+\frac4n+O(n^{-2}).
-  $$
+        可得 $\frac{n}{n+1}T_n\le S_n\le T_n$。
 
-  因而
+      </Step>
+      <Step>
 
-  $$
-  \left(1+\frac4n+O(n^{-2})\right)^n\to\boxed{e^4}.
-  $$
+        ### 计算黎曼和并使用夹逼定理
 
-</Tab>
+        $$
+        T_n\longrightarrow\int_0^1\sin(\pi x)\,\mathrm dx
+        =\left[-\frac{\cos(\pi x)}\pi\right]_0^1=\frac2\pi.
+        $$
+
+        又 $n/(n+1)\to1$，上下界同趋于 $2/\pi$，因此 $\boxed{S_n\to2/\pi}$。
+
+      </Step>
+    </Steps>
+
+  </Tab>
+  <Tab value="方法二：一致误差估计">
+
+    由于 $0\le\sin(k\pi/n)\le1$，有
+
+    $$
+    \begin{aligned}
+    0\le T_n-S_n
+    &=\frac1n\sum_{k=1}^n\sin\frac{k\pi}n
+    \frac{1/(nk)}{1+1/(nk)}\\
+    &\le\frac1n\sum_{k=1}^n\frac1{nk}
+    \le\frac1n\to0.
+    \end{aligned}
+    $$
+
+    因而 $S_n$ 与标准黎曼和 $T_n$ 具有相同极限 $2/\pi$。
+
+  </Tab>
 </Tabs>
 
-<Callout type="warn" title="底数趋 1，不代表整个幂式趋 1">
+<Callout type="warn" title="分母中的 $1/k$ 不是黎曼和的步长">
 
-若 $u_n=1+c/n+o(1/n)$ 且最终为正，则 $u_n^n\to e^c$。先确定 $c$，不要直接以 $u_n\to1$ 作答。
+先提出 $n$ 才能看到真正的步长是 $1/n$。由于 $1/(nk)$ 对所有 $1\le k\le n$ 一致趋于 $0$，可以夹逼或估计差值。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-01-04-003" type="blank" points={3} tags="来源:1998考研数三, 考点:切线方程, 考点:标准幂指极限">
+<Question id="core-1102-math-8c46a4-009" type="essay" points={6} tags="来源:1999年考研数学二, 科目:高等数学, 章节:数列极限的计算, 考点:积分与求和构造单调数列">
 
-设曲线 $f(x)=x^n$ 在 $(1,1)$ 处的切线与 $x$ 轴交于 $(\xi_n,0)$，则
-
-$\displaystyle\lim_{n\to\infty}f(\xi_n)=$ <Blank answer="exp(-1)" aliases={["e^(-1)","1/e"]} kind="math" />。
+设 $f(x)$ 是区间 $[0, +\infty)$ 上单调减少且非负的连续函数，$a_n = \sum_{k=1}^n f(k) - \int_1^n f(x)\mathrm{d}x\ (n=1,2,\cdots)$，证明数列 $\{a_n\}$ 的极限存在。
 
 <Solution>
 
-**答案：** $\displaystyle\boxed{e^{-1}}$。
+**结论：** $\{a_n\}$ 单调不增且非负，因此极限存在（其数值取决于 $f$）。
 
-**第一步：由导数求切线。** 对每个正整数 $n$，有 $f'(x)=nx^{n-1}$，故 $f'(1)=n$。在 $(1,1)$ 处的切线为
+<Steps>
+  <Step>
 
-$$
-y-1=n(x-1).
-$$
+    ### 求相邻两项之差
 
-**第二步：求切线的横截距。** 令 $y=0$，得
+    由定义直接相减，
 
-$$
--1=n(\xi_n-1),\qquad \xi_n=1-\frac1n.
-$$
+    $$
+    a_{n+1}-a_n
+    =f(n+1)-\int_n^{n+1}f(x)\,\mathrm dx.
+    $$
 
-**第三步：把几何问题转化为标准极限。**
+    $f$ 单调减少，故对 $x\in[n,n+1]$ 有 $f(x)\ge f(n+1)$，于是
 
-$$
-f(\xi_n)=\xi_n^n
-=\left(1-\frac1n\right)^n
-\longrightarrow\boxed{e^{-1}}.
-$$
+    $$
+    \int_n^{n+1}f(x)\,\mathrm dx\ge f(n+1)
+    \quad\Longrightarrow\quad a_{n+1}\le a_n.
+    $$
 
-<Callout type="idea" title="几何题中隐藏的指数极限">
+  </Step>
+  <Step>
 
-看到“随 $n$ 变化的曲线切线”时，先写切线方程并把交点坐标表示为 $n$ 的函数；本题的横截距 $1-1/n$ 正好构成标准的 $1^\infty$ 数列极限。
+    ### 用左端点矩形和给出下界
+
+    对每个整数 $k\ge1$，当 $x\in[k,k+1]$ 时 $f(x)\le f(k)$，所以
+
+    $$
+    \int_1^n f(x)\,\mathrm dx
+    =\sum_{k=1}^{n-1}\int_k^{k+1}f(x)\,\mathrm dx
+    \le\sum_{k=1}^{n-1}f(k).
+    $$
+
+    从而
+
+    $$
+    a_n=\sum_{k=1}^nf(k)-\int_1^n f(x)\,\mathrm dx
+    \ge f(n)\ge0.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 应用单调有界定理
+
+    $0\le a_n\le a_1=f(1)$，因此有界且单调，必存在有限极限：
+
+    $$
+    \boxed{\lim_{n\to\infty}a_n=A\in[0,f(1)]}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="和式与积分并列时的常用思路">
+
+把 $\int_k^{k+1}f(x)\,\mathrm dx$ 夹在 $f(k+1)$ 与 $f(k)$ 之间，可以一次解决**相邻差的符号**与**数列上下界**两件事。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-01-04-004" type="single" points={4} tags="来源:2003考研数二, 考点:积分换元, 考点:含参数上限极限">
+<Question id="core-1102-math-8c46a4-011" type="essay" points={8} tags="来源:2002年考研数学二, 科目:高等数学, 章节:数列极限的计算, 考点:非线性递推数列的收敛性">
+
+设 $0<x_1<3, x_{n+1}=\sqrt{x_n(3-x_n)}\ (n=1,2,\cdots)$，证明数列 $\{x_n\}$ 的极限存在，并求此极限。
+
+<Solution>
+
+**结论：** $\displaystyle\boxed{\lim_{n\to\infty}x_n=\frac32}$。
+
+<Steps>
+  <Step>
+
+    ### 先找不动点并确认递推有定义
+
+    由 $0<x_1<3$ 得 $x_2=\sqrt{x_1(3-x_1)}>0$。利用均值不等式，
+
+    $$
+    x_n(3-x_n)\le\left(\frac{x_n+3-x_n}{2}\right)^2=\frac94,
+    $$
+
+    故 $0<x_2\le3/2<3$；归纳可得 $0<x_n\le3/2$（$n\ge2$）。
+
+  </Step>
+  <Step>
+
+    ### 从第二项起证明单调不减
+
+    对 $0<x_n\le3/2$，
+
+    $$
+    \begin{aligned}
+    x_{n+1}\ge x_n
+    &\iff x_n(3-x_n)\ge x_n^2\\
+    &\iff 3-x_n\ge x_n
+    \iff x_n\le\frac32.
+    \end{aligned}
+    $$
+
+    故从 $x_2$ 开始数列单调不减，且上界为 $3/2$，所以收敛。
+
+  </Step>
+  <Step>
+
+    ### 对递推式取极限并排除零根
+
+    设 $x_n\to L$，由 $x_n\ge x_2>0$（$n\ge2$）知 $L>0$。又
+
+    $$
+    L=\sqrt{L(3-L)}\Longrightarrow
+    L^2=L(3-L)\Longrightarrow L\in\left\{0,\frac32\right\}.
+    $$
+
+    故只能有 $\boxed{L=3/2}$。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="原始首项不一定在单调区间内">
+
+题设仅保证 $0<x_1<3$，并不能一开始就断言 $x_2>x_1$。必须先证明 **$x_2\in(0,3/2]$**，再从第二项起使用单调有界定理。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-8c46a4-013" type="single" points={4} tags="来源:2003年考研数学二, 科目:高等数学, 章节:数列极限的计算, 考点:含指数的积分数列与换元">
 
 设
 
 $$
-a_n=\frac32\int_0^{\frac{n}{n+1}}x^{n-1}\sqrt{1+x^n}\,\mathrm dx,
+a_n=\frac32\int_0^{\frac{n}{n+1}}x^{n-1}\sqrt{1+x^n}\,\mathrm{d}x,
 $$
 
-则 $\displaystyle\lim_{n\to\infty}n a_n$ 等于（ ）。
+则极限 $\lim_{n\to\infty}na_n$ 等于（ $\quad$ ）。
 
-<Option>$(1+e)^{3/2}+1$</Option>
-<Option correct>$(1+e^{-1})^{3/2}-1$</Option>
-<Option>$(1+e^{-1})^{3/2}+1$</Option>
-<Option>$(1+e)^{3/2}-1$</Option>
+<Option>$(1+e)^{\frac32}+1$</Option>
+<Option correct>$(1+e^{-1})^{\frac32}-1$</Option>
+<Option>$(1+e^{-1})^{\frac32}+1$</Option>
+<Option>$(1+e)^{\frac32}-1$</Option>
 
 <Solution>
 
-**正确选项：B。** 极限为 $\displaystyle\boxed{(1+e^{-1})^{3/2}-1}$。
-
-**识别结构：** 被积函数含 $x^{n-1}$ 与 $x^n$，且外面有 $n$；应优先尝试 $u=x^n$，它将这两个部分一起消去。
+**答案：B．** $\displaystyle\boxed{(1+e^{-1})^{3/2}-1}$。
 
 <Steps>
   <Step>
 
-  ### 换元消去积分内部的 $n$
+    ### 识别 $x^{n-1}$ 与 $x^n$ 的导数关系
 
-  令 $u=x^n$，则 $\mathrm du=nx^{n-1}\mathrm dx$，因此
+    题目给出
 
-  $$
-  \begin{aligned}
-  na_n
-  &=\frac32\int_0^{(n/(n+1))^n}\sqrt{1+u}\,\mathrm du\\
-  &=\left[(1+u)^{3/2}\right]_0^{(n/(n+1))^n}\\
-  &=\left[1+\left(\frac n{n+1}\right)^n\right]^{3/2}-1.
-  \end{aligned}
-  $$
+    $$
+    a_n=\frac32\int_0^{n/(n+1)}x^{n-1}\sqrt{1+x^n}\,\mathrm dx.
+    $$
 
-</Step>
+    令 $u=x^n$，则 $\mathrm du=nx^{n-1}\,\mathrm dx$，且上限变为
+
+    $$
+    b_n=\left(\frac{n}{n+1}\right)^n=\left(1+\frac1n\right)^{-n}.
+    $$
+
+  </Step>
   <Step>
 
-  ### 计算新上限的极限
+    ### 完成积分并保留随 $n$ 变化的上限
 
-  $$
-  \left(\frac n{n+1}\right)^n
-  =\left(1+\frac1n\right)^{-n}
-  \longrightarrow e^{-1}.
-  $$
+    $$
+    \begin{aligned}
+    na_n&=\frac32\int_0^{b_n}\sqrt{1+u}\,\mathrm du\\
+    &=\left[(1+u)^{3/2}\right]_0^{b_n}
+    =(1+b_n)^{3/2}-1.
+    \end{aligned}
+    $$
 
-  由于 $z\mapsto(1+z)^{3/2}$ 在 $z\ge0$ 上连续，故
+  </Step>
+  <Step>
 
-  $$
-  \lim_{n\to\infty}na_n
-  =\boxed{(1+e^{-1})^{3/2}-1}.
-  $$
+    ### 使用基本指数极限
 
-</Step>
+    由于 $\bigl(1+1/n\bigr)^n\to e$，所以 $b_n\to e^{-1}$。幂函数连续，故
+
+    $$
+    \boxed{\lim_{n\to\infty}na_n=(1+e^{-1})^{3/2}-1}.
+    $$
+
+    与选项对应为 **B**。
+
+  </Step>
 </Steps>
 
-<Callout type="warn" title="两处极易混淆的细节">
+<Callout type="idea" title="含 $x^{n-1}\Phi(x^n)$ 的积分先换元">
 
-- $\bigl(n/(n+1)\bigr)^n\to e^{-1}$，而不是 $e$。
-- 代换后先算定积分：原函数为 $\frac23(1+u)^{3/2}$，正好与外面的 $3/2$ 抵消，最终还要减去下限贡献 $1$。
+原积分区间虽随 $n$ 变化，但在 $u=x^n$ 下被积函数变成固定的 $\sqrt{1+u}$；**难点只剩上限的极限**。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-01-04-005" type="blank" points={4} tags="来源:2019考研数三, 考点:裂项相消, 考点:幂指极限">
+<Question id="core-1102-math-8c46a4-014" type="single" points={4} tags="来源:2004年考研数学二, 科目:高等数学, 章节:数列极限的计算, 考点:对数乘积与黎曼和">
 
-$\displaystyle\lim_{n\to\infty}\left(\frac1{1\times2}+\frac1{2\times3}+\cdots+\frac1{n(n+1)}\right)^n=$ <Blank answer="exp(-1)" aliases={["e^(-1)","1/e"]} kind="math" />。
+$\lim_{n \to \infty} \ln \sqrt[n]{\left(1+\frac{1}{n}\right)^2 \left(1+\frac{2}{n}\right)^2 \cdots \left(1+\frac{n}{n}\right)^2}$ 等于（ $\quad$ ）.
+
+<Option>$\int_1^2 \ln^2 x \, dx$</Option>
+<Option correct>$2 \int_1^2 \ln x \, dx$</Option>
+<Option>$2 \int_1^2 \ln(1+x) \, dx$</Option>
+<Option>$\int_1^2 \ln^2(1+x) \, dx$</Option>
 
 <Solution>
 
-**答案：** $\displaystyle\boxed{e^{-1}}$。
-
-**解题关键：** 指数为 $n$，括号内部是和式。不要对每个加数分别取极限；先观察分母 $k(k+1)$ 能否裂项相消，再判断幂指极限。
+**答案：B．** $\displaystyle\boxed{2\int_1^2\ln x\,\mathrm dx=4\ln2-2}$。
 
 <Steps>
   <Step>
 
-  ### 将有限和化为简单分式
+    ### 把根式、乘积统一转化成和式
 
-  因为 $\frac1{k(k+1)}=\frac1k-\frac1{k+1}$，所以
+    记
 
-  $$
-  \begin{aligned}
-  \sum_{k=1}^n\frac1{k(k+1)}
-  &=\sum_{k=1}^n\left(\frac1k-\frac1{k+1}\right)\\
-  &=1-\frac1{n+1}=\frac n{n+1}.
-  \end{aligned}
-  $$
+    $$
+    P_n=\prod_{k=1}^n\left(1+\frac kn\right)^2.
+    $$
 
-</Step>
+    全部因子均为正，因此
+
+    $$
+    \ln\sqrt[n]{P_n}=\frac1n\ln P_n
+    =\frac2n\sum_{k=1}^n\ln\left(1+\frac kn\right).
+    $$
+
+  </Step>
   <Step>
 
-  ### 计算 $1^\infty$ 型极限
+    ### 识别连续函数的黎曼和
 
-  原式为
+    函数 $g(x)=2\ln(1+x)$ 在 $[0,1]$ 上连续，取分点 $k/n$，有
 
-  $$
-  \left(\frac n{n+1}\right)^n
-  =\left(1+\frac1n\right)^{-n}
-  \longrightarrow\boxed{e^{-1}}.
-  $$
+    $$
+    \lim_{n\to\infty}\frac2n\sum_{k=1}^n\ln\left(1+\frac kn\right)
+    =2\int_0^1\ln(1+x)\,\mathrm dx.
+    $$
 
-  其中使用了标准极限 $\left(1+\frac1n\right)^n\to e$。
+  </Step>
+  <Step>
 
-</Step>
+    ### 转换积分区间并计算
+
+    令 $u=1+x$，再使用 $\int\ln u\,\mathrm du=u\ln u-u$：
+
+    $$
+    \begin{aligned}
+    2\int_0^1\ln(1+x)\,\mathrm dx
+    &=2\int_1^2\ln u\,\mathrm du\\
+    &=2\bigl[(u\ln u-u)\bigr]_1^2
+    =4\ln2-2.
+    \end{aligned}
+    $$
+
+    因此选择 **B**。
+
+  </Step>
 </Steps>
 
-<Callout type="idea" title="裂项相消与幂指型的组合">
+<Callout type="warn" title="是 $\ln(\cdot)^2$ 还是 $\ln^2(\cdot)$？">
 
-遇到 $\sum 1/[k(k+1)]$，第一反应应是**望远镜求和**。当最终得到 $\left(1+\frac cn+o(n^{-1})\right)^n$（底数最终为正）时，极限为 $e^c$。
-
-</Callout>
-
-</Solution>
-</Question>
-
-## 模型二：和式极限——夹逼、黎曼和与端点处理
-
-和式极限先辨认量级：若各项分母主阶相同，可尝试**统一夹逼**；若能写成 $\frac1n\sum f(k/n)$，则转成**定积分**。对端点奇异或小扰动，要额外证明其影响可控。
-
-<Question id="math-core-gd-01-04-006" type="blank" points={3} tags="来源:1995考研数二, 考点:和式夹逼, 考点:统一估计">
-
-$\displaystyle\lim_{n\to\infty}\left(\frac1{n^2+n+1}+\frac2{n^2+n+2}+\cdots+\frac n{n^2+n+n}\right)=$ <Blank answer="1/2" kind="math" />。
-
-<Solution>
-
-**答案：** $\displaystyle\boxed{\frac12}$。
-
-**解题关键：** 设 $S_n=\sum_{k=1}^{n}\frac{k}{n^2+n+k}$。当 $1\le k\le n$ 时，分母均为 $n^2+O(n)$，可用同一对上下界处理全部加数。
-
-因为分子 $k>0$，由
-
-$$
- n^2+n+1\le n^2+n+k\le n^2+2n
-$$
-
-得到
-
-$$
-\frac{k}{n^2+2n}\le\frac{k}{n^2+n+k}\le\frac{k}{n^2+n+1}.
-$$
-
-逐项求和并代入 $\sum_{k=1}^n k=\frac{n(n+1)}2$，有
-
-$$
-\underbrace{\frac{n(n+1)}{2(n^2+2n)}}_{\longrightarrow\,1/2}
-\le S_n\le
-\underbrace{\frac{n(n+1)}{2(n^2+n+1)}}_{\longrightarrow\,1/2}.
-$$
-
-由夹逼定理，$S_n\to\boxed{1/2}$。
-
-<Callout type="idea" title="为什么这种夹逼有效？">
-
-关键不只是分母近似 $n^2$，而是**对所有 $1\le k\le n$ 都成立的统一界**。本题每一项的相对分母误差至多 $O(1/n)$，即使求和项数随 $n$ 增长，仍可整体夹逼。
+本题原来是因子的**平方**，所以取对数后系数为 $2\ln(1+k/n)$；并不是 $(\ln(1+k/n))^2$。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-01-04-007" type="essay" points={6} tags="来源:1998考研数一, 考点:黎曼和, 考点:含扰动分母">
+<Question id="core-1102-math-8c46a4-015" type="essay" points={12} tags="来源:2006年考研数学一、二, 科目:高等数学, 章节:数列极限的计算, 考点:递推数列收敛与幂指极限">
 
-求极限
+设数列 $\{x_n\}$ 满足 $0 < x_1 < \pi$，$x_{n+1} = \sin x_n (n = 1, 2, \cdots)$.
 
-$$
-\lim_{n\to\infty}\left\{
-\frac{\sin\frac\pi n}{n+1}
-+\frac{\sin\frac{2\pi}n}{n+\frac12}
-+\cdots+\frac{\sin\pi}{n+\frac1n}
-\right\}.
-$$
+(1) 证明 $\lim_{n \to \infty} x_n$ 存在，并求该极限；
+
+(2) 计算 $\lim_{n \to \infty} \left(\frac{x_{n+1}}{x_n}\right)^{\frac{1}{x_n^2}}$。
 
 <Solution>
 
-**参考答案：** $\displaystyle\boxed{\frac2\pi}$。
+**结论：** （1）$\displaystyle\boxed{x_n\to0}$；（2）$\displaystyle\boxed{e^{-1/6}}$。
 
-**整体思路：** 分母 $n+1/k$ 不是标准的黎曼和形式，但其中 $1/k$ 相比于 $n$ 是一致的小扰动。先证明扰动可以忽略，剩余部分就对应 $\int_0^1\sin(\pi x)\,\mathrm dx$。
+<Tabs items={['（1）证明收敛并求极限','（2）求幂指型极限']} defaultIndex={0}>
+  <Tab value="（1）证明收敛并求极限">
 
-<Tabs items={['解法一：非负项夹逼（推荐）','解法二：估计与标准和的误差']} defaultIndex={0}>
-  <Tab value="解法一：非负项夹逼（推荐）">
+    <Steps>
+      <Step>
 
-  记
+        ### 证明正性与严格递减性
 
-  $$
-  S_n=\sum_{k=1}^{n}\frac{\sin(k\pi/n)}{n+1/k}
-  =\frac1n\sum_{k=1}^n\frac{\sin(k\pi/n)}{1+1/(nk)}.
-  $$
+        已知 $0<x_1<\pi$。在 $(0,\pi)$ 上，$0<\sin x<x$，因此
 
-  对 $1\le k\le n$，有 $0<1/(nk)\le1/n$；又 $\sin(k\pi/n)\ge0$，故
+        $$
+        0<x_2=\sin x_1<x_1<\pi.
+        $$
 
-  $$
-  \frac{1}{1+1/n}\,\frac1n\sum_{k=1}^n\sin\frac{k\pi}n
-  \le S_n\le
-  \frac1n\sum_{k=1}^n\sin\frac{k\pi}n.
-  $$
+        由数学归纳法，
 
-  右侧是 $[0,1]$ 上的黎曼和，满足
+        $$
+        0<x_{n+1}=\sin x_n<x_n<\pi\quad(n\ge1).
+        $$
 
-  $$
-  \frac1n\sum_{k=1}^{n}\sin\left(\pi\frac kn\right)
-  \longrightarrow\int_0^1\sin(\pi x)\,\mathrm dx
-  =\left[-\frac{\cos(\pi x)}\pi\right]_0^1=\frac2\pi.
-  $$
+      </Step>
+      <Step>
 
-  左右两界同趋 $2/\pi$，所以 $S_n\to\boxed{2/\pi}$。
+        ### 单调有界确定极限存在
 
-</Tab>
-  <Tab value="解法二：估计与标准和的误差">
+        $\{x_n\}$ 严格递减、以 $0$ 为下界，故存在 $L\ge0$ 使 $x_n\to L$。
 
-  记 $R_n=\frac1n\sum_{k=1}^{n}\sin(k\pi/n)$。因 $|\sin(k\pi/n)|\le1$，
+      </Step>
+      <Step>
 
-  $$
-  \begin{aligned}
-  |S_n-R_n|
-  &\le\frac1n\sum_{k=1}^n
-    \left|\frac1{1+1/(nk)}-1\right|\\
-  &=\frac1n\sum_{k=1}^n\frac1{nk+1}
-  \le\frac1n\sum_{k=1}^n\frac1n=\frac1n.
-  \end{aligned}
-  $$
+        ### 根据递推式排除非零极限
 
-  因此 $S_n-R_n\to0$。而 $R_n\to\int_0^1\sin(\pi x)\,\mathrm dx=2/\pi$，故原极限为 $\boxed{2/\pi}$。
+        由正弦函数连续性，
 
-</Tab>
+        $$
+        L=\sin L.
+        $$
+
+        对任何 $L>0$ 都有 $\sin L<L$，与上式矛盾；故 $\boxed{L=0}$。
+
+      </Step>
+    </Steps>
+
+  </Tab>
+  <Tab value="（2）求幂指型极限">
+
+    <Steps>
+      <Step>
+
+        ### 用递推式化简目标表达式
+
+        $$
+        \left(\frac{x_{n+1}}{x_n}\right)^{1/x_n^2}
+        =\left(\frac{\sin x_n}{x_n}\right)^{1/x_n^2}.
+        $$
+
+        因 $x_n\to0^+$ 且 $\sin x_n/x_n>0$，可以取对数。
+
+      </Step>
+      <Step>
+
+        ### 找到对数的二阶主项
+
+        由 $\sin t/t=1-t^2/6+O(t^4)$，
+
+        $$
+        \ln\frac{\sin t}{t}
+        =\ln\left(1-\frac{t^2}{6}+O(t^4)\right)
+        =-\frac{t^2}{6}+O(t^4).
+        $$
+
+        令 $t=x_n$，得到
+
+        $$
+        \frac{1}{x_n^2}\ln\frac{\sin x_n}{x_n}\longrightarrow-\frac16.
+        $$
+
+      </Step>
+      <Step>
+
+        ### 利用指数函数连续性
+
+        原极限为
+
+        $$
+        \boxed{\exp\left(-\frac16\right)=e^{-1/6}}.
+        $$
+
+      </Step>
+    </Steps>
+
+  </Tab>
 </Tabs>
 
-<Callout type="warn" title="不能逐项忽略 $1/k$ 后直接作答">
+<Callout type="idea" title="递推与幂指极限的衔接">
 
-项数本身是 $n$，必须证明替换分母带来的**整个和式误差趋于零**。夹逼法和显式误差估计都完成了这一关键论证。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-01-04-008" type="blank" points={3} tags="来源:2002考研数二, 考点:根式三角恒等式, 考点:黎曼和">
-
-$\displaystyle\lim_{n\to\infty}\frac1n\left(\sqrt{1+\cos\frac\pi n}+\sqrt{1+\cos\frac{2\pi}n}+\cdots+\sqrt{1+\cos\frac{n\pi}n}\right)=$ <Blank answer="2*sqrt(2)/pi" kind="math" />。
-
-<Solution>
-
-**答案：** $\displaystyle\boxed{\frac{2\sqrt2}{\pi}}$。
-
-**第一步：处理平方根内的三角函数。** 由半角公式
-
-$$
-1+\cos\theta=2\cos^2\frac\theta2
-$$
-
-可得 $\sqrt{1+\cos\theta}=\sqrt2\left|\cos(\theta/2)\right|$。
-
-本题中 $\theta=k\pi/n\in[0,\pi]$，所以 $\cos(\theta/2)\ge0$，从而
-
-$$
-\sqrt{1+\cos\frac{k\pi}n}=\sqrt2\cos\frac{k\pi}{2n}.
-$$
-
-**第二步：识别黎曼和并计算积分。** 原式等于
-
-$$
-\frac{\sqrt2}{n}\sum_{k=1}^n\cos\left(\frac\pi2\frac kn\right)
-\longrightarrow\sqrt2\int_0^1\cos\frac{\pi x}{2}\,\mathrm dx.
-$$
-
-因此
-
-$$
-\sqrt2\left[\frac2\pi\sin\frac{\pi x}{2}\right]_0^1
-=\boxed{\frac{2\sqrt2}{\pi}}.
-$$
-
-<Callout type="warn" title="根号不等于直接开平方">
-
-$\sqrt{u^2}=|u|$，不是 $u$。这里能去掉绝对值，是因为**半角**始终落在 $[0,\pi/2]$。
+第二问不必估计 $x_n$ 的衰减速度；第一问已经证明 $x_n\to0$，因此可以直接把标准函数极限沿数列 $x_n$ 代入。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-01-04-009" type="blank" points={4} tags="来源:2012考研数二, 考点:黎曼和, 考点:反正切积分">
+<Question id="core-1102-math-8c46a4-017" type="single" points={4} tags="来源:2007年考研数学一、二, 科目:高等数学, 章节:数列极限的计算, 考点:二阶导数与数列发散">
 
-$\displaystyle\lim_{n\to\infty}n\left(\frac1{1+n^2}+\frac1{2^2+n^2}+\cdots+\frac1{n^2+n^2}\right)=$ <Blank answer="pi/4" kind="math" />。
+设函数 $f(x)$ 在 $(0, +\infty)$ 上具有二阶导数，且 $f''(x) > 0$，令 $u_n = f(n) (n = 1, 2, \cdots)$，则下列结论正确的是（ $\quad$ ）.
+
+<Option>若 $u_1 > u_2$，则 $\{u_n\}$ 必收敛</Option>
+<Option>若 $u_1 > u_2$，则 $\{u_n\}$ 必发散</Option>
+<Option>若 $u_1 < u_2$，则 $\{u_n\}$ 必收敛</Option>
+<Option correct>若 $u_1 < u_2$，则 $\{u_n\}$ 必发散</Option>
 
 <Solution>
 
-**答案：** $\displaystyle\boxed{\frac\pi4}$。
-
-**第一步：把分母里的 $n^2$ 提取出来。** 设原式为 $S_n$，则
-
-$$
-\begin{aligned}
-S_n
-&=n\sum_{k=1}^n\frac1{k^2+n^2}\\
-&=\frac1n\sum_{k=1}^n\frac1{1+(k/n)^2}.
-\end{aligned}
-$$
-
-**第二步：确定连续函数与区间。** 令 $f(x)=\frac1{1+x^2}$，它在 $[0,1]$ 上连续；上式就是以 $k/n$ 为取样点、网格宽度为 $1/n$ 的黎曼和。
-
-$$
-\lim_{n\to\infty}S_n
-=\int_0^1\frac{\mathrm dx}{1+x^2}
-=\left[\arctan x\right]_0^1
-=\boxed{\frac\pi4}.
-$$
-
-<Callout type="idea" title="快速识别标准形式">
-
-$\displaystyle\frac1n\sum_{k=1}^n f(k/n)\to\int_0^1f(x)\,\mathrm dx$ 的前提是 $f$ 在相应区间可积（连续时自动满足）。本题外部的 $n$ 与分母的 $n^2$ 合起来恰好产生 $1/n$。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-01-04-010" type="blank" points={4} tags="来源:2016考研数二, 考点:加权黎曼和, 考点:分部积分">
-
-$\displaystyle\lim_{n\to\infty}\frac1{n^2}\left(\sin\frac1n+2\sin\frac2n+\cdots+n\sin\frac nn\right)=$ <Blank answer="sin(1)-cos(1)" kind="math" />。
-
-<Solution>
-
-**答案：** $\displaystyle\boxed{\sin1-\cos1}$。
-
-**第一步：把系数 $k$ 也缩放成 $k/n$。**
-
-$$
-\frac1{n^2}\sum_{k=1}^n k\sin\frac kn
-=\frac1n\sum_{k=1}^n\left(\frac kn\right)\sin\frac kn.
-$$
-
-取 $f(x)=x\sin x$，由黎曼和定义，上式的极限等于 $\int_0^1x\sin x\,\mathrm dx$。
-
-**第二步：分部积分。** 取 $u=x,\ \mathrm dv=\sin x\,\mathrm dx$，有 $\mathrm du=\mathrm dx$，$v=-\cos x$，故
-
-$$
-\begin{aligned}
-\int_0^1x\sin x\,\mathrm dx
-&=\left[-x\cos x\right]_0^1+\int_0^1\cos x\,\mathrm dx\\
-&=-\cos1+\sin1
-=\boxed{\sin1-\cos1}.
-\end{aligned}
-$$
-
-<Callout type="idea" title="含 $k$ 权重的和式并不特殊">
-
-$\frac{k}{n^2}=\frac1n\cdot\frac kn$。把所有出现的 $k$ 尽量换成 $k/n$，就能把离散权重 $k$ 看作连续函数里的变量 $x$。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-01-04-011" type="essay" points={10} tags="来源:2017考研数一, 考点:黎曼和, 考点:分部积分">
-
-求极限
-
-$$
-\lim_{n\to\infty}\sum_{k=1}^n\frac{k}{n^2}\ln\left(1+\frac kn\right).
-$$
-
-<Solution>
-
-**参考答案：** $\displaystyle\boxed{\frac14}$。
-
-**解题路线：** 先识别连续函数 $f(x)=x\ln(1+x)$ 的黎曼和，再利用分部积分求定积分。
+**答案：D。** 由 $u_1<u_2$ 可以推出 $u_n\to+\infty$。
 
 <Steps>
   <Step>
 
-  ### 规范成黎曼和
+    ### 利用二阶导数的符号，得到斜率递增
 
-  $$
-  \sum_{k=1}^n\frac{k}{n^2}\ln\left(1+\frac kn\right)
-  =\frac1n\sum_{k=1}^n\underbrace{\frac kn\ln\left(1+\frac kn\right)}_{f(k/n)}.
-  $$
+    $f''(x)>0$ 说明 $f'$ 严格递增。若 $u_1<u_2$，即 $f(1)<f(2)$，由拉格朗日中值定理，存在 $\xi\in(1,2)$ 使
 
-  $f(x)=x\ln(1+x)$ 在 $[0,1]$ 上连续，所以
+    $$
+    f'(\xi)=\frac{f(2)-f(1)}{2-1}=u_2-u_1>0.
+    $$
 
-  $$
-  \lim_{n\to\infty}\frac1n\sum_{k=1}^nf(k/n)
-  =\int_0^1x\ln(1+x)\,\mathrm dx.
-  $$
-
-</Step>
+  </Step>
   <Step>
 
-  ### 分部积分并化简有理式
+    ### 将正斜率转化为发散下界
 
-  取 $u=\ln(1+x)$、$\mathrm dv=x\,\mathrm dx$，则
+    对任意整数 $n\ge2$，由 $f'$ 严格递增，区间 $[2,n]$ 上有 $f'(x)>f'(\xi)>0$。于是
 
-  $$
-  \begin{aligned}
-  I&=\int_0^1x\ln(1+x)\,\mathrm dx\\
-  &=\left[\frac{x^2}{2}\ln(1+x)\right]_0^1
-  -\frac12\int_0^1\frac{x^2}{1+x}\,\mathrm dx.
-  \end{aligned}
-  $$
+    $$
+    \begin{aligned}
+    u_n=f(n)
+    &=f(2)+\int_2^n f'(t)\,\mathrm dt\\
+    &\ge f(2)+(n-2)f'(\xi)\xrightarrow[n\to\infty]{}+\infty.
+    \end{aligned}
+    $$
 
-  使用多项式除法：
+    故选项 D 必定成立，同时 C 不成立。
 
-  $$
-  \frac{x^2}{1+x}=x-1+\frac1{1+x}.
-  $$
+  </Step>
+  <Step>
 
-  因此
+    ### 通过反例排除 A、B
 
-  $$
-  \int_0^1\frac{x^2}{1+x}\,\mathrm dx
-  =\left[\frac{x^2}2-x+\ln(1+x)\right]_0^1
-  =\ln2-\frac12.
-  $$
+    若 $u_1>u_2$，序列未必收敛，也未必发散：
 
-  回代可得
+    - 取 $f(x)=e^{-x}$，则 $f''(x)=e^{-x}>0$，$u_1>u_2$，但 $u_n=e^{-n}\to0$。
+    - 取 $f(x)=x^2-4x$，则 $f''(x)=2>0$，$f(1)=-3>f(2)=-4$，但 $u_n=n^2-4n\to+\infty$。
 
-  $$
-  I=\frac12\ln2-\frac12\left(\ln2-\frac12\right)
-  =\boxed{\frac14}.
-  $$
+    因此 A、B 都不是必然命题，**唯一正确选项是 D**。
 
-</Step>
+  </Step>
 </Steps>
 
-<Callout type="idea" title="遇到对数积分的处理顺序">
+<Callout type="idea" title="凸性问题的核心观察">
 
-先对 $x\ln(1+x)$ 做分部积分，让对数求导变成有理函数；然后对 $x^2/(1+x)$ **先除法再积分**，避免在代换中产生多余步骤。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-01-04-012" type="blank" points={5} tags="来源:2025考研数二, 考点:端点连续延拓, 考点:黎曼和">
-
-$\displaystyle\lim_{n\to\infty}\frac1{n^2}\left[\ln\frac1n+2\ln\frac2n+\cdots+(n-1)\ln\frac{n-1}{n}\right]=$ <Blank answer="-1/4" kind="math" />。
-
-<Solution>
-
-**答案：** $\displaystyle\boxed{-\frac14}$。
-
-**第一步：识别求和函数。** 令
-
-$$
-f(x)=\begin{cases}x\ln x,&0<x\le1,\\0,&x=0.\end{cases}
-$$
-
-由于 $\lim_{x\to0^+}x\ln x=0$，所以这样定义后 $f$ 在 $[0,1]$ 上连续。
-
-原式为
-
-$$
-\frac1n\sum_{k=1}^{n-1}\frac kn\ln\frac kn
-=\frac1n\sum_{k=1}^{n}f\left(\frac kn\right),
-$$
-
-因为额外补入的第 $n$ 项为 $f(1)=\ln1=0$，和式数值没有变化。
-
-**第二步：转为积分并处理左端点。**
-
-$$
-\begin{aligned}
-\lim_{n\to\infty}\frac1n\sum_{k=1}^{n}f(k/n)
-&=\int_0^1x\ln x\,\mathrm dx\\
-&=\left[\frac{x^2}{2}\ln x-\frac{x^2}{4}\right]_0^1.
-\end{aligned}
-$$
-
-其中 $\lim_{x\to0^+}x^2\ln x=0$，所以下限贡献为 $0$。故
-
-$$
-\int_0^1x\ln x\,\mathrm dx=\boxed{-\frac14}.
-$$
-
-<Callout type="warn" title="为什么可以用普通黎曼和定理？">
-
-不能因为 $\ln0$ 无定义就认为 $x\ln x$ 在零附近不可积。真正参与求和的是 $x\ln x$，它在 $x=0$ 存在**可去间断点**，补定义 $f(0)=0$ 后成为连续函数。
+$f''>0$ 表示斜率不断增大；只要找到一次**正的割线斜率**，往后的函数值便以至少线性的速度增长。若先出现负斜率，则不能决定后续是否转正。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-## 模型三：递推数列与隐式零点——不变区间、单调有界与固定点
+<Question id="core-1102-math-8c46a4-018" type="single" points={4} tags="来源:2008年考研数学一、二, 科目:高等数学, 章节:数列极限的计算, 考点:单调有界函数与复合数列">
 
-递推数列一般按“**确保有定义与区间不变 → 证明单调有界 → 求固定点**”推进。若题目涉及由方程定义的零点序列，则先分别证明每个零点存在且唯一，再比较相邻零点的位置。
-
-<Question id="math-core-gd-01-04-013" type="essay" points={5} tags="来源:1996考研数一, 考点:递推数列, 考点:单调有界">
-
-设 $x_1=10$，$x_{n+1}=\sqrt{6+x_n}\ (n=1,2,\cdots)$，试证数列 $\{x_n\}$ 的极限存在，并求此极限。
-
-<Solution>
-
-**参考答案：** $\{x_n\}$ 收敛，且 $\displaystyle\boxed{\lim_{n\to\infty}x_n=3}$。
-
-**第一步：确定不会逃离的区间。** 先算 $x_2=\sqrt{6+10}=4$。当 $x>3$ 时，
-
-$$
-\sqrt{6+x}>3\qquad\text{且}\qquad
-\sqrt{6+x}<x,
-$$
-
-因为后一个不等式等价于 $6+x<x^2$，即 $(x-3)(x+2)>0$。
-
-**第二步：归纳证明单调有界。** 由 $x_2=4>3$ 和以上比较可得
-
-$$
-3<x_{n+1}<x_n\qquad(n\ge2).
-$$
-
-因此从第二项开始递减，并以 $3$ 为下界；根据单调有界定理，极限 $L\ge3$ 存在。
-
-**第三步：由连续性解固定点方程。**
-
-$$
-L=\sqrt{6+L}
-\quad\Longrightarrow\quad
-L^2-L-6=(L-3)(L+2)=0.
-$$
-
-候选值为 $3,-2$，但 $L\ge3$，所以 $\boxed{L=3}$。
-
-<Callout type="warn" title="固定点方程不是收敛性证明">
-
-直接解 $L=\sqrt{6+L}$ 只能得到**可能的极限值**。必须先证明递推数列确实收敛，才能把 $n\to\infty$ 代入递推式。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-01-04-014" type="essay" points={8} tags="来源:2002考研数二, 考点:递推不变区间, 考点:单调有界">
-
-设 $0<x_1<3$，且
-
-$$
-x_{n+1}=\sqrt{x_n(3-x_n)}\qquad(n=1,2,\cdots).
-$$
-
-证明数列 $\{x_n\}$ 的极限存在，并求此极限。
-
-<Solution>
-
-**参考答案：** 极限存在，且 $\displaystyle\boxed{\lim_{n\to\infty}x_n=\frac32}$。
-
-**关键观察：** 初值可能位于 $3/2$ 上方，不能从 $x_1$ 起直接断言递增。应先证明**从第二项起**数列落在 $(0,3/2]$。
-
-<Steps>
-  <Step>
-
-  ### 确定从第二项起的不变区间
-
-  对 $0<t<3$，利用配方
-
-  $$
-  t(3-t)=\frac94-\left(t-\frac32\right)^2\in\left(0,\frac94\right],
-  $$
-
-  故 $0<\sqrt{t(3-t)}\le\frac32$。因此 $0<x_2\le\frac32$，且递推持续保持在 $(0,3/2]$。
-
-</Step>
-  <Step>
-
-  ### 检查增减性并证明极限存在
-
-  若 $0<x_n<3/2$，由于两边都为正，
-
-  $$
-  \begin{aligned}
-  x_{n+1}>x_n
-  &\iff x_n(3-x_n)>x_n^2\\
-  &\iff 3>2x_n.
-  \end{aligned}
-  $$
-
-  若 $x_n=3/2$，则 $x_{n+1}=3/2$。故从 $n=2$ 起数列单调不减，且上界为 $3/2$，从而存在极限 $L\in[x_2,3/2]$。
-
-</Step>
-  <Step>
-
-  ### 求极限并排除零根
-
-  $$
-  L=\sqrt{L(3-L)}
-  \quad\Longrightarrow\quad
-  L^2=L(3-L)
-  \quad\Longrightarrow\quad
-  L=0\ \text{或}\ L=\frac32.
-  $$
-
-  因 $L\ge x_2>0$，排除 $L=0$，得到 $\boxed{L=3/2}$。
-
-</Step>
-</Steps>
-
-<Callout type="idea" title="遇到递推式中的开方二次式">
-
-形如 $x_{n+1}=\sqrt{x_n(c-x_n)}$ 的递推，先利用 $x(c-x)\le c^2/4$ 确定像集，再比较 $x_{n+1}$ 与 $x_n$，通常比直接猜测全程单调更稳妥。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-01-04-015" type="essay" points={12} tags="来源:2006考研数一, 考点:递推数列收敛, 考点:幂指极限">
-
-设 $0<x_1<\pi$，$x_{n+1}=\sin x_n\ (n=1,2,\cdots)$。
-
-（1）证明 $\lim_{n\to\infty}x_n$ 存在，并求该极限；
-
-（2）计算
-
-$$
-\lim_{n\to\infty}\left(\frac{x_{n+1}}{x_n}\right)^{1/x_n^2}.
-$$
-
-<Solution>
-
-**参考答案：** （1）$\displaystyle\boxed{\lim_{n\to\infty}x_n=0}$；（2）$\displaystyle\boxed{e^{-1/6}}$。
-
-### （1）先证明收敛，再求极限
-
-对 $0<t<\pi$ 有 $0<\sin t<t$。由 $0<x_1<\pi$，归纳可得
-
-$$
-0<x_{n+1}=\sin x_n<x_n<\pi.
-$$
-
-因此 $\{x_n\}$ 正项严格递减，以下界 $0$ 为界，必收敛。设 $x_n\to L\ge0$，由正弦函数连续性，
-
-$$
-L=\sin L.
-$$
-
-由于对任意 $t\in(0,\pi)$ 均有 $\sin t<t$，而 $L\in[0,\pi)$，上述方程只可能有 $L=0$。故 $\boxed{x_n\to0}$。
-
-### （2）利用第（1）问处理 $1^\infty$ 型
-
-由递推式，原式变为
-
-$$
-Y_n=\left(\frac{\sin x_n}{x_n}\right)^{1/x_n^2}>0.
-$$
-
-<Tabs items={['解法一：取对数（推荐）','解法二：标准幂指极限']} defaultIndex={0}>
-  <Tab value="解法一：取对数（推荐）">
-
-  当 $t\to0$ 时，
-
-  $$
-  \frac{\sin t}{t}=1-\frac{t^2}{6}+O(t^4),\qquad
-  \ln\frac{\sin t}{t}=-\frac{t^2}{6}+O(t^4).
-  $$
-
-  由于 $x_n\to0$，可代入 $t=x_n$，得
-
-  $$
-  \ln Y_n=\frac{\ln(\sin x_n/x_n)}{x_n^2}
-  \longrightarrow-\frac16.
-  $$
-
-  指数函数连续，因此 $Y_n\to\boxed{e^{-1/6}}$。
-
-</Tab>
-  <Tab value="解法二：标准幂指极限">
-
-  在 $x_n\to0$ 的前提下，
-
-  $$
-  \frac{\sin x_n}{x_n}
-  =1-\frac{x_n^2}{6}+o(x_n^2).
-  $$
-
-  利用 $\bigl(1+c\,t+o(t)\bigr)^{1/t}\to e^c$（$t\to0^+$，底数为正），令 $t=x_n^2$、$c=-1/6$，立即得到 $e^{-1/6}$。
-
-</Tab>
-</Tabs>
-
-<Callout type="warn" title="第（2）问依赖第（1）问">
-
-只有知道 $x_n\to0$，才能把 $\ln(\sin t/t)$ 在 $t=0$ 的局部展开用于 $t=x_n$。不能仅凭底数趋于 $1$ 就把整个幂式当成 $1$。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-01-04-016" type="essay" points={11} tags="来源:2012考研数二, 考点:零点存在唯一, 考点:隐式数列极限">
-
-（1）证明：对每个整数 $n>1$，方程
-
-$$
-x^n+x^{n-1}+\cdots+x=1
-$$
-
-在 $\left(\frac12,1\right)$ 内有且仅有一个实根。
-
-（2）记此根为 $x_n$，证明 $\lim_{n\to\infty}x_n$ 存在，并求该极限。
-
-<Solution>
-
-**参考答案：** （1）每个 $n\ge2$ 有且仅有一个根 $x_n\in(1/2,1)$；（2）$\displaystyle\boxed{\lim_{n\to\infty}x_n=\frac12}$。
-
-### （1）存在性与唯一性必须分别证明
-
-令 $F_n(x)=\sum_{k=1}^{n}x^k-1$。它在 $[1/2,1]$ 上连续，并且
-
-$$
-F_n\left(\frac12\right)
-=\sum_{k=1}^n2^{-k}-1=-2^{-n}<0,
-\qquad F_n(1)=n-1>0.
-$$
-
-由介值定理，在 $(1/2,1)$ 内至少存在一根。另一方面，
-
-$$
-F_n'(x)=\sum_{k=1}^n kx^{k-1}>0\qquad(x\in(1/2,1)),
-$$
-
-故 $F_n$ 严格递增，零点至多一个。两者合并，得到唯一根 $x_n$。
-
-### （2）先比较相邻零点，再求极限
-
-<Steps>
-  <Step>
-
-  ### 比较 $x_{n+1}$ 与 $x_n$
-
-  因为 $F_n(x_n)=0$，且对 $x>0$ 有 $F_{n+1}(x)=F_n(x)+x^{n+1}$，所以
-
-  $$
-  F_{n+1}(x_n)=x_n^{n+1}>0.
-  $$
-
-  而 $F_{n+1}$ 严格递增，其唯一零点满足 $F_{n+1}(x_{n+1})=0$，因此必有 $x_{n+1}<x_n$。结合 $x_n>1/2$，说明 $\{x_n\}_{n\ge2}$ 递减有下界，极限 $L\ge1/2$ 存在。
-
-</Step>
-  <Step>
-
-  ### 改写根方程并控制幂项
-
-  使用有限等比和（$0<x_n<1$）：
-
-  $$
-  1=\sum_{k=1}^n x_n^k=\frac{x_n(1-x_n^n)}{1-x_n}
-  \quad\Longrightarrow\quad 2x_n-1=x_n^{n+1}.
-  $$
-
-  由于数列递减且 $x_2<1$，有 $0<x_n\le x_2<1$，于是
-
-  $$
-  0<x_n^{n+1}\le x_2^{n+1}\longrightarrow0.
-  $$
-
-  对等式 $2x_n-1=x_n^{n+1}$ 两边取极限，得 $2L-1=0$，即 $\boxed{L=1/2}$。
-
-</Step>
-</Steps>
-
-<Callout type="warn" title="不能直接把 $x_n^{n+1}$ 看成零">
-
-即使知道 $x_n<1$，因为底数 $x_n$ 也随 $n$ 变化，仍需给出**固定的**上界 $x_n\le x_2<1$，才能严格保证 $x_n^{n+1}\to0$。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-01-04-017" type="essay" points={11} tags="来源:2013考研数二, 考点:函数最值, 考点:隐式递推不等式">
-
-设 $f(x)=\ln x+\frac1x$。
-
-（1）求 $f(x)$ 的最小值；
-
-（2）设数列 $\{x_n\}$ 满足 $\ln x_n+\frac1{x_{n+1}}<1$，证明 $\lim_{n\to\infty}x_n$ 存在，并求该极限。
-
-<Solution>
-
-**参考答案：** （1）$\displaystyle\boxed{f_{\min}=1}$，在 $x=1$ 处取得；（2）$\displaystyle\boxed{\lim_{n\to\infty}x_n=1}$。
-
-### （1）求出后续证明要用的全局不等式
-
-函数定义域为 $x>0$，导数
-
-$$
-f'(x)=\frac1x-\frac1{x^2}=\frac{x-1}{x^2}.
-$$
-
-故 $f$ 在 $(0,1)$ 上递减、在 $(1,+\infty)$ 上递增；因此
-
-$$
-\boxed{\ln x+\frac1x\ge1\quad(x>0)},
-$$
-
-且等号当且仅当 $x=1$ 成立。
-
-### （2）借第（1）问证明单调有界
-
-题设含 $\ln x_n$，所以所有 $x_n>0$。结合第（1）问和已知不等式：
-
-$$
-\ln x_n+\frac1{x_{n+1}}<1
-\le\ln x_n+\frac1{x_n}.
-$$
-
-相减得到 $\frac1{x_{n+1}}<\frac1{x_n}$，即
-
-$$
-x_{n+1}>x_n.
-$$
-
-又因 $\frac1{x_{n+1}}>0$，从题设得 $\ln x_n<1$，所以 $x_n<e$。于是 $\{x_n\}$ **严格递增且有上界 $e$**，极限 $L$ 存在，并满足 $L\ge x_1>0$。
-
-由连续性，可对原不等式取极限（注意严格不等号取极限后只能变成非严格）：
-
-$$
-\ln L+\frac1L\le1.
-$$
-
-但第（1）问说明左侧总是 $\ge1$，故只能相等；等号仅在 $L=1$ 取得。因此
-
-$$
-\boxed{\lim_{n\to\infty}x_n=1}.
-$$
-
-<Callout type="idea" title="不显式给出 $x_{n+1}$ 也能证明收敛">
-
-先用一个**全局最值不等式**与含相邻项的不等式对照，得出序列的单调性；再从题设正项导出上界。这比强行把递推关系解成 $x_{n+1}=\varphi(x_n)$ 更直接。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-01-04-018" type="essay" points={10} tags="来源:2018考研数一, 考点:指数不等式, 考点:递推数列收敛">
-
-设 $x_1>0$，且
-
-$$
-x_ne^{x_{n+1}}=e^{x_n}-1\qquad(n=1,2,\cdots).
-$$
-
-证明数列 $\{x_n\}$ 收敛，并求 $\lim_{n\to\infty}x_n$。
-
-<Solution>
-
-**参考答案：** 数列收敛，且 $\displaystyle\boxed{\lim_{n\to\infty}x_n=0}$。
-
-**解题入口：** 递推关系中包含两个相邻项的指数。先把 $e^{x_{n+1}}$ 单独写出，再用 $e^t>1+t$ 与 $1-e^{-t}<t$ 确定正性、单调性。
-
-<Steps>
-  <Step>
-
-  ### 证明每一项为正
-
-  若 $x_n>0$，则 $e^{x_n}>1+x_n$，所以
-
-  $$
-  e^{x_{n+1}}=\frac{e^{x_n}-1}{x_n}>1.
-  $$
-
-  由指数函数严格递增，得 $x_{n+1}>0$。结合 $x_1>0$，归纳得所有项均为正。
-
-</Step>
-  <Step>
-
-  ### 证明递减，建立收敛性
-
-  对 $t>0$，有 $1-e^{-t}<t$，等价于 $e^t-1<te^t$。令 $t=x_n$，得到
-
-  $$
-  e^{x_{n+1}}=\frac{e^{x_n}-1}{x_n}<e^{x_n}.
-  $$
-
-  从而 $x_{n+1}<x_n$。所以数列正项递减，有极限 $L\ge0$。
-
-</Step>
-  <Step>
-
-  ### 求出唯一的非负固定点
-
-  由指数函数连续性，对题设递推式取极限，得到
-
-  $$
-  Le^L=e^L-1
-  \quad\Longleftrightarrow\quad
-  e^L(1-L)=1.
-  $$
-
-  令 $h(t)=e^t(1-t)$。有 $h(0)=1$，且
-
-  $$
-  h'(t)=-te^t<0\qquad(t>0).
-  $$
-
-  因此 $h(t)<1$ 对所有 $t>0$ 成立，唯一的非负解为 $L=0$。故 $\boxed{L=0}$。
-
-</Step>
-</Steps>
-
-<Callout type="warn" title="为什么不能只解极限方程？">
-
-题设只给递推关系，未先说明 $\{x_n\}$ 收敛。**正性与单调性**保证极限确实存在；然后才能合理地把极限代入方程。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-01-04-019" type="single" tags="来源:李林880, 考点:隐式递推不等式, 考点:单调有界">
-
-设正项数列 $\{x_n\}$ 满足
-
-$$
-x_{n+1}<2-\frac1{x_n}\qquad(n=1,2,\cdots),
-$$
-
-则（ ）。
-
-<Option>$\{x_n\}$ 收敛于 $0$</Option>
-<Option correct>$\{x_n\}$ 收敛于 $1$</Option>
-<Option>$\{x_n\}$ 收敛于 $\sqrt2$</Option>
-<Option>$\{x_n\}$ 发散</Option>
-
-<Solution>
-
-**正确选项：B。** 必有 $\displaystyle\boxed{x_n\to1}$。
-
-**第一步：从不等式推出单调性。** 对任意 $t>0$，由 $(t-1)^2\ge0$ 得
-
-$$
-t+\frac1t\ge2
-\quad\Longleftrightarrow\quad
-2-\frac1t\le t.
-$$
-
-取 $t=x_n$，联立已知 $x_{n+1}<2-1/x_n$，得到
-
-$$
-x_{n+1}<2-\frac1{x_n}\le x_n.
-$$
-
-故 $\{x_n\}$ 严格递减。
-
-**第二步：反推一个正下界。** 因为题目规定 $x_{n+1}>0$，而 $x_{n+1}<2-1/x_n$，所以必须有
-
-$$
-2-\frac1{x_n}>0\quad\Longrightarrow\quad x_n>\frac12.
-$$
-
-因此数列递减且以下界 $1/2$ 为界，存在极限 $L\ge1/2>0$。
-
-**第三步：把递推不等式传递到极限。** 取极限时严格小于只能变成小于等于：
-
-$$
-L\le2-\frac1L.
-$$
-
-因 $L>0$，两边乘以 $L$ 得
-
-$$
-L^2-2L+1\le0
-\quad\Longleftrightarrow\quad
-(L-1)^2\le0.
-$$
-
-平方数非负，故只能为零，得到 $\boxed{L=1}$。
-
-<Callout type="idea" title="不用求递推通项也能唯一确定极限">
-
-本题核心是 $2-1/t\le t$（$t>0$）。它既帮助证明递减，也使极限不等式收紧成 $(L-1)^2\le0$，强制 $L=1$。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-01-04-020" type="essay" tags="来源:李正元练习题, 考点:对数递推, 考点:等价无穷小">
-
-设 $x_1>0$，$x_{n+1}=\ln(1+x_n)$。
-
-（Ⅰ）求 $\displaystyle\lim_{n\to\infty}x_n$；
-
-（Ⅱ）求
-
-$$
-\lim_{n\to\infty}\frac{x_nx_{n+1}}{x_n-x_{n+1}}.
-$$
-
-<Solution>
-
-**参考答案：** （Ⅰ）$\displaystyle\boxed{\lim_{n\to\infty}x_n=0}$；（Ⅱ）$\displaystyle\boxed{2}$。
-
-### （Ⅰ）先确定 $x_n$ 的极限
-
-对所有 $t>0$，$0<\ln(1+t)<t$。以 $t=x_n$ 代入并归纳，有
-
-$$
-0<x_{n+1}=\ln(1+x_n)<x_n.
-$$
-
-因此 $\{x_n\}$ 正项递减，存在极限 $L\ge0$。由 $\ln(1+t)$ 连续，
-
-$$
-L=\ln(1+L).
-$$
-
-令 $h(t)=t-\ln(1+t)$，则 $h(0)=0$，且 $h'(t)=\frac{t}{1+t}>0$（$t>0$），所以 $h(t)$ 的唯一非负零点是 $0$。故 $\boxed{L=0}$。
-
-### （Ⅱ）抓住分母的二阶主项
-
-利用 $x_n\to0$，有
-
-$$
-\ln(1+x_n)=x_n-\frac{x_n^2}2+o(x_n^2),
-$$
-
-因此
-
-$$
-x_n-x_{n+1}=x_n-\ln(1+x_n)
-=\frac{x_n^2}2+o(x_n^2).
-$$
-
-与此同时，$x_{n+1}=\ln(1+x_n)\sim x_n$，故分子
-
-$$
-x_nx_{n+1}=x_n^2(1+o(1)).
-$$
-
-相除得
-
-$$
-\frac{x_nx_{n+1}}{x_n-x_{n+1}}
-=\frac{x_n^2(1+o(1))}{\frac{x_n^2}2(1+o(1))}
-\longrightarrow\boxed{2}.
-$$
-
-<Callout type="warn" title="分子和分母精度不同">
-
-分子只需要知道 $x_{n+1}\sim x_n$；分母却是两个一阶相同的量相减，必须展开 $\ln(1+x_n)$ 到**二阶**。若对分母粗略使用 $\ln(1+x_n)\sim x_n$，就会丢失决定答案的主项。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-01-04-021" type="essay" tags="来源:李林880, 考点:二阶线性递推, 考点:差分等比数列">
-
-（Ⅰ）设 $x_1=1$、$x_2=2$，且
-
-$$
-x_{n+2}=\frac12(3x_{n+1}-x_n)\qquad(n=1,2,\cdots),
-$$
-
-求 $\displaystyle\lim_{n\to\infty}x_n$。
-
-（Ⅱ）设 $x_1=1$、$x_2=2$，且
-
-$$
-x_{n+2}=\frac12(x_n+x_{n+1})\qquad(n=1,2,\cdots),
-$$
-
-求 $\displaystyle\lim_{n\to\infty}x_n$。
-
-<Solution>
-
-**参考答案：** （Ⅰ）$\displaystyle\boxed{3}$；（Ⅱ）$\displaystyle\boxed{\frac53}$。
-
-**统一突破口：** 两个递推式中的 $x_n$ 系数之和都为 $1$。令相邻差 $d_n=x_{n+1}-x_n$，可将二阶递推降为一阶等比递推，然后用望远镜求和恢复 $x_n$。
-
-<Tabs items={['（Ⅰ）公比为 1/2','（Ⅱ）公比为 -1/2']} defaultIndex={0}>
-  <Tab value="（Ⅰ）公比为 1/2">
-
-  根据递推式，
-
-  $$
-  \begin{aligned}
-  d_{n+1}&=x_{n+2}-x_{n+1}\\
-  &=\frac12(3x_{n+1}-x_n)-x_{n+1}\\
-  &=\frac12(x_{n+1}-x_n)=\frac12d_n.
-  \end{aligned}
-  $$
-
-  初始差 $d_1=x_2-x_1=1$，故 $d_n=(1/2)^{n-1}$。于是
-
-  $$
-  \begin{aligned}
-  x_n&=x_1+\sum_{k=1}^{n-1}d_k
-  =1+\sum_{k=0}^{n-2}\left(\frac12\right)^k\\
-  &=1+2\left(1-2^{-(n-1)}\right)
-  \longrightarrow\boxed{3}.
-  \end{aligned}
-  $$
-
-</Tab>
-  <Tab value="（Ⅱ）公比为 -1/2">
-
-  类似计算：
-
-  $$
-  \begin{aligned}
-  d_{n+1}&=\frac12(x_n+x_{n+1})-x_{n+1}\\
-  &=-\frac12(x_{n+1}-x_n)=-\frac12d_n.
-  \end{aligned}
-  $$
-
-  因 $d_1=1$，所以 $d_n=(-1/2)^{n-1}$，从而
-
-  $$
-  \begin{aligned}
-  x_n&=1+\sum_{k=0}^{n-2}\left(-\frac12\right)^k\\
-  &=1+\frac{1-(-1/2)^{n-1}}{1+1/2}\\
-  &=1+\frac23\left[1-\left(-\frac12\right)^{n-1}\right]
-  \longrightarrow\boxed{\frac53}.
-  \end{aligned}
-  $$
-
-</Tab>
-</Tabs>
-
-<Callout type="idea" title="推广到一般二阶递推">
-
-若 $x_{n+2}=p x_{n+1}+q x_n$ 且 $p+q=1$，则
-
-$$
-d_{n+1}=x_{n+2}-x_{n+1}=-q\,d_n.
-$$
-
-当 $|q|<1$ 时，$d_n$ 是衰减的等比数列，$x_n$ 的极限由初始值与等比级数直接确定。这常比求特征根再解通项更省步骤。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-01-04-022" type="essay" tags="来源:原创, 考点:Stolz定理, 考点:递推渐近速度">
-
-设 $x_1>0$，$x_{n+1}=\ln(1+x_n)$。已知 $x_n\to0$，进一步求
-
-$$
-\lim_{n\to\infty}n x_n.
-$$
-
-<Solution>
-
-**参考答案：** $\displaystyle\boxed{\lim_{n\to\infty}nx_n=2}$。
-
-**核心问题：** 仅知道 $x_n\to0$ 还不够；必须确定它以多快的速度趋于零。由于
-
-$$
-x_n-x_{n+1}=x_n-\ln(1+x_n)\sim\frac{x_n^2}{2},
-$$
-
-直接考察 $x_n$ 的差分会越来越小；改考察倒数 $u_n=1/x_n$，相邻差便接近一个非零常数。
-
-<Tabs items={['解法一：差分平均（推荐）','解法二：Stolz 定理']} defaultIndex={0}>
-  <Tab value="解法一：差分平均（推荐）">
-
-  由 $x_n>0$，定义 $u_n=1/x_n$。由于 $x_n\to0$，有
-
-  $$
-  \begin{aligned}
-  u_{n+1}-u_n
-  &=\frac1{\ln(1+x_n)}-\frac1{x_n}\\
-  &=\frac{x_n-\ln(1+x_n)}{x_n\ln(1+x_n)}
-  \longrightarrow\frac12,
-  \end{aligned}
-  $$
-
-  其中用到 $x-\ln(1+x)=\frac{x^2}2+o(x^2)$ 与 $\ln(1+x)=x+o(x)$。
-
-  把差分累加并除以 $n$：
-
-  $$
-  \frac{u_n}{n}
-  =\frac{u_1}{n}+\frac1n\sum_{k=1}^{n-1}(u_{k+1}-u_k)
-  \longrightarrow\frac12,
-  $$
-
-  因为收敛序列的算术平均也收敛到同一极限。于是
-
-  $$
-  nx_n=\frac n{u_n}=\frac1{u_n/n}\longrightarrow\boxed{2}.
-  $$
-
-</Tab>
-  <Tab value="解法二：Stolz 定理">
-
-  $x_n\to0^+$ 说明 $u_n=1/x_n\to+\infty$。对 $u_n/n$ 用 Stolz–Cesàro 定理（分母 $n$ 严格递增且趋无穷）：
-
-  $$
-  \lim_{n\to\infty}\frac{u_n}{n}
-  =\lim_{n\to\infty}\frac{u_{n+1}-u_n}{(n+1)-n}
-  =\frac12.
-  $$
-
-  所以 $nx_n=n/u_n\to\boxed{2}$。
-
-</Tab>
-</Tabs>
-
-<Callout type="idea" title="二次差分对应 $1/n$ 的收敛速度">
-
-一般地，若 $x_n>0$、$x_n\to0$ 且 $x_n-x_{n+1}\sim c x_n^2$（$c>0$），又有 $x_{n+1}/x_n\to1$，则
-
-$$
-\frac1{x_{n+1}}-\frac1{x_n}
-=\frac{x_n-x_{n+1}}{x_nx_{n+1}}\to c,
-\qquad nx_n\to\frac1c.
-$$
-
-本题 $c=1/2$，故结果为 $2$。
-
-</Callout>
-
-</Solution>
-</Question>
-
-## 模型四：积分与数列交织——区间估计、特殊和及比值夹逼
-
-处理“离散和减连续积分”时，要把相邻项之差化为**单个单位区间上的积分误差**；证明收敛一般优先使用单调有界准则。
-
-<Question id="math-core-gd-01-04-023" type="essay" points={6} tags="来源:1999考研数二, 考点:和积分比较, 考点:单调有界">
-
-设 $f(x)$ 在 $[0,+\infty)$ 上连续、非负且单调减少，定义
-
-$$
-a_n=\sum_{k=1}^n f(k)-\int_1^n f(x)\,\mathrm dx\qquad(n=1,2,\cdots).
-$$
-
-证明数列 $\{a_n\}$ 的极限存在。
-
-<Solution>
-
-**参考结论：** $\{a_n\}$ **单调不增且有下界 $0$**，因此收敛。
-
-<Steps>
-  <Step>
-
-  ### 利用相邻项之差证明单调性
-
-  $$
-  \begin{aligned}
-  a_{n+1}-a_n
-  &=\left(\sum_{k=1}^{n+1}f(k)-\int_1^{n+1}f(x)\,\mathrm dx\right)
-  -\left(\sum_{k=1}^nf(k)-\int_1^nf(x)\,\mathrm dx\right)\\
-  &=f(n+1)-\int_n^{n+1}f(x)\,\mathrm dx.
-  \end{aligned}
-  $$
-
-  因为 $f$ 单调减少，所以 $x\in[n,n+1]$ 时 $f(x)\ge f(n+1)$。于是
-
-  $$
-  \int_n^{n+1}f(x)\,\mathrm dx\ge f(n+1)
-  \quad\Longrightarrow\quad a_{n+1}-a_n\le0.
-  $$
-
-  故 $\{a_n\}$ 单调不增。
-
-</Step>
-  <Step>
-
-  ### 用积分矩形比较建立下界
-
-  对 $k=1,\ldots,n-1$，单调性还给出
-
-  $$
-  \int_k^{k+1}f(x)\,\mathrm dx\le f(k).
-  $$
-
-  累加得
-
-  $$
-  \int_1^nf(x)\,\mathrm dx\le\sum_{k=1}^{n-1}f(k).
-  $$
-
-  因而
-
-  $$
-  a_n=\sum_{k=1}^nf(k)-\int_1^nf(x)\,\mathrm dx
-  \ge f(n)\ge0.
-  $$
-
-  所以数列有下界 $0$。
-
-</Step>
-  <Step>
-
-  ### 应用单调有界定理
-
-  已证 $a_{n+1}\le a_n$ 且 $a_n\ge0$，因此 $\lim_{n\to\infty}a_n$ 存在且为非负有限数。
-
-</Step>
-</Steps>
-
-<Callout type="idea" title="把和积分之差看成每段矩形面积误差">
-
-对递减函数，区间 $[k,k+1]$ 上的积分夹在 $f(k+1)$ 与 $f(k)$ 之间。由此既能判定**相邻误差的符号**，又能找到**整个误差和的下界**，不必分别估算无穷和与广义积分。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-01-04-024" type="essay" points={10} tags="来源:2011考研数一, 考点:积分不等式, 考点:调和和收敛">
-
-（1）证明对任意正整数 $n$，均有
-
-$$
-\frac1{n+1}<\ln\left(1+\frac1n\right)<\frac1n.
-$$
-
-（2）令
-
-$$
-a_n=1+\frac12+\cdots+\frac1n-\ln n\qquad(n=1,2,\cdots),
-$$
-
-证明数列 $\{a_n\}$ 收敛。
-
-<Solution>
-
-**参考结论：** （1）两侧严格不等式对所有 $n\ge1$ 成立；（2）$\{a_n\}$ **严格递减且恒正**，因此收敛。
-
-### （1）由单调函数的积分估计证明
-
-利用对数的积分表示：
-
-$$
-\ln\left(1+\frac1n\right)
-=\ln(n+1)-\ln n=\int_n^{n+1}\frac{\mathrm dx}{x}.
-$$
-
-由于 $1/x$ 在 $(0,+\infty)$ 上严格递减，当 $n<x<n+1$ 时，
-
-$$
-\frac1{n+1}<\frac1x<\frac1n.
-$$
-
-对 $[n,n+1]$ 积分，区间长度为 $1$，于是
-
-$$
-\boxed{\frac1{n+1}<\ln\left(1+\frac1n\right)<\frac1n}.
-$$
-
-### （2）分别证明递减性与下界
-
-**单调性：** 直接计算相邻项之差：
-
-$$
-\begin{aligned}
- a_{n+1}-a_n
- &=\frac1{n+1}-[\ln(n+1)-\ln n]\\
- &=\frac1{n+1}-\ln\left(1+\frac1n\right)<0,
-\end{aligned}
-$$
-
-最后一步正是第（1）问给出的左侧不等式。因此 $a_n$ 严格递减。
-
-**下界：** 对 $n\ge2$，$1/x$ 在每个区间 $[k,k+1]$ 上递减，故
-
-$$
-\ln n=\sum_{k=1}^{n-1}\int_k^{k+1}\frac{\mathrm dx}{x}
-<\sum_{k=1}^{n-1}\frac1k.
-$$
-
-从而
-
-$$
-a_n=\sum_{k=1}^n\frac1k-\ln n>\frac1n>0.
-$$
-
-$n=1$ 时 $a_1=1>0$，也满足正性。所以整个数列以下界 $0$ 为界。
-
-由单调有界定理，$\boxed{\{a_n\}\text{ 收敛}}$。
-
-<Callout type="idea" title="这一题与欧拉常数的关系">
-
-$\displaystyle a_n=\sum_{k=1}^n\frac1k-\ln n$ 的极限是**欧拉–马歇罗尼常数** $\gamma$。本题要求的是证明极限存在，并不要求计算 $\gamma$ 的数值；以单调性和下界即可完成完整证明。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-01-04-025" type="essay" points={10} tags="来源:2019考研数一, 考点:含参积分, 考点:递推与夹逼">
-
-设
-
-$$
-a_n=\int_0^1x^n\sqrt{1-x^2}\,\mathrm dx\qquad(n=0,1,2,\ldots).
-$$
-
-（1）证明数列 $\{a_n\}$ 单调减少，并证明对 $n\ge2$，
-
-$$
-a_n=\frac{n-1}{n+2}a_{n-2}.
-$$
-
-（2）求 $\displaystyle\lim_{n\to\infty}\frac{a_n}{a_{n-1}}$。
-
-<Solution>
-
-**参考答案：**（1）$a_n>0$ 且 $a_{n+1}<a_n$，递推关系成立；（2）$\boxed{1}$。
-
-### （1）先证单调，再推递推式
-
-**第一步：比较相邻积分。** 当 $0<x<1$ 时，$x^{n+1}<x^n$，且 $\sqrt{1-x^2}>0$。因此
-
-$$
-a_{n+1}=\int_0^1x^{n+1}\sqrt{1-x^2}\,\mathrm dx
-<\int_0^1x^n\sqrt{1-x^2}\,\mathrm dx=a_n.
-$$
-
-每项的被积函数非负且不恒为零，所以 $a_n>0$。这两条性质是第（2）问夹逼的基础。
-
-**第二步：分部积分构造相隔两项的关系。** 对 $n\ge2$，选取
-
-$$
-u=x^{n-1},\qquad
-\mathrm dv=x\sqrt{1-x^2}\,\mathrm dx
-=-\frac13\mathrm d(1-x^2)^{3/2}.
-$$
-
-分部积分的边界项 $x^{n-1}(1-x^2)^{3/2}\big|_0^1=0$，于是
-
-$$
-\begin{aligned}
-a_n
-&=\frac{n-1}{3}\int_0^1x^{n-2}(1-x^2)^{3/2}\,\mathrm dx\\
-&=\frac{n-1}{3}\int_0^1x^{n-2}(1-x^2)\sqrt{1-x^2}\,\mathrm dx\\
-&=\frac{n-1}{3}(a_{n-2}-a_n).
-\end{aligned}
-$$
-
-移项得到
-
-$$
-\boxed{(n+2)a_n=(n-1)a_{n-2}}.
-$$
-
-### （2）夹逼相邻项的比值
-
-由于 $0<a_n<a_{n-1}<a_{n-2}$（$n\ge2$），有
-
-$$
-\frac{a_n}{a_{n-2}}
-=\frac{a_n}{a_{n-1}}\frac{a_{n-1}}{a_{n-2}}
-\le\frac{a_n}{a_{n-1}}\le1.
-$$
-
-把第（1）问的递推式代入左端：
-
-$$
-\frac{n-1}{n+2}
-\le\frac{a_n}{a_{n-1}}\le1.
-$$
-
-两端都趋于 $1$，由夹逼准则，
-
-$$
-\boxed{\lim_{n\to\infty}\frac{a_n}{a_{n-1}}=1}.
-$$
-
-<Callout type="idea" title="为什么不必求出积分通项？">
-
-题目只要求**相邻项之比**。即使能通过 Beta 函数或递推乘积写出 $a_n$，也没有必要。已知 $a_n$ 正且递减时，若可计算相隔两项之比并证明它趋于 $1$，就可以直接夹逼相邻项之比。
-
-</Callout>
-
-</Solution>
-</Question>
-
-## 模型五：数列命题与反例——复合映射、凸性和连续反函数
-
-判别全称命题时，先寻找可以直接推出结论的充分条件，再用**明确的数列或函数反例**否定其余选项。
-
-<Question id="math-core-gd-01-04-026" type="single" points={4} tags="来源:2007考研数一, 考点:凸函数, 考点:数列发散">
-
-设函数 $f(x)$ 在 $(0,+\infty)$ 上具有二阶导数，且 $f''(x)>0$。令 $u_n=f(n)$（$n=1,2,\ldots$），则下列结论正确的是（ ）。
-
-<Option>若 $u_1>u_2$，则 $\{u_n\}$ 必收敛</Option>
-<Option>若 $u_1>u_2$，则 $\{u_n\}$ 必发散</Option>
-<Option>若 $u_1<u_2$，则 $\{u_n\}$ 必收敛</Option>
-<Option correct>若 $u_1<u_2$，则 $\{u_n\}$ 必发散</Option>
-
-<Solution>
-
-**正确选项：D。** 条件 $u_1<u_2$ 能推出 $u_n\to+\infty$，而 $u_1>u_2$ 时两种情形都可能出现。
-
-**第一步：理解二阶导数条件。** $f''(x)>0$ 意味着 $f'(x)$ 严格递增，即函数的切线斜率不断增大。
-
-**第二步：若 $f(2)>f(1)$，证明以后持续增长。** 根据拉格朗日中值定理，存在 $\xi\in(1,2)$ 使
-
-$$
-f'(\xi)=f(2)-f(1)>0.
-$$
-
-又因 $f'$ 严格递增，所以对 $x\ge2$，$f'(x)>f'(\xi)>0$。进一步由中值定理，
-
-$$
-f(n)-f(2)\ge (n-2)f'(\xi),\qquad n\ge2.
-$$
-
-因此
-
-$$
-u_n=f(n)\ge f(2)+(n-2)f'(\xi)\xrightarrow[n\to\infty]{}+\infty.
-$$
-
-这证明 D 一定正确，同时 C 必错。
-
-**第三步：否定 A、B。** 两个函数都满足 $f''>0$、$f(1)>f(2)$，但结果不同：
-
-- $f(x)=e^{-x}$：$f(n)\to0$，所以 B 不成立。
-- $f(x)=(x-4)^2$：$f(1)=9>4=f(2)$，但 $f(n)\to+\infty$，所以 A 不成立。
-
-<Callout type="idea" title="凸性与差分">
-
-凸性意味着相邻差 $f(n+1)-f(n)$ 随 $n$ 增大而增大。**若已经出现一个正差分，以后差分都至少为这个正数**，数列必发散；出现负差分时则无法判定远期走向。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-01-04-027" type="single" points={4} tags="来源:2008考研数一, 考点:单调有界定理, 考点:复合数列">
-
-设函数 $f(x)$ 在 $(-\infty,+\infty)$ 内单调有界，$\{x_n\}$ 为数列，则下列命题正确的是（ ）。
+设函数 $f(x)$ 在 $(-\infty, +\infty)$ 内单调有界，$\{x_n\}$ 为数列，则下列命题正确的是（ $\quad$ ）.
 
 <Option>若 $\{x_n\}$ 收敛，则 $\{f(x_n)\}$ 收敛</Option>
 <Option correct>若 $\{x_n\}$ 单调，则 $\{f(x_n)\}$ 收敛</Option>
@@ -1692,126 +638,1115 @@ $$
 
 <Solution>
 
-**正确选项：B。** 核心是“**复合后仍单调，再利用有界性**”；题目没有给出 $f$ 连续或严格单调，不能擅自增添这些条件。
+**答案：B。** 复合数列的单调有界性，来自内外两层各自的单调性与外层的有界性。
 
-**证明 B：** 假设 $\{x_n\}$ 单调。不论 $f$ 是单调递增还是单调递减，复合数列 $\{f(x_n)\}$ 总具有某一个确定的单调方向。又 $f$ 在整个实数轴上有界，故 $\{f(x_n)\}$ 有界。由单调有界定理，$\{f(x_n)\}$ 必收敛。
+<Steps>
+  <Step>
 
-**排除其他选项：**
+    ### 证明 B 的充分性
 
-- **A 错：** 取阶跃函数 $f(t)=0$（$t<0$），$f(t)=1$（$t\ge0$），以及 $x_n=(-1)^n/n$。虽然 $x_n\to0$，但 $f(x_n)$ 在 $0,1$ 间交替，故不收敛。关键是 $f$ 可能在 $0$ 处不连续。
-- **C 错：** 取常值函数 $f(t)\equiv0$，$x_n=(-1)^n$。则 $f(x_n)$ 收敛，而 $x_n$ 不收敛。
-- **D 错：** 沿用上例，$f(x_n)\equiv0$ 当然单调，但 $x_n$ 仍不收敛。
+    假设 $\{x_n\}$ 单调。若 $f$ 单调递增，则 $f(x_n)$ 与 $x_n$ 同向单调；若 $f$ 单调递减，则 $f(x_n)$ 与 $x_n$ 反向单调。无论哪种组合，$\{f(x_n)\}$ 都是单调数列。
 
-<Callout type="warn" title="区分连续、单调、严格单调">
+    又因为 $f$ 在整个实数域有界，存在 $M>0$，使 $|f(x_n)|\le M$ 对每个 $n$ 成立。因此 $\{f(x_n)\}$ 单调且有界，必收敛。
 
-从 $x_n\to a$ 推出 $f(x_n)\to f(a)$ 通常需要 $f$ 在 $a$ 连续；从 $f(x_n)$ 收敛反推 $x_n$ 收敛，还需要检查 $f$ 的单射性、反函数连续性及值域边界。**单调有界**本身不足以完成这两类逆推。
+  </Step>
+  <Step>
+
+    ### A 错在“收敛”不保证经过不连续点时函数值收敛
+
+    取单调有界函数
+
+    $$
+    f(x)=\begin{cases}0,&x\le0,\\1,&x>0,\end{cases}
+    \qquad x_n=\frac{(-1)^n}{n}.
+    $$
+
+    虽然 $x_n\to0$，但 $f(x_n)$ 在 $0$ 和 $1$ 之间交替，故不收敛。这里不能未经检查便套用连续函数的极限运算法则。
+
+  </Step>
+  <Step>
+
+    ### C、D 都可由常值函数否定
+
+    取严格递增且有界的函数 $f(x)=\arctan x$，并令 $x_n=n$，则 $f(x_n)=\arctan n$ 单调递增且收敛到 $\pi/2$，但 $x_n=n\to+\infty$ 不收敛于有限值。故 C、D 同时错误。
+
+    **综上选 B。**
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="不要把单调函数等同于连续函数">
+
+单调函数可能有跳跃间断点；题目未要求 $f$ 连续，所以“$x_n$ 收敛 $\Rightarrow f(x_n)$ 收敛”一般不成立。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-01-04-028" type="single" points={5} tags="来源:2022考研数一, 考点:复合函数极限, 考点:反函数连续性">
+<Question id="core-1102-math-8c46a4-019" type="essay" points={10} tags="来源:2011年考研数学一、二, 科目:高等数学, 章节:数列极限的计算, 考点:调和数列与对数估计">
 
-设数列 $\{x_n\}$ 满足 $-\frac\pi2\le x_n\le\frac\pi2$，则（ ）。
+(1) 证明：对任意的正整数 $n$，都有 $\frac{1}{n+1} < \ln\left(1+\frac{1}{n}\right) < \frac{1}{n}$ 成立。
 
-<Option>若 $\lim_{n\to\infty}\cos(\sin x_n)$ 存在，则 $\lim_{n\to\infty}x_n$ 存在</Option>
-<Option>若 $\lim_{n\to\infty}\sin(\cos x_n)$ 存在，则 $\lim_{n\to\infty}x_n$ 存在</Option>
-<Option>若 $\lim_{n\to\infty}\cos(\sin x_n)$ 存在，则 $\lim_{n\to\infty}\sin x_n$ 存在，但 $\lim_{n\to\infty}x_n$ 不一定存在</Option>
-<Option correct>若 $\lim_{n\to\infty}\sin(\cos x_n)$ 存在，则 $\lim_{n\to\infty}\cos x_n$ 存在，但 $\lim_{n\to\infty}x_n$ 不一定存在</Option>
+(2) 设 $a_n = 1 + \frac{1}{2} + \cdots + \frac{1}{n} - \ln n (n = 1, 2, \cdots)$，证明数列 $\{a_n\}$ 收敛。
 
 <Solution>
 
-**正确选项：D。** 一层复合函数的极限能否反推出内层的极限，取决于**外层函数在内层取值区间上能否连续求反函数**。
+**结论：** (1) 对每个正整数 $n$，所给严格不等式成立；(2) $a_n$ 单调递减且有下界，因而收敛。
 
-**第一步：研究 $\sin(\cos x_n)$。** 由题设
+<Steps>
+  <Step>
 
-$$
--\frac\pi2\le x_n\le\frac\pi2
-\quad\Longrightarrow\quad y_n=\cos x_n\in[0,1].
-$$
+    ### 第一问：把对数写为定积分
 
-$\sin t$ 在 $[0,1]$ 上严格递增，且存在连续反函数 $\arcsin$。若 $\sin y_n\to L$，则 $L\in[0,\sin1]$，并且
+    利用牛顿—莱布尼茨公式，
 
-$$
-y_n=\arcsin(\sin y_n)\longrightarrow\arcsin L.
-$$
+    $$
+    \ln\left(1+\frac1n\right)
+    =\int_n^{n+1}\frac1t\,\mathrm dt.
+    $$
 
-所以 $\cos x_n$ 必收敛。
+    因为 $1/t$ 在 $t>0$ 上严格递减，当 $n<t<n+1$ 时，
 
-**第二步：为什么 $x_n$ 仍不必收敛？** 取任意 $0<a<\pi/2$，令
+    $$
+    \frac1{n+1}<\frac1t<\frac1n.
+    $$
 
-$$
-x_n=(-1)^n a.
-$$
+    在 $[n,n+1]$ 上积分，区间长度为 $1$，于是
 
-此时 $x_n$ 在 $a$ 与 $-a$ 间振荡，而 $\cos x_n=\cos a$、$\sin(\cos x_n)=\sin(\cos a)$ 均为常数，故 B 不成立，D 中“$x_n$ 不一定收敛”得到证实。
+    $$
+    \boxed{\frac1{n+1}<\ln\left(1+\frac1n\right)<\frac1n}.
+    $$
 
-**第三步：同一反例排除 A、C。** 对上述 $x_n$，
+  </Step>
+  <Step>
 
-$$
-\sin x_n=(-1)^n\sin a
-$$
+    ### 第二问：用相邻两项差证明单调性
 
-不收敛，但
+    记 $H_n=\sum_{k=1}^n\frac1k$，则 $a_n=H_n-\ln n$。计算得
 
-$$
-\cos(\sin x_n)=\cos(\sin a)
-$$
+    $$
+    \begin{aligned}
+    a_{n+1}-a_n
+    &=\frac1{n+1}-\ln(n+1)+\ln n\\
+    &=\frac1{n+1}-\ln\left(1+\frac1n\right)<0.
+    \end{aligned}
+    $$
 
-为常数。故 A、C 都不能成立。
+    因而 $\{a_n\}$ 严格递减。
 
-<Callout type="idea" title="判断复合数列极限的两步法">
+  </Step>
+  <Step>
 
-先求内层值域，再问外层函数在该值域上是否严格单调且有连续反函数。**在 $[0,1]$ 上的 $\sin$ 可以反推；在 $[-1,1]$ 上的 $\cos$ 因偶对称而无法反推正负号。**
+    ### 第二问：由积分比较给出明确下界
+
+    将第一问的右侧不等式对 $k=1,\ldots,n$ 累加：
+
+    $$
+    \ln(n+1)
+    =\sum_{k=1}^{n}\ln\left(1+\frac1k\right)
+    <\sum_{k=1}^n\frac1k=H_n.
+    $$
+
+    故
+
+    $$
+    a_n=H_n-\ln n
+    >\ln(n+1)-\ln n>0.
+    $$
+
+    $\{a_n\}$ 下有界，结合严格递减性，由单调有界定理知存在有限极限。
+
+  </Step>
+</Steps>
+
+<Callout type="info" title="延伸理解">
+
+本题构造的 $a_n=1+\frac12+\cdots+\frac1n-\ln n$ 收敛到欧拉—马歇罗尼常数 $\gamma$。考场只需证明极限存在，不必求其数值。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-01-04-029" type="single" points={5} tags="来源:2024考研数二, 考点:连续反函数, 考点:发散数列">
+<Question id="core-1102-math-8c46a4-020" type="single" points={4} tags="来源:2012年考研数学二, 科目:高等数学, 章节:数列极限的计算, 考点:正项级数部分和与数列收敛">
 
-已知数列 $\{a_n\}$ 满足 $a_n\ne0$。若 $\{a_n\}$ 发散，则（ ）。
+设 $a_n > 0 (n = 1, 2, \cdots)$，$S_n = a_1 + \cdots + a_n$，则数列 $\{S_n\}$ 有界是数列 $\{a_n\}$ 收敛的（ $\quad$ ）.
 
-<Option>$\left\{a_n+\frac1{a_n}\right\}$ 发散</Option>
-<Option>$\left\{a_n-\frac1{a_n}\right\}$ 发散</Option>
-<Option>$\left\{e^{a_n}+\frac1{e^{a_n}}\right\}$ 发散</Option>
-<Option correct>$\left\{e^{a_n}-\frac1{e^{a_n}}\right\}$ 发散</Option>
+<Option>充分必要条件</Option>
+<Option correct>充分非必要条件</Option>
+<Option>必要充分条件</Option>
+<Option>既非充分也非必要条件</Option>
 
 <Solution>
 
-**正确选项：D。** 寻找能够从函数值唯一恢复自变量、且恢复运算连续的函数。
+**答案：B，充分非必要条件。** 注意被比较的两件事是“部分和有界”与“通项数列收敛”。
 
-### 证明 D 一定成立
+<Steps>
+  <Step>
 
-令
+    ### 证明充分性
 
-$$
-H(t)=e^t-e^{-t}.
-$$
+    由于每项 $a_n>0$，部分和满足
 
-则 $H'(t)=e^t+e^{-t}>0$，并且 $H(t)$ 在 $t\to\pm\infty$ 时分别趋于 $\pm\infty$。所以 $H$ 是 $\mathbb R\to\mathbb R$ 的连续严格递增双射，反函数 $H^{-1}$ 在 $\mathbb R$ 上连续。
+    $$
+    S_{n+1}-S_n=a_{n+1}>0,
+    $$
 
-反设 $H(a_n)=e^{a_n}-e^{-a_n}$ 收敛于有限值 $L$。由反函数的连续性，
+    故 $\{S_n\}$ 严格递增。若它还有上界，则由单调有界定理，存在有限的 $S$，使 $S_n\to S$。
 
-$$
-a_n=H^{-1}(H(a_n))\longrightarrow H^{-1}(L),
-$$
+    对 $n\ge2$，
 
-与 $\{a_n\}$ 发散矛盾。因而 D 正确。
+    $$
+    a_n=S_n-S_{n-1}\xrightarrow[n\to\infty]{}S-S=0.
+    $$
 
-### 为其余三项构造反例
+    因此部分和有界必然推出 $\{a_n\}$ 收敛，且其极限只能为 $0$。
 
-- **A：** $a_{2n-1}=2$，$a_{2n}=\tfrac12$。$a_n$ 发散，但 $a_n+1/a_n\equiv\tfrac52$。
-- **B：** $a_{2n-1}=2$，$a_{2n}=-\tfrac12$。$a_n$ 发散，但 $a_n-1/a_n\equiv\tfrac32$。
-- **C：** $a_n=(-1)^n$。$a_n$ 发散，但 $e^{a_n}+e^{-a_n}\equiv e+e^{-1}$。
+  </Step>
+  <Step>
 
-<Callout type="idea" title="抽象命题与本题的联系">
+    ### 构造反例证明非必要性
 
-若 $H$ 在整个实数域上可逆，且 $H^{-1}$ 在每个可能的有限极限值处连续，那么 $H(a_n)$ 收敛必然推出 $a_n$ 收敛。判断题中各变换时，**双射和反函数连续**比单纯讨论导数符号更有决定性。
+    取 $a_n=1$（满足 $a_n>0$），则 $a_n\to1$，但
+
+    $$
+    S_n=\sum_{k=1}^n1=n\xrightarrow[n\to\infty]{}+\infty.
+    $$
+
+    因而“通项收敛”不能推出“部分和有界”，必要性不成立。
+
+  </Step>
+  <Step>
+
+    ### 对应条件关系
+
+    $$
+    \{S_n\}\text{ 有界}\Longrightarrow a_n\to0
+    \Longrightarrow\{a_n\}\text{ 收敛},
+    $$
+
+    但逆向推论失败，所以答案为 **B**。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="部分和有界不等于通项有界">
+
+即便 $0<a_n\le1$ 对所有 $n$ 成立，也不能保证 $\{S_n\}$ 有界，例如 $a_n=1/n$。关键是**正项部分和的累积量**。
 
 </Callout>
 
 </Solution>
+
+</Question>
+
+<Question id="core-1102-math-8c46a4-021" type="blank" points={4} tags="来源:2012年考研数学二, 科目:高等数学, 章节:数列极限的计算, 考点:含参求和极限与定积分">
+
+$\lim_{n \to \infty} n \left(\frac{1}{1+n^2} + \frac{1}{2^2+n^2} + \cdots + \frac{1}{n^2+n^2}\right) =$ <Blank answer="((pi)/(4))" kind="math" />。
+
+<Solution>
+
+**答案：** $\displaystyle\boxed{\frac\pi4}$。
+
+<Steps>
+  <Step>
+
+    ### 化成等间距的黎曼和
+
+    按通项 $k^2+n^2$ 统一写成求和式：
+
+    $$
+    \begin{aligned}
+    n\sum_{k=1}^n\frac1{k^2+n^2}
+    &=\frac1n\sum_{k=1}^n\frac1{1+(k/n)^2}.
+    \end{aligned}
+    $$
+
+    这里分点为 $x_k=k/n$，分割区间是 $[0,1]$，且 $\Delta x=1/n$。
+
+  </Step>
+  <Step>
+
+    ### 根据连续性转为定积分
+
+    函数 $f(x)=1/(1+x^2)$ 在 $[0,1]$ 连续，因此
+
+    $$
+    \lim_{n\to\infty}\frac1n\sum_{k=1}^n f\!\left(\frac kn\right)
+    =\int_0^1 f(x)\,\mathrm dx.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 求积分并作答
+
+    $$
+    \int_0^1\frac{1}{1+x^2}\,\mathrm dx
+    =\bigl[\arctan x\bigr]_0^1
+    =\boxed{\frac\pi4}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="识别公式">
+
+当求和项能化为 $\frac1n f(k/n)$，且 $f$ 在 $[0,1]$ 连续时，极限一般就是 $\int_0^1f(x)\,\mathrm dx$；先统一提取 $n$ 的幂，切勿把分母误看成 $k+n^2$。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-8c46a4-022" type="essay" points={11} tags="来源:2012年考研数学二, 科目:高等数学, 章节:数列极限的计算, 考点:方程根构成数列与极限">
+
+(1) 证明方程 $x^n + x^{n-1} + \cdots + x = 1 (n > 1, n \in \mathbf{Z})$，在区间 $\left(\frac{1}{2}, 1\right)$ 内有且仅有一个实根；
+
+(2) 记 (1) 中的实根为 $x_n$，证明 $\lim_{n \to \infty} x_n$ 存在，并求此极限。
+
+<Solution>
+
+**结论：** (1) 对每个整数 $n>1$，方程在 $\left(\frac12,1\right)$ 内恰有一个根；(2) $\displaystyle\boxed{\lim_{n\to\infty}x_n=\frac12}$。
+
+<Steps>
+  <Step>
+
+    ### 第一问：建立连续且严格递增的函数
+
+    令
+
+    $$
+    F_n(x)=\sum_{k=1}^n x^k-1.
+    $$
+
+    对 $x\in[\frac12,1]$，$F_n$ 连续，且
+
+    $$
+    F_n'(x)=\sum_{k=1}^n kx^{k-1}>0.
+    $$
+
+    所以 $F_n$ 在该区间严格递增，因而零点至多一个。
+
+  </Step>
+  <Step>
+
+    ### 第一问：检查端点异号，确定唯一根
+
+    利用等比数列求和式，
+
+    $$
+    F_n\!\left(\frac12\right)
+    =\sum_{k=1}^n2^{-k}-1=-2^{-n}<0,
+    \qquad F_n(1)=n-1>0.
+    $$
+
+    由介值定理，存在 $x_n\in(\frac12,1)$ 使 $F_n(x_n)=0$。结合严格单调性，零点唯一。
+
+  </Step>
+  <Step>
+
+    ### 第二问：比较相邻方程的根
+
+    对 $x>0$，有
+
+    $$
+    F_{n+1}(x)=F_n(x)+x^{n+1}>F_n(x).
+    $$
+
+    代入 $x=x_n$ 得 $F_{n+1}(x_n)=x_n^{n+1}>0$。又 $F_{n+1}$ 在 $(\frac12,1)$ 上严格递增，其零点必位于 $x_n$ 左侧，故
+
+    $$
+    \frac12<x_{n+1}<x_n<1.
+    $$
+
+    $\{x_n\}$ 单调递减且以下界 $1/2$ 有界，所以收敛。
+
+  </Step>
+  <Step>
+
+    ### 第二问：用一致的几何上界控制高次幂
+
+    由根的定义，
+
+    $$
+    1=\frac{x_n(1-x_n^n)}{1-x_n}
+    \quad\Longleftrightarrow\quad
+    2x_n-1=x_n^{n+1}.
+    $$
+
+    由于 $n\ge2$ 时 $0<x_n\le x_2=\frac{\sqrt5-1}{2}<1$，有
+
+    $$
+    0<x_n^{n+1}\le x_2^{n+1}\longrightarrow0.
+    $$
+
+    设 $x_n\to L$，两端取极限得 $2L-1=0$，故
+
+    $$
+    \boxed{L=\frac12}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="不能仅由 $0<x_n<1$ 就断定 $x_n^n\to0$">
+
+若 $x_n\to1$，例如 $x_n=1-1/n$，则 $x_n^n\to e^{-1}$。本题真正起作用的是**统一上界** $x_n\le x_2<1$。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-8c46a4-023" type="essay" points={11} tags="来源:2013年考研数学二, 科目:高等数学, 章节:数列极限的计算, 考点:函数最值与递推数列收敛">
+
+设函数 $f(x)=\ln x+\frac{1}{x}$。
+
+(1) 求 $f(x)$ 的最小值；
+
+(2) 设数列 $\{x_n\}$ 满足 $\ln x_n+\frac{1}{x_{n+1}}<1$，证明 $\lim_{n\to\infty} x_n$ 存在，并求此极限。
+
+<Solution>
+
+**答案：** (1) $\displaystyle\boxed{f_{\min}=1}$；(2) $\displaystyle\boxed{\lim_{n\to\infty}x_n=1}$。
+
+<Steps>
+  <Step>
+
+    ### 第一问：判断函数在正半轴上的单调区间
+
+    定义域为 $(0,+\infty)$。求导得到
+
+    $$
+    f'(x)=\frac1x-\frac1{x^2}=\frac{x-1}{x^2}.
+    $$
+
+    在 $(0,1)$ 上 $f'<0$，在 $(1,+\infty)$ 上 $f'>0$。故函数先减后增，仅在 $x=1$ 处取得全局最小值
+
+    $$
+    f(1)=\ln1+1=\boxed{1}.
+    $$
+
+    这给出对任意 $t>0$ 都成立的关键不等式
+
+    $$
+    \ln t+\frac1t\ge1,
+    $$
+
+    且等号当且仅当 $t=1$。
+
+  </Step>
+  <Step>
+
+    ### 第二问：由最值不等式推出递推数列严格递增
+
+    原递推式为
+
+    $$
+    \ln x_n+\frac1{x_{n+1}}<1.
+    $$
+
+    将第一问的结论用于 $t=x_n$，可得
+
+    $$
+    \ln x_n+\frac1{x_{n+1}}
+    <1\le\ln x_n+\frac1{x_n}.
+    $$
+
+    因此 $\frac1{x_{n+1}}<\frac1{x_n}$。因各项均为正数，取倒数时不等号方向改变，得到 $x_{n+1}>x_n$。
+
+  </Step>
+  <Step>
+
+    ### 第二问：建立上界并证明收敛
+
+    由 $1/x_{n+1}>0$ 和原不等式，得到 $\ln x_n<1$，即
+
+    $$
+    0<x_n<e.
+    $$
+
+    于是 $\{x_n\}$ 单调递增、以上界 $e$ 有界，存在极限 $L$；因 $L\ge x_1>0$，可在极限中使用连续函数 $\ln L$ 与 $1/L$。
+
+  </Step>
+  <Step>
+
+    ### 第二问：通过夹逼确定唯一的极限值
+
+    在题设严格不等式中取极限，得
+
+    $$
+    \ln L+\frac1L\le1.
+    $$
+
+    但第一问保证 $\ln L+\frac1L\ge1$，故必须等号成立。由等号成立的唯一条件 $L=1$，得
+
+    $$
+    \boxed{\lim_{n\to\infty}x_n=1}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="递推不等式的常用闭环">
+
+先由同一个函数的最小值构造 $1/x_{n+1}<1/x_n$；再用原式中的**正项**获得 $x_n<e$；最后利用等号条件识别极限。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-8c46a4-024" type="blank" points={4} tags="来源:2016年考研数学二、三, 科目:高等数学, 章节:数列极限的计算, 考点:三角函数黎曼和">
+
+极限 $\lim_{n\to\infty}\frac{1}{n^2}\left(\sin\frac{1}{n}+2\sin\frac{2}{n}+\cdots+n\sin\frac{n}{n}\right)=$ <Blank answer="sin1-cos1" kind="math" />。
+
+<Solution>
+
+**答案：** $\displaystyle\boxed{\sin1-\cos1}$。
+
+<Steps>
+  <Step>
+
+    ### 整理成 $\frac1n\sum f(k/n)$
+
+    令求和指标为 $k$，原式写为
+
+    $$
+    \frac1{n^2}\sum_{k=1}^n k\sin\frac kn
+    =\frac1n\sum_{k=1}^n\left(\frac kn\sin\frac kn\right).
+    $$
+
+    这是区间 $[0,1]$ 上连续函数 $f(x)=x\sin x$ 的右端点黎曼和。
+
+  </Step>
+  <Step>
+
+    ### 由定积分定义求极限
+
+    对应分点 $x_k=k/n$、小区间长度 $\Delta x=1/n$，所以
+
+    $$
+    \lim_{n\to\infty}\frac1n\sum_{k=1}^nf\!\left(\frac kn\right)
+    =\int_0^1x\sin x\,\mathrm dx.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 分部积分计算最终结果
+
+    取 $u=x$、$\mathrm dv=\sin x\,\mathrm dx$，于是 $\mathrm du=\mathrm dx$、$v=-\cos x$，
+
+    $$
+    \begin{aligned}
+    \int_0^1x\sin x\,\mathrm dx
+    &=\left[-x\cos x\right]_0^1+\int_0^1\cos x\,\mathrm dx\\
+    &=-\cos1+\sin1
+    =\boxed{\sin1-\cos1}.
+    \end{aligned}
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="注意 $n$ 的次数和上下限">
+
+系数是 $k/n^2=(1/n)(k/n)$，而不是 $(k/n)^2$；此题的积分区间是 $[0,1]$，三角函数中的角度按**弧度**计算。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-8c46a4-025" type="essay" points={10} tags="来源:2017年考研数学一、二、三, 科目:高等数学, 章节:数列极限的计算, 考点:对数函数黎曼和">
+
+求 $\lim_{n\to\infty}\sum_{k=1}^n \frac{k}{n^2}\ln\left(1+\frac{k}{n}\right)$。
+
+<Solution>
+
+**答案：** $\displaystyle\boxed{\frac14}$。
+
+<Steps>
+  <Step>
+
+    ### 识别黎曼和的函数与区间
+
+    原式可准确重写为
+
+    $$
+    \sum_{k=1}^n\frac{k}{n^2}\ln\left(1+\frac kn\right)
+    =\frac1n\sum_{k=1}^n f\!\left(\frac kn\right),
+    \qquad f(x)=x\ln(1+x).
+    $$
+
+    函数 $f$ 在 $[0,1]$ 上连续，因此极限等于 $I=\int_0^1x\ln(1+x)\,\mathrm dx$。
+
+  </Step>
+  <Step>
+
+    ### 使用分部积分降阶
+
+    令 $u=\ln(1+x)$，$\mathrm dv=x\,\mathrm dx$，得到
+
+    $$
+    \begin{aligned}
+    I
+    &=\left[\frac{x^2}{2}\ln(1+x)\right]_0^1
+    -\frac12\int_0^1\frac{x^2}{1+x}\,\mathrm dx\\
+    &=\frac12\ln2-\frac12\int_0^1\frac{x^2}{1+x}\,\mathrm dx.
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 多项式除法，完成计算
+
+    由恒等式 $\frac{x^2}{1+x}=x-1+\frac1{1+x}$，
+
+    $$
+    \begin{aligned}
+    \int_0^1\frac{x^2}{1+x}\,\mathrm dx
+    &=\left[\frac{x^2}{2}-x+\ln(1+x)\right]_0^1\\
+    &=\ln2-\frac12.
+    \end{aligned}
+    $$
+
+    所以
+
+    $$
+    I=\frac12\ln2-\frac12\left(\ln2-\frac12\right)
+    =\boxed{\frac14}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="考场验证">
+
+因 $x\ln(1+x)\ge0$，所求极限应为正数；分部积分出现 $\frac12\ln2$ 后，记得连同剩余积分中的 $\ln2$ 一起消去。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-8c46a4-026" type="single" points={4} tags="来源:2017年考研数学二, 科目:高等数学, 章节:数列极限的计算, 考点:收敛数列的复合函数">
+
+设数列 $\{x_n\}$ 收敛，则（ ）。
+
+<Option>当 $\lim_{n\to\infty}\sin x_n=0$ 时，$\lim_{n\to\infty} x_n=0$</Option>
+<Option>当 $\lim_{n\to\infty}(x_n+\sqrt{|x_n|})=0$ 时，$\lim_{n\to\infty} x_n=0$</Option>
+<Option>当 $\lim_{n\to\infty}(x_n+x_n^2)=0$ 时，$\lim_{n\to\infty} x_n=0$</Option>
+<Option correct>当 $\lim_{n\to\infty}(x_n+\sin x_n)=0$ 时，$\lim_{n\to\infty} x_n=0$</Option>
+
+<Solution>
+
+**答案：D。** 设 $x_n\to a$，利用连续性可将数列极限问题转化为方程根的唯一性问题。
+
+<Tabs items={['方法一：逐项审查（推荐）','方法二：D 的简洁判定']} defaultIndex={0}>
+  <Tab value="方法一：逐项审查（推荐）">
+
+    <Steps>
+      <Step>
+
+        ### 先把所有候选条件变成极限方程
+
+        由于 $\{x_n\}$ 已知收敛，且题中复合函数连续，各选项都可写成某个关于 $a$ 的方程。要推出 $a=0$，必须证明该方程**没有其他实根**。
+
+      </Step>
+      <Step>
+
+        ### A、B、C 均存在非零极限反例
+
+        - A：令 $x_n\equiv\pi$，则 $\sin x_n=0$，但 $a=\pi\ne0$。
+        - B：令 $x_n\equiv-1$，则 $x_n+\sqrt{|x_n|}=-1+1=0$，但 $a=-1$。
+        - C：仍令 $x_n\equiv-1$，有 $x_n+x_n^2=-1+1=0$，但 $a=-1$。
+
+      </Step>
+      <Step>
+
+        ### D 的极限方程只有零解
+
+        由 $x_n+\sin x_n\to0$ 得
+
+        $$
+        a+\sin a=0.
+        $$
+
+        令 $h(t)=t+\sin t$，则 $h'(t)=1+\cos t\ge0$。导数仅在离散点 $(2k+1)\pi$ 处为零，故 $h$ 在整个实轴上**严格递增**。又 $h(0)=0$，所以唯一零点是 $a=0$。
+
+      </Step>
+    </Steps>
+
+  </Tab>
+  <Tab value="方法二：D 的简洁判定">
+
+    对任意 $t>0$：若 $0<t\le1$，则 $\sin t>0$，故 $t+\sin t>0$；若 $t>1$，则 $t+\sin t\ge t-1>0$。由于 $t+\sin t$ 是奇函数，$t<0$ 时函数值严格小于 $0$。因此
+
+    $$
+    t+\sin t=0\quad\Longleftrightarrow\quad t=0.
+    $$
+
+    从而若 $x_n+\sin x_n\to0$，其极限 $a$ 必为 $0$。
+
+  </Tab>
+</Tabs>
+
+<Callout type="warn" title="连续性不是单射性">
+
+$g(x_n)\to0$ 且 $x_n$ 收敛只能推出 $g(a)=0$。要得出 $a=0$，必须检查 $g$ 的零点是否唯一，不能直接“消去”三角或根式函数。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-8c46a4-027" type="essay" points={10} tags="来源:2018年考研数学一、二、三, 科目:高等数学, 章节:数列极限的计算, 考点:隐式递推数列与收敛性">
+
+设数列 $\{x_n\}$ 满足 $x_1>0, x_n e^{x_{n+1}}=e^{x_n}-1$。证明：$\{x_n\}$ 收敛，并求 $\lim_{n\to\infty} x_n$。
+
+<Solution>
+
+**结论：** $\{x_n\}$ 严格递减、有下界 $0$，并且 $\displaystyle\boxed{\lim_{n\to\infty}x_n=0}$。
+
+<Steps>
+  <Step>
+
+    ### 将隐式递推式改写为显式函数迭代
+
+    题设为 $x_n e^{x_{n+1}}=e^{x_n}-1$。由于 $x_1>0$，先在 $x_n>0$ 的前提下变形：
+
+    $$
+    e^{x_{n+1}}=\frac{e^{x_n}-1}{x_n},
+    \qquad
+    x_{n+1}=\ln\frac{e^{x_n}-1}{x_n}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 归纳证明各项恒为正并严格递减
+
+    对任意 $t>0$，由 $e^t>1+t$ 得
+
+    $$
+    \frac{e^t-1}{t}>1.
+    $$
+
+    由 $1-e^{-t}<t$（可由 $e^{-t}>1-t$ 得到），又有
+
+    $$
+    \frac{e^t-1}{t}<e^t.
+    $$
+
+    合并为
+
+    $$
+    1<\frac{e^t-1}{t}<e^t\qquad(t>0).
+    $$
+
+    代入 $t=x_n$ 并取自然对数，得 $0<x_{n+1}<x_n$。由 $x_1>0$ 归纳可知对一切 $n$ 均成立。
+
+  </Step>
+  <Step>
+
+    ### 单调有界定理先保证极限存在
+
+    $0<x_{n+1}<x_n\le x_1$，因此存在 $L\ge0$ 使 $x_n\to L$。
+
+  </Step>
+  <Step>
+
+    ### 利用递推关系找极限的唯一可能值
+
+    对原式两边取极限（指数函数连续），有
+
+    $$
+    Le^L=e^L-1
+    \quad\Longleftrightarrow\quad
+    (1-L)e^L=1.
+    $$
+
+    令 $\varphi(t)=(1-t)e^t$，则 $\varphi'(t)=-te^t<0$ 对所有 $t>0$ 成立，而 $\varphi(0)=1$。因此当 $L\ge0$ 时，方程 $\varphi(L)=1$ 的唯一解是 $L=0$。
+
+    故 $\displaystyle\boxed{\lim_{n\to\infty}x_n=0}$。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="先证收敛，再传递极限">
+
+未证明 $x_n$ 收敛之前，不能仅从递推式令 $n\to\infty$ 就宣称极限存在。本题的逻辑顺序是**正性 → 单调性 → 有界收敛 → 求极限**。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-8c46a4-028" type="essay" points={10} tags="来源:2019年考研数学一、三, 科目:高等数学, 章节:数列极限的计算, 考点:积分递推式与比值极限">
+
+设 $a_n=\int_0^1 x^n\sqrt{1-x^2}\,dx \ (n=0,1,2,\cdots)$。
+
+(1) 证明：数列 $\{a_n\}$ 单调减少，且 $a_n=\frac{n-1}{n+2}a_{n-2} \ (n=2,3,\cdots)$。
+
+(2) 求 $\lim_{n\to\infty}\frac{a_n}{a_{n-1}}$。
+
+<Solution>
+
+**结论：** (1) $\{a_n\}$ 严格递减，并且 $\displaystyle a_n=\frac{n-1}{n+2}a_{n-2}$（$n\ge2$）；(2) $\displaystyle\boxed{\lim_{n\to\infty}\frac{a_n}{a_{n-1}}=1}$。
+
+<Steps>
+  <Step>
+
+    ### 第一问：由被积函数的大小直接证明单调性
+
+    对 $0<x<1$，有 $x^{n+1}<x^n$，且 $\sqrt{1-x^2}>0$。因此
+
+    $$
+    a_{n+1}=\int_0^1x^{n+1}\sqrt{1-x^2}\,\mathrm dx
+    <\int_0^1x^n\sqrt{1-x^2}\,\mathrm dx=a_n.
+    $$
+
+    同时 $a_n>0$，所以 $\{a_n\}$ 为正项严格递减数列。
+
+  </Step>
+  <Step>
+
+    ### 第一问：通过分部积分获得跨两项递推式
+
+    对 $n\ge2$，把积分拆为
+
+    $$
+    a_n=\int_0^1x^{n-1}\cdot x\sqrt{1-x^2}\,\mathrm dx.
+    $$
+
+    令 $u=x^{n-1}$，$\mathrm dv=x\sqrt{1-x^2}\,\mathrm dx=-\frac13\,\mathrm d(1-x^2)^{3/2}$。边界项
+
+    $$
+    \left[-\frac13x^{n-1}(1-x^2)^{3/2}\right]_0^1=0,
+    $$
+
+    故
+
+    $$
+    \begin{aligned}
+    a_n
+    &=\frac{n-1}{3}\int_0^1x^{n-2}(1-x^2)^{3/2}\,\mathrm dx\\
+    &=\frac{n-1}{3}\int_0^1x^{n-2}(1-x^2)\sqrt{1-x^2}\,\mathrm dx\\
+    &=\frac{n-1}{3}(a_{n-2}-a_n).
+    \end{aligned}
+    $$
+
+    整理得
+
+    $$
+    \boxed{a_n=\frac{n-1}{n+2}a_{n-2}}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 第二问：利用递推比值构造夹逼
+
+    令 $r_n=a_n/a_{n-1}$（$n\ge1$）。由正性与严格递减性，有 $0<r_n<1$。再由递推式
+
+    $$
+    r_nr_{n-1}=\frac{a_n}{a_{n-2}}=\frac{n-1}{n+2}\qquad(n\ge2).
+    $$
+
+    因为 $0<r_{n-1}<1$，所以
+
+    $$
+    \frac{n-1}{n+2}=r_nr_{n-1}<r_n<1.
+    $$
+
+    当 $n\to\infty$ 时，左右两端都趋于 $1$，由夹逼定理得到
+
+    $$
+    \boxed{\lim_{n\to\infty}\frac{a_n}{a_{n-1}}=1}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="相隔两项的递推式，巧用相邻比值的乘积">
+
+已知 $a_n/a_{n-2}$ 时，不必先显式求出 $a_n$；写成 $r_nr_{n-1}$，借助 $0<r_n<1$ 就能得到精确夹逼。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-8c46a4-030" type="single" points={5} tags="来源:2022年考研数学一、二, 科目:高等数学, 章节:数列极限的计算, 考点:反函数与数列极限存在性">
+
+设数列 $\{x_n\}$ 满足 $-\frac{\pi}{2}\leqslant x_n\leqslant\frac{\pi}{2}$，则（ ）。
+
+<Option>若 $\lim_{n\to\infty}\cos(\sin x_n)$ 存在，则 $\lim_{n\to\infty} x_n$ 存在</Option>
+<Option>若 $\lim_{n\to\infty}\sin(\cos x_n)$ 存在，则 $\lim_{n\to\infty} x_n$ 存在</Option>
+<Option>若 $\lim_{n\to\infty}\cos(\sin x_n)$ 存在，则 $\lim_{n\to\infty}\sin x_n$ 存在，但 $\lim_{n\to\infty} x_n$ 不一定存在</Option>
+<Option correct>若 $\lim_{n\to\infty}\sin(\cos x_n)$ 存在，则 $\lim_{n\to\infty}\cos x_n$ 存在，但 $\lim_{n\to\infty} x_n$ 不一定存在</Option>
+
+<Solution>
+
+**答案：D。** 核心是分别判断 $\cos(\sin x)$、$\sin(\cos x)$ 在给定区间上是否能反推出内层数列的极限。
+
+<Steps>
+  <Step>
+
+    ### 先确定两层函数的值域
+
+    由 $-\frac\pi2\le x_n\le\frac\pi2$，有
+
+    $$
+    \sin x_n\in[-1,1],\qquad \cos x_n\in[0,1].
+    $$
+
+    $\sin t$ 在 $[0,1]$ 上严格递增且有连续反函数 $\arcsin t$；但 $\cos t$ 在 $[-1,1]$ 上是偶函数，不能区分 $t$ 与 $-t$。
+
+  </Step>
+  <Step>
+
+    ### 证明 D 的前半句成立
+
+    设 $y_n=\sin(\cos x_n)$，且 $y_n\to L$。因为 $\cos x_n\in[0,1]$，故 $y_n\in[0,\sin1]$，由闭区间保序性质 $L\in[0,\sin1]$。
+
+    在 $[0,1]$ 上 $\sin$ 可逆，故
+
+    $$
+    \cos x_n=\arcsin(y_n)\longrightarrow\arcsin L.
+    $$
+
+    因此“$\sin(\cos x_n)$ 收敛 $\Rightarrow\cos x_n$ 收敛”一定正确。
+
+  </Step>
+  <Step>
+
+    ### 构造一个反例说明不能推出 $x_n$ 收敛
+
+    取 $a\in(0,\frac\pi2)$，令
+
+    $$
+    x_n=(-1)^n a.
+    $$
+
+    则 $x_n$ 在 $-a$、$a$ 间振荡而不收敛，但
+
+    $$
+    \cos x_n=\cos a,
+    \qquad \sin(\cos x_n)=\sin(\cos a)
+    $$
+
+    都是常数数列。由此 B 错而 D 的后半句也得到验证。
+
+  </Step>
+  <Step>
+
+    ### 同一反例否定 A、C
+
+    在上面的构造中，$\sin x_n=(-1)^n\sin a$ 不收敛，但
+
+    $$
+    \cos(\sin x_n)=\cos(\sin a)
+    $$
+
+    是常数。故 A、C 均错误，**唯一正确选项为 D**。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="复合函数的逆推需要在限制值域内单射">
+
+若内层落在 $[0,1]$，$\sin$ 可以反解；若内层落在 $[-1,1]$，$\cos$ 因偶对称而失去符号信息。区间限制是整道题的关键。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-8c46a4-031" type="single" points={5} tags="来源:2024年考研数学二, 科目:高等数学, 章节:数列极限的计算, 考点:利用单调逆函数判断发散">
+
+已知数列 $\{a_n\}$ ($a_n\neq 0$)，若 $\{a_n\}$ 发散，则（ ）。
+
+<Option>$\left\{a_n+\frac{1}{a_n}\right\}$ 发散</Option>
+<Option>$\left\{a_n-\frac{1}{a_n}\right\}$ 发散</Option>
+<Option>$\left\{e^{a_n}+\frac{1}{e^{a_n}}\right\}$ 发散</Option>
+<Option correct>$\left\{e^{a_n}-\frac{1}{e^{a_n}}\right\}$ 发散</Option>
+
+<Solution>
+
+**答案：D。** 利用函数严格单调、连续且值域为整个实数的性质，进行反证。
+
+<Tabs items={['方法一：连续反函数','方法二：反证与有界性']} defaultIndex={0}>
+  <Tab value="方法一：连续反函数">
+
+    <Steps>
+      <Step>
+
+        ### 找出 D 对应的严格单调函数
+
+        设
+
+        $$
+        F(x)=e^x-e^{-x}=2\sinh x.
+        $$
+
+        对一切 $x\in\mathbb R$，
+
+        $$
+        F'(x)=e^x+e^{-x}>0,
+        $$
+
+        且 $\lim_{x\to\pm\infty}F(x)=\pm\infty$。因此 $F:\mathbb R\to\mathbb R$ 为严格递增的连续双射，其反函数在全实轴连续。
+
+      </Step>
+      <Step>
+
+        ### 逆用连续映射，推出 D 必然发散
+
+        若 $F(a_n)$ 收敛到实数 $b$，则
+
+        $$
+        a_n=F^{-1}(F(a_n))\longrightarrow F^{-1}(b),
+        $$
+
+        与 $\{a_n\}$ 发散矛盾。故 $\{e^{a_n}-e^{-a_n}\}$ 必发散，D 正确。
+
+      </Step>
+    </Steps>
+
+  </Tab>
+  <Tab value="方法二：反证与有界性">
+
+    若 $b_n=e^{a_n}-e^{-a_n}\to b$，令 $t_n=e^{a_n}>0$，则
+
+    $$
+    t_n-\frac1{t_n}=b_n
+    \quad\Longleftrightarrow\quad
+    t_n=\frac{b_n+\sqrt{b_n^2+4}}{2}.
+    $$
+
+    右侧连续，故 $t_n\to\frac{b+\sqrt{b^2+4}}2>0$；再取对数得
+
+    $$
+    a_n=\ln t_n\longrightarrow
+    \ln\frac{b+\sqrt{b^2+4}}2,
+    $$
+
+    矛盾。这个方法不需要显式记忆反双曲正弦函数。
+
+  </Tab>
+</Tabs>
+
+<Steps>
+  <Step>
+
+    ### 最后用反例排除 A、B、C
+
+    - A：取 $a_{2n-1}=2$、$a_{2n}=\frac12$，则 $a_n+1/a_n\equiv\frac52$。
+    - B：取 $a_{2n-1}=2$、$a_{2n}=-\frac12$，则 $a_n-1/a_n\equiv\frac32$。
+    - C：取 $a_{2n-1}=1$、$a_{2n}=-1$，则 $e^{a_n}+e^{-a_n}\equiv e+e^{-1}$。
+
+    上述 $a_n$ 均不收敛且各项非零，故 A、B、C 均非必然。选 **D**。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="发散数列经过函数之后是否仍发散？">
+
+若函数在整个实轴上有**连续反函数**，则其像数列收敛将迫使原数列收敛。反之，偶函数及存在两个不同自变量取得相同函数值的映射，常可用交替数列构造反例。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-8c46a4-032" type="blank" points={5} tags="来源:2025年考研数学二, 科目:高等数学, 章节:数列极限的计算, 考点:对数黎曼和与端点延拓">
+
+$\lim_{n\to\infty}\frac{1}{n^2}\left[\ln\frac{1}{n}+2\ln\frac{2}{n}+\cdots+(n-1)\ln\frac{n-1}{n}\right]=$ <Blank answer="-((1)/(4))" kind="math" />。
+
+<Solution>
+
+**答案：** $\displaystyle\boxed{-\frac14}$。
+
+<Steps>
+  <Step>
+
+    ### 补上端点并化为标准黎曼和
+
+    原式为
+
+    $$
+    \frac1{n^2}\sum_{k=1}^{n-1}k\ln\frac kn
+    =\frac1n\sum_{k=1}^{n-1}f\!\left(\frac kn\right),
+    \qquad f(x)=x\ln x\ (x>0).
+    $$
+
+    由于 $f(1)=1\cdot\ln1=0$，把求和上限由 $n-1$ 改为 $n$ 不会改变求和结果。
+
+  </Step>
+  <Step>
+
+    ### 处理零点处的形式不连续
+
+    虽然 $\ln x\to-\infty$（$x\to0^+$），但
+
+    $$
+    \lim_{x\to0^+}x\ln x=0.
+    $$
+
+    定义 $f(0)=0$，便得到 $f$ 在闭区间 $[0,1]$ 上连续。因而该和式为右端点黎曼和，得到
+
+    $$
+    \lim_{n\to\infty}\frac1n\sum_{k=1}^{n}f\!\left(\frac kn\right)
+    =\int_0^1x\ln x\,\mathrm dx.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 分部积分并检查下端点
+
+    $$
+    \begin{aligned}
+    \int x\ln x\,\mathrm dx
+    &=\frac{x^2}{2}\ln x-\frac{x^2}{4}+C,\\
+    \int_0^1x\ln x\,\mathrm dx
+    &=\left[\frac{x^2}{2}\ln x-\frac{x^2}{4}\right]_0^1.
+    \end{aligned}
+    $$
+
+    因 $x^2\ln x\to0$（$x\to0^+$），下端点贡献为 $0$，上端点为 $-1/4$。故
+
+    $$
+    \boxed{\lim_{n\to\infty}\frac1{n^2}\sum_{k=1}^{n-1}k\ln\frac kn=-\frac14}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="含 $\ln(k/n)$ 的和式不能直接在 $k=0$ 代入对数">
+
+应先研究 $x\ln x$ 在 $x=0$ 的可去间断点并作连续延拓，再使用定积分定义。积分时也应核查 $x^2\ln x\to0$。
+
+</Callout>
+
+</Solution>
+
 </Question>

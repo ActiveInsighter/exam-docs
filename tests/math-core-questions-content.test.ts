@@ -20,15 +20,16 @@ describe('Graduate mathematics core questions', () => {
     const math = JSON.parse(readFileSync(join(root, '../meta.json'), 'utf8'));
     const exams = JSON.parse(readFileSync(join(root, '../exam/meta.json'), 'utf8'));
     expect(math.pages).toContain('core-questions');
+    expect(JSON.parse(readFileSync(join(root, 'meta.json'), 'utf8')).title).toBe('真题核心题目');
     expect(exams.pages).not.toContain('core-questions');
     expect(readFileSync(join(root, '../index.mdx'), 'utf8')).toContain('/docs/math/core-questions');
     expect(readFileSync(join(root, '../exam/index.mdx'), 'utf8')).not.toContain('(./core-questions/)');
   });
 
   for (const [subject, questionCount, topicCount] of [
-    ['01-高等数学', 1103, 47],
-    ['02-线性代数', 415, 19],
-    ['03-概率论与数理统计', 364, 16],
+    ['01-高等数学', 955, 47],
+    ['02-线性代数', 250, 19],
+    ['03-概率论与数理统计', 220, 16],
   ] as const) {
     it(`renders every imported question, solution, formula and image in ${subject}`, async () => {
       const pages = pagesIn(join(root, subject));
@@ -40,6 +41,7 @@ describe('Graduate mathematics core questions', () => {
         const { markdown } = await buildStaticMarkdownDocument(page, page.slice(join(process.cwd(), 'content/docs').length + 1));
         const questions = [...content.matchAll(/<Question\b[^>]*>([\s\S]*?)<\/Question>/gu)];
         expect(content.match(/<Question\b/gu)?.length ?? 0, page).toBe(questions.length);
+        expect([...content.matchAll(/<Question\b[^>]*id="([^"]+)"/gu)].every((match) => match[1].startsWith('core-1102-')), page).toBe(true);
         for (const [, question] of questions) {
           expect(question, page).toMatch(/<Solution>\s*\S[\s\S]*<\/Solution>/u);
           for (const [, , payload] of question.matchAll(/<(Solution|Option)(?: correct)?>([\s\S]*?)<\/\1>/gu)) {

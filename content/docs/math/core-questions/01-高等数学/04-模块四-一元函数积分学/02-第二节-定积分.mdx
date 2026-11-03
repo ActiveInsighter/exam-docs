@@ -1,298 +1,3894 @@
 ---
-title: 第二节 定积分
-description: 高等数学核心真题重构：黎曼和、积分比较、对称周期、二次函数最优化、凸性与积分估计。
+title: "第二节 定积分"
+description: "考研数学真题分类：模块四：一元函数积分学"
 ---
 
-本节先建立**和式对应积分、函数性质对应积分比较、端点与符号决定严格性**三条主线。遇到无法用初等函数表示的定积分，仍可通过对称、单调或凸性判断大小；对广义端点则先核对可积性，再作比较与极限运算。
+<Question id="core-1102-math-97dbde-004" type="essay" points={8} tags="来源:1987年考研数学二, 科目:高等数学, 章节:定积分, 考点:反三角函数与分部积分">
 
-<Callout type="idea" title="本节通用判题路径">
+ 计算定积分 $\int_0^1 x \arcsin x \mathrm{d}x$.
 
-- **离散和式：** 明确划分区间、采样点与宽度，三项必须配套；常数函数 $f\equiv1$ 可快速检验权重。
-- **比较积分：** 寻找相同积分区间上的逐点关系；严格性来自正长度子区间的严格不等式。
-- **对称区间：** 奇函数积分为 $0$，偶函数可以折半；对平移变号的三角函数按半周期比较面积。
-- **未知函数：** $f''>0$ 可转为弦线在图像上方，再对易积分的弦线求积分。
+<Solution>
+
+**参考结论：** $\displaystyle \int_0^1x\arcsin x\,\mathrm dx=\frac\pi8$。
+
+**解题思路：** 有反正弦与 $x$ 相乘时，让反三角函数求导，同时把 $x$ 积成 $x^2/2$；剩余奇异端点积分用正弦换元即可。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 分部积分
+
+
+
+    令 $u=\arcsin x$，$\mathrm dv=x\mathrm dx$，则 $v=x^2/2$，$\mathrm du=\mathrm dx/\sqrt{1-x^2}$。对 $0\le x<1$ 先使用分部积分，再令上限趋近 $1$，得到
+
+    $$
+    \begin{aligned}
+    I&=\left[\frac{x^2}2\arcsin x\right]_0^1
+    -\frac12\int_0^1\frac{x^2}{\sqrt{1-x^2}}\,\mathrm dx\\
+    &=\frac\pi4-\frac12J.
+    \end{aligned}
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 用正弦换元计算余项
+
+
+
+    在 $J$ 中令 $x=\sin t$，则 $0\le t\le\pi/2$，且 $\mathrm dx=\cos t\,\mathrm dt$，所以
+
+    $$
+    J=\int_0^{\pi/2}\sin^2t\,\mathrm dt.
+    $$
+
+    利用 $\sin^2t=\frac12(1-\cos2t)$，得
+
+    $$
+    J=\left[\frac t2-\frac{\sin2t}{4}\right]_0^{\pi/2}=\frac\pi4.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 合并计算
+
+
+
+    将 $J=\pi/4$ 代回第一步：
+
+    $$
+    I=\frac\pi4-\frac12\cdot\frac\pi4=\frac\pi8.
+    $$
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+虽然分部积分之后出现 $1/\sqrt{1-x^2}$，在 $x=1$ 不连续，但它对应的是可积的瑕积分。严格处理时可先在 $[0,b]$（$b<1$）上分部积分，再令 $b\to1^-$。
+
+
 
 </Callout>
 
-## 模型：黎曼和、区间平均与离散到连续的过渡
-
-<Question id="math-core-gd-04-02-001" type="single" points={5} tags="来源:2021考研数一数二, 考点:黎曼和, 考点:中点求积">
-
-设 $f$ 在 $[0,1]$ 上连续，则 $\int_0^1 f(x)\,dx=$（ ）。
-
-<Option>$\displaystyle\lim_{n\to\infty}\sum_{k=1}^n f\left(\frac{2k-1}{2n}\right)\frac1{2n}$</Option>
-<Option correct>$\displaystyle\lim_{n\to\infty}\sum_{k=1}^n f\left(\frac{2k-1}{2n}\right)\frac1n$</Option>
-<Option>$\displaystyle\lim_{n\to\infty}\sum_{k=1}^{2n} f\left(\frac{k-1}{2n}\right)\frac1n$</Option>
-<Option>$\displaystyle\lim_{n\to\infty}\sum_{k=1}^{2n} f\left(\frac{k}{2n}\right)\frac2n$</Option>
-
-<Solution>
-
-**答案：B。** 这是 $[0,1]$ 上使用中点作为采样点的黎曼和。
-
-**第一步：辨认采样点。** 把 $[0,1]$ 等分为 $n$ 个区间：
-
-$$
-I_k=\left[\frac{k-1}{n},\frac kn\right],\qquad k=1,\ldots,n.
-$$
-
-每段宽度 $\Delta x=1/n$，中点为 $\xi_k=(2k-1)/(2n)$。
-
-**第二步：把三要素配齐。** $f$ 连续，故任何网格直径趋零的黎曼和都趋于积分；特别地，
-
-$$
-\int_0^1f(x)\,dx=\lim_{n\to\infty}\sum_{k=1}^nf(\xi_k)\Delta x
-=\lim_{n\to\infty}\sum_{k=1}^nf\left(\frac{2k-1}{2n}\right)\frac1n.
-$$
-
-**第三步：检查错误权重。** 对常数测试函数 $f\equiv1$，四个选项分别得到 $1/2,1,2,4$，只有 B 可能等于 $\int_0^1 1\,dx=1$。
-
-<Callout type="warn" title="采样点写对了，不等于黎曼和写对了">A 的采样点为正确中点，但权重少了一半；C、D 使用 $2n$ 段的采样点，却没有用应有的段宽 $1/(2n)$。</Callout>
-
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-02-002" type="essay" points={10} tags="来源:2010考研数一数二数三, 考点:含参积分比较, 考点:夹逼定理, 考点:广义积分">
+<Question id="core-1102-math-97dbde-007" type="essay" points={7} tags="来源:1988年考研数学二, 科目:高等数学, 章节:定积分, 考点:绝对值分段与变上限积分">
 
-(1) 对正整数 $n$，比较
-
-$$
-\int_0^1|\ln t|[\ln(1+t)]^n\,dt
-\quad\text{与}\quad
-\int_0^1t^n|\ln t|\,dt
-$$
-
-的大小，并说明理由。
-
-(2) 记 $u_n=\int_0^1|\ln t|[\ln(1+t)]^n\,dt$，求 $\lim_{n\to\infty}u_n$。
+ 设 $x \ge -1$，求 $\int_{-1}^x (1 - |t|)\mathrm{d}t$.
 
 <Solution>
 
-**参考答案：** 记 $v_n=\int_0^1t^n|\ln t|\,dt$，则
+**参考结论：** $\displaystyle F(x)=\int_{-1}^x(1-|t|)\,\mathrm dt=\begin{cases}\frac12(1+x)^2,&-1\le x\le0,\\\frac12+x-\frac{x^2}{2},&x\ge0.\end{cases}$。
 
-$$
-\boxed{0<u_n<v_n=\frac1{(n+1)^2},\qquad \lim_{n\to\infty}u_n=0.}
-$$
+**解题思路：** 绝对值函数在 $t=0$ 改变表达式，变上限 $x$ 是否越过 $0$ 决定积分需要拆成几段。
 
-**第一步：先确认奇端点处积分可积。** $t\to0^+$ 时 $|\ln t|$ 发散，但 $\int_0^1|\ln t|\,dt=1$；对 $0\le\ln(1+t)\le t\le1$，两种被积函数都可被 $|\ln t|$ 控制，因此广义积分收敛。
+<Steps>
 
-**第二步：逐点作严格比较。** 对 $0<t<1$，利用
+  <Step>
 
-$$
-0<\ln(1+t)<t
-$$
 
-（因为 $t-\ln(1+t)$ 的导数为 $t/(1+t)>0$），正整数次幂保持严格不等式：
 
-$$
-0<[\ln(1+t)]^n<t^n.
-$$
+    ### 当上限没有越过零点
 
-再乘以 $|\ln t|>0$，在 $(0,1)$ 积分，得到 $0<u_n<v_n$。端点虽有广义积分奇性，不影响严格不等式的积分结论。
 
-**第三步：精确计算比较上界。**
 
-$$
-\begin{aligned}
-v_n&=\int_0^1 t^n(-\ln t)\,dt\\
-&=\left[-\frac{t^{n+1}\ln t}{n+1}\right]_0^1
-+\frac1{n+1}\int_0^1t^n\,dt\\
-&=\frac1{(n+1)^2}.
-\end{aligned}
-$$
+    若 $-1\le x\le0$，积分区间内 $t\le0$，故 $|t|=-t$。于是
 
-边界项为零，因为 $t^{n+1}\ln t\to0$（$n+1>0$）。
+    $$
+    \begin{aligned}
+    F(x)&=\int_{-1}^x(1+t)\,\mathrm dt
+    =\left[t+\frac{t^2}2\right]_{-1}^x\\
+    &=\frac12(1+x)^2.
+    \end{aligned}
+    $$
 
-**第四步：夹逼求极限。**
 
-$$
-0<u_n<\frac1{(n+1)^2}\longrightarrow0,
-$$
 
-因此 $u_n\to0$。
+  </Step>
 
-<Callout type="idea" title="为何不优先交换极限与积分？">单点上 $[\ln(1+t)]^n\to0$ 固然成立，但若直接从逐点极限推积分极限，还要先核查支配条件。题目给出了更直接的比较对象 $t^n|\ln t|$，可一步求出显式上界。</Callout>
+  <Step>
+
+
+
+    ### 当上限越过零点
+
+
+
+    若 $x\ge0$，应在 $t=0$ 分割：
+
+    $$
+    \begin{aligned}
+    F(x)&=\int_{-1}^0(1+t)\,\mathrm dt+\int_0^x(1-t)\,\mathrm dt\\
+    &=\frac12+x-\frac{x^2}{2}
+    =1-\frac12(1-x)^2.
+    \end{aligned}
+    $$
+
+    最后一式便于与题库中原答案核对。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 检查拼接点和变上限求导
+
+
+
+    在 $x=0$ 时两种公式都得到 $F(0)=1/2$，且由微积分基本定理
+
+    $$
+    F'(x)=1-|x|,
+    $$
+
+    两段导数在 $0$ 处均为 $1$，因此拼接无误；另外 $F(-1)=0$ 与积分定义相符。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+当 $x>1$ 时，$1-|t|$ 在 $t>1$ 为负数，但表达式 $\int_0^x(1-t)\mathrm dt$ 仍然成立；**不要误把第二段限制为 $0\le x\le1$**。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-02-003" type="essay" tags="来源:李正元练习题, 考点:积分平均极限, 考点:绝对值换元">
+<Question id="core-1102-math-97dbde-011" type="blank" points={3} tags="来源:1989年考研数学一、二, 科目:高等数学, 章节:定积分, 考点:含定积分的函数方程">
 
-设 $f,g$ 在 $0$ 的某邻域内连续，$f(0)=g(0)\ne0$，求
-
-$$
-\lim_{x\to0}
-\frac{\int_0^{x^2}f\bigl(\sqrt{x^2-t}\bigr)\,dt}
-{\int_0^1 x^2g(xt)\,dt}.
-$$
+ 设 $f(x)$ 是连续函数，且 $f(x) = x + 2\int_0^1 f(t)\mathrm{d}t$，则 $f(x) =$ <Blank answer="x-1" kind="math" />.
 
 <Solution>
 
-**参考答案：** $\boxed{1}$。
+**参考结论：** $\displaystyle f(x)=x-1$。
 
-<Tabs items={['方法一：加权积分中值','方法二：统一极限估计']} defaultIndex={0}>
-<Tab value="方法一：加权积分中值">
+**解题思路：** 定积分的上下限均为常数，所以先把该定积分设为常数 $A$；再对函数方程两侧积分，解出 $A$。
 
-**第一步：将分子转为带正权的积分。** 令 $u=\sqrt{x^2-t}$，则 $dt=-2u\,du$；积分上限是 $|x|$ 而非 $x$，故
+<Steps>
 
-$$
-A(x)=2\int_0^{|x|}u f(u)\,du.
-$$
+  <Step>
 
-对 $u\ge0$ 的非负权 $2u$ 应用积分中值定理，存在 $\xi_x\in[0,|x|]$，使
 
-$$
-A(x)=f(\xi_x)\int_0^{|x|}2u\,du=x^2f(\xi_x).
-$$
 
-**第二步：处理分母。** 固定区间上的积分中值定理给出某个 $\tau_x\in[0,1]$，使
+    ### 用常数代表未知的定积分
 
-$$
-B(x)=x^2\int_0^1g(xt)\,dt=x^2g(x\tau_x).
-$$
 
-**第三步：取比值极限。** 对 $x\ne0$，
 
-$$
-\frac{A(x)}{B(x)}=\frac{f(\xi_x)}{g(x\tau_x)}\to\frac{f(0)}{g(0)}=1,
-$$
+    定义
 
-因为 $|\xi_x|\le|x|$、$|x\tau_x|\le|x|$，且 $g(0)\ne0$ 使分母最终非零。
+    $$
+    A=\int_0^1f(t)\,\mathrm dt.
+    $$
 
-</Tab>
-<Tab value="方法二：统一极限估计">
+    原方程因此化为 $f(x)=x+2A$，即 $f$ 是一次函数与未知常数之和。
 
-将分子先按 $t=x^2s$（$0\le s\le1$）变换：
 
-$$
-A(x)=x^2\int_0^1f\bigl(|x|\sqrt{1-s}\bigr)\,ds,
-\qquad B(x)=x^2\int_0^1g(xs)\,ds.
-$$
 
-由 $f,g$ 在 $0$ 连续，且两种函数自变量的绝对值都不超过 $|x|$，故当 $x\to0$ 时两组被积式分别**一致趋于** $f(0)$ 与 $g(0)$。因此括号中积分各自趋于相应常数，原比值趋于 $1$。
+  </Step>
 
-</Tab>
+  <Step>
+
+
+
+    ### 对等式在固定区间积分
+
+
+
+    将 $f(t)=t+2A$ 在 $[0,1]$ 上积分，得到
+
+    $$
+    A=\int_0^1(t+2A)\,\mathrm dt
+    =\frac12+2A.
+    $$
+
+    移项求出 $A=-\frac12$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 回代并检验
+
+
+
+    回代得 $f(x)=x-1$。再计算
+
+    $$
+    \int_0^1(t-1)\,\mathrm dt=-\frac12,
+    $$
+
+    从而 $x+2\int_0^1f(t)\,\mathrm dt=x-1=f(x)$，满足原方程。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+不要把 $\int_0^1f(t)\,\mathrm dt$ 当成关于 $x$ 的变上限积分，也不必对原方程求导才能求解。常数方程 $A=\frac12+2A$ 给出唯一解，故 $f$ 唯一。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-013" type="essay" points={4} tags="来源:1989年考研数学二, 科目:高等数学, 章节:定积分, 考点:二阶导数积分与两次分部积分">
+
+ 已知 $f(2) = \frac{1}{2}, f'(2) = 0$ 及 $\int_0^2 f(x)\mathrm{d}x = 1$，求 $\int_0^1 x^2 f''(2x)\mathrm{d}x$.
+
+<Solution>
+
+**参考结论：** $\boxed{0}$。
+
+**解题思路：** 复合自变量 $2x$ 先通过 $t=2x$ 统一，再对 $t^2f^{\prime\prime}(t)$ 连续分部积分，将二阶导数降为题设给出的函数值、导数值和积分值。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 换元，把导数自变量统一
+
+
+
+    令 $t=2x$，则 $x=t/2,\,\mathrm dx=\frac12\mathrm dt$，上下限 $0\to0$、$1\to2$。故
+
+
+
+    $$
+
+    I=\int_0^1 x^2f''(2x)\,\mathrm dx=\frac18\int_0^2t^2f''(t)\,\mathrm dt.
+
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 第一次分部积分，消去二阶导数
+
+
+
+    取 $u=t^2$，$\mathrm dv=f''(t)\,\mathrm dt$，于是
+
+
+
+    $$
+
+    \int_0^2t^2f''(t)\,\mathrm dt
+
+    =\left[t^2f'(t)\right]_0^2-2\int_0^2t f'(t)\,\mathrm dt.
+
+    $$
+
+
+
+    边界项为 $4f'(2)-0=0$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 第二次分部积分并使用已知条件
+
+
+
+    再用 $u=t$，$\mathrm dv=f'(t)\,\mathrm dt$，得
+
+
+
+    $$
+
+    \int_0^2t f'(t)\,\mathrm dt
+
+    =\left[tf(t)\right]_0^2-\int_0^2f(t)\,\mathrm dt
+
+    =2\cdot\frac12-1=0.
+
+    $$
+
+
+
+    因此 $I=\frac18(0-2\cdot0)=\boxed{0}$。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+关键是先换元再分部积分；若直接处理 $f(2x)$，必须额外计入链式法则产生的系数 $2$，否则容易出现 $2$ 或 $4$ 的倍数错误。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-015" type="essay" points={5} tags="来源:1990年考研数学一, 科目:高等数学, 章节:定积分, 考点:对数有理函数与分部积分">
+
+ 求 $\int_{0}^{1} \frac{\ln(1+x)}{(2-x)^2}dx$.
+
+<Solution>
+
+**参考结论：** $\boxed{\frac13\ln2}$。
+
+**解题思路：** 分母 $(2-x)^2$ 的原函数简单，对数求导也简单；用分部积分将“对数×平方倒数”化为有理函数积分。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 选择分部积分的两个因子
+
+
+
+    取 $u=\ln(1+x)$，$\mathrm dv=(2-x)^{-2}\mathrm dx$，则
+
+
+
+    $$
+
+    \mathrm du=\frac{\mathrm dx}{1+x},\qquad
+
+    v=\frac1{2-x}.
+
+    $$
+
+
+
+    注意 $\frac{\mathrm d}{\mathrm dx}(2-x)^{-1}=(2-x)^{-2}$，这里没有负号。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 求边界项并拆分有理函数
+
+
+
+    根据分部积分公式，
+
+
+
+    $$
+
+    I=\left[\frac{\ln(1+x)}{2-x}\right]_0^1
+
+    -\int_0^1\frac{\mathrm dx}{(1+x)(2-x)}
+
+    =\ln2-J.
+
+    $$
+
+
+
+    设 $\frac1{(1+x)(2-x)}=\frac A{1+x}+\frac B{2-x}$，比较系数得 $A=B=\frac13$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 积分并合并系数
+
+
+
+    因而
+
+
+
+    $$
+
+    \begin{aligned}
+
+    J&=\frac13\left[\ln(1+x)-\ln(2-x)\right]_0^1\\
+
+    &=\frac13(\ln2+\ln2)=\frac23\ln2.
+
+    \end{aligned}
+
+    $$
+
+
+
+    故 $I=\ln2-\frac23\ln2=\boxed{\frac13\ln2}$。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+对 $\frac1{2-x}$ 求导的正号、对 $\ln(2-x)$ 积分的负号不能混淆。被积函数在 $(0,1]$ 为正，结论 $\frac13\ln2>0$ 也符合符号检查。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-016" type="single" points={3} tags="来源:1990年考研数学一、二, 科目:高等数学, 章节:定积分, 考点:变上下限积分求导">
+
+ 设 $f(x)$ 是连续函数, 且 $F(x) = \int_{x}^{e^{-x}} f(t)dt$, 则 $F'(x)$ 等于( $\quad$ ).
+
+<Option correct>$-e^{-x}f(e^{-x}) - f(x)$</Option>
+<Option>$-e^{-x}f(e^{-x}) + f(x)$</Option>
+<Option>$e^{-x}f(e^{-x}) - f(x)$</Option>
+<Option>$e^{-x}f(e^{-x}) + f(x)$</Option>
+
+<Solution>
+
+**参考结论：** $\boxed{-e^{-x}f(e^{-x})-f(x)}$，选 A。
+
+**解题思路：** 直接套用上下限均依赖 $x$ 时的牛顿—莱布尼茨求导公式，再分别代入上下限的导数。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 写出一般公式
+
+
+
+    对于连续函数 $f$ 和可微函数 $a(x),b(x)$，
+
+
+
+    $$
+
+    \frac{\mathrm d}{\mathrm dx}\int_{a(x)}^{b(x)}f(t)\,\mathrm dt
+
+    =f(b(x))b'(x)-f(a(x))a'(x).
+
+    $$
+
+
+
+    上限项取正，下限项取负。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 代入本题的上下限
+
+
+
+    本题 $a(x)=x$，$b(x)=e^{-x}$，于是 $a'(x)=1$、$b'(x)=-e^{-x}$，得
+
+
+
+    $$
+
+    \begin{aligned}
+
+    F'(x)&=f(e^{-x})(-e^{-x})-f(x)\cdot1\\
+
+    &=\boxed{-e^{-x}f(e^{-x})-f(x)}.
+
+    \end{aligned}
+
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 核查结果
+
+
+
+    可令 $f(t)\equiv1$ 作快速检验：$F(x)=e^{-x}-x$，所以 $F'(x)=-e^{-x}-1$，与所得公式一致。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+一定要同时处理 **上限 $e^{-x}$ 的链式求导负号** 与 **下限 $x$ 自带的负号**；不能只求上限导数。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-019" type="essay" points={9} tags="来源:1990年考研数学二, 科目:高等数学, 章节:定积分, 考点:倒数代换与定积分对称性">
+
+ 设 $f(x) = \int_{1}^{x} \frac{\ln t}{1+t}dt$, 其中 $x>0$, 求 $f(x) + f\left(\frac{1}{x}\right)$.
+
+<Solution>
+
+**参考结论：** $\boxed{f(x)+f(1/x)=\frac12(\ln x)^2}$（$x>0$）。
+
+**解题思路：** 不必求出 $f$ 的具体初等原函数。构造 $g(x)=f(x)+f(1/x)$，通过变上限积分求导把复杂表达式降为 $\ln x/x$，最后用 $x=1$ 定积分常数。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 构造目标函数并求导
+
+
+
+    由微积分基本定理 $f^{\prime}(x)=\frac{\ln x}{1+x}$。令 $g(x)=f(x)+f(1/x)$，则
+
+
+
+    $$
+
+    \begin{aligned}
+
+    g^{\prime}(x)&=\frac{\ln x}{1+x}-\frac1{x^2}\frac{\ln(1/x)}{1+1/x}\\
+
+    &=\frac{\ln x}{1+x}+\frac{\ln x}{x(1+x)}\\
+
+    &=\frac{\ln x}{x}.
+
+    \end{aligned}
+
+    $$
+
+
+
+    其中用到 $\ln(1/x)=-\ln x$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 积分并确定常数
+
+
+
+    由 $g^{\prime}(x)=\ln x/x$，得
+
+
+
+    $$
+
+    g(x)=\frac12(\ln x)^2+C.
+
+    $$
+
+
+
+    原积分在上下限相等时 $f(1)=0$，因此 $g(1)=0$，而 $\ln1=0$，所以 $C=0$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 回写结果
+
+
+
+    最终
+
+
+
+    $$
+
+    \boxed{f(x)+f(1/x)=\frac12\ln^2x},\qquad x>0.
+
+    $$
+
+
+
+    右端显然对变换 $x\mapsto1/x$ 保持不变，符合左端对称性。
+
+
+
+  </Step>
+
+</Steps>
+
+<Tabs items={["正向推导", "方法补充"]} defaultIndex={0}>
+
+  <Tab value="正向推导">
+
+
+
+    主线利用 $g^{\prime}(x)=\ln x/x$，不涉及特殊函数。
+
+
+
+  </Tab>
+
+  <Tab value="方法补充">
+
+
+
+    也可以直接对 $f(1/x)$ 换元。令 $t=1/u$，则
+
+
+
+    $$
+
+    \begin{aligned}
+
+    f(1/x)&=\int_1^{1/x}\frac{\ln t}{1+t}\,\mathrm dt
+
+    =\int_1^x\frac{\ln u}{u(1+u)}\,\mathrm du.
+
+    \end{aligned}
+
+    $$
+
+
+
+    两式相加，利用 $\frac1{1+u}+\frac1{u(1+u)}=\frac1u$，立即得到 $\int_1^x\frac{\ln u}{u}\,\mathrm du=\frac12\ln^2x$。
+
+
+
+  </Tab>
+
 </Tabs>
 
-<Callout type="warn" title="零点附近的根式要写 $|x|$">$\sqrt{x^2}=|x|$。若直接把上限替换成 $x$，对 $x<0$ 将改变积分方向，可能使双侧极限判断出现符号错误。</Callout>
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+复合求导时 $f(1/x)$ 必须乘 $-1/x^2$。有些同学会将 $f^{\prime}(1/x)$ 误写成 $\ln x/(1+x)$，正确做法是先完整代入 $1/x$ 再化简。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-## 模型：对称、周期、增减性与积分比较
+<Question id="core-1102-math-97dbde-022" type="essay" points={9} tags="来源:1991年考研数学二, 科目:高等数学, 章节:定积分, 考点:递推周期函数与分段积分">
 
-<Question id="math-core-gd-04-02-004" type="single" points={4} tags="来源:2011考研数一数二数三, 考点:积分比较, 考点:对数奇性">
-
-设
-
-$$
-I=\int_0^{\pi/4}\ln\sin x\,dx,\qquad
-J=\int_0^{\pi/4}\ln\cot x\,dx,\qquad
-K=\int_0^{\pi/4}\ln\cos x\,dx,
-$$
-
-则 $I,J,K$ 的大小关系为（ ）。
-
-<Option>$I<J<K$</Option>
-<Option correct>$I<K<J$</Option>
-<Option>$J<I<K$</Option>
-<Option>$K<J<I$</Option>
+ 设函数 $f(x)$ 在 $(-\infty, +\infty)$ 内满足 $f(x) = f(x-\pi) + \sin x$, 且 $f(x) = x, x\in [0, \pi)$, 计算 $\int_{\pi}^{3\pi} f(x)dx$.
 
 <Solution>
 
-**答案：B，即 $I<K<J$。**
+**参考结论：** $\boxed{\pi^2-2}$。
 
-**第一步：在共同积分区间比较函数值。** 当 $0<x<\pi/4$ 时，
+**解题思路：** 递推关系只能跨越一个长度为 $\pi$ 的区间。先根据给出的 $[0,\pi)$ 表达式逐段递推至 $[\pi,3\pi)$，再分段积分。
 
-$$
-0<\sin x<\cos x<1.
-$$
+<Steps>
 
-因 $\ln$ 严格递增，
+  <Step>
 
-$$
-\ln\sin x<\ln\cos x<0.
-$$
 
-积分得 $I<K<0$。
 
-**第二步：判断 $J$ 的符号。** 在同一区间 $\cot x>1$，故
+    ### 确定 $[\pi,2\pi)$ 上的表达式
 
-$$
-\ln\cot x=\ln\cos x-\ln\sin x>0.
-$$
 
-所以 $J>0$，综合为 $I<K<J$。
 
-**第三步：检查广义端点。** $\ln\sin x\sim\ln x$（$x\to0^+$），其奇性可以积分；$\ln\cot x\sim-\ln x$ 也可积，故积分比较合法。
+    对于 $\pi\le x<2\pi$，有 $x-\pi\in[0,\pi)$，因此
 
-<Callout type="idea" title="不求原函数也可完整比较">题目问大小关系，只要找出三种被积函数在相同区间内的正负与顺序即可。对数的绝对值大小比较不是必要步骤。</Callout>
+
+
+    $$
+
+    f(x)=f(x-\pi)+\sin x=x-\pi+\sin x.
+
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 确定 $[2\pi,3\pi)$ 上的表达式
+
+
+
+    对于 $2\pi\le x<3\pi$，有 $x-\pi\in[\pi,2\pi)$，所以
+
+
+
+    $$
+
+    \begin{aligned}
+
+    f(x)&=f(x-\pi)+\sin x\\
+
+    &=x-2\pi+\sin(x-\pi)+\sin x\\
+
+    &=x-2\pi,
+
+    \end{aligned}
+
+    $$
+
+
+
+    因为 $\sin(x-\pi)=-\sin x$，两项抵消。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 分段计算积分
+
+
+
+    单点的函数值不影响定积分，故
+
+
+
+    $$
+
+    \begin{aligned}
+
+    \int_\pi^{3\pi}f(x)\,\mathrm dx
+
+    &=\int_\pi^{2\pi}(x-\pi+\sin x)\,\mathrm dx
+
+    +\int_{2\pi}^{3\pi}(x-2\pi)\,\mathrm dx\\
+
+    &=\frac{\pi^2}{2}+[-\cos x]_\pi^{2\pi}+\frac{\pi^2}{2}\\
+
+    &=\boxed{\pi^2-2}.
+
+    \end{aligned}
+
+    $$
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+不要误认为 $f$ 本身以 $\pi$ 为周期：它满足的是含 $\sin x$ 的**非齐次平移递推**。积分端点是否包含在分段内不影响结果。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-02-005" type="single" points={4} tags="来源:2012考研数一数二, 考点:半周期积分, 考点:单调权重">
+<Question id="core-1102-math-97dbde-023" type="essay" points={9} tags="来源:1992年考研数学一、二, 科目:高等数学, 章节:定积分, 考点:分段函数的积分区间代换">
 
-设 $I_k=\int_0^{k\pi}e^{x^2}\sin x\,dx$（$k=1,2,3$），则（ ）。
-
-<Option>$I_1<I_2<I_3$</Option>
-<Option>$I_3<I_2<I_1$</Option>
-<Option>$I_2<I_3<I_1$</Option>
-<Option correct>$I_2<I_1<I_3$</Option>
+ 设 $f(x)=\begin{cases}1+x^2, & x\leqslant 0, \\ e^{-x}, & x>0,\end{cases}$ 求 $\int_{1}^{3} f(x-2)dx$.
 
 <Solution>
 
-**答案：D，$I_2<I_1<I_3$。**
+**参考结论：** $\boxed{\frac73-e^{-1}}$。
 
-**第一步：将整段积分拆成三个半周期。** 记
+**解题思路：** 利用平移换元将 $f(x-2)$ 改为 $f(u)$；分段函数的切换点 $u=0$ 对应原变量 $x=2$，所以必须在该处拆开积分。
 
-$$
-A_j=\int_{j\pi}^{(j+1)\pi}e^{x^2}\sin x\,dx\qquad(j=0,1,2).
-$$
+<Steps>
 
-则 $I_1=A_0$、$I_2=A_0+A_1$、$I_3=A_0+A_1+A_2$。
+  <Step>
 
-**第二步：比较第一个正面积与第二个负面积。** 对 $0<t<\pi$，$\sin t>0$，且 $e^{(t+\pi)^2}>e^{t^2}$，因此
 
-$$
-A_0=\int_0^\pi e^{t^2}\sin t\,dt>0,
-$$
 
-$$
-A_1=-\int_0^\pi e^{(t+\pi)^2}\sin t\,dt<-A_0.
-$$
+    ### 统一自变量与积分范围
 
-故 $I_2=A_0+A_1<0<I_1$。
 
-**第三步：比较第三个正面积。** 由 $\sin(t+2\pi)=\sin t$，
 
-$$
-A_2=\int_0^\pi e^{(t+2\pi)^2}\sin t\,dt,
-$$
+    设 $u=x-2$，则 $\mathrm du=\mathrm dx$，$x=1\Rightarrow u=-1$，$x=3\Rightarrow u=1$。因此
 
-其大小严格大于 $|A_1|=\int_0^\pi e^{(t+\pi)^2}\sin t\,dt$，因为权重随自变量严格递增。因此
 
-$$
-I_3=I_1+A_1+A_2>I_1.
-$$
 
-合并得到 $I_2<I_1<I_3$。
+    $$
 
-<Callout type="warn" title="不能仅靠正负交替判定累计积分">每个半周期积分符号交替，但累计值的大小还依赖其绝对值。$e^{x^2}$ 随 $x>0$ 严格递增，保证后一半周期的面积绝对值更大。</Callout>
+    I=\int_1^3f(x-2)\,\mathrm dx=\int_{-1}^1f(u)\,\mathrm du.
+
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 按定义域分段
+
+
+
+    在 $[-1,0]$ 上 $f(u)=1+u^2$；在 $(0,1]$ 上 $f(u)=e^{-u}$。由积分的区间可加性，
+
+
+
+    $$
+
+    I=\int_{-1}^0(1+u^2)\,\mathrm du+\int_0^1e^{-u}\,\mathrm du.
+
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 分别积分并合并
+
+
+
+    分别计算
+
+
+
+    $$
+
+    \begin{aligned}
+
+    \int_{-1}^0(1+u^2)\,\mathrm du&=\left[u+\frac{u^3}3\right]_{-1}^0=\frac43,\\
+
+    \int_0^1e^{-u}\,\mathrm du&=\left[-e^{-u}\right]_0^1=1-e^{-1}.
+
+    \end{aligned}
+
+    $$
+
+
+
+    故 $I=\frac43+1-e^{-1}=\boxed{\frac73-e^{-1}}$。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+平移换元后 **积分上下限也要同时平移**。不要在 $[-1,1]$ 上误用同一段函数表达式；分界点 $0$ 的取值不影响积分。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-02-006" type="single" points={4} tags="来源:2014考研数一, 考点:平方积分最小化, 考点:正交投影">
+<Question id="core-1102-math-97dbde-025" type="essay" points={5} tags="来源:1992年考研数学二, 科目:高等数学, 章节:定积分, 考点:三角根式与绝对值分段">
 
-若
+ 求 $\int_0^\pi \sqrt{1 - \sin x} \, \mathrm{d}x$.
+
+<Solution>
+
+**参考结论：** $\boxed{4(\sqrt2-1)}$。
+
+**解题思路：** 根号下的表达式先化为完全平方，开方得到绝对值；然后判定 $\sin(x/2)-\cos(x/2)$ 在 $[0,\pi]$ 上的符号并分段。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 将根式化为绝对值
+
+
+
+    由 $\sin^2\theta+\cos^2\theta=1$ 以及 $2\sin\theta\cos\theta=\sin2\theta$，
+
+
+
+    $$
+
+    1-\sin x=\left(\sin\frac x2-\cos\frac x2\right)^2.
+
+    $$
+
+
+
+    因此 $\sqrt{1-\sin x}=\left|\sin\frac x2-\cos\frac x2\right|$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 判断正负并拆积分
+
+
+
+    因 $x/2\in[0,\pi/2]$，当 $x<\pi/2$ 时 $\sin(x/2)<\cos(x/2)$；当 $x>\pi/2$ 时不等号相反。所以
+
+
+
+    $$
+
+    \begin{aligned}
+
+    I&=\int_0^{\pi/2}\left(\cos\frac x2-\sin\frac x2\right)\,\mathrm dx\\
+
+    &\quad+\int_{\pi/2}^\pi\left(\sin\frac x2-\cos\frac x2\right)\,\mathrm dx.
+
+    \end{aligned}
+
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 计算两段的面积
+
+
+
+    第一段原函数为 $2\sin\frac x2+2\cos\frac x2$，给出 $2(\sqrt2-1)$；第二段原函数为 $-2\cos\frac x2-2\sin\frac x2$，同样为 $2(\sqrt2-1)$。
+
+
+
+    因此 $I=\boxed{4(\sqrt2-1)}$。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+记住 $\sqrt{A^2}=|A|$，而不是 $A$。若忘记绝对值，积分会出现错误抵消，甚至得出 $0$，与非负被积函数矛盾。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-029" type="single" points={3} tags="来源:1994年考研数学一、二, 科目:高等数学, 章节:定积分, 考点:奇偶性与定积分比较">
+
+ 设 $M = \int_{-\frac{\pi}{2}}^{\frac{\pi}{2}} \frac{\sin x}{1 + x^2} \cos^4 x \, \mathrm{d}x$, $N = \int_{-\frac{\pi}{2}}^{\frac{\pi}{2}} (\sin^3 x + \cos^4 x) \, \mathrm{d}x$, $P = \int_{-\frac{\pi}{2}}^{\frac{\pi}{2}} (x^2 \sin^3 x - \cos^4 x) \, \mathrm{d}x$, 则（ $\quad$ ）.
+
+<Option>$N < P < M$</Option>
+<Option>$M < P < N$</Option>
+<Option>$N < M < P$</Option>
+<Option correct>$P < M < N$</Option>
+
+<Solution>
+
+**参考结论：** $\boxed{P<M<N}$，选 D。
+
+**解题思路：** 三个积分都在关于原点对称的区间上，先用奇偶性消去奇函数积分，再判断剩下的偶函数积分的正负，不需要计算其具体值。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 判断 $M$ 的奇偶性
+
+
+
+    $\sin x$ 是奇函数，$(1+x^2)^{-1}$ 和 $\cos^4x$ 都是偶函数，因此它们的乘积是奇函数。故
+
+
+
+    $$
+
+    M=\int_{-\pi/2}^{\pi/2}\frac{\sin x\cos^4x}{1+x^2}\,\mathrm dx=0.
+
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 判断 $N$ 与 $P$
+
+
+
+    $\sin^3x$ 是奇函数，$x^2\sin^3x$ 也是奇函数，故两者在对称区间上的积分为零。记
+
+
+
+    $$
+
+    A=\int_{-\pi/2}^{\pi/2}\cos^4x\,\mathrm dx>0,
+
+    $$
+
+
+
+    于是 $N=A$，$P=-A$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 比较大小并对应选项
+
+
+
+    由 $A>0$ 立即得到
+
+
+
+    $$
+
+    P=-A<0=M<A=N,
+
+    $$
+
+
+
+    即 $\boxed{P<M<N}$，对应 D 项。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+“偶函数积分可化为两倍半区间积分”不代表其一定大于零；本题是因为 $\cos^4x\ge0$ 且并非恒零，才得出 $A>0$。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-033" type="blank" points={3} tags="来源:1995年考研数学一, 科目:高等数学, 章节:定积分, 考点:积分参数求导与乘积法则">
+
+ $\dfrac{\mathrm{d}}{\mathrm{d}x} \int_{x^2}^0 x\cos t^2 \, \mathrm{d}t =$ <Blank answer="\int_{x^2}^0 \cos t^2 dt - 2x^2 \cos x^4" kind="text" placeholder="输入文字或 LaTeX" />.
+
+<Solution>
+
+**参考结论：** $\boxed{\int_{x^2}^0\cos(t^2)\,\mathrm dt-2x^2\cos(x^4)}$。
+
+**解题思路：** 被积表达式 $x\cos t^2$ 显含参数 $x$，且下限也含 $x$。先把与 $t$ 无关的 $x$ 提到积分外，再用乘积法则与变下限公式。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 提取参数并设置辅助函数
+
+
+
+    写为
+
+
+
+    $$
+
+    I(x)=xJ(x),\qquad J(x)=\int_{x^2}^0\cos(t^2)\,\mathrm dt.
+
+    $$
+
+
+
+    因此 $I^{\prime}(x)=J(x)+xJ^{\prime}(x)$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 对变下限积分求导
+
+
+
+    设 $h(t)=\cos(t^2)$。由变下限公式
+
+
+
+    $$
+
+    J^{\prime}(x)=-h(x^2)(x^2)'=-2x\cos(x^4).
+
+    $$
+
+
+
+    注意 $h(x^2)=\cos((x^2)^2)=\cos(x^4)$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 合并得到答案
+
+
+
+    代回乘积求导式，得
+
+
+
+    $$
+
+    \boxed{I^{\prime}(x)=\int_{x^2}^0\cos(t^2)\,\mathrm dt-2x^2\cos(x^4)}.
+
+    $$
+
+
+
+    令 $x=0$，两项都为 $0$，与 $I(x)$ 在零点附近的高阶小量特征一致。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+不能把 $x$ 看成积分变量 $t$；也不能只对上下限求导而漏掉积分外因子 $x$ 的导数。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-034" type="essay" points={8} tags="来源:1995年考研数学二, 科目:高等数学, 章节:定积分, 考点:变限积分与积分次序转化">
+
+ 设 $f(x) = \int_0^x \frac{\sin t}{\pi - t} \, \mathrm{d}t$, 计算 $\int_0^\pi f(x) \, \mathrm{d}x$.
+
+<Solution>
+
+**参考结论：** $\boxed{2}$。
+
+**解题思路：** 写成二重积分后观察区域 $0\le t\le x\le\pi$。交换顺序会产生长度因子 $\pi-t$，恰好与分母抵消。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 把变上限积分化成二重积分
+
+
+
+    设 $h(t)=\frac{\sin t}{\pi-t}$（$t<\pi$）。由于 $\sin t\sim\pi-t$（当 $t\to\pi^-$），可补定义 $h(\pi)=1$，使 $h$ 在 $[0,\pi]$ 上连续。因此
+
+
+
+    $$
+
+    I=\int_0^\pi\left[\int_0^x h(t)\,\mathrm dt\right]\mathrm dx.
+
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 根据三角形区域交换积分次序
+
+
+
+    积分区域为 $D=\{(t,x):0\le t\le x\le\pi\}$。固定 $t$ 后，$x$ 的取值为 $t\le x\le\pi$，故
+
+
+
+    $$
+
+    \begin{aligned}
+
+    I&=\int_0^\pi\left[\int_t^\pi\frac{\sin t}{\pi-t}\,\mathrm dx\right]\mathrm dt\\
+
+    &=\int_0^\pi\frac{\sin t}{\pi-t}(\pi-t)\,\mathrm dt.
+
+    \end{aligned}
+
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 约去因子并计算
+
+
+
+    在 $t<\pi$ 时因子约去，在端点 $t=\pi$ 的单点值不影响积分。因此
+
+
+
+    $$
+
+    I=\int_0^\pi\sin t\,\mathrm dt=[-\cos t]_0^\pi=\boxed{2}.
+
+    $$
+
+
+
+  </Step>
+
+</Steps>
+
+<Tabs items={["正向推导", "方法补充"]} defaultIndex={0}>
+
+  <Tab value="正向推导">
+
+
+
+    交换积分顺序一眼消去 $\pi-t$。
+
+
+
+  </Tab>
+
+  <Tab value="方法补充">
+
+
+
+    也可设 $F(x)=\int_0^x h(t)\,\mathrm dt$，在 $[0,\pi]$ 上作分部积分：
+
+
+
+    $$
+
+    \begin{aligned}
+
+    I&=[xF(x)]_0^\pi-\int_0^\pi xh(x)\,\mathrm dx\\
+
+    &=\int_0^\pi(\pi-x)h(x)\,\mathrm dx=2.
+
+    \end{aligned}
+
+    $$
+
+
+
+    这与交换积分顺序完全等价。
+
+
+
+  </Tab>
+
+</Tabs>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+原式在 $t=\pi$ 形式上是 $0/0$，但这是**可去奇点**，不影响积分。交换积分顺序必须先准确写出区域边界，避免把内层积分误写成 $0\to t$。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-035" type="essay" points={6} tags="来源:1995年考研数学三, 科目:高等数学, 章节:定积分, 考点:区间对称性与偶函数积分">
+
+ 设 $f(x), g(x)$ 在区间 $[-a, a] \, (a > 0)$ 上连续，$g(x)$ 为偶函数，且 $f(x)$ 满足条件 $f(x) + f(-x) = A$ ($A$ 为常数).
+(1)证明 $\int_{-a}^{a} f(x)g(x)\,\mathrm{d}x = A\int_{0}^{a} g(x)\,\mathrm{d}x$；
+
+(2)利用(1)的结论计算定积分 $\int_{-\frac{\pi}{2}}^{\frac{\pi}{2}} |\sin x|\arctan\mathrm{e}^{x}\,\mathrm{d}x$。
+
+<Solution>
+
+**参考结论：** (1) $\displaystyle\int_{-a}^af(x)g(x)\,\mathrm dx=A\int_0^ag(x)\,\mathrm dx$；(2) $\boxed{\pi/2}$。
+
+**解题思路：** 利用 $g$ 的偶性与 $f(x)+f(-x)=A$ 构造对称积分恒等式，再将 $f(x)=\arctan(e^x)$ 和 $g(x)=|\sin x|$ 代入。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 先做变量替换，得到同一积分的第二种表达式
+
+
+
+    记 $I=\int_{-a}^af(x)g(x)\,\mathrm dx$。令 $x=-u$，并运用 $g(-u)=g(u)$：
+
+
+
+    $$
+
+    I=\int_{-a}^af(-u)g(u)\,\mathrm du.
+
+    $$
+
+
+
+    将 $u$ 重新记成 $x$，与原式相加。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 利用互补关系完成证明
+
+
+
+    由题设 $f(x)+f(-x)=A$，可得
+
+
+
+    $$
+
+    \begin{aligned}
+
+    2I&=\int_{-a}^a[f(x)+f(-x)]g(x)\,\mathrm dx\\
+
+    &=A\int_{-a}^ag(x)\,\mathrm dx
+
+    =2A\int_0^ag(x)\,\mathrm dx.
+
+    \end{aligned}
+
+    $$
+
+
+
+    故 $\boxed{I=A\int_0^ag(x)\,\mathrm dx}$，第一问得证。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 将恒等式用于反正切指数函数
+
+
+
+    取 $a=\pi/2$、$f(x)=\arctan(e^x)$、$g(x)=|\sin x|$。因为 $e^x>0$ 且 $\arctan z+\arctan(1/z)=\pi/2$（$z>0$），所以
+
+
+
+    $$
+
+    f(x)+f(-x)=\arctan(e^x)+\arctan(e^{-x})=\frac\pi2.
+
+    $$
+
+
+
+    又 $|\sin x|$ 是偶函数，于是
+
+
+
+    $$
+
+    \begin{aligned}
+
+    I&=\frac\pi2\int_0^{\pi/2}\sin x\,\mathrm dx\\
+
+    &=\frac\pi2[-\cos x]_0^{\pi/2}=\boxed{\frac\pi2}.
+
+    \end{aligned}
+
+    $$
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+反正切加法公式涉及分支：这里由于 $e^x>0$，两项角度都在 $(0,\pi/2)$，故和确为 $\pi/2$；不能忽略自变量的正负条件。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-038" type="single" points={3} tags="来源:1997年考研数学一、二, 科目:高等数学, 章节:定积分, 考点:周期积分与积分符号判断">
+
+ 设 $F(x) = \int_{x}^{x+2\pi} \mathrm{e}^{\sin t}\sin t\,\mathrm{d}t$，则 $F(x)$（ $\quad$ ）.
+
+<Option correct>为正常数 $\quad\quad$</Option>
+<Option>为负常数 $\quad\quad$</Option>
+<Option>恒为零 $\quad\quad$</Option>
+<Option>不为常数</Option>
+
+<Solution>
+
+**参考结论：** $\boxed{\text{正常数}}$，选 A。
+
+**解题思路：** 先利用 $2\pi$ 周期性证明积分与起点无关，再将一个周期按正负半周配对；比较 $e^s$ 与 $e^{-s}$ 确定严格大于零。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 证明对 $x$ 不变
+
+
+
+    设 $h(t)=e^{\sin t}\sin t$。由 $h(t+2\pi)=h(t)$，若
+
+
+
+    $$
+
+    F(x)=\int_x^{x+2\pi}h(t)\,\mathrm dt,
+
+    $$
+
+
+
+    则
+
+
+
+    $$
+
+    F^{\prime}(x)=h(x+2\pi)-h(x)=0.
+
+    $$
+
+
+
+    因此 $F(x)$ 是常数，且等于 $F(0)$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 对一个周期内的正负半波配对
+
+
+
+    将 $[0,2\pi]$ 分为两段，第二段令 $t=u+\pi$，注意 $\sin(u+\pi)=-\sin u$：
+
+
+
+    $$
+
+    \begin{aligned}
+
+    F(0)&=\int_0^\pi e^{\sin u}\sin u\,\mathrm du
+
+    +\int_0^\pi e^{-\sin u}(-\sin u)\,\mathrm du\\
+
+    &=\int_0^\pi\sin u\left(e^{\sin u}-e^{-\sin u}\right)\mathrm du.
+
+    \end{aligned}
+
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 严格判断符号
+
+
+
+    在 $0<u<\pi$ 上，$\sin u>0$，且 $e^{\sin u}>e^{-\sin u}$；所以积分的被积函数处处为正，得 $F(0)>0$。
+
+
+
+    于是 $F(x)$ 为**正常数**，选 A。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+周期积分等于常数，不代表它等于零。$e^{\sin t}\sin t$ 并非单纯奇函数跨任意中心对称区间，因此直接“正负抵消”是错误的。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-039" type="blank" points={3} tags="来源:1997年考研数学三, 科目:高等数学, 章节:定积分, 考点:含定积分的函数方程">
+
+ 若 $f(x) = \frac{1}{1+x^2} + \sqrt{1-x^2}\int_{0}^{1} f(x)\,\mathrm{d}x$，则 $\int_{0}^{1} f(x)\,\mathrm{d}x = $ <Blank answer="((pi)/(4-pi))" kind="math" /> .
+
+<Solution>
+
+**参考结论：** $\boxed{\frac\pi{4-\pi}}$。
+
+**解题思路：** 把 $\int_0^1f(t)\,\mathrm dt$ 视为一个未知常数 $I$；对整个函数方程积分，得到关于 $I$ 的一次方程。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 设定未知常数并重写函数
+
+
+
+    为避免积分哑变量与自由变量混淆，设
+
+
+
+    $$
+
+    I=\int_0^1 f(t)\,\mathrm dt.
+
+    $$
+
+
+
+    题设成为 $f(x)=\frac1{1+x^2}+I\sqrt{1-x^2}$，其中考虑 $0\le x\le1$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 两边积分并分别求出已知积分
+
+
+
+    两边在 $[0,1]$ 上积分得
+
+
+
+    $$
+
+    I=\int_0^1\frac{\mathrm dx}{1+x^2}+I\int_0^1\sqrt{1-x^2}\,\mathrm dx.
+
+    $$
+
+
+
+    第一项为 $[\arctan x]_0^1=\pi/4$；第二项的积分是单位圆在第一象限的面积，也为 $\pi/4$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 解线性方程并验证分母
+
+
+
+    因此
+
+
+
+    $$
+
+    I=\frac\pi4+\frac\pi4I,
+
+    \qquad
+
+    I\left(1-\frac\pi4\right)=\frac\pi4.
+
+    $$
+
+
+
+    因 $\pi<4$，分母非零，故 $\boxed{I=\frac\pi{4-\pi}}$。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+函数方程中的 $\int_0^1 f(x)\,\mathrm dx$ 是**确定的常数**，不随外面的自由变量 $x$ 改变。遇到这种题先换成 $I$，能避免把它误认为变限积分。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-040" type="single" points={3} tags="来源:1998年考研数学一、二, 科目:高等数学, 章节:定积分, 考点:变量换元与变限积分求导">
+
+ 设 $f(x)$ 连续，则 $\frac{\mathrm{d}}{\mathrm{d}x}\int_{0}^{x} tf(x^2 - t^2)\,\mathrm{d}t = $（ $\quad$ ）.
+
+<Option correct>$xf(x^2)$ $\quad\quad$</Option>
+<Option>$-xf(x^2)$ $\quad\quad$</Option>
+<Option>$2xf(x^2)$ $\quad\quad$</Option>
+<Option>$-2xf(x^2)$</Option>
+
+<Solution>
+
+**参考结论：** $\boxed{xf(x^2)}$，选 A。
+
+**解题思路：** 先换元把被积函数中的 $x^2-t^2$ 变成积分变量，消除参数对被积函数的依赖，然后应用微积分基本定理。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 对内层积分换元
+
+
+
+    令 $u=x^2-t^2$，则 $\mathrm du=-2t\,\mathrm dt$。当 $t=0$ 时 $u=x^2$，当 $t=x$ 时 $u=0$，所以
+
+
+
+    $$
+
+    \int_0^x t f(x^2-t^2)\,\mathrm dt
+
+    =-\frac12\int_{x^2}^0f(u)\,\mathrm du
+
+    =\frac12\int_0^{x^2}f(u)\,\mathrm du.
+
+    $$
+
+
+
+    这一换元也适用于 $x<0$，因为定积分上下限保留了方向。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 应用变上限积分求导
+
+
+
+    设 $H(y)=\int_0^y f(u)\,\mathrm du$。因 $f$ 连续，所以 $H^{\prime}(y)=f(y)$，
+
+
+
+    $$
+
+    \begin{aligned}
+
+    \frac{\mathrm d}{\mathrm dx}\frac12H(x^2)
+
+    &=\frac12H^{\prime}(x^2)\cdot2x\\
+
+    &=\boxed{xf(x^2)}.
+
+    \end{aligned}
+
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 通过常函数校验符号与系数
+
+
+
+    若取 $f\equiv1$，原式为 $\int_0^xt\,\mathrm dt=x^2/2$，其导数为 $x$；答案 $xf(x^2)$ 同样为 $x$。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+不能将 $x$ 当成固定参数而仅对上限 $t=x$ 求导，因为 integrand $tf(x^2-t^2)$ 也依赖 $x$；换元是最省力、最可靠的处理方式。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-043" type="blank" points={3} tags="来源:1999年考研数学三, 科目:高等数学, 章节:定积分, 考点:原函数关系与分部积分">
+
+ 设 $f(x)$ 有一个原函数 $\frac{\sin x}{x}$，则 $\int_{\frac{\pi}{2}}^{\pi} xf'(x)\,\mathrm{d}x = $ <Blank answer="((4)/(pi))-1" kind="math" /> .
+
+<Solution>
+
+**参考结论：** $\boxed{\frac4\pi-1}$。
+
+**解题思路：** 题目说“$f$ 有一个原函数 $\sin x/x$”，意味着 $f$ 是它的一阶导数。先求端点的 $f$ 值，再用分部积分避免直接求繁琐的 $f^{\prime}$。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 从原函数反求 $f$
+
+
+
+    设 $F(x)=\frac{\sin x}x$，则题设意味着 $F^{\prime}=f$，所以
+
+
+
+    $$
+
+    f(x)=\frac{x\cos x-\sin x}{x^2},\qquad x\in[\pi/2,\pi].
+
+    $$
+
+
+
+    由此得到 $f(\pi)=-1/\pi$、$f(\pi/2)=-4/\pi^2$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 对 $x f^{\prime}(x)$ 使用分部积分
+
+
+
+    取 $u=x$，$\mathrm dv=f^{\prime}(x)\,\mathrm dx$，得到
+
+
+
+    $$
+
+    I=\int_{\pi/2}^\pi xf^{\prime}(x)\,\mathrm dx
+
+    =\left[xf(x)\right]_{\pi/2}^{\pi}-\int_{\pi/2}^\pi f(x)\,\mathrm dx.
+
+    $$
+
+
+
+    第一项为
+
+
+
+    $$
+
+    \left[xf(x)\right]_{\pi/2}^{\pi}
+
+    =-1-\left(-\frac2\pi\right)=-1+\frac2\pi.
+
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 使用已知原函数处理余项
+
+
+
+    因为 $F^{\prime}=f$，
+
+
+
+    $$
+
+    \int_{\pi/2}^\pi f(x)\,\mathrm dx
+
+    =F(\pi)-F(\pi/2)=0-\frac2\pi=-\frac2\pi.
+
+    $$
+
+
+
+    所以
+
+
+
+    $$
+
+    I=\left(-1+\frac2\pi\right)-\left(-\frac2\pi\right)
+
+    =\boxed{\frac4\pi-1}.
+
+    $$
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+“$f$ 有一个原函数 $F$”是 $F^{\prime}=f$，而不是 $f^{\prime}=F$。若先求 $f^{\prime}(x)$ 再积分，会平白引入商法则的复杂项。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-044" type="essay" points={6} tags="来源:1999年考研数学三, 科目:高等数学, 章节:定积分, 考点:积分型函数方程与积分变换">
+
+ 设函数 $f(x)$ 连续，且 $\int_{0}^{x} tf(2x-t)\,\mathrm{d}t = \frac{1}{2}\arctan x^2$. 已知 $f(1)=1$，求 $\int_{1}^{2} f(x)\,\mathrm{d}x$ 的值。
+
+<Solution>
+
+**参考结论：** $\boxed{\int_1^2 f(x)\,\mathrm dx=\frac34}$。
+
+**解题思路：** 积分中出现 $f(2x-t)$，直接对 $x$ 求导会涉及未知 $f^{\prime}$（题目只给连续性）。先令 $u=2x-t$，将 $x$ 的作用移到积分限和显式系数，再求导。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 换元为端点随 $x$ 变化的积分
+
+
+
+    记 $H(x)=\int_0^xtf(2x-t)\,\mathrm dt$。令 $u=2x-t$，则 $t=2x-u$、$\mathrm dt=-\mathrm du$，端点 $t=0\to u=2x$，$t=x\to u=x$。故
+
+
+
+    $$
+
+    H(x)=\int_x^{2x}(2x-u)f(u)\,\mathrm du.
+
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 用莱布尼茨公式求导
+
+
+
+    对右侧积分求导，注意 $f$ 仅需连续：
+
+
+
+    $$
+
+    \begin{aligned}
+
+    H^{\prime}(x)
+
+    &=(2x-2x)f(2x)\cdot2
+
+    -(2x-x)f(x)\cdot1
+
+    +\int_x^{2x}2f(u)\,\mathrm du\\
+
+    &=-xf(x)+2\int_x^{2x}f(u)\,\mathrm du.
+
+    \end{aligned}
+
+    $$
+
+
+
+    上限项恰好为零，这是换元的优势。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 对照已知导数，在 $x=1$ 代入
+
+
+
+    题设 $H(x)=\frac12\arctan(x^2)$，因此
+
+
+
+    $$
+
+    H^{\prime}(x)=\frac12\frac{2x}{1+x^4}=\frac x{1+x^4}.
+
+    $$
+
+
+
+    在 $x=1$ 时，$H^{\prime}(1)=1/2$，$f(1)=1$，所以
+
+
+
+    $$
+
+    \frac12=-1+2\int_1^2f(u)\,\mathrm du
+
+    \quad\Longrightarrow\quad
+
+    \boxed{\int_1^2f(u)\,\mathrm du=\frac34}.
+
+    $$
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+若直接对 $f(2x-t)$ 使用链式法则，等于擅自假设 $f$ 可导；题目只保证 $f$ 连续。把 $f$ 改成积分变量 $u$ 的函数后再求导，才能严格合法。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-047" type="essay" points={7} tags="来源:2001年考研数学二, 科目:高等数学, 章节:定积分, 考点:构造乘积导数与积分计算">
+
+ 设函数 $f(x), g(x)$ 满足 $f'(x)=g(x), g'(x)=2\mathrm{e}^x - f(x)$，且 $f(0)=0, g(0)=2$，求 $\int_{0}^{\pi} \left[\frac{g(x)}{1+x} - \frac{f(x)}{(1+x)^2}\right]\,\mathrm{d}x$.
+
+<Solution>
+
+**参考结论：** $\boxed{\dfrac{e^\pi+1}{\pi+1}}$。
+
+**解题思路：** 观察被积函数是 $\bigl(f(x)/(1+x)\bigr)^\prime$；所以只需求 $f(\pi)$。利用 $f^{\prime}=g$ 把给出的联立关系化为二阶线性微分方程解出 $f$。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 识别整体导数并化为端点值
+
+
+
+    因为 $g(x)=f^{\prime}(x)$，
+
+
+
+    $$
+
+    \left(\frac{f(x)}{1+x}\right)'
+
+    =\frac{f^{\prime}(x)}{1+x}-\frac{f(x)}{(1+x)^2}
+
+    =\frac{g(x)}{1+x}-\frac{f(x)}{(1+x)^2}.
+
+    $$
+
+
+
+    故 $I=[f(x)/(1+x)]_0^\pi=f(\pi)/(1+\pi)$，其中 $f(0)=0$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 求解 $f$ 满足的二阶微分方程
+
+
+
+    由 $f^{\prime}=g$、$g^{\prime}=2e^x-f$ 得
+
+
+
+    $$
+
+    f^{\prime\prime}+f=2e^x,\qquad f(0)=0,\quad f^{\prime}(0)=g(0)=2.
+
+    $$
+
+
+
+    齐次通解 $C_1\cos x+C_2\sin x$，取非齐次特解 $e^x$，因此
+
+
+
+    $$
+
+    f(x)=e^x+C_1\cos x+C_2\sin x.
+
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 代入初值并计算端点
+
+
+
+    由 $f(0)=0$ 得 $C_1=-1$；由 $f^{\prime}(0)=2$ 得 $1+C_2=2$，故 $C_2=1$。
+
+
+
+    $$
+
+    f(x)=e^x-\cos x+\sin x,
+
+    \qquad f(\pi)=e^\pi+1.
+
+    $$
+
+
+
+    最终 $I=\boxed{\frac{e^\pi+1}{\pi+1}}$。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+不要一开始就对复杂分式积分；先反向识别商的导数，能把全部积分计算简化为端点代入。求 $C_1,C_2$ 时需使用 $f^{\prime}(0)=g(0)$，而非把 $g(0)$ 误当成 $f(0)$。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-049" type="single" points={3} tags="来源:2002年考研数学二, 科目:高等数学, 章节:定积分, 考点:函数奇偶性与变上限积分">
+
+ 设函数 $f(x)$ 连续，则下列函数中，必为偶函数的是（ $\quad$ ）.
+
+<Option>$\int_{0}^{x} f(t^2)\,\mathrm{d}t$ $\quad\quad$</Option>
+<Option>$\int_{0}^{x} f^2(t)\,\mathrm{d}t$</Option>
+<Option correct>$\int_0^x [f(t) - f(-t)] \mathrm{d}t$</Option>
+<Option>$\int_0^x [f(t) + f(-t)] \mathrm{d}t$</Option>
+
+<Solution>
+
+**参考结论：** 按题面正确选项为 $\boxed{\mathrm C}$（原题资料将 D 标为正确，已在本次更正）。
+
+**解题思路：** 考查积分函数的奇偶性：$h(t)$ 为奇函数时，$\int_0^x h(t)\,\mathrm dt$ 为偶函数；$h(t)$ 为偶函数时，该积分为奇函数。逐项检查。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 先证明奇偶性转换规律
+
+
+
+    令 $G(x)=\int_0^xh(t)\,\mathrm dt$。作代换 $t=-u$：
+
+
+
+    $$
+
+    G(-x)=\int_0^{-x}h(t)\,\mathrm dt
+
+    =-\int_0^xh(-u)\,\mathrm du.
+
+    $$
+
+
+
+    所以 $h$ 为奇函数时 $G(-x)=G(x)$；$h$ 为偶函数时 $G(-x)=-G(x)$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 检查 A、B 选项
+
+
+
+    A：$h(t)=f(t^2)$ 必为偶函数，因此积分必为奇函数，通常不为偶函数。例如 $f\equiv1$ 时结果是 $x$。
+
+
+
+    B：$h(t)=f^2(t)$ 未必是奇函数（例如 $f\equiv1$），因此积分不一定为偶函数。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 检查 C、D 并作出更正
+
+
+
+    C：$h(t)=f(t)-f(-t)$，则
+
+
+
+    $$
+
+    h(-t)=f(-t)-f(t)=-h(t),
+
+    $$
+
+
+
+    故积分必为偶函数，**C 正确**。
+
+
+
+    D：$h(t)=f(t)+f(-t)$ 为偶函数，所以积分必为奇函数，通常非偶函数；例如 $f\equiv1$ 时结果为 $2x$。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+**原选项键存在勘误：按所给题面应选择 C，而不是 D**。本次已同步修改 `<Option correct>` 的结构化答案，确保自动判分与解析一致。零函数同时是奇函数和偶函数，但题目要的是对任意连续 $f$ “必为”偶函数。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-050" type="essay" points={7} tags="来源:2002年考研数学二, 科目:高等数学, 章节:定积分, 考点:分段函数的积分与连续性">
+
+ 设
 
 $$
-\int_{-\pi}^{\pi}(x-a_1\cos x-b_1\sin x)^2\,dx
-=\min_{a,b\in\mathbb R}
-\int_{-\pi}^{\pi}(x-a\cos x-b\sin x)^2\,dx,
+f(x) = \begin{cases} 2x + \frac{3}{2}x^2, & -1 \leqslant x < 0, \\ \frac{xe^x}{(e^x + 1)^2}, & 0 \leqslant x \leqslant 1. \end{cases}
 $$
 
-则 $a_1\cos x+b_1\sin x=$（ ）。
+求函数 $F(x) = \int_{-1}^x f(t) \mathrm{d}t$ 的表达式.
+
+<Solution>
+
+**参考结论：** $\displaystyle\boxed{F(x)=\begin{cases}\frac12x^3+x^2-\frac12,&-1\le x<0,\\[2pt]x-\ln(1+e^x)-\frac{x}{1+e^x}+\ln2-\frac12,&0\le x\le1.\end{cases}}$。
+
+**解题思路：** 积分上限跨过 $0$ 时要先累积 $[-1,0]$ 区间的面积，再从 $0$ 积到 $x$。后一段运用 $\bigl(1/(1+e^t)\bigr)^{\prime}$ 做分部积分。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 求 $-1\le x<0$ 的表达式
+
+
+
+    对第一个分段直接求原函数，
+
+
+
+    $$
+
+    \begin{aligned}
+
+    F(x)&=\int_{-1}^x\left(2t+\frac32t^2\right)\,\mathrm dt\\
+
+    &=\left[t^2+\frac12t^3\right]_{-1}^x
+
+    =x^2+\frac12x^3-\frac12.
+
+    \end{aligned}
+
+    $$
+
+
+
+    特别地，$F(0)=-1/2$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 对 $x\ge0$ 分段并计算第二段
+
+
+
+    因为 $F(x)=F(0)+\int_0^x\frac{t e^t}{(1+e^t)^2}\,\mathrm dt$，注意
+
+
+
+    $$
+
+    \left(\frac1{1+e^t}\right)'=-\frac{e^t}{(1+e^t)^2}.
+
+    $$
+
+
+
+    所以分部积分得到
+
+
+
+    $$
+
+    \begin{aligned}
+
+    \int\frac{t e^t}{(1+e^t)^2}\,\mathrm dt
+
+    &=-\frac t{1+e^t}+\int\frac{\mathrm dt}{1+e^t}\\
+
+    &=-\frac t{1+e^t}+t-\ln(1+e^t)+C.
+
+    \end{aligned}
+
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 确定常数并写完整区间
+
+
+
+    第二段原函数在 $t=0$ 时取 $-\ln2$，所以
+
+
+
+    $$
+
+    F(x)=-\frac12-\frac{x}{1+e^x}+x-\ln(1+e^x)+\ln2,
+
+    \quad 0\le x\le1.
+
+    $$
+
+
+
+    两段在 $x=0$ 时均为 $-1/2$，与由连续被积函数给出的积分函数连续性一致。最终分段公式如上。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+**修正了原答案中第二段遗漏的右端点**：题干规定 $f$ 在 $[-1,1]$ 上有定义，因此 $F$ 的后段区间是 $0\le x\le1$，不是 $0\le x<1$。本题积分常数应通过 $F(0)$ 确定，不可给第二段另选独立常数。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-051" type="single" points={4} tags="来源:2003年考研数学二, 科目:高等数学, 章节:定积分, 考点:定积分大小比较与基本不等式">
+
+ 设 $I_1 = \int_0^{\frac{\pi}{4}} \frac{\tan x}{x} \mathrm{d}x$, $I_2 = \int_0^{\frac{\pi}{4}} \frac{x}{\tan x} \mathrm{d}x$, 则 ( ).
+
+<Option>$I_1 > I_2 > 1$</Option>
+<Option correct>$1 > I_1 > I_2$</Option>
+<Option>$I_2 > I_1 > 1$</Option>
+<Option>$1 > I_2 > I_1$</Option>
+
+<Solution>
+
+**参考结论：** $\boxed{1>I_1>I_2}$，选 B。
+
+**解题思路：** 先用 $\tan x>x$ 比较 $I_1$、$I_2$；然后利用 $\tan x/x<\sec^2x$ 给 $I_1$ 构造一个能直接积分且积分为 $1$ 的上界。
+
+<Steps>
+
+  <Step>
+
+
+
+    ### 逐点比较 $I_1$ 与 $I_2$
+
+
+
+    在 $0<x\le\pi/4$ 上，
+
+
+
+    $$
+
+    \tan x>x>0
+
+    \quad\Longrightarrow\quad
+
+    \frac{\tan x}{x}>1>\frac x{\tan x}.
+
+    $$
+
+
+
+    因此同区间积分满足 $I_1>I_2$。两被积函数在 $x\to0^+$ 的极限均为 $1$，端点没有不可积问题。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 构造 $I_1$ 的可积上界
+
+
+
+    因为 $0<2x\le\pi/2$，所以 $\sin2x<2x$。它等价于 $\sin x\cos x<x$。两边除以正的 $x\cos^2x$，得
+
+
+
+    $$
+
+    \frac{\tan x}{x}<\frac1{\cos^2x}=\sec^2x.
+
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 积分并合并不等式
+
+
+
+    于是
+
+
+
+    $$
+
+    I_1<\int_0^{\pi/4}\sec^2x\,\mathrm dx
+
+    =[\tan x]_0^{\pi/4}=1.
+
+    $$
+
+
+
+    综上，$\boxed{1>I_1>I_2}$，选择 B。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+
+
+只证明 $I_1>I_2$ 并不足以确定选项，还必须与 $1$ 比较。$\tan x>x$ 本身仅给出 $I_1>\pi/4$，无法说明 $I_1<1$；需要寻找更紧的上界。
+
+
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-052" type="essay" points={11} tags="来源:2004年考研数学二, 科目:高等数学, 章节:定积分, 考点:绝对值三角积分的周期和值域">
+
+ 设 $f(x) = \int_x^{x+\frac{\pi}{2}} |\sin t| \mathrm{d}t$.
+
+(1) 证明 $f(x)$ 是以 $\pi$ 为周期的周期函数;
+
+(2) 求 $f(x)$ 的值域.
+
+<Solution>
+
+**参考答案：** (1) $f(x+\pi)=f(x)$；(2) 值域 $\boxed{[2-\sqrt2,\sqrt2]}$。
+**解题思路：** 被积函数 $|\sin t|$ 的周期为 $\pi$；求值域时固定一个周期，按积分区间是否跨过 $\pi$ 分段，再用正弦余弦的振幅求极值。
+<Steps>
+  <Step>
+
+    ### 由积分换元证明周期性
+
+    因为 $|\sin(t+\pi)|=|\sin t|$，令 $u=t-\pi$，得到
+
+    $$
+    \begin{aligned}
+    f(x+\pi)&=\int_{x+\pi}^{x+3\pi/2}|\sin t|\,\mathrm dt\\
+    &=\int_x^{x+\pi/2}|\sin(u+\pi)|\,\mathrm du=f(x).
+    \end{aligned}
+    $$
+
+    故 $\pi$ 是 $f$ 的一个周期，求值域只需研究 $x\in[0,\pi]$。
+
+  </Step>
+  <Step>
+
+    ### 在第一个半周期积分
+
+    当 $0\le x\le\pi/2$ 时，积分区间 $[x,x+\pi/2]\subset[0,\pi]$，所以
+
+    $$
+    f(x)=\int_x^{x+\pi/2}\sin t\,\mathrm dt
+    =\cos x+\sin x=\sqrt2\sin(x+\pi/4).
+    $$
+
+    其中 $f(0)=f(\pi/2)=1$，在 $x=\pi/4$ 达到最大值 $\sqrt2$。于是这一段的值域为 $[1,\sqrt2]$。
+
+  </Step>
+  <Step>
+
+    ### 跨越正弦零点后分段并合并值域
+
+    当 $\pi/2\le x\le\pi$ 时，区间跨过 $\pi$，需写成
+
+    $$
+    \begin{aligned}
+    f(x)&=\int_x^\pi\sin t\,\mathrm dt
+    -\int_\pi^{x+\pi/2}\sin t\,\mathrm dt\\
+    &=2+\cos x-\sin x.
+    \end{aligned}
+    $$
+
+    在 $x=3\pi/4$ 取得最小值 $2-\sqrt2$，在两个端点均等于 $1$。该段值域为 $[2-\sqrt2,1]$。连续性使两段的值域无间隙，合并即 $\boxed{[2-\sqrt2,\sqrt2]}$。
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+由周期性可以**把无限实数域的问题缩成一个周期**。但 $|\sin t|$ 在跨越 $\pi$ 时会改变符号，不能在整个区间都把绝对值直接去掉。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-054" type="essay" points={11} tags="来源:2005年考研数学一、二, 科目:高等数学, 章节:定积分, 考点:高阶导数积分与切线几何信息">
+
+ 如图所示, 曲线 $C$ 的方程为 $y = f(x)$, 点 $(3,2)$ 是它的一个拐点, 直线 $l_1$ 与 $l_2$ 分别是曲线 $C$ 在点 $(0,0)$ 与 $(3,2)$ 处的切线, 其交点为 $(2,4)$, 设函数 $f(x)$ 具有三阶连续导数, 计算定积分 $\int_0^3 (x^2 + x) f'''(x) \mathrm{d}x$.
+![2005-1,2-11 题图](/img/questions/math/calculus-lower-2005-12-11.png)
+
+<Solution>
+
+**参考答案：** $\boxed{20}$。
+**解题思路：** 利用切线斜率和拐点条件把图形信息转成端点处的 $f,f\prime,f\prime\prime$ 数值；对带 $f^{(3)}$ 的积分分部积分两次。
+<Steps>
+  <Step>
+
+    ### 从图形读出边界值
+
+    曲线过 $(0,0)$、$(3,2)$，故 $f(0)=0,\ f(3)=2$。两条切线均过 $(2,4)$，所以
+
+    $$
+    f'(0)=\frac{4-0}{2-0}=2,\qquad
+    f'(3)=\frac{4-2}{2-3}=-2.
+    $$
+
+    由于 $f$ 三阶连续可导，且 $(3,2)$ 为拐点，$f''$ 连续并在该点变号，故 $f''(3)=0$。
+
+  </Step>
+  <Step>
+
+    ### 第一次分部积分消去三阶导数
+
+    设 $P(x)=x^2+x$，$P'(x)=2x+1$，则
+
+    $$
+    \begin{aligned}
+    I&=\int_0^3P(x)f^{(3)}(x)\,\mathrm dx\\
+    &=[P(x)f''(x)]_0^3-\int_0^3(2x+1)f''(x)\,\mathrm dx.
+    \end{aligned}
+    $$
+
+    因为 $P(0)=0$ 且 $f''(3)=0$，第一个边界项为 $0$。
+
+  </Step>
+  <Step>
+
+    ### 第二次分部积分并代入端点信息
+
+    再分部积分：
+
+    $$
+    \begin{aligned}
+    I&=-[(2x+1)f'(x)]_0^3+2\int_0^3f'(x)\,\mathrm dx\\
+    &=-7f'(3)+f'(0)+2[f(3)-f(0)]\\
+    &=-7(-2)+2+2(2-0)=\boxed{20}.
+    \end{aligned}
+    $$
+
+    整个过程均不需要求出 $f(x)$ 的解析式。
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+拐点不一定满足 $f\prime\prime=0$；本题能这样判断是因为**明确给出三阶连续导数**。第一次分部积分时，别忘了下端点 $x=0$ 的系数为零。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-056" type="single" points={4} tags="来源:2006年考研数学二, 科目:高等数学, 章节:定积分, 考点:奇函数间断点与积分函数连续性">
+
+ 设 $f(x)$ 是奇函数, 除 $x = 0$ 外处处连续, $x = 0$ 是其第一类间断点, 则 $\int_0^x f(t) \mathrm{d}t$ 是 ( ).
+
+<Option>连续的奇函数</Option>
+<Option correct>连续的偶函数</Option>
+<Option>在 $x = 0$ 间断的奇函数</Option>
+<Option>在 $x = 0$ 间断的偶函数</Option>
+
+<Solution>
+
+**参考答案：** 连续的偶函数，选 $\boxed{B}$。
+**解题思路：** 积分上限函数能平滑孤立的第一类间断；由奇函数积分从 $0$ 到 $x$ 的对称性判断新函数为偶函数。
+<Steps>
+  <Step>
+
+    ### 证明积分函数处处连续
+
+    令 $F(x)=\int_0^xf(t)\,\mathrm dt$。$f$ 在原点存在有限左右极限，因此在原点附近有界；在别处连续。对任意固定 $x$，若邻域中 $|f(t)|\le M$，则
+
+    $$
+    |F(x+h)-F(x)|=\left|\int_x^{x+h}f(t)\,\mathrm dt\right|\le M|h|\longrightarrow0.
+    $$
+
+    特别在 $x=0$，$F(0)=0$，同样连续；不必要求 $f(0)$ 与其极限相同。
+
+  </Step>
+  <Step>
+
+    ### 利用奇函数积分关系求奇偶性
+
+    因为 $f(-t)=-f(t)$，作变量替换 $t=-u$，则
+
+    $$
+    \begin{aligned}
+    F(-x)&=\int_0^{-x}f(t)\,\mathrm dt\\
+    &=-\int_0^xf(-u)\,\mathrm du\\
+    &=\int_0^xf(u)\,\mathrm du=F(x).
+    \end{aligned}
+    $$
+
+    这说明 $F$ 是偶函数。
+
+  </Step>
+  <Step>
+
+    ### 结合性质确定选项
+
+    已经证明 $F$ 在所有点连续且 $F(-x)=F(x)$，故它是**连续的偶函数**，答案为 B；不需要假设 $f$ 在原点可导或连续。
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+第一类间断点意味着左右极限有限，从而局部有界；**原函数连续性与被积函数连续性不是同一件事**。当 $f$ 是奇函数时，以 $0$ 为下限的积分函数是偶函数。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-057" type="blank" points={4} tags="来源:2007年考研数学一, 科目:高等数学, 章节:定积分, 考点:指数复合积分与倒数换元">
+
+ $\int_1^2 \frac{1}{x^3} e^{\frac{1}{x}} \mathrm{d}x =$ <Blank answer="((sqrt(e))/(2))" kind="math" />.
+
+<Solution>
+
+**参考答案：** $\boxed{\frac{\sqrt e}{2}}$。
+**解题思路：** 把指数中的 $1/x$ 设置为新变量，可同时化简 $x^{-3}\,\mathrm dx$，最后只剩 $ue^u$ 的分部积分。
+<Steps>
+  <Step>
+
+    ### 倒数换元与更新上下限
+
+    设 $u=1/x$，有 $x=1/u$、$\mathrm dx=-u^{-2}\,\mathrm du$，故
+
+    $$
+    x^{-3}e^{1/x}\,\mathrm dx=-ue^u\,\mathrm du.
+    $$
+
+    原积分上下限 $x=1,2$ 对应 $u=1,1/2$；反转限后
+
+    $$
+    I=\int_{1/2}^1ue^u\,\mathrm du.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 分部积分求原函数
+
+    取 $p=u,\ \mathrm dq=e^u\,\mathrm du$，则 $q=e^u$，从而
+
+    $$
+    \int ue^u\,\mathrm du=ue^u-\int e^u\,\mathrm du=(u-1)e^u+C.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 代入边界并检验正负
+
+    因此
+
+    $$
+    I=[(u-1)e^u]_{1/2}^1
+    =0-\left(-\frac12e^{1/2}\right)
+    =\boxed{\frac{\sqrt e}{2}}.
+    $$
+
+    原被积函数在 $[1,2]$ 上为正，结果为正，与性质相符。
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+倒数换元时 $\mathrm dx$ 带负号，**必须同步调换上下限**，不能只做其中一件。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-058" type="single" points={4} tags="来源:2007年考研数学一、二、三, 科目:高等数学, 章节:定积分, 考点:积分函数图形与几何面积">
+
+ 如图所示, 连续函数 $y = f(x)$ 在区间 $[-3, -2], [2, 3]$ 上的图形分别是直径为 1 的上、下半圆周, 在区间 $[-2, 0], [0, 2]$ 上的图形分别是直径为 2 的下、上半圆周, 设 $F(x) = \int_0^x f(t) \mathrm{d}t$, 则下列结论正确的是 ( ).
+
+![2007-1,2,3-4 题图](/img/questions/math/calculus-lower-2007-1234-4.png)
+
+<Option>$F(3) = -\frac{3}{4}F(-2)$</Option>
+<Option>$F(3) = \frac{5}{4}F(2)$</Option>
+<Option correct>$F(-3) = \frac{3}{4}F(2)$</Option>
+<Option>$F(-3) = -\frac{5}{4}F(-2)$</Option>
+
+<Solution>
+
+**参考答案：** $F(-3)=\frac34F(2)$，选 $\boxed{C}$。
+**解题思路：** 将曲线和横轴围成的面积看成“有符号面积”；再注意当积分上限 $x<0$ 时，$\int_0^x=-\int_x^0$。
+<Steps>
+  <Step>
+
+    ### 读出四段半圆的面积符号
+
+    直径为 $2$ 的半圆半径为 $1$，面积为 $\pi/2$；直径为 $1$ 的半圆半径为 $1/2$，面积为 $\pi/8$。从左到右四段积分为
+
+    $$
+    \int_{-3}^{-2}f=\frac\pi8,\quad
+    \int_{-2}^0f=-\frac\pi2,\quad
+    \int_0^2f=\frac\pi2,\quad
+    \int_2^3f=-\frac\pi8.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 把变上限积分写成确定数值
+
+    利用反向积分规则，得到
+
+    $$
+    \begin{aligned}
+    F(2)&=\frac\pi2,\\
+    F(-2)&=-\int_{-2}^0f(t)\,\mathrm dt=\frac\pi2,\\
+    F(-3)&=-\int_{-3}^0f(t)\,\mathrm dt=-\left(\frac\pi8-\frac\pi2\right)=\frac{3\pi}{8},\\
+    F(3)&=\frac\pi2-\frac\pi8=\frac{3\pi}{8}.
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 检验备选关系
+
+    由 $F(-3)=3\pi/8$ 与 $F(2)=\pi/2$，有
+
+    $$
+    \frac{F(-3)}{F(2)}=\frac{3\pi/8}{\pi/2}=\frac34.
+    $$
+
+    因此 C 项正确。其余选项中的比例或符号均与上述数值不符。
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+几何面积默认非负，但**定积分是有向面积**。更易漏掉的是负上限：$F(-3)=\int_0^{-3}f$，不能当作 $\int_{-3}^0f$。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-059" type="essay" points={10} tags="来源:2008年考研数学一, 科目:高等数学, 章节:定积分, 考点:微积分基本定理与周期函数证明">
+
+ 设 $f(x)$ 是连续函数.
+
+(1) 利用定义证明函数 $F(x) = \int_0^x f(t)\,\mathrm{d}t$ 可导，且 $F'(x) = f(x)$；
+
+(2) 当 $f(x)$ 是以 2 为周期的周期函数时，证明函数 $G(x) = 2\int_0^x f(t)\,\mathrm{d}t - x\int_0^2 f(t)\,\mathrm{d}t$ 也是以 2 为周期的周期函数.
+
+<Solution>
+
+**参考答案：** (1) $F^{\prime}(x)=f(x)$；(2) $G(x+2)=G(x)$，即 $2$ 是 $G$ 的周期。
+**解题思路：** 第一问从导数定义出发，用连续性控制短区间的积分均值；第二问利用“周期函数在任何长度为一个周期的区间上积分相等”。
+<Steps>
+  <Step>
+
+    ### 从差商写出积分的短区间平均值
+
+    对任意 $h\ne0$，
+
+    $$
+    \frac{F(x+h)-F(x)}h
+    =\frac1h\int_x^{x+h}f(t)\,\mathrm dt.
+    $$
+
+    减去 $f(x)$ 后为 $\frac1h\int_x^{x+h}[f(t)-f(x)]\,\mathrm dt$。
+
+  </Step>
+  <Step>
+
+    ### 用连续性得到导数
+
+    由 $f$ 在 $x$ 连续，对于任意 $\varepsilon>0$，当 $|h|$ 充分小时，介于 $x$ 与 $x+h$ 之间的 $t$ 均满足 $|f(t)-f(x)|<\varepsilon$。故无论 $h>0$ 还是 $h<0$，都有
+
+    $$
+    \left|\frac{F(x+h)-F(x)}h-f(x)\right|
+    \le\frac1{|h|}\left|\int_x^{x+h}(f(t)-f(x))\,\mathrm dt\right|\le\varepsilon.
+    $$
+
+    从而 $F'(x)=f(x)$，与微积分基本定理一致。
+
+  </Step>
+  <Step>
+
+    ### 证明 $G$ 的 2-周期性
+
+    设 $A=\int_0^2f(t)\,\mathrm dt$。对 $H(x)=\int_x^{x+2}f(t)\,\mathrm dt$，利用第一问可得
+
+    $$
+    H'(x)=f(x+2)-f(x)=0,
+    $$
+
+    于是 $H(x)=H(0)=A$。因此
+
+    $$
+    \begin{aligned}
+    G(x+2)-G(x)
+    &=2\int_x^{x+2}f(t)\,\mathrm dt-2A\\
+    &=2A-2A=0.
+    \end{aligned}
+    $$
+
+    所以 $G$ 以 $2$ 为周期（未必是最小正周期）。
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+“以 $2$ 为周期”只要求 $G(x+2)=G(x)$，无需证明 $2$ 为最小正周期。第一问要求**利用定义**，仅引用变上限求导公式会遗漏关键论证。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-060" type="essay" points={9} tags="来源:2008年考研数学二, 科目:高等数学, 章节:定积分, 考点:反三角函数积分与分部积分">
+
+ 计算 $\int_0^1 \frac{x^2\arcsin x}{\sqrt{1-x^2}}\,\mathrm{d}x$.
+
+<Solution>
+
+**参考答案：** $\boxed{\frac{\pi^2}{16}+\frac14}$。
+**解题思路：** 分母 $\sqrt{1-x^2}$ 与 $\arcsin x$ 提示换元 $x=\sin t$，将根式和反三角函数同时消掉，再做分部积分。
+<Steps>
+  <Step>
+
+    ### 三角换元消除根号
+
+    令 $x=\sin t$，$t\in[0,\pi/2]$，则 $\arcsin x=t$、$\sqrt{1-x^2}=\cos t$、$\mathrm dx=\cos t\,\mathrm dt$。故
+
+    $$
+    I=\int_0^{\pi/2}t\sin^2t\,\mathrm dt.
+    $$
+
+    原积分虽然在 $x=1$ 有可积的根式奇性，换元后变为普通定积分。
+
+  </Step>
+  <Step>
+
+    ### 用倍角公式分解
+
+    由 $\sin^2t=\frac12(1-\cos2t)$，
+
+    $$
+    I=\frac12\int_0^{\pi/2}t\,\mathrm dt
+    -\frac12\int_0^{\pi/2}t\cos2t\,\mathrm dt
+    =\frac{\pi^2}{16}-\frac12J.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 分部积分计算余弦项
+
+    取 $u=t$，$\mathrm dv=\cos2t\,\mathrm dt$，则
+
+    $$
+    \begin{aligned}
+    J&=\left[\frac t2\sin2t\right]_0^{\pi/2}
+    -\frac12\int_0^{\pi/2}\sin2t\,\mathrm dt\\
+    &=0-\frac12\cdot1=-\frac12.
+    \end{aligned}
+    $$
+
+    因此 $I=\frac{\pi^2}{16}-\frac12(-\frac12)=\boxed{\frac{\pi^2}{16}+\frac14}$。
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+端点 $x=1$ 时 $\cos t=0$，换元不能逐点将 $0/0$ 当作代数值；应按**反常积分的极限**理解，换元后的积分在上端点连续，从而可直接计算。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-061" type="single" points={4} tags="来源:2008年考研数学二、三, 科目:高等数学, 章节:定积分, 考点:曲线几何意义与分部积分">
+
+ 如图，曲线方程为 $y=f(x)$，函数在区间 $[0,a]$ 上有连续导数，则积分 $\int_0^a xf'(x)\,\mathrm{d}x$ 等于（ ）.
+
+![2008-2,3-4 题图](/img/questions/math/calculus-lower-2008-234-4.png)
+
+<Option>曲边梯形 $ABOD$ 面积</Option>
+<Option>梯形 $ABOD$ 面积</Option>
+<Option correct>曲边三角形 $ACD$ 面积</Option>
+<Option>三角形 $ACD$ 面积</Option>
+
+<Solution>
+
+**参考答案：** 曲边三角形 $ACD$ 的面积，选 $\boxed{C}$。
+**解题思路：** 把 $xf\prime(x)$ 积分通过分部积分写成“矩形面积减曲边梯形面积”，然后与题图的区域一一对应。
+<Steps>
+  <Step>
+
+    ### 分部积分得到关键表达式
+
+    令 $u=x$、$\mathrm dv=f'(x)\,\mathrm dx$，得
+
+    $$
+    \begin{aligned}
+    I&=\int_0^a xf'(x)\,\mathrm dx\\
+    &=[xf(x)]_0^a-\int_0^af(x)\,\mathrm dx\\
+    &=af(a)-\int_0^af(x)\,\mathrm dx.
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 识别图中的两个几何部分
+
+    图中 $A=(a,f(a))$、$C=(0,f(a))$、$B=(a,0)$、$O=(0,0)$。矩形 $ABOC$ 的面积为 $af(a)$；曲边梯形 $ABOD$ 的面积为 $\int_0^af(x)\,\mathrm dx$。
+
+  </Step>
+  <Step>
+
+    ### 作差得到曲边三角形
+
+    矩形去掉曲边梯形后剩余的上部区域由线段 $CA$、竖直线段 $CD$ 与曲线 $DA$ 围成，正是曲边三角形 $ACD$。因此选 C。
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+这里使用面积解释须结合题图中 $f(x)\ge0$ 且 $f(x)\le f(a)$ 的位置关系；离开图形，一般情况下应理解为**有向积分**，不能不加条件地当作普通面积。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-062" type="blank" points={4} tags="来源:2008年考研数学三, 科目:高等数学, 章节:定积分, 考点:复合函数代换与定积分">
+
+ 函数 $f\left(x+\frac{1}{x}\right) = \frac{x+x^3}{1+x^4}$，求积分 $\int_2^{2\sqrt{2}} f(x)\,\mathrm{d}x=$<Blank answer="((1)/(2))ln 3" kind="math" />.
+
+<Solution>
+
+**参考答案：** $\boxed{\frac12\ln3}$。
+**解题思路：** 不必对 $x+1/x$ 直接解二次方程；同时除以 $x^2$，将给定式完全表示成新变量 $u=x+1/x$ 的有理式。
+<Steps>
+  <Step>
+
+    ### 将已知的复合函数表示成一个变量
+
+    设 $u=x+x^{-1}$（取 $x>0$），则 $u^2-2=x^2+x^{-2}$。因而
+
+    $$
+    \begin{aligned}
+    f(u)&=\frac{x+x^3}{1+x^4}
+    =\frac{x+x^{-1}}{x^2+x^{-2}}\\
+    &=\frac{u}{u^2-2}.
+    \end{aligned}
+    $$
+
+    当 $x>0$ 时，$u\in[2,+\infty)$，覆盖本题积分区间 $[2,2\sqrt2]$。
+
+  </Step>
+  <Step>
+
+    ### 转换成直接可积的有理函数
+
+    于是积分是
+
+    $$
+    I=\int_2^{2\sqrt2}\frac{x}{x^2-2}\,\mathrm dx.
+    $$
+
+    令 $v=x^2-2$，$\mathrm dv=2x\,\mathrm dx$，得到原函数 $\frac12\ln(x^2-2)$（本区间 $x^2-2>0$）。
+
+  </Step>
+  <Step>
+
+    ### 代入端点核对结果
+
+    上端点 $x=2\sqrt2$ 时 $x^2-2=6$，下端点 $x=2$ 时 $x^2-2=2$，故
+
+    $$
+    I=\frac12(\ln6-\ln2)=\boxed{\frac12\ln3}.
+    $$
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+这里 $u=x+1/x$ 与原积分的哑变量 $x$ 是**两种层次的变量**：先解出函数 $f(u)$，再把积分变量记回 $x$；不需要在积分中另做 $u=x+1/x$ 的换元。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-064" type="essay" points={4} tags="来源:2009年考研数学一、二、三, 科目:高等数学, 章节:定积分, 考点:原函数图形与变限积分">
+
+ 设函数 $y=f(x)$ 在区间 $[-1,3]$ 上的图形如下所示.
+则 $F(x) = \int_{0}^{x} f(t)\,\mathrm{d}t$ 的图形为（　　）.
+
+![2009-1,2,3-4 题图](/img/questions/math/calculus-lower-2009-123-4.png)
+
+<Solution>
+
+**参考答案：** 正确图形为 $\boxed{D}$。
+**解题思路：** 由 $F(0)=0$ 定锚点，用 $F^{\prime}(x)=f(x)$（在 $f$ 连续处）判断增减；特别留意 $f$ 在 $0$ 左右符号突变，使 $F$ 的图形有折角。
+<Steps>
+  <Step>
+
+    ### 确定锚点和左侧形状
+
+    根据定义 $F(0)=\int_0^0f(t)\,\mathrm dt=0$。原图中 $f(x)=1$（$-1\le x<0$），故对该区间的 $x$，
+
+    $$
+    F(x)=\int_0^x1\,\mathrm dt=x.
+    $$
+
+    因此 $F(-1)=-1$，从 $(-1,-1)$ 到 $(0,0)$ 是斜率为 $1$ 的直线。
+
+  </Step>
+  <Step>
+
+    ### 利用 $F^{\prime}=f$ 读出极值和转折
+
+    从图看，$f(x)<0$（$0<x<1$），故 $F$ 下降；在 $x=1$ 处 $f$ 由负变正，故 $F$ 有极小值；在 $1<x<2$ 上 $f>0$，故 $F$ 上升。原点处 $f$ 的左侧值为 $1$ 而右侧极限为 $-1$，因此 $F$ 左右导数不同，在 $(0,0)$ 处有尖角。
+
+  </Step>
+  <Step>
+
+    ### 确定右端的水平部分并选图
+
+    图中 $2\le x\le3$ 时 $f(x)=0$，因此
+
+    $$
+    F(x)-F(2)=\int_2^xf(t)\,\mathrm dt=0.
+    $$
+
+    即 $F$ 在 $[2,3]$ 上为常数。选项 D 同时符合：$F(0)=0$、左侧斜直线、右侧先减后增、末端水平；选 A 在 $x<0$ 的斜率为负，与应为 $1$ 不符；B 末端不水平；C 不过原点。
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+题图里的 $f(0)$ 单点取值不影响积分，**不能把 $F^{\prime}(0)$ 机械写作 $f(0)$**：只有连续的被积函数才可直接这样用微积分基本定理。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-065" type="blank" points={4} tags="来源:2009年考研数学二, 科目:高等数学, 章节:定积分, 考点:振荡函数积分与极限">
+
+ $\lim_{n \to \infty} \int_{0}^{1} e^{-x} \sin n x \,\mathrm{d}x = $ <Blank answer="0" kind="math" />.
+
+<Solution>
+
+**参考答案：** $\boxed{0}$。
+**解题思路：** 振荡因子 $\sin(nx)$ 的原函数含系数 $1/n$；对光滑且有界的权函数 $e^{-x}$ 分部积分，就能用 $O(1/n)$ 估计。
+<Steps>
+  <Step>
+
+    ### 分部积分把 $n$ 放到分母
+
+    令 $u=e^{-x}$、$\mathrm dv=\sin(nx)\,\mathrm dx$，则 $\mathrm du=-e^{-x}\,\mathrm dx$、$v=-\cos(nx)/n$，因而
+
+    $$
+    I_n=\left[-\frac{e^{-x}\cos(nx)}n\right]_0^1
+    -\frac1n\int_0^1e^{-x}\cos(nx)\,\mathrm dx.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 分别估计边界项和余项
+
+    对任意正整数 $n$，$|\cos(nx)|\le1$，所以
+
+    $$
+    \begin{aligned}
+    |I_n|
+    &\le\frac{1+e^{-1}}n+\frac1n\int_0^1e^{-x}\,\mathrm dx\\
+    &=\frac{1+e^{-1}+1-e^{-1}}n=\frac2n.
+    \end{aligned}
+    $$
+
+    其实还可进一步精确估计，但已足以求极限。
+
+  </Step>
+  <Step>
+
+    ### 夹逼求极限
+
+    由于 $0\le|I_n|\le2/n\to0$，故
+
+    $$
+    \boxed{\lim_{n\to\infty}\int_0^1e^{-x}\sin(nx)\,\mathrm dx=0}.
+    $$
+
+    无需计算复杂的三角指数原函数。
+
+  </Step>
+</Steps>
+<Tabs items={["核心推导", "拓展方法"]} defaultIndex={0}>
+  <Tab value="核心推导">
+
+    证明只需 $|I_n|\le 2/n$。
+
+  </Tab>
+  <Tab value="拓展方法">
+
+    若想核对精确值，也可用两次分部积分，得到
+
+    $$
+    I_n=\frac{n-e^{-1}(\sin n+n\cos n)}{n^2+1}.
+    $$
+
+    分子绝对值不超过 $2n+1$，故仍收敛于 $0$。
+
+  </Tab>
+</Tabs>
+<Callout type="idea" title="方法总结与易错点">
+
+这里不能把 $\lim\sin(nx)$ 当作 $0$ 后移入积分号，**逐点极限并不存在**；正确论证来自分部积分得到的统一估计。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-066" type="single" points={4} tags="来源:2009年考研数学三, 科目:高等数学, 章节:定积分, 考点:积分不等式与函数单调性">
+
+ 使不等式 $\int_{1}^{x} \frac{\sin t}{t} \,\mathrm{d}t > \ln x$ 成立的 $x$ 的范围是（　　）.
+
+<Option correct>$(0, 1)$</Option>
+<Option>$\left(1, \frac{\pi}{2}\right)$</Option>
+<Option>$\left(\frac{\pi}{2}, \pi\right)$</Option>
+<Option>$(\pi, +\infty)$</Option>
+
+<Solution>
+
+**参考答案：** $\boxed{0<x<1}$，选 $\boxed{A}$。
+**解题思路：** 把 $\ln x$ 写为同上下限的积分，逐点判断 $\sin t-1$ 的符号；当上下限 $x<1$ 时积分方向反转使不等号改变。
+<Steps>
+  <Step>
+
+    ### 构造差函数并统一积分
+
+    定义域必须是 $x>0$。设
+
+    $$
+    H(x)=\int_1^x\frac{\sin t}{t}\,\mathrm dt-\ln x.
+    $$
+
+    利用 $\ln x=\int_1^x\frac1t\,\mathrm dt$，合并为
+
+    $$
+    H(x)=\int_1^x\frac{\sin t-1}{t}\,\mathrm dt.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 判断被积函数的符号
+
+    对任意 $t>0$，有 $\sin t\le1$，因而
+
+    $$
+    \frac{\sin t-1}{t}\le0.
+    $$
+
+    它只在离散点取 $0$，在任意非退化区间都不是恒零，因此该被积函数的定积分具有**严格**的符号。
+
+  </Step>
+  <Step>
+
+    ### 根据积分方向求解 $x$ 范围
+
+    当 $x>1$ 时，$H(x)<0$；当 $0<x<1$ 时，
+
+    $$
+    H(x)=-\int_x^1\frac{\sin t-1}{t}\,\mathrm dt>0.
+    $$
+
+    而 $x=1$ 时 $H(1)=0$ 不满足严格大于号。所以解集为 $\boxed{(0,1)}$。
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+“被积函数非正”并不意味着 $\int_1^x$ 总是非正；若 $x<1$，积分的方向与通常的顺序相反，符号要翻转。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-067" type="blank" points={4} tags="来源:2010年考研数学一, 科目:高等数学, 章节:定积分, 考点:根式换元与三角积分">
+
+ $\int_{0}^{\pi^2} \sqrt{x} \cos \sqrt{x} \,\mathrm{d}x = $ <Blank answer="-4pi" kind="math" />.
+
+<Solution>
+
+**参考答案：** $\boxed{-4\pi}$。
+**解题思路：** 先用 $t=\sqrt x$ 消掉复合余弦和根式；接着对 $t^2\cos t$ 连续分部积分。
+<Steps>
+  <Step>
+
+    ### 根号换元并改限
+
+    令 $t=\sqrt x$，即 $x=t^2$、$\mathrm dx=2t\,\mathrm dt$。原上下限 $0,\pi^2$ 变为 $0,\pi$，所以
+
+    $$
+    I=\int_0^{\pi^2}\sqrt x\cos\sqrt x\,\mathrm dx
+    =2\int_0^\pi t^2\cos t\,\mathrm dt.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 第一次分部积分
+
+    取 $u=t^2$，$\mathrm dv=\cos t\,\mathrm dt$，得到
+
+    $$
+    \int t^2\cos t\,\mathrm dt=t^2\sin t-2\int t\sin t\,\mathrm dt.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 第二次分部积分并代入上下限
+
+    对 $\int t\sin t\,\mathrm dt$，取 $u=t$、$\mathrm dv=\sin t\,\mathrm dt$，得
+
+    $$
+    \int t\sin t\,\mathrm dt=-t\cos t+\sin t+C.
+    $$
+
+    因此
+
+    $$
+    \begin{aligned}
+    I&=2[t^2\sin t+2t\cos t-2\sin t]_0^\pi\\
+    &=2(2\pi\cos\pi)=\boxed{-4\pi}.
+    \end{aligned}
+    $$
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+定积分中被积函数 $\cos\sqrt x$ 会变号，所以结果可以为负；不要因为出现 $\sqrt x\ge0$ 就认为积分必为正。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-068" type="essay" points={10} tags="来源:2010年考研数学一、二、三, 科目:高等数学, 章节:定积分, 考点:含参数积分不等式与数列极限">
+
+ (1) 比较 $\int_{0}^{1} |\ln t| [\ln(1+t)]^n \,\mathrm{d}t$ 与 $\int_{0}^{1} t^n |\ln t| \,\mathrm{d}t$ $(n=1, 2, \cdots)$ 的大小，说明理由；
+
+(2) 记 $u_n = \int_{0}^{1} |\ln t| [\ln(1+t)]^n \,\mathrm{d}t$ $(n=1, 2, \cdots)$，求极限 $\lim_{n \to \infty} u_n$。
+
+<Solution>
+
+**参考答案：** (1) 对每个正整数 $n$，$\boxed{0<u_n<v_n}$；(2) $\boxed{\lim_{n\to\infty}u_n=0}$。
+**解题思路：** 利用 $\ln(1+t)<t$ 建立逐点比较，再把易计算的 $v_n$ 转为夹逼上界 $1/(n+1)^2$。
+<Steps>
+  <Step>
+
+    ### 建立两个积分的严格大小关系
+
+    令
+
+    $$
+    u_n=\int_0^1|\ln t|[\ln(1+t)]^n\,\mathrm dt,\qquad
+    v_n=\int_0^1t^n|\ln t|\,\mathrm dt.
+    $$
+
+    因为对 $0<t\le1$ 恒有 $0<\ln(1+t)<t$，所以
+
+    $$
+    0<[\ln(1+t)]^n<t^n\qquad(n\in\mathbb N^+).
+    $$
+
+    在 $0<t<1$ 上 $|\ln t|>0$，乘上这个正因子并积分，得到 $0<u_n<v_n$（均为收敛的反常积分）。
+
+  </Step>
+  <Step>
+
+    ### 精确计算比较积分 $v_n$
+
+    因为 $|\ln t|=-\ln t$（$0<t<1$），分部积分并考虑 $t\to0^+$ 时 $t^{n+1}\ln t\to0$，可得
+
+    $$
+    \begin{aligned}
+    v_n&=\int_0^1t^n(-\ln t)\,\mathrm dt\\
+    &=\left[-\frac{t^{n+1}\ln t}{n+1}\right]_0^1
+    +\frac1{n+1}\int_0^1t^n\,\mathrm dt\\
+    &=\frac1{(n+1)^2}.
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 应用夹逼定理
+
+    综上，对所有正整数 $n$ 有
+
+    $$
+    0<u_n<\frac1{(n+1)^2}\longrightarrow0.
+    $$
+
+    因此 $\boxed{\lim_{n\to\infty}u_n=0}$。
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+端点 $t=0$ 的 $\ln t$ 不存在，但属于可积的反常端点。比较积分时只需在开区间 $(0,1)$ 上逐点比较并取极限；不能直接代入 $t=0$。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-069" type="single" points={4} tags="来源:2011年考研数学一、二、三, 科目:高等数学, 章节:定积分, 考点:对数三角积分的比较">
+
+ 设 $I = \int_{0}^{\frac{\pi}{4}} \ln \sin x \,\mathrm{d}x$，$J = \int_{0}^{\frac{\pi}{4}} \ln \cot x \,\mathrm{d}x$，$K = \int_{0}^{\frac{\pi}{4}} \ln \cos x \,\mathrm{d}x$，则 $I$, $J$, $K$ 的大小关系是（　　）.
+
+<Option>$I < J < K$</Option>
+<Option correct>$I < K < J$</Option>
+<Option>$J < I < K$</Option>
+<Option>$K < J < I$</Option>
+
+<Solution>
+
+**参考答案：** $\boxed{I<K<J}$，选 $\boxed{B}$。
+**解题思路：** 先判断三个对数函数在 $(0,\pi/4)$ 的正负和逐点大小，再利用积分保持大小关系。
+<Steps>
+  <Step>
+
+    ### 比较正弦、余弦的数值
+
+    在 $0<x<\pi/4$ 上，
+
+    $$
+    0<\sin x<\cos x<1.
+    $$
+
+    利用自然对数函数的单调递增性，得到 $\ln\sin x<\ln\cos x<0$。
+
+  </Step>
+  <Step>
+
+    ### 对无穷端点解释反常积分并比较
+
+    在 $x\to0^+$ 时 $\ln\sin x\sim\ln x$，其反常积分收敛，$\ln\cot x\sim-\ln x$ 的积分也收敛。逐点积分可得
+
+    $$
+    I=\int_0^{\pi/4}\ln\sin x\,\mathrm dx
+    <\int_0^{\pi/4}\ln\cos x\,\mathrm dx=K<0.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 确定第三个积分的符号
+
+    又因为 $\cot x=\cos x/\sin x>1$，所以 $\ln\cot x>0$，进而 $J>0$。综合有
+
+    $$
+    \boxed{I<K<0<J},\qquad \boxed{I<K<J}.
+    $$
+
+    故选 B。
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+虽然 $I,J$ 的被积函数在 $0$ 附近含对数奇性，仍是**可积的反常积分**；比较时不能简单说“被积函数端点无穷大，所以积分不存在”。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-070" type="single" points={4} tags="来源:2012年考研数学一、二, 科目:高等数学, 章节:定积分, 考点:积分分区间与振荡项比较">
+
+ 设 $I_k = \int_{0}^{k\pi} e^{x^2} \sin x \,\mathrm{d}x$ $(k=1, 2, 3)$，则有（　　）.
+
+<Option>$I_1 < I_2 < I_3$</Option>
+<Option>$I_3 < I_2 < I_1$</Option>
+<Option>$I_2 < I_3 < I_1$</Option>
+<Option correct>$I_2 < I_1 < I_3$</Option>
+
+<Solution>
+
+**参考答案：** $\boxed{I_2<I_1<I_3}$，选 $\boxed{D}$。
+**解题思路：** $e^{x^2}$ 随 $x>0$ 增大而严格增大，$\sin x$ 每隔 $\pi$ 变号；对半周期积分平移回 $[0,\pi]$，即可比较交替的正负面积。
+<Steps>
+  <Step>
+
+    ### 第一段积分为正
+
+    定义 $A_k=\int_{k\pi}^{(k+1)\pi}e^{x^2}|\sin x|\,\mathrm dx$（$k=0,1,2$），各 $A_k>0$。由于 $\sin x$ 在相邻半周期交替取正负，
+
+    $$
+    I_1=A_0,\qquad I_2=A_0-A_1,\qquad I_3=A_0-A_1+A_2.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 利用平移和指数单调性比较半周期面积
+
+    令 $x=t+k\pi$，
+
+    $$
+    A_k=\int_0^\pi e^{(t+k\pi)^2}\sin t\,\mathrm dt.
+    $$
+
+    对于 $0<t<\pi$，有 $e^{t^2}<e^{(t+\pi)^2}<e^{(t+2\pi)^2}$ 且 $\sin t>0$，故 $0<A_0<A_1<A_2$。
+
+  </Step>
+  <Step>
+
+    ### 合并为严格次序
+
+    由 $A_1>A_0$，
+
+    $$
+    I_2=A_0-A_1<0<I_1=A_0.
+    $$
+
+    又 $A_2>A_1$，所以
+
+    $$
+    I_3-I_1=A_2-A_1>0.
+    $$
+
+    因此最终 $\boxed{I_2<I_1<I_3}$。
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+仅凭 $\sin x$ 的正负并不足以比较整个积分，关键是权函数 $e^{x^2}$ 使**越靠后的半周期有向面积绝对值越大**。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-071" type="blank" points={4} tags="来源:2012年考研数学一, 科目:高等数学, 章节:定积分, 考点:半圆几何积分与对称性">
+
+ $\int_{0}^{2} x \sqrt{2x - x^2} \,\mathrm{d}x = $ <Blank answer="((pi)/(2))" kind="math" />.
+
+<Solution>
+
+**参考答案：** $\boxed{\frac\pi2}$。
+**解题思路：** 对根式配方并平移到以原点对称的区间，拆成一个奇函数积分和一个单位半圆面积。
+<Steps>
+  <Step>
+
+    ### 配方、平移并改写定积分
+
+    由于 $2x-x^2=1-(x-1)^2$，令 $u=x-1$，上下限从 $0,2$ 变成 $-1,1$，故
+
+    $$
+    I=\int_{-1}^1(u+1)\sqrt{1-u^2}\,\mathrm du.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 利用奇偶性消去一项
+
+    拆分成
+
+    $$
+    I=\int_{-1}^1u\sqrt{1-u^2}\,\mathrm du+
+    \int_{-1}^1\sqrt{1-u^2}\,\mathrm du.
+    $$
+
+    第一项被积函数为奇函数、区间关于 $0$ 对称，所以该项等于 $0$。
+
+  </Step>
+  <Step>
+
+    ### 从几何面积读出另一项
+
+    曲线 $y=\sqrt{1-u^2}$ 是单位圆 $u^2+y^2=1$ 的上半圆，面积为
+
+    $$
+    \frac12\pi\cdot1^2=\frac\pi2.
+    $$
+
+    因此原积分为 $\boxed{\frac\pi2}$。
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+要先完成平移 $u=x-1$ 才能看到**奇函数与对称区间**；直接把 $x\sqrt{2x-x^2}$ 当作奇函数是错误的。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-072" type="essay" points={10} tags="来源:2013年考研数学一, 科目:高等数学, 章节:定积分, 考点:积分交换顺序与对数函数">
+
+ 计算 $\int_{0}^{1} \frac{f(x)}{\sqrt{x}} \,\mathrm{d}x$，其中 $f(x) = \int_{1}^{x} \frac{\ln(t+1)}{t} \,\mathrm{d}t$。
+
+<Solution>
+
+**参考答案：** $\boxed{8-4\ln2-2\pi}$。
+**解题思路：** 外层出现 $f(x)/\sqrt{x}$，对其分部积分可让 $f$ 变成已知的 $f\prime$；再用 $x=u^2$ 化简对数积分。
+<Steps>
+  <Step>
+
+    ### 判定端点项并分部积分
+
+    由题设 $f'(x)=\frac{\ln(1+x)}x$（$x>0$），且 $\lim_{x\to0^+}f'(x)=1$，所以 $f$ 可连续延拓到 $x=0$，$f(x)$ 在 $[0,1]$ 有界。对 $I=\int_0^1x^{-1/2}f(x)\,\mathrm dx$，取 $u=f(x)$、$\mathrm dv=x^{-1/2}\,\mathrm dx$，有
+
+    $$
+    \begin{aligned}
+    I&=[2\sqrt{x}\,f(x)]_0^1-2\int_0^1\sqrt{x}\,f'(x)\,\mathrm dx\\
+    &=-2\int_0^1\frac{\ln(1+x)}{\sqrt{x}}\,\mathrm dx,
+    \end{aligned}
+    $$
+
+    因为 $f(1)=0$，且 $\sqrt{x}\,f(x)\to0$。
+
+  </Step>
+  <Step>
+
+    ### 平方根换元
+
+    令 $x=u^2$，则 $\mathrm dx=2u\,\mathrm du$，$\sqrt{x}=u$，所以
+
+    $$
+    I=-4\int_0^1\ln(1+u^2)\,\mathrm du.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 对数积分再分部积分
+
+    记 $J=\int_0^1\ln(1+u^2)\,\mathrm du$。对 $J$ 取 $p=\ln(1+u^2)$，$\mathrm dq=\mathrm du$，得
+
+    $$
+    \begin{aligned}
+    J&=[u\ln(1+u^2)]_0^1-2\int_0^1\frac{u^2}{1+u^2}\,\mathrm du\\
+    &=\ln2-2\int_0^1\left(1-\frac1{1+u^2}\right)\mathrm du\\
+    &=\ln2-2+\frac\pi2.
+    \end{aligned}
+    $$
+
+    最终 $I=-4J=\boxed{8-4\ln2-2\pi}$，数值小于 $0$，与 $f(x)=\int_1^x\frac{\ln(1+t)}t\,\mathrm dt<0$（$0<x<1$）相符。
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+外层 $x=0$ 是广义积分端点，分部积分必须先在 $[\varepsilon,1]$ 上进行，再让 $\varepsilon\to0^+$。用 $f(1)=0$ 和 $f$ 在 $0$ 附近有界才能合法消去边界项。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-073" type="single" points={4} tags="来源:2013年考研数学二, 科目:高等数学, 章节:定积分, 考点:积分函数的连续与可导">
+
+ 设函数 $f(x) = \begin{cases} \sin x, & 0 \leqslant x < \pi, \\ 2, & \pi \leqslant x \leqslant 2\pi, \end{cases}$ $F(x) = \int_{0}^{x} f(t)\,\mathrm{d}t$，则（　　）.
+
+<Option>$x = \pi$ 是函数 $F(x)$ 的跳跃间断点</Option>
+<Option>$x = \pi$ 是函数 $F(x)$ 的可去间断点</Option>
+<Option correct>$F(x)$ 在 $x = \pi$ 处连续但不可导</Option>
+<Option>$F(x)$ 在 $x = \pi$ 处可导</Option>
+
+<Solution>
+
+**参考答案：** $F$ 在 $x=\pi$ 处连续但不可导，选 $\boxed{C}$。
+**解题思路：** 对分段连续函数积分会得到连续的积分函数，但在原被积函数存在跳跃的位置，积分函数常出现左右导数不一致。
+<Steps>
+  <Step>
+
+    ### 直接计算积分函数
+
+    对 $0\le x\le\pi$，
+
+    $$
+    F(x)=\int_0^x\sin t\,\mathrm dt=1-\cos x.
+    $$
+
+    当 $\pi\le x\le2\pi$ 时，把积分在 $\pi$ 拆开，
+
+    $$
+    F(x)=\int_0^\pi\sin t\,\mathrm dt+\int_\pi^x2\,\mathrm dt
+    =2+2(x-\pi).
+    $$
+
+  </Step>
+  <Step>
+
+    ### 验证在连接点处连续
+
+    两段公式在 $x=\pi$ 的值分别为 $1-\cos\pi=2$ 与 $2+2(\pi-\pi)=2$，因此
+
+    $$
+    \lim_{x\to\pi^-}F(x)=\lim_{x\to\pi^+}F(x)=F(\pi)=2.
+    $$
+
+    所以 $x=\pi$ 是连续点，不是间断点。
+
+  </Step>
+  <Step>
+
+    ### 比较左右导数
+
+    第一段 $F'(x)=\sin x$，故 $F'_-(\pi)=\sin\pi=0$；第二段 $F'(x)=2$，故 $F'_+(\pi)=2$。左右导数不相等，$F'(\pi)$ 不存在。结论为**连续但不可导**，选 C。
+
+  </Step>
+</Steps>
+<Callout type="idea" title="方法总结与易错点">
+
+对跳跃型的 $f$，不能无条件在连接点套用 $F'(x)=f(x)$；正确做法是先证明 $F$ 连续，再算左右导数。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-074" type="single" points={4} tags="来源:2014年考研数学一, 科目:高等数学, 章节:定积分, 考点:正交投影与积分最小二乘">
+
+ 若 $\int_{-\pi}^{\pi} (x - a_1 \cos x - b_1 \sin x)^2 \, dx = \min \left\{ \int_{-\pi}^{\pi} (x - a \cos x - b \sin x)^2 \, dx \right\}$，则 $a_1 \cos x + b_1 \sin x = ($　　$).$
 
 <Option correct>$2\sin x$</Option>
 <Option>$2\cos x$</Option>
@@ -301,1565 +3897,1315 @@ $$
 
 <Solution>
 
-**答案：A，即 $2\sin x$。**
+**参考答案：** $\boxed{2\sin x}$，选 $\boxed{A}$。
+**解题思路：** 目标是最小化平方误差 $L^2$。利用 $x$、$\sin x$、$\cos x$ 的奇偶性和三角正交性，代数展开后配方即可。
+<Steps>
+  <Step>
 
-<Tabs items={['方法一：展开配方','方法二：正交投影']} defaultIndex={0}>
-<Tab value="方法一：展开配方">
+    ### 写出平方误差并消去混合项
 
-**第一步：将泛函化成两个变量的二次函数。** 设
+    设
 
-$$
-J(a,b)=\int_{-\pi}^{\pi}(x-a\cos x-b\sin x)^2dx.
-$$
+    $$
+    J(a,b)=\int_{-\pi}^{\pi}(x-a\cos x-b\sin x)^2\,\mathrm dx.
+    $$
 
-利用奇偶性，$x\cos x$、$\sin x\cos x$ 都为奇函数，积分为 $0$。另外，
+    其中 $x\cos x$、$\sin x\cos x$ 为奇函数，在对称区间上的积分为 $0$，所以 $a$ 与 $b$ 不会出现交叉项。
 
-$$
-\int_{-\pi}^{\pi}\sin^2x\,dx
-=\int_{-\pi}^{\pi}\cos^2x\,dx=\pi,
-$$
+  </Step>
+  <Step>
 
-$$
-\int_{-\pi}^{\pi}x\sin x\,dx
-=2\int_0^\pi x\sin x\,dx=2\pi.
-$$
+    ### 计算二次项与线性项的系数
 
-因此
+    由三角函数对称性及分部积分，
 
-$$
-J(a,b)=\int_{-\pi}^{\pi}x^2dx+\pi a^2+\pi b^2-4\pi b
-=\text{常数}+\pi a^2+\pi(b-2)^2-4\pi.
-$$
+    $$
+    \int_{-\pi}^\pi\cos^2x\,\mathrm dx
+    =\int_{-\pi}^\pi\sin^2x\,\mathrm dx=\pi,
+    $$
 
-**第二步：利用非负平方项确定全局最优。** 只有 $a_1=0,b_1=2$ 能同时让两个平方项为 $0$，所以得到 $2\sin x$。
+    $$
+    \int_{-\pi}^\pi x\sin x\,\mathrm dx
+    =2\int_0^\pi x\sin x\,\mathrm dx=2\pi.
+    $$
 
-</Tab>
-<Tab value="方法二：正交投影">
+    于是
 
-若 $a_1\cos x+b_1\sin x$ 是 $x$ 在二维函数空间 $\operatorname{span}\{\cos x,\sin x\}$ 中的最佳平方逼近，残差 $x-a_1\cos x-b_1\sin x$ 必分别与两个基函数正交：
+    $$
+    J(a,b)=\int_{-\pi}^\pi x^2\,\mathrm dx
+    +\pi a^2+\pi b^2-4\pi b.
+    $$
 
-$$
-\int_{-\pi}^{\pi}(x-a_1\cos x-b_1\sin x)\cos x\,dx=0,
-$$
+  </Step>
+  <Step>
 
-$$
-\int_{-\pi}^{\pi}(x-a_1\cos x-b_1\sin x)\sin x\,dx=0.
-$$
+    ### 配方定位全局极小值
 
-由两个基函数在对称区间正交、平方积分均为 $\pi$，立刻有
+    将含参数部分配方：
 
-$$
-a_1=\frac{\int x\cos x\,dx}{\pi}=0,\qquad
-b_1=\frac{\int x\sin x\,dx}{\pi}=2,
-$$
+    $$
+    \pi a^2+\pi b^2-4\pi b
+    =\pi a^2+\pi(b-2)^2-4\pi.
+    $$
 
-其中积分区间都是 $[-\pi,\pi]$。该方法可迁移到傅里叶系数、最小二乘和函数逼近。
+    因为平方项均非负，且仅当 $a=0,\ b=2$ 时同时为 $0$，唯一极小点是 $(a_1,b_1)=(0,2)$。因此
 
-</Tab>
+    $$
+    a_1\cos x+b_1\sin x=\boxed{2\sin x}.
+    $$
+
+  </Step>
+</Steps>
+<Tabs items={["核心推导", "拓展方法"]} defaultIndex={0}>
+  <Tab value="核心推导">
+
+    配方已证明该极小值为全局最小。
+
+  </Tab>
+  <Tab value="拓展方法">
+
+    用正交投影公式可直接得到
+
+    $$
+    a_1=\frac{\int_{-\pi}^{\pi}x\cos x\,\mathrm dx}{\int_{-\pi}^{\pi}\cos^2x\,\mathrm dx}=0,
+    \qquad
+    b_1=\frac{\int_{-\pi}^{\pi}x\sin x\,\mathrm dx}{\int_{-\pi}^{\pi}\sin^2x\,\mathrm dx}=2.
+    $$
+
+    其中 $\langle\sin x,\cos x\rangle=0$。
+
+  </Tab>
 </Tabs>
+<Callout type="idea" title="方法总结与易错点">
 
-**关键辨析：** 最小化的是**整个区间的平方误差**，而不是在某点让函数相等；得到的系数来自积分意义下的投影。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-007" type="blank" points={4} tags="来源:2015考研数一, 考点:奇偶积分, 考点:绝对值积分">
-
-求
-
-$$
-\int_{-\pi/2}^{\pi/2}\left(\frac{\sin x}{1+\cos x}+|x|\right)dx=
-$$
-
-<Blank answer="pi^2/4" kind="math" />。
-
-<Solution>
-
-**答案：** $\displaystyle\boxed{\frac{\pi^2}{4}}$。
-
-**第一步：识别奇函数项。** $\sin x$ 为奇函数、$1+\cos x$ 为偶函数，而且在 $[-\pi/2,\pi/2]$ 上分母严格为正，因此
-
-$$
-\frac{\sin(-x)}{1+\cos(-x)}=-\frac{\sin x}{1+\cos x}.
-$$
-
-故第一项在对称区间的积分为 $0$。
-
-**第二步：偶函数对称折半。** $|x|$ 是偶函数，所以
-
-$$
-\int_{-\pi/2}^{\pi/2}|x|dx
-=2\int_0^{\pi/2}x\,dx
-=2\left[\frac{x^2}2\right]_0^{\pi/2}
-=\frac{\pi^2}4.
-$$
-
-**方法提示：** 本题无需使用 $\sin x/(1+\cos x)=\tan(x/2)$，直接判断奇偶性更快且不易出错。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-008" type="single" points={4} tags="来源:2017考研数二, 考点:凸性比较, 考点:弦线积分">
-
-设二阶可导函数 $f$ 满足 $f(-1)=f(1)=1$、$f(0)=-1$，且 $f''(x)>0$，则（ ）。
-
-<Option>$\displaystyle\int_{-1}^1f(x)\,dx>0$</Option>
-<Option correct>$\displaystyle\int_{-1}^1f(x)\,dx<0$</Option>
-<Option>$\displaystyle\int_{-1}^0f(x)\,dx>\int_0^1f(x)\,dx$</Option>
-<Option>$\displaystyle\int_{-1}^0f(x)\,dx<\int_0^1f(x)\,dx$</Option>
-
-<Solution>
-
-**答案：B，即 $\int_{-1}^{1}f(x)dx<0$。**
-
-**第一步：把二阶导数条件解释为凸性。** $f''>0$ 使 $f$ 严格凸，图像在任意两点所连弦线的**严格下方**（端点除外）。已知三个取值点，优先使用两段弦线来限制未知函数。
-
-**第二步：在 $[-1,0]$ 上建立直线上界。** 过 $(-1,1)$、$(0,-1)$ 的直线为 $L_-(x)=-2x-1$，故对 $-1<x<0$ 有
-
-$$
-f(x)<-2x-1.
-$$
-
-积分得到
-
-$$
-\int_{-1}^0f(x)dx
-<\int_{-1}^0(-2x-1)dx=0.
-$$
-
-**第三步：在 $[0,1]$ 上做同样比较。** 过 $(0,-1)$、$(1,1)$ 的直线为 $L_+(x)=2x-1$，于是
-
-$$
-\int_0^1f(x)dx
-<\int_0^1(2x-1)dx=0.
-$$
-
-两式相加得到 $\int_{-1}^1f(x)dx<0$。
-
-**第四步：辨析 C、D 为什么不能选。** 已知三个点与凸性只能保证左右积分均小于 $0$，不能固定二者的相对大小。例如
-
-$$
-f_\varepsilon(x)=2x^2-1+\varepsilon x(1-x^2)
-$$
-
-在 $\varepsilon$ 绝对值充分小时仍满足 $f''>0$，三个插值点的函数值不变；但取 $\varepsilon>0$ 或 $\varepsilon<0$ 会使右侧积分相对于左侧积分分别增大或减小。因此 C、D 都非必然结论。
-
-<Callout type="idea" title="严格凸性与弦线">$f''>0$ 说明图像在弦线下方，而不是在切线下方；切线反而位于严格凸函数图像下方。使用哪一种直线必须先区分清楚。</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-009" type="single" points={4} tags="来源:2018考研数一数二数三, 考点:定积分比较, 考点:奇偶性, 考点:双曲函数">
-
-设
-
-$$
-M=\int_{-\pi/2}^{\pi/2}\frac{(1+x)^2}{1+x^2}\,dx,
-$$
-
-$$
-N=\int_{-\pi/2}^{\pi/2}\frac{1+x}{e^x}\,dx,
-\qquad
-K=\int_{-\pi/2}^{\pi/2}(1+\sqrt{\cos x})\,dx,
-$$
-
-则（ ）。
-
-<Option>$M>N>K$</Option>
-<Option>$M>K>N$</Option>
-<Option correct>$K>M>N$</Option>
-<Option>$K>N>M$</Option>
-
-<Solution>
-
-**答案：C，即 $K>M>N$。** 选择公共比较量 $\pi$，并不需要计算非初等的 $\int\sqrt{\cos x}\,dx$。
-
-**第一步：精确求出 $M=\pi$。** 展开分子得
-
-$$
-\frac{(1+x)^2}{1+x^2}=1+\frac{2x}{1+x^2}.
-$$
-
-第二项为奇函数，在对称区间上积分为 $0$，因此 $M=\pi$。
-
-**第二步：立即判定 $K>\pi$。** $\cos x>0$ 在开区间 $(-\pi/2,\pi/2)$ 成立，故
-
-$$
-K=\pi+\int_{-\pi/2}^{\pi/2}\sqrt{\cos x}\,dx>\pi=M.
-$$
-
-**第三步：将 $N$ 的积分按对称点配对。** 令 $a=\pi/2$：
-
-$$
-\begin{aligned}
-N&=\int_0^a\bigl[(1+x)e^{-x}+(1-x)e^x\bigr]dx\\
-&=2\int_0^a(\cosh x-x\sinh x)dx.
-\end{aligned}
-$$
-
-构造
-
-$$
-h(x)=1-\cosh x+x\sinh x.
-$$
-
-由于 $h(0)=0$，且 $h'(x)=x\cosh x>0$（$x>0$），可知 $h(x)>0$，即 $\cosh x-x\sinh x<1$。于是
-
-$$
-N<2\int_0^a1\,dx=2a=\pi=M.
-$$
-
-合并结论：$K>\pi=M>N$。
-
-<Callout type="idea" title="先选择公共阈值，再分别估计">$M$ 的奇函数部分直接消去，$K$ 是 $\pi$ 加一项严格正的积分，$N$ 则通过 $x$ 与 $-x$ 配对得到小于 $\pi$ 的上界。三者不必硬算成小数。</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-010" type="single" points={4} tags="来源:2018考研数二数三, 考点:严格凸性, 考点:积分均值">
-
-已知函数 $f(x)$ 在 $[0,1]$ 上二阶可导，且 $\int_0^1 f(x)\,dx=0$，则（ ）。
-
-<Option>当 $f'(x)<0$ 时，$f(\tfrac12)<0$</Option>
-<Option>当 $f''(x)<0$ 时，$f(\tfrac12)<0$</Option>
-<Option>当 $f'(x)>0$ 时，$f(\tfrac12)<0$</Option>
-<Option correct>当 $f''(x)>0$ 时，$f(\tfrac12)<0$</Option>
-
-<Solution>
-
-**答案：D。** 积分为零时，严格凸函数的中点函数值严格小于其积分平均值。
-
-**第一步：选择中点对称配对。** 对每个 $0\le x<\tfrac12$，两点 $x$、$1-x$ 的中点都是 $\tfrac12$。因 $f''>0$，$f$ 严格凸，故
-
-$$
-f\left(\frac12\right)<\frac{f(x)+f(1-x)}2.
-$$
-
-**第二步：在半区间积分。** 上式在长度为正的区间 $0<x<\tfrac12$ 上严格成立，于是
-
-$$
-\begin{aligned}
-\frac12 f\left(\frac12\right)
-&<\frac12\int_0^{1/2}[f(x)+f(1-x)]\,dx\\
-&=\frac12\int_0^1f(x)\,dx=0.
-\end{aligned}
-$$
-
-因此 $f(\tfrac12)<0$。
-
-**第三步：排除另三个条件。** $f(x)=\tfrac12-x$ 在 $[0,1]$ 积分为零，且 $f'<0$，但 $f(\tfrac12)=0$，排除 A；$f(x)=x-\tfrac12$ 同理排除 C。取 $f(x)=\tfrac1{12}-(x-\tfrac12)^2$，它有 $f''=-2<0$，积分为零，而 $f(\tfrac12)=\tfrac1{12}>0$，排除 B。
-
-<Callout type="idea" title="中点与积分均值的关系">连续凸函数满足 $f((a+b)/2)\le\frac1{b-a}\int_a^bf$；严格凸时不等号严格。其证明来自成对比较 $f(x)+f(a+b-x)$，不需要求原函数。</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-011" type="single" points={4} tags="来源:2020考研数三, 考点:奇偶性, 考点:变上限积分">
-
-设奇函数 $f(x)$ 在 $(-\infty,+\infty)$ 上具有连续导数，则（ ）。
-
-<Option correct>$\displaystyle\int_0^x[\cos f(t)+f'(t)]\,dt$ 是奇函数</Option>
-<Option>$\displaystyle\int_0^x[\cos f(t)+f'(t)]\,dt$ 是偶函数</Option>
-<Option>$\displaystyle\int_0^x[\cos f'(t)+f(t)]\,dt$ 是奇函数</Option>
-<Option>$\displaystyle\int_0^x[\cos f'(t)+f(t)]\,dt$ 是偶函数</Option>
-
-<Solution>
-
-**答案：A。** 先判断被积函数的奇偶性，再用「从 $0$ 开始积分，奇偶性互换」的规律。
-
-**第一步：逐层求奇偶性。** $f$ 为奇函数，故 $f'$ 为偶函数；$\cos$ 为偶函数，因此 $\cos f(t)$、$\cos f'(t)$ 都是 $t$ 的偶函数。
-
-**第二步：看第一个积分。** $h(t)=\cos f(t)+f'(t)$ 是偶函数。令 $H(x)=\int_0^xh(t)\,dt$，换元 $t=-u$ 得
-
-$$
-H(-x)=-\int_0^xh(-u)\,du=-H(x),
-$$
-
-所以 $H$ 是奇函数，A 正确而 B 错误。
-
-**第三步：看第二个积分。**
-
-$$
-\int_0^x[\cos f'(t)+f(t)]\,dt
-=\underbrace{\int_0^x\cos f'(t)\,dt}_{\text{奇函数}}
-+\underbrace{\int_0^xf(t)\,dt}_{\text{偶函数}}.
-$$
-
-这一般既非奇函数又非偶函数。例如 $f(t)=t$，两项分别为 $x\cos1$ 与 $x^2/2$，排除 C、D。
-
-<Callout type="warn" title="不要只看最外层的余弦">$f$ 奇时 $f'$ 偶；$\cos\circ f$ 与 $\cos\circ f'$ 都是偶，但与 $f$ 直接相加后未必保持固定奇偶性。</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-012" type="single" points={5} tags="来源:2022考研数一数二数三, 考点:积分大小, 考点:逐点夹逼">
-
-设
-
-$$
-I_1=\int_0^1\frac{x}{2(1+\cos x)}\,dx,\quad
-I_2=\int_0^1\frac{\ln(1+x)}{1+\cos x}\,dx,\quad
-I_3=\int_0^1\frac{2x}{1+\sin x}\,dx,
-$$
-
-则（ ）。
-
-<Option correct>$I_1<I_2<I_3$</Option>
-<Option>$I_2<I_1<I_3$</Option>
-<Option>$I_1<I_3<I_2$</Option>
-<Option>$I_3<I_2<I_1$</Option>
-
-<Solution>
-
-**答案：A，即 $I_1<I_2<I_3$。** 三个积分都在 $[0,1]$ 上，优先比较其被积函数而非计算积分。
-
-**第一步：比较 $I_1$ 与 $I_2$。** 构造 $h(x)=\ln(1+x)-x/2$。有
-
-$$
-h(0)=0,\qquad h'(x)=\frac1{1+x}-\frac12=\frac{1-x}{2(1+x)}\ge0
-\quad(0\le x\le1).
-$$
-
-因 $h$ 在 $(0,1)$ 上严格递增，故 $\ln(1+x)>x/2$ 对 $0<x\le1$ 成立。分母 $1+\cos x>0$，得到 $I_1<I_2$。
-
-**第二步：比较 $I_2$ 与 $I_3$。** 对 $0<x\le1$，有 $\ln(1+x)<x$，且 $1+\cos x>1$，故
-
-$$
-\frac{\ln(1+x)}{1+\cos x}<x.
-$$
-
-同时 $\sin x<1$，即 $1+\sin x<2$，从而
-
-$$
-x<\frac{2x}{1+\sin x}.
-$$
-
-连锁比较后积分：$I_2<I_3$。两组严格不等式均在长度为正的区间成立，故积分比较也是严格的。
-
-**技巧：** 插入易比较的「中间量」$x$，比单独变形 $I_2$ 与 $I_3$ 的差更快捷。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-013" type="blank" points={5} tags="来源:2023考研数一数二, 考点:平移差分, 考点:积分区间分割">
-
-设连续函数 $f(x)$ 满足 $f(x+2)-f(x)=x$，且 $\int_0^2f(x)\,dx=0$，则
-
-$$
-\int_1^3f(x)\,dx=
-$$
-
-<Blank answer="1/2" kind="math" />。
-
-<Solution>
-
-**答案：$\displaystyle\frac12$。** 方程给出的不是周期性，而是长度为 $2$ 的平移增量。
-
-**第一步：将目标区间拆成已知的基本周期长度。**
-
-$$
-\int_1^3f(x)\,dx=\int_1^2f(x)\,dx+\int_2^3f(x)\,dx.
-$$
-
-**第二步：把第二段平移回 $[0,1]$。** 令 $x=u+2$，根据 $f(u+2)=f(u)+u$，
-
-$$
-\int_2^3f(x)\,dx
-=\int_0^1f(u+2)\,du
-=\int_0^1[f(u)+u] \,du.
-$$
-
-**第三步：合并原积分并计算附加项。**
-
-$$
-\begin{aligned}
-\int_1^3f(x)\,dx
-&=\int_0^2f(x)\,dx+\int_0^1u\,du\\
-&=0+\frac12=\boxed{\frac12}.
-\end{aligned}
-$$
-
-<Callout type="idea" title="平移差分模型">只要 $f(x+T)-f(x)=g(x)$，计算跨越基本区间的积分时先拆段并作 $x\mapsto x+T$，多出的量转化为 $g$ 的定积分。</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-014" type="single" points={5} tags="来源:2024考研数三, 考点:周期积分, 考点:反向积分">
-
-设 $I=\int_a^{a+k\pi}|\sin x|\,dx$，$k$ 为整数，则 $I$ 的值（ ）。
-
-<Option>只与 $a$ 有关</Option>
-<Option correct>只与 $k$ 有关</Option>
-<Option>与 $a$ 和 $k$ 均有关</Option>
-<Option>与 $a$ 和 $k$ 均无关</Option>
-
-<Solution>
-
-**答案：B。** 实际上 $I=2k$，其中 $k$ 可以是负整数。
-
-**第一步：识别周期。** $|\sin(x+\pi)|=|\sin x|$，所以 $|\sin x|$ 以 $\pi$ 为周期，并且
-
-$$
-\int_a^{a+\pi}|\sin x|\,dx=\int_0^\pi\sin x\,dx=2.
-$$
-
-**第二步：处理 $k>0$。** 把区间拆为 $k$ 个完整周期，得 $I=2k$。
-
-**第三步：补齐容易漏掉的 $k\le0$。** 若 $k=0$，积分区间退化，$I=0$；若 $k<0$，积分方向反向，将 $-k$ 个完整周期的正积分取负，仍得 $I=-2(-k)=2k$。
-
-因此 $I=2k$ 与 $a$ 无关。
-
-<Callout type="warn" title="有向积分不是面积">当 $k<0$ 时，本题是 $2k$ 而非 $2|k|$；后者是几何面积的大小。</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-015" type="blank" points={5} tags="来源:2026考研数三, 考点:中心对称, 考点:奇函数积分">
-
-计算
-
-$$
-\int_0^1x(x-1)\left(x-\frac12\right)\,dx=
-$$
-
-<Blank answer="0" kind="math" />。
-
-<Solution>
-
-**答案：$0$。** 以区间中点 $x=\frac12$ 为中心，平移后被积函数是奇函数。
-
-令 $u=x-\frac12$，则 $x=u+\frac12$、$x-1=u-\frac12$，从而
-
-$$
-x(x-1)\left(x-\frac12\right)
-=\left(u^2-\frac14\right)u.
-$$
-
-上下限对应 $u=-\frac12$、$u=\frac12$，于是
-
-$$
-\int_0^1x(x-1)\left(x-\frac12\right)dx
-=\int_{-1/2}^{1/2}\left(u^3-\frac u4\right)du=\boxed{0}.
-$$
-
-**核验方法：** 直接展开也可：$x(x-1)(x-\tfrac12)=x^3-\tfrac32x^2+\tfrac12x$，积分值 $\frac14-\frac12+\frac14=0$。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-016" type="single" tags="来源:李正元练习题, 考点:周期函数积分, 考点:符号判断, 考点:分部积分">
-
-判断积分
-
-$$
-\int_a^{a+2\pi}\cos x\ln(2+\cos x)\,dx
-$$
-
-的取值性质（ ）。
-
-<Option>与 $a$ 有关</Option>
-<Option>是与 $a$ 无关的负数</Option>
-<Option correct>是与 $a$ 无关的正数</Option>
-<Option>为零</Option>
-
-<Solution>
-
-**答案：C。** 先判定与起点无关，再证明其值严格为正。
-
-**第一步：周期性质。** $h(x)=\cos x\ln(2+\cos x)$ 是连续且 $2\pi$ 周期的函数。对 $J(a)=\int_a^{a+2\pi}h(x)dx$ 求导，
-
-$$
-J'(a)=h(a+2\pi)-h(a)=0.
-$$
-
-故 $J$ 与 $a$ 无关。
-
-<Tabs items={['方法一：分部积分','方法二：配对比较']} defaultIndex={0}>
-<Tab value="方法一：分部积分">
-
-计算 $J(0)$。取 $u=\ln(2+\cos x)$、$dv=\cos x\,dx$，则 $du=-\sin x/(2+\cos x)\,dx$，$v=\sin x$。于是
-
-$$
-\begin{aligned}
-J(0)
-&=\left[\sin x\ln(2+\cos x)\right]_0^{2\pi}
-+\int_0^{2\pi}\frac{\sin^2x}{2+\cos x}\,dx\\
-&=\int_0^{2\pi}\frac{\sin^2x}{2+\cos x}\,dx>0.
-\end{aligned}
-$$
-
-分母 $2+\cos x\ge1$，被积函数非负且不恒为零。
-
-</Tab>
-<Tab value="方法二：配对比较">
-
-将 $[0,\pi]$ 在 $\pi/2$ 两侧配对，并利用整周期对称性，得到
-
-$$
-J(0)=2\int_0^{\pi/2}\cos x\ln\frac{2+\cos x}{2-\cos x}\,dx>0,
-$$
-
-因为在 $0<x<\pi/2$ 上两个因子都严格为正。
-
-</Tab>
-</Tabs>
-
-**迁移技巧：** 周期保证积分值不依赖起点；判断正负时可由分部积分将原来变号的 $\cos x$ 转换成非负的 $\sin^2x$。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-017" type="blank" tags="来源:张宇1000题, 考点:偶函数积分, 考点:变量替换">
-
-已知 $f(x)$ 是连续的偶函数，且 $\int_0^1f(x)dx=2$，则
-
-$$
-\int_0^2xf(1-x)\,dx=
-$$
-
-<Blank answer="4" kind="math" />。
-
-<Solution>
-
-**答案：$4$。** 换元后利用偶函数在对称区间上的积分公式。
-
-令 $u=1-x$，则 $x=1-u$，$dx=-du$，上下限 $x=0,2$ 分别对应 $u=1,-1$。因此
-
-$$
-\begin{aligned}
-I&=\int_{-1}^1(1-u)f(u)\,du\\
-&=\int_{-1}^1f(u)\,du-\int_{-1}^1uf(u)\,du.
-\end{aligned}
-$$
-
-$f(u)$ 为偶函数，$uf(u)$ 为奇函数，于是
-
-$$
-I=2\int_0^1f(u)\,du-0=\boxed{4}.
-$$
-
-<Callout type="idea" title="移动对称中心">原题围绕 $x=1$ 对称，换元 $u=1-x$ 后变成围绕 $u=0$ 的积分；不要直接将 $f(1-x)$ 当成 $x$ 的偶函数。</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-018" type="essay" tags="来源:张宇1000题, 考点:对称积分, 考点:对数恒等式">
-
-求
-
-$$
-\int_{-1}^{1}x\ln(1+e^x)\,dx.
-$$
-
-<Solution>
-
-**参考答案：** $\displaystyle\boxed{\frac13}$。
-
-**方法一：对称区间配对。** 设原积分为 $I$。将负半区间作 $x\mapsto -x$ 的换元：
-
-$$
-I=\int_0^1x\left[\ln(1+e^x)-\ln(1+e^{-x})\right]dx.
-$$
-
-注意 $1+e^{-x}=e^{-x}(1+e^x)$，因此
-
-$$
-\ln(1+e^x)-\ln(1+e^{-x})
-=\ln\frac{1+e^x}{e^{-x}(1+e^x)}=x.
-$$
-
-故
-
-$$
-I=\int_0^1x^2dx=\boxed{\frac13}.
-$$
-
-**方法二：分离奇偶部分。** 恒等式
-
-$$
-\ln(1+e^x)=\frac x2+\ln\left(2\cosh\frac x2\right)
-$$
-
-将原被积函数拆为 $x^2/2+x\ln(2\cosh(x/2))$。第二项关于 $x$ 为奇函数，所以
-
-$$
-I=\frac12\int_{-1}^1x^2dx=\frac13.
-$$
-
-**适用技巧：** 对称区间遇到 $\ln(1+e^x)$，优先检验 $\ln(1+e^x)-\ln(1+e^{-x})=x$，避免处理无法初等积分的项。
-
-</Solution>
-</Question>
-
-## 模型：换元、分部积分与难积分的结构化处理
-
-<Question id="math-core-gd-04-02-019" type="blank" points={4} tags="来源:2010考研数一, 考点:定积分换元, 考点:二次分部积分">
-
-$$
-\int_0^{\pi^2}\sqrt{x}\cos\sqrt{x}\,dx=
-$$
-
-<Blank answer="-4*pi" kind="math" />。
-
-<Solution>
-
-**答案：$\boxed{-4\pi}$。** 根号既是外层系数又是余弦的自变量，取 $u=\sqrt{x}$ 可以同步消去两个根号。
-
-令 $x=u^2$、$dx=2u\,du$。当 $x=0$、$\pi^2$ 时分别有 $u=0$、$\pi$，故
-
-$$
-I=2\int_0^\pi u^2\cos u\,du.
-$$
-
-先分部一次：
-
-$$
-\int u^2\cos u\,du=u^2\sin u-2\int u\sin u\,du.
-$$
-
-再分部 $\int u\sin u\,du=-u\cos u+\sin u$，得到
-
-$$
-\int u^2\cos u\,du=u^2\sin u+2u\cos u-2\sin u+C.
-$$
-
-代入端点：
-
-$$
-I=2\left[u^2\sin u+2u\cos u-2\sin u\right]_0^\pi
-=2(-2\pi)=\boxed{-4\pi}.
-$$
-
-**检验：** 虽然积分区间正向，但 $\cos\sqrt{x}$ 在 $x>\pi^2/4$ 后取负值，结果为负并不矛盾。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-020" type="blank" points={4} tags="来源:2012考研数一, 考点:配方法, 考点:圆面积, 考点:奇偶性">
-
-$$
-\int_0^2x\sqrt{2x-x^2}\,dx=
-$$
-
-<Blank answer="pi/2" kind="math" />。
-
-<Solution>
-
-**答案：$\displaystyle\boxed{\frac\pi2}$。** 通过配方和中心平移，把原式化为单位半圆面积。
-
-**第一步：配方并确定换元范围。**
-
-$$
-2x-x^2=1-(x-1)^2.
-$$
-
-令 $u=x-1$，则 $x=u+1$，当 $x$ 从 $0$ 到 $2$ 变化时，$u$ 从 $-1$ 到 $1$。因此
-
-$$
-\begin{aligned}
-I&=\int_{-1}^1(u+1)\sqrt{1-u^2}\,du\\
-&=\int_{-1}^1u\sqrt{1-u^2}\,du
-+\int_{-1}^1\sqrt{1-u^2}\,du.
-\end{aligned}
-$$
-
-**第二步：奇函数部分消失。** $u\sqrt{1-u^2}$ 是奇函数，第一项为 $0$。
-
-**第三步：识别几何面积。** $y=\sqrt{1-u^2}$ 是半径为 $1$ 的上半圆，所以
-
-$$
-I=\frac12\pi\cdot1^2=\boxed{\frac\pi2}.
-$$
-
-<Callout type="idea" title="中心平移与奇偶分解">含 $x\sqrt{2x-x^2}$ 的积分，先把中心移到 $x=1$；$x=(x-1)+1$ 把题目拆成零积分与半圆面积。</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-021" type="essay" points={10} tags="来源:2013考研数一, 考点:广义积分, 考点:分部积分, 考点:嵌套积分">
-
-计算
-
-$$
-\int_0^1\frac{f(x)}{\sqrt{x}}\,dx,
-\qquad
-f(x)=\int_1^x\frac{\ln(t+1)}{t}\,dt.
-$$
-
-<Solution>
-
-**参考答案：**
-
-$$
-\boxed{8-4\ln2-2\pi}.
-$$
-
-**第一步：检查广义积分的端点。** 在 $t\to0^+$ 时，$\ln(1+t)/t\to1$，所以 $f(x)$ 在 $x\to0^+$ 时存在有限极限；因 $x^{-1/2}$ 在 $0$ 附近可积，原广义积分收敛，且 $\sqrt x\,f(x)\to0$。
-
-<Tabs items={['方法一：分部积分','方法二：改变积分次序']} defaultIndex={0}>
-<Tab value="方法一：分部积分">
-
-**第二步：将难求的 $f$ 转换为已知导数。** $f'(x)=\ln(1+x)/x$（$x>0$），而 $d(2\sqrt{x})=x^{-1/2}dx$。于是
-
-$$
-\begin{aligned}
-I&=\left[2\sqrt{x}f(x)\right]_0^1-2\int_0^1\sqrt{x}f'(x)\,dx\\
-&=-2\int_0^1\frac{\ln(1+x)}{\sqrt{x}}\,dx.
-\end{aligned}
-$$
-
-这里 $f(1)=0$，而下端边界项也趋于 $0$。
-
-**第三步：换元并再次分部。** 令 $x=u^2$，得到
-
-$$
-I=-4\int_0^1\ln(1+u^2)\,du.
-$$
-
-由分部积分
-
-$$
-\int\ln(1+u^2)du
-=u\ln(1+u^2)-2u+2\arctan u+C.
-$$
-
-代入上下限：
-
-$$
-I=-4\left(\ln2-2+\frac\pi2\right)
-=\boxed{8-4\ln2-2\pi}.
-$$
-
-</Tab>
-<Tab value="方法二：改变积分次序">
-
-先把 $f(x)$ 写成负向积分，积分区域为 $0\le x\le t\le1$：
-
-$$
-\begin{aligned}
-I&=-\int_0^1\frac1{\sqrt{x}}\left(\int_x^1\frac{\ln(1+t)}t\,dt\right)dx\\
-&=-\int_0^1\frac{\ln(1+t)}t\left(\int_0^t\frac{dx}{\sqrt{x}}\right)dt\\
-&=-2\int_0^1\frac{\ln(1+t)}{\sqrt t}\,dt.
-\end{aligned}
-$$
-
-余下的换元 $t=u^2$ 与方法一相同，仍得 $8-4\ln2-2\pi$。交换积分次序合法，因为核在该三角区域上绝对可积。
-
-</Tab>
-</Tabs>
-
-<Callout type="warn" title="广义端点不能直接忽略">分部积分前先验证 $\sqrt{x}f(x)\to0$，不能仅因 $x=0$ 是下限就把乘积记成零。</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-022" type="blank" points={4} tags="来源:2018考研数一, 考点:切线条件, 考点:分部积分">
-
-设函数 $f(x)$ 具有二阶连续导数，曲线 $y=f(x)$ 过点 $(0,0)$，且与 $y=2^x$ 在 $(1,2)$ 处相切，则
-
-$$
-\int_0^1xf''(x)\,dx=
-$$
-
-<Blank answer="2*(ln(2)-1)" kind="math" />。
-
-<Solution>
-
-**答案：$\boxed{2(\ln2-1)}$。** 不需要求 $f(x)$ 的具体表达式，只需提取端点的函数值与导数值。
-
-**第一步：翻译相切条件。** 两条曲线在 $(1,2)$ 处相切，不仅有相同函数值，而且有相同切线斜率：
-
-$$
-f(1)=2,\qquad f'(1)=\left.(2^x)'\right|_{x=1}=2\ln2.
-$$
-
-另外由曲线经过原点，$f(0)=0$。
-
-**第二步：对 $xf''$ 分部积分。** 取 $u=x$、$dv=f''(x)dx$：
-
-$$
-\begin{aligned}
-I&=\left[xf'(x)\right]_0^1-\int_0^1f'(x)dx\\
-&=f'(1)-f(1)+f(0)\\
-&=2\ln2-2.
-\end{aligned}
-$$
-
-故 $I=\boxed{2(\ln2-1)}$。
-
-**方法总结：** $\int_a^bxf''(x)dx=[xf'(x)-f(x)]_a^b$；遇到相切条件，优先考虑这一端点化结果。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-023" type="blank" points={4} tags="来源:2019考研数二, 考点:积分换序, 考点:变上限积分">
-
-已知 $f(x)=x\int_1^x\frac{\sin t^2}{t}\,dt$，则
-
-$$
-\int_0^1f(x)\,dx=
-$$
-
-<Blank answer="(cos(1)-1)/4" kind="math" />。
-
-<Solution>
-
-**答案：$\displaystyle\boxed{\frac{\cos1-1}{4}}$。** 内层积分不易求原函数，交换积分次序或对外层分部更有效。
-
-<Tabs items={['方法一：交换积分次序','方法二：分部积分']} defaultIndex={0}>
-<Tab value="方法一：交换积分次序">
-
-由于 $0\le x\le1$，有
-
-$$
-I=-\int_0^1x\left(\int_x^1\frac{\sin t^2}{t}dt\right)dx.
-$$
-
-积分区域为三角形 $0\le x\le t\le1$。先对 $x$ 积分：
-
-$$
-\begin{aligned}
-I&=-\int_0^1\frac{\sin t^2}{t}\left(\int_0^t x\,dx\right)dt\\
-&=-\frac12\int_0^1t\sin t^2dt.
-\end{aligned}
-$$
-
-令 $u=t^2$，则 $du=2t\,dt$，
-
-$$
-I=-\frac14\int_0^1\sin u\,du
-=\boxed{\frac{\cos1-1}{4}}.
-$$
-
-</Tab>
-<Tab value="方法二：分部积分">
-
-令 $H(x)=\int_1^x\sin(t^2)/t\,dt$，则 $H'(x)=\sin(x^2)/x$（$x>0$），并且 $H(1)=0$。又因 $\sin(t^2)/t\sim t$（$t\to0$），$H(0)$ 有有限极限，所以 $x^2H(x)\to0$。
-
-$$
-\begin{aligned}
-I&=\int_0^1xH(x)dx\\
-&=\left[\frac{x^2}{2}H(x)\right]_0^1-\frac12\int_0^1x^2H'(x)dx\\
-&=-\frac12\int_0^1x\sin(x^2)dx
-=\frac{\cos1-1}{4}.
-\end{aligned}
-$$
-
-</Tab>
-</Tabs>
-
-**判断技巧：** 「多项式 $x$ × 非初等积分核」常可通过换序或分部把原核 $1/t$ 抵消。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-024" type="blank" points={4} tags="来源:2019考研数三, 考点:二重积分换序, 考点:换元积分">
-
-已知 $f(x)=\int_1^x\sqrt{1+t^4}\,dt$，则
-
-$$
-\int_0^1x^2f(x)\,dx=
-$$
-
-<Blank answer="-(2*sqrt(2)-1)/18" kind="math" />。
-
-<Solution>
-
-**答案：$\displaystyle\boxed{-\frac{2\sqrt2-1}{18}}$。** 内层 $\int\sqrt{1+t^4}\,dt$ 没有简单初等原函数，但外层的 $x^2$ 恰好能在换序后产生可换元的 $t^3$。
-
-**第一步：化成正向积分并写出区域。** 对 $0\le x\le1$，
-
-$$
-f(x)=-\int_x^1\sqrt{1+t^4}\,dt.
-$$
-
-因此原积分是区域 $0\le x\le t\le1$ 上的迭代积分：
-
-$$
-I=-\int_0^1x^2\left(\int_x^1\sqrt{1+t^4}dt\right)dx.
-$$
-
-**第二步：先积分 $x$。**
-
-$$
-\begin{aligned}
-I&=-\int_0^1\sqrt{1+t^4}\left(\int_0^t x^2dx\right)dt\\
-&=-\frac13\int_0^1t^3\sqrt{1+t^4}\,dt.
-\end{aligned}
-$$
-
-**第三步：标准换元。** 令 $u=1+t^4$，$du=4t^3dt$，上下限为 $u=1$ 和 $u=2$：
-
-$$
-\begin{aligned}
-I&=-\frac1{12}\int_1^2u^{1/2}du\\
-&=-\frac1{18}[u^{3/2}]_1^2
-=\boxed{-\frac{2\sqrt2-1}{18}}.
-\end{aligned}
-$$
-
-**合理性检查：** $x\in[0,1]$ 时 $f(x)\le0$，所以外层积分应为负数；答案符合符号判断。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-025" type="blank" points={5} tags="来源:2022考研数二, 考点:分母导数拆分, 考点:反正切积分">
-
-$$
-\int_0^1\frac{2x+3}{x^2-x+1}\,dx=
-$$
-
-<Blank answer="8*sqrt(3)*pi/9" kind="math" />。
-
-<Solution>
-
-**答案：$\displaystyle\boxed{\frac{8\sqrt3\pi}{9}}$。** 先拆出分母的导数，再把正二次式配方。
-
-**第一步：拆分分子。** 设 $q(x)=x^2-x+1$，则 $q'(x)=2x-1$，所以
-
-$$
-2x+3=(2x-1)+4,
-\quad
-I=\int_0^1\frac{q'(x)}{q(x)}dx+4\int_0^1\frac{dx}{q(x)}.
-$$
-
-**第二步：对数项恰好消失。**
-
-$$
-\int_0^1\frac{q'(x)}{q(x)}dx
-=[\ln q(x)]_0^1=\ln1-\ln1=0.
-$$
-
-**第三步：配方后计算反正切。**
-
-$$
-q(x)=\left(x-\frac12\right)^2+\frac34,
-$$
-
-因此
-
-$$
-\begin{aligned}
-I&=\frac8{\sqrt3}
-\left[\arctan\frac{2x-1}{\sqrt3}\right]_0^1\\
-&=\frac8{\sqrt3}\left(\frac\pi6-\left(-\frac\pi6\right)\right)\\
-&=\boxed{\frac{8\sqrt3\pi}{9}}.
-\end{aligned}
-$$
-
-<Callout type="idea" title="对称端点的额外简化">本题 $q(0)=q(1)$，所以对数项天然抵消。见到 $x^2-x+c$，留意以 $x=1/2$ 为轴的对称性。</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-026" type="essay" points={10} tags="来源:2025考研数一数二数三, 考点:部分分式, 考点:二次配方">
-
-计算
-
-$$
-\int_0^1\frac{dx}{(x+1)(x^2-2x+2)}.
-$$
-
-<Solution>
-
-**参考答案：**
-
-$$
-\boxed{\frac3{10}\ln2+\frac\pi{10}}.
-$$
-
-**第一步：按照分母结构设部分分式。** $x^2-2x+2=(x-1)^2+1$ 在实数范围不可约，故应设
-
-$$
-\frac1{(x+1)(x^2-2x+2)}
-=\frac A{x+1}+\frac{Bx+C}{x^2-2x+2}.
-$$
-
-两边乘分母并比较 $x^2,x,1$ 的系数：
-
-$$
-1=A(x^2-2x+2)+(Bx+C)(x+1).
-$$
-
-于是 $A+B=0$，$-2A+B+C=0$，$2A+C=1$，解得 $A=\frac15$、$B=-\frac15$、$C=\frac35$。
-
-**第二步：将二次项的分子拆为导数与常数。** 设 $q(x)=x^2-2x+2$，$q'(x)=2x-2$，有 $-x+3=-\frac12q'(x)+2$。因此
-
-$$
-I=\frac15\int_0^1\frac{dx}{x+1}
--\frac1{10}\int_0^1\frac{q'(x)}{q(x)}dx
-+\frac25\int_0^1\frac{dx}{(x-1)^2+1}.
-$$
-
-**第三步：逐项求值。**
-
-$$
-I=\left[\frac15\ln(x+1)-\frac1{10}\ln q(x)+\frac25\arctan(x-1)\right]_0^1.
-$$
-
-由于 $q(1)=1$、$q(0)=2$，且 $\arctan0-\arctan(-1)=\pi/4$，得到
-
-$$
-I=\frac15\ln2+\frac1{10}\ln2+\frac25\cdot\frac\pi4
-=\boxed{\frac3{10}\ln2+\frac\pi{10}}.
-$$
-
-**解题规律：** 一次因子与不可约二次因子的乘积分母，优先作部分分式；二次项再分解成「$q'/q$」与「$1/[(x-h)^2+k^2]$」两类基本积分。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-027" type="blank" points={5} tags="来源:2026考研数二, 考点:区间平均值, 考点:对数积分">
-
-函数 $f(x)=\ln(2+x)$ 在区间 $[0,2]$ 上的平均值为
-
-<Blank answer="3*ln(2)-1" kind="math" />。
-
-<Solution>
-
-**答案：$\boxed{3\ln2-1}$。** 函数平均值是积分除以**区间长度**，不是积分本身。
-
-**第一步：写出平均值公式。**
-
-$$
-\bar f=\frac1{2-0}\int_0^2\ln(2+x)dx.
-$$
-
-**第二步：换元计算。** 令 $u=x+2$，则
-
-$$
-\bar f=\frac12\int_2^4\ln u\,du
-=\frac12[u\ln u-u]_2^4.
-$$
-
-因此
-
-$$
-\begin{aligned}
-\bar f&=\frac12[(4\ln4-4)-(2\ln2-2)]\\
-&=\frac12(6\ln2-2)
-=\boxed{3\ln2-1}.
-\end{aligned}
-$$
-
-**合理性检验：** 因 $\ln(2+x)$ 严格递增，其平均值必须介于 $\ln2$ 与 $\ln4=2\ln2$ 之间；$3\ln2-1$ 符合这个范围。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-028" type="blank" tags="来源:李正元练习题, 考点:三角半角换元, 考点:分部积分">
-
-计算下列定积分（$a>0$）：
-
-$$
-\int_0^a\arctan\sqrt{\frac{a-x}{a+x}}\,dx=
-$$
-
-<Blank answer="a/2" kind="math" />。
-
-<Solution>
-
-**答案：$\displaystyle\boxed{\frac a2}$。** 根式 $\sqrt{(a-x)/(a+x)}$ 是三角半角公式的典型信号。
-
-**第一步：识别半角恒等式。** 当 $0\le\theta\le\pi/2$ 时，
-
-$$
-\sqrt{\frac{1-\cos\theta}{1+\cos\theta}}
-=\tan\frac\theta2.
-$$
-
-因此令 $x=a\cos2t$，使 $t\in[0,\pi/4]$，有
-
-$$
-\sqrt{\frac{a-x}{a+x}}=\tan t,
-\qquad
-\arctan(\tan t)=t.
-$$
-
-注意 $\arctan(\tan t)=t$ 依赖 $t$ 落在反正切主值区间内，这里满足。
-
-**第二步：严格替换积分上下限。** $x=0$ 对应 $t=\pi/4$，$x=a$ 对应 $t=0$，且 $dx=-2a\sin2t\,dt$，故
-
-$$
-I=2a\int_0^{\pi/4}t\sin2t\,dt.
-$$
-
-**第三步：分部积分。**
-
-$$
-\int t\sin2t\,dt=-\frac t2\cos2t+\frac14\sin2t+C.
-$$
-
-于是
-
-$$
-I=2a\left[-\frac t2\cos2t+\frac14\sin2t\right]_0^{\pi/4}
-=\boxed{\frac a2}.
-$$
-
-**易错点：** 若不核对反三角函数主值，可能漏掉绝对值或错判 $\arctan(\tan t)$ 的结果。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-029" type="blank" tags="来源:李正元练习题, 考点:抽象函数积分, 考点:分部积分">
-
-设 $f(x)$ 在 $[a,b]$ 上连续可导，$f(a)=f(b)=0$，且
-
-$$
-\int_a^bf^2(x)dx=1,
-$$
-
-则
-
-$$
-\int_a^bxf(x)f'(x)\,dx=
-$$
-
-<Blank answer="-1/2" kind="math" />。
-
-<Solution>
-
-**答案：$\boxed{-\frac12}$。** 识别 $ff'=(f^2)'/2$，利用分部积分把所有未知函数信息归约为边界值和已知积分。
-
-**第一步：换写为平方函数的微分。**
-
-$$
-I=\int_a^bxf(x)f'(x)dx
-=\frac12\int_a^bx\,[f^2(x)]'dx.
-$$
-
-**第二步：分部积分。**
-
-$$
-I=\frac12\left[xf^2(x)\right]_a^b
--\frac12\int_a^bf^2(x)dx.
-$$
-
-**第三步：代入题设。** 因 $f(a)=f(b)=0$，边界项等于 $0$；又 $\int_a^bf^2=1$，故
-
-$$
-I=0-\frac12\cdot1=\boxed{-\frac12}.
-$$
-
-**推广：** 若已知 $\int_a^bf^2(x)dx=c$ 且两端函数值均为零，则无论 $f$ 的具体形状如何，总有 $\int_a^bxff'\,dx=-c/2$。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-02-030" type="blank" tags="来源:张宇1000题, 考点:对数幂积分, 考点:伽马积分">
-
-设 $n$ 为非负整数，则
-
-$$
-\int_0^1x^2\ln^n x\,dx=
-$$
-
-<Blank answer="(-1)^n*n!/3^(n+1)" kind="math" />。
-
-<Solution>
-
-**答案：** $\displaystyle\boxed{\frac{(-1)^n n!}{3^{n+1}}}$。
-
-**第一步：把对数幂改写为指数尾积分。** 令 $t=-\ln x$，则 $x=e^{-t}$、$dx=-e^{-t}dt$。当 $x:0\to1$ 时，$t:+\infty\to0$，从而
-
-$$
-I_n=\int_0^1x^2\ln^n x\,dx=(-1)^n\int_0^\infty t^ne^{-3t}\,dt.
-$$
-
-**第二步：不用背诵特殊函数，直接递推。** 记 $J_n=\int_0^\infty t^ne^{-3t}dt$。当 $n=0$ 时，$J_0=1/3$；对正整数 $n$，分部积分得
-
-$$
-\begin{aligned}
-J_n&=\left[-\frac{t^ne^{-3t}}3\right]_0^\infty+\frac n3\int_0^\infty t^{n-1}e^{-3t}dt\\
-&=\frac n3J_{n-1}.
-\end{aligned}
-$$
-
-指数衰减比任何固定次幂更快，故无穷端点的边界项为零。归纳得 $J_n=n!/3^{n+1}$，于是得到答案。
-
-<Callout type="idea" title="同类题统一模板">
-
-对 $\alpha>-1$、非负整数 $n$，同法可得 $\displaystyle\int_0^1x^\alpha\ln^nx\,dx=\frac{(-1)^nn!}{(\alpha+1)^{n+1}}$。本题 $\alpha=2$。
+这是<strong>正交投影（最小二乘）</strong>的典型题：奇函数 $x$ 与偶函数 $\cos x$ 正交，因此 $\cos x$ 系数必为 $0$；$\sin x$ 系数由 $\int x\sin x/\int\sin^2x=2$ 确定。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-## 模型：变上限积分、抽象核与积分方程
+<Question id="core-1102-math-97dbde-076" type="blank" points={4} tags="来源:2015年考研数学一, 科目:高等数学, 章节:定积分, 考点:定积分奇偶性与绝对值">
 
-<Question id="math-core-gd-04-02-031" type="blank" points={4} tags="来源:2015考研数二数三, 考点:变上限积分求导, 考点:乘积法则">
-
-设 $f(x)$ 连续，$\varphi(x)=\int_0^{x^2}xf(t)\,dt$。若 $\varphi(1)=1$、$\varphi'(1)=5$，则 $f(1)=$ <Blank answer="2" kind="math" />。
+ $\int_{-\frac{\pi}{2}}^{\frac{\pi}{2}} \left( \frac{\sin x}{1 + \cos x} + |x| \right) dx = $ <Blank answer="((pi^2)/(4))" kind="math" />.
 
 <Solution>
 
-**答案：** $\boxed{f(1)=2}$。
+**参考答案：** $\boxed{\dfrac{\pi^2}{4}}$。
 
-**第一步：把外层变量提出积分号。** 积分变量是 $t$，因此 $x$ 对积分而言是常数：
+**核心思路：** 对称区间上的积分，先观察每项的奇偶性，再考虑直接求原函数。
 
-$$
-\varphi(x)=x\int_0^{x^2}f(t)\,dt.
-$$
+<Steps>
+  <Step>
 
-令 $x=1$，由 $\varphi(1)=1$ 得 $\int_0^1f(t)dt=1$。
+    ### 确认被积函数的奇偶性
 
-**第二步：乘积求导与复合上限求导同时使用。** 由 $f$ 连续，
+    令 $g(x)=\dfrac{\sin x}{1+\cos x}$。在 $[-\pi/2,\pi/2]$ 上有 $1+\cos x\ge1>0$，故被积函数连续，且
 
-$$
-\varphi'(x)=\int_0^{x^2}f(t)dt+x\cdot f(x^2)\cdot2x
-=\int_0^{x^2}f(t)dt+2x^2f(x^2).
-$$
+    $$
+    g(-x)=\frac{-\sin x}{1+\cos x}=-g(x).
+    $$
 
-令 $x=1$，得 $5=1+2f(1)$，所以 $f(1)=2$。
+    所以 $g$ 是奇函数，对称区间上的积分为零。
 
-<Callout type="warn" title="两个求导来源不可漏掉">第一项来自外部因子 $x$ 的求导；第二项来自上限 $x^2$ 的求导，还须乘链式因子 $2x$。</Callout>
+  </Step>
+  <Step>
+
+    ### 处理绝对值项
+
+    $|x|$ 是偶函数，按 $x\ge0$ 展开绝对值：
+
+    $$
+    \begin{aligned}
+    \int_{-\pi/2}^{\pi/2}|x|\,\mathrm dx
+    &=2\int_0^{\pi/2}x\,\mathrm dx\\
+    &=2\left[\frac{x^2}{2}\right]_0^{\pi/2}=\frac{\pi^2}{4}.
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 合并并检验
+
+    于是
+
+    $$
+    \boxed{I=0+\frac{\pi^2}{4}=\frac{\pi^2}{4}}.
+    $$
+
+    由于 $|x|\ge0$，结果为正符合积分的直观判断。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+先确认分母在区间内不为零；**奇函数积分为零**适用于积分存在且上下限关于原点对称的情形。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-02-032" type="essay" points={11} tags="来源:2016考研数二, 考点:积分平均值, 考点:原函数, 考点:零点唯一性">
+<Question id="core-1102-math-97dbde-078" type="essay" points={11} tags="来源:2016年考研数学二, 科目:高等数学, 章节:定积分, 考点:平均值与积分估计证明">
 
-已知 $f(x)$ 在 $[0,3\pi/2]$ 上连续，在 $(0,3\pi/2)$ 内是 $\dfrac{\cos x}{2x-3\pi}$ 的一个原函数，且 $f(0)=0$。
+ 已知 $f(x)$ 在 $\left[0, \frac{3\pi}{2}\right]$ 上连续，在 $\left(0, \frac{3\pi}{2}\right)$ 内是函数 $\frac{\cos x}{2x - 3\pi}$ 的一个原函数，且 $f(0) = 0$.
 
-（1）求 $f(x)$ 在 $[0,3\pi/2]$ 上的平均值；
+(1) 求 $f(x)$ 在区间 $\left[0, \frac{3\pi}{2}\right]$ 上的平均值；
 
-（2）证明 $f$ 在 $(0,3\pi/2)$ 内存在唯一零点。
+(2) 证明 $f(x)$ 在区间 $\left(0, \frac{3\pi}{2}\right)$ 内存在唯一零点.
 
 <Solution>
 
-**参考答案：**
+**参考答案：** (1) $\boxed{\dfrac1{3\pi}}$；(2) 在 $\left(0,\dfrac{3\pi}{2}\right)$ 内恰有一个零点。
 
-（1）平均值为 $\displaystyle\boxed{\frac1{3\pi}}$。
+**核心思路：** 把原函数条件转化为导数表达式；第 (1) 问用分部积分抵消分母，第 (2) 问用单调性控制“至多一个”，用积分的正值保证“至少一个”。
 
-（2）$f$ 在 $\displaystyle\left(0,\frac{3\pi}{2}\right)$ 内**恰有一个零点**。
+<Steps>
+  <Step>
 
-**第一步：处理看似奇异的端点。** 记 $a=3\pi/2$，在 $(0,a)$ 内
+    ### 建立基本关系并处理端点
 
-$$
-f'(x)=\frac{\cos x}{2(x-a)}.
-$$
+    记 $a=3\pi/2$。在 $0<x<a$ 内，
 
-由于 $\cos a=0$，由洛必达法则，
+    $$
+    f'(x)=\frac{\cos x}{2(x-a)}.
+    $$
 
-$$
-\lim_{x\to a^-}\frac{\cos x}{2(x-a)}=-\frac{\sin a}{2}=\frac12.
-$$
+    因 $\cos a=0$ 且 $\cos x\sim x-a\ (x\to a^-)$，故 $f'(x)\to1/2$，端点处没有不可积的奇异性；在 $[0,a]$ 上可按极限进行分部积分。
 
-故导数表达式在右端可以连续延拓。特别地，$f'(x)$ 在 $(0,a)$ 上有界，且 $f(0)=0$，可写成 $f(x)=\int_0^xf'(t)dt$，这使后面的换序合法。
+  </Step>
+  <Step>
 
-**第二步：计算平均值而非直接求 $f$ 的复杂原函数。** 通过积分换序，
+    ### 求函数在整个区间的平均值
 
-$$
-\begin{aligned}
-\int_0^a f(x)dx
-&=\int_0^a\int_0^x\frac{\cos t}{2(t-a)}dt\,dx\\
-&=\int_0^a(a-t)\frac{\cos t}{2(t-a)}dt\\
-&=-\frac12\int_0^a\cos t\,dt=-\frac12\sin a=\frac12.
-\end{aligned}
-$$
+    对 $\int_0^af(x)\,\mathrm dx$ 进行分部积分：
 
-故区间平均值为 $\displaystyle \frac1a\int_0^a f=\frac1{3\pi}$。
+    $$
+    \begin{aligned}
+    \int_0^af(x)\,\mathrm dx
+    &=[(x-a)f(x)]_0^a-\int_0^a(x-a)f'(x)\,\mathrm dx\\
+    &=0-\frac12\int_0^a\cos x\,\mathrm dx\\
+    &=-\frac12\sin a=\frac12.
+    \end{aligned}
+    $$
 
-**第三步：由导数符号控制零点个数。** 对 $0<x<a$，分母 $2x-3\pi<0$；所以
+    边界项为零：在 $x=a$ 时 $(x-a)f(x)=0$；在 $x=0$ 时 $f(0)=0$。因此平均值
 
-$$
-f'(x)\begin{cases}<0,&0<x<\pi/2,\\>0,&\pi/2<x<a.\end{cases}
-$$
+    $$
+    \overline f=\frac1a\int_0^af(x)\,\mathrm dx
+    =\frac{1}{3\pi}.
+    $$
 
-由 $f(0)=0$，知 $f(x)<0$ 对 $0<x\le\pi/2$ 成立。另一方面，第二步已证 $\int_0^a f(x)dx=1/2>0$。若 $f$ 在 $(\pi/2,a)$ 从不取正值，则由前半段严格为负，整个积分必为负，矛盾。因此存在 $c\in(\pi/2,a)$ 使 $f(c)>0$。
+  </Step>
+  <Step>
 
-**第四步：存在性与唯一性分开证明。** $f(\pi/2)<0<f(c)$，由介值定理，$(\pi/2,c)$ 内有零点；而 $f$ 在 $(\pi/2,a)$ 严格递增，零点至多一个。前半段均为负值，不可能有别的零点。结论得证。
+    ### 用导数符号锁定零点位置
 
-<Callout type="idea" title="此题的两个关键证据">**总积分为正**保证函数必须在某处变正；**先减后增**保证内部零点至多一个。只分析单调性，无法直接说明它必然穿过横轴。</Callout>
+    对 $0<x<a$，分母恒负；余弦在 $(0,\pi/2)$ 为正，在 $(\pi/2,a)$ 为负，于是
+
+    $$
+    f'(x)<0\quad (0<x<\pi/2),\qquad
+    f'(x)>0\quad (\pi/2<x<a).
+    $$
+
+    由 $f(0)=0$，知 $f(x)<0$ 对 $0<x\le\pi/2$ 成立；而在 $(\pi/2,a)$ 上 $f$ 严格递增，所以该区间至多一个零点。
+
+  </Step>
+  <Step>
+
+    ### 用积分正值证明零点存在
+
+    上一步已知 $f(x)<0$ 在 $(0,\pi/2]$ 成立。若 $(\pi/2,a)$ 内始终有 $f(x)\le0$，则由连续性可得 $\int_0^a f(x)\,\mathrm dx<0$，与第 (1) 问的 $1/2>0$ 矛盾。
+
+    故存在 $c\in(\pi/2,a)$ 使 $f(c)>0$。由 $f(\pi/2)<0$、连续性和介值定理，$(\pi/2,c)$ 内至少存在一个零点。结合严格递增性，**该零点唯一**。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+证明“唯一”必须拆成**存在性**与**至多一个**两部分；平均值为正本身不能推出每处函数为正，但与已知的负值区间结合，可以用反证法保证越过横轴。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-02-033" type="blank" tags="来源:李林880, 考点:积分核换元, 考点:导数定义">
+<Question id="core-1102-math-97dbde-079" type="single" points={4} tags="来源:2017年考研数学一、二, 科目:高等数学, 章节:定积分, 考点:速度时间图像与位移积分">
 
-设 $F(x)=\int_0^x t f(x^2-t^2)\,dt$。函数 $f$ 在 $0$ 的某邻域内可导，$f(0)=0$，$f'(0)=1$，则
+ 甲、乙两人赛跑，计时开始时，甲在乙前方 $10$（单位：$\text{m}$）处，如图中，实线表示甲的速度曲线 $v = v_1(t)$（单位：$\text{m/s}$），虚线表示乙的速度曲线 $v = v_2(t)$（单位：$\text{m/s}$），三块阴影部分的面积分别为 $10, 20, 3$，计时开始后乙追上甲的时刻为 $t_0$，则（　　）.
+![2017-1,2-4 题图](/img/questions/math/calculus-lower-2017-12-4.png)
 
-$$
-\lim_{x\to0}\frac{F(x)}{x^4}=
-$$
-
-<Blank answer="1/4" kind="math" />。
+<Option>$t_0 = 10$</Option>
+<Option>$15 < t_0 < 20$</Option>
+<Option correct>$t_0 = 25$</Option>
+<Option>$t_0 > 25$</Option>
 
 <Solution>
 
-**答案：** $\boxed{\frac14}$。
+**参考答案：** $\boxed{t_0=25\ \mathrm s}$，选 C。
 
-**第一步：发现核的微分。** 取 $u=x^2-t^2$，则 $du=-2t\,dt$；当 $t=0$ 时 $u=x^2$，当 $t=x$ 时 $u=0$。即便 $x<0$，这两个代换端点及有向积分仍成立。因此
+**核心思路：** 追及不看两个人的速度是否相等，而看“乙相对甲的累计位移”是否补足初始 $10\,\mathrm m$ 距离。
 
-$$
-F(x)=\frac12\int_0^{x^2}f(u)du.
-$$
+<Steps>
+  <Step>
 
-**第二步：只使用题目真正给出的信息。** 由 $f(0)=0$、$f'(0)=1$，
+    ### 写出追上时的位移等式
 
-$$
-f(u)=u+o(u)\quad(u\to0).
-$$
+    令初始位置 $x_1(0)=10$、$x_2(0)=0$，则
 
-所以
+    $$
+    x_1(t)=10+\int_0^t v_1(s)\,\mathrm ds,\qquad
+    x_2(t)=\int_0^t v_2(s)\,\mathrm ds.
+    $$
 
-$$
-F(x)=\frac12\left[\int_0^{x^2}u\,du+\int_0^{x^2}o(u)\,du\right]
-=\frac{x^4}{4}+o(x^4).
-$$
+    令两者相等，得到追及时刻须满足
 
-最终 $\displaystyle F(x)/x^4\to1/4$。
+    $$
+    D(t):=\int_0^t[v_2(s)-v_1(s)]\,\mathrm ds=10.
+    $$
 
-**注意：** 不能在没有 $f'$ 连续性条件时随意声称 $\lim_{u\to0}f'(u)=f'(0)$。此处使用原点导数定义得到的一阶展开，条件更弱且完全充分。
+  </Step>
+  <Step>
+
+    ### 把速度曲线之间的面积换成带符号积分
+
+    从图中读出：开始到 $t=10$ 时实线在虚线上方，故乙的累计相对位移是 $-10\,\mathrm m$；之后至 $t=25$，虚线在实线上方，对应增加 $20\,\mathrm m$。所以
+
+    $$
+    D(10)=-10,\qquad
+    D(25)=-10+20=10.
+    $$
+
+    图上的第三块面积 $3$ 位于后续区间，判断首次追上不需要使用。
+
+  </Step>
+  <Step>
+
+    ### 判断首次追上时刻
+
+    在 $10$ 到 $25$ 秒期间，$v_2(t)\ge v_1(t)$，因此 $D(t)$ 单调不减，直到 $25$ 秒累计位移差才达到所需 $10\,\mathrm m$；更早时没有达到，故
+
+    $$
+    \boxed{t_0=25\ \mathrm s}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+**图形面积表示位移差，不是速度差。** 高度差积分的正负取决于哪条曲线在上方；本题务必保留开始的 $10\,\mathrm m$ 领先量。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-02-034" type="blank" tags="来源:李林880, 考点:积分函数方程, 考点:微分方程, 考点:符号分支">
+<Question id="core-1102-math-97dbde-080" type="single" points={4} tags="来源:2017年考研数学二, 科目:高等数学, 章节:定积分, 考点:凸函数与区间积分不等式">
 
-设 $f(x)$ 可导，对任意 $x,y$ 有
+ 设二阶可导函数 $f(x)$ 满足 $f(1) = f(-1) = 1, f(0) = -1$ 且 $f''(x) > 0$，则（　　）.
 
-$$
-f(x+y)=\int_x^{x+y}\frac{t(t^2+1)}{f(t)}\,dt+f(x),
-$$
-
-且 $f(1)=\sqrt2$，则 $f(x)=$ <Blank answer="sqrt(2)*(x^2+1)/2" kind="math" />。
+<Option>$\int_{-1}^1 f(x) \, dx > 0$</Option>
+<Option correct>$\int_{-1}^1 f(x) \, dx < 0$</Option>
+<Option>$\int_{-1}^0 f(x) \, dx > \int_0^1 f(x) \, dx$</Option>
+<Option>$\int_{-1}^0 f(x) \, dx < \int_0^1 f(x) \, dx$</Option>
 
 <Solution>
 
-**答案：** $\displaystyle\boxed{f(x)=\frac{\sqrt2}{2}(x^2+1)}$。
+**参考答案：** $\boxed{\displaystyle\int_{-1}^{1}f(x)\,\mathrm dx<0}$，选 B。
 
-**第一步：由函数方程恢复导数。** 原式对任意积分区间成立，故式中分母 $f(t)$ 不得为零。固定 $x$，对 $y$ 求导并令 $y=0$：
+**核心思路：** 用二阶导数正号得到严格凸性，再用图像位于端点连线下方的性质作积分估计。
 
-$$
-f'(x)=\frac{x(x^2+1)}{f(x)}.
-$$
+<Steps>
+  <Step>
 
-**第二步：乘回 $f$，寻找完全平方。** 将上式乘以 $2f(x)$ 得
+    ### 写出左右两段的弦
 
-$$
-(f^2(x))'=2x(x^2+1)=\frac{d}{dx}\left[\frac12(x^2+1)^2\right].
-$$
+    由 $f''(x)>0$ 知 $f$ 严格凸。在 $[-1,0]$ 上，过 $(-1,1)$ 与 $(0,-1)$ 的弦为 $\ell_1(x)=-2x-1$；在 $[0,1]$ 上，过 $(0,-1)$ 与 $(1,1)$ 的弦为 $\ell_2(x)=2x-1$。
 
-所以 $f^2(x)=\tfrac12(x^2+1)^2+C$。由 $f(1)=\sqrt2$，代入 $2=2+C$，得 $C=0$。
+  </Step>
+  <Step>
 
-**第三步：用连续性及初值确定符号。** 于是 $f(x)=\pm(x^2+1)/\sqrt2$。因 $f$ 连续、全实轴不为零，它的符号不能改变，而 $f(1)>0$，所以取正号。
+    ### 用严格凸性建立逐点严格不等式
 
-**第四步：反代验证。** $f'(t)=\sqrt2 t$，而 $t(t^2+1)/f(t)=\sqrt2 t$，原式就化成微积分基本定理，说明所求函数确实满足条件。
+    弦的内部点严格位于函数图像上方，所以
+
+    $$
+    f(x)<-2x-1\ (-1<x<0),\qquad
+    f(x)<2x-1\ (0<x<1).
+    $$
+
+    由于两个严格不等式均在正长度区间成立，积分后仍为严格不等式。
+
+  </Step>
+  <Step>
+
+    ### 积分比较得符号
+
+    直接算两条弦的有向面积：
+
+    $$
+    \int_{-1}^0(-2x-1)\,\mathrm dx=0,\qquad
+    \int_0^1(2x-1)\,\mathrm dx=0.
+    $$
+
+    因此
+
+    $$
+    \boxed{\int_{-1}^{1}f(x)\,\mathrm dx<0}.
+    $$
+
+    左右两段积分谁更大，由所给条件无法唯一确定，因此 C、D 并非必然成立。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+要区分**凸函数曲线在弦的下方**与凹函数在弦的上方；$f''>0$ 的严格性保证本题取“$<$”而不是“$\le$”。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-02-035" type="blank" tags="来源:李正元练习题, 考点:含参积分极限, 考点:一阶展开">
+<Question id="core-1102-math-97dbde-082" type="single" points={4} tags="来源:2018年考研数学一、二、三, 科目:高等数学, 章节:定积分, 考点:定积分的三重比较">
 
-设 $a>0$，$f$ 在实数集上具有连续导数，求
+ 设 $M = \int_{-\frac{\pi}{2}}^{\frac{\pi}{2}} \frac{(1+x)^2}{1+x^2} \, dx$，$N = \int_{-\frac{\pi}{2}}^{\frac{\pi}{2}} \frac{1+x}{e^x} \, dx$，$K = \int_{-\frac{\pi}{2}}^{\frac{\pi}{2}} (1 + \sqrt{\cos x}) \, dx$，则（　　）.
 
-$$
-\lim_{a\to0^+}\frac1{4a^2}\int_{-a}^a[f(t+a)-f(t-a)]\,dt=
-$$
-
-<Blank answer="f'(0)" kind="text" />。
+<Option>$M>N>K$ \quad\quad</Option>
+<Option>$M>K>N$ \quad\quad</Option>
+<Option correct>$K>M>N$ \quad\quad</Option>
+<Option>$K>N>M$</Option>
 
 <Solution>
 
-**答案：** $\boxed{f'(0)}$。
+**参考答案：** $\boxed{K>M>N}$，选 C。
 
-<Tabs items={['方法一：平移积分区间','方法二：将差写为导数积分']} defaultIndex={0}>
-<Tab value="方法一：平移积分区间">
+**核心思路：** 先用奇偶性精确计算 $M$，再把 $K$ 与 $M$ 直接比较，最后利用对称配对控制 $N$。
 
-将第一项令 $u=t+a$，第二项令 $u=t-a$，得到
+<Steps>
+  <Step>
 
-$$
-\int_{-a}^a[f(t+a)-f(t-a)]dt
-=\int_0^{2a}f(u)du-\int_{-2a}^0f(u)du.
-$$
+    ### 精确求出 M
 
-由 $f$ 在 $0$ 处可导，$f(u)=f(0)+f'(0)u+o(u)$。两端积分的常数项分别为 $2af(0)$，相消；线性项之差为 $4a^2f'(0)$。余项积分是 $o(a^2)$。所以
+    拆分：
 
-$$
-\frac1{4a^2}\int_{-a}^a[f(t+a)-f(t-a)]dt=f'(0)+o(1).
-$$
+    $$
+    \frac{(1+x)^2}{1+x^2}=1+\frac{2x}{1+x^2}.
+    $$
 
-</Tab>
-<Tab value="方法二：将差写为导数积分">
+    第二项为奇函数，在 $[-\pi/2,\pi/2]$ 上积分为零，因此 $M=\pi$。
 
-由牛顿—莱布尼茨公式，
+  </Step>
+  <Step>
 
-$$
-f(t+a)-f(t-a)=\int_{t-a}^{t+a}f'(u)du.
-$$
+    ### 证明 K 大于 M
 
-原式分子在积分区域 $-a\le t\le a$、$t-a\le u\le t+a$ 上积分；其区域面积为 $4a^2$。当 $a\to0$，区域中的 $u$ 满足 $|u|\le2a$，由 $f'$ 在 $0$ 连续，$f'(u)=f'(0)+o(1)$ **对整个区域一致成立**。故分子为 $4a^2f'(0)+o(a^2)$。
+    在 $[-\pi/2,\pi/2]$ 内 $\cos x\ge0$，且内部 $\sqrt{\cos x}>0$，故
 
-</Tab>
+    $$
+    K=\pi+\int_{-\pi/2}^{\pi/2}\sqrt{\cos x}\,\mathrm dx>\pi=M.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 证明 N 小于 M
+
+    令 $a=\pi/2$。利用 $x$ 与 $-x$ 配对，
+
+    $$
+    \begin{aligned}
+    N&=\int_0^a[(1+x)e^{-x}+(1-x)e^x] \,\mathrm dx\\
+    &=2\int_0^a(\cosh x-x\sinh x)\,\mathrm dx.
+    \end{aligned}
+    $$
+
+    设 $H(x)=1-\cosh x+x\sinh x$，则 $H(0)=0$ 且
+
+    $$
+    H'(x)=x\cosh x>0\quad (x>0).
+    $$
+
+    故 $\cosh x-x\sinh x<1$，从而
+
+    $$
+    N<2\int_0^a1\,\mathrm dx=\pi=M.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 得出排序
+
+    综上
+
+    $$
+    \boxed{K>M>N}.
+    $$
+
+    三个被积函数无法在整个区间上用简单的逐点大小排序；**化简并利用对称性**更稳妥。
+
+  </Step>
+</Steps>
+
+<Tabs items={["主方法", "方法拓展"]} defaultIndex={0}>
+  <Tab value="主方法">
+
+    以上先算 $M$、再分别比较 $K$ 和 $N$。
+
+  </Tab>
+  <Tab value="方法拓展">
+
+    亦可直接积分得到
+
+    $$
+    \begin{aligned}
+    N&=\left[-(x+2)e^{-x}\right]_{-a}^{a}\\
+    &=(2-a)e^a-(2+a)e^{-a},\qquad a=\pi/2.
+    \end{aligned}
+    $$
+
+    此闭式便于数值核查，但比较 $N<\pi$ 使用对称配对与导数更清楚。
+
+  </Tab>
 </Tabs>
 
-<Callout type="idea" title="结构辨认">差分 $f(t+a)-f(t-a)$ 的一阶主项是 $2af'(0)$；再积分长度 $2a$，产生 $4a^2$。这比直接对两个相近积分使用洛必达法则更清楚。</Callout>
+<Callout type="idea" title="方法总结与易错点">
+
+比较定积分时，不必先求每一个积分的闭式。注意 $N$ 的被积函数在部分区间可能变号，因此不能仅凭某个代表点数值判断。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-02-036" type="essay" tags="来源:李正元练习题, 考点:分段积分函数, 考点:导数连续性">
+<Question id="core-1102-math-97dbde-083" type="blank" points={4} tags="来源:2018年考研数学一, 科目:高等数学, 章节:定积分, 考点:二阶导数的分部积分与边界值">
 
-设 $f$ 在实数集上连续，在 $x=0$ 处可导，且 $f(0)=0$。令
-
-$$
-F(x)=\begin{cases}\displaystyle\frac1{x^2}\int_0^xtf(t)dt,&x\ne0,\\ A,&x=0.\end{cases}
-$$
-
-（Ⅰ）求 $A$ 使 $F$ 在实数集上连续；（Ⅱ）求 $F'(x)$ 并讨论其连续性。
+ 设函数 $f(x)$ 具有二阶连续导数，若曲线 $y=f(x)$ 过 $(0,0)$，且与 $y=2^x$ 在 $(1,2)$ 处相切，则 $\int_0^1 xf^{\prime\prime}(x)\mathrm{d}x=$ <Blank answer="2(ln 2-1)" kind="math" /> 。
 
 <Solution>
 
-**参考答案：**
+**参考答案：** $\boxed{2(\ln2-1)}$。
 
-（Ⅰ）$\boxed{A=0}$。
+**核心思路：** 积分含 $xf$，直接分部积分降阶；相切意味着交点的**函数值和一阶导数**都一致。
 
-（Ⅱ）
+<Steps>
+  <Step>
 
-$$
-\boxed{F'(x)=\begin{cases}\displaystyle\frac{f(x)}x-\frac2{x^3}\int_0^xtf(t)dt,&x\ne0,\\[2mm]\displaystyle\frac{f'(0)}3,&x=0,\end{cases}}
-$$
+    ### 把几何信息转成边界条件
 
-且 $F'$ 在**整个实数集上连续**。
+    $f$ 过 $(0,0)$，所以 $f(0)=0$。与 $y=2^x$ 在 $(1,2)$ 相切意味着
 
-**第一步：先求原点附近的精确阶数。** 原点可导且 $f(0)=0$，于是 $f(t)=f'(0)t+o(t)$。故
+    $$
+    f(1)=2,\qquad f'(1)=\left.\frac{\mathrm d}{\mathrm dx}2^x\right|_{x=1}=2\ln2.
+    $$
 
-$$
-\int_0^xtf(t)dt=\frac{f'(0)}3x^3+o(x^3)
-$$
+  </Step>
+  <Step>
 
-（对 $x<0$ 的有向积分同样成立），从而 $F(x)=\frac{f'(0)}3x+o(x)$。令 $x\to0$ 得 $F(x)\to0$，所以连续性要求并且只要求 $A=0$。
+    ### 分部积分消去未知二阶导函数
 
-**第二步：计算 $x\ne0$ 的导数。** 用乘积法则及积分上限求导，
+    取 $u=x$，$\mathrm dv=f''(x)\,\mathrm dx$，得到
 
-$$
-\begin{aligned}
-F'(x)&=-2x^{-3}\int_0^xtf(t)dt+x^{-2}\cdot xf(x)\\
-&=\frac{f(x)}x-\frac2{x^3}\int_0^xtf(t)dt.
-\end{aligned}
-$$
+    $$
+    \begin{aligned}
+    I&=\int_0^1xf''(x)\,\mathrm dx\\
+    &=[xf'(x)]_0^1-\int_0^1f'(x)\,\mathrm dx\\
+    &=f'(1)-f(1)+f(0).
+    \end{aligned}
+    $$
 
-**第三步：用定义求 $F'(0)$，不能直接代分段公式。** 因 $F(0)=0$，有
+  </Step>
+  <Step>
 
-$$
-F'(0)=\lim_{x\to0}\frac{F(x)}x
-=\lim_{x\to0}\frac1{x^3}\int_0^xtf(t)dt=\frac{f'(0)}3.
-$$
+    ### 代入边界值
 
-**第四步：讨论 $F'$ 连续性。** 当 $x\to0$，由 $f(x)/x\to f'(0)$，及 $x^{-3}\int_0^xtf(t)dt\to f'(0)/3$，可得
+    因此
 
-$$
-\lim_{x\to0}F'(x)=f'(0)-\frac23f'(0)=F'(0).
-$$
+    $$
+    I=2\ln2-2+0=\boxed{2(\ln2-1)}.
+    $$
 
-其余点处 $f$ 连续且 $x\ne0$，导数公式各项都连续，故全域连续。
+    积分值可以为负，与 $f''$ 未被限定符号并不矛盾。
 
-<Callout type="idea" title="更直观的等价写法">对 $x\ne0$ 令 $t=xu$，可直接得到 $F(x)=\int_0^1u f(xu)du$。此式一眼可看出 $F(x)\to\tfrac12f(0)=0$，也利于理解该积分算子对原点的平滑作用；但不能在未给出 $f'$ 全域连续的条件下对积分号内随意求导。</Callout>
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+“相切”不仅是交于同一个点，还必须**切线斜率相同**。不要求求出 $f(x)$ 的具体表达式。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-02-037" type="blank" tags="来源:张宇1000题, 考点:平移函数方程, 考点:对数积分">
+<Question id="core-1102-math-97dbde-084" type="single" points={4} tags="来源:2018年考研数学二、三, 科目:高等数学, 章节:定积分, 考点:凸性条件与积分平均值">
 
-设连续函数 $f$ 满足 $f(x+1)-f(x)=x\ln x$，且 $\int_0^1f(x)dx=0$，则 $\int_1^2f(x)dx=$ <Blank answer="-1/4" kind="math" />。
+ 已知函数 $f(x)$ 在 $[0,1]$ 上二阶可导，且 $\int_0^1 f(x)\mathrm{d}x=0$，则（ ）。
+
+<Option>当 $f^{\prime}(x)<0$ 时, $f\left(\frac{1}{2}\right)<0$ \quad\quad</Option>
+<Option>当 $f^{\prime\prime}(x)<0$ 时, $f\left(\frac{1}{2}\right)<0$</Option>
+<Option>当 $f^{\prime}(x)>0$ 时, $f\left(\frac{1}{2}\right)<0$ \quad\quad</Option>
+<Option correct>当 $f^{\prime\prime}(x)>0$ 时, $f\left(\frac{1}{2}\right)<0$</Option>
 
 <Solution>
 
-**答案：** $\boxed{-\frac14}$。
+**参考答案：** $\boxed{D}$。
 
-**第一步：把未知函数的平移式积分化。** 在 $0<x\le1$ 积分，并令 $t=x+1$，得
+**核心思路：** 由 $f>0$ 的严格凸性，比较区间中点函数值与对称点的平均，再用积分总量为零确定符号。
 
-$$
-\int_0^1[f(x+1)-f(x)]dx
-=\int_1^2f(t)dt-\int_0^1f(x)dx.
-$$
+<Steps>
+  <Step>
 
-因为后一个积分为零，所求值正好是 $\int_0^1x\ln x\,dx$。
+    ### 使用严格凸性比较对称点
 
-**第二步：直接计算可积的端点奇性。** 分部积分，
+    若 $f''(x)>0$，则对任意 $0\le x<1/2$，由 $1/2=(x+(1-x))/2$ 得
 
-$$
-\int_0^1x\ln x\,dx
-=\left[\frac{x^2}{2}\ln x-\frac{x^2}4\right]_0^1
-=-\frac14.
-$$
+    $$
+    f\left(\frac12\right)<\frac{f(x)+f(1-x)}2.
+    $$
 
-边界项 $x^2\ln x\to0$（$x\to0^+$），因此积分合法。
+    注意这一步不依赖 $f$ 的单调性。
 
-**通用技巧：** $f(x+h)-f(x)=g(x)$ 且已知一段长度为 $h$ 的积分时，积分平移往往能使未知函数直接消去，无须解出 $f$。
+  </Step>
+  <Step>
+
+    ### 积分对称配对
+
+    在 $x\in[0,1/2]$ 上积分：
+
+    $$
+    \frac12 f\left(\frac12\right)
+    <\frac12\left(\int_0^{1/2}f(x)\,\mathrm dx+\int_0^{1/2}f(1-x)\,\mathrm dx\right).
+    $$
+
+    对第二项令 $t=1-x$，得到
+
+    $$
+    \frac12 f\left(\frac12\right)<\frac12\int_0^1f(t)\,\mathrm dt=0,
+    $$
+
+    故 $f(1/2)<0$。
+
+  </Step>
+  <Step>
+
+    ### 说明其他导数条件为何不够
+
+    选项 A、C 仅给出单调性，不能强制 $f(1/2)$ 严格小于零。例如
+
+    $$
+    f(x)=x-\frac12
+    $$
+
+    满足 $f'>0$、$\int_0^1f=0$，但 $f(1/2)=0$；取负号可处理 $f'<0$。若 $f''<0$，则严格凹性反而推出 $f(1/2)>0$。因此只能选 D。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+牢记 **凸函数中点值小于其区间平均值**（严格凸时严格小于）；这是积分版的 Jensen/Hermite–Hadamard 不等式。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-## 命题变式：黎曼和的首阶误差
+<Question id="core-1102-math-97dbde-085" type="essay" points={10} tags="来源:2019年考研数学一、二、三, 科目:高等数学, 章节:定积分, 考点:无界区间的分段绝对值积分">
 
-<Question id="math-core-gd-04-02-038" type="essay" tags="来源:原创, 考点:黎曼和误差, 考点:一致连续性">
-
-设 $f\in C^1[0,1]$，且
-
-$$
-S_n=\frac1n\sum_{k=1}^nf\!\left(\frac kn\right).
-$$
-
-证明
-
-$$
-\lim_{n\to\infty}n\left(S_n-\int_0^1f(x)dx\right)=\frac{f(1)-f(0)}2.
-$$
+ 求曲线 $y=e^{-x}\sin x\ (x\geqslant 0)$ 与 $x$ 轴之间图形的面积。
 
 <Solution>
 
-**参考答案：**
+**参考答案：** $\boxed{\dfrac{e^\pi+1}{2(e^\pi-1)}}$。
 
-$$
-\boxed{\lim_{n\to\infty}n\left(S_n-\int_0^1f(x)dx\right)=\frac{f(1)-f(0)}2.}
-$$
+**核心思路：** 题目求总面积，所以必须积分 $|e^{-x}\sin x|$；正弦的绝对值以 $\pi$ 为周期，而指数衰减形成等比级数。
 
-**第一步：把每个小区间的误差表示成导数积分。** 记 $a_k=(k-1)/n$、$b_k=k/n$，则
+<Steps>
+  <Step>
 
-$$
-\begin{aligned}
-S_n-\int_0^1f(x)dx
-&=\sum_{k=1}^n\int_{a_k}^{b_k}[f(b_k)-f(x)]dx\\
-&=\sum_{k=1}^n\int_{a_k}^{b_k}\int_x^{b_k}f'(t)dt\,dx\\
-&=\sum_{k=1}^n\int_{a_k}^{b_k}(t-a_k)f'(t)dt.
-\end{aligned}
-$$
+    ### 写出总面积与分段结构
 
-**第二步：主项来自 $f'$ 在左端点的取值。** $f'$ 在闭区间上一致连续。记
+    由于 $e^{-x}>0$、$\sin x$ 在相邻半周期内变号，所求面积为
 
-$$
-\omega(h)=\sup_{\substack{u,v\in[0,1]\\|u-v|\le h}}|f'(u)-f'(v)|,
-\quad\omega(h)\to0\ (h\to0^+).
-$$
+    $$
+    S=\int_0^{+\infty}e^{-x}|\sin x|\,\mathrm dx.
+    $$
 
-于是对每个区间，
+    分段 $[k\pi,(k+1)\pi]$，令 $x=k\pi+t$（$0\le t\le\pi$），则 $|\sin(k\pi+t)|=\sin t$。
 
-$$
-\left|\int_{a_k}^{b_k}(t-a_k)[f'(t)-f'(a_k)]dt\right|
-\le\frac{\omega(1/n)}{2n^2}.
-$$
+  </Step>
+  <Step>
 
-所以
+    ### 求每一段的面积
 
-$$
-n\left(S_n-\int_0^1 f\right)=\frac1{2n}\sum_{k=1}^nf'(a_k)+R_n,
-\qquad|R_n|\le\frac12\omega(1/n)\to0.
-$$
+    第 $k$ 段面积为
 
-**第三步：辨认余下的黎曼和。** 因 $f'$ 连续，
+    $$
+    S_k=e^{-k\pi}\int_0^\pi e^{-t}\sin t\,\mathrm dt.
+    $$
 
-$$
-\lim_{n\to\infty}\frac1n\sum_{k=1}^nf'(a_k)
-=\int_0^1f'(x)dx=f(1)-f(0).
-$$
+    利用原函数
 
-合并主项与误差得证。
+    $$
+    \int e^{-t}\sin t\,\mathrm dt=-\frac{e^{-t}}2(\sin t+\cos t)+C,
+    $$
 
-<Callout type="idea" title="为什么误差乘以 n 后还不一定为零？">普通右端点黎曼和误差是 $O(1/n)$，乘以 $n$ 后的极限保留端点差的一半；若改为左端点黎曼和，极限反号。仅仅知道黎曼和收敛，不能直接推出这里的首阶误差极限。</Callout>
+    得到 $\int_0^\pi e^{-t}\sin t\,\mathrm dt=(1+e^{-\pi})/2$。所以
+
+    $$
+    S_k=\frac{1+e^{-\pi}}2e^{-k\pi}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 求无穷等比级数
+
+    因 $0<e^{-\pi}<1$，级数收敛，
+
+    $$
+    \begin{aligned}
+    S&=\sum_{k=0}^{\infty}S_k
+    =\frac{1+e^{-\pi}}2\sum_{k=0}^{\infty}e^{-k\pi}\\
+    &=\frac{1+e^{-\pi}}{2(1-e^{-\pi})}
+    =\boxed{\frac{e^\pi+1}{2(e^\pi-1)}}.
+    \end{aligned}
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+**面积**不能用 $\int_0^{\infty}e^{-x}\sin x\,\mathrm dx$ 代替，后者是正负抵消后的有向面积。
+
+</Callout>
 
 </Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-086" type="blank" points={4} tags="来源:2019年考研数学二, 科目:高等数学, 章节:定积分, 考点:复合积分函数与换元分部积分">
+
+ 已知函数 $f(x)=x\int_1^x \frac{\sin t^2}{t}\mathrm{d}t$，则 $\int_0^1 f(x)\mathrm{d}x=$ <Blank answer="((1)/(4))(cos 1-1)" kind="math" /> 。
+
+<Solution>
+
+**参考答案：** $\boxed{\dfrac{\cos1-1}{4}}$。
+
+**核心思路：** 遇到“$x$ 乘以变上限积分函数”的定积分，可优先分部积分；也可视为三角区域上的二重积分交换次序。
+
+<Steps>
+  <Step>
+
+    ### 将积分变为便于交换的形式
+
+    原式
+
+    $$
+    I=\int_0^1x\int_1^x\frac{\sin t^2}{t}\,\mathrm dt\,\mathrm dx
+    =-\int_0^1x\int_x^1\frac{\sin t^2}{t}\,\mathrm dt\,\mathrm dx.
+    $$
+
+    尽管表达式含 $1/t$，但 $\sin(t^2)/t\sim t\ (t\to0^+)$，可连续延拓，因此交换积分顺序合法。
+
+  </Step>
+  <Step>
+
+    ### 在三角区域交换积分次序
+
+    积分区域是 $0\le x\le t\le1$。先积 $x$：
+
+    $$
+    \begin{aligned}
+    I&=-\int_0^1\frac{\sin t^2}{t}\left(\int_0^t x\,\mathrm dx\right)\mathrm dt\\
+    &=-\frac12\int_0^1t\sin(t^2)\,\mathrm dt.
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 换元计算
+
+    令 $u=t^2$，则 $\mathrm du=2t\,\mathrm dt$，所以
+
+    $$
+    I=-\frac14\int_0^1\sin u\,\mathrm du
+    =\frac{\cos1-1}{4}.
+    $$
+
+    结果为负，符合 $0<x<1$ 时 $\int_1^x \sin(t^2)/t\,\mathrm dt<0$ 的符号判断。
+
+  </Step>
+</Steps>
+
+<Tabs items={["主方法", "方法拓展"]} defaultIndex={0}>
+  <Tab value="主方法">
+
+    以上方法通过换序一次消去内层积分。
+
+  </Tab>
+  <Tab value="方法拓展">
+
+    另一种写法对外层分部积分：令 $F(x)=\int_1^x\frac{\sin t^2}{t}\,\mathrm dt$，$F(1)=0$ 且 $F'(x)=\sin(x^2)/x$。于是
+
+    $$
+    \begin{aligned}
+    I&=\left[\frac{x^2}{2}F(x)\right]_0^1-\frac12\int_0^1x^2F'(x)\,\mathrm dx\\
+    &=-\frac12\int_0^1x\sin(x^2)\,\mathrm dx,
+    \end{aligned}
+    $$
+
+    后续同上。
+
+  </Tab>
+</Tabs>
+
+<Callout type="idea" title="方法总结与易错点">
+
+先把 $\int_1^x$ 反向成 $-\int_x^1$，**别漏负号**；同时画清积分区域 $0\le x\le t\le1$。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-087" type="blank" points={4} tags="来源:2019年考研数学三, 科目:高等数学, 章节:定积分, 考点:积分交换次序与对称构造">
+
+ 已知 $f(x)=\int_1^x \sqrt{1+t^4}\mathrm{d}t$，则 $\int_0^1 x^2 f(x)\mathrm{d}x=$ <Blank answer="-((1)/(18))(2sqrt(2)-1)" kind="math" /> 。
+
+<Solution>
+
+**参考答案：** $\boxed{-\dfrac{2\sqrt2-1}{18}}$。
+
+**核心思路：** 先用区间方向确定整体负号，再将交换顺序产生的 $t^3$ 与 $1+t^4$ 的导数配对。
+
+<Steps>
+  <Step>
+
+    ### 把内层积分反向并确定区域
+
+    因为 $0\le x\le1$，
+
+    $$
+    f(x)=\int_1^x\sqrt{1+t^4}\,\mathrm dt=-\int_x^1\sqrt{1+t^4}\,\mathrm dt.
+    $$
+
+    所以
+
+    $$
+    I=-\int_0^1\int_x^1 x^2\sqrt{1+t^4}\,\mathrm dt\,\mathrm dx,
+    $$
+
+    其积分域为 $0\le x\le t\le1$。
+
+  </Step>
+  <Step>
+
+    ### 交换顺序并先积多项式
+
+    改为先 $x$ 后 $t$：
+
+    $$
+    \begin{aligned}
+    I&=-\int_0^1\sqrt{1+t^4}\left(\int_0^tx^2\,\mathrm dx\right)\mathrm dt\\
+    &=-\frac13\int_0^1 t^3\sqrt{1+t^4}\,\mathrm dt.
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 换元并严格代入上下限
+
+    设 $u=1+t^4$，$\mathrm du=4t^3\,\mathrm dt$，积分上下限由 $t=0,1$ 变为 $u=1,2$：
+
+    $$
+    \begin{aligned}
+    I&=-\frac1{12}\int_1^2u^{1/2}\,\mathrm du\\
+    &=-\frac1{18}\big[u^{3/2}\big]_1^2
+    =\boxed{-\frac{2\sqrt2-1}{18}}.
+    \end{aligned}
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+$f(x)\le0$ 在 $[0,1]$ 成立，故整体积分一定**非正**。这是快速检验负号是否丢失的办法。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-088" type="single" points={4} tags="来源:2020年考研数学三, 科目:高等数学, 章节:定积分, 考点:积分函数奇偶性与导数">
+
+ 设奇函数 $f(x)$ 在 $(-\infty, +\infty)$ 上具有连续导数，则（ ）。
+
+<Option correct>$\int_0^x [\cos f(t)+f^{\prime}(t)]\mathrm{d}t$ 是奇函数 \quad\quad</Option>
+<Option>$\int_0^x [\cos f(t)+f^{\prime}(t)]\mathrm{d}t$ 是偶函数</Option>
+<Option>$\int_0^x [\cos f^{\prime}(t)+f(t)]\mathrm{d}t$ 是奇函数 \quad\quad</Option>
+<Option>$\int_0^x [\cos f^{\prime}(t)+f(t)]\mathrm{d}t$ 是偶函数</Option>
+
+<Solution>
+
+**参考答案：** $\boxed{A}$。
+
+**核心思路：** 奇函数的导函数为偶函数；将偶函数作为从 $0$ 到 $x$ 的积分函数的导数，得到奇函数。
+
+<Steps>
+  <Step>
+
+    ### 判断 f 与 f\prime 的奇偶性
+
+    因 $f(-x)=-f(x)$，对等式两边关于 $x$ 求导：
+
+    $$
+    -f'(-x)=-f'(x),\qquad\text{即 } f'(-x)=f'(x).
+    $$
+
+    因此 $f'$ 是偶函数。同时 $\cos f(-x)=\cos(-f(x))=\cos f(x)$，故 $\cos f(x)$ 也是偶函数。
+
+  </Step>
+  <Step>
+
+    ### 判断 A 中的积分函数
+
+    令
+
+    $$
+    G(x)=\int_0^x[\cos f(t)+f'(t)]\,\mathrm dt.
+    $$
+
+    方括号内为偶函数，因此
+
+    $$
+    \begin{aligned}
+    G(-x)&=\int_0^{-x}[\cos f(t)+f'(t)]\,\mathrm dt\\
+    &=-\int_0^x[\cos f(-u)+f'(-u)]\,\mathrm du=-G(x).
+    \end{aligned}
+    $$
+
+    即 $G$ 为奇函数，A 正确，B 不正确。
+
+  </Step>
+  <Step>
+
+    ### 排除 C、D 的必然性
+
+    对另一种被积函数 $\cos f'(t)+f(t)$，第一项为偶函数，第二项为奇函数，一般既非奇也非偶。取 $f(t)=t$ 即可得到
+
+    $$
+    \int_0^x[\cos f'(t)+f(t)]\,\mathrm dt
+    =x\cos1+\frac{x^2}{2},
+    $$
+
+    该函数既非奇函数也非偶函数，说明 C、D 均不成立。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+记忆链条：**奇函数求导得偶函数；偶函数从 $0$ 到 $x$ 积分得奇函数**。奇偶相加通常不保留固定奇偶性。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-089" type="single" points={5} tags="来源:2021年考研数学一、二, 科目:高等数学, 章节:定积分, 考点:定积分的黎曼和定义">
+
+ 设函数 $f(x)$ 在区间 $[0,1]$ 上连续，则 $\int_0^1 f(x)\mathrm{d}x=($ $\quad$ ）。
+
+<Option>$\lim_{n\to\infty}\sum_{k=1}^n f\left(\frac{2k-1}{2n}\right)\frac{1}{2n}$ \quad\quad</Option>
+<Option correct>$\lim_{n\to\infty}\sum_{k=1}^n f\left(\frac{2k-1}{2n}\right)\frac{1}{n}$</Option>
+<Option>$\lim_{n\to\infty}\sum_{k=1}^{2n} f\left(\frac{k-1}{2n}\right)\frac{1}{n}$ \quad\quad</Option>
+<Option>$\lim_{n\to\infty}\sum_{k=1}^{2n} f\left(\frac{k}{2n}\right)\frac{2}{n}$</Option>
+
+<Solution>
+
+**参考答案：** $\boxed{B}$。
+
+**核心思路：** 判断黎曼和时须同时看取样点、分割份数和宽度；关键是每一个取样值乘上真实的小区间长度。
+
+<Steps>
+  <Step>
+
+    ### 建立等分区间及中点
+
+    将 $[0,1]$ 分为 $n$ 等份，则
+
+    $$
+    \Delta x=\frac1n,\qquad
+    \left[\frac{k-1}{n},\frac{k}{n}\right]
+    $$
+
+    是第 $k$ 段，其中点为
+
+    $$
+    \xi_k=\frac12\left(\frac{k-1}{n}+\frac{k}{n}\right)
+    =\frac{2k-1}{2n}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 按黎曼和定义识别正确项
+
+    因 $f$ 在 $[0,1]$ 连续，故其中点黎曼和收敛于定积分：
+
+    $$
+    \int_0^1 f(x)\,\mathrm dx
+    =\lim_{n\to\infty}\sum_{k=1}^n
+    f\left(\frac{2k-1}{2n}\right)\frac1n.
+    $$
+
+    故正确选项是 B。
+
+  </Step>
+  <Step>
+
+    ### 用常值函数快速排除错误权重
+
+    令 $f(x)\equiv1$，则目标积分等于 $1$。此时各项候选和分别趋于：
+
+    $$
+    A:\frac12,\quad B:1,\quad C:2,\quad D:4.
+    $$
+
+    A、C、D 的权重与区间总长度不匹配，可以立即排除。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+**连续性保证黎曼和收敛**，但“分成 $n$ 段”要配 $1/n$，“分成 $2n$ 段”要配 $1/(2n)$；不要只看求和项里的取样点。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-090" type="single" points={5} tags="来源:2022年考研数学一、二、三, 科目:高等数学, 章节:定积分, 考点:积分不等式与函数比较">
+
+ $I_1=\int_0^1 \frac{x}{2(1+\cos x)}\mathrm{d}x$，$I_2=\int_0^1 \frac{\ln(1+x)}{1+\cos x}\mathrm{d}x$，$I_3=\int_0^1 \frac{2x}{1+\sin x}\mathrm{d}x$，则（ ）。
+
+<Option correct>$I_1<I_2<I_3$ \quad\quad</Option>
+<Option>$I_2<I_1<I_3$ \quad\quad</Option>
+<Option>$I_1<I_3<I_2$ \quad\quad</Option>
+<Option>$I_3<I_2<I_1$</Option>
+
+<Solution>
+
+**参考答案：** $\boxed{I_1<I_2<I_3}$，选 A。
+
+**核心思路：** 三个积分区间相同，分母都为正；寻找简单的中间函数 $x$，分别作逐点严格比较。
+
+<Steps>
+  <Step>
+
+    ### 证明 I1 小于 I2
+
+    在 $0<x\le1$ 上令 $h(x)=\ln(1+x)-x/2$，则
+
+    $$
+    h(0)=0,\qquad
+    h'(x)=\frac1{1+x}-\frac12=\frac{1-x}{2(1+x)}\ge0.
+    $$
+
+    于是 $h(x)>0$（$0<x\le1$），因此
+
+    $$
+    \frac{x}{2(1+\cos x)}<\frac{\ln(1+x)}{1+\cos x}.
+    $$
+
+    积分后得到 $I_1<I_2$。
+
+  </Step>
+  <Step>
+
+    ### 找 x 作 I2、I3 的比较桥梁
+
+    对于 $0<x\le1$，$\ln(1+x)<x$，而 $\cos x>0$，故
+
+    $$
+    \frac{\ln(1+x)}{1+\cos x}<x.
+    $$
+
+    又因 $\sin x<1$，于是 $1+\sin x<2$，从而
+
+    $$
+    x<\frac{2x}{1+\sin x}.
+    $$
+
+    两式相连得 $I_2<I_3$。
+
+  </Step>
+  <Step>
+
+    ### 汇总并说明严格性
+
+    各个比较均在具有正长度的区间 $(0,1]$ 上严格成立，因此
+
+    $$
+    \boxed{I_1<I_2<I_3}.
+    $$
+
+    无需分别求出三个定积分的原函数。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+对**同一区间且连续的被积函数**，若 $g(x)<h(x)$ 在正测度子区间上成立且其余位置 $g\le h$，便有 $\int g<\int h$。本题可用 $x$ 作比较中介。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-091" type="blank" points={5} tags="来源:2022年考研数学一, 科目:高等数学, 章节:定积分, 考点:对数幂函数分部积分">
+
+ $\int_1^{e^2} \frac{\ln x}{\sqrt{x}}\mathrm{d}x=$ <Blank answer="4" kind="math" /> 。
+
+<Solution>
+
+**参考答案：** $\boxed{4}$。
+
+**核心思路：** 被积式同时有 $\ln x$ 和 $1/\sqrt{x}$，令 $x=u^2$ 可去掉根号，再用对数积分公式。
+
+<Steps>
+  <Step>
+
+    ### 平方换元并处理上下限
+
+    取 $u=\sqrt{x}$，则 $x=u^2$，$\mathrm dx=2u\,\mathrm du$，$\ln x=2\ln u$。在 $x=1,e^2$ 时，分别有 $u=1,e$，因此
+
+    $$
+    I=\int_1^{e^2}\frac{\ln x}{\sqrt x}\,\mathrm dx
+    =4\int_1^e\ln u\,\mathrm du.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 分部积分求对数原函数
+
+    取 $w=\ln u$、$\mathrm dv=\mathrm du$，得
+
+    $$
+    \int\ln u\,\mathrm du=u\ln u-u+C.
+    $$
+
+    因此
+
+    $$
+    \begin{aligned}
+    I&=4[u\ln u-u]_1^e\\
+    &=4[(e-e)-(0-1)]=\boxed{4}.
+    \end{aligned}
+    $$
+
+  </Step>
+</Steps>
+
+<Tabs items={["主方法", "方法拓展"]} defaultIndex={0}>
+  <Tab value="主方法">
+
+    主方法先换元后分部积分。
+
+  </Tab>
+  <Tab value="方法拓展">
+
+    也可以直接求原函数：对 $\int x^{-1/2}\ln x\,\mathrm dx$ 分部积分，得到
+
+    $$
+    \int\frac{\ln x}{\sqrt x}\,\mathrm dx
+    =2\sqrt x\ln x-4\sqrt x+C.
+    $$
+
+    代入上下限：$(4e-4e)-(-4)=4$。
+
+  </Tab>
+</Tabs>
+
+<Callout type="idea" title="方法总结与易错点">
+
+换元后要同时改**被积函数、微分、积分上下限**。特别是上限 $e^2$ 会变成 $e$，不能仍用 $e^2$。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-094" type="blank" points={5} tags="来源:2023年考研数学一、二, 科目:高等数学, 章节:定积分, 考点:函数平移与定积分区间变换">
+
+ 设连续函数 $f(x)$ 满足 $f(x+2)-f(x)=x$，$\int_0^2 f(x)\mathrm{d}x=0$，则 $\int_1^3 f(x)\mathrm{d}x=$ <Blank answer="((1)/(2))" kind="math" /> 。
+
+<Solution>
+
+**参考答案：** $\boxed{\dfrac12}$。
+
+**核心思路：** 函数满足平移两单位后的增量关系；把待求区间拆成两段，使其通过平移拼成已知的 $[0,2]$。
+
+<Steps>
+  <Step>
+
+    ### 按特殊的整数端点拆分
+
+    令
+
+    $$
+    I=\int_1^3f(x)\,\mathrm dx
+    =\int_1^2f(x)\,\mathrm dx+\int_2^3f(x)\,\mathrm dx.
+    $$
+
+    目的是把 $[2,3]$ 平移回 $[0,1]$，与 $[1,2]$ 拼接。
+
+  </Step>
+  <Step>
+
+    ### 用函数平移关系改写第二段
+
+    在第二段令 $t=x-2$，由 $f(t+2)=f(t)+t$，得
+
+    $$
+    \begin{aligned}
+    \int_2^3f(x)\,\mathrm dx
+    &=\int_0^1f(t+2)\,\mathrm dt\\
+    &=\int_0^1f(t)\,\mathrm dt+\int_0^1t\,\mathrm dt.
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 拼接成已知积分
+
+    于是
+
+    $$
+    \begin{aligned}
+    I&=\int_1^2f(x)\,\mathrm dx+\int_0^1f(x)\,\mathrm dx+\frac12\\
+    &=\int_0^2f(x)\,\mathrm dx+\frac12\\
+    &=\boxed{\frac12}.
+    \end{aligned}
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+遇到 $f(x+T)-f(x)=g(x)$，可把积分区间分解/平移 $T$，从而避开未知函数 $f$ 的具体表达式。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-97dbde-098" type="essay" points={10} tags="来源:2025年考研数学一、二、三, 科目:高等数学, 章节:定积分, 考点:有理函数部分分式与定积分">
+
+ 计算 $\int_{0}^{1}\frac{1}{(x+1)(x^2-2x+2)}\mathrm{d}x$。
+
+<Solution>
+
+**参考答案：** $\boxed{\dfrac3{10}\ln2+\dfrac\pi{10}}$。
+
+**核心思路：** 分母为一次因式与不可约二次因式的乘积：先作部分分式分解，再将二次项分子拆为“导数型 + 反正切型”。
+
+<Steps>
+  <Step>
+
+    ### 进行部分分式分解
+
+    设
+
+    $$
+    \frac1{(x+1)(x^2-2x+2)}
+    =\frac A{x+1}+\frac{Bx+C}{x^2-2x+2}.
+    $$
+
+    比较 $x^2,x,1$ 的系数，解出 $A=1/5$、$B=-1/5$、$C=3/5$，从而
+
+    $$
+    \frac1{(x+1)(x^2-2x+2)}
+    =\frac1{5(x+1)}+\frac{-x+3}{5(x^2-2x+2)}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 拆出对数型和反正切型
+
+    设 $q(x)=x^2-2x+2=(x-1)^2+1$，则
+
+    $$
+    -x+3=-\frac12q'(x)+2.
+    $$
+
+    所以
+
+    $$
+    I=\frac15\int_0^1\frac{\mathrm dx}{x+1}
+    -\frac1{10}\int_0^1\frac{q'(x)}{q(x)}\,\mathrm dx
+    +\frac25\int_0^1\frac{\mathrm dx}{1+(x-1)^2}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 代入端点求值
+
+    分别积分并代入上下限：
+
+    $$
+    \begin{aligned}
+    I&=\left[\frac15\ln(x+1)-\frac1{10}\ln((x-1)^2+1)
+    +\frac25\arctan(x-1)\right]_0^1\\
+    &=\frac15\ln2+\frac1{10}\ln2+\frac25\cdot\frac\pi4\\
+    &=\boxed{\frac3{10}\ln2+\frac\pi{10}}.
+    \end{aligned}
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+二次式 $x^2-2x+2=(x-1)^2+1>0$，对数项的定义域无问题；应避免把 $\arctan(-1)=-\pi/4$ 的下限符号算错。
+
+</Callout>
+
+</Solution>
+
 </Question>

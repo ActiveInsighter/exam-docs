@@ -1,1524 +1,1817 @@
 ---
-title: 第一节 不定积分
-description: 高等数学核心真题重构：分段原函数、隐含函数关系、换元与分部积分、复合结构及抽象函数积分。
+title: "第一节 不定积分"
+description: "考研数学真题分类：模块四：一元函数积分学"
 ---
 
-不定积分的关键不是记忆孤立的积分结果，而是**先辨认“哪个整体的导数”出现在被积式中**。分段函数先检查连接点，复合函数先明确自变量，根式与反三角函数常需换元，两个函数因子中有一个容易求原函数时再考虑分部积分。
+<Question id="core-1102-math-16b5e5-001" type="essay" points={10} tags="来源:1987年考研数学二, 科目:高等数学, 章节:不定积分, 考点:带参数三角不定积分与分类讨论">
 
-<Callout type="idea" title="通用检查顺序">
+ 计算 $\int \frac{1}{a^2 \sin^2 x + b^2 \cos^2 x} dx$，其中 $a, b$ 是不全为零的非负数。
 
-1. **定义域：** 根式、对数与分母是否允许当前换元；原函数的积分常数只能在同一连通区间内统一。
-2. **结构：** 先找 $d\phi(x)$、乘积求导、商求导、平方求导等模式，再展开运算。
-3. **验证：** 对所得原函数求导，确认完整还原被积函数；分段题还要检验接点的可导性。
+<Solution>
+
+**参考结论：** $a,b>0$：局部原函数 $\frac1{ab}\arctan(\frac ab\tan x)+C$；$a=0<b$：$\frac1{b^2}\tan x+C$；$b=0<a$：$-\frac1{a^2}\cot x+C$。
+
+**解题思路：** 参数是否为零决定换元公式及定义域，先分类；当 $a,b>0$ 时用 $t=\tan x$ 将分母变为 $a^2t^2+b^2$，其余两类直接积分。
+
+<Steps>
+
+  <Step>
+
+    ### 按参数是否为零划分情形
+
+    需要按 $a,b$ 是否为零分类，并在每个原函数所适用的连通区间内核验。
+
+    **(1) $a\ne0,\ b\ne0$**
+
+  </Step>
+
+  <Step>
+
+    ### 讨论 $a,b>0$ 并作正切换元
+
+    令
+
+    $$
+    t=\tan x,
+    \qquad
+    \mathrm dx=\frac{\mathrm dt}{1+t^2}.
+    $$
+
+    又
+
+    $$
+    \sin^2x=\frac{t^2}{1+t^2},
+    \qquad
+    \cos^2x=\frac{1}{1+t^2},
+    $$
+
+    所以
+
+    $$
+    \begin{aligned}
+    I
+    &=\int\frac{\mathrm dx}{a^2\sin^2x+b^2\cos^2x}\\
+    &=\int\frac{\mathrm dt}{a^2t^2+b^2}\\
+    &=\frac1{ab}\arctan\frac{at}{b}+C.
+    \end{aligned}
+    $$
+
+  </Step>
+
+  <Step>
+
+    ### 计算反正切积分并回代
+
+    代回 $t=\tan x$：
+
+    $$
+    \boxed{I=\frac1{ab}\arctan\left(\frac ab\tan x\right)+C}.
+    $$
+
+  </Step>
+
+  <Step>
+
+    ### 处理 $a=0<b$ 的特例
+
+    $$
+    I=\frac1{b^2}\int\sec^2x\,\mathrm dx
+    =\boxed{\frac1{b^2}\tan x+C}.
+    $$
+
+  </Step>
+
+  <Step>
+
+    ### 处理 $b=0<a$ 的特例
+
+    $$
+    I=\frac1{a^2}\int\csc^2x\,\mathrm dx
+    =\boxed{-\frac1{a^2}\cot x+C}.
+    $$
+
+    题设说明 $a,b$ 不全为零，因此无需讨论 $a=b=0$。当 $a,b>0$ 时，跨越 $\cos x=0$ 的点，要调整反正切的分支以拼接连续的原函数。
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="关键辨析与解题检查">
+
+**定义域与分支非常重要。** 当 $a,b>0$ 时，原被积函数对全部实数有定义，但 $\arctan(\frac ab\tan x)$ 只可在每个不穿过 $\cos x=0$ 的开区间直接使用；跨越 $\pi/2+k\pi$ 时须相应加上 $\pi/(ab)$ 的整数倍使原函数连续拼接。等价地可用连续展开的角度函数 $\frac1{ab}\operatorname{Arg}_{\mathrm{cont}}(b\cos x+i a\sin x)$ 作为全实轴的原函数。参数 $a=0$ 时须排除 $\cos x=0$，参数 $b=0$ 时须排除 $\sin x=0$。不要将 $a=b=0$ 纳入讨论。
 
 </Callout>
 
-## 模型：原函数存在与拼接
+</Solution>
 
-<Question id="math-core-gd-04-01-001" type="single" points={4} tags="来源:2016考研数一数二, 考点:分段原函数, 考点:连接点可导">
+</Question>
 
-已知函数
+<Question id="core-1102-math-16b5e5-011" type="essay" points={3} tags="来源:1993年考研数学一, 科目:高等数学, 章节:不定积分, 考点:指数复合函数的分部积分与换元">
 
-$$
-f(x)=\begin{cases}2(x-1),&x<1,\\\ln x,&x\ge1,\end{cases}
-$$
-
-则 $f(x)$ 的一个原函数是（ ）。
-
-<Option>$F(x)=\begin{cases}(x-1)^2,&x<1,\\x(\ln x-1),&x\ge1.\end{cases}$</Option>
-<Option>$F(x)=\begin{cases}(x-1)^2,&x<1,\\x(\ln x+1),&x\ge1.\end{cases}$</Option>
-<Option>$F(x)=\begin{cases}(x-1)^2,&x<1,\\x(\ln x+1)+1,&x\ge1.\end{cases}$</Option>
-<Option correct>$F(x)=\begin{cases}(x-1)^2,&x<1,\\x(\ln x-1)+1,&x\ge1.\end{cases}$</Option>
+ 求 $\int \frac{x e^x}{\sqrt{e^x-1}}\mathrm{d}x$。
 
 <Solution>
 
-**答案：D。** 两段导数必须分别正确，且在 $x=1$ 拼接为一个可导函数。
+**参考结论：** $\displaystyle I=2x\sqrt{e^x-1}-4\sqrt{e^x-1}+4\arctan\sqrt{e^x-1}+C$（实数定义域 $x>0$）。
 
-**第一步：分别积分。** $x<1$ 时，$\int2(x-1)\,dx=(x-1)^2+C_1$；$x>1$ 时，分部积分得到
+**解题思路：** 先把 $x$ 视为分部积分的第一因子，利用内层指数函数的导数构造 $2\sqrt{e^x-1}$；剩余根式用 $t=\sqrt{e^x-1}$ 化为有理函数积分。
 
-$$
-\int\ln x\,dx=x\ln x-x+C_2.
-$$
+<Steps>
 
-各选项的左段常数均取 $C_1=0$，所以 $F(1^-)=0$。为使 $F$ 连续，有 $F(1)=0$，即 $-1+C_2=0$，故 $C_2=1$。
+  <Step>
 
-**第二步：额外检查接点导数。** 选 D 后，
+    ### 识别合适的分部积分拆分
 
-$$
-F'_-(1)=\lim_{x\to1^-}2(x-1)=0,\quad
-F'_+(1)=\lim_{x\to1^+}\ln x=0.
-$$
+    先取 $u=x$、$\mathrm dv=e^x/\sqrt{e^x-1}\,\mathrm dx$ 做分部积分。注意
 
-两侧导数一致，且 $f(1)=\ln1=0$，故 $F'(1)=f(1)$，确实是全实轴上的一个原函数。
+    $$
+    \int\frac{e^x}{\sqrt{e^x-1}}\,\mathrm dx
+    =2\sqrt{e^x-1}.
+    $$
 
-<Callout type="warn" title="不能只检验各段的导数">原函数本身必须在接点连续，否则两段各自“求导正确”也不构成整体原函数。B、C 的右段导数本身就不是 $\ln x$。</Callout>
+  </Step>
+
+  <Step>
+
+    ### 进行分部积分降低复杂度
+
+    因此
+
+    $$
+    I=2x\sqrt{e^x-1}-2\int\sqrt{e^x-1}\,\mathrm dx.
+    $$
+
+  </Step>
+
+  <Step>
+
+    ### 以根号为新变量求剩余积分
+
+    再令
+
+    $$
+    t=\sqrt{e^x-1},
+    $$
+
+    则
+
+    $$
+    e^x=t^2+1,
+    \qquad
+    \mathrm dx=\frac{2t}{1+t^2}\,\mathrm dt.
+    $$
+
+    从而
+
+    $$
+    \begin{aligned}
+    \int\sqrt{e^x-1}\,\mathrm dx
+    &=2\int\frac{t^2}{1+t^2}\,\mathrm dt\\
+    &=2\int\left(1-\frac1{1+t^2}\right)\mathrm dt\\
+    &=2t-2\arctan t+C.
+    \end{aligned}
+    $$
+
+  </Step>
+
+  <Step>
+
+    ### 回代并给出定义域
+
+    代回得到
+
+    $$
+    \boxed{
+    I=2x\sqrt{e^x-1}-4\sqrt{e^x-1}
+    +4\arctan\sqrt{e^x-1}+C
+    }.
+    $$
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="关键辨析与解题检查">
+
+实数范围内，$\sqrt{e^x-1}$ 分母必须为正，故原积分的定义域为 $x>0$。求导检验：令 $u=\sqrt{e^x-1}$，则 $u'=e^x/(2u)$，对结果求导可化为 $x e^x/u$。分部积分的两个核心导数为 $\frac{\mathrm d}{\mathrm dx}(2\sqrt{e^x-1})=e^x/\sqrt{e^x-1}$ 与 $\frac{\mathrm d}{\mathrm dt}(t-\arctan t)=t^2/(1+t^2)$。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-01-002" type="single" points={5} tags="来源:2023考研数二数三, 考点:分段原函数, 考点:反双曲函数">
+<Question id="core-1102-math-16b5e5-013" type="essay" points={3} tags="来源:1994年考研数学一、二, 科目:高等数学, 章节:不定积分, 考点:三角换元与有理函数部分分式">
 
-已知
-
-$$
-f(x)=\begin{cases}\dfrac1{\sqrt{1+x^2}},&x\le0,\\(x+1)\cos x,&x>0,\end{cases}
-$$
-
-则 $f(x)$ 的一个原函数为（ ）。
-
-<Option>$F(x)=\begin{cases}\ln(\sqrt{1+x^2}-x),&x\le0,\\(x+1)\cos x-\sin x,&x>0.\end{cases}$</Option>
-<Option>$F(x)=\begin{cases}\ln(\sqrt{1+x^2}-x)+1,&x\le0,\\(x+1)\cos x-\sin x,&x>0.\end{cases}$</Option>
-<Option>$F(x)=\begin{cases}\ln(\sqrt{1+x^2}+x),&x\le0,\\(x+1)\sin x+\cos x,&x>0.\end{cases}$</Option>
-<Option correct>$F(x)=\begin{cases}\ln(\sqrt{1+x^2}+x)+1,&x\le0,\\(x+1)\sin x+\cos x,&x>0.\end{cases}$</Option>
+ 求 $\int \frac{\mathrm{d}x}{\sin 2x+2\sin x}$。
 
 <Solution>
 
-**答案：D。**
+**参考结论：** $\displaystyle I=\frac18\ln\frac{1-\cos x}{1+\cos x}+\frac1{4(1+\cos x)}+C$。
 
-**第一步：确定正确的两段求导结构。** 因为
+**解题思路：** 先提取 $\sin x$，再以 $t=\cos x$ 换元；根式未出现，剩下的是具有一次因子与二重因子的有理积分。
 
-$$
-\frac{d}{dx}\ln\bigl(\sqrt{1+x^2}+x\bigr)=\frac1{\sqrt{1+x^2}},
-$$
+<Steps>
 
-左段必须采用“$+x$”的对数式；“$-x$”的对数式导数为 $-1/\sqrt{1+x^2}$，排除 A、B。
+  <Step>
 
-由乘积法则，
 
-$$
-\frac{d}{dx}\bigl[(x+1)\sin x+\cos x\bigr]
-=\sin x+(x+1)\cos x-\sin x
-=(x+1)\cos x,
-$$
 
-故 C、D 的右段正确。
+    ### 整理分母并完成换元
 
-**第二步：拼接积分常数。** 不加常数时，左段在 $x=0$ 的值为 $\ln1=0$，右段的极限为 $1$；因此左段必须加 $1$ 才能连续，选 D。
 
-接点处左右导数均为 $1=f(0)$，所以拼接后的函数确实处处可导。
 
-<Callout type="idea" title="两个近似表达式，导数符号相反">$\ln(\sqrt{1+x^2}+x)$ 的导数为正，$\ln(\sqrt{1+x^2}-x)$ 的导数为负；两者互为相反数，因为两括号乘积等于 $1$。</Callout>
+    由 $\sin2x=2\sin x\cos x$，得
+
+    $$
+    I=\frac12\int\frac{\mathrm dx}{\sin x(1+\cos x)}.
+    $$
+
+    置 $t=\cos x$，则 $\mathrm dt=-\sin x\,\mathrm dx$，并且 $\sin^2x=1-t^2$。因而
+
+    $$
+    I=-\frac12\int\frac{\mathrm dt}{(1-t)(1+t)^2}.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 针对重因子进行部分分式分解
+
+
+
+    设
+
+    $$
+    \frac1{(1-t)(1+t)^2}=\frac{A}{1-t}+\frac{B}{1+t}+\frac{D}{(1+t)^2}.
+    $$
+
+    乘回分母，分别令 $t=1,-1$ 得 $A=\frac14$、$D=\frac12$；比较二次项（或令 $t=0$）得 $B=\frac14$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 逐项积分并还原
+
+
+
+    因此
+
+    $$
+    \begin{aligned}
+    I&=-\frac18\int\frac{\mathrm dt}{1-t}-\frac18\int\frac{\mathrm dt}{1+t}-\frac14\int\frac{\mathrm dt}{(1+t)^2}\\
+    &=\frac18\ln|1-t|-\frac18\ln|1+t|+\frac1{4(1+t)}+C.
+    \end{aligned}
+    $$
+
+    将 $t=\cos x$ 代回，得到参考结论。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+原被积函数要求 $\sin x\ne0$（即 $x\ne k\pi$）。在这样的连通区间中 $-1<\cos x<1$，所以 $1\pm\cos x$ 均为正；只有在这一条件下才可自然去掉对数绝对值。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-01-003" type="blank" tags="来源:李林880, 考点:原函数反求, 考点:链式法则">
+<Question id="core-1102-math-16b5e5-015" type="essay" points={5} tags="来源:1995年考研数学二, 科目:高等数学, 章节:不定积分, 考点:复合函数关系、反解与不定积分">
 
-设 $F$ 是 $f$ 的一个原函数，$F(\pi/4)=0$，当 $\pi/4<x<\pi/2$ 时，$F(x)>0$，且
-
-$$
-F(x)f(x)=\frac{\ln(\tan x)}{\sin x\cos x}.
-$$
-
-求 $f(x)=$ <Blank answer="1/(sin(x)*cos(x))" kind="math" />。
+ 设 $f(x^2-1) = \ln\frac{x^2}{x^2-2}$，且 $f[\varphi(x)] = \ln x$，求 $\int \varphi(x)\mathrm{d}x$。
 
 <Solution>
 
-**答案：** $\displaystyle\boxed{f(x)=\frac1{\sin x\cos x}}$。
+**参考结论：** $\displaystyle \int\varphi(x)\,\mathrm dx=x+2\ln(x-1)+C$（由题设实数定义域推出 $x>1$）。
 
-**第一步：反向识别平方求导。** 由于 $F'=f$，有
+**解题思路：** 由 $f(x^2-1)$ 先“反代入”恢复 $f(t)$；利用对数函数的单射性求出 $\varphi$，再分项积分。
 
-$$
-\left(F^2(x)\right)'=2F(x)f(x)
-=\frac{2\ln(\tan x)}{\sin x\cos x}.
-$$
+<Steps>
 
-又因为 $\bigl[\ln(\tan x)\bigr]'=1/(\sin x\cos x)$，故
+  <Step>
 
-$$
-\left(F^2(x)\right)'=\left[\ln^2(\tan x)\right]'.
-$$
 
-积分得到 $F^2(x)=\ln^2(\tan x)+C$。由 $F(\pi/4)=0$、$\ln(\tan(\pi/4))=0$，得 $C=0$。
 
-**第二步：用正值条件消除开方歧义。** 对 $\pi/4<x<\pi/2$，有 $\tan x>1$，故 $\ln(\tan x)>0$；题设还说明 $F(x)>0$，所以只能选
+    ### 从复合关系识别函数 $f$
 
-$$
-F(x)=\ln(\tan x),
-$$
 
-而不是其负值。求导即得所求。
 
-<Callout type="warn" title="由平方求原函数时必须判断符号">$F^2=H^2$ 不能未经检查就写 $F=H$；本题的区间及 $F>0$ 正是确定符号的条件。</Callout>
+    令 $t=u^2-1$，那么 $u^2=t+1$，题设给出
+
+    $$
+    f(t)=\ln\frac{t+1}{t-1},\qquad t>1.
+    $$
+
+    这里使用新字母 $u$，避免与第二个方程中的独立变量 $x$ 混淆；定义域 $t>1$ 来自对数的真数为正。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 利用第二个复合关系反解 $\varphi$
+
+
+
+    由 $f[\varphi(x)]=\ln x$，且 $\varphi(x)>1$，可得
+
+    $$
+    \ln\frac{\varphi(x)+1}{\varphi(x)-1}=\ln x.
+    $$
+
+    取指数、交叉相乘：
+
+    $$
+    \varphi(x)+1=x\varphi(x)-x
+    \quad\Longrightarrow\quad
+    \varphi(x)=\frac{x+1}{x-1}=1+\frac2{x-1}.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 求原函数
+
+
+
+    从 $\varphi(x)>1$ 可进一步推出 $x>1$，故
+
+    $$
+    \begin{aligned}
+    \int\varphi(x)\,\mathrm dx
+    &=\int\left(1+\frac2{x-1}\right)\mathrm dx\\
+    &=x+2\ln(x-1)+C.
+    \end{aligned}
+    $$
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+不能把第一个关系里的 $x$ 与第二个关系里的 $x$ 默认看作同一参数。求得的 $\varphi$ 必须再代回验证：$\frac{\varphi+1}{\varphi-1}=x$，且原始函数的实数定义域要求 $x>1$。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-01-004" type="single" tags="来源:李林880, 考点:反求被积函数, 考点:换元积分">
+<Question id="core-1102-math-16b5e5-018" type="essay" points={8} tags="来源:1996年考研数学二, 科目:高等数学, 章节:不定积分, 考点:反三角函数的分部积分与拆分">
 
-设 $f$ 连续且 $f(x)\ne0$，若
-
-$$
-\int xf(x)\,dx=\arcsin x+C,
-$$
-
-则 $\displaystyle\int\frac{dx}{f(x)}=$（ ）。
-
-<Option>$\dfrac13(1-x^2)^{3/2}+C$</Option>
-<Option>$\dfrac23(1-x^2)^{3/2}+C$</Option>
-<Option correct>$-\dfrac13(1-x^2)^{3/2}+C$</Option>
-<Option>$-\dfrac23(1-x^2)^{3/2}+C$</Option>
+ 求 $\int \frac{\arctan x}{x^2(1+x^2)}\mathrm{d}x$。
 
 <Solution>
 
-**答案：C。**
+**参考结论：** $\displaystyle I=-\frac{\arctan x}{x}+\ln|x|-\frac12\ln(1+x^2)-\frac12(\arctan x)^2+C$，$x\ne0$。
 
-**第一步：对已知原函数关系求导。** 在 $|x|<1$ 的有效区间上，
+**解题思路：** 有理因子先拆成 $1/x^2-1/(1+x^2)$，再对含 $\arctan x$ 的乘积用分部积分，剩余部分都能直接积分。
 
-$$
-xf(x)=\frac1{\sqrt{1-x^2}},\qquad
-\frac1{f(x)}=x\sqrt{1-x^2}.
-$$
+<Steps>
 
-**第二步：作简单换元。** 取 $u=1-x^2$，$du=-2x\,dx$，于是
+  <Step>
 
-$$
-\begin{aligned}
-\int\frac{dx}{f(x)}
-&=\int x\sqrt{1-x^2}\,dx\\
-&=-\frac12\int u^{1/2}\,du
-=-\frac13u^{3/2}+C.
-\end{aligned}
-$$
 
-还原 $u$ 即得 $\boxed{-\dfrac13(1-x^2)^{3/2}+C}$。
 
-**定义域提示：** 题设的 $xf(x)=1/\sqrt{1-x^2}$ 还暗含 $x\ne0$，因为 $f$ 是普通连续有限值函数。故该关系只能在避开 $0$ 的连通区间成立，不能无条件声称覆盖整个 $(-1,1)$。
+    ### 识别可积的有理因子
+
+
+
+    先分拆
+
+    $$
+    \frac1{x^2(1+x^2)}=\frac1{x^2}-\frac1{1+x^2},
+    $$
+
+    于是可令 $u=\arctan x$，$\mathrm dv=\frac{\mathrm dx}{x^2(1+x^2)}$，获得
+
+    $$
+    \mathrm du=\frac{\mathrm dx}{1+x^2},\qquad v=-\frac1x-\arctan x.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 应用分部积分
+
+
+
+    代入 $\int u\,\mathrm dv=uv-\int v\,\mathrm du$：
+
+    $$
+    \begin{aligned}
+    I={}&-\frac{\arctan x}{x}-(\arctan x)^2\\
+    &+\int\frac{\mathrm dx}{x(1+x^2)}
+    +\int\frac{\arctan x}{1+x^2}\,\mathrm dx.
+    \end{aligned}
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 分别计算两个余项
+
+
+
+    前一项利用 $\frac1{x(1+x^2)}=\frac1x-\frac{x}{1+x^2}$，后一项利用 $t=\arctan x$：
+
+    $$
+    \begin{aligned}
+    \int\frac{\mathrm dx}{x(1+x^2)}&=\ln|x|-\tfrac12\ln(1+x^2),\\
+    \int\frac{\arctan x}{1+x^2}\,\mathrm dx&=\tfrac12(\arctan x)^2.
+    \end{aligned}
+    $$
+
+    代回并合并平方项即得结论。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+分部积分最容易在 $-\int v\,\mathrm du$ 的负号处出错；积分原式在 $x=0$ 处无定义，两侧区间的积分常数可以分别选取。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-01-005" type="blank" tags="来源:李正元练习题, 考点:抽象函数积分, 考点:商的导数">
+<Question id="core-1102-math-16b5e5-021" type="essay" points={5} tags="来源:1997年考研数学二, 科目:高等数学, 章节:不定积分, 考点:识别乘积导数与凑微分">
 
-设 $f''$ 连续且 $f'(x)\ne0$，则
-
-$$
-\int\left[\frac{f(x)}{f'(x)}-\frac{f^2(x)f''(x)}{[f'(x)]^3}\right]dx=
-$$
-
-<Blank answer="\frac{f^2(x)}{2[f'(x)]^2}+C" kind="text" />。
+ 求 $\int e^{2x}(\tan x+1)^2\mathrm{d}x$。
 
 <Solution>
 
-**答案：** $\displaystyle\boxed{\frac{f^2(x)}{2[f'(x)]^2}+C}$。
+**参考结论：** $\displaystyle \int e^{2x}(1+\tan x)^2\,\mathrm dx=e^{2x}\tan x+C$。
 
-**第一步：识别平方形式。** 第一项含 $f/f'$，第二项含 $f^2f''/(f')^3$；这提示尝试对 $f/f'$ 求导：
+**解题思路：** 观察 $e^{2x}$ 的导数给出系数 $2$，而 $\tan x$ 的导数是 $1+\tan^2x$；展开平方后正好凑成乘积求导式。
 
-$$
-\left(\frac f{f'}\right)'
-=\frac{(f')^2-ff''}{(f')^2}
-=1-\frac{ff''}{(f')^2}.
-$$
+<Steps>
 
-**第二步：写成可直接积分的乘积。** 被积式恰好等于
+  <Step>
 
-$$
-\frac f{f'}\left(\frac f{f'}\right)'
-=\left[\frac12\left(\frac f{f'}\right)^2\right]'.
-$$
 
-所以原积分为 $\frac12(f/f')^2+C$。
 
-**验算关键：** $f'\ne0$ 才能形成该商式；积分常数在每个满足这一条件的连通区间上单独确定。
+    ### 展开被积函数中的平方
+
+
+
+    利用恒等式 $\sec^2x=1+\tan^2x$，
+
+    $$
+    (1+\tan x)^2=1+2\tan x+\tan^2x=2\tan x+\sec^2x.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 对目标乘积求导检验
+
+
+
+    根据乘积法则，
+
+    $$
+    \begin{aligned}
+    \frac{\mathrm d}{\mathrm dx}(e^{2x}\tan x)
+    &=2e^{2x}\tan x+e^{2x}\sec^2x\\
+    &=e^{2x}(1+\tan x)^2.
+    \end{aligned}
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 写出原函数
+
+
+
+    由被积函数恰好等于 $\frac{\mathrm d}{\mathrm dx}(e^{2x}\tan x)$，直接得到
+
+    $$
+    I=e^{2x}\tan x+C.
+    $$
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+此题不宜先作 $t=\tan x$ 的换元，因为 $e^{2x}$ 会变成 $e^{2\arctan t}$，使问题复杂化。原函数仅在 $\cos x\ne0$ 的连通区间上讨论。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-## 模型：复合关系反求与结构化换元
+<Question id="core-1102-math-16b5e5-025" type="essay" points={5} tags="来源:2000年考研数学二, 科目:高等数学, 章节:不定积分, 考点:复合函数关系与分部积分">
 
-<Question id="math-core-gd-04-01-006" type="blank" points={4} tags="来源:2004考研数一, 考点:复合函数自变量, 考点:原函数反求">
-
-已知 $f'(e^x)=xe^{-x}$，且 $f(1)=0$，则 $f(x)=$ <Blank answer="(ln(x))^2/2" kind="math" />。
+ 设 $f(\ln x)=\frac{\ln(1+x)}{x}$，计算 $\int f(x)\mathrm{d}x$.
 
 <Solution>
 
-**答案：** $\displaystyle\boxed{f(x)=\frac12(\ln x)^2\quad(x>0)}$。
+**参考结论：** $\displaystyle I=-e^{-x}\ln(1+e^x)+x-\ln(1+e^x)+C$。
 
-**第一步：先替换导数的自变量。** 令 $t=e^x>0$，则 $x=\ln t$，$e^{-x}=1/t$，所以
+**解题思路：** 先将 $f(\ln x)$ 改写成 $f(t)$，然后把 $f(x)$ 中的指数衰减项选作分部积分的积分因子。
 
-$$
-f'(t)=\frac{\ln t}{t}.
-$$
+<Steps>
 
-此处没有额外乘链式系数 $e^x$：题设给出的是在 $e^x$ 处的**导数值** $f'(e^x)$，并非复合函数 $f(e^x)$ 对 $x$ 的导数。
+  <Step>
 
-**第二步：求原函数并代初值。**
 
-$$
-f(t)=\int\frac{\ln t}{t}\,dt
-=\frac12(\ln t)^2+C.
-$$
 
-由 $f(1)=0$ 得 $C=0$。换回自变量，结论成立。
+    ### 从复合表达式恢复 $f(x)$
 
-<Callout type="idea" title="两种求导对象要区分">$f'(e^x)$ 与 $\dfrac{d}{dx}f(e^x)=f'(e^x)e^x$ 不同。先令 $t=e^x$，能直接避开误乘 $e^x$ 的错误。</Callout>
+
+
+    设 $t=\ln u$（$u>0$），则 $u=e^t$，从而
+
+    $$
+    f(t)=\frac{\ln(1+e^t)}{e^t}=e^{-t}\ln(1+e^t).
+    $$
+
+    因此 $I=\int e^{-x}\ln(1+e^x)\,\mathrm dx$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 分部积分剥离对数
+
+
+
+    取 $u=\ln(1+e^x)$，$\mathrm dv=e^{-x}\mathrm dx$，则
+
+    $$
+    \mathrm du=\frac{e^x}{1+e^x}\mathrm dx,\quad v=-e^{-x}.
+    $$
+
+    于是
+
+    $$
+    I=-e^{-x}\ln(1+e^x)+\int\frac{\mathrm dx}{1+e^x}.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 计算剩余积分并合并
+
+
+
+    把余项写成 $\frac1{1+e^x}=1-\frac{e^x}{1+e^x}$，立即得
+
+    $$
+    \int\frac{\mathrm dx}{1+e^x}=x-\ln(1+e^x)+C.
+    $$
+
+    代入上式，得到参考答案。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+此处 $\ln(1+e^x)$ 的导数为 $e^x/(1+e^x)$，不是 $1/(1+e^x)$。验证时对最后三项逐项求导，$\ln(1+e^x)$ 的导数相关项会抵消。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-01-007" type="essay" points={5} tags="来源:1995考研数二, 考点:复合函数反求, 考点:有理积分">
+<Question id="core-1102-math-16b5e5-026" type="essay" points={6} tags="来源:2001年考研数学一, 科目:高等数学, 章节:不定积分, 考点:反三角函数与指数复合换元">
 
-设
-
-$$
-f(x^2-1)=\ln\frac{x^2}{x^2-2},\qquad
-f[\varphi(x)]=\ln x.
-$$
-
-求 $\displaystyle\int\varphi(x)\,dx$。
+ 求 $\int \frac{\arctan e^x}{e^{2x}}\mathrm{d}x$
 
 <Solution>
 
-**参考答案：**
+**参考结论：** $\displaystyle I=-\frac12\bigl[(1+e^{-2x})\arctan(e^x)+e^{-x}\bigr]+C$。
 
-$$
-\boxed{\int\varphi(x)\,dx=x+2\ln|x-1|+C}.
-$$
+**解题思路：** 以 $\arctan(e^x)$ 为分部积分的求导项；利用 $e^{-x}$ 换元使余下积分变为标准有理积分。
 
-**第一步：把 $f$ 的复合自变量还原。** 设 $t=x^2-1$，则 $x^2=t+1$，$x^2-2=t-1$。由第一式得到
+<Steps>
 
-$$
-f(t)=\ln\frac{t+1}{t-1},
-$$
+  <Step>
 
-在原关系的自然分支上 $t>1$（这源于 $x^2>2$）。
 
-**第二步：反求 $\varphi(x)$。** 由第二式，
 
-$$
-\ln\frac{\varphi(x)+1}{\varphi(x)-1}=\ln x
-\quad\Longrightarrow\quad
-\frac{\varphi(x)+1}{\varphi(x)-1}=x.
-$$
+    ### 选取分部积分因子
 
-整理得 $\varphi(x)(x-1)=x+1$，所以
 
-$$
-\varphi(x)=\frac{x+1}{x-1}=1+\frac2{x-1}.
-$$
 
-**第三步：积分并核对分支。**
+    写成 $I=\int e^{-2x}\arctan(e^x)\,\mathrm dx$。取
 
-$$
-\int\varphi(x)\,dx
-=\int\left(1+\frac2{x-1}\right)dx
-=\boxed{x+2\ln|x-1|+C}.
-$$
+    $$
+    u=\arctan(e^x),\quad \mathrm dv=e^{-2x}\,\mathrm dx,
+    $$
 
-因为 $f(t)$ 在这里由第一式确定于 $t>1$，所以 $\varphi(x)>1$，结合 $x>0$ 可得本题实数原关系对应 $x>1$。对每个有效连通区间，原函数均可添加常数。
+    则
+
+    $$
+    \mathrm du=\frac{e^x}{1+e^{2x}}\,\mathrm dx,\qquad v=-\tfrac12e^{-2x}.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 分部积分并换元
+
+
+
+    于是
+
+    $$
+    I=-\tfrac12e^{-2x}\arctan(e^x)+\tfrac12J,
+    \quad J=\int\frac{e^{-x}}{1+e^{2x}}\,\mathrm dx.
+    $$
+
+    令 $t=e^{-x}>0$，则 $\mathrm dt=-e^{-x}\mathrm dx$、$e^{2x}=t^{-2}$，从而
+
+    $$
+    J=-\int\frac{t^2}{1+t^2}\,\mathrm dt
+    =-t+\arctan t+C.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 使用反正切互补关系化简
+
+
+
+    由 $e^x>0$，有 $\arctan(e^{-x})+\arctan(e^x)=\frac\pi2$，故
+
+    $$
+    J=-e^{-x}-\arctan(e^x)+C
+    $$
+
+    （常量 $\pi/2$ 并入 $C$）。代回得结论。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+务必说明反正切互补公式要求自变量为正数；这里由指数函数天然满足。合并积分常数后，各种相差常数的写法都是同一个原函数族。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-01-008" type="essay" points={6} tags="来源:2001考研数二, 考点:巧妙换元, 考点:根式积分">
+<Question id="core-1102-math-16b5e5-027" type="essay" points={6} tags="来源:2001年考研数学二, 科目:高等数学, 章节:不定积分, 考点:根式有理积分的构造换元">
 
-求
-
-$$
-I=\int\frac{dx}{(2x^2+1)\sqrt{x^2+1}}.
-$$
+ 求 $\int \frac{\mathrm{d}x}{(2x^2+1)\sqrt{x^2+1}}$.
 
 <Solution>
 
-**参考答案：**
+**参考结论：** $\displaystyle I=\arctan\!\frac{x}{\sqrt{1+x^2}}+C$。
 
-$$
-\boxed{I=\arctan\left(\frac{x}{\sqrt{1+x^2}}\right)+C}.
-$$
+**解题思路：** 面对 $\sqrt{1+x^2}$ 与 $1+2x^2$ 同时出现，构造 $t=x/\sqrt{1+x^2}$，使导数中的三次根式与原分母配合。
 
-<Tabs items={['方法一：直接代换（推荐）', '方法二：双曲代换']} defaultIndex={0}>
-<Tab value="方法一：直接代换（推荐）">
+<Steps>
 
-**思路：识别根式分式的整体导数。** 取
+  <Step>
 
-$$
-t=\frac{x}{\sqrt{1+x^2}},\qquad
-\frac{dt}{dx}=\frac1{(1+x^2)^{3/2}}.
-$$
 
-同时
 
-$$
-1+t^2=1+\frac{x^2}{1+x^2}=
-\frac{1+2x^2}{1+x^2}.
-$$
+    ### 构造能消去根式的变量
 
-因此
 
-$$
-\frac{dx}{(1+2x^2)\sqrt{1+x^2}}
-=\frac{dt}{1+t^2},
-$$
 
-原积分直接化为 $\int dt/(1+t^2)=\arctan t+C$。
+    设 $t=x(1+x^2)^{-1/2}$，应用乘积法则：
 
-</Tab>
-<Tab value="方法二：双曲代换">
+    $$
+    \frac{\mathrm dt}{\mathrm dx}=(1+x^2)^{-1/2}-x^2(1+x^2)^{-3/2}
+    =\frac1{(1+x^2)^{3/2}}.
+    $$
 
-**思路：双曲代换的直观解释。** 令 $x=\sinh u$，则 $dx=\cosh u\,du$、$\sqrt{1+x^2}=\cosh u$，故
 
-$$
-I=\int\frac{du}{1+2\sinh^2u}.
-$$
 
-再令 $v=\tanh u$，有 $du=dv/(1-v^2)$、$\sinh^2u=v^2/(1-v^2)$，最终仍得 $\int dv/(1+v^2)$，其中 $v=x/\sqrt{1+x^2}$。
+  </Step>
 
-</Tab>
-</Tabs>
+  <Step>
 
-<Callout type="idea" title="怎样想到代换">遇到 $\sqrt{1+x^2}$ 与 $1+2x^2$ 同时出现，尝试 $x/\sqrt{1+x^2}$，因为它的导数产生 $(1+x^2)^{-3/2}$，而其平方补 $1$ 正好产生 $1+2x^2$。</Callout>
+
+
+    ### 消去额外的二次多项式
+
+
+
+    又由 $t^2=x^2/(1+x^2)$，得到
+
+    $$
+    1+t^2=\frac{1+2x^2}{1+x^2}.
+    $$
+
+    所以原积分恰好满足
+
+    $$
+    \begin{aligned}
+    I&=\int\frac{\mathrm dx}{(1+2x^2)\sqrt{1+x^2}}\\
+    &=\int\frac{(1+x^2)^{3/2}\mathrm dt}{(1+2x^2)\sqrt{1+x^2}}
+    =\int\frac{\mathrm dt}{1+t^2}.
+    \end{aligned}
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 积分并回代
+
+
+
+    由 $\int\frac{\mathrm dt}{1+t^2}=\arctan t+C$，代入 $t=x/\sqrt{1+x^2}$ 即得结论。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+不必令 $t=\sqrt{1+x^2}$：那样微分会额外引入 $x$。本题的关键是把 $1+2x^2$ 精确识别为 $(1+x^2)(1+t^2)$。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-01-009" type="essay" points={9} tags="来源:2003考研数二, 考点:三角换元, 考点:指数三角积分">
+<Question id="core-1102-math-16b5e5-029" type="essay" points={9} tags="来源:2003年考研数学二, 科目:高等数学, 章节:不定积分, 考点:反正切换元与指数三角积分">
 
-求
-
-$$
-I=\int\frac{xe^{\arctan x}}{(1+x^2)^{3/2}}\,dx.
-$$
+ 求 $\int \frac{xe^{\arctan x}}{(1+x^2)^{\frac{3}{2}}}\mathrm{d}x$.
 
 <Solution>
 
-**参考答案：**
+**参考结论：** $\displaystyle I=\frac{(x-1)e^{\arctan x}}{2\sqrt{1+x^2}}+C$。
 
-$$
-\boxed{I=\frac{(x-1)e^{\arctan x}}{2\sqrt{1+x^2}}+C}.
-$$
+**解题思路：** 反正切与 $1+x^2$ 共同出现时令 $t=\arctan x$，把原式转为 $\int e^t\sin t\,\mathrm dt$，再两次分部积分。
 
-**第一步：由指数中的反正切确定换元。** 取 $t=\arctan x$，则 $-\pi/2<t<\pi/2$，$x=\tan t$，且
+<Steps>
 
-$$
-dx=\sec^2t\,dt,\qquad (1+x^2)^{3/2}=\sec^3t,
-$$
+  <Step>
 
-这里 $\cos t>0$ 保证根式等式不必附加绝对值。因此
 
-$$
-I=\int e^t\frac{\tan t\sec^2t}{\sec^3t}\,dt
-=\int e^t\sin t\,dt.
-$$
 
-**第二步：两次分部积分，消去循环。** 设 $J=\int e^t\sin t\,dt$、$K=\int e^t\cos t\,dt$，则
+    ### 将有理根式转成三角函数
 
-$$
-J=e^t\sin t-K,
-\qquad K=e^t\cos t+J.
-$$
 
-联立得 $2J=e^t(\sin t-\cos t)$，即
 
-$$
-J=\tfrac12e^t(\sin t-\cos t)+C.
-$$
+    令 $t=\arctan x\in(-\pi/2,\pi/2)$，则
 
-**第三步：换回 $x$。** 因为 $\sin t=x/\sqrt{1+x^2}$、$\cos t=1/\sqrt{1+x^2}$，代回即可。
+    $$
+    x=\tan t,\quad \mathrm dx=\sec^2t\,\mathrm dt,
+    \quad (1+x^2)^{3/2}=\sec^3t
+    $$
 
-<Callout type="idea" title="优先减少复合层次">直接对 $e^{\arctan x}$ 求导，会同时出现 $(1+x^2)^{-1}$ 与原来的三次根式；先用 $t=\arctan x$，积分立即变成标准的 $e^t\sin t$ 型。</Callout>
+    （因 $\cos t>0$）。于是
+
+    $$
+    I=\int e^t\frac{\tan t}{\sec t}\,\mathrm dt
+    =\int e^t\sin t\,\mathrm dt.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 两次分部积分
+
+
+
+    记 $A=\int e^t\sin t\,\mathrm dt$、$B=\int e^t\cos t\,\mathrm dt$，分部积分得
+
+    $$
+    A=e^t\sin t-B,\qquad B=e^t\cos t+A.
+    $$
+
+    消去 $B$，有
+
+    $$
+    2A=e^t(\sin t-\cos t),\qquad
+    A=\frac12e^t(\sin t-\cos t)+C.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 还原三角函数
+
+
+
+    由 $\tan t=x$ 且 $\cos t>0$，
+
+    $$
+    \sin t=\frac{x}{\sqrt{1+x^2}},\qquad
+    \cos t=\frac1{\sqrt{1+x^2}}.
+    $$
+
+    代回 $e^t=e^{\arctan x}$，得到结论。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+三角换元处应写 $(1+x^2)^{3/2}=|\sec t|^3$；因为 $t=\arctan x$ 落在主值区间，$\sec t>0$，才可以直接去绝对值。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-01-010" type="essay" points={10} tags="来源:2006考研数二, 考点:分部积分, 考点:三角根式换元">
+<Question id="core-1102-math-16b5e5-030" type="blank" points={4} tags="来源:2004年考研数学一, 科目:高等数学, 章节:不定积分, 考点:复合导数关系与积分常数">
 
-求
-
-$$
-I=\int\frac{\arcsin(e^x)}{e^x}\,dx.
-$$
+ 已知 $f'(e^x)=xe^{-x}$，且 $f(1)=0$，则 $f(x)=$<Blank answer="((1)/(2))(ln x)^2" kind="math" />.
 
 <Solution>
 
-**参考答案：** 在实数区间 $x<0$ 上，
+**参考结论：** $\displaystyle f(x)=\frac12(\ln x)^2$（$x>0$）。
 
-$$
-\boxed{
-I=-e^{-x}\arcsin(e^x)
-+\frac12\ln\left|\frac{\sqrt{1-e^{2x}}-1}{\sqrt{1-e^{2x}}+1}\right|+C
-}.
-$$
+**解题思路：** 将导数在 $e^x$ 处的取值关系改写为一般自变量的微分方程，再用初值确定积分常数。
 
-**第一步：反三角函数适合作分部积分的 $u$。** 令
+<Steps>
 
-$$
-u=\arcsin(e^x),\qquad dv=e^{-x}\,dx.
-$$
+  <Step>
 
-则
 
-$$
-du=\frac{e^x}{\sqrt{1-e^{2x}}}\,dx,
-\qquad v=-e^{-x}.
-$$
 
-因此
+    ### 更换自变量
 
-$$
-\begin{aligned}
-I&=uv-\int v\,du\\
-&=-e^{-x}\arcsin(e^x)
-+\underbrace{\int\frac{dx}{\sqrt{1-e^{2x}}}}_{J}.
-\end{aligned}
-$$
 
-**第二步：分解剩余的根式积分。** 令 $t=e^x$（$0<t<1$），$dx=dt/t$，则
 
-$$
-J=\int\frac{dt}{t\sqrt{1-t^2}}.
-$$
+    设 $t=e^x>0$，则 $x=\ln t$、$e^{-x}=t^{-1}$。题设变为
 
-再令 $v=\sqrt{1-t^2}$；因 $2v\,dv=-2t\,dt$、$t^2=1-v^2$，有
+    $$
+    f'(t)=\frac{\ln t}{t},\qquad t>0.
+    $$
 
-$$
-J=-\int\frac{dv}{1-v^2}
-=\frac12\ln\left|\frac{v-1}{v+1}\right|+C.
-$$
 
-代回 $v=\sqrt{1-e^{2x}}$ 即得答案。
 
-**第三步：快速验算原函数。** 对第二项求导恢复 $1/\sqrt{1-e^{2x}}$；对第一项求导恢复 $e^{-x}\arcsin(e^x)-1/\sqrt{1-e^{2x}}$。两项相加恰好只剩原被积函数。
+  </Step>
 
-<Callout type="warn" title="实数定义域">由于 $\arcsin(e^x)$ 的导数含 $\sqrt{1-e^{2x}}$，通常在 $x<0$ 上计算不定积分；端点 $x=0$ 不宜直接使用中间的可导步骤。</Callout>
+  <Step>
+
+
+
+    ### 积分求函数
+
+
+
+    由于 $\mathrm d(\ln t)=\mathrm dt/t$，有
+
+    $$
+    f(t)=\int\frac{\ln t}{t}\,\mathrm dt
+    =\frac12(\ln t)^2+C.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 代入初值并验证
+
+
+
+    由 $f(1)=0$ 得 $C=0$，故 $f(x)=\frac12(\ln x)^2$。直接核验：
+
+    $$
+    f'(e^x)=\frac{\ln(e^x)}{e^x}=xe^{-x},
+    $$
+
+    完全符合题设。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+不要误把 $f\prime(e^x)$ 当成 $\frac{\mathrm d}{\mathrm dx}f(e^x)$；后者按链式法则还要乘上 $e^x$。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-01-011" type="essay" points={10} tags="来源:2011考研数三, 考点:平方根换元, 考点:分部积分">
+<Question id="core-1102-math-16b5e5-031" type="essay" points={10} tags="来源:2006年考研数学二, 科目:高等数学, 章节:不定积分, 考点:反正弦函数的分部积分与换元">
 
-求
-
-$$
-I=\int\frac{\arcsin\sqrt{x}+\ln x}{\sqrt{x}}\,dx.
-$$
+ 求 $\int \frac{\arcsin e^x}{e^x}\mathrm{d}x$
 
 <Solution>
 
-**参考答案：**
+**参考结论：** $\displaystyle I=-e^{-x}\arcsin(e^x)+\frac12\ln\frac{1-\sqrt{1-e^{2x}}}{1+\sqrt{1-e^{2x}}}+C$（$x<0$）。
 
-$$
-\boxed{I=2\sqrt{x}\arcsin\sqrt{x}+2\sqrt{x}\ln x+2\sqrt{1-x}-4\sqrt{x}+C},
-\quad 0<x<1.
-$$
+**解题思路：** 以反正弦为求导项做分部积分，再令 $t=e^x$、$u=\sqrt{1-t^2}$，把余项化为简单的有理积分。
 
-**第一步：消去共同的根式。** 令 $t=\sqrt x$，则 $x=t^2$、$dx=2t\,dt$。所以
+<Steps>
 
-$$
-I=2\int\bigl(\arcsin t+2\ln t\bigr)\,dt.
-$$
+  <Step>
 
-**第二步：对两类标准超越函数分别求原函数。** 分部积分得到
 
-$$
-\begin{aligned}
-\int\arcsin t\,dt
-&=t\arcsin t+\sqrt{1-t^2}+C,\\
-\int\ln t\,dt&=t\ln t-t+C.
-\end{aligned}
-$$
 
-因此
+    ### 分部积分减少反三角函数
 
-$$
-I=2t\arcsin t+2\sqrt{1-t^2}+4t\ln t-4t+C.
-$$
 
-**第三步：还原变量。** 代入 $t=\sqrt x$，利用 $4\sqrt x\ln\sqrt x=2\sqrt x\ln x$，得到参考答案。
 
-**易错点：** $\ln x$ 转换为 $2\ln t$，同时 $dx/\sqrt x=2\,dt$；漏掉任意一个系数 $2$ 都会使结果错误。实数范围内取 $0<x<1$（端点可通过连续极限另论）。
+    将原式写为 $I=\int e^{-x}\arcsin(e^x)\,\mathrm dx$。取
+
+    $$
+    u=\arcsin(e^x),\quad \mathrm dv=e^{-x}\,\mathrm dx,
+    \quad \mathrm du=\frac{e^x}{\sqrt{1-e^{2x}}}\,\mathrm dx,
+    \quad v=-e^{-x}.
+    $$
+
+    于是
+
+    $$
+    I=-e^{-x}\arcsin(e^x)+J,\quad
+    J=\int\frac{\mathrm dx}{\sqrt{1-e^{2x}}}.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 两次换元消去指数和根式
+
+
+
+    取 $t=e^x\in(0,1)$，得
+
+    $$
+    J=\int\frac{\mathrm dt}{t\sqrt{1-t^2}}.
+    $$
+
+    再取 $u=\sqrt{1-t^2}\in(0,1)$，利用 $2u\,\mathrm du=-2t\,\mathrm dt$，得
+
+    $$
+    J=-\int\frac{\mathrm du}{1-u^2}.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 有理积分计算与回代
+
+
+
+    分解 $\frac1{1-u^2}=\frac12\left(\frac1{1-u}+\frac1{1+u}\right)$，因此
+
+    $$
+    J=\frac12\ln\left|\frac{1-u}{1+u}\right|+C
+    =\frac12\ln\frac{1-\sqrt{1-e^{2x}}}{1+\sqrt{1-e^{2x}}}+C.
+    $$
+
+    与第一步相加即为结论。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+实数被积函数的正常积分区间是 $x<0$：$e^x\le1$ 才能取实数 $\arcsin$，且端点 $x=0$ 导致后续反正弦导数出现分母 $0$。在 $x<0$ 上 $0<u<1$，所写对数的真数严格为正。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-01-012" type="blank" points={4} tags="来源:2018考研数三, 考点:反三角恒等式, 考点:分部积分">
+<Question id="core-1102-math-16b5e5-032" type="essay" points={10} tags="来源:2009年考研数学二、三, 科目:高等数学, 章节:不定积分, 考点:对数根式积分与双重换元">
 
-$$
-\int e^x\arcsin\sqrt{1-e^{2x}}\,dx=
-$$
-
-<Blank answer="e^x*arcsin(sqrt(1-e^(2*x)))-sqrt(1-e^(2*x))+C" kind="math" />。
+ 求 $\int \ln\left(1+\sqrt{\frac{1+x}{x}}\right)\mathrm{d}x(x>0)$.
 
 <Solution>
 
-**答案：**
+**参考结论：** $\displaystyle I=x\ln\left(1+\sqrt{\frac{1+x}{x}}\right)+\frac12\ln(\sqrt{1+x}+\sqrt x)+\frac x2-\frac12\sqrt{x(1+x)}+C$。
 
-$$
-\boxed{e^x\arcsin\sqrt{1-e^{2x}}-\sqrt{1-e^{2x}}+C}.
-$$
+**解题思路：** 平方根中出现 $(1+x)/x$，取 $t=\sqrt{x}$ 可将对数化成 $\operatorname{arsinh}t-\ln t$；再各自分部积分。
 
-**第一步：选择恰好匹配微分的换元。** 令 $t=e^x$，于是 $dt=e^x\,dx$。在 $x<0$ 时 $0<t<1$，由反三角函数的主值关系
+<Steps>
 
-$$
-\arcsin\sqrt{1-t^2}=\arccos t,
-$$
+  <Step>
 
-积分变为 $I=\int\arccos t\,dt$。
 
-**第二步：分部积分。** 取 $u=\arccos t$，$dv=dt$，则 $du=-dt/\sqrt{1-t^2}$、$v=t$，从而
 
-$$
-\begin{aligned}
-I&=t\arccos t+\int\frac{t}{\sqrt{1-t^2}}\,dt\\
-&=t\arccos t-\sqrt{1-t^2}+C.
-\end{aligned}
-$$
+    ### 先将对数整理为差
 
-还原 $t=e^x$，并将 $\arccos(e^x)$ 写回原式中的反正弦形式，得到答案。
 
-<Callout type="idea" title="先识别主值恒等式">只有 $0\le t\le1$ 时，$\arcsin\sqrt{1-t^2}=\arccos t$ 才能这样直接化简；把 $\arcsin\sqrt{1-t^2}$ 无条件换成 $\arccos t$ 会忽略主值限制。</Callout>
+
+    对 $x>0$ 取 $t=\sqrt x>0$，则 $x=t^2$、$\mathrm dx=2t\,\mathrm dt$。并且
+
+    $$
+    \begin{aligned}
+    \ln\left(1+\sqrt{\frac{1+x}{x}}\right)
+    &=\ln\frac{t+\sqrt{1+t^2}}{t}\\
+    &=\operatorname{arsinh}t-\ln t.
+    \end{aligned}
+    $$
+
+    于是 $I=2\int t\operatorname{arsinh}t\,\mathrm dt-2\int t\ln t\,\mathrm dt$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 计算含反双曲正弦的部分
+
+
+
+    对 $2\int t\operatorname{arsinh}t\,\mathrm dt$ 取 $u=\operatorname{arsinh}t$，$\mathrm dv=2t\,\mathrm dt$，得
+
+    $$
+    \begin{aligned}
+    2\int t\operatorname{arsinh}t\,\mathrm dt
+    &=t^2\operatorname{arsinh}t-\int\frac{t^2}{\sqrt{1+t^2}}\,\mathrm dt\\
+    &=t^2\operatorname{arsinh}t-\frac12t\sqrt{1+t^2}+\frac12\operatorname{arsinh}t.
+    \end{aligned}
+    $$
+
+    其中使用 $t^2=(1+t^2)-1$；也可令 $t=\sinh u$ 验算剩余积分。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 计算对数部分并还原
+
+
+
+    另由分部积分，
+
+    $$
+    2\int t\ln t\,\mathrm dt=t^2\ln t-\frac12t^2.
+    $$
+
+    两式相减并整理：
+
+    $$
+    I=t^2(\operatorname{arsinh}t-\ln t)+\frac12\operatorname{arsinh}t
+    -\frac12t\sqrt{1+t^2}+\frac12t^2+C.
+    $$
+
+    最后代回 $t=\sqrt x$、$\operatorname{arsinh}t=\ln(t+\sqrt{1+t^2})$，得到参考结论。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+此题对数内的根式要先分子分母同乘 $\sqrt{x}$，不可以把 $\ln(1+\sqrt{(1+x)/x})$ 拆成两个对数。$\operatorname{arsinh}t$ 仅作为 $\ln(t+\sqrt{1+t^2})$ 的简写，不要求额外记忆反双曲函数。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-01-013" type="essay" tags="来源:李正元练习题, 考点:三角换元, 考点:二次有理积分">
+<Question id="core-1102-math-16b5e5-033" type="essay" points={10} tags="来源:2011年考研数学三, 科目:高等数学, 章节:不定积分, 考点:根式换元与反三角分部积分">
 
-设 $a>0$，在 $|x|<a$ 上求
-
-$$
-I=\int\frac{dx}{(x^2+a^2)\sqrt{a^2-x^2}}.
-$$
+ 求 $\int \frac{\arcsin\sqrt{x}+\ln x}{\sqrt{x}}\mathrm{d}x$.
 
 <Solution>
 
-**参考答案：**
+**参考结论：** $\displaystyle I=2\sqrt x\arcsin\sqrt x+2\sqrt x\ln x+2\sqrt{1-x}-4\sqrt x+C$（$0<x<1$）。
 
-$$
-\boxed{I=\frac{1}{\sqrt2\,a^2}\arctan\left(\frac{\sqrt2\,x}{\sqrt{a^2-x^2}}\right)+C}.
-$$
+**解题思路：** 令 $t=\sqrt x$ 抵消分母的根式，将积分化成反正弦与对数两类标准分部积分。
 
-**第一步：用正弦代换消去平方根。** 令 $x=a\sin t$，选 $-\pi/2<t<\pi/2$，则 $dx=a\cos t\,dt$，$\sqrt{a^2-x^2}=a\cos t$（因为 $\cos t>0$）。所以
+<Steps>
 
-$$
-I=\frac1{a^2}\int\frac{dt}{1+\sin^2t}.
-$$
+  <Step>
 
-**第二步：将三角有理式转为普通有理式。** 再令 $u=\tan t$，有
 
-$$
-dt=\frac{du}{1+u^2},\qquad
-\sin^2t=\frac{u^2}{1+u^2}.
-$$
 
-代入可得
+    ### 根式换元使分母消失
 
-$$
-I=\frac1{a^2}\int\frac{du}{1+2u^2}
-=\frac1{\sqrt2\,a^2}\arctan(\sqrt2u)+C.
-$$
 
-**第三步：换回 $x$。** 因为 $u=\tan t=x/\sqrt{a^2-x^2}$，所以得到所求结果。
 
-**验算思路：** 令 $u=x/\sqrt{a^2-x^2}$，则 $u'=a^2/(a^2-x^2)^{3/2}$；再将 $1+2u^2=(a^2+x^2)/(a^2-x^2)$ 代入结果的导数，就会恢复原被积式。
+    取 $t=\sqrt{x}$，则 $x=t^2$、$\mathrm dx=2t\,\mathrm dt$，且 $\ln x=2\ln t$。因此
+
+    $$
+    I=2\int\bigl(\arcsin t+2\ln t\bigr)\,\mathrm dt.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 求反正弦与对数的原函数
+
+
+
+    由分部积分，
+
+    $$
+    \begin{aligned}
+    \int\arcsin t\,\mathrm dt
+    &=t\arcsin t+\sqrt{1-t^2}+C,\\
+    \int\ln t\,\mathrm dt&=t\ln t-t+C.
+    \end{aligned}
+    $$
+
+    第一式可通过取 $u=\arcsin t$、$\mathrm dv=\mathrm dt$ 验算。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 合并并恢复 $x$
+
+
+
+    所以
+
+    $$
+    I=2t\arcsin t+2\sqrt{1-t^2}+4t\ln t-4t+C.
+    $$
+
+    代入 $t=\sqrt x$，使用 $4\sqrt x\ln\sqrt x=2\sqrt x\ln x$，便得所求。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+考虑实数微积分的常规开区间，必须同时有 $\ln x$ 存在且 $\arcsin\sqrt x$ 有意义，因此在 $0<x<1$ 上求原函数。注意对 $\arcsin t$ 求导的根式是 $\sqrt{1-t^2}$，不是 $\sqrt{1+t^2}$。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-## 模型：分部积分与复合超越函数
+<Question id="core-1102-math-16b5e5-034" type="single" points={4} tags="来源:2016年考研数学一、二, 科目:高等数学, 章节:不定积分, 考点:分段函数原函数与衔接条件">
 
-<Question id="math-core-gd-04-01-014" type="essay" points={3} tags="来源:1993考研数一, 考点:分部积分, 考点:根式指数换元">
+ 已知函数 $f(x)=\begin{cases} 2(x-1), & x<1, \\ \ln x, & x\ge 1, \end{cases}$ 则 $f(x)$ 的一个原函数是( ).
 
-求
-
-$$
-I=\int\frac{xe^x}{\sqrt{e^x-1}}\,dx.
-$$
+<Option>$F(x)=\begin{cases} (x-1)^2, & x<1, \\ x(\ln x-1), & x\ge 1 \end{cases}$</Option>
+<Option>$F(x)=\begin{cases} (x-1)^2, & x<1, \\ x(\ln x+1), & x\ge 1 \end{cases}$</Option>
+<Option>$F(x)=\begin{cases} (x-1)^2, & x<1, \\ x(\ln x+1)+1, & x\ge 1 \end{cases}$</Option>
+<Option correct>$F(x)=\begin{cases} (x-1)^2, & x<1, \\ x(\ln x-1)+1, & x\ge 1 \end{cases}$</Option>
 
 <Solution>
 
-**参考答案：**
+**参考结论：** 选择 **D**；$\displaystyle F(x)=\begin{cases}(x-1)^2,&x<1,\\x\ln x-x+1,&x\ge1.\end{cases}$。
 
-$$
-\boxed{I=2x\sqrt{e^x-1}-4\sqrt{e^x-1}+4\arctan\sqrt{e^x-1}+C}.
-$$
+**解题思路：** 分段原函数题不只要检查各段求导正确，还必须检验拼接点的连续性和导数。
 
-**第一步：观察到易求原函数的部分。** 因为
+<Steps>
 
-$$
-\frac{d}{dx}\bigl[2\sqrt{e^x-1}\bigr]
-=\frac{e^x}{\sqrt{e^x-1}},
-$$
+  <Step>
 
-所以将 $x$ 作为分部积分的 $u$，其余作为 $dv$：
 
-$$
-I=2x\sqrt{e^x-1}-2\underbrace{\int\sqrt{e^x-1}\,dx}_{J}.
-$$
 
-**第二步：对余下的根式指数积分换元。** 取 $t=\sqrt{e^x-1}>0$，则 $e^x=1+t^2$，且 $dx=2t\,dt/(1+t^2)$，故
+    ### 分别计算两侧的原函数
 
-$$
-\begin{aligned}
-J&=\int t\frac{2t}{1+t^2}\,dt
-=2\int\frac{t^2}{1+t^2}\,dt\\
-&=2\int\left(1-\frac1{1+t^2}\right)dt
-=2t-2\arctan t+C.
-\end{aligned}
-$$
 
-**第三步：合并并还原变量。**
 
-$$
-\begin{aligned}
-I&=2xt-2(2t-2\arctan t)+C\\
-&=2xt-4t+4\arctan t+C.
-\end{aligned}
-$$
+    在 $x<1$ 上有
 
-代回 $t=\sqrt{e^x-1}$，即为答案。求导可验证。实数可微的计算区间是 $x>0$。
+    $$
+    \int2(x-1)\,\mathrm dx=(x-1)^2+C_1.
+    $$
 
-**方法提炼：** 乘积 $x\cdot\bigl(\sqrt{e^x-1}\bigr)'$ 宜先分部积分；剩余根式整体令 $t=\sqrt{e^x-1}$，即可转为标准有理函数。
+    在 $x>1$ 上有
+
+    $$
+    \int\ln x\,\mathrm dx=x\ln x-x+C_2.
+    $$
+
+    题目各选项在左侧都固定为 $(x-1)^2$，因此取 $C_1=0$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 在 $x=1$ 处匹配函数值
+
+
+
+    任何原函数都必须连续，左极限 $F(1-)=0$，右侧取值是 $F(1)=-1+C_2$。于是
+
+    $$
+    -1+C_2=0\quad\Longrightarrow\quad C_2=1.
+    $$
+
+    由此只有 D 所给的拼接常数正确。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 验证拼接处的可导性
+
+
+
+    两侧分别求导得
+
+    $$
+    F'(x)=\begin{cases}2(x-1),&x<1,\\\ln x,&x>1.\end{cases}
+    $$
+
+    当 $x\to1^-$ 与 $x\to1^+$ 时导数都趋于 $0$，并且 $F(1)=0$ 与左右极限一致，故由导数定义可得 $F'(1)=0=f(1)$。因此 D 确为原函数。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+只检查连续性通常还不足以判定任意分段函数一定是原函数；此处可借助 $f$ 在分界点连续，并且分段导数的左右极限一致，进一步验证可导性。选择题的正确答案已由 `<Option correct>` 标注。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-01-015" type="blank" points={3} tags="来源:1998考研数二, 考点:对数三角函数, 考点:分部积分">
+<Question id="core-1102-math-16b5e5-035" type="essay" points={10} tags="来源:2018年考研数学一、二, 科目:高等数学, 章节:不定积分, 考点:复合换元与分部积分">
 
-$$
-\int\frac{\ln\sin x}{\sin^2x}\,dx=
-$$
-
-<Blank answer="-cot(x)*ln(sin(x))-cot(x)-x+C" kind="math" />。
+ 求 $\int e^{2x}\arctan\sqrt{e^x-1}\mathrm{d}x$.
 
 <Solution>
 
-**答案：**
+**参考结论：** $\displaystyle I=\frac12\left[e^{2x}\arctan\sqrt{e^x-1}-\sqrt{e^x-1}-\frac13(e^x-1)^{3/2}\right]+C$。
 
-$$
-\boxed{-\cot x\,\ln\sin x-\cot x-x+C}.
-$$
+**解题思路：** 指数和根式由 $t=\sqrt{e^x-1}$ 同时消去，化成多项式乘 $\arctan t$ 的积分，再分部积分。
 
-**第一步：选对分部积分的两部分。** 令 $u=\ln\sin x$、$dv=\csc^2x\,dx$，则
+<Steps>
 
-$$
-du=\cot x\,dx,\qquad v=-\cot x.
-$$
+  <Step>
 
-应用 $\int u\,dv=uv-\int v\,du$ 得
 
-$$
-I=-\cot x\,\ln\sin x+\int\cot^2x\,dx.
-$$
 
-**第二步：用毕达哥拉斯恒等式收尾。** 由 $\cot^2x=\csc^2x-1$，
+    ### 以根式为新变量
 
-$$
-\int\cot^2x\,dx=-\cot x-x+C.
-$$
 
-两式相加即得结果。原被积式要求 $\sin x>0$，积分常数在每个符合条件的连通区间上确定。
 
-**易错点：** 不可把 $\ln\sin x$ 随意改成 $\ln|\sin x|$ 而不说明题设的实数定义域；使用分部积分时，$v=-\cot x$ 的负号尤需核对。
+    在实数积分区间 $x>0$，设 $t=\sqrt{e^x-1}$。于是
+
+    $$
+    e^x=1+t^2,\quad e^{2x}=(1+t^2)^2,
+    \quad\mathrm dx=\frac{2t}{1+t^2}\,\mathrm dt.
+    $$
+
+    原积分转为
+
+    $$
+    I=2\int t(1+t^2)\arctan t\,\mathrm dt.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 选择易积分的多项式为 $\mathrm dv$
+
+
+
+    令 $u=\arctan t$、$\mathrm dv=2t(1+t^2)\,\mathrm dt$，则
+
+    $$
+    \mathrm du=\frac{\mathrm dt}{1+t^2},
+    \qquad v=\frac12(1+t^2)^2.
+    $$
+
+    代入分部积分公式：
+
+    $$
+    I=\frac12(1+t^2)^2\arctan t-\frac12\int(1+t^2)\,\mathrm dt.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 计算多项式余项并回代
+
+
+
+    由于 $\int(1+t^2)\,\mathrm dt=t+t^3/3$，
+
+    $$
+    I=\frac12(1+t^2)^2\arctan t-\frac12t-\frac16t^3+C.
+    $$
+
+    再代回 $t=\sqrt{e^x-1}$，即为参考结果。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+若先把 $\arctan\sqrt{e^x-1}$ 展开求导，会出现较复杂的分母；先换元使其变为 $\arctan t$，才有机会直接分部积分。$x=0$ 是积分区间的端点，原函数通常在 $x>0$ 求得。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-01-016" type="essay" points={6} tags="来源:2001考研数一, 考点:反正切函数积分, 考点:指数换元">
+<Question id="core-1102-math-16b5e5-036" type="blank" points={4} tags="来源:2018年考研数学三, 科目:高等数学, 章节:不定积分, 考点:反三角函数恒等式与不定积分">
 
-求
-
-$$
-I=\int\frac{\arctan(e^x)}{e^{2x}}\,dx.
-$$
+ $\int e^x\arcsin\sqrt{1-e^{2x}}\mathrm{d}x=$<Blank answer="e^x arcsin sqrt(1-e^(2x)) - sqrt(1-e^(2x)) + C" kind="math" />.
 
 <Solution>
 
-**参考答案：**
+**参考结论：** $\displaystyle I=e^x\arcsin\sqrt{1-e^{2x}}-\sqrt{1-e^{2x}}+C$（$x<0$）。
 
-$$
-\boxed{I=-\frac12\left[e^{-2x}\arctan(e^x)+e^{-x}+\arctan(e^x)\right]+C}.
-$$
+**解题思路：** 指数函数的微分 $e^x\mathrm dx$ 已经出现，直接令 $t=e^x$；利用主值范围 $\arcsin\sqrt{1-t^2}=\arccos t$ 简化。
 
-**第一步：反正切函数作分部积分的 $u$。** 写作 $I=\int e^{-2x}\arctan(e^x)\,dx$，令
+<Steps>
 
-$$
-u=\arctan(e^x),\qquad dv=e^{-2x}\,dx.
-$$
+  <Step>
 
-则
 
-$$
-du=\frac{e^x}{1+e^{2x}}\,dx,
-\qquad v=-\frac12e^{-2x}.
-$$
 
-因此
+    ### 指数换元并标明范围
 
-$$
-I=-\frac12e^{-2x}\arctan(e^x)
-+\frac12\underbrace{\int\frac{e^{-x}}{1+e^{2x}}\,dx}_{J}.
-$$
 
-**第二步：换元后有理式拆分。** 取 $t=e^{-x}>0$，则 $dt=-e^{-x}\,dx$，$e^{2x}=1/t^2$，于是
 
-$$
-\begin{aligned}
-J&=-\int\frac{t^2}{1+t^2}\,dt\\
-&=-\int\left(1-\frac1{1+t^2}\right)dt\\
-&=-t+\arctan t+C\\
-&=-e^{-x}+\arctan(e^{-x})+C.
-\end{aligned}
-$$
+    取 $t=e^x$，则 $\mathrm dt=e^x\mathrm dx$。实数条件要求 $0<t\le1$，故
 
-**第三步：利用倒数反正切恒等式整理。** 因 $e^x>0$，有 $\arctan(e^{-x})=\frac\pi2-\arctan(e^x)$。将 $\pi/2$ 吸收入积分常数，可得
+    $$
+    I=\int\arcsin\sqrt{1-t^2}\,\mathrm dt.
+    $$
 
-$$
-I=-\frac12e^{-2x}\arctan(e^x)
--\frac12e^{-x}-\frac12\arctan(e^x)+C.
-$$
 
-这就是参考答案。
 
-<Callout type="idea" title="反正切的互补关系需看正负">$u>0$ 时 $\arctan u+\arctan(1/u)=\pi/2$。这里 $u=e^x>0$ 恒成立，因此整理积分常数时没有分支歧义。</Callout>
+  </Step>
+
+  <Step>
+
+
+
+    ### 利用反三角函数恒等式
+
+
+
+    对 $0<t\le1$，有 $\sqrt{1-t^2}=\sin(\arccos t)$ 且 $\arccos t\in[0,\pi/2)$，所以
+
+    $$
+    \arcsin\sqrt{1-t^2}=\arccos t.
+    $$
+
+    于是问题化为 $I=\int\arccos t\,\mathrm dt$。
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 分部积分并回代
+
+
+
+    令 $u=\arccos t$，$\mathrm dv=\mathrm dt$。由 $\mathrm du=-\frac{\mathrm dt}{\sqrt{1-t^2}}$，得到
+
+    $$
+    \begin{aligned}
+    I&=t\arccos t+\int\frac{t\,\mathrm dt}{\sqrt{1-t^2}}\\
+    &=t\arccos t-\sqrt{1-t^2}+C.
+    \end{aligned}
+    $$
+
+    代回 $t=e^x$ 并换回题面反正弦形式，得到答案。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+对于 $x=0$，被积函数仍有定义且为 $0$，但推导中的反三角求导式出现端点奇性，因此在开区间 $x<0$ 求原函数更规范。填空答案中的 $C$ 表示任意常数，代数等价式也应判为正确。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-01-017" type="essay" points={10} tags="来源:2009考研数二数三, 考点:根式对数积分, 考点:反双曲函数">
+<Question id="core-1102-math-16b5e5-037" type="essay" points={10} tags="来源:2019年考研数学二, 科目:高等数学, 章节:不定积分, 考点:有理函数部分分式与重因子">
 
-求
-
-$$
-I=\int\ln\left(1+\sqrt{\frac{1+x}{x}}\right)dx,\qquad x>0.
-$$
+ 求 $\int \frac{3x+6}{(x-1)^2(x^2+x+1)}\mathrm{d}x$.
 
 <Solution>
 
-**参考答案：**
+**参考结论：** $\displaystyle I=\ln(x^2+x+1)-2\ln|x-1|-\frac3{x-1}+C$（$x\ne1$）。
 
-$$
-\boxed{\begin{aligned}
-I={}&x\ln\left(1+\sqrt{\frac{1+x}{x}}\right)
-+\frac12\ln(\sqrt{1+x}+\sqrt{x})\\
-&+\frac{x}{2}-\frac12\sqrt{x+x^2}+C.
-\end{aligned}}
-$$
+**解题思路：** 把二重线性因子 $(x-1)^2$ 与不可约二次因子 $x^2+x+1$ 分别设置部分分式项，再凑二次式的导数。
 
-**第一步：换元以识别隐藏的反双曲正弦结构。** 令 $t=\sqrt x>0$，$x=t^2$、$dx=2t\,dt$。则
+<Steps>
 
-$$
-\begin{aligned}
-\ln\left(1+\sqrt{\frac{1+x}{x}}\right)
-&=\ln\frac{t+\sqrt{1+t^2}}{t}\\
-&=\underbrace{\ln\bigl(t+\sqrt{1+t^2}\bigr)}_{A(t)}-\ln t.
-\end{aligned}
-$$
+  <Step>
 
-注意 $A'(t)=1/\sqrt{1+t^2}$。所以
 
-$$
-I=2\int tA(t)\,dt-2\int t\ln t\,dt.
-$$
 
-**第二步：分别分部积分。** 由于 $d(t^2)=2t\,dt$，
+    ### 列出正确的部分分式结构
 
-$$
-\begin{aligned}
-2\int tA(t)\,dt
-&=t^2A(t)-\int\frac{t^2}{\sqrt{1+t^2}}\,dt\\
-&=t^2A(t)-\frac12t\sqrt{1+t^2}+\frac12A(t)+C.
-\end{aligned}
-$$
 
-上式利用了 $\int t^2/\sqrt{1+t^2}\,dt=\frac12[t\sqrt{1+t^2}-A(t)]$。此外
 
-$$
-2\int t\ln t\,dt=t^2\ln t-\frac12t^2+C.
-$$
+    设
 
-**第三步：合并并还原。**
+    $$
+    \frac{3x+6}{(x-1)^2(x^2+x+1)}
+    =\frac{A}{x-1}+\frac{B}{(x-1)^2}+\frac{Cx+D}{x^2+x+1}.
+    $$
 
-$$
-I=t^2[A(t)-\ln t]+\frac12A(t)
--\frac12t\sqrt{1+t^2}+\frac12t^2+C.
-$$
+    注意 $(x-1)^2$ 必须同时包含一次项和二次项，二次分母的分子应设为一次式。
 
-还原 $t=\sqrt x$，并把 $A(t)-\ln t$ 换成题目原对数，便得到参考答案。
 
-<Callout type="idea" title="高难根式对数积分的识别方式">当 $\ln(t+\sqrt{1+t^2})$ 出现时，其导数是 $1/\sqrt{1+t^2}$；因此不必硬记反双曲函数名称，也能用这一导数关系组织分部积分。</Callout>
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 解系数并检查
+
+
+
+    乘回分母得多项式恒等式
+
+    $$
+    3x+6=A(x-1)(x^2+x+1)+B(x^2+x+1)+(Cx+D)(x-1)^2.
+    $$
+
+    令 $x=1$，有 $9=3B$，故 $B=3$。比较三次、二次和一次项，求得
+
+    $$
+    A=-2,\quad C=2,\quad D=1.
+    $$
+
+    因此分解为
+
+    $$
+    -\frac2{x-1}+\frac3{(x-1)^2}+\frac{2x+1}{x^2+x+1}.
+    $$
+
+
+
+  </Step>
+
+  <Step>
+
+
+
+    ### 逐项积分
+
+
+
+    利用 $(x^2+x+1)'=2x+1$，有
+
+    $$
+    \begin{aligned}
+    I&=-2\int\frac{\mathrm dx}{x-1}+3\int\frac{\mathrm dx}{(x-1)^2}+\int\frac{2x+1}{x^2+x+1}\,\mathrm dx\\
+    &=-2\ln|x-1|-\frac3{x-1}+\ln(x^2+x+1)+C.
+    \end{aligned}
+    $$
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+二次式 $x^2+x+1=(x+\frac12)^2+\frac34>0$ 对所有实数成立，所以它的对数不必加绝对值；但 $\ln|x-1|$ 的绝对值必须保留。重根项积分为 $-1/(x-1)$，不是对数。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-01-018" type="essay" points={10} tags="来源:2018考研数一数二, 考点:反正切复合积分, 考点:先换元再分部">
+<Question id="core-1102-math-16b5e5-038" type="single" points={5} tags="来源:2023年考研数学二、三, 科目:高等数学, 章节:不定积分, 考点:分段原函数的导数与连续拼接">
 
-求
+ $f(x)=\begin{cases} \frac{1}{\sqrt{1+x^2}}, & x\le 0, \\ (x+1)\cos x, & x>0 \end{cases}$ 的一个原函数为( ).
+
+<Option>$F(x)=\begin{cases} \ln(\sqrt{1+x^2}-x), & x\le 0, \\ (x+1)\cos x-\sin x, & x>0 \end{cases}$</Option>
+
+<Option>$F(x)=\begin{cases} \ln(\sqrt{1+x^2}-x)+1, & x\le 0, \\ (x+1)\cos x-\sin x, & x>0 \end{cases}$</Option>
+
+<Option>$F(x) = \begin{cases} \ln(\sqrt{1+x^2}+x), & x \le 0, \\ (x+1)\sin x + \cos x, & x > 0 \end{cases}$</Option>
+
+<Option correct>
 
 $$
-I=\int e^{2x}\arctan\sqrt{e^x-1}\,dx.
+F(x) = \begin{cases} \ln(\sqrt{1+x^2}+x) + 1, & x \le 0, \\ (x+1)\sin x + \cos x, & x > 0 \end{cases}
 $$
+
+</Option>
 
 <Solution>
 
-**参考答案：**
+**参考结论：** 选择 **D**；对应 $F(x)=\begin{cases}\ln(\sqrt{1+x^2}+x)+1,&x\le0,\\(x+1)\sin x+\cos x,&x>0.\end{cases}$。
 
-$$
-\boxed{
-I=\frac12\left[e^{2x}\arctan\sqrt{e^x-1}
--\sqrt{e^x-1}-\frac13(e^x-1)^{3/2}\right]+C
-}.
-$$
+**解题思路：** 候选函数能否作为原函数，要过两道关：各段求导是否等于 $f$，以及在 $x=0$ 处是否拼成可导函数。
 
-**第一步：取能同时处理根式和指数的变量。** 令 $t=\sqrt{e^x-1}>0$，则
+<Steps>
 
-$$
-e^x=1+t^2,\quad e^{2x}=(1+t^2)^2,
-\quad dx=\frac{2t}{1+t^2}\,dt.
-$$
+  <Step>
 
-故原积分转为
 
-$$
-I=2\int t(1+t^2)\arctan t\,dt.
-$$
 
-**第二步：分部积分，让多项式的导数匹配 $\arctan t$。** 取
+    ### 排除左段导数不符的选项
 
-$$
-u=\arctan t,\quad dv=2t(1+t^2)\,dt,
-$$
 
-则 $du=dt/(1+t^2)$、$v=(1+t^2)^2/2$，所以
 
-$$
-\begin{aligned}
-I&=\frac12(1+t^2)^2\arctan t
--\frac12\int(1+t^2)\,dt\\
-&=\frac12(1+t^2)^2\arctan t
--\frac12t-\frac16t^3+C.
-\end{aligned}
-$$
+    观察
 
-**第三步：将 $t^2+1=e^x$ 代回。** 得到原题所需的形式。由于 $t=\sqrt{e^x-1}$，实数计算宜取 $x>0$。
+    $$
+    \frac{\mathrm d}{\mathrm dx}\ln(\sqrt{1+x^2}+x)=\frac1{\sqrt{1+x^2}},
+    $$
 
-**验算提示：** 对首项求导将出现“原被积式”和 $\frac12(1+t^2)\,dt$ 两部分；后两项的导数恰好抵消后者，因此最终只留下原被积式。
+    而 $\ln(\sqrt{1+x^2}-x)$ 的导数为 $-1/\sqrt{1+x^2}$。因此 A、B 在左区间已经不满足 $F'=f$。
 
-</Solution>
-</Question>
 
-<Question id="math-core-gd-04-01-019" type="essay" tags="来源:原创, 考点:参数化母题, 考点:换元分部">
 
-以 2018 年数学一、数学二不定积分题为母题，将指数权重改为三次，计算
+  </Step>
 
-$$
-I=\int e^{3x}\arctan\sqrt{e^x-1}\,dx,\qquad x>0.
-$$
+  <Step>
 
-<Solution>
 
-**参考答案：**
 
-$$
-\boxed{\begin{aligned}
-I={}&\frac{e^{3x}}3\arctan\sqrt{e^x-1}\\
-&-\frac13\left[\sqrt{e^x-1}
-+\frac23(e^x-1)^{3/2}
-+\frac15(e^x-1)^{5/2}\right]+C.
-\end{aligned}}
-$$
+    ### 检查右段导数
 
-**第一步：与母题使用相同的结构换元。** 令 $t=\sqrt{e^x-1}$，则 $e^x=1+t^2$、$dx=2t\,dt/(1+t^2)$，故
 
-$$
-I=2\int t(1+t^2)^2\arctan t\,dt.
-$$
 
-**第二步：按指数权重选择分部积分的 $dv$。** 令
+    对 C、D 共同的右侧形式求导：
 
-$$
-u=\arctan t,\quad
- dv=2t(1+t^2)^2\,dt;
-\qquad du=\frac{dt}{1+t^2},\quad
-v=\frac{(1+t^2)^3}{3}.
-$$
+    $$
+    \frac{\mathrm d}{\mathrm dx}\bigl[(x+1)\sin x+\cos x\bigr]
+    =\sin x+(x+1)\cos x-\sin x
+    =(x+1)\cos x.
+    $$
 
-因此
+    这与题设右段吻合。
 
-$$
-\begin{aligned}
-I&=\frac{(1+t^2)^3}{3}\arctan t
--\frac13\int(1+t^2)^2\,dt\\
-&=\frac{(1+t^2)^3}{3}\arctan t
--\frac13\left(t+\frac{2t^3}{3}+\frac{t^5}{5}\right)+C.
-\end{aligned}
-$$
 
-把 $t=\sqrt{e^x-1}$ 代回，即得参考答案。
 
-**第三步：归纳整个母题族。** 设正整数 $n$，则同样的换元给出
+  </Step>
 
-$$
-\begin{aligned}
-I_n&=\int e^{nx}\arctan\sqrt{e^x-1}\,dx\\
-&=\frac{(1+t^2)^n}{n}\arctan t
--\frac1n\int(1+t^2)^{n-1}\,dt,
-\quad t=\sqrt{e^x-1}.
-\end{aligned}
-$$
+  <Step>
 
-右侧最后一项只是多项式积分。$n=2$ 回到前一题母题，$n=3$ 正是本题。
 
-<Callout type="idea" title="从一题推广到一类">关键是 $e^x=1+t^2$，使 $e^{nx}\,dx=2t(1+t^2)^{n-1}dt$；因此对 $\arctan t$ 分部积分总能把剩余积分降为多项式，避免逐题重新猜方法。</Callout>
+
+    ### 在分界点拼接并验证导数
+
+
+
+    候选左侧基本原函数在 $x=0$ 取值 $\ln1=0$，右侧极限为 $\cos0=1$。要使整体原函数连续，左段必须补 $+1$，即选 D。并且左右两侧导数在 $0$ 处的极限均为 $1$，故该连续拼接函数在 $0$ 处可导，$F'(0)=1=f(0)$。
+
+
+
+  </Step>
+
+</Steps>
+
+<Callout type="idea" title="易错提醒与检验">
+
+
+
+有些同学只看哪个选项分段求导正确，从而错选 C。**原函数首先是一个可导函数，所以必连续**；左右段积分常数不是独立任意的。正确选项由 `<Option correct>` 标记。
+
+
+
+</Callout>
 
 </Solution>
+
 </Question>
-
-<Question id="math-core-gd-04-01-020" type="essay" points={10} tags="来源:1987考研数二, 考点:含参不定积分, 考点:三角换元">
-
-计算
-
-$$
-I=\int\frac{dx}{a^2\sin^2x+b^2\cos^2x},
-$$
-
-其中 $a,b$ 为不全为零的非负常数。
-
-<Solution>
-
-**参考答案：** 在原被积函数有定义的各连通区间上，
-
-$$
-\boxed{I=\begin{cases}
-\displaystyle\frac1{ab}\arctan\!\left(\frac ab\tan x\right)+C,&a>0,\ b>0,\\[5pt]
-\displaystyle\frac1{b^2}\tan x+C,&a=0,\ b>0,\\[5pt]
-\displaystyle-\frac1{a^2}\cot x+C,&a>0,\ b=0.
-\end{cases}}
-$$
-
-第一种情形中的反正切表达式须按局部连续分支解释；若要求 $a,b>0$ 时在全实轴得到一个原函数，需在越过 $	an x$ 的极点时对相邻公式增减适当的常数以保证连续。
-
-**第一步：说明为什么必须分类。** $a,b$ 可以等于 $0$，因此不能未经讨论就除以 $ab$。先处理 $a,b>0$：在 $\cos x\ne0$ 的局部区间令 $t=\tan x$，则
-
-$$
-\sin^2x=\frac{t^2}{1+t^2},\quad
-\cos^2x=\frac1{1+t^2},\quad dx=\frac{dt}{1+t^2}.
-$$
-
-于是
-
-$$
-I=\int\frac{dt}{a^2t^2+b^2}
-=\frac1{ab}\arctan\frac{at}{b}+C.
-$$
-
-代回 $t=\tan x$，得到第一种情形。
-
-**第二步：零参数的退化情形。** 若 $a=0$，被积式为 $\sec^2x/b^2$，故 $I=\tan x/b^2+C$；若 $b=0$，被积式为 $\csc^2x/a^2$，故 $I=-\cot x/a^2+C$。
-
-**第三步：验算与定义域。** 第一种情形直接求导：
-
-$$
-\frac d{dx}\left[\frac1{ab}\arctan\left(\frac ab\tan x\right)\right]
-=\frac{\sec^2x}{b^2+a^2\tan^2x}
-=\frac1{a^2\sin^2x+b^2\cos^2x}.
-$$
-
-<Callout type="warn" title="反正切主值不能不加处理地跨越极点">当 $a,b>0$ 时原被积函数在每个实数处都有定义，但 $\arctan((a/b)\tan x)$ 的主值在 $x=\pi/2+k\pi$ 发生跳跃。因此局部求导正确不代表主值表达式已给出全实轴连续的一个原函数；可在每个相邻区间调整积分常数拼接。</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-01-021" type="essay" points={3} tags="来源:1994考研数一数二, 考点:三角有理积分, 考点:部分分式">
-
-求
-
-$$
-\int\frac{dx}{\sin2x+2\sin x}.
-$$
-
-<Solution>
-
-**参考答案：**
-
-$$
-\boxed{\frac18\left[\ln(1-\cos x)-\ln(1+\cos x)+\frac2{1+\cos x}\right]+C.}
-$$
-
-**第一步：将三角函数化为有理式。** 用 $\sin2x=2\sin x\cos x$，原式分母变为 $2\sin x(1+\cos x)$。令 $t=\cos x$，有 $dt=-\sin x\,dx$，因此
-
-$$
-I=-\frac12\int\frac{dt}{(1-t)(1+t)^2}.
-$$
-
-**第二步：处理重根 $1+t$。** 部分分式分解为
-
-$$
-\frac1{(1-t)(1+t)^2}
-=\frac1{4(1-t)}+\frac1{4(1+t)}+\frac1{2(1+t)^2}.
-$$
-
-逐项积分时注意 $\int dt/(1-t)=-\ln|1-t|$，由此
-
-$$
-I=\frac18\ln|1-t|-\frac18\ln|1+t|
-+\frac1{4(1+t)}+C.
-$$
-
-**第三步：代回并检查。** 因 $t=\cos x$，得到参考答案。原被积式要求 $\sin x\ne0$；在这样的连通区间内 $1\pm\cos x>0$，故可以去掉对数中的绝对值。
-
-<Callout type="idea" title="含重复因子时不要漏项">分母有 $(1+t)^2$，应同时保留 $B/(1+t)$ 和 $C/(1+t)^2$；前者积分成对数，后者积分成有理项。</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-01-022" type="essay" points={8} tags="来源:1996考研数二, 考点:分部积分, 考点:部分分式, 考点:反三角函数">
-
-求
-
-$$
-I=\int\frac{\arctan x}{x^2(1+x^2)}\,dx.
-$$
-
-<Solution>
-
-**参考答案：**
-
-$$
-\boxed{I=-\frac{\arctan x}{x}+\ln|x|-\frac12\ln(1+x^2)-\frac12(\arctan x)^2+C,\quad x\ne0.}
-$$
-
-<Tabs items={['方法一：整体分部积分','方法二：先拆分母']} defaultIndex={0}>
-<Tab value="方法一：整体分部积分">
-
-**第一步：为分部积分找 $dv$。** 利用
-
-$$
-\frac1{x^2(1+x^2)}=\frac1{x^2}-\frac1{1+x^2},
-$$
-
-取 $u=\arctan x$，$dv=dx/[x^2(1+x^2)]$，则
-
-$$
-du=\frac{dx}{1+x^2},\qquad v=-\frac1x-\arctan x.
-$$
-
-**第二步：分部后分别求两个基础积分。**
-
-$$
-\begin{aligned}
-I&=-\frac{\arctan x}{x}-(\arctan x)^2\\
-&\quad+\int\frac{dx}{x(1+x^2)}
-+\int\frac{\arctan x}{1+x^2}\,dx.
-\end{aligned}
-$$
-
-前一项拆为 $1/x-x/(1+x^2)$，得到 $\ln|x|-\tfrac12\ln(1+x^2)$；后一项令 $t=\arctan x$，得到 $t^2/2$。合并即为参考答案。
-
-</Tab>
-<Tab value="方法二：先拆分母">
-
-将原积分直接拆为
-
-$$
-I=\int\frac{\arctan x}{x^2}\,dx
--\int\frac{\arctan x}{1+x^2}\,dx.
-$$
-
-第二项立即等于 $\tfrac12(\arctan x)^2$；第一项令 $u=\arctan x,\,dv=dx/x^2$，得到
-
-$$
-\int\frac{\arctan x}{x^2}\,dx
-=-\frac{\arctan x}{x}
-+\int\frac{dx}{x(1+x^2)}.
-$$
-
-只余对数项，因此得到同一结果。此法的优势在于先把能立即积分的一项分离，减少一次长分部公式的书写。
-
-</Tab>
-</Tabs>
-
-**自检：** 对 $-\arctan x/x$ 求导时会出现 $\arctan x/x^2$ 与 $-1/[x(1+x^2)]$ 两部分，后者恰被两个对数导数抵消。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-01-023" type="essay" points={10} tags="来源:2019考研数二, 考点:有理函数积分, 考点:二重极点">
-
-求
-
-$$
-I=\int\frac{3x+6}{(x-1)^2(x^2+x+1)}\,dx.
-$$
-
-<Solution>
-
-**参考答案：**
-
-$$
-\boxed{I=\ln(x^2+x+1)-2\ln|x-1|-\frac3{x-1}+C,\qquad x\ne1.}
-$$
-
-**第一步：按因子阶数设部分分式。** 因为分母含二重一次因子和不可约二次因子，正确的待定形式为
-
-$$
-\frac{3x+6}{(x-1)^2(x^2+x+1)}
-=\frac A{x-1}+\frac B{(x-1)^2}+\frac{Cx+D}{x^2+x+1}.
-$$
-
-通分、比较系数，得 $A=-2,B=3,C=2,D=1$，故
-
-$$
-\frac{3x+6}{(x-1)^2(x^2+x+1)}
-=-\frac2{x-1}+\frac3{(x-1)^2}
-+\frac{2x+1}{x^2+x+1}.
-$$
-
-**第二步：三项分别积分。**
-
-$$
-\int\frac{2x+1}{x^2+x+1}\,dx=\ln(x^2+x+1),
-$$
-
-$$
--2\int\frac{dx}{x-1}=-2\ln|x-1|,\qquad
-3\int\frac{dx}{(x-1)^2}=-\frac3{x-1}.
-$$
-
-将三项合并即得答案。由于 $x^2+x+1=(x+\frac12)^2+\frac34>0$，第一项不必加绝对值。
-
-<Callout type="warn" title="二重极点不是两个对数">$\int(x-1)^{-2}dx=-(x-1)^{-1}+C$；只有 $(x-1)^{-1}$ 的积分才是对数。</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-01-024" type="essay" tags="来源:李正元练习题, 考点:高次有理函数, 考点:配方反正切">
-
-求
-
-$$
-\int\frac{x^4+1}{1+x^6}\,dx.
-$$
-
-<Solution>
-
-**参考答案：**
-
-$$
-\boxed{I=\frac23\arctan x
-+\frac13\arctan(2x+\sqrt3)
-+\frac13\arctan(2x-\sqrt3)+C.}
-$$
-
-**第一步：分解偶次多项式。** 利用 $x^6+1=(x^2+1)(x^4-x^2+1)$，再分解四次式：
-
-$$
-1+x^6=(1+x^2)(x^2+\sqrt3x+1)(x^2-\sqrt3x+1).
-$$
-
-**第二步：按三个实二次因子作部分分式。** 通分后可核对恒等式
-
-$$
-\frac{x^4+1}{x^6+1}
-=\frac2{3(1+x^2)}
-+\frac1{6(x^2+\sqrt3x+1)}
-+\frac1{6(x^2-\sqrt3x+1)}.
-$$
-
-本题分子的特殊结构使三个分子的 $x$ 项均抵消，仅剩常数；这是它比一般六次有理函数简便的原因。
-
-**第三步：配方后反正切积分。** 对任一符号，有
-
-$$
-x^2\pm\sqrt3x+1
-=\left(x\pm\frac{\sqrt3}{2}\right)^2+\frac14,
-$$
-
-因而
-
-$$
-\int\frac{dx}{x^2\pm\sqrt3x+1}
-=2\arctan(2x\pm\sqrt3)+C.
-$$
-
-乘上分式系数即得参考答案。三个分母在全实数上严格为正，所以原函数在实轴上可取同一个积分常数。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-01-025" type="essay" tags="来源:张宇1000题, 考点:部分分式, 考点:对数反正切">
-
-求
-
-$$
-\int\frac{x+2}{(2x+1)(x^2+x+1)}\,dx.
-$$
-
-<Solution>
-
-**参考答案：**
-
-$$
-\boxed{\ln|2x+1|-\frac12\ln(x^2+x+1)
-+\frac1{\sqrt3}\arctan\frac{2x+1}{\sqrt3}+C.}
-$$
-
-**第一步：分离一次因子。** 直接通分可验
-
-$$
-\frac{x+2}{(2x+1)(x^2+x+1)}
-=\frac2{2x+1}-\frac{x}{x^2+x+1}.
-$$
-
-第一项的积分为 $\ln|2x+1|$。
-
-**第二步：将二次式分子拆成导数与常数。** 因为 $-x=-\frac12(2x+1)+\frac12$，所以
-
-$$
--\int\frac{x}{x^2+x+1}\,dx
-=-\frac12\ln(x^2+x+1)
-+\frac12\int\frac{dx}{(x+\frac12)^2+\frac34}.
-$$
-
-最后一个积分为 $\frac2{\sqrt3}\arctan\frac{2x+1}{\sqrt3}$，乘外层系数 $1/2$ 得出参考答案。
-
-**方法提醒：** $\int2/(2x+1)\,dx=\ln|2x+1|$，不是 $2\ln|2x+1|$；换元中的 $2$ 会抵消。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-01-026" type="essay" tags="来源:李正元练习题, 考点:整体代换, 考点:二项式展开">
-
-计算
-
-$$
-I=\int\left(\frac{x-1}{x+1}\right)^4dx.
-$$
-
-<Solution>
-
-**参考答案：**
-
-$$
-\boxed{I=x+1-8\ln|x+1|-\frac{24}{x+1}
-+\frac{16}{(x+1)^2}-\frac{16}{3(x+1)^3}+C,\ x\ne-1.}
-$$
-
-**第一步：整体平移，使分子与分母只差常数。** 令 $u=x+1$，则 $x-1=u-2$、$du=dx$，被积函数成为 $(1-2/u)^4$。
-
-**第二步：按二项式定理展开后逐项积分。**
-
-$$
-\left(1-\frac2u\right)^4
-=1-\frac8u+\frac{24}{u^2}-\frac{32}{u^3}+\frac{16}{u^4}.
-$$
-
-因此
-
-$$
-\begin{aligned}
-I&=\int\left(1-8u^{-1}+24u^{-2}-32u^{-3}+16u^{-4}\right)du\\
-&=u-8\ln|u|-24u^{-1}+16u^{-2}-\frac{16}{3}u^{-3}+C.
-\end{aligned}
-$$
-
-**第三步：代回并验算结构。** 代回 $u=x+1$ 即得答案。求导时 $-24/u$ 产生 $+24/u^2$，而 $+16/u^2$ 产生 $-32/u^3$，逐项还原展开式。
-
-<Callout type="idea" title="有理幂式先看分子、分母的差">$(x-1)/(x+1)=1-2/(x+1)$；先做这个平移比直接对四次有理式进行部分分式分解更短。</Callout>
-
-</Solution>
-</Question>
-
-## 模型：逆向求导与抽象函数
-
-<Question id="math-core-gd-04-01-027" type="essay" points={5} tags="来源:1997考研数二, 考点:逆向乘积求导, 考点:三角恒等式">
-
-求
-
-$$
-\int e^{2x}(\tan x+1)^2\,dx.
-$$
-
-<Solution>
-
-**参考答案：**
-
-$$
-\boxed{\int e^{2x}(\tan x+1)^2\,dx=e^{2x}\tan x+C.}
-$$
-
-**第一步：展开识别模式。**
-
-$$
-(\tan x+1)^2=\tan^2x+2\tan x+1=\sec^2x+2\tan x.
-$$
-
-**第二步：逆向应用乘积法则。**
-
-$$
-\begin{aligned}
-\frac d{dx}\bigl(e^{2x}\tan x\bigr)
-&=2e^{2x}\tan x+e^{2x}\sec^2x\\
-&=e^{2x}(\tan x+1)^2.
-\end{aligned}
-$$
-
-**结论：** 已完整匹配被积函数，所以直接得到参考答案；原式在各个 $\cos x\ne0$ 的连通区间分别加常数。
-
-<Callout type="idea" title="先辨认乘积求导，再决定是否换元">遇到 $e^{kx}P(\tan x)$ 时先测试 $(e^{kx}Q(\tan x))'$；本题无需任何换元或分部积分。</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-01-028" type="blank" tags="来源:李正元练习题, 考点:幂函数换元, 考点:有理式化简">
-
-已知 $n\ne0$，求
-
-$$
-\int\frac{x^{2n-1}}{1+x^n}\,dx=
-$$
-
-<Blank answer="(x^n-ln(abs(1+x^n)))/n+C" kind="math" />。
-
-<Solution>
-
-**答案：**
-
-$$
-\boxed{\frac1n\left[x^n-\ln|1+x^n|\right]+C.}
-$$
-
-**第一步：观察导数配套因子。** 因为 $(x^n)'=nx^{n-1}$，而 $x^{2n-1}=x^n x^{n-1}$，令 $u=x^n$ 后有
-
-$$
-du=nx^{n-1}dx,\qquad x^{2n-1}dx=\frac{u}{n}\,du.
-$$
-
-**第二步：把分式拆为基础积分。**
-
-$$
-\begin{aligned}
-I&=\frac1n\int\frac{u}{1+u}\,du
-=\frac1n\int\left(1-\frac1{1+u}\right)du\\
-&=\frac1n\bigl(u-\ln|1+u|\bigr)+C.
-\end{aligned}
-$$
-
-**第三步：回代并验证。** 回代 $u=x^n$。对答案求导得到
-
-$$
-\frac1n\left(nx^{n-1}-\frac{nx^{n-1}}{1+x^n}\right)
-=\frac{x^{2n-1}}{1+x^n}.
-$$
-
-<Callout type="warn" title="实数幂的定义域">若 $n$ 非整数，应在 $x^n$ 有意义且相关表达式可导、$1+x^n\ne0$ 的实数连通区间内理解此不定积分；积分常数可因区间而异。</Callout>
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-01-029" type="essay" tags="来源:李正元练习题, 考点:抽象函数原函数, 考点:分部积分">
-
-已知 $\dfrac{\sin x}{x}$ 是 $f(x)$ 的一个原函数，求
-
-$$
-\int x^3f'(x)\,dx.
-$$
-
-<Solution>
-
-**参考答案：**
-
-$$
-\boxed{\int x^3f'(x)\,dx=x^2\cos x-4x\sin x-6\cos x+C.}
-$$
-
-**第一步：区分原函数与被积函数。** 已知 $\sin x/x$ 是 $f$ 的原函数，因此
-
-$$
-f(x)=\frac d{dx}\frac{\sin x}{x}
-=\frac{x\cos x-\sin x}{x^2},\qquad x\ne0.
-$$
-
-注意不能把已知的 $\sin x/x$ 直接当作 $f(x)$。
-
-**第二步：不必计算 $f''$，直接分部积分。**
-
-$$
-I=\int x^3f'(x)dx
-=x^3f(x)-3\int x^2f(x)dx.
-$$
-
-现在 $x^3f(x)=x^2\cos x-x\sin x$，而
-
-$$
-\begin{aligned}
-\int x^2f(x)dx
-&=\int(x\cos x-\sin x)dx\\
-&=x\sin x+\cos x+\cos x+C\\
-&=x\sin x+2\cos x+C.
-\end{aligned}
-$$
-
-故
-
-$$
-I=x^2\cos x-x\sin x-3(x\sin x+2\cos x)+C,
-$$
-
-整理即得参考答案。
-
-**验算：** 结果求导为 $-x^2\sin x-2x\cos x+2\sin x$，恰是 $x^3f'(x)$ 的化简式（在 $x\ne0$ 上）。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-01-030" type="essay" tags="来源:张宇1000题, 考点:函数方程, 考点:对称变换, 考点:有理式积分">
-
-设函数 $f(x)$ 满足
-
-$$
-xf(x)+f(1-x)=x^2,
-$$
-
-求 $\displaystyle\int f(x)\,dx$。
-
-<Solution>
-
-**参考答案：**
-
-$$
-\boxed{\int f(x)dx=\frac{x^2}2+x-\ln(x^2-x+1)
--\frac2{\sqrt3}\arctan\frac{2x-1}{\sqrt3}+C.}
-$$
-
-**第一步：用自变量对称变换产生第二个方程。** 将原式的 $x$ 换成 $1-x$：
-
-$$
-(1-x)f(1-x)+f(x)=(1-x)^2.
-$$
-
-原式还给出 $f(1-x)=x^2-xf(x)$。代入第二式：
-
-$$
-(1-x)x^2+\bigl[1-x(1-x)\bigr]f(x)=(1-x)^2.
-$$
-
-**第二步：解出 $f$ 再化简。** 因为 $1-x(1-x)=x^2-x+1>0$，有
-
-$$
-\begin{aligned}
-f(x)&=\frac{(1-x)^2-(1-x)x^2}{x^2-x+1}\\
-&=\frac{(x-1)(x^2+x-1)}{x^2-x+1}
-=x+1-\frac{2x}{x^2-x+1}.
-\end{aligned}
-$$
-
-**第三步：分子配凑分母导数。** 记 $D=x^2-x+1$，有 $-2x=-(2x-1)-1$，所以
-
-$$
-\begin{aligned}
-\int f(x)dx
-&=\int(x+1)dx-\int\frac{2x-1}{D}\,dx-\int\frac{dx}{D}\\
-&=\frac{x^2}2+x-\ln D
--\frac2{\sqrt3}\arctan\frac{2x-1}{\sqrt3}+C,
-\end{aligned}
-$$
-
-其中 $D=(x-1/2)^2+3/4$。
-
-<Callout type="idea" title="抽象方程先消未知函数，再积分">出现 $f(x)$ 和 $f(1-x)$ 时，优先使用 $x\mapsto1-x$ 联立解方程；不应直接对原函数方程逐项积分而引入新的未知积分。</Callout>
-
-</Solution>
-</Question>
-
-## 一题多用：方法选择的判别
-
-不定积分选法应遵循 **先逆向求导 → 再整体换元 → 再分部积分 → 最后部分分式** 的优先级：题 27 直接识别导数；题 26、28 先找到整体；题 22、29 使用分部积分；题 23—25、30 转成有理式。含参数、分段或奇点时必须先说明积分区间和参数边界。

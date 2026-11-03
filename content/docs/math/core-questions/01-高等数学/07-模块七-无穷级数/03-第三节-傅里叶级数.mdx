@@ -1,1004 +1,848 @@
 ---
-title: 第三节 傅里叶级数（数一）
-description: 高等数学核心题目重构：周期延拓、跳跃点收敛、正余弦系数、频谱对称及半区间级数。
+title: "第三节 傅里叶级数（数一）"
+description: "考研数学真题分类：模块七：无穷级数（数一、数三）"
 ---
 
-傅里叶级数题首先确认**所展开的是原函数还是它的奇延拓、偶延拓与周期延拓**。对分段光滑函数，收敛值满足
+<Question id="core-1102-math-d71ab6-001" type="blank" points={3} tags="来源:1988年考研数学一, 科目:高等数学, 章节:傅里叶级数, 考点:周期端点傅里叶收敛值">
+
+ 设 $f(x)$ 是周期为 2 的周期函数, 它在区间 $(-1,1]$ 上定义为
 
 $$
-\boxed{S(x_0)=\frac{f(x_0-0)+f(x_0+0)}2}.
+f(x) = \begin{cases} 2, & -1 < x \leqslant 0, \\ x^3, & 0 < x \leqslant 1, \end{cases}
 $$
 
-在连续点，这等于函数值；在跳跃点（包括周期拼接点），即使原函数单独给出了该点的值，也必须取两侧极限的平均值。计算系数时，先判断奇偶性，再考虑积分与正交性。
-
-## 一、和函数与延拓：周期、奇偶和跳跃点
-
-<Question id="math-core-gd-07-03-001" type="blank" points={3} tags="来源:1988考研数一, 考点:傅里叶级数收敛, 考点:周期端点">
-
-设 $f(x)$ 为周期 $2$ 的周期函数，且在 $(-1,1]$ 上
-
-$$
-f(x)=\begin{cases}2,&-1<x\le0,\\ x^3,&0<x\le1.\end{cases}
-$$
-
-则其傅里叶级数在 $x=1$ 处收敛于 <Blank answer="3/2" kind="math" />。
+则 $f(x)$ 的傅里叶级数在 $x=1$ 处收敛于 <Blank answer="((3)/(2))" kind="math" /> 。
 
 <Solution>
 
-**答案：$\boxed{\dfrac32}$。**
+**答案**：傅里叶级数在 $x=1$ 处的和为 $\boxed{\frac32}$。
 
-**第一步：从基本周期区间读左极限。** 当 $x\to1^-$ 时，处于 $x^3$ 一段，故 $f(1-0)=1$。
+**关键**：分段光滑周期函数的傅里叶级数在跳跃点收敛于**左右极限的平均值**，而不必收敛到题目给出的函数值。
 
-**第二步：用周期性读右极限。** $f(x+2)=f(x)$，所以 $x\to1^+$ 对应 $x-2\to-1^+$。右侧落在常值段，故 $f(1+0)=f(-1+0)=2$。
+<Steps>
+  <Step>
 
-**第三步：应用狄利克雷收敛定理。**
+    ### 判断 $x=1$ 是否为跳跃点
 
-$$
-S(1)=\frac{f(1-0)+f(1+0)}2=\frac{1+2}2=\boxed{\frac32}.
-$$
+    在所给基本区间 $(-1,1]$，靠近 $x=1$ 的左侧使用 $f(x)=x^3$，因此
 
-**易错提醒：** $x=1$ 是**周期拼接点**，不能只看题目给出的 $f(1)=1$；右极限需要回到 $-1$ 的右侧寻找。
+    $$
+    f(1^-)=\lim_{x\to1^-}x^3=1.
+    $$
 
-</Solution>
-</Question>
+    函数周期为 $2$，故从 $1$ 的右侧靠近相当于从 $-1$ 的右侧靠近：
 
-<Question id="math-core-gd-07-03-002" type="single" points={3} tags="来源:1989考研数一, 考点:正弦级数, 考点:奇延拓">
+    $$
+    f(1^+)=f((-1)^+)=2.
+    $$
 
-设 $f(x)=x^2$（$0\le x<1$），令
+  </Step>
+  <Step>
 
-$$
-S(x)=\sum_{n=1}^{\infty}b_n\sin n\pi x,
-\qquad b_n=2\int_0^1 f(x)\sin n\pi x\,\mathrm dx.
-$$
+    ### 应用狄利克雷收敛定理
 
-则 $S(-\frac12)$ 等于（ ）。
+    本题函数在一周期内分段光滑，因此其傅里叶级数在 $x=1$ 的收敛值为
 
-<Option>$-\dfrac12$</Option>
-<Option correct>$-\dfrac14$</Option>
-<Option>$\dfrac14$</Option>
-<Option>$\dfrac12$</Option>
+    $$
+    \frac{f(1^-)+f(1^+)}2
+    =\frac{1+2}2
+    =\boxed{\frac32}.
+    $$
 
-<Solution>
+  </Step>
+</Steps>
 
-**答案：B，$\boxed{-\frac14}$。**
+<Callout type="warn" title="端点的右极限不是代入右侧的公式">
 
-**第一步：识别展开方式。** 这是区间 $[0,1]$ 上的傅里叶**正弦**系数。其和函数对应 $x^2$ 的奇延拓，再以 $2$ 为周期延拓；并非把 $x^2$ 直接延伸到负半轴。
-
-**第二步：利用奇性求值。** 对 $0<x<1$，被延拓函数连续，故 $S(x)=x^2$。由奇性得
-
-$$
-S\left(-\frac12\right)=-S\left(\frac12\right)
-=-\left(\frac12\right)^2=\boxed{-\frac14}.
-$$
-
-<Callout type="info" title="正弦展开与余弦展开的几何含义">
-
-$[0,L]$ 上的正弦展开对应**奇延拓**，余弦展开对应**偶延拓**；两种延拓通常都采用周期 $2L$。先找延拓方式，比计算全部系数快得多。
+$x=1$ 是所给基本区间的右端点，右极限要利用 **周期性** 回到 $x=-1$ 附近；仅根据 $f(1)=1$ 判出傅里叶级数和为 $1$ 是错误的。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-07-03-003" type="blank" points={3} tags="来源:1992考研数一, 考点:傅里叶级数收敛, 考点:周期拼接">
+<Question id="core-1102-math-d71ab6-002" type="single" points={3} tags="来源:1989年考研数学一, 科目:高等数学, 章节:傅里叶级数, 考点:奇延拓正弦级数取值">
 
-设
+ 设函数 $f(x) = x^2, 0 \leqslant x < 1$, 而
 
 $$
-f(x)=\begin{cases}-1,&-\pi<x\le0,\\ 1+x^2,&0<x\le\pi.\end{cases}
+S(x) = \sum_{n=1}^{\infty} b_n \sin n\pi x, -\infty < x < +\infty,
 $$
 
-则其以 $2\pi$ 为周期的傅里叶级数在 $x=\pi$ 处收敛于 <Blank answer="pi^2/2" kind="math" />。
+其中 $b_n = 2 \int_{0}^{1} f(x) \sin n\pi x \, dx, n = 1, 2, 3, \cdots$, 则 $S\left(-\frac{1}{2}\right)$ 等于 ( ).
+
+<Option>$-\frac{1}{2}$</Option>
+<Option correct>$-\frac{1}{4}$</Option>
+<Option>$\frac{1}{4}$</Option>
+<Option>$\frac{1}{2}$</Option>
 
 <Solution>
 
-**答案：$\boxed{\pi^2/2}$。**
+**正确答案：B，$\boxed{-\frac14}$。**
 
-**第一步：求 $\pi$ 左侧极限。**
+**思路**：题目给出的系数来自半区间正弦展开，故先认出奇延拓与周期 $2$，无需计算每一个 $b_n$。
 
-$$
-f(\pi-0)=1+\pi^2.
-$$
+<Steps>
+  <Step>
 
-**第二步：求周期拼接后的右侧极限。** 因周期为 $2\pi$，
+    ### 从正弦系数确定对应的延拓
 
-$$
-f(\pi+0)=f(-\pi+0)=-1.
-$$
+    对 $0<x<1$，给出的
 
-**第三步：取平均值。**
+    $$
+    b_n=2\int_0^1x^2\sin(n\pi x)\,\mathrm dx
+    $$
 
-$$
-S(\pi)=\frac{(1+\pi^2)+(-1)}2=\boxed{\frac{\pi^2}{2}}.
-$$
+    正是长度 $L=1$ 的半区间正弦系数。因此 $S(x)$ 是将 $x^2$ 先奇延拓到 $(-1,1)$，再以 $2$ 为周期延拓所得的傅里叶级数。
 
-关键在于函数的**实际周期延拓**。不应因为 $f(\pi)=1+\pi^2$，就把端点原函数值直接视为傅里叶级数的和。
+  </Step>
+  <Step>
 
-</Solution>
-</Question>
+    ### 利用奇性确定负半轴的函数值
 
-<Question id="math-core-gd-07-03-004" type="single" points={3} tags="来源:1999考研数一, 考点:余弦展开, 考点:跳跃点">
+    延拓函数在 $x=\pm\tfrac12$ 处连续，故傅里叶级数在那里等于延拓函数。由奇性，
 
-设
+    $$
+    S\left(-\frac12\right)
+    =-S\left(\frac12\right)
+    =-f\left(\frac12\right)
+    =-\left(\frac12\right)^2
+    =\boxed{-\frac14}.
+    $$
 
-$$
-f(x)=\begin{cases}x,&0\le x\le\dfrac12,\\ 2-2x,&\dfrac12<x<1,\end{cases}
-$$
+    故选 **B**。
 
-$$
-S(x)=\frac{a_0}{2}+\sum_{n=1}^{\infty}a_n\cos n\pi x,
-\qquad a_n=2\int_0^1 f(x)\cos n\pi x\,\mathrm dx.
-$$
+  </Step>
+</Steps>
 
-则 $S(-\frac52)$ 等于（ ）。
+<Callout type="idea" title="识别展开类型">
 
-<Option>$\dfrac12$</Option>
-<Option>$-\dfrac12$</Option>
-<Option correct>$\dfrac34$</Option>
-<Option>$-\dfrac34$</Option>
-
-<Solution>
-
-**答案：C，$\boxed{\frac34}$。**
-
-**第一步：还原余弦级数的延拓。** 在 $[0,1]$ 上作**偶延拓**，再按周期 $2$ 延拓。于是
-
-$$
-S\left(-\frac52\right)=S\left(-\frac12\right)=S\left(\frac12\right).
-$$
-
-**第二步：辨别折点是不是跳跃点。**
-
-$$
-\lim_{x\to(1/2)^-}f(x)=\frac12,
-\qquad
-\lim_{x\to(1/2)^+}f(x)=2-2\cdot\frac12=1.
-$$
-
-虽然题目规定 $f(1/2)=1/2$，但此点左右极限不同。故
-
-$$
-S\left(\frac12\right)=\frac{\frac12+1}2
-=\boxed{\frac34}.
-$$
-
-**易错提醒：** 从周期化、偶延拓化简到 $1/2$ 后，必须再检查**局部是否连续**；不能未经检查就代入 $f(1/2)$。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-07-03-005" type="single" points={4} tags="来源:2013考研数一, 考点:奇延拓, 考点:周期移位">
-
-设 $f(x)=|x-\frac12|$（$x\in[0,1]$），
-
-$$
-b_n=2\int_0^1 f(x)\sin n\pi x\,\mathrm dx,
-\qquad
-S(x)=\sum_{n=1}^{\infty}b_n\sin n\pi x.
-$$
-
-则 $S(-\frac94)$ 等于（ ）。
-
-<Option>$\dfrac34$</Option>
-<Option>$\dfrac14$</Option>
-<Option correct>$-\dfrac14$</Option>
-<Option>$-\dfrac34$</Option>
-
-<Solution>
-
-**答案：C，$\boxed{-\frac14}$。**
-
-**第一步：用周期 $2$ 折回。**
-
-$$
--\frac94+2=-\frac14,
-\qquad S\left(-\frac94\right)=S\left(-\frac14\right).
-$$
-
-**第二步：使用正弦级数的奇延拓。** $S(-t)=-S(t)$，故
-
-$$
-S\left(-\frac14\right)=-S\left(\frac14\right).
-$$
-
-**第三步：在连续点取原函数值。** $1/4$ 不在分段函数的跳跃点，因而
-
-$$
-S\left(\frac14\right)=f\left(\frac14\right)
-=\left|\frac14-\frac12\right|=\frac14.
-$$
-
-综上，$S(-9/4)=\boxed{-1/4}$。关键次序是**折回基本周期、处理奇偶、最后检查连续性**。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-07-03-006" type="blank" points={5} tags="来源:2025考研数一, 考点:半区间正弦级数, 考点:跳跃收敛">
-
-已知函数
-
-$$
-f(x)=\begin{cases}0,&0\le x<\frac12,\\ x^2,&\frac12\le x\le1\end{cases}
-$$
-
-的正弦级数为 $\sum_{n=1}^{\infty}b_n\sin n\pi x$，其和函数记为 $S(x)$。求 $S(-\frac72)=$ <Blank answer="1/8" kind="math" />。
-
-<Solution>
-
-**答案：$\boxed{\frac18}$。**
-
-**第一步：定位等价点。** 正弦级数的和函数来自奇延拓、再以 $2$ 为周期延拓。由于 $-7/2+4=1/2$，故
-
-$$
-S\left(-\frac72\right)=S\left(\frac12\right).
-$$
-
-**第二步：计算跳跃点的左右值。**
-
-$$
-f\left(\frac12-0\right)=0,
-\qquad
-f\left(\frac12+0\right)=\left(\frac12\right)^2=\frac14.
-$$
-
-故狄利克雷定理给出
-
-$$
-S\left(\frac12\right)=\frac{0+\frac14}{2}
-=\boxed{\frac18}.
-$$
-
-**易错提醒：** $f(1/2)=1/4$ 是题目赋给跳跃点的函数值，不等于傅里叶级数在该点的和。
-
-</Solution>
-</Question>
-
-## 二、系数与频谱：正交、对称、端点贡献
-
-<Question id="math-core-gd-07-03-007" type="blank" points={3} tags="来源:1993考研数一, 考点:傅里叶正弦系数, 考点:奇偶性">
-
-设 $f(x)=\pi x+x^2$（$-\pi<x<\pi$）的傅里叶展开为
-
-$$
-\frac{a_0}{2}+\sum_{n=1}^{\infty}\bigl(a_n\cos nx+b_n\sin nx\bigr).
-$$
-
-则 $b_3=$ <Blank answer="2pi/3" kind="math" />。
-
-<Solution>
-
-**答案：$\boxed{\dfrac{2\pi}{3}}$。**
-
-**第一步：先做奇偶性筛选。**
-
-$$
-b_n=\frac1\pi\int_{-\pi}^{\pi}(\pi x+x^2)\sin nx\,\mathrm dx.
-$$
-
-因为 $x^2\sin nx$ 是奇函数，其在对称区间积分为零；$\pi x\sin nx$ 是偶函数。因此
-
-$$
-b_n=2\int_0^\pi x\sin nx\,\mathrm dx.
-$$
-
-**第二步：分部积分。**
-
-$$
-\begin{aligned}
-\int_0^\pi x\sin nx\,\mathrm dx
-&=\left[-\frac{x\cos nx}{n}\right]_0^\pi
-+\frac1n\int_0^\pi\cos nx\,\mathrm dx\\
-&=-\frac{\pi(-1)^n}{n}.
-\end{aligned}
-$$
-
-因此 $b_n=-2\pi(-1)^n/n$，代入 $n=3$：
-
-$$
-\boxed{b_3=\frac{2\pi}{3}}.
-$$
-
-**技巧：** 求正弦系数时只需关注原函数的**奇部分**，偶部分与正弦相乘为奇函数，在对称区间上自动消去。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-07-03-008" type="blank" points={4} tags="来源:2003考研数一, 考点:余弦系数, 考点:分部积分">
-
-设
-
-$$
-x^2=\sum_{n=0}^{\infty}a_n\cos nx,
-\qquad-\pi\le x\le\pi,
-$$
-
-则 $a_2=$ <Blank answer="1" kind="math" />。
-
-<Solution>
-
-**答案：$\boxed{1}$。**
-
-**第一步：识别系数规范。** 题干把常数项写作 $a_0$ 而非通常的 $a_0/2$。但对 $n\ge1$，余弦系数仍是
-
-$$
-a_n=\frac1\pi\int_{-\pi}^{\pi}x^2\cos nx\,\mathrm dx
-=\frac2\pi\int_0^\pi x^2\cos nx\,\mathrm dx.
-$$
-
-**第二步：连续分部积分两次。** 对 $n\ge1$，
-
-$$
-\begin{aligned}
-I_n=\int_0^\pi x^2\cos nx\,\mathrm dx
-&=-\frac2n\int_0^\pi x\sin nx\,\mathrm dx\\
-&=\frac{2\pi(-1)^n}{n^2}.
-\end{aligned}
-$$
-
-故 $a_n=4(-1)^n/n^2$。特别地，
-
-$$
-a_2=\frac{4}{2^2}=\boxed{1}.
-$$
-
-**易错提醒：** 不要因为题干采用 $\sum_{n=0}^{\infty}a_n\cos nx$ 的记法就把 $n\ge1$ 的系数公式额外除以 $2$。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-07-03-009" type="blank" points={5} tags="来源:2023考研数一, 考点:余弦系数, 考点:奇偶下标求和">
-
-设 $f$ 为周期 $2$ 的函数，且 $f(x)=1-x$（$x\in[0,1]$）。若其余弦级数写为
-
-$$
-f(x)=\frac{a_0}{2}+\sum_{n=1}^{\infty}a_n\cos n\pi x,
-$$
-
-则 $\displaystyle\sum_{n=1}^{\infty}a_{2n}=$ <Blank answer="0" kind="math" />。
-
-<Solution>
-
-**答案：$\boxed{0}$。**
-
-**第一步：用端点函数值构造两个关于系数的等式。** 题意是把 $1-x$ 在 $[0,1]$ 上作偶延拓并周期化。该延拓在 $x=0,1$ 都连续，所以
-
-$$
-1=f(0)=\frac{a_0}{2}+\sum_{n=1}^{\infty}a_n,
-$$
-
-$$
-0=f(1)=\frac{a_0}{2}+\sum_{n=1}^{\infty}(-1)^na_n.
-$$
-
-两式相加，奇数下标相消：
-
-$$
-1=a_0+2\sum_{n=1}^{\infty}a_{2n}.
-$$
-
-**第二步：计算 $a_0$。**
-
-$$
-a_0=2\int_0^1(1-x)\,\mathrm dx=1.
-$$
-
-代入得
-
-$$
-\boxed{\sum_{n=1}^{\infty}a_{2n}=0}.
-$$
-
-**方法对照：** 也可直接计算 $a_n=2\int_0^1(1-x)\cos n\pi x\,\mathrm dx=2[1-(-1)^n]/(n^2\pi^2)$，故每个 $a_{2n}$ 本身就等于 $0$。端点相加则是一种更普遍的频谱筛选技巧。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-07-03-010" type="blank" points={5} tags="来源:2024考研数一, 考点:半区间余弦系数, 考点:等价无穷小">
-
-设 $f(x)=x+1$ 在 $[0,\pi]$ 上作余弦展开：
-
-$$
-f(x)=\frac{a_0}{2}+\sum_{n=1}^{\infty}a_n\cos nx.
-$$
-
-则 $\displaystyle\lim_{n\to\infty}n^2\sin a_{2n-1}=$ <Blank answer="-1/pi" kind="math" />。
-
-<Solution>
-
-**答案：$\boxed{-1/\pi}$。**
-
-**第一步：计算正弦为零的余弦积分。** 对 $k\ge1$，
-
-$$
-\begin{aligned}
-a_k
-&=\frac2\pi\int_0^\pi(x+1)\cos kx\,\mathrm dx\\
-&=\frac2\pi\int_0^\pi x\cos kx\,\mathrm dx
-=\frac{2[(-1)^k-1]}{\pi k^2}.
-\end{aligned}
-$$
-
-这里常数项 $1$ 与 $\cos kx$ 正交，不贡献 $a_k$。
-
-**第二步：保留奇数下标。** 令 $k=2n-1$，则
-
-$$
-a_{2n-1}=-\frac4{\pi(2n-1)^2}\longrightarrow0.
-$$
-
-**第三步：利用 $\sin t\sim t$。**
-
-$$
-\begin{aligned}
-\lim_{n\to\infty}n^2\sin a_{2n-1}
-&=\lim_{n\to\infty}n^2a_{2n-1}\\
-&=-\frac4\pi\lim_{n\to\infty}\frac{n^2}{(2n-1)^2}
-=\boxed{-\frac1\pi}.
-\end{aligned}
-$$
-
-**易错提醒：** 两处极限量级不同：系数按 $(2n-1)^{-2}$ 衰减，而题目乘的是 $n^2$。最终留下的因子是 $1/4$。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-07-03-011" type="blank" tags="来源:张宇1000题, 考点:余弦系数, 考点:对数等价">
-
-设 $f(x)=\sin x$ 在 $[0,\pi]$ 上展开为
-
-$$
-\frac{a_0}{2}+\sum_{n=1}^{\infty}a_n\cos nx.
-$$
-
-求 $\displaystyle\lim_{n\to\infty}n^2\ln(1+a_{2n})=$ <Blank answer="-1/pi" kind="math" />。
-
-<Solution>
-
-**答案：$\boxed{-1/\pi}$。**
-
-**第一步：求偶数下标的余弦系数。**
-
-$$
-a_{2n}=\frac2\pi\int_0^\pi\sin x\cos(2nx)\,\mathrm dx.
-$$
-
-利用积化和差公式，
-
-$$
-2\sin x\cos(2nx)
-=\sin(2n+1)x+\sin(1-2n)x,
-$$
-
-积分得到
-
-$$
-\int_0^\pi\sin x\cos(2nx)\,\mathrm dx
-=\frac2{1-4n^2},
-\qquad
-a_{2n}=\frac4{\pi(1-4n^2)}.
-$$
-
-**第二步：处理复合极限。** $a_{2n}\to0$，而 $\ln(1+t)/t\to1$，因此
-
-$$
-\begin{aligned}
-\lim_{n\to\infty}n^2\ln(1+a_{2n})
-&=\lim_{n\to\infty}n^2a_{2n}\\
-&=\lim_{n\to\infty}\frac{4n^2}{\pi(1-4n^2)}
-=\boxed{-\frac1\pi}.
-\end{aligned}
-$$
-
-**关键思路：** 此处不需要求完整的 $a_n$ 通项，直接限定为 $2n$ 可避免奇偶分类。最终由傅里叶系数的 $n^{-2}$ 衰减决定极限。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-07-03-012" type="essay" tags="来源:李正元练习题, 考点:对称性, 考点:偶次谐波消项">
-
-设 $f(x)$ 为区间 $[-\pi,\pi]$ 上的偶函数，且对于 $t\in[-\pi/2,\pi/2]$ 有
-
-$$
-f\left(\frac\pi2+t\right)
-=-f\left(\frac\pi2-t\right).
-$$
-
-证明：其傅里叶级数的余弦系数满足 $a_{2n}=0$（$n=1,2,\ldots$）。
-
-<Solution>
-
-**参考答案：**
-
-$$
-\boxed{a_{2n}=0\qquad(n=1,2,\ldots)}.
-$$
-
-**第一步：把中心对称条件改写为反射关系。** 令 $x=\frac\pi2+t$，题设即
-
-$$
-f(x)=-f(\pi-x),\qquad x\in[0,\pi].
-$$
-
-这表示在 $[0,\pi]$ 上，函数关于中点 $\pi/2$ 呈**反对称**。
-
-**第二步：计算偶次余弦系数。** 由于 $f$ 为偶函数，
-
-$$
-a_{2n}=\frac2\pi\int_0^\pi f(x)\cos 2nx\,\mathrm dx.
-$$
-
-记积分为 $I$，代换 $x=\pi-t$，并利用
-
-$$
-\cos[2n(\pi-t)]=\cos(2n\pi-2nt)=\cos 2nt,
-$$
-
-便有
-
-$$
-\begin{aligned}
-I&=\int_0^\pi f(\pi-t)\cos[2n(\pi-t)]\,\mathrm dt\\
-&=-\int_0^\pi f(t)\cos2nt\,\mathrm dt=-I.
-\end{aligned}
-$$
-
-所以 $I=0$，即 $a_{2n}=0$。
-
-**进一步：** 同样的代换还给出 $a_0=0$；而奇次余弦 $\cos[(2n-1)(\pi-x)]=-\cos[(2n-1)x]$，与反对称函数相乘后反而不一定消失。
-
-<Callout type="info" title="对称性筛选谐波的判断法">
-
-先观察 $x\mapsto\pi-x$ 是否使函数变号，再观察 $\cos(nx)$ 在同一反射下是否变号。若被积函数整体变号，则对称积分必为零；无需实际求积分。
+只有 $\sin(n\pi x/L)$ 的半区间级数对应奇延拓，只有 $\cos(n\pi x/L)$ 的半区间级数对应偶延拓；在普通连续点可直接使用延拓函数值，在跳跃点应先取左右平均。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-07-03-013" type="blank" tags="来源:张宇1000题, 考点:反周期性, 考点:傅里叶系数">
+<Question id="core-1102-math-d71ab6-003" type="essay" points={8} tags="来源:1991年考研数学一, 科目:高等数学, 章节:傅里叶级数, 考点:偶函数傅里叶展开与级数求和">
 
-设 $f(x)$ 是以 $2\pi$ 为周期的连续函数，并满足
-
-$$
-f(x+\pi)=-f(x)\qquad(x\in\mathbb R).
-$$
-
-求其偶数下标余弦系数：$a_{2n}=$ <Blank answer="0" kind="math" />（$n=1,2,\ldots$）。
+ 将函数 $f(x) = 2 + |x| \, (-1 \leqslant x \leqslant 1)$ 展开成以 2 为周期的傅里叶级数, 并由此求级数 $\sum_{n=1}^{\infty} \frac{1}{n^2}$ 的和.
 
 <Solution>
 
-**答案：$\boxed{a_{2n}=0}$。**
-
-**第一步：在一整个周期上写系数。**
+**答案：**
 
 $$
-a_{2n}=\frac1\pi\int_0^{2\pi}f(x)\cos(2nx)\,\mathrm dx.
+\boxed{2+|x|=\frac52-\frac4{\pi^2}\sum_{k=1}^{\infty}
+\frac{\cos((2k-1)\pi x)}{(2k-1)^2}},
+\qquad -1\le x\le1.
 $$
 
-**第二步：把周期分成相差 $\pi$ 的两段。**
+并由此得 $\boxed{\sum_{n=1}^{\infty}1/n^2=\pi^2/6}$。
 
-$$
-\begin{aligned}
-\pi a_{2n}
-&=\int_0^\pi f(x)\cos2nx\,\mathrm dx
-+\int_\pi^{2\pi}f(x)\cos2nx\,\mathrm dx\\
-&=\int_0^\pi \bigl[f(x)+f(x+\pi)\bigr]\cos2nx\,\mathrm dx=0.
-\end{aligned}
-$$
+<Steps>
+  <Step>
 
-其中用到 $\cos[2n(x+\pi)]=\cos2nx$ 与 $f(x+\pi)=-f(x)$。
+    ### 判断奇偶性并求常数系数
 
-**结论：** $a_{2n}=0$。同理还可推出 $b_{2n}=0$、$a_0=0$，因此满足半周期反对称性的函数**只可能含奇次谐波**。
+    $f(x)=2+|x|$ 为偶函数，周期为 $2$，所以只需要余弦项：
 
-**易错提醒：** 这里的“偶次系数为零”来自 $f(x+\pi)=-f(x)$，不是来自 $f$ 关于原点为偶函数；两种对称性的含义不同。
+    $$
+    f(x)=\frac{a_0}2+\sum_{n=1}^{\infty}a_n\cos(n\pi x).
+    $$
 
-</Solution>
-</Question>
+    其中
 
-<Question id="math-core-gd-07-03-014" type="essay" tags="来源:李正元练习题, 考点:傅里叶正弦展开, 考点:参数共振">
+    $$
+    a_0=\int_{-1}^1(2+|x|)\,\mathrm dx
+    =2\int_0^1(2+x)\,\mathrm dx=5,
+    $$
 
-设
+    即常数项为 $5/2$。
 
-$$
-f(x)=\sin ax,\qquad -\pi\le x\le\pi,\qquad a>0.
-$$
+  </Step>
+  <Step>
 
-将其展开为以 $2\pi$ 为周期的傅里叶级数，并讨论正整数 $a$ 的特殊情形及 $x=\pm\pi$ 处的收敛值。
+    ### 分部积分计算余弦系数
 
-<Solution>
+    因为 $\int_0^1\cos(n\pi x)\,\mathrm dx=0$（$n\ge1$），故
 
-**参考答案：** 当 $a\notin\mathbb N^+$ 时，在 $-\pi<x<\pi$ 有
+    $$
+    \begin{aligned}
+    a_n&=2\int_0^1(2+x)\cos(n\pi x)\,\mathrm dx\\
+    &=2\int_0^1x\cos(n\pi x)\,\mathrm dx\\
+    &=2\left[\frac{x\sin(n\pi x)}{n\pi}
+        +\frac{\cos(n\pi x)}{n^2\pi^2}\right]_0^1\\
+    &=\frac{2[(-1)^n-1]}{n^2\pi^2}.
+    \end{aligned}
+    $$
 
-$$
-\boxed{\sin ax=\frac{2\sin\pi a}{\pi}
-\sum_{n=1}^{\infty}\frac{(-1)^{n+1}n}{n^2-a^2}\sin nx}.
-$$
+    偶数 $n$ 时 $a_n=0$；奇数 $n=2k-1$ 时 $a_n=-4/[(2k-1)^2\pi^2]$，从而得到题首展开式。
 
-当 $a=m\in\mathbb N^+$ 时，仅第 $m$ 个正弦系数为 $1$，其余为零，即 $\boxed{f(x)=\sin mx}$。**两种情况下傅里叶级数在 $x=\pm\pi$ 的收敛值均为 $0$**。
+  </Step>
+  <Step>
 
-**第一步：用奇偶性消去余弦系数。** 对任意 $a>0$，$\sin ax$ 关于原点是奇函数，因此 $a_0=a_n=0$。只需求
+    ### 代入 $x=0$ 得奇数项平方倒数和
 
-$$
-b_n=\frac2\pi\int_0^\pi \sin ax\sin nx\,\mathrm dx.
-$$
+    由于周期延拓的 $f$ 连续且分段光滑，可在 $x=0$ 直接取值：
 
-**第二步：当 $a$ 不是正整数时，积化和差。** $a\ne n$，所以
+    $$
+    2=\frac52-\frac4{\pi^2}
+    \sum_{k=1}^{\infty}\frac1{(2k-1)^2}.
+    $$
 
-$$
-\begin{aligned}
-b_n
-&=\frac1\pi\int_0^\pi[\cos(a-n)x-\cos(a+n)x]\,\mathrm dx\\
-&=\frac1\pi\left[\frac{\sin(a-n)\pi}{a-n}-\frac{\sin(a+n)\pi}{a+n}\right].
-\end{aligned}
-$$
+    因此
 
-利用 $\sin(a\pm n)\pi=(-1)^n\sin\pi a$，得到
+    $$
+    \sum_{k=1}^{\infty}\frac1{(2k-1)^2}=\frac{\pi^2}8.
+    $$
 
-$$
-\begin{aligned}
-b_n&=\frac{(-1)^n\sin\pi a}{\pi}
-\left(\frac1{a-n}-\frac1{a+n}\right)\\
-&=\frac{2n(-1)^{n+1}\sin\pi a}{\pi(n^2-a^2)}.
-\end{aligned}
-$$
+  </Step>
+  <Step>
 
-因此得到所求正弦级数。周期延拓在区间内部连续，狄利克雷定理保证其和等于 $\sin ax$。
+    ### 合并奇偶项求全级数
 
-**第三步：处理整数参数。** 如果 $a=m\in\mathbb N^+$，不能把上面公式代入 $n=m$，因为它会产生 $0/0$。应回到正交积分：
+    记 $A=\sum_{n=1}^{\infty}1/n^2$。其偶数项之和为
 
-$$
-\frac2\pi\int_0^\pi\sin mx\sin nx\,\mathrm dx
-=\begin{cases}1,&n=m,\\0,&n\ne m.\end{cases}
-$$
+    $$
+    \sum_{k=1}^{\infty}\frac1{(2k)^2}=\frac A4.
+    $$
 
-故傅里叶展开退化为单项 $\sin mx$。
+    所以 $A=\pi^2/8+A/4$，解得
 
-**第四步：检查周期拼接点。** 对 $a\notin\mathbb N^+$，$x=\pi$ 处左右极限分别为 $\sin a\pi$ 与 $\sin(-a\pi)=-\sin a\pi$，所以级数和为 $0$；在 $x=-\pi$ 同理。对于整数 $m$，原函数端点本来就是 $0$。
+    $$
+    \boxed{A=\frac{\pi^2}6}.
+    $$
 
-<Callout type="warn" title="参数恰好等于频率整数时要单独回到积分定义">
+  </Step>
+</Steps>
 
-公式中有 $n^2-a^2$ 分母。当 $a$ 与某个整数频率重合时，表达式形式上为 $0/0$，但实际傅里叶系数并不无定义，而是由三角正交性确定为 $1$。
+<Callout type="warn" title="为何可以代入端点或特殊点">
+
+傅里叶展开只保证在连续点等于函数值，在跳跃点等于左右极限平均值。本题使用的 $x=0$ 是连续点，因此代入 $f(0)=2$ 合法。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-07-03-015" type="essay" tags="来源:原创变式, 考点:傅里叶频谱, 考点:跳跃点与参数">
+<Question id="core-1102-math-d71ab6-006" type="essay" points={6} tags="来源:1995年考研数学一, 科目:高等数学, 章节:傅里叶级数, 考点:半区间余弦展开与傅里叶系数">
 
-设 $f_\lambda(x)=x^2+\lambda x$（$-\pi\le x\le\pi$），其中 $\lambda\in\mathbb R$。记其 $2\pi$ 周期傅里叶级数的和函数为 $S_\lambda(x)$。
-
-（1）计算 $S_\lambda(\pi)$，并确定使 $S_\lambda(\pi)=f_\lambda(\pi)$ 成立的参数；（2）求 $a_n,b_n$（$n\ge1$），说明参数如何影响频谱。
+ 将函数 $f(x) = x - 1 \, (0 \leqslant x \leqslant 2)$ 展开成周期为 4 的余弦级数.
 
 <Solution>
 
-**参考答案：**
+**答案**：在 $0\le x\le2$ 上，
 
 $$
-\boxed{S_\lambda(\pi)=\pi^2},\qquad\boxed{\lambda=0},
+\boxed{x-1=-\frac8{\pi^2}
+\sum_{k=1}^{\infty}\frac{\cos\!\left(\frac{(2k-1)\pi x}{2}\right)}{(2k-1)^2}}.
 $$
 
-$$
-\boxed{a_n=\frac{4(-1)^n}{n^2}},
-\qquad\boxed{b_n=\frac{2\lambda(-1)^{n+1}}n},\quad n\ge1.
-$$
+**思路：**“周期为 $4$ 的余弦级数”意味着半区间长度为 $L=2$；将函数偶延拓到 $[-2,2]$，故只出现 $\cos(n\pi x/2)$。
 
-**（1）周期端点的收敛值。** 在 $x=\pi$，周期延拓左极限由本周期右端读出，右极限等于下个周期左端的极限：
+<Steps>
+  <Step>
 
-$$
-f_\lambda(\pi-0)=\pi^2+\lambda\pi,
-\qquad
-f_\lambda(\pi+0)=f_\lambda(-\pi+0)=\pi^2-\lambda\pi.
-$$
+    ### 写出半区间余弦展开与常数项
 
-所以无论参数为何，
+    $$
+    f(x)=\frac{a_0}2+\sum_{n=1}^{\infty}a_n
+    \cos\frac{n\pi x}2,
+    \qquad a_n=\frac2L\int_0^Lf(x)\cos\frac{n\pi x}L\,\mathrm dx.
+    $$
 
-$$
-S_\lambda(\pi)=\frac{(\pi^2+\lambda\pi)+(\pi^2-\lambda\pi)}2
-=\boxed{\pi^2}.
-$$
+    这里 $L=2$，故
 
-要求该值等于 $f_\lambda(\pi)=\pi^2+\lambda\pi$，当且仅当 $\lambda=0$。
+    $$
+    a_0=\int_0^2(x-1)\,\mathrm dx
+    =\left[\frac{x^2}2-x\right]_0^2=0.
+    $$
 
-**（2）分别计算奇偶部分的频谱。** $x^2$ 为偶函数，$\lambda x$ 为奇函数：偶部分只贡献余弦系数，奇部分只贡献正弦系数。对于 $n\ge1$，
+  </Step>
+  <Step>
 
-$$
-\begin{aligned}
-a_n
-&=\frac2\pi\int_0^\pi x^2\cos nx\,\mathrm dx
-=\boxed{\frac{4(-1)^n}{n^2}},\\
-b_n
-&=\frac{2\lambda}{\pi}\int_0^\pi x\sin nx\,\mathrm dx
-=\boxed{\frac{2\lambda(-1)^{n+1}}n}.
-\end{aligned}
-$$
+    ### 对一般项做分部积分
 
-（若需完整展开，常数系数 $a_0=\frac1\pi\int_{-\pi}^\pi x^2\,\mathrm dx=2\pi^2/3$。）
+    令 $k=n\pi/2$，则
 
-**频谱意义：** $\lambda$ 不改变 $a_n$，余弦系数始终按 $n^{-2}$ 衰减；但它线性控制正弦系数，$\lambda\ne0$ 时其大小只按 $n^{-1}$ 衰减。这正对应周期拼接点的跳跃幅度 $2\lambda\pi$。
+    $$
+    \begin{aligned}
+    a_n&=\int_0^2(x-1)\cos(kx)\,\mathrm dx\\
+       &=\left[\frac{(x-1)\sin(kx)}k
+         +\frac{\cos(kx)}{k^2}\right]_0^2\\
+       &=\frac{(-1)^n-1}{k^2}
+       =\frac{4[(-1)^n-1]}{n^2\pi^2}.
+    \end{aligned}
+    $$
 
-<Callout type="info" title="从函数的奇偶组成预判频谱">
+    因而偶数下标系数为 $0$，奇数下标系数为
 
-任何函数均可分解为偶部和奇部：偶部只贡献余弦、奇部只贡献正弦。周期拼接的不连续性通常导致更慢的 $n^{-1}$ 衰减；连续但导数出现折点时往往衰减更快。
+    $$
+    a_{2k-1}=-\frac8{(2k-1)^2\pi^2}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 写出级数并说明收敛值
+
+    代回余弦展开式即得题首表达式。偶延拓后的函数是 $|x|-1$（在 $|x|\le2$ 上），在端点拼接处连续且分段光滑，故级数在 $0\le x\le2$ 上均收敛到 $x-1$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="半区间展开的参数速查">
+
+区间 $[0,L]$ 的余弦基函数为 $\cos(n\pi x/L)$，偶延拓后周期为 $2L$。本题周期 $4$，所以应写 $L=2$，不能误用 $\cos(n\pi x)$。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-## 三、半区间展开与级数求和：用特殊点制造目标数列
+<Question id="core-1102-math-d71ab6-007" type="single" points={3} tags="来源:1999年考研数学一, 科目:高等数学, 章节:傅里叶级数, 考点:跳跃点的傅里叶收敛值">
 
-<Question id="math-core-gd-07-03-016" type="essay" points={8} tags="来源:1991考研数一, 考点:傅里叶余弦展开, 考点:级数求和">
+ 设
 
-将函数 $f(x)=2+|x|$（$-1\le x\le1$）展开成以 $2$ 为周期的傅里叶级数，并由此求 $\displaystyle\sum_{n=1}^{\infty}\frac1{n^2}$。
+$$
+f(x) = \begin{cases} x, & 0 \leqslant x \leqslant \frac{1}{2}, \\ 2-2x, & \frac{1}{2} < x < 1, \end{cases}
+$$
+
+$$
+S(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} a_n \cos n\pi x, -\infty < x < +\infty,
+$$
+
+其中 $a_n = 2 \int_{0}^{1} f(x) \cos n\pi x \, dx \, (n = 0, 1, 2, \cdots)$, 则 $S\left(-\frac{5}{2}\right)$ 等于 ( ).
+
+<Option>$\frac{1}{2}$</Option>
+<Option>$-\frac{1}{2}$</Option>
+<Option correct>$\frac{3}{4}$</Option>
+<Option>$-\frac{3}{4}$</Option>
 
 <Solution>
 
-**参考答案：**
+**正确答案：C，$\boxed{\tfrac34}$。**
 
-$$
-\boxed{2+|x|=\frac52-\frac4{\pi^2}\sum_{k=1}^{\infty}\frac{\cos(2k-1)\pi x}{(2k-1)^2}},\quad -1\le x\le1;
-$$
+**关键判断**：本题是半区间余弦展开；要求值点先按周期与偶性化到基本区间，再在跳跃点取左右平均。
 
-$$
-\boxed{\sum_{n=1}^{\infty}\frac1{n^2}=\frac{\pi^2}{6}}.
-$$
+<Steps>
+  <Step>
 
-**第一步：利用偶性确定傅里叶形式。** 周期为 $2$，取 $L=1$。由于 $f(-x)=f(x)$，正弦系数 $b_n=0$，只需计算
+    ### 先用周期性与偶性化简自变量
 
-$$
-a_0=2\int_0^1(2+x)\,\mathrm dx=5,
-\qquad a_n=2\int_0^1(2+x)\cos(n\pi x)\,\mathrm dx.
-$$
+    给定
 
-**第二步：计算余弦系数。** 常数项 $2$ 与 $\cos(n\pi x)$ 正交；对其余部分分部积分：
+    $$
+    a_n=2\int_0^1f(x)\cos(n\pi x)\,\mathrm dx
+    $$
 
-$$
-\begin{aligned}
-a_n&=2\int_0^1x\cos(n\pi x)\,\mathrm dx\\
-&=2\left[\frac{x\sin(n\pi x)}{n\pi}+\frac{\cos(n\pi x)}{n^2\pi^2}\right]_0^1\\
-&=\frac{2[(-1)^n-1]}{n^2\pi^2}
-=\begin{cases}0,&n\text{ 为偶数},\\ -\dfrac4{n^2\pi^2},&n\text{ 为奇数} .\end{cases}
-\end{aligned}
-$$
+    表明这是一种偶延拓后的周期 $2$ 的傅里叶余弦级数。因此 $S(x+2)=S(x)$ 且 $S(-x)=S(x)$，于是
 
-函数的周期延拓连续且分段光滑，因此傅里叶级数在整个 $[-1,1]$ 上收敛至 $f(x)$，得到所求展开。
+    $$
+    S\left(-\frac52\right)
+    =S\left(-\frac12\right)=S\left(\frac12\right).
+    $$
 
-**第三步：选取 $x=0$ 生成奇数倒平方和。** 代入 $f(0)=2$ 和 $\cos0=1$，
+  </Step>
+  <Step>
 
-$$
-2=\frac52-\frac4{\pi^2}\sum_{k=1}^{\infty}\frac1{(2k-1)^2},
-\qquad\Longrightarrow\qquad
-\sum_{k=1}^{\infty}\frac1{(2k-1)^2}=\frac{\pi^2}{8}.
-$$
+    ### 求出 $x=1/2$ 的左右极限
 
-**第四步：从奇数项推广到全体整数项。** 设 $A=\sum_{n\ge1}n^{-2}$，则偶数项和为 $A/4$，
+    题设分段函数在该点左侧为 $f(x)=x$，右侧为 $f(x)=2-2x$，故
 
-$$
-A=\frac{\pi^2}{8}+\frac A4
-\quad\Longrightarrow\quad \boxed{A=\frac{\pi^2}{6}}.
-$$
+    $$
+    f\left(\frac12-0\right)=\frac12,\qquad
+    f\left(\frac12+0\right)=2-2\cdot\frac12=1.
+    $$
 
-<Callout type="info" title="考点归纳">
+    两个极限不相同，因此存在跳跃间断。
 
-傅里叶级数求数项级数时，先寻找使 $\cos(n\pi x)$ 取 $0,\pm1$ 的特殊点，再用奇偶拆项将部分级数转换为目标级数。不要直接把 $\sum_{k\ge1}(2k-1)^{-2}$ 当作整个平方倒数和。
+  </Step>
+  <Step>
+
+    ### 应用傅里叶级数收敛定理
+
+    对分段光滑周期函数，傅里叶级数在跳跃处的和为两侧极限的算术平均值：
+
+    $$
+    S\left(-\frac52\right)
+    =S\left(\frac12\right)
+    =\frac{\frac12+1}{2}
+    =\boxed{\frac34}.
+    $$
+
+    故选 **C**。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="函数值与傅里叶收敛值不等同">
+
+题目明确给出 $f(1/2)=1/2$，但傅里叶级数在该点的和不是 $1/2$，而是左右极限平均值 $3/4$。此题不需要繁琐地计算全部 $a_n$。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-07-03-017" type="essay" points={6} tags="来源:1995考研数一, 考点:半区间余弦级数, 考点:分部积分">
+<Question id="core-1102-math-d71ab6-008" type="blank" points={4} tags="来源:2003年考研数学一, 科目:高等数学, 章节:傅里叶级数, 考点:傅里叶余弦系数的计算">
 
-将 $f(x)=x-1$（$0\le x\le2$）展开成周期为 $4$ 的余弦级数。
+ 设 $x^2 = \sum_{n=0}^{\infty} a_n \cos nx \, (-\pi \leqslant x \leqslant \pi)$, 则 $a_2 =$ <Blank answer="1" kind="math" /> 。
 
 <Solution>
 
-**参考答案：**
+**答案：**$\boxed{a_2=1}$。
 
-$$
-\boxed{x-1=-\frac8{\pi^2}\sum_{k=1}^{\infty}
-\frac{\cos\!\left(\frac{(2k-1)\pi x}{2}\right)}{(2k-1)^2}},
-\qquad 0\le x\le2.
-$$
+**解题思路：**$x^2$ 为偶函数，正弦系数为零；题目把常数项也记作 $a_0$，但对 $n\ge1$ 仍使用标准余弦系数公式即可。
 
-**第一步：确定半区间的长度。** 余弦级数对应把 $f$ 从 $[0,2]$ 偶延拓到 $[-2,2]$，再以 $4$ 为周期延拓。因此 $L=2$，标准形式为
+<Steps>
+  <Step>
 
-$$
-\frac{a_0}{2}+\sum_{n=1}^{\infty}a_n\cos\frac{n\pi x}{2},
-\qquad a_n=\frac2L\int_0^Lf(x)\cos\frac{n\pi x}{L}\,\mathrm dx.
-$$
+    ### 写出第 $n$ 个余弦系数
 
-**第二步：常数项。**
+    在 $[-\pi,\pi]$ 上，$n\ge1$ 时
 
-$$
-a_0=\int_0^2(x-1)\,\mathrm dx=\left[\frac{x^2}{2}-x\right]_0^2=0.
-$$
+    $$
+    a_n=\frac1\pi\int_{-\pi}^{\pi}x^2\cos(nx)\,\mathrm dx
+    =\frac2\pi\int_0^\pi x^2\cos(nx)\,\mathrm dx.
+    $$
 
-**第三步：一般系数。** 令 $k_n=n\pi/2$。对 $n\ge1$，
+    利用偶性已把积分化为 $[0,\pi]$ 上积分。
 
-$$
-\begin{aligned}
-a_n&=\int_0^2(x-1)\cos(k_nx)\,\mathrm dx\\
-&=\left[\frac{(x-1)\sin(k_nx)}{k_n}
-+\frac{\cos(k_nx)}{k_n^2}\right]_0^2\\
-&=\frac{4[(-1)^n-1]}{n^2\pi^2}.
-\end{aligned}
-$$
+  </Step>
+  <Step>
 
-所以 $a_{2k}=0$，$a_{2k-1}=-8/[(2k-1)^2\pi^2]$，代回即得答案。偶延拓在拼接点连续、分段光滑，故包括 $x=0,2$ 在内均收敛到原函数值。
+    ### 两次分部积分计算通项
 
-**易错提醒：** 半区间长度为 $2$，基频是 $\pi/2$，不是 $\pi$；系数公式前因子为 $2/L=1$。
+    记 $I_n=\int_0^\pi x^2\cos(nx)\,\mathrm dx$。第一次分部积分得
 
-</Solution>
-</Question>
+    $$
+    I_n=\left[\frac{x^2\sin(nx)}n\right]_0^\pi
+    -\frac2n\int_0^\pi x\sin(nx)\,\mathrm dx
+    =-\frac2nJ_n.
+    $$
 
-<Question id="math-core-gd-07-03-018" type="essay" points={4} tags="来源:2008考研数一, 考点:余弦级数, 考点:交错平方级数">
+    第二次分部积分得到
 
-将 $f(x)=1-x^2$（$0\le x\le\pi$）展开成以 $2\pi$ 为周期的余弦级数，并求
+    $$
+    J_n=\left[-\frac{x\cos(nx)}n
+    +\frac{\sin(nx)}{n^2}\right]_0^\pi
+    =-\frac{\pi(-1)^n}{n}.
+    $$
 
-$$
-\sum_{n=1}^{\infty}\frac{(-1)^{n-1}}{n^2}.
-$$
+    因此 $I_n=2\pi(-1)^n/n^2$，所以
 
-<Solution>
+    $$
+    a_n=\frac2\pi I_n=\frac{4(-1)^n}{n^2}.
+    $$
 
-**参考答案：**
+  </Step>
+  <Step>
 
-$$
-\boxed{1-x^2=1-\frac{\pi^2}{3}+4\sum_{n=1}^{\infty}
-\frac{(-1)^{n+1}}{n^2}\cos nx},\quad 0\le x\le\pi;
-$$
+    ### 代入 $n=2$
 
-$$
-\boxed{\sum_{n=1}^{\infty}\frac{(-1)^{n-1}}{n^2}=\frac{\pi^2}{12}}.
-$$
+    $$
+    \boxed{a_2=\frac{4(-1)^2}{2^2}=1}.
+    $$
 
-**第一步：计算 $a_0$。** 在 $[0,\pi]$ 作余弦展开，
+  </Step>
+</Steps>
 
-$$
-a_0=\frac2\pi\int_0^\pi(1-x^2)\,\mathrm dx
-=2\left(1-\frac{\pi^2}{3}\right).
-$$
+<Callout type="warn" title="注意本题常数项的记号">
 
-**第二步：两次分部积分求 $a_n$。** 由于 $\int_0^\pi\cos nx\,\mathrm dx=0$，
-
-$$
-\begin{aligned}
-a_n&=-\frac2\pi\int_0^\pi x^2\cos nx\,\mathrm dx,\\
-\int_0^\pi x^2\cos nx\,\mathrm dx
-&=-\frac2n\int_0^\pi x\sin nx\,\mathrm dx
-=\frac{2\pi(-1)^n}{n^2}.
-\end{aligned}
-$$
-
-故 $a_n=4(-1)^{n+1}/n^2$，得出余弦展开。
-
-**第三步：在 $x=0$ 求和。** 偶延拓连续，$f(0)=1$，且 $\cos0=1$，所以
-
-$$
-1=1-\frac{\pi^2}{3}
-+4\sum_{n=1}^{\infty}\frac{(-1)^{n+1}}{n^2}.
-$$
-
-移项得 $\boxed{\sum_{n\ge1}(-1)^{n-1}/n^2=\pi^2/12}$。
-
-**解题技巧：** 目标含 $(-1)^n$ 时也可尝试在 $x=\pi$ 代入（因 $\cos n\pi=(-1)^n$）；本题在 $x=0$ 已经直接得到所需符号，步骤更少。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-07-03-019" type="essay" tags="来源:李林880, 考点:傅里叶正弦级数, 考点:莱布尼茨常数">
-
-求形如 $\sum_{n=1}^{\infty}b_n\sin nx$ 的级数，使其在 $(0,\pi)$ 内的和函数为 $\frac12(\pi-x)$，并计算 $x=\frac\pi2$ 时该级数的和。
-
-<Solution>
-
-**参考答案：**
-
-$$
-\boxed{b_n=\frac1n},\qquad
-\boxed{\sum_{n=1}^{\infty}\frac{\sin nx}{n}=\frac{\pi-x}{2}\ (0<x<\pi)},
-$$
-
-$$
-\boxed{\sum_{n=1}^{\infty}\frac{\sin(n\pi/2)}n
-=1-\frac13+\frac15-\cdots=\frac\pi4}.
-$$
-
-**第一步：确定正弦系数公式。** 把 $f(x)=(\pi-x)/2$（$0<x<\pi$）作奇延拓，再以 $2\pi$ 为周期延拓，则
-
-$$
-b_n=\frac2\pi\int_0^\pi\frac{\pi-x}{2}\sin nx\,\mathrm dx
-=\frac1\pi\int_0^\pi(\pi-x)\sin nx\,\mathrm dx.
-$$
-
-**第二步：分部积分。**
-
-$$
-\begin{aligned}
-\int_0^\pi(\pi-x)\sin nx\,\mathrm dx
-&=\left[-\frac{(\pi-x)\cos nx}{n}\right]_0^\pi
--\frac1n\int_0^\pi\cos nx\,\mathrm dx\\
-&=\frac\pi n.
-\end{aligned}
-$$
-
-故 $b_n=1/n$。虽然奇延拓在 $x=0$ 有跳跃，但 $(0,\pi)$ 内连续且分段光滑，因此傅里叶级数恰收敛到 $(\pi-x)/2$。
-
-**第三步：代入 $x=\pi/2$。** 由 $\sin(n\pi/2)$ 按 $1,0,-1,0$ 循环，得到
-
-$$
-\sum_{n=1}^{\infty}\frac{\sin(n\pi/2)}n
-=1-\frac13+\frac15-\cdots
-=\frac{\pi-\pi/2}{2}=\boxed{\frac\pi4}.
-$$
-
-<Callout type="info" title="关于端点的提醒">
-
-在 $x=0$，正弦级数每项为 $0$，其和为 $0$；而原区间右侧极限是 $\pi/2$。这是傅里叶级数在奇延拓跳跃点取左右极限平均值的体现，不影响区间内部的展开公式。
+题目将展开写为 $\sum_{n=0}^{\infty}a_n\cos nx$，因此常数项是 $a_0$ 而不是 $a_0/2$；但 $n\ge1$ 的余弦系数不受这项记号差异影响。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-07-03-020" type="essay" tags="来源:原创, 考点:正弦展开, 考点:奇数立方倒数和">
+<Question id="core-1102-math-d71ab6-009" type="essay" points={4} tags="来源:2008年考研数学一, 科目:高等数学, 章节:傅里叶级数, 考点:余弦展开与交错平方倒数和">
 
-将 $f(x)=x(\pi-x)$（$0\le x\le\pi$）展开为傅里叶正弦级数，并借此计算
+ $f(x) = 1 - x^2 \, (0 \leqslant x \leqslant \pi)$ 展开成以 $2\pi$ 为周期的余弦级数, 并求级数
 
 $$
-\sum_{k=0}^{\infty}\frac{(-1)^k}{(2k+1)^3}.
+\sum_{n=1}^{\infty} \frac{(-1)^{n-1}}{n^2}
 $$
+
+的和.
 
 <Solution>
 
-**参考答案：**
+**答案：**
 
 $$
-\boxed{x(\pi-x)=\frac8\pi\sum_{k=0}^{\infty}\frac{\sin(2k+1)x}{(2k+1)^3}},
-\qquad 0\le x\le\pi,
+\boxed{1-x^2=1-\frac{\pi^2}3
++4\sum_{n=1}^{\infty}\frac{(-1)^{n+1}}{n^2}\cos(nx)},
+\quad 0\le x\le\pi,
 $$
 
-$$
-\boxed{\sum_{k=0}^{\infty}\frac{(-1)^k}{(2k+1)^3}=\frac{\pi^3}{32}}.
-$$
+并由此得到 $\boxed{\sum_{n=1}^{\infty}(-1)^{n-1}/n^2=\pi^2/12}$。
 
-**第一步：写出正弦系数。** 在 $[0,\pi]$ 上作奇延拓，
+<Steps>
+  <Step>
 
-$$
-b_n=\frac2\pi\int_0^\pi x(\pi-x)\sin nx\,\mathrm dx.
-$$
+    ### 明确余弦展开的区间参数
 
-**第二步：分部积分提取 $n^{-3}$。** 令 $u=x(\pi-x)$，其端点值 $u(0)=u(\pi)=0$，故
+    对 $[0,\pi]$ 作偶延拓，其周期为 $2\pi$，所以
 
-$$
-\begin{aligned}
-I_n&=\int_0^\pi x(\pi-x)\sin nx\,\mathrm dx\\
-&=\frac1n\int_0^\pi(\pi-2x)\cos nx\,\mathrm dx\\
-&=-\frac2n\int_0^\pi x\cos nx\,\mathrm dx
-=\frac{2[1-(-1)^n]}{n^3}.
-\end{aligned}
-$$
+    $$
+    f(x)=\frac{a_0}2+\sum_{n=1}^{\infty}a_n\cos(nx),
+    \quad a_n=\frac2\pi\int_0^\pi f(x)\cos(nx)\,\mathrm dx.
+    $$
 
-于是
+    常数项为
 
-$$
-b_n=\frac{4[1-(-1)^n]}{\pi n^3}
-=\begin{cases}0,&n\text{ 为偶数},\\[2pt]\dfrac8{\pi n^3},&n\text{ 为奇数} .\end{cases}
-$$
+    $$
+    \frac{a_0}2=\frac1\pi\int_0^\pi(1-x^2)\,\mathrm dx
+    =1-\frac{\pi^2}3.
+    $$
 
-**第三步：代入 $x=\pi/2$。** 奇延拓在周期拼接处连续、分段光滑，因此级数在 $[0,\pi]$ 上收敛到 $f$。取 $x=\pi/2$，
+  </Step>
+  <Step>
 
-$$
-\frac{\pi^2}{4}
-=\frac8\pi\sum_{k=0}^{\infty}\frac{\sin[(2k+1)\pi/2]}{(2k+1)^3}
-=\frac8\pi\sum_{k=0}^{\infty}\frac{(-1)^k}{(2k+1)^3}.
-$$
+    ### 两次分部积分求 $a_n$
 
-故答案为 $\boxed{\pi^3/32}$。
+    当 $n\ge1$，常数 $1$ 对余弦系数的贡献为零，故
 
-**方法总结：** 当题目要求交错奇数分母的幂级数和时，先构造只含奇次正弦项的半区间展开，最后将 $x$ 设为 $\pi/2$；每一次分部积分对应系数多衰减一个 $n^{-1}$。
+    $$
+    a_n=-\frac2\pi\int_0^\pi x^2\cos(nx)\,\mathrm dx.
+    $$
+
+    写 $I_n=\int_0^\pi x^2\cos(nx)\,\mathrm dx$。按分部积分公式，
+
+    $$
+    \begin{aligned}
+    I_n&=\left[\frac{x^2\sin(nx)}n\right]_0^\pi
+      -\frac2n\int_0^\pi x\sin(nx)\,\mathrm dx\\
+      &=\frac{2\pi(-1)^n}{n^2}.
+    \end{aligned}
+    $$
+
+    因此
+
+    $$
+    a_n=-\frac2\pi I_n
+    =\frac{4(-1)^{n+1}}{n^2}.
+    $$
+
+    代回即得到题首展开式。
+
+  </Step>
+  <Step>
+
+    ### 取 $x=0$ 提取交错平方倒数和
+
+    偶周期延拓函数在 $0$ 连续，傅里叶级数在那里收敛到 $f(0)=1$。令 $x=0$，用 $\cos0=1$ 得
+
+    $$
+    1=1-\frac{\pi^2}3
+    +4\sum_{n=1}^{\infty}\frac{(-1)^{n+1}}{n^2}.
+    $$
+
+    移项即得
+
+    $$
+    \boxed{\sum_{n=1}^{\infty}\frac{(-1)^{n-1}}{n^2}
+    =\frac{\pi^2}{12}}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="系数与级数求和的联动">
+
+将函数展开成余弦级数后，常选 $x=0$ 或 $x=\pi$，使 $\cos(nx)$ 化为 $1$ 或 $(-1)^n$，从而将所求数项级数提取出来。选取代入点前先验证该点的傅里叶收敛值。
+
+</Callout>
 
 </Solution>
+
+</Question>
+
+<Question id="core-1102-math-d71ab6-010" type="single" points={4} tags="来源:2013年考研数学一, 科目:高等数学, 章节:傅里叶级数, 考点:奇延拓周期性与和函数取值">
+
+ 设 $f(x) = \left|x - \frac{1}{2}\right|, x \in [0, 1], b_n = 2 \int_0^1 f(x) \sin n\pi x \, dx \, (n = 1, 2, \cdots)$,
+令 $S(x) = \sum_{n=1}^\infty b_n \sin n\pi x$, 则 $S\left(-\frac{9}{4}\right) = (\quad)$.
+
+<Option>$\frac{3}{4}$</Option>
+<Option>$\frac{1}{4}$</Option>
+<Option correct>$-\frac{1}{4}$</Option>
+<Option>$-\frac{3}{4}$</Option>
+
+<Solution>
+
+**解题思路：** 不必逐个计算傅里叶系数。由正弦级数判断其对应的**奇延拓与周期延拓**，先用周期性把自变量移回基本区间，再利用奇性直接读出函数值。
+
+<Steps>
+  <Step>
+
+  ### 第一步：确定正弦级数的和函数
+
+  因为 $b_n=2\int_0^1f(x)\sin(n\pi x)\,dx$，故级数是 $f(x)=\left|x-\frac12\right|$ 在 $[0,1]$ 上的**半区间正弦展开**。将 $f$ 奇延拓至 $[-1,1]$，再作周期为 $2$ 的延拓，记为 $F$。
+
+  在所有连续点处，由傅里叶级数收敛定理，$S(x)=F(x)$；在跳跃点处，$S(x)$ 为左右极限的平均值。本题所需点不是跳跃点。
+
+  </Step>
+  <Step>
+
+  ### 第二步：先利用周期性，再利用奇性
+
+  $$
+  -\frac94+2=-\frac14,\qquad S\left(-\frac94\right)=S\left(-\frac14\right).
+  $$
+
+  奇延拓满足 $F(-x)=-F(x)$。又 $1/4\in(0,1)$，并且 $f$ 在该点连续，所以
+
+  $$
+  S\left(-\frac14\right)=-S\left(\frac14\right)
+  =-f\left(\frac14\right)
+  =-\left|\frac14-\frac12\right|=-\frac14.
+  $$
+
+  </Step>
+</Steps>
+
+**结论：** $\boxed{S(-9/4)=-1/4}$，选择 **C**。
+
+<Callout type="warn" title="易错点：不能直接代入原函数">
+
+$f$ 仅在 $[0,1]$ 给定；对于区间外的自变量，必须先通过周期与奇偶延拓转换。另需区分连续点的函数值与跳跃点的左右极限平均值。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-d71ab6-011" type="blank" points={5} tags="来源:2023年考研数学一, 科目:高等数学, 章节:傅里叶级数, 考点:傅里叶偶次系数求和">
+
+ 设 $f(x)$ 是周期为 $2$ 的周期函数，且 $f(x) = 1 - x, x \in [0, 1]$, 若
+$f(x) = \frac{a_0}{2} + \sum_{n=1}^\infty a_n \cos n\pi x$, 则 $\sum_{n=1}^\infty a_{2n} =$ <Blank answer="0" kind="math" />.
+
+<Solution>
+
+**解题思路：** 题目给出纯余弦展开，相当于把 $1-x$ 在 $[0,1]$ 上作偶延拓，再以 $2$ 为周期延拓。求偶数下标的系数和，优先把级数分别代入 $x=0$、$x=1$，从而消去奇数下标的系数。
+
+<Steps>
+  <Step>
+
+  ### 第一步：在两个端点利用傅里叶级数的收敛值
+
+  偶延拓后的周期函数在 $0$、$1$ 处左右连续接合，故其傅里叶级数在这两点分别收敛到 $f(0)=1$、$f(1)=0$。于是
+
+  $$
+  \begin{aligned}
+  \frac{a_0}{2}+\sum_{n=1}^\infty a_n&=1,\\
+  \frac{a_0}{2}+\sum_{n=1}^\infty(-1)^na_n&=0.
+  \end{aligned}
+  $$
+
+  两式相加，奇数项相消，得到
+
+  $$
+  a_0+2\sum_{n=1}^\infty a_{2n}=1.
+  $$
+
+  </Step>
+  <Step>
+
+  ### 第二步：计算常数项
+
+  长度为 $2$ 的余弦展开满足
+
+  $$
+  a_0=2\int_0^1(1-x)\,dx
+  =2\left[x-\frac{x^2}{2}\right]_0^1=1.
+  $$
+
+  因此
+
+  $$
+  \boxed{\sum_{n=1}^\infty a_{2n}=\frac{1-a_0}{2}=0}.
+  $$
+
+  </Step>
+</Steps>
+
+<Tabs items={['端点求和法','直接验证系数']}>
+  <Tab value="端点求和法">
+
+  记忆公式：对连续的 $2$ 周期余弦展开，$f(0)+f(1)=a_0+2\sum_{n\ge1}a_{2n}$，但使用前需检查端点的收敛值。
+
+  </Tab>
+  <Tab value="直接验证系数">
+
+  分部积分得到
+
+  $$
+  a_n=2\int_0^1(1-x)\cos(n\pi x)\,dx
+  =\frac{2\,[1-(-1)^n]}{n^2\pi^2}.
+  $$
+
+  因而每一个 $a_{2n}=0$，从系数角度直接验证题目结论。
+
+  </Tab>
+</Tabs>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-d71ab6-012" type="blank" points={5} tags="来源:2024年考研数学一, 科目:高等数学, 章节:傅里叶级数, 考点:傅里叶系数渐近与极限">
+
+ 若函数 $f(x) = x + 1$, 若 $f(x) = \frac{a_0}{2} + \sum_{n=1}^\infty a_n \cos nx, x \in [0, \pi]$, 则极
+限 $\lim_{n \to \infty} n^2 \sin a_{2n-1} =$ <Blank answer="-((1)/(pi))" kind="math" />.
+
+<Solution>
+
+**解题思路：** 先根据余弦展开公式求 $a_n$，再抓住奇数下标带来的符号变化。最后利用 $\sin t/t\to1$（$t\to0$）处理复合极限。
+
+<Steps>
+  <Step>
+
+  ### 第一步：写出余弦系数并分部积分
+
+  对 $n\ge1$，
+
+  $$
+  a_n=\frac2\pi\int_0^\pi(x+1)\cos(nx)\,dx.
+  $$
+
+  常数 $1$ 的贡献为 $0$。对其余部分作一次分部积分：
+
+  $$
+  \begin{aligned}
+  \int_0^\pi x\cos(nx)\,dx
+  &=\left[\frac{x\sin(nx)}n\right]_0^\pi
+  -\frac1n\int_0^\pi\sin(nx)\,dx\\
+  &=\left[\frac{x\sin(nx)}n+\frac{\cos(nx)}{n^2}\right]_0^\pi\\
+  &=\frac{(-1)^n-1}{n^2}.
+  \end{aligned}
+  $$
+
+  因此 $a_n=\dfrac{2[(-1)^n-1]}{\pi n^2}$。
+
+  </Step>
+  <Step>
+
+  ### 第二步：选取奇数项
+
+  由于 $(-1)^{2n-1}=-1$，
+
+  $$
+  a_{2n-1}=-\frac4{\pi(2n-1)^2}\xrightarrow[n\to\infty]{}0.
+  $$
+
+  </Step>
+  <Step>
+
+  ### 第三步：拆分极限
+
+  $$
+  \begin{aligned}
+  \lim_{n\to\infty}n^2\sin a_{2n-1}
+  &=\lim_{n\to\infty}
+  \frac{\sin a_{2n-1}}{a_{2n-1}}
+  \cdot n^2a_{2n-1}\\
+  &=1\cdot\left(-\frac4\pi\right)
+  \lim_{n\to\infty}\frac{n^2}{(2n-1)^2}\\
+  &=\boxed{-\frac1\pi}.
+  \end{aligned}
+  $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="解题规律">
+
+傅里叶系数常表现为 $a_n\asymp n^{-2}$；遇到 $n^2\sin(a_{2n-1})$ 一类题，先求准确的系数主项，再使用等价无穷小，不能在未确认 $a_{2n-1}\to0$ 前直接替换。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-d71ab6-013" type="blank" points={5} tags="来源:2025年考研数学一, 科目:高等数学, 章节:傅里叶级数, 考点:正弦展开的跳跃点求值">
+
+ 已知函数
+
+$$
+f(x) = \begin{cases} 0, & 0 \leqslant x < \frac{1}{2}, \\ x^2, & \frac{1}{2} \leqslant x \leqslant 1 \end{cases}
+$$
+
+的傅里叶级数为 $\sum_{n=1}^\infty b_n \sin n\pi x$, $S(x)$ 为 $\sum_{n=1}^\infty b_n \sin n\pi x$ 的和函数，则 $S\left(-\frac{7}{2}\right) =$ <Blank answer="((1)/(8))" kind="math" />。
+
+<Solution>
+
+**解题思路：** 正弦级数的和函数是奇延拓后作 $2$ 周期延拓的函数。自变量先移至 $[0,1]$；由于落在 $x=1/2$ 的跳跃点，必须取左右极限的平均值，而不能直接取题目规定的 $f(1/2)$。
+
+<Steps>
+  <Step>
+
+  ### 第一步：用周期性化简自变量
+
+  $S$ 具有周期 $2$，因此
+
+  $$
+  -\frac72+2\times2=\frac12,
+  \qquad S\left(-\frac72\right)=S\left(\frac12\right).
+  $$
+
+  </Step>
+  <Step>
+
+  ### 第二步：计算跳跃点的两侧极限
+
+  原函数分段给出
+
+  $$
+  f(x)=\begin{cases}
+  0,&0\le x<\frac12,\\
+  x^2,&\frac12\le x\le1.
+  \end{cases}
+  $$
+
+  因而
+
+  $$
+  f\left(\frac12-0\right)=0,
+  \qquad
+  f\left(\frac12+0\right)=\frac14.
+  $$
+
+  </Step>
+  <Step>
+
+  ### 第三步：应用狄利克雷收敛定理
+
+  在分段光滑函数的跳跃点，傅里叶级数收敛到左右极限的算术平均值：
+
+  $$
+  S\left(\frac12\right)
+  =\frac12\left[0+\frac14\right]
+  =\frac18.
+  $$
+
+  故 $\boxed{S(-7/2)=1/8}$。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="易错点：端点函数值不是级数和">
+
+虽然按分段定义有 $f(1/2)=1/4$，但傅里叶级数在该跳跃点的和是 $1/8$。计算傅里叶级数的点值时，应优先检查延拓函数在目标点是否连续。
+
+</Callout>
+
+</Solution>
+
 </Question>
