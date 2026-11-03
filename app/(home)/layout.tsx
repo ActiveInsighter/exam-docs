@@ -1,7 +1,7 @@
 import { baseOptions, linkItems } from '@/lib/layout.shared';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import type { ReactNode } from 'react';
-import '@/styles/study-home.css';
+import '@/styles/home-layout.css';
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (

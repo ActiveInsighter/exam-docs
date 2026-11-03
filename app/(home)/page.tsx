@@ -1,4 +1,4 @@
-import { StudyHome } from '@/components/study-home';
+import { ExamHome } from '@/components/home/exam-home';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  return <StudyHome />;
+  return <ExamHome />;
 }
