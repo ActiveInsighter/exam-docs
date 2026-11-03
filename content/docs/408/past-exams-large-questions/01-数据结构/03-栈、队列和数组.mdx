@@ -43,76 +43,33 @@ questionCount: 6
 
 <Solution>
 
-### 参考答案
+### 答案速览
 
-**选择循环单链表**，所有已申请结点永久保留在环内（直到整个队列销毁时才释放）。约定：
+1. **选链式存储**，具体用**循环单链表**：结点只增不减，出队后的结点留在环中复用。顺序存储（数组）扩容需整体搬移，做不到「入队始终 $O(1)$」。
+2. 约定 `front` 指向队头元素，`rear` 指向**下一个可写入的空闲结点**（环中始终至少留一个空结点）：
+   - **队空**：`front == rear`；
+   - **已分配空间已满**（再入队需申请新结点）：`rear->next == front`。
+3. 初始只有一个结点 $N_0$ 自成环，`front = rear = N0`；第一个元素入队后环中有 $N_0$（存数据）、$N_1$（空），`front = N0`，`rear = N1`。
+4. 入队：若满先在 `rear` 后插入新结点；把数据写入 `rear`，`rear = rear->next`。出队：若空则失败；取 `front->data`，`front = front->next`，**不释放结点**。
 
-- `front` 指向当前队头**数据结点**；
-- `rear` 指向**下一次准备写入的空闲结点**，不是最后一个有效数据结点；
-- 环中始终**至少留一个空闲结点**，因此容量为已申请结点数减 1。
+### 图解：初始状态与第一次入队
 
-在这组明确的指针语义下：
+<AlgoFigure src="/img/408/past-exams-large-questions/01-数据结构/solutions/2019-42-1" w={740} h={300} alt="2019-42 循环链式队列的初始状态与第一个元素入队后的状态" caption="① 只有一个结点、front 与 rear 重合，此时既是队空也是「满」；② 先在 rear 后插入 N₁ 扩容，再把 x 写入旧 rear（N₀），rear 前进到 N₁" />
 
-$$
-\boxed{\text{队空}\iff front=rear},
-$$
+为什么要「永远留一个空结点」？如果允许环中结点全部存数据，`rear` 追上 `front` 时会出现 `front == rear`，就与队空的判断式冲突了。留一个空结点后：
 
-$$
-\boxed{\text{现有空间已满，入队需扩容}\iff rear\!\to next=front}.
-$$
+- `front == rear` 只可能是「一个元素都没有」；
+- `rear->next == front` 表示「只剩 `rear` 这一个空结点」，此时再入队必须先申请结点。
 
-初始只申请一个结点 $N_0$，令 `N0->next=N0`，`front=rear=N0`。首次入队必先申请 $N_1$，把 $N_1$ 接在 $N_0$ 后面；再将数据写入 $N_0$，令 `rear=N1`、`front=N0`。
+### 图解：一般状态与扩容
 
-### 关键过程：把「逻辑队列」和「物理环」分开
+<AlgoFigure src="/img/408/past-exams-large-questions/01-数据结构/solutions/2019-42-2" w={740} h={360} alt="2019-42 循环链式队列的一般状态（数据区与空闲区）以及空间已满时在 rear 后插入新结点" caption="蓝色为有效数据（从 front 起到 rear 之前），灰色为可复用的空闲结点；④ 中虚线绿色是新申请并插在 rear 后面的结点" />
 
-| 概念 | 表示什么 | 出队时的处理 |
-| --- | --- | --- |
-| 已申请结点 | 环中全部结点（数据区与空闲区） | **不释放**任何结点 |
-| 逻辑有效元素 | 从 `front` 起沿 `next` 到 `rear` 前的所有结点 | 只把 `front` 后移 |
-| 可复用空闲结点 | 从 `rear` 起到 `front` 前的结点，含 `rear` | 今后 `rear` 到达时可再次写入 |
+环被 `front`、`rear` 切成两段：**数据区**和**空闲区**。出队只是把 `front` 往前推，旧队头结点自动并入空闲区，以后 `rear` 绕回来时会再次写入——这就是「出队空间可重复使用」。
 
-<Steps>
-  <Step>
+### 入队与出队过程
 
-  ### 初始化：一个结点自成环
-
-  ```text
-      +---------+
-      |    N0   |---+
-      +---------+   |
-           ^________|
-      front = rear = N0
-  ```
-
-  队空条件成立；由于只有一个空闲格，再入队前**必须增加结点**。初始状态与题图一对应。
-
-  </Step>
-  <Step>
-
-  ### 第一次入队：先扩容再写入
-
-  在 `rear` 后面插入一个新结点 `N1`：
-
-  ```text
-  front=N0 [数据 x]  -->  rear=N1 [空]  -->  N0
-  ```
-
-  此时环有两个结点，只有 `N0` 含有效元素；与题图二一致。
-
-  </Step>
-  <Step>
-
-  ### 后续操作：始终复用空闲格
-
-  - **入队**：若 `rear->next==front`，先在 `rear` 后新增一个结点；将新数据写入旧 `rear`，然后 `rear=rear->next`。
-  - **出队**：若 `front==rear`，报告队空；否则输出 `front->data`，再执行 `front=front->next`，**不释放旧结点**。
-
-  </Step>
-</Steps>
-
-### C 语言实现
-
-```c title="循环链式队列：结点只扩容、不逐次释放" lineNumbers
+```c title="2019-42：循环链式队列（结点只增不减）" lineNumbers
 #include <stdlib.h>
 
 typedef struct QNode {
@@ -121,70 +78,47 @@ typedef struct QNode {
 } QNode;
 
 typedef struct {
-    QNode *front;          // 首个有效数据位置；空时与 rear 相等
-    QNode *rear;           // 下一空位置（常驻空闲格）
-} CircleQueue;
+    QNode *front;   // 队头元素
+    QNode *rear;    // 下一个空闲结点
+} Queue;
 
-int InitQueue(CircleQueue *q) {
-    if (q == NULL) return 0;
+int InitQueue(Queue *q) {
     QNode *p = (QNode *)malloc(sizeof(QNode));
     if (p == NULL) return 0;
-    p->next = p;
+    p->next = p;                         // 自成环
     q->front = q->rear = p;
     return 1;
 }
 
-int IsEmpty(const CircleQueue *q) {
-    return q->front == q->rear;
-}
-
-int EnQueue(CircleQueue *q, int value) {
-    if (q == NULL || q->front == NULL) return 0;
-    if (q->rear->next == q->front) { // 满的是已申请容量，不是逻辑操作失败
+int EnQueue(Queue *q, int x) {
+    if (q->rear->next == q->front) {     // 只剩 rear 一个空结点：扩容
         QNode *p = (QNode *)malloc(sizeof(QNode));
         if (p == NULL) return 0;
         p->next = q->rear->next;
-        q->rear->next = p;           // 恰好插在 rear 后方
+        q->rear->next = p;               // 插在 rear 之后
     }
-    q->rear->data = value;
+    q->rear->data = x;                   // 写入当前空结点
     q->rear = q->rear->next;
     return 1;
 }
 
-int DeQueue(CircleQueue *q, int *out) {
-    if (q == NULL || out == NULL || q->front == NULL || IsEmpty(q))
-        return 0;
-    *out = q->front->data;
-    q->front = q->front->next;       // 旧队头变成以后可复用的空格
+int DeQueue(Queue *q, int *x) {
+    if (q->front == q->rear) return 0;   // 队空
+    *x = q->front->data;
+    q->front = q->front->next;           // 旧结点留在环中复用
     return 1;
-}
-
-void DestroyQueue(CircleQueue *q) {
-    if (q == NULL || q->front == NULL) return;
-    QNode *first = q->front, *p = first->next;
-    while (p != first) {
-        QNode *next = p->next;
-        free(p);
-        p = next;
-    }
-    free(first);
-    q->front = q->rear = NULL;
 }
 ```
 
-### 不变量、正确性与复杂度
+### 正确性与复杂度
 
-**环形分区不变量**：队列有效元素按 FIFO 顺序恰位于从 `front` 依 `next` 行至 `rear` 之前的结点中；`rear` 以及之后直到 `front` 前的结点均为空闲区。
+- **不变量**：从 `front` 沿 `next` 走到 `rear` 之前的结点恰好是队列元素（FIFO 顺序），`rear` 起到 `front` 之前都是空闲结点，且 `rear` 本身一定空闲。
+- 入队需扩容时，新结点插在 `rear` 之后，写入旧 `rear` 后新的 `rear` 正是这个新结点，不会覆盖队头。
+- 入队至多申请一个结点并改常数个指针，出队只改 `front`，二者都是 $O(1)$。若队列同时最多有 $H$ 个元素，整个生命周期最多申请 $H+1$ 个结点。
 
-- **入队无扩容**：把 `rear` 这个空结点改为有效元素，`rear` 顺移后仍指向空结点。
-- **入队需扩容**：若 `rear->next==front`，当前只有 `rear` 一格空闲；先在它后面接新结点，写入旧 `rear`，新 `rear` 就有空格，不会覆盖队头。
-- **出队**：移走的是有效序列的第一项，旧 `front` 留在环内，保证之后仍可复用并继续满足 FIFO。
+<Callout type="warn" title="必须先说清指针含义">
 
-每次入队最多新建一个结点、修改常数个指针；每次出队只改一次队头指针，因此**在通常考研链式结构分析中，把一次结点分配视为 $O(1)$，单次操作都是 $O(1)$**。若生命周期内逻辑队列最多同时有 $H$ 个元素，则恰至多申请 $H+1$ 个结点，整个销毁过程耗时 $O(H)$。
-
-<Callout type="warn" title="必须声明指针定义">
-
-这里 `rear` **不是尾数据结点**。如果换成「`rear` 指尾元素」的定义，空队列与满队列的判断式也会改变。不要把 `front==rear` 与 `rear->next==front` 不加说明地套在任意循环链队列上。
+本解中 `rear` 指「下一个空闲结点」而不是「队尾元素」。若换成 `rear` 指队尾元素的约定，判空、判满条件都要随之改变，不能把 `front == rear`、`rear->next == front` 套到任何循环链队列上。
 
 </Callout>
 
@@ -376,130 +310,68 @@ $$
 
 <Solution>
 
-### 参考答案
+### 答案速览
 
-1. 第一组 $(2,3,1,6,4,7,5,9,8)$ **不合法**；第二组 $(2,3,1,5,6,7,4,9,8)$ **合法**。
-2. 禁止出现按出栈先后顺序排列、满足
-
-   $$
-   \boxed{i<j<k,\quad P_j<P_k<P_i}
-   $$
-
-   的三个元素，通常称为 **312 型禁形**。一个升序输入的单栈出栈排列合法，当且仅当不存在这种禁形。
-3. 当 $n=4$ 时，以 $2$ 开头的合法序列共 **5** 个。
-4. 当 $k\ge2$ 且 $C_{k-1}=M$，首元素为 $1$ 的有 **$M$** 个，首元素为 $2$ 的也有 **$M$** 个；全部合法序列数为
+1. 序列 $\{2,3,1,6,4,7,5,9,8\}$ **不能**得到；序列 $\{2,3,1,5,6,7,4,9,8\}$ **能**得到。
+2. 不能由栈得到，当且仅当存在 $i<j<k$ 使
 
    $$
-   \boxed{C_k=\frac{2(2k-1)}{k+1}M},
+   \boxed{P_j<P_k<P_i}
    $$
 
-   其中 $C_k=\frac{1}{k+1}\binom{2k}{k}$ 是第 $k$ 个卡特兰数。
+   即按出栈先后看：**先出最大、再出最小、最后出中间**（「312 型」）。
+3. $n=4$ 时以 2 开头的合法序列有 **5** 个：$2134,2143,2314,2341,2431$。
+4. 以 1 开头的有 $M$ 个，以 2 开头的也有 $M$ 个；总数为第 $k$ 个卡特兰数
 
-### 第 1 问：用唯一可行的压栈过程作判定
+   $$
+   C_k=\frac{1}{k+1}\binom{2k}{k}=\frac{2(2k-1)}{k+1}\,M .
+   $$
 
-**原则**：下一个要求输出的元素 $x$ 尚未入栈，就必须依次压入到 $x$；若 $x$ 已在栈内却不是栈顶，直接判失败。压入更多更大的数不可能把 $x$ 变到栈顶。
+### 第 1 问图解：唯一可行的模拟
 
-<Tabs items={['序列一：不合法', '序列二：合法']} defaultIndex={0}>
-  <Tab value="序列一：不合法">
+<AlgoFigure src="/img/408/past-exams-large-questions/01-数据结构/solutions/2026-42-1" w={760} h={470} alt="2026-42 两个出栈序列的栈模拟：序列一在输出 4 时被 5 挡住，序列二全部成功" caption="每一列是输出目标元素之后的栈（自底向上）。序列 ① 在要输出 4 时，4 被 5 压住" />
 
-  目标是 `2,3,1,6,4,7,5,9,8`。先执行：
+判定规则只有一条：**要输出 $x$ 时，若 $x$ 还没入栈，就按顺序一直压到 $x$ 再弹出；若 $x$ 已在栈中但不是栈顶，判失败。**（再压入更大的数只会把 $x$ 埋得更深，不可能补救。）
 
-  ```text
-  push 1, push 2, pop 2;
-  push 3, pop 3, pop 1;
-  push 4, push 5, push 6, pop 6.
-  ```
+- 序列 ①：输出 6 时要依次压入 4、5、6 再弹出 6，栈中剩 `[4, 5]`；下一个要 4，但栈顶是 5，失败。
+- 序列 ②：`push1 push2 pop | push3 pop | pop | push4 push5 pop | push6 pop | push7 pop | pop | push8 push9 pop | pop`，9 个数各进出一次，全部吻合。
 
-  此时栈自底至顶为 `[4,5]`，下一个目标却是 `4`；**栈顶 5 挡在 4 上方**，不可能合法。前后还出现禁形 $(6,4,5)$，满足 $4<5<6$。
+### 第 2 问图解：312 禁形
 
-  </Tab>
-  <Tab value="序列二：合法">
+<AlgoFigure src="/img/408/past-exams-large-questions/01-数据结构/solutions/2026-42-2" w={740} h={260} alt="2026-42 312 禁形：先出最大 a，再出最小 b，后出中间 c 时，c 压在 b 上无法取出 b" caption="出栈顺序 a → b → c，数值 a 最大、b 最小、c 居中：b 被 c 压在下面" />
 
-  目标是 `2,3,1,5,6,7,4,9,8`，下面是一条完整操作记录：
+- **必要性**（出现禁形 ⇒ 不合法）：设出栈顺序中 $a,b,c$ 依次出现且 $a>c>b$。弹出 $a$ 时，比它小的 $b,c$ 都已入栈；因 $b<c$，$b$ 先入栈，位于 $c$ 之下。$c$ 要在 $b$ 之后才出栈，所以轮到 $b$ 时 $c$ 仍挡在上面，矛盾。
+- **充分性**（模拟失败 ⇒ 必有禁形）：模拟第一次失败时，待输出的 $b$ 在栈中且其上方有更大的 $c$；$c$ 之所以已入栈，是因为此前输出过某个更大的 $a$。于是 $a,b,c$ 构成禁形。
 
-  ```text
-  push 1, push 2, pop 2;
-  push 3, pop 3, pop 1;
-  push 4, push 5, pop 5;
-  push 6, pop 6;
-  push 7, pop 7, pop 4;
-  push 8, push 9, pop 9, pop 8.
-  ```
+### 第 3 问图解：以 2 开头的序列
 
-  全部 9 个输入恰好压入一次、弹出一次，输出顺序完全吻合，故合法。
+<AlgoFigure src="/img/408/past-exams-large-questions/01-数据结构/solutions/2026-42-3" w={720} h={326} alt="2026-42 n=4 时以 2 开头的合法出栈序列枚举树，共 5 种" caption="第一个输出 2 强制了 push 1、push 2、pop 2，此时栈中只有 1；再按第二个输出分三类" />
 
-  </Tab>
-</Tabs>
+### 第 4 问：卡特兰数推导
 
-### 第 2 问：312 禁形为什么恰好刻画不合法序列？
-
-<Steps>
-  <Step>
-
-  ### 必要性：禁形出现，就无法从栈中取出
-
-  假设输出依次出现 $a,b,c$，满足 $a>c>b$。为了先弹出 $a$，输入按 $1,2,\ldots,a$ 的顺序已全部压入过，因此较小的 $b,c$ 也早已入栈。由于 $b<c$，入栈时 $b$ 位于 $c$ 的**下面**。在输出 $b$ 之前没有弹出 $c$，所以栈顶方向仍被 $c$ 挡住，不可能完成。
-
-  </Step>
-  <Step>
-
-  ### 充分性：模拟若失败，必可找出禁形
-
-  假设贪心模拟第一次在待输出 $b$ 处失败，此时 $b$ 已入栈且上方有较大元素 $c>b$。由于该 $c$ 已压入而尚未弹出，说明此前某个已经输出的更大元素 $a>c$ 迫使输入先压到至少 $a$，但出栈时没有移走 $c$。于是按输出顺序存在 $a,b,c$，并满足 $a>c>b$。
-
-  因此「模拟失败」必有 312 禁形；不存在这种禁形时一定可模拟成功。
-
-  </Step>
-</Steps>
-
-<Callout type="warn" title="别把禁形写成按数值先后的位置关系">
-
-这里的 $i<j<k$ 表示三个元素在**输出序列里出现的先后次序**。数值关系为 $P_j<P_k<P_i$，即第一项最大、第二项最小、第三项居中；不是数值下标的大小次序。
-
-</Callout>
-
-### 第 3 问：四个元素时以 2 开头的序列
-
-首个输出若为 2，则头三个操作必为 `push 1, push 2, pop 2`，余下按合法操作枚举：
+把 `push` 看成「(」、`pop` 看成「)」，合法操作序列就是 $k$ 对括号的合法匹配（任何前缀中「)」不多于「(」），个数为卡特兰数
 
 $$
-\boxed{2134,\quad2143,\quad2314,\quad2341,\quad2431}.
+C_k=\binom{2k}{k}-\binom{2k}{k+1}=\frac{1}{k+1}\binom{2k}{k}.
 $$
 
-所以共有 **5** 种。比如 `2413` 不合法：弹出 4 后栈顶是 3，不能越过 3 先弹出 1。
-
-### 第 4 问：利用卡特兰数计数
-
-将一次 `push` 记为左括号、一次 `pop` 记为右括号，则合法操作序列满足：**任何前缀的出栈次数不超过入栈次数**。这样的长度为 $2n$、恰含 $n$ 对括号的序列数就是
-
-$$
-C_n=\binom{2n}{n}-\binom{2n}{n+1}=\frac{1}{n+1}\binom{2n}{n}.
-$$
-
-- **首项为 1**：强制 `push 1,pop 1`，剩余 $2,\ldots,k$ 构成同构的 $k-1$ 个元素问题，因此有 $C_{k-1}=M$ 种。
-- **首项为 2**：强制 `push 1,push 2,pop 2`。此后栈中已有 1，剩余 `push 3,...,push k` 与 $k-1$ 次弹出组成一个从高度 1 出发再回到 0 的合法路径；它与规模 $k-1$ 的完整 Dyck 路径一一对应，所以仍有 $C_{k-1}=M$ 种。
+- **以 1 开头**：强制 `push 1, pop 1`，剩下 $2,\ldots,k$ 是规模 $k-1$ 的同类问题，共 $C_{k-1}=M$ 个。
+- **以 2 开头**：强制 `push 1, push 2, pop 2`，此后栈底留着 1，还剩 $k-2$ 次 push（元素 $3,\ldots,k$）和 $k-1$ 次 pop。在这些剩余操作前补上一个「push 1」，恰好得到元素 $1,3,4,\ldots,k$ 这 $k-1$ 个数的一个完整合法操作序列；反过来，规模 $k-1$ 的任何合法序列都以 push 开头，去掉它就还原回来。二者一一对应，所以也是 $M$ 个。（$k=4$ 时 $M=C_3=5$，与第 3 问吻合。）
 - **总数**：
 
 $$
-\begin{aligned}
-\frac{C_k}{C_{k-1}}
-&=\frac{\dfrac{1}{k+1}\binom{2k}{k}}
-{\dfrac{1}{k}\binom{2k-2}{k-1}}\\
-&=\frac{k}{k+1}\cdot\frac{(2k)(2k-1)}{k^2}\\
-&=\frac{2(2k-1)}{k+1}.
-\end{aligned}
+\frac{C_k}{C_{k-1}}=\frac{\frac{1}{k+1}\binom{2k}{k}}{\frac{1}{k}\binom{2k-2}{k-1}}=\frac{2(2k-1)}{k+1}
+\ \Longrightarrow\ 
+C_k=\frac{2(2k-1)}{k+1}M .
 $$
 
-故 $C_k=\frac{2(2k-1)}{k+1}M$。
+<Callout type="warn" title="易错点">
 
-### 复习要点
+- 禁形中的 $i<j<k$ 指**出栈先后**，数值关系是 $P_j<P_k<P_i$（大、小、中），不要写反。
+- 判断单个序列时用模拟最稳；说明「为什么不行」时指出被挡住的元素或 312 禁形。
+- 以 2 开头的个数也是 $M$，不是 $M-1$ 或 $C_k-M$。
 
-| 问题类型 | 首选工具 | 得分关键 |
-| --- | --- | --- |
-| 给定一个候选序列，判断可否出栈 | **显式栈模拟** | 按顺序压到目标，再检查栈顶 |
-| 问为什么不合法 | **312 禁形 / 首次冲突** | 指出不能越过栈顶元素 |
-| 计数所有合法操作序列 | **卡特兰数** | 所有操作前缀必须合法 |
-| 限定第一出栈元素 | **强制前缀 + 剩余路径** | 先锁定压栈操作，再计数 |
+</Callout>
 
 </Solution>
 </Question>

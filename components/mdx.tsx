@@ -1,5 +1,6 @@
 import { Blank, Option, Question, Solution } from '@/components/question';
 import { EnglishReading, Evidence, ExamArticle, Paragraph, Translation } from '@/components/english-reading';
+import { AlgoFigure } from '@/components/mdx/algo-figure';
 import { Callout } from '@/components/mdx/callout';
 import { DocTable } from '@/components/mdx/doc-table';
 import { Mermaid } from '@/components/mdx/mermaid';
@@ -20,7 +21,8 @@ import type { MDXComponents } from 'mdx/types';
  * Markdown tables replace its `table` with DocTable (wrapping columns, copy
  * and expand). The component groups below are registered globally so
  * documentation can use Tabs, Accordions, Steps, Files, TypeTable and Mermaid
- * without repeating imports in every MDX file. Question, Option, Blank and Solution are the
+ * without repeating imports in every MDX file. AlgoFigure is a colour solution
+ * diagram with light / dark SVG variants (components/mdx/algo-figure.tsx). Question, Option, Blank and Solution are the
  * exercise components: <Question id type> declares the interaction (single /
  * multiple / boolean / blank / essay), <Option correct> and <Blank answer>
  * carry the key, and <Solution> holds the reference answer shown in the dialog.
@@ -35,6 +37,7 @@ export function getMDXComponents(components?: MDXComponents) {
     ...FilesComponents,
     ...StepsComponents,
     ...TabsComponents,
+    AlgoFigure,
     Callout,
     table: DocTable,
     Blank,

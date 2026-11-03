@@ -1,0 +1,59 @@
+/*
+ * Solution diagrams (components/mdx/algo-figure.tsx).
+ *
+ * Each figure ships a light and a dark SVG generated from one source
+ * (scripts/diagrams); the theme class on <html> picks one. They are drawn in
+ * colour on a transparent ground, so the monochrome ink filter that question
+ * figures get (styles/question.css) is switched off here.
+ */
+[data-algo-figure] {
+  margin: 1.25rem 0;
+}
+
+[data-algo-figure] [data-slot='algo-figure-frame'] {
+  margin-inline: auto;
+}
+
+:is([data-exam-question-body], [data-solution-card] .prose, .prose) [data-algo-figure] img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  border-radius: 0;
+  filter: none;
+}
+
+:is([data-exam-question-body], [data-solution-card] .prose, .prose) [data-algo-figure] img[data-variant='dark'],
+.dark :is([data-exam-question-body], [data-solution-card] .prose, .prose) [data-algo-figure] img[data-variant='light'] {
+  display: none;
+}
+
+.dark :is([data-exam-question-body], [data-solution-card] .prose, .prose) [data-algo-figure] img[data-variant='dark'] {
+  display: block;
+  filter: none;
+}
+
+[data-algo-figure] figcaption {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-fd-muted-foreground, currentColor);
+}
+
+/*
+ * Phones: the diagrams are drawn ~740px wide with 11–14px labels. Rather than
+ * shrinking them below legibility, keep a 560px floor and let the frame scroll
+ * sideways.
+ */
+@media (width < 40rem) {
+  [data-algo-figure] [data-slot='algo-figure-frame'] {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+
+  :is([data-exam-question-body], [data-solution-card] .prose, .prose) [data-algo-figure] img {
+    width: max(100%, min(35rem, var(--algo-figure-w)));
+    max-width: none;
+  }
+}
