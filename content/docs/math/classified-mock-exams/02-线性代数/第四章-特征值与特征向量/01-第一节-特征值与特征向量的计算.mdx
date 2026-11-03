@@ -1,0 +1,1277 @@
+---
+title: "第一节 特征值与特征向量的计算｜谱映射、秩一结构与特征子空间"
+description: "对照真题核心题目中的特征值运算、伴随矩阵谱映射、特征向量独立性与秩一结构，精选多来源高区分度模拟练习原题，完整保留原始题解组件。"
+---
+
+# 第一节 特征值与特征向量的计算｜谱映射、秩一结构与特征子空间
+
+参照「真题核心题目」同名小节的考点、题型与命题风格精选 **26 道模拟与练习原题**；所有 Question 组件连同选项、题干、答案、解析、公式及嵌套结构均保留原文。
+
+## 考点1：特征值基本性质、逆矩阵与伴随矩阵的谱映射
+
+<Question id="selected-1103-classified-1031-lilin-2027-s1-q07" type="single" points={5} tags="来源:李林六套卷, 考点:特征值与伴随矩阵, 难度:较难">
+
+设 $A$ 为 $3$ 阶实矩阵，则下列选项中能推出 $A$ **必有特征值 $1$** 的是（　）。
+
+<Option correct>$2$ 是 $A+A^{-1}$ 的一个特征值</Option>
+<Option>$2$ 是 $A+A^{\mathrm T}$ 的一个特征值</Option>
+<Option>$2$ 是 $A+A^*$ 的一个特征值</Option>
+<Option>$2$ 是 $A+A^2$ 的一个特征值</Option>
+
+<Solution>
+
+**证明 A**：条件已保证 $A$ 可逆。若存在非零向量 $v$ 使
+
+$$
+(A+A^{-1})v=2v,
+$$
+
+两边左乘 $A$，得
+
+$$
+(A^2-2A+E)v=(A-E)^2v=0.
+$$
+
+由于 $v\ne0$，矩阵 $(A-E)^2$ 奇异，故 $A-E$ 奇异，即 $1$ 是 $A$ 的特征值。
+
+<Accordions>
+  <Accordion title="其余选项为何不能推出？">
+
+  - **B**：取 $A=\begin{pmatrix}1&1&0\\-1&0&0\\0&0&2\end{pmatrix}$。有 $A+A^{\mathrm T}=\operatorname{diag}(2,0,4)$，但 $\det(A-E)=1\ne0$。
+  - **C**：这里 $A^*$ 指**伴随矩阵**。取 $A=\operatorname{diag}(2,0,0)$，则 $A^*=0$；$A+A^*$ 有特征值 $2$，而 $A$ 没有特征值 $1$。
+  - **D**：取 $A=\operatorname{diag}(-2,0,0)$，则 $A+A^2=\operatorname{diag}(2,0,0)$，但 $A$ 没有特征值 $1$。
+
+  </Accordion>
+</Accordions>
+
+所以选 **A**。
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-classified-1031-liyongle-2027-s4-q07" type="single" points={5} tags="来源:李永乐六套卷, 考点:特征值与行列式, 难度:中等">
+
+设 $A$ 为三阶矩阵，且 $|A|=8$、$|2E-A|=0$、$|-2E-A|=-72$。若 $\lambda_1,\lambda_2,\lambda_3$ 为 $A$ 的三个特征值（计重数），则 $\lambda_1^2+\lambda_2^2+\lambda_3^2=$（　）。
+
+<Option>$14$</Option>
+<Option correct>$21$</Option>
+<Option>$28$</Option>
+<Option>$49$</Option>
+
+<Solution>
+
+**答案：B，$\boxed{21}$。**
+
+因 $|2E-A|=0$，$2$ 是 $A$ 的特征值。设另外两个特征值为 $u,v$，则
+
+$$
+2uv=|A|=8\quad\Longrightarrow\quad uv=4.
+$$
+
+利用 $|-2E-A|=-72$，注意三阶行列式中的符号：
+
+$$
+(-4)(-2-u)(-2-v)=-72
+\quad\Longrightarrow\quad (2+u)(2+v)=18.
+$$
+
+展开得 $4+2(u+v)+uv=18$，结合 $uv=4$，可知 $u+v=5$，所以 $u,v$ 是方程 $t^2-5t+4=0$ 的两个根，即 $1,4$。
+
+因此
+
+$$
+\lambda_1^2+\lambda_2^2+\lambda_3^2=2^2+1^2+4^2=\boxed{21}.
+$$
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-classified-1031-tangjiafeng-2027-s6-q15" type="blank" points={5} tags="来源:汤家凤八套卷, 考点:特征值与伴随矩阵行列式, 难度:中等">
+
+设
+
+$$
+A=\begin{pmatrix}1&-1&0\\1&1&1\\1&a&2\end{pmatrix},
+$$
+
+且存在 $\boldsymbol\alpha\ne\boldsymbol0$，使 $A\boldsymbol\alpha=2\boldsymbol\alpha$。求 $|A^*+2E|=$
+
+<Blank answer="48" kind="math" />。
+
+<Solution>
+
+**答案：$\boxed{48}$。**
+
+**过程**：由于 $2$ 是 $A$ 的特征值，
+
+$$
+0=|2E-A|=\begin{vmatrix}1&1&0\\-1&1&-1\\-1&-a&0\end{vmatrix}=1-a,
+$$
+
+故 $a=1$。此时
+
+$$
+|\lambda E-A|=(\lambda-1)^2(\lambda-2),
+$$
+
+所以 $A$ 的特征值（计重数）为 $1,1,2$，$|A|=2$。$A$ 可逆，由 $A^*=|A|A^{-1}$ 可知 $A^*$ 的特征值为 $2,2,1$，因此 $A^*+2E$ 的特征值为 $4,4,3$。于是
+
+$$
+|A^*+2E|=4\times4\times3=\boxed{48}.
+$$
+
+<Callout type="idea" title="技巧">求 $|A^*+cE|$ 不必显式计算伴随矩阵。确定 $A$ 的特征值后，用 $A^*=|A|A^{-1}$ 即可。</Callout>
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-classified-1031-liyongle-2027-s1-q07" type="single" points={5} tags="来源:李永乐六套卷, 考点:转置矩阵的特征向量正交性, 难度:中等">
+
+设 $A$ 为 $n$ 阶可逆矩阵，$A^{-1}\boldsymbol\alpha=2\boldsymbol\alpha$，且
+
+$$
+A^\mathrm T\boldsymbol\beta=\frac12\boldsymbol\beta,\qquad
+A^\mathrm T\boldsymbol\gamma=3\boldsymbol\gamma,
+$$
+
+其中 $\boldsymbol\alpha,\boldsymbol\beta,\boldsymbol\gamma$ 均为非零向量，则下列结论中**必然成立**的是（　）。
+
+<Option>$\boldsymbol\alpha$ 与 $\boldsymbol\beta+\boldsymbol\gamma$ 正交</Option>
+<Option correct>$\boldsymbol\alpha$ 与 $\boldsymbol\gamma$ 正交</Option>
+<Option>$\boldsymbol\alpha$ 与 $\boldsymbol\beta$ 正交</Option>
+<Option>$\boldsymbol\beta$ 与 $\boldsymbol\gamma$ 正交</Option>
+
+<Solution>
+
+**答案：B，$\boxed{\boldsymbol\alpha^\mathrm T\boldsymbol\gamma=0}$。**
+
+由 $A^{-1}\boldsymbol\alpha=2\boldsymbol\alpha$ 得
+
+$$
+A\boldsymbol\alpha=\frac12\boldsymbol\alpha.
+$$
+
+分别利用 $A\boldsymbol\alpha=\frac12\boldsymbol\alpha$ 与 $A^\mathrm T\boldsymbol\gamma=3\boldsymbol\gamma$，计算同一个数量 $\boldsymbol\alpha^\mathrm TA^\mathrm T\boldsymbol\gamma$：
+
+$$
+\begin{aligned}
+\boldsymbol\alpha^\mathrm TA^\mathrm T\boldsymbol\gamma
+&=(A\boldsymbol\alpha)^\mathrm T\boldsymbol\gamma
+=\frac12\boldsymbol\alpha^\mathrm T\boldsymbol\gamma,\\
+\boldsymbol\alpha^\mathrm TA^\mathrm T\boldsymbol\gamma
+&=3\boldsymbol\alpha^\mathrm T\boldsymbol\gamma.
+\end{aligned}
+$$
+
+两式相减，得到 $\frac52\boldsymbol\alpha^\mathrm T\boldsymbol\gamma=0$，故 B 必然成立。
+
+<Callout type="warn" title="区分左右特征向量">
+
+本题使用的是 **$A$ 的右特征向量**与 **$A^\mathrm T$ 的右特征向量**。只在这两个向量对应的特征值不同的情况下，才能直接得到上述正交关系；两个 $A^\mathrm T$ 的特征向量对应不同特征值，一般并不正交，因为 $A$ 未必对称。
+
+</Callout>
+
+其余三项都不能保证成立。事实上，令
+
+$$
+A=\begin{pmatrix}\tfrac12&0\\\tfrac52&3\end{pmatrix},\quad
+\boldsymbol\alpha=\begin{pmatrix}1\\-1\end{pmatrix},\quad
+\boldsymbol\beta=\begin{pmatrix}1\\0\end{pmatrix},\quad
+\boldsymbol\gamma=\begin{pmatrix}1\\1\end{pmatrix},
+$$
+
+则各特征向量关系均满足，但 $\boldsymbol\alpha^\mathrm T\boldsymbol\beta=1$、$\boldsymbol\beta^\mathrm T\boldsymbol\gamma=1$、$\boldsymbol\alpha^\mathrm T(\boldsymbol\beta+\boldsymbol\gamma)=1$，故 A、C、D 均不必然成立。
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-classified-1031-math-56d40c-006" type="single" points={5} tags="来源:张宇8套卷">
+
+设 $\lambda_1,\lambda_2$ 是 3 阶矩阵 $A$ 的两个不同特征值，$\alpha_1,\alpha_2$ 是 $A$ 的属于 $\lambda_1$ 的线性无关的特征向量，$\alpha_3$ 是 $A$ 的属于 $\lambda_2$ 的特征向量，则
+
+$$
+\alpha_1+A\alpha_3,\qquad A(\alpha_2-\alpha_3),\qquad A\alpha_1+\alpha_3
+$$
+
+线性相关的充要条件是
+
+<Option correct>$\lambda_1=0$ 或 $\lambda_1\lambda_2=1$。</Option>
+<Option>$\lambda_2=0$ 或 $\lambda_1\lambda_2=1$。</Option>
+<Option>$\lambda_1\ne0$ 且 $\lambda_1\lambda_2\ne1$。</Option>
+<Option>$\lambda_2\ne0$ 且 $\lambda_1\lambda_2\ne1$。</Option>
+
+<Solution>
+
+由题意，
+
+$$
+A\alpha_1=\lambda_1\alpha_1,\qquad
+A\alpha_2=\lambda_1\alpha_2,\qquad
+A\alpha_3=\lambda_2\alpha_3.
+$$
+
+于是
+
+$$
+\begin{aligned}
+&\bigl(\alpha_1+A\alpha_3,\ A(\alpha_2-\alpha_3),\ A\alpha_1+\alpha_3\bigr)\\
+&=(\alpha_1,\alpha_2,\alpha_3)
+\begin{pmatrix}
+1&0&\lambda_1\\
+0&\lambda_1&0\\
+\lambda_2&-\lambda_2&1
+\end{pmatrix}.
+\end{aligned}
+$$
+
+由于 $\alpha_1,\alpha_2,\alpha_3$ 线性无关，所以所给三个向量线性相关当且仅当右侧系数矩阵行列式为 $0$。
+
+而
+
+$$
+\begin{vmatrix}
+1&0&\lambda_1\\
+0&\lambda_1&0\\
+\lambda_2&-\lambda_2&1
+\end{vmatrix}
+=\lambda_1(1-\lambda_1\lambda_2).
+$$
+
+因此充要条件为
+
+$$
+\lambda_1=0
+$$
+
+或
+
+$$
+\lambda_1\lambda_2=1.
+$$
+
+故选 A。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-classified-1031-tangjiafeng-2027-s4-q06" type="single" points={5} tags="来源:汤家凤八套卷, 考点:转置矩阵与特征值, 难度:中等">
+
+设 $A$ 为 $n$ 阶实矩阵，则下列结论正确的是（　）。
+
+<Option>存在可逆矩阵 $P$，使得 $P^{-1}AP$ 和 $P^{-1}A^{\mathrm T}P$ 都是对角矩阵</Option>
+<Option>$A$ 与 $A^{\mathrm T}$ 的特征向量相同</Option>
+<Option correct>$A^{\mathrm T}A$ 与 $AA^{\mathrm T}$ 的特征值相同</Option>
+<Option>$A^{\mathrm T}A$ 与 $AA^{\mathrm T}$ 的特征向量相同</Option>
+
+<Solution>
+
+**答案：C。** $\boxed{A^{\mathrm T}A\text{ 与 }AA^{\mathrm T}\text{ 的特征值相同}}$，包括重数。
+
+**过程**：利用行列式恒等式 $\det(I+UV)=\det(I+VU)$。对 $\lambda\ne0$，有
+
+$$
+\begin{aligned}
+\det(\lambda I-A^{\mathrm T}A)
+&=\lambda^n\det\left(I-\frac1\lambda A^{\mathrm T}A\right)\\
+&=\lambda^n\det\left(I-\frac1\lambda AA^{\mathrm T}\right)\\
+&=\det(\lambda I-AA^{\mathrm T}).
+\end{aligned}
+$$
+
+两边均为关于 $\lambda$ 的多项式，因此此式对一切 $\lambda$ 成立，二者的特征多项式相同。
+
+其他选项不成立：一般矩阵未必可对角化（A 错），转置不必保留特征向量（B 错）；即便二者特征值相同，特征向量也可能不同（D 错）。
+
+<Callout type="idea" title="同谱不等于同特征向量">
+
+$A^{\mathrm T}A$ 与 $AA^{\mathrm T}$ 的非零特征值是 $A$ 的奇异值平方；在本题的方阵情形下，零特征值的重数也相同。
+
+</Callout>
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-math-729cce-001" type="single">
+
+设 $ A$ 为 $ n$ 阶可逆矩阵，$ \lambda$ 是 $ A$ 的一个特征值，则伴随矩阵 $ A^\ast$ 的一个特征值是
+
+<Option>$ \lambda^{-1}|A|^{n-1}$</Option>
+<Option correct>$ \lambda^{-1}|A|$</Option>
+<Option>$ \lambda|A|$</Option>
+<Option>$ \lambda|A|^{n-1}$</Option>
+
+<Solution>
+
+设 $ \alpha\ne 0$ 是 $ A$ 属于特征值 $ \lambda$ 的特征向量，即
+
+$$
+ A\alpha=\lambda\alpha.
+$$
+
+由于 $ A$ 可逆，所以 $ \lambda\ne0$，并且
+
+$$
+ A^\ast=|A|A^{-1}.
+$$
+
+由 $ A\alpha=\lambda\alpha$ 得
+
+$$
+ A^{-1}\alpha=\lambda^{-1}\alpha.
+$$
+
+因此
+
+$$
+ A^\ast\alpha
+=|A|A^{-1}\alpha
+=\frac{|A|}{\lambda}\alpha.
+$$
+
+故 $ \alpha$ 也是 $ A^\ast$ 的特征向量，对应特征值为
+
+$$
+ \frac{|A|}{\lambda}=\lambda^{-1}|A|.
+$$
+
+选项（A）、（D）错误地将 $ |A|$ 的次数写成了 $ n-1$；选项（C）错误地把 $ \lambda^{-1}$ 写成了 $ \lambda$。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-729cce-008" type="blank">
+
+设 $ A$ 是 $ n$ 阶可逆矩阵，$ \lambda$ 是 $ A$ 的特征值，则 $ (A^\ast)^2+E$ 必有特征值 <Blank answer="\frac{|A|^2}{\lambda^2}+1" kind="text" placeholder="输入文字或 LaTeX" />。
+
+<Solution>
+
+**答案：**
+
+$$
+ \frac{|A|^2}{\lambda^2}+1.
+$$
+
+**解析：** 设 $ \alpha\ne0$ 是 $ A$ 属于特征值 $ \lambda$ 的特征向量，则
+
+$$
+ A\alpha=\lambda\alpha.
+$$
+
+由于 $ A$ 可逆，$ \lambda\ne0$，且
+
+$$
+ A^\ast=|A|A^{-1}.
+$$
+
+于是
+
+$$
+ A^{-1}\alpha=\frac1\lambda\alpha,
+$$
+
+从而
+
+$$
+ A^\ast\alpha=\frac{|A|}{\lambda}\alpha.
+$$
+
+继续作用一次 $ A^\ast$，得
+
+$$
+ (A^\ast)^2\alpha
+=\frac{|A|^2}{\lambda^2}\alpha.
+$$
+
+因此
+
+$$
+ \bigl((A^\ast)^2+E\bigr)\alpha
+=\left(\frac{|A|^2}{\lambda^2}+1\right)\alpha.
+$$
+
+故所求特征值为
+
+$$
+ \boxed{\frac{|A|^2}{\lambda^2}+1}.
+$$
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-dde9f5-005" type="single">
+
+设$A,P$都是$n$阶可逆矩阵，$\lambda,\xi$分别是$A$的特征值和对应的特征向量，则$P^{-1}A^*P$的特征值和对应的特征向量分别是( ).  
+
+<Option correct>$\frac{|A|}{\lambda},P^{-1}\xi$</Option>
+<Option>$\frac{|A|}{\lambda},\xi$</Option>
+<Option>$\frac1\lambda,P\xi$</Option>
+<Option>$\frac1\lambda,P^{-1}\xi$</Option>
+
+<Solution>
+
+因$A$可逆，
+$$
+ A^*=|A|A^{-1}.
+$$
+由$A\xi=\lambda\xi$可得
+$$
+ A^{-1}\xi=\frac1\lambda\xi,
+$$
+故
+$$
+ A^*\xi=\frac{|A|}{\lambda}\xi.
+$$
+再由相似变换，
+$$
+ (P^{-1}A^*P)(P^{-1}\xi)
+=P^{-1}A^*\xi
+=\frac{|A|}{\lambda}P^{-1}\xi.
+$$
+因此特征值为$\frac{|A|}{\lambda}$，对应特征向量为$P^{-1}\xi$，选A。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-dde9f5-021" type="essay">
+
+设$A$是3阶矩阵，$\lambda_0$是$A$的特征值，对应的特征向量为$\xi=[1,1,1]^T$，且$|A|=1$，$A^*$是$A$的伴随矩阵，
+$$
+ A^*=\begin{bmatrix}-a&1&-2\\-1&b&-\frac72\\2&-3&a\end{bmatrix},
+$$
+求$a,b$及$\lambda_0$。
+
+<Solution>
+
+**答案：**
+
+$$
+ a=0,
+\qquad b=\frac72,
+\qquad \lambda_0=-1.
+$$
+
+**解析：** 因$|A|=1$，
+$$
+ A^*=A^{-1}.
+$$
+若$A\xi=\lambda_0\xi$，则
+$$
+ A^*\xi=A^{-1}\xi=\frac1{\lambda_0}\xi.
+$$
+
+计算$A^*\xi$：
+$$
+ A^*\xi=
+\begin{bmatrix}
+-a-1\\
+b-\frac92\\
+a-1
+\end{bmatrix}.
+$$
+三个分量都应等于$\frac1{\lambda_0}$，故
+$$
+ -a-1=a-1,
+$$
+所以$a=0$。于是共同值为$-1$，从而
+$$
+ \frac1{\lambda_0}=-1,
+$$
+即$\lambda_0=-1$。
+
+再由
+$$
+ b-\frac92=-1
+$$
+得
+$$
+ b=\frac72.
+$$
+
+</Solution>
+
+</Question>
+
+## 考点2：特征子空间、秩一矩阵与特征向量线性关系
+
+<Question id="selected-1103-classified-1031-liyongle-2027-s1-q06" type="single" points={5} tags="来源:李永乐六套卷, 考点:矩阵秩与特征子空间, 难度:中等">
+
+已知 $A,B$ 为三阶方阵，满足 $AB=A-B+E$，且 $r(B-E)=2$，其中 $E$ 是三阶单位矩阵。则下列结论正确的是（　）。
+
+<Option>$r(A+E)=2$</Option>
+<Option correct>$A$ 至少有两个线性无关的属于特征值 $-1$ 的特征向量</Option>
+<Option>$B-E$ 可逆</Option>
+<Option>$AB=BA$</Option>
+
+<Solution>
+
+**答案：B。**
+
+<Steps>
+  <Step>
+
+  ### 将矩阵等式分解成零乘积
+
+  由 $AB=A-B+E$，移项并因式分解得
+
+  $$
+  \boxed{(A+E)(B-E)=O}.
+  $$
+
+  于是 $\operatorname{Im}(B-E)\subseteq\ker(A+E)$。因为 $r(B-E)=2$，故
+
+  $$
+  \dim\ker(A+E)\ge2
+  \quad\Longleftrightarrow\quad
+  r(A+E)\le1.
+  $$
+
+  </Step>
+  <Step>
+
+  ### 解释特征值 $-1$ 的几何重数
+
+  若 $\boldsymbol x\in\ker(A+E)$，则
+
+  $$
+  (A+E)\boldsymbol x=\boldsymbol0
+  \quad\Longleftrightarrow\quad
+  A\boldsymbol x=-\boldsymbol x.
+  $$
+
+  因此 $\ker(A+E)$ 就是 $A$ 对应特征值 $-1$ 的特征子空间，其维数至少为 $2$，B 正确。
+
+  </Step>
+</Steps>
+
+**其余选项**：A 与 $r(A+E)\le1$ 冲突；C 与 $r(B-E)=2<3$ 冲突。D 并不必然成立，例如取
+
+$$
+A=\begin{pmatrix}0&0&0\\0&-1&0\\0&0&-1\end{pmatrix},\qquad
+B=E+\begin{pmatrix}0&0&0\\1&0&0\\0&1&0\end{pmatrix}.
+$$
+
+此时 $(A+E)(B-E)=O$ 且 $r(B-E)=2$，但 $AB\ne BA$。
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-classified-1031-lilin-2027-s5-q07" type="single" points={5} tags="来源:李林六套卷, 考点:分块矩阵的秩与特征值, 难度:中等">
+
+设 $\alpha=(1,1)^{\mathrm T}$，$4$ 阶矩阵 $A$ 相似于
+
+$$
+B=\begin{pmatrix}
+\alpha\alpha^{\mathrm T}&O\\
+O&2\alpha\alpha^{\mathrm T}
+\end{pmatrix},
+$$
+
+$r_1=r(A)$，$r_2=r(A-E)$，$r_3=r(A-2E)$，则（　）。
+
+<Option>$r_1<r_2<r_3$</Option>
+<Option>$r_2<r_3<r_1$</Option>
+<Option>$r_3<r_1<r_2$</Option>
+<Option correct>$r_1<r_3<r_2$</Option>
+
+<Solution>
+
+**答案：D，$\boxed{r_1<r_3<r_2}$。**
+
+因为 $\alpha^{\mathrm T}\alpha=2$，秩一矩阵 $\alpha\alpha^{\mathrm T}$ 的特征值为 $2,0$；矩阵 $2\alpha\alpha^{\mathrm T}$ 的特征值为 $4,0$。分块对角矩阵 $B$ 的特征值因此为
+
+$$
+\lambda_1,\lambda_2,\lambda_3,\lambda_4=0,0,2,4.
+$$
+
+相似变换保持秩以及各特征值的几何重数。这里 $B$ 是实对称矩阵，故可对角化；计算秩只需数出对应平移特征值中的非零值：
+
+| 矩阵 | 特征值 | 秩 |
+| --- | --- | --- |
+| $A$ | $0,0,2,4$ | $r_1=2$ |
+| $A-E$ | $-1,-1,1,3$ | $r_2=4$ |
+| $A-2E$ | $-2,-2,0,2$ | $r_3=3$ |
+
+故 $\boxed{2=r_1<r_3=3<r_2=4}$，选 **D**。
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-math-dde9f5-017" type="single">
+
+已知$A$是3阶矩阵，$r(A)=1$，则$\lambda=0$是$A$的特征值，其重数( ).  
+
+<Option>必为2</Option>
+<Option correct>可能为2或3</Option>
+<Option>可能为1或2</Option>
+<Option>可能为1,2或3</Option>
+
+<Solution>
+
+由秩-零度定理，
+$$
+ \dim N(A)=3-r(A)=2.
+$$
+因此$\lambda=0$的几何重数为2，而代数重数不小于几何重数，所以0的代数重数至少为2，至多为3。
+
+两种情况都可能发生，因此选B。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-dde9f5-020" type="essay">
+
+设
+$$
+ A=E-\frac{3}{\alpha^T\alpha}\alpha\alpha^T,
+$$
+其中$E$是$n$阶单位矩阵，$\alpha=[a_1,a_2,\cdots,a_n]^T\neq0$。  
+(1)计算$A^2$，并求$A^{-1}$；  
+(2)验证$\alpha$是$A$的特征向量，并求$A$的对应于$\alpha$的特征值。
+
+<Solution>
+
+**答案：**
+
+$$
+ A^2=E+\frac{3}{\alpha^T\alpha}\alpha\alpha^T,
+$$
+$$
+ A^{-1}=E-\frac{3}{2\alpha^T\alpha}\alpha\alpha^T.
+$$
+$\alpha$是$A$的特征向量，对应特征值为$-2$。
+
+**解析：** 令
+$$
+ P=\frac{\alpha\alpha^T}{\alpha^T\alpha}.
+$$
+则
+$$
+ P^2
+=\frac{\alpha(\alpha^T\alpha)\alpha^T}{(\alpha^T\alpha)^2}=P.
+$$
+因此$A=E-3P$，从而
+$$
+ A^2=(E-3P)^2=E-6P+9P^2=E+3P,
+$$
+即
+$$
+ A^2=E+\frac{3}{\alpha^T\alpha}\alpha\alpha^T.
+$$
+
+设$A^{-1}=E+cP$，则
+$$
+ (E-3P)(E+cP)
+=E+(c-3-3c)P.
+$$
+要使其等于$E$，须有
+$$
+ c-3-3c=0,
+$$
+即$c=-\frac32$。故
+$$
+ A^{-1}=E-\frac32P
+=E-\frac{3}{2\alpha^T\alpha}\alpha\alpha^T.
+$$
+
+又
+$$
+ A\alpha
+=\alpha-\frac{3}{\alpha^T\alpha}\alpha(\alpha^T\alpha)
+=-2\alpha,
+$$
+所以$\alpha$是$A$的特征向量，对应特征值为$-2$。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-dde9f5-028" type="essay">
+
+设3阶矩阵$A$的某一行元素全是1，且$A$有3个特征向量
+$$
+ \xi_1=\begin{bmatrix}1\\0\\-1\end{bmatrix},\quad
+\xi_2=\begin{bmatrix}1\\0\\1\end{bmatrix},\quad
+\xi_3=\begin{bmatrix}1\\-1\\1\end{bmatrix},
+$$
+则$A$的迹$tr(A)=$
+
+<Solution>
+
+**答案：**
+
+$$
+ 3.
+$$
+
+**解析：** 三个特征向量线性无关，因此对应的三个特征值之和就是$tr(A)$。
+
+设全为1的是第$i$行。对任一特征向量$\xi$，该行与$\xi$的乘积等于$\xi$各分量之和，同时又等于相应特征值乘以$\xi$的第$i$个分量。
+
+三个向量的分量和分别为
+$$
+ 0,\qquad 2,\qquad 1.
+$$
+第2行不可能全为1，因为$\xi_2$第二分量为0而分量和为2，会导致$2=\lambda_2\cdot0$的矛盾。
+
+若第1行全为1，则三个特征值分别为
+$$
+ 0,2,1.
+$$
+若第3行全为1，同样得到
+$$
+ 0,2,1.
+$$
+所以无论是哪一种可能，
+$$
+ tr(A)=0+2+1=3.
+$$
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-dde9f5-029" type="essay">
+
+设
+$$
+ A=\begin{bmatrix}1&-2&3\\a_{21}&a_{22}&a_{23}\\a_{31}&a_{32}&a_{33}\end{bmatrix}
+$$
+有特征向量
+$$
+ \xi_1=\begin{bmatrix}1\\2\\1\end{bmatrix},\quad
+\xi_2=\begin{bmatrix}-1\\1\\1\end{bmatrix},\quad
+\xi_3=\begin{bmatrix}-1\\2\\2\end{bmatrix}.
+$$
+(1)求$A$的对应于$\xi_i(i=1,2,3)$的特征值；  
+(2)求$Ax=0$的通解；  
+(3)求$A$。
+
+<Solution>
+
+**答案：**
+
+(1)
+$$
+ \lambda_1=0,\qquad \lambda_2=0,\qquad \lambda_3=-1.
+$$
+
+(2)
+$$
+ x=k_1\xi_1+k_2\xi_2
+=k_1\begin{bmatrix}1\\2\\1\end{bmatrix}
++k_2\begin{bmatrix}-1\\1\\1\end{bmatrix}.
+$$
+
+(3)
+$$
+ A=\begin{bmatrix}
+1&-2&3\\
+-2&4&-6\\
+-2&4&-6
+\end{bmatrix}.
+$$
+
+**解析：** 由第一行即可确定每个特征向量对应的特征值。
+
+对$\xi_1$，第一行乘积为
+$$
+ 1-4+3=0,
+$$
+而$\xi_1$第一分量为1，故$\lambda_1=0$。
+
+对$\xi_2$，第一行乘积为
+$$
+ -1-2+3=0,
+$$
+且第一分量为$-1$，故$\lambda_2=0$。
+
+对$\xi_3$，第一行乘积为
+$$
+ -1-4+6=1.
+$$
+由于$\xi_3$第一分量为$-1$，故
+$$
+ 1=\lambda_3(-1),
+$$
+所以$\lambda_3=-1$。
+
+三个给定向量线性无关，因此$\xi_1,\xi_2$张成$N(A)$，得到(2)。
+
+令
+$$
+ P=[\xi_1,\xi_2,\xi_3],
+\qquad
+\Lambda=\operatorname{diag}(0,0,-1).
+$$
+则
+$$
+ A=P\Lambda P^{-1}.
+$$
+计算可得
+$$
+ A=\begin{bmatrix}1&-2&3\\-2&4&-6\\-2&4&-6\end{bmatrix}.
+$$
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-e2436e-025" type="single">
+
+设 $n$ 阶矩阵 $A$ 有特征值 $\lambda_1 = 1, \lambda_2 = -1$，对应的特征向量为 $\alpha_1, \alpha_2$，$k$ 为任意常数，则下列选项中正确的是 ( ).
+
+<Option>$k\alpha_1$ 必是 $A$ 的特征向量</Option>
+<Option>$\alpha_1 - \alpha_2$ 必是 $A$ 的特征向量</Option>
+<Option>$\alpha_1 + \alpha_2$ 必是 $A$ 的特征向量</Option>
+<Option correct>$\alpha_1 + \alpha_2$ 必是 $A^2$ 的特征向量</Option>
+
+<Solution>
+
+**解析：** 依题设，知 $A\alpha_1 = \alpha_1, A\alpha_2 = -\alpha_2$，则
+$$A^2\alpha_1 = A\alpha_1 = \alpha_1, \ A^2\alpha_2 = A(-\alpha_2) = -A\alpha_2 = \alpha_2,$$
+从而
+$$A^2\alpha_1 + A^2\alpha_2 = A^2(\alpha_1 + \alpha_2) = \alpha_1 + \alpha_2.$$
+
+由已知，$\alpha_1$ 与 $\alpha_2$ 线性无关，故 $\alpha_1 + \alpha_2 \neq 0$。所以，$\alpha_1 + \alpha_2$ 是 $A^2$ 的特征向量。选项 D 正确。
+
+对于选项 A：若 $k = 0$，则 $k\alpha_1 = 0$ 不是 $A$ 的特征向量。
+
+对于选项 B：用反证法，若 $\alpha_1 - \alpha_2$ 是 $A$ 的特征向量，其特征值为 $\lambda$，则 $A(\alpha_1 - \alpha_2) = \lambda(\alpha_1 - \alpha_2)$。
+又
+$$A(\alpha_1 - \alpha_2) = A\alpha_1 - A\alpha_2 = \alpha_1 - (-\alpha_2) = \alpha_1 + \alpha_2,$$
+故
+$$\alpha_1 + \alpha_2 = \lambda\alpha_1 - \lambda\alpha_2,$$
+即
+$$(1 - \lambda)\alpha_1 + (1 + \lambda)\alpha_2 = 0.$$
+由 $\alpha_1, \alpha_2$ 线性无关，知 $1 - \lambda = 0$，且 $1 + \lambda = 0$，矛盾。所以，$\alpha_1 - \alpha_2$ 不是 $A$ 的特征向量。
+
+同理可知，选项 C 不正确。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-e2436e-027" type="single">
+
+设 3 维列向量 $\alpha_1, \alpha_2, \alpha_3$ 线性无关，$A = (a_{ij})_{3\times3}$ 满足 $A\alpha_1 = \alpha_1, A\alpha_2 = \alpha_2 + \alpha_3, A\alpha_3 = \alpha_1 + \alpha_3$，$A_{ij}$ 是 $a_{ij}$ 的代数余子式，则 $A_{11} + A_{22} + A_{33} = ( \quad )$.
+
+<Option>$1$</Option>
+<Option>$2$</Option>
+<Option correct>$3$</Option>
+<Option>$4$</Option>
+
+<Solution>
+
+**解析：** 由已知, 有
+$$A(\boldsymbol{\alpha}_1, \boldsymbol{\alpha}_2, \boldsymbol{\alpha}_3) = (\boldsymbol{\alpha}_1, \boldsymbol{\alpha}_2 + \boldsymbol{\alpha}_3, \boldsymbol{\alpha}_1 + \boldsymbol{\alpha}_3) = (\boldsymbol{\alpha}_1, \boldsymbol{\alpha}_2, \boldsymbol{\alpha}_3) \begin{pmatrix} 1 & 0 & 1 \\ 0 & 1 & 0 \\ 0 & 1 & 1 \end{pmatrix}.$$
+由 $\boldsymbol{\alpha}_1, \boldsymbol{\alpha}_2, \boldsymbol{\alpha}_3$ 线性无关, 有
+$$(\boldsymbol{\alpha}_1, \boldsymbol{\alpha}_2, \boldsymbol{\alpha}_3)^{-1}A(\boldsymbol{\alpha}_1, \boldsymbol{\alpha}_2, \boldsymbol{\alpha}_3) = \begin{pmatrix} 1 & 0 & 1 \\ 0 & 1 & 0 \\ 0 & 1 & 1 \end{pmatrix} \xlongequal{\text{记}} B.$$
+由
+$$|\lambda E - B| = \begin{vmatrix} \lambda - 1 & 0 & -1 \\ 0 & \lambda - 1 & 0 \\ 0 & -1 & \lambda - 1 \end{vmatrix} = (\lambda - 1)^3 = 0,$$
+知 $B$ 的特征值为 $\lambda_1 = \lambda_2 = \lambda_3 = 1,$ 也是 $A$ 的特征值, 且 $|A| = 1,$ 从而 $A^*$ 的特征值为 $\frac{|A|}{\lambda},$ 即 $\mu_1 = \mu_2 = \mu_3 = 1.$
+故 $A_{11} + A_{22} + A_{33} = \mathrm{tr}(A^*) = \mu_1 + \mu_2 + \mu_3 = 3.$ 选项 C 正确.
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-e2436e-039" type="essay">
+
+设 $\alpha = (a_1, a_2, \cdots, a_n)^T, \beta = (b_1, b_2, \cdots, b_n)^T$ 均为非零列向量，$A = \alpha\beta^T$。
+
+$(I)$ 求 $A$ 的全部特征值；
+
+$(II)$ 问 $\alpha^T\beta$ 满足什么条件时, $A$ 可以相似于对角矩阵 $\Lambda$, 并求可逆矩阵 $P$, 使 $P^{-1}AP = \Lambda$。
+
+<Solution>
+
+**答案：** 特征值为 $\beta^T\alpha$ 与 $0$（后者重数至少 $n-1$）；$\beta^T\alpha\ne0$ 时可对角化。
+
+**解析：** (I) $A = \alpha\beta^{T} = \begin{pmatrix} a_{1} \\ a_{2} \\ \vdots \\ a_{n} \end{pmatrix} (b_{1}, b_{2}, \cdots, b_{n}) = \begin{pmatrix} a_{1}b_{1} & a_{1}b_{2} & \cdots & a_{1}b_{n} \\ a_{2}b_{1} & a_{2}b_{2} & \cdots & a_{2}b_{n} \\ \vdots & \vdots & & \vdots \\ a_{n}b_{1} & a_{n}b_{2} & \cdots & a_{n}b_{n} \end{pmatrix}$.
+
+用定义,设 $A$ 的任一个特征值为 $\lambda$,对应的特征向量为 $\xi$,则
+$$ A\xi = \alpha\beta^{T}\xi = \lambda\xi. \quad \text{①} $$
+
+①式两边左乘 $\beta^{T}$,得 $\beta^{T}\alpha\beta^{T}\xi = \lambda\beta^{T}\xi$.
+
+当 $\beta^{T}\xi \neq 0$ 时,有 $\lambda = \beta^{T}\alpha = \sum_{i=1}^{n}a_{i}b_{i}$; 当 $\beta^{T}\xi = 0$ 时,由 ① 式知 $\lambda = 0$,故 $A$ 的特征值为 $\lambda = 0$ 或 $\lambda = \beta^{T}\alpha = \sum_{i=1}^{n}a_{i}b_{i}$.
+
+(II) 当 $\beta^{T}\alpha = \sum_{i=1}^{n}a_{i}b_{i} = 0$ 时,由 (I) 知, $A$ 的全部特征值为 $\lambda = 0$ ($n$ 重根),因 $\alpha \neq 0, \beta \neq 0$,故 $A =$
+
+$\alpha \beta^{\text{T}} \neq O$. 于是 $r(A) = 1$, 但对应 $\lambda = 0$ ($n$ 重根) 的线性无关的特征向量满足 $(0E - A)x = 0$, 即 $Ax = 0$, 只有 $n - r(A) = n - 1$ 个基础解系, 即只有 $n - 1$ 个线性无关的特征向量, 故 $A$ 不能相似于对角矩阵.
+
+当 $\alpha^{\text{T}} \beta = \sum\limits_{i=1}^n a_i b_i \neq 0$ 时, 对于 $\lambda = \alpha^{\text{T}} \beta$, 由 $(\lambda E - A)\xi = (\alpha^{\text{T}} \beta E - \alpha \beta^{\text{T}})\xi = 0$, 以及
+$$(\alpha^{\text{T}} \beta E - \alpha \beta^{\text{T}})\alpha = (\alpha^{\text{T}} \beta)\alpha - \alpha(\beta^{\text{T}} \alpha) = 0,$$
+知对应的特征向量 $\xi_1 = \alpha$, 对于 $\lambda = 0$, 由 $(0E - A)\xi = 0$, 即 $A\xi = \alpha^{\text{T}} \xi = 0$, 故
+$$\beta^{\text{T}} \xi = b_1 x_1 + b_2 x_2 + \cdots + b_n x_n = 0. \quad \text{②}$$
+因 $\beta \neq 0$, 不妨设 $b_1 \neq 0$, 解方程 ② 得线性无关的特征向量为
+
+$$\begin{aligned} \xi_2 &= (b_2, -b_1, 0, \cdots, 0)^{\text{T}}, \\ \xi_3 &= (b_3, 0, -b_1, 0, \cdots, 0)^{\text{T}}, \\ &\vdots \\ \xi_n &= (b_n, 0, \cdots, 0, -b_1)^{\text{T}}. \end{aligned}$$
+
+令
+$$P = (\xi_1, \xi_2, \cdots, \xi_n) = \begin{pmatrix} a_1 & b_2 & b_3 & \cdots & b_n \\ a_2 & -b_1 & 0 & \cdots & 0 \\ a_3 & 0 & -b_1 & \cdots & 0 \\ \vdots & \vdots & \vdots & & \vdots \\ a_n & 0 & 0 & \cdots & -b_1 \end{pmatrix},$$
+
+使
+$$P^{-1}AP = \begin{pmatrix} \sum\limits_{i=1}^n a_i b_i & & & & \\ & 0 & & & \\ & & \ddots & & \\ & & & 0 & \end{pmatrix}.$$
+
+**知识点 / 技巧：** ① 此题 $A = \alpha \beta^{\text{T}}$, 显然 $r(A) = 1$, 故 $A^2 = kA$, 其中 $k = \beta^{\text{T}} \alpha = \sum\limits_{i=1}^n a_i b_i$, 即
+$$A^2 = (\beta^{\text{T}} \alpha)A.$$
+设 $A$ 的任一个特征值为 $\lambda$, 则 $A^2 - (\beta^{\text{T}} \alpha)A$ 有特征值 $\lambda^2 - (\beta^{\text{T}} \alpha)\lambda$.
+而 $A^2 - (\beta^{\text{T}} \alpha)A = O$, 故
+$$\lambda^2 - (\beta^{\text{T}} \alpha)\lambda = 0,$$
+从而 $A$ 有特征值 $\lambda = 0, \lambda = \beta^{\text{T}} \alpha = \sum\limits_{i=1}^n a_i b_i$ (这实际上是秩为 $1$ 的矩阵特征值的结论).
+
+② 求 $A$ 的特征值、特征向量的常用方法:
+(i) 当 $A$ 是具体矩阵时, 用公式 $|\lambda E - A| = 0, (\lambda E - A)x = 0$;
+(ii) 当 $A$ 是抽象矩阵时, 用定义 $A\alpha = \lambda\alpha (\alpha \neq 0)$.
+
+</Solution>
+
+</Question>
+
+## 考点3：谱的重数、循环向量与非标准基下求特征值
+
+<Question id="selected-1103-math-dde9f5-024" type="single" number={1}>
+
+设
+$$
+ A=\begin{bmatrix}1&0&a\\b&2&0\\0&c&3\end{bmatrix},
+$$
+$abc=-6$，则$A$的伴随矩阵$A^*$有非零特征值( ).  
+
+<Option>-8</Option>
+<Option>8</Option>
+<Option>-11</Option>
+<Option correct>11</Option>
+
+<Solution>
+
+计算$A$的特征多项式：
+$$
+ |\lambda E-A|
+=\lambda^3-6\lambda^2+11\lambda-(6+abc).
+$$
+由$abc=-6$得
+$$
+ |\lambda E-A|
+=\lambda(\lambda^2-6\lambda+11).
+$$
+故$A$的三个特征值为
+$$
+ 0,\quad 3+i\sqrt2,\quad 3-i\sqrt2.
+$$
+其中仅有一个特征值为0，因此$r(A)=2$，从而$r(A^*)=1$，故$A^*$恰有一个非零特征值。
+
+对于可对角化矩阵，伴随矩阵在同一特征基下的特征值是“其余特征值的乘积”。这里三个特征值互异，所以$A$在复数域可对角化，$A^*$的唯一非零特征值为
+$$
+ (3+i\sqrt2)(3-i\sqrt2)=9+2=11.
+$$
+故选D。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-dde9f5-047" type="essay">
+
+设向量组$\alpha,A\alpha,A^2\alpha$线性无关，其中$A$为3阶矩阵，$\alpha$为3维非零列向量，且
+$$
+ A^3\alpha=3A\alpha-2A^2\alpha,
+$$
+则$A$的特征值为
+
+<Solution>
+
+**答案：**
+
+$$
+ 0,1,-3.
+$$
+
+**解析：** 因$\alpha,A\alpha,A^2\alpha$线性无关，它们构成$\mathbb R^3$的一组基。题设可写成
+$$
+ (A^3+2A^2-3A)\alpha=0.
+$$
+即
+$$
+ A(A-E)(A+3E)\alpha=0.
+$$
+
+由于$\alpha$是循环向量，$\alpha,A\alpha,A^2\alpha$张成整个空间，故$A$的最小多项式次数为3，并且由上述关系可知
+$$
+ m_A(\lambda)=\lambda(\lambda-1)(\lambda+3).
+$$
+3阶矩阵的特征多项式也是3次，因此其三个特征值就是
+$$
+ 0,1,-3.
+$$
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-e2436e-031" type="blank" number={1}>
+
+设 $A$ 是 $3$ 阶方阵，$\alpha$ 为 $3$ 维列向量，$P = (\alpha, A\alpha, A^2\alpha)$ 为可逆矩阵，$B = P^{-1}AP$，且 $A^3\alpha + 2A^2\alpha = 3A\alpha$，则 $|A+E| =$ <Blank answer="-4" kind="math" />.
+
+<Solution>
+
+**答案：** $-4$
+
+**解析：** 由 $B = P^{-1}AP$, 知 $AP = PB$, 故
+$$AP = A(\alpha, A\alpha, A^2\alpha) = (A\alpha, A^2\alpha, A^3\alpha) = (A\alpha, A^2\alpha, 3A\alpha - 2A^2\alpha)$$
+$$= (\alpha, A\alpha, A^2\alpha) \begin{pmatrix} 0 & 0 & 0 \\ 1 & 0 & 3 \\ 0 & 1 & -2 \end{pmatrix} = PB,$$
+得 $B = \begin{pmatrix} 0 & 0 & 0 \\ 1 & 0 & 3 \\ 0 & 1 & -2 \end{pmatrix}$, 则
+$$|A + E| = |PBP^{-1} + PP^{-1}| = |P| \cdot |B + E| \cdot |P^{-1}|$$
+$$= |B + E| = \begin{vmatrix} 1 & 0 & 0 \\ 1 & 1 & 3 \\ 0 & 1 & -1 \end{vmatrix} = -4.$$
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-e2436e-038" type="essay">
+
+设 $A_{3\times 3}$ 有三个不同的特征值 $\lambda_1, \lambda_2, \lambda_3$，它们对应的特征向量分别为 $\alpha_1, \alpha_2, \alpha_3$，令 $\beta = \alpha_1 + \alpha_2 + \alpha_3$。
+
+$(I)$ 证明: $\beta, A\beta, A^2\beta$ 线性无关；
+
+$(II)$ 若 $A^3\beta = A\beta$，求 $r(A - E)$。
+
+<Solution>
+
+**答案：** $\beta,A\beta,A^2\beta$ 线性无关；若 $A^3\beta=A\beta$，则 $r(A-E)=2$。
+
+**解析：** (I) 用定义证.设
+$$ k_{1}\beta + k_{2}A\beta + k_{3}A^{2}\beta = 0, \quad \text{①} $$
+
+由已知有
+$$ A\beta = A(\alpha_{1} + \alpha_{2} + \alpha_{3}) = \lambda_{1}\alpha_{1} + \lambda_{2}\alpha_{2} + \lambda_{3}\alpha_{3}, $$
+$$ A^{2}\beta = \lambda_{1}^{2}\alpha_{1} + \lambda_{2}^{2}\alpha_{2} + \lambda_{3}^{2}\alpha_{3}. $$
+
+将 $\beta = \alpha_{1} + \alpha_{2} + \alpha_{3}$ 及以上两式代入 $\text{①}$ 式,整理得
+$$ (k_{1} + k_{2}\lambda_{1} + k_{3}\lambda_{1}^{2})\alpha_{1} + (k_{1} + k_{2}\lambda_{2} + k_{3}\lambda_{2}^{2})\alpha_{2} + (k_{1} + k_{2}\lambda_{3} + k_{3}\lambda_{3}^{2})\alpha_{3} = 0, $$
+
+由于 $\alpha_{1}, \alpha_{2}, \alpha_{3}$ 是不同特征值对应的特征向量,所以它们线性无关,故
+$$ \begin{cases} k_{1} + k_{2}\lambda_{1} + k_{3}\lambda_{1}^{2} = 0, \\ k_{1} + k_{2}\lambda_{2} + k_{3}\lambda_{2}^{2} = 0, \\ k_{1} + k_{2}\lambda_{3} + k_{3}\lambda_{3}^{2} = 0. \end{cases} $$
+
+其系数行列式
+$$ \begin{vmatrix} 1 & \lambda_{1} & \lambda_{1}^{2} \\ 1 & \lambda_{2} & \lambda_{2}^{2} \\ 1 & \lambda_{3} & \lambda_{3}^{2} \end{vmatrix} \neq 0, $$
+所以 $k_{1} = k_{2} = k_{3} = 0$,故 $\beta, A\beta, A^{2}\beta$ 线性无关.
+
+ (II) 由 $A^{3}\beta = A\beta$,有
+$$ A(\beta, A\beta, A^{2}\beta) = (A\beta, A^{2}\beta, A^{3}\beta) = (A\beta, A^{2}\beta, A\beta) $$
+$$ = (\beta, A\beta, A^{2}\beta)\begin{pmatrix} 0 & 0 & 0 \\ 1 & 0 & 1 \\ 0 & 1 & 0 \end{pmatrix}. $$
+
+令 $P = (\beta, A\beta, A^{2}\beta)$,故 $AP = PB$,其中 $B = \begin{pmatrix} 0 & 0 & 0 \\ 1 & 0 & 1 \\ 0 & 1 & 0 \end{pmatrix}$,即 $P^{-1}AP = B$,所以 $A - E$ 与 $B - E$ 相似,
+
+故 $r(A - E) = r(B - E)$.而
+$$ r(B - E) = r\left(\begin{pmatrix} -1 & 0 & 0 \\ 1 & -1 & 1 \\ 0 & 1 & -1 \end{pmatrix}\right) = 2, $$
+
+所以 $r(A - E) = 2$.
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-729cce-009" type="blank">
+
+已知 $ -2$ 是
+
+$$
+ A=
+\begin{bmatrix}
+0&-2&-2\\
+2&x&-2\\
+-2&2&6
+\end{bmatrix}
+$$
+
+的特征值，则 $x=$ <Blank answer="-4" kind="math" />。
+
+<Solution>
+
+**答案：**
+
+$$
+ x=-4.
+$$
+
+**解析：** 因为 $ -2$ 是 $ A$ 的特征值，所以
+
+$$
+ |A-(-2)E|=|A+2E|=0.
+$$
+
+计算
+
+$$
+ \begin{aligned}
+|A+2E|
+&=
+\begin{vmatrix}
+2&-2&-2\\
+2&x+2&-2\\
+-2&2&8
+\end{vmatrix}\\
+&=12(x+4).
+\end{aligned}
+$$
+
+因此
+
+$$
+ 12(x+4)=0,
+$$
+
+解得
+
+$$
+ \boxed{x=-4}.
+$$
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-729cce-012" type="blank">
+
+设 $ A$ 是三阶矩阵，且各行元素之和都是 $ 5$，则 $ A$ 必有特征向量 <Blank answer="\begin{bmatrix} 1\\1\\1 \end{bmatrix}" kind="text" placeholder="输入文字或 LaTeX" />。
+
+<Solution>
+
+**答案：**
+
+$$
+ \begin{bmatrix}
+1\\1\\1
+\end{bmatrix}.
+$$
+
+**解析：** 设
+
+$$
+ A=
+\begin{bmatrix}
+a_{11}&a_{12}&a_{13}\\
+a_{21}&a_{22}&a_{23}\\
+a_{31}&a_{32}&a_{33}
+\end{bmatrix}.
+$$
+
+由各行元素之和均为 $ 5$，有
+
+$$
+ a_{i1}+a_{i2}+a_{i3}=5,
+\qquad i=1,2,3.
+$$
+
+因此
+
+$$
+ A
+\begin{bmatrix}
+1\\1\\1
+\end{bmatrix}
+=
+\begin{bmatrix}
+5\\5\\5
+\end{bmatrix}
+=5
+\begin{bmatrix}
+1\\1\\1
+\end{bmatrix}.
+$$
+
+所以
+
+$$
+ \boxed{(1,1,1)^T}
+$$
+
+是 $ A$ 属于特征值 $ 5$ 的特征向量；其任一非零倍数也都是特征向量。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-729cce-022" type="essay">
+
+已知 $ \lambda_1,\lambda_2,\lambda_3$ 是 $ A$ 的特征值，$ \alpha_1,\alpha_2,\alpha_3$ 是相应的特征向量且线性无关，如 $ \alpha_1+\alpha_2+\alpha_3$ 仍是 $ A$ 的特征向量，则 $ \lambda_1=\lambda_2=\lambda_3$。
+
+<Solution>
+
+**答案：**
+
+$$
+ \boxed{\lambda_1=\lambda_2=\lambda_3}.
+$$
+
+**解析：** 因为 $ \alpha_i$ 是属于特征值 $ \lambda_i$ 的特征向量，所以
+
+$$
+ A\alpha_i=\lambda_i\alpha_i,
+\qquad i=1,2,3.
+$$
+
+又因为
+
+$$
+ \alpha_1+\alpha_2+\alpha_3
+$$
+
+仍是 $ A$ 的特征向量，所以存在特征值 $ \lambda$，使得
+
+$$
+ A(\alpha_1+\alpha_2+\alpha_3)
+=\lambda(\alpha_1+\alpha_2+\alpha_3).
+$$
+
+一方面，由矩阵乘法的线性性，
+
+$$
+ \begin{aligned}
+A(\alpha_1+\alpha_2+\alpha_3)
+&=A\alpha_1+A\alpha_2+A\alpha_3\\
+&=\lambda_1\alpha_1+\lambda_2\alpha_2+\lambda_3\alpha_3.
+\end{aligned}
+$$
+
+另一方面，
+
+$$
+ \lambda(\alpha_1+\alpha_2+\alpha_3)
+=\lambda\alpha_1+\lambda\alpha_2+\lambda\alpha_3.
+$$
+
+两式相减得
+
+$$
+ (\lambda_1-\lambda)\alpha_1
++(\lambda_2-\lambda)\alpha_2
++(\lambda_3-\lambda)\alpha_3=0.
+$$
+
+由于 $ \alpha_1,\alpha_2,\alpha_3$ 线性无关，所以各系数必须全为零，即
+
+$$
+ \lambda_1-\lambda=0,
+\qquad
+\lambda_2-\lambda=0,
+\qquad
+\lambda_3-\lambda=0.
+$$
+
+因此
+
+$$
+ \boxed{\lambda_1=\lambda_2=\lambda_3=\lambda}.
+$$
+
+</Solution>
+
+</Question>

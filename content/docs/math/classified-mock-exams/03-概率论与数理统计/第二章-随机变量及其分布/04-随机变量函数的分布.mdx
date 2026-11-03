@@ -1,0 +1,1771 @@
+---
+title: "第四节 随机变量函数的分布｜非单调变换、最值统计量与混合卷积"
+description: "仿照真题的分段映射、非单调变量变换、最值分布、独立变量卷积及离散连续混合模型，选择多层次且方法覆盖充分的高质量原题。"
+---
+
+# 第四节 随机变量函数的分布｜非单调变换、最值统计量与混合卷积
+
+依照「真题核心题目」同名小节的考点与命题风格精选 **21 道高质量模拟、练习原题**。题干、选项、答案、解析、公式及原有交互组件保持原样。
+
+## 考点1：单变量函数变换、逆映射及混合型分布
+
+<Question id="selected-1103-classified-1031-lilin-2027-s4-q09" type="single" points={5} tags="来源:李林六套卷, 考点:均匀分布与指数分布变换, 难度:中等">
+
+下列命题中正确的个数是（　）。
+
+① 设 $X\sim U(0,1)$，则 $Y=-\ln X\sim E(1)$；
+
+② 设 $X\sim U(0,1)$，则 $Y=-2\ln X\sim E\left(\frac12\right)$；
+
+③ 设 $X\sim E(2)$，则 $Y=e^{-2X}\sim U(0,1)$；
+
+④ 设 $X\sim E(2)$，则 $Y=1-e^{-2X}\sim U(0,1)$。
+
+<Option>$1$</Option>
+<Option>$2$</Option>
+<Option>$3$</Option>
+<Option correct>$4$</Option>
+
+<Solution>
+
+**答案：D（四个命题都正确）。**
+
+本题以指数分布 $E(\lambda)$ 的参数 $\lambda$ 为**率参数**，即 $P(X>x)=e^{-\lambda x}$（$x\ge0$）。
+
+<Steps>
+  <Step>
+
+  ### 验证①、②：由均匀分布得到指数分布
+
+  设 $U\sim U(0,1)$，$c>0$，$T=-c\ln U$。对 $t\ge0$，
+
+  $$
+  \begin{aligned}
+  P(T\le t)&=P\!\left(U\ge e^{-t/c}\right)\\
+  &=1-e^{-t/c}.
+  \end{aligned}
+  $$
+
+  所以 $T\sim E(1/c)$。分别取 $c=1,2$，得到①、②均正确。
+
+  </Step>
+  <Step>
+
+  ### 验证③、④：由指数分布得到均匀分布
+
+  若 $X\sim E(2)$，记 $V=e^{-2X}$。对于 $0<v<1$，
+
+  $$
+  \begin{aligned}
+  P(V\le v)
+  &=P\left(X\ge-\frac12\ln v\right)\\
+  &=e^{-2(-\frac12\ln v)}=v.
+  \end{aligned}
+  $$
+
+  因此 $V\sim U(0,1)$，③正确。又因 $1-V\sim U(0,1)$，④同样正确。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="记忆公式">
+
+若 $U\sim U(0,1)$，则 $-\frac1\lambda\ln U\sim E(\lambda)$；反过来，若 $X\sim E(\lambda)$，则 $e^{-\lambda X}\sim U(0,1)$。这也是反函数抽样的基本原理。
+
+</Callout>
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-classified-1031-lilin-2027-s4-q22" type="essay" points={12} tags="来源:李林六套卷, 考点:正态对称性与协方差, 难度:中等">
+
+设 $X\sim N(0,1)$，
+
+$$
+Y=\begin{cases}
+X,&|X|\le1,\\
+-X,&|X|>1.
+\end{cases}
+$$
+
+（Ⅰ）求 $Y$ 的分布函数；
+
+（Ⅱ）求 $\operatorname{Cov}(X-Y,XY)$。
+
+<Solution>
+
+**参考答案：**（Ⅰ）$\boxed{F_Y(y)=\Phi(y),\ y\in\mathbb R}$；（Ⅱ）$\boxed{\operatorname{Cov}(X-Y,XY)=0}$。
+
+其中 $\Phi$ 为标准正态分布函数。
+
+<Tabs items={['对称性法', '分区变换法']} defaultIndex={0}>
+  <Tab value="对称性法">
+
+  <Steps>
+    <Step>
+
+    ### Ⅰ. 利用条件对称性求分布
+
+    标准正态密度 $\phi(x)$ 是偶函数。在 $|X|\le1$ 的区间内，$Y=X$；在 $|X|>1$ 的区间内，$Y=-X$，这只是把两侧对称的尾部互换，故 $Y$ 与 $X$ 同分布。
+
+    更严格地，对任意有界可测函数 $h$，
+
+    $$
+    \begin{aligned}
+    E[h(Y)]
+    &=\int_{-1}^1h(x)\phi(x)\,\mathrm dx
+      +\int_{|x|>1}h(-x)\phi(x)\,\mathrm dx\\
+    &=\int_{-1}^1h(x)\phi(x)\,\mathrm dx
+      +\int_{|x|>1}h(x)\phi(x)\,\mathrm dx
+    =E[h(X)],
+    \end{aligned}
+    $$
+
+    第二个等号用到了换元 $x\mapsto-x$ 与 $\phi(-x)=\phi(x)$。因此 $Y\sim N(0,1)$，即 $F_Y(y)=\Phi(y)$。
+
+    </Step>
+    <Step>
+
+    ### Ⅱ. 利用奇偶性计算协方差
+
+    由 $Y(-x)=-Y(x)$，知 $Y$ 是 $X$ 的奇函数；因此 $X-Y$ 是奇函数，而 $XY$ 是偶函数。关于对称正态分布，奇函数的期望为零，故
+
+    $$
+    E(X-Y)=0,\qquad E[(X-Y)XY]=0.
+    $$
+
+    于是
+
+    $$
+    \begin{aligned}
+    \operatorname{Cov}(X-Y,XY)
+    &=E[(X-Y)XY]-E(X-Y)E(XY)\\
+    &=\boxed0.
+    \end{aligned}
+    $$
+
+    </Step>
+  </Steps>
+
+  </Tab>
+  <Tab value="分区变换法">
+
+  在 $|X|\le1$ 时 $Y=X$，在 $|X|>1$ 时 $Y=-X$，因此
+
+  $$
+  X-Y=\begin{cases}0,&|X|\le1,\\2X,&|X|>1,\end{cases}
+  \quad
+  XY=\begin{cases}X^2,&|X|\le1,\\-X^2,&|X|>1.\end{cases}
+  $$
+
+  所以
+
+  $$
+  E(X-Y)=2E[X\mathbf1_{\{|X|>1\}}]=0
+  $$
+
+  及
+
+  $$
+  E[(X-Y)XY]=-2E[X^3\mathbf1_{\{|X|>1\}}]=0,
+  $$
+
+  两式均因积分区间与密度关于原点对称、被积函数为奇函数而成立。由此协方差为 $0$。
+
+  </Tab>
+</Tabs>
+
+<Callout type="warn" title="同分布不代表独立">
+
+虽然 $Y\sim N(0,1)$，但 $Y$ 完全由 $X$ 决定，不能据此把 $X$ 与 $Y$ 当作独立变量。
+
+</Callout>
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-classified-1031-tangjiafeng-2027-s3-q22" type="essay" points={12} tags="来源:汤家凤八套卷, 考点:随机变量函数的分布与期望, 难度:中等">
+
+设随机变量 $X$ 服从参数为 $\lambda>0$ 的指数分布，令
+
+$$
+Y=\begin{cases}X,&|X|\le1,\\-X,&|X|>1.\end{cases}
+$$
+
+求：（1）$P\{X+Y=0\}$；（2）$Y$ 的分布函数；（3）$E(Y)$。
+
+<Solution>
+
+**答案：**
+
+（1）$\boxed{e^{-\lambda}}$。
+
+（2）
+
+$$
+\boxed{F_Y(y)=\begin{cases}
+e^{\lambda y},&y<-1,\\
+e^{-\lambda},&-1\le y<0,\\
+1-e^{-\lambda y}+e^{-\lambda},&0\le y<1,\\
+1,&y\ge1.
+\end{cases}}
+$$
+
+（3）$\boxed{E(Y)=\dfrac1\lambda-2e^{-\lambda}\left(1+\dfrac1\lambda\right)}$。
+
+<Steps>
+  <Step>
+
+  ### 确定事件与取值区间
+
+  指数随机变量 $X\ge0$。当 $X>1$ 时 $Y=-X$，否则 $Y=X$（$X=0$ 的概率为零），故
+
+  $$
+  P(X+Y=0)=P(X>1)=e^{-\lambda}.
+  $$
+
+  $Y$ 的取值落在 $(-\infty,-1)\cup[0,1]$。
+
+  </Step>
+  <Step>
+
+  ### 分段求分布函数
+
+  对任意实数 $y$，
+
+  $$
+  F_Y(y)=P(X\le y,\,0\le X\le1)+P(X\ge-y,\,X>1).
+  $$
+
+  当 $y<-1$ 时只有第二项且概率为 $e^{\lambda y}$；当 $-1\le y<0$ 时为 $P(X>1)=e^{-\lambda}$；当 $0\le y<1$ 时为
+
+  $$
+  P(X\le y)+P(X>1)=1-e^{-\lambda y}+e^{-\lambda}.
+  $$
+
+  当 $y\ge1$ 时概率为 $1$，得到上方分段结果。
+
+  </Step>
+  <Step>
+
+  ### 用尾部期望求 $E(Y)$
+
+  由 $Y=X-2X\mathbf1_{\{X>1\}}$，
+
+  $$
+  E(Y)=E(X)-2E[X\mathbf1_{\{X>1\}}].
+  $$
+
+  利用指数分布的密度，
+
+  $$
+  E[X\mathbf1_{\{X>1\}}]
+  =\int_1^\infty x\lambda e^{-\lambda x}\,\mathrm dx
+  =e^{-\lambda}\left(1+\frac1\lambda\right).
+  $$
+
+  再代入 $E(X)=1/\lambda$，得到第（3）问的答案。
+
+  </Step>
+</Steps>
+
+<Callout type="info" title="分布的连续性">
+
+$Y$ 在 $(-1,0)$ 上没有取值，但在 $-1$、$0$ 处也没有原子概率；因此 $F_Y$ 在两个连接点处均连续。
+
+</Callout>
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-classified-1031-tangjiafeng-2027-s6-q08" type="single" points={5} tags="来源:汤家凤八套卷, 考点:随机变量函数的分布, 难度:中等">
+
+设连续型随机变量 $X$ 的概率密度和分布函数分别为 $f(x)$、$F(x)$，令 $Y=X^2+1$。下列给出 $Y$ 的概率密度 $f_Y(y)$ 及分布函数 $F_Y(y)$ 的组合，正确的是（　）。
+
+<Option>$f_Y(y)=\begin{cases}0,&y\le1,\\\dfrac{f(\sqrt{y-1})+f(-\sqrt{y-1})}{2\sqrt{y-1}},&y>1,\end{cases}\quad F_Y(y)=\begin{cases}0,&y<1,\\\dfrac{F(\sqrt{y-1})+F(-\sqrt{y-1})}{2},&y\ge1.\end{cases}$</Option>
+<Option>$f_Y(y)=\begin{cases}0,&y\le1,\\\dfrac{f(\sqrt{y-1})+f(-\sqrt{y-1})}{2\sqrt{y-1}},&y>1,\end{cases}\quad F_Y(y)=\begin{cases}0,&y<1,\\\dfrac{F(\sqrt{y-1})-F(-\sqrt{y-1})}{2},&y\ge1.\end{cases}$</Option>
+<Option>$f_Y(y)=\begin{cases}0,&y\le1,\\\dfrac{f(\sqrt{y-1})}{\sqrt{y-1}},&y>1,\end{cases}\quad F_Y(y)=\begin{cases}0,&y<1,\\F(\sqrt{y-1})-F(-\sqrt{y-1}),&y\ge1.\end{cases}$</Option>
+<Option correct>$f_Y(y)=\begin{cases}0,&y\le1,\\\dfrac{f(\sqrt{y-1})+f(-\sqrt{y-1})}{2\sqrt{y-1}},&y>1,\end{cases}\quad F_Y(y)=\begin{cases}0,&y<1,\\F(\sqrt{y-1})-F(-\sqrt{y-1}),&y\ge1.\end{cases}$</Option>
+
+<Solution>
+
+**答案：D。**
+
+**过程：**
+
+1. **先求分布函数**。因 $Y\ge1$，当 $y<1$ 时，$F_Y(y)=0$。当 $y\ge1$ 时，
+
+   $$
+   \begin{aligned}
+   F_Y(y)&=P(X^2+1\le y)\\
+   &=P(-\sqrt{y-1}\le X\le\sqrt{y-1})\\
+   &=F(\sqrt{y-1})-F(-\sqrt{y-1}).
+   \end{aligned}
+   $$
+
+2. **再求密度**。对 $y>1$ 使用链式法则，
+
+   $$
+   \begin{aligned}
+   f_Y(y)&=f(\sqrt{y-1})\frac{1}{2\sqrt{y-1}}\\
+   &\quad-f(-\sqrt{y-1})\left(-\frac{1}{2\sqrt{y-1}}\right)\\
+   &=\frac{f(\sqrt{y-1})+f(-\sqrt{y-1})}{2\sqrt{y-1}}.
+   \end{aligned}
+   $$
+
+   对 $y<1$，密度为 $0$；在单点 $y=1$ 处如何赋值不影响连续型分布，通常约定为 $0$。
+
+<Callout type="warn" title="易错点">$x\mapsto x^2+1$ 不是一一映射。$y>1$ 时存在正负两个原像，求密度时必须将两支贡献**相加**，而不是漏掉负根或把分布函数除以 $2$。</Callout>
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-math-3c342e-025" type="blank">
+
+设$X \sim U(0,1)$，则$Y=X\ln X$的概率密度$f_Y(y)=$<Blank answer="设对每个 -\frac1e&lt;y&lt;0 ，方程 x\ln x=y 在(0,1)内的两个根分别为x_1(y)\in(0,e^{-1})和x_2(y)\in(e^{-1},1)，则 f_Y(y)= \begin{cases} \frac{1}{|1+\ln x_1(y)|}+\frac{1}{|1+\ln x_2(y)|},&amp;-\frac1e&lt;y&lt;0,\\[3mm] 0,&amp;\text{其他}. \end{cases}" kind="text" placeholder="输入文字或 LaTeX" />。
+
+<Solution>
+
+**答案：**
+
+设对每个
+
+$$
+ -\frac1e<y<0
+$$
+，方程
+$$
+ x\ln x=y
+$$
+在$(0,1)$内的两个根分别为$x_1(y)\in(0,e^{-1})$和$x_2(y)\in(e^{-1},1)$，则
+$$
+ f_Y(y)=
+\begin{cases}
+\frac{1}{|1+\ln x_1(y)|}+\frac{1}{|1+\ln x_2(y)|},&-\frac1e<y<0,\\[3mm]
+0,&\text{其他}.
+\end{cases}
+$$
+
+**解析：** 令
+$$
+ g(x)=x\ln x,\qquad 0<x<1.
+$$
+有
+$$
+ g'(x)=1+\ln x.
+$$
+故$g'(x)=0$在$x=e^{-1}$处成立，且
+$$
+ g(e^{-1})=-\frac1e,
+$$
+而
+$$
+ \lim_{x\to0^+}x\ln x=0,\qquad g(1)=0.
+$$
+因此$Y$的取值范围为
+$$
+ \left[-\frac1e,0\right),
+$$
+且对任意$-\frac1e<y<0$，方程$x\ln x=y$有两个根$x_1,x_2$。
+
+由于$X\sim U(0,1)$，有$f_X(x)=1$。对非单调变换，应把两个反函数分支的密度相加：
+$$
+ f_Y(y)
+=\sum_{i=1}^{2}f_X(x_i)\left|\frac{dx_i}{dy}\right|.
+$$
+由
+$$
+ \frac{dy}{dx}=1+\ln x,
+$$
+得
+$$
+ \left|\frac{dx_i}{dy}\right|
+=\frac1{|1+\ln x_i|}.
+$$
+于是得到上述结果。
+
+若使用Lambert $W$函数，两个根也可写为
+$$
+ x_1=e^{W_{-1}(y)},\qquad x_2=e^{W_0(y)},
+$$
+但考研解答中通常用“两根$x_1(y),x_2(y)$”表示即可。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-328a62-024" type="essay">
+
+设随机变量 $ X$ 服从 $ (0,1)$ 上的均匀分布，求下列函数的密度函数：
+
+（Ⅰ）$ Y_1=e^X$；（Ⅱ）$ Y_2=-2\ln X$；（Ⅲ）$ Y_3=\frac1X$；（Ⅳ）$ Y_4=X^2$。
+
+<Solution>
+
+**答案：**
+
+（Ⅰ）
+
+
+$$
+ f_{Y_1}(y)=\begin{cases}
+\frac1y,&1<y<e,\\[2mm]
+0,&\text{其他};
+\end{cases}
+$$
+
+（Ⅱ）
+
+$$
+ f_{Y_2}(y)=\begin{cases}
+\frac12e^{-y/2},&y>0,\\[2mm]
+0,&y\le0;
+\end{cases}
+$$
+
+（Ⅲ）
+
+$$
+ f_{Y_3}(y)=\begin{cases}
+\frac1{y^2},&y>1,\\[2mm]
+0,&y\le1;
+\end{cases}
+$$
+
+（Ⅳ）
+
+$$
+ f_{Y_4}(y)=\begin{cases}
+\frac1{2\sqrt y},&0<y<1,\\[2mm]
+0,&\text{其他}.
+\end{cases}
+$$
+
+**解析：** 由于 $ X\sim U(0,1)$，其密度为
+
+$$
+ f_X(x)=\begin{cases}
+1,&0<x<1,\\
+0,&\text{其他}.
+\end{cases}
+$$
+
+四个变换在 $ (0,1)$ 上均为严格单调函数，可以使用一维随机变量函数变换公式
+
+$$
+ f_Y(y)=f_X\bigl(x(y)\bigr)\left|\frac{dx}{dy}\right|,
+$$
+
+其中 $ x=x(y)$ 是变换的反函数。
+
+（Ⅰ）由
+
+$$
+ y=e^x
+$$
+
+可知
+
+$$
+ x=\ln y,
+\qquad
+\frac{dx}{dy}=\frac1y.
+$$
+
+当 $ 0<x<1$ 时，$ 1<y<e$。因此
+
+$$
+ f_{Y_1}(y)
+=f_X(\ln y)\left|\frac1y\right|
+=\frac1y,
+\qquad 1<y<e.
+$$
+
+（Ⅱ）由
+
+$$
+ y=-2\ln x
+$$
+
+可得
+
+$$
+ x=e^{-y/2},
+\qquad
+\frac{dx}{dy}=-\frac12e^{-y/2}.
+$$
+
+当 $ 0<x<1$ 时，$ y>0$，故
+
+$$
+ f_{Y_2}(y)
+=f_X\left(e^{-y/2}\right)
+\left|-\frac12e^{-y/2}\right|
+=\frac12e^{-y/2},
+\qquad y>0.
+$$
+
+这正是参数为 $ \frac12$ 的指数分布密度。
+
+（Ⅲ）由
+
+$$
+ y=\frac1x
+$$
+
+得
+
+$$
+ x=\frac1y,
+\qquad
+\frac{dx}{dy}=-\frac1{y^2}.
+$$
+
+当 $ 0<x<1$ 时，$ y>1$，所以
+
+$$
+ f_{Y_3}(y)
+=f_X\left(\frac1y\right)
+\left|-\frac1{y^2}\right|
+=\frac1{y^2},
+\qquad y>1.
+$$
+
+（Ⅳ）由
+
+$$
+ y=x^2
+$$
+
+且 $ x>0$，可得唯一反函数
+
+$$
+ x=\sqrt y,
+\qquad
+\frac{dx}{dy}=\frac1{2\sqrt y}.
+$$
+
+当 $ 0<x<1$ 时，$ 0<y<1$，于是
+
+$$
+ f_{Y_4}(y)
+=f_X(\sqrt y)\frac1{2\sqrt y}
+=\frac1{2\sqrt y},
+\qquad 0<y<1.
+$$
+
+各密度均满足非负性，且在各自取值范围上的积分均等于 $ 1$。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-3db062-018" type="essay">
+
+设随机变量 $X$ 服从参数为 $\lambda$ 的指数分布，记 $Y = \max\left(X, \frac{1}{X}\right)$，求 $Y$ 的分布函数.
+
+<Solution>
+
+**答案：** $F_Y(y)=\begin{cases}0,&y<1,\\e^{-\lambda/y}-e^{-\lambda y},&y\ge1.\end{cases}$
+
+**解析：** 依题设, $X$ 的概率密度为
+$$
+f(x) = \begin{cases} \lambda e^{-\lambda x}, & x > 0, \\ 0, & x \leqslant 0. \end{cases}
+$$
+$P\{X > 0\} = 1, P\{X \leqslant 0\} = 0$, 则 $Y$ 的分布函数为
+$$
+F_Y(y) = P\{Y \leqslant y\} = P\left\{\max\left(X, \frac{1}{X}\right) \leqslant y\right\}
+$$
+$$
+= P\left\{X \leqslant y, \frac{1}{X} \leqslant y, X > 0\right\}.
+$$
+
+当 $y \leqslant 0$ 时, $F_Y(y) = 0$;
+当 $0 < y < 1$ 时, 事件 $\left\{\frac{1}{X} \leqslant y, X > 0\right\} = \left\{\frac{1}{y} \leqslant X, X > 0\right\} = \left\{\frac{1}{y} \leqslant X\right\}$. 由于 $\{X \leqslant y\}$ 与 $\left\{\frac{1}{X} \leqslant y, X > 0\right\}$ 不能同时发生, 故 $F_Y(y) = 0$;
+当 $y \geqslant 1$ 时,
+$$
+F_Y(y) = P\left\{X \leqslant y, \frac{1}{y} \leqslant X, X > 0\right\} = P\left\{\frac{1}{y} \leqslant X \leqslant y\right\}
+$$
+$$
+= \int_{\frac{1}{y}}^{y} \lambda e^{-\lambda x} \mathrm{d}x = e^{-\frac{\lambda}{y}} - e^{-\lambda y}.
+$$
+
+故
+$$
+F_Y(y) = \begin{cases} e^{-\frac{\lambda}{y}} - e^{-\lambda y}, & y \geqslant 1, \\ 0, & y < 1. \end{cases}
+$$
+
+</Solution>
+
+</Question>
+
+## 考点2：极值函数、正态绝对差与次序统计量
+
+<Question id="selected-1103-classified-1031-lilin-2027-s1-q22" type="essay" points={12} tags="来源:李林六套卷, 考点:最大次序统计量, 难度:中等">
+
+随机变量 $X$ 与 $Y$ 相互独立，且均服从 $N(0,\sigma^2)$（$\sigma>0$），记 $U=\max(|X|,|Y|)$。
+
+（Ⅰ）求 $U$ 的概率密度 $g(u)$（可用变限积分表示）。
+
+（Ⅱ）求 $E(U)$。
+
+<Solution>
+
+**参考答案**：记 $\Phi$、$\varphi$ 分别为标准正态分布函数、密度函数，则
+
+$$
+g(u)=\begin{cases}
+\dfrac4\sigma\left[2\Phi\!\left(\dfrac u\sigma\right)-1\right]\varphi\!\left(\dfrac u\sigma\right),&u>0,\\[5pt]
+0,&u\le0,
+\end{cases}
+\qquad E(U)=\frac{2\sigma}{\sqrt\pi}.
+$$
+
+<Steps>
+  <Step>
+
+  ### 先求分布函数，再求密度
+
+  当 $u<0$ 时，$F_U(u)=0$。当 $u\ge0$ 时，由独立性，
+
+  $$
+  \begin{aligned}
+  F_U(u)&=P\{|X|\le u,\ |Y|\le u\}\\
+  &=P\{|X|\le u\}^2
+  =\left[2\Phi\!\left(\frac u\sigma\right)-1\right]^2.
+  \end{aligned}
+  $$
+
+  对 $u>0$ 求导，得
+
+  $$
+  g(u)=F_U'(u)=\frac4\sigma\left[2\Phi\!\left(\frac u\sigma\right)-1\right]\varphi\!\left(\frac u\sigma\right).
+  $$
+
+  若不使用 $\Phi$，也可写成
+
+  $$
+  g(u)=\frac4{\pi\sigma^2}e^{-u^2/(2\sigma^2)}
+  \int_0^u e^{-t^2/(2\sigma^2)}\,\mathrm dt,\qquad u>0.
+  $$
+
+  </Step>
+  <Step>
+
+  ### 利用绝对值恒等式求期望
+
+  对任意实数 $x,y$，均有
+
+  $$
+  \max(|x|,|y|)=\frac{|x+y|+|x-y|}{2}.
+  $$
+
+  由于 $X,Y$ 独立且同分布于 $N(0,\sigma^2)$，所以
+
+  $$
+  X+Y\sim N(0,2\sigma^2),\qquad
+  X-Y\sim N(0,2\sigma^2).
+  $$
+
+  对 $Z\sim N(0,\tau^2)$，有 $E|Z|=\tau\sqrt{2/\pi}$。因此
+
+  $$
+  \begin{aligned}
+  E(U)
+  &=\frac12\bigl(E|X+Y|+E|X-Y|\bigr)\\
+  &=\frac12\left(\frac{2\sigma}{\sqrt\pi}+\frac{2\sigma}{\sqrt\pi}\right)
+  =\frac{2\sigma}{\sqrt\pi}.
+  \end{aligned}
+  $$
+
+  </Step>
+</Steps>
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-classified-1031-lilin-2027-s5-q22" type="essay" points={12} tags="来源:李林六套卷, 考点:正态次序统计量与联合分布函数, 难度:较难">
+
+设随机变量 $X_1$ 与 $X_2$ 相互独立，且均服从 $N(0,1)$。记
+
+$$
+X=\max(X_1,X_2),\qquad Y=\min(X_1,X_2),\qquad Z=X-Y.
+$$
+
+（I）求 $Z$ 的概率密度 $f_Z(z)$ 和 $E(Z)$；
+
+（II）求二维随机变量 $(X,Y)$ 的分布函数。
+
+<Solution>
+
+**答案：**（I）$Z=|X_1-X_2|$，
+
+$$
+\boxed{f_Z(z)=\begin{cases}
+\dfrac1{\sqrt\pi}e^{-z^2/4},&z\ge0,\\
+0,&z<0,
+\end{cases}}
+\qquad\boxed{E(Z)=\dfrac2{\sqrt\pi}}.
+$$
+
+（II）记 $\Phi$ 为标准正态分布函数，则
+
+$$
+\boxed{F_{X,Y}(x,y)=\begin{cases}
+\Phi(x)^2,&y\ge x,\\
+\Phi(x)^2-[\Phi(x)-\Phi(y)]^2,&y<x.
+\end{cases}}
+$$
+
+<Steps>
+  <Step>
+
+  ### （I）将极差化为半正态分布
+
+  由最大值与最小值的定义，
+
+  $$
+  Z=\max(X_1,X_2)-\min(X_1,X_2)=|X_1-X_2|.
+  $$
+
+  独立正态变量之差 $W=X_1-X_2\sim N(0,2)$，其密度为
+
+  $$
+  f_W(w)=\frac1{2\sqrt\pi}e^{-w^2/4}.
+  $$
+
+  对 $z>0$，绝对值变量的密度为两侧密度之和：
+
+  $$
+  f_Z(z)=f_W(z)+f_W(-z)=\frac1{\sqrt\pi}e^{-z^2/4}.
+  $$
+
+  进一步，
+
+  $$
+  E(Z)=\frac1{\sqrt\pi}\int_0^\infty z e^{-z^2/4}\,\mathrm dz
+  =\boxed{\frac2{\sqrt\pi}}.
+  $$
+
+  </Step>
+  <Step>
+
+  ### （II）先限制最大值，再减去最小值不达标的事件
+
+  $X\le x$ 当且仅当 $X_1\le x$ 且 $X_2\le x$。于是
+
+  $$
+  F_{X,Y}(x,y)=P(X\le x,\ Y\le y).
+  $$
+
+  - 当 $y\ge x$ 时，$Y\le X\le x\le y$ 恒成立，故 $F_{X,Y}(x,y)=\Phi(x)^2$。
+  - 当 $y<x$ 时，从两者都不大于 $x$ 的事件中，扣去二者都落在 $(y,x]$（即 $Y>y$）的事件，由独立性得
+
+  $$
+  \begin{aligned}
+  F_{X,Y}(x,y)
+   &=P(X_1\le x,X_2\le x)-P(y<X_1\le x,\ y<X_2\le x)\\
+   &=\Phi(x)^2-[\Phi(x)-\Phi(y)]^2\\
+   &=2\Phi(x)\Phi(y)-\Phi(y)^2.
+  \end{aligned}
+  $$
+
+  两式在 $y=x$ 处吻合，即得所求联合分布函数。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="更一般的极值分布法">
+
+独立同分布样本的最大值满足 $P(\max_i X_i\le x)=F(x)^n$。求“最大值与最小值”的联合分布函数时，再排除所有样本同时落在 $(y,x]$ 的事件，是最直接的方法。
+
+</Callout>
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-classified-1031-liyongle-2027-s5-q16" type="blank" points={5} tags="来源:李永乐六套卷, 考点:次序统计量与二项分布, 难度:基础">
+
+随机变量 $X_1,X_2,X_3$ 相互独立且同分布，其分布函数为
+
+$$
+F(x)=\begin{cases}0,&x\le0,\\x^2,&0<x<1,\\1,&x\ge1.\end{cases}
+$$
+
+记 $Z$ 为三者的**次大值**，则 $P\{Z>\tfrac12\}=$ <Blank answer="27/32" kind="math" />。
+
+<Solution>
+
+**答案：** $\boxed{\dfrac{27}{32}}$。
+
+单个样本超过 $1/2$ 的概率为
+
+$$
+p=P\left\{X_i>\frac12\right\}=1-F\left(\frac12\right)=\frac34.
+$$
+
+$Z>1/2$ 等价于三个样本中**至少两个**超过 $1/2$。令 $N=\sum_{i=1}^3\mathbf1_{\{X_i>1/2\}}$，则 $N\sim B(3,3/4)$。因此
+
+$$
+\begin{aligned}
+P\left\{Z>\frac12\right\}
+&=P(N=2)+P(N=3)\\
+&=\binom32\left(\frac34\right)^2\left(\frac14\right)
++\left(\frac34\right)^3\\
+&=\frac{27}{64}+\frac{27}{64}=\boxed{\frac{27}{32}}.
+\end{aligned}
+$$
+
+<Callout type="idea" title="次大值判别">三个数的次大值超过阈值，当且仅当至少两个数超过该阈值。</Callout>
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-classified-1031-tangjiafeng-2027-s2-q08" type="single" points={5} tags="来源:汤家凤八套卷, 考点:独立随机变量最小值分布, 难度:基础">
+
+设随机变量 $X\sim U(-1,3)$，$Y$ 的概率密度为
+
+$$
+f_Y(y)=\begin{cases}2e^{2(1-y)},&y>1,\\0,&y\le1.\end{cases}
+$$
+
+已知 $X,Y$ 独立，令 $Z=\min\{X,Y\}$，则 $P\{0<Z\le2\}=$（　）。
+
+<Option>$\dfrac1{e^2}$</Option>
+<Option>$\dfrac12-\dfrac1{2e^2}$</Option>
+<Option correct>$\dfrac34-\dfrac1{4e^2}$</Option>
+<Option>$\dfrac2{e^2}$</Option>
+
+<Solution>
+
+**答案：C。**$\boxed{\dfrac34-\dfrac1{4e^2}}$。
+
+**过程**：对最小值，优先求右尾概率：
+
+$$
+P(Z>t)=P(X>t,Y>t)=P(X>t)P(Y>t).
+$$
+
+因为 $Y>1$ 几乎处处成立，
+
+$$
+P(Z>0)=P(X>0)=\frac{3-0}{3-(-1)}=\frac34.
+$$
+
+另一方面，
+
+$$
+P(X>2)=\frac14,\qquad
+P(Y>2)=\int_2^{+\infty}2e^{-2(y-1)}\,dy=e^{-2}.
+$$
+
+所以
+
+$$
+P(0<Z\le2)=P(Z>0)-P(Z>2)
+=\boxed{\frac34-\frac1{4e^2}}.
+$$
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-math-cd3f5c-027" type="essay">
+
+设随机变量 $X$ 和 $Y$ 都在 $[a,b]$ 上服从均匀分布，且 $X$ 与 $Y$ 相互独立.求:
+(I) $Z_1=\max\{X,Y\}$ 和 $Z_2=\min\{X,Y\}$ 的概率密度;
+(II) $(Z_1,Z_2)$ 的联合概率密度.
+
+<Solution>
+
+**答案：** 见解析
+
+**解析：** (I) 依题设，$X$ 与 $Y$ 的分布函数分别为
+$$
+F_X(x) = \int_{-\infty}^{x} f(t) \mathrm{d}t = \begin{cases} 0, & x < a, \\ \dfrac{x - a}{b - a}, & a \leqslant x < b, \\ 1, & x \geqslant b, \end{cases}
+$$
+$$
+F_Y(y) = \int_{-\infty}^{y} f(t) \mathrm{d}t = \begin{cases} 0, & y < a, \\ \dfrac{y - a}{b - a}, & a \leqslant y < b, \\ 1, & y \geqslant b, \end{cases}
+$$
+
+$Z_1$ 的分布函数为
+
+$$
+\begin{aligned}
+F_{Z_1}(z) &= P\{Z_1 \leqslant z\} = P\{\max\{X, Y\} \leqslant z\} \\
+&= P\{X \leqslant z, Y \leqslant z\} = P\{X \leqslant z\} \cdot P\{Y \leqslant z\}.
+\end{aligned}
+$$
+
+当 $a \leqslant z \leqslant b$ 时，
+$$
+F_{Z_1}(z) = \frac{z - a}{b - a} \cdot \frac{z - a}{b - a} = \left(\frac{z - a}{b - a}\right)^2;
+$$
+
+当 $z < a$ 时，$F_{Z_1}(z) = 0$；当 $z > b$ 时，$F_{Z_1}(z) = 1$，故
+$$
+F_{Z_1}(z) = \begin{cases} 0, & z < a, \\ \left(\dfrac{z - a}{b - a}\right)^2, & a \leqslant z < b, \\ 1, & z \geqslant b, \end{cases}
+$$
+$$
+f_{Z_1}(z) = F_{Z_1}'(z) = \begin{cases} \dfrac{2(z - a)}{(b - a)^2}, & a \leqslant z \leqslant b, \\ 0, & \text{其他}. \end{cases}
+$$
+
+$Z_2$ 的分布函数为
+
+$$
+\begin{aligned}
+F_{Z_2}(z) &= P\{Z_2 \leqslant z\} = 1 - P\{Z_2 > z\} = 1 - P\{\min\{X, Y\} > z\} \\
+&= 1 - P\{X > z, Y > z\} = 1 - [1 - P\{X \leqslant z\}]^2 \\
+&= \begin{cases} 0, & z < a, \\ 1 - \left(1 - \dfrac{z - a}{b - a}\right)^2, & a \leqslant z < b, \\ 1, & z \geqslant b, \end{cases}
+\end{aligned}
+$$
+
+$$
+f_{Z_2}(z) = F_{Z_2}'(z) = \begin{cases} \dfrac{2(b - z)}{(b - a)^2}, & a \leqslant z \leqslant b, \\ 0, & \text{其他}. \end{cases}
+$$
+
+(II) 由于
+
+$$
+Z_1=\max\{X,Y\},\qquad Z_2=\min\{X,Y\},
+$$
+
+必有 $Z_2\leqslant Z_1$。当 $a<z_2<z_1<b$ 时，$(Z_1,Z_2)=(z_1,z_2)$ 对应原变量的两种排列：$(X,Y)=(z_1,z_2)$ 或 $(z_2,z_1)$。
+
+又因为 $X,Y$ 相互独立且都服从 $U(a,b)$，所以
+
+$$
+f_{X,Y}(x,y)=\frac{1}{(b-a)^2},\qquad a<x<b,\ a<y<b.
+$$
+
+因此 $(Z_1,Z_2)$ 的联合概率密度为
+
+$$
+f_{Z_1,Z_2}(z_1,z_2)=
+\begin{cases}
+\dfrac{2}{(b-a)^2}, & a<z_2<z_1<b, \\
+0, & \text{其他}.
+\end{cases}
+$$
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-78e870-029" type="essay">
+
+设$X_0,X_1,X_2,\cdots,X_n$是来自总体$X$的简单随机样本，$Y=\frac{1}{\max\limits_{1 \leq i \leq n}\{X_i\}}$，已知$X$的概率密度为$f(x)=\begin{cases}e^{-x},&x>0\\0,&x \leq 0\end{cases}$。
+(1) 求$Y$的分布函数；
+(2) 求$P\{X_0Y-X_0-Y+1<0\}$。
+
+<Solution>
+
+**答案：**
+
+(1)
+$$
+ F_Y(y)=
+\begin{cases}
+0,&y\le0,\\[1mm]
+1-\left(1-e^{-1/y}\right)^n,&y>0.
+\end{cases}
+$$
+
+(2)
+$$
+ P\{X_0Y-X_0-Y+1<0\}
+=e^{-1}+(1-2e^{-1})(1-e^{-1})^n.
+$$
+
+**解析：** 令
+$$
+ M=\max_{1\le i\le n}X_i,
+$$
+则$Y=1/M$。
+
+(1) 对$y>0$，
+$$
+ F_Y(y)=P\left\{\frac1M\le y\right\}
+=P\left\{M\ge\frac1y\right\}.
+$$
+又
+$$
+ P\left\{M<\frac1y\right\}
+=\left[P\left\{X_1<\frac1y\right\}\right]^n
+=\left(1-e^{-1/y}\right)^n,
+$$
+故得到答案。
+
+(2) 因
+$$
+ X_0Y-X_0-Y+1=(X_0-1)(Y-1),
+$$
+所求事件为两个因子异号：
+$$
+ \{X_0>1,Y<1\}\cup\{X_0<1,Y>1\}.
+$$
+由于$X_0$与$Y$独立，
+$$
+ P\{X_0>1\}=e^{-1},\qquad P\{X_0<1\}=1-e^{-1}.
+$$
+又
+$$
+ P\{Y>1\}=P\{M<1\}=(1-e^{-1})^n,
+$$
+$$
+ P\{Y<1\}=1-(1-e^{-1})^n.
+$$
+所以
+$$
+ P=e^{-1}\left[1-(1-e^{-1})^n\right]
++(1-e^{-1})(1-e^{-1})^n,
+$$
+整理即得
+$$
+ P=e^{-1}+(1-2e^{-1})(1-e^{-1})^n.
+$$
+
+</Solution>
+
+</Question>
+
+## 考点3：独立卷积、离散连续叠加及随机阈值变换
+
+<Question id="selected-1103-classified-1031-math-66038b-022" type="essay" points={12} tags="来源:张宇8套卷">
+
+快递驿站有 2 个打包台，同时来了 3 位寄件人：$A$ 和 $B$ 先在两个打包台打包快递，$C$ 需要等其中一个打包台空闲后，再开始打包。已知每个人的打包时间相互独立，且都服从参数为 $\lambda$（$\lambda>0$）的指数分布，求寄件人 $C$ 从进入驿站到打包完成离开的总时间 $T$ 的概率密度。
+
+<Solution>
+
+**答案：** 见解析
+
+**解析：** 设三位寄件人的打包时间分别为
+
+$$
+X_i\qquad(i=1,2,3),
+$$
+
+则 $X_1,X_2,X_3$ 相互独立，且均服从参数为 $\lambda$ 的指数分布，概率密度为
+
+$$
+f_i(x)=
+\begin{cases}
+\lambda e^{-\lambda x},&x>0,\\
+0,&x\le0.
+\end{cases}
+$$
+
+**（4 分）**
+
+寄件人 $C$ 的总等待加打包时间为
+
+$$
+T=\min\{X_1,X_2\}+X_3.
+$$
+
+记
+
+$$
+Y=\min\{X_1,X_2\}.
+$$
+
+当 $t>0$ 时，
+
+$$
+\begin{aligned}
+G(t)
+&=P\{Y\le t\}\\
+&=1-P\{Y>t\}\\
+&=1-P\{X_1>t\}P\{X_2>t\}\\
+&=1-e^{-2\lambda t}.
+\end{aligned}
+$$
+
+因此 $Y$ 的概率密度为
+
+$$
+g(t)=
+\begin{cases}
+2\lambda e^{-2\lambda t},&t>0,\\
+0,&t\le0.
+\end{cases}
+$$
+
+**（8 分）**
+
+由于 $Y$ 与 $X_3$ 独立，由卷积公式，$T=Y+X_3$ 的概率密度为
+
+$$
+\begin{aligned}
+f_T(t)
+&=\int_{-\infty}^{+\infty}g(x)f_3(t-x)\,dx\\
+&=
+\begin{cases}
+\displaystyle\int_0^t2\lambda e^{-2\lambda x}\cdot
+\lambda e^{-\lambda(t-x)}\,dx,&t>0,\\[8pt]
+0,&t\le0
+\end{cases}\\
+&=
+\begin{cases}
+\displaystyle2\lambda e^{-\lambda t}
+\int_0^t\lambda e^{-\lambda x}\,dx,&t>0,\\[8pt]
+0,&t\le0
+\end{cases}\\
+&=
+\begin{cases}
+2\lambda e^{-\lambda t}(1-e^{-\lambda t}),&t>0,\\
+0,&t\le0.
+\end{cases}
+\end{aligned}
+$$
+
+故
+
+$$
+\boxed{
+f_T(t)=
+\begin{cases}
+2\lambda e^{-\lambda t}(1-e^{-\lambda t}),&t>0,\\
+0,&t\le0.
+\end{cases}}
+$$
+
+**（12 分）**
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-classified-1031-math-56d40c-022" type="essay" points={12} tags="来源:张宇8套卷">
+
+某通信网络中，数据传输过程需经过 3 个独立的中间结点，每个结点的处理延迟时间（单位：秒）服从参数为 $\lambda$ 的指数分布，平均延迟为 $0.2$ 秒，总延迟时间 $X$ 为 3 个结点延迟时间之和。
+
+（1）求 $X$ 的概率密度；
+
+（2）计算
+
+$$
+P\{X<0.5\}.
+$$
+
+<Solution>
+
+**答案：** 见解析
+
+**解析：** 设三个结点的延迟时间为
+
+$$
+X_1,X_2,X_3,
+$$
+
+则它们相互独立且均服从参数为 $\lambda$ 的指数分布，
+
+$$
+X=X_1+X_2+X_3.
+$$
+
+#### （1）求 $X$ 的概率密度
+
+先令
+
+$$
+Y=X_1+X_2.
+$$
+
+由卷积公式，
+
+$$
+f_Y(y)=
+\begin{cases}
+\displaystyle\int_0^y\lambda e^{-\lambda u}\lambda e^{-\lambda(y-u)}du
+=\lambda^2ye^{-\lambda y},&y\ge0,\\[8pt]
+0,&y<0.
+\end{cases}
+$$
+
+再由 $X=Y+X_3$，
+
+$$
+\begin{aligned}
+f_X(x)
+&=\int_0^x\lambda^2ye^{-\lambda y}\lambda e^{-\lambda(x-y)}dy\\
+&=\frac{\lambda^3x^2}{2}e^{-\lambda x},\qquad x\ge0.
+\end{aligned}
+$$
+
+所以
+
+$$
+f_X(x)=
+\begin{cases}
+\displaystyle\frac{\lambda^3x^2}{2}e^{-\lambda x},&x\ge0,\\[6pt]
+0,&x<0.
+\end{cases}
+$$
+
+又平均延迟为 $0.2$ 秒，所以
+
+$$
+\frac1\lambda=0.2,
+$$
+
+即
+
+$$
+\lambda=5.
+$$
+
+因此
+
+$$
+\boxed{
+f_X(x)=
+\begin{cases}
+\displaystyle\frac{125}{2}x^2e^{-5x},&x\ge0,\\[6pt]
+0,&x<0.
+\end{cases}}
+$$
+
+#### （2）计算 $P\{X<0.5\}$
+
+$$
+\begin{aligned}
+P\{X<0.5\}
+&=\int_0^{0.5}\frac{125}{2}x^2e^{-5x}dx\\
+&=\frac12\int_0^{2.5}t^2e^{-t}dt\\
+&=1-\frac{53}{8}e^{-2.5}.
+\end{aligned}
+$$
+
+故
+
+$$
+\boxed{P\{X<0.5\}=1-\frac{53}{8}e^{-2.5}}.
+$$
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-classified-1031-tangjiafeng-2027-s5-q22" type="essay" points={12} tags="来源:汤家凤八套卷, 考点:离散与连续随机变量之和, 难度:中等">
+
+设随机变量 $X$ 的分布律为
+
+$$
+P(X=0)=\frac14,\qquad P(X=1)=\frac12,\qquad P(X=2)=\frac14,
+$$
+
+随机变量 $Y$ 的概率密度为
+
+$$
+f_Y(y)=\begin{cases}2y,&0<y<1,\\0,&\text{其他},\end{cases}
+$$
+
+且 $X$ 与 $Y$ 相互独立。求 $Z=X+Y$ 的分布函数。
+
+<Solution>
+
+**答案：**
+
+$$
+\boxed{
+F_Z(z)=\begin{cases}
+0,&z<0,\\
+\dfrac14z^2,&0\le z<1,\\
+\dfrac14+\dfrac12(z-1)^2,&1\le z<2,\\
+\dfrac34+\dfrac14(z-2)^2,&2\le z<3,\\
+1,&z\ge3.
+\end{cases}}
+$$
+
+**过程**：独立性允许按 $X$ 的三个取值分层。先由密度积分得
+
+$$
+F_Y(t)=\begin{cases}0,&t\le0,\\t^2,&0<t<1,\\1,&t\ge1.\end{cases}
+$$
+
+对任意实数 $z$，由全概率公式，
+
+$$
+\begin{aligned}
+F_Z(z)&=P(X+Y\le z)
+=\sum_{k=0}^2P(X=k)P(Y\le z-k)\\
+&=\frac14F_Y(z)+\frac12F_Y(z-1)+\frac14F_Y(z-2).
+\end{aligned}
+$$
+
+分段代入：
+
+| $z$ 的范围 | 有贡献的取值 | $F_Z(z)$ |
+| --- | --- | --- |
+| $z<0$ | 无 | $0$ |
+| $0\le z<1$ | $X=0$ | $\frac14z^2$ |
+| $1\le z<2$ | $X=0,1$ | $\frac14+\frac12(z-1)^2$ |
+| $2\le z<3$ | $X=0,1,2$ | $\frac34+\frac14(z-2)^2$ |
+| $z\ge3$ | 全部 | $1$ |
+
+在 $z=1,2,3$ 处左右表达式衔接连续，且两端分别为 $0$、$1$，得到上述分布函数。
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-classified-1031-math-6d85d7-022" type="essay" points={12} tags="来源:张宇8套卷">
+
+一给水设备每次供水时间为 2 小时，已知该设备启动时发生故障的概率为 $p$。一旦设备启动，它的无故障工作时间 $X$ 服从指数分布，平均无故障工作时间 $(EX)$ 为 10 小时。试求设备每次启动无故障工作时间 $Y$ 的分布函数 $F_Y(y)$。
+
+<Solution>
+
+**答案：** 见解析
+
+**解析：** 设事件 $A$ 表示“设备启动时发生故障”，则
+
+$$
+P(A)=p,
+\qquad P(\bar A)=1-p.
+$$
+
+设备每次最多工作 2 小时，因此
+
+$$
+Y=\min\{X,2\}
+=
+\begin{cases}
+X,&X<2,\\
+2,&X\ge2.
+\end{cases}
+$$
+
+在设备成功启动的条件下，$X$ 服从平均寿命为 10 的指数分布，所以
+
+$$
+\lambda=\frac1{EX}=\frac1{10}=0.1,
+$$
+
+且
+
+$$
+P\{X\le x\mid\bar A\}
+=
+\begin{cases}
+0,&x\le0,\\
+1-e^{-0.1x},&x>0.
+\end{cases}
+$$
+
+当 $y<0$ 时，显然
+
+$$
+F_Y(y)=0.
+$$
+
+当 $0\le y<2$ 时，
+
+$$
+\begin{aligned}
+F_Y(y)
+&=P\{Y\le y\}\\
+&=P\{X\le y\}\\
+&=P(A)+P(\bar A)P\{0\le X\le y\mid\bar A\}\\
+&=p+(1-p)(1-e^{-0.1y})\\
+&=1-(1-p)e^{-0.1y}.
+\end{aligned}
+$$
+
+当 $y\ge2$ 时，$Y\le2$ 恒成立，故
+
+$$
+F_Y(y)=1.
+$$
+
+因此
+
+$$
+\boxed{
+F_Y(y)=
+\begin{cases}
+0,&y<0,\\
+1-(1-p)e^{-0.1y},&0\le y<2,\\
+1,&y\ge2.
+\end{cases}}
+$$
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-classified-1031-liyongle-2027-s4-q22" type="essay" points={12} tags="来源:李永乐六套卷, 考点:随机变量函数分布与协方差, 难度:中等">
+
+设随机变量 $(X,Y)$ 的联合概率密度为
+
+$$
+f_{X,Y}(x,y)=
+\begin{cases}
+\dfrac2\pi(x^2+y^2),&x^2+y^2<1,\\
+0,&\text{其他}.
+\end{cases}
+$$
+
+令 $U=X^2+Y^2$、$Z=\begin{cases}1,&X\ge Y,\\-1,&X<Y,\end{cases}$ 及 $T=UZ$。
+
+（1）求 $T$ 的概率密度；（2）求 $\operatorname{Cov}(T,Z)$。
+
+<Solution>
+
+**答案：**
+
+$$
+\boxed{f_T(t)=\begin{cases}|t|,&-1<t<1,\\0,&\text{其他},\end{cases}}
+\qquad
+\boxed{\operatorname{Cov}(T,Z)=\frac23}.
+$$
+
+<Steps>
+  <Step>
+
+  ### 先求半径平方 $U$ 的分布
+
+  由极坐标变换 $x=r\cos\theta$、$y=r\sin\theta$，有
+
+  $$
+  f_{R,\Theta}(r,\theta)=\frac2\pi r^3,
+  \qquad0<r<1,\ 0\le\theta<2\pi.
+  $$
+
+  对 $0\le u\le1$，
+
+  $$
+  F_U(u)=\frac2\pi\int_0^{2\pi}\!\mathrm d\theta
+  \int_0^{\sqrt u}r^3\,\mathrm dr=u^2.
+  $$
+
+  因此
+
+  $$
+  f_U(u)=\begin{cases}2u,&0<u<1,\\0,&\text{其他}.
+  \end{cases}
+  $$
+
+  </Step>
+  <Step>
+
+  ### 利用角度对称性求 $T$ 的分布
+
+  联合密度仅依赖于 $r$，因此角度在 $[0,2\pi)$ 上均匀分布且与 $U$ 独立。直线 $x=y$ 将单位圆盘分成面积与概率各占一半的两部分，故
+
+  $$
+  P(Z=1)=P(Z=-1)=\frac12,
+  $$
+
+  且 $Z$ 与 $U$ 独立。由 $T=U$（当 $Z=1$）和 $T=-U$（当 $Z=-1$），
+
+  $$
+  f_T(t)=\begin{cases}
+  \frac12f_U(t)=t,&0<t<1,\\
+  \frac12f_U(-t)=-t,&-1<t<0,\\
+  0,&\text{其他}.
+  \end{cases}
+  $$
+
+  合并即得 $\boxed{f_T(t)=|t|\ (|t|<1)}$，其余处为 $0$。
+
+  </Step>
+  <Step>
+
+  ### 求协方差
+
+  由 $P(Z=\pm1)=1/2$，$E(Z)=0$；又因 $Z^2\equiv1$，有 $TZ=UZ^2=U$。故
+
+  $$
+  \begin{aligned}
+  \operatorname{Cov}(T,Z)
+  &=E(TZ)-E(T)E(Z)\\
+  &=E(U)=\int_0^1u\cdot2u\,\mathrm du
+  =\boxed{\frac23}.
+  \end{aligned}
+  $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="对称性可省去二维积分">先把变量分成径向量 $U$ 和只依赖角度的符号 $Z$，再利用二者独立；协方差则用 $TZ=U$ 一步化简。</Callout>
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-classified-1031-tangjiafeng-2027-s6-q22" type="essay" points={12} tags="来源:汤家凤八套卷, 考点:条件密度与相关系数, 难度:较难">
+
+设 $X\sim U(1,4)$；已知 $X=x$（$1<x<4$）时，$Y$ 的条件密度为
+
+$$
+f_{Y\mid X}(y\mid x)=\begin{cases}\dfrac{3y^2}{x^3},&0<y<x,\\0,&\text{其他}.
+\end{cases}
+$$
+
+（1）求 $Y$ 的密度 $f_Y(y)$；（2）求 $X,Y$ 的相关系数；（3）令 $Z=X-Y$，求其分布函数。
+
+<Solution>
+
+**答案：**
+
+$$
+f_Y(y)=\begin{cases}\dfrac{15y^2}{32},&0<y<1,\\\dfrac{16-y^2}{32},&1\le y<4,\\0,&\text{其他};\end{cases}
+$$
+
+$$
+\rho_{XY}=\boxed{\frac{3\sqrt5}{\sqrt{73}}},
+$$
+
+$$
+F_Z(z)=\begin{cases}
+0,&z<0,\\
+z\ln4-\dfrac{3z^2}{4}+\dfrac{5z^3}{32},&0\le z<1,\\
+-\dfrac13-\dfrac z2+z\ln4-z\ln z+\dfrac{z^2}{4}-\dfrac{z^3}{96},&1\le z<4,\\
+1,&z\ge4.
+\end{cases}
+$$
+
+**过程：**
+
+<Steps>
+  <Step>
+
+  ### 求联合密度与边缘密度
+
+  由于 $f_X(x)=1/3$（$1<x<4$），可得
+
+  $$
+  f_{X,Y}(x,y)=\begin{cases}\dfrac{y^2}{x^3},&1<x<4,\ 0<y<x,\\0,&\text{其他} .\end{cases}
+  $$
+
+  固定 $y$ 后，$x$ 的积分下限为 $\max\{1,y\}$：
+
+  $$
+  f_Y(y)=y^2\int_{\max\{1,y\}}^4x^{-3}\,\mathrm dx,
+  \qquad 0<y<4.
+  $$
+
+  在 $y=1$ 处分段即可得到所求密度。
+
+  </Step>
+  <Step>
+
+  ### 利用条件矩计算相关系数
+
+  对 $k>-3$，条件矩为
+
+  $$
+  E(Y^k\mid X=x)=\int_0^x y^k\frac{3y^2}{x^3}\,\mathrm dy
+  =\frac{3x^k}{k+3}.
+  $$
+
+  因 $E(X)=5/2$、$E(X^2)=7$，于是
+
+  $$
+  \begin{aligned}
+  E(Y)&=\tfrac34E(X)=\tfrac{15}8,\\
+  E(Y^2)&=\tfrac35E(X^2)=\tfrac{21}5,\\
+  E(XY)&=\tfrac34E(X^2)=\tfrac{21}4.
+  \end{aligned}
+  $$
+
+  因此
+
+  $$
+  D(X)=\tfrac34,\quad D(Y)=\tfrac{219}{320},\quad
+  \operatorname{Cov}(X,Y)=\tfrac9{16},
+  $$
+
+  并得到 $\rho_{XY}=\dfrac{9/16}{\sqrt{(3/4)(219/320)}}=\dfrac{3\sqrt5}{\sqrt{73}}$。
+
+  </Step>
+  <Step>
+
+  ### 条件化计算 $Z=X-Y$ 的分布函数
+
+  给定 $X=x$，$Z$ 位于 $(0,x)$，且在 $0\le z<x$ 时
+
+  $$
+  \begin{aligned}
+  P(Z\le z\mid X=x)&=P(Y\ge x-z\mid X=x)\\
+  &=1-\left(\frac{x-z}{x}\right)^3.
+  \end{aligned}
+  $$
+
+  当 $0\le z<1$，所有 $x\in(1,4)$ 都大于 $z$，故
+
+  $$
+  \begin{aligned}
+  F_Z(z)&=\frac13\int_1^4\left[1-\left(1-\frac zx\right)^3\right]\mathrm dx\\
+  &=z\ln4-\frac{3z^2}4+\frac{5z^3}{32}.
+  \end{aligned}
+  $$
+
+  当 $1\le z<4$，对 $x\le z$ 有 $P(Z\le z\mid X=x)=1$，故宜采用补事件：
+
+  $$
+  \begin{aligned}
+  F_Z(z)&=1-\frac13\int_z^4\left(1-\frac zx\right)^3\mathrm dx\\
+  &=-\frac13-\frac z2+z\ln4-z\ln z+\frac{z^2}{4}-\frac{z^3}{96}.
+  \end{aligned}
+  $$
+
+  最后结合 $0<Z<4$ 得到两端区间的表达式。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="分段依据">$X$ 的取值范围是 $(1,4)$。当 $z$ 穿过 $1$ 时，条件事件 $Z\le z$ 的积分范围改变，因此 $F_Z$ 必须分段。</Callout>
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-math-3ab794-020" type="essay">
+
+设随机变量 $ X$ 与 $ Y$ 相互独立，且都在 $ [0,1]$ 上服从均匀分布，试求：（Ⅰ）$ U=XY$ 的概率密度 $ f_U(u)$；（Ⅱ）$ V=|X-Y|$ 的概率密度 $ f_V(v)$。
+
+<Solution>
+
+**答案：**
+
+（Ⅰ）
+
+
+$$
+ f_U(u)=\begin{cases}
+-\ln u,&0<u<1,\\
+0,&\text{其他}；
+\end{cases}
+$$
+
+（Ⅱ）
+
+$$
+ f_V(v)=\begin{cases}
+2(1-v),&0<v<1,\\
+0,&\text{其他}。
+\end{cases}
+$$
+
+**解析：** 由于 $ X,Y$ 独立且均服从 $ [0,1]$ 上的均匀分布，故 $ (X,Y)$ 在单位正方形上均匀分布，联合密度为1。
+
+（Ⅰ）显然 $ 0\le U=XY\le1$。当 $ 0<u<1$ 时，
+
+$$
+ F_U(u)=P\{XY\le u\}.
+$$
+
+在单位正方形内，对 $ 0<x\le u$，恒有 $ xy\le u$；对 $ u<x\le1$，需有 $ 0<y\le u/x$。所以
+
+$$
+ \begin{aligned}
+F_U(u)
+&=\int_0^u1\,dx+\int_u^1\frac ux\,dx\\
+&=u+u\int_u^1\frac{dx}{x}\\
+&=u-u\ln u.
+\end{aligned}
+$$
+
+因此
+
+$$
+ f_U(u)=F_U'(u)=-\ln u,
+\qquad 0<u<1.
+$$
+
+从而
+
+$$
+ f_U(u)=\begin{cases}
+-\ln u,&0<u<1,\\
+0,&\text{其他}。
+\end{cases}
+$$
+
+（Ⅱ）显然 $ 0\le V=|X-Y|\le1$。当 $ 0\le v\le1$ 时，事件
+
+$$
+ |X-Y|>v
+$$
+
+对应于单位正方形中直线 $ y=x+v$ 上方和直线 $ y=x-v$ 下方的两个全等直角三角形，每个三角形的直角边长为 $ 1-v$。故
+
+$$
+ P\{|X-Y|>v\}=(1-v)^2.
+$$
+
+因此
+
+$$
+ F_V(v)=P\{|X-Y|\le v\}=1-(1-v)^2=2v-v^2.
+$$
+
+于是
+
+$$
+ f_V(v)=F_V'(v)=2(1-v),
+\qquad 0<v<1.
+$$
+
+即
+
+$$
+ f_V(v)=\begin{cases}
+2(1-v),&0<v<1,\\
+0,&\text{其他}。
+\end{cases}
+$$
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-cd3f5c-016" type="essay">
+
+设随机变量 $X$ 与 $Y$ 相互独立，$X$ 服从 $p=0.6$ 的 $0-1$ 分布，$Y$ 的分布函数为
+$$
+F_Y(y)=\begin{cases} 1-\mathrm{e}^{-y}, & y\geqslant 0, \\ 0, & y<0, \end{cases}
+$$
+记 $Z=X-Y$.求:
+
+$(I) P\left\{Z\leqslant -\dfrac{1}{2}\mid X=0\right\}$;
+
+$(II) Z$ 的分布函数.
+
+<Solution>
+
+**答案：** 见解析
+
+**解析：** (I) 由已知, $Y$ 的概率密度为
+$$
+f_Y(y) = F_Y'(y) = \begin{cases} \mathrm{e}^{-y}, & y \ge 0, \\ 0, & y < 0, \end{cases}
+$$
+$$
+P\left\{Z \leqslant -\frac{1}{2} \mid X = 0\right\} = \frac{P\left\{X = 0, Z \leqslant -\frac{1}{2}\right\}}{P\{X = 0\}} = \frac{P\left\{X = 0, Y \ge \frac{1}{2}\right\}}{P\{X = 0\}}
+$$
+$$
+= \frac{P\{X = 0\} \cdot P\left\{Y \ge \frac{1}{2}\right\}}{P\{X = 0\}} = P\left\{Y \ge \frac{1}{2}\right\} = 1 - \int_{0}^{\frac{1}{2}} \mathrm{e}^{-y} \mathrm{d}y = \mathrm{e}^{-\frac{1}{2}}.
+$$
+
+(II) $F_Z(z) = P\{Z \leqslant z\} = P\{X - Y \leqslant z\}$
+$$
+= P\{X = 0\} \cdot P\{X - Y \leqslant z \mid X = 0\} + P\{X = 1\} \cdot P\{X - Y \leqslant z \mid X = 1\}
+$$
+$$
+= P\{X = 0\} \cdot P\{Y \ge -z \mid X = 0\} + P\{X = 1\} \cdot P\{Y \ge 1 - z \mid X = 1\}.
+$$
+
+由 $X$ 与 $Y$ 相互独立, 知
+$$
+P\{Y \ge -z \mid X = 0\} = P\{Y \ge -z\} = \begin{cases} \mathrm{e}^{z}, & z < 0, \\ 1, & z \ge 0, \end{cases}
+$$
+$$
+P\{Y \ge 1 - z \mid X = 1\} = P\{Y \ge 1 - z\} = \begin{cases} \mathrm{e}^{z-1}, & z < 1, \\ 1, & z \ge 1, \end{cases}
+$$
+
+故 $Z$ 的分布函数为
+$$
+F_Z(z) = \begin{cases} 0.4\mathrm{e}^{z} + 0.6\mathrm{e}^{z-1}, & z < 0, \\ 0.4 + 0.6\mathrm{e}^{z-1}, & 0 \leqslant z < 1, \\ 1, & z \ge 1. \end{cases}
+$$
+
+</Solution>
+
+</Question>

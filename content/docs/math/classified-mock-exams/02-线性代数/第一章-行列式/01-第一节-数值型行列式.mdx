@@ -1,0 +1,1408 @@
+---
+title: "第一节 数值型行列式｜余子式展开、初等变换、分块降阶与递推计算"
+description: "参照真题数值型行列式的展开与代数余子式、含参多项式系数、分块结构、降阶求值和递推计算，精选分类模拟题、张宇、李正元、李林练习。"
+---
+
+# 第一节 数值型行列式｜余子式展开、初等变换、分块降阶与递推计算
+
+按同名「真题核心题目」小节的考点与命题风格，精选 **33 道高质量模拟及名师练习原题**。题干、选项、答案、解析、LaTeX 与 MDX 组件严格保持原样。
+
+## 考点1：按行列展开、代数余子式与含参系数提取
+
+<Question id="selected-1103-classified-1031-liyongle-2027-s1-q15" type="blank" points={5} tags="来源:李永乐六套卷, 考点:行列式的列变换, 难度:中等">
+
+设 $a>0$，记
+
+$$
+D(x)=\begin{vmatrix}
+x&-x&0&0\\
+2&3x-2&-3x&0\\
+0&3&4x-3&-4x\\
+0&0&4&5x-4
+\end{vmatrix}.
+$$
+
+若 $D(a)=\dfrac1{16}D(1)$，则 $D(a+1)=$ <Blank answer="1215/4" kind="math" />。
+
+<Solution>
+
+**答案：$\displaystyle\boxed{\frac{1215}{4}}$。**
+
+<Steps>
+  <Step>
+
+  ### 连续做列加法
+
+  按顺序进行 $C_2\leftarrow C_2+C_1$、$C_3\leftarrow C_3+C_2$、$C_4\leftarrow C_4+C_3$。每一步均使用**上一步更新后的列**，故
+
+  $$
+  \begin{aligned}
+  D(x)
+  &=\begin{vmatrix}
+  x&0&0&0\\
+  2&3x&0&0\\
+  0&3&4x&0\\
+  0&0&4&5x
+  \end{vmatrix}\\
+  &=x\cdot3x\cdot4x\cdot5x=60x^4.
+  \end{aligned}
+  $$
+
+  </Step>
+  <Step>
+
+  ### 根据条件确定参数并求值
+
+  已知 $D(1)=60$，因此
+
+  $$
+  60a^4=\frac{60}{16}\quad\Longrightarrow\quad a^4=\frac1{16}.
+  $$
+
+  由 $a>0$ 得 $a=1/2$。于是
+
+  $$
+  D(a+1)=60\left(\frac32\right)^4=\boxed{\frac{1215}{4}}.
+  $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="列变换方向不可颠倒">
+
+本题必须从左往右累加更新后的列；若从右往左随意变换，就不能得到上述下三角形式。
+
+</Callout>
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-math-7ff068-002" type="single">
+
+行列式$\begin{vmatrix}x&1&0&1\\0&1&x&1\\1&x&1&0\\1&0&1&x\end{vmatrix}$展开式中的常数项为( ).  
+
+<Option>4</Option>
+<Option>2</Option>
+<Option>1</Option>
+<Option correct>0</Option>
+
+<Solution>
+
+行列式关于$x$的展开式中的常数项，就是令$x=0$后所得行列式的值：
+$ \begin{vmatrix}0&1&0&1\\0&1&0&1\\1&0&1&0\\1&0&1&0\end{vmatrix}=0$，
+因为第1、2行相同（同时第3、4行也相同）。
+
+故常数项为$0$，选D。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-7ff068-003" type="single">
+
+$D=\begin{vmatrix}5x&1&2&3\\x&x&1&2\\1&2&x&3\\x&1&2&2x\end{vmatrix}$，则$D$的展开式中$x^3$的系数与$x^4$的系数分别为( ).  
+
+<Option correct>-5,10</Option>
+<Option>-5,-10</Option>
+<Option>5,-10</Option>
+<Option>5,10</Option>
+
+<Solution>
+
+直接按行列式性质展开并整理得
+$ D=10x^4-5x^3-45x^2+46x-3$。
+
+因此$x^3$的系数为$-5$，$x^4$的系数为$10$，故选A。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-7ff068-004" type="single">
+
+不恒为零的函数$f(x)=\begin{vmatrix}a_1+x&b_1+x&c_1+x\\a_2+x&b_2+x&c_2+x\\a_3+x&b_3+x&c_3+x\end{vmatrix}$( ).  
+
+<Option>没有零点</Option>
+<Option correct>至多有1个零点</Option>
+<Option>恰有2个零点</Option>
+<Option>恰有3个零点</Option>
+
+<Solution>
+
+作列变换$C_2-C_1$、$C_3-C_1$，得
+$ f(x)=\begin{vmatrix}a_1+x&b_1-a_1&c_1-a_1\\a_2+x&b_2-a_2&c_2-a_2\\a_3+x&b_3-a_3&c_3-a_3\end{vmatrix}$。
+
+此时仅第1列含$x$，且各元素关于$x$均为一次式，因此$f(x)$至多是一次多项式。题设又说明$f(x)$不恒为零，所以$f(x)$至多有1个零点，故选B。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-7ff068-005" type="single">
+
+$f(x)=\begin{vmatrix}3x+1&x+11&x-2\\x+1&x+4&-1\\x&7&x-1\end{vmatrix}$，则曲线$f(x)$的拐点为( ).  
+
+<Option>$(1,7)$</Option>
+<Option correct>$(-1,-1)$</Option>
+<Option>$(0,0)$</Option>
+<Option>$(-2,-2)$</Option>
+
+<Solution>
+
+计算行列式得
+$ f(x)=x^3+3x^2+3x$。
+
+于是
+$ f''(x)=6x+6=6(x+1)$。
+
+在$x=-1$两侧，$f''(x)$变号，因此$x=-1$为拐点横坐标。又
+$ f(-1)=-1$，
+故拐点为$(-1,-1)$，选B。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-7ff068-007" type="essay">
+
+$\begin{vmatrix}-a&-5&b\\2&0&-a\\b&b&-2\end{vmatrix}=$
+
+<Solution>
+
+**答案：** $ -a^2b+5ab+2b^2-20$
+
+**解析：** 按第一行展开：
+$ \begin{aligned}
+D&=(-a)\begin{vmatrix}0&-a\\b&-2\end{vmatrix}-(-5)\begin{vmatrix}2&-a\\b&-2\end{vmatrix}+b\begin{vmatrix}2&0\\b&b\end{vmatrix}\\
+&=-a(ab)+5(-4+ab)+2b^2\\
+&=-a^2b+5ab+2b^2-20.
+\end{aligned}$
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-7ff068-008" type="essay">
+
+$\begin{vmatrix}2&1&0&-1\\-1&2&-5&3\\3&0&a&b\\1&-3&5&0\end{vmatrix}-\begin{vmatrix}2&1&0&-1\\-1&2&-5&3\\3&0&a&b\\1&-1&1&0\end{vmatrix}=$
+
+<Solution>
+
+**答案：** $ 10(a-3)$
+
+**解析：** 两个行列式仅第4行不同，利用行列式对一行的线性性，原式等于
+$ \begin{vmatrix}2&1&0&-1\\-1&2&-5&3\\3&0&a&b\\0&-2&4&0\end{vmatrix}$。
+
+按第4行展开，或继续作初等变换化简，可得
+$ D=10a-30=10(a-3)$。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-c1d28a-001" type="single">
+
+若
+
+$$
+ \begin{vmatrix}
+a_1 & a_2 & a_3\\
+b_1 & b_2 & b_3\\
+c_1 & c_2 & c_3
+\end{vmatrix}=m,
+$$
+
+则
+
+$$
+ \begin{vmatrix}
+a_1 & 2c_1-5b_1 & 3b_1\\
+a_2 & 2c_2-5b_2 & 3b_2\\
+a_3 & 2c_3-5b_3 & 3b_3
+\end{vmatrix}=
+$$
+
+<Option>$ 30m$</Option>
+<Option>$ -15m$</Option>
+<Option>$ 6m$</Option>
+<Option correct>$ -6m$</Option>
+
+<Solution>
+
+记
+$$
+ \boldsymbol a=(a_1,a_2,a_3)^T,\qquad
+\boldsymbol b=(b_1,b_2,b_3)^T,\qquad
+\boldsymbol c=(c_1,c_2,c_3)^T.
+$$
+原行列式转置后仍为 $ m$，即
+$$
+ |\boldsymbol a,\boldsymbol b,\boldsymbol c|=m.
+$$
+利用行列式对列的线性性质，所求行列式为
+$$
+ \begin{aligned}
+|\boldsymbol a,2\boldsymbol c-5\boldsymbol b,3\boldsymbol b|
+&=3|\boldsymbol a,2\boldsymbol c-5\boldsymbol b,\boldsymbol b|\\
+&=6|\boldsymbol a,\boldsymbol c,\boldsymbol b|
+-15|\boldsymbol a,\boldsymbol b,\boldsymbol b|.
+\end{aligned}
+$$
+其中，含有两个相同列的行列式为零，且交换第二、三列使行列式变号，所以
+$$
+ |\boldsymbol a,\boldsymbol c,\boldsymbol b|=-|\boldsymbol a,\boldsymbol b,\boldsymbol c|=-m.
+$$
+因此
+$$
+ |\boldsymbol a,2\boldsymbol c-5\boldsymbol b,3\boldsymbol b|=6(-m)=-6m.
+$$
+故选 D。A、B、C 均未正确处理行列式的线性性质及交换两列产生的负号。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-c1d28a-005" type="single">
+
+$ x=-2$ 是
+
+$$
+ \begin{vmatrix}
+1 & 1 & 1\\
+1 & x & x^2\\
+1 & -2 & 4
+\end{vmatrix}=0
+$$
+
+的
+
+<Option>充分必要条件</Option>
+<Option correct>充分而非必要条件</Option>
+<Option>必要而非充分条件</Option>
+<Option>既不充分也非必要条件</Option>
+
+<Solution>
+
+该行列式是以 $ 1,x,-2$ 为参数的三阶范德蒙德行列式。按范德蒙德行列式公式，
+$$
+ \begin{aligned}
+D
+&=\begin{vmatrix}
+1&1&1^2\\
+1&x&x^2\\
+1&-2&(-2)^2
+\end{vmatrix}\\
+&=(x-1)(-2-1)(-2-x)\\
+&=3(x-1)(x+2).
+\end{aligned}
+$$
+因此
+$$
+ D=0\iff x=1\quad\text{或}\quad x=-2.
+$$
+当 $ x=-2$ 时，第二行与第三行相同，行列式必为零，所以“$ x=-2$”是行列式等于零的充分条件；但行列式等于零时还可能有 $ x=1$，故它不是必要条件。
+
+因此，$ x=-2$ 是充分而非必要条件，选 B。A 错在忽略了另一根 $ x=1$；C、D 均与 $ x=-2$ 确实能推出行列式为零相矛盾。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-c1d28a-006" type="blank" number={1}>
+
+若
+
+$$
+ \begin{vmatrix}
+1 & 0 & 2\\
+x & 3 & 1\\
+4 & x & 5
+\end{vmatrix}
+$$
+
+的代数余子式 $ A_{12}=-1$，则代数余子式 $A_{21}=$ <Blank answer="2" kind="math" />。
+
+<Solution>
+
+**答案：** $ 2$
+
+**解析：** 由代数余子式的定义，
+$$
+ A_{12}=(-1)^{1+2}
+\begin{vmatrix}
+x&1\\
+4&5
+\end{vmatrix}
+=-(5x-4)=4-5x.
+$$
+由题设 $ A_{12}=-1$，得
+$$
+ 4-5x=-1,
+$$
+所以
+$$
+ x=1.
+$$
+再计算
+$$
+ A_{21}=(-1)^{2+1}
+\begin{vmatrix}
+0&2\\
+x&5
+\end{vmatrix}
+=-(-2x)=2x.
+$$
+代入 $ x=1$，得到
+$$
+ A_{21}=2.
+$$
+相关知识点：计算代数余子式时，既要删去对应的行、列，又要乘符号因子 $ (-1)^{i+j}$。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-b9ebfd-001" type="single">
+
+设行列式
+
+$$
+D=\begin{vmatrix}
+3&0&4&0\\
+2&2&2&2\\
+0&-7&0&0\\
+5&3&-2&2
+\end{vmatrix},
+$$
+
+则 $D$ 的第 $4$ 行各元素的余子式之和 $M_{41}+M_{42}+M_{43}+M_{44}=(\quad)$。
+
+<Option correct>$-28$</Option>
+<Option>$28$</Option>
+<Option>$14$</Option>
+<Option>$-14$</Option>
+
+<Solution>
+
+由代数余子式与余子式的关系
+
+$$
+A_{4j}=(-1)^{4+j}M_{4j},
+$$
+
+有
+
+$$
+M_{41}+M_{42}+M_{43}+M_{44}=-A_{41}+A_{42}-A_{43}+A_{44}.
+$$
+
+利用“某行元素与另一组数分别乘对应代数余子式后求和”可写成
+
+$$
+\begin{vmatrix}
+3&0&4&0\\
+2&2&2&2\\
+0&-7&0&0\\
+-1&1&-1&1
+\end{vmatrix}.
+$$
+
+按第 $3$ 行展开：
+
+$$
+7\begin{vmatrix}
+3&4&0\\
+2&2&2\\
+-1&-1&1
+\end{vmatrix}=-28.
+$$
+
+因此答案为 $-28$，选 A。
+
+**技巧：** 代数余子式 $A_{ij}$ 与原位置 $a_{ij}$ 的具体数值无关。遇到“若干余子式或代数余子式之和”，优先把它改写成一个新行列式，而不是逐个计算余子式。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-b9ebfd-008" type="blank">
+
+设
+
+$$
+f(x)=\begin{vmatrix}
+x&-2x&1&2\\
+1&x&1&-1\\
+3&2&3x&1\\
+1&1&1&x
+\end{vmatrix},
+$$
+
+则 $x^3$ 的系数为 <Blank answer="6" kind="math" />。
+
+<Solution>
+
+**答案：** $6$
+
+**解析：** 按第 $1$ 行展开。若只关心 $x^3$ 的系数，不必把整个行列式展开。
+
+其中由元素 $-2x$ 产生的项为
+
+$$
+(-2x)(-1)^{1+2}
+\begin{vmatrix}
+1&1&-1\\
+3&3x&1\\
+1&1&x
+\end{vmatrix}
+=2x(3x-3)(x+1)
+=6x^3-6x.
+$$
+
+其余展开项的次数不足以再产生 $x^3$ 项，因此所求系数为 $6$。
+
+**技巧：** 求某一指定次数的系数时，先做“次数筛选”，只计算可能贡献该次数的排列或展开项。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-b9ebfd-014" type="blank">
+
+设 $A=(a_{ij})_{n\times n}$ 为 $n$ 阶方阵，$|A|=1$，且 $A$ 的每列元素之和均为 $k$（$k\ne0$），则
+
+$$
+A_{11}+A_{12}+\cdots+A_{1n}=
+$$
+
+<Blank answer="((1)/(k))" kind="math" />。
+
+<Solution>
+
+**答案：** $\dfrac1k$
+
+**解析：** 把第 $2,3,\ldots,n$ 行都加到第 $1$ 行。因为每一列元素之和均为 $k$，得到
+
+$$
+|A|=
+\begin{vmatrix}
+k&k&\cdots&k\\
+a_{21}&a_{22}&\cdots&a_{2n}\\
+\vdots&\vdots&&\vdots\\
+a_{n1}&a_{n2}&\cdots&a_{nn}
+\end{vmatrix}.
+$$
+
+按第 $1$ 行展开。改变第 $1$ 行不会改变第 $1$ 行各位置对应的代数余子式，因此
+
+$$
+1=|A|=k(A_{11}+A_{12}+\cdots+A_{1n}).
+$$
+
+所以
+
+$$
+A_{11}+A_{12}+\cdots+A_{1n}=\frac1k.
+$$
+
+**知识点：** 某一行的代数余子式只由“删去该行后”的元素决定，因此替换该行本身不会改变这些代数余子式。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-b9ebfd-020" type="single">
+
+设
+
+$$
+f(x)=\begin{vmatrix}
+1&x&x^2&x^3\\
+1&2&4&8\\
+1&-1&1&-1\\
+1&1&1&1
+\end{vmatrix},
+$$
+
+则曲线 $y=f(x)$ 在 $(-1,2)$ 内存在水平切线的条数为 $(\quad)$。
+
+<Option>$1$</Option>
+<Option correct>$2$</Option>
+<Option>$3$</Option>
+<Option>$4$</Option>
+
+<Solution>
+
+转置后是范德蒙行列式，因此
+
+$$
+f(x)=6(x^2-1)(2-x).
+$$
+
+显然
+
+$$
+f(-1)=f(1)=f(2)=0.
+$$
+
+由罗尔定理，在 $(-1,1)$ 与 $(1,2)$ 内分别至少存在一个点使 $f'(x)=0$，因此至少有 $2$ 条水平切线。
+
+另一方面，$f(x)$ 是三次多项式，$f'(x)$ 是二次多项式，至多有 $2$ 个实根。因此水平切线恰有 $2$ 条。
+
+**技巧：** “行列式 + 多项式 + 水平切线”题，先识别范德蒙结构得到零点，再用罗尔定理数 $f'(x)=0$ 的根，往往无需真正求导解方程。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-b9ebfd-026" type="blank">
+
+设 $n$ 阶行列式
+
+$$
+|A|=\begin{vmatrix}
+0&1&0&\cdots&0\\
+0&0&2&\cdots&0\\
+\vdots&\vdots&\vdots&&\vdots\\
+0&0&0&\cdots&n-1\\
+n&0&0&\cdots&0
+\end{vmatrix},
+$$
+
+则第 $k$ 行元素的代数余子式之和
+
+$$
+A_{k1}+A_{k2}+\cdots+A_{kn}=
+$$
+
+<Blank answer="(((-1)^(n+1)n!)/(k))" kind="math" />。
+
+<Solution>
+
+**答案：** $\dfrac{(-1)^{n+1}n!}{k}$
+
+**解析：** 这个矩阵每行每列都只有一个非零元素，因此可直接写出
+
+$$
+|A|=(-1)^{n+1}n!.
+$$
+
+又因为 $A$ 可逆，
+
+$$
+A^*=|A|A^{-1}.
+$$
+
+矩阵 $A$ 的作用是一个带权循环移位，因此
+
+$$
+A^{-1}=\begin{pmatrix}
+0&0&\cdots&0&\frac1n\\
+1&0&\cdots&0&0\\
+0&\frac12&\cdots&0&0\\
+\vdots&\vdots&&\vdots&\vdots\\
+0&0&\cdots&\frac1{n-1}&0
+\end{pmatrix}.
+$$
+
+注意 $A^*$ 的第 $j,k$ 个元素是代数余子式 $A_{kj}$，所以题目所求正好是 $A^*$ 第 $k$ 列元素之和。由上式可知 $A^{-1}$ 第 $k$ 列只有一个非零元 $1/k$，于是
+
+$$
+A_{k1}+A_{k2}+\cdots+A_{kn}
+=|A|\cdot\frac1k
+=\frac{(-1)^{n+1}n!}{k}.
+$$
+
+**易错点：** 伴随矩阵满足 $(A^*)_{ij}=A_{ji}$，代数余子式的下标在伴随矩阵中发生转置。
+
+</Solution>
+
+</Question>
+
+## 考点2：分块行列式、初等变换与结构降阶
+
+<Question id="selected-1103-math-7ff068-001" type="single">
+
+设$a,b,c$是方程$x^3-2x+4=0$的三个不同的根，则行列式$\begin{vmatrix}a&b&c\\b&c&a\\c&a&b\end{vmatrix}$的值等于( ).  
+
+<Option>1</Option>
+<Option correct>0</Option>
+<Option>-1</Option>
+<Option>-2</Option>
+
+<Solution>
+
+由韦达定理，
+$ a+b+c=0$。
+
+又
+$ \begin{vmatrix}a&b&c\\b&c&a\\c&a&b\end{vmatrix}=-(a+b+c)(a^2+b^2+c^2-ab-bc-ca)$。
+
+因此该行列式等于$0$，故选B。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-7ff068-010" type="essay">
+
+设$x\neq0$，则$D_4=\begin{vmatrix}x&x&0&0\\1&1+2x&2x&0\\0&2&2+3x&3x\\0&0&3&3+4x\end{vmatrix}=$
+
+<Solution>
+
+**答案：** $ 24x^4$
+
+**解析：** 依次作行变换
+$ R_2\leftarrow R_2-\frac{1}{x}R_1$，
+可将第一列消元；再按三对角结构继续消元，或直接逐级展开，可得
+$ D_4=24x^4$。
+
+也可由直接展开验证：最高次项只能由主对角线上的$x,2x,3x,4x$相乘得到，即$24x^4$，而其余低次项在展开中恰好相消。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-7ff068-012" type="essay" number={1}>
+
+计算$n$阶行列式：$D_n=\begin{vmatrix}a_1+x_1&a_2&\cdots&a_n\\a_1&a_2+x_2&\cdots&a_n\\\vdots&\vdots&&\vdots\\a_1&a_2&\cdots&a_n+x_n\end{vmatrix}$，其中$x_i\neq0,i=1,2,\cdots,n$.
+
+<Solution>
+
+**答案：** $ D_n=x_1x_2\cdots x_n\left(1+\sum_{i=1}^n\frac{a_i}{x_i}\right)$
+
+**解析：** 记
+$ X=\operatorname{diag}(x_1,x_2,\ldots,x_n)$，
+$ e=(1,1,\ldots,1)^T$，
+$ a=(a_1,a_2,\ldots,a_n)^T$。
+
+原矩阵可写为
+$ X+ea^T$。
+
+因为$x_i\neq0$，故$X$可逆。利用秩一修正的行列式公式
+$ |X+uv^T|=|X|\left(1+v^TX^{-1}u\right)$，
+得
+$ \begin{aligned}
+D_n&=|X|\left(1+a^TX^{-1}e\right)\\
+&=x_1x_2\cdots x_n\left(1+\frac{a_1}{x_1}+\frac{a_2}{x_2}+\cdots+\frac{a_n}{x_n}\right).
+\end{aligned}$
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-c1d28a-009" type="blank">
+
+设 $ \alpha,\beta,\gamma_1,\gamma_2,\gamma_3$ 都是 $ 4$ 维列向量，且
+
+$$
+ |A|=|\alpha,\gamma_1,\gamma_2,\gamma_3|=4,
+\qquad
+|B|=|\beta,2\gamma_1,3\gamma_2,\gamma_3|=21,
+$$
+
+则 $|A+B|=$ <Blank answer="180" kind="math" />。
+
+<Solution>
+
+**答案：** $ 180$
+
+**解析：** 由题意，
+$$
+ A=(\alpha,\gamma_1,\gamma_2,\gamma_3),
+\qquad
+B=(\beta,2\gamma_1,3\gamma_2,\gamma_3).
+$$
+因此
+$$
+ A+B=(\alpha+\beta,3\gamma_1,4\gamma_2,2\gamma_3).
+$$
+先由 $ |B|=21$ 求出
+$$
+ |\beta,2\gamma_1,3\gamma_2,\gamma_3|
+=6|\beta,\gamma_1,\gamma_2,\gamma_3|=21,
+$$
+所以
+$$
+ |\beta,\gamma_1,\gamma_2,\gamma_3|=\frac72.
+$$
+再利用行列式对第一列的线性性质，
+$$
+ \begin{aligned}
+|A+B|
+&=|\alpha+\beta,3\gamma_1,4\gamma_2,2\gamma_3|\\
+&=24|\alpha+\beta,\gamma_1,\gamma_2,\gamma_3|\\
+&=24\left(
+|\alpha,\gamma_1,\gamma_2,\gamma_3|
++|\beta,\gamma_1,\gamma_2,\gamma_3|
+\right)\\
+&=24\left(4+\frac72\right)\\
+&=180.
+\end{aligned}
+$$
+相关知识点：矩阵相加是对应列相加；行列式对任意一列具有线性性质。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-b9ebfd-004" type="essay" number={1}>
+
+计算
+
+$$
+\begin{vmatrix}
+k&0&-1&1\\
+0&k&1&-1\\
+-1&1&k&0\\
+1&-1&0&k
+\end{vmatrix}.
+$$
+
+<Solution>
+
+**答案：** $k^2(k^2-4)$
+
+**解析：** 把第 $2,3,4$ 行都加到第 $1$ 行，第一行变为 $(k,k,k,k)$，提出 $k$：
+
+$$
+D=k\begin{vmatrix}
+1&1&1&1\\
+0&k&1&-1\\
+-1&1&k&0\\
+1&-1&0&k
+\end{vmatrix}.
+$$
+
+再作 $R_3\leftarrow R_3+R_1$、$R_4\leftarrow R_4-R_1$，并继续化简，可得
+
+$$
+D=k^2\begin{vmatrix}
+k&2&-1\\
+2&k&1\\
+0&0&1
+\end{vmatrix}
+=k^2(k^2-4).
+$$
+
+**技巧：** 参数行列式若各行（列）元素和有规律，先用“行（列）求和”制造公共因子，通常比直接展开快得多。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-b9ebfd-006" type="essay">
+
+计算
+
+$$
+D_4=\begin{vmatrix}
+1&0&0&1\\
+0&2&0&1\\
+0&0&3&1\\
+1&1&1&4
+\end{vmatrix}.
+$$
+
+<Solution>
+
+**答案：** $13$
+
+**解析：** 利用前三个主对角元消去第 $4$ 行前三项：
+
+$$
+R_4\leftarrow R_4-R_1-\frac12R_2-\frac13R_3.
+$$
+
+于是
+
+$$
+D_4=1\cdot2\cdot3\left(4-1-\frac12-\frac13\right)=13.
+$$
+
+**技巧：** 这是典型箭形（爪形）行列式。主对角元非零时，把“爪子”消成上三角即可。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-b9ebfd-007" type="essay">
+
+计算
+
+$$
+D_4=\begin{vmatrix}
+0&1&2&0\\
+1&0&0&2\\
+0&3&4&0\\
+3&0&0&4
+\end{vmatrix}.
+$$
+
+<Solution>
+
+**答案：** $-4$
+
+**解析：** 通过交换行、列把非零元素集中成两个 $2\times2$ 块，可化为
+
+$$
+\begin{vmatrix}
+3&4&0&0\\
+1&2&0&0\\
+0&0&4&3\\
+0&0&2&1
+\end{vmatrix}.
+$$
+
+因此
+
+$$
+D_4=\begin{vmatrix}3&4\\1&2\end{vmatrix}
+\begin{vmatrix}4&3\\2&1\end{vmatrix}
+=(6-4)(4-6)=-4.
+$$
+
+**技巧：** 稀疏行列式应先观察“零的位置”，能重排成分块对角形式时，行列式就是各对角块行列式之积；交换行或列时注意符号。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-b9ebfd-013" type="blank">
+
+设 $3$ 阶方阵 $A=(\alpha_1,\alpha_2,\alpha_3)$，
+
+$$
+B=(3\alpha_1-\alpha_2,\,3\alpha_2-2\alpha_1,\,2\alpha_3-\alpha_1-2\alpha_2),
+$$
+
+且 $|B|=14$，则 $|A|=$ <Blank answer="1" kind="math" />。
+
+<Solution>
+
+**答案：** $1$
+
+**解析：** 把 $B$ 写成 $A$ 右乘系数矩阵：
+
+$$
+B=A
+\begin{pmatrix}
+3&-2&-1\\
+-1&3&-2\\
+0&0&2
+\end{pmatrix}.
+$$
+
+于是
+
+$$
+|B|=|A|
+\begin{vmatrix}
+3&-2&-1\\
+-1&3&-2\\
+0&0&2
+\end{vmatrix}
+=14|A|.
+$$
+
+由 $|B|=14$，得
+
+$$
+|A|=1.
+$$
+
+**技巧：** 新列向量都是原列向量的线性组合时，优先写成 $B=AP$，再用 $|B|=|A||P|$。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-b9ebfd-015" type="essay" number={1}>
+
+计算 $n$ 阶行列式
+
+$$
+D_n=\begin{vmatrix}
+b&a&a&\cdots&a\\
+a&b&a&\cdots&a\\
+\vdots&\vdots&\vdots&&\vdots\\
+a&a&a&\cdots&b
+\end{vmatrix}.
+$$
+
+<Solution>
+
+**答案：** $[b+(n-1)a](b-a)^{n-1}$
+
+**解析：** **解法一：行变换。** 把第 $2,3,\ldots,n$ 行加到第 $1$ 行：
+
+$$
+D_n=[b+(n-1)a]
+\begin{vmatrix}
+1&1&\cdots&1\\
+a&b&\cdots&a\\
+\vdots&\vdots&&\vdots\\
+a&a&\cdots&b
+\end{vmatrix}.
+$$
+
+再对 $i=2,\ldots,n$ 作
+
+$$
+R_i\leftarrow R_i-aR_1,
+$$
+
+得到上三角形行列式，因此
+
+$$
+D_n=[b+(n-1)a](b-a)^{n-1}.
+$$
+
+**解法二：特征值视角。** 该矩阵可写成
+
+$$
+A=(b-a)E+aJ,
+$$
+
+其中 $J$ 为全 $1$ 矩阵。$J$ 的特征值为 $n,0,\ldots,0$，故 $A$ 的特征值为
+
+$$
+b+(n-1)a,\quad b-a,\ldots,b-a.
+$$
+
+行列式为全部特征值之积，同样得到
+
+$$
+D_n=[b+(n-1)a](b-a)^{n-1}.
+$$
+
+**技巧总结：** “主对角线同值、其余位置同值”的行列式，要么做“行求和 + 消元”，要么直接识别为 $(b-a)E+aJ$。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-b9ebfd-017" type="essay">
+
+计算
+
+$$
+\begin{aligned}
+D_n={}&
+\begin{vmatrix}
+a_1&b_1&0&\cdots&0&0\\
+0&a_2&b_2&\cdots&0&0\\
+\vdots&\vdots&\vdots&&\vdots&\vdots\\
+0&0&0&\cdots&a_{n-1}&b_{n-1}\\
+b_n&0&0&\cdots&0&a_n
+\end{vmatrix}\\
+&+
+\begin{vmatrix}
+a_1&0&0&\cdots&0&b_n\\
+b_1&a_2&0&\cdots&0&0\\
+0&b_2&a_3&\cdots&0&0\\
+\vdots&\vdots&\vdots&&\vdots&\vdots\\
+0&0&0&\cdots&a_{n-1}&0\\
+0&0&0&\cdots&b_{n-1}&a_n
+\end{vmatrix},
+\end{aligned}
+$$
+
+其中 $a_i,b_i$ 均不为 $0$。
+
+<Solution>
+
+**答案：** $2\displaystyle\prod_{i=1}^na_i+2(-1)^{n+1}\displaystyle\prod_{i=1}^nb_i$
+
+**解析：** 记两个行列式分别为 $D^{(1)}$、$D^{(2)}$。
+
+对 $D^{(1)}$ 按第一列展开，只有 $a_1$ 与 $b_n$ 两项有贡献：
+
+$$
+D^{(1)}=
+\prod_{i=1}^na_i+(-1)^{n+1}\prod_{i=1}^nb_i.
+$$
+
+第二个行列式恰好是第一个行列式的转置，因此
+
+$$
+D^{(2)}=D^{(1)}.
+$$
+
+所以
+
+$$
+D_n=2\prod_{i=1}^na_i+2(-1)^{n+1}\prod_{i=1}^nb_i.
+$$
+
+**技巧：** 环状稀疏行列式常常只有“全取主对角线”与“沿环取元素”两类非零排列项；若两个行列式互为转置，直接利用 $|A^T|=|A|$。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-b9ebfd-027" type="essay" number={1}>
+
+计算 $n$ 阶行列式
+
+$$
+D_n=\begin{vmatrix}
+b-a_1^2&-a_1a_2&\cdots&-a_1a_n\\
+-a_2a_1&b-a_2^2&\cdots&-a_2a_n\\
+\vdots&\vdots&&\vdots\\
+-a_na_1&-a_na_2&\cdots&b-a_n^2
+\end{vmatrix}.
+$$
+
+<Solution>
+
+**答案：** $b^{n-1}\left(b-\displaystyle\sum_{i=1}^na_i^2\right)$
+
+**解析：** 原矩阵可写成
+
+$$
+bE-aa^T,
+$$
+
+其中
+
+$$
+a=(a_1,a_2,\ldots,a_n)^T.
+$$
+
+用加边法，可写成等值的 $(n+1)$ 阶行列式：
+
+$$
+D_n=\begin{vmatrix}
+1&a_1&a_2&\cdots&a_n\\
+a_1&b&0&\cdots&0\\
+a_2&0&b&\cdots&0\\
+\vdots&\vdots&\vdots&&\vdots\\
+a_n&0&0&\cdots&b
+\end{vmatrix}.
+$$
+
+这是箭形行列式，化简得到
+
+$$
+D_n=b^{n-1}\left(b-\sum_{i=1}^na_i^2\right).
+$$
+
+**补充理解：** 这是“标量矩阵减一个秩 $1$ 矩阵”。向量 $a$ 方向对应特征值 $b-\|a\|^2$，与 $a$ 正交的 $n-1$ 维子空间对应特征值 $b$，所以行列式就是
+
+$$
+b^{n-1}(b-\|a\|^2).
+$$
+
+这个观点也说明公式对 $b=0$ 仍然成立。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-b9ebfd-028" type="essay">
+
+计算 $n$ 阶行列式
+
+$$
+D_n=\begin{vmatrix}
+a+b_1&a&\cdots&a\\
+a&a+b_2&\cdots&a\\
+\vdots&\vdots&&\vdots\\
+a&a&\cdots&a+b_n
+\end{vmatrix},\qquad b_i\ne0.
+$$
+
+<Solution>
+
+**答案：** $\left(1+a\displaystyle\sum_{i=1}^n\frac1{b_i}\right)\displaystyle\prod_{i=1}^nb_i$
+
+**解析：** 使用加边法：
+
+$$
+D_n=
+\begin{vmatrix}
+1&-a&-a&\cdots&-a\\
+1&b_1&0&\cdots&0\\
+1&0&b_2&\cdots&0\\
+\vdots&\vdots&\vdots&&\vdots\\
+1&0&0&\cdots&b_n
+\end{vmatrix}.
+$$
+
+这是箭形行列式。由于 $b_i\ne0$，可直接使用箭形行列式公式：
+
+$$
+D_n=
+\left(1+\sum_{i=1}^n\frac{a}{b_i}\right)
+\prod_{i=1}^nb_i.
+$$
+
+即
+
+$$
+D_n=\left(1+a\sum_{i=1}^n\frac1{b_i}\right)\prod_{i=1}^nb_i.
+$$
+
+**技巧：** “对角线上各自多一个 $b_i$，其余元素全为同一个 $a$”是典型加边法结构。
+
+</Solution>
+
+</Question>
+
+## 考点3：三对角、循环结构与递推行列式
+
+<Question id="selected-1103-math-7ff068-006" type="single">
+
+$17$阶行列式$D_n=\begin{vmatrix}2&1&0&\cdots&0\\1&2&1&\cdots&0\\0&1&2&\cdots&0\\\vdots&\vdots&\vdots&&\vdots\\0&0&0&\cdots&2\end{vmatrix}$( ).  
+
+<Option>$D_1,D_2,\cdots,D_n$为等比数列</Option>
+<Option correct>$D_1,D_2,\cdots,D_n$为等差数列</Option>
+<Option>$D_n$为范德蒙德行列式</Option>
+<Option>$D_n=n$</Option>
+
+<Solution>
+
+按第一行展开可得递推关系
+$ D_n=2D_{n-1}-D_{n-2}$。
+
+初值为
+$ D_1=2,\qquad D_2=\begin{vmatrix}2&1\\1&2\end{vmatrix}=3$。
+
+于是
+$ D_n-D_{n-1}=D_{n-1}-D_{n-2}$，
+说明$D_1,D_2,\ldots$为等差数列，公差为$1$，从而
+$ D_n=n+1$。
+
+故选B。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-7ff068-013" type="essay">
+
+$D_n=\begin{vmatrix}b&-1&0&\cdots&0&0\\0&b&-1&\cdots&0&0\\\vdots&\vdots&\vdots&&\vdots&\vdots\\0&0&0&\cdots&b&-1\\a_n&a_{n-1}&a_{n-2}&\cdots&a_2&b+a_1\end{vmatrix}=$
+
+<Solution>
+
+**答案：** $ b^n+a_1b^{n-1}+a_2b^{n-2}+\cdots+a_{n-1}b+a_n$
+
+**解析：** 沿第一列展开，或依次利用前$n-1$行的上双对角结构消元，可得到递推关系。直接观察最后一行与上方$b,-1$链式结构，每向左取一个$a_k$，其余位置唯一确定，且符号均化为正号，因此
+$ D_n=b^n+a_1b^{n-1}+a_2b^{n-2}+\cdots+a_{n-1}b+a_n$。
+
+例如$n=3$时
+$ \begin{vmatrix}b&-1&0\\0&b&-1\\a_3&a_2&b+a_1\end{vmatrix}=b^3+a_1b^2+a_2b+a_3$，与一般公式一致。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-c1d28a-010" type="blank">
+
+已知
+
+$$
+ D_n=
+\begin{vmatrix}
+a_1 & 1 & 0 & \cdots & 0 & 0\\
+-1 & a_2 & 1 & \cdots & 0 & 0\\
+0 & -1 & a_3 & \cdots & 0 & 0\\
+\vdots & \vdots & \vdots & & \vdots & \vdots\\
+0 & 0 & 0 & \cdots & a_{n-1} & 1\\
+0 & 0 & 0 & \cdots & -1 & a_n
+\end{vmatrix},
+$$
+
+若 $ D_n=a_nD_{n-1}+kD_{n-2}$，则 $k=$ <Blank answer="1" kind="math" />。
+
+<Solution>
+
+**答案：** $ 1$
+
+**解析：** 按行列式 $ D_n$ 的最后一行展开。最后一行只有第 $ n-1$ 列的元素 $ -1$ 和第 $ n$ 列的元素 $ a_n$ 非零。
+
+元素 $ a_n$ 对应的余子式正是 $ D_{n-1}$，故产生
+$$
+ a_nD_{n-1}.
+$$
+元素 $ -1$ 对应项为
+$$
+ (-1)(-1)^{n+(n-1)}M_{n,n-1}=M_{n,n-1}.
+$$
+在余子式 $ M_{n,n-1}$ 中，最后一列仅有一个非零元素 $ 1$，再沿最后一列展开，即得到 $ D_{n-2}$。因此
+$$
+ D_n=a_nD_{n-1}+D_{n-2}.
+$$
+故
+$$
+ k=1.
+$$
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-b9ebfd-016" type="essay">
+
+计算 $n$ 阶行列式
+
+$$
+D_n=\begin{vmatrix}
+2&-1&0&\cdots&0&0\\
+-1&2&-1&\cdots&0&0\\
+0&-1&2&\cdots&0&0\\
+\vdots&\vdots&\vdots&&\vdots&\vdots\\
+0&0&0&\cdots&2&-1\\
+0&0&0&\cdots&-1&2
+\end{vmatrix}.
+$$
+
+<Solution>
+
+**答案：** $n+1$
+
+**解析：** 这是三对角行列式。按第一行展开：
+
+$$
+D_n=2D_{n-1}-D_{n-2}.
+$$
+
+于是
+
+$$
+D_n-D_{n-1}=D_{n-1}-D_{n-2},
+$$
+
+说明数列 $\{D_n\}$ 的一阶差分为常数。
+
+初值为
+
+$$
+D_1=2,\qquad D_2=\begin{vmatrix}2&-1\\-1&2\end{vmatrix}=3.
+$$
+
+故公差为 $1$，从而
+
+$$
+D_n=D_1+(n-1)=n+1.
+$$
+
+**技巧：** 三对角行列式优先建立二阶递推。得到递推后，再判断是等差、等比还是一般特征方程。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-b9ebfd-029" type="essay">
+
+计算 $n$ 阶行列式
+
+$$
+D_n=\begin{vmatrix}
+a_0&-1&0&\cdots&0&0\\
+a_1&x&-1&\cdots&0&0\\
+a_2&0&x&\cdots&0&0\\
+\vdots&\vdots&\vdots&&\vdots&\vdots\\
+a_{n-2}&0&0&\cdots&x&-1\\
+a_{n-1}&0&0&\cdots&0&x
+\end{vmatrix}.
+$$
+
+<Solution>
+
+**答案：** $a_0x^{n-1}+a_1x^{n-2}+\cdots+a_{n-2}x+a_{n-1}$
+
+**解析：** 按最后一行展开。左下角元素 $a_{n-1}$ 的余子式是一个对角线全为 $-1$ 的上三角行列式，符号恰好抵消，得到
+
+$$
+D_n=a_{n-1}+xD_{n-1}.
+$$
+
+反复递推：
+
+$$
+\begin{aligned}
+D_n
+&=a_{n-1}+xa_{n-2}+x^2D_{n-2}\\
+&=\cdots\\
+&=a_0x^{n-1}+a_1x^{n-2}+\cdots+a_{n-2}x+a_{n-1}.
+\end{aligned}
+$$
+
+**技巧：** 这种“第一列放系数、上超对角线为 $-1$、其余为 $x$”的行列式本质上是在编码一个多项式。递推比直接展开最自然。
+
+</Solution>
+
+</Question>
+
+<Question id="selected-1103-math-b9ebfd-030" type="essay">
+
+计算
+
+$$
+D_n=\begin{vmatrix}
+a&b&0&\cdots&0&0\\
+c&a&b&\cdots&0&0\\
+0&c&a&\cdots&0&0\\
+\vdots&\vdots&\vdots&&\vdots&\vdots\\
+0&0&0&\cdots&a&b\\
+0&0&0&\cdots&c&a
+\end{vmatrix},
+\qquad a^2-4bc\ge0.
+$$
+
+<Solution>
+
+**答案：**
+
+设 $r_{1,2}=\dfrac{a\pm\sqrt{a^2-4bc}}2$，则
+
+$$
+D_n=\begin{cases}
+\dfrac{r_1^{n+1}-r_2^{n+1}}{r_1-r_2},&r_1\ne r_2,\\[6pt]
+(n+1)r_1^n,&r_1=r_2.
+\end{cases}
+$$
+
+**解析：** 按第一行展开，得到标准二阶递推：
+
+$$
+D_n=aD_{n-1}-bcD_{n-2},
+$$
+
+并取
+
+$$
+D_0=1,\qquad D_1=a.
+$$
+
+对应特征方程为
+
+$$
+r^2-ar+bc=0,
+$$
+
+其两根为
+
+$$
+r_{1,2}=\frac{a\pm\sqrt{a^2-4bc}}2.
+$$
+
+当 $r_1\ne r_2$ 时，由初值解得
+
+$$
+D_n=\frac{r_1^{n+1}-r_2^{n+1}}{r_1-r_2}.
+$$
+
+当 $r_1=r_2=r$ 时，即 $a^2=4bc$，重根递推给出
+
+$$
+D_n=(n+1)r^n.
+$$
+
+**技巧总结：** 一般常系数三对角行列式都应先写递推关系；递推式本质上就是一个二阶线性递推数列。
+
+</Solution>
+
+</Question>
