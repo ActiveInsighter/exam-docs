@@ -1,2014 +1,3341 @@
 ---
-title: 第四节 定积分的应用
-description: 高等数学核心真题重构：平面图形面积、旋转体积、曲线弧长、形心、压力与变力作功。
+title: "第四节 定积分的应用"
+description: "考研数学真题分类：模块四：一元函数积分学"
 ---
 
-本节采用**建立几何量 → 确定积分区间 → 选择微元 → 列式与验证**的顺序。面积题须区分“矩形面积”和“曲线下的面积”；存在唯一性题应把几何条件转换为连续函数零点，并给出严格单调性的证明。
+## 一、面积与体积
 
-## 一、面积的建模、切线围域与参数曲线
+<Question id="core-1102-math-70b5a1-001" type="blank" points={3} tags="来源:1987年考研数学一, 科目:高等数学, 章节:定积分的应用, 考点:曲线交点与定积分面积">
 
-<Question id="math-core-gd-04-04-001" type="essay" points={6} tags="来源:1998考研数一数二, 考点:面积等式, 考点:存在唯一性">
-
-设 $y=f(x)$ 是区间 $[0,1]$ 上任一非负连续函数。
-
-(1) 证明存在 $x_0\in(0,1)$，使区间 $[0,x_0]$ 上以 $f(x_0)$ 为高的矩形面积，等于在区间 $[x_0,1]$ 上由曲线 $y=f(x)$、$x$ 轴和两条竖线围成的曲边梯形面积；
-
-(2) 再设 $f$ 在 $(0,1)$ 内可导，且 $f'(x)>-\dfrac{2f(x)}x$，证明第 (1) 问中的 $x_0$ 唯一。
+ 由曲线 $y=\ln x$ 与两直线 $y=e+1-x$ 及 $y=0$ 所围成的平面图形的面积是<Blank answer="((3)/(2))" kind="math" />.
 
 <Solution>
 
-**参考答案：** 存在 $x_0\in(0,1)$ 满足
+**参考答案：** $\boxed{\frac32}$。
 
-$$
-\boxed{x_0f(x_0)=\int_{x_0}^1f(t)dt}.
-$$
+**解题思路：** 先确定三条边界曲线的交点，再按上边界切换的位置拆分面积积分；不能在整个区间统一用同一个上边界。
 
-若再满足第 (2) 问的导数不等式，则该点**唯一**。
+<Steps>
+  <Step>
 
-**第一步：把几何描述转成方程。** 左侧矩形的宽为 $x$、高为 $f(x)$，面积是 $xf(x)$；右侧曲边梯形的面积是 $T(x)=\int_x^1f(t)dt$。故所求等价于
+    ### 确定围成区域的三个顶点
 
-$$
-F(x)=xf(x)-T(x)=0.
-$$
+    $y=\ln x$ 与 $y=0$ 相交于 $(1,0)$，$y=e+1-x$ 与 $y=0$ 相交于 $(e+1,0)$。两条非水平曲线的交点满足 $\ln x=e+1-x$。
 
-由于 $f$ 连续，$F$ 在 $[0,1]$ 上连续。
+    令 $h(x)=\ln x+x-(e+1)$，则 $h'(x)=1+1/x>0$（$x>0$），故交点至多一个；由 $h(e)=0$ 得唯一交点 $(e,1)$。
 
-**第二步：证明内部必有解，特别处理 $f(1)=0$ 的情况。** 若 $f\equiv0$，任取内部点均成立。以下设 $f$ 不恒为零。由 $f\ge0$ 且连续，存在某点附近 $f>0$，从而
+  </Step>
+  <Step>
 
-$$
-\int_0^1f(t)dt>0,
-\qquad
-F(0)=-\int_0^1f(t)dt<0.
-$$
+    ### 按区间划分上边界
 
-如果 $f(1)>0$，则 $F(1)=f(1)>0$，零点定理直接给出内部零点。但题目只要求 $f\ge0$，所以还需处理 $f(1)=0$。
+    当 $1\le x\le e$，围成图形的上边界为 $y=\ln x$；当 $e\le x\le e+1$，上边界变为 $y=e+1-x$，下边界始终是 $y=0$。因此
 
-为此构造
+    $$
+    S=\int_1^e\ln x\,\mathrm dx+\int_e^{e+1}(e+1-x)\,\mathrm dx.
+    $$
 
-$$
-H(x)=xT(x)=x\int_x^1f(t)dt.
-$$
+  </Step>
+  <Step>
 
-有 $H(0)=H(1)=0$。因为 $f$ 非负且不恒零，存在某个 $c\in(0,1)$ 使 $\int_c^1f(t)dt>0$，从而 $H(c)>0$。故 $H$ 在 $[0,1]$ 上取得**正的最大值**，最大点 $x_0$ 必位于 $(0,1)$。由费马定理，
+    ### 分别积分并合并
 
-$$
-0=H'(x_0)=T(x_0)-x_0f(x_0).
-$$
+    利用 $\int\ln x\,\mathrm dx=x\ln x-x+C$，第一项为
 
-这正是要求的面积等式。此方法也包括 $f(1)=0$ 的情况，不需要假设曲线终点高度为正。
+    $$
+    [x\ln x-x]_1^e=0-(-1)=1.
+    $$
 
-**第三步：用导数正性证明唯一性。** 在 $(0,1)$ 内，利用变下限积分求导，
+    第二项是底、高均为 $1$ 的三角形面积，等于 $1/2$。故 $S=1+1/2=\boxed{3/2}$。
 
-$$
-\begin{aligned}
-F'(x)&=f(x)+xf'(x)-\frac d{dx}\int_x^1f(t)dt\\
-&=xf'(x)+2f(x).
-\end{aligned}
-$$
+  </Step>
+</Steps>
 
-由 $x>0$ 及题设 $f'(x)>-2f(x)/x$，得到
+<Callout type="idea" title="方法总结与易错点">
 
-$$
-F'(x)>0\qquad(0<x<1).
-$$
+积分区域沿 $x$ 方向切片时，先找**上边界发生变化**的位置。$x=e$ 必须作为分段点，否则会把不属于所围区域的面积计入。
 
-故 $F$ 严格递增；第一步找到的零点至多只有一个，结合存在性便知唯一。
-
-<Tabs items={['存在性：最大值法','存在性：零点法的补强']} defaultIndex={0}>
-<Tab value="存在性：最大值法">
-
-构造 $H(x)=x\int_x^1f$。$H(0)=H(1)=0$ 且内部可取正值，于是内部正最大值点满足 $H'=0$，直接得到面积等式。这是对 $f(1)=0$ 情况也适用的简洁证明。
-
-</Tab>
-<Tab value="存在性：零点法的补强">
-
-令 $F=xf-\int_x^1f$，已知 $F(0)<0$。若始终 $F(x)<0$（$0<x<1$），则
-
-$$
-H'(x)=\int_x^1f(t)dt-xf(x)=-F(x)>0,
-$$
-
-使 $H$ 在 $(0,1)$ 严格递增，与 $H(1)=0$ 且 $H(x)\ge0$ 矛盾。因此某内点必有 $F(x)\ge0$；再由介值定理获得内点零值。
-
-</Tab>
-</Tabs>
-
-<Callout type="idea" title="为什么要构造辅助函数 $H$">直接比较 $F(0)$ 与 $F(1)$ 时，若 $f(1)=0$ 只能得到 $F(1)=0$，无法保证零点在内部。令 $H=x\int_x^1f$ 并取内部极大值，就补齐了存在性证明中最容易遗漏的端点情形。</Callout>
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-002" type="essay" points={5} tags="来源:2000考研数二, 考点:分段面积, 考点:变上限积分">
+<Question id="core-1102-math-70b5a1-007" type="essay" points={10} tags="来源:1989年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:抛物线约束下旋转体体积最小化">
 
-设正方形 $D=\{(u,v)\mid 0\le u\le1,\ 0\le v\le1\}$，直线 $l:u+v=t$（$t\ge0$）。用 $S(t)$ 表示正方形位于直线左下方的面积，求
-
-$$
-F(x)=\int_0^x S(t)\,dt,\qquad x\ge0.
-$$
+ 设抛物线 $y=ax^2+bx+c$ 过原点，当 $0 \leqslant x \leqslant 1$ 时，$y \geqslant 0$，又已知该抛物线与 $x$ 轴及直线 $x=1$ 所围图形的面积为 $\frac{1}{3}$，试确定 $a, b, c$，使此图形绕 $x$ 轴旋转一周而成的旋转体的体积 $V$ 最小。
 
 <Solution>
 
-**参考答案：**
+**参考答案：** $\boxed{a=-\frac54,\ b=\frac32,\ c=0}$。
 
-$$
-\boxed{F(x)=\begin{cases}
-\dfrac{x^3}{6},&0\le x\le1,\\[2mm]
--\dfrac{x^3}{6}+x^2-x+\dfrac13,&1<x\le2,\\[2mm]
-x-1,&x>2.
-\end{cases}}
-$$
+**解题思路：** 用“过原点 + 面积固定”消去两个系数，将体积化为单变量严格凸二次函数；最后检查取得极值的抛物线满足非负约束。
 
-**第一步：找出图形改变形状的两个临界位置。** 为免与积分上限 $x$ 混淆，将正方形内的坐标记为 $(u,v)$。$S(t)$ 就是 $D$ 中满足 $u+v\le t$ 的面积。
+<Steps>
+  <Step>
 
-- 当 $0\le t\le1$，直线与两坐标轴相交，左下方是两直角边均为 $t$ 的三角形，$S(t)=t^2/2$。
-- 当 $1<t\le2$，应从面积为 $1$ 的正方形中扣除右上角小三角形；其两直角边为 $2-t$，故 $S(t)=1-(2-t)^2/2$。
-- 当 $t>2$，直线越过右上顶点 $(1,1)$，$S(t)=1$。
+    ### 利用过原点与面积约束消元
 
-于是
+    过原点给出 $c=0$，故 $y=ax^2+bx$。由于 $0\le x\le1$ 时 $y\ge0$，题设面积就是
 
-$$
-S(t)=\begin{cases}
-\dfrac{t^2}{2},&0\le t\le1,\\
-1-\dfrac{(2-t)^2}{2},&1<t\le2,\\
-1,&t>2.
-\end{cases}
-$$
+    $$
+    \int_0^1(ax^2+bx)\,\mathrm dx=\frac a3+\frac b2=\frac13.
+    $$
 
-**第二步：分段求变上限积分，不能只积分当前所在的一段。**
+    整理为 $2a+3b=2$，从而 $b=\frac{2(1-a)}3$。
 
-当 $0\le x\le1$ 时，$F(x)=\int_0^x t^2/2\,dt=x^3/6$。
+  </Step>
+  <Step>
 
-当 $1<x\le2$ 时，要保留前一段已累积的面积：
+    ### 建立旋转体体积函数
 
-$$
-\begin{aligned}
-F(x)&=F(1)+\int_1^x\left[1-\frac{(2-t)^2}{2}\right]dt\\
-&=\frac16+\left[t+\frac{(2-t)^3}{6}\right]_1^x\\
-&=-\frac{x^3}{6}+x^2-x+\frac13.
-\end{aligned}
-$$
+    绕 $x$ 轴采用圆盘法：
 
-当 $x>2$ 时，$F(2)=1$，所以 $F(x)=F(2)+\int_2^x 1\,dt=x-1$。
+    $$
+    \frac{V(a)}\pi=\int_0^1(ax^2+bx)^2\,\mathrm dx
+    =\frac{a^2}{5}+\frac{ab}{2}+\frac{b^2}{3}.
+    $$
 
-<Callout type="idea" title="两个必须核对的节点">在 $x=1$ 处前两式均为 $1/6$，在 $x=2$ 处后两式均为 $1$；而且每段求导都应回到面积函数 $S(x)$。这样可以及时发现常数项漏加的错误。</Callout>
+    代入 $b=2(1-a)/3$ 并合并同类项，得到
+
+    $$
+    \frac{V(a)}\pi=\frac{2a^2+5a+20}{135}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 完成平方并核对约束
+
+    配方可得
+
+    $$
+    \frac V\pi=\frac2{135}\left(a+\frac54\right)^2+\frac18.
+    $$
+
+    故不考虑非负限制时的唯一全局最小点是 $a=-5/4$；由此 $b=3/2,c=0$。此时
+
+    $$
+    y=x\left(\frac32-\frac54x\right)\ge\frac{x}{4}\ge0\qquad(0\le x\le1),
+    $$
+
+    因此最优点确实可行，且最小体积为 $V_{\min}=\pi/8$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+这是有约束的参数最优化：求出无约束极小值后，必须代回检验 $y\ge0$；不能仅凭二次函数开口向上就跳过可行性。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-003" type="essay" points={10} tags="来源:2003考研数一, 考点:切线围域, 考点:柱壳法">
+<Question id="core-1102-math-70b5a1-018" type="single" points={3} tags="来源:1993年考研数学一, 科目:高等数学, 章节:定积分的应用, 考点:极坐标曲线面积表达式">
 
-过坐标原点作曲线 $y=\ln x$ 的切线，该切线与曲线 $y=\ln x$、$x$ 轴围成平面图形 $D$。求：(1) 面积 $A$；(2) $D$ 绕直线 $x=e$ 旋转一周的体积 $V$。
+ 双纽线 $(x^2+y^2)^2=x^2-y^2$ 所围成的区域面积可用定积分表示为 ( ).
+
+<Option correct>$2\int_{0}^{\frac{\pi}{4}}\cos 2\theta d\theta$</Option>
+<Option>$4\int_{0}^{\frac{\pi}{4}}\cos 2\theta d\theta$</Option>
+<Option>$2\int_{0}^{\frac{\pi}{4}}\sqrt{\cos 2\theta} d\theta$</Option>
+<Option>$\frac{1}{2}\int_{0}^{\frac{\pi}{4}}(\cos 2\theta)^2 d\theta$</Option>
 
 <Solution>
 
-**参考答案：**
+**参考答案：** 选 **A**，总面积还可算为 $\boxed{1}$。
 
-$$
-\boxed{A=\frac e2-1,\qquad V=\frac\pi6(5e^2-12e+3).}
-$$
+**解题思路：** 先化极坐标求出极径平方，再利用双纽线关于两个坐标轴的对称性；极坐标面积公式中的 $1/2$ 容易遗漏。
 
-**第一步：由“过原点”求切点。** 在 $(a,\ln a)$ 处的切线为
+<Steps>
+  <Step>
 
-$$
-y=\ln a+\frac{x-a}{a}=\frac xa+\ln a-1.
-$$
+    ### 化为极坐标并确定有效角域
 
-令 $x=y=0$，得 $\ln a=1$，即 $a=e$；切线为 $y=x/e$。另外，$\ln x=0$ 对应 $x=1$。因为 $\ln x\le x/e$（等号仅在 $x=e$），所围图形的**上边界一直是切线**，下边界则在 $x=1$ 处由 $x$ 轴切换为 $\ln x$。
+    设 $x=r\cos\theta$、$y=r\sin\theta$。题设 $(x^2+y^2)^2=x^2-y^2$ 化为
 
-**第二步：分两段列面积积分。**
+    $$
+    r^4=r^2\cos2\theta\quad\Rightarrow\quad r^2=\cos2\theta\quad(r>0).
+    $$
 
-$$
-\begin{aligned}
-A&=\int_0^1\frac xe\,dx+\int_1^e\left(\frac xe-\ln x\right)dx\\
-&=\int_0^e\frac xe\,dx-\int_1^e\ln x\,dx\\
-&=\frac e2-\left[x\ln x-x\right]_1^e=\frac e2-1.
-\end{aligned}
-$$
+    右叶位于 $-\pi/4\le\theta\le\pi/4$，其中 $\cos2\theta\ge0$；左叶是右叶关于 $y$ 轴的镜像。
 
-**第三步：绕竖直线 $x=e$ 用柱壳法。** 每条竖直小条旋转所得壳的半径为 $r(x)=e-x$、高度为上下函数之差，故
+  </Step>
+  <Step>
 
-$$
-\begin{aligned}
-V&=2\pi\left[\int_0^1(e-x)\frac xe\,dx+\int_1^e(e-x)\left(\frac xe-\ln x\right)dx\right]\\
-&=2\pi\left[\int_0^e(e-x)\frac xe\,dx-\int_1^e(e-x)\ln x\,dx\right].
-\end{aligned}
-$$
+    ### 计算右叶面积
 
-第一项为 $e^2/6$。第二项分部积分，取 $u=\ln x$、$dv=(e-x)dx$：
+    由极坐标面积元 $\mathrm dA=r\,\mathrm dr\,\mathrm d\theta$，右叶的面积为
 
-$$
-\begin{aligned}
-\int_1^e(e-x)\ln x\,dx
-&=\left[(ex-\tfrac{x^2}{2})\ln x\right]_1^e
--\int_1^e(e-\tfrac{x}{2})dx\\
-&=\frac{e^2}{2}-\left[ex-\frac{x^2}{4}\right]_1^e\\
-&=-\frac{e^2}{4}+e-\frac14.
-\end{aligned}
-$$
+    $$
+    \begin{aligned}
+    S_{\rm 右}&=\int_{-\pi/4}^{\pi/4}\int_0^{\sqrt{\cos2\theta}}r\,\mathrm dr\,\mathrm d\theta\\
+    &=\frac12\int_{-\pi/4}^{\pi/4}\cos2\theta\,\mathrm d\theta
+    =\int_0^{\pi/4}\cos2\theta\,\mathrm d\theta.
+    \end{aligned}
+    $$
 
-故
+  </Step>
+  <Step>
 
-$$
-\begin{aligned}
-V&=2\pi\left(\frac{e^2}{6}+\frac{e^2}{4}-e+\frac14\right)\\
-&=\boxed{\frac\pi6(5e^2-12e+3)}.
-\end{aligned}
-$$
+    ### 由对称性得总面积
 
-<Callout type="warn" title="壳半径的方向">绕 $x=e$ 旋转时，半径是 $e-x$，不是 $x$；同时 $x<1$ 与 $x>1$ 的下边界不同，不能直接只积分 $x/e-\ln x$。</Callout>
+    两叶面积相等，故
+
+    $$
+    S=2S_{\rm 右}=2\int_0^{\pi/4}\cos2\theta\,\mathrm d\theta.
+    $$
+
+    这正是选项 **A**；若进一步计算，$S=2[\sin2\theta/2]_0^{\pi/4}=1$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+面积公式为 $S=\frac12\int r^2\,\mathrm d\theta$，不是 $\int r^2\,\mathrm d\theta$；同时注意该曲线有**左右两叶**，只算一叶后要乘 $2$。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-004" type="essay" points={12} tags="来源:2006考研数二, 考点:参数曲线, 考点:切线, 考点:面积积分">
+<Question id="core-1102-math-70b5a1-019" type="essay" points={9} tags="来源:1993年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:偏轴旋转体与圆盘壳层法">
 
-曲线 $L$ 的参数方程为
-
-$$
-x=t^2+1,\qquad y=4t-t^2,\qquad t\ge0.
-$$
-
-(1) 讨论 $L$ 的凹凸性；(2) 由点 $(-1,0)$ 向 $L$ 引切线，求切点 $(x_0,y_0)$ 及切线方程；(3) 求该切线、$L$ 中 $x\le x_0$ 的弧段与 $x$ 轴围成的面积。
+ 设平面图形 $A$ 由 $x^2+y^2 \leqslant 2x$ 与 $y \geqslant x$ 所确定, 求图形 $A$ 绕直线 $x=2$ 旋转一周所得旋转体的体积.
 
 <Solution>
 
-**参考答案：**
+**参考答案：** $\boxed{V=2\pi\left(\frac\pi4-\frac13\right)}$。
 
-$$
-\boxed{y''(x)=-t^{-3}<0\ (t>0);\quad (x_0,y_0)=(2,3);\quad y=x+1;\quad S=\frac73.}
-$$
+**解题思路：** 旋转轴是竖直线 $x=2$，用柱壳法最自然：体积等于 $2\pi$ 乘上“壳半径 $2-x$”对区域的面积积分。
 
-**(1) 先求对 $x$ 的二阶导数。** 参数法则要求分母 $x'(t)\ne0$，所以先在 $t>0$ 计算：
+<Steps>
+  <Step>
 
-$$
-\frac{dy}{dx}=\frac{4-2t}{2t}=\frac2t-1,
-\qquad
-\frac{d^2y}{dx^2}=\frac{d(2/t-1)/dt}{dx/dt}=-\frac1{t^3}<0.
-$$
+    ### 把区域写为极坐标扇形边界
 
-因而曲线在 $x>1$ 上斜率严格递减，图像位于切线下方。$t=0$ 处 $x'(0)=0$，不能直接代入该二阶导数式。
+    圆盘不等式 $x^2+y^2\le2x$ 化为 $r^2\le2r\cos\theta$，即 $0\le r\le2\cos\theta$；又 $y\ge x$ 对应 $\pi/4\le\theta\le\pi/2$。故
 
-**(2) 设切点对应参数为 $s>0$。** 点、斜率分别为
+    $$
+    A=\left\{(r,\theta):\frac\pi4\le\theta\le\frac\pi2,\quad0\le r\le2\cos\theta\right\}.
+    $$
 
-$$
-P=(s^2+1,4s-s^2),\qquad k=\frac2s-1.
-$$
+    区域上 $0\le x\le1<2$，绕轴旋转时壳半径恒为 $2-x>0$。
 
-将 $(-1,0)$ 代入点斜式，得到
+  </Step>
+  <Step>
 
-$$
--(4s-s^2)=\left(\frac2s-1\right)(-s^2-2).
-$$
+    ### 建立柱壳体积和两个辅助积分
 
-直接将过点条件化简：
+    采用竖直条带柱壳法，并写 $\mathrm dA=r\,\mathrm dr\,\mathrm d\theta$，有
 
-$$
-0=4s-s^2+\left(\frac2s-1\right)(-s^2-2)
-=\frac{2(s-1)(s+2)}s.
-$$
+    $$
+    V=2\pi\iint_A(2-x)\,\mathrm dA
+    =2\pi\left(2|A|-\iint_Ax\,\mathrm dA\right).
+    $$
 
-由 $s>0$ 可得 $s=1$。故切点 $(2,3)$、切线斜率 $1$，方程 $y=x+1$。
+    其中
 
-**(3) 按 $x=1$ 分段列面积。** 曲线 $L$ 起点为 $(1,0)$；在 $[-1,1]$ 上区域是切线与 $x$ 轴间的直角三角形，在 $[1,2]$ 上区域是切线与曲线间的带状区域。
+    $$
+    |A|=2\int_{\pi/4}^{\pi/2}\cos^2\theta\,\mathrm d\theta=\frac\pi4-\frac12,
+    $$
 
-$$
-S=\int_{-1}^{1}(x+1)dx+\int_1^2\bigl[(x+1)-y_L(x)\bigr]dx.
-$$
+    $$
+    \iint_Ax\,\mathrm dA=\frac83\int_{\pi/4}^{\pi/2}\cos^4\theta\,\mathrm d\theta=\frac\pi4-\frac23.
+    $$
 
-第二段用 $x=1+t^2$，$dx=2t\,dt$、$0\le t\le1$，并有
+  </Step>
+  <Step>
 
-$$
-(x+1)-y=2+t^2-(4t-t^2)=2(t-1)^2.
-$$
+    ### 代回并校验结果为正
 
-从而
+    代入得到
 
-$$
-S=2+4\int_0^1t(t-1)^2dt=2+\frac13=\boxed{\frac73}.
-$$
+    $$
+    \begin{aligned}
+    V&=2\pi\left[2\left(\frac\pi4-\frac12\right)-\left(\frac\pi4-\frac23\right)\right]\\
+    &=\boxed{2\pi\left(\frac\pi4-\frac13\right)}.
+    \end{aligned}
+    $$
 
-<Callout type="idea" title="两段面积的底边不同">参数弧线只存在于 $x\ge1$，不能把 $[-1,1]$ 也写成“切线减曲线”；该段应直接用切线到 $x$ 轴的高度。</Callout>
+    由于 $\pi/4>1/3$，体积为正，与几何意义一致。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+不要把 $x=2$ 误当 $y$ 方向旋转轴；竖直轴的壳半径是**横向距离** $2-x$。极坐标只是用来描述 $A$，并不意味着绕极轴旋转。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-005" type="essay" points={10} tags="来源:2012考研数一, 考点:参数切线, 考点:广义面积">
+<Question id="core-1102-math-70b5a1-025" type="single" points={3} tags="来源:1996年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:绕水平直线旋转的垫片法">
 
-曲线 $L$ 的参数方程为
+ 设 $f(x), g(x)$ 在区间 $[a,b]$ 上连续，且 $g(x)<f(x)<m$ （$m$ 为常数），由曲线 $y=g(x), y=f(x), x=a$ 及 $x=b$ 所围平面图形绕直线 $y=m$ 旋转而成的旋转体体积为（ ）.
 
-$$
-x=f(t),\qquad y=\cos t,\qquad 0\le t<\frac\pi2,
-$$
-
-其中 $f$ 具有连续导数，$f(0)=0$，且 $f'(t)>0$（$0<t<\pi/2$）。若 $L$ 的每条切线与 $x$ 轴交点到切点的距离恒为 $1$，求 $f(t)$，以及曲线与两坐标轴围成的无界区域的面积。
+<Option>$\int_a^b \pi [2m - f(x) + g(x)][f(x) - g(x)]\mathrm{d}x$</Option>
+<Option correct>$\int_a^b \pi [2m - f(x) - g(x)][f(x) - g(x)]\mathrm{d}x$</Option>
+<Option>$\int_a^b \pi [m - f(x) + g(x)][f(x) - g(x)]\mathrm{d}x$</Option>
+<Option>$\int_a^b \pi [m - f(x) - g(x)][f(x) - g(x)]\mathrm{d}x$</Option>
 
 <Solution>
 
-**参考答案：**
+**参考答案：** 选 **B**。
 
-$$
-\boxed{f(t)=\ln(\sec t+\tan t)-\sin t,\qquad S=\frac\pi4.}
-$$
+**解题思路：** 垂直于旋转轴切片得到圆环；由 $g(x)<f(x)<m$ 判断内外半径，然后用平方差公式化简。
 
-**第一步：从切线的几何距离推导微分方程。** 对 $0<t<\pi/2$，切点 $P=(f(t),\cos t)$，斜率为
+<Steps>
+  <Step>
 
-$$
-k=\frac{dy/dt}{dx/dt}=-\frac{\sin t}{f'(t)}.
-$$
+    ### 画出切片并确定半径
 
-令切线与 $x$ 轴交于 $Q$。由点斜式，横坐标差满足
+    固定 $x\in[a,b]$，原区域的竖直小线段从 $y=g(x)$ 延伸至 $y=f(x)$，整段位于轴 $y=m$ 下方。旋转后，离轴较远的下边界产生外圆半径
 
-$$
-|x_Q-x_P|=\frac{|\cos t|}{|k|}=\frac{f'(t)\cos t}{\sin t}.
-$$
+    $$
+    R(x)=m-g(x),
+    $$
 
-根据直角三角形的斜边长度 $PQ=1$：
+    离轴较近的上边界产生内圆半径 $r(x)=m-f(x)$。
 
-$$
-\left(\frac{f'(t)\cos t}{\sin t}\right)^2+\cos^2t=1=\sin^2t+\cos^2t.
-$$
+  </Step>
+  <Step>
 
-化简为 $[f'(t)]^2=\sin^4t/\cos^2t$；因题设 $f'(t)>0$，必取正根：
+    ### 按垫片法写横截面积
 
-$$
-f'(t)=\frac{\sin^2t}{\cos t}=\sec t-\cos t.
-$$
+    每个垂直切片产生圆环而非实心圆盘，面积为
 
-**第二步：积分并用初值确定常数。**
+    $$
+    \begin{aligned}
+    A(x)&=\pi\bigl[R(x)^2-r(x)^2\bigr]\\
+    &=\pi\bigl[(m-g(x))^2-(m-f(x))^2\bigr].
+    \end{aligned}
+    $$
 
-$$
-\begin{aligned}
-f(t)&=\int(\sec t-\cos t)dt\\
-&=\ln(\sec t+\tan t)-\sin t+C.
-\end{aligned}
-$$
+  </Step>
+  <Step>
 
-$t=0$ 时对数为 $0$、正弦为 $0$，由 $f(0)=0$ 得 $C=0$。
+    ### 化简并对应选项
 
-**第三步：无界图形按参数求面积。** 曲线随 $t$ 递增向右延伸，且 $y=\cos t\downarrow0$；面积是广义积分
+    用 $u^2-v^2=(u-v)(u+v)$：
 
-$$
-\begin{aligned}
-S&=\lim_{b\to\pi/2^-}\int_0^b y(t)x'(t)dt\\
-&=\lim_{b\to\pi/2^-}\int_0^b\cos t\,\frac{\sin^2t}{\cos t}dt\\
-&=\int_0^{\pi/2}\sin^2t\,dt=\boxed{\frac\pi4}.
-\end{aligned}
-$$
+    $$
+    \begin{aligned}
+    A(x)&=\pi(f(x)-g(x))(2m-f(x)-g(x)),\\
+    V&=\boxed{\pi\int_a^b[2m-f(x)-g(x)][f(x)-g(x)]\,\mathrm dx}.
+    \end{aligned}
+    $$
 
-<Callout type="idea" title="曲线无界，面积为何有限">$f(t)\to+\infty$，但 $y\to0$；对面积有意义的是 $y\,dx=\cos t f'(t)dt=\sin^2t\,dt$，后者在 $[0,\pi/2]$ 上有界可积。</Callout>
+    对应 **B**。两个因子均为正，亦符合体积正性。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+外半径必须对应**离旋转轴更远**的 $g(x)$，不是简单按“上函数”选外半径。将 $R$ 和 $r$ 写反会出现负体积。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-006" type="essay" points={11} tags="来源:2012考研数二, 考点:切线与弦, 考点:圆环法, 考点:对数积分">
+<Question id="core-1102-math-70b5a1-027" type="single" points={3} tags="来源:1997年考研数学一、二, 科目:高等数学, 章节:定积分的应用, 考点:凹凸函数与曲边面积比较">
 
-过点 $(0,1)$ 作曲线 $L:y=\ln x$ 的切线，切点为 $A$；$L$ 与 $x$ 轴的交点为 $B$。区域 $D$ 由曲线 $L$ 的弧段 $BA$ 与直线 $AB$ 围成。求 $D$ 的面积及 $D$ 绕 $x$ 轴旋转所得体积。
+ 设在区间 $[a,b]$ 上 $f(x)>0, f'(x)<0, f''(x)>0$，令
+
+$$
+S_1 = \int_a^b f(x)\mathrm{d}x, S_2 = f(b)(b-a), S_3 = \frac{1}{2}[f(a) + f(b)](b-a),
+$$
+
+则（ ）.
+
+<Option>$S_1 < S_2 < S_3$</Option>
+<Option correct>$S_2 < S_1 < S_3$</Option>
+<Option>$S_3 < S_1 < S_2$</Option>
+<Option>$S_2 < S_3 < S_1$</Option>
 
 <Solution>
 
-**参考答案：**
+**参考答案：** 选 **B**，$\boxed{S_2<S_1<S_3}$。
 
-$$
-\boxed{S=2,\qquad V=\frac{2\pi}{3}(e^2-1).}
-$$
+**解题思路：** 单调性给出矩形下界，二阶导数为正（严格凸性）给出端点弦线/梯形上界，最后串联两个不等式。
 
-**第一步：切线条件先确定切点，再确定围域的下边界。** 设切点为 $A=(a,\ln a)$，过切点的切线为
+<Steps>
+  <Step>
 
-$$
-y=\ln a+\frac{x-a}{a}.
-$$
+    ### 由严格递减建立矩形下界
 
-代入 $(0,1)$ 得 $1=\ln a-1$，故 $a=e^2$，即 $A=(e^2,2)$。曲线与 $x$ 轴的交点为 $B=(1,0)$。
+    已知 $f'(x)<0$，当 $a\le x<b$ 时有 $f(x)>f(b)$。由于 $a<b$，积分可得
 
-注意：**所求区域的直线边界是连接 $A,B$ 的弦，不是过 $(0,1)$ 的切线**。因此直线 $AB$ 的方程为
+    $$
+    S_1=\int_a^bf(x)\,\mathrm dx>\int_a^bf(b)\,\mathrm dx=f(b)(b-a)=S_2.
+    $$
 
-$$
-y=\frac{2(x-1)}{e^2-1},\qquad1\le x\le e^2.
-$$
+    几何上，曲线下方的面积严格大于以右端函数值为高的矩形面积。
 
-由 $\ln x$ 的严格凹性，在 $[1,e^2]$ 内弧位于弦的上方。
+  </Step>
+  <Step>
 
-**第二步：面积按“弧－弦”积分。**
+    ### 由凸性建立梯形上界
 
-$$
-\begin{aligned}
-S&=\int_1^{e^2}\left[\ln x-\frac{2(x-1)}{e^2-1}\right]dx\\
-&=\left[x\ln x-x\right]_1^{e^2}-\frac{2}{e^2-1}\left[\frac{(x-1)^2}{2}\right]_1^{e^2}\\
-&=(e^2+1)-(e^2-1)=\boxed{2}.
-\end{aligned}
-$$
+    $f''(x)>0$ 表明 $f$ 为严格凸函数，图像在端点连线的下方。对 $x\in(a,b)$，令 $\lambda=(b-x)/(b-a)$，有
 
-**第三步：绕 $x$ 轴用圆环法。** 两边界在此区间都非负，外半径是 $\ln x$，内半径是 $2(x-1)/(e^2-1)$，因此
+    $$
+    f(x)<\lambda f(a)+(1-\lambda)f(b).
+    $$
 
-$$
-V=\pi\int_1^{e^2}\left[(\ln x)^2-\frac{4(x-1)^2}{(e^2-1)^2}\right]dx.
-$$
+    将此不等式从 $a$ 积分到 $b$，得到
 
-分开算：
+    $$
+    S_1<\frac{b-a}{2}[f(a)+f(b)]=S_3.
+    $$
 
-$$
-\begin{aligned}
-\int_1^{e^2}(\ln x)^2dx
-&=\left[x\bigl((\ln x)^2-2\ln x+2\bigr)\right]_1^{e^2}=2e^2-2,\\
-\int_1^{e^2}\frac{4(x-1)^2}{(e^2-1)^2}dx&=\frac43(e^2-1).
-\end{aligned}
-$$
+  </Step>
+  <Step>
 
-所以 $V=\pi[(2-4/3)(e^2-1)]=\boxed{\frac{2\pi}{3}(e^2-1)}$。
+    ### 合并结论并解释各量
 
-<Callout type="warn" title="不要把切线误当成区域的弦">题目用“过 $(0,1)$ 作切线”来定位 $A$，但围成平面区域的是 $AB$ 线段；过 $(0,1)$ 的切线并不经过 $B$，若拿它作为内半径，将得到另一道题。</Callout>
+    结合 $S_2<S_1$ 与 $S_1<S_3$，有
+
+    $$
+    \boxed{S_2<S_1<S_3}.
+    $$
+
+    其中 $S_2$ 是下矩形面积，$S_1$ 是曲边实际面积，$S_3$ 是端点割线对应的梯形面积。故选 **B**。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+切勿把 $f>0$ 的凸性方向记反：严格凸函数的图像位于**端点弦的下方**，因而梯形公式在此给出上界。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-007" type="blank" tags="来源:李林880, 考点:变上限积分, 考点:面积, 考点:积分换序">
+<Question id="core-1102-math-70b5a1-028" type="essay" points={8} tags="来源:1997年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:微分方程与旋转体体积最优化">
 
-设 $a>0$，$f(x)=\displaystyle\int_0^{a-x}e^{t(2a-t)}dt$（$0\le x\le a$）。曲线 $y=f(x)$ 与两坐标轴围成的面积为
-
-<Blank answer="(e^(a^2)-1)/2" kind="math" />。
+ 设函数 $f(x)$ 在闭区间 $[0,1]$ 上连续，在开区间 $(0,1)$ 内大于零，并满足 $xf'(x)=f(x)+\frac{3a}{2}x^2$ （$a$ 为常数），又由于曲线 $y=f(x)$ 与 $x=1, y=0$ 所围成的图形 $S$ 的面积值为 $2$，求函数 $y=f(x)$，并求 $a$ 为何值时，图形 $S$ 绕 $x$ 轴旋转一周所得的旋转体的体积最小.
 
 <Solution>
 
-**答案：** $\boxed{\dfrac{e^{a^2}-1}{2}}$。
+**参考答案：** $\boxed{f(x)=\frac{3a}{2}x^2+(4-a)x}$；体积最小时 $\boxed{a=-5}$。
 
-**第一步：确定积分区间及被积函数的正性。** 对 $0\le x\le a$，上限 $a-x\ge0$，故 $f(x)\ge0$，且 $f(a)=0$。围域位于第一象限，面积为 $S=\int_0^a f(x)dx$。
+**解题思路：** 先解微分方程得到含参二次函数，再用面积条件定出积分常数，最后用圆盘体积的严格凸性求最优参数。
 
-<Tabs items={['方法一：交换积分顺序','方法二：分部积分']} defaultIndex={0}>
-<Tab value="方法一：交换积分顺序">
+<Steps>
+  <Step>
 
-在 $(x,t)$ 平面中，原积分的积分域为 $0\le x\le a$、$0\le t\le a-x$，等价于 $0\le t\le a$、$0\le x\le a-t$，于是
+    ### 解一阶微分方程
 
-$$
-\begin{aligned}
-S&=\int_0^a\int_0^{a-x}e^{t(2a-t)}dt\,dx\\
-&=\int_0^a(a-t)e^{t(2a-t)}dt\\
-&=\frac12\int_0^a(2a-2t)e^{t(2a-t)}dt\\
-&=\frac12\left[e^{t(2a-t)}\right]_0^a
-=\frac{e^{a^2}-1}{2}.
-\end{aligned}
-$$
+    对 $0<x<1$，方程 $xf'(x)-f(x)=\frac{3a}{2}x^2$ 可写为
 
-</Tab>
-<Tab value="方法二：分部积分">
+    $$
+    \left(\frac{f(x)}x\right)'=\frac{xf'(x)-f(x)}{x^2}=\frac{3a}{2}.
+    $$
 
-由变上限积分求导，
+    积分得 $f(x)=\frac{3a}{2}x^2+Cx$，该表达式可按连续性延拓到 $x=0$，且 $f(0)=0$。
 
-$$
-f'(x)=-e^{(a-x)(a+x)}=-e^{a^2-x^2}.
-$$
+  </Step>
+  <Step>
 
-分部积分 $S=[xf(x)]_0^a-\int_0^a xf'(x)dx$。边界项为 $0$，故
+    ### 用面积条件求 C
 
-$$
-S=\int_0^a x e^{a^2-x^2}dx=\frac12\left[e^{a^2-x^2}\right]_a^0=\frac{e^{a^2}-1}{2}.
-$$
+    由 $f(x)>0$（$0<x<1$），几何面积无须绝对值：
 
-</Tab>
-</Tabs>
+    $$
+    2=\int_0^1f(x)\,\mathrm dx
+    =\frac a2+\frac C2.
+    $$
 
-**方法选择：** 积分嵌套且内层上限为 $a-x$ 时，换序或分部积分都能生成 $a-t$（或 $x$）这样的可直接配指数函数导数的因子。
+    于是 $C=4-a$，即
+
+    $$
+    \boxed{f(x)=\frac{3a}{2}x^2+(4-a)x}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 建立并最小化体积
+
+    绕 $x$ 轴的圆盘体积为
+
+    $$
+    \begin{aligned}
+    \frac{V(a)}\pi&=\int_0^1\left[\frac{3a}{2}x^2+(4-a)x\right]^2\,\mathrm dx\\
+    &=\frac{a^2}{30}+\frac a3+\frac{16}{3}
+    =\frac{(a+5)^2}{30}+\frac92.
+    \end{aligned}
+    $$
+
+    因平方项非负，最小值在 $a=-5$ 取得，此时 $f(x)=\frac32x(6-5x)>0$ 对 $0<x<1$ 恒成立，满足题意。故最优参数为 $\boxed{-5}$，最小体积为 $9\pi/2$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+本题面积已指定为正，利用 $f(x)>0$ 才能写 $\int f=2$；二次函数优化后，还要确认所求参数保持整个内区间上的正性。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-008" type="essay" tags="来源:张宇1000题, 考点:无界面积, 考点:柱壳法">
+<Question id="core-1102-math-70b5a1-029" type="essay" points={6} tags="来源:1998年考研数学一、二, 科目:高等数学, 章节:定积分的应用, 考点:面积中值点的存在与唯一性">
 
-过原点作曲线 $y=e^x$ 的切线。由该切线、曲线及 $x$ 轴围成向 $x$ 轴负方向无限延伸的区域 $D$。(1) 求 $D$ 的面积；(2) 求 $D$ 绕直线 $x=1$ 旋转一周的体积。
+ 设 $y=f(x)$ 是区间 $[0,1]$ 上的任一非负连续函数.
+(1)试证存在 $x_0 \in (0,1)$，使得在区间 $[0,x_0]$ 上以 $f(x_0)$ 为高的矩形面积，等于在区
+间 $[x_0, 1]$上以 $y=f(x)$为曲线的梯形面积;
+
+(2)又设 $f(x)$在区间 $(0,1)$内可导, 且 $f'(x) > -\frac{2f(x)}{x}$, 证明(1)中的 $x_0$ 是唯一的.
 
 <Solution>
 
-**参考答案：**
+**参考答案：** 第（1）问：存在所求 $x_0\in(0,1)$；第（2）问：在附加条件下此点唯一。
 
-$$
-\boxed{S=\frac e2,\qquad V=\frac{5\pi e}{3}.}
-$$
+**解题思路：** 把几何等面积转化为连续函数的零点问题；存在性用反证法和积分尾函数，唯一性用导数严格为正。
 
-**第一步：求切线并定位无界围域。** 在 $x=a$ 处的切线是 $y=e^a(1+x-a)$。令 $x=y=0$ 得 $a=1$，故切点 $(1,e)$、切线 $y=ex$。
+<Steps>
+  <Step>
 
-由于 $e^x\ge 1+x$，有 $e^x\ge ex$（等号仅 $x=1$）。当 $x<0$，切线在 $x$ 轴下方，不属于所围图形的下边界；故高度分段为
+    ### 构造面积差函数
 
-$$
-h(x)=\begin{cases}e^x,&x<0,\\ e^x-ex,&0\le x\le1.\end{cases}
-$$
+    设
 
-**第二步：按广义积分求面积。**
+    $$
+    F(x)=xf(x)-\int_x^1f(t)\,\mathrm dt,\qquad0\le x\le1.
+    $$
 
-$$
-\begin{aligned}
-S&=\int_{-\infty}^0e^x\,dx+\int_0^1(e^x-ex)dx\\
-&=1+(e-1-\tfrac e2)=\boxed{\frac e2}.
-\end{aligned}
-$$
+    矩形面积是 $xf(x)$，曲边梯形面积是右端积分，故欲证 $F(x_0)=0$。由于 $f$ 连续，$F$ 在 $[0,1]$ 上连续。若 $f\equiv0$，任意内部点满足第（1）问；以下设 $f\not\equiv0$，则 $F(0)=-\int_0^1f<0$。
 
-**第三步：绕 $x=1$ 用柱壳法。** 壳半径是 $1-x$，故
+  </Step>
+  <Step>
 
-$$
-\begin{aligned}
-\frac V{2\pi}
-&=\int_{-\infty}^0(1-x)e^x\,dx
-+\int_0^1(1-x)(e^x-ex)dx.
-\end{aligned}
-$$
+    ### 证明一定存在内部零点
 
-分别计算：
+    记 $T(x)=\int_x^1f(t)\,\mathrm dt\ge0$。反设 $F(x)<0$ 对所有 $0<x<1$ 成立（因为假如某处 $F\ge0$，就可利用 $F(0)<0$ 和介值定理找到内部零点）。反设给出 $xf(x)<T(x)$，从而
 
-$$
-\begin{aligned}
-\int_{-\infty}^0(1-x)e^x dx
-&=[(2-x)e^x]_{-\infty}^0=2,\\
-\int_0^1(1-x)e^x dx&=[(2-x)e^x]_0^1=e-2,\\
-\int_0^1e x(1-x)dx&=e(\tfrac12-\tfrac13)=\frac e6.
-\end{aligned}
-$$
+    $$
+    \frac{\mathrm d}{\mathrm dx}[xT(x)]
+    =T(x)+xT'(x)=T(x)-xf(x)>0\quad(0<x<1).
+    $$
 
-所以 $V=2\pi[2+(e-2)-e/6]=\boxed{5\pi e/3}$。
+    故 $xT(x)$ 应严格递增；但 $T\ge0$ 且 $\lim_{x\to1^-}xT(x)=0$，严格递增函数在 $(0,1)$ 上不可能始终非负而极限为 $0$，矛盾。于是存在 $x_1\in(0,1)$ 使 $F(x_1)\ge0$，再由介值定理得到 $x_0\in(0,x_1]$ 且 $F(x_0)=0$。
 
-**收敛性说明：** 当 $x\to-\infty$ 时，$e^x$ 与 $(1-x)e^x$ 均可积，所以平面区域无界不妨碍面积和体积有限。
+  </Step>
+  <Step>
+
+    ### 用导数正性证明唯一性
+
+    对 $0<x<1$，按变上、下限积分求导公式：
+
+    $$
+    F'(x)=f(x)+xf'(x)+f(x)=xf'(x)+2f(x).
+    $$
+
+    由题设 $f'(x)>-2f(x)/x$（且 $x>0$），可知 $F'(x)>0$。因此 $F$ 在 $(0,1)$ 严格递增，零点至多一个。结合第（1）问存在性，$x_0$ 唯一。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+若只用 $F(0)\le0$ 与 $F(1)=f(1)\ge0$，两端可能取等号，不能直接保证**内部**零点。反证论证是为弥补这一逻辑空缺。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-## 二、旋转体积、体积比较和变端点最值
+<Question id="core-1102-math-70b5a1-033" type="essay" points={5} tags="来源:2000年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:移动直线的截面积与分段积分">
 
-<Question id="math-core-gd-04-04-009" type="essay" points={8} tags="来源:1988考研数三, 考点:抛物线切线, 考点:圆环体积">
-
-在曲线 $y=x^2$（$x\ge0$）上某点 $A$ 作切线，使之与曲线及 $x$ 轴所围面积为 $1/12$。求：(1) 切点 $A$；(2) 切线方程；(3) 所围图形绕 $x$ 轴旋转一周所得体积。
+ 设 $xOy$ 平面上有正方形 $D = \{(x, y) \mid 0 \le x \le 1, 0 \le y \le 1\}$ 及直线 $l: x + y = t (t \ge 0)$. 若 $S(t)$ 表示正方形 $D$ 位于直线 $l$ 左下方部分的面积, 试求 $\int_{0}^{x} S(t)\mathrm{d}t (x \ge 0)$.
 
 <Solution>
 
-**参考答案：**
+**参考答案：** $\boxed{\int_0^xS(t)\,\mathrm dt=\begin{cases}\frac{x^3}{6},&0\le x\le1,\\-\frac{x^3}{6}+x^2-x+\frac13,&1<x\le2,\\x-1,&x>2.\end{cases}}$
 
-$$
-\boxed{A=(1,1),\qquad y=2x-1,\qquad V=\frac\pi{30}.}
-$$
+**解题思路：** 截线与单位正方形相交的形状在 $t=1$ 和 $t=2$ 发生改变；先分段求 $S(t)$，再按相同分点累积积分。
 
-**第一步：用切点坐标 $a$ 表示所有边界。** 设 $A=(a,a^2)$，其中 $a>0$。切线为
+<Steps>
+  <Step>
 
-$$
-y=2ax-a^2,
-$$
+    ### 判断截得面积的三个阶段
 
-与 $x$ 轴的交点为 $x=a/2$。抛物线和切线的纵坐标差是完全平方：
+    令 $S(t)$ 为 $[0,1]^2$ 中满足 $u+v\le t$ 的点集面积。$0\le t\le1$ 时左下角是两直角边长为 $t$ 的三角形；$1<t\le2$ 时用整个正方形减去右上角边长 $2-t$ 的三角形；$t>2$ 时全正方形在直线左下方。因此
 
-$$
-x^2-(2ax-a^2)=(x-a)^2\ge0.
-$$
+    $$
+    S(t)=\begin{cases}
+    \tfrac12t^2,&0\le t\le1,\\
+    1-\tfrac12(2-t)^2,&1<t\le2,\\
+    1,&t>2.
+    \end{cases}
+    $$
 
-因此切线在 $[a/2,a]$ 充当下边界，而 $[0,a/2]$ 的下边界是 $x$ 轴。
+  </Step>
+  <Step>
 
-**第二步：由面积确定 $a$。**
+    ### 在前两段计算累积积分
 
-$$
-\begin{aligned}
-S&=\int_0^{a/2}x^2dx+\int_{a/2}^a(x-a)^2dx\\
-&=\frac{a^3}{24}+\frac{a^3}{24}=\frac{a^3}{12}.
-\end{aligned}
-$$
+    记 $G(x)=\int_0^xS(t)\,\mathrm dt$。若 $0\le x\le1$，
 
-由 $S=1/12$ 且 $a>0$，得 $a=1$，故 $A=(1,1)$，切线为 $y=2x-1$。
+    $$
+    G(x)=\int_0^x\frac{t^2}{2}\,\mathrm dt=\frac{x^3}{6}.
+    $$
 
-**第三步：绕 $x$ 轴旋转时圆盘与圆环分开。**
+    若 $1<x\le2$，必须加上前一段积累的 $G(1)=1/6$，故
 
-$$
-\begin{aligned}
-V&=\pi\int_0^{1/2}x^4dx+\pi\int_{1/2}^1\left[x^4-(2x-1)^2\right]dx\\
-&=\pi\left[\int_0^1x^4dx-\int_{1/2}^1(2x-1)^2dx\right]\\
-&=\pi\left(\frac15-\frac16\right)=\boxed{\frac\pi{30}}.
-\end{aligned}
-$$
+    $$
+    \begin{aligned}
+    G(x)&=\frac16+\int_1^x\left[1-\frac{(2-t)^2}{2}\right]\,\mathrm dt\\
+    &=-\frac{x^3}{6}+x^2-x+\frac13.
+    \end{aligned}
+    $$
 
-<Callout type="warn" title="面积和体积都必须在 $x=a/2$ 处分段">对 $0\le x<a/2$，切线在 $x$ 轴下方，不能把负值当作内半径；几何体不允许出现“负的圆盘半径”。</Callout>
+  </Step>
+  <Step>
+
+    ### 完成第三段并检验连续性
+
+    第二段代入 $x=2$ 得 $G(2)=1$。当 $x>2$，$S(t)=1$，所以
+
+    $$
+    G(x)=G(2)+\int_2^x1\,\mathrm dt=x-1.
+    $$
+
+    在 $x=1$ 两段都为 $1/6$，在 $x=2$ 两段都为 $1$，满足积分上限函数连续性。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+分段积分时，不能在 $1<x\le2$ 只写 $\int_1^xS(t)\,\mathrm dt$ 而遗漏之前的 $\int_0^1S(t)\,\mathrm dt$；第三段同理。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-010" type="essay" points={10} tags="来源:2013考研数二数三, 考点:双轴旋转体, 考点:柱壳法">
+<Question id="core-1102-math-70b5a1-036" type="essay" points={8} tags="来源:2002年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:微分方程与旋转体体积最小化">
 
-平面区域 $D$ 由 $y=x^{1/3}$、$x=a$（$a>0$）及 $x$ 轴围成。$V_x,V_y$ 分别表示 $D$ 绕 $x$ 轴与 $y$ 轴旋转的体积。若 $V_y=10V_x$，求 $a$。
+ 求微分方程 $x\mathrm{d}y + (x - 2y)\mathrm{d}x = 0$ 的一个解 $y = y(x)$, 使得由曲线 $y = y(x)$, 与直线 $x = 1, x = 2$ 以及 $x$ 轴所围成的平面图形绕 $x$ 轴旋转一周的旋转体体积最小.
+
+<Solution>
+
+**参考答案：** $\boxed{y(x)=x-\frac{75}{124}x^2}$。
+
+**解题思路：** 先利用积分因子求微分方程通解，再以积分常数为变量建立旋转体体积的严格凸二次函数。
+
+<Steps>
+  <Step>
+
+    ### 求微分方程的一般解
+
+    对 $1\le x\le2$，原方程等价于 $xy'+x-2y=0$，即
+
+    $$
+    y'-\frac2x y=-1.
+    $$
+
+    积分因子为 $\mu(x)=\exp\int(-2/x)\,\mathrm dx=x^{-2}$，相乘得
+
+    $$
+    \left(\frac{y}{x^2}\right)'=-\frac1{x^2}.
+    $$
+
+    积分为 $y/x^2=1/x+C$，从而 $\boxed{y=x+Cx^2}$。
+
+  </Step>
+  <Step>
+
+    ### 写出体积关于 C 的二次表达式
+
+    半径为 $|y(x)|$，其平方等于 $y(x)^2$，不论曲线在某处是否穿过 $x$ 轴，体积公式均为
+
+    $$
+    \begin{aligned}
+    \frac{V(C)}\pi&=\int_1^2(x+Cx^2)^2\,\mathrm dx\\
+    &=\int_1^2(x^2+2Cx^3+C^2x^4)\,\mathrm dx\\
+    &=\frac73+\frac{15}{2}C+\frac{31}{5}C^2.
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 求全局最小并回代
+
+    由于 $V''(C)=\frac{62\pi}{5}>0$，体积函数严格凸。令
+
+    $$
+    V'(C)=\pi\left(\frac{15}{2}+\frac{62}{5}C\right)=0,
+    $$
+
+    得到 $C=-\frac{15}{2}\cdot\frac5{62}=-\frac{75}{124}$，因此最优解是
+
+    $$
+    \boxed{y=x-\frac{75}{124}x^2}.
+    $$
+
+    该解满足原微分方程，且给出唯一的全局最小体积。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+微分方程的积分常数不是任意选取的：题目中的“体积最小”就是确定它的第二个条件。绕 $x$ 轴取半径的平方，无须因函数可能变号而改变公式。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-70b5a1-037" type="essay" points={7} tags="来源:2002年考研数学三, 科目:高等数学, 章节:定积分的应用, 考点:双轴旋转体积与参数最优化">
+
+ 设 $D_1$ 是由抛物线 $y = 2x^2$ 和直线 $x = a, x = 2$ 及 $y = 0$ 所围成的平面区域; $D_2$ 是由抛物线 $y = 2x^2$ 和直线 $y = 0, x = a$ 所围成的平面区域, 其中 $0 < a < 2$.
+
+(1)试求: $D_1$ 绕 $x$ 轴旋转而成的旋转体体积 $V_1$; $D_2$ 绕 $y$ 轴旋转而成的旋转体体积 $V_2$;
+
+(2)当 $a$ 为何值时, $V_1 + V_2$ 取得最大值? 试求此最大值.
+
+<Solution>
+
+**参考答案：** $\boxed{V_1=\frac{4\pi}{5}(32-a^5),\quad V_2=\pi a^4}$；$\boxed{a=1,\ V_{\max}=\frac{129\pi}{5}}$。
+
+**解题思路：** 两个旋转轴对应不同切片方法：绕 $x$ 轴用圆盘法，绕 $y$ 轴用柱壳法；合并后按导数符号求内点最大值。
+
+<Steps>
+  <Step>
+
+    ### 计算 D₁ 绕 x 轴的体积
+
+    $D_1$ 位于 $a\le x\le2$、$0\le y\le2x^2$。圆盘半径为 $2x^2$，所以
+
+    $$
+    \begin{aligned}
+    V_1&=\pi\int_a^2(2x^2)^2\,\mathrm dx
+    =4\pi\left[\frac{x^5}{5}\right]_a^2\\
+    &=\boxed{\frac{4\pi}{5}(32-a^5)}.
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 计算 D₂ 绕 y 轴的体积
+
+    $D_2$ 位于 $0\le x\le a$、$0\le y\le2x^2$。用竖直柱壳：壳半径为 $x$，壳高为 $2x^2$，有
+
+    $$
+    V_2=2\pi\int_0^a x(2x^2)\,\mathrm dx
+    =4\pi\left[\frac{x^4}{4}\right]_0^a
+    =\boxed{\pi a^4}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 求 V₁+V₂ 的最大值
+
+    令
+
+    $$
+    H(a)=\frac{4\pi}{5}(32-a^5)+\pi a^4,\qquad0<a<2.
+    $$
+
+    求导得 $H'(a)=4\pi a^3(1-a)$。因 $a>0$，在 $0<a<1$ 为正、在 $1<a<2$ 为负，所以 $a=1$ 是唯一最大点，且
+
+    $$
+    \boxed{H(1)=\frac{4\pi}{5}\cdot31+\pi=\frac{129\pi}{5}}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+“最大值”必须结合**整个区间的导数符号**判断；仅令 $H^{\prime}(a)=0$ 还不能确定极值性质。两个体积公式不要混用圆盘与柱壳的半径。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-70b5a1-040" type="essay" points={12} tags="来源:2006年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:参数曲线切线与平面图形面积">
+
+ 已知曲线 $L$ 的方程 $\begin{cases} x = t^2 + 1, \\ y = 4t - t^2, \end{cases}$ $t \ge 0$.
+(1)讨论 $L$ 的凹凸性；
+(2)过点 $(-1, 0)$ 引 $L$ 的切线，求切点 $(x_0, y_0)$，并写出切线的方程；
+(3)求此切线与 $L$（对应 $x \le x_0$ 的部分）及 $x$ 轴所围成的平面图形的面积.
+
+<Solution>
+
+**参考答案：** 曲线 $y^{\prime\prime}<0$（向下弯）；切点 $\boxed{(2,3)}$，切线 $\boxed{y=x+1}$；面积 $\boxed{\frac73}$。
+
+**解题思路：** 参数消去前直接求导数与切线；面积用“直线下三角形 + 切线与曲线间的狭条”分成两部分计算。
+
+<Steps>
+  <Step>
+
+    ### 求一、二阶导数判断凹凸
+
+    曲线 $x=t^2+1,\ y=4t-t^2$（$t\ge0$）。对 $t>0$，
+
+    $$
+    \frac{\mathrm dy}{\mathrm dx}=\frac{4-2t}{2t}=\frac2t-1,
+    \qquad
+    \frac{\mathrm d^2y}{\mathrm dx^2}
+    =\frac{(-2/t^2)}{2t}=-\frac1{t^3}<0.
+    $$
+
+    故曲线内点二阶导数恒负，图形在端点 $t=0$ 右侧向下弯（教材常称凸弧）；$t=0$ 对应 $(1,0)$，具有竖直切线，不能套 $\mathrm dy/\mathrm dx$ 的有限斜率公式。
+
+  </Step>
+  <Step>
+
+    ### 由给定外点求切点参数
+
+    设切点参数为 $t_0>0$，切点 $(1+t_0^2,4t_0-t_0^2)$ 的切线斜率是 $2/t_0-1$。该直线通过 $(-1,0)$，于是
+
+    $$
+    4t_0-t_0^2=\left(\frac2{t_0}-1\right)(t_0^2+2).
+    $$
+
+    乘 $t_0$ 并化简：$t_0^2+t_0-2=0$，所以 $t_0=1$（另一根 $-2$ 舍去）。进而切点 $(2,3)$、斜率 $1$，切线为 $\boxed{y=x+1}$。
+
+  </Step>
+  <Step>
+
+    ### 分割并计算所围面积
+
+    从 $(-1,0)$ 到 $(1,0)$，区域在 $x$ 轴与直线 $y=x+1$ 之间，面积 $\int_{-1}^1(x+1)\,\mathrm dx=2$。从 $x=1$ 到切点 $x=2$，区域在曲线和切线之间，令 $x=1+t^2$：
+
+    $$
+    \begin{aligned}
+    S&=2+\int_0^1\bigl[(x(t)+1)-y(t)\bigr]x'(t)\,\mathrm dt\\
+    &=2+\int_0^1 2(t-1)^2\cdot2t\,\mathrm dt\\
+    &=2+4\left[\frac{t^4}{4}-\frac{2t^3}{3}+\frac{t^2}{2}\right]_0^1
+    =\boxed{\frac73}.
+    \end{aligned}
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+题目中的“曲线对应 $x\le x_0$”指 $1\le x\le2$，**不能**把 $x<-1$ 或切点右侧计入面积。判断凹凸请始终以 $y^{\prime\prime}<0$ 这一不含歧义的结论为准。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-70b5a1-043" type="essay" points={10} tags="来源:2010年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:椭圆截面面积与液体体积">
+
+ [仅数一、数二] 一个高为 $l$ 的柱体形贮油罐，底面是长轴为 $2a$, 短轴为 $2b$ 的椭圆. 现将贮油罐平放，当油罐中油面高度为 $\frac{3}{2}b$ 时（如图），计算油的质量.（长度单位为 m, 质量单位为 kg, 油的密度为常数 $\rho \, \text{kg/m}^3$）
+![2010-2-10 题图](/img/questions/math/calculus-lower-2010-2-10.png)
+
+<Solution>
+
+**参考答案：** $\boxed{m=ab l\rho\left(\frac{2\pi}{3}+\frac{\sqrt3}{4}\right)}$。
+
+**解题思路：** 平放的椭圆柱油罐，先对横截面水平切片求油面下方的椭圆截面积，再乘罐长与密度；特别注意题干中的 $l$。
+
+<Steps>
+  <Step>
+
+    ### 建立截面坐标并定位液面
+
+    以椭圆截面中心为原点，水平轴与长轴重合，有
+
+    $$
+    \frac{x^2}{a^2}+\frac{y^2}{b^2}=1.
+    $$
+
+    底部为 $y=-b$，油面高度 $3b/2$ 以底部为基准，故液面是 $y=-b+3b/2=b/2$。每个高度 $y$ 处的油层横宽为
+
+    $$
+    2a\sqrt{1-y^2/b^2}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 积分求油液横截面积
+
+    油的截面积
+
+    $$
+    S=2a\int_{-b}^{b/2}\sqrt{1-\frac{y^2}{b^2}}\,\mathrm dy.
+    $$
+
+    令 $y=b\sin\theta$，上下限依次变为 $-\pi/2$、$\pi/6$，积分化为
+
+    $$
+    S=2ab\int_{-\pi/2}^{\pi/6}\cos^2\theta\,\mathrm d\theta.
+    $$
+
+    利用 $\cos^2\theta=(1+\cos2\theta)/2$，得
+
+    $$
+    S=ab\left[\theta+\frac12\sin2\theta\right]_{-\pi/2}^{\pi/6}
+    =ab\left(\frac{2\pi}{3}+\frac{\sqrt3}{4}\right).
+    $$
+
+  </Step>
+  <Step>
+
+    ### 由面积求体积与质量
+
+    贮油罐是长度为 $l$ 的柱体，故液体体积 $V=Sl$。油密度为常数 $\rho$，由 $m=\rho V$：
+
+    $$
+    \boxed{m=ab l\rho\left(\frac{2\pi}{3}+\frac{\sqrt3}{4}\right)}.
+    $$
+
+    量纲检验：$abl$ 是体积量纲 $\mathrm m^3$，乘 $\rho$（$\mathrm{kg}/\mathrm m^3$）得到质量 $\mathrm{kg}$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+原题存档的“答案”栏遗漏了罐长因子 **$l$**，而解析末尾已经包含它。本版统一修正为 $abl\rho(2\pi/3+\sqrt3/4)$，确保结果和量纲一致。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-70b5a1-046" type="essay" points={10} tags="来源:2012年考研数学一, 科目:高等数学, 章节:定积分的应用, 考点:参数曲线切线几何与弧长">
+
+ 已知曲线 $L$: $\begin{cases} x = f(t), \\ y = \cos t \end{cases}$ ($0 \le t < \frac{\pi}{2}$)，其中函数 $f(t)$ 具有连续导数，且 $f(0) = 0, f'(t) > 0$ ($0 < t < \frac{\pi}{2}$). 若曲线 $L$ 的切线与 $x$ 轴的交点到切点的距离恒为 1，求函数 $f(t)$ 的表达式，并求此曲线 $L$ 与 $x$ 轴与 $y$ 轴无边界的区域的面积.
+
+<Solution>
+
+**参考答案：** $\boxed{f(t)=\ln(\sec t+\tan t)-\sin t}$，面积 $\boxed{\frac\pi4}$。
+
+**解题思路：** “切线与 $x$ 轴交点到切点的距离恒为 1”转化为一个直角三角形关系，从而求出 $f^{\prime}(t)$；面积可直接做参数积分。
+
+<Steps>
+  <Step>
+
+    ### 把切线几何条件转为方程
+
+    对 $0<t<\pi/2$，切点为 $P=(f(t),\cos t)$，切线斜率
+
+    $$
+    k=\frac{y'(t)}{x'(t)}=-\frac{\sin t}{f'(t)}<0.
+    $$
+
+    设切线与 $x$ 轴交于 $Q$，两点的纵坐标差为 $\cos t$，横坐标差的绝对值为 $\cos t\,f'(t)/\sin t$。由 $PQ=1$，
+
+    $$
+    \left(\frac{f'(t)\cos t}{\sin t}\right)^2+\cos^2t=1.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 确定导数正根并求 f(t)
+
+    化简得
+
+    $$
+    [f'(t)]^2=\frac{\sin^4t}{\cos^2t}.
+    $$
+
+    由题设 $f'(t)>0$，得 $f'(t)=\frac{\sin^2t}{\cos t}=\sec t-\cos t$。积分并代入 $f(0)=0$：
+
+    $$
+    \begin{aligned}
+    f(t)&=\int_0^t(\sec u-\cos u)\,\mathrm du\\
+    &=\boxed{\ln(\sec t+\tan t)-\sin t}.
+    \end{aligned}
+    $$
+
+    这里 $0\le t<\pi/2$，故 $\sec t+\tan t>0$，不必加绝对值。
+
+  </Step>
+  <Step>
+
+    ### 处理无界区域的面积
+
+    由于 $f'(t)>0$、$f(0)=0$、$y=\cos t>0$ 且 $y\to0$（$t\to\pi/2^-$），可用参数表达式计算面积：
+
+    $$
+    \begin{aligned}
+    S&=\lim_{T\to\pi/2^-}\int_0^T y(t)x'(t)\,\mathrm dt\\
+    &=\lim_{T\to\pi/2^-}\int_0^T\cos t\,\frac{\sin^2t}{\cos t}\,\mathrm dt\\
+    &=\int_0^{\pi/2}\sin^2t\,\mathrm dt=\boxed{\frac\pi4}.
+    \end{aligned}
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+本题区域沿 $x$ 轴**无界**，但面积收敛；求面积必须以 $t\to\pi/2^-$ 取极限，不因 $f(t)\to\infty$ 就误判面积无穷。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-70b5a1-047" type="essay" points={11} tags="来源:2012年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:对数曲线切线与旋转体积">
+
+ 过点 $(0, 1)$ 作曲线 $L: y = \ln x$ 的切线，切点为 $A$，又 $L$ 与 $x$ 轴交于 $B$ 点，区域 $D$ 由 $L$ 与直线 $AB$ 围成，求区域 $D$ 的面积及 $D$ 绕 $x$ 轴旋转一周所得体的体积.
+
+
+<Solution>
+
+**参考答案：** $\boxed{S=2}$；$\boxed{V=\frac{2\pi}{3}(e^2-1)}$。
+
+**解题思路：** 先用外点确定 $y=\ln x$ 的切点，再连接切点与 $x$ 轴交点形成弦 $AB$；面积积分和体积积分均使用“对数曲线减弦线”。
+
+<Steps>
+  <Step>
+
+    ### 求切点 A 及弦线 AB
+
+    设 $A=(a,\ln a)$，在 $A$ 处切线为
+
+    $$
+    y=\ln a+\frac1a(x-a).
+    $$
+
+    其经过 $(0,1)$，故 $1=\ln a-1$，得 $a=e^2$，即 $A=(e^2,2)$。曲线与 $x$ 轴交于 $B=(1,0)$。注意 **$AB$ 不是上述切线**：连接 $A,B$ 的弦线为
+
+    $$
+    y_{AB}=\frac{2(x-1)}{e^2-1}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 按上下曲线求平面面积
+
+    因为 $\frac{\mathrm d^2}{\mathrm dx^2}\ln x=-1/x^2<0$，$y=\ln x$ 在弦 $AB$ 上方。于是
+
+    $$
+    \begin{aligned}
+    S&=\int_1^{e^2}\left[\ln x-\frac{2(x-1)}{e^2-1}\right]\,\mathrm dx\\
+    &=\underbrace{[x\ln x-x]_1^{e^2}}_{e^2+1}
+    -\underbrace{\frac{(e^2-1)\cdot2}{2}}_{e^2-1}
+    =\boxed{2}.
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 按圆环法求绕 x 轴体积
+
+    在 $[1,e^2]$ 上两边界均非负，外半径为 $\ln x$，内半径为弦线高度。故
+
+    $$
+    V=\pi\int_1^{e^2}\left[(\ln x)^2-\frac{4(x-1)^2}{(e^2-1)^2}\right]\,\mathrm dx.
+    $$
+
+    其中
+
+    $$
+    \int_1^{e^2}(\ln x)^2\,\mathrm dx
+    =\left[x((\ln x)^2-2\ln x+2)\right]_1^{e^2}=2(e^2-1),
+    $$
+
+    $$
+    \int_1^{e^2}\frac{4(x-1)^2}{(e^2-1)^2}\,\mathrm dx=\frac43(e^2-1).
+    $$
+
+    两式相减，$V=\pi(2-4/3)(e^2-1)=\boxed{\frac{2\pi}{3}(e^2-1)}$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+最易混淆的是“经过 $(0,1)$ 的**切线**”与围成区域使用的“**弦 $AB$**”。原存档题干中的孤立数字“96”为页码残留，不属于题目条件，本版已清理。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-70b5a1-050" type="essay" points={10} tags="来源:2013年考研数学二、三, 科目:高等数学, 章节:定积分的应用, 考点:双轴旋转体积的比例关系">
+
+ 设 $D$ 是由曲线 $y=x^{\frac{1}{3}}$，直线 $x=a(a>0)$ 及 $x$ 轴所围成的平面图形，$V_x,V_y$ 分别是 $D$ 绕 $x$ 轴、$y$ 轴旋转一周所得旋转体的体积，若 $V_y=10V_x$，求 $a$ 的值。
 
 <Solution>
 
 **参考答案：** $\boxed{a=7\sqrt7}$。
 
-**第一步：表示原区域。**
+**解题思路：** 同一区域绕两个不同轴转动，分别用圆盘法和柱壳法建立体积，再将比例方程化为 $a^{2/3}=7$。
 
-$$
-D=\{(x,y)\mid 0\le x\le a,\quad 0\le y\le x^{1/3}\}.
-$$
+<Steps>
+  <Step>
 
-**第二步：两条旋转轴分别选合适方法。**
+    ### 明确区域与绕 x 轴体积
 
-绕 $x$ 轴用圆盘法，半径 $x^{1/3}$：
+    曲线 $y=x^{1/3}$ 与 $x$ 轴相交于 $(0,0)$。由于 $a>0$，区域为 $0\le x\le a$、$0\le y\le x^{1/3}$。绕 $x$ 轴旋转使用圆盘法：
 
-$$
-V_x=\pi\int_0^a x^{2/3}dx=\frac{3\pi}{5}a^{5/3}.
-$$
+    $$
+    V_x=\pi\int_0^a(x^{1/3})^2\,\mathrm dx
+    =\pi\left[\frac35x^{5/3}\right]_0^a
+    =\frac{3\pi}{5}a^{5/3}.
+    $$
 
-绕 $y$ 轴用柱壳法，半径 $x$、高度 $x^{1/3}$：
+  </Step>
+  <Step>
 
-$$
-V_y=2\pi\int_0^a x\,x^{1/3}dx=\frac{6\pi}{7}a^{7/3}.
-$$
+    ### 绕 y 轴采用柱壳法
 
-**第三步：由体积比解参数。**
+    竖直条带距 $y$ 轴的距离是 $x$，条带高度是 $x^{1/3}$，故
 
-$$
-\frac{V_y}{V_x}=\frac{10}{7}a^{2/3}=10
-\quad\Longrightarrow\quad a^{2/3}=7.
-$$
+    $$
+    V_y=2\pi\int_0^a x\cdot x^{1/3}\,\mathrm dx
+    =2\pi\left[\frac37x^{7/3}\right]_0^a
+    =\frac{6\pi}{7}a^{7/3}.
+    $$
 
-由于 $a>0$，两边取 $3/2$ 次幂，得 $a=7^{3/2}=7\sqrt7$。
+  </Step>
+  <Step>
 
-**易错点：** 柱壳公式有 $2\pi$ 而圆盘公式有 $\pi$；$a^{2/3}=7$ 需得到 $a=7^{3/2}$，不能只开平方。
+    ### 利用体积比确定 a
+
+    题设 $V_y=10V_x$ 给出
+
+    $$
+    \frac{6\pi}{7}a^{7/3}=10\cdot\frac{3\pi}{5}a^{5/3}
+    =6\pi a^{5/3}.
+    $$
+
+    因 $a>0$，可约去 $6\pi a^{5/3}$，得到 $a^{2/3}=7$。将两边取 $3/2$ 次方，
+
+    $$
+    \boxed{a=7^{3/2}=7\sqrt7}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+当旋转轴为 $y$ 轴时，**柱壳半径是 $x$**、壳高是 $x^{1/3}$；若误将 $x^{1/3}$ 当半径，求得的 $V_y$ 将错误。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-011" type="essay" points={10} tags="来源:2015考研数二, 考点:双轴旋转体, 考点:振幅参数">
+<Question id="core-1102-math-70b5a1-051" type="essay" points={11} tags="来源:2014年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:复合函数迭代与积分极限">
 
-设 $A>0$，区域 $D$ 由曲线段 $y=A\sin x$（$0\le x\le\pi/2$）、$y=0$ 及 $x=\pi/2$ 围成。$V_1,V_2$ 分别为 $D$ 绕 $x$ 轴、$y$ 轴旋转所得体积。若 $V_1=V_2$，求 $A$。
+ 设函数 $f(x)=\frac{x}{1+x}, x\in[0,1]$，定义函数列
+$f_1(x)=f(x), f_2(x)=f(f_1(x)),\cdots, f_n(x)=f(f_{n-1}(x)),\cdots$，
+记 $S_n$ 是由曲线 $y=f_n(x)$，直线 $x=1$ 及 $x$ 轴所围成平面图形的面积，求极限 $\lim_{n\to\infty} nS_n$。
 
 <Solution>
 
-**参考答案：** $\boxed{A=\dfrac8\pi}$。
+**参考答案：** 按本版订正后的题意，$\boxed{\lim_{n\to\infty}nS_n=1}$；若只求 $\lim S_n$，答案应为 $\boxed0$。
 
-**第一步：把区域写成明确的上下界。**
+**解题思路：** 先找复合迭代的一般式 $f_n(x)=x/(1+nx)$；精确积分后区分 $S_n$ 与 $nS_n$ 两个不同极限。
 
-$$
-0\le x\le\frac\pi2,\qquad0\le y\le A\sin x.
-$$
+<Steps>
+  <Step>
 
-**第二步：绕 $x$ 轴用圆盘法。**
+    ### 归纳得到第 n 次迭代的表达式
 
-$$
-\begin{aligned}
-V_1&=\pi A^2\int_0^{\pi/2}\sin^2x\,dx\\
-&=\pi A^2\left[\frac x2-\frac{\sin2x}{4}\right]_0^{\pi/2}
-=\frac{\pi^2A^2}{4}.
-\end{aligned}
-$$
+    已知 $f(x)=x/(1+x)$，$f_1(x)=x/(1+x)$。假设 $f_n(x)=x/(1+nx)$，则
 
-**第三步：绕 $y$ 轴用柱壳法。**
+    $$
+    \begin{aligned}
+    f_{n+1}(x)&=f(f_n(x))
+    =\frac{x/(1+nx)}{1+x/(1+nx)}\\
+    &=\frac{x}{1+(n+1)x}.
+    \end{aligned}
+    $$
 
-$$
-\begin{aligned}
-V_2&=2\pi A\int_0^{\pi/2}x\sin x\,dx\\
-&=2\pi A[-x\cos x+\sin x]_0^{\pi/2}
-=2\pi A.
-\end{aligned}
-$$
+    由归纳法，对全部正整数 $n$ 都有 $\boxed{f_n(x)=\frac{x}{1+nx}}$。
 
-**第四步：求振幅。** 由 $V_1=V_2$ 得 $\pi^2A^2/4=2\pi A$。题设 $A>0$，因此可安全地约去 $\pi A$，得 $A=8/\pi$。
+  </Step>
+  <Step>
 
-**模型迁移：** 绕水平轴时半径随振幅成正比，体积与 $A^2$ 成正比；绕竖直轴时壳高与振幅成正比，体积与 $A$ 成正比。利用幂次差可直接求参数。
+    ### 精确计算每一步的曲边面积
+
+    函数在 $[0,1]$ 上非负，因此
+
+    $$
+    S_n=\int_0^1\frac{x}{1+nx}\,\mathrm dx
+    =\frac1n\int_0^1\left(1-\frac1{1+nx}\right)\,\mathrm dx.
+    $$
+
+    积分得到
+
+    $$
+    \boxed{S_n=\frac1n-\frac{\ln(1+n)}{n^2}}.
+    $$
+
+    所以 $S_n\sim1/n$，不加倍数时极限为 $0$。
+
+  </Step>
+  <Step>
+
+    ### 区分两种极限并匹配原参考答案
+
+    由 $\ln(1+n)/n\to0$，
+
+    $$
+    \begin{aligned}
+    \lim_{n\to\infty}nS_n
+    &=\lim_{n\to\infty}\left(1-\frac{\ln(1+n)}n\right)=\boxed1,\\
+    \lim_{n\to\infty}S_n&=\boxed0.
+    \end{aligned}
+    $$
+
+    因此原存档给出的参考答案“$1$”应对应带因子 $n$ 的极限。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+源文件题干写作 $\lim S_n$，但源文件参考答案写“$1$”，两者数学上**不一致**。本版将题干修订为求 $\lim nS_n$，并保留若无 $n$ 时答案为 $0$ 的辨析，避免盲从错误题干。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-012" type="essay" points={10} tags="来源:2019考研数二数三, 考点:积分因子, 考点:圆盘体积">
+<Question id="core-1102-math-70b5a1-052" type="essay" points={11} tags="来源:2014年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:偏导约束与旋转体体积">
 
-已知 $y=y(x)$ 满足
+ 已知函数 $f(x,y)$ 满足 $\frac{\partial f}{\partial y}=2(y+1)$，且
 
 $$
-y'-xy=\frac{1}{2\sqrt{x}}e^{x^2/2},\qquad y(1)=\sqrt e.
+f(y,y)=(y+1)^2-(2-y)\ln y.
 $$
 
-(1) 求 $y(x)$；(2) 区域 $D=\{(x,y)\mid1\le x\le2,\ 0\le y\le y(x)\}$ 绕 $x$ 轴旋转一周，求体积。
+求曲线 $f(x,y)=0$ 所围成的图形绕直线 $y=-1$ 旋转所成的旋转体的体积。
 
 <Solution>
 
-**参考答案：**
+**参考答案：** $\boxed{V=\pi\left(2\ln2-\frac54\right)}$。
 
-$$
-\boxed{y(x)=\sqrt{x}\,e^{x^2/2}\quad(x>0),\qquad V=\frac\pi2(e^4-e).}
-$$
+**解题思路：** 先对指定偏导数积分并用对角线条件确定待定函数，再识别绕对称轴 $y=-1$ 旋转产生的是实心圆盘。
 
-**第一步：识别一阶线性微分方程。** 标准形式是 $y'+P(x)y=Q(x)$，这里 $P(x)=-x$。积分因子为
+<Steps>
+  <Step>
 
-$$
-\mu(x)=\exp\!\left(\int -x\,dx\right)=e^{-x^2/2}.
-$$
+    ### 恢复二元函数 f(x,y)
 
-两边乘以 $\mu$ 后，左端成为乘积的导数：
+    由 $\frac{\partial f}{\partial y}=2(y+1)$，对 $y$ 积分（$x$ 视为常数），得
 
-$$
-\bigl(ye^{-x^2/2}\bigr)'=\frac{1}{2\sqrt x}.
-$$
+    $$
+    f(x,y)=(y+1)^2+C(x).
+    $$
 
-因此
+    将 $x=y$ 代入条件 $f(y,y)=(y+1)^2-(2-y)\ln y$（$y>0$），推出 $C(y)=-(2-y)\ln y$。故
 
-$$
-ye^{-x^2/2}=\sqrt x+C,
-\qquad y=e^{x^2/2}(\sqrt x+C).
-$$
+    $$
+    \boxed{f(x,y)=(y+1)^2-(2-x)\ln x}.
+    $$
 
-**第二步：用初值确定积分常数。** 代入 $x=1$：$\sqrt e=e^{1/2}(1+C)$，所以 $C=0$，得到 $y=\sqrt x e^{x^2/2}>0$。
+  </Step>
+  <Step>
 
-**第三步：沿 $x$ 轴旋转，截面是圆盘。** 半径为 $y(x)$，故
+    ### 确定闭合区域的旋转截面
 
-$$
-\begin{aligned}
-V&=\pi\int_1^2 y^2(x)dx=\pi\int_1^2 xe^{x^2}dx\\
-&=\frac\pi2\left[e^{x^2}\right]_1^2=\boxed{\frac\pi2(e^4-e)}.
-\end{aligned}
-$$
+    曲线 $f(x,y)=0$ 等价于
 
-<Callout type="idea" title="解方程与体积计算的衔接">积分因子使微分方程恰好出现 $(\mu y)'$；在体积环节，平方后 $y^2=xe^{x^2}$ 又恰好含指数函数的内层导数 $2x$，所以无需进一步技巧。</Callout>
+    $$
+    y=-1\pm\sqrt{(2-x)\ln x}.
+    $$
+
+    由于需要 $(2-x)\ln x\ge0$ 且 $x>0$，有界闭合部分在 $1\le x\le2$；两支曲线关于 $y=-1$ 对称，并在 $x=1,2$ 处相遇。旋转轴正是对称轴，截面为半径 $R(x)=\sqrt{(2-x)\ln x}$ 的**实心圆盘**。
+
+  </Step>
+  <Step>
+
+    ### 求体积并精确计算积分
+
+    由圆盘法，
+
+    $$
+    V=\pi\int_1^2R(x)^2\,\mathrm dx
+    =\pi\int_1^2(2-x)\ln x\,\mathrm dx.
+    $$
+
+    取原函数
+
+    $$
+    \int(2-x)\ln x\,\mathrm dx
+    =2x\ln x-2x-\frac{x^2}{2}\ln x+\frac{x^2}{4}+C.
+    $$
+
+    上下限代入得 $\int_1^2(2-x)\ln x\,\mathrm dx=2\ln2-5/4$，于是
+
+    $$
+    \boxed{V=\pi\left(2\ln2-\frac54\right)}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+偏导积分产生的是只依赖 **$x$** 的“积分常数函数” $C(x)$，不是普通常数；此外双分支关于旋转轴对称，取**圆盘**而非“上下半径相减的圆环”。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-013" type="essay" points={10} tags="来源:2020考研数二, 考点:函数方程, 考点:反函数, 考点:柱壳法">
+<Question id="core-1102-math-70b5a1-054" type="essay" points={10} tags="来源:2015年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:参数曲线与旋转体积关系">
 
-设 $f$ 的定义域为 $(0,+\infty)$，且
-
-$$
-2f(x)+x^2f\!\left(\frac1x\right)=\frac{x^2+2x}{\sqrt{1+x^2}}.
-$$
-
-求 $f(x)$；再求直线 $y=1/2$、$y=\sqrt3/2$、曲线 $y=f(x)$ 及 $y$ 轴围成的区域绕 $x$ 轴旋转一周所得体积。
+ 设 $A>0, D$ 是由曲线段 $y=A\sin x\left(0\leqslant x\leqslant\frac{\pi}{2}\right)$ 及直线 $y=0, x=\frac{\pi}{2}$ 所围成的平面区域，$V_1,V_2$ 分别表示 $D$ 绕 $x$ 轴与绕 $y$ 轴旋转所成旋转体的体积，若 $V_1=V_2$，求 $A$ 的值。
 
 <Solution>
 
-**参考答案：**
+**参考答案：** $\boxed{A=\frac8\pi}$。
 
-$$
-\boxed{f(x)=\frac{x}{\sqrt{1+x^2}},\qquad V=\frac{\pi^2}{6}.}
-$$
+**解题思路：** 绕 $x$ 轴用圆盘法，绕 $y$ 轴用柱壳法；对参数 $A>0$ 的条件作约分，防止产生不合题意的零解。
 
-**第一步：用 $x\leftrightarrow1/x$ 把抽象函数方程变为线性方程组。** 原式为
+<Steps>
+  <Step>
 
-$$
-2f(x)+x^2f(1/x)=\frac{x^2+2x}{\sqrt{1+x^2}}.\tag{1}
-$$
+    ### 描述区域并计算 V₁
 
-因 $x>0$，用 $1/x$ 代换原式，再乘 $x^2$，得
+    由 $A>0$，区域可写成 $0\le x\le\pi/2$、$0\le y\le A\sin x$。绕 $x$ 轴形成实心圆盘，
 
-$$
-f(x)+2x^2f(1/x)=\frac{x+2x^2}{\sqrt{1+x^2}}.\tag{2}
-$$
+    $$
+    V_1=\pi\int_0^{\pi/2}(A\sin x)^2\,\mathrm dx
+    =\pi A^2\int_0^{\pi/2}\sin^2x\,\mathrm dx
+    =\frac{\pi^2A^2}{4}.
+    $$
 
-用 $2\times(1)-(2)$ 消去 $f(1/x)$，得到 $3f(x)=3x/\sqrt{1+x^2}$，故 $f(x)=x/\sqrt{1+x^2}$。
+  </Step>
+  <Step>
 
-**第二步：改用 $y$ 描述区域，避免解成复杂的分段圆盘。** 对 $x>0$，
+    ### 按柱壳法计算 V₂
 
-$$
-f'(x)=\frac1{(1+x^2)^{3/2}}>0.
-$$
+    绕 $y$ 轴时，壳半径为 $x$、壳高为 $A\sin x$，故
 
-因此可反解 $x=y/\sqrt{1-y^2}$（$0<y<1$）。所围区域为
+    $$
+    V_2=2\pi A\int_0^{\pi/2}x\sin x\,\mathrm dx.
+    $$
 
-$$
-\frac12\le y\le\frac{\sqrt3}{2},\qquad 0\le x\le\frac y{\sqrt{1-y^2}}.
-$$
+    由分部积分，
 
-**第三步：用水平柱壳法求绕 $x$ 轴的体积。** 壳半径是 $y$，壳的横向长度是 $y/\sqrt{1-y^2}$，所以
+    $$
+    \int_0^{\pi/2}x\sin x\,\mathrm dx
+    =[-x\cos x+\sin x]_0^{\pi/2}=1,
+    $$
 
-$$
-V=2\pi\int_{1/2}^{\sqrt3/2}\frac{y^2}{\sqrt{1-y^2}}dy.
-$$
+    因此 $V_2=2\pi A$。
 
-令 $y=\sin t$，上下限变成 $t=\pi/6$、$\pi/3$，得
+  </Step>
+  <Step>
 
-$$
-\begin{aligned}
-V&=2\pi\int_{\pi/6}^{\pi/3}\sin^2t\,dt\\
-&=2\pi\left[\frac t2-\frac{\sin2t}{4}\right]_{\pi/6}^{\pi/3}\\
-&=2\pi\cdot\frac\pi{12}=\boxed{\frac{\pi^2}{6}}.
-\end{aligned}
-$$
+    ### 联立体积关系确定 A
 
-**题型迁移：** 看到“横向边界以 $y$ 给定、旋转轴为 $x$ 轴”，优先考虑水平柱壳；其壳半径与壳长度都能直接从反函数读出。
+    由 $V_1=V_2$，
+
+    $$
+    \frac{\pi^2A^2}{4}=2\pi A
+    \quad\Longrightarrow\quad
+    \pi A(\pi A-8)=0.
+    $$
+
+    题设 $A>0$，舍去 $A=0$，于是 $\boxed{A=8/\pi}$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+柱壳法体积包含系数 **$2\pi$**；漏乘 $2$ 会导致答案少一倍。$A=0$ 虽是代数方程的根，但违反题设必须舍去。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-014" type="blank" points={4} tags="来源:2020考研数三, 考点:绕纵轴体积, 考点:柱壳法">
+<Question id="core-1102-math-70b5a1-055" type="essay" points={10} tags="来源:2019年考研数学二、三, 科目:高等数学, 章节:定积分的应用, 考点:线性微分方程与旋转体体积">
 
-区域
-
-$$
-D=\left\{(x,y)\middle|\frac{x}{2}\le y\le\frac1{1+x^2},\ 0\le x\le1\right\}
-$$
-
-绕 $y$ 轴旋转一周所得体积为
-
-<Blank answer="pi*(ln(2)-1/3)" kind="math" />。
+ 已知 $y=y(x)$ 是微分方程 $y'-xy=\frac{1}{2\sqrt{x}}e^{\frac{x^2}{2}}$ 满足 $y(1)=\sqrt{e}$ 的解。
+(1) 求 $y(x)$；
+(2) 设平面区域 $D=\{(x,y)\mid 1\leqslant x\leqslant 2, 0\leqslant y\leqslant y(x)\}$，求 $D$ 绕 $x$ 轴旋转一周的体积。
 
 <Solution>
 
-**答案：** $\boxed{\pi(\ln2-1/3)}$。
+**参考答案：** $\boxed{y(x)=\sqrt{x}\,e^{x^2/2}}$；$\boxed{V=\frac\pi2(e^4-e)}$。
 
-**第一步：明确壳的半径和高度。** 对 $0\le x\le1$，上边界为 $1/(1+x^2)$、下边界为 $x/2$。该高度非负，因为 $1/(1+x^2)\ge1/2\ge x/2$。
+**解题思路：** 一阶线性微分方程先乘积分因子求特解；旋转体体积用圆盘法并以 $u=x^2$ 换元。
 
-绕 $y$ 轴的竖直柱壳半径为 $x$，高度为 $1/(1+x^2)-x/2$。
+<Steps>
+  <Step>
 
-**第二步：列式并计算。**
+    ### 构造积分因子解线性方程
 
-$$
-\begin{aligned}
-V&=2\pi\int_0^1x\left(\frac1{1+x^2}-\frac x2\right)dx\\
-&=2\pi\left(\left[\frac12\ln(1+x^2)\right]_0^1-\left[\frac{x^3}{6}\right]_0^1\right)\\
-&=\boxed{\pi\left(\ln2-\frac13\right)}.
-\end{aligned}
-$$
+    题设 $x>0$。方程
 
-**为什么用柱壳法？** 竖条边界已由 $x$ 给出，壳高可以直接相减。若改用垂直于 $y$ 轴的圆环法，必须分析两个边界函数的反函数和交点，工作量明显增加。
+    $$
+    y'-xy=\frac{e^{x^2/2}}{2\sqrt{x}}
+    $$
+
+    的一阶线性标准形中 $P(x)=-x$，积分因子为
+
+    $$
+    \mu(x)=e^{\int P(x)\,\mathrm dx}=e^{-x^2/2}.
+    $$
+
+    相乘得
+
+    $$
+    \frac{\mathrm d}{\mathrm dx}\left(ye^{-x^2/2}\right)=\frac1{2\sqrt{x}}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 积分并利用初值确定常数
+
+    积分可得 $ye^{-x^2/2}=\sqrt{x}+C$，故通解
+
+    $$
+    y=e^{x^2/2}(\sqrt{x}+C).
+    $$
+
+    由 $y(1)=\sqrt e=e^{1/2}$，有 $e^{1/2}(1+C)=e^{1/2}$，故 $C=0$。因此
+
+    $$
+    \boxed{y(x)=\sqrt{x}\,e^{x^2/2}}.
+    $$
+
+    特别地 $1\le x\le2$ 时 $y(x)>0$，符合所给区域定义。
+
+  </Step>
+  <Step>
+
+    ### 建立圆盘体积积分并换元
+
+    绕 $x$ 轴旋转所得截面半径为 $y(x)$，故
+
+    $$
+    \begin{aligned}
+    V&=\pi\int_1^2y(x)^2\,\mathrm dx
+    =\pi\int_1^2x\,e^{x^2}\,\mathrm dx\\
+    &=\frac\pi2[e^{x^2}]_1^2
+    =\boxed{\frac\pi2(e^4-e)}.
+    \end{aligned}
+    $$
+
+    这里用 $u=x^2$、$\mathrm du=2x\,\mathrm dx$ 可直接计算。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错点">
+
+积分因子必须与 $P(x)=-x$ 对应，故为 $e^{-x^2/2}$ 而不是 $e^{x^2/2}$。体积 integrand 是 $y^2=xe^{x^2}$，不是 $\sqrt{x}e^{x^2/2}$。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-015" type="blank" points={5} tags="来源:2021考研数三, 考点:旋转圆盘, 考点:对称积分">
+<Question id="core-1102-math-70b5a1-056" type="essay" points={10} tags="来源:2020年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:函数反演方程与平面区域面积">
 
-曲线 $y=\sqrt x\sin(\pi x)$（$0\le x\le1$）与 $x$ 轴围成的区域绕 $x$ 轴旋转一周，其体积为
-
-<Blank answer="pi/4" kind="math" />。
+ 设函数 $f(x)$ 的定义域为 $(0,+\infty)$，且 $2f(x)+x^2f\left(\frac{1}{x}\right)=\frac{x^2+2x}{\sqrt{1+x^2}}$，
+求 $f(x)$，并求直线 $y=\frac{1}{2}, y=\frac{\sqrt{3}}{2}$ 与 $f(x)$ 及 $y$ 轴所围图形绕 $x$ 轴旋转一周而成的旋转体的体积。
 
 <Solution>
 
-**答案：** $\boxed{\pi/4}$。
+**参考答案：** (1) $\boxed{f(x)=\frac{x}{\sqrt{1+x^2}}}$；(2) $\boxed{V=\frac{\pi^2}{6}}$。
 
-**第一步：选用圆盘法。** 在 $[0,1]$ 上 $\sin\pi x\ge0$，截面半径为 $\sqrt x\sin\pi x$，故
+**解题思路：** 函数方程中同时出现 $f(x)$ 与 $f(1/x)$，先用 $x\mapsto1/x$ 构造二元一次方程组；旋转轴是 $x$ 轴而区域以 $y$ 为界，按水平条带使用柱壳法。
 
-$$
-V=\pi\int_0^1x\sin^2(\pi x)dx.
-$$
+<Steps>
+  <Step>
 
-**第二步：利用关于 $x=1/2$ 的对称性消去权重。** 设 $I=\int_0^1x\sin^2(\pi x)dx$。代换 $u=1-x$ 后，因 $\sin^2(\pi-\pi u)=\sin^2(\pi u)$，有
+    ### 用倒数替换建立第二个方程
 
-$$
-I=\int_0^1(1-u)\sin^2(\pi u)du.
-$$
+    设 $x>0$，题给关系为
 
-两式相加，得到
+    $$
+    2f(x)+x^2f(1/x)=\frac{x^2+2x}{\sqrt{1+x^2}}.\tag{1}
+    $$
 
-$$
-2I=\int_0^1\sin^2(\pi x)dx=\frac12,
-\qquad I=\frac14.
-$$
+    将其中 $x$ 替为 $1/x$，再乘 $x^2$（因 $x>0$，没有零除问题），得到
 
-因此 $V=\pi I=\boxed{\pi/4}$。
+    $$
+    f(x)+2x^2f(1/x)=\frac{x+2x^2}{\sqrt{1+x^2}}.\tag{2}
+    $$
 
-<Callout type="idea" title="记住这种对称消权">若 $g(1-x)=g(x)$，则 $\int_0^1xg(x)dx=\tfrac12\int_0^1g(x)dx$。不必逐次分部积分。</Callout>
+    这里并未预设 $f$ 的形式，而是把 $f(x)$、$x^2f(1/x)$ 当作两个未知量。
+
+  </Step>
+  <Step>
+
+    ### 消元求函数并写出反函数
+
+    由 $2\times(1)-(2)$，直接消去 $x^2f(1/x)$：
+
+    $$
+    3f(x)=\frac{2x^2+4x-x-2x^2}{\sqrt{1+x^2}}
+    =\frac{3x}{\sqrt{1+x^2}}.
+    $$
+
+    因此 $f(x)=x/\sqrt{1+x^2}$。又
+
+    $$
+    f'(x)=\frac{1}{(1+x^2)^{3/2}}>0,
+    $$
+
+    且 $f((0,+\infty))=(0,1)$。将 $y=x/\sqrt{1+x^2}$ 平方并利用 $x>0$，可反解为
+
+    $$
+    x=\frac{y}{\sqrt{1-y^2}},\qquad 0<y<1.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 描述区域并使用柱壳法计算体积
+
+    水平直线 $y=1/2$、$y=\sqrt3/2$ 截取的区域，其左边界是 $x=0$，右边界是上述反函数，故
+
+    $$
+    \frac12\le y\le\frac{\sqrt3}{2},\qquad
+    0\le x\le\frac{y}{\sqrt{1-y^2}}.
+    $$
+
+    水平微元绕 $x$ 轴旋转得到半径 $y$、高度 $y/\sqrt{1-y^2}$ 的圆柱壳。因此
+
+    $$
+    V=2\pi\int_{1/2}^{\sqrt3/2}\frac{y^2}{\sqrt{1-y^2}}\,\mathrm dy.
+    $$
+
+    令 $y=\sin u$，上下限变为 $\pi/6,\pi/3$，则
+
+    $$
+    \begin{aligned}
+    V&=2\pi\int_{\pi/6}^{\pi/3}\sin^2u\,\mathrm du\\
+    &=2\pi\left[\frac u2-\frac{\sin 2u}{4}\right]_{\pi/6}^{\pi/3}
+    =\boxed{\frac{\pi^2}{6}}.
+    \end{aligned}
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+解反函数时应使用 $x>0$ 选正根。水平壳的半径是 $y$，高度是 $x_{\rm 右}(y)-x_{\rm 左}(y)$；不能把柱壳公式误写成 $\pi\int x^2\,\mathrm dy$。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-016" type="essay" points={12} tags="来源:2023考研数二数三, 考点:无界区域, 考点:广义积分, 考点:圆盘体积">
+<Question id="core-1102-math-70b5a1-060" type="essay" points={12} tags="来源:2023年考研数学二、三, 科目:高等数学, 章节:定积分的应用, 考点:无界区域面积与旋转体积">
 
-平面区域
-
-$$
-D=\left\{(x,y)\middle|x\ge1,\ 0\le y\le\frac1{x\sqrt{1+x^2}}\right\}.
-$$
-
-求：(1) $D$ 的面积；(2) $D$ 绕 $x$ 轴旋转所得体积。
+ 已知平面区域 $D=\left\{(x,y)\middle|0\leqslant y\leqslant\frac{1}{x\sqrt{1+x^2}}, x\geqslant 1\right\}$，求：
+(1) $D$ 的面积；
+(2) $D$ 绕 $x$ 轴旋转所成旋转体的体积.
 
 <Solution>
 
-**参考答案：**
+**参考答案：** (1) $\boxed{S=\ln(1+\sqrt2)}$；(2) $\boxed{V=\pi(1-\pi/4)}$。
 
-$$
-\boxed{S=\ln(\sqrt2+1),\qquad V=\pi\left(1-\frac\pi4\right).}
-$$
+**解题思路：** 区域在 $x$ 方向无界，先确认面积与体积必须写成广义积分；面积可用三角换元，体积则使用圆盘法并作有理式拆分。
 
-**第一步：虽为无界区域，仍需分别判断面积与体积的收敛性。** 当 $x\to\infty$，区域高度
+<Steps>
+  <Step>
 
-$$
-h(x)=\frac1{x\sqrt{1+x^2}}\sim\frac1{x^2},
-$$
+    ### 识别无界区域并建立面积广义积分
 
-因此面积积分收敛；圆盘面积 $\pi h^2\sim\pi/x^4$，所以体积积分也收敛。
+    令 $f(x)=1/[x\sqrt{1+x^2}]$，在 $x\ge1$ 上 $f(x)>0$。对任意 $R>1$，截断区域的面积为 $S_R=\int_1^R f(x)\,\mathrm dx$，所求面积是 $R\to\infty$ 的极限：
 
-**第二步：计算面积。**
+    $$
+    S=\int_1^\infty\frac{\mathrm dx}{x\sqrt{1+x^2}}.
+    $$
 
-$$
-S=\int_1^\infty\frac{dx}{x\sqrt{1+x^2}}.
-$$
+    当 $x\to\infty$ 时被积函数与 $1/x^2$ 同阶，因而此积分收敛；这一步确保无界区域的面积是有限的。
 
-<Tabs items={['方法一：三角代换','方法二：双曲函数代换']} defaultIndex={0}>
-<Tab value="方法一：三角代换">
+  </Step>
+  <Step>
 
-令 $x=\tan\theta$，$\theta\in[\pi/4,\pi/2)$，则 $dx=\sec^2\theta\,d\theta$、$\sqrt{1+x^2}=\sec\theta$，从而
+    ### 计算面积积分
 
-$$
-S=\int_{\pi/4}^{\pi/2}\csc\theta\,d\theta
-=\left[\ln\tan\frac\theta2\right]_{\pi/4}^{\pi/2}
-=-\ln(\sqrt2-1)=\ln(\sqrt2+1).
-$$
+    取 $x=\tan\theta$，则 $\theta\in[\pi/4,\pi/2)$，且 $\sqrt{1+x^2}=\sec\theta$，从而
 
-</Tab>
-<Tab value="方法二：双曲函数代换">
+    $$
+    \frac{\mathrm dx}{x\sqrt{1+x^2}}=\frac{\sec^2\theta}{\tan\theta\sec\theta}\,\mathrm d\theta=\csc\theta\,\mathrm d\theta.
+    $$
 
-令 $u=\sqrt{1+x^2}$，则 $dx/x= u\,du/(u^2-1)$，所以
+    利用 $\int\csc\theta\,\mathrm d\theta=\ln|\tan(\theta/2)|+C$，有
 
-$$
-\frac{dx}{x\sqrt{1+x^2}}=\frac{du}{u^2-1}.
-$$
+    $$
+    \begin{aligned}
+    S&=\left[\ln\tan\frac\theta2\right]_{\pi/4}^{\pi/2}
+    =-\ln\tan\frac\pi8\\
+    &=-\ln(\sqrt2-1)=\boxed{\ln(\sqrt2+1)}.
+    \end{aligned}
+    $$
 
-因此
+  </Step>
+  <Step>
 
-$$
-S=\left[\frac12\ln\frac{u-1}{u+1}\right]_{\sqrt2}^{\infty}
-=\frac12\ln\frac{\sqrt2+1}{\sqrt2-1}=\ln(\sqrt2+1).
-$$
+    ### 采用圆盘法求旋转体体积
 
-</Tab>
-</Tabs>
+    绕 $x$ 轴旋转时，截面是半径为 $f(x)$ 的圆盘，故
 
-**第三步：求绕 $x$ 轴的体积。** 圆盘法给出
+    $$
+    V=\pi\int_1^\infty[f(x)]^2\,\mathrm dx
+    =\pi\int_1^\infty\frac{\mathrm dx}{x^2(1+x^2)}.
+    $$
 
-$$
-\begin{aligned}
-V&=\pi\int_1^\infty\frac{dx}{x^2(1+x^2)}\\
-&=\pi\int_1^\infty\left(\frac1{x^2}-\frac1{1+x^2}\right)dx\\
-&=\pi\left(1-\left[\arctan x\right]_1^\infty\right)\\
-&=\boxed{\pi(1-\pi/4)}.
-\end{aligned}
-$$
+    利用恒等式
 
-**易错点：** 面积是 $\int h(x)dx$，而绕 $x$ 轴的体积是 $\pi\int h^2(x)dx$，二者不能混用；上限为 $+\infty$ 时要分别建立收敛性。
+    $$
+    \frac1{x^2(1+x^2)}=\frac1{x^2}-\frac1{1+x^2},
+    $$
+
+    得
+
+    $$
+    \begin{aligned}
+    \frac V\pi&=\left[-\frac1x-\arctan x\right]_1^\infty\\
+    &=-\frac\pi2-\left(-1-\frac\pi4\right)
+    =1-\frac\pi4.
+    \end{aligned}
+    $$
+
+    因此 $V=\boxed{\pi(1-\pi/4)}$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+面积积分含 $f$，旋转体积积分含 $f^2$；必须保留上限 $+\infty$ 的极限含义，不能直接将 $x=\infty$ 当作普通积分端点。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-017" type="essay" points={12} tags="来源:2024考研数二, 考点:动区间体积, 考点:莱布尼茨公式">
+<Question id="core-1102-math-70b5a1-061" type="essay" points={12} tags="来源:2024年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:参数积分的最大值与变限积分">
 
-设 $t>0$，有界区域 $D$ 由曲线 $y=\sqrt x e^{-x}$、$x=t$、$x=2t$ 和 $x$ 轴围成。记 $D$ 绕 $x$ 轴旋转所得体积为 $V(t)$，求 $V(t)$ 的最大值。
+ 设 $t>0$，平面有界区域 $D$ 由曲线 $y=\sqrt{x}e^{-x}$，$x=t$，$x=2t$ 及 $x$ 轴围成，$D$ 绕 $x$ 轴旋转一周所得旋转体的体积为 $V(t)$，求 $V(t)$ 的最大值.
 
 <Solution>
 
-**参考答案：** 最优参数 $\boxed{t=\ln2}$，最大体积
+**参考答案：** $\boxed{V_{\max}=\pi\left(\frac{\ln2}{16}+\frac3{64}\right)}$，在 $\boxed{t=\ln2}$ 处取得。
 
-$$
-\boxed{V_{\max}=\pi\left(\frac{\ln2}{16}+\frac3{64}\right)}.
-$$
+**解题思路：** 以 $t$ 为优化变量，先建立变上下限体积积分，再用莱布尼茨公式求导，最后检验导数变号确认全局最大值。
 
-**第一步：用圆盘法表示含参体积。** 截面半径为 $\sqrt x e^{-x}$，圆盘面积为 $\pi x e^{-2x}$，所以
+<Steps>
+  <Step>
 
-$$
-V(t)=\pi\int_t^{2t}xe^{-2x}\,dx.
-$$
+    ### 由圆盘法建立参数体积
 
-**第二步：对两个变化的端点同时求导。** 若 $F(t)=\int_{a(t)}^{b(t)}g(x)dx$，则 $F'(t)=g(b(t))b'(t)-g(a(t))a'(t)$。故
+    在 $x\in[t,2t]$ 上，曲线 $y=\sqrt{x}e^{-x}$ 为正。绕 $x$ 轴旋转时横截面积是 $\pi y^2=\pi xe^{-2x}$，所以
 
-$$
-\begin{aligned}
-\frac{V'(t)}\pi
-&=2(2t)e^{-4t}-te^{-2t}\\
-&=t e^{-4t}(4-e^{2t}).
-\end{aligned}
-$$
+    $$
+    V(t)=\pi\int_t^{2t}xe^{-2x}\,\mathrm dx,\qquad t>0.
+    $$
 
-$t>0$ 时前两因子恒正。于是 $V'(t)>0$ 当 $t<\ln2$；$V'(t)<0$ 当 $t>\ln2$。因此在 $t=\ln2$ 取得唯一全局最大值。
+    这里 $t$ 与 $2t$ 都随参数变化，求导时必须分别考虑两个端点的导数。
 
-**第三步：精确求最大体积。** 分部积分得到
+  </Step>
+  <Step>
 
-$$
-\int xe^{-2x}dx=-\left(\frac x2+\frac14\right)e^{-2x}+C.
-$$
+    ### 使用变限积分求导并判号
 
-故
+    设 $F(x)=xe^{-2x}$。变上下限公式给出
 
-$$
-\begin{aligned}
-\frac{V(\ln2)}\pi
-&=\left[-\left(\frac x2+\frac14\right)e^{-2x}\right]_{\ln2}^{2\ln2}\\
-&=\frac{\ln2}{16}+\frac3{64}.
-\end{aligned}
-$$
+    $$
+    \begin{aligned}
+    \frac{V'(t)}\pi&=F(2t)\cdot2-F(t)\cdot1\\
+    &=4te^{-4t}-te^{-2t}=te^{-4t}(4-e^{2t}).
+    \end{aligned}
+    $$
 
-**结构说明：** 最优点的导数条件 $2g(2t)=g(t)$ 表示扩大右端点增加的体积与移动左端点损失的体积正好相等，其中右端速度是左端的两倍。
+    由于 $t>0$ 且 $te^{-4t}>0$，$V'(t)$ 的符号仅取决于 $4-e^{2t}$：当 $0<t<\ln2$ 时为正，当 $t>\ln2$ 时为负，唯一驻点为 $t=\ln2$。因此 $V$ 先增后减，此点取得全局最大值。
+
+  </Step>
+  <Step>
+
+    ### 代入最优参数并计算最大体积
+
+    分部积分可得
+
+    $$
+    \int xe^{-2x}\,\mathrm dx=-\left(\frac x2+\frac14\right)e^{-2x}+C.
+    $$
+
+    因为 $e^{-2\ln2}=1/4$、$e^{-4\ln2}=1/16$，所以
+
+    $$
+    \begin{aligned}
+    \frac{V(\ln2)}\pi&=\left[-\left(\frac x2+\frac14\right)e^{-2x}\right]_{\ln2}^{2\ln2}\\
+    &=\frac{\ln2}{16}+\frac3{64},
+    \end{aligned}
+    $$
+
+    从而 $V_{\max}=\boxed{\pi(\ln2/16+3/64)}$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+若对 $\int_t^{2t}$ 求导，**上限项必须乘 $2$**；只求出 $V'(t)=0$ 不足以证明是最大值，还要判定导数由正变负。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-018" type="essay" points={12} tags="来源:2026考研数二, 考点:拐点, 考点:分段圆盘, 考点:无界体积">
+<Question id="core-1102-math-70b5a1-063" type="essay" points={12} tags="来源:2026年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:曲线拐点与无界区域旋转体积">
 
-$M(x_0,y_0)$ 是曲线 $y=1/(1+x^2)$（$x\ge0$）的拐点，$O$ 是原点。第一象限无界区域 $D$ 由曲线 $y=1/(1+x^2)$（$x\ge x_0$）、线段 $OM$ 及 $x$ 正半轴围成。求 $D$ 绕 $x$ 轴旋转所得体积。
+ 已知 $M(x_0,y_0)$ 是曲线 $y=\frac{1}{1+x^2}(x\geqslant 0)$ 的拐点，$O$ 为坐标原点，记 $D$ 是第一象限中以曲线 $y=\frac{1}{1+x^2}(x\geqslant x_0)$，线段 $OM$ 及 $x$ 正半轴为边界的无界区域，求 $D$ 绕 $x$ 轴旋转所成旋转体的体积.
 
 <Solution>
 
-**参考答案：**
+**参考答案：** $\boxed{V=\frac{\pi^2}{6}-\frac{\sqrt3\pi}{16}}$。
+
+**解题思路：** 先用二阶导数确定拐点，再以其横坐标为分界，对直线段与曲线尾部的旋转体积分别积分；无界部分采用反正切型广义积分。
+
+<Steps>
+  <Step>
+
+    ### 求拐点位置并验证凹凸变化
+
+    设 $f(x)=1/(1+x^2)$，则
+
+    $$
+    f'(x)=-\frac{2x}{(1+x^2)^2},\qquad
+    f''(x)=\frac{2(3x^2-1)}{(1+x^2)^3}.
+    $$
+
+    在 $x\ge0$ 上，$f''(x)$ 于 $x=1/\sqrt3$ 左侧为负、右侧为正，因此此点确为拐点。于是
+
+    $$
+    x_0=\frac1{\sqrt3},\qquad y_0=f(x_0)=\frac34.
+    $$
+
+    注意 $f''(x_0)=0$ 只是候选条件，检查变号才保证是拐点。
+
+  </Step>
+  <Step>
+
+    ### 写出线段与曲线所围区域
+
+    线段 $OM$ 过原点和 $M(1/\sqrt3,3/4)$，其方程为
+
+    $$
+    y=\frac{y_0}{x_0}x=\frac{3\sqrt3}{4}x.
+    $$
+
+    因此区域的上边界在 $0\le x\le1/\sqrt3$ 为直线，在 $x\ge1/\sqrt3$ 为 $1/(1+x^2)$；下边界始终是 $y=0$。绕 $x$ 轴利用圆盘法：
+
+    $$
+    \frac V\pi=\int_0^{1/\sqrt3}\left(\frac{3\sqrt3}{4}x\right)^2\,\mathrm dx
+    +\int_{1/\sqrt3}^{\infty}\frac{\mathrm dx}{(1+x^2)^2}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 分别积分并合并
+
+    第一部分
+
+    $$
+    \int_0^{1/\sqrt3}\frac{27x^2}{16}\,\mathrm dx
+    =\left[\frac{9x^3}{16}\right]_0^{1/\sqrt3}=\frac{\sqrt3}{16}.
+    $$
+
+    第二部分使用原函数
+
+    $$
+    \int\frac{\mathrm dx}{(1+x^2)^2}
+    =\frac{x}{2(1+x^2)}+\frac12\arctan x+C,
+    $$
+
+    得到
+
+    $$
+    \int_{1/\sqrt3}^\infty\frac{\mathrm dx}{(1+x^2)^2}
+    =\frac\pi6-\frac{\sqrt3}{8}.
+    $$
+
+    故 $V=\pi[\sqrt3/16+\pi/6-\sqrt3/8]=\boxed{\pi^2/6-\sqrt3\pi/16}$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+本题只有右侧尾部是无界区域，**体积可有限**，原因是 $f(x)^2=O(x^{-4})$。拐点左侧应使用线段 $OM$，不可误把 $f(x)$ 积分到 $x=0$。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+## 二、弧长、侧面积、质心及形心（数一、数二）
+
+<Question id="core-1102-math-70b5a1-065" type="essay" points={5} tags="来源:1995年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:摆线的参数方程弧长">
+
+ 求摆线
 
 $$
-\boxed{V=\frac{\pi^2}{6}-\frac{\sqrt3\pi}{16}}.
-$$
-
-**第一步：求拐点及直线 $OM$。** 设 $h(x)=1/(1+x^2)$，则
-
-$$
-h'(x)=-\frac{2x}{(1+x^2)^2},\qquad
-h''(x)=\frac{2(3x^2-1)}{(1+x^2)^3}.
-$$
-
-当 $x\ge0$，$h''$ 在 $x=1/\sqrt3$ 两侧改变符号，故
-
-$$
-x_0=\frac1{\sqrt3},\qquad y_0=h(x_0)=\frac34.
-$$
-
-直线 $OM$ 斜率为 $y_0/x_0=3\sqrt3/4$，其线段方程为 $y=(3\sqrt3/4)x$（$0\le x\le1/\sqrt3$）。
-
-**第二步：分清有限圆锥部分和无穷尾部。** 圆盘半径
-
-$$
-r(x)=\begin{cases}
-\dfrac{3\sqrt3}{4}x,&0\le x\le1/\sqrt3,\\[1mm]
-\dfrac1{1+x^2},&x>1/\sqrt3.
+\begin{cases}
+x=t-\sin t, \\
+y=1-\cos t
 \end{cases}
 $$
 
-故
-
-$$
-V=\pi\int_0^{1/\sqrt3}\frac{27x^2}{16}dx
-+\pi\int_{1/\sqrt3}^\infty\frac{dx}{(1+x^2)^2}.
-$$
-
-**第三步：逐段积分。** 第一段：
-
-$$
-\pi\int_0^{1/\sqrt3}\frac{27x^2}{16}dx=\frac{\sqrt3\pi}{16}.
-$$
-
-第二段使用标准原函数
-
-$$
-\int\frac{dx}{(1+x^2)^2}
-=\frac{x}{2(1+x^2)}+\frac12\arctan x+C,
-$$
-
-所以
-
-$$
-\begin{aligned}
-\pi\int_{1/\sqrt3}^\infty\frac{dx}{(1+x^2)^2}
-&=\pi\left[\frac\pi4-\left(\frac{\sqrt3}{8}+\frac\pi{12}\right)\right]\\
-&=\pi\left(\frac\pi6-\frac{\sqrt3}{8}\right).
-\end{aligned}
-$$
-
-相加得
-
-$$
-V=\frac{\sqrt3\pi}{16}+\frac{\pi^2}{6}-\frac{\sqrt3\pi}{8}
-=\boxed{\frac{\pi^2}{6}-\frac{\sqrt3\pi}{16}}.
-$$
-
-**收敛性检查：** 无穷端的截面面积为 $\pi/(1+x^2)^2=O(x^{-4})$，可积，因此旋转体体积有限。
-
-</Solution>
-</Question>
-
-<Question id="math-core-gd-04-04-019" type="essay" points={11} tags="来源:2016考研数二, 考点:参数曲线, 考点:旋转体积, 考点:曲面面积">
-
-区域 $D$ 由第一象限圆弧
-
-$$
-y=\sqrt{1-x^2},\qquad 0\le x\le1,
-$$
-
-与参数曲线
-
-$$
-x=\cos^3t,\qquad y=\sin^3t,\qquad0\le t\le\frac\pi2
-$$
-
-围成。求 $D$ 绕 $x$ 轴旋转一周所得旋转体的体积与表面积。
+一拱 $(0\leqslant t\leqslant 2\pi)$ 的弧长.
 
 <Solution>
 
-**参考答案：**
+**参考答案：** $\boxed{L=8}$。
 
-$$
-\boxed{V=\frac{18\pi}{35},\qquad S=\frac{16\pi}{5}.}
-$$
+**解题思路：** 对参数曲线采用弧长元 $\mathrm ds=\sqrt{(x')^2+(y')^2}\,\mathrm dt$，利用半角公式化简根号，并根据参数范围确定绝对值符号。
 
-**第一步：明确哪个是外边界。** 两条曲线连接相同端点 $(0,1)$ 与 $(1,0)$。参数曲线满足
+<Steps>
+  <Step>
 
-$$
-x^{2/3}+y^{2/3}=1,
-\qquad y_{\mathrm{in}}=(1-x^{2/3})^{3/2}.
-$$
+    ### 求参数导数并建立弧长积分
 
-因 $0\le x\le1$ 时 $x^{2/3}\ge x^2$ 且在区间内部严格大于，故 $y_{\mathrm{in}}\le\sqrt{1-x^2}=y_{\mathrm{out}}$。外旋转面来自圆弧，内旋转面来自参数曲线。
+    摆线一拱的参数方程为
 
-**第二步：体积用圆环法：外圆盘减内圆盘。**
+    $$
+    x=t-\sin t,\qquad y=1-\cos t,\qquad0\le t\le2\pi.
+    $$
 
-$$
-\begin{aligned}
-V&=\pi\int_0^1\left[y_{\mathrm{out}}^2-y_{\mathrm{in}}^2\right]dx\\
-&=\pi\int_0^1\left[(1-x^2)-(1-x^{2/3})^3\right]dx\\
-&=\pi\int_0^1(3x^{2/3}-3x^{4/3})dx\\
-&=\pi\left(\frac95-\frac97\right)=\boxed{\frac{18\pi}{35}}.
-\end{aligned}
-$$
+    其导数是 $x'(t)=1-\cos t$、$y'(t)=\sin t$。所以弧长为
 
-**第三步：表面积应计算外、内两个旋转曲面并相加。** 外侧圆弧绕 $x$ 轴形成单位半球的曲面，面积为 $S_{\mathrm{out}}=2\pi$。
+    $$
+    L=\int_0^{2\pi}\sqrt{(1-\cos t)^2+\sin^2t}\,\mathrm dt.
+    $$
 
-内侧参数曲线的弧长微元为
+  </Step>
+  <Step>
 
-$$
-\begin{aligned}
-\frac{dx}{dt}&=-3\cos^2t\sin t,\\
-\frac{dy}{dt}&=3\sin^2t\cos t,\\
-\frac{ds}{dt}&=\sqrt{(x')^2+(y')^2}=3\sin t\cos t.
-\end{aligned}
-$$
+    ### 用半角恒等式化简弧长元
 
-绕 $x$ 轴的曲面面积公式为 $S_{\mathrm{in}}=2\pi\int y\,ds$，故
+    根号内展开后 $\cos^2t+\sin^2t=1$，于是
 
-$$
-\begin{aligned}
-S_{\mathrm{in}}&=2\pi\int_0^{\pi/2}\sin^3t\cdot3\sin t\cos t\,dt\\
-&=6\pi\int_0^{\pi/2}\sin^4t\cos t\,dt=\frac{6\pi}{5}.
-\end{aligned}
-$$
+    $$
+    \begin{aligned}
+    (1-\cos t)^2+\sin^2t
+    &=2-2\cos t=4\sin^2\frac t2.
+    \end{aligned}
+    $$
 
-两侧曲面只沿端点圆周相接，边界无额外端面，因此
+    因此弧长元为 $2|\sin(t/2)|\,\mathrm dt$。在 $t\in[0,2\pi]$ 上，$t/2\in[0,\pi]$，故 $\sin(t/2)\ge0$，绝对值可以去掉。
 
-$$
-S=S_{\mathrm{out}}+S_{\mathrm{in}}=2\pi+\frac{6\pi}{5}=\boxed{\frac{16\pi}{5}}.
-$$
+  </Step>
+  <Step>
 
-<Callout type="warn" title="体积减，表面积加">体积计算是外圆盘面积与内圆盘面积之差；曲面面积则是旋转体两侧真实边界各自的面积之和，不能将内壁面积相减。</Callout>
+    ### 积分求出整拱的长度
+
+    由此
+
+    $$
+    \begin{aligned}
+    L&=2\int_0^{2\pi}\sin\frac t2\,\mathrm dt\\
+    &=\left[-4\cos\frac t2\right]_0^{2\pi}
+    =-4(-1)+4(1)=\boxed{8}.
+    \end{aligned}
+    $$
+
+    端点处 $x'=y'=0$ 不会妨碍上述弧长积分。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+根式 $\sqrt{4\sin^2(t/2)}=2|\sin(t/2)|$，不能在任意区间直接去绝对值。本题之所以可去，是因只计算一拱 $0\le t\le2\pi$。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-020" type="blank" tags="来源:李林880, 考点:累积体积, 考点:广义积分, 考点:分割比例">
+<Question id="core-1102-math-70b5a1-066" type="essay" points={5} tags="来源:1996年考研数学一, 科目:高等数学, 章节:定积分的应用, 考点:心形线的极坐标弧长">
 
-曲线 $y=\dfrac{\sqrt x}{1+x^2}$ 绕 $x$ 轴旋转。令 $V(\xi)$ 为 $0\le x\le\xi$ 部分的体积。若 $a>0$ 满足
-
-$$
-V(a)=\frac12\lim_{\xi\to+\infty}V(\xi),
-$$
-
-则 $a=$ <Blank answer="1" kind="math" />。
+ 求心形线 $r=a(1+\cos\theta)$ 的全长，其中 $a>0$ 是常数.
 
 <Solution>
 
-**答案：** $\boxed{a=1}$。
+**参考答案：** $\boxed{L=8a}$。
 
-**第一步：求累积体积函数。** 半径是 $y=\sqrt x/(1+x^2)$，故截面面积为 $\pi x/(1+x^2)^2$，于是
+**解题思路：** 用极坐标弧长公式，把根号化为半角余弦，再利用对称性处理绝对值。
 
-$$
-\begin{aligned}
-V(\xi)&=\pi\int_0^\xi\frac{x}{(1+x^2)^2}dx\\
-&=\frac\pi2\left[-\frac1{1+x^2}\right]_0^\xi\\
-&=\frac\pi2\left(1-\frac1{1+\xi^2}\right).
-\end{aligned}
-$$
+<Steps>
+  <Step>
 
-**第二步：先计算总容积，再求体积分割点。** 因积分在无穷远处按 $x^{-3}$ 衰减，总容积存在且为 $V_\infty=\pi/2$。
+    ### 建立极坐标弧长表达式
 
-由 $V(a)=V_\infty/2$：
+    对于极坐标曲线 $r=r(\theta)$，有
 
-$$
-\frac\pi2\left(1-\frac1{1+a^2}\right)=\frac\pi4
-\quad\Longrightarrow\quad
-\frac1{1+a^2}=\frac12.
-$$
+    $$
+    \mathrm ds=\sqrt{r^2+\left(\frac{\mathrm dr}{\mathrm d\theta}\right)^2}\,\mathrm d\theta.
+    $$
 
-所以 $a^2=1$；结合 $a>0$，得到 $a=1$。
+    心形线 $r=a(1+\cos\theta)$（$a>0$）在 $0\le\theta\le2\pi$ 描完一周，且 $r'= -a\sin\theta$。全长即上式在一周上的积分。
 
-**模型推广：** 题目要的是“某一位置累积了总体积的指定比例”，先建累积函数 $V(x)$，再解比例方程；$V'(x)=\pi y^2(x)>0$ 还能保证这样的切分点唯一。
+  </Step>
+  <Step>
+
+    ### 化简根式并确定积分范围
+
+    由恒等式 $\sin^2\theta+\cos^2\theta=1$，
+
+    $$
+    \begin{aligned}
+    r^2+(r')^2
+    &=a^2[(1+\cos\theta)^2+\sin^2\theta]\\
+    &=2a^2(1+\cos\theta)=4a^2\cos^2\frac\theta2.
+    \end{aligned}
+    $$
+
+    弧长元为 $2a|\cos(\theta/2)|\,\mathrm d\theta$。心形线关于极轴对称，可只积分 $\theta\in[0,\pi]$ 再乘 $2$，这半圈中 $\cos(\theta/2)\ge0$。
+
+  </Step>
+  <Step>
+
+    ### 计算全长
+
+    因此
+
+    $$
+    \begin{aligned}
+    L&=2\int_0^\pi2a\cos\frac\theta2\,\mathrm d\theta\\
+    &=4a\left[2\sin\frac\theta2\right]_0^\pi
+    =\boxed{8a}.
+    \end{aligned}
+    $$
+
+    该结果量纲为长度，并随尺度参数 $a$ 线性变化，符合几何缩放规律。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+若直接从 $0$ 积分到 $2\pi$，必须保留 $|\cos(\theta/2)|$；否则下半圈积分会被错误地抵消。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-021" type="essay" tags="来源:张宇1000题, 考点:隐函数切线, 考点:圆锥体积, 考点:最优化">
+<Question id="core-1102-math-70b5a1-067" type="essay" points={8} tags="来源:1997年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:极坐标弧长与微分方程">
 
-在曲线 $\sqrt x+\sqrt y=1$ 上横坐标为 $a$（$0<a<1$）的点处作切线，由该切线与坐标轴围成的三角形绕 $y$ 轴旋转一周。求使旋转体积最大的 $a$。
+ 设曲线 $L$ 的极坐标方程为 $r=r(\theta)$，$M(r,\theta)$ 为 $L$ 上任一点，$M_0(2,0)$ 为 $L$ 上一定点，若极径 $OM_0$、$OM$ 与曲线 $L$ 所围成的曲边扇形面积值等于 $L$ 上 $M_0$，$M$ 两点间弧长值的一半，求曲线 $L$ 的方程.
 
 <Solution>
 
-**参考答案：** $\boxed{a=\dfrac49}$。
+**参考答案：** $\boxed{x+\sqrt3y=2\quad\text{或}\quad x-\sqrt3y=2}$（经过 $M_0$ 的两支）。
 
-**第一步：通过隐函数求切线截距。** 设切点为 $P=(a,b)$，其中 $\sqrt a+\sqrt b=1$，即 $b=(1-\sqrt a)^2$。
+**解题思路：** 面积与弧长的比例关系可对角度求导，得到关于 $r(\theta)$ 的一阶方程；分离变量积分后利用 $r(0)=2$，最后转为直角坐标直线。
 
-对 $\sqrt x+\sqrt y=1$ 求导：
+<Steps>
+  <Step>
 
-$$
-\frac1{2\sqrt x}+\frac{y'}{2\sqrt y}=0
-\quad\Longrightarrow\quad
-y'=-\frac{\sqrt y}{\sqrt x}.
-$$
+    ### 把几何等量关系化为微分方程
 
-在 $P$ 处斜率为 $-(1-\sqrt a)/\sqrt a$，点斜式整理成截距式
+    记从 $M_0(2,0)$ 到 $M(r,\theta)$ 形成的扇形面积与弧长分别为 $A$、$s$，题给 $A=s/2$。沿选定的单向参数区间，有
 
-$$
-\frac x{\sqrt a}+\frac y{1-\sqrt a}=1.
-$$
+    $$
+    A'(\theta)=\frac12r^2,\qquad
+    s'(\theta)=\sqrt{r^2+[r'(\theta)]^2}.
+    $$
 
-因此直线在 $x$ 轴、$y$ 轴的截距分别为 $\sqrt a$ 与 $1-\sqrt a$，均为正。
+    在正向 $\theta$ 参数化的局部区间，两边求导得到
 
-**第二步：识别旋转体并列出体积。** 该三角形绕 $y$ 轴旋转形成直圆锥，底面半径 $r=\sqrt a$、高 $h=1-\sqrt a$，所以
+    $$
+    r^2=\sqrt{r^2+(r')^2}
+    \quad\Longrightarrow\quad(r')^2=r^2(r^2-1).
+    $$
 
-$$
-V(a)=\frac\pi3r^2h=\frac\pi3a(1-\sqrt a).
-$$
+    因为已知 $r(0)=2>1$，可在该点附近选择 $r\ge1$ 的实值分支求解。
 
-**第三步：把根式参数化并判断全局最大值。** 令 $s=\sqrt a\in(0,1)$，则
+  </Step>
+  <Step>
 
-$$
-V(s)=\frac\pi3s^2(1-s),\qquad
-V'(s)=\frac\pi3s(2-3s).
-$$
+    ### 分离变量并确定常数
 
-在 $(0,2/3)$ 上导数为正，在 $(2/3,1)$ 上导数为负；同时两端极限均为 $0$。因此唯一全局最大值在 $s=2/3$ 处取得：
+    由上式
 
-$$
-a=s^2=\boxed{\frac49}.
-$$
+    $$
+    \frac{r'}{r\sqrt{r^2-1}}=\pm1,
+    \qquad\frac{\mathrm dr}{r\sqrt{r^2-1}}=\pm\mathrm d\theta.
+    $$
 
-**解题技巧：** 切线截距控制圆锥的半径和高度，常比直接对曲线求极值简单。遇到 $\sqrt a$ 同时出现在两个截距时，令 $s=\sqrt a$ 可把优化函数化为三次多项式。
+    注意 $r>1$ 时 $\int\mathrm dr/[r\sqrt{r^2-1}]=\operatorname{arcsec}r+C$。于是可写
+
+    $$
+    \operatorname{arcsec}r=\pm\theta+C.
+    $$
+
+    由 $r(0)=2$ 得 $C=\pi/3$（取初值附近的主值分支）。因此在各自有效区间内
+
+    $$
+    r=\sec\left(\frac\pi3+\theta\right)
+    \quad\text{或}\quad
+    r=\sec\left(\frac\pi3-\theta\right).
+    $$
+
+  </Step>
+  <Step>
+
+    ### 转换为直角坐标并说明分支
+
+    利用 $x=r\cos\theta$、$y=r\sin\theta$，由
+
+    $$
+    r\cos\left(\theta\pm\frac\pi3\right)=1
+    $$
+
+    得到
+
+    $$
+    \frac x2\mp\frac{\sqrt3y}{2}=1,
+    $$
+
+    即
+
+    $$
+    \boxed{x-\sqrt3y=2\quad\text{或}\quad x+\sqrt3y=2}.
+    $$
+
+    两条直线都经过 $(2,0)$，分别对应微分方程的两种符号选择；曲线只取满足题设极角、极径条件的相应部分。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+面积与弧长均为**非负几何量**，对 $\theta$ 求导需要在角度单向增大的局部区间理解；所得是经过已知点的两种可能直线，而非必须把两条直线拼成一条可微曲线。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-## 三、弧长、旋转曲面面积与形心
+<Question id="core-1102-math-70b5a1-070" type="essay" points={12} tags="来源:2004年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:旋转曲面表面积与体积求导">
 
-<Question id="math-core-gd-04-04-022" type="essay" points={8} tags="来源:1998考研数二, 考点:切线, 考点:旋转曲面面积, 考点:参数换元">
+ 曲线 $y=\frac{e^x+e^{-x}}{2}$ 与直线 $x=0, x=t(t>0)$ 及 $y=0$ 围成一曲边梯形. 该曲边梯形绕 $x$ 轴旋转一周得一旋转体，其体积为 $V(t)$，侧面积为 $S(t)$，在 $x=t$ 处
 
-设曲线 $y=\sqrt{x-1}$，过原点作其切线。求由此曲线、切线及 $x$ 轴围成的平面图形绕 $x$ 轴旋转一周所得旋转体的**表面积**。
+的底面积为 $F(t)$。
+
+(1) 求 $\frac{S(t)}{V(t)}$ 的值；
+
+(2) 计算极限 $\lim_{t \to +\infty} \frac{S(t)}{F(t)}$。
 
 <Solution>
 
-**参考答案：**
+**参考答案：** (1) $\boxed{S(t)/V(t)=2}$；(2) $\boxed{\lim_{t\to\infty}S(t)/F(t)=1}$。
 
-$$
-\boxed{S=\frac\pi6(11\sqrt5-1)}.
-$$
+**解题思路：** 把曲线认作双曲余弦函数，利用 $1+\sinh^2x=\cosh^2x$ 将旋转表面积化为与体积相同的积分，再分别求比值和极限。
 
-**第一步：确定切点和围成区域。** 设切点 $P(x_0,y_0)$，则 $y_0^2=x_0-1$，且 $y'(x_0)=1/(2y_0)$。切线经过原点，因而
+<Steps>
+  <Step>
 
-$$
-\frac{y_0}{x_0}=\frac1{2y_0}
-\quad\Longrightarrow\quad x_0=2y_0^2=2(x_0-1).
-$$
+    ### 化简曲线斜率与弧长因子
 
-解得 $x_0=2$、$y_0=1$；切线是 $\boxed{y=x/2}$。围域边界为 $x\in[0,2]$ 的切线段、$x\in[1,2]$ 的曲线弧以及 $x\in[0,1]$ 的轴上段。轴上段旋转不产生曲面面积。
+    题设曲线为 $y(x)=(e^x+e^{-x})/2=\cosh x$。它的导数是 $y'(x)=\sinh x$，所以
 
-**第二步：计算曲线弧的旋转曲面。** 直接代入 $y'=1/(2\sqrt{x-1})$ 时在 $x=1$ 出现无穷斜率，改令 $u=\sqrt{x-1}$：
+    $$
+    \sqrt{1+[y'(x)]^2}=\sqrt{1+\sinh^2x}=\cosh x=y(x),
+    $$
 
-$$
-x=1+u^2,\quad y=u,\quad 0\le u\le1,
-\quad ds=\sqrt{(2u)^2+1}\,du.
-$$
+    最后一步成立是因为 $\cosh x>0$。这个特殊恒等式是全题的简化关键。
 
-所以
+  </Step>
+  <Step>
 
-$$
-\begin{aligned}
-S_1&=2\pi\int_0^1u\sqrt{1+4u^2}\,du\\
-&=\frac\pi6\left[(1+4u^2)^{3/2}\right]_0^1
-=\frac\pi6(5\sqrt5-1).
-\end{aligned}
-$$
+    ### 比较圆盘体积与旋转曲面侧面积
 
-**第三步：计算切线的旋转侧面。** 切线 $y=x/2$ 绕 $x$ 轴形成底半径为 $1$、母线长为 $\sqrt{2^2+1^2}=\sqrt5$ 的圆锥侧面：
+    绕 $x$ 轴旋转的体积和侧面积分别为
 
-$$
-S_2=\pi\cdot1\cdot\sqrt5=\pi\sqrt5.
-$$
+    $$
+    V(t)=\pi\int_0^t y(x)^2\,\mathrm dx,
+    $$
 
-故 $S=S_1+S_2=\pi(11\sqrt5-1)/6$。
+    $$
+    S(t)=2\pi\int_0^ty(x)\sqrt{1+[y'(x)]^2}\,\mathrm dx
+    =2\pi\int_0^ty(x)^2\,\mathrm dx.
+    $$
 
-<Callout type="warn" title="表面积不能按体积作差">本题所求是旋转体的**曲面边界面积**：弧面与锥面都是真实边界，故相加；不能像垫片体积那样把内侧曲面面积相减。曲线端点的竖直切线用参数化可避免形式上的瑕点。</Callout>
+    因此对一切 $t>0$，都有 $S(t)=2V(t)$，故
+
+    $$
+    \boxed{\frac{S(t)}{V(t)}=2}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 把底面积代入并求无穷远极限
+
+    在 $x=t$ 处的横截面面积为 $F(t)=\pi\cosh^2t$。又
+
+    $$
+    \int_0^t\cosh^2x\,\mathrm dx
+    =\frac t2+\frac14\sinh2t,
+    $$
+
+    所以
+
+    $$
+    \begin{aligned}
+    \frac{S(t)}{F(t)}
+    &=\frac{t+\frac12\sinh2t}{\cosh^2t}\\
+    &=t\operatorname{sech}^2t+\tanh t.
+    \end{aligned}
+    $$
+
+    当 $t\to+\infty$ 时，$t\operatorname{sech}^2t\to0$（指数衰减快于线性增长），$\tanh t\to1$，故极限为 $\boxed{1}$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+“侧面积”是**曲面部分** $2\pi\int y\,\mathrm ds$，不能擅自加上两端底圆面积；题目已将 $F(t)$ 单独定义为右端截面积。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-023" type="essay" points={12} tags="来源:2004考研数二, 考点:旋转体积与侧面积, 考点:双曲函数, 考点:无穷极限">
+<Question id="core-1102-math-70b5a1-071" type="blank" points={4} tags="来源:2010年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:对数螺线的极坐标弧长">
 
-曲线 $y=\dfrac{e^x+e^{-x}}2$ 与 $x=0$、$x=t$（$t>0$）、$y=0$ 围成曲边梯形。绕 $x$ 轴旋转所得体积、侧面积分别记为 $V(t),S(t)$；在 $x=t$ 处的底面积记为 $F(t)$。
-
-(1) 求 $S(t)/V(t)$；(2) 求 $\displaystyle\lim_{t\to+\infty}S(t)/F(t)$。
+ 当 $0 \leqslant \theta \leqslant \pi$ 时，对数螺线 $r = e^\theta$ 的弧长为 <Blank answer="sqrt(2)(e^pi-1)" kind="math" />。
 
 <Solution>
 
-**参考答案：** $\boxed{\dfrac{S(t)}{V(t)}=2}$，$\boxed{\displaystyle\lim_{t\to+\infty}\dfrac{S(t)}{F(t)}=1}$。
+**参考答案：** $\boxed{\sqrt2\,(e^\pi-1)}$。
 
-**第一步：找到弧长元的关键恒等式。** 令 $y=\cosh x$，则 $y'=\sinh x$。双曲恒等式给出
+**解题思路：** 极坐标弧长元与半径和半径对角度的导数共同有关；此处 $r'=r$，因此根式可直接化为 $\sqrt2r$。
 
-$$
-\sqrt{1+(y')^2}=\sqrt{1+\sinh^2x}=\cosh x=y\quad(x\ge0).
-$$
+<Steps>
+  <Step>
 
-因此侧面积与体积具有相同的积分核：
+    ### 列出极坐标弧长公式
 
-$$
-V(t)=\pi\int_0^t\cosh^2x\,dx,
-\qquad S(t)=2\pi\int_0^t\cosh^2x\,dx.
-$$
+    对数螺线 $r=e^\theta$（$0\le\theta\le\pi$）是一条在极径随角度指数增长的极坐标曲线。标准弧长公式为
 
-由于二者都正，立即得 $S/V=2$。
+    $$
+    L=\int_0^\pi\sqrt{r(\theta)^2+\bigl[r'(\theta)\bigr]^2}\,\mathrm d\theta.
+    $$
 
-**第二步：化简第二问的比值。** 截面底面积为 $F(t)=\pi\cosh^2t$。利用 $\cosh^2x=(1+\cosh2x)/2$，
+    不能将 $\int r\,\mathrm d\theta$ 误当作一般极坐标曲线的弧长。
 
-$$
-\begin{aligned}
-S(t)&=2\pi\left(\frac t2+\frac{\sinh2t}{4}\right)
-=\pi(t+\sinh t\cosh t),\\
-\frac{S(t)}{F(t)}
-&=\frac t{\cosh^2t}+\tanh t.
-\end{aligned}
-$$
+  </Step>
+  <Step>
 
-因为 $\cosh t\ge e^t/2$，故 $0\le t/\cosh^2t\le4te^{-2t}\to0$；又 $\tanh t\to1$。因此极限为 $1$。
+    ### 代入 $r$ 及其导数
 
-**技巧：** 计算曲面面积之前优先检查 $1+(y')^2$ 是否为完全平方；本题整个第一问甚至不必具体求出积分。
+    由于 $r(\theta)=e^\theta$，有
+
+    $$
+    r'(\theta)=e^\theta=r(\theta).
+    $$
+
+    因此
+
+    $$
+    \sqrt{r^2+(r')^2}=\sqrt{2e^{2\theta}}=\sqrt2e^\theta.
+    $$
+
+    指数函数为正，不需要额外处理绝对值。
+
+  </Step>
+  <Step>
+
+    ### 进行定积分计算
+
+    于是
+
+    $$
+    \begin{aligned}
+    L&=\sqrt2\int_0^\pi e^\theta\,\mathrm d\theta\\
+    &=\sqrt2\left[e^\theta\right]_0^\pi
+    =\boxed{\sqrt2(e^\pi-1)}.
+    \end{aligned}
+    $$
+
+    长度为正，且明显大于径向增量 $e^\pi-1$，与螺线既向外又转动的几何事实一致。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+公式中 $r^2+(r')^2$ 两项缺一不可；本题若漏掉 $r'$，答案会少一个 $\sqrt2$ 因子。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-024" type="essay" points={11} tags="来源:2013考研数二, 考点:弧长, 考点:平面形心, 考点:一阶矩">
+<Question id="core-1102-math-70b5a1-072" type="blank" points={4} tags="来源:2011年考研数学一、二, 科目:高等数学, 章节:定积分的应用, 考点:积分定义曲线与弧长">
 
-曲线 $L$ 为
-
-$$
-y=\frac14x^2-\frac12\ln x,\qquad1\le x\le e.
-$$
-
-(1) 求 $L$ 的弧长；(2) 曲线、直线 $x=1$、$x=e$ 及 $x$ 轴围成区域 $D$，求 $D$ 的形心横坐标。
+ 曲线 $y = \int_0^x \tan t \mathrm{d}t \ (0 \leqslant x \leqslant \frac{\pi}{4})$ 的弧长 $S =$ <Blank answer="ln(1+sqrt(2))" kind="math" />。
 
 <Solution>
 
-**参考答案：**
+**参考答案：** $\boxed{\ln(1+\sqrt2)}$。
 
-$$
-\boxed{L=\frac{e^2+1}{4}},\qquad
-\boxed{\bar x=\frac{3(e^4-2e^2-3)}{4(e^3-7)}}.
-$$
+**解题思路：** 无需计算原积分函数的显式式子，直接由微积分基本定理求导；利用三角恒等式将弧长积分转化为正割函数积分。
 
-**第一步：弧长根式化为完全平方。** 计算
+<Steps>
+  <Step>
 
-$$
-y'=\frac x2-\frac1{2x}
-\quad\Longrightarrow\quad
-1+(y')^2=\frac{(x^2+1)^2}{4x^2}.
-$$
+    ### 求变上限积分定义曲线的导数
 
-因为 $x\ge1$，所以 $\sqrt{1+(y')^2}=(x^2+1)/(2x)$，故
+    设 $y(x)=\int_0^x\tan u\,\mathrm du$，$0\le x\le\pi/4$。因 $\tan u$ 在此区间连续，微积分基本定理给出
 
-$$
-L=\int_1^e\left(\frac x2+\frac1{2x}\right)dx
-=\left[\frac{x^2}{4}+\frac12\ln x\right]_1^e
-=\frac{e^2+1}{4}.
-$$
+    $$
+    y'(x)=\tan x.
+    $$
 
-**第二步：明确面积与一阶矩。** 设 $g(x)=x^2/4-\ln x/2$，则 $g'(x)=(x^2-1)/(2x)\ge0$，且 $g(1)=1/4>0$，所以区域确为 $0\le y\le g(x)$。面积和关于 $y$ 轴的**静矩**分别为
+    曲线在该闭区间上的弧长为 $L=\int_0^{\pi/4}\sqrt{1+[y'(x)]^2}\,\mathrm dx$。
 
-$$
-A=\int_1^eg(x)dx,
-\qquad M_y=\int_1^exg(x)dx.
-$$
+  </Step>
+  <Step>
 
-分别积分得
+    ### 用恒等式化简弧长因子
 
-$$
-\begin{aligned}
-A&=\left[\frac{x^3}{12}-\frac12(x\ln x-x)\right]_1^e
-=\frac{e^3-7}{12},\\
-M_y&=\left[\frac{x^4}{16}-\frac{x^2}4\ln x+\frac{x^2}8\right]_1^e
-=\frac{e^4-2e^2-3}{16}.
-\end{aligned}
-$$
+    利用 $1+\tan^2x=\sec^2x$，且 $0\le x\le\pi/4$ 时 $\cos x>0$，所以
 
-**第三步：面积矩除以面积。** 按均匀薄片形心公式，
+    $$
+    \sqrt{1+\tan^2x}=|\sec x|=\sec x.
+    $$
 
-$$
-\bar x=\frac{M_y}{A}=
-\frac{3(e^4-2e^2-3)}{4(e^3-7)}.
-$$
+    因而
 
-<Callout type="idea" title="区分弧长、面积和形心">弧长使用 $\int\sqrt{1+(y')^2}\,dx$；面积使用 $\int y\,dx$；形心横坐标为 $\int xy\,dx/\int y\,dx$。三者不能互换。</Callout>
+    $$
+    L=\int_0^{\pi/4}\sec x\,\mathrm dx.
+    $$
+
+    特别地，若区间穿越 $\cos x=0$ 的点，则不能如此直接处理；本题不存在这个问题。
+
+  </Step>
+  <Step>
+
+    ### 积分并代入端点
+
+    正割函数的原函数可写为 $\ln|\sec x+\tan x|$，从而
+
+    $$
+    \begin{aligned}
+    L&=\left[\ln|\sec x+\tan x|\right]_0^{\pi/4}\\
+    &=\ln(\sqrt2+1)-\ln1
+    =\boxed{\ln(1+\sqrt2)}.
+    \end{aligned}
+    $$
+
+    结果是无量纲的确定正常数，且区间长度 $\pi/4$ 小于此弧长，符合弧长不小于水平投影长度的事实。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+处理 $y=\int_0^x g(t)\,\mathrm dt$ 类型弧长题，通常**只要求 $y'$**，不必先求 $y(x)$，能显著减少运算量。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-025" type="essay" points={12} tags="来源:2021考研数二, 考点:逆向求导, 考点:弧长, 考点:旋转曲面面积">
+<Question id="core-1102-math-70b5a1-073" type="essay" points={11} tags="来源:2013年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:曲线弧长与面积体积">
 
-已知
+ 设曲线 $L$ 的方程为 $y = \frac{1}{4} x^2 - \frac{1}{2} \ln x \ (1 \leqslant x \leqslant e)$。
 
-$$
-\int\frac{f(x)}{\sqrt x}\,dx=\frac16x^2-x+C.
-$$
+(1) 求 $L$ 的弧长；
 
-设 $L$ 是曲线 $y=f(x)$ 在 $4\le x\le9$ 上的弧，弧长为 $S$；$L$ 绕 $x$ 轴旋转形成的曲面面积为 $A$。求 $S,A$。
+(2) 设 $D$ 是由曲线 $L$，直线 $x = 1, x = e$ 及 $x$ 轴所围平面图形，求 $D$ 的形心的横坐标。
 
 <Solution>
 
-**参考答案：**
+**参考答案：** (1) $\boxed{L=(e^2+1)/4}$；(2) $\boxed{\bar x=\frac{3(e^4-2e^2-3)}{4(e^3-7)}}$。
 
-$$
-\boxed{S=\frac{22}{3}},\qquad\boxed{A=\frac{425\pi}{9}}.
-$$
+**解题思路：** 先通过配平方把弧长根式化简为初等函数，再用形心横坐标公式 $\bar x=M_y/A$，分别计算面积和对 $y$ 轴的一阶矩。
 
-**第一步：由原函数条件恢复曲线。** 对题给不定积分求导，而不是再做一次积分：
+<Steps>
+  <Step>
 
-$$
-\frac{f(x)}{\sqrt x}=\frac x3-1
-\quad\Longrightarrow\quad
-f(x)=\sqrt x\left(\frac x3-1\right).
-$$
+    ### 求导并计算曲线弧长
 
-因 $x\in[4,9]$，有 $f(x)>0$，可直接把 $f(x)$ 用作旋转半径。进一步
+    题设 $y=f(x)=x^2/4-(\ln x)/2$，定义于 $1\le x\le e$。求导为
 
-$$
-f'(x)=\frac{x-1}{2\sqrt x},\qquad
-\sqrt{1+[f'(x)]^2}=\frac{x+1}{2\sqrt x}.
-$$
+    $$
+    y'=\frac{x}{2}-\frac1{2x}=\frac{x^2-1}{2x}.
+    $$
 
-**第二步：弧长。**
+    观察弧长根式可构造完全平方：
 
-$$
-\begin{aligned}
-S&=\int_4^9\frac{x+1}{2\sqrt x}\,dx
-=\left[\frac{x^{3/2}}3+\sqrt x\right]_4^9\\
-&=(9+3)-\left(\frac83+2\right)=\frac{22}{3}.
-\end{aligned}
-$$
+    $$
+    1+(y')^2=\frac{4x^2+(x^2-1)^2}{4x^2}
+    =\frac{(x^2+1)^2}{4x^2}.
+    $$
 
-**第三步：旋转曲面面积。**
+    因 $x\ge1>0$，有 $\sqrt{1+(y')^2}=(x^2+1)/(2x)$。于是
 
-$$
-\begin{aligned}
-A&=2\pi\int_4^9f(x)\sqrt{1+(f'(x))^2}\,dx\\
-&=\pi\int_4^9\left(\frac x3-1\right)(x+1)\,dx\\
-&=\pi\left[\frac{x^3}{9}-\frac{x^2}{3}-x\right]_4^9
-=\frac{425\pi}{9}.
-\end{aligned}
-$$
+    $$
+    \begin{aligned}
+    L&=\int_1^e\left(\frac x2+\frac1{2x}\right)\mathrm dx\\
+    &=\left[\frac{x^2}{4}+\frac12\ln x\right]_1^e
+    =\boxed{\frac{e^2+1}{4}}.
+    \end{aligned}
+    $$
 
-**验算要点：** 与弧长相比，旋转曲面面积多了半径因子 $2\pi f(x)$；使用该公式之前必须确认 $f$ 的符号，若曲线跨越轴则半径为 $|f(x)|$。
+  </Step>
+  <Step>
+
+    ### 建立形心计算的面积与一阶矩
+
+    由于 $f'(x)=(x^2-1)/(2x)\ge0$，故 $f$ 在 $[1,e]$ 单调不减，而且 $f(1)=1/4>0$，因此区域恰在 $x$ 轴上方。面积及对 $y$ 轴的静矩分别为
+
+    $$
+    A=\int_1^e f(x)\,\mathrm dx,\qquad
+    M_y=\int_1^e xf(x)\,\mathrm dx.
+    $$
+
+    形心横坐标 $\bar x=M_y/A$，不能直接把上下端点取平均，因为区域的竖直高度不均匀。
+
+  </Step>
+  <Step>
+
+    ### 分别求积分并形成最终分式
+
+    由分部积分 $\int\ln x\,\mathrm dx=x\ln x-x$，
+
+    $$
+    \begin{aligned}
+    A&=\left[\frac{x^3}{12}-\frac12(x\ln x-x)\right]_1^e
+    =\frac{e^3-7}{12}.
+    \end{aligned}
+    $$
+
+    同理，由 $\int x\ln x\,\mathrm dx=\tfrac{x^2}{2}\ln x-\tfrac{x^2}{4}$，
+
+    $$
+    \begin{aligned}
+    M_y&=\left[\frac{x^4}{16}-\frac{x^2}{4}\ln x+\frac{x^2}{8}\right]_1^e\\
+    &=\frac{e^4-2e^2-3}{16}.
+    \end{aligned}
+    $$
+
+    因此
+
+    $$
+    \boxed{\bar x=\frac{M_y}{A}=
+    \frac{3(e^4-2e^2-3)}{4(e^3-7)}}.
+    $$
+
+    它位于区间 $(1,e)$ 内，符合形心几何位置要求。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+注意题目求的是**平面区域的形心**，不是曲线弧长的形心：静矩积分应为 $\int x f(x)\,\mathrm dx$，而非 $\int x\sqrt{1+(f')^2}\,\mathrm dx$。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-026" type="essay" points={12} tags="来源:2022考研数二, 考点:一阶线性微分方程, 考点:积分因子, 考点:弧长">
+<Question id="core-1102-math-70b5a1-075" type="essay" points={11} tags="来源:2016年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:参数曲线与几何面积">
 
-$y(x)$ 满足
+ 设 $D$ 是由曲线 $y = \sqrt{1 - x^2} \ (0 \leqslant x \leqslant 1)$ 与 $\begin{cases} x = \cos^3 t, \\ y = \sin^3 t \end{cases} (0 \leqslant t \leqslant \frac{\pi}{2})$ 围成的平面区域，求 $D$ 绕 $x$ 轴旋转一周所得旋转体的体积和表面积。
 
-$$
-2xy'-4y=2\ln x-1,\qquad y(1)=\frac14.
-$$
+<Solution>
 
-求曲线 $y=y(x)$（$1\le x\le e$）的弧长。
+**参考答案：** (1) $\boxed{V=18\pi/35}$；(2) $\boxed{S=16\pi/5}$。
+
+**解题思路：** 先判断两条曲线的位置关系，用垫片法计算体积；边界旋转所得总表面积由外侧球面和内侧参数曲面两部分组成。
+
+<Steps>
+  <Step>
+
+    ### 确定上下曲线并建立圆环体积
+
+    第一条曲线是单位圆的上四分之一弧 $y_{\rm out}=\sqrt{1-x^2}$。第二条满足
+
+    $$
+    x=\cos^3t,\quad y=\sin^3t
+    \quad\Longrightarrow\quad x^{2/3}+y^{2/3}=1,
+    $$
+
+    因此其显式表达为 $y_{\rm in}=(1-x^{2/3})^{3/2}$（$0\le x\le1$）。因 $x^{2/3}\ge x^2$，故 $y_{\rm in}\le y_{\rm out}$。绕 $x$ 轴旋转得到圆环，体积为
+
+    $$
+    V=\pi\int_0^1\Bigl[(1-x^2)-(1-x^{2/3})^3\Bigr]\,\mathrm dx.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 展开并积分求旋转体体积
+
+    立方展开后，$x^2$ 项相互抵消，因而
+
+    $$
+    \begin{aligned}
+    V&=3\pi\int_0^1(x^{2/3}-x^{4/3})\,\mathrm dx\\
+    &=3\pi\left(\frac35-\frac37\right)
+    =\boxed{\frac{18\pi}{35}}.
+    \end{aligned}
+    $$
+
+    体积非负且小于整个单位半球的体积 $2\pi/3$，结果在数量级上合理。
+
+  </Step>
+  <Step>
+
+    ### 分别计算两侧旋转曲面的面积
+
+    外侧四分之一圆弧绕 $x$ 轴旋转形成单位半球，曲面面积为 $S_1=2\pi$。内侧参数曲线的导数为
+
+    $$
+    x'=-3\cos^2t\sin t,\qquad y'=3\sin^2t\cos t.
+    $$
+
+    因此（$0\le t\le\pi/2$）
+
+    $$
+    \mathrm ds=\sqrt{(x')^2+(y')^2}\,\mathrm dt
+    =3\sin t\cos t\,\mathrm dt.
+    $$
+
+    内侧曲面面积为
+
+    $$
+    \begin{aligned}
+    S_2&=2\pi\int_0^{\pi/2}y(t)\,\mathrm ds\\
+    &=6\pi\int_0^{\pi/2}\sin^4t\cos t\,\mathrm dt
+    =\frac{6\pi}{5}.
+    \end{aligned}
+    $$
+
+    两侧曲面在端部交界处只有边界线，没有正面积的平面封口，因此
+
+    $$
+    \boxed{S=S_1+S_2=\frac{16\pi}{5}}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+表面积不是将两个截面的圆面积相减后积分；体积用 $\pi(R^2-r^2)$，曲面面积用 $2\pi y\,\mathrm ds$。本题还应避免把内侧曲面漏算。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-70b5a1-077" type="essay" points={12} tags="来源:2021年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:由原函数求曲线弧长与表面积">
+
+ 设函数 $f(x)$ 满足 $\int \frac{f(x)}{\sqrt{x}} \mathrm{d}x = \frac{1}{6} x^2 - x + C$，$L$ 为曲线 $y = f(x) \ (4 \leqslant x \leqslant 9)$，$L$ 的弧长为 $S$，$L$ 绕 $x$ 轴旋转一周所形成的曲面面积为 $A$，求 $S$ 和 $A$。
+
+<Solution>
+
+**参考答案：** $\boxed{S=22/3}$，$\boxed{A=425\pi/9}$。
+
+**解题思路：** 对题给原函数等式直接求导以确定 $f(x)$；再分别使用弧长与旋转曲面面积公式，且先检查曲线到旋转轴的距离是否为 $f$。
+
+<Steps>
+  <Step>
+
+    ### 由不定积分条件还原函数
+
+    对等式
+
+    $$
+    \int\frac{f(x)}{\sqrt x}\,\mathrm dx=\frac{x^2}{6}-x+C
+    $$
+
+    两边求导（$x>0$），有
+
+    $$
+    \frac{f(x)}{\sqrt x}=\frac x3-1
+    \quad\Longrightarrow\quad
+    f(x)=\sqrt x\left(\frac x3-1\right).
+    $$
+
+    进一步求导并合并分母得
+
+    $$
+    f'(x)=\frac{x-1}{2\sqrt x}.
+    $$
+
+    在 $4\le x\le9$ 上 $f(x)>0$，故旋转曲面的半径为 $f(x)$。
+
+  </Step>
+  <Step>
+
+    ### 化简并积分计算弧长
+
+    有
+
+    $$
+    \begin{aligned}
+    1+[f'(x)]^2&=1+\frac{(x-1)^2}{4x}
+    =\frac{(x+1)^2}{4x},\\
+    \sqrt{1+[f'(x)]^2}&=\frac{x+1}{2\sqrt x}.
+    \end{aligned}
+    $$
+
+    所以
+
+    $$
+    \begin{aligned}
+    S&=\int_4^9\frac{x+1}{2\sqrt x}\,\mathrm dx\\
+    &=\left[\frac{x^{3/2}}3+\sqrt x\right]_4^9
+    =(9+3)-\left(\frac83+2\right)
+    =\boxed{\frac{22}{3}}.
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 使用曲面面积公式求面积
+
+    旋转所得曲面面积为
+
+    $$
+    A=2\pi\int_4^9 f(x)\sqrt{1+[f'(x)]^2}\,\mathrm dx.
+    $$
+
+    化简积分函数：
+
+    $$
+    2f(x)\sqrt{1+[f'(x)]^2}
+    =\left(\frac x3-1\right)(x+1)
+    =\frac{x^2}{3}-\frac{2x}{3}-1.
+    $$
+
+    于是
+
+    $$
+    \begin{aligned}
+    A&=\pi\left[\frac{x^3}{9}-\frac{x^2}{3}-x\right]_4^9\\
+    &=\pi\left(45-\left(-\frac{20}{9}\right)\right)
+    =\boxed{\frac{425\pi}{9}}.
+    \end{aligned}
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+不定积分等式的右侧有任意常数 $C$，但求导时会消去，不会影响 $f(x)$。旋转面积中的 $2\pi$ 不能漏。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-70b5a1-078" type="essay" points={12} tags="来源:2022年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:一阶微分方程与弧长">
+
+ 设函数 $y(x)$ 是微分方程 $2xy' - 4y = 2\ln x - 1$ 满足条件 $y(1) = \frac{1}{4}$ 的解，求曲线 $y = y(x) \ (1 \leqslant x \leqslant e)$ 的弧长。
 
 <Solution>
 
 **参考答案：** $\boxed{L=(e^2+1)/4}$。
 
-**第一步：先由初值问题确定曲线。** 因 $x>0$，将方程除以 $2x$：
+**解题思路：** 先将微分方程写成一阶线性标准型，用积分因子求出满足初值的解；解确定后再使用曲线弧长公式，避免直接对未知 $y$ 积分。
 
-$$
-y'-\frac2xy=\frac{\ln x-1/2}{x}.
-$$
+<Steps>
+  <Step>
 
-积分因子为 $\mu=x^{-2}$，乘上后左边成为商的导数：
+    ### 整理微分方程并选取积分因子
 
-$$
-\left(\frac y{x^2}\right)'=\frac{\ln x-1/2}{x^3}.
-$$
+    因为定义区间为 $[1,e]$，有 $x>0$。题设
 
-注意
+    $$
+    2xy'-4y=2\ln x-1
+    $$
 
-$$
-\left(\frac14-\frac{\ln x}{2x^2}\right)'
-=\frac{\ln x-1/2}{x^3}.
-$$
+    可除以 $2x$ 整理成
 
-故 $y/x^2=1/4-(\ln x)/(2x^2)+C$，即 $y=x^2/4-(\ln x)/2+Cx^2$。代入 $y(1)=1/4$ 得 $C=0$，于是
+    $$
+    y'-\frac2x y=\frac{\ln x-1/2}{x}.
+    $$
 
-$$
-\boxed{y(x)=\frac{x^2}{4}-\frac12\ln x}.
-$$
+    积分因子为
 
-**第二步：套用弧长元并化简。**
+    $$
+    \mu(x)=\exp\int\left(-\frac2x\right)\mathrm dx=x^{-2}.
+    $$
 
-$$
-y'=\frac x2-\frac1{2x},\quad
-\sqrt{1+(y')^2}=\frac{x^2+1}{2x}\quad(x>0).
-$$
+    乘以积分因子得
 
-所以
+    $$
+    \left(\frac{y}{x^2}\right)'=\frac{\ln x-1/2}{x^3}.
+    $$
 
-$$
-L=\int_1^e\left(\frac x2+\frac1{2x}\right)dx
-=\left[\frac{x^2}4+\frac12\ln x\right]_1^e
-=\frac{e^2+1}4.
-$$
+  </Step>
+  <Step>
 
-<Callout type="idea" title="母题联动">求出曲线方程后，本题的弧长计算与同节第 24 题相同。真正新增的考查点是用积分因子从微分方程和初始条件恢复曲线。</Callout>
+    ### 积分并利用初值求出特解
+
+    注意右端恰为 $-\tfrac12(\ln x/x^2)'$：
+
+    $$
+    \int\frac{\ln x-1/2}{x^3}\,\mathrm dx=-\frac{\ln x}{2x^2}+C.
+    $$
+
+    于是
+
+    $$
+    \frac{y}{x^2}=-\frac{\ln x}{2x^2}+C
+    \quad\Longrightarrow\quad
+     y=-\frac12\ln x+Cx^2.
+    $$
+
+    代入 $y(1)=1/4$ 得 $C=1/4$，即
+
+    $$
+    \boxed{y(x)=\frac{x^2}{4}-\frac12\ln x}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 求导并计算弧长
+
+    由特解
+
+    $$
+    y'(x)=\frac x2-\frac1{2x}=\frac{x^2-1}{2x}.
+    $$
+
+    因此 $1+(y')^2=(x^2+1)^2/(4x^2)$，当 $x>0$ 时
+
+    $$
+    \sqrt{1+(y')^2}=\frac{x^2+1}{2x}.
+    $$
+
+    于是
+
+    $$
+    \begin{aligned}
+    L&=\int_1^e\frac{x^2+1}{2x}\,\mathrm dx\\
+    &=\left[\frac{x^2}{4}+\frac12\ln x\right]_1^e
+    =\boxed{\frac{e^2+1}{4}}.
+    \end{aligned}
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+积分因子法的关键是先将 $y'$ 系数化为 $1$；对 $\sqrt{(x^2+1)^2/(4x^2)}$ 化简时使用 $x>0$ 消去绝对值。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-027" type="blank" points={5} tags="来源:2023考研数二, 考点:变上限积分求导, 考点:曲线弧长, 考点:三角代换">
+<Question id="core-1102-math-70b5a1-079" type="blank" points={5} tags="来源:2023年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:积分函数的弧长与几何换元">
 
-曲线
-
-$$
-y(x)=\int_{-\sqrt3}^{x}\sqrt{3-t^2}\,dt
-$$
-
-在其自然定义区间上的弧长为 <Blank answer="4π/3+√3" kind="math" />。
+ 曲线 $y = \int_{-\sqrt{3}}^x \sqrt{3 - t^2} \mathrm{d}t$ 的弧长为 <Blank answer="((4)/(3))pi+sqrt(3)" kind="math" />。
 
 <Solution>
 
-**答案：** $\boxed{\dfrac{4\pi}{3}+\sqrt3}$。
+**参考答案：** $\boxed{\frac{4\pi}{3}+\sqrt3}$。
 
-**第一步：确定曲线区间。** 根式要求 $-\sqrt3\le t\le\sqrt3$，所以以所给实值积分定义的整段曲线对应 $x\in[-\sqrt3,\sqrt3]$。
+**解题思路：** 先确定积分函数在实数范围上的自然定义域，再由微积分基本定理求导。弧长根号化成圆弧积分，可以三角换元直接计算。
 
-**第二步：先求导再列弧长积分。** 由微积分基本定理，
+<Steps>
+  <Step>
 
-$$
-y'(x)=\sqrt{3-x^2},\qquad
-L=\int_{-\sqrt3}^{\sqrt3}\sqrt{1+(y')^2}\,dx
-=\int_{-\sqrt3}^{\sqrt3}\sqrt{4-x^2}\,dx.
-$$
+    ### 确定曲线定义域和导数
 
-**第三步：三角代换算弧长。** 根式关于 $0$ 偶对称，取 $x=2\sin\theta$，其中 $x\in[0,\sqrt3]$ 对应 $\theta\in[0,\pi/3]$，得到
+    题给
 
-$$
-\begin{aligned}
-L&=2\int_0^{\sqrt3}\sqrt{4-x^2}\,dx
-=8\int_0^{\pi/3}\cos^2\theta\,d\theta\\
-&=4\left[\theta+\frac12\sin2\theta\right]_0^{\pi/3}
-=\frac{4\pi}3+\sqrt3.
-\end{aligned}
-$$
+    $$
+    y(x)=\int_{-\sqrt3}^x\sqrt{3-u^2}\,\mathrm du.
+    $$
 
-**关键提醒：** 不定积分的下限是 $-\sqrt3$，它与根式的实值范围共同确定弧的完整区间；不能把积分上限随意延伸到 $\pm2$。
+    被积函数要求 $|u|\le\sqrt3$，因此曲线的自然实数定义区间为 $-\sqrt3\le x\le\sqrt3$。由微积分基本定理，在内点有
+
+    $$
+    y'(x)=\sqrt{3-x^2}.
+    $$
+
+    在端点的导数值可以用连续延拓处理，弧长积分不受影响。
+
+  </Step>
+  <Step>
+
+    ### 建立弧长并利用偶函数性
+
+    弧长公式给出
+
+    $$
+    \begin{aligned}
+    L&=\int_{-\sqrt3}^{\sqrt3}\sqrt{1+[y'(x)]^2}\,\mathrm dx\\
+    &=\int_{-\sqrt3}^{\sqrt3}\sqrt{4-x^2}\,\mathrm dx
+    =2\int_0^{\sqrt3}\sqrt{4-x^2}\,\mathrm dx.
+    \end{aligned}
+    $$
+
+    最后一式利用了被积函数的偶性，所积函数是半径为 $2$ 的上半圆的纵坐标。
+
+  </Step>
+  <Step>
+
+    ### 以三角换元求积分
+
+    设 $x=2\sin\theta$，则 $\theta\in[0,\pi/3]$，$\mathrm dx=2\cos\theta\,\mathrm d\theta$，且 $\sqrt{4-x^2}=2\cos\theta$。所以
+
+    $$
+    \begin{aligned}
+    L&=8\int_0^{\pi/3}\cos^2\theta\,\mathrm d\theta\\
+    &=4\left[\theta+\frac12\sin2\theta\right]_0^{\pi/3}\\
+    &=\boxed{\frac{4\pi}{3}+\sqrt3}.
+    \end{aligned}
+    $$
+
+    这是积分定义曲线的全长，而不是原积分函数在两端点的函数值之差。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+被积函数 $\sqrt{3-u^2}$ 给出了重要的**定义域约束**，不能将弧长积分上限擅自扩展到 $\pm2$，虽然化简后的 $\sqrt{4-x^2}$ 在更大的区间仍有定义。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-028" type="blank" tags="来源:李林880, 考点:极坐标弧长, 考点:完全平方, 考点:三角积分">
+## 三、物理应用（数一、数二）
 
-极坐标曲线
+<Question id="core-1102-math-70b5a1-081" type="essay" points={6} tags="来源:1999年考研数学一、二, 科目:高等数学, 章节:定积分的应用, 考点:变力做功与连续损耗模型">
 
-$$
-r=a\sin^3\frac\theta3,\qquad a>0,\quad0\le\theta\le3\pi
-$$
+ 为清除井底的污泥，用缆绳将抓斗放入井底，抓起污泥后提出井口(见图)，已知井深 $30\text{ m}$，抓斗自重 $400\text{ N}$，缆绳每米重 $50\text{ N}$，抓斗抓起的污泥重 $2000\text{ N}$，提升速度为 $3\text{ m/s}$，在提升过程中，污泥以 $20\text{ N/s}$ 的速度从抓斗缝隙中漏掉，现将抓起污泥的抓斗提升至井口，问克服重力需做多少焦耳的功？(说明：(1) $1\text{ N}\times 1\text{ m}=1\text{ J}$，其中 $\text{m}, \text{N}, \text{s}, \text{J}$ 分别表示米、牛顿、秒、焦耳；(2)抓斗高度及位于井口上方缆绳长度忽略不计。)
 
-的弧长为 <Blank answer="3πa/2" kind="math" />。
+![1999-1,2-6 题图](/img/questions/math/calculus-lower-1999-12-7.png)
 
 <Solution>
 
-**答案：** $\boxed{s=\dfrac{3\pi a}{2}}$。
+**参考答案：** $\boxed{W=91\,500\ \mathrm J}$。
 
-**第一步：列极坐标弧长元。** 对 $r=r(\theta)$，弧长公式为
+**解题思路：** 把已提升距离 $x$ 作为自变量，分别计算斗重、剩余污泥重与悬垂缆绳重；速度只用于把污泥漏失的时间率换成距离率。
 
-$$
-\mathrm ds=\sqrt{r^2+\left(\frac{dr}{d\theta}\right)^2}\,d\theta.
-$$
+<Steps>
+  <Step>
 
-设 $u=\theta/3$。则 $r=a\sin^3u$，
+    ### 确定提升位置与时间的关系
 
-$$
-\frac{dr}{d\theta}=a\sin^2u\cos u.
-$$
+    设已提升 $x\,\mathrm m$（$0\le x\le30$）。提升速度恒为 $3\,\mathrm{m/s}$，则已经历的时间为
 
-**第二步：根号内合并同类项。**
+    $$
+    t=\frac{x}{3}\,\mathrm s.
+    $$
 
-$$
-\begin{aligned}
-r^2+(r')^2
-&=a^2\sin^6u+a^2\sin^4u\cos^2u\\
-&=a^2\sin^4u(\sin^2u+\cos^2u)
-=a^2\sin^4u.
-\end{aligned}
-$$
+    污泥每秒漏失重量 $20\,\mathrm{N/s}$，在此时的剩余重量为
 
-因 $a>0$，故弧长元为 $a\sin^2u\,d\theta$。
+    $$
+    G_{\rm 泥}(x)=2000-20\frac{x}{3}=2000-\frac{20x}{3}\quad(\mathrm N).
+    $$
 
-**第三步：代换积分限。**
+    提升到井口共需 $10\,\mathrm s$，仅漏失 $200\,\mathrm N$，因此污泥重始终非负，模型适用。
 
-$$
-s=a\int_0^{3\pi}\sin^2(\theta/3)\,d\theta
-=3a\int_0^\pi\sin^2u\,du
-=\frac{3\pi a}{2}.
-$$
+  </Step>
+  <Step>
 
-**技巧：** 极坐标曲线不使用直角坐标的 $\int\sqrt{1+(y')^2}\,dx$；应始终从 $\sqrt{r^2+(r')^2}$ 出发。
+    ### 写出每一位置需要克服的总重力
+
+    抓斗自身重量恒为 $400\,\mathrm N$。已提升 $x$ 米时，尚悬挂于井内的缆绳长 $30-x$ 米，其重量为 $50(30-x)\,\mathrm N$。所以总重力
+
+    $$
+    \begin{aligned}
+    F(x)&=400+\left(2000-\frac{20x}{3}\right)+50(30-x)\\
+    &=3900-\frac{170}{3}x\qquad(\mathrm N).
+    \end{aligned}
+    $$
+
+    题目只求克服重力所做的功，忽略机械摩擦与启动加速过程。
+
+  </Step>
+  <Step>
+
+    ### 积分总重力得到做功
+
+    将总位移 $30\,\mathrm m$ 划分为无穷小段，位移 $\mathrm dx$ 上做功为 $F(x)\,\mathrm dx$。于是
+
+    $$
+    \begin{aligned}
+    W&=\int_0^{30}\left(3900-\frac{170}{3}x\right)\mathrm dx\\
+    &=\left[3900x-\frac{85}{3}x^2\right]_0^{30}\\
+    &=117000-25500
+    =\boxed{91500\ \mathrm J}.
+    \end{aligned}
+    $$
+
+    结果可拆成抓斗做功 $12000\,\mathrm J$、污泥做功 $57000\,\mathrm J$ 和缆绳做功 $22500\,\mathrm J$，三者相加仍是 $91500\,\mathrm J$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+缆绳重必须随提升距离减少；污泥损耗率的单位是 $\mathrm{N/s}$ 而非 $\mathrm{N/m}$，需先除以提升速度 $3\,\mathrm{m/s}$。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-029" type="essay" tags="来源:张宇1000题, 考点:隐式曲线, 考点:反变量弧长, 考点:完全平方">
+<Question id="core-1102-math-70b5a1-082" type="essay" points={7} tags="来源:2002年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:液体压力与复杂闸门截面">
 
-曲线由
+ 某闸门的形状与大小如图所示，其中直线 $l$ 为对称轴，闸门的上部为矩形 $ABCD$，下部由二次抛物线与线段 $AB$ 所围成，当水面与闸门的上端相平行，欲使闸门矩形部分承受的水压力与闸门下部承受的水压力之比为 $5:4$，闸门矩形部分的高 $h$ 应为多少米？
 
-$$
-y^4-6xy+3=0,\qquad1\le y\le2
-$$
-
-确定。求从 $\left(\frac23,1\right)$ 到 $\left(\frac{19}{12},2\right)$ 的弧长。
+![2002-2-7 题图](/img/questions/math/calculus-lower-2002-2-7.png)
 
 <Solution>
 
-**参考答案：** $\boxed{L=\dfrac{17}{12}}$。
+**参考答案：** $\boxed{h=2\ \mathrm m}$。
 
-**第一步：将 $x$ 写成 $y$ 的函数。** 题目直接给出 $y$ 的范围，且 $y\ne0$，解出
+**解题思路：** 从水面向下取深度变量：矩形部分水平条的宽度恒为 $2$，下部抛物线部分的条宽由图示抛物线方程确定；压力元是压强乘受力面积。
 
-$$
-x=\frac{y^4+3}{6y}=\frac{y^3}{6}+\frac1{2y}.
-$$
+<Steps>
+  <Step>
 
-这与题给两个端点相符：$x(1)=2/3$，$x(2)=19/12$。
+    ### 计算矩形部分的水压力
 
-**第二步：对 $y$ 求弧长。**
+    以水面为 $y=0$，向下为正方向。由原图可知矩形宽 $2\,\mathrm m$、高 $h\,\mathrm m$。深度为 $y$ 的水平微元面积为 $2\,\mathrm dy$，静水压强是 $\rho gy$。因此
 
-$$
-\frac{dx}{dy}=\frac{y^2}{2}-\frac1{2y^2},
-\quad
-1+\left(\frac{dx}{dy}\right)^2
-=\frac14\left(y^2+\frac1{y^2}\right)^2.
-$$
+    $$
+    F_1=\rho g\int_0^h2y\,\mathrm dy=\rho g h^2.
+    $$
 
-由于 $y>0$，根号直接化成 $(y^2+y^{-2})/2$，故
+    其中 $\rho$ 是水密度，$g$ 是重力加速度；最后求比值时它们会消去。
 
-$$
-\begin{aligned}
-L&=\int_1^2\sqrt{1+\left(\frac{dx}{dy}\right)^2}\,dy\\
-&=\frac12\int_1^2(y^2+y^{-2})\,dy
-=\left[\frac{y^3}{6}-\frac1{2y}\right]_1^2
-=\frac{17}{12}.
-\end{aligned}
-$$
+  </Step>
+  <Step>
 
-**方法选择：** 当隐式曲线可以方便地写成 $x=x(y)$ 且给定的是 $y$ 的范围时，用 $\int\sqrt{1+(dx/dy)^2}\,dy$ 通常比解出 $y(x)$ 更快捷。
+    ### 写出抛物线部分的宽度并求压力
+
+    令 $u$ 表示从矩形下边 $AB$ 向下的距离，原图下部的高、半宽均为 $1\,\mathrm m$。取对称轴为 $x=0$，边界抛物线可写为 $u=1-x^2$，故 $0\le u\le1$ 时条宽
+
+    $$
+    w(u)=2\sqrt{1-u}.
+    $$
+
+    该条距水面深度为 $h+u$，其受力为
+
+    $$
+    \begin{aligned}
+    F_2&=\rho g\int_0^1(h+u)2\sqrt{1-u}\,\mathrm du\\
+    &=\rho g\left(2h\cdot\frac23+2\cdot\frac4{15}\right)\\
+    &=\rho g\left(\frac{4h}{3}+\frac8{15}\right).
+    \end{aligned}
+    $$
+
+  </Step>
+  <Step>
+
+    ### 代入压力比值并舍去不合理根
+
+    由 $F_1:F_2=5:4$，消去公共因子 $\rho g>0$：
+
+    $$
+    \frac{h^2}{4h/3+8/15}=\frac54.
+    $$
+
+    交叉相乘并化简得到
+
+    $$
+    3h^2-5h-2=0
+    \quad\Longleftrightarrow\quad(3h+1)(h-2)=0.
+    $$
+
+    因矩形高度必须为正，舍去 $h=-1/3$，故 $\boxed{h=2\ \mathrm m}$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+水压强与**从水面起算的深度**成正比，下部条带深度是 $h+u$ 而不是 $u$。使用抛物线水平条宽必须依据题图的 $1\,\mathrm m$ 尺寸。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-## 四、静水压力、变力作功与万有引力
+<Question id="core-1102-math-70b5a1-083" type="essay" points={10} tags="来源:2003年考研数学一, 科目:高等数学, 章节:定积分的应用, 考点:变力做功与等比递推">
 
-<Question id="math-core-gd-04-04-030" type="essay" points={10} tags="来源:2003考研数一, 考点:变力作功, 考点:等比数列, 考点:累积深度">
-
-汽锤将桩打入土层，深度为 $x$ 时土层阻力大小为 $kx$（$k>0$）。第一次击打使桩进入地下 $a$ 米，以后每次击打所做的功与前一次之比均为 $r$（$0<r<1$）。
-
-(1) 求击打 3 次后的总深度；(2) 若击打次数不限，求桩能够达到的极限深度。
+ 某建筑工程打地基时，需用汽锤将桩打进土层，汽锤每次击打都将克服土层对桩的阻力而做功.设土层对桩的阻力的大小与桩被打进地下的深度成正比(比例系数为 $k, k>0$)，汽锤第一次击打将桩打进地下 $a\text{ m}$，根据设计方案，要求汽锤每次击打桩时所做的功与前一次击打时所做的功之比为常数 $r(0<r<1)$.问：
+(1)汽锤击打桩 $3$ 次后，可将桩打进地下多深？
+(2)若击打次数不限，汽锤至多能将桩打进地下多深？
 
 <Solution>
 
-**参考答案：**
+**参考答案：** (1) $\boxed{x_3=a\sqrt{1+r+r^2}}$；(2) $\boxed{x_\infty=a/\sqrt{1-r}}$。
 
-$$
-\boxed{x_3=a\sqrt{1+r+r^2}},\qquad
-\boxed{x_\infty=\frac a{\sqrt{1-r}}}.
-$$
+**解题思路：** 把每次击打的做功写成阻力对进入深度的积分。因阻力为 $kx$，累计功与累计深度的平方成正比；再利用等比数列求和。
 
-**第一步：建立「作功—深度平方」的关系。** 设第 $n$ 次打入后的深度为 $x_n$，令 $x_0=0$。因为阻力为 $F(x)=kx$，该次击打做功
+<Steps>
+  <Step>
 
-$$
-W_n=\int_{x_{n-1}}^{x_n}kx\,dx
-=\frac k2(x_n^2-x_{n-1}^2).
-$$
+    ### 建立一次击打功与深度增量之间的联系
 
-首次击打达到 $x_1=a$，故 $W_1=ka^2/2$。题设是**每次的功**成等比，而非每次下沉距离成等比：
+    设第 $n$ 次击打后桩入土的总深度为 $x_n$，令 $x_0=0$。阻力 $F(x)=kx$，因此第 $n$ 次做功为
 
-$$
-W_n=\frac{ka^2}{2}r^{n-1}.
-$$
+    $$
+    \begin{aligned}
+    W_n&=\int_{x_{n-1}}^{x_n}kx\,\mathrm dx
+    =\frac{k}{2}(x_n^2-x_{n-1}^2).
+    \end{aligned}
+    $$
 
-**第二步：前三次的累计深度。** 总功之和也等于从 $0$ 打到 $x_3$ 的功：
+    首次入土深度 $x_1=a$，所以 $W_1=ka^2/2$。题设相邻两次做功之比 $W_{n+1}/W_n=r$，故 $W_n=(ka^2/2)r^{n-1}$。
 
-$$
-\frac{kx_3^2}{2}=W_1+W_2+W_3
-=\frac{ka^2}{2}(1+r+r^2).
-$$
+  </Step>
+  <Step>
 
-取非负平方根，得到 $x_3=a\sqrt{1+r+r^2}$。
+    ### 把前三次功相加得到第三次后的深度
 
-**第三步：求极限深度。** 一般地
+    把前三次的单次功相加有
 
-$$
-\frac{kx_n^2}{2}=\sum_{j=1}^nW_j
-=\frac{ka^2}{2}\frac{1-r^n}{1-r}.
-$$
+    $$
+    W_1+W_2+W_3=\frac{ka^2}{2}(1+r+r^2).
+    $$
 
-于是 $x_n=a\sqrt{(1-r^n)/(1-r)}$。因为 $0<r<1$，$r^n\to0$，所以 $x_\infty=a/\sqrt{1-r}$。
+    另一方面，各次区间 $[x_{j-1},x_j]$ 首尾相接，积分可直接合并：
 
-<Callout type="warn" title="不要把等比功误判为等比下沉量">阻力随深度线性增加，故累计总功与**总深度的平方**成正比；每次击打深入的距离并不保持固定比值。</Callout>
+    $$
+    W_1+W_2+W_3=\int_0^{x_3}kx\,\mathrm dx=\frac{kx_3^2}{2}.
+    $$
+
+    两式相等，$k>0$，$x_3>0$，取正根得 $\boxed{x_3=a\sqrt{1+r+r^2}}$。
+
+  </Step>
+  <Step>
+
+    ### 利用等比级数求极限深度
+
+    一般地前 $n$ 次做功总和是
+
+    $$
+    \sum_{j=1}^nW_j=\frac{ka^2}{2}\cdot\frac{1-r^n}{1-r}
+    =\frac{kx_n^2}{2}.
+    $$
+
+    所以 $x_n=a\sqrt{(1-r^n)/(1-r)}$。题给 $0<r<1$，于是 $r^n\to0$，可得
+
+    $$
+    \boxed{x_\infty=\lim_{n\to\infty}x_n
+    =\frac{a}{\sqrt{1-r}}}.
+    $$
+
+    它是有限的上界，且每次击打的功均为正，故 $x_n$ 单调上升并趋向该值。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+比例 $r$ 作用在**每次击打所做的功**上，而不是深度增量上；因此深度满足平方和关系，不是 $a(1+r+r^2)$。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-031" type="essay" points={11} tags="来源:2011考研数二, 考点:旋转容器容积, 考点:抽水作功, 考点:分段积分">
+<Question id="core-1102-math-70b5a1-084" type="essay" points={11} tags="来源:2011年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:分段旋转容器体积与注水高度">
 
-一容器内壁由下列两段曲线绕 $y$ 轴旋转形成：
+ 一容器的内侧是由图中曲线绕 $y$ 轴旋转一周而成的曲面，该曲线由 $x^2 + y^2 = 2y \left(y \ge \frac{1}{2}\right)$ 与 $x^2 + y^2 = 1 \left(y \le \frac{1}{2}\right)$ 连接而成的.
+(1)求容器的容积；
+(2)若将容器内盛满的水从容器顶部全部抽出，至少需要做多少功？(长度单位：$\text{m}$，重力加速度为 $g\text{ m/s}^2$，水的密度为 $10^3\text{ kg/m}^3$.)
 
-$$
-\begin{cases}
-x^2+y^2=2y,& y\ge\frac12,\\
-x^2+y^2=1,& y\le\frac12.
-\end{cases}
-$$
-
-(1) 求容器的容积；(2) 将盛满的水全部提升至容器顶部至少需做多少功？长度以米为单位，水密度为 $10^3\,\mathrm{kg/m^3}$，重力加速度为 $g\,\mathrm{m/s^2}$。
-
-![2011年数学二第11题容器示意图](/img/questions/math-core/calculus-lower-2011-2-11.png)
+![2011-2-11 题图](/img/questions/math/calculus-lower-2011-2-11.png)
 
 <Solution>
 
-**参考答案：**
+**参考答案：** (1) $\boxed{V=9\pi/4\ \mathrm{m^3}}$；(2) $\boxed{W=\frac{27}{8}\rho\pi g=3375\pi g\ \mathrm J}$（$\rho=10^3\,\mathrm{kg/m^3}$）。
 
-$$
-\boxed{V=\frac{9\pi}{4}\ \mathrm{m}^3},\qquad
-\boxed{W=\frac{27}{8}\times10^3\pi g\ \mathrm J}.
-$$
+**解题思路：** 旋转轴为 $y$ 轴，最简便的是按高度取水平圆盘：先在两个分段区间列出截面半径平方，再计算容积和将每层水提升到顶部 $y=2$ 的功。
 
-**第一步：明确两段内壁的高度范围。** 下部 $x^2+y^2=1$ 为单位圆，底端 $y=-1$；上部 $x^2+y^2=2y$ 可改写为 $x^2+(y-1)^2=1$，顶端 $y=2$。两段在 $y=1/2$ 连接，水平截面的半径平方为
+<Steps>
+  <Step>
 
-$$
-r^2(y)=\begin{cases}
-1-y^2,&-1\le y\le\frac12,\\
-2y-y^2,&\frac12\le y\le2.
-\end{cases}
-$$
+    ### 根据两段圆曲线确定截面积
 
-**第二步：圆盘法求容积。** 高度为 $y$、厚度 $dy$ 的薄层体积是 $dV=\pi r^2(y)\,dy$。所以
+    下部曲线 $x^2+y^2=1$ 仅取 $y\le1/2$ 的容器内侧部分，其最低点在 $y=-1$，所以
 
-$$
-\begin{aligned}
-V&=\pi\left[\int_{-1}^{1/2}(1-y^2)dy
-+\int_{1/2}^{2}(2y-y^2)dy\right]\\
-&=\pi\left(\frac98+\frac98\right)=\frac{9\pi}{4}.
-\end{aligned}
-$$
+    $$
+    r_1(y)^2=1-y^2,\qquad -1\le y\le\frac12.
+    $$
 
-**第三步：薄水层的提升距离不可遗漏。** 从高度 $y$ 抽到顶端 $y=2$，必须提升 $2-y$ 米。密度记为 $\rho=10^3$，则微元重量是 $\rho g\,dV$，微元作功
+    上部曲线 $x^2+y^2=2y$ 等价于 $x^2+(y-1)^2=1$，其最高点为 $y=2$，所以
 
-$$
-dW=\rho g\,\pi r^2(y)(2-y)dy.
-$$
+    $$
+    r_2(y)^2=2y-y^2,\qquad \frac12\le y\le2.
+    $$
 
-故
+    在 $y=1/2$ 处两式都为 $3/4$，截面积衔接连续。
 
-$$
-\begin{aligned}
-W=\rho g\pi\bigg[&\int_{-1}^{1/2}(1-y^2)(2-y)dy\\
-&+\int_{1/2}^{2}(2y-y^2)(2-y)dy\bigg].
-\end{aligned}
-$$
+  </Step>
+  <Step>
 
-两个积分分别为 $153/64$、$63/64$，和为 $27/8$，于是 $W=(27/8)\times10^3\pi g$ 焦耳。
+    ### 分别计算两部分容积
 
-**微元模型：** 容积积分是 $\int A(y)dy$，抽水作功是 $\rho g\int A(y)\cdot\text{提升距离}\,dy$；同一截面积函数，第二问多出高度权重。
+    由水平圆盘法，每层体积为 $\mathrm dV=\pi r(y)^2\,\mathrm dy$，总容积
+
+    $$
+    \begin{aligned}
+    V&=\pi\int_{-1}^{1/2}(1-y^2)\,\mathrm dy
+    +\pi\int_{1/2}^{2}(2y-y^2)\,\mathrm dy\\
+    &=\pi\left(\frac98+\frac98\right)
+    =\boxed{\frac{9\pi}{4}\ \mathrm{m^3}}.
+    \end{aligned}
+    $$
+
+    两段积分值相等是本题的结构特点，而非将整个容器误看成同一个球体。
+
+  </Step>
+  <Step>
+
+    ### 建立提升距离并求抽水做功
+
+    全部水需从顶部 $y=2$ 抽出。高度 $y$ 处的薄水层重量为 $\rho g\pi r(y)^2\,\mathrm dy$，提升距离为 $2-y$，故
+
+    $$
+    \begin{aligned}
+    W=\rho g\pi\Bigg[&\int_{-1}^{1/2}(1-y^2)(2-y)\,\mathrm dy\\
+    &+\int_{1/2}^2(2y-y^2)(2-y)\,\mathrm dy\Bigg].
+    \end{aligned}
+    $$
+
+    将两段分别积分得
+
+    $$
+    \int_{-1}^{1/2}(1-y^2)(2-y)\,\mathrm dy=\frac{153}{64},
+    \qquad
+    \int_{1/2}^2(2y-y^2)(2-y)\,\mathrm dy=\frac{63}{64}.
+    $$
+
+    因此
+
+    $$
+    W=\frac{216}{64}\rho g\pi
+    =\boxed{\frac{27}{8}\rho\pi g}
+    =\boxed{3375\pi g\ \mathrm J}.
+    $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+题设 $\rho=10^3\,\mathrm{kg/m^3}$，最终做功若保留 $\rho$ 必须说明其取值；如果写为 $3375\pi g$，单位才是焦耳。抽水的提升距离是 $2-y$，不可统写成容器全高 $3$。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-032" type="blank" points={4} tags="来源:2020考研数二, 考点:静水压力, 考点:相似三角形, 考点:面积形心">
+<Question id="core-1102-math-70b5a1-085" type="blank" points={4} tags="来源:2020年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:静水压力与深度积分">
 
-斜边长为 $2a$ 的等腰直角三角形平板铅直浸没在水中，斜边与水面齐平，水密度为 $\rho$，重力加速度为 $g$。该平板**一侧**所受水压力为 <Blank answer="ρga³/3" kind="text" />。
+ 斜边长为 $2a$ 的等腰直角三角形平板铅直地沉没在水中，且斜边与水面相齐，设重力加速度为 $g$，水密度为 $\rho$，则该平板一侧所受的水压力为<Blank answer="\frac{1}{3}\rho ga^3" kind="text" placeholder="输入文字或 LaTeX" />.
 
 <Solution>
 
-**答案：** $\boxed{F=\dfrac13\rho ga^3}$。
+**参考答案：** $\boxed{F=\frac13\rho ga^3}$。
 
-**方法一：水平微元积分。** 等腰直角三角形由斜边到直角顶点的高为 $a$。令水面为 $y=0$，向下为正，板的深度范围 $0\le y\le a$。相似三角形给出深度 $y$ 处板宽 $w(y)=2(a-y)$。
+**解题思路：** 以斜边为水面水平边，先用三角形相似关系写出任一深度的条带宽度，再将静水压强 $\rho gy$ 与条带面积相乘积分。
 
-该深度处压强 $p(y)=\rho gy$，所以
+<Steps>
+  <Step>
 
-$$
-\begin{aligned}
-F&=\int_0^ap(y)w(y)dy
-=2\rho g\int_0^ay(a-y)dy\\
-&=2\rho g\left(\frac{a^3}2-\frac{a^3}3\right)
-=\frac13\rho ga^3.
-\end{aligned}
-$$
+    ### 确定三角形在水下的高度和宽度
 
-**方法二：形心深度验算。** 板面积 $A=\tfrac12(2a)\cdot a=a^2$，由底边向对顶点的三角形形心深度为 $a/3$，因此 $F=\rho gA\bar y=\rho ga^3/3$。
+    等腰直角三角形的斜边为 $2a$，从直角顶点到斜边的高等于斜边的一半，即 $a$。设水面向下的深度为 $y$，则 $0\le y\le a$。在水面（$y=0$）的水平条宽为 $2a$；到最下方顶点（$y=a$）条宽缩为 $0$。由相似三角形得
 
-**易错点：** 压力取决于**深度**而非板上各点到顶点的距离；题目明确求一侧，不能因板有两面而乘以 $2$。
+    $$
+    \frac{w(y)}{2a}=\frac{a-y}{a}
+    \quad\Longrightarrow\quad
+    w(y)=2(a-y).
+    $$
+
+  </Step>
+  <Step>
+
+    ### 写出静水压力微元
+
+    静水压强只与深度有关，深度 $y$ 处有
+
+    $$
+    p(y)=\rho gy.
+    $$
+
+    取厚度为 $\mathrm dy$ 的水平条，其受水一侧面积为 $w(y)\,\mathrm dy$，故作用在该条上的微小压力为
+
+    $$
+    \mathrm dF=p(y)w(y)\,\mathrm dy
+    =2\rho gy(a-y)\,\mathrm dy.
+    $$
+
+    这里求的是**平板单侧**压力，因此不乘 $2$ 计入另一侧。
+
+  </Step>
+  <Step>
+
+    ### 积分得到总压力
+
+    在 $0\le y\le a$ 上积分得
+
+    $$
+    \begin{aligned}
+    F&=2\rho g\int_0^a y(a-y)\,\mathrm dy\\
+    &=2\rho g\left[\frac{ay^2}{2}-\frac{y^3}{3}\right]_0^a\\
+    &=2\rho g\left(\frac{a^3}{2}-\frac{a^3}{3}\right)
+    =\boxed{\frac13\rho ga^3}.
+    \end{aligned}
+    $$
+
+    量纲验证：$[\rho ga^3]=\mathrm{kg\,m^{-3}}\cdot\mathrm{m\,s^{-2}}\cdot\mathrm{m^3}=\mathrm N$，与压力（力）的单位一致。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="方法总结与易错提醒">
+
+液体压强等于 $\rho g\times$ **距水面的垂直深度**；三角形条带宽度沿深度逐渐变小，不能把所有微元都当成宽 $2a$ 的矩形。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-033" type="single" points={5} tags="来源:2025考研数二, 考点:万有引力, 考点:方向分量, 考点:变力作功">
+<Question id="core-1102-math-70b5a1-086" type="single" points={5} tags="来源:2025年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:万有引力与沿路径做功">
 
-单位质点 $P,Q$ 初始分别位于 $(0,0)$、$(0,1)$。$P$ 沿 $x$ 轴正向由 $(0,0)$ 移动至 $(l,0)$（$l>0$）。引力常量为 $G$，克服 $Q$ 对 $P$ 引力所做的功为（ ）。
+ 设单位质点 $P, Q$ 分别位于点 $(0,0)$ 和 $(0,1)$ 处，$P$ 从 $(0,0)$ 出发沿 $x$ 轴正向移动，记 $G$ 为引力常量，则当质点 $P$ 移动到点 $(l,0)$ 时，克服质点 $Q$ 的引力所做的功为（ ）.
 
-<Option>$\displaystyle\int_0^l\frac{G}{x^2+1}\,dx$</Option>
-<Option correct>$\displaystyle\int_0^l\frac{Gx}{(x^2+1)^{3/2}}\,dx$</Option>
-<Option>$\displaystyle\int_0^l\frac{G}{(x^2+1)^{3/2}}\,dx$</Option>
-<Option>$\displaystyle\int_0^l\frac{G(x+1)}{(x^2+1)^{3/2}}\,dx$</Option>
+<Option>$\int_{0}^{l} \frac{G}{x^2 + 1} dx$</Option>
+<Option correct>$\int_{0}^{l} \frac{Gx}{(x^2 + 1)^{\frac{3}{2}}} dx$</Option>
+<Option>$\int_{0}^{l} \frac{G}{(x^2 + 1)^{\frac{3}{2}}} dx$</Option>
+<Option>$\int_{0}^{l} \frac{G(x+1)}{(x^2 + 1)^{\frac{3}{2}}} dx$</Option>
 
 <Solution>
 
-**答案：B。** 克服引力所做的功为 $\boxed{\displaystyle W=\int_0^l\frac{Gx}{(x^2+1)^{3/2}}dx}$。
+**参考答案：** B，$\displaystyle W=\int_0^l\frac{Gx}{(1+x^2)^{3/2}}\,\mathrm dx$（$l\ge 0$）。
 
-**第一步：求引力大小。** $P$ 移到 $(x,0)$ 时，两点间距离 $r=\sqrt{x^2+1}$。两个质点质量均为 $1$，引力大小为 $G/r^2=G/(x^2+1)$。
+**解题思路：** 万有引力是**矢量**；做功应取引力在运动方向上的投影，再根据“克服引力”调整符号。不能直接把引力的大小对路程积分。
 
-**第二步：沿位移方向投影。** 从 $P$ 指向 $Q$ 的方向向量为 $(-x,1)$，其单位方向为 $(-x,1)/\sqrt{x^2+1}$。因此引力的水平分量
+<Steps>
+  <Step>
 
-$$
-F_x(x)=-\frac{G}{x^2+1}\cdot\frac{x}{\sqrt{x^2+1}}
-=-\frac{Gx}{(x^2+1)^{3/2}}.
-$$
+    ### 写出两质点间的引力矢量
 
-**第三步：处理「克服」二字。** $P$ 向右移动，重力分量向左，外力必须做正功抵消，故
+    当 $P=(x,0)$、$Q=(0,1)$ 时，从 $P$ 指向 $Q$ 的位移矢量为 $(-x,1)$，距离为 $r=\sqrt{1+x^2}$。两质点质量均为 $1$，故 $Q$ 对 $P$ 的引力为
 
-$$
-W=-\int_0^lF_x(x)dx
-=\int_0^l\frac{Gx}{(x^2+1)^{3/2}}dx.
-$$
+    $$
+    \boldsymbol F(x)=\frac{G}{r^3}(-x,1)
+    =\frac{G}{(1+x^2)^{3/2}}(-x,1).
+    $$
 
-其数值还可算成 $G\bigl(1-1/\sqrt{1+l^2}\bigr)>0$，可用于验证。
+    因此其水平分量为 $F_x=-Gx/(1+x^2)^{3/2}$，在 $x>0$ 时方向向左。
 
-<Callout type="warn" title="力的大小不等于沿路径做功的力">万有引力大小按 $1/r^2$ 变化，但作功只取沿运动方向的分量；投影额外带来因子 $x/r$。</Callout>
+  </Step>
+  <Step>
+
+    ### 计算引力做功与外力做功
+
+    $P$ 沿 $x$ 轴向右运动，位移微元是 $\mathrm d\boldsymbol r=(\mathrm dx,0)$。引力做功
+
+    $$
+    W_{\rm 引}=\int_0^l\boldsymbol F\cdot\mathrm d\boldsymbol r
+    =-\int_0^l\frac{Gx}{(1+x^2)^{3/2}}\,\mathrm dx.
+    $$
+
+    “克服引力所做的功”指外力在准静态运动中抵消引力所做的功，因此
+
+    $$
+    \boxed{W=-W_{\rm 引}=\int_0^l\frac{Gx}{(1+x^2)^{3/2}}\,\mathrm dx}.
+    $$
+
+  </Step>
+  <Step>
+
+    ### 额外验算（也可用引力势能）
+
+    用换元 $u=1+x^2$ 可得
+
+    $$
+    W=G\left[-\frac1{\sqrt{1+x^2}}\right]_0^l
+    =G\left(1-\frac1{\sqrt{1+l^2}}\right)\ge0.
+    $$
+
+    外力做功非负，与质点远离吸引源时势能升高相符。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="易错点：力的大小不等于做功的被积函数">
+
+选项 A 把 $G/r^2$ 直接积分，漏掉了运动方向上的投影因子 $x/r$；选项 C 只有分母 $r^3$，同样漏掉分子 $x$。正确的被积函数是 $Gx/r^3$。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="math-core-gd-04-04-034" type="single" points={5} tags="来源:2026考研数二, 考点:连续质量分布, 考点:对称抵消, 考点:引力分量">
+<Question id="core-1102-math-70b5a1-087" type="single" points={5} tags="来源:2026年考研数学二, 科目:高等数学, 章节:定积分的应用, 考点:分布引力与积分的对称性">
 
-线密度为 $1$ 的细棒从 $(-1,0)$ 延伸至 $(1,0)$；质量为 $m$ 的质点位于 $(0,1)$，引力常量为 $G$。细棒对该质点的引力大小为（ ）。
+ 设线密度为 $1$ 的细直棒的两个端点分别位于点 $(-1,0), (1,0)$ 处，质量为 $m$ 的质点位于点 $(0,1)$ 处，$G$ 为引力常量，则该细直棒对该质点的引力大小为 $(\quad)$.
 
-<Option>$\displaystyle\int_0^1\frac{2Gmx}{\sqrt{x^2+1}}\,dx$</Option>
-<Option>$\displaystyle\int_0^1\frac{2Gm}{\sqrt{x^2+1}}\,dx$</Option>
-<Option>$\displaystyle\int_0^1\frac{2Gmx}{(x^2+1)^{3/2}}\,dx$</Option>
-<Option correct>$\displaystyle\int_0^1\frac{2Gm}{(x^2+1)^{3/2}}\,dx$</Option>
+<Option>$\int_0^1 \frac{2Gmx}{(x^2+1)^{\frac{1}{2}}} \mathrm{d}x$</Option>
+<Option>$\int_0^1 \frac{2Gm}{(x^2+1)^{\frac{1}{2}}} \mathrm{d}x$</Option>
+<Option>$\int_0^1 \frac{2Gmx}{(x^2+1)^{\frac{3}{2}}} \mathrm{d}x$</Option>
+<Option correct>$\int_0^1 \frac{2Gm}{(x^2+1)^{\frac{3}{2}}} \mathrm{d}x$</Option>
 
 <Solution>
 
-**答案：D。** $\boxed{\displaystyle F=2Gm\int_0^1\frac{dx}{(x^2+1)^{3/2}}}$。
+**参考答案：** D，$\displaystyle F=2Gm\int_0^1\frac{\mathrm dx}{(1+x^2)^{3/2}}=\sqrt2\,Gm$。
 
-**第一步：建立微元受力。** 取细棒 $(x,0)$ 处长度 $dx$，因线密度是 $1$，故 $dm=dx$。到质点 $(0,1)$ 的距离为 $r=\sqrt{x^2+1}$；引力大小
+**解题思路：** 对细棒分割质量微元；先求每个微元引力的**竖直分量**，再利用关于 $y$ 轴的对称性使水平分量抵消。
 
-$$
-dF=\frac{Gm\,dm}{r^2}=\frac{Gm}{x^2+1}dx.
-$$
+<Steps>
+  <Step>
 
-**第二步：利用对称性，只累加竖直分量。** 位于 $x$ 与 $-x$ 的质量元对质点产生的水平分量相互抵消，竖直分量都指向下方。每个微元的竖直分量大小为
+    ### 质量微元和距离
 
-$$
-dF_y=dF\cdot\frac1r=\frac{Gm}{(1+x^2)^{3/2}}dx.
-$$
+    在 $(x,0)$（$-1\le x\le1$）取长度为 $\mathrm dx$ 的微元。因为线密度 $\lambda=1$，所以 $\mathrm dm=\mathrm dx$。微元到质点 $(0,1)$ 的距离为 $r=\sqrt{1+x^2}$，产生的引力大小为
 
-左右配对后积分，得到选项 D 的表达式。还可积分验证其数值为
+    $$
+    \mathrm dF=\frac{Gm\,\mathrm dm}{r^2}
+    =\frac{Gm}{1+x^2}\,\mathrm dx.
+    $$
 
-$$
-F=2Gm\left[\frac{x}{\sqrt{1+x^2}}\right]_0^1
-=\sqrt2\,Gm.
-$$
+  </Step>
+  <Step>
 
-**技巧：** 对称连续体求合力，先抵消无效方向的分量，再积分有效方向；不要把各微元引力的大小直接相加。
+    ### 对竖直方向投影并利用对称性
 
-</Solution>
-</Question>
+    质点所受的微元引力方向指向 $(x,0)$，方向矢量为 $(x,-1)$。其竖直分量的绝对值应再乘上 $1/r$，即
 
-<Question id="math-core-gd-04-04-035" type="essay" tags="来源:张宇1000题, 考点:旋转抛物面, 考点:抽水时间, 考点:变力作功">
+    $$
+    \mathrm dF_y^{\rm (大小)}
+    =\frac{Gm}{(1+x^2)^{3/2}}\,\mathrm dx.
+    $$
 
-水缸内表面为旋转抛物面，缸深为 $a$ 米，缸口直径为 $2a$ 米，盛满水。水密度为 $\rho$，以恒定体积流率 $Q$（$\mathrm{m^3/s}$）从缸口抽水。
+    两个位置分别在 $x$ 与 $-x$ 的微元，其水平分量等大反向，竖直分量均向下。故合力大小
 
-(1) 求抽空所需时间；(2) 求把全部水抽到缸口至少需要做的功（重力加速度为 $g$）。
+    $$
+    \boxed{F=2Gm\int_0^1\frac{\mathrm dx}{(1+x^2)^{3/2}}}.
+    $$
 
-<Solution>
+  </Step>
+  <Step>
 
-**参考答案：**
+    ### 算出积分以验证
 
-$$
-\boxed{T=\frac{\pi a^3}{2Q}\ \mathrm s},\qquad
-\boxed{W=\frac{\pi\rho ga^4}{6}\ \mathrm J}.
-$$
+    因为
 
-**第一步：由几何尺寸确定抛物面方程。** 以缸底顶点为 $z=0$，竖直向上为正。旋转抛物面水平截面的半径为 $r$，有 $r^2=kz$。缸口位于 $z=a$，其半径亦为 $a$，故 $a^2=ka$，即 $\boxed{r^2=az}$。
+    $$
+    \frac{\mathrm d}{\mathrm dx}\left(\frac{x}{\sqrt{1+x^2}}\right)
+    =\frac1{(1+x^2)^{3/2}},
+    $$
 
-从而高度为 $z$ 处的截面积为 $A(z)=\pi r^2=\pi az$。
+    所以
 
-**第二步：总体积除以流率求时间。**
+    $$
+    F=2Gm\left[\frac{x}{\sqrt{1+x^2}}\right]_0^1
+    =\boxed{\sqrt2\,Gm}.
+    $$
 
-$$
-V=\int_0^a\pi az\,dz=\frac{\pi a^3}2,
-\qquad T=\frac VQ=\frac{\pi a^3}{2Q}.
-$$
+  </Step>
+</Steps>
 
-**第三步：水层逐层提升。** 高度 $z$ 处的水层体积 $dV=\pi az\,dz$，重量为 $\rho g\,dV$，提升到缸口的距离为 $a-z$，故
+<Callout type="idea" title="分布力题的通法">
 
-$$
-\begin{aligned}
-W&=\rho g\int_0^a(a-z)\,dV
-=\pi\rho ga\int_0^az(a-z)dz\\
-&=\pi\rho ga\left[\frac{az^2}{2}-\frac{z^3}{3}\right]_0^a
-=\frac{\pi\rho ga^4}{6}.
-\end{aligned}
-$$
+先写 $\mathrm dm=\lambda\,\mathrm dx$，再写 $\mathrm d\boldsymbol F=Gm\,\mathrm dm\,\boldsymbol r/r^3$。先投影、再积分；对称性能够直接消去不需要的方向分量。
 
-**单位核查：** $V/Q$ 的单位为秒；$\rho g\times(\mathrm{m^3})\times(\mathrm m)$ 的单位为焦耳。时间不取决于重力加速度，作功不取决于抽水速率 $Q$（忽略能量损耗）。
+</Callout>
 
 </Solution>
-</Question>
 
-<Question id="math-core-gd-04-04-036" type="single" tags="来源:张宇1000题, 考点:三角形形心, 考点:静水压力, 考点:翻转比较">
-
-一块三角形薄板竖直浸入水中。第一次让其一条边与水面齐平，平板一侧受水压力为 $F_1$；第二次将板倒转，使与该边相对的顶点与水面齐平、原边仍与水面平行，受水压力为 $F_2$。二者关系是（ ）。
-
-<Option>$F_2=\dfrac32F_1$</Option>
-<Option>$F_2=\dfrac43F_1$</Option>
-<Option correct>$F_2=2F_1$</Option>
-<Option>$F_2=3F_1$</Option>
-
-<Solution>
-
-**答案：C。** $\boxed{F_2=2F_1}$。
-
-**第一步：用形心公式统一处理任意三角形。** 设原来贴着水面的边长为 $b$，它对应的高为 $h$。三角形面积 $A=bh/2$ 不因翻转改变。竖直平板所受静水合压力
-
-$$
-F=\int_A\rho gy\,dA=\rho gA\bar y,
-$$
-
-其中 $\bar y$ 是面积形心距水面的深度。
-
-**第二步：分别确定形心深度。** 原边在水面时，从底边到顶点的形心距离为 $h/3$，故
-
-$$
-F_1=\rho g\frac{bh}2\frac h3
-=\frac{\rho gbh^2}6.
-$$
-
-倒转后顶点在水面，形心距该顶点的深度为 $2h/3$，故
-
-$$
-F_2=\rho g\frac{bh}2\frac{2h}3
-=\frac{\rho gbh^2}3=2F_1.
-$$
-
-**适用要点：** 水密度、板面积和三角形形状不变，改变的是形心深度；因此只需比较 $h/3$ 与 $2h/3$，无需再对两种摆放分别积分。
-
-</Solution>
-</Question>
-
-## 五、原创高价值变式：改变旋转轴后的动区间优化
-
-<Question id="math-core-gd-04-04-037" type="essay" tags="来源:原创, 考点:柱壳法, 考点:变限积分求导, 考点:全局最值">
-
-对 $t>0$，$D_t$ 是 $y=xe^{-x}$、$y=0$、$x=t$、$x=2t$ 围成的区域。将 $D_t$ 绕 **$y$ 轴**旋转，体积为 $V(t)$。求 $V(t)$ 取得最大值时的 $t$ 以及最大体积，并解释为什么不能照搬绕 $x$ 轴时的结论。
-
-<Solution>
-
-**参考答案：**
-
-$$
-\boxed{t=\ln8},\qquad
-\boxed{V_{\max}=\frac\pi{16}\bigl[2(\ln8)^2+6\ln8+7\bigr]}.
-$$
-
-**第一步：根据旋转轴正确选取微元。** 因绕 $y$ 轴且区域以竖条描述，取半径 $x$、高度 $xe^{-x}$ 的柱壳，故
-
-$$
-V(t)=2\pi\int_t^{2t}x\cdot xe^{-x}\,dx
-=2\pi\int_t^{2t}x^2e^{-x}\,dx.
-$$
-
-**第二步：上下限都依赖 $t$，须同时求导。** 由莱布尼茨公式
-
-$$
-\begin{aligned}
-V'(t)&=2\pi\bigl[2(2t)^2e^{-2t}-t^2e^{-t}\bigr]\\
-&=2\pi t^2e^{-2t}(8-e^t).
-\end{aligned}
-$$
-
-$t>0$ 时前面的因子严格为正，故 $V'$ 在 $0<t<\ln8$ 时为正，在 $t>\ln8$ 时为负。所以 $t=\ln8$ 是**唯一的全局最大值点**。
-
-**第三步：代入最优参数计算体积。** 先求原函数：
-
-$$
-\int x^2e^{-x}dx=-(x^2+2x+2)e^{-x}+C.
-$$
-
-令 $a=\ln8$，则 $e^{-a}=1/8$、$e^{-2a}=1/64$，于是
-
-$$
-\begin{aligned}
-V_{\max}&=2\pi\left[\frac{a^2+2a+2}{8}-\frac{4a^2+4a+2}{64}\right]\\
-&=\frac\pi{16}(2a^2+6a+7).
-\end{aligned}
-$$
-
-<Tabs items={['本题：绕 y 轴','对照：绕 x 轴']} defaultIndex={0}>
-<Tab value="本题：绕 y 轴">
-
-柱壳法的积分核为 $x^2e^{-x}$，上下限求导给出驻点方程 $e^t=8$，故 $t=\ln8$。
-
-</Tab>
-<Tab value="对照：绕 x 轴">
-
-圆盘法的积分核为 $[xe^{-x}]^2=x^2e^{-2x}$，故 $V_x(t)=\pi\int_t^{2t}x^2e^{-2x}dx$，相应的驻点满足 $e^{2t}=8$，即 $t=(\ln8)/2$，**并非本题答案**。
-
-</Tab>
-</Tabs>
-
-**技巧：** 改变旋转轴不仅使 $\pi$ 变成 $2\pi$，还改变了**积分核中的半径因子**；因此应从几何微元重新建模，再讨论极值。
-
-</Solution>
 </Question>

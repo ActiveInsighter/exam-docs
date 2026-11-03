@@ -1,122 +1,243 @@
 ---
-title: 第四节 秩
-description: 矩阵的秩、加边子式、列空间、矩阵乘积与伴随矩阵核心题目重构
+title: "第四节 秩"
+description: "27版考研数学历年分类真题：第二章矩阵·第四节 秩，含2025、2026年补充真题1题。"
 ---
 
-本节先识别非零子式、外积与秩一扰动，再借助列空间和零空间处理矩阵乘积。解答始终区分“秩至多”和“秩恰好”两个层次。
+<Question id="core-1102-math-5d75aa-001" type="boolean" answer={true} points={2} tags="来源:1987年考研数学三, 科目:线性代数, 章节:第四节-秩, 考点:非零子式的加边法判定秩">
 
-## 一、识别秩：非零子式、外积与秩一扰动
 
-<Question id="core-la-rank-1992-m1-01" type="blank" number="1" tags="来源:1992年数学一, 考点:外积矩阵, 考点:秩一判定">
-
-设
-
-$$
-A=\begin{pmatrix}
-a_1b_1&a_1b_2&\cdots&a_1b_n\\
-a_2b_1&a_2b_2&\cdots&a_2b_n\\
-\vdots&\vdots&&\vdots\\
-a_nb_1&a_nb_2&\cdots&a_nb_n
-\end{pmatrix},
-$$
-
-其中 $a_i\ne0,b_i\ne0$，则矩阵 $A$ 的秩 $r(A)=$ <Blank answer="1" kind="math" />。
-
-<Solution>
-
-**参考答案：** $\boxed{1}$。
-
-**解析：** 与其计算高阶子式，不如观察每个元素都是“仅依赖行号的因子”与“仅依赖列号的因子”的乘积。令
-
-$$
-u=(a_1,\ldots,a_n)^{\mathrm T},\qquad v=(b_1,\ldots,b_n)^{\mathrm T},
-$$
-
-那么 $A=uv^{\mathrm T}$。第 $j$ 列为 $b_j u$，所以所有列均落在同一维空间 $\operatorname{span}\{u\}$ 中，推出 $r(A)\le1$。
-
-另一方面，题设 $a_1b_1\ne0$，所以矩阵至少有一个非零元素，即 $r(A)\ge1$。合并得到
-
-$$
-r(A)=1.
-$$
-
-<Callout type="idea" title="认识外积的两个关键性质">
-
-对任意非零列向量 $u,v$，都有 $r(uv^{\mathrm T})=1$；此外，
-
-$$
-(uv^{\mathrm T})^2=(v^{\mathrm T}u)uv^{\mathrm T}.
-$$
-
-后一恒等式还可直接用于下一专题的矩阵高次幂与求逆。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="core-la-rank-1987-m3-02" type="boolean" answer={true} number="2" tags="来源:1987年数学三, 考点:加边子式, 考点:秩的判定定理">
 
 假设 $D$ 是矩阵 $A$ 的 $r$ 阶子式，且 $D\ne0$，但含 $D$ 的一切 $r+1$ 阶子式都等于零，那么矩阵 $A$ 的一切 $r+1$ 阶子式都等于零。（ ）
 
 <Solution>
 
-**参考答案：正确。**
-
-**解析：** 核心问题是：为什么**只检查围绕一个非零 $r$ 阶子式构造的加边子式**，就足以判断整矩阵的秩？
+**判断：正确。**
 
 <Steps>
   <Step>
 
-**把这个非零子式放在左上角。** 通过交换若干行、列，将矩阵写为
+### 从非零子式建立满秩子块
+
+$D\ne0$ 是 $A$ 的 $r$ 阶子式。交换行列次序后，可将 $A$ 写为
 
 $$
-A=\begin{pmatrix}U&V\\W&T\end{pmatrix},\qquad |U|=D\ne0,
+A\sim\begin{pmatrix}B&C\\D_0&E\end{pmatrix},
+\qquad B\in\mathbb R^{r\times r},\quad\det B\ne0.
 $$
 
-其中 $U$ 为 $r$ 阶方阵，因此 $U^{-1}$ 存在。
+这里 $B$ 对应题设的非零子式，故 $B^{-1}$ 存在。
 
-</Step>
+  </Step>
   <Step>
 
-**利用每个加边子式。** 记 $v_j$ 为 $V$ 的第 $j$ 列，$w_i$ 为 $W$ 的第 $i$ 行，$t_{ij}$ 为 $T$ 的相应元素。由分块行列式公式，
+### 将“所有加边子式为零”转化为 Schur 补
+
+对任一剩余行 $i$ 和剩余列 $j$，包含 $B$ 的 $(r+1)$ 阶子式等于
 
 $$
-\det\begin{pmatrix}U&v_j\\w_i&t_{ij}\end{pmatrix}
-=|U|\bigl(t_{ij}-w_iU^{-1}v_j\bigr)=0.
+\det\begin{pmatrix}B&c_j\\d_i&e_{ij}\end{pmatrix}
+=\det B\,(e_{ij}-d_iB^{-1}c_j).
 $$
 
-因为 $|U|\ne0$，于是 $t_{ij}=w_iU^{-1}v_j$ 对每个 $i,j$ 都成立；即
+这些子式全为零，且 $\det B\ne0$，故每个 $e_{ij}-d_iB^{-1}c_j=0$，即 $E=D_0B^{-1}C$。
 
-$$
-T=WU^{-1}V.
-$$
-
-</Step>
+  </Step>
   <Step>
 
-**整体消元并判断秩。** 左乘可逆分块矩阵得到
+### 求矩阵的秩并得出结论
+
+初等分块消元给出
 
 $$
-\begin{pmatrix}E&0\\-WU^{-1}&E\end{pmatrix}A
-=\begin{pmatrix}U&V\\0&0\end{pmatrix}.
+\begin{pmatrix}B&C\\D_0&E\end{pmatrix}
+\sim\begin{pmatrix}B&C\\0&E-D_0B^{-1}C\end{pmatrix}
+=\begin{pmatrix}B&C\\0&0\end{pmatrix}.
 $$
 
-右侧秩恰为 $r$；可逆行变换不改变秩，故 $r(A)=r$，矩阵所有 $r+1$ 阶子式自然全为零。
+因此 $r(A)=r$，所以任意 $(r+1)$ 阶子式都为零。
 
-</Step>
+  </Step>
 </Steps>
 
-<Callout type="warn" title="前提不能省略">
+<Callout type="idea" title="加边法的严格依据">
 
-$D\ne0$ 是关键。若 $D=0$，则“包含它的所有加边子式为零”可能根本无法反映整个矩阵的最高非零子式阶数。
+非零的 $r$ 阶子式已经确定了 $r$ 维基底。围绕它的所有一阶加边子式为零，等价于其余元素均由这些基底行列决定，而不只是“看起来无法继续扩展”。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="core-la-rank-1998-m3-03" type="single" number="3" tags="来源:1998年数学三, 考点:常对角元素矩阵, 考点:秩一扰动">
+<Question id="core-1102-math-5d75aa-006" type="single" points={3} tags="来源:1995年考研数学三, 科目:线性代数, 章节:第四节-秩, 考点:满行秩与矩阵左零因子">
+
+
+
+设矩阵 $A_{m\times n}$ 的秩为
+
+$$
+r(A)=m<n,
+$$
+
+$E_m$ 为 $m$ 阶单位矩阵。下述结论中正确的是（ ）。
+
+<Option>$A$ 的任意 $m$ 个列向量必线性无关</Option>
+<Option>$A$ 的任意一个 $m$ 阶子式都不等于零</Option>
+<Option correct>若矩阵 $B$ 满足 $BA=O$，则 $B=O$</Option>
+<Option>$A$ 通过初等行变换，必可以化为 $(E_m,O)$ 的形式</Option>
+
+<Solution>
+
+**答案：** 第三个选项。
+
+<Steps>
+  <Step>
+
+### 把满行秩转化为右逆的存在性
+
+$A$ 为 $m\times n$，且 $r(A)=m$，说明映射 $x\mapsto Ax$ 可覆盖 $\mathbb R^m$。因此存在 $n\times m$ 矩阵 $C$，满足
+
+$$
+AC=I_m.
+$$
+
+若 $BA=O$，则在等式右侧乘 $C$，立刻得到
+
+$$
+B=(BA)C=O.
+$$
+
+这证明了第三项，且不要求 $B$ 是方阵。
+
+  </Step>
+  <Step>
+
+### 用反例排除其余选项
+
+取 $m=1,n=2$，$A=(1\ \ 0)$，则 $r(A)=1=m$，但第二列为零。因此“任意 $m$ 个列向量线性无关”和“任意 $m$ 阶子式非零”都不成立。
+
+只用初等**行**变换时 $A$ 的列向量之间的线性关系保持不变，上例无法变成 $(1\ \ 0)$ 以外任意指定的列布局。更明确地取 $A=(0\ \ 1)$：它行满秩，但乘以任何非零 $1\times1$ 初等行矩阵，第一列始终为零，不可能化成 $(I_1,O)$。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="不要混淆两类标准化">
+
+满行秩仅保证存在一个可逆 $m$ 阶子式。要在任意列位置形成 $(I_m,O)$，一般需要允许**列变换**；单靠行变换无法随意移动主元列。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-5d75aa-008" type="single" points={3} tags="来源:1998年考研数学一, 科目:线性代数, 章节:第四节-秩, 考点:空间直线位置关系与向量秩">
+
+
+
+设矩阵
+
+$$
+\begin{pmatrix}
+a_1&b_1&c_1\\
+a_2&b_2&c_2\\
+a_3&b_3&c_3
+\end{pmatrix}
+$$
+
+是满秩的，则直线
+
+$$
+\frac{x-a_3}{a_1-a_2}
+=
+\frac{y-b_3}{b_1-b_2}
+=
+\frac{z-c_3}{c_1-c_2}
+$$
+
+与直线
+
+$$
+\frac{x-a_1}{a_2-a_3}
+=
+\frac{y-b_1}{b_2-b_3}
+=
+\frac{z-c_1}{c_2-c_3}
+$$
+
+（ ）。
+
+<Option correct>相交于一点</Option>
+<Option>重合</Option>
+<Option>平行但不重合</Option>
+<Option>异面</Option>
+
+<Solution>
+
+**答案：** 第一项，两直线相交于一点。
+
+<Steps>
+  <Step>
+
+### 改写为向量参数方程
+
+令原矩阵的三行向量分别为 $u_1,u_2,u_3$，它们线性无关。两条直线为
+
+$$
+L_1:\ x=u_3+t(u_1-u_2),\qquad
+L_2:\ x=u_1+s(u_2-u_3).
+$$
+
+这里 $x$ 表示空间位置向量，记 $p=u_1-u_2$，$q=u_2-u_3$。
+
+  </Step>
+  <Step>
+
+### 直接构造公共点
+
+取 $t=1$，则第一条直线上的点是
+
+$$
+u_3+p=u_1-u_2+u_3.
+$$
+
+取 $s=-1$，第二条直线上的点同样是
+
+$$
+u_1-q=u_1-u_2+u_3.
+$$
+
+故两直线至少交于这一点。
+
+  </Step>
+  <Step>
+
+### 验证交点唯一
+
+若两方向向量平行，则存在 $\lambda$ 使 $u_1-u_2=\lambda(u_2-u_3)$，即
+
+$$
+u_1-(1+\lambda)u_2+\lambda u_3=0,
+$$
+
+与 $u_1,u_2,u_3$ 线性无关矛盾。因此两条直线方向不平行，公共点唯一。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="比先判共面更快捷">
+
+题中两直线的位置向量恰好由三行向量的差组成，可直接令参数为 $1$ 和 $-1$ 找到交点，再用满秩保证不重合。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-5d75aa-009" type="single" points={3} tags="来源:1998年考研数学三, 科目:线性代数, 章节:第四节-秩, 考点:等对角对称矩阵的参数与秩">
+
+
 
 设 $n(n\ge3)$ 阶矩阵
 
@@ -139,380 +260,67 @@ $$
 
 <Solution>
 
-**参考答案：B，即 $\boxed{a=-\frac1{n-1}}$。**
-
-**解析：** 这是“对角元相同、非对角元相同”的典型秩一扰动，直接按行消元会繁琐。令 $u=(1,\ldots,1)^{\mathrm T}$，可写为
-
-$$
-A=(1-a)E_n+a uu^{\mathrm T}.
-$$
-
-<Tabs items={['特征空间分解','行列式结合秩核查']}>
-  <Tab value="特征空间分解">
-
-在 $u$ 的方向，$u^{\mathrm T}u=n$，于是
-
-$$
-Au=[1-a+an]u=[1+(n-1)a]u.
-$$
-
-若 $v\perp u$，则 $uu^{\mathrm T}v=0$，故 $Av=(1-a)v$。所以 $A$ 有一个特征值 $1+(n-1)a$，另一个特征值 $1-a$ 的重数为 $n-1$。
-
-秩恰好为 $n-1$ 表示**恰有一个零特征值**。如果 $a=1$，则 $1-a=0$ 重数为 $n-1\ge2$，秩实际上是 $1$，应排除。只能令
-
-$$
-1+(n-1)a=0\quad\Rightarrow\quad a=-\frac1{n-1}.
-$$
-
-此时 $1-a=n/(n-1)\ne0$，秩确实为 $n-1$。
-
-</Tab>
-  <Tab value="行列式结合秩核查">
-
-由上面的特征值结构，
-
-$$
-|A|=(1-a)^{n-1}[1+(n-1)a].
-$$
-
-若秩为 $n-1$，必有 $|A|=0$，得到 $a=1$ 或 $a=-1/(n-1)$。但 $a=1$ 时全部元素都为 $1$，$r(A)=1\ne n-1$（$n\ge3$），因此只能选第二根。
-
-</Tab>
-</Tabs>
-
-<Callout type="warn" title="行列式为零不等于秩恰少一">
-
-$|A|=0$ 只意味着 $r(A)<n$。本题 $a=1$ 虽也令行列式为零，却使矩阵秩降到 $1$，因此需要进一步排除。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="core-la-rank-2012-m1-04" type="blank" number="4" tags="来源:2012年数学一, 考点:正交投影, 考点:秩与零空间">
-
-设 $x$ 为三维单位向量，$E$ 为三阶单位矩阵，则矩阵 $E-xx^{\mathrm T}$ 的秩为 <Blank answer="2" kind="math" />。
-
-<Solution>
-
-**参考答案：** $\boxed{2}$。
-
-**解析：** 已知 $x^{\mathrm T}x=1$，所以
-
-$$
-(E-xx^{\mathrm T})x=x-x(x^{\mathrm T}x)=0.
-$$
-
-因此 $x$ 是一个非零零空间向量。再对任意与 $x$ 正交的 $y$，有
-
-$$
-(E-xx^{\mathrm T})y=y-x(x^{\mathrm T}y)=y.
-$$
-
-由于 $x$ 为三维非零向量，$x^\perp$ 是二维子空间。矩阵在这两个互补子空间上的作用分别是：
-
-- 沿 $\operatorname{span}\{x\}$：变为零；
-- 在 $x^\perp$ 上：保持不变。
-
-故其像空间正是 $x^\perp$，维数为 $2$，所以 $r(E-xx^{\mathrm T})=2$。
-
-**另一快速证明：** 矩阵 $xx^{\mathrm T}$ 的秩为 $1$，且 $E-xx^{\mathrm T}$ 是幂等矩阵；取含 $x$ 的正交基后，它相似于 $\operatorname{diag}(0,1,1)$，秩立即可见。
-
-<Callout type="idea" title="推广至 n 维">
-
-对任何 $n$ 维单位列向量 $x$，$E_n-xx^{\mathrm T}$ 都是投影到 $x^\perp$ 的正交投影，故 $r(E_n-xx^{\mathrm T})=n-1$。
-
-</Callout>
-
-</Solution>
-</Question>
-
-## 二、矩阵乘积与列空间：等号成立条件
-
-<Question id="core-la-rank-2004-m12-05" type="single" number="5" tags="来源:2004年数学一数学二, 考点:零乘积, 考点:秩-零度定理">
-
-设 $A,B$ 为满足 $AB=O$ 的任意两个非零矩阵，则必有（ ）。
-
-<Option correct>$A$ 的列向量组线性相关，$B$ 的行向量组线性相关</Option>
-<Option>$A$ 的列向量组线性相关，$B$ 的列向量组线性相关</Option>
-<Option>$A$ 的行向量组线性相关，$B$ 的行向量组线性相关</Option>
-<Option>$A$ 的行向量组线性相关，$B$ 的列向量组线性相关</Option>
-
-<Solution>
-
-**参考答案：A。**
-
-**解析：** 本题最容易把 $B$ 的行、列位置混淆。令 $A$ 为 $m\times n$ 矩阵，$B$ 为 $n\times k$ 矩阵，公共内维数为 $n$。
-
-由 $AB=O$ 得对 $B$ 的每一列 $b_j$，都有 $Ab_j=0$，即
-
-$$
-\operatorname{Im}B\subseteq\ker A.
-$$
-
-因此
-
-$$
-r(B)\le\dim\ker A=n-r(A),
-\qquad r(A)+r(B)\le n.
-$$
-
-由于 $A,B$ 均非零，$r(A)\ge1,r(B)\ge1$，遂有
-
-$$
-r(A)\le n-1,\qquad r(B)\le n-1.
-$$
-
-$A$ 的**列数**是 $n$，其中至多有 $n-1$ 个线性无关，所以其列向量组相关；$B$ 的**行数**也是 $n$，但其秩至多 $n-1$，所以其行向量组相关，选 A。
-
-<Callout type="warn" title="不是方阵题，不能默认行列同时相关">
-
-$A$ 有 $m$ 行、$n$ 列，$B$ 有 $n$ 行、$k$ 列。结论分别落在 $A$ 的 $n$ 列与 $B$ 的 $n$ 行上；并不意味着 $A$ 的行组或 $B$ 的列组必然相关。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="core-la-rank-2010-m1-06" type="single" number="6" tags="来源:2010年数学一, 考点:乘积为单位矩阵, 考点:矩形矩阵的秩">
-
-设 $A$ 为 $m\times n$ 矩阵，$B$ 为 $n\times m$ 矩阵，$E$ 为 $m$ 阶单位矩阵。若 $AB=E$，则（ ）。
-
-<Option correct>$r(A)=m,\ r(B)=m$</Option>
-<Option>$r(A)=m,\ r(B)=n$</Option>
-<Option>$r(A)=n,\ r(B)=m$</Option>
-<Option>$r(A)=n,\ r(B)=n$</Option>
-
-<Solution>
-
-**参考答案：A。**
-
-**解析：** 乘积 $AB=E_m$ 的秩等于 $m$。依据乘积的秩不超过各因子的秩，
-
-$$
-m=r(AB)\le\min\{r(A),r(B)\}.
-$$
-
-但 $A$ 只有 $m$ 行，故 $r(A)\le m$；$B$ 只有 $m$ 列，故 $r(B)\le m$。上下界相合，得到
-
-$$
-\boxed{r(A)=r(B)=m}.
-$$
-
-从而 $m\le n$ 也自动成立。
-
-<Accordions>
-  <Accordion title="从线性映射理解为何不能推出 BA=E_n">
-
-$B$ 将 $\mathbb R^m$ **单射**到 $\mathbb R^n$；$A$ 将 $\mathbb R^n$ **满射**到 $\mathbb R^m$，并且 $AB$ 在 $\mathbb R^m$ 上是恒等映射。
-
-但当 $n>m$ 时，$BA$ 的秩至多 $m<n$，不可能等于 $E_n$。例如
-
-$$
-A=\begin{pmatrix}1&0\end{pmatrix},\qquad
-B=\begin{pmatrix}1\\0\end{pmatrix}
-$$
-
-就有 $AB=1$，而 $BA=\operatorname{diag}(1,0)\ne E_2$。
-
-  </Accordion>
-</Accordions>
-
-</Solution>
-</Question>
-
-<Question id="core-la-rank-2018-m123-07" type="single" number="7" tags="来源:2018年数学一二三, 考点:拼接矩阵的秩, 考点:列空间包含">
-
-设 $A,B$ 为 $n$ 阶矩阵，记 $r(X)$ 为矩阵 $X$ 的秩，$(X,Y)$ 表示分块矩阵，则（ ）。
-
-<Option correct>$r(A,AB)=r(A)$</Option>
-<Option>$r(A,BA)=r(A)$</Option>
-<Option>$r(A,B)=\max\{r(A),r(B)\}$</Option>
-<Option>$r(A,B)=r(A^{\mathrm T},B^{\mathrm T})$</Option>
-
-<Solution>
-
-**参考答案：A。**
-
-**解析：** 把矩阵 $(A,AB)$ 看作一组列向量的拼接。由于 $AB$ 的每一列都是 $A$ 各列的线性组合，拼上 $AB$ 不增加列空间；形式上
-
-$$
-(A,AB)=A(E,B).
-$$
-
-所以 $\operatorname{Col}(A,AB)=\operatorname{Col}(A)$，从而 $r(A,AB)=r(A)$。
-
-**逐项排除：**
-
-- B 中的 $BA$，其列属于 $B$ 的列空间，不一定属于 $A$ 的列空间。例如 $A=\operatorname{diag}(1,0)$、$B=\begin{pmatrix}0&0\\1&0\end{pmatrix}$，此时 $r(A,BA)=2>r(A)=1$。
-- C 中取 $A=\operatorname{diag}(1,0), B=\operatorname{diag}(0,1)$，得到 $r(A,B)=2$，但 $\max\{r(A),r(B)\}=1$。
-- D 中取 $A=\begin{pmatrix}1&0\\0&0\end{pmatrix}$、$B=\begin{pmatrix}0&1\\0&0\end{pmatrix}$，则 $r(A,B)=1$，而 $r(A^{\mathrm T},B^{\mathrm T})=2$。
-
-<Callout type="idea" title="一对对称的基本模板">
-
-$$
-r(A,AX)=r(A),\qquad
-r\begin{pmatrix}A\\YA\end{pmatrix}=r(A).
-$$
-
-前者因为新增列都在 $A$ 的列空间中；后者因为新增行都在 $A$ 的行空间中。把 $AX$ 和 $XA$ 搞反往往是失分点。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="core-la-rank-zhangyu1000-08" type="single" number="8" tags="来源:张宇1000题, 考点:伴随矩阵的秩, 考点:零乘积">
-
-若 $A,A^*,B$ 都是 $n(n>2)$ 阶非零矩阵，且 $A^*$ 是 $A$ 的伴随矩阵，$AB=O$，则 $r(B)=$（ ）。
-
-<Option correct>$1$</Option>
-<Option>$n-1$</Option>
-<Option>$n$</Option>
-<Option>$n-1$ 或 $n$</Option>
-
-<Solution>
-
-**参考答案：A，即 $\boxed{r(B)=1}$。**
-
-**解析：** 三个条件必须配合使用，不能只根据 $AB=O$ 猜测 $r(B)$。
+**答案：** 第二项，$\boxed{a=-\dfrac1{n-1}}$。
 
 <Steps>
   <Step>
 
-**由 $A^*\ne O$ 得秩下界。** 伴随矩阵元素来自 $A$ 的 $(n-1)$ 阶代数余子式；至少有一个非零意味着
+### 分解为单位矩阵与全一矩阵
+
+记 $J=\mathbf1\mathbf1^{\mathrm T}$，其中 $\mathbf1=(1,\ldots,1)^{\mathrm T}$，则
 
 $$
-r(A)\ge n-1.
+A=(1-a)I_n+aJ.
 $$
 
-</Step>
+因为 $J\mathbf1=n\mathbf1$，故
+
+$$
+A\mathbf1=[1+(n-1)a]\mathbf1.
+$$
+
+而任取 $x$ 满足 $\mathbf1^{\mathrm T}x=0$，有 $Jx=0$，从而 $Ax=(1-a)x$。
+
+  </Step>
   <Step>
 
-**由 $AB=O$ 与 $B\ne O$ 排除满秩。** 若 $r(A)=n$，则 $A^{-1}$ 存在，左乘 $A^{-1}$ 会得到 $B=O$，矛盾。所以 $r(A)<n$。结合上界，
+### 根据特征值重数判断秩
+
+$A$ 的特征值分别是 $1+(n-1)a$（一次）和 $1-a$（$n-1$ 次）。要使秩恰为 $n-1$，必须**恰有一个**零特征值。
+
+若 $a=1$，则 $A=J$，其秩为 $1$；由于 $n\ge3$，不可能等于 $n-1$。因此只能
 
 $$
-r(A)=n-1,\quad \dim\ker A=1.
+1+(n-1)a=0,
+\qquad a=\boxed{-\frac1{n-1}}.
 $$
 
-</Step>
-  <Step>
+此时 $1-a=\frac n{n-1}\ne0$，恰有 $n-1$ 个非零特征值，满足题设。
 
-**把零空间维数传递给 $B$。** 由于 $AB=O$，$B$ 的每列都属于 $\ker A$，故
-
-$$
-r(B)\le\dim\ker A=1.
-$$
-
-再由 $B\ne O$ 知 $r(B)\ge1$，于是 $r(B)=1$。
-
-</Step>
+  </Step>
 </Steps>
 
-**迁移结论：** 对任意方阵，若 $A^*\ne O$ 且 $AB=O$、$B\ne O$，便可直接锁定 $\operatorname{Im}B=\ker A$，二者都是一维空间。本题并不需要计算 $A^*$ 的具体元素。
+<Callout type="warn" title="零行列式只是必要条件">
 
-</Solution>
-</Question>
-
-<Question id="core-la-rank-2025-m1-09" type="single" number="9" tags="来源:2025年数学一第7题, 考点:Sylvester秩不等式, 考点:等号条件">
-
-设 $A,B,C$ 为 $n$ 阶矩阵，且
-
-$$
-r(A)+r(B)+r(C)=r(ABC)+2n.
-$$
-
-考察以下结论：
-
-① $r(ABC)+n=r(AB)+r(C)$；
-
-② $r(AB)+n=r(A)+r(B)$；
-
-③ $r(A)=r(B)=r(C)=n$；
-
-④ $r(AB)=r(BC)=n$。
-
-必然成立的是（ ）。
-
-<Option correct>①②</Option>
-<Option>①③</Option>
-<Option>②④</Option>
-<Option>③④</Option>
-
-<Solution>
-
-**参考答案：A（①②）。**
-
-**解题主线：** 题设不是普通的秩相等，而是连续使用两次 Sylvester 不等式后，**总下界恰好取等**。
-
-<Steps>
-  <Step>
-
-### 将题设与两次秩下界对齐
-
-对任意 $n$ 阶方阵，
-
-$$
-\begin{aligned}
-r(AB)&\ge r(A)+r(B)-n,\\
-r(ABC)&\ge r(AB)+r(C)-n.
-\end{aligned}
-$$
-
-相加（消去 $r(AB)$）得 $r(ABC)\ge r(A)+r(B)+r(C)-2n$。题设正好使这一不等式成为等式。
-
-</Step>
-  <Step>
-
-### 证明每一步都必须取等
-
-定义两个非负的秩差
-
-$$
-\begin{aligned}
-\delta_1&=r(AB)-r(A)-r(B)+n\ge0,\\
-\delta_2&=r(ABC)-r(AB)-r(C)+n\ge0.
-\end{aligned}
-$$
-
-由已知条件，$\delta_1+\delta_2=0$。两个非负数之和为零，只能均为零，于是
-
-$$
-\boxed{r(AB)+n=r(A)+r(B)},
-\qquad
-\boxed{r(ABC)+n=r(AB)+r(C)}.
-$$
-
-这分别就是②和①。
-
-</Step>
-  <Step>
-
-### 用反例排除“全部满秩”的误判
-
-取 $A=C=E_n,B=O_n$，有 $r(A)+r(B)+r(C)=2n=r(ABC)+2n$，但 $B$ 不满秩，$AB$、$BC$ 均为零矩阵，所以③④都不必成立。
-
-</Step>
-</Steps>
-
-<Callout type="idea" title="可迁移的等号思想">
-
-连续使用多个不等式，若每步误差都非负，最终总误差为零，则**每步必须取等**。处理多个矩阵乘积的秩时，这是比逐个猜测是否满秩更可靠的做法。
+$\det A=0$ 只能说明秩小于 $n$；本题须进一步排除 $a=1$（此时秩为 $1$），才能确定秩恰为 $n-1$。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-## 三、伴随矩阵、幂与幂等矩阵的秩
+<Question id="core-1102-math-5d75aa-011" type="single" points={4} tags="来源:2003年考研数学三, 科目:线性代数, 章节:第四节-秩, 考点:伴随矩阵的秩与参数判定">
 
-<Question id="core-la-rank-2003-m3-10" type="single" number="10" tags="来源:2003年数学三, 考点:伴随矩阵的秩, 考点:特殊矩阵特征值">
+
 
 设三阶矩阵
 
 $$
 A=\begin{pmatrix}
-a&b&b\\b&a&b\\b&b&a
+a&b&b\\
+b&a&b\\
+b&b&a
 \end{pmatrix}.
 $$
 
@@ -525,304 +333,316 @@ $$
 
 <Solution>
 
-**参考答案：C。**
+**答案：** 第三个选项，$a\ne b$ 且 $a+2b=0$。
 
-**第一步：将“伴随矩阵秩为 1”翻译成原矩阵的秩。** 对三阶方阵，
+<Steps>
+  <Step>
+
+### 将伴随矩阵的秩转回原矩阵
+
+对于三阶矩阵，伴随矩阵满足
 
 $$
 r(A^*)=\begin{cases}3,&r(A)=3,\\1,&r(A)=2,\\0,&r(A)\le1.\end{cases}
 $$
 
-所以题设等价于 $r(A)=2$。这比仅知道 $|A|=0$ 要强，必须排除秩为 $1$ 的情况。
+题设 $r(A^*)=1$，所以必须有 $r(A)=2$。
 
-**第二步：利用等对角、等非对角结构。** 记 $u=(1,1,1)^{\mathrm T}$，则
+  </Step>
+  <Step>
 
-$$
-A=(a-b)E_3+buu^{\mathrm T}.
-$$
+### 利用等对角结构求特征值
 
-在 $u$ 方向上 $Au=(a+2b)u$；在 $u^\perp$（二维）上 $Av=(a-b)v$。因此特征值为 $a+2b$（一次）、$a-b$（两次），并且
+写成 $A=(a-b)I_3+bJ$。沿 $\mathbf1=(1,1,1)^{\mathrm T}$ 的特征值为 $a+2b$；在 $\mathbf1^\perp$ 上，特征值为 $a-b$（重数 $2$）。
 
-$$
-|A|=(a+2b)(a-b)^2.
-$$
-
-要使秩**恰为 2**，只能让一次的特征值为零，而二重特征值非零，即
+于是
 
 $$
-\boxed{a+2b=0,\qquad a\ne b}.
+\det A=(a+2b)(a-b)^2.
 $$
 
-若 $a=b$，矩阵的各行相同，秩最多为 $1$，伴随矩阵反而为零；因此不能只用行列式为零来选答案。
-
-</Solution>
-</Question>
-
-<Question id="core-la-rank-2007-m123-11" type="blank" number="11" tags="来源:2007年数学一二三, 考点:幂零矩阵, 考点:矩阵幂的秩">
-
-设矩阵
+要恰好有一个零特征值，只能要求
 
 $$
-A=\begin{pmatrix}
-0&1&0&0\\0&0&1&0\\0&0&0&1\\0&0&0&0
-\end{pmatrix},
+a+2b=0,\qquad a-b\ne0.
 $$
 
-则 $A^3$ 的秩为 <Blank answer="1" kind="math" />。
+此时其余两个特征值均非零，确有 $r(A)=2$，从而 $r(A^*)=1$。
 
-<Solution>
+  </Step>
+</Steps>
 
-**参考答案：** $\boxed{1}$。
+<Callout type="idea" title="快速判别公式">
 
-观察 $A$ 对标准基的作用：$Ae_1=0, Ae_2=e_1, Ae_3=e_2, Ae_4=e_3$。连续作用三次，
-
-$$
-A^3e_4=e_1,\qquad A^3e_1=A^3e_2=A^3e_3=0.
-$$
-
-故 $A^3$ 仅第 $(1,4)$ 元为 $1$，即
-
-$$
-A^3=\begin{pmatrix}0&0&0&1\\0&0&0&0\\0&0&0&0\\0&0&0&0\end{pmatrix},
-\qquad r(A^3)=1.
-$$
-
-**方法迁移：** 这是四阶零特征值 Jordan 块 $J_4(0)$，有 $r(A^k)=4-k$（$0\le k\le4$）。求高次幂秩时，先识别移位矩阵的非零超对角线，而不是重复做整矩阵乘法。
-
-</Solution>
-</Question>
-
-<Question id="core-la-rank-2019-m23-12" type="single" number="12" tags="来源:2019年数学二三, 考点:零空间维数, 考点:伴随矩阵的秩">
-
-设 $A$ 是四阶矩阵，$A^*$ 是 $A$ 的伴随矩阵。若线性方程组
-
-$$
-Ax=0
-$$
-
-的基础解系中只有 $2$ 个向量，则 $A^*$ 的秩是（ ）。
-
-<Option correct>$0$</Option>
-<Option>$1$</Option>
-<Option>$2$</Option>
-<Option>$3$</Option>
-
-<Solution>
-
-**参考答案：A（$r(A^*)=0$）。**
-
-基础解系中向量的个数就是解空间维数，即 $\dim\ker A=2$。由秩—零度定理，
-
-$$
-r(A)+\dim\ker A=4\quad\Longrightarrow\quad r(A)=2.
-$$
-
-四阶矩阵 $A^*$ 的元素由 $A$ 的三阶代数余子式组成；但 $r(A)=2$ 意味着所有三阶子式均为零，因此
-
-$$
-A^*=O_4,\qquad\boxed{r(A^*)=0}.
-$$
-
-<Callout type="warn" title="不要把两个秩直接看成相同">
-
-对 $n\ge2$ 的方阵，伴随矩阵的秩只有三类：$r(A)=n$ 时为 $n$；$r(A)=n-1$ 时为 $1$；$r(A)\le n-2$ 时为 $0$。本题 $n=4,r(A)=2=n-2$，属于第三类。
+对于 $n\ge2$ 的 $n$ 阶矩阵，$r(A^*)$ 只能为 $n,1,0$：分别对应 $r(A)=n,n-1,\le n-2$。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="core-la-rank-zhangyu1000-13" type="single" number="13" tags="来源:张宇1000题, 考点:矩阵幂降秩, 考点:含参矩阵">
+<Question id="core-1102-math-5d75aa-012" type="single" points={4} tags="来源:2004年考研数学一、二, 科目:线性代数, 章节:第四节-秩, 考点:零乘积与向量组线性相关">
 
-设矩阵 $A=\begin{bmatrix}1&-1&1\\-2&2&1\\1&-1&k\end{bmatrix}$，$r((3E-A)^2)<r(3E-A)$，其中 $E$ 是三阶单位矩阵，则常数 $k=$（ ）。
 
-<Option correct>$3$</Option>
-<Option>$4$</Option>
-<Option>$5$</Option>
-<Option>$6$</Option>
+
+设 $A,B$ 为满足
+
+$$
+AB=O
+$$
+
+的任意两个非零矩阵，则必有（ ）。
+
+<Option correct>$A$ 的列向量组线性相关，$B$ 的行向量组线性相关</Option>
+<Option>$A$ 的列向量组线性相关，$B$ 的列向量组线性相关</Option>
+<Option>$A$ 的行向量组线性相关，$B$ 的行向量组线性相关</Option>
+<Option>$A$ 的行向量组线性相关，$B$ 的列向量组线性相关</Option>
 
 <Solution>
 
-**参考答案：A（$k=3$）。**
-
-设 $M=3E-A$，则
-
-$$
-M=\begin{pmatrix}2&1&-1\\2&1&-1\\-1&1&3-k\end{pmatrix}.
-$$
-
-**先判 $r(M)$：** 前两行相同，故 $r(M)\le2$；第一行 $(2,1,-1)$ 与第三行 $(-1,1,3-k)$ 在任何 $k$ 下都不成比例（前两项比例不一致），故 $r(M)=2$。
-
-因此题设相当于 $r(M^2)<2$。计算平方后只需挑选便于计算的二阶子式；第 $1,3$ 行和第 $1,2$ 列对应的子式为
-
-$$
-\det\bigl[(M^2)_{\{1,3\},\{1,2\}}\bigr]=-9(k-3).
-$$
-
-若 $r(M^2)\le1$，一切二阶子式必须为零，故 $k=3$。
-
-**最后检验充分性：** 代回 $k=3$，直接计算得到 $r(M^2)=1<2=r(M)$，所以答案确为 $3$，而不只是必要条件。
-
-<Callout type="idea" title="为什么不能只计算行列式">
-
-矩阵 $M$ 前两行始终相同，故对所有 $k$ 都有 $|M|=0$，它根本不能筛选参数。题目要求的是**平方后秩严格下降**，必须检查 $M^2$ 的二阶子式或零空间结构。
-
-</Callout>
-
-</Solution>
-</Question>
-
-<Question id="core-la-rank-2024-m2-14" type="single" number="14" tags="来源:2024年数学二, 考点:伴随矩阵恒等式, 考点:二次幂零秩界">
-
-$A$ 为四阶矩阵，$A^*$ 为 $A$ 的伴随矩阵。若
-
-$$
-A(A-A^*)=O,
-$$
-
-且
-
-$$
-A\ne A^*,
-$$
-
-则 $r(A)$ 可能为（ ）。
-
-<Option>$0$ 或 $1$</Option>
-<Option>$1$ 或 $3$</Option>
-<Option>$2$ 或 $3$</Option>
-<Option correct>$1$ 或 $2$</Option>
-
-<Solution>
-
-**参考答案：D（$r(A)=1$ 或 $2$）。**
+**答案：** 第一项。
 
 <Steps>
   <Step>
 
-### 用伴随矩阵等式降为二次幂问题
+### 把零乘积转换为维数限制
 
-由 $AA^*=|A|E_4$，有
+设 $A$ 为 $m\times n$、$B$ 为 $n\times k$，乘积 $AB=O$。由 Sylvester 秩不等式
 
 $$
-A(A-A^*)=O\iff A^2=|A|E_4.
+r(AB)\ge r(A)+r(B)-n
 $$
 
-若 $A$ 可逆，则左乘 $A^{-1}$ 得 $A=A^*$，与题设相矛盾；所以 $|A|=0$，再代回即得 $A^2=O$。
+可知
 
-</Step>
+$$
+r(A)+r(B)\le n.
+$$
+
+  </Step>
   <Step>
 
-### 给出可能的秩上下界
+### 用两个矩阵非零的条件锁定相关的向量组
 
-$A^2=O$ 意味着 $\operatorname{Im}A\subseteq\ker A$。对于四阶方阵，
+因为 $A\ne O$ 且 $B\ne O$，故 $r(A)\ge1$、$r(B)\ge1$。于是
 
 $$
-r(A)\le\dim\ker A=4-r(A),
+r(A)\le n-r(B)\le n-1,
+\qquad
+r(B)\le n-r(A)\le n-1.
 $$
 
-故 $r(A)\le2$。而 $r(A)=0$ 意味着 $A=O$，此时 $A^*=O$，又违反 $A\ne A^*$；所以 $r(A)\in\{1,2\}$。
+$A$ 恰有 $n$ 个列向量，列秩小于 $n$，故这些列向量线性相关；$B$ 恰有 $n$ 个行向量，行秩小于 $n$，故这些行向量线性相关。
 
-</Step>
+  </Step>
+</Steps>
+
+<Callout type="warn" title="为什么不能选另外三项">
+
+乘积 $AB$ 中共用的维数是 $n$，它对应的是 **$A$ 的列数**与 **$B$ 的行数**。零乘积不能保证 $A$ 的行向量组或 $B$ 的列向量组也相关，尤其当两个矩阵不是方阵时更应谨慎。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-5d75aa-014" type="single" points={4} tags="来源:2010年考研数学一, 科目:线性代数, 章节:第四节-秩, 考点:右逆矩阵与行列满秩">
+
+
+
+设 $A$ 为 $m\times n$ 矩阵，$B$ 为 $n\times m$ 矩阵，$E$ 为 $m$ 阶单位矩阵。若
+
+$$
+AB=E,
+$$
+
+则（ ）。
+
+<Option correct>$r(A)=m,\ r(B)=m$</Option>
+<Option>$r(A)=m,\ r(B)=n$</Option>
+<Option>$r(A)=n,\ r(B)=m$</Option>
+<Option>$r(A)=n,\ r(B)=n$</Option>
+
+<Solution>
+
+**答案：** 第一项，$r(A)=r(B)=m$。
+
+<Steps>
   <Step>
 
-### 构造实例证实两个秩都能实现
+### 利用单位矩阵的满秩性质
 
-令 $J=\begin{pmatrix}0&1\\0&0\end{pmatrix}$。取 $A=\operatorname{diag}(J,O_2)$ 时 $r(A)=1$；取 $A=\operatorname{diag}(J,J)$ 时 $r(A)=2$。两者都满足 $A^2=O$、$A^*=O$ 且 $A\ne O$，故都符合原条件。
+由 $AB=I_m$，可得
+
+$$
+r(AB)=r(I_m)=m.
+$$
+
+而矩阵乘积的秩不超过任一因子的秩，因此
+
+$$
+m=r(AB)\le\min\{r(A),r(B)\}.
+$$
+
+  </Step>
+  <Step>
+
+### 与形状给出的秩上界结合
+
+$A$ 是 $m\times n$ 矩阵，所以 $r(A)\le m$；$B$ 是 $n\times m$ 矩阵，所以 $r(B)\le m$。上下界相同，只能
+
+$$
+\boxed{r(A)=r(B)=m}.
+$$
+
+特别地，$m\le n$，但题设不保证 $BA=I_n$；仅能说 $B$ 是 $A$ 的一个右逆，$A$ 是 $B$ 的一个左逆。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="一眼判秩">
+
+只要 $AB=I_m$，两边秩均不得低于 $m$；又因矩阵形状不允许超过 $m$，所以两矩阵的秩都恰为 $m$。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-5d75aa-015" type="blank" points={4} tags="来源:2012年考研数学一, 科目:线性代数, 章节:第四节-秩, 考点:正交投影矩阵的秩">
+
+
+
+设 $x$ 为三维单位向量，$E$ 为三阶单位矩阵，则矩阵
+
+$$
+E-xx^{\mathrm T}
+$$
+
+的秩为 <Blank answer="2" kind="math" />。
+
+<Solution>
+
+**答案：** $\boxed{2}$。
+
+<Steps>
+  <Step>
+
+### 识别为正交投影
+
+设 $P=I_3-xx^{\mathrm T}$。因 $x$ 为单位向量，$x^{\mathrm T}x=1$，故
+
+$$
+P^2=I_3-2xx^{\mathrm T}+x(x^{\mathrm T}x)x^{\mathrm T}
+=I_3-xx^{\mathrm T}=P.
+$$
+
+$P$ 又是对称矩阵，所以它是到平面 $x^\perp$ 的正交投影矩阵。
+
+  </Step>
+  <Step>
+
+### 分别考察平行和正交方向
+
+在 $x$ 方向上，
+
+$$
+Px=x-x(x^{\mathrm T}x)=0.
+$$
+
+在任一 $y\perp x$ 的方向上，$x^{\mathrm T}y=0$，因而
+
+$$
+Py=y-x(x^{\mathrm T}y)=y.
+$$
+
+所以 $P$ 的特征值为 $0,1,1$，其像空间正是二维平面 $x^\perp$，得到
+
+$$
+\boxed{r(I_3-xx^{\mathrm T})=2}.
+$$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="推广结论">
+
+对于任意 $n$ 维单位列向量 $x$，都有 $r(I_n-xx^{\mathrm T})=n-1$；这比直接计算行列式与所有子式更简洁。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+<Question id="core-1102-math-5d75aa-016" type="single" points={4} tags="来源:2018年考研数学一、二、三, 科目:线性代数, 章节:第四节-秩, 考点:分块矩阵的秩与列空间">
+
+
+
+设 $A,B$ 为 $n$ 阶矩阵，记 $r(X)$ 为矩阵 $X$ 的秩，$(X,Y)$ 表示分块矩阵，则（ ）。
+
+<Option correct>$r(A,AB)=r(A)$</Option>
+<Option>$r(A,BA)=r(A)$</Option>
+<Option>$r(A,B)=\max\{r(A),r(B)\}$</Option>
+<Option>$r(A,B)=r(A^{\mathrm T},B^{\mathrm T})$</Option>
+
+<Solution>
+
+**答案：** 第一项。
+
+<Steps>
+  <Step>
+
+### 用列空间包含关系证明
+
+$(A,AB)$ 的前 $n$ 列就是 $A$ 的列；而 $AB$ 的每一列又都是 $A$ 的列的线性组合，因此
+
+$$
+\operatorname{Col}(A,AB)=\operatorname{Col}(A).
+$$
+
+从而
+
+$$
+\boxed{r(A,AB)=r(A)}.
+$$
+
+等价地，利用可逆分块列变换
+
+$$
+(A,AB)\begin{pmatrix}I_n&-B\\O&I_n\end{pmatrix}=(A,O),
+$$
+
+可直接得到同样结论。
+
+  </Step>
+  <Step>
+
+### 看清其他选项为何不恒成立
+
+- **第二项：** $BA$ 的列空间一般不在 $A$ 的列空间中。例如 $A=\operatorname{diag}(1,0)$、$B=\begin{pmatrix}0&0\\1&0\end{pmatrix}$，有 $r(A,BA)=2>r(A)=1$。
+- **第三项：** $r(A,B)$ 可能大于 $\max\{r(A),r(B)\}$。取 $A=\operatorname{diag}(1,0)$、$B=\operatorname{diag}(0,1)$，拼接矩阵秩为 $2$，而两者秩均为 $1$。
+- **第四项：** 转置后列空间变成原来的行空间，拼接秩并不保持。取 $A=\begin{pmatrix}1&0\\0&0\end{pmatrix}$、$B=\begin{pmatrix}0&1\\0&0\end{pmatrix}$，则 $r(A,B)=1$，但 $r(A^{\mathrm T},B^{\mathrm T})=2$。
 
 </Step>
 </Steps>
 
-**考点总结：** “可能为”必须完成**必要性 + 存在性**两层论证。仅证明 $r(A)\le2$，并不足以排除秩零或证明秩二一定可取。
+<Callout type="warn" title="常见误区">
+
+$r(A,B)=r(A)$ 的关键是 $B$ 的**每一列**都可由 $A$ 的列线性表出；对于 $(A,BA)$ 没有这种自动包含关系。
+
+</Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="core-la-rank-lilin880-15" type="blank" number="15" tags="来源:李林880, 考点:对合矩阵, 考点:互补投影的秩">
+<Question id="core-1102-math-5d75aa-018" type="single" points={5} tags="来源:2021年考研数学一, 科目:线性代数, 章节:第四节-秩, 考点:实矩阵与分块矩阵秩等式">
 
-设 $A,B$ 均为 $n$ 阶可逆矩阵，且 $AB=B^{-1}A^{-1}$，则 $r(E+BA)+r(E-BA)=$ <Blank answer="n" kind="math" />。
 
-<Solution>
-
-**参考答案：** $\boxed n$。
-
-设 $T=BA$。由 $AB=B^{-1}A^{-1}=(AB)^{-1}$ 可知 $(AB)^2=E$；又 $T=B(AB)B^{-1}$ 与 $AB$ 相似，所以
-
-$$
-T^2=E.
-$$
-
-由此构造两个投影矩阵
-
-$$
-P_+=\frac{E+T}{2},\qquad P_-=\frac{E-T}{2}.
-$$
-
-它们满足 $P_+^2=P_+$、$P_-^2=P_-$、$P_+P_-=O$ 和 $P_++P_-=E$。因此 $\operatorname{Im}P_+\oplus\operatorname{Im}P_-=\mathbb R^n$，从而
-
-$$
-r(E+T)+r(E-T)=r(P_+)+r(P_-)=n.
-$$
-
-把 $T=BA$ 代回，得到所求结果。
-
-**快解：** 因 $(E+T)(E-T)=O$ 且 $2E=(E+T)+(E-T)$，一方面由乘积为零推出两秩之和不超过 $n$，另一方面由秩的次可加性推出不小于 $n$，故必为 $n$。这里 $2\ne0$ 是在通常实（或复）数域下成立的前提。
-
-</Solution>
-</Question>
-
-<Question id="core-la-rank-zhangyu1000-16" type="single" number="16" tags="来源:张宇1000题, 考点:幂等矩阵, 考点:秩分解">
-
-设 $A$ 为 $n$ 阶矩阵，$r(A)=r$，$E_r$ 为 $r$ 阶单位矩阵，则“$A^2=A$”是“存在列满秩矩阵 $C_{n\times r}$，使得 $A=CB$，$BC=E_r$”的（ ）。
-
-<Option>充分非必要条件</Option>
-<Option>必要非充分条件</Option>
-<Option correct>充分必要条件</Option>
-<Option>既非充分又非必要条件</Option>
-
-<Solution>
-
-**参考答案：C（充分必要条件）。**
-
-<Tabs items={['由幂等性推出分解','由分解推出幂等性']}>
-  <Tab value="由幂等性推出分解">
-
-给定 $r(A)=r$，总存在秩分解 $A=CB$，其中 $C\in\mathbb R^{n\times r}$ 列满秩，$B\in\mathbb R^{r\times n}$ 行满秩。由 $A^2=A$ 得
-
-$$
-C(BC)B=CB.
-$$
-
-因为 $C$ 列满秩，存在左逆 $L$ 使 $LC=E_r$；因为 $B$ 行满秩，存在右逆 $R$ 使 $BR=E_r$。上式左乘 $L$、右乘 $R$，得到
-
-$$
-BC=E_r.
-$$
-
-所以存在题目要求的分解。
-
-</Tab>
-  <Tab value="由分解推出幂等性">
-
-若 $A=CB$ 且 $BC=E_r$，则保持因子顺序，
-
-$$
-A^2=CBCB=C(BC)B=CE_rB=CB=A.
-$$
-
-所以 $A^2=A$ 必然成立。
-
-</Tab>
-</Tabs>
-
-**关键细节：** 矩阵秩分解与一般分解不同：要利用 $r(A)=r$ 保证 $C$ 列满秩且 $B$ 行满秩，才能合理消去两侧因子。幂等矩阵还满足 $\mathbb R^n=\operatorname{Im}A\oplus\ker A$。
-
-</Solution>
-</Question>
-
-## 四、分块秩：Schur 补、消块与综合比较
-
-<Question id="core-la-rank-2021-m1-17" type="single" number="17" tags="来源:2021年数学一, 考点:分块矩阵秩, 考点:Gram矩阵">
 
 设 $A,B$ 为 $n$ 阶实矩阵，下列各式中不成立的是（ ）。
 
@@ -833,43 +653,84 @@ $$
 
 <Solution>
 
-**参考答案：C。**
+**答案：** 第三个选项中的等式不一定成立。
 
-**先建立共用事实：** 对实矩阵 $A$，$r(A^{\mathrm T}A)=r(AA^{\mathrm T})=r(A)$。这是因为 $x^{\mathrm T}A^{\mathrm T}Ax=\|Ax\|^2$，故 $\ker(A^{\mathrm T}A)=\ker A$；对转置矩阵同理。
+<Steps>
+  <Step>
 
-逐项判断：
+### 先记住实矩阵的秩恒等式
 
-- **A 正确：** 分块对角阵的秩可相加，得 $r(A)+r(A^{\mathrm T}A)=2r(A)$。
-- **B 正确：** 右乘可逆分块矩阵 $\begin{pmatrix}E&-B\\O&E\end{pmatrix}$，原式化为 $\operatorname{diag}(A,A^{\mathrm T})$，秩恰为 $2r(A)$。
-- **D 正确：** 左乘可逆分块矩阵 $\begin{pmatrix}E&O\\-B&E\end{pmatrix}$，同样化为 $\operatorname{diag}(A,A^{\mathrm T})$。
-- **C 不必成立：** 与 B 的上右块 $AB$ 不同，$BA$ 的列不必属于 $A$ 的列空间，不能通过同样的右乘消去。
-
-**给 C 一个明确反例。** 取
+对于实矩阵，
 
 $$
-A=\begin{pmatrix}0&1\\0&0\end{pmatrix},\quad
-B=\begin{pmatrix}0&0\\1&0\end{pmatrix}.
+r(A^{\mathrm T}A)=r(AA^{\mathrm T})=r(A),
 $$
 
-则 $BA=\begin{pmatrix}0&0\\0&1\end{pmatrix}$、$AA^{\mathrm T}=\begin{pmatrix}1&0\\0&0\end{pmatrix}$，所以
+因为 $x^{\mathrm T}A^{\mathrm T}Ax=\|Ax\|^2$，由此 $\ker(A^{\mathrm T}A)=\ker A$。故第一个分块对角矩阵的秩为 $2r(A)$。
+
+  </Step>
+  <Step>
+
+### 通过可逆分块变换验证第二、第四项
+
+第二项中，
+
+$$
+\begin{pmatrix}A&AB\\O&A^{\mathrm T}\end{pmatrix}
+\begin{pmatrix}I&-B\\O&I\end{pmatrix}
+=\begin{pmatrix}A&O\\O&A^{\mathrm T}\end{pmatrix},
+$$
+
+第四项中，
+
+$$
+\begin{pmatrix}I&O\\-B&I\end{pmatrix}
+\begin{pmatrix}A&O\\BA&A^{\mathrm T}\end{pmatrix}
+=\begin{pmatrix}A&O\\O&A^{\mathrm T}\end{pmatrix}.
+$$
+
+右乘或左乘的分块矩阵均可逆，故两个式子的秩均为 $2r(A)$。
+
+  </Step>
+  <Step>
+
+### 对第三项构造可核算的反例
+
+取
+
+$$
+A=\begin{pmatrix}0&0\\1&0\end{pmatrix},
+\qquad
+B=\begin{pmatrix}0&1\\0&0\end{pmatrix}.
+$$
+
+此时 $r(A)=1$，但
 
 $$
 \begin{pmatrix}A&BA\\O&AA^{\mathrm T}\end{pmatrix}
-=\begin{pmatrix}0&1&0&0\\0&0&0&1\\0&0&1&0\\0&0&0&0\end{pmatrix},
+=\begin{pmatrix}
+0&0&1&0\\1&0&0&0\\0&0&0&0\\0&0&0&1
+\end{pmatrix}
 $$
 
-该矩阵秩为 $3$，而 $2r(A)=2$，故 C 错误。
+的秩为 $3\ne2r(A)=2$，因此第三项并非恒等式。
 
-<Callout type="warn" title="AB 与 BA 的位置不能互换">
+  </Step>
+</Steps>
 
-$AB$ 的列向量必属于 $A$ 的列空间，因此适于通过分块列变换消去；$BA$ 的列向量属于 $B$ 的列空间，一般不能用同样方法处理。这是本题的命题核心。
+<Callout type="idea" title="分块秩题型的判断顺序">
+
+先检查非对角块是否是相邻对角块的左倍或右倍；若能用可逆分块三角矩阵消去，就能化为分块对角矩阵。若不能，尝试用低阶奇异矩阵构造反例。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="core-la-rank-2023-m1-18" type="single" number="18" tags="来源:2023年数学一, 考点:Schur补与分块秩, 考点:矩阵幂的秩">
+<Question id="core-1102-math-5d75aa-019" type="single" points={5} tags="来源:2023年考研数学一, 科目:线性代数, 章节:第四节-秩, 考点:分块矩阵秩比较与零乘积">
+
+
 
 已知 $n$ 阶矩阵 $A,B,C$ 满足
 
@@ -896,307 +757,255 @@ $$
 
 <Solution>
 
-**参考答案：B。**
-
-**核心观察：** 三个分块矩阵都含有一个 $n$ 阶单位块，先围绕该单位块做分块消元，余下的秩就容易比较。
+**答案：** 第二项，$r_1\le r_3\le r_2$。
 
 <Steps>
   <Step>
 
-### 求 $r_1$
+### 处理带可逆单位块的第一个矩阵
 
-以下右下角单位块为主元的分块秩恒等式成立：
+对
 
 $$
-r\begin{pmatrix}P&Q\\R&E\end{pmatrix}=n+r(P-QR).
+M_1=\begin{pmatrix}O&A\\BC&I\end{pmatrix},
 $$
 
-取 $P=O,Q=A,R=BC$，则 $P-QR=-ABC=O$，所以 $\boxed{r_1=n}$。
+将下方块行的 $A$ 倍从上方块行中减去，得到
 
-</Step>
+$$
+\begin{pmatrix}-ABC&O\\BC&I\end{pmatrix}
+=\begin{pmatrix}O&O\\BC&I\end{pmatrix}.
+$$
+
+因 $ABC=O$ 且右下块是 $I$，故 $r_1=n$。
+
+  </Step>
   <Step>
 
-### 求 $r_2$
+### 处理第二个矩阵
 
-$M_2$ 本身是分块上三角形，右下角为 $E$，利用分块消元立即得到
+对
 
 $$
-\boxed{r_2=n+r(AB)}.
+M_2=\begin{pmatrix}AB&C\\O&I\end{pmatrix},
 $$
 
-</Step>
+以第一块行减去下方块行的 $C$ 倍，可得 $\operatorname{diag}(AB,I)$，因此
+
+$$
+r_2=n+r(AB).
+$$
+
+  </Step>
   <Step>
 
-### 求 $r_3$ 并比较
+### 处理第三个矩阵并比较
 
-令 $X=AB$。以左上角的 $E$ 为主元，
+对
 
 $$
-r\begin{pmatrix}E&X\\X&O\end{pmatrix}=n+r(O-XE^{-1}X)=n+r(X^2).
+M_3=\begin{pmatrix}I&AB\\AB&O\end{pmatrix},
 $$
 
-即 $\boxed{r_3=n+r((AB)^2)}$。任何矩阵都满足 $0\le r(X^2)\le r(X)$，所以
+以第二块行减去第一块行的 $AB$ 倍，得
+
+$$
+\begin{pmatrix}I&AB\\O&-(AB)^2\end{pmatrix}
+\sim\operatorname{diag}(I,-(AB)^2).
+$$
+
+故 $r_3=n+r((AB)^2)$。由 $r((AB)^2)\le r(AB)$ 可得
 
 $$
 \boxed{r_1=n\le r_3=n+r((AB)^2)\le r_2=n+r(AB)}.
 $$
 
-</Step>
+  </Step>
 </Steps>
 
-**解题技巧：** 分块矩阵中出现单位阵时先尝试 Schur 补；它是对矩阵做**可逆分块初等变换**后的秩恒等式，不要求未知的 $A,B,C$ 本身可逆。
+<Callout type="warn" title="避免遗漏乘法次序">
 
-</Solution>
-</Question>
-
-<Question id="core-la-rank-zhangyu1000-19" type="single" number="19" tags="来源:张宇1000题, 考点:Schur补与矩阵秩">
-
-已知$A$为$n$阶矩阵，$E$为$n$阶单位矩阵，记矩阵$\begin{bmatrix}O&A\\A^T&E\end{bmatrix},\begin{bmatrix}O&A^TA\\A^T&E\end{bmatrix},\begin{bmatrix}A^T&E\\A^TA&A^TA\end{bmatrix}$的秩分别为$r_1,r_2,r_3$，则( ).
-
-<Option correct>$r_1=r_2\geq r_3$</Option>
-
-<Option>$r_1=r_2\leq r_3$</Option>
-
-<Option>$r_1=r_3\geq r_2$</Option>
-
-<Option>$r_1=r_3\leq r_2$</Option>
-
-<Solution>
-
-**答案：A，即 $r_1=r_2\ge r_3$。**
-
-**解题思路：** 第一个和第二个块矩阵都含可逆的 $E$，使用 Schur 补求出精确秩；第三个块矩阵则以两组块行为界估计上界，不必机械消元。
-
-<Steps>
-  <Step title="先求第一个分块矩阵的秩">
-
-以右下角 $E$ 作块消元：
-
-$$
-\begin{aligned}
-r_1&=r\begin{pmatrix}O&A\\A^{\mathrm T}&E\end{pmatrix}
-=n+r(-AA^{\mathrm T})\\
-&=n+r(A).
-\end{aligned}
-$$
-
-这里使用实矩阵的恒等式 $r(AA^{\mathrm T})=r(A)$。
-
-</Step>
-  <Step title="求第二个分块矩阵的秩">
-
-同样以 $E$ 作 Schur 补：
-
-$$
-r_2=n+r\left(A^{\mathrm T}AA^{\mathrm T}\right).
-$$
-
-对实矩阵可作奇异值分解 $A=U\Sigma V^{\mathrm T}$，则
-
-$$
-A^{\mathrm T}AA^{\mathrm T}=V\bigl(\Sigma^{\mathrm T}\Sigma\Sigma^{\mathrm T}\bigr)U^{\mathrm T}.
-$$
-
-中间矩阵的非零奇异值方向仍恰有 $r(A)$ 个，故 $r_2=n+r(A)=r_1$。
-
-</Step>
-  <Step title="上界控制第三个分块矩阵">
-
-按上下块行纵向拼接，秩不超过两者秩之和：
-
-$$
-\begin{aligned}
-r_3
-&=r\begin{pmatrix}A^{\mathrm T}&E\\A^{\mathrm T}A&A^{\mathrm T}A\end{pmatrix}\\
-&\le r(A^{\mathrm T},E)+r(A^{\mathrm T}A,A^{\mathrm T}A)\\
-&=n+r(A).
-\end{aligned}
-$$
-
-因此 $\boxed{r_1=r_2\ge r_3}$，选 A。
-
-</Step>
-</Steps>
-
-<Callout type="warn" title="Gram 矩阵的域条件">
-
-$\ker(A^{\mathrm T}A)=\ker A$ 的证明依赖 $x^{\mathrm T}A^{\mathrm T}Ax=\|Ax\|^2$，默认矩阵在**实数域**。题目中不应把这种论证不加条件地照搬到复矩阵的普通转置上；复矩阵应改用共轭转置 $A^*_{\mathrm H}$。
+这里利用的是 $ABC=O$，而非 $BAC=O$ 或 $CAB=O$。处理块矩阵时要保证相乘顺序、块行操作与各块尺寸一致。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
-<Question id="core-la-rank-zhangyu1000-20" type="single" number="20" tags="来源:张宇1000题, 考点:分块矩阵秩比较">
+<Question id="core-1102-math-5d75aa-020" type="single" points={5} tags="来源:2024年考研数学二, 科目:线性代数, 章节:第四节-秩, 考点:伴随矩阵与平方零矩阵的秩">
 
-设$A,B,C$均为$n$阶矩阵，$r(AB)\leq r(BA)$，记$\begin{bmatrix}O&AB\\B&BC\end{bmatrix},\begin{bmatrix}B&BC\\AB&O\end{bmatrix},\begin{bmatrix}BA&BAC\\O&B\end{bmatrix}$的秩分别为$r_1,r_2,r_3$，则( ).
 
-<Option>$r_2\leq r_3\leq r_1$</Option>
 
-<Option correct>$r_2\leq r_1\leq r_3$</Option>
+$A$ 为四阶矩阵，$A^*$ 为 $A$ 的伴随矩阵。若
 
-<Option>$r_1\leq r_2\leq r_3$</Option>
+$$
+A(A-A^*)=O,
+$$
 
-<Option>$r_3\leq r_2\leq r_1$</Option>
+且
+
+$$
+A\ne A^*,
+$$
+
+则 $r(A)$ 可能为（ ）。
+
+<Option>$0$ 或 $1$</Option>
+<Option>$1$ 或 $3$</Option>
+<Option>$2$ 或 $3$</Option>
+<Option correct>$1$ 或 $2$</Option>
 
 <Solution>
 
-**答案：B，即 $r_2\le r_1\le r_3$。**
-
-**观察结构：** 三个块矩阵中都出现 $B$，但其余块可以写作 $AB$、$BC$、$BAC$。关键是先消掉“可以由旁边块线性表示”的部分。
+**答案：** 第四项，秩可能为 $1$ 或 $2$。
 
 <Steps>
-  <Step title="第一个矩阵：用列变换消去 BC">
+  <Step>
 
-右乘可逆块矩阵 $\begin{pmatrix}E&-C\\O&E\end{pmatrix}$，得到
+### 利用伴随矩阵恒等式
 
-$$
-\begin{pmatrix}O&AB\\B&BC\end{pmatrix}
-\begin{pmatrix}E&-C\\O&E\end{pmatrix}
-=\begin{pmatrix}O&AB\\B&O\end{pmatrix}.
-$$
-
-交换两个块列后成为块对角阵，故
+四阶矩阵总满足 $AA^*=(\det A)I_4$。由 $A(A-A^*)=O$ 得
 
 $$
-\boxed{r_1=r(B)+r(AB)}.
+A^2=(\det A)I_4.
 $$
 
-</Step>
-  <Step title="第二个矩阵：用行变换消去 AB">
-
-以第二块行减去第一块行的 $A$ 倍：
+若 $\det A\ne0$，则 $A$ 可逆，原式左乘 $A^{-1}$ 将迫使 $A=A^*$，与题设矛盾。故 $\det A=0$，从而
 
 $$
-\begin{pmatrix}B&BC\\AB&O\end{pmatrix}
-\sim\begin{pmatrix}B&BC\\O&-ABC\end{pmatrix}.
+A^2=O.
 $$
 
-第一块行 $[B,BC]=B[E,C]$ 的任意行组合若左半块为零，则右半块也为零，因此与 $[O,-ABC]$ 的行空间交仅有零向量。于是
+  </Step>
+  <Step>
+
+### 由平方零限制秩
+
+从 $A^2=O$ 得 $\operatorname{Im}A\subseteq\ker A$，于是
 
 $$
-\boxed{r_2=r(B)+r(ABC)}.
+r(A)\le \dim\ker A=4-r(A),
+\qquad r(A)\le2.
 $$
 
-</Step>
-  <Step title="第三个矩阵：判断块行空间是直和">
+又若 $r(A)=0$，则 $A=O$，且 $A^*=O$，不满足 $A\ne A^*$，所以 $r(A)\ge1$。
 
-$[BA,BAC]=BA[E,C]$ 的行空间与 $[O,B]$ 的行空间仅交于零向量：上部线性组合的左半块若为零，右半块也为零。因此
+  </Step>
+  <Step>
 
-$$
-\boxed{r_3=r(BA)+r(B)}.
-$$
+### 构造例子证明两个值都可取
 
-</Step>
+取 $A=E_{12}$，则 $A^2=O$、$r(A)=1$。取 $A=E_{12}+E_{34}$，则 $A^2=O$、$r(A)=2$。
+
+这两个四阶矩阵的秩均不超过 $2$，故 $A^*=O$；又 $A\ne O$，因此均符合题设，两个秩值都实际可达。
+
+  </Step>
 </Steps>
 
-最后利用矩阵乘积的秩不增性质与已知条件：
+<Callout type="idea" title="平方零矩阵的通法">
 
-$$
-r(ABC)\le r(AB)\le r(BA).
-$$
-
-三式分别加上 $r(B)$，得到 $\boxed{r_2\le r_1\le r_3}$。
-
-<Callout type="idea" title="可迁移模板">
-
-对于相容的块，$r\begin{pmatrix}X&XC\\O&Y\end{pmatrix}=r(X)+r(Y)$。原因不是“上三角直接把两块相加”，而是上部块行的右半部分完全由其左半部分确定；可用可逆列消元严格证明。
+若 $A$ 是 $n$ 阶且 $A^2=O$，则 $\operatorname{Im}A\subseteq\ker A$，所以 $r(A)\le\lfloor n/2\rfloor$，比逐个讨论高阶子式更有效。
 
 </Callout>
 
 </Solution>
+
 </Question>
 
+## 2025 年补充真题
 
-## 五、秩与空间位置：线性无关判定相交
+<Question id="core-1102-math-5d75aa-021" type="single" points={5} tags="来源:2025年考研数学一, 科目:线性代数, 章节:第四节-秩, 考点:Sylvester秩不等式的等号条件">
 
 
-<Question id="core-la-rank-1998-m1-21" type="single" number="21" tags="来源:1998年数学一, 考点:直线参数式与满秩">
 
-设矩阵
-
-$$
-\begin{pmatrix}
-a_1&b_1&c_1\\
-a_2&b_2&c_2\\
-a_3&b_3&c_3
-\end{pmatrix}
-$$
-
-是满秩的，则直线
+设 $A,B,C$ 为 $n$ 阶矩阵，且
 
 $$
-\frac{x-a_3}{a_1-a_2}
-=\frac{y-b_3}{b_1-b_2}
-=\frac{z-c_3}{c_1-c_2}
+r(A)+r(B)+r(C)=r(ABC)+2n.
 $$
 
-与直线
+考察以下结论：
 
-$$
-\frac{x-a_1}{a_2-a_3}
-=\frac{y-b_1}{b_2-b_3}
-=\frac{z-c_1}{c_2-c_3}
-$$
+① $r(ABC)+n=r(AB)+r(C)$；
 
-（ ）。
+② $r(AB)+n=r(A)+r(B)$；
 
-<Option correct>相交于一点</Option>
+③ $r(A)=r(B)=r(C)=n$；
 
-<Option>重合</Option>
+④ $r(AB)=r(BC)=n$。
 
-<Option>平行但不重合</Option>
+必然成立的是（ ）。
 
-<Option>异面</Option>
+<Option correct>①②</Option>
+<Option>①③</Option>
+<Option>②④</Option>
+<Option>③④</Option>
 
 <Solution>
 
-**答案：A，两条直线相交于唯一一点。**
-
-**解题思路：** 先把对称式改写成参数式，既能避免方向分量为零造成的除零，也更容易直接构造交点。满秩负责保证两条直线的方向不平行。
-
-令 $u_i=(a_i,b_i,c_i)$（$i=1,2,3$）。因为给定矩阵满秩，三个行向量 $u_1,u_2,u_3$ 线性无关。
+**答案：** 第一项，①② 必然成立。
 
 <Steps>
-  <Step title="将两条直线写成向量参数式">
+  <Step>
+
+### 将 Sylvester 秩不等式连续使用两次
+
+对 $A,B$ 有
 
 $$
-L_1:\quad X=u_3+t(u_1-u_2),\qquad
-L_2:\quad X=u_1+s(u_2-u_3).
+r(AB)\ge r(A)+r(B)-n.
 $$
 
-这里 $X=(x,y,z)$ 表示任意空间位置向量。
-
-</Step>
-  <Step title="构造公共点">
-
-在第一条直线上取 $t=1$，得 $X=u_3+u_1-u_2$；在第二条直线上取 $s=-1$，同样得到
+再把 $AB$ 与 $C$ 视为两个 $n$ 阶矩阵，得到
 
 $$
-X=u_1-(u_2-u_3)=u_1+u_3-u_2.
+r(ABC)\ge r(AB)+r(C)-n.
 $$
 
-所以两直线**必有公共点**，且交点可写成
+合并为
 
 $$
-\boxed{(a_1+a_3-a_2,\ b_1+b_3-b_2,\ c_1+c_3-c_2)}.
+r(ABC)+2n\ge r(AB)+r(C)+n\ge r(A)+r(B)+r(C).
 $$
 
-</Step>
-  <Step title="证明交点唯一">
+  </Step>
+  <Step>
 
-若方向向量 $u_1-u_2$ 与 $u_2-u_3$ 成比例，则存在非全零系数 $h,k$ 使
+### 观察等号传递
+
+题设最左端与最右端相等。因此夹在两端之间的两处“$\ge$”必须同时取等号。于是
 
 $$
-h(u_1-u_2)+k(u_2-u_3)=0,
+\boxed{r(ABC)+n=r(AB)+r(C)}\quad\text{(①)},
 $$
 
-从而 $hu_1+(-h+k)u_2-ku_3=0$。这与 $u_1,u_2,u_3$ 线性无关矛盾。因此两方向不平行，交点唯一。
+$$
+\boxed{r(AB)+n=r(A)+r(B)}\quad\text{(②)}.
+$$
 
-</Step>
+  </Step>
+  <Step>
+
+### 一个反例同时否定③④的必然性
+
+取 $A=C=I_n$、$B=O$，则
+
+$$
+r(A)+r(B)+r(C)=n+0+n=2n=r(ABC)+2n.
+$$
+
+题设成立，但 $r(B)=0$、$r(AB)=r(BC)=0$，因此③④都不必然成立。
+
+  </Step>
 </Steps>
 
-**技巧：** 对称式只是参数式的简写；即使某个分母为零，参数式仍能正确表示该直线。判断空间直线是否相交，优先尝试**直接解参数**，不必一开始就计算方向向量的混合积。
+<Callout type="idea" title="等号链的思维方法">
+
+若 $X\ge Y\ge Z$ 且题设给出 $X=Z$，可以立刻断定两步均取等号。此法在矩阵秩、范数和概率不等式题中很常见。
+
+</Callout>
 
 </Solution>
+
 </Question>
