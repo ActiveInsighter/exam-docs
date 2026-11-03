@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildSourceTree, countQuestionsInMdx, indexSources, normalizeDocPath, resolveSource, sourceTrail, type PageTreeLike,
 } from '../lib/doc-sources';
-import { buildCoverage, collectRecords, groupSessions, pagesOf, totalsOf } from '../lib/question-records';
+import { buildCoverage, collectActivity, collectRecords, dayKey, groupSessions, pagesOf, streakOf, totalsOf } from '../lib/question-records';
 import type { AnswerState } from '../lib/question-store/types';
 
 const pageTree: PageTreeLike = {
@@ -101,5 +101,34 @@ describe('question records', () => {
       ['2026-11-02', '/docs/math/past/2020', 2],
       ['2026-10-01', '/docs/math/gone', 1],
     ]);
+  });
+});
+
+describe('activity', () => {
+  const local = (y: number, m: number, d: number, h = 12) => new Date(y, m - 1, d, h).toISOString();
+
+  it('counts distinct questions per local day from submissions and current answers', () => {
+    const activity = collectActivity(
+      [
+        { documentPath: '/docs/a', questionId: 'q1', state: state(['A'], true), updatedAt: local(2026, 11, 2) },
+        { documentPath: '/docs/a', questionId: 'q2', state: state(['B']), updatedAt: local(2026, 11, 3) },
+        // An empty (reset) answer is not activity.
+        { documentPath: '/docs/a', questionId: 'q3', state: state([]), updatedAt: local(2026, 11, 3) },
+      ],
+      [
+        { documentPath: '/docs/a', questionId: 'q1', createdAt: local(2026, 11, 1) },
+        { documentPath: '/docs/a', questionId: 'q1', createdAt: local(2026, 11, 2, 9) },
+        { documentPath: '/docs/a/', questionId: 'q1', createdAt: local(2026, 11, 2, 10) },
+      ],
+    );
+    expect(Object.fromEntries(activity)).toEqual({ '2026-11-01': 1, '2026-11-02': 1, '2026-11-03': 1 });
+    expect(dayKey(new Date(2026, 0, 5))).toBe('2026-01-05');
+  });
+
+  it('measures the streak up to today, or up to yesterday while today is empty', () => {
+    const activity = new Map([['2026-11-01', 2], ['2026-11-02', 5], ['2026-11-03', 1], ['2026-10-30', 4]]);
+    expect(streakOf(activity, new Date(2026, 10, 3, 20))).toBe(3);
+    expect(streakOf(activity, new Date(2026, 10, 4, 8))).toBe(3);
+    expect(streakOf(activity, new Date(2026, 10, 5, 8))).toBe(0);
   });
 });
