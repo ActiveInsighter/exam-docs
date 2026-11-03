@@ -3,82 +3,90 @@ title: 第三节 连续型随机变量
 description: 历年考研数学概率论与数理统计分类真题：一维连续型随机变量。
 ---
 
-## 一、一维连续型随机变量
+## 考点1：一维密度、对称性与尾概率
 
-<Question id="core-1102-math-1167f4-009" type="essay" points={4} tags="来源:1998年考研数学一, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:正态样本均值与样本量估计">
+### 01｜分段概率密度的归一化条件
+
+<Question id="core-1102-math-1167f4-015" type="single" points={4} tags="来源:2010年考研数学一、三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:分段概率密度的归一化">
 
 
 
-从正态总体 $N(3.4,6^2)$ 中抽取容量为 $n$ 的样本，如果要求其样本均值位于区间 $(1.4,5.4)$ 内的概率不小于 $0.95$，问样本容量 $n$ 至少应取多大？
-
-附表：
+设 $f_1(x)$ 为标准正态分布的概率密度，$f_2(x)$ 为 $[-1,3]$ 上均匀分布的概率密度。若
 
 $$
-\begin{array}{c|cccc}
-z&1.28&1.645&1.96&2.33\\\hline
-\Phi(z)&0.900&0.950&0.975&0.990
-\end{array}
+f(x)=
+\begin{cases}
+a f_1(x),&x\le0,\\
+b f_2(x),&x>0,
+\end{cases}
+\qquad (a>0,b>0)
 $$
+
+为概率密度，则 $a,b$ 应满足（　）。
+
+<Option correct>$2a+3b=4$</Option>
+<Option>$3a+2b=4$</Option>
+<Option>$a+b=1$</Option>
+<Option>$a+b=2$</Option>
 
 <Solution>
 
-**答案：** 最小样本容量为 $\boxed{n=35}$。
+**答案：** 选 A，$\boxed{2a+3b=4}$（并保留题设 $a>0,b>0$）。
 
 <Steps>
   <Step>
 
-### 第一步：准确写出样本均值的分布
+### 第一步：写出拼接密度的合法性条件
 
-总体服从 $N(3.4,6^2)$，这是均值 $3.4$、方差 $36$ 的正态分布。对独立同分布的容量为 $n$ 的样本，样本均值**精确**服从
-
-$$
-\overline X\sim N\left(3.4,\frac{36}{n}\right),
-\qquad \frac{\overline X-3.4}{6/\sqrt n}\sim N(0,1).
-$$
-
-这里不需要使用中心极限定理作近似，因为总体本身是正态的。
+概率密度必须非负且在实数轴上的积分为 $1$。由于题设 $a,b>0$，$f_1,f_2$ 本身非负，故只需对左右两段分别积分并使总面积为 $1$。注意右半段是 $f_2$ 在 $x>0$ 的部分，**不是**整个均匀分布的质量。
 
   </Step>
   <Step>
 
-### 第二步：把对称区间要求变成标准正态分位数要求
+### 第二步：计算两个加权半区间的概率质量
 
-区间 $(1.4,5.4)$ 恰好以总体均值 $3.4$ 为中心，半宽度为 $2$。于是对标准正态变量 $Z$，
+标准正态密度以 $0$ 为对称中心，所以
+
+$$
+\int_{-\infty}^0 f_1(x)\,dx=\frac12.
+$$
+
+$[-1,3]$ 上的均匀密度为 $f_2(x)=1/(3-(-1))=1/4$，其位于 $x>0$ 的支持区间为 $(0,3]$，因此
+
+$$
+\int_0^{+\infty}f_2(x)\,dx=\int_0^3\frac14\,dx=\frac34.
+$$
+
+  </Step>
+  <Step>
+
+### 第三步：归一化并整理选项形式
 
 $$
 \begin{aligned}
-P(1.4<\overline X<5.4)
-&=P(|\overline X-3.4|<2)\\
-&=P\left(|Z|<\frac{\sqrt n}{3}\right)\\
-&=2\Phi\left(\frac{\sqrt n}{3}\right)-1.
+\int_{-\infty}^{+\infty}f(x)\,dx
+&=a\int_{-\infty}^0f_1(x)\,dx
++b\int_0^{+\infty}f_2(x)\,dx\\
+&=\frac a2+\frac{3b}{4}=1.
 \end{aligned}
 $$
 
-该概率要求至少 $0.95$，故 $\Phi(\sqrt n/3)\ge0.975$。由附表 $\Phi(1.96)=0.975$，可得 $\sqrt n/3\ge1.96$。
-
-  </Step>
-  <Step>
-
-### 第三步：平方后取最小整数
-
-$$
-n\ge(3\times1.96)^2=(5.88)^2=34.5744.
-$$
-
-样本容量必须是正整数，所以最小取 $n=\lceil34.5744\rceil=\boxed{35}$。取 $34$ 时不能达到这一界限。
+两边乘以 $4$，得到 $\boxed{2a+3b=4}$。例如 $a=1/2,b=1$ 是满足非负与归一化的一个可行解。
 
   </Step>
 </Steps>
 
-<Callout type="warn" title="标准差不是方差">
+<Callout type="warn" title="截取密度后，左右质量不是各 1">
 
-题中 $N(3.4,6^2)$ 的第二参数是方差 $36$，但标准化时分母应为样本均值的**标准差** $6/\sqrt n$，绝不是 $36/n$。
+$f_1,f_2$ 单独积分均为 $1$，但拼接时使用的分别是 $(-\infty,0]$ 与 $(0,\infty)$ 的**截取部分**，其原始积分为 $1/2$ 和 $3/4$。故不可直接写 $a+b=1$。
 
 </Callout>
 
 </Solution>
 
 </Question>
+
+### 02｜密度为零区间的尾概率平台
 
 <Question id="core-1102-math-1167f4-011" type="blank" points={3} tags="来源:2000年考研数学三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:密度零区间与尾概率">
 
@@ -156,6 +164,158 @@ $$
 </Solution>
 
 </Question>
+
+### 03｜对称密度与区间外尾概率
+
+<Question id="core-1102-math-1167f4-020" type="single" points={4} tags="来源:2018年考研数学一、三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:对称密度与尾概率">
+
+
+
+$f(x)$ 为某分布的密度函数，且
+
+$$
+f(1+x)=f(1-x),
+$$
+
+又
+
+$$
+\int_0^2 f(x)\,dx=0.6,
+$$
+
+则 $P\{X<0\}=$（　）。
+
+<Option correct>$0.2$</Option>
+<Option>$0.3$</Option>
+<Option>$0.4$</Option>
+<Option>$0.5$</Option>
+
+<Solution>
+
+**正确选项：A。** $\boxed{P(X<0)=0.2}$。
+
+**解题思路：** 从密度满足的函数等式识别**对称中心**，再利用对称区间外左右两侧概率相同。
+
+<Steps>
+  <Step>
+
+  ### 第一步：识别对称中心
+
+  对一切实数 $t$，$f(1+t)=f(1-t)$，即密度关于直线 $x=1$ 对称。因而在积分变换 $u=2-x$ 下，
+
+  $$
+  \int_{-\infty}^{0}f(x)\,\mathrm{d}x
+  =\int_2^{+\infty}f(u)\,\mathrm{d}u.
+  $$
+
+  所以 $P(X<0)=P(X>2)$。
+
+  </Step>
+  <Step>
+
+  ### 第二步：计算区间外总概率
+
+  已知 $P(0\le X\le2)=\int_0^2 f(x)\,\mathrm{d}x=0.6$。密度对应连续型变量，在单点取值的概率为 $0$，故
+
+  $$
+  P(X<0)+P(X>2)=1-0.6=0.4.
+  $$
+
+  </Step>
+  <Step>
+
+  ### 第三步：左右平分
+
+  由对称性，两项相等，因此
+
+  $$
+  \boxed{P(X<0)=\frac{0.4}{2}=0.2}.
+  $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="对称中心不是原点">
+  密度关于 $x=1$ 对称，不能直接断言 $P(X<0)=1/2$。只有把给定的区间 $[0,2]$ 看成以 $1$ 为中心的对称区间，才能正确分配左右尾部的概率。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 04｜指数分布的无记忆性
+
+<Question id="core-1102-math-1167f4-017" type="blank" points={4} tags="来源:2013年考研数学一, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:指数分布无记忆性">
+
+
+
+设随机变量 $Y$ 服从参数为 $1$ 的指数分布，$a$ 为常数且大于零，则
+
+$$
+P\{Y\le a+1\mid Y>a\}=
+$$
+
+<Blank answer="1-((1)/(e))" kind="math" />
+
+.
+
+<Solution>
+
+**答案：** $\boxed{1-e^{-1}}$。
+
+**解题思路：** 条件 $Y>a$ 表示随机变量已超过 $a$，要求的是“再过 $1$ 个单位时间内发生”的概率。指数分布的无记忆性可直接去掉已经等待的时间，也可从条件概率定义验证。
+
+<Steps>
+  <Step>
+
+  ### 第一步：写出指数分布的尾概率
+
+  参数为 $1$ 的指数分布满足 $f_Y(y)=e^{-y}$（$y>0$），因此对 $t\ge0$，
+
+  $$
+  P(Y>t)=\int_t^{+\infty}e^{-y}\,\mathrm{d}y=e^{-t}.
+  $$
+
+  </Step>
+  <Step>
+
+  ### 第二步：把目标事件化为条件尾概率
+
+  由于 $a>0$，且 $\{Y>a+1\}\subset\{Y>a\}$，
+
+  $$
+  \begin{aligned}
+  P(Y\le a+1\mid Y>a)
+  &=1-P(Y>a+1\mid Y>a)\\
+  &=1-\frac{P(Y>a+1)}{P(Y>a)}.
+  \end{aligned}
+  $$
+
+  </Step>
+  <Step>
+
+  ### 第三步：代入并约去 $a$
+
+  $$
+  1-\frac{e^{-(a+1)}}{e^{-a}}=\boxed{1-\frac1e}.
+  $$
+
+  故结果与 $a$ 的具体取值无关。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="无记忆性的一步法">
+  对任意 $s,t\ge0$，$P(Y>s+t\mid Y>s)=P(Y>t)$。取 $s=a,t=1$，即得所求概率 $1-P(Y>1)=1-e^{-1}$。注意这一性质是指数分布的特征，不能随意用于一般连续型分布。
+</Callout>
+
+</Solution>
+
+</Question>
+
+## 考点2：正态标准化、区间概率与样本量
+
+### 05｜标准正态双侧概率与上侧分位数
 
 <Question id="core-1102-math-1167f4-013" type="single" points={4} tags="来源:2004年考研数学一、三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:正态分布上侧分位数">
 
@@ -237,6 +397,8 @@ $$
 
 </Question>
 
+### 06｜正态区间概率与方差大小
+
 <Question id="core-1102-math-1167f4-014" type="single" points={4} tags="来源:2006年考研数学一、三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:正态区间概率与方差比较">
 
 
@@ -309,224 +471,7 @@ $$
 
 </Question>
 
-<Question id="core-1102-math-1167f4-015" type="single" points={4} tags="来源:2010年考研数学一、三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:分段概率密度的归一化">
-
-
-
-设 $f_1(x)$ 为标准正态分布的概率密度，$f_2(x)$ 为 $[-1,3]$ 上均匀分布的概率密度。若
-
-$$
-f(x)=
-\begin{cases}
-a f_1(x),&x\le0,\\
-b f_2(x),&x>0,
-\end{cases}
-\qquad (a>0,b>0)
-$$
-
-为概率密度，则 $a,b$ 应满足（　）。
-
-<Option correct>$2a+3b=4$</Option>
-<Option>$3a+2b=4$</Option>
-<Option>$a+b=1$</Option>
-<Option>$a+b=2$</Option>
-
-<Solution>
-
-**答案：** 选 A，$\boxed{2a+3b=4}$（并保留题设 $a>0,b>0$）。
-
-<Steps>
-  <Step>
-
-### 第一步：写出拼接密度的合法性条件
-
-概率密度必须非负且在实数轴上的积分为 $1$。由于题设 $a,b>0$，$f_1,f_2$ 本身非负，故只需对左右两段分别积分并使总面积为 $1$。注意右半段是 $f_2$ 在 $x>0$ 的部分，**不是**整个均匀分布的质量。
-
-  </Step>
-  <Step>
-
-### 第二步：计算两个加权半区间的概率质量
-
-标准正态密度以 $0$ 为对称中心，所以
-
-$$
-\int_{-\infty}^0 f_1(x)\,dx=\frac12.
-$$
-
-$[-1,3]$ 上的均匀密度为 $f_2(x)=1/(3-(-1))=1/4$，其位于 $x>0$ 的支持区间为 $(0,3]$，因此
-
-$$
-\int_0^{+\infty}f_2(x)\,dx=\int_0^3\frac14\,dx=\frac34.
-$$
-
-  </Step>
-  <Step>
-
-### 第三步：归一化并整理选项形式
-
-$$
-\begin{aligned}
-\int_{-\infty}^{+\infty}f(x)\,dx
-&=a\int_{-\infty}^0f_1(x)\,dx
-+b\int_0^{+\infty}f_2(x)\,dx\\
-&=\frac a2+\frac{3b}{4}=1.
-\end{aligned}
-$$
-
-两边乘以 $4$，得到 $\boxed{2a+3b=4}$。例如 $a=1/2,b=1$ 是满足非负与归一化的一个可行解。
-
-  </Step>
-</Steps>
-
-<Callout type="warn" title="截取密度后，左右质量不是各 1">
-
-$f_1,f_2$ 单独积分均为 $1$，但拼接时使用的分别是 $(-\infty,0]$ 与 $(0,\infty)$ 的**截取部分**，其原始积分为 $1/2$ 和 $3/4$。故不可直接写 $a+b=1$。
-
-</Callout>
-
-</Solution>
-
-</Question>
-
-<Question id="core-1102-math-1167f4-016" type="single" points={4} tags="来源:2011年考研数学一、三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:分布函数乘积的导数">
-
-
-
-设 $F_1(x),F_2(x)$ 为两个分布函数，其相应的概率密度 $f_1(x),f_2(x)$ 是连续函数，则必为概率密度的是（　）。
-
-<Option>$f_1(x)f_2(x)$</Option>
-<Option>$2f_2(x)F_1(x)$</Option>
-<Option>$f_1(x)F_2(x)$</Option>
-<Option correct>$f_1(x)F_2(x)+f_2(x)F_1(x)$</Option>
-
-<Solution>
-
-**答案：** 选 D，$\boxed{f_1(x)F_2(x)+f_2(x)F_1(x)}$ 必为概率密度。
-
-<Steps>
-  <Step>
-
-### 第一步：利用分布函数与密度的导数关系
-
-题设 $f_1,f_2$ 连续，且各为相应分布函数的密度，因此 $F_1'(x)=f_1(x)$、$F_2'(x)=f_2(x)$。应用乘积求导法则：
-
-$$
-\frac{d}{dx}\bigl[F_1(x)F_2(x)\bigr]
-=f_1(x)F_2(x)+F_1(x)f_2(x).
-$$
-
-这正是选项 D 的形式。
-
-  </Step>
-  <Step>
-
-### 第二步：证明非负性
-
-对任意 $x$，密度 $f_i(x)\ge0$，分布函数满足 $0\le F_i(x)\le1$。因此
-
-$$
-f_1(x)F_2(x)+f_2(x)F_1(x)\ge0.
-$$
-
-这是概率密度的第一个必要条件，不能仅凭导数外形就跳过。
-
-  </Step>
-  <Step>
-
-### 第三步：验证全轴积分为一
-
-借助上面的乘积求导关系和分布函数的极限，
-
-$$
-\begin{aligned}
-\int_{-\infty}^{+\infty}\!\bigl[f_1(x)F_2(x)+f_2(x)F_1(x)\bigr]dx
-&=\lim_{b\to\infty,a\to-\infty}\bigl[F_1(b)F_2(b)-F_1(a)F_2(a)\bigr]\\
-&=1\cdot1-0\cdot0=1.
-\end{aligned}
-$$
-
-故它一定是有效的概率密度。更进一步，$F_1F_2$ 也确实构成一个分布函数。
-
-  </Step>
-</Steps>
-
-<Callout type="idea" title="概率解释：最大值的分布">
-
-取独立随机变量 $U,V$，使其边缘分布函数分别为 $F_1,F_2$，则 $P(\max(U,V)\le x)=F_1(x)F_2(x)$；对其求导即得 D。这是一种快速记忆方式，**但本题不需要假定原先给定的两个分布对应的随机变量独立**。
-
-</Callout>
-
-</Solution>
-
-</Question>
-
-<Question id="core-1102-math-1167f4-017" type="blank" points={4} tags="来源:2013年考研数学一, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:指数分布无记忆性">
-
-
-
-设随机变量 $Y$ 服从参数为 $1$ 的指数分布，$a$ 为常数且大于零，则
-
-$$
-P\{Y\le a+1\mid Y>a\}=
-$$
-
-<Blank answer="1-((1)/(e))" kind="math" />
-
-.
-
-<Solution>
-
-**答案：** $\boxed{1-e^{-1}}$。
-
-**解题思路：** 条件 $Y>a$ 表示随机变量已超过 $a$，要求的是“再过 $1$ 个单位时间内发生”的概率。指数分布的无记忆性可直接去掉已经等待的时间，也可从条件概率定义验证。
-
-<Steps>
-  <Step>
-
-  ### 第一步：写出指数分布的尾概率
-
-  参数为 $1$ 的指数分布满足 $f_Y(y)=e^{-y}$（$y>0$），因此对 $t\ge0$，
-
-  $$
-  P(Y>t)=\int_t^{+\infty}e^{-y}\,\mathrm{d}y=e^{-t}.
-  $$
-
-  </Step>
-  <Step>
-
-  ### 第二步：把目标事件化为条件尾概率
-
-  由于 $a>0$，且 $\{Y>a+1\}\subset\{Y>a\}$，
-
-  $$
-  \begin{aligned}
-  P(Y\le a+1\mid Y>a)
-  &=1-P(Y>a+1\mid Y>a)\\
-  &=1-\frac{P(Y>a+1)}{P(Y>a)}.
-  \end{aligned}
-  $$
-
-  </Step>
-  <Step>
-
-  ### 第三步：代入并约去 $a$
-
-  $$
-  1-\frac{e^{-(a+1)}}{e^{-a}}=\boxed{1-\frac1e}.
-  $$
-
-  故结果与 $a$ 的具体取值无关。
-
-  </Step>
-</Steps>
-
-<Callout type="idea" title="无记忆性的一步法">
-  对任意 $s,t\ge0$，$P(Y>s+t\mid Y>s)=P(Y>t)$。取 $s=a,t=1$，即得所求概率 $1-P(Y>1)=1-e^{-1}$。注意这一性质是指数分布的特征，不能随意用于一般连续型分布。
-</Callout>
-
-</Solution>
-
-</Question>
+### 07｜不同正态分布的区间概率比较
 
 <Question id="core-1102-math-1167f4-018" type="single" points={4} tags="来源:2013年考研数学一、三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:正态区间概率大小比较">
 
@@ -616,6 +561,8 @@ $$
 
 </Question>
 
+### 08｜正态标准化后的参数单调性
+
 <Question id="core-1102-math-1167f4-019" type="single" points={4} tags="来源:2016年考研数学一, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:正态分布标准化与单调性">
 
 
@@ -690,83 +637,795 @@ $$
 
 </Question>
 
-<Question id="core-1102-math-1167f4-020" type="single" points={4} tags="来源:2018年考研数学一、三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:对称密度与尾概率">
+### 09｜正态样本均值的概率与最小样本量
+
+<Question id="core-1102-math-1167f4-009" type="essay" points={4} tags="来源:1998年考研数学一, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:正态样本均值与样本量估计">
 
 
 
-$f(x)$ 为某分布的密度函数，且
+从正态总体 $N(3.4,6^2)$ 中抽取容量为 $n$ 的样本，如果要求其样本均值位于区间 $(1.4,5.4)$ 内的概率不小于 $0.95$，问样本容量 $n$ 至少应取多大？
 
-$$
-f(1+x)=f(1-x),
-$$
-
-又
+附表：
 
 $$
-\int_0^2 f(x)\,dx=0.6,
+\begin{array}{c|cccc}
+z&1.28&1.645&1.96&2.33\\\hline
+\Phi(z)&0.900&0.950&0.975&0.990
+\end{array}
 $$
-
-则 $P\{X<0\}=$（　）。
-
-<Option correct>$0.2$</Option>
-<Option>$0.3$</Option>
-<Option>$0.4$</Option>
-<Option>$0.5$</Option>
 
 <Solution>
 
-**正确选项：A。** $\boxed{P(X<0)=0.2}$。
-
-**解题思路：** 从密度满足的函数等式识别**对称中心**，再利用对称区间外左右两侧概率相同。
+**答案：** 最小样本容量为 $\boxed{n=35}$。
 
 <Steps>
   <Step>
 
-  ### 第一步：识别对称中心
+### 第一步：准确写出样本均值的分布
 
-  对一切实数 $t$，$f(1+t)=f(1-t)$，即密度关于直线 $x=1$ 对称。因而在积分变换 $u=2-x$ 下，
+总体服从 $N(3.4,6^2)$，这是均值 $3.4$、方差 $36$ 的正态分布。对独立同分布的容量为 $n$ 的样本，样本均值**精确**服从
 
-  $$
-  \int_{-\infty}^{0}f(x)\,\mathrm{d}x
-  =\int_2^{+\infty}f(u)\,\mathrm{d}u.
-  $$
+$$
+\overline X\sim N\left(3.4,\frac{36}{n}\right),
+\qquad \frac{\overline X-3.4}{6/\sqrt n}\sim N(0,1).
+$$
 
-  所以 $P(X<0)=P(X>2)$。
-
-  </Step>
-  <Step>
-
-  ### 第二步：计算区间外总概率
-
-  已知 $P(0\le X\le2)=\int_0^2 f(x)\,\mathrm{d}x=0.6$。密度对应连续型变量，在单点取值的概率为 $0$，故
-
-  $$
-  P(X<0)+P(X>2)=1-0.6=0.4.
-  $$
+这里不需要使用中心极限定理作近似，因为总体本身是正态的。
 
   </Step>
   <Step>
 
-  ### 第三步：左右平分
+### 第二步：把对称区间要求变成标准正态分位数要求
 
-  由对称性，两项相等，因此
+区间 $(1.4,5.4)$ 恰好以总体均值 $3.4$ 为中心，半宽度为 $2$。于是对标准正态变量 $Z$，
 
-  $$
-  \boxed{P(X<0)=\frac{0.4}{2}=0.2}.
-  $$
+$$
+\begin{aligned}
+P(1.4<\overline X<5.4)
+&=P(|\overline X-3.4|<2)\\
+&=P\left(|Z|<\frac{\sqrt n}{3}\right)\\
+&=2\Phi\left(\frac{\sqrt n}{3}\right)-1.
+\end{aligned}
+$$
+
+该概率要求至少 $0.95$，故 $\Phi(\sqrt n/3)\ge0.975$。由附表 $\Phi(1.96)=0.975$，可得 $\sqrt n/3\ge1.96$。
+
+  </Step>
+  <Step>
+
+### 第三步：平方后取最小整数
+
+$$
+n\ge(3\times1.96)^2=(5.88)^2=34.5744.
+$$
+
+样本容量必须是正整数，所以最小取 $n=\lceil34.5744\rceil=\boxed{35}$。取 $34$ 时不能达到这一界限。
 
   </Step>
 </Steps>
 
-<Callout type="warn" title="对称中心不是原点">
-  密度关于 $x=1$ 对称，不能直接断言 $P(X<0)=1/2$。只有把给定的区间 $[0,2]$ 看成以 $1$ 为中心的对称区间，才能正确分配左右尾部的概率。
+<Callout type="warn" title="标准差不是方差">
+
+题中 $N(3.4,6^2)$ 的第二参数是方差 $36$，但标准化时分母应为样本均值的**标准差** $6/\sqrt n$，绝不是 $36/n$。
+
 </Callout>
 
 </Solution>
 
 </Question>
 
-## 二、二维连续型随机变量
+## 考点3：独立正态变量的线性组合
+
+### 10｜正态差的分布与均值消去
+
+<Question id="core-1102-math-1167f4-035" type="single" points={4} tags="来源:2019年考研数学一、三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:独立正态变量之差的分布">
+
+
+
+设随机变量 $X,Y$ 相互独立，且都服从正态分布 $N(\mu,\sigma^2)$，则
+
+$$
+P\{|X-Y|<1\}
+$$
+
+（　）。
+
+<Option correct>与 $\mu$ 无关，而与 $\sigma^2$ 有关</Option>
+<Option>与 $\mu$ 有关，而与 $\sigma^2$ 无关</Option>
+<Option>与 $\mu,\sigma^2$ 都有关</Option>
+<Option>与 $\mu,\sigma^2$ 都无关</Option>
+
+<Solution>
+
+**正确选项：A。** 概率与 $\mu$ 无关，但与 $\sigma^2$ 有关。
+
+<Steps>
+  <Step>
+
+  ### 第一步：求独立正态变量之差的分布
+
+  对 $X,Y$ 独立且均服从 $N(\mu,\sigma^2)$，线性组合仍服从正态分布，且
+
+  $$
+  E(X-Y)=\mu-\mu=0,
+  $$
+
+  $$
+  D(X-Y)=D(X)+D(Y)=2\sigma^2.
+  $$
+
+  所以 $X-Y\sim N(0,2\sigma^2)$。注意独立保证 $\operatorname{Cov}(X,Y)=0$；若不独立，方差还须加入协方差项。
+
+  </Step>
+  <Step>
+
+  ### 第二步：将绝对值概率标准化
+
+  假定正态分布非退化，即 $\sigma>0$。令 $Z=(X-Y)/(\sqrt2\sigma)\sim N(0,1)$，则
+
+  $$
+  \begin{aligned}
+  P(|X-Y|<1)
+  &=P\left(-\frac1{\sqrt2\sigma}<Z<\frac1{\sqrt2\sigma}\right)\\
+  &=2\Phi\left(\frac1{\sqrt2\sigma}\right)-1.
+  \end{aligned}
+  $$
+
+  </Step>
+  <Step>
+
+  ### 第三步：明确参数依赖关系
+
+  结果中没有 $\mu$；而 $\sigma$ 进入 $\Phi$ 的自变量中。$\sigma$ 增大时，$1/(\sqrt2\sigma)$ 减小，所求概率随之减小，说明确实依赖于方差 $\sigma^2$。
+
+  因此选择 A。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="方差公式要用对">
+  $D(X-Y)=D(X)+D(Y)-2\operatorname{Cov}(X,Y)$；本题因独立才化为 $2\sigma^2$。切勿误写成 $D(X)-D(Y)=0$。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 11｜正态线性组合与分位数反求
+
+<Question id="core-1102-math-1167f4-037" type="single" points={5} tags="来源:2024年考研数学一, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:正态线性组合与分布函数">
+
+
+
+设随机变量 $X,Y$ 相互独立，$X$ 服从 $N(0,2)$ 的正态分布，$Y$ 服从 $N(-2,2)$ 的正态分布。若
+
+$$
+P\{2X+Y<a\}=P\{X>Y\},
+$$
+
+则 $a=$（　）。
+
+<Option>$-2-\sqrt{10}$</Option>
+<Option correct>$-2+\sqrt{10}$</Option>
+<Option>$-2-\sqrt6$</Option>
+<Option>$-2+\sqrt6$</Option>
+
+<Solution>
+
+**正确选项：B。** $\boxed{a=-2+\sqrt{10}}$。
+
+<Steps>
+  <Step>
+
+  ### 第一步：求 $2X+Y$ 的分布
+
+  正态分布 $N(\mu,\sigma^2)$ 的第二参数是**方差**。由 $X\sim N(0,2)$、$Y\sim N(-2,2)$ 且独立，有
+
+  $$
+  \begin{aligned}
+  E(2X+Y)&=2\cdot0-2=-2,\\
+  D(2X+Y)&=2^2\cdot2+2=10.
+  \end{aligned}
+  $$
+
+  故 $2X+Y\sim N(-2,10)$，所以
+
+  $$
+  P(2X+Y<a)=\Phi\left(\frac{a+2}{\sqrt{10}}\right).
+  $$
+
+  </Step>
+  <Step>
+
+  ### 第二步：将 $P(X>Y)$ 转成标准正态概率
+
+  同样，$X-Y\sim N(0-(-2),2+2)=N(2,4)$，因此
+
+  $$
+  \begin{aligned}
+  P(X>Y)&=P(X-Y>0)\\
+  &=P\left(\frac{X-Y-2}{2}>-1\right)\\
+  &=1-\Phi(-1)=\Phi(1).
+  \end{aligned}
+  $$
+
+  </Step>
+  <Step>
+
+  ### 第三步：利用分布函数严格单调性
+
+  题给等式化为
+
+  $$
+  \Phi\left(\frac{a+2}{\sqrt{10}}\right)=\Phi(1).
+  $$
+
+  标准正态分布函数严格递增，因而
+
+  $$
+  \frac{a+2}{\sqrt{10}}=1,
+  \qquad \boxed{a=-2+\sqrt{10}}.
+  $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="线性组合方差并非线性组合">
+  $D(2X+Y)=4D(X)+D(Y)$，不是 $2D(X)+D(Y)$。同样 $D(X-Y)=D(X)+D(Y)$ 在独立条件下成立，负号不会让方差相减。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 12｜正态线性组合的概率比较
+
+<Question id="core-1102-math-1167f4-038" type="single" points={5} tags="来源:2024年考研数学三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:正态线性组合的概率比较">
+
+
+
+设随机变量 $X,Y$ 相互独立，且 $X$ 服从 $N(0,2)$，$Y$ 服从 $N(-1,1)$。记
+
+$$
+p_1=P\{2X-Y>0\},\qquad
+p_2=P\{X-2Y>1\},
+$$
+
+则（　）。
+
+<Option>$p_1>p_2>\dfrac12$</Option>
+<Option correct>$p_2>p_1>\dfrac12$</Option>
+<Option>$p_1<p_2<\dfrac12$</Option>
+<Option>$p_2<p_1<\dfrac12$</Option>
+
+<Solution>
+
+**正确选项：B。** $\boxed{p_2>p_1>1/2}$。
+
+**解题思路：** 两个概率都形如正态变量大于阈值的概率。分别先确定正态线性组合的均值和方差，再标准化；比较的是两个**标准化阈值**，而非原始均值。
+
+<Steps>
+  <Step>
+
+  ### 第一步：计算 $2X-Y$ 的分布与 $p_1$
+
+  独立性给出
+
+  $$
+  E(2X-Y)=0-(-1)=1,
+  \qquad D(2X-Y)=4\cdot2+1=9.
+  $$
+
+  所以 $2X-Y\sim N(1,9)$，标准差为 $3$，
+
+  $$
+  p_1=P(2X-Y>0)=1-\Phi\left(-\frac13\right)=\Phi\left(\frac13\right).
+  $$
+
+  </Step>
+  <Step>
+
+  ### 第二步：计算 $X-2Y$ 的分布与 $p_2$
+
+  $$
+  E(X-2Y)=0-2(-1)=2,
+  \qquad D(X-2Y)=2+4\cdot1=6.
+  $$
+
+  故 $X-2Y\sim N(2,6)$，并有
+
+  $$
+  p_2=P(X-2Y>1)=1-\Phi\left(-\frac1{\sqrt6}\right)=\Phi\left(\frac1{\sqrt6}\right).
+  $$
+
+  </Step>
+  <Step>
+
+  ### 第三步：比较标准化结果
+
+  因为 $\sqrt6<3$，故
+
+  $$
+  \frac1{\sqrt6}>\frac13>0.
+  $$
+
+  又 $\Phi$ 严格递增，且 $\Phi(0)=1/2$，所以
+
+  $$
+  \boxed{p_2>p_1>\frac12}.
+  $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="一眼比较的抓手">
+  对 $W\sim N(m,s^2)$，$P(W>c)=\Phi((m-c)/s)$。本题只需比较两个“均值减阈值再除以标准差”的量：$1/3$ 与 $1/\sqrt6$，无需查表计算小数概率。
+</Callout>
+
+</Solution>
+
+</Question>
+
+## 考点4：独立随机变量的事件与函数分布
+
+### 13｜独立二项变量相等的概率
+
+<Question id="core-1102-math-1167f4-036" type="blank" points={5} tags="来源:2023年考研数学一, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:独立二项变量相等的概率">
+
+
+
+设随机变量 $X,Y$ 相互独立，且
+
+$$
+X\sim B\left(1,\frac13\right),\qquad
+Y\sim B\left(2,\frac12\right),
+$$
+
+则
+
+$$
+P\{X=Y\}=
+$$
+
+<Blank answer="((1)/(3))" kind="math" />
+
+.
+
+<Solution>
+
+**答案：** $\boxed{P(X=Y)=1/3}$。
+
+**解题思路：** 两个二项随机变量的取值范围不同，先找**共同的可能取值**，再用独立性把联合概率分解相乘。
+
+<Steps>
+  <Step>
+
+  ### 第一步：列出两变量的分布
+
+  $X\sim B(1,1/3)$ 是伯努利分布：
+
+  $$
+  P(X=0)=\frac23,\qquad P(X=1)=\frac13.
+  $$
+
+  $Y\sim B(2,1/2)$，故
+
+  $$
+  P(Y=0)=\frac14,\quad P(Y=1)=\frac12,\quad P(Y=2)=\frac14.
+  $$
+
+  </Step>
+  <Step>
+
+  ### 第二步：确定互斥的相等事件
+
+  因 $X$ 不能取 $2$，所以 $\{X=Y\}$ 只能分为
+
+  $$
+  \{X=0,Y=0\}\ \cup\ \{X=1,Y=1\}.
+  $$
+
+  两事件互斥，可以将概率相加。
+
+  </Step>
+  <Step>
+
+  ### 第三步：利用独立性计算
+
+  $$
+  \begin{aligned}
+  P(X=Y)
+  &=P(X=0)P(Y=0)+P(X=1)P(Y=1)\\
+  &=\frac23\cdot\frac14+\frac13\cdot\frac12\\
+  &=\frac16+\frac16=\boxed{\frac13}.
+  \end{aligned}
+  $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="离散型变量相等事件通式">
+  对相互独立的离散型随机变量，$P(X=Y)=\sum_{k}P(X=k)P(Y=k)$，只对双方**共同支持的取值**求和。本题虽然编排在连续型章节，但具体考查的是离散型二项分布及独立性。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 14｜独立指数变量的大小比较
+
+<Question id="core-1102-math-1167f4-031" type="single" points={4} tags="来源:2012年考研数学一, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:独立指数变量大小比较">
+
+
+
+设随机变量 $X,Y$ 相互独立，且分别服从参数为 $1$ 与参数为 $4$ 的指数分布，则
+
+$$
+P\{X<Y\}=
+$$
+
+（　）。
+
+<Option correct>$\dfrac15$</Option>
+<Option>$\dfrac13$</Option>
+<Option>$\dfrac25$</Option>
+<Option>$\dfrac45$</Option>
+
+<Solution>
+
+**正确选项：A。** $\boxed{P(X<Y)=1/5}$。
+
+<Steps>
+  <Step>
+
+  ### 第一步：明确指数分布的率参数
+
+  按题目中的常用参数约定，$X\sim\mathrm{Exp}(1)$，$Y\sim\mathrm{Exp}(4)$，即
+
+  $$
+  f_X(x)=e^{-x}\ (x>0),\qquad P(Y>x)=e^{-4x}\ (x\ge0).
+  $$
+
+  $Y$ 的率参数更大，平均等待时间更短，故 $P(X<Y)$ 应当小于 $1/2$，可作为结果的直观检查。
+
+  </Step>
+  <Step>
+
+  ### 第二步：对 $X=x$ 条件化
+
+  将 $X$ 的取值视为积分变量。独立性保证给定 $X=x$ 时，$Y$ 的尾概率不变：
+
+  $$
+  \begin{aligned}
+  P(X<Y)&=\int_0^{+\infty}P(Y>x\mid X=x)f_X(x)\,\mathrm{d}x\\
+  &=\int_0^{+\infty}P(Y>x)f_X(x)\,\mathrm{d}x.
+  \end{aligned}
+  $$
+
+  </Step>
+  <Step>
+
+  ### 第三步：计算并归纳
+
+  $$
+  P(X<Y)=\int_0^{+\infty}e^{-4x}e^{-x}\,\mathrm{d}x
+  =\int_0^{+\infty}e^{-5x}\,\mathrm{d}x=\boxed{\frac15}.
+  $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="两指数变量的先到概率">
+  若独立的 $X\sim\mathrm{Exp}(\lambda_1)$，$Y\sim\mathrm{Exp}(\lambda_2)$，则
+
+  $$
+  P(X<Y)=\int_0^{+\infty}\lambda_1e^{-(\lambda_1+\lambda_2)x}\,\mathrm{d}x
+  =\frac{\lambda_1}{\lambda_1+\lambda_2}.
+  $$
+
+  这个分子对应的是“$X$ 先到”的率 $\lambda_1$；不要误记成 $\lambda_2$。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 15｜分布函数乘积与极值的密度
+
+<Question id="core-1102-math-1167f4-016" type="single" points={4} tags="来源:2011年考研数学一、三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:分布函数乘积的导数">
+
+
+
+设 $F_1(x),F_2(x)$ 为两个分布函数，其相应的概率密度 $f_1(x),f_2(x)$ 是连续函数，则必为概率密度的是（　）。
+
+<Option>$f_1(x)f_2(x)$</Option>
+<Option>$2f_2(x)F_1(x)$</Option>
+<Option>$f_1(x)F_2(x)$</Option>
+<Option correct>$f_1(x)F_2(x)+f_2(x)F_1(x)$</Option>
+
+<Solution>
+
+**答案：** 选 D，$\boxed{f_1(x)F_2(x)+f_2(x)F_1(x)}$ 必为概率密度。
+
+<Steps>
+  <Step>
+
+### 第一步：利用分布函数与密度的导数关系
+
+题设 $f_1,f_2$ 连续，且各为相应分布函数的密度，因此 $F_1'(x)=f_1(x)$、$F_2'(x)=f_2(x)$。应用乘积求导法则：
+
+$$
+\frac{d}{dx}\bigl[F_1(x)F_2(x)\bigr]
+=f_1(x)F_2(x)+F_1(x)f_2(x).
+$$
+
+这正是选项 D 的形式。
+
+  </Step>
+  <Step>
+
+### 第二步：证明非负性
+
+对任意 $x$，密度 $f_i(x)\ge0$，分布函数满足 $0\le F_i(x)\le1$。因此
+
+$$
+f_1(x)F_2(x)+f_2(x)F_1(x)\ge0.
+$$
+
+这是概率密度的第一个必要条件，不能仅凭导数外形就跳过。
+
+  </Step>
+  <Step>
+
+### 第三步：验证全轴积分为一
+
+借助上面的乘积求导关系和分布函数的极限，
+
+$$
+\begin{aligned}
+\int_{-\infty}^{+\infty}\!\bigl[f_1(x)F_2(x)+f_2(x)F_1(x)\bigr]dx
+&=\lim_{b\to\infty,a\to-\infty}\bigl[F_1(b)F_2(b)-F_1(a)F_2(a)\bigr]\\
+&=1\cdot1-0\cdot0=1.
+\end{aligned}
+$$
+
+故它一定是有效的概率密度。更进一步，$F_1F_2$ 也确实构成一个分布函数。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="概率解释：最大值的分布">
+
+取独立随机变量 $U,V$，使其边缘分布函数分别为 $F_1,F_2$，则 $P(\max(U,V)\le x)=F_1(x)F_2(x)$；对其求导即得 D。这是一种快速记忆方式，**但本题不需要假定原先给定的两个分布对应的随机变量独立**。
+
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 16｜独立同分布变量乘积的区域概率
+
+<Question id="core-1102-math-1167f4-039" type="single" points={5} tags="来源:2026年考研数学三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:独立随机变量乘积的区域概率">
+
+
+
+设随机变量 $X$ 与 $Y$ 独立同分布，$X$ 的概率密度为
+
+$$
+f(x)=\begin{cases}\dfrac1{(1+x)^2},&x>0,\\0,&x\le0.\end{cases}
+$$
+
+则 $P\{XY\le1\}=$（ ）。
+
+<Option>$\frac34$</Option>
+<Option correct>$\frac12$</Option>
+<Option>$\frac13$</Option>
+<Option>$\frac16$</Option>
+
+<Solution>
+
+**正确选项：B。** $\boxed{P(XY\le1)=1/2}$。
+
+<Steps>
+  <Step>
+
+  ### 第一步：求单个随机变量的分布函数
+
+  由 $f_X(x)=(1+x)^{-2}$（$x>0$），可得
+
+  $$
+  F_X(t)=\int_0^t\frac1{(1+x)^2}\,\mathrm{d}x
+  =1-\frac1{1+t}=\frac{t}{1+t},\qquad t>0.
+  $$
+
+  因 $X,Y$ 独立同分布，$F_Y=F_X$。
+
+  </Step>
+  <Step>
+
+  ### 第二步：对 $X=x$ 条件化
+
+  $X>0,Y>0$ 几乎处处成立，故对 $x>0$，$XY\le1$ 等价于 $Y\le1/x$。因此
+
+  $$
+  \begin{aligned}
+  P(XY\le1)&=\int_0^{+\infty}P(Y\le1/x\mid X=x)f_X(x)\,\mathrm{d}x\\
+  &=\int_0^{+\infty}F_Y(1/x)\,f_X(x)\,\mathrm{d}x.
+  \end{aligned}
+  $$
+
+  </Step>
+  <Step>
+
+  ### 第三步：化简并积分
+
+  $F_Y(1/x)=(1/x)/(1+1/x)=1/(1+x)$。所以
+
+  $$
+  \begin{aligned}
+  P(XY\le1)
+  &=\int_0^{+\infty}\frac1{(1+x)^3}\,\mathrm{d}x\\
+  &=\left[-\frac1{2(1+x)^2}\right]_0^{+\infty}=\boxed{\frac12}.
+  \end{aligned}
+  $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="巧妙的对称性检验">
+  $1/X$ 与 $X$ 同分布，因为对 $t>0$ 有 $P(1/X\le t)=P(X\ge1/t)=t/(1+t)$。于是 $P(XY\le1)=P(X\le1/Y)$；由独立同分布且连续，$X$ 与 $1/Y$ 同分布且独立，故 $P(X\le1/Y)=1/2$。这可作为积分结果的独立验证。
+</Callout>
+
+</Solution>
+
+</Question>
+
+## 考点5：二维联合密度与区域积分
+
+### 17｜区域均匀分布的边缘密度
+
+<Question id="core-1102-math-1167f4-024" type="blank" points={3} tags="来源:1998年考研数学一, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:区域均匀分布的边缘密度">
+
+
+
+设 $D$ 由曲线 $y=\dfrac1x$ 及直线 $y=0$、$x=1$、$x=e^2$ 所围成。二维随机变量 $(X,Y)$ 在区域 $D$ 上服从均匀分布，则 $(X,Y)$ 关于 $X$ 的边缘概率密度在 $x=2$ 处的值为 <Blank answer="((1)/(4))" kind="math" />。
+
+<Solution>
+
+**答案：** $\boxed{f_X(2)=1/4}$。
+
+<Steps>
+  <Step>
+
+  ### 第一步：明确二维均匀分布的常数密度
+
+  区域 $D$ 由 $1\le x\le e^2$ 与 $0\le y\le1/x$ 构成。面积为
+
+  $$
+  S_D=\int_1^{e^2}\frac{1}{x}\,\mathrm{d}x=[\ln x]_1^{e^2}=2.
+  $$
+
+  因而联合概率密度在 $D$ 内等于 $1/S_D=1/2$，其他地方等于 $0$。
+
+  </Step>
+  <Step>
+
+  ### 第二步：按固定 $x$ 的纵向截线积分
+
+  取 $1<x<e^2$，纵向允许的 $y$ 从 $0$ 到 $1/x$，所以
+
+  $$
+  \begin{aligned}
+  f_X(x)&=\int_{-\infty}^{+\infty}f(x,y)\,\mathrm{d}y\\
+  &=\int_0^{1/x}\frac12\,\mathrm{d}y=\frac1{2x}.
+  \end{aligned}
+  $$
+
+  在区间外，$f_X(x)=0$。这表明边缘密度等于**纵向截线长度乘以联合密度常数**。
+
+  </Step>
+  <Step>
+
+  ### 第三步：代入要求的点并核验
+
+  因为 $1<2<e^2$，可以直接代入：
+
+  $$
+  \boxed{f_X(2)=\frac1{2\cdot2}=\frac14}.
+  $$
+
+  归一化检查：$\int_1^{e^2}\frac1{2x}\,\mathrm{d}x=1$。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="密度值不是点概率">
+  $f_X(2)=1/4$ 是边缘**密度**在 $x=2$ 的函数值，并非 $P(X=2)$；由于 $X$ 连续，$P(X=2)=0$。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 18｜三角支持域的事件概率
+
+<Question id="core-1102-math-1167f4-026" type="blank" points={4} tags="来源:2003年考研数学一, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:二维密度支持域与积分区域">
+
+
+
+设二维随机变量 $(X,Y)$ 的概率密度为
+
+$$
+f(x,y)=
+\begin{cases}
+6x,&0\le x<y\le1,\\
+0,&\text{其他}.
+\end{cases}
+$$
+
+则
+
+$$
+P\{X+Y\le1\}=
+$$
+
+<Blank answer="((1)/(4))" kind="math" />
+
+.
+
+<Solution>
+
+**答案：** $\boxed{P(X+Y\le1)=1/4}$。
+
+**解题思路：** 联合密度的三角形支持域是 $0\le x<y\le1$；增加 $x+y\le1$ 后，积分区域被直线 $y=1-x$ 截去一部分。核心是找对两条斜线的交点。
+
+<Steps>
+  <Step>
+
+  ### 第一步：确定 $x$ 的范围
+
+  固定 $x$，须有 $x<y\le1-x$，因此 $x<1-x$，即 $0\le x<1/2$。在该范围内，$1-x\le1$，故原条件 $y\le1$ 已自动满足。
+
+  </Step>
+  <Step>
+
+  ### 第二步：建立二重积分
+
+  由题设密度 $f(x,y)=6x$，
+
+  $$
+  P(X+Y\le1)=\int_0^{1/2}\!\int_x^{1-x}6x\,\mathrm{d}y\,\mathrm{d}x.
+  $$
+
+  此时积分域正是 $0\le x\le1/2,\ x\le y\le1-x$。
+
+  </Step>
+  <Step>
+
+  ### 第三步：积分计算
+
+  $$
+  \begin{aligned}
+  P(X+Y\le1)
+  &=\int_0^{1/2}6x(1-2x)\,\mathrm{d}x\\
+  &=[3x^2-4x^3]_0^{1/2}\\
+  &=\frac34-\frac12=\boxed{\frac14}.
+  \end{aligned}
+  $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="反向验证支持域">
+  全区域总概率为 $\int_0^1\int_x^1 6x\,\mathrm{d}y\,\mathrm{d}x=\int_0^1 6x(1-x)\,\mathrm{d}x=1$。此检验能帮助发现将积分上界误写成 $1$、漏掉 $x+y\le1$ 的问题。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 19｜非矩形支持域的边缘与区域概率
 
 <Question id="core-1102-math-1167f4-023" type="essay" points={7} tags="来源:1992年考研数学三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:二维联合密度与区域概率">
 
@@ -866,143 +1525,9 @@ $$
 
 </Question>
 
-<Question id="core-1102-math-1167f4-024" type="blank" points={3} tags="来源:1998年考研数学一, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:区域均匀分布的边缘密度">
+## 考点6：条件密度、二维正态与联合分布反推
 
-
-
-设 $D$ 由曲线 $y=\dfrac1x$ 及直线 $y=0$、$x=1$、$x=e^2$ 所围成。二维随机变量 $(X,Y)$ 在区域 $D$ 上服从均匀分布，则 $(X,Y)$ 关于 $X$ 的边缘概率密度在 $x=2$ 处的值为 <Blank answer="((1)/(4))" kind="math" />。
-
-<Solution>
-
-**答案：** $\boxed{f_X(2)=1/4}$。
-
-<Steps>
-  <Step>
-
-  ### 第一步：明确二维均匀分布的常数密度
-
-  区域 $D$ 由 $1\le x\le e^2$ 与 $0\le y\le1/x$ 构成。面积为
-
-  $$
-  S_D=\int_1^{e^2}\frac{1}{x}\,\mathrm{d}x=[\ln x]_1^{e^2}=2.
-  $$
-
-  因而联合概率密度在 $D$ 内等于 $1/S_D=1/2$，其他地方等于 $0$。
-
-  </Step>
-  <Step>
-
-  ### 第二步：按固定 $x$ 的纵向截线积分
-
-  取 $1<x<e^2$，纵向允许的 $y$ 从 $0$ 到 $1/x$，所以
-
-  $$
-  \begin{aligned}
-  f_X(x)&=\int_{-\infty}^{+\infty}f(x,y)\,\mathrm{d}y\\
-  &=\int_0^{1/x}\frac12\,\mathrm{d}y=\frac1{2x}.
-  \end{aligned}
-  $$
-
-  在区间外，$f_X(x)=0$。这表明边缘密度等于**纵向截线长度乘以联合密度常数**。
-
-  </Step>
-  <Step>
-
-  ### 第三步：代入要求的点并核验
-
-  因为 $1<2<e^2$，可以直接代入：
-
-  $$
-  \boxed{f_X(2)=\frac1{2\cdot2}=\frac14}.
-  $$
-
-  归一化检查：$\int_1^{e^2}\frac1{2x}\,\mathrm{d}x=1$。
-
-  </Step>
-</Steps>
-
-<Callout type="warn" title="密度值不是点概率">
-  $f_X(2)=1/4$ 是边缘**密度**在 $x=2$ 的函数值，并非 $P(X=2)$；由于 $X$ 连续，$P(X=2)=0$。
-</Callout>
-
-</Solution>
-
-</Question>
-
-<Question id="core-1102-math-1167f4-026" type="blank" points={4} tags="来源:2003年考研数学一, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:二维密度支持域与积分区域">
-
-
-
-设二维随机变量 $(X,Y)$ 的概率密度为
-
-$$
-f(x,y)=
-\begin{cases}
-6x,&0\le x<y\le1,\\
-0,&\text{其他}.
-\end{cases}
-$$
-
-则
-
-$$
-P\{X+Y\le1\}=
-$$
-
-<Blank answer="((1)/(4))" kind="math" />
-
-.
-
-<Solution>
-
-**答案：** $\boxed{P(X+Y\le1)=1/4}$。
-
-**解题思路：** 联合密度的三角形支持域是 $0\le x<y\le1$；增加 $x+y\le1$ 后，积分区域被直线 $y=1-x$ 截去一部分。核心是找对两条斜线的交点。
-
-<Steps>
-  <Step>
-
-  ### 第一步：确定 $x$ 的范围
-
-  固定 $x$，须有 $x<y\le1-x$，因此 $x<1-x$，即 $0\le x<1/2$。在该范围内，$1-x\le1$，故原条件 $y\le1$ 已自动满足。
-
-  </Step>
-  <Step>
-
-  ### 第二步：建立二重积分
-
-  由题设密度 $f(x,y)=6x$，
-
-  $$
-  P(X+Y\le1)=\int_0^{1/2}\!\int_x^{1-x}6x\,\mathrm{d}y\,\mathrm{d}x.
-  $$
-
-  此时积分域正是 $0\le x\le1/2,\ x\le y\le1-x$。
-
-  </Step>
-  <Step>
-
-  ### 第三步：积分计算
-
-  $$
-  \begin{aligned}
-  P(X+Y\le1)
-  &=\int_0^{1/2}6x(1-2x)\,\mathrm{d}x\\
-  &=[3x^2-4x^3]_0^{1/2}\\
-  &=\frac34-\frac12=\boxed{\frac14}.
-  \end{aligned}
-  $$
-
-  </Step>
-</Steps>
-
-<Callout type="idea" title="反向验证支持域">
-  全区域总概率为 $\int_0^1\int_x^1 6x\,\mathrm{d}y\,\mathrm{d}x=\int_0^1 6x(1-x)\,\mathrm{d}x=1$。此检验能帮助发现将积分上界误写成 $1$、漏掉 $x+y\le1$ 的问题。
-</Callout>
-
-</Solution>
-
-</Question>
+### 20｜二维正态零相关与条件独立
 
 <Question id="core-1102-math-1167f4-027" type="single" points={4} tags="来源:2007年考研数学一、三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:二维正态独立与条件密度">
 
@@ -1070,6 +1595,78 @@ $$
 </Solution>
 
 </Question>
+
+### 21｜二维正态独立与乘积事件概率
+
+<Question id="core-1102-math-1167f4-034" type="blank" points={4} tags="来源:2015年考研数学一、三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:二维正态分布与独立性">
+
+
+
+设二维随机变量 $(X,Y)$ 服从正态分布
+
+$$
+N(1,0;1,1;0),
+$$
+
+则
+
+$$
+P\{XY-Y<0\}=
+$$
+
+<Blank answer="((1)/(2))" kind="math" />
+
+.
+
+<Solution>
+
+**答案：** $\boxed{P(XY-Y<0)=1/2}$。
+
+<Steps>
+  <Step>
+
+  ### 第一步：读出二维正态分布的参数
+
+  从 $N(1,0;1,1;0)$ 可知 $X\sim N(1,1)$、$Y\sim N(0,1)$，二者相关系数为 $0$。由于**联合二维正态**，零相关系数推出 $X,Y$ 独立。
+
+  </Step>
+  <Step>
+
+  ### 第二步：作中心化并翻译不等式
+
+  $$
+  XY-Y=(X-1)Y.
+  $$
+
+  令 $U=X-1$，则 $U\sim N(0,1)$，并且 $U$ 与 $Y$ 仍然独立。因连续型随机变量取 $0$ 的概率为 $0$，乘积小于 $0$ 等价于二者**一正一负**。
+
+  </Step>
+  <Step>
+
+  ### 第三步：利用对称性与独立性
+
+  标准正态密度关于原点对称，故 $P(U>0)=P(U<0)=P(Y>0)=P(Y<0)=1/2$。于是
+
+  $$
+  \begin{aligned}
+  P(UY<0)&=P(U<0,Y>0)+P(U>0,Y<0)\\
+  &=P(U<0)P(Y>0)+P(U>0)P(Y<0)\\
+  &=\frac14+\frac14=\boxed{\frac12}.
+  \end{aligned}
+  $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="符号判定模型">
+  若两个独立、连续、关于 $0$ 对称的随机变量均没有 $0$ 处的原子概率，则它们的乘积为负的概率为 $1/2$。关键是**中心化后**的 $X-1$ 对称，而不是原变量 $X$ 对称。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 22｜三角支持域的条件密度与条件概率
 
 <Question id="core-1102-math-1167f4-028" type="essay" points={11} tags="来源:2009年考研数学三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:条件密度与条件概率">
 
@@ -1172,100 +1769,7 @@ $$
 
 </Question>
 
-<Question id="core-1102-math-1167f4-029" type="essay" points={11} tags="来源:2010年考研数学一、三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:二维正态密度配方与条件密度">
-
-
-
-设二维随机变量 $(X,Y)$ 的概率密度为
-
-$$
-f(x,y)=A e^{-2x^2+2xy-y^2},
-\qquad x,y\in\mathbb R,
-$$
-
-求常数 $A$ 及条件概率密度 $f_{Y\mid X}(y\mid x)$。
-
-<Solution>
-
-**参考答案：**
-
-$$
-\boxed{A=\frac1\pi},\qquad
-\boxed{f_{Y\mid X}(y\mid x)=\frac1{\sqrt\pi}e^{-(y-x)^2}},\quad x,y\in\mathbb R.
-$$
-
-**解题思路：** 看到 $xy$ 交叉项，优先对指数的二次型**配方**；配成两个高斯核后，既能求归一化常数，也能直接识别条件密度。
-
-<Steps>
-  <Step>
-
-  ### 第一步：对指数配方
-
-  $$
-  -2x^2+2xy-y^2=-x^2-(y-x)^2.
-  $$
-
-  因而
-
-  $$
-  f_{X,Y}(x,y)=A e^{-x^2}e^{-(y-x)^2}.
-  $$
-
-  对固定 $x$，第二个因子关于 $y$ 是平移后的高斯核。
-
-  </Step>
-  <Step>
-
-  ### 第二步：利用总概率求 $A$
-
-  由 $\int_{-\infty}^{+\infty}e^{-t^2}\,\mathrm{d}t=\sqrt\pi$，
-
-  $$
-  \begin{aligned}
-  1&=\int_{\mathbb R^2}f_{X,Y}(x,y)\,\mathrm{d}x\,\mathrm{d}y\\
-  &=A\int_{-\infty}^{+\infty}e^{-x^2}
-      \left(\int_{-\infty}^{+\infty}e^{-(y-x)^2}\,\mathrm{d}y\right)\mathrm{d}x\\
-  &=A\sqrt\pi\sqrt\pi=A\pi.
-  \end{aligned}
-  $$
-
-  故 $\boxed{A=1/\pi}$。
-
-  </Step>
-  <Step>
-
-  ### 第三步：先求 $X$ 的边缘密度
-
-  $$
-  f_X(x)=\int_{-\infty}^{+\infty}\frac1\pi e^{-x^2}e^{-(y-x)^2}\,\mathrm{d}y
-  =\frac{e^{-x^2}}{\sqrt\pi}.
-  $$
-
-  </Step>
-  <Step>
-
-  ### 第四步：求条件密度并检验
-
-  $$
-  \begin{aligned}
-  f_{Y\mid X}(y\mid x)&=\frac{f_{X,Y}(x,y)}{f_X(x)}\\
-  &=\frac{\frac1\pi e^{-x^2}e^{-(y-x)^2}}{\frac1{\sqrt\pi}e^{-x^2}}\\
-  &=\boxed{\frac1{\sqrt\pi}e^{-(y-x)^2}}.
-  \end{aligned}
-  $$
-
-  对任何固定 $x$，它对 $y$ 的积分都为 $1$。
-
-  </Step>
-</Steps>
-
-<Callout type="idea" title="条件正态分布的识别">
-  $f_{Y\mid X}(y\mid x)$ 是 $N(x,1/2)$ 的密度，即 $Y\mid X=x\sim N(x,1/2)$；这里指数为 $-(y-x)^2$，所以 $1/(2\sigma^2)=1$，勿把条件方差误写成 $1$。
-</Callout>
-
-</Solution>
-
-</Question>
+### 23｜区域均匀分布的边缘与条件密度
 
 <Question id="core-1102-math-1167f4-030" type="essay" points={11} tags="来源:2011年考研数学三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:三角形区域的边缘与条件密度">
 
@@ -1370,81 +1874,104 @@ $$
 
 </Question>
 
-<Question id="core-1102-math-1167f4-031" type="single" points={4} tags="来源:2012年考研数学一, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:独立指数变量大小比较">
+### 24｜二维正态密度配方与条件分布
+
+<Question id="core-1102-math-1167f4-029" type="essay" points={11} tags="来源:2010年考研数学一、三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:二维正态密度配方与条件密度">
 
 
 
-设随机变量 $X,Y$ 相互独立，且分别服从参数为 $1$ 与参数为 $4$ 的指数分布，则
+设二维随机变量 $(X,Y)$ 的概率密度为
 
 $$
-P\{X<Y\}=
+f(x,y)=A e^{-2x^2+2xy-y^2},
+\qquad x,y\in\mathbb R,
 $$
 
-（　）。
-
-<Option correct>$\dfrac15$</Option>
-<Option>$\dfrac13$</Option>
-<Option>$\dfrac25$</Option>
-<Option>$\dfrac45$</Option>
+求常数 $A$ 及条件概率密度 $f_{Y\mid X}(y\mid x)$。
 
 <Solution>
 
-**正确选项：A。** $\boxed{P(X<Y)=1/5}$。
+**参考答案：**
+
+$$
+\boxed{A=\frac1\pi},\qquad
+\boxed{f_{Y\mid X}(y\mid x)=\frac1{\sqrt\pi}e^{-(y-x)^2}},\quad x,y\in\mathbb R.
+$$
+
+**解题思路：** 看到 $xy$ 交叉项，优先对指数的二次型**配方**；配成两个高斯核后，既能求归一化常数，也能直接识别条件密度。
 
 <Steps>
   <Step>
 
-  ### 第一步：明确指数分布的率参数
-
-  按题目中的常用参数约定，$X\sim\mathrm{Exp}(1)$，$Y\sim\mathrm{Exp}(4)$，即
+  ### 第一步：对指数配方
 
   $$
-  f_X(x)=e^{-x}\ (x>0),\qquad P(Y>x)=e^{-4x}\ (x\ge0).
+  -2x^2+2xy-y^2=-x^2-(y-x)^2.
   $$
 
-  $Y$ 的率参数更大，平均等待时间更短，故 $P(X<Y)$ 应当小于 $1/2$，可作为结果的直观检查。
+  因而
+
+  $$
+  f_{X,Y}(x,y)=A e^{-x^2}e^{-(y-x)^2}.
+  $$
+
+  对固定 $x$，第二个因子关于 $y$ 是平移后的高斯核。
 
   </Step>
   <Step>
 
-  ### 第二步：对 $X=x$ 条件化
+  ### 第二步：利用总概率求 $A$
 
-  将 $X$ 的取值视为积分变量。独立性保证给定 $X=x$ 时，$Y$ 的尾概率不变：
+  由 $\int_{-\infty}^{+\infty}e^{-t^2}\,\mathrm{d}t=\sqrt\pi$，
 
   $$
   \begin{aligned}
-  P(X<Y)&=\int_0^{+\infty}P(Y>x\mid X=x)f_X(x)\,\mathrm{d}x\\
-  &=\int_0^{+\infty}P(Y>x)f_X(x)\,\mathrm{d}x.
+  1&=\int_{\mathbb R^2}f_{X,Y}(x,y)\,\mathrm{d}x\,\mathrm{d}y\\
+  &=A\int_{-\infty}^{+\infty}e^{-x^2}
+      \left(\int_{-\infty}^{+\infty}e^{-(y-x)^2}\,\mathrm{d}y\right)\mathrm{d}x\\
+  &=A\sqrt\pi\sqrt\pi=A\pi.
   \end{aligned}
+  $$
+
+  故 $\boxed{A=1/\pi}$。
+
+  </Step>
+  <Step>
+
+  ### 第三步：先求 $X$ 的边缘密度
+
+  $$
+  f_X(x)=\int_{-\infty}^{+\infty}\frac1\pi e^{-x^2}e^{-(y-x)^2}\,\mathrm{d}y
+  =\frac{e^{-x^2}}{\sqrt\pi}.
   $$
 
   </Step>
   <Step>
 
-  ### 第三步：计算并归纳
+  ### 第四步：求条件密度并检验
 
   $$
-  P(X<Y)=\int_0^{+\infty}e^{-4x}e^{-x}\,\mathrm{d}x
-  =\int_0^{+\infty}e^{-5x}\,\mathrm{d}x=\boxed{\frac15}.
+  \begin{aligned}
+  f_{Y\mid X}(y\mid x)&=\frac{f_{X,Y}(x,y)}{f_X(x)}\\
+  &=\frac{\frac1\pi e^{-x^2}e^{-(y-x)^2}}{\frac1{\sqrt\pi}e^{-x^2}}\\
+  &=\boxed{\frac1{\sqrt\pi}e^{-(y-x)^2}}.
+  \end{aligned}
   $$
+
+  对任何固定 $x$，它对 $y$ 的积分都为 $1$。
 
   </Step>
 </Steps>
 
-<Callout type="idea" title="两指数变量的先到概率">
-  若独立的 $X\sim\mathrm{Exp}(\lambda_1)$，$Y\sim\mathrm{Exp}(\lambda_2)$，则
-
-  $$
-  P(X<Y)=\int_0^{+\infty}\lambda_1e^{-(\lambda_1+\lambda_2)x}\,\mathrm{d}x
-  =\frac{\lambda_1}{\lambda_1+\lambda_2}.
-  $$
-
-  这个分子对应的是“$X$ 先到”的率 $\lambda_1$；不要误记成 $\lambda_2$。
+<Callout type="idea" title="条件正态分布的识别">
+  $f_{Y\mid X}(y\mid x)$ 是 $N(x,1/2)$ 的密度，即 $Y\mid X=x\sim N(x,1/2)$；这里指数为 $-(y-x)^2$，所以 $1/(2\sigma^2)=1$，勿把条件方差误写成 $1$。
 </Callout>
 
 </Solution>
 
 </Question>
+
+### 25｜由条件和边缘密度反求联合分布
 
 <Question id="core-1102-math-1167f4-033" type="essay" points={11} tags="来源:2013年考研数学三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:条件密度反求联合与边缘密度">
 
@@ -1563,477 +2090,6 @@ $$
 
 <Callout type="warn" title="边缘积分上下限易错">
   求 $f_Y(y)$ 时要固定 $y$，其对应的 $x$ 范围是 $[y,1]$，不是 $[0,1]$；求 $P(X>2Y)$ 时，还要把上界 $y<x$ 收紧到 $y<x/2$。
-</Callout>
-
-</Solution>
-
-</Question>
-
-<Question id="core-1102-math-1167f4-034" type="blank" points={4} tags="来源:2015年考研数学一、三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:二维正态分布与独立性">
-
-
-
-设二维随机变量 $(X,Y)$ 服从正态分布
-
-$$
-N(1,0;1,1;0),
-$$
-
-则
-
-$$
-P\{XY-Y<0\}=
-$$
-
-<Blank answer="((1)/(2))" kind="math" />
-
-.
-
-<Solution>
-
-**答案：** $\boxed{P(XY-Y<0)=1/2}$。
-
-<Steps>
-  <Step>
-
-  ### 第一步：读出二维正态分布的参数
-
-  从 $N(1,0;1,1;0)$ 可知 $X\sim N(1,1)$、$Y\sim N(0,1)$，二者相关系数为 $0$。由于**联合二维正态**，零相关系数推出 $X,Y$ 独立。
-
-  </Step>
-  <Step>
-
-  ### 第二步：作中心化并翻译不等式
-
-  $$
-  XY-Y=(X-1)Y.
-  $$
-
-  令 $U=X-1$，则 $U\sim N(0,1)$，并且 $U$ 与 $Y$ 仍然独立。因连续型随机变量取 $0$ 的概率为 $0$，乘积小于 $0$ 等价于二者**一正一负**。
-
-  </Step>
-  <Step>
-
-  ### 第三步：利用对称性与独立性
-
-  标准正态密度关于原点对称，故 $P(U>0)=P(U<0)=P(Y>0)=P(Y<0)=1/2$。于是
-
-  $$
-  \begin{aligned}
-  P(UY<0)&=P(U<0,Y>0)+P(U>0,Y<0)\\
-  &=P(U<0)P(Y>0)+P(U>0)P(Y<0)\\
-  &=\frac14+\frac14=\boxed{\frac12}.
-  \end{aligned}
-  $$
-
-  </Step>
-</Steps>
-
-<Callout type="idea" title="符号判定模型">
-  若两个独立、连续、关于 $0$ 对称的随机变量均没有 $0$ 处的原子概率，则它们的乘积为负的概率为 $1/2$。关键是**中心化后**的 $X-1$ 对称，而不是原变量 $X$ 对称。
-</Callout>
-
-</Solution>
-
-</Question>
-
-<Question id="core-1102-math-1167f4-035" type="single" points={4} tags="来源:2019年考研数学一、三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:独立正态变量之差的分布">
-
-
-
-设随机变量 $X,Y$ 相互独立，且都服从正态分布 $N(\mu,\sigma^2)$，则
-
-$$
-P\{|X-Y|<1\}
-$$
-
-（　）。
-
-<Option correct>与 $\mu$ 无关，而与 $\sigma^2$ 有关</Option>
-<Option>与 $\mu$ 有关，而与 $\sigma^2$ 无关</Option>
-<Option>与 $\mu,\sigma^2$ 都有关</Option>
-<Option>与 $\mu,\sigma^2$ 都无关</Option>
-
-<Solution>
-
-**正确选项：A。** 概率与 $\mu$ 无关，但与 $\sigma^2$ 有关。
-
-<Steps>
-  <Step>
-
-  ### 第一步：求独立正态变量之差的分布
-
-  对 $X,Y$ 独立且均服从 $N(\mu,\sigma^2)$，线性组合仍服从正态分布，且
-
-  $$
-  E(X-Y)=\mu-\mu=0,
-  $$
-
-  $$
-  D(X-Y)=D(X)+D(Y)=2\sigma^2.
-  $$
-
-  所以 $X-Y\sim N(0,2\sigma^2)$。注意独立保证 $\operatorname{Cov}(X,Y)=0$；若不独立，方差还须加入协方差项。
-
-  </Step>
-  <Step>
-
-  ### 第二步：将绝对值概率标准化
-
-  假定正态分布非退化，即 $\sigma>0$。令 $Z=(X-Y)/(\sqrt2\sigma)\sim N(0,1)$，则
-
-  $$
-  \begin{aligned}
-  P(|X-Y|<1)
-  &=P\left(-\frac1{\sqrt2\sigma}<Z<\frac1{\sqrt2\sigma}\right)\\
-  &=2\Phi\left(\frac1{\sqrt2\sigma}\right)-1.
-  \end{aligned}
-  $$
-
-  </Step>
-  <Step>
-
-  ### 第三步：明确参数依赖关系
-
-  结果中没有 $\mu$；而 $\sigma$ 进入 $\Phi$ 的自变量中。$\sigma$ 增大时，$1/(\sqrt2\sigma)$ 减小，所求概率随之减小，说明确实依赖于方差 $\sigma^2$。
-
-  因此选择 A。
-
-  </Step>
-</Steps>
-
-<Callout type="warn" title="方差公式要用对">
-  $D(X-Y)=D(X)+D(Y)-2\operatorname{Cov}(X,Y)$；本题因独立才化为 $2\sigma^2$。切勿误写成 $D(X)-D(Y)=0$。
-</Callout>
-
-</Solution>
-
-</Question>
-
-<Question id="core-1102-math-1167f4-036" type="blank" points={5} tags="来源:2023年考研数学一, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:独立二项变量相等的概率">
-
-
-
-设随机变量 $X,Y$ 相互独立，且
-
-$$
-X\sim B\left(1,\frac13\right),\qquad
-Y\sim B\left(2,\frac12\right),
-$$
-
-则
-
-$$
-P\{X=Y\}=
-$$
-
-<Blank answer="((1)/(3))" kind="math" />
-
-.
-
-<Solution>
-
-**答案：** $\boxed{P(X=Y)=1/3}$。
-
-**解题思路：** 两个二项随机变量的取值范围不同，先找**共同的可能取值**，再用独立性把联合概率分解相乘。
-
-<Steps>
-  <Step>
-
-  ### 第一步：列出两变量的分布
-
-  $X\sim B(1,1/3)$ 是伯努利分布：
-
-  $$
-  P(X=0)=\frac23,\qquad P(X=1)=\frac13.
-  $$
-
-  $Y\sim B(2,1/2)$，故
-
-  $$
-  P(Y=0)=\frac14,\quad P(Y=1)=\frac12,\quad P(Y=2)=\frac14.
-  $$
-
-  </Step>
-  <Step>
-
-  ### 第二步：确定互斥的相等事件
-
-  因 $X$ 不能取 $2$，所以 $\{X=Y\}$ 只能分为
-
-  $$
-  \{X=0,Y=0\}\ \cup\ \{X=1,Y=1\}.
-  $$
-
-  两事件互斥，可以将概率相加。
-
-  </Step>
-  <Step>
-
-  ### 第三步：利用独立性计算
-
-  $$
-  \begin{aligned}
-  P(X=Y)
-  &=P(X=0)P(Y=0)+P(X=1)P(Y=1)\\
-  &=\frac23\cdot\frac14+\frac13\cdot\frac12\\
-  &=\frac16+\frac16=\boxed{\frac13}.
-  \end{aligned}
-  $$
-
-  </Step>
-</Steps>
-
-<Callout type="idea" title="离散型变量相等事件通式">
-  对相互独立的离散型随机变量，$P(X=Y)=\sum_{k}P(X=k)P(Y=k)$，只对双方**共同支持的取值**求和。本题虽然编排在连续型章节，但具体考查的是离散型二项分布及独立性。
-</Callout>
-
-</Solution>
-
-</Question>
-
-<Question id="core-1102-math-1167f4-037" type="single" points={5} tags="来源:2024年考研数学一, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:正态线性组合与分布函数">
-
-
-
-设随机变量 $X,Y$ 相互独立，$X$ 服从 $N(0,2)$ 的正态分布，$Y$ 服从 $N(-2,2)$ 的正态分布。若
-
-$$
-P\{2X+Y<a\}=P\{X>Y\},
-$$
-
-则 $a=$（　）。
-
-<Option>$-2-\sqrt{10}$</Option>
-<Option correct>$-2+\sqrt{10}$</Option>
-<Option>$-2-\sqrt6$</Option>
-<Option>$-2+\sqrt6$</Option>
-
-<Solution>
-
-**正确选项：B。** $\boxed{a=-2+\sqrt{10}}$。
-
-<Steps>
-  <Step>
-
-  ### 第一步：求 $2X+Y$ 的分布
-
-  正态分布 $N(\mu,\sigma^2)$ 的第二参数是**方差**。由 $X\sim N(0,2)$、$Y\sim N(-2,2)$ 且独立，有
-
-  $$
-  \begin{aligned}
-  E(2X+Y)&=2\cdot0-2=-2,\\
-  D(2X+Y)&=2^2\cdot2+2=10.
-  \end{aligned}
-  $$
-
-  故 $2X+Y\sim N(-2,10)$，所以
-
-  $$
-  P(2X+Y<a)=\Phi\left(\frac{a+2}{\sqrt{10}}\right).
-  $$
-
-  </Step>
-  <Step>
-
-  ### 第二步：将 $P(X>Y)$ 转成标准正态概率
-
-  同样，$X-Y\sim N(0-(-2),2+2)=N(2,4)$，因此
-
-  $$
-  \begin{aligned}
-  P(X>Y)&=P(X-Y>0)\\
-  &=P\left(\frac{X-Y-2}{2}>-1\right)\\
-  &=1-\Phi(-1)=\Phi(1).
-  \end{aligned}
-  $$
-
-  </Step>
-  <Step>
-
-  ### 第三步：利用分布函数严格单调性
-
-  题给等式化为
-
-  $$
-  \Phi\left(\frac{a+2}{\sqrt{10}}\right)=\Phi(1).
-  $$
-
-  标准正态分布函数严格递增，因而
-
-  $$
-  \frac{a+2}{\sqrt{10}}=1,
-  \qquad \boxed{a=-2+\sqrt{10}}.
-  $$
-
-  </Step>
-</Steps>
-
-<Callout type="warn" title="线性组合方差并非线性组合">
-  $D(2X+Y)=4D(X)+D(Y)$，不是 $2D(X)+D(Y)$。同样 $D(X-Y)=D(X)+D(Y)$ 在独立条件下成立，负号不会让方差相减。
-</Callout>
-
-</Solution>
-
-</Question>
-
-<Question id="core-1102-math-1167f4-038" type="single" points={5} tags="来源:2024年考研数学三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:正态线性组合的概率比较">
-
-
-
-设随机变量 $X,Y$ 相互独立，且 $X$ 服从 $N(0,2)$，$Y$ 服从 $N(-1,1)$。记
-
-$$
-p_1=P\{2X-Y>0\},\qquad
-p_2=P\{X-2Y>1\},
-$$
-
-则（　）。
-
-<Option>$p_1>p_2>\dfrac12$</Option>
-<Option correct>$p_2>p_1>\dfrac12$</Option>
-<Option>$p_1<p_2<\dfrac12$</Option>
-<Option>$p_2<p_1<\dfrac12$</Option>
-
-<Solution>
-
-**正确选项：B。** $\boxed{p_2>p_1>1/2}$。
-
-**解题思路：** 两个概率都形如正态变量大于阈值的概率。分别先确定正态线性组合的均值和方差，再标准化；比较的是两个**标准化阈值**，而非原始均值。
-
-<Steps>
-  <Step>
-
-  ### 第一步：计算 $2X-Y$ 的分布与 $p_1$
-
-  独立性给出
-
-  $$
-  E(2X-Y)=0-(-1)=1,
-  \qquad D(2X-Y)=4\cdot2+1=9.
-  $$
-
-  所以 $2X-Y\sim N(1,9)$，标准差为 $3$，
-
-  $$
-  p_1=P(2X-Y>0)=1-\Phi\left(-\frac13\right)=\Phi\left(\frac13\right).
-  $$
-
-  </Step>
-  <Step>
-
-  ### 第二步：计算 $X-2Y$ 的分布与 $p_2$
-
-  $$
-  E(X-2Y)=0-2(-1)=2,
-  \qquad D(X-2Y)=2+4\cdot1=6.
-  $$
-
-  故 $X-2Y\sim N(2,6)$，并有
-
-  $$
-  p_2=P(X-2Y>1)=1-\Phi\left(-\frac1{\sqrt6}\right)=\Phi\left(\frac1{\sqrt6}\right).
-  $$
-
-  </Step>
-  <Step>
-
-  ### 第三步：比较标准化结果
-
-  因为 $\sqrt6<3$，故
-
-  $$
-  \frac1{\sqrt6}>\frac13>0.
-  $$
-
-  又 $\Phi$ 严格递增，且 $\Phi(0)=1/2$，所以
-
-  $$
-  \boxed{p_2>p_1>\frac12}.
-  $$
-
-  </Step>
-</Steps>
-
-<Callout type="idea" title="一眼比较的抓手">
-  对 $W\sim N(m,s^2)$，$P(W>c)=\Phi((m-c)/s)$。本题只需比较两个“均值减阈值再除以标准差”的量：$1/3$ 与 $1/\sqrt6$，无需查表计算小数概率。
-</Callout>
-
-</Solution>
-
-</Question>
-
-## 2026 年补充真题
-
-<Question id="core-1102-math-1167f4-039" type="single" points={5} tags="来源:2026年考研数学三, 科目:概率论与数理统计, 章节:连续型随机变量, 考点:独立随机变量乘积的区域概率">
-
-
-
-设随机变量 $X$ 与 $Y$ 独立同分布，$X$ 的概率密度为
-
-$$
-f(x)=\begin{cases}\dfrac1{(1+x)^2},&x>0,\\0,&x\le0.\end{cases}
-$$
-
-则 $P\{XY\le1\}=$（ ）。
-
-<Option>$\frac34$</Option>
-<Option correct>$\frac12$</Option>
-<Option>$\frac13$</Option>
-<Option>$\frac16$</Option>
-
-<Solution>
-
-**正确选项：B。** $\boxed{P(XY\le1)=1/2}$。
-
-<Steps>
-  <Step>
-
-  ### 第一步：求单个随机变量的分布函数
-
-  由 $f_X(x)=(1+x)^{-2}$（$x>0$），可得
-
-  $$
-  F_X(t)=\int_0^t\frac1{(1+x)^2}\,\mathrm{d}x
-  =1-\frac1{1+t}=\frac{t}{1+t},\qquad t>0.
-  $$
-
-  因 $X,Y$ 独立同分布，$F_Y=F_X$。
-
-  </Step>
-  <Step>
-
-  ### 第二步：对 $X=x$ 条件化
-
-  $X>0,Y>0$ 几乎处处成立，故对 $x>0$，$XY\le1$ 等价于 $Y\le1/x$。因此
-
-  $$
-  \begin{aligned}
-  P(XY\le1)&=\int_0^{+\infty}P(Y\le1/x\mid X=x)f_X(x)\,\mathrm{d}x\\
-  &=\int_0^{+\infty}F_Y(1/x)\,f_X(x)\,\mathrm{d}x.
-  \end{aligned}
-  $$
-
-  </Step>
-  <Step>
-
-  ### 第三步：化简并积分
-
-  $F_Y(1/x)=(1/x)/(1+1/x)=1/(1+x)$。所以
-
-  $$
-  \begin{aligned}
-  P(XY\le1)
-  &=\int_0^{+\infty}\frac1{(1+x)^3}\,\mathrm{d}x\\
-  &=\left[-\frac1{2(1+x)^2}\right]_0^{+\infty}=\boxed{\frac12}.
-  \end{aligned}
-  $$
-
-  </Step>
-</Steps>
-
-<Callout type="idea" title="巧妙的对称性检验">
-  $1/X$ 与 $X$ 同分布，因为对 $t>0$ 有 $P(1/X\le t)=P(X\ge1/t)=t/(1+t)$。于是 $P(XY\le1)=P(X\le1/Y)$；由独立同分布且连续，$X$ 与 $1/Y$ 同分布且独立，故 $P(X\le1/Y)=1/2$。这可作为积分结果的独立验证。
 </Callout>
 
 </Solution>

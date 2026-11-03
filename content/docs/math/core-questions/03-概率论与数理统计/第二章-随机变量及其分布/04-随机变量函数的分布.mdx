@@ -3,7 +3,9 @@ title: 第四节 随机变量函数的分布
 description: 历年考研数学概率论与数理统计分类真题：一维随机变量函数、二维随机变量函数及其分布。
 ---
 
-## 一、一维随机变量函数的分布
+## 考点1：一维函数变换与分段映射
+
+### 01｜柯西变量的单调立方根变换
 
 <Question id="core-1102-math-65f0b9-001" type="essay" points={6} tags="来源:1988年考研数学一, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:柯西分布的非线性变量变换">
 
@@ -96,6 +98,196 @@ $$
 </Solution>
 
 </Question>
+
+### 02｜指数变换的密度与期望存在性
+
+<Question id="core-1102-math-65f0b9-008" type="essay" points={12} tags="来源:2023年考研数学三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:指数变换与期望存在性">
+
+
+
+设随机变量 $X$ 的概率密度为
+
+$$
+f(x)=\frac{e^x}{(1+e^x)^2},\qquad x\in\mathbb R,
+$$
+
+令
+
+$$
+Y=e^X.
+$$
+
+（1）求 $X$ 的分布函数；
+
+（2）求 $Y$ 的概率密度；
+
+（3）问 $Y$ 的期望是否存在？
+
+<Solution>
+
+**参考答案：** $F_X(x)=\dfrac{e^x}{1+e^x}$；$f_Y(y)=\dfrac1{(1+y)^2}$（$y>0$）；$Y$ 的有限数学期望**不存在**，其非负期望为 $+\infty$。
+
+**解题思路：** 密度是一个熟悉函数的导数，先积分得 $F_X$；指数映射严格单调，用分布函数换元；期望存在性由广义积分判定。
+
+<Steps>
+  <Step>
+
+  ### 积分得到 $X$ 的分布函数
+
+  因为
+
+  $$
+  \frac{d}{dt}\left(\frac{e^t}{1+e^t}\right)=\frac{e^t}{(1+e^t)^2},
+  $$
+
+  并且当 $t\to-\infty$ 时原函数趋于 $0$，所以
+
+  $$
+  F_X(x)=\int_{-\infty}^x\frac{e^t}{(1+e^t)^2}dt=\boxed{\frac{e^x}{1+e^x}}.
+  $$
+
+  当 $x\to+\infty$ 时它趋于 $1$，归一性成立。
+
+  </Step>
+  <Step>
+
+  ### 指数映射并求 $Y$ 的密度
+
+  $Y=e^X>0$。对 $y>0$，指数函数严格递增，
+
+  $$
+  F_Y(y)=P(X\le\ln y)=F_X(\ln y)=\frac{y}{1+y}.
+  $$
+
+  $y\le0$ 时 $F_Y(y)=0$。求导得
+
+  $$
+  f_Y(y)=\begin{cases}\dfrac1{(1+y)^2},&y>0,\\0,&\text{其他}.
+  \end{cases}
+  $$
+
+  </Step>
+  <Step>
+
+  ### 以广义积分证明均值发散
+
+  $$
+  \begin{aligned}
+  E(Y)&=\int_0^\infty\frac{y}{(1+y)^2}dy\\
+  &=\lim_{R\to\infty}\left[\ln(1+y)+\frac1{1+y}\right]_{0}^{R}\\
+  &=\lim_{R\to\infty}\left(\ln(1+R)+\frac1{1+R}-1\right)=+\infty.
+  \end{aligned}
+  $$
+
+  因而不存在有限的 $E(Y)$。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="密度合法不代表一阶矩有限">
+  $\int_0^\infty f_Y(y)dy=1$，但尾部 $y f_Y(y)\sim1/y$，一阶矩像调和积分一样发散；题目问“期望是否存在”，须单独检查积分收敛。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 03｜随机分段长度与比值变换
+
+<Question id="core-1102-math-65f0b9-007" type="essay" points={12} tags="来源:2021年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:随机分段长度的分布与期望">
+
+
+
+在区间 $(0,2)$ 上随机取一点，将该区间分成两段，较短一段的长度记为 $X$，较长一段的长度记为 $Y$，令
+
+$$
+Z=\frac{Y}{X}.
+$$
+
+（1）求 $X$ 的概率密度；
+
+（2）求 $Z$ 的概率密度；
+
+（3）求
+
+$$
+E\left(\frac{X}{Y}\right).
+$$
+
+<Solution>
+
+**参考答案：** $X\sim U(0,1)$；$f_Z(z)=\dfrac2{(z+1)^2}$（$z>1$，其余为 $0$）；$E(X/Y)=\boxed{2\ln2-1}$。
+
+**解题思路：** 设切点为 $T$，先用对称性求较短段 $X$ 的分布；再把 $Z=Y/X$ 表成 $X$ 的单调函数，最后对 $X$ 积分求期望。
+
+<Steps>
+  <Step>
+
+  ### 用切点位置建立长度变量
+
+  $T\sim U(0,2)$，两段是 $T,2-T$，所以
+
+  $$
+  X=\min(T,2-T),\quad Y=\max(T,2-T)=2-X,\quad 0<X<1.
+  $$
+
+  对 $0<x<1$，$X\le x$ 当且仅当 $T\le x$ 或 $T\ge2-x$，且两事件不相交：
+
+  $$
+  P(X\le x)=\frac{x}{2}+\frac{x}{2}=x.
+  $$
+
+  故 $F_X(x)=0$（$x\le0$）、$x$（$0<x<1$）、$1$（$x\ge1$），从而 $f_X(x)=1$（$0<x<1$）。
+
+  </Step>
+  <Step>
+
+  ### 从分布函数求 $Z=Y/X$
+
+  $Z=(2-X)/X=2/X-1$ 在 $(0,1)$ 上严格递减。对于 $z>1$，
+
+  $$
+  \begin{aligned}
+  F_Z(z)&=P\left(\frac2X-1\le z\right)\\
+  &=P\left(X\ge\frac2{z+1}\right)=1-\frac2{z+1}.
+  \end{aligned}
+  $$
+
+  $z\le1$ 时 $F_Z(z)=0$。求导得到
+
+  $$
+  f_Z(z)=\begin{cases}\dfrac2{(z+1)^2},&z>1,\\0,&\text{其他}.
+  \end{cases}
+  $$
+
+  </Step>
+  <Step>
+
+  ### 求短段与长段长度之比的期望
+
+  注意题目求的是 $X/Y=1/Z$，不是 $Z$ 的期望。利用 $X$ 的均匀密度：
+
+  $$
+  \begin{aligned}
+  E\left(\frac XY\right)&=\int_0^1\frac{x}{2-x}\,dx
+  =\int_0^1\left(\frac2{2-x}-1\right)dx\\
+  &=\left[-2\ln(2-x)-x\right]_0^1
+  =\boxed{2\ln2-1}.
+  \end{aligned}
+  $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="检验结果的合理性">
+  $0<X/Y<1$，而 $2\ln2-1\approx0.386$，符合范围要求。$Z$ 的密度在 $(1,+\infty)$ 上积分为 $1$，可用于独立核查变换。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 04｜平方变换的多分支密度与协方差
 
 <Question id="core-1102-math-65f0b9-005" type="essay" points={13} tags="来源:2006年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:非单调函数密度与协方差">
 
@@ -219,6 +411,8 @@ $F(x,y)$ 为二维随机变量 $(X,Y)$ 的分布函数，求：
 
 </Question>
 
+### 05｜分段映射产生离散连续混合分布
+
 <Question id="core-1102-math-65f0b9-006" type="essay" points={11} tags="来源:2013年考研数学一, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:混合型随机变量的分布函数">
 
 
@@ -336,193 +530,152 @@ $$
 
 </Question>
 
-<Question id="core-1102-math-65f0b9-007" type="essay" points={12} tags="来源:2021年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:随机分段长度的分布与期望">
+## 考点2：极值函数与绝对差分布
+
+### 06｜独立同分布最大值的分布函数
+
+<Question id="core-1102-math-65f0b9-013" type="single" points={4} tags="来源:2008年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:独立随机变量最大值的分布函数">
 
 
 
-在区间 $(0,2)$ 上随机取一点，将该区间分成两段，较短一段的长度记为 $X$，较长一段的长度记为 $Y$，令
-
-$$
-Z=\frac{Y}{X}.
-$$
-
-（1）求 $X$ 的概率密度；
-
-（2）求 $Z$ 的概率密度；
-
-（3）求
+设随机变量 $X,Y$ 独立同分布，且 $X$ 的分布函数为 $F(x)$，则
 
 $$
-E\left(\frac{X}{Y}\right).
+Z=\max(X,Y)
 $$
+
+的分布函数为（　）。
+
+<Option correct>$F^2(x)$</Option>
+<Option>$F(x)F(y)$</Option>
+<Option>$1-[1-F(x)]^2$</Option>
+<Option>$[1-F(x)][1-F(y)]$</Option>
 
 <Solution>
 
-**参考答案：** $X\sim U(0,1)$；$f_Z(z)=\dfrac2{(z+1)^2}$（$z>1$，其余为 $0$）；$E(X/Y)=\boxed{2\ln2-1}$。
-
-**解题思路：** 设切点为 $T$，先用对称性求较短段 $X$ 的分布；再把 $Z=Y/X$ 表成 $X$ 的单调函数，最后对 $X$ 积分求期望。
+**正确选项：A。** $\boxed{F_Z(x)=F(x)^2}$。
 
 <Steps>
   <Step>
 
-  ### 用切点位置建立长度变量
+  ### 将最大值事件转为交事件
 
-  $T\sim U(0,2)$，两段是 $T,2-T$，所以
-
-  $$
-  X=\min(T,2-T),\quad Y=\max(T,2-T)=2-X,\quad 0<X<1.
-  $$
-
-  对 $0<x<1$，$X\le x$ 当且仅当 $T\le x$ 或 $T\ge2-x$，且两事件不相交：
+  $\max(X,Y)\le x$ 当且仅当 $X\le x$ 且 $Y\le x$，即
 
   $$
-  P(X\le x)=\frac{x}{2}+\frac{x}{2}=x.
-  $$
-
-  故 $F_X(x)=0$（$x\le0$）、$x$（$0<x<1$）、$1$（$x\ge1$），从而 $f_X(x)=1$（$0<x<1$）。
-
-  </Step>
-  <Step>
-
-  ### 从分布函数求 $Z=Y/X$
-
-  $Z=(2-X)/X=2/X-1$ 在 $(0,1)$ 上严格递减。对于 $z>1$，
-
-  $$
-  \begin{aligned}
-  F_Z(z)&=P\left(\frac2X-1\le z\right)\\
-  &=P\left(X\ge\frac2{z+1}\right)=1-\frac2{z+1}.
-  \end{aligned}
-  $$
-
-  $z\le1$ 时 $F_Z(z)=0$。求导得到
-
-  $$
-  f_Z(z)=\begin{cases}\dfrac2{(z+1)^2},&z>1,\\0,&\text{其他}.
-  \end{cases}
+  \{Z\le x\}=\{X\le x\}\cap\{Y\le x\}.
   $$
 
   </Step>
   <Step>
 
-  ### 求短段与长段长度之比的期望
-
-  注意题目求的是 $X/Y=1/Z$，不是 $Z$ 的期望。利用 $X$ 的均匀密度：
+  ### 利用独立性相乘
 
   $$
-  \begin{aligned}
-  E\left(\frac XY\right)&=\int_0^1\frac{x}{2-x}\,dx
-  =\int_0^1\left(\frac2{2-x}-1\right)dx\\
-  &=\left[-2\ln(2-x)-x\right]_0^1
-  =\boxed{2\ln2-1}.
-  \end{aligned}
+  F_Z(x)=P(X\le x,Y\le x)=P(X\le x)P(Y\le x).
   $$
+
+  由于 $X,Y$ 同分布，两因子均为 $F(x)$，所以 $F_Z(x)=\boxed{F(x)^2}$。
+
+  </Step>
+  <Step>
+
+  ### 辨别最小值的公式
+
+  对比最小值 $W=\min(X,Y)$：
+
+  $$
+  P(W>x)=P(X>x,Y>x)=[1-F(x)]^2,
+  $$
+
+  故 $F_W(x)=1-[1-F(x)]^2$，这是本题 C 项，而不是最大值的分布函数。
 
   </Step>
 </Steps>
 
-<Callout type="idea" title="检验结果的合理性">
-  $0<X/Y<1$，而 $2\ln2-1\approx0.386$，符合范围要求。$Z$ 的密度在 $(1,+\infty)$ 上积分为 $1$，可用于独立核查变换。
+<Callout type="warn" title="题目用同一阈值 x">
+  $F_Z$ 是一个一元函数，不能把 $X\le x$、$Y\le y$ 混用；$F(x)F(y)$ 是二维联合分布函数在 $(x,y)$ 处的乘积表达式，不是本题所求。
 </Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="core-1102-math-65f0b9-008" type="essay" points={12} tags="来源:2023年考研数学三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:指数变换与期望存在性">
+### 07｜独立指数变量的最小值及期望
+
+<Question id="core-1102-math-65f0b9-014" type="essay" points={11} tags="来源:2012年考研数学三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:指数分布最值与期望">
 
 
 
-设随机变量 $X$ 的概率密度为
-
-$$
-f(x)=\frac{e^x}{(1+e^x)^2},\qquad x\in\mathbb R,
-$$
-
-令
+设随机变量 $X$ 和 $Y$ 相互独立，且均服从参数为 $1$ 的指数分布，令
 
 $$
-Y=e^X.
+V=\min(X,Y),\qquad U=\max(X,Y).
 $$
 
-（1）求 $X$ 的分布函数；
+（1）求随机变量 $V$ 的概率密度；
 
-（2）求 $Y$ 的概率密度；
-
-（3）问 $Y$ 的期望是否存在？
+（2）求 $E(U+V)$。
 
 <Solution>
 
-**参考答案：** $F_X(x)=\dfrac{e^x}{1+e^x}$；$f_Y(y)=\dfrac1{(1+y)^2}$（$y>0$）；$Y$ 的有限数学期望**不存在**，其非负期望为 $+\infty$。
+**参考答案：** $V\sim\operatorname{Exp}(2)$，即 $f_V(v)=2e^{-2v}$（$v>0$）；$\boxed{E(U+V)=2}$。
 
-**解题思路：** 密度是一个熟悉函数的导数，先积分得 $F_X$；指数映射严格单调，用分布函数换元；期望存在性由广义积分判定。
+**解题思路：** 最小值使用“全部大于阈值”的尾事件；求极值之和时利用 $\max+\min=X+Y$ 避免额外积分。
 
 <Steps>
   <Step>
 
-  ### 积分得到 $X$ 的分布函数
+  ### 从尾概率求最小值分布
 
-  因为
-
-  $$
-  \frac{d}{dt}\left(\frac{e^t}{1+e^t}\right)=\frac{e^t}{(1+e^t)^2},
-  $$
-
-  并且当 $t\to-\infty$ 时原函数趋于 $0$，所以
-
-  $$
-  F_X(x)=\int_{-\infty}^x\frac{e^t}{(1+e^t)^2}dt=\boxed{\frac{e^x}{1+e^x}}.
-  $$
-
-  当 $x\to+\infty$ 时它趋于 $1$，归一性成立。
-
-  </Step>
-  <Step>
-
-  ### 指数映射并求 $Y$ 的密度
-
-  $Y=e^X>0$。对 $y>0$，指数函数严格递增，
-
-  $$
-  F_Y(y)=P(X\le\ln y)=F_X(\ln y)=\frac{y}{1+y}.
-  $$
-
-  $y\le0$ 时 $F_Y(y)=0$。求导得
-
-  $$
-  f_Y(y)=\begin{cases}\dfrac1{(1+y)^2},&y>0,\\0,&\text{其他}.
-  \end{cases}
-  $$
-
-  </Step>
-  <Step>
-
-  ### 以广义积分证明均值发散
+  当 $v\ge0$，
 
   $$
   \begin{aligned}
-  E(Y)&=\int_0^\infty\frac{y}{(1+y)^2}dy\\
-  &=\lim_{R\to\infty}\left[\ln(1+y)+\frac1{1+y}\right]_{0}^{R}\\
-  &=\lim_{R\to\infty}\left(\ln(1+R)+\frac1{1+R}-1\right)=+\infty.
+  P(V>v)&=P(X>v,Y>v)\\
+  &=P(X>v)P(Y>v)=e^{-v}\cdot e^{-v}=e^{-2v},
   \end{aligned}
   $$
 
-  因而不存在有限的 $E(Y)$。
+  其中独立性是两个尾概率能够相乘的依据。于是 $F_V(v)=1-e^{-2v}$（$v\ge0$），$v<0$ 时为 $0$。
+
+  </Step>
+  <Step>
+
+  ### 求密度并核对
+
+  $$
+  f_V(v)=\begin{cases}2e^{-2v},&v>0,\\0,&\text{其他}.
+  \end{cases}
+  $$
+
+  $\int_0^\infty2e^{-2v}dv=1$，所以 $V$ 是参数为 $2$ 的指数变量，且 $E(V)=1/2$。
+
+  </Step>
+  <Step>
+
+  ### 利用最大值与最小值的恒等式
+
+  对每一对实数 $x,y$，总有 $\max(x,y)+\min(x,y)=x+y$。代入随机变量得到 $U+V=X+Y$，于是
+
+  $$
+  E(U+V)=E(X)+E(Y)=1+1=\boxed{2}.
+  $$
+
+  作为核验，$E(U)=E(X+Y)-E(V)=3/2$。
 
   </Step>
 </Steps>
 
-<Callout type="warn" title="密度合法不代表一阶矩有限">
-  $\int_0^\infty f_Y(y)dy=1$，但尾部 $y f_Y(y)\sim1/y$，一阶矩像调和积分一样发散；题目问“期望是否存在”，须单独检查积分收敛。
+<Callout type="idea" title="多变量最小值的推广">
+  $n$ 个相互独立的参数为 $\lambda_i$ 的指数变量之最小值服从参数为 $\sum_i\lambda_i$ 的指数分布；本题是 $n=2$ 且两参数均为 $1$ 的情形。
 </Callout>
 
 </Solution>
 
 </Question>
 
-## 二、二维随机变量函数的分布
-
-### 1. 最值函数的分布
+### 08｜离散最大最小值的联合分布
 
 <Question id="core-1102-math-65f0b9-011" type="essay" points={6} tags="来源:1996年考研数学一, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:最大最小次序统计量的联合分布">
 
@@ -602,146 +755,162 @@ $$
 
 </Question>
 
-<Question id="core-1102-math-65f0b9-013" type="single" points={4} tags="来源:2008年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:独立随机变量最大值的分布函数">
+### 09｜均匀变量绝对差的几何分布
+
+<Question id="core-1102-math-65f0b9-022" type="essay" points={8} tags="来源:2001年考研数学三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:均匀分布绝对差的密度">
 
 
 
-设随机变量 $X,Y$ 独立同分布，且 $X$ 的分布函数为 $F(x)$，则
+设随机变量 $X,Y$ 的联合分布是在正方形
 
 $$
-Z=\max(X,Y)
+G=\{(x,y)\mid1\le x\le3,\ 1\le y\le3\}
 $$
 
-的分布函数为（　）。
+上的均匀分布，试求随机变量
 
-<Option correct>$F^2(x)$</Option>
-<Option>$F(x)F(y)$</Option>
-<Option>$1-[1-F(x)]^2$</Option>
-<Option>$[1-F(x)][1-F(y)]$</Option>
+$$
+U=|X-Y|
+$$
+
+的概率密度 $g(u)$。
 
 <Solution>
 
-**正确选项：A。** $\boxed{F_Z(x)=F(x)^2}$。
+**参考答案：**
+
+$$
+\boxed{g(u)=\begin{cases}\dfrac{2-u}{2},&0<u<2,\\0,&\text{其他}.
+\end{cases}}
+$$
+
+**解题思路：** 联合分布在边长为 $2$ 的正方形上均匀，直接对事件 $|X-Y|\le u$ 计算几何面积，补集是两块相等的直角三角形。
 
 <Steps>
   <Step>
 
-  ### 将最大值事件转为交事件
+  ### 确定 $U$ 的值域和总面积
 
-  $\max(X,Y)\le x$ 当且仅当 $X\le x$ 且 $Y\le x$，即
-
-  $$
-  \{Z\le x\}=\{X\le x\}\cap\{Y\le x\}.
-  $$
+  正方形 $G=[1,3]\times[1,3]$ 面积为 $4$，联合密度等于 $1/4$。由于 $1\le X,Y\le3$，故 $0\le U=|X-Y|\le2$。
 
   </Step>
   <Step>
 
-  ### 利用独立性相乘
+  ### 利用补集计算分布函数
+
+  对 $0\le u\le2$，事件 $|X-Y|\le u$ 是两条直线 $y=x\pm u$ 之间的带状区域。其补集由两个全等直角三角形组成，每块直角边长为 $2-u$，每块面积为 $(2-u)^2/2$。
+
+  因而
 
   $$
-  F_Z(x)=P(X\le x,Y\le x)=P(X\le x)P(Y\le x).
+  F_U(u)=1-\frac{2\cdot\frac12(2-u)^2}{4}
+  =1-\frac{(2-u)^2}{4}.
   $$
 
-  由于 $X,Y$ 同分布，两因子均为 $F(x)$，所以 $F_Z(x)=\boxed{F(x)^2}$。
+  完整分布函数为：$u<0$ 时 $0$，$0\le u<2$ 时上述表达式，$u\ge2$ 时 $1$。
 
   </Step>
   <Step>
 
-  ### 辨别最小值的公式
-
-  对比最小值 $W=\min(X,Y)$：
+  ### 求导并检查积分
 
   $$
-  P(W>x)=P(X>x,Y>x)=[1-F(x)]^2,
+  g(u)=F_U'(u)=\frac{2-u}{2},\qquad 0<u<2.
   $$
 
-  故 $F_W(x)=1-[1-F(x)]^2$，这是本题 C 项，而不是最大值的分布函数。
+  $$
+  \int_0^2\frac{2-u}{2}du=\left[u-\frac{u^2}{4}\right]_0^2=1.
+  $$
+
+  因此密度已归一化，$u=0,2$ 处的密度值可任意定义。
 
   </Step>
 </Steps>
 
-<Callout type="warn" title="题目用同一阈值 x">
-  $F_Z$ 是一个一元函数，不能把 $X\le x$、$Y\le y$ 混用；$F(x)F(y)$ 是二维联合分布函数在 $(x,y)$ 处的乘积表达式，不是本题所求。
+<Callout type="idea" title="平移不影响绝对差">
+  令 $A=X-1,B=Y-1$，它们在 $[0,2]^2$ 上独立均匀，而 $|X-Y|=|A-B|$；因此结果只依赖区间长度 $2$，与区间起点 $1$ 无关。
 </Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="core-1102-math-65f0b9-014" type="essay" points={11} tags="来源:2012年考研数学三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:指数分布最值与期望">
+### 10｜独立指数变量绝对差的分布
+
+<Question id="core-1102-math-65f0b9-026" type="single" points={5} tags="来源:2024年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:独立指数变量绝对差的分布">
 
 
 
-设随机变量 $X$ 和 $Y$ 相互独立，且均服从参数为 $1$ 的指数分布，令
+设随机变量 $X,Y$ 相互独立，都服从参数为 $\lambda$ 的指数分布，令
 
 $$
-V=\min(X,Y),\qquad U=\max(X,Y).
+Z=|X-Y|,
 $$
 
-（1）求随机变量 $V$ 的概率密度；
+则下列与 $Z$ 服从同一分布的是（　）。
 
-（2）求 $E(U+V)$。
+<Option>$X+Y$</Option>
+<Option>$\dfrac{X+Y}{2}$</Option>
+<Option>$2X$</Option>
+<Option correct>$X$</Option>
 
 <Solution>
 
-**参考答案：** $V\sim\operatorname{Exp}(2)$，即 $f_V(v)=2e^{-2v}$（$v>0$）；$\boxed{E(U+V)=2}$。
+**正确选项：D。** $\boxed{|X-Y|\sim\operatorname{Exp}(\lambda)}$，与 $X$ 同分布。
 
-**解题思路：** 最小值使用“全部大于阈值”的尾事件；求极值之和时利用 $\max+\min=X+Y$ 避免额外积分。
+**解题思路：** 对 $z\ge0$，事件 $|X-Y|>z$ 分为两个互斥的方向：$X>Y+z$ 与 $Y>X+z$；利用独立性对其中一个条件积分。
 
 <Steps>
   <Step>
 
-  ### 从尾概率求最小值分布
+  ### 将绝对值事件拆为两个互斥事件
 
-  当 $v\ge0$，
+  $$
+  \{|X-Y|>z\}=\{X>Y+z\}\cup\{Y>X+z\},\qquad z\ge0.
+  $$
+
+  两个事件不相交，且由于 $X,Y$ 独立同分布，两者概率相等。
+
+  </Step>
+  <Step>
+
+  ### 条件于 $Y$ 计算单侧概率
 
   $$
   \begin{aligned}
-  P(V>v)&=P(X>v,Y>v)\\
-  &=P(X>v)P(Y>v)=e^{-v}\cdot e^{-v}=e^{-2v},
+  P(X>Y+z)
+  &=\int_0^\infty P(X>y+z)\,\lambda e^{-\lambda y}dy\\
+  &=\int_0^\infty e^{-\lambda(y+z)}\lambda e^{-\lambda y}dy\\
+  &=\lambda e^{-\lambda z}\int_0^\infty e^{-2\lambda y}dy
+  =\frac12e^{-\lambda z}.
   \end{aligned}
   $$
 
-  其中独立性是两个尾概率能够相乘的依据。于是 $F_V(v)=1-e^{-2v}$（$v\ge0$），$v<0$ 时为 $0$。
-
   </Step>
   <Step>
 
-  ### 求密度并核对
+  ### 还原 $Z$ 的尾概率并辨别选项
 
   $$
-  f_V(v)=\begin{cases}2e^{-2v},&v>0,\\0,&\text{其他}.
-  \end{cases}
+  P(Z>z)=2\cdot\frac12e^{-\lambda z}=e^{-\lambda z}\quad(z\ge0).
   $$
 
-  $\int_0^\infty2e^{-2v}dv=1$，所以 $V$ 是参数为 $2$ 的指数变量，且 $E(V)=1/2$。
-
-  </Step>
-  <Step>
-
-  ### 利用最大值与最小值的恒等式
-
-  对每一对实数 $x,y$，总有 $\max(x,y)+\min(x,y)=x+y$。代入随机变量得到 $U+V=X+Y$，于是
-
-  $$
-  E(U+V)=E(X)+E(Y)=1+1=\boxed{2}.
-  $$
-
-  作为核验，$E(U)=E(X+Y)-E(V)=3/2$。
+  所以 $F_Z(z)=1-e^{-\lambda z}$（$z\ge0$），$f_Z(z)=\lambda e^{-\lambda z}$（$z>0$），与 $X\sim\operatorname{Exp}(\lambda)$ 相同，选择 D。
 
   </Step>
 </Steps>
 
-<Callout type="idea" title="多变量最小值的推广">
-  $n$ 个相互独立的参数为 $\lambda_i$ 的指数变量之最小值服从参数为 $\sum_i\lambda_i$ 的指数分布；本题是 $n=2$ 且两参数均为 $1$ 的情形。
+<Callout type="idea" title="不要把差当成和">
+  $X+Y$ 服从形状为 $2$ 的伽马分布，不服从指数分布；$2X$ 的指数率参数变成 $\lambda/2$。本题特殊结论来自指数分布的尾概率，而非对任意同分布变量都成立。
 </Callout>
 
 </Solution>
 
 </Question>
 
-### 2. 二维离散型函数的分布
+## 考点3：离散函数与随机符号乘积
+
+### 11｜平方约束下的离散联合分布与乘积
 
 <Question id="core-1102-math-65f0b9-016" type="essay" points={11} tags="来源:2011年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:离散函数的联合分布与相关系数">
 
@@ -843,6 +1012,8 @@ $Z=XY$ 的分布为 $P(Z=-1)=P(Z=0)=P(Z=1)=1/3$；$\boxed{\rho_{XY}=0}$。
 
 </Question>
 
+### 12｜泊松变量随机变号的分布与协方差
+
 <Question id="core-1102-math-65f0b9-017" type="essay" points={11} tags="来源:2018年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:泊松变量随机变号与协方差">
 
 
@@ -931,7 +1102,268 @@ $$
 
 </Question>
 
-### 3. 二维连续型函数的分布
+### 13｜指数变量随机变号的密度及独立性
+
+<Question id="core-1102-math-65f0b9-033" type="essay" points={11} tags="来源:2019年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:指数变量乘随机符号与不相关性">
+
+
+
+设随机变量 $X,Y$ 相互独立，$X$ 服从参数为 $1$ 的指数分布，$Y$ 的概率分布为
+
+$$
+P\{Y=-1\}=p,\qquad P\{Y=1\}=1-p,
+\qquad 0<p<1,
+$$
+
+令 $Z=XY$。
+
+（1）求 $Z$ 的概率密度；
+
+（2）$p$ 为何值时，$X$ 与 $Z$ 不相关？
+
+（3）$X$ 与 $Z$ 是否相互独立？
+
+<Solution>
+
+**参考答案：**
+
+$$
+f_Z(z)=\begin{cases}
+pe^z,&z<0,\\
+(1-p)e^{-z},&z>0,
+\end{cases}
+\qquad p=\boxed{\frac12}\ \text{时不相关}.
+$$
+
+无论 $0<p<1$ 取何值，$X$ 与 $Z$ 均**不独立**。$z=0$ 处的密度值可任意指定。
+
+<Steps>
+  <Step>
+
+  ### 利用随机符号求 $Z$ 的密度
+
+  指数分布 $X>0$ 几乎处处成立。条件于 $Y=1$ 时，$Z=X>0$；条件于 $Y=-1$ 时，$Z=-X<0$。因此
+
+  $$
+  \begin{aligned}
+  P(Z\in dz\mid Y=1)&=e^{-z}dz,\quad z>0,\\
+  P(Z\in dz\mid Y=-1)&=e^z dz,\quad z<0.
+  \end{aligned}
+  $$
+
+  按权重 $1-p$ 与 $p$ 叠加即得到答案。检验：$\int_{-\infty}^0pe^z\,dz+\int_0^{+\infty}(1-p)e^{-z}\,dz=p+(1-p)=1$。
+
+  </Step>
+  <Step>
+
+  ### 用独立性化简协方差
+
+  $Z=XY$，由于 $X$ 与 $Y$ 独立，
+
+  $$
+  \begin{aligned}
+  \operatorname{Cov}(X,Z)
+  &=E(X^2Y)-E(X)E(XY)\\
+  &=\big(E(X^2)-[E(X)]^2\big)E(Y)\\
+  &=D(X)E(Y).
+  \end{aligned}
+  $$
+
+  指数分布 $X\sim\operatorname{Exp}(1)$ 有 $D(X)=1$；而 $E(Y)=(-1)p+1(1-p)=1-2p$。所以
+
+  $$
+  \operatorname{Cov}(X,Z)=1-2p=0
+  \iff\boxed{p=\frac12}.
+  $$
+
+  </Step>
+  <Step>
+
+  ### 证明即使不相关仍不独立
+
+  因为 $Y\in\{-1,1\}$，有 $|Z|=|XY|=X$ 几乎处处成立。若 $X$ 与 $Z$ 独立，那么 $X$ 与其函数 $|Z|$ 亦独立；但 $|Z|=X$，意味着 $X$ 与自身独立，从而对任意事件 $A$ 满足 $P(X\in A)=P(X\in A)^2$，只能取 $0$ 或 $1$。
+
+  取 $A=(0,1]$，$P(X\le1)=1-e^{-1}\in(0,1)$，产生矛盾。因此 $X$ 与 $Z$ **不独立**。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="不相关不推出独立">
+  在 $p=1/2$ 时虽然 $\operatorname{Cov}(X,Z)=0$，仍有确定性约束 $X=|Z|$；这正是反例的核心。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 14｜离散乘子导致的原子与跳跃点
+
+<Question id="core-1102-math-65f0b9-029" type="single" points={4} tags="来源:2009年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:混合型分布的跳跃点">
+
+
+
+设随机变量 $X$ 与 $Y$ 相互独立，且 $X$ 服从标准正态分布 $N(0,1)$，$Y$ 的概率分布为
+
+$$
+P\{Y=0\}=P\{Y=1\}=\frac12.
+$$
+
+记 $F_Z(z)$ 为随机变量 $Z=XY$ 的分布函数，则函数 $F_Z(z)$ 的间断点个数为（　）。
+
+<Option>0</Option>
+<Option correct>1</Option>
+<Option>2</Option>
+<Option>3</Option>
+
+<Solution>
+
+**正确选项：B。** $F_Z$ 恰有 **1 个** 间断点，即 $z=0$。
+
+**解题思路：** 分布函数的跳跃点恰是随机变量的原子概率点；当 $Y=0$ 时 $XY$ 被压成 $0$，当 $Y=1$ 时 $XY=X$ 仍为连续正态分布。
+
+<Steps>
+  <Step>
+
+  ### 对 $Y$ 的两个取值分别讨论
+
+  若 $Y=0$（概率 $1/2$），则 $Z=0$；若 $Y=1$（概率 $1/2$），则 $Z=X\sim N(0,1)$。独立性保证条件于 $Y=1$ 时 $X$ 仍为标准正态分布。
+
+  </Step>
+  <Step>
+
+  ### 写出精确分布函数
+
+  记标准正态分布函数为 $\Phi$。对 $z<0$，$Y=0$ 那部分不满足 $Z\le z$，所以
+
+  $$
+  F_Z(z)=\frac12\Phi(z),\quad z<0.
+  $$
+
+  对 $z\ge0$，$Y=0$ 那部分全落入事件 $Z\le z$，因此
+
+  $$
+  F_Z(z)=\frac12+\frac12\Phi(z),\quad z\ge0.
+  $$
+
+  </Step>
+  <Step>
+
+  ### 检查跳跃大小与间断点个数
+
+  利用 $\Phi(0)=1/2$，有
+
+  $$
+  F_Z(0^-)=\frac14,\qquad F_Z(0)=\frac12+\frac14=\frac34.
+  $$
+
+  跳跃量 $F_Z(0)-F_Z(0^-)=1/2=P(Z=0)$。其余点只有连续的正态分布部分，故仅 $z=0$ 处间断。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="混合分布不是普通连续密度">
+  $Z$ 同时有点质量 $P(Z=0)=1/2$ 和连续正态部分，不能仅以 $\frac12\varphi(z)$ 当作完整概率密度而漏掉 $0$ 处的原子概率。
+</Callout>
+
+</Solution>
+
+</Question>
+
+## 考点4：独立连续变量之和与卷积
+
+### 15｜指数变量之和与伽马分布函数
+
+<Question id="core-1102-math-65f0b9-020" type="essay" points={6} tags="来源:1991年考研数学一, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:指数变量之和的伽马分布">
+
+
+
+设二维随机变量 $(X,Y)$ 的概率密度为
+
+$$
+f(x,y)=
+\begin{cases}
+2e^{-(x+2y)},&x>0,\ y>0,\\
+0,&\text{其他}.
+\end{cases}
+$$
+
+求随机变量
+
+$$
+Z=X+2Y
+$$
+
+的分布函数。
+
+<Solution>
+
+**参考答案：**
+
+$$
+F_Z(z)=\begin{cases}0,&z<0,\\1-(1+z)e^{-z},&z\ge0.\end{cases}
+$$
+
+**解题思路：** 联合密度可分离，识别 $X$ 与 $Y$ 的指数分布后，将 $2Y$ 变为参数为 $1$ 的指数变量；再以卷积求和的密度，积分得分布函数。
+
+<Steps>
+  <Step>
+
+  ### 从联合密度判定独立与边缘律
+
+  对 $x,y>0$，
+
+  $$
+  f(x,y)=2e^{-(x+2y)}=(e^{-x})(2e^{-2y}).
+  $$
+
+  这两因子分别归一化为 $1$，所以 $X,Y$ 独立，且 $X\sim\operatorname{Exp}(1)$、$Y\sim\operatorname{Exp}(2)$。
+
+  </Step>
+  <Step>
+
+  ### 变换 $W=2Y$
+
+  当 $w>0$，
+
+  $$
+  f_W(w)=f_Y\left(\frac w2\right)\cdot\frac12
+  =2e^{-w}\cdot\frac12=e^{-w}.
+  $$
+
+  因而 $W\sim\operatorname{Exp}(1)$ 且 $X,W$ 独立。题设 $Z=X+W$。
+
+  </Step>
+  <Step>
+
+  ### 卷积后求 $F_Z$
+
+  对 $z>0$，
+
+  $$
+  f_Z(z)=\int_0^z e^{-x}e^{-(z-x)}\,dx=ze^{-z}.
+  $$
+
+  对 $z\ge0$，分部积分给出
+
+  $$
+  F_Z(z)=\int_0^zte^{-t}dt=\bigl[-(t+1)e^{-t}\bigr]_0^z
+  =\boxed{1-(1+z)e^{-z}}.
+  $$
+
+  由于 $Z>0$ 几乎必然，$z<0$ 时 $F_Z(z)=0$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="识别伽马分布之前也应能直接推导">
+  两个独立 $\operatorname{Exp}(1)$ 变量之和服从形状 $2$、率参数 $1$ 的伽马分布。但卷积式 $f_Z(z)=ze^{-z}$ 本身已足以完成推导，避免误用率参数与尺度参数的记号。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 16｜均匀变量与指数变量之和的卷积
 
 <Question id="core-1102-math-65f0b9-018" type="essay" points={6} tags="来源:1987年考研数学一, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:均匀分布与指数分布的卷积">
 
@@ -1032,95 +1464,7 @@ $$
 
 </Question>
 
-<Question id="core-1102-math-65f0b9-020" type="essay" points={6} tags="来源:1991年考研数学一, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:指数变量之和的伽马分布">
-
-
-
-设二维随机变量 $(X,Y)$ 的概率密度为
-
-$$
-f(x,y)=
-\begin{cases}
-2e^{-(x+2y)},&x>0,\ y>0,\\
-0,&\text{其他}.
-\end{cases}
-$$
-
-求随机变量
-
-$$
-Z=X+2Y
-$$
-
-的分布函数。
-
-<Solution>
-
-**参考答案：**
-
-$$
-F_Z(z)=\begin{cases}0,&z<0,\\1-(1+z)e^{-z},&z\ge0.\end{cases}
-$$
-
-**解题思路：** 联合密度可分离，识别 $X$ 与 $Y$ 的指数分布后，将 $2Y$ 变为参数为 $1$ 的指数变量；再以卷积求和的密度，积分得分布函数。
-
-<Steps>
-  <Step>
-
-  ### 从联合密度判定独立与边缘律
-
-  对 $x,y>0$，
-
-  $$
-  f(x,y)=2e^{-(x+2y)}=(e^{-x})(2e^{-2y}).
-  $$
-
-  这两因子分别归一化为 $1$，所以 $X,Y$ 独立，且 $X\sim\operatorname{Exp}(1)$、$Y\sim\operatorname{Exp}(2)$。
-
-  </Step>
-  <Step>
-
-  ### 变换 $W=2Y$
-
-  当 $w>0$，
-
-  $$
-  f_W(w)=f_Y\left(\frac w2\right)\cdot\frac12
-  =2e^{-w}\cdot\frac12=e^{-w}.
-  $$
-
-  因而 $W\sim\operatorname{Exp}(1)$ 且 $X,W$ 独立。题设 $Z=X+W$。
-
-  </Step>
-  <Step>
-
-  ### 卷积后求 $F_Z$
-
-  对 $z>0$，
-
-  $$
-  f_Z(z)=\int_0^z e^{-x}e^{-(z-x)}\,dx=ze^{-z}.
-  $$
-
-  对 $z\ge0$，分部积分给出
-
-  $$
-  F_Z(z)=\int_0^zte^{-t}dt=\bigl[-(t+1)e^{-t}\bigr]_0^z
-  =\boxed{1-(1+z)e^{-z}}.
-  $$
-
-  由于 $Z>0$ 几乎必然，$z<0$ 时 $F_Z(z)=0$。
-
-  </Step>
-</Steps>
-
-<Callout type="idea" title="识别伽马分布之前也应能直接推导">
-  两个独立 $\operatorname{Exp}(1)$ 变量之和服从形状 $2$、率参数 $1$ 的伽马分布。但卷积式 $f_Z(z)=ze^{-z}$ 本身已足以完成推导，避免误用率参数与尺度参数的记号。
-</Callout>
-
-</Solution>
-
-</Question>
+### 17｜正态变量与均匀变量的卷积
 
 <Question id="core-1102-math-65f0b9-021" type="essay" points={7} tags="来源:1992年考研数学一, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:正态与均匀变量之和的卷积">
 
@@ -1202,83 +1546,479 @@ $$
 
 </Question>
 
-<Question id="core-1102-math-65f0b9-022" type="essay" points={8} tags="来源:2001年考研数学三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:均匀分布绝对差的密度">
+## 考点5：离散连续混合与条件分布
+
+### 18｜离散变量加连续变量的加权平移
+
+<Question id="core-1102-math-65f0b9-027" type="essay" points={13} tags="来源:2003年考研数学三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:离散连续混合卷积公式">
 
 
 
-设随机变量 $X,Y$ 的联合分布是在正方形
-
-$$
-G=\{(x,y)\mid1\le x\le3,\ 1\le y\le3\}
-$$
-
-上的均匀分布，试求随机变量
+设随机变量 $X$ 与 $Y$ 独立，其中 $X$ 的概率分布为
 
 $$
-U=|X-Y|
+\begin{array}{c|cc}
+X&1&2\\ \hline
+P&0.3&0.7
+\end{array},
+$$
+
+而 $Y$ 的概率密度为 $f(y)$，求随机变量
+
+$$
+U=X+Y
 $$
 
 的概率密度 $g(u)$。
 
 <Solution>
 
-**参考答案：**
+**参考答案：** 对所有 $u\in\mathbb R$，
 
 $$
-\boxed{g(u)=\begin{cases}\dfrac{2-u}{2},&0<u<2,\\0,&\text{其他}.
-\end{cases}}
+\boxed{g(u)=0.3f(u-1)+0.7f(u-2)}.
 $$
 
-**解题思路：** 联合分布在边长为 $2$ 的正方形上均匀，直接对事件 $|X-Y|\le u$ 计算几何面积，补集是两块相等的直角三角形。
+**解题思路：** $X$ 只有两个离散取值，按 $X=1$ 或 $X=2$ 条件分解，再把 $Y$ 的密度分别平移并加权即可。
 
 <Steps>
   <Step>
 
-  ### 确定 $U$ 的值域和总面积
+  ### 对离散随机变量分情况
 
-  正方形 $G=[1,3]\times[1,3]$ 面积为 $4$，联合密度等于 $1/4$。由于 $1\le X,Y\le3$，故 $0\le U=|X-Y|\le2$。
-
-  </Step>
-  <Step>
-
-  ### 利用补集计算分布函数
-
-  对 $0\le u\le2$，事件 $|X-Y|\le u$ 是两条直线 $y=x\pm u$ 之间的带状区域。其补集由两个全等直角三角形组成，每块直角边长为 $2-u$，每块面积为 $(2-u)^2/2$。
-
-  因而
-
-  $$
-  F_U(u)=1-\frac{2\cdot\frac12(2-u)^2}{4}
-  =1-\frac{(2-u)^2}{4}.
-  $$
-
-  完整分布函数为：$u<0$ 时 $0$，$0\le u<2$ 时上述表达式，$u\ge2$ 时 $1$。
+  当 $X=1$ 时，$U=1+Y$；当 $X=2$ 时，$U=2+Y$。独立性说明在给定 $X$ 取值后，$Y$ 的条件分布仍是原密度 $f$。
 
   </Step>
   <Step>
 
-  ### 求导并检查积分
+  ### 写条件密度并加权
+
+  平移变量 $Y+c$ 的密度为 $f(u-c)$，因此
 
   $$
-  g(u)=F_U'(u)=\frac{2-u}{2},\qquad 0<u<2.
+  f_{U\mid X=1}(u)=f(u-1),\qquad f_{U\mid X=2}(u)=f(u-2).
   $$
 
+  用全概率公式，
+
   $$
-  \int_0^2\frac{2-u}{2}du=\left[u-\frac{u^2}{4}\right]_0^2=1.
+  g(u)=P(X=1)f_{U\mid X=1}(u)+P(X=2)f_{U\mid X=2}(u)
+  =\boxed{0.3f(u-1)+0.7f(u-2)}.
   $$
 
-  因此密度已归一化，$u=0,2$ 处的密度值可任意定义。
+  </Step>
+  <Step>
+
+  ### 核验这是合法的密度
+
+  因为平移不改变积分，
+
+  $$
+  \int_{-\infty}^\infty g(u)du
+  =0.3\int f(u-1)du+0.7\int f(u-2)du=0.3+0.7=1.
+  $$
+
+  $g(u)\ge0$ 也显然成立。
 
   </Step>
 </Steps>
 
-<Callout type="idea" title="平移不影响绝对差">
-  令 $A=X-1,B=Y-1$，它们在 $[0,2]^2$ 上独立均匀，而 $|X-Y|=|A-B|$；因此结果只依赖区间长度 $2$，与区间起点 $1$ 无关。
+<Callout type="warn" title="离散连续之和并非单纯平移">
+  若 $X$ 是随机的，就应把所有可能平移量的密度按其离散概率加权；不能直接将 $X$ 替换成 $E(X)=1.7$，写成 $f(u-1.7)$。
 </Callout>
 
 </Solution>
 
 </Question>
+
+### 19｜分段连续密度的离散平移混合
+
+<Question id="core-1102-math-65f0b9-032" type="essay" points={11} tags="来源:2017年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:离散连续之和的混合密度">
+
+
+
+设随机变量 $X,Y$ 相互独立，且
+
+$$
+P\{X=0\}=P\{X=2\}=\frac12,
+$$
+
+$Y$ 的概率密度为
+
+$$
+f_Y(y)=
+\begin{cases}
+2y,&0<y<1,\\
+0,&\text{其他}.
+\end{cases}
+$$
+
+（1）求概率 $P\{Y\le E(Y)\}$；
+
+（2）求 $Z=X+Y$ 的概率密度。
+
+<Solution>
+
+**参考答案：**
+
+$$
+P\{Y\le E(Y)\}=\boxed{\frac49},\qquad
+f_Z(z)=\begin{cases}
+z,&0<z<1,\\
+z-2,&2<z<3,\\
+0,&\text{其他}.
+\end{cases}
+$$
+
+**思路：** 先按密度积分计算期望；$X$ 是取值为 $0,2$ 的离散变量，$Z$ 是两种平移后密度的加权混合，而非两个连续密度的普通卷积。
+
+<Steps>
+  <Step>
+
+  ### 计算 $Y$ 的均值及所求概率
+
+  $$
+  E(Y)=\int_0^1 y\cdot2y\,dy
+  =\left[\frac{2y^3}{3}\right]_0^1=\frac23.
+  $$
+
+  $Y$ 的分布函数在 $0<y<1$ 时为 $F_Y(y)=\int_0^y2t\,dt=y^2$。因此
+
+  $$
+  P\{Y\le E(Y)\}=F_Y\left(\frac23\right)
+  =\left(\frac23\right)^2=\boxed{\frac49}.
+  $$
+
+  </Step>
+  <Step>
+
+  ### 按 $X$ 的取值构造条件分布
+
+  $P(X=0)=P(X=2)=1/2$ 且 $X\perp Y$。条件于 $X=0$ 时，$Z=Y$；条件于 $X=2$ 时，$Z=2+Y$，其密度分别为 $f_Y(z)$ 和 $f_Y(z-2)$。
+
+  所以
+
+  $$
+  f_Z(z)=\frac12f_Y(z)+\frac12f_Y(z-2).
+  $$
+
+  </Step>
+  <Step>
+
+  ### 分段代入并检验归一性
+
+  当 $0<z<1$，仅第一项不为零：$f_Z(z)=\frac12\cdot2z=z$；当 $2<z<3$，仅第二项不为零：$f_Z(z)=\frac12\cdot2(z-2)=z-2$。其余处为零。
+
+  $$
+  \int_{-\infty}^{+\infty} f_Z(z)\,dz
+  =\int_0^1z\,dz+\int_2^3(z-2)\,dz
+  =\frac12+\frac12=1.
+  $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="离散＋连续型求和公式">
+  若 $X$ 取值 $a_i$，概率为 $p_i$，且与连续型 $Y$ 独立，则 $X+Y$ 的密度是 $f_{X+Y}(z)=\sum_i p_i f_Y(z-a_i)$。务必根据平移后的支撑区间分段。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 20｜离散均匀混合的条件概率与密度
+
+<Question id="core-1102-math-65f0b9-028" type="essay" points={11} tags="来源:2008年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:离散连续混合的条件分布">
+
+
+
+设随机变量 $X$ 与 $Y$ 相互独立，$X$ 的概率分布为
+
+$$
+P\{X=i\}=\frac13,\qquad i=-1,0,1,
+$$
+
+$Y$ 的概率密度为
+
+$$
+f_Y(y)=
+\begin{cases}
+1,&0\le y\le1,\\
+0,&\text{其他},
+\end{cases}
+$$
+
+记 $Z=X+Y$。
+
+（1）求 $P\left\{Z\le\dfrac12\mid X=0\right\}$；
+
+（2）求 $Z$ 的概率密度。
+
+<Solution>
+
+**参考答案：**
+
+$$
+P\left(Z\le\frac12\mid X=0\right)=\boxed{\frac12},\qquad
+f_Z(z)=\begin{cases}\frac13,&-1<z<2,\\0,&\text{其他}.\end{cases}
+$$
+
+**解题思路：** 在第（1）问先固定 $X=0$；在第（2）问对三个离散取值各自平移均匀密度，三段不重叠（除零概率端点），拼成一个大区间上的均匀分布。
+
+<Steps>
+  <Step>
+
+  ### 计算条件概率
+
+  $P(X=0)=1/3>0$。在条件 $X=0$ 下，$Z=Y$，且独立性保证 $Y$ 的条件分布仍为 $U(0,1)$。因此
+
+  $$
+  P\left(Z\le\frac12\mid X=0\right)=P\left(Y\le\frac12\right)=\int_0^{1/2}dy=\boxed{\frac12}.
+  $$
+
+  </Step>
+  <Step>
+
+  ### 写出每种 $X$ 取值时的 $Z$ 支持区间
+
+  | 固定 $X$ | 对应 $Z$ | 条件支持区间 | 权重 |
+  | --- | --- | --- | --- |
+  | $-1$ | $Y-1$ | $(-1,0)$ | $1/3$ |
+  | $0$ | $Y$ | $(0,1)$ | $1/3$ |
+  | $1$ | $Y+1$ | $(1,2)$ | $1/3$ |
+
+  每个条件密度在对应区间内均为 $1$。
+
+  </Step>
+  <Step>
+
+  ### 利用全概率公式求混合密度
+
+  $$
+  f_Z(z)=\frac13f_Y(z+1)+\frac13f_Y(z)+\frac13f_Y(z-1).
+  $$
+
+  对于 $-1<z<2$，除端点外恰有一项等于 $1$，因此 $f_Z(z)=1/3$。积分核验：$\int_{-1}^2(1/3)dz=1$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="离散随机平移可以拼出均匀分布">
+  $Z$ 最终服从 $U(-1,2)$；这依赖三个区间长度均为 $1$、相邻不重叠且权重相同。若权重不同，拼接后的密度就是不同高度的阶梯函数。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 21｜按离散条件混合均匀分布与全期望
+
+<Question id="core-1102-math-65f0b9-030" type="essay" points={11} tags="来源:2014年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:条件均匀分布与全期望">
+
+
+
+设随机变量 $X$ 的概率分布为
+
+$$
+P\{X=1\}=P\{X=2\}=\frac12.
+$$
+
+在给定 $X=i$ 的条件下，随机变量 $Y$ 服从均匀分布 $U(0,i)$，$i=1,2$。
+
+（1）求 $Y$ 的分布函数 $F_Y(y)$；
+
+（2）求 $E(Y)$。
+
+<Solution>
+
+**参考答案：**
+
+$$
+F_Y(y)=\begin{cases}
+0,&y<0,\\
+\dfrac{3y}{4},&0\le y<1,\\
+\dfrac12+\dfrac y4,&1\le y<2,\\
+1,&y\ge2;
+\end{cases}
+\qquad E(Y)=\boxed{\frac34}.
+$$
+
+**思路：** $X$ 决定了条件均匀分布的上端点；先按 $X=1,2$ 分层求分布函数，再用全期望公式求均值。
+
+<Steps>
+  <Step>
+
+  ### 写出两个条件分布函数
+
+  记 $F_i(y)=P(Y\le y\mid X=i)$。均匀分布的分布函数为
+
+  $$
+  F_1(y)=\begin{cases}0,&y<0,\\y,&0\le y<1,\\1,&y\ge1,\end{cases}
+  \quad
+  F_2(y)=\begin{cases}0,&y<0,\\y/2,&0\le y<2,\\1,&y\ge2.\end{cases}
+  $$
+
+  </Step>
+  <Step>
+
+  ### 按全概率公式分段合并
+
+  $$
+  F_Y(y)=\frac12 F_1(y)+\frac12 F_2(y).
+  $$
+
+  分段点来自 $0,1,2$：当 $0\le y<1$ 时，$F_Y(y)=\frac12y+\frac12\cdot\frac y2=\frac{3y}{4}$；当 $1\le y<2$ 时，第一种条件分布已累积到 $1$，所以 $F_Y(y)=\frac12+\frac y4$；区间外分别为 $0$ 与 $1$。
+
+  特别地，$F_Y(1^-)=\frac34=F_Y(1)$，分布函数在 $1$ 处连续。
+
+  </Step>
+  <Step>
+
+  ### 使用全期望公式
+
+  $$
+  \begin{aligned}
+  E(Y\mid X=i)&=\frac{i}{2},\\
+  E(Y)&=\sum_{i=1}^{2} E(Y\mid X=i)P(X=i)\\
+      &=\frac12\cdot\frac12+\frac12\cdot1
+       =\boxed{\frac34}.
+  \end{aligned}
+  $$
+
+  用密度核对亦可：$f_Y(y)=\frac34$（$0<y<1$），$f_Y(y)=\frac14$（$1<y<2$），故 $\int_0^2 y f_Y(y)\,dy=\frac34$。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="同类题的最简路线">
+  条件分布已知时，求分布函数优先用**全概率公式**；求期望优先用**全期望公式**，不必先把联合分布构造出来。
+</Callout>
+
+</Solution>
+
+</Question>
+
+## 考点6：二维联合密度下的函数分布
+
+### 22｜正方形联合密度下的和分布
+
+<Question id="core-1102-math-65f0b9-024" type="essay" points={11} tags="来源:2007年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:二维联合密度与和的分布">
+
+
+
+设二维随机变量 $(X,Y)$ 的概率密度为
+
+$$
+f(x,y)=
+\begin{cases}
+2-x-y,&0<x<1,\ 0<y<1,\\
+0,&\text{其他}.
+\end{cases}
+$$
+
+（1）求 $P\{X>2Y\}$；
+
+（2）求
+
+$$
+Z=X+Y
+$$
+
+的概率密度 $f_Z(z)$。
+
+<Solution>
+
+**参考答案：**
+
+$$
+P(X>2Y)=\boxed{\frac7{24}},\qquad
+f_Z(z)=\begin{cases}
+2z-z^2,&0<z<1,\\
+(2-z)^2,&1\le z<2,\\
+0,&\text{其他}.
+\end{cases}
+$$
+
+**解题思路：** 第（1）问在正方形内画出 $x>2y$ 对应的三角形；第（2）问用 $z=x+y$ 的直线截面长度，注意联合密度恰好在每条截线上恒为 $2-z$。
+
+<Steps>
+  <Step>
+
+  ### 确定事件 $X>2Y$ 的积分区域
+
+  在 $0<x,y<1$ 内，$x>2y$ 要求 $y<1/2$，且对固定 $y$ 有 $2y<x<1$。因此
+
+  $$
+  P(X>2Y)=\int_0^{1/2}\!\int_{2y}^1(2-x-y)\,dx\,dy.
+  $$
+
+  </Step>
+  <Step>
+
+  ### 计算概率积分
+
+  先对 $x$ 积分，保留代入上下限的步骤：
+
+  $$
+  \begin{aligned}
+  \int_{2y}^{1}(2-x-y)\,dx
+  &=\left[2x-\frac{x^2}{2}-yx\right]_{2y}^{1}\\
+  &=\left(\frac32-y\right)-\left(4y-4y^2\right)\\
+  &=\frac32-5y+4y^2.
+  \end{aligned}
+  $$
+
+  再对 $y$ 积分：
+
+  $$
+  \begin{aligned}
+  P(X>2Y)&=\int_0^{1/2}\left(\frac32-5y+4y^2\right)dy\\
+  &=\left[\frac32y-\frac52y^2+\frac43y^3\right]_0^{1/2}\\
+  &=\frac34-\frac58+\frac16=\boxed{\frac7{24}}.
+  \end{aligned}
+  $$
+
+  </Step>
+  <Step>
+
+  ### 将 $z=x+y$ 代入联合密度
+
+  $$
+  f_Z(z)=\int_{\max(0,z-1)}^{\min(1,z)}f(x,z-x)\,dx.
+  $$
+
+  当 $(x,z-x)$ 属于单位正方形时，$f(x,z-x)=2-x-(z-x)=2-z$，所以
+
+  $$
+  f_Z(z)=\begin{cases}
+  \int_0^z(2-z)dx=z(2-z),&0<z<1,\\
+  \int_{z-1}^1(2-z)dx=(2-z)^2,&1\le z<2.
+  \end{cases}
+  $$
+
+  其余位置为 $0$。
+
+  </Step>
+  <Step>
+
+  ### 检验密度归一性
+
+  $$
+  \int_0^1(2z-z^2)dz+\int_1^2(2-z)^2dz=\frac23+\frac13=1.
+  $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="不要只套用独立变量卷积公式">
+  这里 $f(x,y)=2-x-y$ 不是两个边缘密度的乘积，所以 $X,Y$ 一般不独立。公式 $f_Z(z)=\int f_{X,Y}(x,z-x)dx$ 使用的是**联合密度**，不是 $f_X(x)f_Y(z-x)$。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 23｜三角区域联合密度与线性变换
 
 <Question id="core-1102-math-65f0b9-023" type="essay" points={13} tags="来源:2005年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:二维联合密度与线性变换">
 
@@ -1397,121 +2137,7 @@ $$
 
 </Question>
 
-<Question id="core-1102-math-65f0b9-024" type="essay" points={11} tags="来源:2007年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:二维联合密度与和的分布">
-
-
-
-设二维随机变量 $(X,Y)$ 的概率密度为
-
-$$
-f(x,y)=
-\begin{cases}
-2-x-y,&0<x<1,\ 0<y<1,\\
-0,&\text{其他}.
-\end{cases}
-$$
-
-（1）求 $P\{X>2Y\}$；
-
-（2）求
-
-$$
-Z=X+Y
-$$
-
-的概率密度 $f_Z(z)$。
-
-<Solution>
-
-**参考答案：**
-
-$$
-P(X>2Y)=\boxed{\frac7{24}},\qquad
-f_Z(z)=\begin{cases}
-2z-z^2,&0<z<1,\\
-(2-z)^2,&1\le z<2,\\
-0,&\text{其他}.
-\end{cases}
-$$
-
-**解题思路：** 第（1）问在正方形内画出 $x>2y$ 对应的三角形；第（2）问用 $z=x+y$ 的直线截面长度，注意联合密度恰好在每条截线上恒为 $2-z$。
-
-<Steps>
-  <Step>
-
-  ### 确定事件 $X>2Y$ 的积分区域
-
-  在 $0<x,y<1$ 内，$x>2y$ 要求 $y<1/2$，且对固定 $y$ 有 $2y<x<1$。因此
-
-  $$
-  P(X>2Y)=\int_0^{1/2}\!\int_{2y}^1(2-x-y)\,dx\,dy.
-  $$
-
-  </Step>
-  <Step>
-
-  ### 计算概率积分
-
-  先对 $x$ 积分，保留代入上下限的步骤：
-
-  $$
-  \begin{aligned}
-  \int_{2y}^{1}(2-x-y)\,dx
-  &=\left[2x-\frac{x^2}{2}-yx\right]_{2y}^{1}\\
-  &=\left(\frac32-y\right)-\left(4y-4y^2\right)\\
-  &=\frac32-5y+4y^2.
-  \end{aligned}
-  $$
-
-  再对 $y$ 积分：
-
-  $$
-  \begin{aligned}
-  P(X>2Y)&=\int_0^{1/2}\left(\frac32-5y+4y^2\right)dy\\
-  &=\left[\frac32y-\frac52y^2+\frac43y^3\right]_0^{1/2}\\
-  &=\frac34-\frac58+\frac16=\boxed{\frac7{24}}.
-  \end{aligned}
-  $$
-
-  </Step>
-  <Step>
-
-  ### 将 $z=x+y$ 代入联合密度
-
-  $$
-  f_Z(z)=\int_{\max(0,z-1)}^{\min(1,z)}f(x,z-x)\,dx.
-  $$
-
-  当 $(x,z-x)$ 属于单位正方形时，$f(x,z-x)=2-x-(z-x)=2-z$，所以
-
-  $$
-  f_Z(z)=\begin{cases}
-  \int_0^z(2-z)dx=z(2-z),&0<z<1,\\
-  \int_{z-1}^1(2-z)dx=(2-z)^2,&1\le z<2.
-  \end{cases}
-  $$
-
-  其余位置为 $0$。
-
-  </Step>
-  <Step>
-
-  ### 检验密度归一性
-
-  $$
-  \int_0^1(2z-z^2)dz+\int_1^2(2-z)^2dz=\frac23+\frac13=1.
-  $$
-
-  </Step>
-</Steps>
-
-<Callout type="warn" title="不要只套用独立变量卷积公式">
-  这里 $f(x,y)=2-x-y$ 不是两个边缘密度的乘积，所以 $X,Y$ 一般不独立。公式 $f_Z(z)=\int f_{X,Y}(x,z-x)dx$ 使用的是**联合密度**，不是 $f_X(x)f_Y(z-x)$。
-</Callout>
-
-</Solution>
-
-</Question>
+### 24｜圆域径向密度与平方和分布
 
 <Question id="core-1102-math-65f0b9-025" type="essay" points={12} tags="来源:2023年考研数学一, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:径向密度与平方和的分布">
 
@@ -1606,398 +2232,7 @@ $$
 
 </Question>
 
-<Question id="core-1102-math-65f0b9-026" type="single" points={5} tags="来源:2024年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:独立指数变量绝对差的分布">
-
-
-
-设随机变量 $X,Y$ 相互独立，都服从参数为 $\lambda$ 的指数分布，令
-
-$$
-Z=|X-Y|,
-$$
-
-则下列与 $Z$ 服从同一分布的是（　）。
-
-<Option>$X+Y$</Option>
-<Option>$\dfrac{X+Y}{2}$</Option>
-<Option>$2X$</Option>
-<Option correct>$X$</Option>
-
-<Solution>
-
-**正确选项：D。** $\boxed{|X-Y|\sim\operatorname{Exp}(\lambda)}$，与 $X$ 同分布。
-
-**解题思路：** 对 $z\ge0$，事件 $|X-Y|>z$ 分为两个互斥的方向：$X>Y+z$ 与 $Y>X+z$；利用独立性对其中一个条件积分。
-
-<Steps>
-  <Step>
-
-  ### 将绝对值事件拆为两个互斥事件
-
-  $$
-  \{|X-Y|>z\}=\{X>Y+z\}\cup\{Y>X+z\},\qquad z\ge0.
-  $$
-
-  两个事件不相交，且由于 $X,Y$ 独立同分布，两者概率相等。
-
-  </Step>
-  <Step>
-
-  ### 条件于 $Y$ 计算单侧概率
-
-  $$
-  \begin{aligned}
-  P(X>Y+z)
-  &=\int_0^\infty P(X>y+z)\,\lambda e^{-\lambda y}dy\\
-  &=\int_0^\infty e^{-\lambda(y+z)}\lambda e^{-\lambda y}dy\\
-  &=\lambda e^{-\lambda z}\int_0^\infty e^{-2\lambda y}dy
-  =\frac12e^{-\lambda z}.
-  \end{aligned}
-  $$
-
-  </Step>
-  <Step>
-
-  ### 还原 $Z$ 的尾概率并辨别选项
-
-  $$
-  P(Z>z)=2\cdot\frac12e^{-\lambda z}=e^{-\lambda z}\quad(z\ge0).
-  $$
-
-  所以 $F_Z(z)=1-e^{-\lambda z}$（$z\ge0$），$f_Z(z)=\lambda e^{-\lambda z}$（$z>0$），与 $X\sim\operatorname{Exp}(\lambda)$ 相同，选择 D。
-
-  </Step>
-</Steps>
-
-<Callout type="idea" title="不要把差当成和">
-  $X+Y$ 服从形状为 $2$ 的伽马分布，不服从指数分布；$2X$ 的指数率参数变成 $\lambda/2$。本题特殊结论来自指数分布的尾概率，而非对任意同分布变量都成立。
-</Callout>
-
-</Solution>
-
-</Question>
-
-## 三、离散 + 连续型函数的分布
-
-<Question id="core-1102-math-65f0b9-027" type="essay" points={13} tags="来源:2003年考研数学三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:离散连续混合卷积公式">
-
-
-
-设随机变量 $X$ 与 $Y$ 独立，其中 $X$ 的概率分布为
-
-$$
-\begin{array}{c|cc}
-X&1&2\\ \hline
-P&0.3&0.7
-\end{array},
-$$
-
-而 $Y$ 的概率密度为 $f(y)$，求随机变量
-
-$$
-U=X+Y
-$$
-
-的概率密度 $g(u)$。
-
-<Solution>
-
-**参考答案：** 对所有 $u\in\mathbb R$，
-
-$$
-\boxed{g(u)=0.3f(u-1)+0.7f(u-2)}.
-$$
-
-**解题思路：** $X$ 只有两个离散取值，按 $X=1$ 或 $X=2$ 条件分解，再把 $Y$ 的密度分别平移并加权即可。
-
-<Steps>
-  <Step>
-
-  ### 对离散随机变量分情况
-
-  当 $X=1$ 时，$U=1+Y$；当 $X=2$ 时，$U=2+Y$。独立性说明在给定 $X$ 取值后，$Y$ 的条件分布仍是原密度 $f$。
-
-  </Step>
-  <Step>
-
-  ### 写条件密度并加权
-
-  平移变量 $Y+c$ 的密度为 $f(u-c)$，因此
-
-  $$
-  f_{U\mid X=1}(u)=f(u-1),\qquad f_{U\mid X=2}(u)=f(u-2).
-  $$
-
-  用全概率公式，
-
-  $$
-  g(u)=P(X=1)f_{U\mid X=1}(u)+P(X=2)f_{U\mid X=2}(u)
-  =\boxed{0.3f(u-1)+0.7f(u-2)}.
-  $$
-
-  </Step>
-  <Step>
-
-  ### 核验这是合法的密度
-
-  因为平移不改变积分，
-
-  $$
-  \int_{-\infty}^\infty g(u)du
-  =0.3\int f(u-1)du+0.7\int f(u-2)du=0.3+0.7=1.
-  $$
-
-  $g(u)\ge0$ 也显然成立。
-
-  </Step>
-</Steps>
-
-<Callout type="warn" title="离散连续之和并非单纯平移">
-  若 $X$ 是随机的，就应把所有可能平移量的密度按其离散概率加权；不能直接将 $X$ 替换成 $E(X)=1.7$，写成 $f(u-1.7)$。
-</Callout>
-
-</Solution>
-
-</Question>
-
-<Question id="core-1102-math-65f0b9-028" type="essay" points={11} tags="来源:2008年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:离散连续混合的条件分布">
-
-
-
-设随机变量 $X$ 与 $Y$ 相互独立，$X$ 的概率分布为
-
-$$
-P\{X=i\}=\frac13,\qquad i=-1,0,1,
-$$
-
-$Y$ 的概率密度为
-
-$$
-f_Y(y)=
-\begin{cases}
-1,&0\le y\le1,\\
-0,&\text{其他},
-\end{cases}
-$$
-
-记 $Z=X+Y$。
-
-（1）求 $P\left\{Z\le\dfrac12\mid X=0\right\}$；
-
-（2）求 $Z$ 的概率密度。
-
-<Solution>
-
-**参考答案：**
-
-$$
-P\left(Z\le\frac12\mid X=0\right)=\boxed{\frac12},\qquad
-f_Z(z)=\begin{cases}\frac13,&-1<z<2,\\0,&\text{其他}.\end{cases}
-$$
-
-**解题思路：** 在第（1）问先固定 $X=0$；在第（2）问对三个离散取值各自平移均匀密度，三段不重叠（除零概率端点），拼成一个大区间上的均匀分布。
-
-<Steps>
-  <Step>
-
-  ### 计算条件概率
-
-  $P(X=0)=1/3>0$。在条件 $X=0$ 下，$Z=Y$，且独立性保证 $Y$ 的条件分布仍为 $U(0,1)$。因此
-
-  $$
-  P\left(Z\le\frac12\mid X=0\right)=P\left(Y\le\frac12\right)=\int_0^{1/2}dy=\boxed{\frac12}.
-  $$
-
-  </Step>
-  <Step>
-
-  ### 写出每种 $X$ 取值时的 $Z$ 支持区间
-
-  | 固定 $X$ | 对应 $Z$ | 条件支持区间 | 权重 |
-  | --- | --- | --- | --- |
-  | $-1$ | $Y-1$ | $(-1,0)$ | $1/3$ |
-  | $0$ | $Y$ | $(0,1)$ | $1/3$ |
-  | $1$ | $Y+1$ | $(1,2)$ | $1/3$ |
-
-  每个条件密度在对应区间内均为 $1$。
-
-  </Step>
-  <Step>
-
-  ### 利用全概率公式求混合密度
-
-  $$
-  f_Z(z)=\frac13f_Y(z+1)+\frac13f_Y(z)+\frac13f_Y(z-1).
-  $$
-
-  对于 $-1<z<2$，除端点外恰有一项等于 $1$，因此 $f_Z(z)=1/3$。积分核验：$\int_{-1}^2(1/3)dz=1$。
-
-  </Step>
-</Steps>
-
-<Callout type="idea" title="离散随机平移可以拼出均匀分布">
-  $Z$ 最终服从 $U(-1,2)$；这依赖三个区间长度均为 $1$、相邻不重叠且权重相同。若权重不同，拼接后的密度就是不同高度的阶梯函数。
-</Callout>
-
-</Solution>
-
-</Question>
-
-<Question id="core-1102-math-65f0b9-029" type="single" points={4} tags="来源:2009年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:混合型分布的跳跃点">
-
-
-
-设随机变量 $X$ 与 $Y$ 相互独立，且 $X$ 服从标准正态分布 $N(0,1)$，$Y$ 的概率分布为
-
-$$
-P\{Y=0\}=P\{Y=1\}=\frac12.
-$$
-
-记 $F_Z(z)$ 为随机变量 $Z=XY$ 的分布函数，则函数 $F_Z(z)$ 的间断点个数为（　）。
-
-<Option>0</Option>
-<Option correct>1</Option>
-<Option>2</Option>
-<Option>3</Option>
-
-<Solution>
-
-**正确选项：B。** $F_Z$ 恰有 **1 个** 间断点，即 $z=0$。
-
-**解题思路：** 分布函数的跳跃点恰是随机变量的原子概率点；当 $Y=0$ 时 $XY$ 被压成 $0$，当 $Y=1$ 时 $XY=X$ 仍为连续正态分布。
-
-<Steps>
-  <Step>
-
-  ### 对 $Y$ 的两个取值分别讨论
-
-  若 $Y=0$（概率 $1/2$），则 $Z=0$；若 $Y=1$（概率 $1/2$），则 $Z=X\sim N(0,1)$。独立性保证条件于 $Y=1$ 时 $X$ 仍为标准正态分布。
-
-  </Step>
-  <Step>
-
-  ### 写出精确分布函数
-
-  记标准正态分布函数为 $\Phi$。对 $z<0$，$Y=0$ 那部分不满足 $Z\le z$，所以
-
-  $$
-  F_Z(z)=\frac12\Phi(z),\quad z<0.
-  $$
-
-  对 $z\ge0$，$Y=0$ 那部分全落入事件 $Z\le z$，因此
-
-  $$
-  F_Z(z)=\frac12+\frac12\Phi(z),\quad z\ge0.
-  $$
-
-  </Step>
-  <Step>
-
-  ### 检查跳跃大小与间断点个数
-
-  利用 $\Phi(0)=1/2$，有
-
-  $$
-  F_Z(0^-)=\frac14,\qquad F_Z(0)=\frac12+\frac14=\frac34.
-  $$
-
-  跳跃量 $F_Z(0)-F_Z(0^-)=1/2=P(Z=0)$。其余点只有连续的正态分布部分，故仅 $z=0$ 处间断。
-
-  </Step>
-</Steps>
-
-<Callout type="warn" title="混合分布不是普通连续密度">
-  $Z$ 同时有点质量 $P(Z=0)=1/2$ 和连续正态部分，不能仅以 $\frac12\varphi(z)$ 当作完整概率密度而漏掉 $0$ 处的原子概率。
-</Callout>
-
-</Solution>
-
-</Question>
-
-<Question id="core-1102-math-65f0b9-030" type="essay" points={11} tags="来源:2014年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:条件均匀分布与全期望">
-
-
-
-设随机变量 $X$ 的概率分布为
-
-$$
-P\{X=1\}=P\{X=2\}=\frac12.
-$$
-
-在给定 $X=i$ 的条件下，随机变量 $Y$ 服从均匀分布 $U(0,i)$，$i=1,2$。
-
-（1）求 $Y$ 的分布函数 $F_Y(y)$；
-
-（2）求 $E(Y)$。
-
-<Solution>
-
-**参考答案：**
-
-$$
-F_Y(y)=\begin{cases}
-0,&y<0,\\
-\dfrac{3y}{4},&0\le y<1,\\
-\dfrac12+\dfrac y4,&1\le y<2,\\
-1,&y\ge2;
-\end{cases}
-\qquad E(Y)=\boxed{\frac34}.
-$$
-
-**思路：** $X$ 决定了条件均匀分布的上端点；先按 $X=1,2$ 分层求分布函数，再用全期望公式求均值。
-
-<Steps>
-  <Step>
-
-  ### 写出两个条件分布函数
-
-  记 $F_i(y)=P(Y\le y\mid X=i)$。均匀分布的分布函数为
-
-  $$
-  F_1(y)=\begin{cases}0,&y<0,\\y,&0\le y<1,\\1,&y\ge1,\end{cases}
-  \quad
-  F_2(y)=\begin{cases}0,&y<0,\\y/2,&0\le y<2,\\1,&y\ge2.\end{cases}
-  $$
-
-  </Step>
-  <Step>
-
-  ### 按全概率公式分段合并
-
-  $$
-  F_Y(y)=\frac12 F_1(y)+\frac12 F_2(y).
-  $$
-
-  分段点来自 $0,1,2$：当 $0\le y<1$ 时，$F_Y(y)=\frac12y+\frac12\cdot\frac y2=\frac{3y}{4}$；当 $1\le y<2$ 时，第一种条件分布已累积到 $1$，所以 $F_Y(y)=\frac12+\frac y4$；区间外分别为 $0$ 与 $1$。
-
-  特别地，$F_Y(1^-)=\frac34=F_Y(1)$，分布函数在 $1$ 处连续。
-
-  </Step>
-  <Step>
-
-  ### 使用全期望公式
-
-  $$
-  \begin{aligned}
-  E(Y\mid X=i)&=\frac{i}{2},\\
-  E(Y)&=\sum_{i=1}^{2} E(Y\mid X=i)P(X=i)\\
-      &=\frac12\cdot\frac12+\frac12\cdot1
-       =\boxed{\frac34}.
-  \end{aligned}
-  $$
-
-  用密度核对亦可：$f_Y(y)=\frac34$（$0<y<1$），$f_Y(y)=\frac14$（$1<y<2$），故 $\int_0^2 y f_Y(y)\,dy=\frac34$。
-
-  </Step>
-</Steps>
-
-<Callout type="idea" title="同类题的最简路线">
-  条件分布已知时，求分布函数优先用**全概率公式**；求期望优先用**全期望公式**，不必先把联合分布构造出来。
-</Callout>
-
-</Solution>
-
-</Question>
+### 25｜区域示性变量与混合型和的分布函数
 
 <Question id="core-1102-math-65f0b9-031" type="essay" points={11} tags="来源:2016年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:示性变量与混合随机变量分布">
 
@@ -2115,191 +2350,6 @@ $$
 
 <Callout type="warn" title="示性变量与连续变量的和">
   $U$ 不是与 $X$ 独立的伯努利变量，不能用两个独立变量卷积；必须保持 $U=\mathbf1_{\{X\le Y\}}$ 与 $(X,Y)$ 的几何关系。
-</Callout>
-
-</Solution>
-
-</Question>
-
-<Question id="core-1102-math-65f0b9-032" type="essay" points={11} tags="来源:2017年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:离散连续之和的混合密度">
-
-
-
-设随机变量 $X,Y$ 相互独立，且
-
-$$
-P\{X=0\}=P\{X=2\}=\frac12,
-$$
-
-$Y$ 的概率密度为
-
-$$
-f_Y(y)=
-\begin{cases}
-2y,&0<y<1,\\
-0,&\text{其他}.
-\end{cases}
-$$
-
-（1）求概率 $P\{Y\le E(Y)\}$；
-
-（2）求 $Z=X+Y$ 的概率密度。
-
-<Solution>
-
-**参考答案：**
-
-$$
-P\{Y\le E(Y)\}=\boxed{\frac49},\qquad
-f_Z(z)=\begin{cases}
-z,&0<z<1,\\
-z-2,&2<z<3,\\
-0,&\text{其他}.
-\end{cases}
-$$
-
-**思路：** 先按密度积分计算期望；$X$ 是取值为 $0,2$ 的离散变量，$Z$ 是两种平移后密度的加权混合，而非两个连续密度的普通卷积。
-
-<Steps>
-  <Step>
-
-  ### 计算 $Y$ 的均值及所求概率
-
-  $$
-  E(Y)=\int_0^1 y\cdot2y\,dy
-  =\left[\frac{2y^3}{3}\right]_0^1=\frac23.
-  $$
-
-  $Y$ 的分布函数在 $0<y<1$ 时为 $F_Y(y)=\int_0^y2t\,dt=y^2$。因此
-
-  $$
-  P\{Y\le E(Y)\}=F_Y\left(\frac23\right)
-  =\left(\frac23\right)^2=\boxed{\frac49}.
-  $$
-
-  </Step>
-  <Step>
-
-  ### 按 $X$ 的取值构造条件分布
-
-  $P(X=0)=P(X=2)=1/2$ 且 $X\perp Y$。条件于 $X=0$ 时，$Z=Y$；条件于 $X=2$ 时，$Z=2+Y$，其密度分别为 $f_Y(z)$ 和 $f_Y(z-2)$。
-
-  所以
-
-  $$
-  f_Z(z)=\frac12f_Y(z)+\frac12f_Y(z-2).
-  $$
-
-  </Step>
-  <Step>
-
-  ### 分段代入并检验归一性
-
-  当 $0<z<1$，仅第一项不为零：$f_Z(z)=\frac12\cdot2z=z$；当 $2<z<3$，仅第二项不为零：$f_Z(z)=\frac12\cdot2(z-2)=z-2$。其余处为零。
-
-  $$
-  \int_{-\infty}^{+\infty} f_Z(z)\,dz
-  =\int_0^1z\,dz+\int_2^3(z-2)\,dz
-  =\frac12+\frac12=1.
-  $$
-
-  </Step>
-</Steps>
-
-<Callout type="idea" title="离散＋连续型求和公式">
-  若 $X$ 取值 $a_i$，概率为 $p_i$，且与连续型 $Y$ 独立，则 $X+Y$ 的密度是 $f_{X+Y}(z)=\sum_i p_i f_Y(z-a_i)$。务必根据平移后的支撑区间分段。
-</Callout>
-
-</Solution>
-
-</Question>
-
-<Question id="core-1102-math-65f0b9-033" type="essay" points={11} tags="来源:2019年考研数学一、三, 科目:概率论与数理统计, 章节:随机变量函数的分布, 考点:指数变量乘随机符号与不相关性">
-
-
-
-设随机变量 $X,Y$ 相互独立，$X$ 服从参数为 $1$ 的指数分布，$Y$ 的概率分布为
-
-$$
-P\{Y=-1\}=p,\qquad P\{Y=1\}=1-p,
-\qquad 0<p<1,
-$$
-
-令 $Z=XY$。
-
-（1）求 $Z$ 的概率密度；
-
-（2）$p$ 为何值时，$X$ 与 $Z$ 不相关？
-
-（3）$X$ 与 $Z$ 是否相互独立？
-
-<Solution>
-
-**参考答案：**
-
-$$
-f_Z(z)=\begin{cases}
-pe^z,&z<0,\\
-(1-p)e^{-z},&z>0,
-\end{cases}
-\qquad p=\boxed{\frac12}\ \text{时不相关}.
-$$
-
-无论 $0<p<1$ 取何值，$X$ 与 $Z$ 均**不独立**。$z=0$ 处的密度值可任意指定。
-
-<Steps>
-  <Step>
-
-  ### 利用随机符号求 $Z$ 的密度
-
-  指数分布 $X>0$ 几乎处处成立。条件于 $Y=1$ 时，$Z=X>0$；条件于 $Y=-1$ 时，$Z=-X<0$。因此
-
-  $$
-  \begin{aligned}
-  P(Z\in dz\mid Y=1)&=e^{-z}dz,\quad z>0,\\
-  P(Z\in dz\mid Y=-1)&=e^z dz,\quad z<0.
-  \end{aligned}
-  $$
-
-  按权重 $1-p$ 与 $p$ 叠加即得到答案。检验：$\int_{-\infty}^0pe^z\,dz+\int_0^{+\infty}(1-p)e^{-z}\,dz=p+(1-p)=1$。
-
-  </Step>
-  <Step>
-
-  ### 用独立性化简协方差
-
-  $Z=XY$，由于 $X$ 与 $Y$ 独立，
-
-  $$
-  \begin{aligned}
-  \operatorname{Cov}(X,Z)
-  &=E(X^2Y)-E(X)E(XY)\\
-  &=\big(E(X^2)-[E(X)]^2\big)E(Y)\\
-  &=D(X)E(Y).
-  \end{aligned}
-  $$
-
-  指数分布 $X\sim\operatorname{Exp}(1)$ 有 $D(X)=1$；而 $E(Y)=(-1)p+1(1-p)=1-2p$。所以
-
-  $$
-  \operatorname{Cov}(X,Z)=1-2p=0
-  \iff\boxed{p=\frac12}.
-  $$
-
-  </Step>
-  <Step>
-
-  ### 证明即使不相关仍不独立
-
-  因为 $Y\in\{-1,1\}$，有 $|Z|=|XY|=X$ 几乎处处成立。若 $X$ 与 $Z$ 独立，那么 $X$ 与其函数 $|Z|$ 亦独立；但 $|Z|=X$，意味着 $X$ 与自身独立，从而对任意事件 $A$ 满足 $P(X\in A)=P(X\in A)^2$，只能取 $0$ 或 $1$。
-
-  取 $A=(0,1]$，$P(X\le1)=1-e^{-1}\in(0,1)$，产生矛盾。因此 $X$ 与 $Z$ **不独立**。
-
-  </Step>
-</Steps>
-
-<Callout type="warn" title="不相关不推出独立">
-  在 $p=1/2$ 时虽然 $\operatorname{Cov}(X,Z)=0$，仍有确定性约束 $X=|Z|$；这正是反例的核心。
 </Callout>
 
 </Solution>

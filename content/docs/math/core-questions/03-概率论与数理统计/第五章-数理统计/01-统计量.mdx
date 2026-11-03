@@ -3,86 +3,81 @@ title: 第一节 统计量
 description: 历年考研数学概率论与数理统计分类真题：统计量、抽样分布、卡方分布与 t 分布。
 ---
 
-<Question id="core-1102-math-b7030a-005" type="essay" points={7} tags="来源:1999年考研数学三, 科目:概率论与数理统计, 章节:统计量, 考点:正态样本均值方差的独立性与t分布构造">
+## 考点1：样本统计量与经验分布函数
 
-设 $X_1,X_2,\cdots,X_9$ 是来自正态总体 $X$ 的简单随机样本，
+### 01｜经验分布函数的均值与方差
 
-$$
-Y_1=\frac16(X_1+X_2+\cdots+X_6),
-\qquad
-Y_2=\frac13(X_7+X_8+X_9),
-$$
+<Question id="core-1102-math-b7030a-022" type="single" points={5} tags="来源:2025年考研数学三, 科目:概率论与数理统计, 章节:统计量, 考点:经验分布函数与伯努利样本均值方差">
 
-$$
-S^2=\frac12\sum_{i=7}^9(X_i-Y_2)^2,
-\qquad
-Z=\frac{\sqrt2(Y_1-Y_2)}{S}.
-$$
+设总体 $X$ 的分布函数为 $F(x)$，$X_1,\ldots,X_n$ 为来自该总体的简单随机样本，$F_n(x)$ 为样本经验分布函数。对于给定 $x$，且 $0<F(x)<1$，$D[F_n(x)]=$（ ）。
 
-证明：统计量 $Z$ 服从自由度为 $2$ 的 $t$ 分布。
+<Option>$F(x)[1-F(x)]$</Option>
+<Option>$[F(x)]^2$</Option>
+<Option correct>$\frac1nF(x)[1-F(x)]$</Option>
+<Option>$\frac1n[F(x)]^2$</Option>
 
 <Solution>
 
-**参考结论：** $\boxed{Z\sim t(2)}$。
+**正确选项：C。** 对固定 $x$，
 
-**思路：** 将分子标准化为 $N(0,1)$，将后 $3$ 个样本的方差标准化为 $\chi^2(2)$；验证二者独立，再代入 $t$ 分布定义。
+$$
+\boxed{D[F_n(x)]=\frac{F(x)[1-F(x)]}{n}}.
+$$
 
 <Steps>
   <Step>
 
-  ### 标准化均值差
+  ### 将经验分布函数写成示性变量的均值
 
-  设总体 $X\sim N(\mu,\sigma^2)$。独立的两个样本块分别给出
-
-  $$
-  Y_1\sim N\!\left(\mu,\frac{\sigma^2}{6}\right),\quad
-  Y_2\sim N\!\left(\mu,\frac{\sigma^2}{3}\right).
-  $$
-
-  因而 $D(Y_1-Y_2)=\sigma^2/6+\sigma^2/3=\sigma^2/2$，于是
+  固定 $x$ 并记 $p=F(x)=P(X\le x)$。对第 $i$ 个样本，定义
 
   $$
-  U=\frac{Y_1-Y_2}{\sigma/\sqrt2}\sim N(0,1).
+  I_i=\mathbf1_{\{X_i\le x\}}=
+  \begin{cases}1,&X_i\le x,\\0,&X_i>x.\end{cases}
+  $$
+
+  由于样本独立同分布，$I_i$ 独立同分布于 $\operatorname{Bernoulli}(p)$，并且
+
+  $$
+  F_n(x)=\frac1n\sum_{i=1}^n I_i.
   $$
 
   </Step>
   <Step>
 
-  ### 构造分母中的卡方变量
+  ### 用伯努利方差计算
 
-  由 $X_7,X_8,X_9$ 组成的容量为 $3$ 的正态样本，其无偏样本方差正是 $S^2$，故
+  $E(I_i)=p$，$D(I_i)=p(1-p)$。独立性使协方差项全部为零，故
 
   $$
-  V=\frac{(3-1)S^2}{\sigma^2}
-  =\frac{2S^2}{\sigma^2}\sim\chi^2(2).
+  \begin{aligned}
+  D[F_n(x)]
+  &=D\left(\frac1n\sum_{i=1}^nI_i\right)\\
+  &=\frac1{n^2}\sum_{i=1}^nD(I_i)\\
+  &=\frac{np(1-p)}{n^2}
+  =\boxed{\frac{F(x)[1-F(x)]}{n}}.
+  \end{aligned}
   $$
-
-  正态样本均值与样本方差独立，所以 $Y_2\perp S^2$；前 $6$ 个观测与后 $3$ 个样本整体独立，故 $Y_1$ 也独立于 $(Y_2,S^2)$。由此 $U$ 与 $V$ 相互独立。
 
   </Step>
   <Step>
 
-  ### 对照 $t$ 分布定义
+  ### 检验极端与大样本行为
 
-  若 $U\sim N(0,1)$、$V\sim\chi^2(\nu)$ 且独立，则 $U/\sqrt{V/\nu}\sim t(\nu)$。令 $\nu=2$ 得
-
-  $$
-  \frac{U}{\sqrt{V/2}}
-  =\frac{\frac{\sqrt2(Y_1-Y_2)}{\sigma}}{S/\sigma}
-  =\frac{\sqrt2(Y_1-Y_2)}{S}
-  =Z\sim\boxed{t(2)}.
-  $$
+  $nF_n(x)=\sum_iI_i\sim\operatorname{Binomial}(n,p)$；其期望为 $np$、方差为 $np(1-p)$。因而 $E[F_n(x)]=F(x)$，且方差随 $n$ 增大按 $1/n$ 缩小，与大数定律一致。
 
   </Step>
 </Steps>
 
-<Callout type="idea" title="识别自由度">
-  分母来自 $3$ 个正态观测的样本方差，其卡方自由度是 $3-1=2$，不是全部样本容量 $9$ 的自由度。
+<Callout type="warn" title="固定 x 后再做随机变量运算">
+  $F(x)$ 是总体分布函数在给定 $x$ 处的**确定常数**，而 $F_n(x)$ 是随样本变化的随机量；二者不可混淆。
 </Callout>
 
 </Solution>
 
 </Question>
+
+### 02｜配对样本离差平方和的期望
 
 <Question id="core-1102-math-b7030a-006" type="essay" points={7} tags="来源:2001年考研数学一, 科目:概率论与数理统计, 章节:统计量, 考点:样本方差恒等式与统计量期望">
 
@@ -170,160 +165,7 @@ $$
 
 </Question>
 
-<Question id="core-1102-math-b7030a-008" type="single" points={3} tags="来源:2002年考研数学三, 科目:概率论与数理统计, 章节:统计量, 考点:抽样分布判别中的独立性必要条件">
-
-设随机变量 $X$ 和 $Y$ 都服从标准正态分布，则（　）。
-
-<Option>$X+Y$ 服从正态分布</Option>
-<Option>$X^2+Y^2$ 服从 $\chi^2$ 分布</Option>
-<Option correct>$X^2$ 和 $Y^2$ 都服从 $\chi^2$ 分布</Option>
-<Option>$X^2/Y^2$ 服从 $F$ 分布</Option>
-
-<Solution>
-
-**正确选项：C。** 已知的只是两个**边缘分布**为 $N(0,1)$，并没有说明 $X$、$Y$ 独立或联合正态。
-
-<Steps>
-  <Step>
-
-  ### 找出必然成立的结论
-
-  对任一标准正态变量 $U\sim N(0,1)$，定义即给出 $U^2\sim\chi^2(1)$。因此
-
-  $$
-  X^2\sim\chi^2(1),\qquad Y^2\sim\chi^2(1),
-  $$
-
-  无需 $X$ 与 $Y$ 之间的任何独立性条件，选 C。
-
-  </Step>
-  <Step>
-
-  ### 用反例排除其余选项
-
-  取 $Y=X$，仍满足两者均为标准正态，但 $X+Y=2X\sim N(0,4)$（提示：此例不能否定“服从正态”的 A）。要否定 A，需要构造**非联合正态**的相关方式：令 $X\sim N(0,1)$，$B$ 独立于 $X$ 且等概率取 $\pm1$，令 $Y=BX$。则 $Y\sim N(0,1)$，但 $X+Y$ 以概率 $1/2$ 等于 $0$，以概率 $1/2$ 等于 $2X$，带有零点原子，不是正态分布。
-
-  对 B，取 $Y=X$，则 $X^2+Y^2=2X^2$，不是标准卡方分布；对 D，同取 $Y=X$，几乎必然有 $X^2/Y^2=1$（$P(X=0)=0$），不是 $F$ 分布。
-
-  </Step>
-</Steps>
-
-<Callout type="warn" title="抽样分布的前提">
-  $\sum_iU_i^2\sim\chi^2(k)$ 及两个独立卡方变量之比服从 $F$ 分布，都要求相应独立性；不能仅凭各自的边缘正态性推断联合结论。
-</Callout>
-
-</Solution>
-
-</Question>
-
-<Question id="core-1102-math-b7030a-009" type="single" points={4} tags="来源:2003年考研数学一, 科目:概率论与数理统计, 章节:统计量, 考点:t分布平方与F分布倒数关系">
-
-设随机变量 $X\sim t(n)$（$n>1$），$Y=1/X^2$，则（　）。
-
-<Option>$Y\sim\chi^2(n)$</Option>
-<Option>$Y\sim\chi^2(n-1)$</Option>
-<Option correct>$Y\sim F(n,1)$</Option>
-<Option>$Y\sim F(1,n)$</Option>
-
-<Solution>
-
-**正确选项：C，** 即 $\boxed{Y\sim F(n,1)}$。
-
-<Steps>
-  <Step>
-
-  ### 展开 $t$ 分布的构造式
-
-  若 $X\sim t(n)$，存在相互独立的 $U\sim N(0,1)$ 与 $V\sim\chi^2(n)$，使
-
-  $$
-  X\overset{d}=\frac{U}{\sqrt{V/n}}.
-  $$
-
-  平方后得到
-
-  $$
-  X^2\overset{d}=\frac{U^2/1}{V/n}\sim F(1,n),
-  $$
-
-  因为 $U^2\sim\chi^2(1)$ 且与 $V$ 独立。
-
-  </Step>
-  <Step>
-
-  ### 对倒数交换两个自由度
-
-  $$
-  \frac1{X^2}\overset{d}=\frac{V/n}{U^2/1}
-  \sim\boxed{F(n,1)}.
-  $$
-
-  原统计量 $X=0$ 的概率为 $0$，因此 $1/X^2$ 几乎处处有定义。
-
-  </Step>
-</Steps>
-
-<Callout type="idea" title="速记三连关系">
-  $t(\nu)$ 平方后为 $F(1,\nu)$；$F(m,n)$ 取倒数变成 $F(n,m)$；同时留意 **自由度顺序不能颠倒**。
-</Callout>
-
-</Solution>
-
-</Question>
-
-<Question id="core-1102-math-b7030a-011" type="single" points={4} tags="来源:2005年考研数学一, 科目:概率论与数理统计, 章节:统计量, 考点:独立卡方变量构造F统计量">
-
-设 $X_1,X_2,\cdots,X_n$（$n\ge2$）为来自总体 $N(0,1)$ 的简单随机样本，$\overline X$ 为样本均值，$S^2$ 为样本方差，则（　）。
-
-<Option>$N\overline X\sim N(0,1)$</Option>
-<Option>$nS^2\sim\chi^2(n)$</Option>
-<Option>$\dfrac{(n-1)\overline X}{S}\sim t(n-1)$</Option>
-<Option correct>$\dfrac{(n-1)X_1^2}{\displaystyle\sum_{i=2}^nX_i^2}\sim F(1,n-1)$</Option>
-
-<Solution>
-
-**正确选项：D。** $\displaystyle\boxed{\frac{(n-1)X_1^2}{\sum_{i=2}^nX_i^2}\sim F(1,n-1)}$。
-
-<Steps>
-  <Step>
-
-  ### 从独立的标准正态平方和构造 $F$ 分布
-
-  简单随机样本相互独立，故
-
-  $$
-  U=X_1^2\sim\chi^2(1),\qquad
-  V=\sum_{i=2}^nX_i^2\sim\chi^2(n-1),\qquad U\perp V.
-  $$
-
-  按 $F$ 的定义
-
-  $$
-  \frac{U/1}{V/(n-1)}
-  =\frac{(n-1)X_1^2}{\sum_{i=2}^nX_i^2}\sim F(1,n-1).
-  $$
-
-  </Step>
-  <Step>
-
-  ### 逐项辨析其余选项
-
-  - A：$\overline X\sim N(0,1/n)$，故<strong>$\sqrt n\overline X$</strong> 才是标准正态，写成 $n\overline X$ 不对（$n\ge2$）。
-  - B：$\displaystyle(n-1)S^2\sim\chi^2(n-1)$，不是 $nS^2\sim\chi^2(n)$。
-  - C：标准的 $t$ 统计量是 $\displaystyle\sqrt n\,\overline X/S\sim t(n-1)$；$n-1$ 不可替代 $\sqrt n$ 而不核对系数（即使特定 $n$ 可能偶合，也不构成通用结论）。
-
-  因而 D 是始终成立的选项。
-
-  </Step>
-</Steps>
-
-<Callout type="warn" title="C 项的特殊 n 值">
-  在 $n=\frac{3+\sqrt5}{2}$ 或 $\frac{3-\sqrt5}{2}$ 时形式系数或有偶合，但 $n$ 必须是整数 $\ge2$，所以 $n-1=\sqrt n$ 对合法样本容量没有整数解。
-</Callout>
-
-</Solution>
-
-</Question>
+### 03｜样本均值与方差构造无偏统计量
 
 <Question id="core-1102-math-b7030a-013" type="essay" points={11} tags="来源:2008年考研数学一、三, 科目:概率论与数理统计, 章节:统计量, 考点:正态样本无偏估计量与方差">
 
@@ -417,139 +259,57 @@ $$
 
 </Question>
 
-<Question id="core-1102-math-b7030a-016" type="single" points={4} tags="来源:2012年考研数学三, 科目:概率论与数理统计, 章节:统计量, 考点:独立正态线性组合构造t分布">
+## 考点2：标准正态平方和与卡方分布
 
-设 $X_1,X_2,X_3,X_4$ 为来自总体 $N(1,\sigma^2)$（$\sigma>0$）的简单随机样本，则
+### 04｜卡方构造的独立性条件辨析
 
-$$
-\frac{X_1-X_2}{|X_3+X_4-2|}
-$$
+<Question id="core-1102-math-b7030a-008" type="single" points={3} tags="来源:2002年考研数学三, 科目:概率论与数理统计, 章节:统计量, 考点:抽样分布判别中的独立性必要条件">
 
-的分布为（　）。
+设随机变量 $X$ 和 $Y$ 都服从标准正态分布，则（　）。
 
-<Option>$N(0,1)$</Option>
-<Option correct>$t(1)$</Option>
-<Option>$\chi^2(1)$</Option>
-<Option>$F(1,1)$</Option>
+<Option>$X+Y$ 服从正态分布</Option>
+<Option>$X^2+Y^2$ 服从 $\chi^2$ 分布</Option>
+<Option correct>$X^2$ 和 $Y^2$ 都服从 $\chi^2$ 分布</Option>
+<Option>$X^2/Y^2$ 服从 $F$ 分布</Option>
 
 <Solution>
 
-**正确选项：B。** 所求统计量服从 $\boxed{t(1)}$（即标准柯西分布）。
+**正确选项：C。** 已知的只是两个**边缘分布**为 $N(0,1)$，并没有说明 $X$、$Y$ 独立或联合正态。
 
 <Steps>
   <Step>
 
-  ### 将分子与分母各自标准化
+  ### 找出必然成立的结论
 
-  因样本独立同分布于 $N(1,\sigma^2)$，有
-
-  $$
-  X_1-X_2\sim N(0,2\sigma^2),\quad
-  X_3+X_4-2\sim N(0,2\sigma^2).
-  $$
-
-  两个表达式涉及互不重叠的样本，所以相互独立。令
+  对任一标准正态变量 $U\sim N(0,1)$，定义即给出 $U^2\sim\chi^2(1)$。因此
 
   $$
-  U=\frac{X_1-X_2}{\sqrt2\sigma},\qquad
-  V=\frac{X_3+X_4-2}{\sqrt2\sigma},
+  X^2\sim\chi^2(1),\qquad Y^2\sim\chi^2(1),
   $$
 
-  则 $U,V$ 独立且均为 $N(0,1)$。
+  无需 $X$ 与 $Y$ 之间的任何独立性条件，选 C。
 
   </Step>
   <Step>
 
-  ### 将绝对值分母转化为卡方变量
+  ### 用反例排除其余选项
 
-  因为 $V^2\sim\chi^2(1)$，且与 $U$ 独立，
+  取 $Y=X$，仍满足两者均为标准正态，但 $X+Y=2X\sim N(0,4)$（提示：此例不能否定“服从正态”的 A）。要否定 A，需要构造**非联合正态**的相关方式：令 $X\sim N(0,1)$，$B$ 独立于 $X$ 且等概率取 $\pm1$，令 $Y=BX$。则 $Y\sim N(0,1)$，但 $X+Y$ 以概率 $1/2$ 等于 $0$，以概率 $1/2$ 等于 $2X$，带有零点原子，不是正态分布。
 
-  $$
-  \frac{X_1-X_2}{|X_3+X_4-2|}
-  =\frac{U}{|V|}
-  =\frac{U}{\sqrt{V^2/1}}
-  \sim\boxed{t(1)}.
-  $$
-
-  注意 $P(V=0)=0$，比值几乎处处有定义。
+  对 B，取 $Y=X$，则 $X^2+Y^2=2X^2$，不是标准卡方分布；对 D，同取 $Y=X$，几乎必然有 $X^2/Y^2=1$（$P(X=0)=0$），不是 $F$ 分布。
 
   </Step>
 </Steps>
 
-<Callout type="idea" title="绝对值不是障碍">
-  $t$ 分布的定义分母是 $\sqrt{\chi^2(\nu)/\nu}$；当 $\nu=1$ 且 $V\sim N(0,1)$ 时，分母恰好是 $|V|$。
+<Callout type="warn" title="抽样分布的前提">
+  $\sum_iU_i^2\sim\chi^2(k)$ 及两个独立卡方变量之比服从 $F$ 分布，都要求相应独立性；不能仅凭各自的边缘正态性推断联合结论。
 </Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="core-1102-math-b7030a-017" type="single" points={4} tags="来源:2013年考研数学一, 科目:概率论与数理统计, 章节:统计量, 考点:t分布与F分布分位数和对称性">
-
-设随机变量 $X\sim t(n)$，$Y\sim F(1,n)$，给定 $\alpha$（$0<\alpha<0.5$），常数 $c$ 满足
-
-$$
-P\{X>c\}=\alpha,
-$$
-
-则
-
-$$
-P\{Y>c^2\}=(\ \ ).
-$$
-
-<Option>$\alpha$</Option>
-<Option>$1-\alpha$</Option>
-<Option correct>$2\alpha$</Option>
-<Option>$1-2\alpha$</Option>
-
-<Solution>
-
-**正确选项：C。** $\boxed{P(Y>c^2)=2\alpha}$。
-
-<Steps>
-  <Step>
-
-  ### 先判断分位点 $c$ 的正负
-
-  $t(n)$ 分布关于原点对称且连续，所以 $P(X>0)=1/2$。由于 $P(X>c)=\alpha<1/2$，必有 $c>0$。
-
-  </Step>
-  <Step>
-
-  ### 将 $F$ 分布转化为 $t$ 分布的平方
-
-  由 $X\sim t(n)$ 可知 $X^2\sim F(1,n)$。题给 $Y\sim F(1,n)$，因此
-
-  $$
-  P(Y>c^2)=P(X^2>c^2)=P(|X|>c).
-  $$
-
-  最后一个等号用到了 $c>0$，从而 $|X|>c$ 等价于 $X>c$ 或 $X<-c$。
-
-  </Step>
-  <Step>
-
-  ### 使用分布的对称性
-
-  $$
-  \begin{aligned}
-  P(|X|>c)&=P(X>c)+P(X<-c)\\
-  &=\alpha+\alpha
-  =\boxed{2\alpha}.
-  \end{aligned}
-  $$
-
-  </Step>
-</Steps>
-
-<Callout type="warn" title="阈值平方后的双侧事件">
-  $P(X^2>c^2)$ 在 $c>0$ 时包含**两侧尾部**，不能直接写成单侧的 $\alpha$。不需要假设 $X$ 与 $Y$ 相互独立，只使用同分布关系即可。
-</Callout>
-
-</Solution>
-
-</Question>
+### 05｜正态样本中心化平方和的自由度
 
 <Question id="core-1102-math-b7030a-019" type="single" points={4} tags="来源:2017年考研数学一、三, 科目:概率论与数理统计, 章节:统计量, 考点:正态样本统计量的卡方分布辨析">
 
@@ -635,6 +395,10 @@ $$
 
 </Question>
 
+## 考点3：正态样本构造 t 统计量
+
+### 06｜样本均值与样本标准差的 t 分布
+
 <Question id="core-1102-math-b7030a-020" type="single" points={4} tags="来源:2018年考研数学三, 科目:概率论与数理统计, 章节:统计量, 考点:正态总体t统计量的自由度与独立性">
 
 已知 $X_1,X_2,\cdots,X_n$ 为来自总体 $X\sim N(\mu,\sigma^2)$ 的简单随机样本，
@@ -718,6 +482,218 @@ $$
 
 </Question>
 
+### 07｜独立正态线性组合的 t 分布
+
+<Question id="core-1102-math-b7030a-016" type="single" points={4} tags="来源:2012年考研数学三, 科目:概率论与数理统计, 章节:统计量, 考点:独立正态线性组合构造t分布">
+
+设 $X_1,X_2,X_3,X_4$ 为来自总体 $N(1,\sigma^2)$（$\sigma>0$）的简单随机样本，则
+
+$$
+\frac{X_1-X_2}{|X_3+X_4-2|}
+$$
+
+的分布为（　）。
+
+<Option>$N(0,1)$</Option>
+<Option correct>$t(1)$</Option>
+<Option>$\chi^2(1)$</Option>
+<Option>$F(1,1)$</Option>
+
+<Solution>
+
+**正确选项：B。** 所求统计量服从 $\boxed{t(1)}$（即标准柯西分布）。
+
+<Steps>
+  <Step>
+
+  ### 将分子与分母各自标准化
+
+  因样本独立同分布于 $N(1,\sigma^2)$，有
+
+  $$
+  X_1-X_2\sim N(0,2\sigma^2),\quad
+  X_3+X_4-2\sim N(0,2\sigma^2).
+  $$
+
+  两个表达式涉及互不重叠的样本，所以相互独立。令
+
+  $$
+  U=\frac{X_1-X_2}{\sqrt2\sigma},\qquad
+  V=\frac{X_3+X_4-2}{\sqrt2\sigma},
+  $$
+
+  则 $U,V$ 独立且均为 $N(0,1)$。
+
+  </Step>
+  <Step>
+
+  ### 将绝对值分母转化为卡方变量
+
+  因为 $V^2\sim\chi^2(1)$，且与 $U$ 独立，
+
+  $$
+  \frac{X_1-X_2}{|X_3+X_4-2|}
+  =\frac{U}{|V|}
+  =\frac{U}{\sqrt{V^2/1}}
+  \sim\boxed{t(1)}.
+  $$
+
+  注意 $P(V=0)=0$，比值几乎处处有定义。
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="绝对值不是障碍">
+  $t$ 分布的定义分母是 $\sqrt{\chi^2(\nu)/\nu}$；当 $\nu=1$ 且 $V\sim N(0,1)$ 时，分母恰好是 $|V|$。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 08｜两组均值差与样本方差的 t 分布证明
+
+<Question id="core-1102-math-b7030a-005" type="essay" points={7} tags="来源:1999年考研数学三, 科目:概率论与数理统计, 章节:统计量, 考点:正态样本均值方差的独立性与t分布构造">
+
+设 $X_1,X_2,\cdots,X_9$ 是来自正态总体 $X$ 的简单随机样本，
+
+$$
+Y_1=\frac16(X_1+X_2+\cdots+X_6),
+\qquad
+Y_2=\frac13(X_7+X_8+X_9),
+$$
+
+$$
+S^2=\frac12\sum_{i=7}^9(X_i-Y_2)^2,
+\qquad
+Z=\frac{\sqrt2(Y_1-Y_2)}{S}.
+$$
+
+证明：统计量 $Z$ 服从自由度为 $2$ 的 $t$ 分布。
+
+<Solution>
+
+**参考结论：** $\boxed{Z\sim t(2)}$。
+
+**思路：** 将分子标准化为 $N(0,1)$，将后 $3$ 个样本的方差标准化为 $\chi^2(2)$；验证二者独立，再代入 $t$ 分布定义。
+
+<Steps>
+  <Step>
+
+  ### 标准化均值差
+
+  设总体 $X\sim N(\mu,\sigma^2)$。独立的两个样本块分别给出
+
+  $$
+  Y_1\sim N\!\left(\mu,\frac{\sigma^2}{6}\right),\quad
+  Y_2\sim N\!\left(\mu,\frac{\sigma^2}{3}\right).
+  $$
+
+  因而 $D(Y_1-Y_2)=\sigma^2/6+\sigma^2/3=\sigma^2/2$，于是
+
+  $$
+  U=\frac{Y_1-Y_2}{\sigma/\sqrt2}\sim N(0,1).
+  $$
+
+  </Step>
+  <Step>
+
+  ### 构造分母中的卡方变量
+
+  由 $X_7,X_8,X_9$ 组成的容量为 $3$ 的正态样本，其无偏样本方差正是 $S^2$，故
+
+  $$
+  V=\frac{(3-1)S^2}{\sigma^2}
+  =\frac{2S^2}{\sigma^2}\sim\chi^2(2).
+  $$
+
+  正态样本均值与样本方差独立，所以 $Y_2\perp S^2$；前 $6$ 个观测与后 $3$ 个样本整体独立，故 $Y_1$ 也独立于 $(Y_2,S^2)$。由此 $U$ 与 $V$ 相互独立。
+
+  </Step>
+  <Step>
+
+  ### 对照 $t$ 分布定义
+
+  若 $U\sim N(0,1)$、$V\sim\chi^2(\nu)$ 且独立，则 $U/\sqrt{V/\nu}\sim t(\nu)$。令 $\nu=2$ 得
+
+  $$
+  \frac{U}{\sqrt{V/2}}
+  =\frac{\frac{\sqrt2(Y_1-Y_2)}{\sigma}}{S/\sigma}
+  =\frac{\sqrt2(Y_1-Y_2)}{S}
+  =Z\sim\boxed{t(2)}.
+  $$
+
+  </Step>
+</Steps>
+
+<Callout type="idea" title="识别自由度">
+  分母来自 $3$ 个正态观测的样本方差，其卡方自由度是 $3-1=2$，不是全部样本容量 $9$ 的自由度。
+</Callout>
+
+</Solution>
+
+</Question>
+
+## 考点4：F 统计量及 t 与 F 的转换
+
+### 09｜独立卡方平方和之比构造 F 分布
+
+<Question id="core-1102-math-b7030a-011" type="single" points={4} tags="来源:2005年考研数学一, 科目:概率论与数理统计, 章节:统计量, 考点:独立卡方变量构造F统计量">
+
+设 $X_1,X_2,\cdots,X_n$（$n\ge2$）为来自总体 $N(0,1)$ 的简单随机样本，$\overline X$ 为样本均值，$S^2$ 为样本方差，则（　）。
+
+<Option>$N\overline X\sim N(0,1)$</Option>
+<Option>$nS^2\sim\chi^2(n)$</Option>
+<Option>$\dfrac{(n-1)\overline X}{S}\sim t(n-1)$</Option>
+<Option correct>$\dfrac{(n-1)X_1^2}{\displaystyle\sum_{i=2}^nX_i^2}\sim F(1,n-1)$</Option>
+
+<Solution>
+
+**正确选项：D。** $\displaystyle\boxed{\frac{(n-1)X_1^2}{\sum_{i=2}^nX_i^2}\sim F(1,n-1)}$。
+
+<Steps>
+  <Step>
+
+  ### 从独立的标准正态平方和构造 $F$ 分布
+
+  简单随机样本相互独立，故
+
+  $$
+  U=X_1^2\sim\chi^2(1),\qquad
+  V=\sum_{i=2}^nX_i^2\sim\chi^2(n-1),\qquad U\perp V.
+  $$
+
+  按 $F$ 的定义
+
+  $$
+  \frac{U/1}{V/(n-1)}
+  =\frac{(n-1)X_1^2}{\sum_{i=2}^nX_i^2}\sim F(1,n-1).
+  $$
+
+  </Step>
+  <Step>
+
+  ### 逐项辨析其余选项
+
+  - A：$\overline X\sim N(0,1/n)$，故<strong>$\sqrt n\overline X$</strong> 才是标准正态，写成 $n\overline X$ 不对（$n\ge2$）。
+  - B：$\displaystyle(n-1)S^2\sim\chi^2(n-1)$，不是 $nS^2\sim\chi^2(n)$。
+  - C：标准的 $t$ 统计量是 $\displaystyle\sqrt n\,\overline X/S\sim t(n-1)$；$n-1$ 不可替代 $\sqrt n$ 而不核对系数（即使特定 $n$ 可能偶合，也不构成通用结论）。
+
+  因而 D 是始终成立的选项。
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="C 项的特殊 n 值">
+  在 $n=\frac{3+\sqrt5}{2}$ 或 $\frac{3-\sqrt5}{2}$ 时形式系数或有偶合，但 $n$ 必须是整数 $\ge2$，所以 $n-1=\sqrt n$ 对合法样本容量没有整数解。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 10｜双正态总体样本方差比与 F 分布
+
 <Question id="core-1102-math-b7030a-021" type="single" points={5} tags="来源:2023年考研数学一、三, 科目:概率论与数理统计, 章节:统计量, 考点:双正态总体方差比的F分布">
 
 设 $X_1,X_2,\cdots,X_n$ 为来自总体 $N(\mu_1,\sigma^2)$ 的简单随机样本，$Y_1,Y_2,\cdots,Y_m$ 为来自总体 $N(\mu_2,2\sigma^2)$ 的简单随机样本，且两样本相互独立。记
@@ -796,72 +772,126 @@ $$
 
 </Question>
 
-## 2025 年补充真题
+### 11｜t 分布平方倒数与 F 自由度互换
 
-<Question id="core-1102-math-b7030a-022" type="single" points={5} tags="来源:2025年考研数学三, 科目:概率论与数理统计, 章节:统计量, 考点:经验分布函数与伯努利样本均值方差">
+<Question id="core-1102-math-b7030a-009" type="single" points={4} tags="来源:2003年考研数学一, 科目:概率论与数理统计, 章节:统计量, 考点:t分布平方与F分布倒数关系">
 
-设总体 $X$ 的分布函数为 $F(x)$，$X_1,\ldots,X_n$ 为来自该总体的简单随机样本，$F_n(x)$ 为样本经验分布函数。对于给定 $x$，且 $0<F(x)<1$，$D[F_n(x)]=$（ ）。
+设随机变量 $X\sim t(n)$（$n>1$），$Y=1/X^2$，则（　）。
 
-<Option>$F(x)[1-F(x)]$</Option>
-<Option>$[F(x)]^2$</Option>
-<Option correct>$\frac1nF(x)[1-F(x)]$</Option>
-<Option>$\frac1n[F(x)]^2$</Option>
+<Option>$Y\sim\chi^2(n)$</Option>
+<Option>$Y\sim\chi^2(n-1)$</Option>
+<Option correct>$Y\sim F(n,1)$</Option>
+<Option>$Y\sim F(1,n)$</Option>
 
 <Solution>
 
-**正确选项：C。** 对固定 $x$，
-
-$$
-\boxed{D[F_n(x)]=\frac{F(x)[1-F(x)]}{n}}.
-$$
+**正确选项：C，** 即 $\boxed{Y\sim F(n,1)}$。
 
 <Steps>
   <Step>
 
-  ### 将经验分布函数写成示性变量的均值
+  ### 展开 $t$ 分布的构造式
 
-  固定 $x$ 并记 $p=F(x)=P(X\le x)$。对第 $i$ 个样本，定义
-
-  $$
-  I_i=\mathbf1_{\{X_i\le x\}}=
-  \begin{cases}1,&X_i\le x,\\0,&X_i>x.\end{cases}
-  $$
-
-  由于样本独立同分布，$I_i$ 独立同分布于 $\operatorname{Bernoulli}(p)$，并且
+  若 $X\sim t(n)$，存在相互独立的 $U\sim N(0,1)$ 与 $V\sim\chi^2(n)$，使
 
   $$
-  F_n(x)=\frac1n\sum_{i=1}^n I_i.
+  X\overset{d}=\frac{U}{\sqrt{V/n}}.
   $$
+
+  平方后得到
+
+  $$
+  X^2\overset{d}=\frac{U^2/1}{V/n}\sim F(1,n),
+  $$
+
+  因为 $U^2\sim\chi^2(1)$ 且与 $V$ 独立。
 
   </Step>
   <Step>
 
-  ### 用伯努利方差计算
-
-  $E(I_i)=p$，$D(I_i)=p(1-p)$。独立性使协方差项全部为零，故
+  ### 对倒数交换两个自由度
 
   $$
-  \begin{aligned}
-  D[F_n(x)]
-  &=D\left(\frac1n\sum_{i=1}^nI_i\right)\\
-  &=\frac1{n^2}\sum_{i=1}^nD(I_i)\\
-  &=\frac{np(1-p)}{n^2}
-  =\boxed{\frac{F(x)[1-F(x)]}{n}}.
-  \end{aligned}
+  \frac1{X^2}\overset{d}=\frac{V/n}{U^2/1}
+  \sim\boxed{F(n,1)}.
   $$
 
-  </Step>
-  <Step>
-
-  ### 检验极端与大样本行为
-
-  $nF_n(x)=\sum_iI_i\sim\operatorname{Binomial}(n,p)$；其期望为 $np$、方差为 $np(1-p)$。因而 $E[F_n(x)]=F(x)$，且方差随 $n$ 增大按 $1/n$ 缩小，与大数定律一致。
+  原统计量 $X=0$ 的概率为 $0$，因此 $1/X^2$ 几乎处处有定义。
 
   </Step>
 </Steps>
 
-<Callout type="warn" title="固定 x 后再做随机变量运算">
-  $F(x)$ 是总体分布函数在给定 $x$ 处的**确定常数**，而 $F_n(x)$ 是随样本变化的随机量；二者不可混淆。
+<Callout type="idea" title="速记三连关系">
+  $t(\nu)$ 平方后为 $F(1,\nu)$；$F(m,n)$ 取倒数变成 $F(n,m)$；同时留意 **自由度顺序不能颠倒**。
+</Callout>
+
+</Solution>
+
+</Question>
+
+### 12｜t 与 F 分布的上侧概率转换
+
+<Question id="core-1102-math-b7030a-017" type="single" points={4} tags="来源:2013年考研数学一, 科目:概率论与数理统计, 章节:统计量, 考点:t分布与F分布分位数和对称性">
+
+设随机变量 $X\sim t(n)$，$Y\sim F(1,n)$，给定 $\alpha$（$0<\alpha<0.5$），常数 $c$ 满足
+
+$$
+P\{X>c\}=\alpha,
+$$
+
+则
+
+$$
+P\{Y>c^2\}=(\ \ ).
+$$
+
+<Option>$\alpha$</Option>
+<Option>$1-\alpha$</Option>
+<Option correct>$2\alpha$</Option>
+<Option>$1-2\alpha$</Option>
+
+<Solution>
+
+**正确选项：C。** $\boxed{P(Y>c^2)=2\alpha}$。
+
+<Steps>
+  <Step>
+
+  ### 先判断分位点 $c$ 的正负
+
+  $t(n)$ 分布关于原点对称且连续，所以 $P(X>0)=1/2$。由于 $P(X>c)=\alpha<1/2$，必有 $c>0$。
+
+  </Step>
+  <Step>
+
+  ### 将 $F$ 分布转化为 $t$ 分布的平方
+
+  由 $X\sim t(n)$ 可知 $X^2\sim F(1,n)$。题给 $Y\sim F(1,n)$，因此
+
+  $$
+  P(Y>c^2)=P(X^2>c^2)=P(|X|>c).
+  $$
+
+  最后一个等号用到了 $c>0$，从而 $|X|>c$ 等价于 $X>c$ 或 $X<-c$。
+
+  </Step>
+  <Step>
+
+  ### 使用分布的对称性
+
+  $$
+  \begin{aligned}
+  P(|X|>c)&=P(X>c)+P(X<-c)\\
+  &=\alpha+\alpha
+  =\boxed{2\alpha}.
+  \end{aligned}
+  $$
+
+  </Step>
+</Steps>
+
+<Callout type="warn" title="阈值平方后的双侧事件">
+  $P(X^2>c^2)$ 在 $c>0$ 时包含**两侧尾部**，不能直接写成单侧的 $\alpha$。不需要假设 $X$ 与 $Y$ 相互独立，只使用同分布关系即可。
 </Callout>
 
 </Solution>
