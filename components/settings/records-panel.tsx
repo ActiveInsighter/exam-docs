@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronRightIcon, PlayIcon } from 'lucide-react';
-import { useMemo, useState, type ComponentProps, type ReactNode } from 'react';
+import { ArrowRight, ChevronRightIcon, PlayIcon } from 'lucide-react';
+import { useMemo, useState, type ComponentProps, type CSSProperties, type ReactNode } from 'react';
 import { Modal, ModalBody, ModalContent, ModalDescription, ModalHeader, ModalTags, ModalTitle, useModal } from '@/components/ui/modal';
 import { resolveSource, type SourceIndex, type SourceTree } from '@/lib/doc-sources';
 import {
@@ -10,16 +10,20 @@ import {
   type CoverageFolder, type CoverageNode, type CoveragePage, type QuestionRecord, type RecordSession,
 } from '@/lib/question-records';
 import { cn } from '@/lib/utils';
+import sheet from '@/styles/answer-sheet.module.css';
+import styles from './records.module.css';
+import page from './settings.module.css';
 
 /*
- * The reader's answers by source. "按模块" shows one card per sidebar module
- * (progress, its busiest folders) and opens the module's full folder tree in
- * a bottom sheet. "按时间" lists the answers newest first, consecutive answers
- * on one page folded into one entry.
+ * The reader's answers by source. "按模块" shows one row per sidebar module
+ * (its share in red, twenty answer-sheet boxes, its busiest folders) and
+ * opens the module's full folder tree in a bottom sheet. "按时间" lists the
+ * answers newest first, consecutive answers on one page folded into one entry.
  */
 
 type View = 'modules' | 'timeline';
 
+const BOXES = 20;
 const numberFormat = new Intl.NumberFormat('zh-CN');
 const fmt = (value: number) => numberFormat.format(value);
 const touched = (node: CoverageNode) => node.totals.answered > 0 || node.totals.attempts > 0;
@@ -34,7 +38,7 @@ function percent(value: number) {
   return `${Math.round(value * 100)}%`;
 }
 
-export function formatDay(iso: string, now = new Date()): string {
+function formatDay(iso: string, now = new Date()): string {
   const date = new Date(iso);
   const startOf = (value: Date) => new Date(value.getFullYear(), value.getMonth(), value.getDate()).getTime();
   const days = Math.round((startOf(now) - startOf(date)) / 86_400_000);
@@ -48,26 +52,39 @@ export function formatDay(iso: string, now = new Date()): string {
 
 const timeOf = (iso: string) => new Date(iso).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
 
-export function Meter({ value, size, className, label }: { value: number; size?: 'sm'; className?: string; label?: string }) {
+/** A thin graphite bar on a faint red track. */
+function Bar({ value, className }: { value: number; className?: string }) {
+  return (
+    <span aria-hidden className={cn(styles.bar, className)}>
+      <span data-some={value > 0 ? '' : undefined} style={{ width: `${value * 100}%` }} />
+    </span>
+  );
+}
+
+/** Twenty answer-sheet boxes, five percent each; the box in progress is shaded to its share. */
+function Boxes({ value, label }: { value: number; label: string }) {
+  const filled = value * BOXES;
   return (
     <span
-      role={label ? 'meter' : undefined}
+      className={styles.boxes}
+      role="meter"
       aria-label={label}
-      aria-valuemin={label ? 0 : undefined}
-      aria-valuemax={label ? 100 : undefined}
-      aria-valuenow={label ? Math.round(value * 100) : undefined}
-      aria-hidden={label ? undefined : true}
-      data-size={size}
-      className={cn('settings-meter', className)}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(value * 100)}
     >
-      <span data-some={value > 0 ? '' : undefined} style={{ width: `${value * 100}%` }} />
+      {Array.from({ length: BOXES }, (_, index) => {
+        const fill = Math.min(1, Math.max(0, filled - index));
+        // A share too small to see still shows that something was done.
+        return <i key={index} data-fill={fill > 0 ? '' : undefined} style={fill > 0 ? { '--fill': Math.max(fill, 0.2) } as CSSProperties : undefined} />;
+      })}
     </span>
   );
 }
 
 /* ------------------------------------------------------------------ modules */
 
-function ModuleCard({ module, onOpen }: { module: CoverageFolder; onOpen(): void }) {
+function ModuleRow({ module, onOpen }: { module: CoverageFolder; onOpen(): void }) {
   const pages = pagesOf(module);
   const pagesDone = pages.filter(touched).length;
   const value = share(module.totals.answered, module.questions);
@@ -82,39 +99,41 @@ function ModuleCard({ module, onOpen }: { module: CoverageFolder; onOpen(): void
   const firstPage = pages[0];
 
   return (
-    <article className="settings-card flex flex-col p-5 sm:p-6" data-interactive="" aria-labelledby={`module-${module.id}`}>
-      <header className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h3 id={`module-${module.id}`} className="truncate text-lg font-semibold tracking-tight">{module.name}</h3>
-          <p className="mt-0.5 text-[13px] text-(--home-muted)">{fmt(pagesDone)} / {fmt(pages.length)} 个页面做过</p>
-        </div>
-        <div className="shrink-0 text-right">
-          <p className={cn('text-[28px] leading-none font-semibold tracking-tight', !started && 'text-(--home-muted)')}>{percent(value)}</p>
-          <p className="mt-1.5 text-[13px] text-(--home-muted)">
-            <span className="text-(--home-foreground)">{fmt(module.totals.answered)}</span> / {fmt(module.questions)} 题
-          </p>
-        </div>
+    <article className={styles.module} aria-labelledby={`module-${module.id}`}>
+      <header className={styles.moduleHead}>
+        <h3 id={`module-${module.id}`} className={styles.moduleName}>{module.name}</h3>
+        <p className={styles.moduleCount}>
+          <strong>{fmt(module.totals.answered)}</strong> / {fmt(module.questions)} 题
+        </p>
       </header>
-      <Meter value={value} className="mt-4" label={`${module.name}完成度`} />
-      <ul className="mt-5 space-y-3">
-        {folders.map((folder) => (
-          <li key={folder.kind === 'folder' ? folder.id : folder.url} className={cn('grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5', !touched(folder) && 'opacity-55')}>
-            <span className="truncate text-sm">{folder.name}</span>
-            <span className="text-xs text-(--home-muted) tabular-nums">{fmt(folder.totals.answered)} / {fmt(folder.questions)}</span>
-            <Meter value={share(folder.totals.answered, folder.questions)} size="sm" className="col-span-2" />
-          </li>
-        ))}
-      </ul>
-      <footer className="mt-auto flex items-center justify-between gap-3 pt-6">
-        <span className="text-[13px] text-(--home-muted)">
-          {module.totals.lastAt ? `最近一次：${formatDay(module.totals.lastAt)}` : '还没开始'}
-        </span>
-        {started || !firstPage ? (
-          <button type="button" className="settings-btn" onClick={onOpen}>查看目录<ChevronRightIcon /></button>
-        ) : (
-          <Link href={firstPage.url} prefetch={false} className="settings-btn" data-variant="accent"><PlayIcon />开始练习</Link>
-        )}
-      </footer>
+      <div className={styles.moduleBody}>
+        <div className={styles.scoreRow}>
+          <Boxes value={value} label={`${module.name}完成度`} />
+          <span className={styles.score} data-idle={started ? undefined : ''} aria-hidden>{percent(value)}</span>
+        </div>
+        {folders.length ? (
+          <ul className={styles.folders}>
+            {folders.map((folder) => (
+              <li key={folder.kind === 'folder' ? folder.id : folder.url} className={styles.folder} data-idle={touched(folder) ? undefined : ''}>
+                <span className={styles.folderName}>{folder.name}</span>
+                <span className={styles.folderCount}>{fmt(folder.totals.answered)} / {fmt(folder.questions)}</span>
+                <Bar value={share(folder.totals.answered, folder.questions)} />
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <footer className={styles.moduleFoot}>
+          <span className={styles.moduleFacts}>
+            <span>做过 {fmt(pagesDone)} / {fmt(pages.length)} 个页面</span>
+            {module.totals.lastAt ? <span>最近一次：{formatDay(module.totals.lastAt)}</span> : null}
+          </span>
+          {started || !firstPage ? (
+            <button type="button" className={page.button} onClick={onOpen}>查看目录<ChevronRightIcon aria-hidden /></button>
+          ) : (
+            <Link href={firstPage.url} prefetch={false} className={page.button}><PlayIcon aria-hidden />开始练习</Link>
+          )}
+        </footer>
+      </div>
     </article>
   );
 }
@@ -127,33 +146,33 @@ function SheetLink(props: ComponentProps<typeof Link>) {
 
 function Count({ answered, questions }: { answered: number; questions: number }) {
   return (
-    <span className="flex items-center gap-3">
-      <Meter value={share(answered, questions)} size="sm" className="w-20 max-sm:hidden" />
-      <span className="min-w-[5.5rem] text-right text-[13px] whitespace-nowrap text-muted-foreground tabular-nums">
-        <span className={cn(answered > 0 && 'text-foreground')}>{fmt(answered)}</span> / {fmt(questions)}
+    <span className={styles.count}>
+      <Bar value={share(answered, questions)} />
+      <span className={styles.countText}>
+        {answered > 0 ? <strong>{fmt(answered)}</strong> : fmt(answered)} / {fmt(questions)}
       </span>
     </span>
   );
 }
 
-function TreePage({ page, depth }: { page: CoveragePage; depth: number }) {
-  const { answered, submitted, lastAt } = page.totals;
+function TreePage({ page: item, depth }: { page: CoveragePage; depth: number }) {
+  const { answered, submitted, lastAt } = item.totals;
   return (
     <li>
       <SheetLink
-        href={page.url}
-        className={cn('grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 rounded-xl py-2.5 pr-3 hover:bg-(--ui-fill-hover) focus-visible:bg-(--ui-fill-hover)', !touched(page) && 'opacity-55')}
+        href={item.url}
+        className={cn('grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 rounded-xl py-2.5 pr-3 hover:bg-(--ui-fill-hover) focus-visible:bg-(--ui-fill-hover)', !touched(item) && 'opacity-55')}
         style={{ paddingLeft: `${0.75 + depth * 1.25}rem` }}
       >
         <span className="min-w-0">
-          <span className="block truncate text-[15px]">{page.name}</span>
-          {touched(page) ? (
+          <span className="block truncate text-[15px]">{item.name}</span>
+          {touched(item) ? (
             <span className="mt-0.5 block text-xs text-muted-foreground">
               已提交 {fmt(submitted)}{lastAt ? `，${formatDay(lastAt)}` : ''}
             </span>
           ) : null}
         </span>
-        <Count answered={answered} questions={page.questions} />
+        <Count answered={answered} questions={item.questions} />
       </SheetLink>
     </li>
   );
@@ -215,12 +234,13 @@ function ModuleSheet({ module, open, onOpenChange }: { module: CoverageFolder | 
                 ))}
               </ModalTags>
             </ModalHeader>
-            <ModalBody className="px-3 md:px-4">
+            {/* The sheet is portalled outside the page: it needs the palette for its bars. */}
+            <ModalBody className={cn(sheet.palette, 'px-3 md:px-4')}>
               <div className="px-3 pb-4">
                 <ModalDescription className="text-sm text-muted-foreground">
                   已作答 {fmt(module.totals.answered)} / {fmt(module.questions)} 题，已提交 {fmt(module.totals.submitted)} 题。点页面可直接跳过去接着做。
                 </ModalDescription>
-                <Meter value={share(module.totals.answered, module.questions)} className="mt-3" />
+                <div className="mt-3"><Boxes value={share(module.totals.answered, module.questions)} label={`${module.name}完成度`} /></div>
               </div>
               {onlyDone && !touched(module)
                 ? <p className="px-3 py-10 text-center text-sm text-muted-foreground">这个模块还没有作答记录。</p>
@@ -242,9 +262,9 @@ function ModulesView({ coverage }: { coverage: CoverageFolder[] }) {
   if (!coverage.length) return <Empty>还没有可统计的题目。</Empty>;
   return (
     <>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div>
         {ordered.map((module) => (
-          <ModuleCard key={module.id} module={module} onOpen={() => { setModuleId(module.id); setOpen(true); }} />
+          <ModuleRow key={module.id} module={module} onOpen={() => { setModuleId(module.id); setOpen(true); }} />
         ))}
       </div>
       <ModuleSheet key={moduleId ?? ''} module={current} open={open && current !== null} onOpenChange={setOpen} />
@@ -257,63 +277,48 @@ function ModulesView({ coverage }: { coverage: CoverageFolder[] }) {
 function StatePill({ record }: { record: QuestionRecord }) {
   const state = record.submitted ? 'submitted' : record.answered ? 'draft' : 'reset';
   return (
-    <span
-      data-state={state}
-      className="shrink-0 rounded-full px-2 text-xs leading-5 data-[state=draft]:border data-[state=draft]:border-(--home-border) data-[state=draft]:text-(--home-muted) data-[state=reset]:text-(--home-muted) data-[state=submitted]:bg-(--home-accent) data-[state=submitted]:text-(--home-accent-foreground)"
-    >
+    <span data-state={state} className={styles.pill}>
       {record.submitted ? '已提交' : record.answered ? '作答中' : '已重做'}
     </span>
   );
 }
 
-function SessionItem({ session, index, last }: { session: RecordSession; index: SourceIndex | null; last: boolean }) {
+function SessionItem({ session, index }: { session: RecordSession; index: SourceIndex | null }) {
   const [open, setOpen] = useState(false);
   const source = resolveSource(index, session.documentPath);
   const submitted = session.records.filter((record) => record.submitted).length;
   const single = session.records.length === 1 ? session.records[0] : null;
   return (
-    <li className="relative pl-6">
-      <span aria-hidden className={cn('absolute top-0 left-[7px] w-px bg-(--home-border)', last ? 'h-5' : 'bottom-0')} />
-      <span aria-hidden className="absolute top-[17px] left-[3px] size-[9px] rounded-full bg-(--set-meter-fill) ring-4 ring-(--home-elevated)" />
-      <div className="grid grid-cols-[2.75rem_minmax(0,1fr)] items-start gap-x-3 rounded-xl px-3 py-2.5 hover:bg-(--home-active) sm:grid-cols-[2.75rem_minmax(0,1fr)_auto]">
-        <time dateTime={session.lastAt} className="pt-0.5 text-[13px] text-(--home-muted) tabular-nums">{timeOf(session.lastAt)}</time>
+    <li className={styles.session}>
+      <div className={styles.sessionRow}>
+        <time dateTime={session.lastAt} className={styles.time}>{timeOf(session.lastAt)}</time>
         <Link
           href={single ? questionHref(single.documentPath, single.questionId) : session.documentPath}
           prefetch={false}
-          className="min-w-0 rounded-sm hover:underline focus-visible:underline"
+          className={styles.sessionLink}
         >
-          <span className="block truncate text-[15px] font-medium">{source.page}</span>
-          <span className="mt-0.5 block truncate text-xs text-(--home-muted)">{[source.module, ...source.folders].join(' › ')}</span>
+          <span className={styles.sessionTitle}>{source.page}</span>
+          <span className={styles.trail}>{[source.module, ...source.folders].join(' › ')}</span>
         </Link>
-        {/* Under the title on a phone, so long page names keep their room. */}
-        <div className="col-start-2 mt-2 justify-self-start sm:col-start-3 sm:mt-0 sm:justify-self-end">
+        <div>
           {single ? (
             <StatePill record={single} />
           ) : (
-            <button
-              type="button"
-              aria-expanded={open}
-              onClick={() => setOpen((value) => !value)}
-              className="inline-flex items-center gap-1 rounded-full bg-(--home-active) pr-1.5 pl-2.5 text-xs leading-6 whitespace-nowrap text-(--home-muted) tabular-nums hover:text-(--home-foreground)"
-            >
-              {fmt(session.records.length)} 题{submitted ? ` · 提交 ${fmt(submitted)}` : ''}
-              <ChevronRightIcon className={cn('size-3.5 transition-transform', open && 'rotate-90')} />
+            <button type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)} className={styles.expand}>
+              {fmt(session.records.length)} 题{submitted ? `，提交 ${fmt(submitted)}` : ''}
+              <ChevronRightIcon aria-hidden />
             </button>
           )}
         </div>
       </div>
       {open ? (
-        <ol className="mb-2 ml-3 space-y-0.5 sm:ml-14">
+        <ol className={styles.questions}>
           {session.records.map((record) => (
             <li key={record.questionId}>
-              <Link
-                href={questionHref(record.documentPath, record.questionId)}
-                prefetch={false}
-                className="flex items-center gap-3 rounded-lg px-2.5 py-1.5 text-sm hover:bg-(--home-active)"
-              >
-                <span className="w-10 shrink-0 text-xs text-(--home-muted) tabular-nums">{timeOf(record.lastAt)}</span>
-                <span className="min-w-0 flex-1 truncate">{record.questionId}</span>
-                {record.attempts > 1 ? <span className="text-xs text-(--home-muted) tabular-nums">提交 {record.attempts} 次</span> : null}
+              <Link href={questionHref(record.documentPath, record.questionId)} prefetch={false} className={styles.question}>
+                <span className={styles.questionMeta}>{timeOf(record.lastAt)}</span>
+                <span>{record.questionId}</span>
+                {record.attempts > 1 ? <span className={styles.questionMeta}>提交 {record.attempts} 次</span> : null}
                 <StatePill record={record} />
               </Link>
             </li>
@@ -340,22 +345,22 @@ function TimelineView({ records, index }: { records: QuestionRecord[]; index: So
   }, [sessions, limit]);
   if (!records.length) return <Empty>这里还没有作答记录。</Empty>;
   return (
-    <div className="space-y-4">
+    <div className={styles.days}>
       {groups.map((group) => (
-        <section key={group.day} className="settings-card px-2 pt-4 pb-2 sm:px-3" aria-label={group.day}>
-          <h3 className="flex items-baseline justify-between px-3 pb-2">
-            <span className="text-[15px] font-semibold">{group.day}</span>
-            <span className="text-[13px] text-(--home-muted)">{fmt(group.questions)} 题</span>
+        <section key={group.day} aria-label={group.day}>
+          <h3 className={styles.dayHead}>
+            <span className={styles.dayName}>{group.day}</span>
+            <span className={styles.dayCount}>{fmt(group.questions)} 题</span>
           </h3>
-          <ol className="pl-1">
-            {group.items.map((session, position) => (
-              <SessionItem key={`${session.documentPath}\u0000${session.lastAt}`} session={session} index={index} last={position === group.items.length - 1} />
+          <ol>
+            {group.items.map((session) => (
+              <SessionItem key={`${session.documentPath}\u0000${session.lastAt}`} session={session} index={index} />
             ))}
           </ol>
         </section>
       ))}
       {sessions.length > limit ? (
-        <button type="button" onClick={() => setLimit((value) => value + PAGE_SIZE)} className="settings-btn w-full">
+        <button type="button" onClick={() => setLimit((value) => value + PAGE_SIZE)} className={cn(page.button, styles.more)}>
           显示更早的记录（还有 {fmt(sessions.length - limit)} 组）
         </button>
       ) : null}
@@ -366,30 +371,29 @@ function TimelineView({ records, index }: { records: QuestionRecord[]; index: So
 /* -------------------------------------------------------------------- panel */
 
 function Empty({ children }: { children: ReactNode }) {
-  return <p className="settings-card px-6 py-14 text-center text-sm text-(--home-muted)">{children}</p>;
+  return <p className={styles.empty}>{children}</p>;
 }
 
-function ResumeCard({ record, index }: { record: QuestionRecord; index: SourceIndex | null }) {
+function ResumeLink({ record, index }: { record: QuestionRecord; index: SourceIndex | null }) {
   const source = resolveSource(index, record.documentPath);
   return (
-    <div className="settings-card flex flex-wrap items-center gap-x-5 gap-y-4 p-5 sm:flex-nowrap sm:p-6">
-      <div className="min-w-0 flex-1">
-        <p className="text-[13px] text-(--home-muted)">上次做到 {formatDay(record.lastAt)} {timeOf(record.lastAt)}</p>
-        <p className="mt-1 truncate text-lg font-semibold tracking-tight">{source.page}</p>
-        <p className="mt-0.5 truncate text-[13px] text-(--home-muted)">{[source.module, ...source.folders].join(' › ')}</p>
-      </div>
-      <Link href={questionHref(record.documentPath, record.questionId)} prefetch={false} className="settings-btn max-sm:w-full" data-variant="primary">
-        <PlayIcon />继续做题
-      </Link>
-    </div>
+    <Link href={questionHref(record.documentPath, record.questionId)} prefetch={false} className={styles.resume}>
+      <span className={styles.resumeText}>
+        <span className={styles.resumeLabel}>上次做到 {formatDay(record.lastAt)} {timeOf(record.lastAt)}</span>
+        <span className={styles.resumeTitle}>{source.page}</span>
+        <span className={styles.trail}>{[source.module, ...source.folders].join(' › ')}</span>
+      </span>
+      <span className={cn(page.button, page.primary, styles.resumeGo)}>继续做题<ArrowRight aria-hidden /></span>
+    </Link>
   );
 }
 
-export function RecordsPanel({ records, tree, index, treeFailed }: {
+export function RecordsPanel({ records, tree, index, treeFailed, error }: {
   records: QuestionRecord[] | null;
   tree: SourceTree | null;
   index: SourceIndex | null;
   treeFailed: boolean;
+  error: string | null;
 }) {
   const [view, setView] = useState<View>('modules');
   const [module, setModule] = useState<string>('all');
@@ -406,8 +410,8 @@ export function RecordsPanel({ records, tree, index, treeFailed }: {
 
   if (!records || !coverage) {
     return (
-      <div className="grid gap-4 md:grid-cols-2" aria-busy="true" aria-label="正在读取答题记录">
-        {[0, 1, 2, 3].map((item) => <div key={item} className="settings-card h-64 animate-pulse bg-(--home-active)" />)}
+      <div className={cn(styles.records, styles.loading)} aria-busy="true" aria-label="正在读取答题记录">
+        {[0, 1, 2].map((item) => <i key={item} />)}
       </div>
     );
   }
@@ -419,29 +423,30 @@ export function RecordsPanel({ records, tree, index, treeFailed }: {
   ];
 
   return (
-    <div className="space-y-5">
-      {records[0] ? <ResumeCard record={records[0]} index={index} /> : null}
+    <div className={styles.records}>
+      {error ? <p role="alert" className={page.error}>{error}</p> : null}
+      {records[0] ? <ResumeLink record={records[0]} index={index} /> : null}
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="settings-tabs" role="radiogroup" aria-label="查看方式">
+      <div className={styles.toolbar}>
+        <div className={styles.views} role="radiogroup" aria-label="查看方式">
           {([['modules', '按模块'], ['timeline', '按时间']] as const).map(([value, label]) => (
-            <button key={value} type="button" role="radio" aria-checked={view === value} data-active={view === value ? '' : undefined} onClick={() => setView(value)} className="settings-tab h-8 px-3.5">
-              {label}
+            <button key={value} type="button" role="radio" aria-checked={view === value} onClick={() => setView(value)} className={styles.view}>
+              <span className={page.mark} aria-hidden />{label}
             </button>
           ))}
         </div>
         {view === 'timeline' && chips.length > 2 ? (
-          <div className="-mx-1 flex max-w-full gap-1.5 overflow-x-auto px-1 py-0.5 [scrollbar-width:none]" role="radiogroup" aria-label="模块">
+          <div className={styles.chips} role="radiogroup" aria-label="模块">
             {chips.map((item) => (
-              <button key={item.name} type="button" role="radio" aria-checked={module === item.name} onClick={() => setModule(item.name)} className="settings-chip">
-                {item.label}<span className="settings-chip-count">{fmt(item.count)}</span>
+              <button key={item.name} type="button" role="radio" aria-checked={module === item.name} onClick={() => setModule(item.name)} className={styles.chip}>
+                {item.label}<span>{fmt(item.count)}</span>
               </button>
             ))}
           </div>
         ) : null}
       </div>
 
-      {treeFailed ? <p role="status" className="text-sm text-(--home-muted)">目录信息暂时无法读取，来源按页面地址显示。</p> : null}
+      {treeFailed ? <p role="status" className={styles.status}>目录信息暂时无法读取，来源按页面地址显示。</p> : null}
 
       {view === 'modules' ? <ModulesView coverage={coverage} /> : <TimelineView records={shownRecords} index={index} />}
     </div>

@@ -1,43 +1,40 @@
 'use client';
 
-import '@/styles/settings.css';
 import { useTheme } from 'next-themes';
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ComponentType, type ReactNode } from 'react';
-import {
-  ChartNoAxesColumnIcon, CheckIcon, CloudIcon, CloudUploadIcon, DatabaseIcon, DownloadIcon, FileInputIcon, GlobeIcon,
-  HardDriveIcon, InfoIcon, LaptopIcon, LibraryBigIcon, LogInIcon, LogOutIcon, NotebookPenIcon, PaletteIcon,
-  RefreshCwIcon, ShieldAlertIcon, ShieldCheckIcon, StarIcon, TagIcon, UserRoundIcon,
-} from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { DownloadIcon, LibraryBigIcon, LogInIcon, LogOutIcon, RefreshCwIcon } from 'lucide-react';
 import { SignInDialog, useAccount } from '@/components/account';
 import { describeSync, downloadBackup, importGuestRecords } from '@/components/question/account-section';
 import { useQuestionDatabase } from '@/components/question/database-context';
 import { UserTagChip } from '@/components/question/marks/question-marks';
 import { useUserTags } from '@/components/question/marks/use-marks';
 import { useQuestionRecords, type QuestionRecordsState } from '@/components/question/use-question-records';
-import { accountInitials, accountLabel } from '@/lib/account/types';
+import { accountLabel } from '@/lib/account/types';
 import { useSourceTree } from '@/lib/doc-sources-client';
-import { streakOf, totalsOf } from '@/lib/question-records';
 import type { QuestionMark } from '@/lib/question-store/types';
 import { siteConfig } from '@/lib/site-config';
-import { cn } from '@/lib/utils';
-import { ActivityHeatmap } from './activity-heatmap';
+import sheet from '@/styles/answer-sheet.module.css';
+import clsx from 'clsx';
+import { CandidateSheet } from './candidate-sheet';
 import { RecordsPanel } from './records-panel';
+import styles from './settings.module.css';
 
 /*
- * Everything about the reader rather than the documents. A profile header
- * (who, sync state, the headline numbers and the practice calendar) sits
- * above tabs: records by source, account and sync, favourites and tags,
- * appearance, local data, and the site. The tab follows the URL hash, so
- * /settings#account opens that tab and Back returns to the previous one.
+ * Everything about the reader rather than the documents, in the home page's
+ * answer-sheet language. The candidate block (who, sync state, totals, the
+ * answered count as an admission number, a year of practice) sits above the
+ * sections: records by source, account and sync, favourites and tags,
+ * appearance, local data, and the site. The section follows the URL hash, so
+ * /settings#account opens it and Back returns to the previous one.
  */
 
 const TABS = [
-  { id: 'records', label: '学习记录', icon: ChartNoAxesColumnIcon },
-  { id: 'account', label: '账号与同步', icon: CloudIcon },
-  { id: 'library', label: '收藏与标签', icon: StarIcon },
-  { id: 'appearance', label: '外观', icon: PaletteIcon },
-  { id: 'data', label: '数据与存储', icon: DatabaseIcon },
-  { id: 'about', label: '关于', icon: InfoIcon },
+  { id: 'records', label: '学习记录' },
+  { id: 'account', label: '账号与同步' },
+  { id: 'library', label: '收藏与标签' },
+  { id: 'appearance', label: '外观' },
+  { id: 'data', label: '数据与存储' },
+  { id: 'about', label: '关于' },
 ] as const;
 
 type TabId = typeof TABS[number]['id'];
@@ -55,7 +52,7 @@ function useTab(): [TabId, (tab: TabId) => void] {
   const hash = useSyncExternalStore(subscribeHash, () => window.location.hash.slice(1), () => '');
   const tab = (TABS.find((item) => item.id === hash)?.id ?? 'records') as TabId;
   const select = useCallback((next: TabId) => {
-    // No element carries a tab's id, so changing the hash never scrolls.
+    // No element carries a section's id, so changing the hash never scrolls.
     window.location.hash = next;
   }, []);
   return [tab, select];
@@ -63,39 +60,31 @@ function useTab(): [TabId, (tab: TabId) => void] {
 
 /* --------------------------------------------------------------- building blocks */
 
-function PanelSection({ title, description, children, action }: { title: string; description?: ReactNode; children: ReactNode; action?: ReactNode }) {
+function PanelHead({ title, note, action }: { title: string; note?: ReactNode; action?: ReactNode }) {
   return (
-    <section className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
-        <div className="min-w-0">
-          <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
-          {description ? <p className="mt-1 max-w-[62ch] text-sm leading-relaxed text-(--home-muted)">{description}</p> : null}
-        </div>
-        {action}
+    <div className={styles.panelHead}>
+      <div>
+        <h2 className={styles.panelTitle}>{title}</h2>
+        {note ? <p className={styles.panelNote}>{note}</p> : null}
       </div>
-      {children}
-    </section>
-  );
-}
-
-function Row({ icon: Icon, title, hint, children }: { icon?: ComponentType<{ className?: string }>; title: ReactNode; hint?: ReactNode; children?: ReactNode }) {
-  return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-3 px-5 py-4 sm:px-6 [&+&]:border-t [&+&]:border-(--home-border)">
-      {Icon ? (
-        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-(--home-active) text-(--home-muted)"><Icon className="size-[18px]" /></span>
-      ) : null}
-      <div className="min-w-0 flex-1 basis-56">
-        <div className="text-[15px] font-medium">{title}</div>
-        {hint ? <div className="mt-0.5 text-[13px] leading-relaxed text-(--home-muted)">{hint}</div> : null}
-      </div>
-      {children ? <div className="flex shrink-0 flex-wrap items-center gap-2">{children}</div> : null}
+      {action}
     </div>
   );
 }
 
-const DOT = {
-  ok: 'bg-emerald-500', busy: 'bg-sky-500 animate-pulse', muted: 'bg-(--home-muted)', warn: 'bg-amber-500', error: 'bg-destructive',
-} as const;
+/** One line of a form: a label, what it says now and what can be done about it. */
+function Field({ label, children, hint, action }: { label: string; children: ReactNode; hint?: ReactNode; action?: ReactNode }) {
+  return (
+    <div className={styles.field}>
+      <dt className={styles.fieldLabel}>{label}</dt>
+      <dd className={styles.fieldValue}>
+        {children}
+        {hint ? <p className={styles.fieldHint}>{hint}</p> : null}
+      </dd>
+      {action ? <dd className={styles.fieldAction}>{action}</dd> : null}
+    </div>
+  );
+}
 
 function useGuestRecordCount() {
   const context = useQuestionDatabase();
@@ -115,86 +104,18 @@ function useGuestRecordCount() {
   return namespace === 'guest' ? 0 : count;
 }
 
-/* ------------------------------------------------------------------------ hero */
-
-function Stat({ value, unit, label }: { value: string; unit?: string; label: string }) {
-  return (
-    <div className="min-w-0 sm:border-l sm:border-(--home-border) sm:pl-5 sm:first:border-l-0 sm:first:pl-0">
-      <dd className="text-[30px] leading-none font-semibold tracking-tight sm:text-[34px]">
-        {value}{unit ? <span className="ml-1 text-sm font-normal text-(--home-muted)">{unit}</span> : null}
-      </dd>
-      <dt className="mt-2 text-[13px] text-(--home-muted)">{label}</dt>
-    </div>
-  );
-}
-
-function Hero({ state, onSignIn }: { state: QuestionRecordsState; onSignIn(): void }) {
-  const account = useAccount();
-  const context = useQuestionDatabase();
-  const { records, activity } = state;
-  const totals = useMemo(() => (records ? totalsOf(records) : null), [records]);
-  const mounted = useSyncExternalStore(noop, () => true, () => false);
-  const streak = useMemo(() => (activity && mounted ? streakOf(activity) : null), [activity, mounted]);
-  const signedIn = account.phase === 'signed-in' ? account.user : null;
-  const sync = describeSync(context);
-
-  const status = signedIn
-    ? sync ?? { tone: 'ok' as const, text: '已登录' }
-    : account.phase === 'disabled'
-      ? { tone: 'muted' as const, text: '云端账号未启用，记录保存在本机' }
-      : account.phase === 'loading'
-        ? { tone: 'muted' as const, text: '正在读取登录状态…' }
-        : { tone: 'muted' as const, text: '访客 · 记录只保存在这个浏览器' };
-
-  return (
-    <section className="settings-hero p-5 sm:p-8 lg:p-10" aria-label="学习概览">
-      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-12">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-4">
-            <span className="settings-avatar" data-guest={signedIn ? undefined : ''} aria-hidden>
-              {signedIn ? accountInitials(signedIn) : <UserRoundIcon className="size-6" />}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-lg font-semibold tracking-tight">{signedIn ? accountLabel(signedIn) : '访客'}</p>
-              <p className="mt-1 inline-flex max-w-full items-center gap-2 text-[13px] text-(--home-muted)" role="status">
-                <span aria-hidden className={cn('size-2 shrink-0 rounded-full', DOT[status.tone])} />
-                <span className="truncate">{status.text}</span>
-              </p>
-            </div>
-            {!signedIn && account.phase === 'guest' ? (
-              <button type="button" className="settings-btn max-sm:w-full" data-variant="primary" onClick={onSignIn}>
-                <LogInIcon />登录同步记录
-              </button>
-            ) : null}
-          </div>
-          <dl className="mt-8 grid grid-cols-2 gap-x-5 gap-y-6 sm:grid-cols-4 lg:mt-10">
-            <Stat value={fmt(totals?.answered)} unit="题" label="已作答" />
-            <Stat value={fmt(totals?.submitted)} unit="题" label="已提交" />
-            <Stat value={fmt(activity ? activity.size : null)} unit="天" label="做过题的日子" />
-            <Stat value={fmt(streak)} unit="天" label="连续做题" />
-          </dl>
-        </div>
-        <div className="min-w-0 border-t border-(--home-border) pt-6 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-12">
-          <ActivityHeatmap activity={activity} />
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ----------------------------------------------------------------------- panels */
 
 function RecordsTab({ state }: { state: QuestionRecordsState }) {
-  const { records, error } = state;
   const { tree, index, failed } = useSourceTree();
   return (
-    <PanelSection
-      title="学习记录"
-      description="每道题都按它所在的页面归到侧边栏的模块和目录下；页面改名或调整目录后，旧记录也会显示新的位置。"
-    >
-      {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
-      <RecordsPanel records={records} tree={tree} index={index} treeFailed={failed} />
-    </PanelSection>
+    <>
+      <PanelHead
+        title="学习记录"
+        note="每道题都按它所在的页面归到侧边栏的模块和目录下；页面改名或调整目录后，旧记录也会显示新的位置。"
+      />
+      <RecordsPanel records={state.records} error={state.error} tree={tree} index={index} treeFailed={failed} />
+    </>
   );
 }
 
@@ -203,66 +124,72 @@ function AccountTab({ onSignIn }: { onSignIn(): void }) {
   const context = useQuestionDatabase();
   const guestRecords = useGuestRecordCount();
   const [message, setMessage] = useState<string | null>(null);
-  const signedIn = account.phase === 'signed-in' ? account.user : null;
+  const user = account.phase === 'signed-in' ? account.user : null;
   const sync = describeSync(context);
   const syncing = context?.status.phase === 'syncing';
 
   return (
-    <div className="space-y-8">
-      <PanelSection title="账号" description="登录后，提交、重做、收藏和注释会同步到云端，换设备也能接着做。">
-        <div className="settings-card overflow-hidden">
-          <div className="flex flex-wrap items-center gap-4 p-5 sm:p-6">
-            <span className="settings-avatar" data-guest={signedIn ? undefined : ''} aria-hidden>
-              {signedIn ? accountInitials(signedIn) : <UserRoundIcon className="size-6" />}
-            </span>
-            <div className="min-w-0 flex-1 basis-48">
-              <p className="truncate text-[17px] font-semibold">{signedIn ? accountLabel(signedIn) : '未登录'}</p>
-              <p className="mt-0.5 text-[13px] text-(--home-muted)">
-                {signedIn ? '邮箱账号' : account.phase === 'disabled' ? '这个站点没有启用云端账号，记录只保存在本机。' : account.phase === 'loading' ? '正在读取登录状态…' : '用邮箱登录，不需要密码。'}
-              </p>
-            </div>
-            {signedIn ? (
-              <button type="button" className="settings-btn" onClick={() => { void account.signOut().catch(() => undefined); }}><LogOutIcon />退出登录</button>
-            ) : (
-              <button type="button" className="settings-btn" data-variant="primary" disabled={account.phase !== 'guest'} onClick={onSignIn}><LogInIcon />登录 / 注册</button>
-            )}
-          </div>
-          {signedIn ? (
-            <div className="border-t border-(--home-border) bg-(--home-surface) px-5 py-3 text-[13px] text-(--home-muted) sm:px-6">
-              退出后本机记录仍保留在这个浏览器，再次登录同一账号即可继续同步。
-            </div>
-          ) : null}
-        </div>
-      </PanelSection>
-
-      <PanelSection title="同步">
-        <div className="settings-card">
-          <Row
-            icon={CloudUploadIcon}
-            title="同步状态"
-            hint={signedIn && sync ? (
-              <span className="inline-flex items-center gap-1.5" role="status">
-                <span aria-hidden className={cn('size-1.5 rounded-full', DOT[sync.tone])} />{sync.text}
-              </span>
-            ) : '登录后开启云端同步。'}
-          >
-            {signedIn ? (
-              <button type="button" className="settings-btn" disabled={!context?.engine || syncing} onClick={() => { void context?.engine?.sync(); }}>
-                <RefreshCwIcon className={cn(syncing && 'animate-spin')} />{syncing ? '正在同步…' : '立即同步'}
+    <div className={styles.stack}>
+      <div>
+        <PanelHead title="账号与同步" note="登录后，提交、重做、收藏和注释会同步到云端，换设备也能接着做。" />
+        <dl className={styles.fields}>
+          <Field
+            label="账号"
+            hint={user
+              ? '用邮箱登录的账号。'
+              : account.phase === 'disabled'
+                ? '这个站点没有启用云端账号，记录只保存在本机。'
+                : account.phase === 'loading' ? '正在读取登录状态…' : '用邮箱登录，不需要密码。'}
+            action={user ? (
+              <button type="button" className={styles.button} onClick={() => { void account.signOut().catch(() => undefined); }}>
+                <LogOutIcon aria-hidden />退出登录
               </button>
-            ) : null}
-          </Row>
-          {signedIn && guestRecords > 0 && context ? (
-            <Row icon={FileInputIcon} title="未登录时的记录" hint={`这个浏览器里还有 ${fmt(guestRecords)} 条登录前的作答记录，可以并入当前账号；账号里已有的答案不会被覆盖。`}>
-              <button type="button" className="settings-btn" data-variant="accent" onClick={() => { void importGuestRecords(context).then(setMessage); }}>导入到账号</button>
-            </Row>
+            ) : (
+              <button type="button" className={clsx(styles.button, styles.primary)} disabled={account.phase !== 'guest'} onClick={onSignIn}>
+                <LogInIcon aria-hidden />登录 / 注册
+              </button>
+            )}
+          >
+            {user ? accountLabel(user) : '未登录'}
+          </Field>
+          <Field
+            label="同步"
+            action={user ? (
+              <button type="button" className={styles.button} disabled={!context?.engine || syncing} onClick={() => { void context?.engine?.sync(); }}>
+                <RefreshCwIcon aria-hidden className={clsx(syncing && 'animate-spin')} />{syncing ? '正在同步…' : '立即同步'}
+              </button>
+            ) : undefined}
+          >
+            {user && sync
+              ? <span className={styles.state} data-tone={sync.tone} role="status">{sync.text}</span>
+              : <span className={styles.state} data-tone="muted">登录后开启云端同步</span>}
+          </Field>
+          {user && guestRecords > 0 && context ? (
+            <Field
+              label="登录前的记录"
+              hint="可以并入当前账号；账号里已有的答案不会被覆盖。"
+              action={(
+                <button type="button" className={clsx(styles.button, styles.primary)} onClick={() => { void importGuestRecords(context).then(setMessage); }}>
+                  导入到账号
+                </button>
+              )}
+            >
+              这个浏览器里还有 {fmt(guestRecords)} 条未登录时的作答记录
+            </Field>
           ) : null}
-          <Row icon={LaptopIcon} title="草稿留在本机" hint="选了选项还没提交、正在输入的填空只保存在当前设备；提交、重做、收藏和注释才会上传。" />
-          <Row icon={RefreshCwIcon} title="以最后一次修改为准" hint="同一道题在两台设备上都改过时，保留时间更晚的那一次。" />
-        </div>
-        {context?.status.error && context.status.phase === 'error' ? <p role="alert" className="text-sm text-destructive">{context.status.error}</p> : null}
-        {message ? <p role="status" className="text-sm text-(--home-muted)">{message}</p> : null}
-      </PanelSection>
+        </dl>
+        {context?.status.error && context.status.phase === 'error' ? <p role="alert" className={styles.error}>{context.status.error}</p> : null}
+        {message ? <p role="status" className={styles.message}>{message}</p> : null}
+      </div>
+
+      <section className={styles.notice} aria-labelledby="sync-notice">
+        <h3 id="sync-notice">同步须知</h3>
+        <ul>
+          <li><strong>草稿留在本机</strong>选了选项还没提交、正在输入的填空只保存在当前设备；提交、重做、收藏和注释才会上传。</li>
+          <li><strong>以最后一次修改为准</strong>同一道题在两台设备上都改过时，保留时间更晚的那一次。</li>
+          <li><strong>退出后记录仍在</strong>本机记录留在这个浏览器里，再次登录同一账号即可继续同步。</li>
+        </ul>
+      </section>
     </div>
   );
 }
@@ -283,56 +210,71 @@ function LibraryTab() {
     return () => { disposed = true; unsubscribe?.(); };
   }, [cache, database, namespace]);
 
-  const tiles = [
-    { icon: StarIcon, label: '收藏', value: marks?.filter((mark) => mark.favorite).length },
-    { icon: NotebookPenIcon, label: '注释', value: marks?.filter((mark) => mark.note).length },
-    { icon: TagIcon, label: '标签', value: tags.length },
-  ];
-
   return (
-    <PanelSection
-      title="收藏与标签"
-      description="题目右上角的收藏、标签和注释都汇总在收藏夹里，可按标签筛选，点一下回到原题。"
-      action={<button type="button" className="settings-btn" data-variant="primary" disabled={!context} onClick={() => context?.openLibrary()}><LibraryBigIcon />打开收藏夹</button>}
-    >
-      <div className="grid grid-cols-3 gap-3 sm:gap-4">
-        {tiles.map(({ icon: Icon, label, value }) => (
-          <div key={label} className="settings-card p-4 sm:p-5">
-            <Icon className="size-[18px] text-(--home-muted)" />
-            <p className="mt-4 text-[28px] leading-none font-semibold tracking-tight sm:text-[32px]">{fmt(value)}</p>
-            <p className="mt-1.5 text-[13px] text-(--home-muted)">{label}</p>
-          </div>
-        ))}
+    <div className={styles.stack}>
+      <div>
+        <PanelHead
+          title="收藏与标签"
+          note="题目右上角的收藏、标签和注释都汇总在收藏夹里，可按标签筛选，点一下回到原题。"
+          action={(
+            <button type="button" className={clsx(styles.button, styles.primary)} disabled={!context} onClick={() => context?.openLibrary()}>
+              <LibraryBigIcon aria-hidden />打开收藏夹
+            </button>
+          )}
+        />
+        <dl className={styles.tally}>
+          <div><dt>收藏的题</dt><dd>{fmt(marks?.filter((mark) => mark.favorite).length)}</dd></div>
+          <div><dt>写了注释的题</dt><dd>{fmt(marks?.filter((mark) => mark.note).length)}</dd></div>
+          <div><dt>标签</dt><dd>{fmt(tags.length)}</dd></div>
+        </dl>
       </div>
-      <div className="settings-card p-5 sm:p-6">
-        <p className="text-[15px] font-medium">我的标签</p>
+      <section aria-labelledby="my-tags">
+        <h3 id="my-tags" className={styles.subhead}>我的标签</h3>
         {tags.length ? (
-          <div className="mt-3 flex flex-wrap gap-2">{tags.map((tag) => <UserTagChip key={tag.tagId} tag={tag} />)}</div>
+          <div className={styles.tags}>{tags.map((tag) => <UserTagChip key={tag.tagId} tag={tag} />)}</div>
         ) : (
-          <p className="mt-1 text-[13px] text-(--home-muted)">还没有标签。在任意题目右上角点标签按钮即可新建，比如「易错」「二刷」。</p>
+          <p className={styles.empty}>还没有标签。在任意题目右上角点标签按钮即可新建，比如「易错」「二刷」。</p>
         )}
-      </div>
-    </PanelSection>
+      </section>
+    </div>
   );
 }
 
-/** A small drawing of the site in one theme, used as the theme choice itself. */
+/** A small drawing of the home page in one theme, used as the theme choice itself. */
 function ThemePreview({ variant }: { variant: 'light' | 'dark' }) {
-  const colors = variant === 'light'
-    ? { bg: '#ffffff', side: '#f6f6f2', line: '#e5e5e0', ink: '#cfcfc8', strong: '#20201e', accent: '#f5ed91' }
-    : { bg: '#0f0f0f', side: '#171716', line: '#2a2a27', ink: '#3a3a36', strong: '#edede7', accent: '#fff19a' };
+  const c = variant === 'light'
+    ? { paper: '#ffffff', rule: '#e4e5e9', ink: '#1c1d21', soft: '#c9cacf', red: '#c8324f', line: '#efb4c0' }
+    : { paper: '#0a0a0a', rule: '#2a2b31', ink: '#ececef', soft: '#45464d', red: '#ff7d93', line: '#6b3542' };
   return (
-    <svg viewBox="0 0 160 100" className="block h-full w-full" aria-hidden>
-      <rect width="160" height="100" fill={colors.bg} />
-      <rect width="44" height="100" fill={colors.side} />
-      <rect x="44" width="1" height="100" fill={colors.line} />
-      {[16, 28, 40, 52].map((y, index) => <rect key={y} x="10" y={y} width={index === 0 ? 24 : 20} height="4" rx="2" fill={index === 0 ? colors.strong : colors.ink} />)}
-      <rect x="58" y="16" width="56" height="7" rx="3.5" fill={colors.strong} />
-      <rect x="58" y="32" width="88" height="4" rx="2" fill={colors.ink} />
-      <rect x="58" y="41" width="72" height="4" rx="2" fill={colors.ink} />
-      <rect x="58" y="56" width="88" height="30" rx="6" fill={colors.bg} stroke={colors.line} />
-      <rect x="66" y="66" width="34" height="4" rx="2" fill={colors.accent} />
-      <rect x="66" y="75" width="60" height="4" rx="2" fill={colors.ink} />
+    <svg className={styles.shot} viewBox="0 0 160 100" aria-hidden>
+      <rect width="160" height="100" fill={c.paper} />
+      <rect x="10" y="5" width="18" height="3" rx="1" fill={c.ink} />
+      <rect x="126" y="4.5" width="24" height="4" rx="2" fill={c.rule} />
+      <rect y="13" width="160" height="0.75" fill={c.rule} />
+      <rect x="12" y="27" width="50" height="7" rx="1" fill={c.ink} />
+      <rect x="12" y="38" width="40" height="7" rx="1" fill={c.ink} />
+      <rect x="12" y="52" width="54" height="2.5" rx="1" fill={c.soft} />
+      <rect x="12" y="58" width="46" height="2.5" rx="1" fill={c.soft} />
+      <rect x="12" y="68" width="20" height="7" rx="1.5" fill={c.ink} />
+      <rect x="35" y="68" width="18" height="7" rx="1.5" fill="none" stroke={c.ink} strokeWidth="0.8" />
+      <rect x="82" y="22" width="66" height="64" rx="2" fill={c.paper} stroke={c.red} strokeWidth="0.9" />
+      {[30, 37, 44, 51, 58, 65, 72].map((y) => <rect key={y} x="86" y={y} width="3" height="1.6" fill={c.ink} />)}
+      <rect x="95" y="27" width="18" height="4" fill={c.red} />
+      <rect x="95" y="37" width="44" height="2.5" rx="1" fill={c.soft} />
+      <rect x="95" y="43" width="36" height="2.5" rx="1" fill={c.soft} />
+      <rect x="95" y="49" width="40" height="2.5" rx="1" fill={c.soft} />
+      <rect x="95" y="58" width="48" height="0.6" fill={c.line} />
+      {[95, 107, 119, 131].map((x, index) => (
+        <rect key={x} x={x} y="65" width="9" height="5" rx="0.6" fill={index === 1 ? c.ink : 'none'} stroke={index === 1 ? c.ink : c.line} strokeWidth="0.7" />
+      ))}
+    </svg>
+  );
+}
+
+function PenTick() {
+  return (
+    <svg className={styles.tick} viewBox="0 0 48 40" aria-hidden>
+      <path pathLength={1} d="M6 22 C10 25 14 29 18 34 C24 22 32 12 44 4" />
     </svg>
   );
 }
@@ -348,43 +290,24 @@ function AppearanceTab() {
     { value: 'system', label: '跟随系统' },
   ] as const;
   return (
-    <PanelSection title="外观" description="文档、题目、公式和图表都会跟着切换。">
-      <div role="radiogroup" aria-label="主题" className="grid grid-cols-3 gap-3 sm:gap-4">
+    <>
+      <PanelHead title="外观" note="文档、题目、公式和图表都会跟着切换。" />
+      <div role="radiogroup" aria-label="主题" className={styles.themes}>
         {options.map(({ value, label }) => {
           const selected = current === value;
           return (
-            <button
-              key={value}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              onClick={() => setTheme(value)}
-              className="group text-left"
-            >
-              <span
-                className={cn(
-                  'relative block aspect-[16/10] overflow-hidden rounded-2xl border transition-shadow',
-                  selected ? 'border-transparent shadow-[0_0_0_2px_var(--home-focus)]' : 'border-(--home-border) group-hover:shadow-(--set-shadow)',
-                )}
-              >
-                {value === 'system' ? (
-                  <>
-                    <ThemePreview variant="light" />
-                    <span className="absolute inset-0 [clip-path:inset(0_0_0_50%)]"><ThemePreview variant="dark" /></span>
-                  </>
-                ) : <ThemePreview variant={value} />}
-                {selected ? (
-                  <span className="absolute top-2 right-2 grid size-6 place-items-center rounded-full bg-(--home-foreground) text-(--home-background)">
-                    <CheckIcon className="size-3.5" strokeWidth={3} />
-                  </span>
-                ) : null}
+            <button key={value} type="button" role="radio" aria-checked={selected} onClick={() => setTheme(value)} className={styles.theme}>
+              <span className={styles.preview}>
+                <ThemePreview variant={value === 'dark' ? 'dark' : 'light'} />
+                {value === 'system' ? <span className={styles.half}><ThemePreview variant="dark" /></span> : null}
+                {selected ? <PenTick /> : null}
               </span>
-              <span className={cn('mt-2.5 block text-center text-sm', selected ? 'font-medium' : 'text-(--home-muted)')}>{label}</span>
+              <span className={styles.themeLabel}><span className={styles.mark} aria-hidden />{label}</span>
             </button>
           );
         })}
       </div>
-    </PanelSection>
+    </>
   );
 }
 
@@ -412,66 +335,75 @@ function DataTab() {
   }, []);
   useEffect(refresh, [refresh]);
 
-  return (
-    <div className="space-y-8">
-      <PanelSection title="备份" description="把当前身份的答案、提交历史、收藏和注释保存为一个 JSON 文件。">
-        <div className="settings-card flex flex-wrap items-center gap-4 p-5 sm:p-6">
-          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-(--home-accent) text-(--home-accent-foreground)"><DownloadIcon className="size-5" /></span>
-          <div className="min-w-0 flex-1 basis-48">
-            <p className="text-[15px] font-medium">导出本机备份</p>
-            <p className="mt-0.5 text-[13px] text-(--home-muted)">清理浏览器前，或者没有登录时，建议先导出一份。</p>
-          </div>
-          <button
-            type="button"
-            className="settings-btn max-sm:w-full"
-            data-variant="primary"
-            disabled={!context?.database}
-            onClick={() => { if (context) void downloadBackup(context).then(() => setMessage(null), () => setMessage('导出失败，请重试。')); }}
-          >
-            <DownloadIcon />导出 JSON
-          </button>
-        </div>
-        {message ? <p role="alert" className="text-sm text-destructive">{message}</p> : null}
-      </PanelSection>
+  const canPersist = storage?.persisted === false && typeof navigator !== 'undefined' && Boolean(navigator.storage?.persist);
 
-      <PanelSection title="本机存储" description="答案先写进这个浏览器的本机数据库，登录后再同步到云端。">
-        <div className="settings-card">
-          <Row
-            icon={HardDriveIcon}
-            title={storage?.usage !== undefined ? `已用 ${formatBytes(storage.usage)}` : '本机占用'}
-            hint={storage === null ? '正在估算…' : storage.usage === undefined ? '这个浏览器不提供存储用量。' : `整个站点的数据（含页面缓存）${storage.quota ? `，浏览器允许的上限约 ${formatBytes(storage.quota)}` : ''}。`}
-          />
-          <Row
-            icon={storage?.persisted ? ShieldCheckIcon : ShieldAlertIcon}
-            title={storage?.persisted === undefined ? '持久保存' : storage.persisted ? '持久保存已开启' : '持久保存未开启'}
-            hint={storage?.persisted === undefined
-              ? '这个浏览器不提供持久保存状态。'
-              : storage.persisted
-                ? '空间紧张时，浏览器不会自动清理这里的记录。'
-                : '空间紧张时浏览器可能清理本机记录。可以申请开启，也建议登录同步或定期导出备份。'}
-          >
-            {storage?.persisted === false && typeof navigator !== 'undefined' && navigator.storage?.persist ? (
-              <button
-                type="button"
-                className="settings-btn"
-                disabled={requesting}
-                onClick={() => {
-                  setRequesting(true);
-                  void navigator.storage.persist().catch(() => false).finally(() => { setRequesting(false); refresh(); });
-                }}
-              >
-                申请开启
-              </button>
-            ) : null}
-          </Row>
-          <Row
-            icon={GlobeIcon}
-            title="按域名保存"
-            hint={<>记录保存在当前浏览器的 {host ? <span className="font-medium text-(--home-foreground)">{host}</span> : '这个域名'} 下。清除站点数据、结束隐私模式或换用其他域名，都看不到未同步的本机记录。</>}
-          />
-        </div>
-      </PanelSection>
-    </div>
+  return (
+    <>
+      <PanelHead title="数据与存储" note="答案先写进这个浏览器的本机数据库，登录后再同步到云端。" />
+      <dl className={styles.fields}>
+        <Field
+          label="备份"
+          hint="当前身份的答案、提交历史、收藏和注释，保存为一个 JSON 文件。清理浏览器前，或者没有登录时，建议先导出一份。"
+          action={(
+            <button
+              type="button"
+              className={clsx(styles.button, styles.primary)}
+              disabled={!context?.database}
+              onClick={() => { if (context) void downloadBackup(context).then(() => setMessage(null), () => setMessage('导出失败，请重试。')); }}
+            >
+              <DownloadIcon aria-hidden />导出 JSON
+            </button>
+          )}
+        >
+          导出本机备份
+        </Field>
+        <Field
+          label="本机占用"
+          hint={storage === null
+            ? '正在估算…'
+            : storage.usage === undefined
+              ? '这个浏览器不提供存储用量。'
+              : `整个站点的数据，含页面缓存${storage.quota ? `；浏览器允许的上限约 ${formatBytes(storage.quota)}` : ''}。`}
+        >
+          {storage?.usage !== undefined ? `已用 ${formatBytes(storage.usage)}` : '–'}
+          {storage?.usage !== undefined && storage.quota ? (
+            <span className={styles.meter} aria-hidden><span style={{ width: `${Math.min(100, (storage.usage / storage.quota) * 100)}%` }} /></span>
+          ) : null}
+        </Field>
+        <Field
+          label="持久保存"
+          hint={storage?.persisted === undefined
+            ? '这个浏览器不提供持久保存状态。'
+            : storage.persisted
+              ? '空间紧张时，浏览器不会自动清理这里的记录。'
+              : '空间紧张时浏览器可能清理本机记录。可以申请开启，也建议登录同步或定期导出备份。'}
+          action={canPersist ? (
+            <button
+              type="button"
+              className={styles.button}
+              disabled={requesting}
+              onClick={() => {
+                setRequesting(true);
+                void navigator.storage.persist().catch(() => false).finally(() => { setRequesting(false); refresh(); });
+              }}
+            >
+              申请开启
+            </button>
+          ) : undefined}
+        >
+          <span className={styles.state} data-tone={storage?.persisted ? 'ok' : storage?.persisted === false ? 'warn' : 'muted'}>
+            {storage?.persisted === undefined ? '未知' : storage.persisted ? '已开启' : '未开启'}
+          </span>
+        </Field>
+        <Field
+          label="保存位置"
+          hint="清除站点数据、结束隐私模式或换用其他域名，都看不到未同步的本机记录。"
+        >
+          {host ? <>当前浏览器的 <strong>{host}</strong> 下</> : '当前浏览器的这个域名下'}
+        </Field>
+      </dl>
+      {message ? <p role="alert" className={styles.error}>{message}</p> : null}
+    </>
   );
 }
 
@@ -490,31 +422,35 @@ function AboutTab() {
   }, [tree]);
 
   return (
-    <PanelSection title="关于">
-      <div className="settings-card overflow-hidden">
-        <div className="flex flex-wrap items-center gap-4 p-5 sm:p-6">
-          <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-(--home-border) bg-(--home-surface) text-lg font-semibold" aria-hidden>考</span>
-          <div className="min-w-0 flex-1 basis-56">
-            <p className="text-[17px] font-semibold">{siteConfig.name}</p>
-            <p className="mt-0.5 text-[13px] text-(--home-muted)">{siteConfig.description}</p>
-          </div>
-          <a href={siteConfig.repository.url} target="_blank" rel="noreferrer" className="settings-btn">GitHub</a>
+    <>
+      <PanelHead title="关于" />
+      <div className={styles.site}>
+        <div>
+          <p className={styles.siteName}>{siteConfig.name}</p>
+          <p className={styles.siteText}>{siteConfig.description}发现题目或解析有误，可以在 GitHub 上提交 Issue，或在页面右上角打开源文件直接修改。</p>
+          <p className={styles.siteLinks}>
+            <a href={siteConfig.repository.url} target="_blank" rel="noreferrer">GitHub 仓库</a>
+            <a href="/docs/question-types/">题型示例</a>
+            <a href="/llms.txt">全部文档目录</a>
+          </p>
         </div>
-        <dl className="grid grid-cols-3 border-t border-(--home-border) bg-(--home-surface)">
-          {[
-            { label: '道可作答的题', value: facts?.questions },
-            { label: '个练习页面', value: facts?.pages },
-            { label: '个科目模块', value: facts?.modules },
-          ].map((item) => (
-            <div key={item.label} className="px-5 py-4 sm:px-6 [&+&]:border-l [&+&]:border-(--home-border)">
-              <dd className="text-[22px] leading-none font-semibold tracking-tight">{fmt(item.value)}</dd>
-              <dt className="mt-1.5 text-[13px] text-(--home-muted)">{item.label}</dt>
-            </div>
-          ))}
-        </dl>
+        <svg className={styles.seal} viewBox="0 0 100 100" aria-hidden>
+          <defs>
+            <path id="about-seal-arc" d="M 18 52 A 32 32 0 1 1 82 52" />
+          </defs>
+          <circle cx="50" cy="50" r="45" />
+          <text fontSize="12" letterSpacing="1">
+            <textPath href="#about-seal-arc" startOffset="50%" textAnchor="middle">考研学习复习专用</textPath>
+          </text>
+          <text x="50" y="62" fontSize="26" textAnchor="middle">★</text>
+        </svg>
       </div>
-      <p className="text-[13px] text-(--home-muted)">发现题目或解析有误，可以在 GitHub 上提交 Issue，或在页面右上角打开源文件直接修改。</p>
-    </PanelSection>
+      <dl className={styles.tally}>
+        <div><dt>道可作答的题</dt><dd>{fmt(facts?.questions)}</dd></div>
+        <div><dt>个练习页面</dt><dd>{fmt(facts?.pages)}</dd></div>
+        <div><dt>个科目模块</dt><dd>{fmt(facts?.modules)}</dd></div>
+      </dl>
+    </>
   );
 }
 
@@ -522,23 +458,32 @@ function AboutTab() {
 
 export function SettingsPage() {
   const [tab, setTab] = useTab();
-  // Read once for the header and the records tab.
+  // Read once for the candidate block and the records section.
   const records = useQuestionRecords();
   const [signInOpen, setSignInOpen] = useState(false);
   const openSignIn = useCallback(() => setSignInOpen(true), []);
+  const panel = useRef<HTMLDivElement>(null);
+
+  const select = (next: TabId, focus = false) => {
+    setTab(next);
+    if (focus) document.getElementById(`tab-${next}`)?.focus();
+    // Switching from far down a long section starts the new one at its top.
+    const node = panel.current;
+    if (node && node.getBoundingClientRect().top < parseFloat(getComputedStyle(node).scrollMarginTop)) node.scrollIntoView({ block: 'start' });
+  };
 
   return (
-    <main className="settings mx-auto w-full max-w-6xl px-4 pt-6 pb-24 sm:px-6 lg:pt-10">
-      <header className="mb-5 sm:mb-6">
-        <h1 className="text-[28px] font-semibold tracking-tight sm:text-[34px]">设置</h1>
-        <p className="mt-1 text-sm text-(--home-muted)">做过的题、来自哪里，以及账号、同步和本机数据。</p>
+    <div className={clsx(sheet.palette, styles.page)}>
+      <header className={styles.head}>
+        <h1 className={styles.title}>设置</h1>
+        <p className={styles.note}>做过的题、来自哪里，以及账号、同步和本机数据。</p>
       </header>
 
-      <Hero state={records} onSignIn={openSignIn} />
+      <CandidateSheet state={records} onSignIn={openSignIn} />
 
-      <div className="sticky top-16 z-20 mt-6 sm:mt-8">
-        <div className="settings-tabs w-fit max-w-full shadow-[0_8px_24px_-16px_rgb(0_0_0/0.3)]" role="tablist" aria-label="设置分区">
-          {TABS.map(({ id, label, icon: Icon }) => (
+      <div className={styles.layout}>
+        <div className={styles.nav} role="tablist" aria-label="设置分区">
+          {TABS.map(({ id, label }) => (
             <button
               key={id}
               type="button"
@@ -547,33 +492,38 @@ export function SettingsPage() {
               aria-selected={tab === id}
               aria-controls={`panel-${id}`}
               tabIndex={tab === id ? 0 : -1}
-              onClick={() => setTab(id)}
+              onClick={() => select(id)}
               onKeyDown={(event) => {
-                const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
-                if (!step) return;
+                const position = TABS.findIndex((item) => item.id === tab);
+                const target = event.key === 'Home'
+                  ? 0
+                  : event.key === 'End'
+                    ? TABS.length - 1
+                    : ['ArrowRight', 'ArrowDown'].includes(event.key)
+                      ? (position + 1) % TABS.length
+                      : ['ArrowLeft', 'ArrowUp'].includes(event.key) ? (position - 1 + TABS.length) % TABS.length : null;
+                if (target === null) return;
                 event.preventDefault();
-                const next = TABS[(TABS.findIndex((item) => item.id === tab) + step + TABS.length) % TABS.length].id;
-                setTab(next);
-                document.getElementById(`tab-${next}`)?.focus();
+                select(TABS[target].id, true);
               }}
-              className="settings-tab"
+              className={styles.tab}
             >
-              <Icon />{label}
+              <span className={styles.mark} aria-hidden />{label}
             </button>
           ))}
         </div>
-      </div>
 
-      <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className="mt-6 sm:mt-8">
-        {tab === 'records' ? <RecordsTab state={records} /> : null}
-        {tab === 'account' ? <AccountTab onSignIn={openSignIn} /> : null}
-        {tab === 'library' ? <LibraryTab /> : null}
-        {tab === 'appearance' ? <AppearanceTab /> : null}
-        {tab === 'data' ? <DataTab /> : null}
-        {tab === 'about' ? <AboutTab /> : null}
+        <div ref={panel} id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className={styles.panel}>
+          {tab === 'records' ? <RecordsTab state={records} /> : null}
+          {tab === 'account' ? <AccountTab onSignIn={openSignIn} /> : null}
+          {tab === 'library' ? <LibraryTab /> : null}
+          {tab === 'appearance' ? <AppearanceTab /> : null}
+          {tab === 'data' ? <DataTab /> : null}
+          {tab === 'about' ? <AboutTab /> : null}
+        </div>
       </div>
 
       <SignInDialog open={signInOpen} onOpenChange={setSignInOpen} />
-    </main>
+    </div>
   );
 }

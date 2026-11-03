@@ -1,6 +1,8 @@
+import clsx from 'clsx';
 import { IntentLink as Link } from '@/components/intent-link';
 import { getExamHomeData } from '@/lib/home/catalog.server';
 import { siteConfig } from '@/lib/site-config';
+import sheet from '@/styles/answer-sheet.module.css';
 import { AdmissionTicket } from './admission-ticket';
 import { Hero } from './hero';
 import home from './home.module.css';
@@ -20,7 +22,7 @@ export function ExamHome() {
   const start = data.modules.find((module) => module.questions > 0)?.href ?? data.modules[0]?.href ?? '/docs/';
 
   return (
-    <div className={home.page}>
+    <div className={clsx(sheet.palette, home.page)}>
       <Hero data={data} />
       <QuestionBank modules={data.modules} />
       <div className={home.split}>

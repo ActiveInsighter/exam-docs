@@ -1,0 +1,608 @@
+/*
+ * 学习记录: where the reader stopped, progress per sidebar module (scored in
+ * red like a marked paper, filled in answer-sheet boxes) and a dated log.
+ */
+
+.records {
+  display: grid;
+  gap: 28px;
+  margin-top: 28px;
+}
+
+/* ---------------------------------------------------------------- resume */
+
+.resume {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px 32px;
+  padding: 20px 24px;
+  border-radius: 8px;
+  background: var(--paper-sunk);
+  transition: box-shadow 140ms;
+}
+
+.resume:hover {
+  box-shadow: inset 0 0 0 1px var(--dropout-line);
+}
+
+.resumeText {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.resumeLabel {
+  color: var(--dropout);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.resumeTitle {
+  overflow: hidden;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trail {
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resumeGo svg {
+  transition: transform 160ms;
+}
+
+.resume:hover .resumeGo svg {
+  transform: translateX(3px);
+}
+
+/* --------------------------------------------------------------- toolbar */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+}
+
+.views {
+  display: flex;
+  gap: 4px;
+}
+
+.view {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
+  color: var(--ink-muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.view:hover {
+  color: var(--ink);
+  background: var(--dropout-wash);
+}
+
+.view[aria-checked='true'] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.chips {
+  display: flex;
+  gap: 6px;
+  max-width: 100%;
+  margin-inline: -2px;
+  padding: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chip {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  color: var(--ink-muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.chip:hover {
+  color: var(--ink);
+  border-color: var(--dropout-line);
+}
+
+.chip[aria-checked='true'] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.chip span {
+  opacity: 0.65;
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+/* --------------------------------------------------------------- modules */
+
+.module {
+  display: grid;
+  grid-template-columns: minmax(120px, 176px) minmax(0, 1fr);
+  gap: 16px 36px;
+  padding-block: 28px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.module:first-child {
+  padding-top: 8px;
+}
+
+.moduleName {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+}
+
+.moduleCount {
+  margin-top: 8px !important;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.moduleCount strong {
+  margin-right: 2px;
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.moduleBody {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.scoreRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* The share written in red, the way a marked paper carries its score. */
+.score {
+  min-width: 3.2em;
+  color: var(--pen);
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: right;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.score[data-idle] {
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+
+/* Twenty boxes, five percent each; the last one shaded to its share. */
+.boxes {
+  display: flex;
+  flex: 1;
+  gap: 5px;
+  min-width: 0;
+}
+
+.boxes i {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 6px;
+  max-width: 30px;
+  height: 14px;
+  border: 1px solid var(--dropout-line);
+  border-radius: 2px;
+}
+
+.boxes i::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: 1px;
+  background: var(--graphite);
+  clip-path: inset(0 calc((1 - var(--fill, 0)) * 100%) 0 0);
+}
+
+.boxes i[data-fill] {
+  border-color: var(--graphite);
+}
+
+.folders {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 32px;
+}
+
+.folder {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 6px 12px;
+}
+
+.folder[data-idle] {
+  opacity: 0.55;
+}
+
+.folderName {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folderCount {
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.folder > .bar {
+  grid-column: 1 / -1;
+}
+
+.bar {
+  position: relative;
+  display: block;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 1px;
+  background: color-mix(in oklab, var(--dropout-line) 45%, transparent);
+}
+
+.bar > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--graphite);
+}
+
+.bar > span[data-some] {
+  min-width: 3px;
+}
+
+.moduleFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.moduleFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+}
+
+/* -------------------------------------------------------------- timeline */
+
+.days {
+  display: grid;
+  gap: 32px;
+}
+
+.dayHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1.5px solid var(--ink);
+}
+
+.dayName {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.dayCount {
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.session {
+  border-bottom: 1px dashed var(--dropout-line);
+}
+
+.sessionRow {
+  display: grid;
+  grid-template-columns: 3.4em minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 4px 16px;
+  padding: 14px 4px;
+}
+
+.time {
+  padding-top: 2px;
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sessionLink {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sessionLink:hover .sessionTitle {
+  text-decoration: underline;
+  text-decoration-color: var(--dropout);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+
+.sessionTitle {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--dropout-line);
+  border-radius: 3px;
+  color: var(--dropout);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.pill[data-state='submitted'] {
+  border-color: var(--graphite);
+  background: var(--graphite);
+  color: var(--paper);
+}
+
+.pill[data-state='reset'] {
+  border-style: dashed;
+  border-color: var(--rule);
+  color: var(--ink-muted);
+}
+
+.expand {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 6px 0 10px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  color: var(--ink-muted);
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+
+.expand:hover {
+  color: var(--ink);
+  border-color: var(--dropout-line);
+}
+
+.expand svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 160ms;
+}
+
+.expand[aria-expanded='true'] svg {
+  transform: rotate(90deg);
+}
+
+.questions {
+  display: grid;
+  gap: 2px;
+  margin: -4px 0 12px calc(3.4em + 20px) !important;
+}
+
+.question {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 34px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.question:hover {
+  background: var(--dropout-wash);
+}
+
+.question > :nth-child(2) {
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.questionMeta {
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.more {
+  width: 100%;
+}
+
+/* ----------------------------------------------------------- empty, busy */
+
+.empty {
+  padding: 48px 24px;
+  border: 1.5px dashed var(--dropout-line);
+  border-radius: 6px;
+  color: var(--ink-muted);
+  font-size: 14px;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.loading {
+  display: grid;
+}
+
+.loading i {
+  height: 132px;
+  border-bottom: 1px solid var(--rule);
+  background: linear-gradient(90deg, transparent, var(--paper-sunk), transparent) 0 0 / 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ------------------------------------------------- module sheet (modal) */
+
+.count {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.count .bar {
+  width: 80px;
+}
+
+.countText {
+  min-width: 5.5rem;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.countText strong {
+  color: var(--foreground);
+  font-weight: 400;
+}
+
+/* --------------------------------------------------------------- narrow */
+
+@media (max-width: 760px) {
+  .module {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .moduleHead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 16px;
+  }
+
+  .moduleCount {
+    margin-top: 0 !important;
+  }
+
+  .folders {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .resume {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 18px;
+  }
+
+  .resumeGo {
+    width: 100%;
+  }
+
+  .scoreRow {
+    gap: 14px;
+  }
+
+  .score {
+    font-size: 26px;
+  }
+
+  .boxes {
+    gap: 3px;
+  }
+
+  .boxes i {
+    height: 12px;
+  }
+
+  .sessionRow {
+    grid-template-columns: 3em minmax(0, 1fr);
+  }
+
+  /* Under the title on a phone, so long page names keep their room. */
+  .sessionRow > :last-child {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .questions {
+    margin-left: 12px !important;
+  }
+
+  .count .bar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resume,
+  .resumeGo svg,
+  .expand svg {
+    transition: none;
+  }
+
+  .loading i {
+    animation: none;
+  }
+}
