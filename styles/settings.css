@@ -1,0 +1,302 @@
+/*
+ * Settings page (/settings). It lives in the home layout and builds on its
+ * tokens (styles/tokens/home.css): the highlighter yellow marks what the
+ * reader has done — activity cells, progress meters, the active tab.
+ */
+
+:root {
+  /* Activity heat ramp: one hue, empty -> most. Lightness falls in light mode, rises in dark.
+     Global (prefixed) so the module sheet, portalled outside the page, can use them too. */
+  --set-heat-0: #ecebe2;
+  --set-heat-1: #f3e98a;
+  --set-heat-2: #e0c93f;
+  --set-heat-3: #b39f26;
+  --set-heat-4: #7a6d14;
+  --set-meter-track: #f0edd3;
+  --set-meter-fill: #cbb52b;
+}
+
+.settings {
+  --set-radius-xl: 28px;
+  --set-radius-lg: 20px;
+  --set-radius: 14px;
+  --set-shadow: 0 1px 2px rgb(32 32 30 / 0.04), 0 8px 24px -12px rgb(32 32 30 / 0.12);
+  --set-tab-active: var(--home-elevated);
+  font-family: var(--font-inter), 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+}
+
+.dark {
+  --set-heat-0: #222220;
+  --set-heat-1: #514a1b;
+  --set-heat-2: #8c7f25;
+  --set-heat-3: #cdbb3f;
+  --set-heat-4: #fff19a;
+  --set-meter-track: #2c2a1c;
+  --set-meter-fill: #eedc63;
+}
+
+.dark .settings {
+  --set-shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 30px -14px rgb(0 0 0 / 0.7);
+  --set-tab-active: #1d1d1a;
+}
+
+.settings :where(a, button, [role='tab'], input):focus-visible {
+  outline: 2px solid var(--home-focus);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- hero */
+
+.settings-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid var(--home-border);
+  border-radius: var(--set-radius-xl);
+  background: var(--home-surface);
+}
+
+/* The home hero's glow and dot grid, quieter, behind the profile. */
+.settings-hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -40% -10% auto auto;
+  width: 640px;
+  height: 640px;
+  background: radial-gradient(closest-side, var(--home-glow), transparent);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.dark .settings-hero::before { opacity: 0.28; }
+
+.settings-hero::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image: radial-gradient(var(--home-grid) 1px, transparent 1px);
+  background-size: 12px 12px;
+  mask-image: radial-gradient(ellipse 60% 80% at 100% 0%, black, transparent 70%);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.settings-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--home-accent);
+  color: var(--home-accent-foreground);
+  font-size: 22px;
+  font-weight: 600;
+  box-shadow: 0 0 0 4px var(--home-surface), 0 0 0 5px var(--home-border);
+}
+
+.settings-avatar[data-guest] {
+  background: var(--home-active);
+  color: var(--home-muted);
+}
+
+/* ---------------------------------------------------------------- cards */
+
+.settings-card {
+  border: 1px solid var(--home-border);
+  border-radius: var(--set-radius-lg);
+  background: var(--home-elevated);
+}
+
+.settings-card[data-interactive] {
+  transition: border-color 160ms, box-shadow 160ms, transform 160ms;
+}
+
+.settings-card[data-interactive]:hover {
+  border-color: color-mix(in oklab, var(--home-focus) 35%, var(--home-border));
+  box-shadow: var(--set-shadow);
+}
+
+/* ---------------------------------------------------------------- meter */
+
+.settings-meter {
+  position: relative;
+  display: block;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--set-meter-track);
+}
+
+.settings-meter[data-size='sm'] { height: 4px; }
+
+.settings-meter > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: var(--set-meter-fill);
+  transition: width 400ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* A share too small to see still shows that something was done. */
+.settings-meter > span[data-some] { min-width: 6px; }
+.settings-meter[data-size='sm'] > span[data-some] { min-width: 4px; }
+
+/* ---------------------------------------------------------------- heat map */
+
+.settings-heat-wrap {
+  --cell: 12px;
+  --gap: 3px;
+}
+
+@media (min-width: 1024px) {
+  .settings-heat-wrap { --cell: 14px; }
+}
+
+.settings-heat-days {
+  display: grid;
+  grid-template-rows: repeat(7, var(--cell));
+  gap: var(--gap);
+  font-size: 10px;
+  line-height: var(--cell);
+}
+
+.settings-heat {
+  display: grid;
+  grid-template-rows: repeat(7, var(--cell));
+  grid-auto-flow: column;
+  grid-auto-columns: var(--cell);
+  gap: var(--gap);
+}
+
+.settings-heat-cell {
+  display: block;
+  width: var(--cell, 10px);
+  height: var(--cell, 10px);
+  border-radius: 3px;
+  background: var(--set-heat-0);
+}
+
+.settings-heat-cell[data-level='1'] { background: var(--set-heat-1); }
+.settings-heat-cell[data-level='2'] { background: var(--set-heat-2); }
+.settings-heat-cell[data-level='3'] { background: var(--set-heat-3); }
+.settings-heat-cell[data-level='4'] { background: var(--set-heat-4); }
+.settings-heat-cell[data-future] { visibility: hidden; }
+.settings-heat-cell[data-today] { box-shadow: inset 0 0 0 1.5px var(--home-foreground); }
+.settings-heat-cell[data-hover] { box-shadow: 0 0 0 2px var(--home-surface), 0 0 0 3px var(--home-foreground); }
+
+.settings-heat-months {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--cell);
+  gap: var(--gap);
+}
+
+/* ---------------------------------------------------------------- tabs */
+
+.settings-tabs {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--home-active);
+}
+
+.settings-tabs::-webkit-scrollbar { display: none; }
+
+.settings-tab {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: var(--home-muted);
+  font-size: 14px;
+  white-space: nowrap;
+  transition: color 160ms, background-color 160ms, box-shadow 160ms;
+}
+
+.settings-tab svg { width: 16px; height: 16px; }
+.settings-tab:hover { color: var(--home-foreground); }
+
+.settings-tab:is([aria-selected='true'], [data-active]) {
+  color: var(--home-foreground);
+  background: var(--set-tab-active);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 0 0 1px var(--home-border);
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------------------- controls */
+
+.settings-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 16px;
+  border: 1px solid var(--home-border);
+  border-radius: 999px;
+  background: var(--home-elevated);
+  color: var(--home-foreground);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color 160ms, border-color 160ms, opacity 160ms;
+}
+
+.settings-btn svg { width: 16px; height: 16px; }
+.settings-btn:hover { background: var(--home-active); }
+.settings-btn:disabled { opacity: 0.5; pointer-events: none; }
+
+.settings-btn[data-variant='primary'] {
+  border-color: transparent;
+  background: var(--home-foreground);
+  color: var(--home-background);
+}
+
+.settings-btn[data-variant='primary']:hover { opacity: 0.88; }
+
+.settings-btn[data-variant='accent'] {
+  border-color: transparent;
+  background: var(--home-accent);
+  color: var(--home-accent-foreground);
+}
+
+.settings-btn[data-variant='accent']:hover { border-color: var(--home-focus); }
+
+.settings-chip {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--home-border);
+  border-radius: 999px;
+  color: var(--home-muted);
+  font-size: 13px;
+  transition: color 160ms, background-color 160ms, border-color 160ms;
+}
+
+.settings-chip:hover { color: var(--home-foreground); }
+
+.settings-chip[aria-checked='true'] {
+  border-color: transparent;
+  background: var(--home-foreground);
+  color: var(--home-background);
+}
+
+.settings-chip-count { opacity: 0.6; font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-meter > span,
+  .settings-card[data-interactive],
+  .settings-tab { transition: none; }
+}

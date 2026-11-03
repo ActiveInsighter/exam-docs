@@ -234,3 +234,49 @@ export function groupSessions(records: readonly QuestionRecord[], bucket: (recor
 export function questionHref(documentPath: string, questionId: string): string {
   return `${documentPath}#question-${encodeURIComponent(questionId)}`;
 }
+
+/* ------------------------------------------------------------------------
+ * Activity: how many questions the reader worked on each day.
+ * ---------------------------------------------------------------------- */
+
+/** Local calendar day, `YYYY-MM-DD`. */
+export function dayKey(value: string | number | Date): string {
+  const date = new Date(value);
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+/**
+ * Distinct questions touched per local day: every submission counts on its
+ * day, and an answer still in progress counts on the day it was last edited.
+ * (Earlier edits of a draft are not kept, so they cannot be counted.)
+ */
+export function collectActivity(answers: readonly AnswerLike[], attempts: readonly AttemptLike[]): Map<string, number> {
+  const days = new Map<string, Set<string>>();
+  const touch = (at: string, documentPath: string, questionId: string) => {
+    const time = Date.parse(at);
+    if (!Number.isFinite(time)) return;
+    const key = dayKey(time);
+    let questions = days.get(key);
+    if (!questions) days.set(key, (questions = new Set()));
+    questions.add(recordKey(documentPath, questionId));
+  };
+  for (const row of answers) {
+    if (isAnswered(row.state) || row.state.submitted) touch(row.updatedAt, row.documentPath, row.questionId);
+  }
+  for (const attempt of attempts) touch(attempt.createdAt, attempt.documentPath, attempt.questionId);
+  return new Map([...days].map(([key, questions]) => [key, questions.size]));
+}
+
+/** Consecutive active days ending today, or ending yesterday while today is still empty. */
+export function streakOf(activity: ReadonlyMap<string, number>, now = new Date()): number {
+  const cursor = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (!activity.get(dayKey(cursor))) cursor.setDate(cursor.getDate() - 1);
+  let streak = 0;
+  while (activity.get(dayKey(cursor))) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}

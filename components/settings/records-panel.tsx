@@ -1,29 +1,37 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronRightIcon } from 'lucide-react';
-import { useMemo, useState, type ReactNode } from 'react';
+import { ChevronRightIcon, PlayIcon } from 'lucide-react';
+import { useMemo, useState, type ComponentProps, type ReactNode } from 'react';
+import { Modal, ModalBody, ModalContent, ModalDescription, ModalHeader, ModalTags, ModalTitle, useModal } from '@/components/ui/modal';
 import { resolveSource, type SourceIndex, type SourceTree } from '@/lib/doc-sources';
 import {
-  buildCoverage, groupSessions, pagesOf, questionHref, totalsOf,
+  buildCoverage, groupSessions, pagesOf, questionHref,
   type CoverageFolder, type CoverageNode, type CoveragePage, type QuestionRecord, type RecordSession,
 } from '@/lib/question-records';
 import { cn } from '@/lib/utils';
 
 /*
- * The reader's answers by source. "按目录" mirrors the sidebar: one block per
- * module with a strip of cells (one per page, filled by how much of the page
- * was answered) and the folders below it. "按时间" lists answers newest first
- * with the page and folders each came from.
+ * The reader's answers by source. "按模块" shows one card per sidebar module
+ * (progress, its busiest folders) and opens the module's full folder tree in
+ * a bottom sheet. "按时间" lists the answers newest first, consecutive answers
+ * on one page folded into one entry.
  */
 
-type View = 'tree' | 'timeline';
+type View = 'modules' | 'timeline';
 
 const numberFormat = new Intl.NumberFormat('zh-CN');
 const fmt = (value: number) => numberFormat.format(value);
+const touched = (node: CoverageNode) => node.totals.answered > 0 || node.totals.attempts > 0;
 
-function ratio(answered: number, questions: number) {
+function share(answered: number, questions: number) {
   return questions > 0 ? Math.min(1, answered / questions) : answered > 0 ? 1 : 0;
+}
+
+function percent(value: number) {
+  if (value <= 0) return '0%';
+  if (value < 0.01) return '<1%';
+  return `${Math.round(value * 100)}%`;
 }
 
 export function formatDay(iso: string, now = new Date()): string {
@@ -32,166 +40,219 @@ export function formatDay(iso: string, now = new Date()): string {
   const days = Math.round((startOf(now) - startOf(date)) / 86_400_000);
   if (days === 0) return '今天';
   if (days === 1) return '昨天';
-  if (days < 7 && days > 0) return `${days} 天前`;
+  if (days > 1 && days < 7) return `${days} 天前`;
   return date.getFullYear() === now.getFullYear()
-    ? `${date.getMonth() + 1} 月 ${date.getDate()} 日`
-    : `${date.getFullYear()} 年 ${date.getMonth() + 1} 月 ${date.getDate()} 日`;
+    ? `${date.getMonth() + 1}月${date.getDate()}日`
+    : `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
 }
 
 const timeOf = (iso: string) => new Date(iso).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
 
-function Meter({ value, className }: { value: number; className?: string }) {
+export function Meter({ value, size, className, label }: { value: number; size?: 'sm'; className?: string; label?: string }) {
   return (
-    <span aria-hidden className={cn('relative block h-1 overflow-hidden rounded-full bg-(--home-border)', className)}>
-      <span className="absolute inset-y-0 left-0 rounded-full bg-(--home-focus)" style={{ width: `${Math.round(value * 100)}%` }} />
+    <span
+      role={label ? 'meter' : undefined}
+      aria-label={label}
+      aria-valuemin={label ? 0 : undefined}
+      aria-valuemax={label ? 100 : undefined}
+      aria-valuenow={label ? Math.round(value * 100) : undefined}
+      aria-hidden={label ? undefined : true}
+      data-size={size}
+      className={cn('settings-meter', className)}
+    >
+      <span data-some={value > 0 ? '' : undefined} style={{ width: `${value * 100}%` }} />
     </span>
   );
 }
 
-/** One cell per page; the fill shows the answered share of its questions. */
-function CoverageStrip({ module }: { module: CoverageFolder }) {
+/* ------------------------------------------------------------------ modules */
+
+function ModuleCard({ module, onOpen }: { module: CoverageFolder; onOpen(): void }) {
   const pages = pagesOf(module);
+  const pagesDone = pages.filter(touched).length;
+  const value = share(module.totals.answered, module.questions);
+  const started = touched(module);
+  // The folders the reader worked in most, then the rest in sidebar order.
+  const folders = module.children
+    .map((child, order) => ({ child, order }))
+    .filter(({ child }) => child.questions > 0)
+    .sort((a, b) => b.child.totals.answered - a.child.totals.answered || a.order - b.order)
+    .map(({ child }) => child)
+    .slice(0, 4);
+  const firstPage = pages[0];
+
   return (
-    <div className="flex flex-wrap gap-[3px]" role="img" aria-label={`${module.name}：${pages.filter((page) => page.totals.answered).length} / ${pages.length} 个页面做过`}>
-      {pages.map((page) => {
-        const value = ratio(page.totals.answered, page.questions);
-        return (
-          <Link
-            key={page.url}
-            href={page.url}
-            prefetch={false}
-            tabIndex={-1}
-            title={`${page.name}：${page.totals.answered} / ${page.questions} 题`}
-            data-filled={value > 0 ? '' : undefined}
-            className="size-2.5 rounded-[3px] border border-(--home-border) data-filled:border-transparent"
-            style={value > 0 ? { background: `color-mix(in oklab, var(--home-focus) ${Math.round(25 + value * 75)}%, transparent)` } : undefined}
-          />
-        );
-      })}
-    </div>
+    <article className="settings-card flex flex-col p-5 sm:p-6" data-interactive="" aria-labelledby={`module-${module.id}`}>
+      <header className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h3 id={`module-${module.id}`} className="truncate text-lg font-semibold tracking-tight">{module.name}</h3>
+          <p className="mt-0.5 text-[13px] text-(--home-muted)">{fmt(pagesDone)} / {fmt(pages.length)} 个页面做过</p>
+        </div>
+        <div className="shrink-0 text-right">
+          <p className={cn('text-[28px] leading-none font-semibold tracking-tight', !started && 'text-(--home-muted)')}>{percent(value)}</p>
+          <p className="mt-1.5 text-[13px] text-(--home-muted)">
+            <span className="text-(--home-foreground)">{fmt(module.totals.answered)}</span> / {fmt(module.questions)} 题
+          </p>
+        </div>
+      </header>
+      <Meter value={value} className="mt-4" label={`${module.name}完成度`} />
+      <ul className="mt-5 space-y-3">
+        {folders.map((folder) => (
+          <li key={folder.kind === 'folder' ? folder.id : folder.url} className={cn('grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5', !touched(folder) && 'opacity-55')}>
+            <span className="truncate text-sm">{folder.name}</span>
+            <span className="text-xs text-(--home-muted) tabular-nums">{fmt(folder.totals.answered)} / {fmt(folder.questions)}</span>
+            <Meter value={share(folder.totals.answered, folder.questions)} size="sm" className="col-span-2" />
+          </li>
+        ))}
+      </ul>
+      <footer className="mt-auto flex items-center justify-between gap-3 pt-6">
+        <span className="text-[13px] text-(--home-muted)">
+          {module.totals.lastAt ? `最近一次：${formatDay(module.totals.lastAt)}` : '还没开始'}
+        </span>
+        {started || !firstPage ? (
+          <button type="button" className="settings-btn" onClick={onOpen}>查看目录<ChevronRightIcon /></button>
+        ) : (
+          <Link href={firstPage.url} prefetch={false} className="settings-btn" data-variant="accent"><PlayIcon />开始练习</Link>
+        )}
+      </footer>
+    </article>
   );
 }
 
-function Counts({ node }: { node: CoverageNode }) {
+/** Follows the link and closes the whole sheet. */
+function SheetLink(props: ComponentProps<typeof Link>) {
+  const modal = useModal();
+  return <Link prefetch={false} {...props} onClick={() => modal?.closeAll({ returnFocus: false })} />;
+}
+
+function Count({ answered, questions }: { answered: number; questions: number }) {
   return (
-    <span className="shrink-0 text-right text-xs text-(--home-muted) tabular-nums">
-      <span className={cn(node.totals.answered ? 'text-(--home-foreground)' : undefined)}>{fmt(node.totals.answered)}</span> / {fmt(node.questions)}
+    <span className="flex items-center gap-3">
+      <Meter value={share(answered, questions)} size="sm" className="w-20 max-sm:hidden" />
+      <span className="min-w-[5.5rem] text-right text-[13px] whitespace-nowrap text-muted-foreground tabular-nums">
+        <span className={cn(answered > 0 && 'text-foreground')}>{fmt(answered)}</span> / {fmt(questions)}
+      </span>
     </span>
   );
 }
 
-function PageRow({ page, depth }: { page: CoveragePage; depth: number }) {
-  const { answered, submitted, attempts, lastAt } = page.totals;
+function TreePage({ page, depth }: { page: CoveragePage; depth: number }) {
+  const { answered, submitted, lastAt } = page.totals;
   return (
     <li>
-      <Link
+      <SheetLink
         href={page.url}
-        prefetch={false}
-        className={cn('group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 rounded-lg py-2 pr-2 hover:bg-(--home-active) focus-visible:bg-(--home-active)', !answered && !attempts && 'opacity-60')}
-        style={{ paddingLeft: `${0.5 + depth * 1.125}rem` }}
+        className={cn('grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 rounded-xl py-2.5 pr-3 hover:bg-(--ui-fill-hover) focus-visible:bg-(--ui-fill-hover)', !touched(page) && 'opacity-55')}
+        style={{ paddingLeft: `${0.75 + depth * 1.25}rem` }}
       >
-        <span className="truncate text-sm">{page.name}</span>
-        <Counts node={page} />
-        {answered || attempts ? (
-          <span className="col-span-2 flex flex-wrap gap-x-3 text-xs text-(--home-muted)">
-            <span>已提交 {fmt(submitted)}</span>
-            {attempts ? <span>提交 {fmt(attempts)} 次</span> : null}
-            {lastAt ? <span>{formatDay(lastAt)}</span> : null}
-          </span>
-        ) : null}
-      </Link>
+        <span className="min-w-0">
+          <span className="block truncate text-[15px]">{page.name}</span>
+          {touched(page) ? (
+            <span className="mt-0.5 block text-xs text-muted-foreground">
+              已提交 {fmt(submitted)}{lastAt ? `，${formatDay(lastAt)}` : ''}
+            </span>
+          ) : null}
+        </span>
+        <Count answered={answered} questions={page.questions} />
+      </SheetLink>
     </li>
   );
 }
 
-function FolderRow({ folder, depth, onlyDone, open, toggle }: {
-  folder: CoverageFolder; depth: number; onlyDone: boolean; open: ReadonlySet<string>; toggle(id: string): void;
-}) {
-  const expanded = open.has(folder.id);
-  const done = folder.totals.answered > 0 || folder.totals.attempts > 0;
+function TreeFolder({ folder, depth, onlyDone }: { folder: CoverageFolder; depth: number; onlyDone: boolean }) {
+  const [open, setOpen] = useState(depth === 0 && touched(folder));
   return (
     <li>
       <button
         type="button"
-        aria-expanded={expanded}
-        onClick={() => toggle(folder.id)}
-        className={cn('grid w-full grid-cols-[1rem_minmax(0,1fr)_5rem_auto] items-center gap-2 rounded-lg py-2 pr-2 text-left hover:bg-(--home-active) focus-visible:bg-(--home-active) max-sm:grid-cols-[1rem_minmax(0,1fr)_auto]', !done && 'opacity-60')}
-        style={{ paddingLeft: `${0.25 + depth * 1.125}rem` }}
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+        className={cn('grid w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-x-2 rounded-xl py-2.5 pr-3 text-left hover:bg-(--ui-fill-hover) focus-visible:bg-(--ui-fill-hover)', !touched(folder) && 'opacity-55')}
+        style={{ paddingLeft: `${0.5 + depth * 1.25}rem` }}
       >
-        <ChevronRightIcon className={cn('size-4 text-(--home-muted) transition-transform', expanded && 'rotate-90')} />
-        <span className="truncate text-sm font-medium">{folder.name}</span>
-        <Meter value={ratio(folder.totals.answered, folder.questions)} className="max-sm:hidden" />
-        <Counts node={folder} />
+        <ChevronRightIcon className={cn('size-4 text-muted-foreground transition-transform', open && 'rotate-90')} />
+        <span className="truncate text-[15px] font-medium">{folder.name}</span>
+        <Count answered={folder.totals.answered} questions={folder.questions} />
       </button>
-      {expanded ? <NodeList nodes={folder.children} depth={depth + 1} onlyDone={onlyDone} open={open} toggle={toggle} /> : null}
+      {open ? <TreeNodes nodes={folder.children} depth={depth + 1} onlyDone={onlyDone} /> : null}
     </li>
   );
 }
 
-function NodeList({ nodes, depth, onlyDone, open, toggle }: {
-  nodes: CoverageNode[]; depth: number; onlyDone: boolean; open: ReadonlySet<string>; toggle(id: string): void;
-}) {
-  const shown = onlyDone ? nodes.filter((node) => node.totals.answered > 0 || node.totals.attempts > 0) : nodes;
+function TreeNodes({ nodes, depth, onlyDone }: { nodes: CoverageNode[]; depth: number; onlyDone: boolean }) {
+  const shown = onlyDone ? nodes.filter(touched) : nodes;
   if (!shown.length) return null;
   return (
     <ul>
       {shown.map((node) => node.kind === 'page'
-        ? <PageRow key={node.url} page={node} depth={depth} />
-        : <FolderRow key={node.id} folder={node} depth={depth} onlyDone={onlyDone} open={open} toggle={toggle} />)}
+        ? <TreePage key={node.url} page={node} depth={depth} />
+        : <TreeFolder key={node.id} folder={node} depth={depth} onlyDone={onlyDone} />)}
     </ul>
   );
 }
 
-function ModuleBlock({ module, onlyDone, open, toggle }: {
-  module: CoverageFolder; onlyDone: boolean; open: ReadonlySet<string>; toggle(id: string): void;
-}) {
-  const value = ratio(module.totals.answered, module.questions);
-  const expanded = open.has(module.id);
+function ModuleSheet({ module, open, onOpenChange }: { module: CoverageFolder | null; open: boolean; onOpenChange(open: boolean): void }) {
+  const [onlyDone, setOnlyDone] = useState(true);
   return (
-    <section className="border-t border-(--home-border) py-5 first:border-t-0" aria-label={module.name}>
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h3 className="text-lg font-semibold tracking-tight">{module.name}</h3>
-        <p className="text-sm text-(--home-muted) tabular-nums">
-          <span className="text-(--home-foreground)">{fmt(module.totals.answered)}</span> / {fmt(module.questions)} 题
-          <span className="ml-3">{(value * 100).toFixed(value > 0 && value < 0.01 ? 1 : 0)}%</span>
-        </p>
-      </div>
-      <Meter value={value} className="mt-2.5" />
-      <div className="mt-3"><CoverageStrip module={module} /></div>
-      <button
-        type="button"
-        aria-expanded={expanded}
-        onClick={() => toggle(module.id)}
-        className="mt-3 inline-flex items-center gap-1 rounded-md text-sm text-(--home-muted) hover:text-(--home-foreground)"
-      >
-        <ChevronRightIcon className={cn('size-4 transition-transform', expanded && 'rotate-90')} />
-        {expanded ? '收起目录' : `展开目录（${fmt(module.totals.pages)} 个页面做过）`}
-      </button>
-      {expanded ? (
-        <div className="mt-2 -mx-2">
-          <NodeList nodes={module.children} depth={0} onlyDone={onlyDone} open={open} toggle={toggle} />
-          {onlyDone && !module.totals.answered && !module.totals.attempts ? (
-            <p className="px-2 py-2 text-sm text-(--home-muted)">这个模块还没有作答记录。</p>
-          ) : null}
-        </div>
-      ) : null}
-    </section>
+    <Modal open={open} onOpenChange={onOpenChange}>
+      <ModalContent size="md" className="md:min-h-[min(28rem,calc(100dvh-4rem))]">
+        {module ? (
+          <>
+            <ModalHeader>
+              <ModalTitle>{module.name}</ModalTitle>
+              <ModalTags role="radiogroup" aria-label="显示范围">
+                {([[true, '做过的'], [false, '全部目录']] as const).map(([option, label]) => (
+                  <button
+                    key={label}
+                    type="button"
+                    role="radio"
+                    aria-checked={onlyDone === option}
+                    onClick={() => setOnlyDone(option)}
+                    className={cn('inline-flex h-8 shrink-0 items-center rounded-full px-3 text-sm transition-colors', onlyDone === option ? 'bg-foreground text-background' : 'bg-(--ui-fill) text-muted-foreground hover:text-foreground')}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </ModalTags>
+            </ModalHeader>
+            <ModalBody className="px-3 md:px-4">
+              <div className="px-3 pb-4">
+                <ModalDescription className="text-sm text-muted-foreground">
+                  已作答 {fmt(module.totals.answered)} / {fmt(module.questions)} 题，已提交 {fmt(module.totals.submitted)} 题。点页面可直接跳过去接着做。
+                </ModalDescription>
+                <Meter value={share(module.totals.answered, module.questions)} className="mt-3" />
+              </div>
+              {onlyDone && !touched(module)
+                ? <p className="px-3 py-10 text-center text-sm text-muted-foreground">这个模块还没有作答记录。</p>
+                : <TreeNodes key={String(onlyDone)} nodes={module.children} depth={0} onlyDone={onlyDone} />}
+            </ModalBody>
+          </>
+        ) : null}
+      </ModalContent>
+    </Modal>
   );
 }
 
-function TreeView({ modules, onlyDone }: { modules: CoverageFolder[]; onlyDone: boolean }) {
-  // Modules the reader worked in start expanded, the rest stay folded.
-  const [open, setOpen] = useState<ReadonlySet<string>>(() => new Set(modules.filter((module) => module.totals.answered).map((module) => module.id)));
-  const toggle = (id: string) => setOpen((current) => {
-    const next = new Set(current);
-    if (!next.delete(id)) next.add(id);
-    return next;
-  });
-  if (!modules.length) return <Empty>当前筛选下没有题目。</Empty>;
-  return <div>{modules.map((module) => <ModuleBlock key={module.id} module={module} onlyDone={onlyDone} open={open} toggle={toggle} />)}</div>;
+function ModulesView({ coverage }: { coverage: CoverageFolder[] }) {
+  const [open, setOpen] = useState(false);
+  // The id stays set while the sheet animates closed, so its content does not vanish mid-slide.
+  const [moduleId, setModuleId] = useState<string | null>(null);
+  const ordered = useMemo(() => [...coverage].sort((a, b) => Number(touched(b)) - Number(touched(a))), [coverage]);
+  const current = coverage.find((module) => module.id === moduleId) ?? null;
+  if (!coverage.length) return <Empty>还没有可统计的题目。</Empty>;
+  return (
+    <>
+      <div className="grid gap-4 md:grid-cols-2">
+        {ordered.map((module) => (
+          <ModuleCard key={module.id} module={module} onOpen={() => { setModuleId(module.id); setOpen(true); }} />
+        ))}
+      </div>
+      <ModuleSheet key={moduleId ?? ''} module={current} open={open && current !== null} onOpenChange={setOpen} />
+    </>
+  );
 }
 
-const PAGE_SIZE = 40;
+/* ----------------------------------------------------------------- timeline */
 
 function StatePill({ record }: { record: QuestionRecord }) {
   const state = record.submitted ? 'submitted' : record.answered ? 'draft' : 'reset';
@@ -205,47 +266,50 @@ function StatePill({ record }: { record: QuestionRecord }) {
   );
 }
 
-/** Consecutive answers on one page, shown as one entry that unfolds into its questions. */
-function SessionItem({ session, index }: { session: RecordSession; index: SourceIndex | null }) {
+function SessionItem({ session, index, last }: { session: RecordSession; index: SourceIndex | null; last: boolean }) {
   const [open, setOpen] = useState(false);
   const source = resolveSource(index, session.documentPath);
   const submitted = session.records.filter((record) => record.submitted).length;
-  const first = session.records.at(-1)!;
-  const single = session.records.length === 1;
+  const single = session.records.length === 1 ? session.records[0] : null;
   return (
-    <li className="-mx-2">
-      <div className="grid grid-cols-[3rem_minmax(0,1fr)_auto] items-start gap-x-3 rounded-lg px-2 py-2 hover:bg-(--home-active)">
-        <time dateTime={session.lastAt} className="pt-px text-sm text-(--home-muted) tabular-nums">{timeOf(session.lastAt)}</time>
+    <li className="relative pl-6">
+      <span aria-hidden className={cn('absolute top-0 left-[7px] w-px bg-(--home-border)', last ? 'h-5' : 'bottom-0')} />
+      <span aria-hidden className="absolute top-[17px] left-[3px] size-[9px] rounded-full bg-(--set-meter-fill) ring-4 ring-(--home-elevated)" />
+      <div className="grid grid-cols-[2.75rem_minmax(0,1fr)] items-start gap-x-3 rounded-xl px-3 py-2.5 hover:bg-(--home-active) sm:grid-cols-[2.75rem_minmax(0,1fr)_auto]">
+        <time dateTime={session.lastAt} className="pt-0.5 text-[13px] text-(--home-muted) tabular-nums">{timeOf(session.lastAt)}</time>
         <Link
-          href={single ? questionHref(first.documentPath, first.questionId) : session.documentPath}
+          href={single ? questionHref(single.documentPath, single.questionId) : session.documentPath}
           prefetch={false}
           className="min-w-0 rounded-sm hover:underline focus-visible:underline"
         >
-          <span className="block truncate text-sm">{source.page}</span>
-          <span className="block truncate text-xs text-(--home-muted)">{[source.module, ...source.folders].join(' › ')}</span>
+          <span className="block truncate text-[15px] font-medium">{source.page}</span>
+          <span className="mt-0.5 block truncate text-xs text-(--home-muted)">{[source.module, ...source.folders].join(' › ')}</span>
         </Link>
-        {single ? (
-          <StatePill record={first} />
-        ) : (
-          <button
-            type="button"
-            aria-expanded={open}
-            onClick={() => setOpen((value) => !value)}
-            className="inline-flex shrink-0 items-center gap-1 rounded-full border border-(--home-border) px-2 text-xs leading-5 text-(--home-muted) tabular-nums hover:text-(--home-foreground)"
-          >
-            {fmt(session.records.length)} 题{submitted ? `，已提交 ${fmt(submitted)}` : ''}
-            <ChevronRightIcon className={cn('size-3 transition-transform', open && 'rotate-90')} />
-          </button>
-        )}
+        {/* Under the title on a phone, so long page names keep their room. */}
+        <div className="col-start-2 mt-2 justify-self-start sm:col-start-3 sm:mt-0 sm:justify-self-end">
+          {single ? (
+            <StatePill record={single} />
+          ) : (
+            <button
+              type="button"
+              aria-expanded={open}
+              onClick={() => setOpen((value) => !value)}
+              className="inline-flex items-center gap-1 rounded-full bg-(--home-active) pr-1.5 pl-2.5 text-xs leading-6 whitespace-nowrap text-(--home-muted) tabular-nums hover:text-(--home-foreground)"
+            >
+              {fmt(session.records.length)} 题{submitted ? ` · 提交 ${fmt(submitted)}` : ''}
+              <ChevronRightIcon className={cn('size-3.5 transition-transform', open && 'rotate-90')} />
+            </button>
+          )}
+        </div>
       </div>
       {open ? (
-        <ol className="mb-1 ml-[3.75rem] border-l border-(--home-border) pl-3">
+        <ol className="mb-2 ml-3 space-y-0.5 sm:ml-14">
           {session.records.map((record) => (
             <li key={record.questionId}>
               <Link
                 href={questionHref(record.documentPath, record.questionId)}
                 prefetch={false}
-                className="flex items-center gap-3 rounded-md px-2 py-1 text-sm hover:bg-(--home-active)"
+                className="flex items-center gap-3 rounded-lg px-2.5 py-1.5 text-sm hover:bg-(--home-active)"
               >
                 <span className="w-10 shrink-0 text-xs text-(--home-muted) tabular-nums">{timeOf(record.lastAt)}</span>
                 <span className="min-w-0 flex-1 truncate">{record.questionId}</span>
@@ -260,31 +324,38 @@ function SessionItem({ session, index }: { session: RecordSession; index: Source
   );
 }
 
+const PAGE_SIZE = 30;
+
 function TimelineView({ records, index }: { records: QuestionRecord[]; index: SourceIndex | null }) {
   const [limit, setLimit] = useState(PAGE_SIZE);
   const sessions = useMemo(() => groupSessions(records, (record) => formatDay(record.lastAt)), [records]);
   const groups = useMemo(() => {
-    const result: { day: string; items: RecordSession[] }[] = [];
+    const result: { day: string; items: RecordSession[]; questions: number }[] = [];
     for (const session of sessions.slice(0, limit)) {
       const last = result.at(-1);
-      if (last?.day === session.group) last.items.push(session);
-      else result.push({ day: session.group, items: [session] });
+      if (last?.day === session.group) { last.items.push(session); last.questions += session.records.length; }
+      else result.push({ day: session.group, items: [session], questions: session.records.length });
     }
     return result;
   }, [sessions, limit]);
-  if (!records.length) return <Empty>当前筛选下还没有作答记录。</Empty>;
+  if (!records.length) return <Empty>这里还没有作答记录。</Empty>;
   return (
-    <div>
+    <div className="space-y-4">
       {groups.map((group) => (
-        <section key={group.day} className="border-t border-(--home-border) pt-3 pb-2 first:border-t-0" aria-label={group.day}>
-          <h3 className="pb-1 text-sm font-medium text-(--home-muted)">{group.day}</h3>
-          <ol>
-            {group.items.map((session) => <SessionItem key={`${session.documentPath}\u0000${session.lastAt}`} session={session} index={index} />)}
+        <section key={group.day} className="settings-card px-2 pt-4 pb-2 sm:px-3" aria-label={group.day}>
+          <h3 className="flex items-baseline justify-between px-3 pb-2">
+            <span className="text-[15px] font-semibold">{group.day}</span>
+            <span className="text-[13px] text-(--home-muted)">{fmt(group.questions)} 题</span>
+          </h3>
+          <ol className="pl-1">
+            {group.items.map((session, position) => (
+              <SessionItem key={`${session.documentPath}\u0000${session.lastAt}`} session={session} index={index} last={position === group.items.length - 1} />
+            ))}
           </ol>
         </section>
       ))}
       {sessions.length > limit ? (
-        <button type="button" onClick={() => setLimit((value) => value + PAGE_SIZE)} className="mt-2 w-full rounded-lg border border-(--home-border) py-2 text-sm text-(--home-muted) hover:bg-(--home-active) hover:text-(--home-foreground)">
+        <button type="button" onClick={() => setLimit((value) => value + PAGE_SIZE)} className="settings-btn w-full">
           显示更早的记录（还有 {fmt(sessions.length - limit)} 组）
         </button>
       ) : null}
@@ -292,27 +363,24 @@ function TimelineView({ records, index }: { records: QuestionRecord[]; index: So
   );
 }
 
+/* -------------------------------------------------------------------- panel */
+
 function Empty({ children }: { children: ReactNode }) {
-  return <p className="py-10 text-center text-sm text-(--home-muted)">{children}</p>;
+  return <p className="settings-card px-6 py-14 text-center text-sm text-(--home-muted)">{children}</p>;
 }
 
-function Segmented<T extends string>({ value, options, onChange, label }: {
-  value: T; options: readonly { value: T; label: ReactNode }[]; onChange(value: T): void; label: string;
-}) {
+function ResumeCard({ record, index }: { record: QuestionRecord; index: SourceIndex | null }) {
+  const source = resolveSource(index, record.documentPath);
   return (
-    <div role="radiogroup" aria-label={label} className="inline-flex rounded-full border border-(--home-border) p-0.5">
-      {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          role="radio"
-          aria-checked={value === option.value}
-          onClick={() => onChange(option.value)}
-          className="rounded-full px-3 py-1 text-sm text-(--home-muted) aria-checked:bg-(--home-foreground) aria-checked:text-(--home-background)"
-        >
-          {option.label}
-        </button>
-      ))}
+    <div className="settings-card flex flex-wrap items-center gap-x-5 gap-y-4 p-5 sm:flex-nowrap sm:p-6">
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] text-(--home-muted)">上次做到 {formatDay(record.lastAt)} {timeOf(record.lastAt)}</p>
+        <p className="mt-1 truncate text-lg font-semibold tracking-tight">{source.page}</p>
+        <p className="mt-0.5 truncate text-[13px] text-(--home-muted)">{[source.module, ...source.folders].join(' › ')}</p>
+      </div>
+      <Link href={questionHref(record.documentPath, record.questionId)} prefetch={false} className="settings-btn max-sm:w-full" data-variant="primary">
+        <PlayIcon />继续做题
+      </Link>
     </div>
   );
 }
@@ -323,98 +391,59 @@ export function RecordsPanel({ records, tree, index, treeFailed }: {
   index: SourceIndex | null;
   treeFailed: boolean;
 }) {
-  const [view, setView] = useState<View>('tree');
+  const [view, setView] = useState<View>('modules');
   const [module, setModule] = useState<string>('all');
-  const [onlyDone, setOnlyDone] = useState(true);
 
   const coverage = useMemo(
     () => (records && (tree || treeFailed) ? buildCoverage(tree ?? { modules: [] }, records, index ?? new Map()) : null),
     [records, tree, treeFailed, index],
   );
-  const totals = useMemo(() => (records ? totalsOf(records) : null), [records]);
   const moduleOf = useMemo(() => {
     const map = new Map<string, string>();
     for (const record of records ?? []) map.set(record.documentPath, resolveSource(index, record.documentPath).module);
     return map;
   }, [records, index]);
 
-  if (!records || !coverage || !totals) {
-    return <div className="space-y-3 py-6" aria-busy="true" aria-label="正在读取答题记录">
-      {[0, 1, 2].map((item) => <div key={item} className="h-16 animate-pulse rounded-xl bg-(--home-active)" />)}
-    </div>;
+  if (!records || !coverage) {
+    return (
+      <div className="grid gap-4 md:grid-cols-2" aria-busy="true" aria-label="正在读取答题记录">
+        {[0, 1, 2, 3].map((item) => <div key={item} className="settings-card h-64 animate-pulse bg-(--home-active)" />)}
+      </div>
+    );
   }
 
-  const worked = coverage.filter((item) => item.totals.answered || item.totals.attempts);
-  const shownModules = coverage.filter((item) => (module === 'all' ? true : item.name === module));
   const shownRecords = module === 'all' ? records : records.filter((record) => moduleOf.get(record.documentPath) === module);
-  const latest = records[0];
-  const latestSource = latest ? resolveSource(index, latest.documentPath) : null;
+  const chips = [
+    { name: 'all', label: '全部', count: records.length },
+    ...coverage.filter(touched).map((item) => ({ name: item.name, label: item.name, count: item.totals.answered })),
+  ];
 
   return (
-    <div>
-      <div className="rounded-(--home-radius) border border-(--home-border) bg-(--home-surface) px-5 py-5 sm:px-6">
-        {totals.answered || totals.attempts ? (
-          <>
-            <p className="text-2xl leading-snug font-semibold tracking-tight sm:text-[1.75rem]">
-              已作答 {fmt(totals.answered)} 题，分布在 {fmt(worked.length)} 个模块、{fmt(totals.pages)} 个页面
-            </p>
-            <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-(--home-muted) [&_dt]:shrink-0">
-              <div className="flex gap-1.5"><dt>已提交</dt><dd className="text-(--home-foreground) tabular-nums">{fmt(totals.submitted)}</dd></div>
-              <div className="flex gap-1.5"><dt>累计提交</dt><dd className="text-(--home-foreground) tabular-nums">{fmt(totals.attempts)} 次</dd></div>
-              {latest && latestSource ? (
-                <div className="flex min-w-0 gap-1.5">
-                  <dt>最近</dt>
-                  <dd className="min-w-0 truncate text-(--home-foreground)">
-                    <Link href={questionHref(latest.documentPath, latest.questionId)} prefetch={false} className="hover:underline">
-                      {formatDay(latest.lastAt)} {timeOf(latest.lastAt)}，{[latestSource.module, ...latestSource.folders, latestSource.page].join(' › ')}
-                    </Link>
-                  </dd>
-                </div>
-              ) : null}
-            </dl>
-          </>
-        ) : (
-          <>
-            <p className="text-2xl font-semibold tracking-tight">还没有作答记录</p>
-            <p className="mt-2 text-sm text-(--home-muted)">在任意文档里做题，记录会按模块和目录汇总到这里。</p>
-          </>
-        )}
-      </div>
+    <div className="space-y-5">
+      {records[0] ? <ResumeCard record={records[0]} index={index} /> : null}
 
-      <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2">
-        <Segmented<View> label="查看方式" value={view} onChange={setView} options={[{ value: 'tree', label: '按目录' }, { value: 'timeline', label: '按时间' }]} />
-        <div className="-mx-1 flex max-w-full gap-1 overflow-x-auto px-1 py-0.5" role="radiogroup" aria-label="模块">
-          {[{ name: 'all', label: '全部', count: totals.answered }, ...coverage.map((item) => ({ name: item.name, label: item.name, count: item.totals.answered }))].map((item) => (
-            <button
-              key={item.name}
-              type="button"
-              role="radio"
-              aria-checked={module === item.name}
-              onClick={() => setModule(item.name)}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-(--home-active) px-3 py-1 text-sm text-(--home-muted) hover:text-(--home-foreground) aria-checked:bg-(--home-accent) aria-checked:text-(--home-accent-foreground)"
-            >
-              {item.label}
-              <span className="tabular-nums opacity-70">{fmt(item.count)}</span>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="settings-tabs" role="radiogroup" aria-label="查看方式">
+          {([['modules', '按模块'], ['timeline', '按时间']] as const).map(([value, label]) => (
+            <button key={value} type="button" role="radio" aria-checked={view === value} data-active={view === value ? '' : undefined} onClick={() => setView(value)} className="settings-tab h-8 px-3.5">
+              {label}
             </button>
           ))}
         </div>
-        {view === 'tree' ? (
-          <label className="ml-auto inline-flex cursor-pointer items-center gap-2 text-sm text-(--home-muted) select-none">
-            <input type="checkbox" checked={onlyDone} onChange={(event) => setOnlyDone(event.target.checked)} className="size-4 accent-(--home-focus)" />
-            目录中只看做过的
-          </label>
+        {view === 'timeline' && chips.length > 2 ? (
+          <div className="-mx-1 flex max-w-full gap-1.5 overflow-x-auto px-1 py-0.5 [scrollbar-width:none]" role="radiogroup" aria-label="模块">
+            {chips.map((item) => (
+              <button key={item.name} type="button" role="radio" aria-checked={module === item.name} onClick={() => setModule(item.name)} className="settings-chip">
+                {item.label}<span className="settings-chip-count">{fmt(item.count)}</span>
+              </button>
+            ))}
+          </div>
         ) : null}
       </div>
 
-      {treeFailed ? (
-        <p role="status" className="mt-3 text-sm text-(--home-muted)">目录信息暂时无法读取，来源按页面地址显示。</p>
-      ) : null}
+      {treeFailed ? <p role="status" className="text-sm text-(--home-muted)">目录信息暂时无法读取，来源按页面地址显示。</p> : null}
 
-      <div className="mt-2">
-        {view === 'tree'
-          ? <TreeView key={module} modules={shownModules} onlyDone={onlyDone} />
-          : <TimelineView records={shownRecords} index={index} />}
-      </div>
+      {view === 'modules' ? <ModulesView coverage={coverage} /> : <TimelineView records={shownRecords} index={index} />}
     </div>
   );
 }
