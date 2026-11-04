@@ -1,0 +1,362 @@
+/*
+ * The candidate block printed at the top of every answer sheet (考生信息):
+ * red-ink frame, timing marks, written fields, the admission-number grid
+ * whose digits are filled with pencil, and the barcode-sticker area. Here
+ * the number is the reader's answered count and the sticker is the account.
+ */
+
+.sheet {
+  position: relative;
+  margin-top: 40px;
+  padding: 22px 32px 26px 62px;
+  border: 1.5px solid var(--dropout);
+  border-radius: 6px;
+  background: var(--paper);
+  box-shadow:
+    0 1px 0 var(--rule),
+    0 28px 56px -36px rgb(28 29 33 / 0.32);
+}
+
+/* Registration squares used by scanners to align the sheet. */
+.sheet::before,
+.sheet::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--timing);
+}
+
+.sheet::before {
+  top: 14px;
+  right: 14px;
+}
+
+.sheet::after {
+  bottom: 14px;
+  left: 14px;
+}
+
+.timing {
+  position: absolute;
+  top: 68px;
+  bottom: 48px;
+  left: 22px;
+  width: 10px;
+  background: repeating-linear-gradient(to bottom, var(--timing) 0 5px, transparent 5px 22px);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding-right: 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--dropout-line);
+}
+
+.heading {
+  color: var(--dropout);
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.5em;
+}
+
+.status {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(232px, 292px);
+  align-items: stretch;
+  gap: 28px 44px;
+  padding-block: 24px 26px;
+  border-bottom: 1px dashed var(--dropout-line);
+}
+
+/* ------------------------------------------------------- written fields */
+
+.fields {
+  display: grid;
+  align-content: start;
+}
+
+.fields > div {
+  display: grid;
+  grid-template-columns: 6.5em minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+  min-height: 52px;
+  padding-block: 12px 8px;
+  border-bottom: 1px solid var(--dropout-line);
+}
+
+.fields dt {
+  color: var(--dropout);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.fields dd {
+  min-width: 0;
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+.fields dd strong {
+  margin-right: 4px;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.name {
+  overflow: hidden;
+  color: var(--ink) !important;
+  font-family: var(--font-display);
+  font-size: 22px !important;
+  font-weight: 700;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------- admission-number bubbles */
+
+.number {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.numberLabel {
+  color: var(--dropout);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.columns {
+  display: flex;
+  border: 1.5px solid var(--dropout);
+  border-radius: 2px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 0 6px 10px;
+}
+
+.column + .column {
+  border-left: 1px solid var(--dropout-line);
+}
+
+/* The digit written by hand above its column. */
+.written {
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  height: 38px;
+  margin: 0 -6px 5px;
+  border-bottom: 1.5px solid var(--dropout);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.written[data-lead] {
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+
+.bubble {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 14px;
+  color: var(--dropout);
+  font-size: 10px;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+/* Graphite fill, shaded from left to right like a pencil. */
+.bubble::after {
+  content: '';
+  position: absolute;
+  inset: 1px 2px;
+  border-radius: 1px;
+  background: repeating-linear-gradient(-62deg, var(--graphite) 0 2.2px, var(--graphite-sheen) 2.2px 3px);
+  clip-path: inset(0 100% 0 0);
+}
+
+.bubble[data-filled]::after {
+  clip-path: inset(0);
+  animation: pencil 320ms steps(6, end) var(--delay, 0ms) backwards;
+}
+
+@keyframes pencil {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
+/* ---------------------------------------------------------- barcode area */
+
+.slot {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px 18px 18px;
+  border: 1.5px dashed var(--dropout);
+  border-radius: 4px;
+}
+
+.slotLabel {
+  color: var(--dropout);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+}
+
+.slotText {
+  color: var(--ink-muted);
+  font-size: 13px;
+  line-height: 1.8;
+  text-wrap: pretty;
+}
+
+/* Until a sticker is there, the empty area says what goes in it. */
+.slotBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  margin-block: auto;
+}
+
+/* The account, as the sticker that identifies a sheet wherever it is read. */
+.sticker {
+  display: grid;
+  gap: 8px;
+  margin: auto 0;
+  padding: 14px 16px 12px;
+  border-radius: 3px;
+  background: #fff;
+  color: #1c1d21;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.12),
+    0 12px 24px -14px rgb(0 0 0 / 0.4);
+  transform: rotate(-1.4deg);
+}
+
+:global(.dark) .sticker {
+  background: #ececef;
+}
+
+.barcode {
+  display: block;
+  width: 100%;
+  height: 46px;
+}
+
+.stickerId {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stickerNote {
+  color: #6f7178;
+  font-size: 12px;
+}
+
+.calendar {
+  padding-top: 22px;
+}
+
+/* --------------------------------------------------------------- narrow */
+
+@media (max-width: 1079px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .slot {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .sheet {
+    margin-top: 28px;
+    padding: 18px 16px 20px 40px;
+  }
+
+  .sheet::after {
+    left: 11px;
+  }
+
+  .timing {
+    top: 60px;
+    left: 13px;
+    width: 8px;
+  }
+
+  .heading {
+    font-size: 19px;
+  }
+
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    padding-top: 12px;
+  }
+
+  .fields > div {
+    grid-template-columns: 6em minmax(0, 1fr);
+  }
+
+  .number {
+    align-items: flex-start;
+  }
+
+  .column {
+    padding-inline: 4px;
+  }
+
+  .written {
+    margin-inline: -4px;
+  }
+
+  .bubble {
+    width: 26px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble[data-filled]::after {
+    animation: none;
+  }
+}

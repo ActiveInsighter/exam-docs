@@ -1,17 +1,19 @@
 'use client';
 
-import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type PointerEvent } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type PointerEvent } from 'react';
 import { dayKey } from '@/lib/question-records';
+import styles from './activity-calendar.module.css';
 
 /*
  * The reader's practice calendar: one column per week (Monday first), one
- * cell per day, filled by how many questions were worked on that day. The
- * newest week is on the right; on a narrow screen the grid scrolls and opens
- * scrolled to today.
+ * box per day, shaded by how many questions were worked on that day. The
+ * newest week is on the right; on a narrow screen the strip scrolls and
+ * opens scrolled to today.
  */
 
 const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日'];
 const noop = () => () => {};
+const numberFormat = new Intl.NumberFormat('zh-CN');
 
 interface Cell {
   key: string;
@@ -31,9 +33,8 @@ function levelOf(count: number, max: number): number {
 
 function buildWeeks(activity: ReadonlyMap<string, number>, weeks: number, now: Date) {
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const mondayOffset = (today.getDay() + 6) % 7;
   const start = new Date(today);
-  start.setDate(today.getDate() - mondayOffset - (weeks - 1) * 7);
+  start.setDate(today.getDate() - ((today.getDay() + 6) % 7) - (weeks - 1) * 7);
   let max = 0;
   const days: Omit<Cell, 'level'>[] = [];
   for (let index = 0; index < weeks * 7; index++) {
@@ -56,15 +57,14 @@ function buildWeeks(activity: ReadonlyMap<string, number>, weeks: number, now: D
     if (months.length && column - months[months.length - 1].column < 3) continue;
     months.push({ column, label });
   }
-  return { cells, months, max };
+  return { cells, months };
 }
 
-const describe = (cell: Cell) =>
-  `${cell.date.getMonth() + 1}月${cell.date.getDate()}日 周${WEEKDAYS[(cell.date.getDay() + 6) % 7]}：${cell.count ? `做了 ${cell.count} 道题` : '没有做题'}`;
+const dateLabel = (cell: Cell) => `${cell.date.getMonth() + 1}月${cell.date.getDate()}日 周${WEEKDAYS[(cell.date.getDay() + 6) % 7]}`;
 
-export function ActivityHeatmap({ activity, weeks = 26 }: { activity: ReadonlyMap<string, number> | null; weeks?: number }) {
+export function ActivityCalendar({ activity, weeks = 52 }: { activity: ReadonlyMap<string, number> | null; weeks?: number }) {
   // The calendar depends on "today", which the static page cannot know: the
-  // server renders empty cells and the browser fills in the real dates.
+  // server renders empty boxes and the browser fills in the real dates.
   const mounted = useSyncExternalStore(noop, () => true, () => false);
   const now = useMemo(() => (mounted ? new Date() : new Date(0)), [mounted]);
   const data = useMemo(() => buildWeeks(mounted ? activity ?? new Map() : new Map(), weeks, now), [mounted, activity, weeks, now]);
@@ -78,6 +78,7 @@ export function ActivityHeatmap({ activity, weeks = 26 }: { activity: ReadonlyMa
 
   const activeDays = data.cells.filter((cell) => cell.count > 0).length;
   const total = data.cells.reduce((sum, cell) => sum + cell.count, 0);
+  const loading = !mounted || activity === null;
 
   const onPointer = (event: PointerEvent<HTMLDivElement>) => {
     const target = (event.target as HTMLElement).closest<HTMLElement>('[data-index]');
@@ -85,67 +86,65 @@ export function ActivityHeatmap({ activity, weeks = 26 }: { activity: ReadonlyMa
     if (!target || !box) { setHover(null); return; }
     const cell = data.cells[Number(target.dataset.index)];
     if (!cell || cell.future) { setHover(null); return; }
+    // Moving within the same box changes nothing: skip re-rendering the year of boxes.
+    if (hover?.cell.key === cell.key) return;
     const rect = target.getBoundingClientRect();
     setHover({ cell, x: rect.left + rect.width / 2 - box.left, y: rect.top - box.top });
   };
 
   return (
-    <figure className="m-0 min-w-0">
-      <figcaption className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <span className="text-[15px] font-semibold">做题日历</span>
-        <span className="text-[13px] text-(--home-muted)">
-          {!mounted || activity === null ? '正在读取…' : `近半年 ${activeDays} 天做过题，共 ${total.toLocaleString('zh-CN')} 题次`}
+    <figure className={styles.figure}>
+      <figcaption className={styles.caption}>
+        <span className={styles.title}>做题日历</span>
+        <span className={styles.summary}>
+          {loading ? '正在读取…' : (
+            <>近一年 <strong>{numberFormat.format(activeDays)}</strong> 天做过题，共 <strong>{numberFormat.format(total)}</strong> 题次</>
+          )}
         </span>
       </figcaption>
-      <div className="settings-heat-wrap relative mt-4">
-        <div ref={scroller} className="overflow-x-auto pb-1 [scrollbar-width:thin]">
-          <div className="inline-grid grid-cols-[auto_auto] gap-x-2 gap-y-1.5">
-            <span className="sticky left-0 z-[1] bg-(--home-surface)" />
-            <div className="settings-heat-months text-[11px] text-(--home-muted)" aria-hidden style={{ gridTemplateColumns: `repeat(${weeks}, var(--cell))` }}>
+      <div className={styles.frame}>
+        <div ref={scroller} className={styles.scroller}>
+          <div className={styles.board} style={{ '--weeks': weeks } as CSSProperties}>
+            <span className={styles.corner} />
+            <div className={styles.months} aria-hidden>
               {mounted && data.months.map((month) => (
-                <span key={month.column} className="whitespace-nowrap" style={{ gridColumnStart: month.column + 1 }}>{month.label}</span>
+                <span key={month.column} style={{ gridColumnStart: month.column + 1 }}>{month.label}</span>
               ))}
             </div>
             {/* Weekday labels stay put while a narrow screen scrolls the weeks. */}
-            <div className="settings-heat-days sticky left-0 z-[1] bg-(--home-surface) pr-1 text-(--home-muted)" aria-hidden>
+            <div className={styles.days} aria-hidden>
               {WEEKDAYS.map((label, index) => <span key={label}>{index % 2 === 0 ? label : ''}</span>)}
             </div>
             <div
-              className="settings-heat"
+              className={styles.cells}
               role="img"
-              aria-label={`做题日历：近半年 ${activeDays} 天做过题，共 ${total} 题次。逐日明细见「学习记录」的按时间视图。`}
+              aria-label={`做题日历：近一年 ${activeDays} 天做过题，共 ${total} 题次。逐日明细见「学习记录」的按时间视图。`}
               onPointerMove={onPointer}
               onPointerLeave={() => setHover(null)}
             >
               {data.cells.map((cell, index) => (
-                <span
+                <i
                   key={index}
                   data-index={index}
-                  data-level={cell.level}
+                  data-level={cell.level || undefined}
                   data-future={mounted && cell.future ? '' : undefined}
                   data-today={mounted && cell.today ? '' : undefined}
                   data-hover={hover?.cell.key === cell.key ? '' : undefined}
-                  className="settings-heat-cell"
+                  className={styles.cell}
                 />
               ))}
             </div>
           </div>
         </div>
         {hover ? (
-          <div
-            role="presentation"
-            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-lg bg-(--home-foreground) px-2.5 py-1.5 text-xs whitespace-nowrap text-(--home-background) shadow-lg"
-            style={{ left: hover.x, top: hover.y - 8 }}
-          >
-            <strong className="font-semibold">{hover.cell.count ? `${hover.cell.count} 道题` : '没有做题'}</strong>
-            <span className="ml-1.5 opacity-70">{describe(hover.cell).split('：')[0]}</span>
+          <div role="presentation" className={styles.tip} style={{ left: hover.x, top: hover.y - 8 }}>
+            <strong>{hover.cell.count ? `${hover.cell.count} 道题` : '没有做题'}</strong>
+            <span>{dateLabel(hover.cell)}</span>
           </div>
         ) : null}
       </div>
-      <div className="mt-3 flex items-center justify-end gap-1.5 text-[11px] text-(--home-muted)" aria-hidden>
-        少
-        {[0, 1, 2, 3, 4].map((level) => <span key={level} data-level={level} className="settings-heat-cell" />)}
-        多
+      <div className={styles.legend} aria-hidden>
+        少<i /><i data-level="1" /><i data-level="2" /><i data-level="3" /><i data-level="4" />多
       </div>
     </figure>
   );
