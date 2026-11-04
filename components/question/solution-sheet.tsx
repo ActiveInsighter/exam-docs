@@ -326,7 +326,7 @@ function SolutionCard({ self, open, setOpen, triggerRef }: {
         <StudyCardHeader
           title={entry.numberLabel ? (
             <>
-              <span data-question-number="" data-type={entry.questionType} aria-hidden="true">{entry.numberLabel}</span>
+              <span data-question-number="" aria-hidden="true">{entry.numberLabel}</span>
               <span className="sr-only">第 {entry.numberLabel} 题</span>
             </>
           ) : entry.dialogTitle}
