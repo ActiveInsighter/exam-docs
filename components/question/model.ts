@@ -110,6 +110,7 @@ export function toBlankSpec(props: BlankProps): BlankSpec {
         ? props.tolerance
         : undefined,
     kind,
+    ...(kind === 'text' && typeof props.answerHtml === 'string' && props.answerHtml ? { html: props.answerHtml } : {}),
   };
 }
 

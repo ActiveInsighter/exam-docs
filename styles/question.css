@@ -23,24 +23,88 @@
   unicode-range: U+0041-005A;
 }
 
+/* ---------------------------------------------------------------- accent */
+
+/*
+ * One accent per question type, from an analogous cool family (cyan, blue,
+ * indigo, violet, magenta) at a shared lightness and chroma, so a page of
+ * mixed types stays one palette. It colours the chrome only (number, type
+ * chip, header band, the picked option, submit, focus); right / wrong keep
+ * their own result tones. The accent is resolved on each card (and on each
+ * type chip and number, which the solution card shows outside one), so --exam-hue can
+ * differ per card.
+ */
+[data-question-type='boolean'], :is([data-question-type-label], [data-question-number])[data-type='boolean'] { --exam-hue: 212; }
+[data-question-type='single'], :is([data-question-type-label], [data-question-number])[data-type='single'] { --exam-hue: 248; }
+[data-question-type='essay'], :is([data-question-type-label], [data-question-number])[data-type='essay'] { --exam-hue: 266; }
+[data-question-type='multiple'], :is([data-question-type-label], [data-question-number])[data-type='multiple'] { --exam-hue: 290; }
+[data-question-type='blank'], :is([data-question-type-label], [data-question-number])[data-type='blank'] { --exam-hue: 318; }
+
+:root,
+[data-exam-question],
+:is([data-question-type-label], [data-question-number])[data-type] {
+  --exam-accent: oklch(0.56 0.15 var(--exam-hue));
+  --exam-accent-ink: oklch(0.46 0.13 var(--exam-hue));
+  --exam-accent-deep: oklch(0.5 0.16 var(--exam-hue));
+  --exam-accent-on: oklch(0.99 0.01 var(--exam-hue));
+  --exam-number-from: oklch(0.63 0.14 var(--exam-hue));
+  --exam-number-to: oklch(0.52 0.16 var(--exam-hue));
+}
+
+.dark,
+.dark [data-exam-question],
+.dark :is([data-question-type-label], [data-question-number])[data-type] {
+  --exam-accent: oklch(0.72 0.13 var(--exam-hue));
+  --exam-accent-ink: oklch(0.83 0.09 var(--exam-hue));
+  --exam-accent-deep: oklch(0.66 0.14 var(--exam-hue));
+  --exam-accent-on: oklch(0.18 0.03 var(--exam-hue));
+  --exam-number-from: oklch(0.6 0.14 var(--exam-hue));
+  --exam-number-to: oklch(0.5 0.15 var(--exam-hue));
+}
+
 /* ------------------------------------------------------------------ card */
 
 [data-exam-question] {
+  /* Padding, shared with the header and footer bands that bleed to the edge. */
+  --card-px: 0.875rem;
+  --card-pt: 0.75rem;
+  --card-pb: 0.75rem;
+  /* The plate: a breath of the accent over the page, a tinted hairline, a soft lift. */
+  --exam-card: color-mix(in oklch, var(--exam-accent) 1.8%, var(--ui-panel));
+  --exam-card-ring: color-mix(in oklch, var(--exam-accent) 16%, color-mix(in oklch, var(--foreground) 5%, transparent));
+  --exam-card-shadow:
+    0 1px 2px rgb(0 0 0 / 3%),
+    0 14px 32px -22px color-mix(in oklch, var(--exam-accent) 45%, transparent);
+  --exam-head-from: color-mix(in oklch, var(--exam-accent) 8%, transparent);
+  --exam-head-to: color-mix(in oklch, var(--exam-accent) 2.5%, transparent);
+  --exam-head-rule: color-mix(in oklch, var(--exam-accent) 15%, transparent);
+  --exam-foot-bg: color-mix(in oklch, var(--foreground) 2%, transparent);
+  --exam-foot-rule: color-mix(in oklch, var(--foreground) 7%, transparent);
+  --exam-card-dot: color-mix(in oklch, var(--exam-accent) 26%, transparent);
   position: relative;
   isolation: isolate;
   /* The blog sets its prose in serif; questions keep the interface face. */
   font-family: var(--font-sans);
-  margin-block: 1.25rem;
-  padding: 0.75rem 0.875rem 0.625rem;
+  margin-block: 1.5rem;
+  padding: var(--card-pt) var(--card-px) var(--card-pb);
   border-radius: var(--exam-card-radius);
-  /* A sheen over the header end of the plate, and a hairline edge. */
-  background:
-    linear-gradient(180deg, var(--exam-card-sheen), transparent 5.5rem),
-    var(--exam-card);
-  box-shadow: inset 0 0 0 1px var(--exam-card-ring);
+  background: var(--exam-card);
+  box-shadow: inset 0 0 0 1px var(--exam-card-ring), var(--exam-card-shadow);
   /* Long pages: skip layout and paint of cards far off screen. */
   content-visibility: auto;
   contain-intrinsic-size: auto 18rem;
+}
+
+.dark [data-exam-question] {
+  --exam-card: color-mix(in oklch, var(--exam-accent) 3.5%, oklch(0.165 0 0));
+  --exam-card-ring: color-mix(in oklch, var(--exam-accent) 18%, rgb(255 255 255 / 6%));
+  --exam-card-shadow: 0 1px 0 rgb(255 255 255 / 3%) inset, 0 16px 36px -20px rgb(0 0 0 / 80%);
+  --exam-head-from: color-mix(in oklch, var(--exam-accent) 13%, transparent);
+  --exam-head-to: color-mix(in oklch, var(--exam-accent) 4%, transparent);
+  --exam-head-rule: color-mix(in oklch, var(--exam-accent) 20%, transparent);
+  --exam-foot-bg: rgb(255 255 255 / 2.5%);
+  --exam-foot-rule: rgb(255 255 255 / 8%);
+  --exam-card-dot: color-mix(in oklch, var(--exam-accent) 24%, transparent);
 }
 
 /*
@@ -64,7 +128,9 @@
 
 @media (min-width: 640px) {
   [data-exam-question] {
-    padding: 0.875rem 1.25rem 0.75rem;
+    --card-px: 1.25rem;
+    --card-pt: 0.875rem;
+    --card-pb: 0.875rem;
   }
 }
 
@@ -79,20 +145,8 @@
 }
 
 @keyframes exam-card-target {
-  0%, 30% { box-shadow: inset 0 0 0 1px var(--exam-card-ring), 0 0 0 2px color-mix(in oklch, var(--foreground) 22%, transparent); }
-  100% { box-shadow: inset 0 0 0 1px var(--exam-card-ring), 0 0 0 2px transparent; }
-}
-
-/*
- * Perforations: a dashed rule tears the header and the footer off the stem,
- * like the sections of an answer sheet. Drawn as a background so the dash
- * length is ours, not the browser's border pattern.
- */
-[data-question-header],
-[data-question-footer] {
-  --rule: linear-gradient(90deg, var(--exam-rule) 0 0.25rem, transparent 0.25rem 0.5rem);
-  background-repeat: repeat-x;
-  background-size: 0.5rem 1px;
+  0%, 30% { box-shadow: inset 0 0 0 1px var(--exam-card-ring), var(--exam-card-shadow), 0 0 0 3px color-mix(in oklch, var(--exam-accent) 35%, transparent); }
+  100% { box-shadow: inset 0 0 0 1px var(--exam-card-ring), var(--exam-card-shadow), 0 0 0 3px transparent; }
 }
 
 /* Container for the option grid's fallback columns. */
@@ -110,16 +164,21 @@
   container: exam-card / inline-size;
 }
 
+/*
+ * The header is a band across the top of the card: a wash of the accent
+ * fading downwards, closed by a tinted hairline.
+ */
 [data-question-header] {
   display: grid;
   grid-template-columns: minmax(0, max-content) minmax(0, 1fr) auto;
   grid-template-areas: 'meta trail actions';
   align-items: start;
   gap: 0.375rem 0.75rem;
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.5rem;
-  background-image: var(--rule);
-  background-position: left bottom;
+  margin: calc(var(--card-pt) * -1) calc(var(--card-px) * -1) 0.875rem;
+  padding: 0.625rem var(--card-px) 0.5625rem;
+  border-radius: var(--exam-card-radius) var(--exam-card-radius) 0 0;
+  background: linear-gradient(180deg, var(--exam-head-from), var(--exam-head-to));
+  box-shadow: inset 0 -1px 0 var(--exam-head-rule);
 }
 
 [data-question-meta] {
@@ -168,9 +227,12 @@
   height: 1.75rem;
   padding-inline: 0.4375rem;
   border-radius: 0.5625rem;
-  background: var(--exam-number-bg);
-  box-shadow: inset 0 0 0 1px var(--exam-number-edge);
-  color: var(--exam-number-fg);
+  background: linear-gradient(155deg, var(--exam-number-from), var(--exam-number-to));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    0 1px 2px color-mix(in oklch, var(--exam-number-to) 35%, transparent),
+    0 4px 10px -4px color-mix(in oklch, var(--exam-number-to) 45%, transparent);
+  color: #fff;
   font-family: var(--font-outfit), var(--font-sans);
   font-size: 0.9375rem;
   font-weight: 600;
@@ -187,9 +249,9 @@
   height: 1.5rem;
   padding-inline: 0.4375rem 0.5625rem;
   border-radius: 0.5rem;
-  box-shadow: inset 0 0 0 1px var(--exam-type-ring);
-  background: var(--exam-type-bg);
-  color: var(--exam-type-fg);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--exam-accent) 22%, transparent);
+  background: color-mix(in oklch, var(--exam-accent) 9%, transparent);
+  color: var(--exam-accent-ink);
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1;
@@ -203,7 +265,7 @@
   width: 0.8125rem;
   height: 0.8125rem;
   background: currentColor;
-  opacity: 0.75;
+  opacity: 0.9;
   mask: var(--type-icon) center / contain no-repeat;
 }
 
@@ -220,7 +282,7 @@
   align-items: center;
   gap: 0.375rem;
   margin-inline-start: 0.125rem;
-  color: var(--muted-foreground);
+  color: color-mix(in oklch, var(--exam-accent-ink) 75%, var(--muted-foreground));
   font-weight: 560;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
@@ -230,7 +292,7 @@
   content: '';
   width: 1px;
   height: 0.6875rem;
-  background: var(--exam-type-ring);
+  background: color-mix(in oklch, var(--exam-accent) 30%, transparent);
 }
 
 [data-question-actions] {
@@ -363,7 +425,7 @@
   width: 0.9375rem;
   height: 0.9375rem;
   margin-inline-end: 0.4375rem;
-  background: var(--exam-source-accent);
+  background: color-mix(in oklch, var(--exam-accent) 60%, var(--muted-foreground));
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7v14'/%3E%3Cpath d='M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
@@ -451,15 +513,16 @@
   background: var(--tag-color, var(--muted-foreground));
 }
 
-[data-tag-color='gray'] { --tag-color: oklch(0.62 0 0); }
-[data-tag-color='red'] { --tag-color: oklch(0.63 0.2 25); }
-[data-tag-color='orange'] { --tag-color: oklch(0.7 0.17 50); }
-[data-tag-color='amber'] { --tag-color: oklch(0.78 0.16 80); }
-[data-tag-color='green'] { --tag-color: oklch(0.66 0.16 150); }
-[data-tag-color='teal'] { --tag-color: oklch(0.66 0.11 195); }
-[data-tag-color='blue'] { --tag-color: oklch(0.6 0.17 255); }
-[data-tag-color='violet'] { --tag-color: oklch(0.6 0.19 295); }
-[data-tag-color='pink'] { --tag-color: oklch(0.66 0.19 350); }
+/* One lightness and chroma band, so the dots read as a set rather than a rainbow. */
+[data-tag-color='gray'] { --tag-color: oklch(0.64 0.01 260); }
+[data-tag-color='red'] { --tag-color: oklch(0.64 0.17 22); }
+[data-tag-color='orange'] { --tag-color: oklch(0.7 0.15 50); }
+[data-tag-color='amber'] { --tag-color: oklch(0.77 0.14 80); }
+[data-tag-color='green'] { --tag-color: oklch(0.67 0.14 155); }
+[data-tag-color='teal'] { --tag-color: oklch(0.68 0.1 195); }
+[data-tag-color='blue'] { --tag-color: oklch(0.63 0.15 252); }
+[data-tag-color='violet'] { --tag-color: oklch(0.62 0.16 295); }
+[data-tag-color='pink'] { --tag-color: oklch(0.67 0.16 350); }
 
 [data-user-tag] {
   animation: exam-tag-in 220ms var(--ui-ease);
@@ -519,7 +582,8 @@
 
 @media (hover: hover) {
   :is([data-exam-choice-option], [data-boolean-option])[data-feedback='idle']:not([aria-disabled='true']):hover {
-    --tile-ring: var(--exam-choice-outline-hover);
+    --tile-ring: color-mix(in oklch, var(--exam-accent) 42%, transparent);
+    --tile-bg-hover: color-mix(in oklch, var(--exam-accent) 3%, transparent);
   }
 }
 
@@ -570,8 +634,8 @@
 
 @media (hover: hover) {
   [data-exam-choice-option]:not([aria-disabled='true'])[data-feedback='idle']:hover [data-choice-marker] {
-    background: var(--exam-marker-hover);
-    color: var(--foreground);
+    background: color-mix(in oklch, var(--exam-accent) 14%, transparent);
+    color: var(--exam-accent-ink);
   }
 }
 
@@ -652,15 +716,16 @@
   color: color-mix(in oklch, var(--tone) var(--exam-tone-ink), var(--foreground));
 }
 
-/* While answering: the picked option is the one solid thing on the card. */
+/* While answering: the picked option is the one solid thing on the card, in its accent. */
 [data-exam-choice-option][data-feedback='selected'] {
-  --tile-ring: var(--exam-choice-ring-strong);
+  --tile-ring: color-mix(in oklch, var(--exam-accent) 78%, transparent);
   --tile-ring-width: 1.5px;
+  --reveal-color: color-mix(in oklch, var(--exam-accent) 9%, transparent);
 }
 [data-feedback='selected'] [data-choice-marker] {
-  background: var(--foreground);
-  box-shadow: none;
-  color: var(--background);
+  background: linear-gradient(155deg, var(--exam-number-from), var(--exam-number-to));
+  box-shadow: 0 2px 6px -2px color-mix(in oklch, var(--exam-number-to) 60%, transparent);
+  color: #fff;
 }
 
 /* Options not involved in the result recede. */
@@ -869,8 +934,8 @@
 
 @media (hover: hover) {
   [data-boolean-option][data-feedback='idle']:not([aria-disabled='true']):hover [data-boolean-glyph] {
-    background: var(--exam-marker-hover);
-    color: var(--foreground);
+    background: color-mix(in oklch, var(--exam-accent) 14%, transparent);
+    color: var(--exam-accent-ink);
   }
 }
 
@@ -904,9 +969,9 @@
 
 input[data-question-blank]:focus-visible,
 input[data-question-blank][data-active] {
-  --blank-line: var(--foreground);
+  --blank-line: var(--exam-accent);
   background: var(--ui-panel);
-  box-shadow: inset 0 -2px 0 var(--blank-line), 0 0 0 3px color-mix(in oklch, var(--ring) 35%, transparent);
+  box-shadow: inset 0 -2px 0 var(--blank-line), inset 0 0 0 1px color-mix(in oklch, var(--exam-accent) 30%, transparent), 0 0 0 3px color-mix(in oklch, var(--exam-accent) 18%, transparent);
 }
 
 [data-question-blank][data-kind='math'] {
@@ -957,8 +1022,8 @@ span[data-question-blank][data-kind='math'] {
   height: 1.125rem;
   margin-inline-end: 0.25rem;
   border-radius: 999px;
-  background: var(--ui-fill-strong);
-  color: var(--muted-foreground);
+  background: color-mix(in oklch, var(--exam-accent) 13%, transparent);
+  color: var(--exam-accent-ink);
   font-family: var(--font-outfit), var(--font-sans);
   font-size: 0.6875rem;
   font-weight: 600;
@@ -1000,10 +1065,18 @@ span[data-question-blank][data-kind='math'] {
   align-items: center;
   gap: 0.625rem 0.75rem;
   min-height: 2rem;
-  margin-top: 0.75rem;
-  padding-top: 0.5rem;
-  background-image: var(--rule);
-  background-position: left top;
+  /* A quiet band across the bottom of the card, under a hairline. */
+  margin: 1rem calc(var(--card-px) * -1) calc(var(--card-pb) * -1);
+  padding: 0.5625rem var(--card-px) 0.625rem;
+  border-radius: 0 0 var(--exam-card-radius) var(--exam-card-radius);
+  background: var(--exam-foot-bg);
+  box-shadow: inset 0 1px 0 var(--exam-foot-rule);
+}
+
+/* A note under the footer closes the card instead. */
+[data-question-footer]:not(:last-child) {
+  margin-bottom: 0;
+  border-radius: 0;
 }
 
 /* A single-answer question without a solution: nothing to show yet. */
@@ -1025,6 +1098,21 @@ span[data-question-blank][data-kind='math'] {
   [data-submit-hint] {
     display: none;
   }
+}
+
+/* Submit takes the card's accent. */
+[data-submit-answer]:not(:disabled) {
+  background: linear-gradient(160deg, var(--exam-accent), var(--exam-accent-deep));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%), 0 4px 12px -6px color-mix(in oklch, var(--exam-accent-deep) 70%, transparent);
+  color: var(--exam-accent-on);
+}
+@media (hover: hover) {
+  [data-submit-answer]:not(:disabled):hover {
+    background: linear-gradient(160deg, var(--exam-accent-deep), var(--exam-accent-deep));
+  }
+}
+.dark [data-submit-answer]:not(:disabled) {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 20%);
 }
 
 /* An empty answer: the submit button waits as a quiet outline rather than a grey block. */
@@ -1279,26 +1367,59 @@ span[data-question-blank][data-kind='math'] {
   font-weight: 600;
 }
 
-/* "正确答案 D" beside the grade. */
+/*
+ * "正确答案 D" beside the grade: the key on a pale green slip,
+ * set in its own face (letters, typeset maths or KaTeX), never bolded.
+ */
 [data-result-key] {
   display: inline-flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: 0.375rem;
+  min-width: 0;
+  max-width: 100%;
   font-size: 0.8125rem;
   color: var(--muted-foreground);
 }
-[data-result-key] > span {
+[data-result-key] > [data-key-text] {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.875rem;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 2rem;
+  padding: 0.1875rem 0.75rem;
+  border-radius: 0.625rem;
+  background: color-mix(in oklch, var(--exam-tone-correct) 7%, var(--ui-panel));
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--exam-tone-correct) 30%, transparent);
+  color: var(--foreground);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  overflow-x: auto;
+}
+[data-key-blank] {
   display: inline-flex;
   align-items: center;
-  min-height: 1.75rem;
-  padding: 0.125rem 0.625rem;
-  border-radius: 0.625rem;
-  background: color-mix(in oklch, var(--exam-tone-correct) 9%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--exam-tone-correct) 22%, transparent);
-  font-size: 0.9375rem;
+  gap: 0.375rem;
+  min-width: 0;
 }
-[data-result-key] { align-items: center; }
+[data-key-badge] {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.0625rem;
+  height: 1.0625rem;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--exam-tone-correct) 16%, transparent);
+  color: color-mix(in oklch, var(--exam-tone-correct) 85%, var(--foreground));
+  font-family: var(--font-outfit), var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 650;
+  line-height: 1;
+}
+[data-result-key] [data-math-preview] { font-size: 1.0625rem; }
+[data-result-key] [data-tex-answer] .katex { font-size: 1.05em; }
 
 @media (prefers-reduced-motion: no-preference) {
   [data-result-pill] { animation: exam-pill-in 320ms var(--ui-ease); }
@@ -1706,11 +1827,28 @@ sub > [data-key-box] { border-width: 1px; }
 
 /* ------------------------------------------------------- maths rendering */
 
+/*
+ * KaTeX's faces come in one weight: a bold parent would make the browser
+ * smear a fake bold over them, so typeset maths always sets its own.
+ */
 [data-math-preview] {
   font-family: KaTeX_Main, 'Times New Roman', var(--font-serif), serif;
   font-size: 1.125rem;
+  font-weight: 400;
+  font-synthesis: none;
   line-height: 1.3;
 }
+
+/* A LaTeX key of a text blank, typeset by KaTeX at compile time. */
+[data-tex-answer] {
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  font-weight: 400;
+  vertical-align: middle;
+}
+[data-tex-answer] .katex { white-space: nowrap; }
 
 [data-math-preview] var {
   font-family: KaTeX_Math, KaTeX_Main, 'Times New Roman', serif;

@@ -104,9 +104,14 @@ export function ManualGradePanel({ question }: { question: QuestionState }) {
   );
 }
 
-/** The key, typeset like the stem. */
-export function BlankKey({ blank }: { blank: BlankSpec }) {
-  return blank.kind === 'math' ? <MathPreview text={blank.answer} /> : <>{blank.answer}</>;
+/**
+ * The key, typeset like the stem: maths keys by MathPreview, LaTeX keys of
+ * text blanks from their compile-time KaTeX HTML, other text as written.
+ */
+export function BlankKey({ blank, className }: { blank: BlankSpec; className?: string }) {
+  if (blank.kind === 'math') return <MathPreview text={blank.answer} className={className} />;
+  if (blank.html) return <span data-tex-answer="" className={className} dangerouslySetInnerHTML={{ __html: blank.html }} />;
+  return <span className={className}>{blank.answer}</span>;
 }
 
 /**

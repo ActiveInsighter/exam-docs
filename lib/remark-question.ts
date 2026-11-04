@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { renderTexAnswer } from './blank-answer-tex';
 import { parseMath } from './math-expression';
 
 /*
@@ -7,7 +8,8 @@ import { parseMath } from './math-expression';
  *  1. strips heading semantics inside questions (no TOC entries),
  *  2. validates the authored structure and fails the build on mistakes,
  *  3. adds the resolved display number (`index`) and a content hash
- *     (`revision`) to every question.
+ *     (`revision`) to every question,
+ *  4. typesets LaTeX keys of text blanks (`answerHtml`, see blank-answer-tex.ts).
  *
  * It works on the MDX syntax tree, so answers are read from the structured
  * props (`correct`, `answer`, `type`) and never parsed out of prose.
@@ -340,6 +342,20 @@ function assignDisplay(questions: QuestionNode[], source: string) {
   }
 }
 
+/** Typeset LaTeX keys of text blanks, so the answer key shows the formula. */
+function typesetTexAnswers(questions: QuestionNode[]) {
+  for (const question of questions) {
+    if (readAttribute(question, 'type').text !== 'blank') continue;
+    for (const blank of collect(question).blanks) {
+      if (readAttribute(blank, 'kind').text === 'math') continue;
+      const answer = readAttribute(blank, 'answer');
+      if (!answer.literal || !answer.text) continue;
+      const html = renderTexAnswer(answer.text);
+      if (html) setAttribute(blank, 'answerHtml', html);
+    }
+  }
+}
+
 export function remarkQuestion() {
   return (tree: QuestionNode, file?: { path?: string; value?: unknown }) => {
     stripHeadings(tree, false);
@@ -354,6 +370,8 @@ export function remarkQuestion() {
       throw new Error(`${location} 中的题目写法有误：\n${lines.join('\n')}`);
     }
 
-    assignDisplay(findQuestions(tree), typeof file?.value === 'string' ? file.value : '');
+    const questions = findQuestions(tree);
+    assignDisplay(questions, typeof file?.value === 'string' ? file.value : '');
+    typesetTexAnswers(questions);
   };
 }
