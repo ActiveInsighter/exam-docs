@@ -86,6 +86,8 @@ export function ActivityCalendar({ activity, weeks = 52 }: { activity: ReadonlyM
     if (!target || !box) { setHover(null); return; }
     const cell = data.cells[Number(target.dataset.index)];
     if (!cell || cell.future) { setHover(null); return; }
+    // Moving within the same box changes nothing: skip re-rendering the year of boxes.
+    if (hover?.cell.key === cell.key) return;
     const rect = target.getBoundingClientRect();
     setHover({ cell, x: rect.left + rect.width / 2 - box.left, y: rect.top - box.top });
   };

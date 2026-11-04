@@ -144,7 +144,7 @@ function AccountTab({ onSignIn }: { onSignIn(): void }) {
               <button type="button" className={styles.button} onClick={() => { void account.signOut().catch(() => undefined); }}>
                 <LogOutIcon aria-hidden />退出登录
               </button>
-            ) : (
+            ) : account.phase === 'disabled' ? undefined : (
               <button type="button" className={clsx(styles.button, styles.primary)} disabled={account.phase !== 'guest'} onClick={onSignIn}>
                 <LogInIcon aria-hidden />登录 / 注册
               </button>
