@@ -1,15 +1,13 @@
 ---
-title: "第二节 离散型随机变量｜分布律、二项泊松模型与分层条件分布"
-description: "参照真题的离散分布归一化、二项与泊松模型、条件分布、混合抽样与分布律构造命题方式，筛选统计计算、概率推断和模型迁移兼备的练习原题。"
+title: "2. 离散型随机变量"
+description: "18道离散型随机变量练习已全部重写：归一化、几何与二项分布、泊松模型、抽样计数及条件分布。"
 ---
 
-# 第二节 离散型随机变量｜分布律、二项泊松模型与分层条件分布
+本节收录 **18 道**离散型随机变量分类练习，现已**全部重写答案与解析**。围绕分布律的归一化、泊松与二项模型、几何等待时间、随机投放、两阶段抽样和条件期望，采用“答案先行—模型识别—逐步推导—要点提醒”的统一结构。保留原题、结构化选项及媒体资源。
 
-参照「真题核心题目」同名小节的考点、题型与命题风格精选 **18 道模拟与练习原题**；所有 Question 组件连同题干、选项、答案、解析、公式及嵌套结构均保留原文。
+## 考点一｜分布律归一化、几何分布与二项计数
 
-## 考点1：离散分布归一化、几何尾概率与二项模型
-
-<Question id="selected-1103-math-328a62-002" type="single">
+<Question id="selected-1103-math-328a62-002" type="single" tags="科目:概率论与数理统计, 考点:分布律归一化">
 
 设离散型随机变量 $ X$ 的概率分布为 $ P\{X=i\}=cp^i$，$ i=1,2,\cdots$，其中 $ c>0$ 是常数，则
 
@@ -20,30 +18,34 @@ description: "参照真题的离散分布归一化、二项与泊松模型、条
 
 <Solution>
 
-概率分布必须满足所有概率之和为 $ 1$。由于
+**参考答案：**选 **B**，$\boxed{p=\frac1{c+1}}$。
+
+### 一、由归一化列方程
+
+题给 $P(X=i)=cp^i$，$i=1,2,\ldots$，概率必须非负、总和必须等于1。因 $c>0$ 且 $P(X=1),P(X=2),\ldots$ 均要非负，并且为无限级数，合法的非退化解须满足 $0<p<1$。因此
 
 $$
- \sum_{i=1}^{\infty}P\{X=i\}
-=c\sum_{i=1}^{\infty}p^i=1,
+\begin{aligned}
+1=\sum_{i=1}^{\infty}P(X=i)
+&=c\sum_{i=1}^{\infty}p^i\\
+&=c\frac{p}{1-p}.
+\end{aligned}
 $$
 
-该等比级数收敛要求 $ 0<p<1$，并且
+### 二、解方程并检验
 
 $$
- c\frac{p}{1-p}=1.
+cp=1-p\quad\Longrightarrow\quad p(c+1)=1
+\quad\Longrightarrow\quad \boxed{p=\frac1{c+1}}.
 $$
 
-解得
+$ c>0$ 保证 $c+1>1$，所以 $0<1/(c+1)<1$，代回原级数确有总和1。于是该取值**既必要又充分**。
 
-$$
- cp=1-p,
-\qquad
-p(c+1)=1,
-\qquad
-p=\frac1{c+1}.
-$$
+<Callout type="warn" title="为什么不能选 D">
 
-因为 $ c>0$，所以所得 $ p$ 自动满足 $ 0<p<1$。故选（B）。选项（D）只给出了收敛条件，没有满足概率总和为 $ 1$ 的归一化条件。
+$0<p<1$ 只是等比级数收敛的条件，不等于概率已归一化。给定 $c$ 后，$p$ 被归一化方程唯一确定。
+
+</Callout>
 
 </Solution>
 
@@ -61,70 +63,89 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**$\boxed{P\{X\text{ 能被 }3\text{ 整除}\}=\frac17}$。
+
+### 一、先确定分布中的常数 $a$
+
+对每个 $k\ge1$ 都应有 $a^{-k}\ge0$，并且总概率为1。由于是正项无限等比级数，必须 $a>1$。于是
 
 $$
-\boxed{\frac17}
+1=\sum_{k=1}^{\infty}\frac1{a^k}
+=\frac{1/a}{1-1/a}=\frac1{a-1},
 $$
 
-**解析：** 由概率归一性，
+解得 $\boxed{a=2}$，所以 $P(X=k)=2^{-k}$，$k=1,2,\ldots$。
+
+### 二、将“能被3整除”改写成等差序号
+
+能被3整除的取值只能是 $3,6,9,\ldots,3j,\ldots$，这些事件互斥，因此
 
 $$
-\sum_{k=1}^{\infty}\frac1{a^k}=1.
-$$
-
-根据等比级数求和公式，
-
-$$
-\frac{1/a}{1-1/a}=1,
-$$
-
-解得
-
-$$
-a=2.
-$$
-
-因此
-
-$$
-P\{X\text{ 可以被 }3\text{ 整除}\}
-=\sum_{i=1}^{\infty}\frac1{2^{3i}}
+\begin{aligned}
+P\{X\text{ 能被 }3\text{ 整除}\}
+&=\sum_{j=1}^{\infty}P(X=3j)\\
+&=\sum_{j=1}^{\infty}2^{-3j}
 =\frac{1/8}{1-1/8}
-=\frac17.
+=\boxed{\frac17}.
+\end{aligned}
 $$
+
+<Callout type="idea" title="同类推广">
+
+若 $P(X=k)=(1-q)q^{k-1}$，$k\ge1$，则 $P(m\text{ 整除 }X)=\frac{(1-q)q^{m-1}}{1-q^m}$。本题 $q=1/2$、$m=3$，立即得到 $1/7$。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3db062-026" type="blank">
+<Question id="selected-1103-math-3db062-026" type="blank" tags="科目:概率论与数理统计, 考点:几何分布与偶数概率">
 
 在伯努利试验中，设事件发生的概率 $p=\frac{3}{4}$，$X$ 表示首次发生所需试验次数，$n$ 为正整数，则
 $\sum_{n=1}^{\infty} P\{X=2n\}=$ <Blank answer="((1)/(5))" kind="math" />。
 
 <Solution>
 
-**答案：** $\frac{1}{5}$
+**参考答案：**$\boxed{\displaystyle\sum_{n=1}^{\infty}P(X=2n)=\frac15}$。
 
-**解析：** 依题设，
+### 一、识别“首次成功”的几何分布
+
+一次试验成功概率 $p=3/4$，失败概率 $q=1-p=1/4$。首次成功出现在第 $k$ 次，意味着先连续失败 $k-1$ 次、随后成功，因此
+
 $$
-P\{X=k\}=(1-p)^{k-1}p=pq^{k-1}\left(q=1-p=\frac{1}{4}\right),
+P(X=k)=q^{k-1}p,\qquad k=1,2,\ldots.
 $$
-故
+
+### 二、将全部偶数次首次成功概率求和
 
 $$
 \begin{aligned}
-\sum_{n=1}^{\infty}P\{X=2n\} &= pq+pq^3+\cdots+pq^{2n-1}+\cdots \\
-&= pq\cdot\frac{1}{1-q^2}=\frac{q}{1+q}=\frac{1}{5}.
+P(X\text{ 为偶数})
+&=\sum_{n=1}^{\infty}pq^{2n-1}\\
+&=pq\bigl(1+q^2+q^4+\cdots\bigr)\\
+&=\frac{pq}{1-q^2}
+=\frac{q}{1+q}
+=\frac{1/4}{1+1/4}
+=\boxed{\frac15}.
 \end{aligned}
 $$
+
+### 三、用递推关系验证（可选）
+
+设 $r=P(X\text{ 为偶数})$。要首次成功于偶数次，可先失败一次、第二次成功（概率 $qp$）；或者前两次都失败（概率 $q^2$），之后又回到原问题。因此 $r=qp+q^2r$，解得 $r=qp/(1-q^2)=1/5$。
+
+<Callout type="warn" title="注意和式的含义">
+
+$\sum_{n\ge1}P(X=2n)$ 不是 $P(X=2n)$ 在某个固定 $n$ 下的值，而是**全部偶数取值的概率之和**。这与 $P(X\text{ 为偶数})$ 是同一个事件。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3c342e-002" type="single">
+<Question id="selected-1103-math-3c342e-002" type="single" tags="科目:概率论与数理统计, 考点:二项分布与补事件">
 
 设随机变量$X \sim B(n,\frac{1}{3})$，$Y \sim B(2n,\frac{1}{3})$，若$P\{X \geq 1\}=\frac{5}{9}$，则$P\{Y \geq 1\}=$( )
 
@@ -135,28 +156,49 @@ $$
 
 <Solution>
 
-由$X\sim B(n,\frac13)$，
-$$
- P\{X\ge1\}=1-P\{X=0\}=1-\left(\frac23\right)^n=\frac59.
-$$
-故
-$$
- \left(\frac23\right)^n=\frac49=\left(\frac23\right)^2,
-$$
-从而$n=2$。
+**参考答案：**选 **D**，$\boxed{P(Y\ge1)=\frac{65}{81}}$。
 
-于是$Y\sim B(4,\frac13)$，因此
+### 一、对“至少一次”先取补事件
+
+若 $X\sim B(n,1/3)$，则一次试验“未成功”的概率是 $2/3$，故
+
 $$
- P\{Y\ge1\}=1-P\{Y=0\}=1-\left(\frac23\right)^4
-=1-\frac{16}{81}=\frac{65}{81}.
+P(X\ge1)=1-P(X=0)=1-\left(\frac23\right)^n.
 $$
-故选D。
+
+代入题设 $P(X\ge1)=5/9$：
+
+$$
+\left(\frac23\right)^n=1-\frac59=\frac49
+=\left(\frac23\right)^2.
+$$
+
+由 $n$ 是正整数得到 $\boxed{n=2}$。
+
+### 二、对 $Y$ 再求一次补事件
+
+题设 $Y\sim B(2n,1/3)=B(4,1/3)$，因此
+
+$$
+\begin{aligned}
+P(Y\ge1)&=1-P(Y=0)\\
+&=1-\left(\frac23\right)^4
+=1-\frac{16}{81}
+=\boxed{\frac{65}{81}}.
+\end{aligned}
+$$
+
+<Callout type="idea" title="无需先求 $n$ 的快捷法">
+
+由于 $2n$ 是 $n$ 的两倍，$P(Y=0)=((2/3)^n)^2=[P(X=0)]^2=(4/9)^2$，所以直接有 $P(Y\ge1)=1-(4/9)^2=65/81$。此等式只利用**两个二项分布的参数关系**，不需要假设随机变量 $X,Y$ 本身相互独立。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3c342e-004" type="single">
+<Question id="selected-1103-math-3c342e-004" type="single" tags="科目:概率论与数理统计, 考点:二项计数合并">
 
 随机试验$E$有三种两两不相容的结果$A_1,A_2,A_3$，且三种结果发生的概率均为$\frac{1}{3}$。将试验$E$独立重复做2次，$X$表示2次试验中结果$A_1$发生的次数，$Y$表示2次试验中结果$A_2$发生的次数，则$X+Y$服从( )
 
@@ -167,110 +209,123 @@ $$
 
 <Solution>
 
-每次试验中，事件“出现$A_1$或$A_2$”的概率为
-$$
- P(A_1\cup A_2)=P(A_1)+P(A_2)=\frac23,
-$$
-而$X+Y$恰好表示2次独立试验中“出现$A_1$或$A_2$”的次数。
+**参考答案：**选 **B**，$\boxed{X+Y\sim B(2,\frac23)}$。
 
-因此
+### 一、将题目中的两个计数合并
+
+一次试验只能出现三种两两不相容的结果之一，故“本次出现 $A_1$ 或 $A_2$”的成功概率是
+
 $$
- X+Y\sim B\left(2,\frac23\right).
+P(A_1\cup A_2)=P(A_1)+P(A_2)=\frac13+\frac13=\frac23.
 $$
-故选B。
+
+记第 $j$ 次试验出现 $A_1$ 或 $A_2$ 的指示变量为 $I_j$，则 $I_j\sim B(1,2/3)$。因两次重复试验**独立**，$I_1,I_2$ 相互独立。
+
+### 二、把 $X+Y$ 看成两次成功的总数
+
+在每次试验中，$A_1$ 与 $A_2$ 不能同时出现，所以两者的出现次数相加恰等于“出现 $A_1$ 或 $A_2$”的次数。于是
+
+$$
+X+Y=I_1+I_2
+\quad\Longrightarrow\quad
+\boxed{X+Y\sim B\!\left(2,\frac23\right)}.
+$$
+
+例如由二项分布律，$P(X+Y=k)=\binom2k(2/3)^k(1/3)^{2-k}$，$k=0,1,2$。
+
+<Callout type="warn" title="$X$ 与 $Y$ 不是独立二项计数">
+
+虽然分别看 $X\sim B(2,1/3)$、$Y\sim B(2,1/3)$，但同一次试验中的 $A_1,A_2$ 互斥，两个计数之间存在依赖。若直接把它们当作独立二项变量相加，会错误地认为试验次数为4。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-328a62-027" type="essay">
+<Question id="selected-1103-math-328a62-027" type="essay" tags="科目:概率论与数理统计, 考点:截断几何分布">
 
 某个人参加跳高项目的及格选拔赛，规定一旦跳过指定高度就被认为及格而被入选，但是限制每人最多只能跳6次，若6次均未过竿，则认定其为落选。如果一位参试者在试跳指定高度的过竿率为 $ 0.6$，求他在测试中所跳次数的概率分布。
 
 <Solution>
 
-**答案：**
-
-设测试中实际试跳次数为 $ X$，则
-
+**参考答案：**设 $X$ 表示选拔赛中实际试跳次数。记单次过竿概率 $p=0.6$、不过竿概率 $q=0.4$，则
 
 $$
- P\{X=k\}=\begin{cases}
+\boxed{P(X=k)=\begin{cases}
 0.6(0.4)^{k-1},&k=1,2,3,4,5,\\[1mm]
-(0.4)^5,&k=6,\\[1mm]
+(0.4)^5,&k=6,\\
 0,&\text{其他}.
-\end{cases}
+\end{cases}}
 $$
 
-即
+分布律为
+
+| $X$ | 1 | 2 | 3 | 4 | 5 | 6 |
+| :--: | --: | --: | --: | --: | --: | --: |
+| $P(X=k)$ | $0.6$ | $0.24$ | $0.096$ | $0.0384$ | $0.01536$ | $0.01024$ |
+
+### 一、写出停止规则
+
+试跳会在**首次过竿**时立即停止，但无论是否成功，达到第6次后也必须停止。默认各次试跳独立且成功率均为 $0.6$；否则单给一次过竿率无法确定多次试跳的联合概率。
+
+### 二、区分前五次停止和第六次被迫停止
+
+<Steps>
+<Step>
+
+  ### 当 $1\le k\le5$
+
+  恰好跳 $k$ 次的充要条件是前 $k-1$ 次全失败、第 $k$ 次成功，因此
+
+
 
 $$
- \begin{array}{c|cccccc}
-X&1&2&3&4&5&6\\ \hline
-P&0.6&0.24&0.096&0.0384&0.01536&0.01024
-\end{array}
+P(X=k)=q^{k-1}p=(0.4)^{k-1}\times0.6.
 $$
 
-**解析：** 每次试跳过竿的概率为
+</Step>
+<Step>
+
+  ### 当 $k=6$
+
+  **只要前五次全部失败，就一定要进行第六次**。最后一次成功和失败都要计入 $X=6$：
+
+
 
 $$
- p=0.6,
+\begin{aligned}
+  P(X=6)&=q^5p+q^6\\
+  &=q^5(p+q)=q^5=(0.4)^5=0.01024.
+  \end{aligned}
 $$
 
-未过竿的概率为
+</Step>
+<Step>
+
+  ### 核对概率总和
+
+
 
 $$
- q=1-p=0.4.
+\sum_{k=1}^{5}q^{k-1}p+q^5
+  =p\frac{1-q^5}{1-q}+q^5=1.
 $$
 
-默认各次试跳结果相互独立且单次过竿率保持不变。
+</Step>
+</Steps>
 
-对于 $ k=1,2,3,4,5$，恰好试跳 $ k$ 次意味着前 $ k-1$ 次均未过竿，第 $ k$ 次过竿，因此
+<Callout type="warn" title="最关键的边界陷阱">
 
-$$
- P\{X=k\}=q^{k-1}p=0.6(0.4)^{k-1}.
-$$
+本题不是普通几何分布，因为试验次数被截断在6。尤其不能写 $P(X=6)=q^5p$；那只是“第六次成功”的概率，漏掉了“第六次失败而落选”的 $q^6$。
 
-分别为
-
-$$
- \begin{aligned}
-P\{X=1\}&=0.6,\\
-P\{X=2\}&=0.4\times0.6=0.24,\\
-P\{X=3\}&=(0.4)^2\times0.6=0.096,\\
-P\{X=4\}&=(0.4)^3\times0.6=0.0384,\\
-P\{X=5\}&=(0.4)^4\times0.6=0.01536.
-\end{aligned}
-$$
-
-对于 $ X=6$，只要前五次均未过竿，第六次就一定会进行。第六次无论过竿还是未过竿，实际试跳次数均为 $ 6$，所以
-
-$$
- \begin{aligned}
-P\{X=6\}
-&=P\{\text{前五次均未过竿}\}\\
-&=q^5\\
-&=(0.4)^5\\
-&=0.01024.
-\end{aligned}
-$$
-
-注意不能将 $ P\{X=6\}$ 只写成 $ q^5p$，因为“第六次也未过竿”的情形同样进行了六次试跳，也应计入 $ X=6$。
-
-最后检验：
-
-$$
- \sum_{k=1}^{5}q^{k-1}p+q^5
-=p\frac{1-q^5}{1-q}+q^5
-=1-q^5+q^5
-=1.
-$$
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：泊松分布、奇偶项、可加性与近似估计
+## 考点二｜泊松分布的可加性与近似计算
 
 <Question id="selected-1103-classified-1031-liyongle-2027-s2-q09" type="single" points={5} tags="来源:李永乐六套卷, 考点:泊松分布的可加性与数字特征, 难度:基础">
 
@@ -289,30 +344,49 @@ $$
 
 <Solution>
 
-**答案：B，$\boxed{1-2e^{-1}}$。**
+**参考答案：**选 **B**，$\boxed{P(X+Y\ge2)=1-2e^{-1}}$。
 
-令 $Z=X+Y$。由独立泊松变量的可加性，$Z\sim P(\lambda)$，其中 $\lambda=\lambda_1+\lambda_2>0$，故
+### 一、利用泊松分布的可加性
 
-$$
-EZ=\lambda,\qquad DZ=\lambda,\qquad EZ^2=DZ+(EZ)^2=\lambda+\lambda^2.
-$$
-
-代入已知条件，得
+因为 $X,Y$ 相互独立，且 $X\sim\mathrm{Poisson}(\lambda_1)$、$Y\sim\mathrm{Poisson}(\lambda_2)$，所以
 
 $$
-\lambda^2+\lambda-2\lambda=\lambda(\lambda-1)=0.
+Z=X+Y\sim\mathrm{Poisson}(\lambda),\qquad
+\lambda=\lambda_1+\lambda_2>0.
 $$
 
-因泊松分布的参数为正，$\lambda=1$。因此
+泊松变量满足 $E(Z)=D(Z)=\lambda$，于是
+
+$$
+E(Z^2)=D(Z)+[E(Z)]^2=\lambda+\lambda^2.
+$$
+
+### 二、由题给矩条件解出参数
 
 $$
 \begin{aligned}
-P\{X+Y\ge2\}
-&=1-P(Z=0)-P(Z=1)\\
-&=1-e^{-1}-e^{-1}\\
+E(Z^2)-2E(Z)&=(\lambda+\lambda^2)-2\lambda\\
+&=\lambda(\lambda-1)=0.
+\end{aligned}
+$$
+
+由于泊松参数 $\lambda>0$，排除 $\lambda=0$，得到 $\boxed{\lambda=1}$。
+
+### 三、用补事件计算尾概率
+
+$$
+\begin{aligned}
+P(Z\ge2)&=1-P(Z=0)-P(Z=1)\\
+&=1-e^{-1}-1\cdot e^{-1}\\
 &=\boxed{1-2e^{-1}}.
 \end{aligned}
 $$
+
+<Callout type="idea" title="二阶阶乘矩的另一种理解">
+
+$E[Z(Z-1)]=\lambda^2$，而 $Z^2-2Z=Z(Z-1)-Z$，所以题设也可直接写成 $\lambda^2-\lambda=0$。这在泊松分布的矩条件题中非常常用。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -328,24 +402,39 @@ $$
 
 <Solution>
 
-**答案：B，$\boxed{13e^{-4}}$。**
+**参考答案：**选 **B**，$\boxed{P(T\le2)\approx13e^{-4}}$。
 
-**过程：**$T\sim B(100,0.04)$，由 $\lambda=np=100\times0.04=4$，采用泊松近似 $T\approx P(4)$，于是
+### 一、先确定精确分布
+
+样本来自 $B(1,0.04)$，即每个 $X_i$ 都是成功概率 $0.04$ 的独立伯努利变量，因此
+
+$$
+T=\sum_{i=1}^{100}X_i\sim B(100,0.04).
+$$
+
+题目要求使用**泊松近似**，其参数取 $\lambda=np=100\times0.04=4$，故可用 $Z\sim\mathrm{Poisson}(4)$ 来近似 $T$。
+
+### 二、求至多出现两次的概率
 
 $$
 \begin{aligned}
-P(T\le2)&\approx\sum_{k=0}^2\frac{4^ke^{-4}}{k!}\\
-&=e^{-4}\left(1+4+\frac{4^2}{2}\right)
-=\boxed{13e^{-4}}.
+P(T\le2)&\approx P(Z\le2)\\
+&=\sum_{k=0}^2\frac{4^k}{k!}e^{-4}\\
+&=e^{-4}\left(1+4+\frac{16}{2}\right)\\
+&=\boxed{13e^{-4}}.
 \end{aligned}
 $$
 
-注意这只是题目指定的**近似**，并非二项分布的精确概率。
+<Callout type="warn" title="不能把近似值写成严格相等">
+
+精确的二项分布概率是 $\sum_{k=0}^2\binom{100}{k}(0.04)^k(0.96)^{100-k}$。泊松近似的使用条件通常是试验次数较多、单次成功概率较小，且 $np$ 不太大；题目指定采用这种近似，所以答案保留“$\approx$”。
+
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-3c342e-013" type="single">
+<Question id="selected-1103-math-3c342e-013" type="single" tags="科目:概率论与数理统计, 考点:泊松分布的奇偶概率">
 
 设$X$服从参数为$\lambda(\lambda>0)$的泊松分布，$p_1,p_2,p_3$分别是$X$取整数、偶数与奇数的概率，则( )
 
@@ -356,34 +445,78 @@ $$
 
 <Solution>
 
-泊松随机变量只取非负整数，因此
+**参考答案：C，$p_1>p_2>p_3$。** 更具体地，
+
 $$
- p_1=1.
+p_1=1,\qquad p_2=\frac{1+e^{-2\lambda}}2,\qquad p_3=\frac{1-e^{-2\lambda}}2.
 $$
-又利用指数函数展开式，
+
+**核心思路：** 泊松分布只取非负整数；偶数概率与奇数概率分别对应指数级数的偶数项、奇数项。
+
+<Steps>
+<Step>
+
+  ### 先确定三个事件
+
+  泊松分布的概率质量函数为
+
+
+
 $$
- p_2=P\{X\text{为偶数}\}
-=e^{-\lambda}\sum_{k=0}^{\infty}\frac{\lambda^{2k}}{(2k)!}
-=e^{-\lambda}\cosh\lambda
-=\frac{1+e^{-2\lambda}}2,
+P(X=k)=e^{-\lambda}\frac{\lambda^k}{k!},\qquad k=0,1,2,\ldots,\quad\lambda>0.
 $$
+
+  因而 $p_1=P(X\text{取整数})=1$。注意这里的偶数包含 $0$。
+
+</Step>
+<Step>
+
+  ### 利用指数级数拆出奇偶项
+
+  根据 $e^t=\sum_{j=0}^{\infty}t^j/j!$，有
+
+
+
 $$
- p_3=P\{X\text{为奇数}\}
-=e^{-\lambda}\sum_{k=0}^{\infty}\frac{\lambda^{2k+1}}{(2k+1)!}
-=e^{-\lambda}\sinh\lambda
-=\frac{1-e^{-2\lambda}}2.
+\begin{aligned}
+  p_2&=e^{-\lambda}\sum_{k=0}^{\infty}\frac{\lambda^{2k}}{(2k)!}
+      =e^{-\lambda}\frac{e^\lambda+e^{-\lambda}}2
+      =\frac{1+e^{-2\lambda}}2,\\
+  p_3&=e^{-\lambda}\sum_{k=0}^{\infty}\frac{\lambda^{2k+1}}{(2k+1)!}
+      =e^{-\lambda}\frac{e^\lambda-e^{-\lambda}}2
+      =\frac{1-e^{-2\lambda}}2.
+  \end{aligned}
 $$
-因$\lambda>0$，有$e^{-2\lambda}>0$，所以
+
+</Step>
+<Step>
+
+  ### 比较大小
+
+  $\lambda>0$ 使 $0<e^{-2\lambda}<1$，故
+
+
+
 $$
- p_1=1>p_2>p_3.
+p_2-p_3=e^{-2\lambda}>0,\qquad 1-p_2=p_3>0.
 $$
-故选C。
+
+  于是严格不等式 $1=p_1>p_2>p_3$ 成立。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="秒算技巧：奇偶指示量">
+
+由 $E[(-1)^X]=\exp[\lambda(-1-1)]=e^{-2\lambda}$，再联立 $p_2+p_3=1$、$p_2-p_3=e^{-2\lambda}$，即可直接求得两概率。这里用到的是泊松分布的概率母函数。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3c342e-014" type="single">
+<Question id="selected-1103-math-3c342e-014" type="single" tags="科目:概率论与数理统计, 考点:泊松参数与随机序">
 
 设$X,Y$分别服从参数为$n,m$的泊松分布，且$n>m$，$F_X(x),F_Y(y)$分别是$X,Y$的分布函数，$-\infty<z<+\infty$，则( )
 
@@ -394,58 +527,141 @@ $$
 
 <Solution>
 
-泊松分布关于参数具有随机单调性：参数越大，分布整体越向右移动。
+**参考答案：D，对一切实数 $z$，均有 $F_X(z)\le F_Y(z)$。**
 
-可作如下构造：设
+**核心思路：** 泊松分布的参数越大，随机变量越倾向于取较大的值，因此其分布函数（左侧累积概率）越小。这是**随机序**，并不意味着题给的 $X$、$Y$ 必然满足逐点大小关系。
+
+<Tabs items={['构造法：推荐', '直接比较法']}>
+<Tab value="构造法：推荐">
+
+  令 $Y_0\sim P(m)$、$Z\sim P(n-m)$ 相互独立（由于 $n>m$，第二个参数为正）。泊松分布的可加性给出
+
+
+
 $$
- Y_0\sim P(m),\qquad Z\sim P(n-m),
+X_0=Y_0+Z\sim P(n).
 $$
-且$Y_0,Z$相互独立，则
+
+  因 $Z\ge0$，有 $X_0\ge Y_0$，从而任意实数 $z$ 都满足
+
+
+
 $$
- Y_0+Z\sim P(n).
+\{X_0\le z\}\subseteq\{Y_0\le z\}.
 $$
-因此可以令$X_0=Y_0+Z$，使$X_0\ge Y_0$几乎处处成立。于是对任意实数$z$，
+
+  对两端取概率，并利用 $X_0$ 与 $X$、$Y_0$ 与 $Y$ 的**边缘分布相同**，得到
+
+
+
 $$
- \{X_0\le z\}\subseteq\{Y_0\le z\},
+F_X(z)=P(X_0\le z)\le P(Y_0\le z)=F_Y(z).
 $$
-从而
+
+  该构造只用于比较分布，不是对原来 $X,Y$ 的联合分布作假设。
+
+</Tab>
+<Tab value="直接比较法">
+
+  对 $z<0$，两个分布函数都为 $0$。对 $z\ge0$，设 $k=\lfloor z\rfloor$，考虑
+
+
+
 $$
- F_X(z)=P\{X_0\le z\}\le P\{Y_0\le z\}=F_Y(z).
+H_k(\lambda)=e^{-\lambda}\sum_{j=0}^k\frac{\lambda^j}{j!}.
 $$
-故选D。注意题目并未给定原随机变量$X,Y$之间的联合分布，所以不能由边缘分布直接断言$P\{X\ge Y\}=1$。
+
+  对 $\lambda>0$ 求导并把相邻项错位相消：
+
+
+
+$$
+\begin{aligned}
+  H'_k(\lambda)
+  &=e^{-\lambda}\left(\sum_{j=1}^k\frac{\lambda^{j-1}}{(j-1)!}
+   -\sum_{j=0}^k\frac{\lambda^j}{j!}\right)\\
+  &=-e^{-\lambda}\frac{\lambda^k}{k!}<0.
+  \end{aligned}
+$$
+
+  故 $H_k(n)<H_k(m)$，即 $F_X(z)<F_Y(z)$（$z\ge0$），结论比所选选项更强。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="不要把分布函数的序误写成随机变量的序">
+
+题目没有规定 $X,Y$ 是否独立，更没有规定它们之间的逐点大小关系。$F_X(z)\le F_Y(z)$ 是由**各自分布**决定的；$P(X\ge Y)$ 则取决于**联合分布**，所以 A、B 都无法推出。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3db062-025" type="blank">
+<Question id="selected-1103-math-3db062-025" type="blank" tags="科目:概率论与数理统计, 考点:泊松分布参数识别">
 
 设随机变量 $X$ 服从泊松分布，且 $P\{X=1\}=P\{X=2\}$，则 $P\{X>1\}=$ <Blank answer="1 - 3e^(-2)" kind="math" />。
 
 <Solution>
 
-**答案：** $1 - 3\mathrm{e}^{-2}$
+**参考答案：** $\boxed{1-3e^{-2}}$。
 
-**解析：** 由已知, 有
+**解题过程：**
+
+<Steps>
+<Step>
+
+  ### 由相邻概率相等确定参数
+
+  设 $X\sim P(\lambda)$，按通常定义 $\lambda>0$。泊松分布给出
+
+
 
 $$
-P\{X=k\}=\frac{\lambda^k}{k!}e^{-\lambda}, \lambda>0, k=0,1,2,\cdots
+P(X=1)=\lambda e^{-\lambda},\qquad
+  P(X=2)=\frac{\lambda^2}{2}e^{-\lambda}.
 $$
 
-依题设，$\lambda e^{-\lambda}=\frac{\lambda^2 e^{-\lambda}}{2!}$，解得 $\lambda=2$，$\lambda=0$(舍去)，所以
+  利用已知等式并消去正因子 $\lambda e^{-\lambda}$：
+
+
+
+$$
+1=\frac\lambda2\quad\Longrightarrow\quad \lambda=2.
+$$
+
+</Step>
+<Step>
+
+  ### 对右尾事件取补集
+
+  因 $X$ 只能取 $0,1,2,\ldots$，事件 $\{X>1\}$ 的补事件恰是 $\{X=0\}\cup\{X=1\}$，两者互斥。因此
+
+
 
 $$
 \begin{aligned}
-P\{X>1\} &= 1-P\{X\leqslant 1\} = 1-P\{X=0\}-P\{X=1\} \\
-&= 1-e^{-2}-2e^{-2} = 1-3e^{-2}.
-\end{aligned}
+  P(X>1)&=1-P(X=0)-P(X=1)\\
+        &=1-e^{-2}-2e^{-2}
+         =\boxed{1-3e^{-2}}.
+  \end{aligned}
 $$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="泊松分布相邻概率之比">
+
+对于 $k\ge0$，$P(X=k+1)/P(X=k)=\lambda/(k+1)$。已知两个相邻概率相等时，可直接推出 $\lambda=k+1$；这比先展开求和更快。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点3：抽样计数、随机环境与条件分布的联合建模
+## 考点三｜随机投放与抽样计数、条件分布及混合模型
 
 <Question id="selected-1103-classified-1031-liyongle-2027-s3-q22" type="essay" points={12} tags="来源:李永乐六套卷, 考点:条件分布与协方差, 难度:中等">
 
@@ -461,72 +677,109 @@ $$
 
 <Solution>
 
-**答案：**（1）$\boxed{P(Y=0)=\tfrac38,\ P(Y=1)=\tfrac14,\ P(Y=2)=\tfrac38}$；（2）$\boxed{\rho_{XY}=\dfrac{\sqrt6}{3}}$。
+**参考答案：**
+
+（1）$Y$ 的分布律为
+
+| $Y$ | $0$ | $1$ | $2$ |
+| :---: | :---: | :---: | :---: |
+| $P(Y=y)$ | $\frac38$ | $\frac14$ | $\frac38$ |
+
+（2）$\displaystyle\boxed{\rho_{XY}=\frac{\sqrt6}{3}}$。
+
+**核心思路：** 根据 $X$ 分层求 $Y$ 的边缘分布；计算协方差时优先利用题设给出的**条件期望**，避免枚举所有乘积。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### （1）由全概率公式求边缘分布
+  ### 写清每一层的条件分布
 
-  在 $X=0$ 时 $Y=0$；在 $X=2$ 时 $Y=2$；而在 $X=1$ 时，$Y\sim B(2,1/2)$。所以
+  $X=0$ 时，$Y\sim B(2,0)$，故 $Y=0$；$X=2$ 时，$Y\sim B(2,1)$，故 $Y=2$。$X=1$ 时，
 
-  $$
-  \begin{aligned}
+
+
+$$
+P(Y=0\mid X=1)=\frac14,\quad
+  P(Y=1\mid X=1)=\frac12,\quad
+  P(Y=2\mid X=1)=\frac14.
+$$
+
+  利用 $P(Y=j)=\sum_{k=0}^2P(X=k)P(Y=j\mid X=k)$：
+
+
+
+$$
+\begin{aligned}
   P(Y=0)&=\frac14+\frac12\cdot\frac14=\frac38,\\
   P(Y=1)&=\frac12\cdot\frac12=\frac14,\\
   P(Y=2)&=\frac12\cdot\frac14+\frac14=\frac38.
   \end{aligned}
-  $$
+$$
 
-  即
+  三项之和为 $1$，得到上表。
 
-  | $Y$ | $0$ | $1$ | $2$ |
-  | :---: | :---: | :---: | :---: |
-  | $P(Y=y)$ | $\frac38$ | $\frac14$ | $\frac38$ |
+</Step>
+<Step>
 
-  </Step>
-  <Step>
+  ### 求两个变量的均值与方差
 
-  ### （2）计算期望、方差与协方差
+  由题给 $X$ 的分布律及刚求出的 $Y$ 的分布律，
 
-  由两边的分布律，
 
-  $$
-  E(X)=E(Y)=1,\qquad D(X)=\frac12,\qquad D(Y)=\frac34.
-  $$
 
-  条件二项分布给出一个关键关系：
-
-  $$
-  E(Y\mid X=k)=2\cdot\frac k2=k,
-  \qquad\text{即 }E(Y\mid X)=X.
-  $$
-
-  故
-
-  $$
-  \begin{aligned}
-  \operatorname{Cov}(X,Y)
-  &=E\bigl[XE(Y\mid X)\bigr]-E(X)E(Y)\\
-  &=E(X^2)-[E(X)]^2\\
-  &=D(X)=\frac12.
+$$
+\begin{aligned}
+  EX&=0\cdot\frac14+1\cdot\frac12+2\cdot\frac14=1,\\
+  E(X^2)&=0+\frac12+4\cdot\frac14=\frac32,\\
+  EY&=0\cdot\frac38+1\cdot\frac14+2\cdot\frac38=1,\\
+  E(Y^2)&=\frac14+4\cdot\frac38=\frac74.
   \end{aligned}
-  $$
+$$
 
-  因此
+  因此 $DX=\frac32-1=\frac12$，$DY=\frac74-1=\frac34$。
 
-  $$
-  \rho_{XY}=\frac{\operatorname{Cov}(X,Y)}{\sqrt{D(X)D(Y)}}
-  =\frac{1/2}{\sqrt{(1/2)(3/4)}}
-  =\boxed{\frac{\sqrt6}{3}}.
-  $$
+</Step>
+<Step>
 
-  </Step>
+  ### 用条件期望计算协方差
+
+  对 $k=0,1,2$，二项分布的条件均值为
+
+
+
+$$
+E(Y\mid X=k)=2\cdot\frac k2=k,
+  \qquad\text{即 }E(Y\mid X)=X.
+$$
+
+  由于给定 $X$ 后 $X$ 为常数，
+
+
+
+$$
+\begin{aligned}
+  E(XY)&=E\bigl[X\,E(Y\mid X)\bigr]
+        =E(X^2)=\frac32,\\
+  \operatorname{Cov}(X,Y)&=E(XY)-EX\,EY=\frac12.
+  \end{aligned}
+$$
+
+  最后
+
+
+
+$$
+\rho_{XY}=\frac{\operatorname{Cov}(X,Y)}{\sqrt{DX\,DY}}
+   =\frac{\frac12}{\sqrt{\frac12\cdot\frac34}}
+   =\boxed{\frac{\sqrt6}{3}}.
+$$
+
+</Step>
 </Steps>
 
-<Callout type="idea" title="更快的协方差计算">
+<Callout type="idea" title="此类题的关键公式">
 
-看到 $Y\mid X\sim B(2,X/2)$，应先写出 $E(Y\mid X)=X$。据此 $\operatorname{Cov}(X,Y)=\operatorname{Cov}(X,E(Y\mid X))=D(X)$，无需逐个求联合分布概率。
+$\operatorname{Cov}(X,Y)=\operatorname{Cov}\bigl(X,E(Y\mid X)\bigr)$。本题 $E(Y\mid X)=X$，协方差立即简化成 $DX$；它不要求 $X,Y$ 独立。
 
 </Callout>
 
@@ -544,259 +797,309 @@ $$
 
 <Solution>
 
-**答案：C，$\boxed{E(X)=\dfrac23}$。**
+**参考答案：C，$\displaystyle\boxed{E(X)=\frac23}$。**
 
-**过程**：设 $R$ 为由甲袋转入乙袋的红球数。转移属于不放回抽样，故 $R$ 服从参数为 $(4,2,2)$ 的超几何分布，
+**核心思路：** 分两阶段抽球时，先对第一阶段的结果取条件期望，再用**全期望公式**消除条件。没有必要先算完整的 $X$ 分布律。
 
-$$
-E(R)=2\cdot\frac24=1.
-$$
+<Tabs items={['条件期望法（推荐）', '列分布律核对']}>
+<Tab value="条件期望法（推荐）">
 
-转移后乙袋共有 $6$ 个球，其中红球数为 $1+R$。给定 $R$，再抽 $2$ 个球，红球数的条件期望为
+  设 $R$ 为从甲口袋转移到乙口袋的红球数。甲袋中红球占一半，所以不放回抽取两个球时
 
-$$
-E(X\mid R)=2\cdot\frac{1+R}{6}=\frac{1+R}{3}.
-$$
 
-由全期望公式，
 
 $$
-E(X)=E\bigl[E(X\mid R)\bigr]
-=\frac{1+E(R)}3=\boxed{\frac23}.
+ER=2\cdot\frac24=1.
 $$
 
-<Accordions>
-  <Accordion title="另法：列出分布律进行核对">
+  转移后乙袋共有 $4+2=6$ 球，其中红球 $1+R$ 个。从乙袋不放回取两个球，条件期望等于“抽取数量 $\times$ 红球比例”：
 
-转入红球数 $R=0,1,2$ 的概率依次为 $\frac16,\frac46,\frac16$。按乙袋中红球数 $1,2,3$ 分类，得到
+
+
+$$
+E(X\mid R)=2\frac{1+R}{6}=\frac{1+R}{3}.
+$$
+
+  再取期望得
+
+
+
+$$
+EX=E[E(X\mid R)]=\frac{1+ER}{3}=\boxed{\frac23}.
+$$
+
+</Tab>
+<Tab value="列分布律核对">
+
+  转入红球数 $R=0,1,2$ 的概率为
+
+
+
+$$
+P(R=r)=\frac{\binom2r\binom2{2-r}}{\binom42},\qquad
+  \bigl(P(R=0),P(R=1),P(R=2)\bigr)=\left(\frac16,\frac46,\frac16\right).
+$$
+
+  当乙袋共有 $1+r$ 个红球时，抽出的两个球中恰有 $j$ 个红球的条件概率是
+
+
+
+$$
+P(X=j\mid R=r)=\frac{\binom{1+r}j\binom{5-r}{2-j}}{\binom62}.
+$$
+
+  求和得到
+
+
 
 $$
 \begin{aligned}
-P(X=0)&=\frac16\frac{\binom52}{\binom62}+\frac46\frac{\binom42}{\binom62}+\frac16\frac{\binom32}{\binom62}=\frac{37}{90},\\
-P(X=2)&=\frac46\frac{\binom22}{\binom62}+\frac16\frac{\binom32}{\binom62}=\frac7{90},\\
-P(X=1)&=1-\frac{37}{90}-\frac7{90}=\frac{46}{90}.
-\end{aligned}
+  P(X=0)&=\frac16\frac{\binom52}{15}+\frac46\frac{\binom42}{15}+\frac16\frac{\binom32}{15}=\frac{37}{90},\\
+  P(X=2)&=\frac46\frac{\binom22}{15}+\frac16\frac{\binom32}{15}=\frac7{90},\\
+  P(X=1)&=1-\frac{37}{90}-\frac7{90}=\frac{46}{90}.
+  \end{aligned}
 $$
 
-因此 $E(X)=\frac{46}{90}+2\cdot\frac7{90}=\frac23$，与上法一致。
+  从而 $EX=P(X=1)+2P(X=2)=60/90=2/3$。
 
-  </Accordion>
-</Accordions>
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="不放回不等于可以用二项分布代替">
+
+给定转移结果后，乙袋的第二次抽取服从**超几何分布**；尽管每次取出的红球个数不独立，但抽取红球数的期望仍等于“抽取次数乘红球比例”。
+
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-328a62-020" type="essay">
+<Question id="selected-1103-math-328a62-020" type="essay" tags="科目:概率论与数理统计, 考点:随机投放与空盒子计数">
 
 将三封信随机地投入编号为 $ 1,2,3,4$ 的四个邮筒，求没有信的邮筒数 $ X$ 的概率函数。
 
 <Solution>
 
-**答案：**
-
-$ X$ 的概率函数为
-
+**参考答案：** 设 $X$ 为四个邮筒中空邮筒的个数，则
 
 $$
- P\{X=x\}=\begin{cases}
-\frac38,&x=1,\\[2mm]
-\frac9{16},&x=2,\\[2mm]
-\frac1{16},&x=3,\\[2mm]
+\boxed{P(X=x)=
+\begin{cases}
+\frac38,&x=1,\\
+\frac9{16},&x=2,\\
+\frac1{16},&x=3,\\
 0,&\text{其他}.
-\end{cases}
+\end{cases}}
 $$
 
-**解析：** 每封信均可投入四个邮筒中的任意一个，且各种投入方式等可能。三封信共有
+**核心思路：** 先确定 $X$ 的取值范围，再对“恰有多少个邮筒收到信”计数。默认三封信**独立、等可能**地选择四个有编号的邮筒，故有 $4^3=64$ 种等可能的投法。
+
+<Steps>
+<Step>
+
+  ### 确定取值范围
+
+  三封信至多占据三个邮筒，至少占据一个，所以空邮筒个数只能为
+
+
 
 $$
- 4^3=64
+X\in\{4-3,4-2,4-1\}=\{1,2,3\}.
 $$
 
-种有序投入方式。
+</Step>
+<Step>
 
-由于只有三封信，至少有一个邮筒为空；又至少有一个邮筒收到信，因此
+  ### 分情况计算
 
-$$
- X\in\{1,2,3\}.
-$$
+  - **$X=3$**：所有信都进入同一邮筒，只需决定是哪一个邮筒，共 $4$ 种投法：
 
-当 $ X=3$ 时，只有一个邮筒收到全部三封信。先选择这个邮筒，共有 $ 4$ 种方式，因此
 
-$$
- P\{X=3\}=\frac4{64}=\frac1{16}.
-$$
-
-当 $ X=1$ 时，恰有三个邮筒收到信。由于只有三封信，这等价于三封信分别进入三个不同的邮筒。第一封、第二封、第三封信依次有 $ 4,3,2$ 种选择，因此有
 
 $$
- 4\times3\times2=24
+P(X=3)=\frac4{64}=\frac1{16}.
 $$
 
-种方式，故
+  - **$X=1$**：三个邮筒各收到一封信，三封信依次有 $4,3,2$ 种选择：
+
+
 
 $$
- P\{X=1\}=\frac{24}{64}=\frac38.
+P(X=1)=\frac{4\cdot3\cdot2}{64}=\frac38.
 $$
 
-当 $ X=2$ 时，恰有两个邮筒收到信。可以用总概率减去其余两种情况：
+  - **$X=2$**：恰有两个邮筒收到信。先选这两个邮筒，再排除“全投到同一个”这两种投法：
+
+
 
 $$
- P\{X=2\}
-=1-P\{X=1\}-P\{X=3\}
-=1-\frac38-\frac1{16}
-=\frac9{16}.
+P(X=2)=\frac{\binom42(2^3-2)}{4^3}
+      =\frac{6\cdot6}{64}=\frac9{16}.
 $$
 
-也可直接计数：先从四个邮筒中选两个，共有 $ \binom42=6$ 种；三封信投入这两个邮筒且两个邮筒均非空的方式数为
+</Step>
+<Step>
+
+  ### 检验概率函数
+
+
 
 $$
- 2^3-2=6,
+\frac38+\frac9{16}+\frac1{16}=1,
 $$
 
-故共有 $ 6\times6=36$ 种，概率同样为
+  且三项均非负，因此所得分布律合法。
 
-$$
- \frac{36}{64}=\frac9{16}.
-$$
+</Step>
+</Steps>
+
+<Callout type="idea" title="占位计数通法">
+
+若有 $n$ 个有编号的信件、$m$ 个邮筒，恰占据 $r$ 个邮筒的投法数为 $\binom mr r!\,S(n,r)$，其中 $S(n,r)$ 是第二类斯特林数。本题直接分类更快，不需要背诵通式。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-328a62-023" type="essay">
+<Question id="selected-1103-math-328a62-023" type="essay" tags="科目:概率论与数理统计, 考点:泊松二项分布与分布函数">
 
 设某一设备由三大部件构成，设备运转时，各部件需调整的概率分别为 $ 0.1,0.2,0.3$，若各部件的状态相互独立，求同时需调整的部件数 $ X$ 的分布函数。
 
 <Solution>
 
-**答案：**
+**参考答案：** $X$ 的分布律为
 
-$ X$ 的分布律为
+| $X$ | $0$ | $1$ | $2$ | $3$ |
+| :---: | :---: | :---: | :---: | :---: |
+| $P(X=k)$ | $0.504$ | $0.398$ | $0.092$ | $0.006$ |
 
-
-$$
- \begin{array}{c|cccc}
-X&0&1&2&3\\ \hline
-P&0.504&0.398&0.092&0.006
-\end{array}
-$$
-
-其分布函数为
+因此其分布函数为
 
 $$
- F(x)=\begin{cases}
-0,&x<0,\\[1mm]
-0.504,&0\le x<1,\\[1mm]
-0.902,&1\le x<2,\\[1mm]
-0.994,&2\le x<3,\\[1mm]
+\boxed{F_X(x)=
+\begin{cases}
+0,&x<0,\\
+0.504,&0\le x<1,\\
+0.902,&1\le x<2,\\
+0.994,&2\le x<3,\\
 1,&x\ge3.
-\end{cases}
+\end{cases}}
 $$
 
-**解析：** 设三个部件是否需要调整的指示变量分别为 $ I_1,I_2,I_3$，则
+**核心思路：** 三个部件的需调整概率不同，$X$ 是三个**不等参数伯努利变量的和**，不能机械地套用同参数二项分布。
+
+<Steps>
+<Step>
+
+  ### 设独立指示变量
+
+  令 $I_i=1$ 表示第 $i$ 个部件需要调整，反之为 $0$。则 $X=I_1+I_2+I_3$，其中
+
+
 
 $$
- P\{I_1=1\}=0.1,\qquad
-P\{I_2=1\}=0.2,\qquad
-P\{I_3=1\}=0.3,
+P(I_1=1)=0.1,\quad P(I_2=1)=0.2,\quad P(I_3=1)=0.3.
 $$
 
-并且三个指示变量相互独立。需调整的部件数为
+</Step>
+<Step>
+
+  ### 枚举恰有 $k$ 个部件需要调整
+
+  利用独立性，
+
+
 
 $$
- X=I_1+I_2+I_3,
+\begin{aligned}
+  P(X=0)&=0.9\cdot0.8\cdot0.7=0.504,\\
+  P(X=1)&=0.1\cdot0.8\cdot0.7+0.9\cdot0.2\cdot0.7+0.9\cdot0.8\cdot0.3\\
+        &=0.056+0.126+0.216=0.398,\\
+  P(X=2)&=0.1\cdot0.2\cdot0.7+0.1\cdot0.8\cdot0.3+0.9\cdot0.2\cdot0.3\\
+        &=0.014+0.024+0.054=0.092,\\
+  P(X=3)&=0.1\cdot0.2\cdot0.3=0.006.
+  \end{aligned}
 $$
 
-故 $ X$ 的可能取值为 $ 0,1,2,3$。
+  四项合计 $1$，可检验没有漏掉情况。
 
-当 $ X=0$ 时，三个部件均不需要调整，因此
+</Step>
+<Step>
 
-$$
- P\{X=0\}=0.9\times0.8\times0.7=0.504.
-$$
+  ### 由分布律累加成分布函数
 
-当 $ X=1$ 时，恰有一个部件需要调整。按需要调整的是第一、第二、第三个部件分别计算，得
+  依据 $F_X(x)=P(X\le x)$，每经过一个取值点就向上跳一次：
 
-$$
- \begin{aligned}
-P\{X=1\}
-&=0.1\times0.8\times0.7
-+0.9\times0.2\times0.7
-+0.9\times0.8\times0.3\\
-&=0.056+0.126+0.216\\
-&=0.398.
-\end{aligned}
-$$
 
-当 $ X=2$ 时，恰有两个部件需要调整，故
 
 $$
- \begin{aligned}
-P\{X=2\}
-&=0.1\times0.2\times0.7
-+0.1\times0.8\times0.3
-+0.9\times0.2\times0.3\\
-&=0.014+0.024+0.054\\
-&=0.092.
-\end{aligned}
+F_X(0)=0.504,\quad F_X(1)=0.504+0.398=0.902,
 $$
 
-当 $ X=3$ 时，三个部件均需要调整，因此
+
 
 $$
- P\{X=3\}=0.1\times0.2\times0.3=0.006.
+F_X(2)=0.902+0.092=0.994,\quad F_X(3)=1.
 $$
 
-检验概率之和：
+  注意**取值点属于右侧分段**，确保分布函数右连续。
 
-$$
- 0.504+0.398+0.092+0.006=1.
-$$
+</Step>
+</Steps>
 
-由分布函数定义
+<Callout type="idea" title="不等参数伯努利和的生成函数">
 
-$$
- F(x)=P\{X\le x\},
-$$
+$E(z^X)=(0.9+0.1z)(0.8+0.2z)(0.7+0.3z)$。展开后 $z^k$ 的系数就是 $P(X=k)$，遇到部件较多时这种方法更适合程序或公式计算。
 
-逐段累加即可得到答案中的阶梯形分布函数。
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3c342e-016" type="blank">
+<Question id="selected-1103-math-3c342e-016" type="blank" tags="科目:概率论与数理统计, 考点:二项分布的众数">
 
 设有40个盒子，100个球，每个球等可能地放入任一盒子中，则指定某一个盒子中最有可能出现的球的个数为<Blank answer="2" kind="math" />。
 
 <Solution>
 
-**答案：** $2$。
+**参考答案：** $\boxed{2}$ 个球。
 
-**解析：** 固定一个盒子。对每个球而言，落入该盒子的概率为
-$$
- p=\frac1{40}.
-$$
-因此该盒子中的球数
-$$
- X\sim B\left(100,\frac1{40}\right).
-$$
-二项分布$B(n,p)$的众数为$\lfloor(n+1)p\rfloor$；当$(n+1)p$不是整数时众数唯一。
+**解题过程：** 固定题目指定的一个盒子。对每个球来说，进入该盒子的概率恒为 $p=1/40$；各球独立放置，因此球数
 
-这里
 $$
- (n+1)p=101\cdot\frac1{40}=2.525,
+X\sim B\left(100,\frac1{40}\right),\qquad
+P(X=k)=\binom{100}{k}\left(\frac1{40}\right)^k\left(\frac{39}{40}\right)^{100-k}.
 $$
-故最可能的球数为
+
+求“最有可能”的个数，就是找分布律的**众数**。比较相邻概率：
+
 $$
- \lfloor2.525\rfloor=2.
+\frac{P(X=k)}{P(X=k-1)}
+=\frac{101-k}{39k},\qquad 1\le k\le100.
 $$
+
+它大于 $1$ 等价于 $101-k>39k$，即
+
+$$
+k<\frac{101}{40}=2.525.
+$$
+
+所以从 $k=0$ 到 $k=2$，概率依次增大；从 $k=3$ 起，概率减小。故唯一众数是 $\boxed{k=2}$。
+
+<Callout type="idea" title="二项分布众数公式">
+
+对 $B(n,p)$，若 $(n+1)p$ 不是整数，唯一众数为 $\lfloor(n+1)p\rfloor$；若 $(n+1)p$ 是位于 $1$ 到 $n$ 的整数，则有两个相邻众数 $(n+1)p-1$ 和 $(n+1)p$。本题 $(101)/40=2.525$，所以直接取整即可。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3c342e-021" type="single" number={1}>
+<Question id="selected-1103-math-3c342e-021" type="single" tags="科目:概率论与数理统计, 考点:指数分布取整与几何分布">
 
 设$X \sim E(1)$，$Y=[X+1]$，其中$[\cdot]$表示取整符号，则$Y$服从( )
 
@@ -807,20 +1110,66 @@ $$
 
 <Solution>
 
-由于$X\ge0$，故$Y$的可能取值为$1,2,3,\cdots$。对$k=1,2,\cdots$，
+**参考答案：B，$Y$ 服从以 $1,2,\ldots$ 为取值、成功概率 $\boxed{p=1-e^{-1}}$ 的几何分布。**
+
+**核心思路：** 取整运算把一条连续型指数随机变量轴切成长度为 $1$ 的区间；每个区间对应一个离散取值。
+
+<Steps>
+<Step>
+
+  ### 把取整等式转成区间事件
+
+  $Y=\lfloor X+1\rfloor$。因为 $X\ge0$（几乎处处），所以 $Y=1,2,\ldots$。对于任意正整数 $k$，
+
+
+
 $$
- \{Y=k\}=\{k\le X+1<k+1\}=\{k-1\le X<k\}.
+\begin{aligned}
+  \{Y=k\}&=\{k\le X+1<k+1\}\\
+           &=\{k-1\le X<k\}.
+  \end{aligned}
 $$
-因为$X\sim E(1)$，所以
+
+</Step>
+<Step>
+
+  ### 利用指数分布的尾概率
+
+  $X\sim E(1)$ 表示速率参数为 $1$ 的指数分布，故 $P(X\ge t)=e^{-t}$（$t\ge0$）。于是
+
+
+
 $$
- P\{Y=k\}=e^{-(k-1)}-e^{-k}
-=(1-e^{-1})(e^{-1})^{k-1}.
+\begin{aligned}
+  P(Y=k)&=P(k-1\le X<k)\\
+        &=e^{-(k-1)}-e^{-k}\\
+        &=(1-e^{-1})(e^{-1})^{k-1}.
+  \end{aligned}
 $$
-这正是以$1,2,\cdots$为取值、参数
+
+</Step>
+<Step>
+
+  ### 对照几何分布参数
+
+  正整数型几何分布的标准形式是 $P(Y=k)=p(1-p)^{k-1}$，故
+
+
+
 $$
- p=1-e^{-1}
+p=1-e^{-1},\qquad 1-p=e^{-1}.
 $$
-的几何分布。因此选B。
+
+  注意选项 A 的 $e^{-1}$ 是这里的**失败概率**，不是成功概率。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="离散几何分布有两套起点约定">
+
+有些教材把几何分布记作 $0,1,2,\ldots$ 上的“首次成功前失败次数”。本题 $Y$ 从 $1$ 开始，必须采用 $P(Y=k)=p(1-p)^{k-1}$ 的定义。
+
+</Callout>
 
 </Solution>
 
@@ -842,102 +1191,156 @@ $$
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：**
 
-**解析：**
+（1）$\boxed{a=1}$；（2）$\displaystyle\boxed{EX=\frac74,\quad DX=\frac{23}{16}}$；
 
-#### （1）求 $a$
-
-由概率分布归一性，
+（3）
 
 $$
-\sum_{k=1}^\infty\left(\frac1{2^{k+1}}+\frac{a}{3^k}\right)=1.
+\boxed{E(X\mid X>1)=\frac{14}{5}<\frac{50}{13}=E(X\mid X>2)}.
 $$
 
-即
+**核心思路：** 先用归一化确定常数；期望与方差用几何级数求和；条件期望可以通过**删去低取值后的尾部概率和**计算。
+
+<Steps>
+<Step>
+
+  ### （1）利用概率之和为 $1$
+
+  对 $k\ge1$，$P(X=k)=2^{-(k+1)}+a3^{-k}$，而
+
+
 
 $$
-\frac12+\frac a2=1,
+\sum_{k=1}^{\infty}\frac1{2^{k+1}}=\frac12,
+  \qquad\sum_{k=1}^{\infty}\frac1{3^k}=\frac12.
 $$
 
-所以
+  由 $\sum_{k=1}^{\infty}P(X=k)=1$ 得
+
+
 
 $$
-a=1.
+\frac12+\frac a2=1\quad\Longrightarrow\quad\boxed{a=1}.
 $$
 
-#### （2）求 $EX$ 与 $DX$
+  代入后所有概率均为正，满足合法性要求。
 
-于是
+</Step>
+<Step>
 
-$$
-EX
-=\sum_{k=1}^\infty k\left(\frac1{2^{k+1}}+\frac1{3^k}\right).
-$$
+  ### （2）计算一阶矩和二阶矩
 
-利用
+  使用几何级数导数公式（$|r|<1$）：
 
-$$
-\sum_{k=1}^\infty kp^{k-1}=\frac1{(1-p)^2},
-$$
 
-可得
 
 $$
-EX=1+\frac34=\frac74.
+\sum_{k=1}^{\infty}kr^k=\frac{r}{(1-r)^2},
+  \quad
+  \sum_{k=1}^{\infty}k^2r^k=\frac{r(1+r)}{(1-r)^3}.
 $$
 
-又利用
+  所以
+
+
 
 $$
-\sum_{k=1}^\infty k^2p^k
-=\frac{p(1+p)}{(1-p)^3},
+\begin{aligned}
+  EX&=\frac12\sum_{k=1}^{\infty}k\left(\frac12\right)^k
+      +\sum_{k=1}^{\infty}k\left(\frac13\right)^k
+      =\frac12\cdot2+\frac34=\boxed{\frac74},\\
+  E(X^2)&=\frac12\sum_{k=1}^{\infty}k^2\left(\frac12\right)^k
+      +\sum_{k=1}^{\infty}k^2\left(\frac13\right)^k
+      =\frac12\cdot6+\frac32=\frac92.
+  \end{aligned}
 $$
 
-可得
+  因而
+
+
 
 $$
-E(X^2)=\frac92.
+DX=E(X^2)-(EX)^2=\frac92-\left(\frac74\right)^2=\boxed{\frac{23}{16}}.
 $$
 
-因此
+</Step>
+<Step>
+
+  ### （3）利用截尾公式求条件期望
+
+  先计算低取值处的概率：
+
+
 
 $$
-DX=E(X^2)-(EX)^2
-=\frac92-\frac{49}{16}
-=\frac{23}{16}.
+p_1=P(X=1)=\frac14+\frac13=\frac7{12},
+  \qquad p_2=P(X=2)=\frac18+\frac19=\frac{17}{72}.
 $$
 
-#### （3）比较条件期望
+  因 $X$ 为正整数变量，
 
-因为
 
-$$
-E(X\mid X>1)P\{X>1\}
-=\sum_{k=2}^\infty kP\{X=k\},
-$$
-
-所以
 
 $$
-E(X\mid X>1)
-=\frac{EX-P\{X=1\}}{P\{X>1\}}
-=\frac{14}{5}.
+E(X\mid X>1)=\frac{EX-1\cdot p_1}{1-p_1}
+  =\frac{\frac74-\frac7{12}}{\frac5{12}}=\boxed{\frac{14}{5}}.
 $$
 
-同理，
+  同理
+
+
 
 $$
-E(X\mid X>2)
-=\frac{EX-P\{X=1\}-2P\{X=2\}}{P\{X>2\}}
-=\frac{50}{13}.
+\begin{aligned}
+  E(X\mid X>2)
+  &=\frac{EX-p_1-2p_2}{1-p_1-p_2}\\
+  &=\frac{\frac74-\frac7{12}-\frac{17}{36}}{1-\frac7{12}-\frac{17}{72}}
+  =\frac{\frac{25}{36}}{\frac{13}{72}}
+  =\boxed{\frac{50}{13}}.
+  \end{aligned}
 $$
 
-故
+  由于 $14/5=2.8$，$50/13\approx3.846$，得题目要求的不等式。
+
+</Step>
+</Steps>
+
+<Tabs items={['比较大小的直观证明', '混合几何分布的另一种算法']}>
+<Tab value="比较大小的直观证明">
+
+  条件 $X>1$ 将取值分为 $X=2$ 与 $X>2$ 两部分，前者的均值等于 $2$，后者的均值严格大于 $2$。因此 $E(X\mid X>1)$ 是 $2$ 和 $E(X\mid X>2)$ 的严格加权平均，必小于后者。这个论证不依赖上面求出的具体分数。
+
+</Tab>
+<Tab value="混合几何分布的另一种算法">
+
+  将 $a=1$ 的分布改写为
+
+
 
 $$
-\boxed{E(X\mid X>1)<E(X\mid X>2)}.
+P(X=k)=\frac12\underbrace{\left(\frac12\right)^k}_{\mathrm{Geom}(1/2)}
+  +\frac12\underbrace{\frac{2}{3^k}}_{\mathrm{Geom}(2/3)},\qquad k\ge1.
 $$
+
+  即两种正整数型几何分布等权混合。几何分布 $\mathrm{Geom}(p)$ 满足 $EX=1/p$、$E(X^2)=(2-p)/p^2$，故
+
+
+
+$$
+EX=\frac12\cdot2+\frac12\cdot\frac32=\frac74,
+  \quad E(X^2)=\frac12\cdot6+\frac12\cdot3=\frac92.
+$$
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="不能把条件期望当作直接删项后的求和">
+
+$E(X\mid X>r)$ 的分子是 $E[X\mathbf1_{\{X>r\}}]$，还必须除以 $P(X>r)$。若忽略分母，结果不是条件期望。
+
+</Callout>
 
 </Solution>
 

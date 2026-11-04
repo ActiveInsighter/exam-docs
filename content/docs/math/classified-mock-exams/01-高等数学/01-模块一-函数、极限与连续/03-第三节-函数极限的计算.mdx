@@ -1,13 +1,11 @@
 ---
-title: "第三节 函数极限的计算｜泰勒主项、幂指变换与积分渐近"
-description: "对照真题核心题目第三节，精选等价替换、高阶差式、幂指型极限、变限积分与极限反求参数等典型难题。"
+title: "3. 函数极限的计算"
+description: "精选 22 道函数极限题，全部重构参考答案、严谨推导与解题技巧；涵盖高阶差式、幂指型极限、变限积分和渐近比较。"
 ---
 
-# 第三节 函数极限的计算｜泰勒主项、幂指变换与积分渐近
+精选 **22 道题**，均已完成答案与解析的系统重构。依次从局部泰勒展开、幂指型极限到变限积分与无穷远渐近比较，统一采用“结论在前—思路—分步过程—陷阱辨析”的结构。
 
-精选 **22 道题**，对应「真题核心题目」的同名小节。按核心命题考点归类，题干、选项、答案、解析及原有 MDX 组件均未改写。
-
-## 考点1：等价无穷小与主项比较
+## 一、高阶差式：有理化、等价替换与主项比较
 
 <Question id="selected-1103-math-1364b7-011" type="essay">
 
@@ -15,19 +13,57 @@ $ \lim\limits_{x\to0}\frac{\sqrt{1+2x}-\sqrt[3]{1+3x}}{\ln(1+x^{2})}=$
 
 <Solution>
 
-**答案：** $ \frac12$
+**参考答案：** $\boxed{\dfrac12}$。
 
-**解析：** 在 $ x=0$ 处展开：
+**思路：** 分子两项都趋于 $1$，且一次项彼此抵消，必须展开到 **二阶**；分母为二阶无穷小。
 
-$ \sqrt{1+2x}=1+x-\frac12x^2+o(x^2)$，
+<Tabs items={['方法一：二阶泰勒展开（推荐）', '方法二：利用导数和洛必达']} defaultIndex={0}>
+<Tab value="方法一：二阶泰勒展开（推荐）">
 
-$ \sqrt[3]{1+3x}=1+x-x^2+o(x^2)$。
+利用二项式展开式 $(1+u)^\alpha=1+\alpha u+\frac{\alpha(\alpha-1)}2u^2+o(u^2)$，可得
 
-故分子为 $ \frac12x^2+o(x^2)$，分母
+$$
+\begin{aligned}
+\sqrt{1+2x}&=1+x-\frac{x^2}{2}+o(x^2),\\
+\sqrt[3]{1+3x}&=1+x-x^2+o(x^2).
+\end{aligned}
+$$
 
-$ \ln(1+x^2)\sim x^2$，
+两式相减，常数项、一次项消去：
 
-所以极限为 $ \frac12$。
+$$
+\sqrt{1+2x}-\sqrt[3]{1+3x}=\frac{x^2}{2}+o(x^2).
+$$
+
+另一方面，$\ln(1+x^2)=x^2+o(x^2)$。因此
+
+$$
+\lim_{x\to0}\frac{\sqrt{1+2x}-\sqrt[3]{1+3x}}{\ln(1+x^2)}
+=\frac{1/2}{1}=\boxed{\frac12}.
+$$
+
+</Tab>
+<Tab value="方法二：二阶导数法">
+
+记 $h(x)=\sqrt{1+2x}-\sqrt[3]{1+3x}$，则 $h(0)=h'(0)=0$。计算二阶导数在零点的值：
+
+$$
+\begin{aligned}
+\left(\sqrt{1+2x}\right)''\big|_{x=0}&=-1,\\
+\left((1+3x)^{1/3}\right)''\big|_{x=0}&=-2,
+\end{aligned}
+$$
+
+所以 $h''(0)=(-1)-(-2)=1$。由二阶泰勒公式，$h(x)=\frac12x^2+o(x^2)$；又 $\ln(1+x^2)\sim x^2$，极限仍为 $1/2$。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="高阶差式不能逐项做一阶等价替换">
+
+两项各自都等于 $1+x+o(x)$，仅凭这一阶信息无法确定它们的差与 $x^2$ 的比值。应先判断相消到哪一阶，再统一展开到足够精度。
+
+</Callout>
 
 </Solution>
 
@@ -39,17 +75,65 @@ $ \lim\limits_{x\to0}\frac{\sqrt{1+\tan x}-\sqrt{1+\sin x}}{x^{2}-x\ln(1+x)}=$
 
 <Solution>
 
-**答案：** $ \frac12$
+**参考答案：** $\boxed{\dfrac12}$。
 
-**解析：** 先有理化：
+**思路：** 分子出现根式之差，先**有理化**；分母出现 $x-\ln(1+x)$，用二阶展开判定主项。
 
-$ \sqrt{1+\tan x}-\sqrt{1+\sin x}=\frac{\tan x-\sin x}{\sqrt{1+\tan x}+\sqrt{1+\sin x}}\sim\frac{x^3/2}{2}=\frac14x^3$。
+<Steps>
+<Step>
 
-又
+### 分子有理化
 
-$ x^2-x\ln(1+x)=x^2-x\left(x-\frac12x^2+o(x^2)\right)\sim\frac12x^3$。
+$$
+\sqrt{1+\tan x}-\sqrt{1+\sin x}
+=\frac{\tan x-\sin x}{\sqrt{1+\tan x}+\sqrt{1+\sin x}}.
+$$
 
-故极限为 $ \frac{1/4}{1/2}=\frac12$。
+根号分母趋于 $2$，故关键转化为比较 $\tan x-\sin x$ 与 $x^3$。
+
+</Step>
+<Step>
+
+### 找到三阶主项
+
+直接恒等变形而不必先展开两项：
+
+$$
+\tan x-\sin x
+=\sin x\left(\frac1{\cos x}-1\right)
+=\frac{\sin x(1-\cos x)}{\cos x}
+\sim x\cdot\frac{x^2}{2}=\frac{x^3}{2}.
+$$
+
+因此根式差 $\sim x^3/4$。
+
+</Step>
+<Step>
+
+### 计算分母并求比值
+
+因为 $\ln(1+x)=x-\frac{x^2}{2}+o(x^2)$，所以
+
+$$
+x^2-x\ln(1+x)
+=x\bigl(x-\ln(1+x)\bigr)
+=\frac{x^3}{2}+o(x^3).
+$$
+
+分子、分母均为三阶无穷小，故原极限为
+
+$$
+\frac{1/4}{1/2}=\boxed{\frac12}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="有理化 + 恒等变形 + 等价无穷小">
+
+遇到 $\sqrt{1+A(x)}-\sqrt{1+B(x)}$，常先除以共轭式，化成 $A(x)-B(x)$。对于 $\tan x-\sin x$，使用 $\sin x(1-\cos x)/\cos x$ 能迅速看出三阶主项。
+
+</Callout>
 
 </Solution>
 
@@ -61,17 +145,79 @@ $\lim_{x \to 0} \frac{e^{x^2} - e^{2 - 2\cos x}}{e^{x^4} - 1} =$ <Blank answer="
 
 <Solution>
 
-**答案：** $\frac{1}{12}$
+**答案：** $\boxed{\dfrac1{12}}$。
 
-**解析：** 当 $x \to 0$ 时, 有 $e^{x^4} - 1 \sim x^4$, 故
+**思路：** 两个指数趋于相同的值 $0$，先比较它们的指数差；原式整体是四阶无穷小之比。
 
-$$\begin{aligned} \text{原式} &= \lim_{x \to 0} \frac{e^{x^2} - e^{2 - 2\cos x}}{x^4} = \lim_{x \to 0} e^{2 - 2\cos x} \cdot \frac{e^{x^2 - 2 + 2\cos x} - 1}{x^4} \\ &= \lim_{x \to 0} \frac{x^2 - 2 + 2\cos x}{x^4} = \lim_{x \to 0} \frac{2x - 2\sin x}{4x^3} \\ &= \frac{1}{2} \lim_{x \to 0} \frac{1 - \cos x}{3x^2} = \frac{1}{6} \lim_{x \to 0} \frac{\frac{1}{2}x^2}{x^2} = \frac{1}{12}. \end{aligned}$$
+<Tabs items={['方法一：比较指数差（推荐）', '方法二：洛必达法则']} defaultIndex={0}>
+<Tab value="方法一：比较指数差（推荐）">
+
+利用余弦的四阶展开，
+
+$$
+2-2\cos x=x^2-\frac{x^4}{12}+O(x^6),
+$$
+
+因而
+
+$$
+x^2-(2-2\cos x)=\frac{x^4}{12}+O(x^6).
+$$
+
+将分子拆成指数差：
+
+$$
+e^{x^2}-e^{2-2\cos x}
+=e^{2-2\cos x}\left[e^{x^2-(2-2\cos x)}-1\right].
+$$
+
+前一因子趋于 $1$，中括号内满足 $e^u-1\sim u$，所以整个分子 $\sim x^4/12$。再由 $e^{x^4}-1\sim x^4$，得
+
+$$
+\lim_{x\to0}\frac{e^{x^2}-e^{2-2\cos x}}{e^{x^4}-1}
+=\boxed{\frac1{12}}.
+$$
+
+</Tab>
+<Tab value="方法二：分离指数共因子">
+
+先把原式写成
+
+$$
+\frac{e^{2-2\cos x}\bigl(e^{x^2-2+2\cos x}-1\bigr)}{e^{x^4}-1}.
+$$
+
+当 $x\to0$ 时，前一因子趋于 $1$；后面两个指数增量同时趋于 $0$，故原式与
+
+$$
+\frac{x^2-2+2\cos x}{x^4}
+$$
+
+等价。对后一商连续使用两次洛必达法则：
+
+$$
+\begin{aligned}
+\lim_{x\to0}\frac{x^2-2+2\cos x}{x^4}
+&=\lim_{x\to0}\frac{2x-2\sin x}{4x^3}\\
+&=\lim_{x\to0}\frac{2-2\cos x}{12x^2}\\
+&=\frac16\lim_{x\to0}\frac{1-\cos x}{x^2}=\frac1{12}.
+\end{aligned}
+$$
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="不要直接把两个指数函数都替换为 1">
+
+$e^{x^2}$ 与 $e^{2-2\cos x}$ 都趋于 $1$，但其**差**依赖四阶项。需要先提取共因子或先求指数差，才可以安全地使用 $e^u-1\sim u$。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：高阶差式与泰勒展开消去
+## 二、泰勒展开与高阶抵消：计算常数主项
 
 <Question id="selected-1103-classified-1031-math-6178b5-017" type="essay" points={10} tags="来源:张宇8套卷">
 
@@ -83,66 +229,65 @@ $$
 
 <Solution>
 
-**答案：** 见解析
-
-**解析：** 只需将
-
-$$
-\ln\frac{2+x}{2-x}
-$$
-
-展开到 $x^3$ 项。
-
-有
-
-$$
-\ln\frac{2+x}{2-x}
-=\ln\left(1+\frac x2\right)
--\ln\left(1-\frac x2\right).
-$$
-
-利用泰勒展开，
-
-$$
-\ln(1+u)=u-\frac{u^2}{2}+\frac{u^3}{3}+o(u^3),
-$$
-
-$$
-\ln(1-u)=-u-\frac{u^2}{2}-\frac{u^3}{3}+o(u^3),
-$$
-
-可得
-
-$$
-\ln\frac{2+x}{2-x}
-=x+\frac1{12}x^3+o(x^3).
-$$
-
-于是
-
-$$
-\lim_{x\to0}
-\left(
-1+\frac1{x^2}
--\frac1{x^3}\ln\frac{2+x}{2-x}
-\right)
-$$
-
-$$
-=\lim_{x\to0}
-\left[
-1+\frac1{x^2}
--\frac1{x^3}
-\left(x+\frac1{12}x^3+o(x^3)\right)
-\right]
-=\frac{11}{12}.
-$$
-
-故极限为
+**参考答案：**
 
 $$
 \boxed{\frac{11}{12}}.
 $$
+
+**解题思路：** 原式包含 $1/x^2$ 与 $x^{-3}\ln\frac{2+x}{2-x}$，它们的发散部分正好相消。要获得常数项，必须将对数展开到三阶，而不是只使用一阶等价无穷小。
+
+<Steps>
+<Step>
+
+### 将对数拆成标准形式
+
+当 $|x|<2$ 时，
+
+$$
+\ln\frac{2+x}{2-x}=\ln\left(1+\frac{x}{2}\right)-\ln\left(1-\frac{x}{2}\right).
+$$
+
+两项中的偶次幂在相减时抵消，因此只需关注一次项和三次项。
+
+</Step>
+<Step>
+
+### 展开并保留消去后的首项
+
+利用 $\ln(1+u)=u-\frac{u^2}{2}+\frac{u^3}{3}+O(u^4)$，或直接使用奇函数展开，得到
+
+$$
+\begin{aligned}
+\ln\frac{2+x}{2-x}
+&=2\left(\frac{x}{2}+\frac{1}{3}\frac{x^3}{8}+O(x^5)\right)\\
+&=x+\frac{x^3}{12}+O(x^5).
+\end{aligned}
+$$
+
+</Step>
+<Step>
+
+### 代入并完成抵消
+
+$$
+\begin{aligned}
+1+\frac1{x^2}-\frac1{x^3}\ln\frac{2+x}{2-x}
+&=1+\frac1{x^2}-\left(\frac1{x^2}+\frac1{12}+O(x^2)\right)\\
+&=\frac{11}{12}+O(x^2).
+\end{aligned}
+$$
+
+所以所求极限为 $\frac{11}{12}$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="先确定保留到几阶">
+
+分母是 $x^3$，而对数中的一次项与外面的 $1/x^2$ 相消，所以至少保留对数的 **$x^3$ 项**。只写 $\ln\frac{2+x}{2-x}\sim x$ 会丢失决定答案的常数 $1/12$。
+
+</Callout>
 
 </Solution>
 
@@ -160,56 +305,79 @@ $$
 
 <Solution>
 
-**答案：$\boxed{-21}$。**
+**答案：**
+
+$$
+\boxed{-21}.
+$$
+
+**核心观察：** 分子是三个趋于 $1$ 的因子的乘积减 $1$；各因子的一阶变化量相加为零，因此要计算二阶项。直接展开三个幂较繁琐，先取对数可以把乘积变成和。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 先对乘积取对数
+### 引入乘积并取对数
 
-  记 $G(x)=(1+2x)^{1/2}(1+3x)^{1/3}(1-8x)^{1/4}$。则
+令
 
-  $$
-  \ln G(x)=\frac12\ln(1+2x)+\frac13\ln(1+3x)+\frac14\ln(1-8x).
-  $$
+$$
+G(x)=(1+2x)^{1/2}(1+3x)^{1/3}(1-8x)^{1/4}.
+$$
 
-  </Step>
-  <Step>
+在 $x=0$ 的某邻域中三个底数均为正，故
 
-  ### 将三项准确展开到二阶
+$$
+\ln G(x)=\frac12\ln(1+2x)+\frac13\ln(1+3x)+\frac14\ln(1-8x).
+$$
 
-  由 $\ln(1+t)=t-t^2/2+o(t^2)$，得
+</Step>
+<Step>
 
-  $$
-  \begin{aligned}
-  \frac12\ln(1+2x)&=x-x^2+o(x^2),\\
-  \frac13\ln(1+3x)&=x-\frac32x^2+o(x^2),\\
-  \frac14\ln(1-8x)&=-2x-8x^2+o(x^2).
-  \end{aligned}
-  $$
+### 展开到二阶，查明一阶抵消
 
-  一阶项恰好抵消，因此 $\ln G(x)=-\dfrac{21}{2}x^2+o(x^2)$。又 $e^u-1\sim u$（$u\to0$），于是
+由 $\ln(1+u)=u-\frac12u^2+o(u^2)$，分别得到
 
-  $$
-  G(x)-1=-\frac{21}{2}x^2+o(x^2).
-  $$
+$$
+\begin{aligned}
+\tfrac12\ln(1+2x)&=x-x^2+o(x^2),\\
+\tfrac13\ln(1+3x)&=x-\tfrac32x^2+o(x^2),\\
+\tfrac14\ln(1-8x)&=-2x-8x^2+o(x^2).
+\end{aligned}
+$$
 
-  </Step>
-  <Step>
+因此
 
-  ### 与分母比较
+$$
+\ln G(x)=(1+1-2)x-\left(1+\frac32+8\right)x^2+o(x^2)
+=-\frac{21}{2}x^2+o(x^2).
+$$
 
-  因 $e^x-1-x=\dfrac{x^2}{2}+o(x^2)$，所以
+</Step>
+<Step>
 
-  $$
-  \lim_{x\to0}\frac{G(x)-1}{e^x-1-x}
-  =\frac{-21/2}{1/2}=\boxed{-21}.
-  $$
+### 恢复原乘积，计算商的极限
 
-  </Step>
+$G(x)=e^{\ln G(x)}$ 且 $e^u-1=u+o(u)$，所以
+
+$$
+G(x)-1=-\frac{21}{2}x^2+o(x^2).
+$$
+
+另一方面，$e^x-1-x=\frac12x^2+o(x^2)$，于是
+
+$$
+\lim_{x\to0}\frac{G(x)-1}{e^x-1-x}
+=\frac{-21/2}{1/2}=-21.
+$$
+
+</Step>
 </Steps>
 
-<Callout type="warn" title="展开阶数">这里对数的一阶项为零，若仅使用 $\ln(1+t)\sim t$，会得到无效的 $0/0$；必须保留二阶项。</Callout>
+<Callout type="idea" title="乘积型高阶极限的通法">
+
+遇到 $\prod_i(1+a_ix)^{b_i}-1$，先看 $\sum_i a_ib_i$ 是否为零：若为零，则一阶项相消，可直接研究 $\ln G(x)$ 的二阶项。这里 $\sum_i a_ib_i=1+1-2=0$。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -220,35 +388,91 @@ $$
 
 <Solution>
 
-**答案：** $\dfrac18 e^{e+1}$。
+**参考答案：**
 
-**解析：** 令 $t=\frac1x$，则 $t\to0$，原极限化为
+$$
+\boxed{\frac{e^{e+1}}{8}}.
+$$
 
-$$\lim_{t\to0}\frac{ e^{(1+t)^{1/t}}-(1+t)^{e/t} }{t^2}.$$
+**解题思路：** 两个被减数都趋于 $e^e$，甚至一阶扰动也相同。先令 $t=1/x$，再提取共同的指数因子，避免把两项分别展开后出现冗长的抵消运算。
 
-设
+<Tabs items={['方法一：指数差提取（推荐）','方法二：分别展开至二阶']} defaultIndex={0}>
+<Tab value="方法一：指数差提取（推荐）">
 
-$$u(t)=\frac{\ln(1+t)}t =1-\frac t2+\frac{t^2}{3}+o(t^2).$$
+令 $t=1/x\to0$，记
+
+$$
+u(t)=\frac{\ln(1+t)}t=1-\frac t2+\frac{t^2}{3}+O(t^3).
+$$
 
 则
 
-$$(1+t)^{1/t}=e^{u(t)} =e\left(1-\frac t2+\frac{11}{24}t^2+o(t^2)\right).$$
+$$
+\begin{aligned}
+(1+t)^{1/t}&=e^{u(t)},\\
+(1+t)^{e/t}&=e^{eu(t)}.
+\end{aligned}
+$$
 
-因此
+由于 $e^{u}=e\bigl[1+(u-1)+\frac12(u-1)^2+O((u-1)^3)\bigr]$，
 
-$$e^{(1+t)^{1/t}} =e^e\exp\left(-\frac e2t+\frac{11e}{24}t^2+o(t^2)\right),$$
+$$
+\begin{aligned}
+e^{u(t)}&=e\left(1-\frac t2+\frac{11}{24}t^2+O(t^3)\right),\\
+eu(t)&=e\left(1-\frac t2+\frac13t^2+O(t^3)\right).
+\end{aligned}
+$$
 
-而
+两指数之差为
 
-$$(1+t)^{e/t} =e^{eu(t)} =e^e\exp\left(-\frac e2t+\frac e3t^2+o(t^2)\right).$$
+$$
+e^{u(t)}-eu(t)=\frac e8t^2+O(t^3).
+$$
 
-两式的一次项相同，相减后只需比较二次项：
+将原分子的第一项写成 $e^{eu(t)}e^{e^{u(t)}-eu(t)}$，得
 
-$$e^{(1+t)^{1/t}}-(1+t)^{e/t} =e^e\left(\frac{11e}{24}-\frac e3\right)t^2+o(t^2) =\frac18e^{e+1}t^2+o(t^2).$$
+$$
+\begin{aligned}
+e^{e^{u(t)}}-e^{eu(t)}
+&=e^{eu(t)}\left(e^{e^{u(t)}-eu(t)}-1\right)\\
+&=e^e\left(\frac e8t^2+o(t^2)\right).
+\end{aligned}
+$$
 
-故
+原式再除以 $t^2$，极限即 $e^{e+1}/8$。
 
-$$\boxed{\frac18e^{e+1}}.$$
+</Tab>
+<Tab value="方法二：分别展开至二阶">
+
+同样记 $u(t)=\ln(1+t)/t$，则
+
+$$
+\begin{aligned}
+e^{e^{u(t)}}&=e^e\exp\left(-\frac e2t+\frac{11e}{24}t^2+O(t^3)\right),\\
+e^{eu(t)}&=e^e\exp\left(-\frac e2t+\frac e3t^2+O(t^3)\right).
+\end{aligned}
+$$
+
+对于 $e^{at+bt^2+O(t^3)}$，其展开是
+
+$$
+1+at+\left(b+\frac{a^2}2\right)t^2+O(t^3).
+$$
+
+两式的 $a=-e/2$ 相同，因此相减时 $at$ 和 $a^2t^2/2$ 均抵消，剩余系数是
+
+$$
+e^e\left(\frac{11e}{24}-\frac e3\right)=\frac{e^{e+1}}8.
+$$
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="精度与换元方向">
+
+$t=1/x$ 时，$x^2=t^{-2}$，不是 $t^2$。因为分子是二阶小量，必须算到 $t^2$，只用经典极限 $(1+1/x)^x\to e$ 无法确定结果。
+
+</Callout>
 
 </Solution>
 
@@ -267,39 +491,75 @@ $$
 
 <Solution>
 
-**答案：**$\boxed{\dfrac5{12}}$。
-
-**过程**：将第一因子提取最大指数项：
+**答案：**
 
 $$
-\ln(e^{x^2}+2x-1)
-=x^2+\ln\!\left[1+(2x-1)e^{-x^2}\right]
-=x^2+o(1).
+\boxed{\frac5{12}}.
 $$
 
-令 $t=1/x\to0^+$，对第二因子作必要精度的展开：
+**解题思路：** 第一因子与 $x^2$ 等价；第二因子的常数项相消，必须找到 $x^{-2}$ 的系数。令 $t=1/x$ 后，两类函数均可在 $t=0$ 附近展开。
+
+<Steps>
+<Step>
+
+### 分离第一个因子的主项
 
 $$
 \begin{aligned}
-\sqrt{1+t}+\sqrt{1-t}&=2-\frac{t^2}4+O(t^4),\\
-\frac2t\arctan t&=2-\frac{2t^2}3+O(t^4).
+A(x)&=\ln(e^{x^2}+2x-1)\\
+&=x^2+\ln\bigl[1+(2x-1)e^{-x^2}\bigr]
+=x^2+o(1).
 \end{aligned}
 $$
 
-相减得到
+这里 $(2x-1)e^{-x^2}\to0$，且 $x^2$ 是决定乘积极限的主项。
+
+</Step>
+<Step>
+
+### 求第二因子的二阶主项
+
+令 $t=1/x\to0^+$。由二项式公式和反正切展开，
 
 $$
-\sqrt{1+t}+\sqrt{1-t}-\frac2t\arctan t
-=\left(-\frac14+\frac23\right)t^2+O(t^4)
-=\frac5{12}t^2+O(t^4).
+\begin{aligned}
+\sqrt{1+t}+\sqrt{1-t}
+&=2-\frac{t^2}{4}+O(t^4),\\
+\frac{2}{t}\arctan t
+&=2-\frac23t^2+O(t^4).
+\end{aligned}
 $$
 
-因此原极限为 $\displaystyle\lim_{x\to+\infty}[x^2+o(1)]\left(\frac5{12x^2}+O(x^{-4})\right)=\boxed{\frac5{12}}$。
+相减得
+
+$$
+B(x)=\left(\frac23-\frac14\right)t^2+O(t^4)
+=\frac5{12x^2}+O(x^{-4}).
+$$
+
+</Step>
+<Step>
+
+### 组合极限
+
+$$
+A(x)B(x)=\bigl(x^2+o(1)\bigr)\left(\frac5{12x^2}+O(x^{-4})\right)
+\longrightarrow\frac5{12}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="偶函数相加，一阶项自然抵消">
+
+$\sqrt{1+t}+\sqrt{1-t}$ 是偶函数，在 $t=0$ 附近没有一次项；如果只取两项的极限 $1+1$，就会忽略决定结果的二阶系数。
+
+</Callout>
 
 </Solution>
 </Question>
 
-## 考点3：幂指型极限与对数变换
+## 三、幂指型极限：取对数与指数主项
 
 <Question id="selected-1103-classified-1031-math-c06546-011" type="blank" points={5} tags="来源:张宇8套卷">
 
@@ -313,41 +573,74 @@ $$
 
 <Solution>
 
-**答案：** $e^{1/2}$
-
-**解析：** 原式取对数：
+**答案：**
 
 $$
-\ln L
-=\lim_{x\to0}\cot x\,\ln\frac{e^x-1}{\sin x}.
+\boxed{e^{1/2}=\sqrt e}.
 $$
 
-利用展开式
+**解题思路：** 底数趋于 $1$，指数 $\cot x$ 发散，是典型的 $1^\infty$ 型。先将整个式子取对数，计算“指数乘以底数对数”的极限。
+
+<Steps>
+<Step>
+
+### 验证底数可取对数
+
+当 $x$ 接近 $0$ 且 $x\ne0$ 时，$e^x-1$ 与 $\sin x$ 同号，因此它们的比值为正，幂和对数均有定义。
+
+</Step>
+<Step>
+
+### 求底数偏离 $1$ 的一阶量
 
 $$
-e^x-1=x+\frac{x^2}{2}+O(x^3),
-\qquad
-\sin x=x+O(x^3),
+\begin{aligned}
+e^x-1&=x+\frac{x^2}{2}+O(x^3),\\
+\sin x&=x+O(x^3).
+\end{aligned}
 $$
 
-有
+于是
 
 $$
-\ln\frac{e^x-1}{\sin x}
-=\frac{x}{2}+O(x^2),
-$$
-
-故
-
-$$
-\ln L=\frac12,
+\frac{e^x-1}{\sin x}
+=\frac{1+x/2+O(x^2)}{1+O(x^2)}
+=1+\frac x2+O(x^2),
 $$
 
 从而
 
 $$
-L=e^{1/2}.
+\ln\frac{e^x-1}{\sin x}=\frac x2+O(x^2).
 $$
+
+</Step>
+<Step>
+
+### 取对数求极限并还原
+
+记原表达式为 $Y(x)>0$，则
+
+$$
+\ln Y(x)=\cot x\,\ln\frac{e^x-1}{\sin x}.
+$$
+
+由 $x\cot x\to1$，有
+
+$$
+\lim_{x\to0}\ln Y(x)=\lim_{x\to0}(x\cot x)\left(\frac12+O(x)\right)=\frac12.
+$$
+
+指数函数连续，故 $Y(x)\to e^{1/2}$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="可迁移的公式">
+
+若 $u(x)\to0$ 且 $v(x)u(x)\to c$，则 $(1+u(x))^{v(x)}\to e^c$，前提是邻域内底数为正。本题 $u(x)\sim x/2$，$v(x)=\cot x\sim1/x$。
+
+</Callout>
 
 </Solution>
 
@@ -365,32 +658,76 @@ $$
 
 <Solution>
 
-**答案：$\boxed{e^4}$。**
+**答案：**
 
-**过程**：所求极限是 $1^\infty$ 型，设原式为 $L(x)$，取对数。
+$$
+\boxed{e^4}.
+$$
 
-当 $x\to0^+$ 时，$x\ln x\to0$，且
+**核心思路：** 虽然指数含有 $\ln x$ 且 $x\to0^+$，但是 $x\ln x\to0$；底数趋于 $1$。应先取对数，再逐层比较等价无穷小。
+
+<Steps>
+<Step>
+
+### 分析底数的变化
+
+因 $x^{2x}=e^{2x\ln x}$，而 $x\ln x\to0$，所以
+
+$$
+x^{2x}-1=e^{2x\ln x}-1\sim2x\ln x.
+$$
+
+于是
 
 $$
 \begin{aligned}
-1-\sqrt{\cos x}&=\frac{1-\cos x}{1+\sqrt{\cos x}}\sim\frac{x^2}{4},\\
-x^{2x}-1&=e^{2x\ln x}-1\sim2x\ln x,\\
-\ln\frac{1+x^{2x}}2&=\ln\left(1+\frac{x^{2x}-1}{2}\right)\sim x\ln x.
+\ln\frac{x^{2x}+1}{2}
+&=\ln\left(1+\frac{x^{2x}-1}{2}\right)\\
+&\sim\frac{x^{2x}-1}{2}\sim x\ln x.
 \end{aligned}
 $$
 
-所以
+其中 $x\ln x<0$，但等价关系仍成立。
+
+</Step>
+<Step>
+
+### 计算根式差的主项
 
 $$
-\ln L(x)
-=\frac{x}{(1-\sqrt{\cos x})\ln x}
-\ln\frac{x^{2x}+1}{2}
-\sim\frac{x\cdot x\ln x}{(x^2/4)\ln x}=4.
+1-\sqrt{\cos x}
+=\frac{1-\cos x}{1+\sqrt{\cos x}}
+\sim\frac{x^2/2}{2}=\frac{x^2}{4}.
 $$
 
-于是 $L(x)\to e^4$。
+</Step>
+<Step>
 
-<Callout type="idea" title="通法">对于 $1^\infty$ 型极限，先求“指数 $\times$ 底数的对数”的极限，再取指数。</Callout>
+### 取对数后合并
+
+记原式为 $Y(x)>0$，则
+
+$$
+\begin{aligned}
+\ln Y(x)
+&=\frac{x}{(1-\sqrt{\cos x})\ln x}
+\ln\frac{x^{2x}+1}{2}\\
+&=\frac{x^2}{1-\sqrt{\cos x}}\cdot
+\frac{\ln[(x^{2x}+1)/2]}{x\ln x}\\
+&\longrightarrow4\cdot1=4.
+\end{aligned}
+$$
+
+所以 $\lim_{x\to0^+}Y(x)=e^4$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="不要把 $x^{2x}$ 当作 $x^0$ 直接代入">
+
+$x^{2x}\to1$，但它与 $1$ 的差是 $2x\ln x$ 量级，不是普通的 $O(x)$。本题恰好需要保留这个对数因子，它与指数中的 $\ln x$ 抵消。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -400,7 +737,7 @@ $$
 极限
 
 $$
- \lim_{x\to 0}\left(\frac{\sin x}{x}\right)^{\frac{1}{x^2}}
+\lim_{x\to 0}\left(\frac{\sin x}{x}\right)^{\frac{1}{x^2}}
 $$
 
 <Option correct>等于 $ e^{-\frac16}$；</Option>
@@ -410,27 +747,60 @@ $$
 
 <Solution>
 
-这是“$ 1^\infty$”型极限。设原极限为 $ L$，取对数：
+**答案：A。** 极限等于 $\boxed{e^{-1/6}}$。
+
+**解题思路：** $\sin x/x\to1$，指数 $1/x^2\to+\infty$，不能按普通幂函数代入；先取对数，寻找底数偏离 $1$ 的二阶项。
+
+<Tabs items={['方法一：泰勒展开（推荐）','方法二：洛必达法则']} defaultIndex={0}>
+<Tab value="方法一：泰勒展开（推荐）">
+
+当 $x\to0$ 时，
+
 $$
- \ln L=\lim_{x\to0}\frac{1}{x^2}\ln\frac{\sin x}{x}.
+\frac{\sin x}{x}=1-\frac{x^2}{6}+O(x^4).
 $$
-由
+
+在 $0$ 的去心邻域内底数为正，记原式为 $Y(x)$，则
+
 $$
- \frac{\sin x}{x}=1-\frac{x^2}{6}+o(x^2),
-\qquad
-\ln(1+u)=u+o(u),
+\begin{aligned}
+\ln Y(x)
+&=\frac1{x^2}\ln\left(1-\frac{x^2}{6}+O(x^4)\right)\\
+&=\frac1{x^2}\left(-\frac{x^2}{6}+O(x^4)\right)\longrightarrow-\frac16.
+\end{aligned}
 $$
-可得
+
+故 $Y(x)\to e^{-1/6}$。
+
+</Tab>
+<Tab value="方法二：洛必达法则">
+
+用 $\ln(1+u)\sim u$（$u\to0$）可得
+
 $$
- \ln\frac{\sin x}{x}=-\frac{x^2}{6}+o(x^2),
+\lim_{x\to0}\frac{\ln(\sin x/x)}{x^2}
+=\lim_{x\to0}\frac{\sin x-x}{x^3}.
 $$
-从而
+
+后式对分子分母连续求导：
+
 $$
- \ln L=-\frac16,
-\qquad
-L=e^{-1/6}.
+\lim_{x\to0}\frac{\cos x-1}{3x^2}
+=-\frac16,
 $$
-故选（A）。（B）的指数符号错误；（C）的指数数值错误；极限存在，故（D）错误。
+
+因为 $(\cos x-1)/x^2\to-1/2$。因此原极限为 $e^{-1/6}$。
+
+</Tab>
+</Tabs>
+
+**选项辨析：** B 错在指数符号，C 错在系数倒置；对数极限存在且有限，所以 D“极限不存在”不成立。
+
+<Callout type="idea" title="典型标准结论">
+
+由 $\sin x/x=1-x^2/6+o(x^2)$，可记住 $\lim_{x\to0}(\sin x/x)^{1/x^2}=e^{-1/6}$，但解答时要明确它是通过**先取对数**得到的。
+
+</Callout>
 
 </Solution>
 
@@ -442,27 +812,81 @@ $$
 
 <Solution>
 
-**答案：** $ \frac1{2e}$
+**参考答案：**
 
-**解析：** 原式等于
+$$
+\boxed{\frac{1}{2e}}.
+$$
 
-$ x\left[\left(1+\frac1x\right)^{-x}-e^{-1}\right]$。
+**解题思路：** 两个项都约为 $x/e$，直接代入是 $\infty-\infty$ 型。先提取 $x$，再把 $(1+1/x)^{-x}$ 的指数展开到 $1/x$ 项。
+
+<Steps>
+<Step>
+
+### 改写为同一基准下的差
+
+$$
+\frac{x^{x+1}}{(1+x)^x}-\frac{x}{e}
+=x\left[\left(1+\frac1x\right)^{-x}-e^{-1}\right].
+$$
+
+令 $t=1/x\to0^+$，原式变为
+
+$$
+\frac{e^{-\ln(1+t)/t}-e^{-1}}{t}.
+$$
+
+</Step>
+<Step>
+
+### 找到指数中第一个修正项
 
 由
 
-$ -x\ln\left(1+\frac1x\right)=-1+\frac1{2x}+O\left(\frac1{x^2}\right)$，
+$$
+\frac{\ln(1+t)}t=1-\frac t2+O(t^2),
+$$
 
-得
+可得
 
-$ \left(1+\frac1x\right)^{-x}=e^{-1}\left(1+\frac1{2x}+O\left(\frac1{x^2}\right)\right)$。
+$$
+-\frac{\ln(1+t)}t=-1+\frac t2+O(t^2).
+$$
 
-故极限为 $ \frac1{2e}$。
+因此
+
+$$
+\begin{aligned}
+e^{-\ln(1+t)/t}-e^{-1}
+&=e^{-1}\left(e^{t/2+O(t^2)}-1\right)\\
+&=e^{-1}\left(\frac t2+O(t^2)\right).
+\end{aligned}
+$$
+
+</Step>
+<Step>
+
+### 消去 $t$ 并取极限
+
+$$
+\lim_{t\to0^+}\frac{e^{-\ln(1+t)/t}-e^{-1}}t
+=\frac{1}{2e}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="不能把因子直接替换为极限">
+
+$(1+1/x)^{-x}\to e^{-1}$ 只说明方括号趋于 $0$，不足以判断 $x$ 乘这个差后的结果；必须再求一阶误差。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点4：变限积分与抽象函数渐近
+## 四、变限积分与抽象函数的局部渐近
 
 <Question id="selected-1103-classified-1031-lilin-2027-s1-q17" type="essay" points={10} tags="来源:李林六套卷, 考点:积分极限, 难度:中等">
 
@@ -474,59 +898,77 @@ $$
 
 <Solution>
 
-**参考答案：**$\boxed{\dfrac18}$。
+**参考答案：**
 
-**解题过程：**
+$$
+\boxed{\frac18}.
+$$
+
+**解题思路：** 分子含有 $f(t)-f(\ln(1+t))$。两处自变量只相差 $O(t^2)$；借助拉格朗日中值定理，把函数值之差转换为导数乘自变量之差，再利用 $f'(0)=0$、$f''(0)=1$ 找到三阶主项。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 求复合函数自变量的差
+### 计算两个自变量的距离
 
-  由 $\ln(1+t)=t-\frac{t^2}{2}+O(t^3)$，知
+由 $\ln(1+t)=t-\frac12t^2+O(t^3)$ 得
 
-  $$
-  t-\ln(1+t)=\frac{t^2}{2}+O(t^3).
-  $$
+$$
+t-\ln(1+t)=\frac12t^2+O(t^3).
+$$
 
-  </Step>
-  <Step>
+特别地，$t$ 和 $\ln(1+t)$ 都趋于 $0$，且它们之间的任意点 $\xi_t$ 满足 $\xi_t=t+O(t^2)$。
 
-  ### 用中值定理求被积函数主项
+</Step>
+<Step>
 
-  对 $t$ 与 $\ln(1+t)$ 之间的区间应用拉格朗日中值定理，存在介于二者之间的 $\xi_t$，使
+### 用中值定理精确控制函数差
 
-  $$
-  f(t)-f[\ln(1+t)]
-  =f'(\xi_t)\bigl[t-\ln(1+t)\bigr].
-  $$
+对于 $t\ne0$ 足够小，存在 $\xi_t$ 位于 $t$ 与 $\ln(1+t)$ 之间，使
 
-  由 $f'(0)=0$、$f''(0)=1$，得 $f'(s)=s+o(s)$。又有 $\xi_t=t+O(t^2)$，故 $f'(\xi_t)=t+o(t)$，从而
+$$
+f(t)-f(\ln(1+t))=f'(\xi_t)\,[t-\ln(1+t)].
+$$
 
-  $$
-  f(t)-f[\ln(1+t)]
-  =\bigl(t+o(t)\bigr)\left(\frac{t^2}{2}+O(t^3)\right)
-  =\frac{t^3}{2}+o(t^3).
-  $$
+因 $f''(0)=1$、$f'(0)=0$，
 
-  </Step>
-  <Step>
+$$
+f'(s)=s+o(s)\qquad(s\to0).
+$$
 
-  ### 积分并求极限
+而 $\xi_t=t+O(t^2)$，所以 $f'(\xi_t)=t+o(t)$。因而
 
-  $$
-  \int_0^x\bigl\{f(t)-f[\ln(1+t)]\bigr\}\,\mathrm dt
-  =\frac{x^4}{8}+o(x^4),
-  $$
+$$
+\begin{aligned}
+f(t)-f(\ln(1+t))
+&=(t+o(t))\left(\frac{t^2}{2}+O(t^3)\right)\\
+&=\frac12t^3+o(t^3).
+\end{aligned}
+$$
 
-  所求极限为 $\dfrac18$。
+</Step>
+<Step>
 
-  </Step>
+### 积分求四阶主项
+
+利用 $\int_0^x o(t^3)\,\mathrm dt=o(x^4)$（$x\to0$ 的正、负两侧都成立），得
+
+$$
+\begin{aligned}
+\int_0^x\{f(t)-f[\ln(1+t)]\}\,\mathrm dt
+&=\int_0^x\left(\frac12t^3+o(t^3)\right)\,\mathrm dt\\
+&=\frac18x^4+o(x^4).
+\end{aligned}
+$$
+
+故原极限为 $1/8$。
+
+</Step>
 </Steps>
 
-<Callout type="warn" title="为何不能只做二阶泰勒相减？">
+<Callout type="warn" title="不要随意相减两个低阶余项">
 
-题目仅保证 $f''$ 在原点连续，$f(x)=f(0)+\frac12x^2+o(x^2)$ 中的两个余项相减，**不能直接**断言得到 $o(x^3)$。使用中值定理可以严格控制相邻自变量的函数值之差。
+虽有 $f(t)=f(0)+\frac12t^2+o(t^2)$，却不能把两个 $o(t^2)$ 余项相减后直接断定为 $o(t^3)$。本题应利用**中值定理**以及 $f'(s)=s+o(s)$ 充分控制相邻自变量的函数值差。
 
 </Callout>
 
@@ -548,54 +990,72 @@ $$
 
 <Solution>
 
-**答案：D，$\boxed{\dfrac13}$。**
+**答案：D。** 极限为 $\boxed{\dfrac13}$。
 
-<Tabs items={['方法一：直接积分与洛必达', '方法二：泰勒展开']} defaultIndex={0}>
-  <Tab value="方法一：直接积分与洛必达">
+**解题思路：** 被积区间的上限是 $x$，被积函数又含有 $xt$ 和 $x^2$；在积分前先令 $t=xu$，把积分区间变成固定的 $[0,1]$，能够一次性处理 $x\to0^+$ 与 $x\to0^-$。
 
-  对 $x\ne0$，
+<Tabs items={['方法一：固定区间换元（推荐）','方法二：先积分后求极限']} defaultIndex={0}>
+<Tab value="方法一：固定区间换元（推荐）">
 
-  $$
-  \int_0^x\big[\cos(xt)-\cos(x^2)\big]\,\mathrm dt
-  =\frac{\sin(x^2)}x-x\cos(x^2).
-  $$
+令 $t=xu$，此时 $\mathrm dt=x\,\mathrm du$，对 $x>0$、$x<0$ 均成立，原分子为
 
-  令 $u=x^2$，原极限化为
+$$
+x\int_0^1\bigl[\cos(x^2u)-\cos(x^2)\bigr] \,\mathrm du.
+$$
 
-  $$
-  \lim_{u\to0^+}\frac{\sin u-u\cos u}{u^3}.
-  $$
+使用 $\cos z=1-z^2/2+O(z^4)$，且 $0\le u\le1$ 时余项可一致控制，得到
 
-  对分子分母求导（分子导数为 $u\sin u$），得
+$$
+\cos(x^2u)-\cos(x^2)
+=\frac{x^4}{2}(1-u^2)+O(x^8).
+$$
 
-  $$
-  \lim_{u\to0^+}\frac{u\sin u}{3u^2}
-  =\frac13\lim_{u\to0^+}\frac{\sin u}{u}
-  =\boxed{\frac13}.
-  $$
+于是
 
-  </Tab>
-  <Tab value="方法二：泰勒展开">
+$$
+\begin{aligned}
+\frac{1}{x^5}\int_0^x[\cos(xt)-\cos(x^2)]\,\mathrm dt
+&=\frac12\int_0^1(1-u^2)\,\mathrm du+O(x^4)\\
+&=\frac12\left(1-\frac13\right)+O(x^4)\\
+&\longrightarrow\frac13.
+\end{aligned}
+$$
 
-  在 $u=0$ 附近，
+</Tab>
+<Tab value="方法二：先积分后求极限">
 
-  $$
-  \sin u=u-\frac{u^3}{6}+O(u^5),\qquad
-  \cos u=1-\frac{u^2}{2}+O(u^4).
-  $$
+对 $x\ne0$，
 
-  因此
+$$
+\int_0^x\bigl[\cos(xt)-\cos(x^2)\bigr] \,\mathrm dt
+=\frac{\sin(x^2)}x-x\cos(x^2).
+$$
 
-  $$
-  \sin u-u\cos u
-  =\left(\frac12-\frac16\right)u^3+O(u^5)
-  =\frac{u^3}{3}+O(u^5).
-  $$
+故原式化为
 
-  与 $u^3$ 相比，极限直接为 $1/3$。
+$$
+\frac{\sin(x^2)-x^2\cos(x^2)}{x^6}.
+$$
 
-  </Tab>
+令 $u=x^2\to0^+$，并展开
+
+$$
+\sin u-u\cos u
+=\left(u-\frac{u^3}{6}+O(u^5)\right)
+-u\left(1-\frac{u^2}{2}+O(u^4)\right)
+=\frac13u^3+O(u^5).
+$$
+
+除以 $u^3$ 后得 $1/3$。
+
+</Tab>
 </Tabs>
+
+<Callout type="idea" title="含参数的变限积分换元技巧">
+
+遇到 $\int_0^x F(x,t)\,\mathrm dt$，优先考虑 $t=xu$，将移动区间固定为 $[0,1]$；之后再用一致的泰勒展开，往往比直接对含参积分反复求导简明。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -610,70 +1070,89 @@ $$
 
 <Solution>
 
-**参考答案：**$\boxed{\dfrac32}$。
+**参考答案：**
 
-**过程**：分子与分母的主项分别为 $x$ 和 $x^2$，相减后要保留到常数项；只作一阶等价替换是不够的。
+$$
+\boxed{\frac32}.
+$$
 
-<Tabs items={['泰勒展开', '拆分极限']}>
-  <Tab value="泰勒展开">
+**解题思路：** 分子积分是 $x+O(x^2)$，而 $\ln^2(1+x)=x^2+O(x^3)$，所以第一个分式具有 $1/x$ 型发散项。既然题目又减去 $1/x$，要得到有限常数，就必须同时求出积分的二阶系数和分母的三阶系数。
 
-  在 $t\to0$ 时，$\arctan t=t+O(t^3)$，故
+<Tabs items={['方法一：泰勒展开（推荐）','方法二：巧妙拆成两个极限']} defaultIndex={0}>
+<Tab value="方法一：泰勒展开（推荐）">
 
-  $$
-  e^{\arctan t}\cos t=1+t+O(t^2),\qquad
-  \int_0^xe^{\arctan t}\cos t\,dt=x+\frac{x^2}{2}+O(x^3).
-  $$
+令 $A(x)=\int_0^x e^{\arctan t}\cos t\,\mathrm dt$。由 $\arctan t=t+O(t^3)$、$e^t=1+t+O(t^2)$、$\cos t=1+O(t^2)$，可得
 
-  又 $\ln(1+x)=x-\frac{x^2}{2}+O(x^3)$，所以
+$$
+e^{\arctan t}\cos t=1+t+O(t^2),
+$$
 
-  $$
-  \ln^2(1+x)=x^2-x^3+O(x^4).
-  $$
+故
 
-  于是
+$$
+A(x)=x+\frac12x^2+O(x^3).
+$$
 
-  $$
-  \begin{aligned}
-  \frac{\int_0^xe^{\arctan t}\cos t\,dt}{\ln^2(1+x)}
-  &=\frac1x\frac{1+\frac{x}{2}+O(x^2)}{1-x+O(x^2)}\\
-  &=\frac1x\left(1+\frac32x+O(x^2)\right)
-  =\frac1x+\frac32+O(x).
-  \end{aligned}
-  $$
+又有
 
-  因此 $I=\dfrac32$。
+$$
+\ln^2(1+x)=\left(x-\frac12x^2+O(x^3)\right)^2=x^2-x^3+O(x^4).
+$$
 
-  </Tab>
-  <Tab value="拆分极限">
+于是
 
-  通分后利用 $\ln^2(1+x)\sim x^2$，得
+$$
+\begin{aligned}
+\frac{A(x)}{\ln^2(1+x)}
+&=\frac1x\frac{1+x/2+O(x^2)}{1-x+O(x^2)}\\
+&=\frac1x\left(1+\frac32x+O(x^2)\right)\\
+&=\frac1x+\frac32+O(x).
+\end{aligned}
+$$
 
-  $$
-  \begin{aligned}
-  I&=\lim_{x\to0}\frac{x\int_0^xe^{\arctan t}\cos t\,dt-\ln^2(1+x)}{x\ln^2(1+x)}\\
-  &=\lim_{x\to0}\frac{\int_0^xe^{\arctan t}\cos t\,dt-x}{x^2}
-   +\lim_{x\to0}\frac{x^2-\ln^2(1+x)}{x^3}.
-  \end{aligned}
-  $$
+减去 $1/x$ 后极限为 $3/2$。
 
-  第一项由洛必达法则得
+</Tab>
+<Tab value="方法二：巧妙拆成两个极限">
 
-  $$
-  \lim_{x\to0}\frac{\int_0^xe^{\arctan t}\cos t\,dt-x}{x^2}
-  =\frac12\lim_{x\to0}\frac{e^{\arctan x}\cos x-1}{x}=\frac12.
-  $$
+精确恒等变形为
 
-  第二项分解平方差：
+$$
+\begin{aligned}
+\frac{A(x)}{\ln^2(1+x)}-\frac1x
+&=\frac{A(x)-x}{\ln^2(1+x)}\\
+&\quad+\frac{x^2-\ln^2(1+x)}{x\ln^2(1+x)}.
+\end{aligned}
+$$
 
-  $$
-  \lim_{x\to0}\frac{x+\ln(1+x)}x
-  \cdot\frac{x-\ln(1+x)}{x^2}=2\cdot\frac12=1.
-  $$
+对第一项，由 $\ln(1+x)/x\to1$，
 
-  相加即得 $I=\dfrac32$。
+$$
+\lim_{x\to0}\frac{A(x)-x}{\ln^2(1+x)}
+=\lim_{x\to0}\frac{A(x)-x}{x^2}
+=\lim_{x\to0}\frac{e^{\arctan x}\cos x-1}{2x}=\frac12.
+$$
 
-  </Tab>
+对第二项，分解平方差，
+
+$$
+\begin{aligned}
+\lim_{x\to0}\frac{x^2-\ln^2(1+x)}{x\ln^2(1+x)}
+&=\lim_{x\to0}\frac{x-\ln(1+x)}{x^2}\cdot\frac{x[x+\ln(1+x)]}{\ln^2(1+x)}\\
+&=\frac12\cdot2=1.
+\end{aligned}
+$$
+
+两项相加，得到 $I=\frac12+1=\frac32$。
+
+</Tab>
 </Tabs>
+
+<Callout type="warn" title="等价无穷小不能用于减法抵消">
+
+只使用 $A(x)\sim x$、$\ln^2(1+x)\sim x^2$，最多得到第一个分式 $\sim1/x$，并不能计算减去 $1/x$ 后的常数。必须精确到**下一阶**。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -684,21 +1163,71 @@ $$
 
 <Solution>
 
-**答案：** $ 2008$
+**参考答案：**
 
-**解析：** 由 $ \lim_{x\to3}f(x)=0$ 及可微性知 $ f(3)=0$，并且
+$$
+\boxed{2008}.
+$$
 
-$ f(s)=4016(s-3)+o(s-3)$。
+**解题思路：** 因 $f(3)=0$ 且 $f'(x)\to4016$，所以 $f(s)$ 在 $3$ 附近的一阶主项为 $4016(s-3)$。两次积分后变成三次小量，再注意分母 $(3-x)^3$ 与 $(x-3)^3$ 的符号相反。
 
-因此
+<Steps>
+<Step>
 
-$ \int_t^3f(s)ds=-2008(t-3)^2+o((t-3)^2)$。
+### 确定 $f$ 在 $x=3$ 附近的主项
 
-再乘 $ t=3+o(1)$ 并积分：
+$f$ 在 $3$ 附近可微，故在 $3$ 连续；结合 $\lim_{x\to3}f(x)=0$，有 $f(3)=0$。进一步由导数极限与拉格朗日中值定理知 $f'(3)=4016$，因而
 
-$ \int_3^x\left[t\int_t^3f(s)ds\right]dt=-2008(x-3)^3+o((x-3)^3)$。
+$$
+f(s)=4016(s-3)+o(s-3)\qquad(s\to3).
+$$
 
-而 $ (3-x)^3=-(x-3)^3$，故极限为 $ 2008$。
+</Step>
+<Step>
+
+### 先计算内层积分
+
+$$
+\begin{aligned}
+\int_t^3f(s)\,\mathrm ds
+&=4016\int_t^3(s-3)\,\mathrm ds+\int_t^3o(s-3)\,\mathrm ds\\
+&=-2008(t-3)^2+o((t-3)^2).
+\end{aligned}
+$$
+
+请注意：即使 $t<3$，上述带方向积分的展开同样成立。
+
+</Step>
+<Step>
+
+### 代入外层积分并判断符号
+
+由于 $t=3+O(t-3)$，有
+
+$$
+t\int_t^3f(s)\,\mathrm ds=-6024(t-3)^2+o((t-3)^2).
+$$
+
+故
+
+$$
+\begin{aligned}
+\int_3^x\left[t\int_t^3f(s)\,\mathrm ds\right]\mathrm dt
+&=-6024\cdot\frac{(x-3)^3}{3}+o((x-3)^3)\\
+&=-2008(x-3)^3+o((x-3)^3).
+\end{aligned}
+$$
+
+又 $(3-x)^3=-(x-3)^3$，所以所求极限为 $2008$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="阶数快速检查">
+
+$f(s)$ 在 $3$ 附近是一阶小量，内层积分增加一阶变二阶，外层积分再增加一阶变三阶；恰与分母的三次幂匹配。先做阶数判断，可防止漏掉一次积分。
+
+</Callout>
 
 </Solution>
 
@@ -710,57 +1239,145 @@ $ \lim\limits_{x\to0}\frac{1}{x}\int_{0}^{x}(1+\sin2t)^{\frac{1}{t}}dt=$
 
 <Solution>
 
-**答案：** $ e^2$
+**参考答案：**
 
-**解析：** 令
+$$
+\boxed{e^2}.
+$$
 
-$ \varphi(t)=(1+\sin2t)^{1/t}$。
+**解题思路：** 这是积分平均值的极限。关键不在于直接积分，而在于先求被积函数在 $t=0$ 附近的极限，并将可去间断点补成连续点。
 
-当 $ t\to0$ 时，
+<Steps>
+<Step>
 
-$ \ln\varphi(t)=\frac{\ln(1+\sin2t)}{t}\to2$，
+### 计算被积函数的极限
 
-故 $ \varphi(t)\to e^2$。由积分中值定理或积分平均值极限，
+令 $\varphi(t)=(1+\sin2t)^{1/t}$（$t\ne0$）。当 $|t|$ 充分小时，$1+\sin2t>0$，故取对数合法：
 
-$ \lim_{x\to0}\frac1x\int_0^x\varphi(t)dt=e^2$。
+$$
+\begin{aligned}
+\ln\varphi(t)
+&=\frac{\ln(1+\sin2t)}{t}\\
+&=\frac{\ln(1+\sin2t)}{\sin2t}\cdot\frac{\sin2t}{t}
+\longrightarrow1\cdot2=2.
+\end{aligned}
+$$
+
+所以 $\varphi(t)\to e^2$。
+
+</Step>
+<Step>
+
+### 补充定义并应用积分平均值极限
+
+给 $\varphi(0)$ 补定义为 $e^2$ 后，$\varphi$ 在 $0$ 连续。对任意足够小的 $x\ne0$，有
+
+$$
+\frac1x\int_0^x\varphi(t)\,\mathrm dt\longrightarrow\varphi(0)=e^2.
+$$
+
+该结论对 $x\to0^+$ 与 $x\to0^-$ 都成立，因为带方向的积分与分母 $x$ 同时变号。
+
+</Step>
+</Steps>
+
+<Callout type="info" title="积分平均值极限公式">
+
+若 $\varphi(t)\to L$（$t\to0$），且在零点附近可积，则
+
+$$
+\lim_{x\to0}\frac1x\int_0^x\varphi(t)\,\mathrm dt=L.
+$$
+
+等价地，也可对分子、分母使用洛必达法则，结果同为 $\varphi(0)$（按连续延拓理解）。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点5：由极限条件反求函数与参数
+## 五、根据极限反推函数、参数与隐含条件
 
 <Question id="selected-1103-math-461806-012" type="blank">
 
 设
 
 $$
- \lim_{x\to0}\frac{\sqrt{1+f(x)\tan x}-1}{e^{2x}-1}=3,
+\lim_{x\to0}\frac{\sqrt{1+f(x)\tan x}-1}{e^{2x}-1}=3,
 $$
 
 则 $\lim\limits_{x\to0}f(x)=$ <Blank answer="12" kind="math" />。
 
 <Solution>
 
-**答案：** $ 12$
+**答案：**
 
-**解析：** 由题设极限有限可知 $ f(x)\tan x\to0$。利用
 $$
- \sqrt{1+u}-1\sim\frac u2,
-\qquad
-e^{2x}-1\sim2x,
-\qquad
-\tan x\sim x,
+\boxed{12}.
 $$
-得
+
+**解题思路：** 与其一开始就假设 $f(x)$ 有极限，不如先把根式有理化，将未知函数从根号中提出，再逐步由已知极限反推出它的极限。
+
+<Steps>
+<Step>
+
+### 利用已知商确定分子趋于零
+
+因 $e^{2x}-1\to0$，且已知商趋于有限值 $3$，因此
+
 $$
- 3=\lim_{x\to0}\frac{\frac12f(x)\tan x}{2x}
-=\frac14\lim_{x\to0}f(x).
+\sqrt{1+f(x)\tan x}-1\to0,
 $$
-所以
+
+从而 $f(x)\tan x\to0$，且 $\sqrt{1+f(x)\tan x}\to1$。
+
+</Step>
+<Step>
+
+### 根式有理化并解出 $f(x)$
+
+在 $x\ne0$ 时，
+
 $$
- \lim_{x\to0}f(x)=12.
+\frac{\sqrt{1+f(x)\tan x}-1}{e^{2x}-1}
+=\frac{f(x)\tan x}{[e^{2x}-1]\,[\sqrt{1+f(x)\tan x}+1]}.
 $$
+
+因此可写成恒等式
+
+$$
+f(x)
+=\frac{\sqrt{1+f(x)\tan x}-1}{e^{2x}-1}
+\cdot\frac{e^{2x}-1}{\tan x}
+\cdot\bigl[\sqrt{1+f(x)\tan x}+1\bigr].
+$$
+
+</Step>
+<Step>
+
+### 分别对三个因子求极限
+
+依次有
+
+$$
+\begin{aligned}
+\frac{\sqrt{1+f(x)\tan x}-1}{e^{2x}-1}&\to3,\\
+\frac{e^{2x}-1}{\tan x}&\to2,\\
+\sqrt{1+f(x)\tan x}+1&\to2.
+\end{aligned}
+$$
+
+三者相乘，得 $\lim_{x\to0}f(x)=3\times2\times2=12$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="避免循环论证">
+
+在并不知道 $f(x)\to L$ 的情况下，不能先写 $\sqrt{1+f(x)\tan x}-1\sim f(x)\tan x/2$ 就直接把 $L$ 当作已知。本解通过已知极限先证明 $f(x)\tan x\to0$，再有理化，逻辑更严密。
+
+</Callout>
 
 </Solution>
 
@@ -771,7 +1388,7 @@ $$
 若
 
 $$
- \lim_{x\to0}\frac{\ln(1-2x^3)+xf(x)}{x^6}=3,
+\lim_{x\to0}\frac{\ln(1-2x^3)+xf(x)}{x^6}=3,
 $$
 
 则
@@ -786,26 +1403,60 @@ $$
 
 <Solution>
 
-**答案：** $ 5$
-
-**解析：**
+**答案：**
 
 $$
- \ln(1-2x^3)=-2x^3-2x^6+o(x^6).
+\boxed{5}.
 $$
 
+**解题思路：** 已知式的分母为 $x^6$，要把对数展开到六阶。对数的前三阶中，因自变量是 $-2x^3$，只需保留到 $(x^3)^2$，即可提取未知函数的目标表达式。
 
+<Steps>
+<Step>
 
+### 对对数进行准确展开
 
-于是
+由 $\ln(1+u)=u-\frac{u^2}{2}+o(u^2)$，取 $u=-2x^3$，得到
+
 $$
- \frac{\ln(1-2x^3)+xf(x)}{x^6}
-=\frac{f(x)-2x^2}{x^5}-2+o(1).
+\ln(1-2x^3)=-2x^3-2x^6+o(x^6).
 $$
-左端极限为 $ 3$，故
+
+</Step>
+<Step>
+
+### 使已知式包含待求商
+
 $$
- \lim_{x\to0}\frac{f(x)-2x^2}{x^5}=3+2=5.
+\begin{aligned}
+\frac{\ln(1-2x^3)+xf(x)}{x^6}
+&=\frac{xf(x)-2x^3-2x^6+o(x^6)}{x^6}\\
+&=\frac{f(x)-2x^2}{x^5}-2+o(1).
+\end{aligned}
 $$
+
+</Step>
+<Step>
+
+### 利用已知极限反推
+
+记待求极限为 $L$。原题给定的极限为 $3$，故
+
+$$
+3=L-2,
+\qquad L=5.
+$$
+
+因此 $\displaystyle\lim_{x\to0}\frac{f(x)-2x^2}{x^5}=5$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="反求未知函数渐近式">
+
+已知极限还蕴含 $f(x)=2x^2+5x^5+o(x^5)$。做这类题时，可以先把已知式整理成“待求量＋已知常数＋趋零项”，再直接读取极限。
+
+</Callout>
 
 </Solution>
 
@@ -817,25 +1468,76 @@ $$
 
 <Solution>
 
-**答案：** $ e^3$
+**参考答案：**
 
-**解析：** 令
+$$
+\boxed{e^3}.
+$$
 
-$ u(x)=2x+3x^2+\frac{f(x)}x$。
+**解题思路：** 第一条极限为 $e^5$，其对数就趋于 $5$。因此第一条式子的底数相对于 $1$ 的一阶变化量是 $5x$。去掉其中已知的 $2x+3x^2$，即可找出第二条式子所需的主项。
 
-由 $ [1+u(x)]^{1/x}\to e^5$ 得
+<Steps>
+<Step>
 
-$ \frac{\ln(1+u(x))}{x}\to5$，从而 $ u(x)=5x+o(x)$。
+### 将已知幂指极限改写为对数极限
 
-因此
+设
 
-$ \frac{f(x)}x=3x+o(x)$。
+$$
+A(x)=1+2x+3x^2+\frac{f(x)}x.
+$$
 
-于是
+由题设 $A(x)^{1/x}\to e^5>0$，对数连续性给出
 
-$ \lim_{x\to0}\frac1x\ln\left(1+\frac{f(x)}x\right)=3$，
+$$
+\lim_{x\to0}\frac{\ln A(x)}x=5.
+$$
 
-所求极限为 $ e^3$。
+于是 $\ln A(x)=5x+o(x)$，再利用 $e^u=1+u+o(u)$，得
+
+$$
+A(x)=e^{5x+o(x)}=1+5x+o(x).
+$$
+
+</Step>
+<Step>
+
+### 单独提取未知函数部分
+
+由 $A(x)$ 的定义，
+
+$$
+\frac{f(x)}x
+=A(x)-1-2x-3x^2
+=3x+o(x).
+$$
+
+因此 $f(x)=3x^2+o(x^2)$，而第二条极限的底数满足
+
+$$
+1+\frac{f(x)}x=1+3x+o(x).
+$$
+
+</Step>
+<Step>
+
+### 再取一次对数求极限
+
+$$
+\lim_{x\to0}\frac1x\ln\left(1+\frac{f(x)}x\right)
+=\lim_{x\to0}\frac{3x+o(x)}x=3.
+$$
+
+故所求极限为 $e^3$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="不要直接拆开幂指式的加法底数">
+
+$\bigl[1+2x+3x^2+f(x)/x\bigr]^{1/x}$ **不等于** $(1+2x)^{1/x}(1+3x^2+f(x)/x)^{1/x}$。必须先通过对数或渐近展开提取各项的一阶贡献。
+
+</Callout>
 
 </Solution>
 
@@ -846,7 +1548,7 @@ $ \lim_{x\to0}\frac1x\ln\left(1+\frac{f(x)}x\right)=3$，
 设
 
 $$
- \lim_{x\to0}\frac1{bx-\sin x}\int_0^x\frac{t^2}{\sqrt{a^2+t^2}}\,dt=4,
+\lim_{x\to0}\frac1{bx-\sin x}\int_0^x\frac{t^2}{\sqrt{a^2+t^2}}\,dt=4,
 $$
 
 则 $a=$ <Blank answer="\pm\frac12" kind="text" placeholder="输入文字或 LaTeX" />，$b=$ <Blank answer="1" kind="math" />。
@@ -856,36 +1558,93 @@ $$
 **答案：**
 
 $$
- a=\pm\frac12,
-\qquad
+\boxed{a=\pm\frac12,\qquad b=1}.
+$$
+
+**解题思路：** 先讨论 $a=0$ 是否可能，再比较分子与分母的无穷小阶数。积分含 $\sqrt{a^2+t^2}$，最终取决于 $|a|$ 而不是 $a$ 的符号。
+
+<Steps>
+<Step>
+
+### 排除 $a=0$
+
+若 $a=0$，被积函数化为 $|t|$，故
+
+$$
+\int_0^x\frac{t^2}{\sqrt{t^2}}\,\mathrm dt
+=\frac12x|x|.
+$$
+
+而
+
+$$
+bx-\sin x=(b-1)x+\frac{x^3}{6}+O(x^5).
+$$
+
+若 $b\ne1$，原比值趋于 $0$；若 $b=1$，原比值的绝对值趋于无穷大。均不可能得到给定的极限 $4$，故 $a\ne0$。
+
+</Step>
+<Step>
+
+### 展开积分的三阶主项
+
+因 $a\ne0$，当 $t\to0$ 时，
+
+$$
+\frac{t^2}{\sqrt{a^2+t^2}}
+=\frac{t^2}{|a|}+O(t^4).
+$$
+
+由此
+
+$$
+\int_0^x\frac{t^2}{\sqrt{a^2+t^2}}\,\mathrm dt
+=\frac{x^3}{3|a|}+O(x^5).
+$$
+
+</Step>
+<Step>
+
+### 由阶数匹配确定 $b$
+
+若 $b\ne1$，分母主项为 $(b-1)x$，与三阶分子相除后趋于 $0$。题目要求极限为 $4$，因此只能取
+
+$$
 b=1.
 $$
 
+此时
 
+$$
+bx-\sin x=x-\sin x=\frac{x^3}{6}+O(x^5).
+$$
 
+</Step>
+<Step>
 
-若约定 $ a>0$，则 $ a=1/2$。
+### 比较系数，求出 $a$
 
-**解析：** 当 $ a\ne0$ 时，
 $$
- \int_0^x\frac{t^2}{\sqrt{a^2+t^2}}\,dt
-=\frac{x^3}{3|a|}+o(x^3).
+4=\lim_{x\to0}\frac{x^3/(3|a|)+O(x^5)}{x^3/6+O(x^5)}
+=\frac{2}{|a|}.
 $$
-又
-$$
- bx-\sin x=(b-1)x+\frac{x^3}{6}+o(x^3).
-$$
-若 $ b\ne1$，原比值趋于零，不可能等于 $ 4$，故 $ b=1$。此时
-$$
- 4=\frac{1/(3|a|)}{1/6}=\frac2{|a|},
-$$
-从而 $ |a|=1/2$。
+
+所以 $|a|=\frac12$，即 $a=\pm\frac12$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="平方根中的绝对值不能丢">
+
+$\sqrt{a^2}=|a|$。题目没有给 $a>0$，所以必须保留正、负两种结果；只有额外规定 $a>0$ 时，才可写 $a=1/2$。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点6：无穷远极限与渐近比较
+## 六、无穷远极限：等价阶与对数增长
 
 <Question id="selected-1103-math-0ed1ba-046" type="essay">
 
@@ -893,15 +1652,83 @@ $$
 
 <Solution>
 
-**答案：** $-\dfrac12$。
+**参考答案：**
 
-**解析：** 当 $x \to +\infty$ 时，$1 - e^{\frac{1}{x}} \sim -\frac{1}{x}$，故
-$$\lim_{x\to +\infty} \frac{\frac{1}{x^3}\int_1^x \left[(1+t^2)\sin\frac{1}{t} - \cos t\right] dt}{1 - e^{\frac{1}{x}}} = \lim_{x\to +\infty} \frac{\int_1^x \left[(1+t^2)\sin\frac{1}{t} - \cos t\right] dt}{-x^2}$$
-$$\underset{\text{法则}}{\overset{\text{洛必达}}{=}} \lim_{x\to +\infty} \frac{(1+x^2)\sin\frac{1}{x} - \cos x}{-2x} = \lim_{x\to +\infty} \frac{x^2\sin\frac{1}{x}}{-2x} + \lim_{x\to +\infty} \frac{\sin\frac{1}{x} - \cos x}{-2x}.$$
-当 $x \to +\infty$ 时，$\sin\frac{1}{x} \to 0$，$|\cos x| \leqslant 1$，即 $\sin\frac{1}{x} - \cos x$ 有界，且分母 $-2x$ 趋于无穷大，
-故
-$$\lim_{x\to +\infty} \frac{\sin\frac{1}{x} - \cos x}{-2x} = 0.$$
-又 $\lim_{x\to +\infty} \frac{x^2\sin\frac{1}{x}}{-2x} = -\frac{1}{2}\lim_{x\to +\infty} \frac{\sin\frac{1}{x}}{\frac{1}{x}} = -\frac{1}{2}$，故原式 $= -\frac{1}{2} + 0 = -\frac{1}{2}$。
+$$
+\boxed{-\frac12}.
+$$
+
+**解题思路：** 分母 $1-e^{1/x}$ 约为 $-1/x$，因此整个分式等价于“积分除以 $-x^2$”。被积函数中，$(1+t^2)\sin(1/t)$ 的主项是 $t$，而 $-\cos t$ 积分只产生有界振荡项，不影响二次增长的主项。
+
+<Tabs items={['方法一：积分渐近分解（推荐）','方法二：先化简再用洛必达']} defaultIndex={0}>
+<Tab value="方法一：积分渐近分解（推荐）">
+
+当 $t\to+\infty$ 时，$\sin(1/t)=1/t+O(t^{-3})$，所以
+
+$$
+(1+t^2)\sin\frac1t=t+O\left(\frac1t\right).
+$$
+
+因此
+
+$$
+\begin{aligned}
+\int_1^x\left[(1+t^2)\sin\frac1t-\cos t\right]\mathrm dt
+&=\int_1^x\left(t+O(t^{-1})-\cos t\right)\mathrm dt\\
+&=\frac{x^2}{2}+O(\ln x)+O(1)\\
+&=\frac{x^2}{2}+o(x^2).
+\end{aligned}
+$$
+
+此外，
+
+$$
+1-e^{1/x}=-\frac1x+O(x^{-2}).
+$$
+
+所以原式为
+
+$$
+\frac{x^{-3}[x^2/2+o(x^2)]}{-x^{-1}+O(x^{-2})}
+\longrightarrow-\frac12.
+$$
+
+</Tab>
+<Tab value="方法二：先化简再用洛必达">
+
+记
+
+$$
+F(x)=\int_1^x\left[(1+t^2)\sin\frac1t-\cos t\right]\mathrm dt.
+$$
+
+由 $x(1-e^{1/x})\to-1$，原式可写为
+
+$$
+\frac{F(x)}{x^2}\cdot\frac{1}{x(1-e^{1/x})}.
+$$
+
+因为 $F(x)$ 与 $x^2$ 均趋向 $+\infty$，可以用洛必达法则：
+
+$$
+\begin{aligned}
+\lim_{x\to+\infty}\frac{F(x)}{x^2}
+&=\lim_{x\to+\infty}\frac{(1+x^2)\sin(1/x)-\cos x}{2x}\\
+&=\frac12\lim_{x\to+\infty}\left[\left(x+\frac1x\right)\sin\frac1x-\frac{\cos x}{x}\right]\\
+&=\frac12.
+\end{aligned}
+$$
+
+而第二因子趋于 $-1$，因此乘积极限为 $-1/2$。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="识别积分增长阶数">
+
+若被积函数为 $t+O(1/t)$ 加一个积分有界的振荡项，则从固定下限积分到 $x$ 的增长主项是 $x^2/2$。本题的 $-\cos t$ 的原函数是 $-\sin t$，仅贡献有界量。
+
+</Callout>
 
 </Solution>
 
@@ -913,19 +1740,59 @@ $$\lim_{x\to +\infty} \frac{\sin\frac{1}{x} - \cos x}{-2x} = 0.$$
 
 <Solution>
 
-**答案：** $ 1$
+**参考答案：**
 
-**解析：** 由 $ f(x)/g(x)\to a>0$，可写成
+$$
+\boxed{1}.
+$$
 
-$ \ln f(x)=\ln g(x)+\ln\frac{f(x)}{g(x)}$。
+**解题思路：** $f(x)$ 与 $g(x)$ 都趋于正无穷，并且 $f(x)/g(x)\to a>0$，说明两者具有相同的增长阶。取对数后，它们的差仅趋于有限常数 $\ln a$，而分母 $\ln g(x)$ 趋于无穷。
 
-因为 $ g(x)\to+\infty$，所以 $ \ln g(x)\to+\infty$，而
+<Steps>
+<Step>
 
-$ \ln\frac{f(x)}{g(x)}\to\ln a$。
+### 使用对数恒等式
 
-故
+因为 $f(x)\to+\infty$、$g(x)\to+\infty$，在足够大的 $x$ 上它们都为正，且 $\ln g(x)\ne0$。于是
 
-$ \frac{\ln f(x)}{\ln g(x)}=1+\frac{\ln(f/g)}{\ln g}\to1$。
+$$
+\frac{\ln f(x)}{\ln g(x)}
+=\frac{\ln g(x)+\ln[f(x)/g(x)]}{\ln g(x)}
+=1+\frac{\ln[f(x)/g(x)]}{\ln g(x)}.
+$$
+
+</Step>
+<Step>
+
+### 分别计算修正项的分子与分母
+
+由 $f(x)/g(x)\to a>0$ 和对数连续性，
+
+$$
+\ln\frac{f(x)}{g(x)}\to\ln a\quad\text{（有限常数）}.
+$$
+
+同时 $g(x)\to+\infty$，所以 $\ln g(x)\to+\infty$。
+
+</Step>
+<Step>
+
+### 得出极限
+
+$$
+\frac{\ln[f(x)/g(x)]}{\ln g(x)}\longrightarrow0,
+\qquad
+\frac{\ln f(x)}{\ln g(x)}\longrightarrow1.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="条件 $a>0$ 的作用">
+
+只有 $f(x)/g(x)\to a>0$，才能保证 $\ln[f(x)/g(x)]\to\ln a$ 是有限值。若该比值趋于 $0$，结论可能改变，例如 $f(x)=x$、$g(x)=x^2$ 时，对数之比为 $1/2$。
+
+</Callout>
 
 </Solution>
 

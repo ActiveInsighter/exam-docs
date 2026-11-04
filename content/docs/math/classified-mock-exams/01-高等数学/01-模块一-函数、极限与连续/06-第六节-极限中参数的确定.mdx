@@ -1,13 +1,11 @@
 ---
-title: "第六节 极限中参数的确定｜主项配平、双侧条件与泰勒消元"
-description: "参照真题核心题目参数求解命题，精选无穷小等价匹配、极限逆推、分段双侧条件、积分渐近与多阶泰勒系数消去。"
+title: "6. 极限中参数的确定"
+description: "20 道极限参数题全部完成深度重构：低阶系数配平、积分双端渐近、左右极限参数、取整函数、无穷远展开与高阶泰勒逼近。"
 ---
 
-# 第六节 极限中参数的确定｜主项配平、双侧条件与泰勒消元
+精选 **20 道题**，本节已全部重写解析。依次训练系数配平、函数与未知参数反推、积分主项的双端比较、取整与绝对值导致的左右极限差异，以及高阶泰勒近似。每题先给结论，再完整论证必要性、充分性及易错条件。
 
-精选 **20 道题**，对应「真题核心题目」同名小节。按命题考点归类，完整保留原始题干、选项、答案、解析和 MDX 组件。
-
-## 考点1：无穷小等价与系数匹配
+## 一、等价无穷小：消去低阶项与系数匹配
 
 <Question id="selected-1103-classified-1031-lilin-2027-s1-q01" type="single" points={5} tags="来源:李林六套卷, 考点:等价无穷小, 难度:基础" number={1}>
 
@@ -20,42 +18,54 @@ description: "参照真题核心题目参数求解命题，精选无穷小等价
 
 <Solution>
 
+**参考答案：A．$a=-1,\ b=2$。**
+
+**解题思路：**等价无穷小要求两式的比值趋于 $1$。分母从 $x^2$ 起步，所以分子的 $x$ 项必须消失，$x^2$ 项系数还必须与分母完全相同。
+
 <Steps>
-  <Step>
+<Step>
 
-  ### 确定分母的首项
+### 求出比较对象的首项
 
-  由泰勒展开，
+用 $e^{x^2}=1+x^2+O(x^4)$、$\cos x=1-x^2/2+O(x^4)$，可得
 
-  $$
-  e^{x^2}-\cos x=\left(1+x^2+O(x^4)\right)-\left(1-\frac{x^2}{2}+O(x^4)\right)
-  =\frac32x^2+O(x^4).
-  $$
+$$
+e^{x^2}-\cos x=\frac32x^2+O(x^4).
+$$
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### 匹配分子的同阶项
+### 展开待定系数表达式并配平
 
-  $$
-  ax+bx^2+\ln(1+x)
-  =(a+1)x+\left(b-\frac12\right)x^2+O(x^3).
-  $$
+$$
+\begin{aligned}
+ax+bx^2+\ln(1+x)
+&=ax+bx^2+x-\frac{x^2}{2}+O(x^3)\\
+&=(a+1)x+\left(b-\frac12\right)x^2+O(x^3).
+\end{aligned}
+$$
 
-  要使二者等价，分子不能有一次项，且二次项系数须为 $\frac32$，所以
+若 $a+1\ne0$，分子为一阶而分母为二阶，比值不可能趋于 $1$，故 $a=-1$。此时要使比值为 $1$，还须
 
-  $$
-  a+1=0,\qquad b-\frac12=\frac32.
-  $$
+$$
+\frac{b-\frac12}{\frac32}=1
+\quad\Longrightarrow\quad b=2.
+$$
 
-  解得 $a=-1,\ b=2$，故选 **A**。
+</Step>
+<Step>
 
-  </Step>
+### 回代验证充分性
+
+取 $a=-1,b=2$ 时，分子 $=\dfrac32x^2+O(x^3)$，分母 $=\dfrac32x^2+O(x^4)$，比值确实趋于 $1$。
+
+</Step>
 </Steps>
 
-<Callout type="warn" title="易错点">
+<Callout type="warn" title="同阶与等价的区别">
 
-“等价无穷小”要求比值趋于 $1$，不仅要求两者同为二阶无穷小。
+只让 $b-1/2\ne0$ 能保证同阶，却不能保证等价；等价必须满足 $b-1/2=3/2$。
 
 </Callout>
 
@@ -73,15 +83,46 @@ description: "参照真题核心题目参数求解命题，精选无穷小等价
 
 <Solution>
 
-左侧
+**参考答案：C．$\displaystyle(a,b)=\left(\frac12,1\right)$。**
 
-$ a\int_0^{x^2}\cos t^2dt\sim ax^2$。
+**解题思路：**积分上限是 $x^2$，被积函数在零点取值 $1$，故左式是二阶无穷小；右式则先消去一次项，再匹配二次项。
 
-右侧展开为
+<Steps>
+<Step>
 
-$ \sin x-b\ln(1+x)=(1-b)x+\frac b2x^2+o(x^2)$。
+### 判断积分的主阶
 
-要与左侧等价，先须 $ b=1$，此时右侧 $ \sim\frac12x^2$，再得 $ a=\frac12$。
+由于 $\cos(t^2)=1+O(t^4)$，
+
+$$
+\int_0^{x^2}\cos(t^2)\,\mathrm dt
+=x^2+O(x^{10}).
+$$
+
+所以左式 $=ax^2+o(x^2)$。若要成为非零的等价无穷小，必有 $a\ne0$。
+
+</Step>
+<Step>
+
+### 消去右式的一次项并匹配系数
+
+利用 $\sin x=x+O(x^3)$、$\ln(1+x)=x-x^2/2+O(x^3)$，
+
+$$
+\sin x-b\ln(1+x)
+=(1-b)x+\frac b2x^2+O(x^3).
+$$
+
+要与二阶的左式等价，先使 $1-b=0$，得 $b=1$。再比较二次项：$a=b/2=1/2$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="变上限积分的主项">
+
+若 $f$ 在 $0$ 连续且 $f(0)=c\ne0$，则 $\int_0^{u(x)}f(t)\,\mathrm dt\sim c\,u(x)$（$u(x)\to0$）。这一步经常能让复杂积分直接降为参数配平问题。
+
+</Callout>
 
 </Solution>
 
@@ -93,19 +134,68 @@ $ \sin x-b\ln(1+x)=(1-b)x+\frac b2x^2+o(x^2)$。
 
 <Solution>
 
-**答案：** $ 2$
+**参考答案：$\boxed{ab=2}$。** 更精确地，$\displaystyle a=\frac23,\ b=3$。
 
-**解析：** 注意
+**解题思路：**对数项和反正切项的一次项都是 $x$，相减后首个非零项为三次项。可用泰勒展开，也可利用导数的结构避免背公式。
 
-$ \frac12\ln\frac{1+x}{1-x}=x+\frac13x^3+\frac15x^5+\cdots$，
+<Tabs items={['方法一：泰勒展开', '方法二：求导再积分']} defaultIndex={0}>
+<Tab value="方法一：泰勒展开">
 
-$ \arctan x=x-\frac13x^3+\frac15x^5-\cdots$。
+由于 $\lvert x\rvert<1$ 时
 
-相减得
+$$
+\begin{aligned}
+\frac12\ln\frac{1+x}{1-x}
+&=x+\frac{x^3}{3}+\frac{x^5}{5}+O(x^7),\\
+\arctan x
+&=x-\frac{x^3}{3}+\frac{x^5}{5}+O(x^7),
+\end{aligned}
+$$
 
-$ f(x)\sim\frac23x^3$。
+相减得到
 
-故 $ a=\frac23,\ b=3$，于是 $ ab=2$。
+$$
+f(x)=\frac23x^3+O(x^7)\sim\frac23x^3.
+$$
+
+故 $a=2/3$、$b=3$，从而 $ab=2$。
+
+</Tab>
+<Tab value="方法二：求导再积分">
+
+设
+
+$$
+F(x)=\frac12\ln\frac{1+x}{1-x}-\arctan x.
+$$
+
+则 $F(0)=0$，并且
+
+$$
+\begin{aligned}
+F'(x)
+&=\frac{1}{1-x^2}-\frac{1}{1+x^2}\\
+&=\frac{2x^2}{1-x^4}=2x^2+O(x^6).
+\end{aligned}
+$$
+
+因此
+
+$$
+F(x)=\int_0^xF'(t)\,\mathrm dt
+=\frac23x^3+O(x^7).
+$$
+
+仍得到 $ab=2$。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="先检验抵消再判阶">
+
+两部分各自均为一阶小量，但它们的差不是一阶。相减型极限必须保留到首个**未被抵消**的项。
+
+</Callout>
 
 </Solution>
 
@@ -117,15 +207,43 @@ $ f(x)\sim\frac23x^3$。
 
 <Solution>
 
-**答案：** $ f(x)=1+\frac12x^2$
+**参考答案：$\displaystyle\boxed{f(x)=1+\frac12x^2}$。**
 
-**解析：** 在 $ x=0$ 处
+**解题思路：**题设要求 $f(x)-\sec x=o(x^2)$，这比“误差趋于零”更严格：常数项、一次项、二次项都必须匹配 $\sec x$ 在零点的二阶泰勒多项式。
 
-$ \sec x=1+\frac12x^2+o(x^2)$。
+<Steps>
+<Step>
 
-若二次多项式 $ f(x)$ 与 $ \sec x$ 的差为 $ o(x^2)$，则其常数项、一次项、二次项必须分别与上述泰勒多项式一致。
+### 求 $\sec x$ 的二阶展开
 
-故 $ f(x)=1+\frac12x^2$。
+因为 $\cos x=1-x^2/2+O(x^4)$，且 $\dfrac1{1-u}=1+u+O(u^2)$，
+
+$$
+\sec x=\frac1{\cos x}
+=1+\frac{x^2}{2}+O(x^4).
+$$
+
+</Step>
+<Step>
+
+### 逐阶确定三个系数
+
+令 $f(x)=A+Bx+Cx^2$。则
+
+$$
+f(x)-\sec x=(A-1)+Bx+\left(C-\frac12\right)x^2+O(x^4).
+$$
+
+若上式是 $o(x^2)$，依次必须有 $A-1=0$、$B=0$、$C-1/2=0$。故 $f(x)=1+x^2/2$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="一般原则">
+
+若 $g$ 在 $0$ 有 $n$ 阶泰勒展开，那么满足 $g(x)-P_n(x)=o(x^n)$ 的次数不超过 $n$ 的多项式 $P_n$ 唯一，即它的 $n$ 阶泰勒多项式。
+
+</Callout>
 
 </Solution>
 
@@ -136,47 +254,68 @@ $ \sec x=1+\frac12x^2+o(x^2)$。
 设
 
 $$
- \lim_{x\to0}\left(x^{-3}\sin3x+ax^{-2}+b\right)=0,
+\lim_{x\to0}\left(x^{-3}\sin3x+ax^{-2}+b\right)=0,
 $$
 
 试确定常数 $ a,b$ 的值。
 
 <Solution>
 
-**答案：**
+**参考答案：$\displaystyle\boxed{a=-3,\qquad b=\frac92}$。**
+
+**解题思路：**原式含 $x^{-3}\sin3x$，直接代入出现发散的 $x^{-2}$ 项。要使总极限为零，需先消去发散项，再消去常数项。
+
+<Steps>
+<Step>
+
+### 将正弦展开至三次项
 
 $$
- a=-3,
-\qquad
-b=\frac92.
+\sin3x=3x-\frac{(3x)^3}{6}+O(x^5)
+=3x-\frac92x^3+O(x^5).
 $$
 
-**解析：** 由
+所以
+
 $$
- \sin3x=3x-\frac{(3x)^3}{3!}+\frac{(3x)^5}{5!}+o(x^5),
+x^{-3}\sin3x=\frac3{x^2}-\frac92+O(x^2).
 $$
-得
+
+</Step>
+<Step>
+
+### 先消去发散项，再消去常数项
+
 $$
- x^{-3}\sin3x
-=\frac3{x^2}-\frac92+\frac{81}{40}x^2+o(x^2).
+\begin{aligned}
+x^{-3}\sin3x+ax^{-2}+b
+&=\frac{3+a}{x^2}+\left(b-\frac92\right)+O(x^2).
+\end{aligned}
 $$
-于是
-$$
- x^{-3}\sin3x+ax^{-2}+b
-=\frac{3+a}{x^2}+b-\frac92+o(1).
-$$
-要使极限为 $ 0$，必须有
-$$
- 3+a=0,
-\qquad
-b-\frac92=0.
-$$
+
+若 $3+a\ne0$，首项发散，不可能有零极限，故 $a=-3$。此时极限等于 $b-9/2$，要使其为零，取 $b=9/2$。
+
+</Step>
+<Step>
+
+### 回代检查
+
+代回后原表达式 $=O(x^2)\to0$，题设成立。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="展开阶数要由分母决定">
+
+$\sin3x$ 不能仅写成 $3x+o(x)$，因为除以 $x^3$ 后无法确定常数项；至少保留 $x^3$ 项。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：极限条件反求函数与未知参数
+## 二、极限反推：函数展开、零点条件与无穷远参数
 
 <Question id="selected-1103-classified-1031-liyongle-2027-s5-q11" type="blank" points={5} tags="来源:李永乐六套卷, 考点:泰勒展开与极限, 难度:中等">
 
@@ -190,60 +329,63 @@ $$
 
 <Solution>
 
-**答案：** $\boxed{-12}$。
+**参考答案：$\boxed{-12}$。**
+
+**解题思路：**原极限为零等价于 $f(x)\tan x-\sin4x=o(x^3)$。由于 $\tan x\sim x$，这实际上将 $f(x)$ 精确到 $o(x^2)$；把 $f-4$ 变成含已知差的形式，便能避免直接求未知函数。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 利用条件提取余项
+### 从极限条件得到高阶误差
 
-  题设等价于
+设 $R(x)=f(x)\tan x-\sin4x$，则 $R(x)=o(x^3)$。在 $x\ne0$ 充分小时，$\tan x\ne0$，所以
 
-  $$
-  f(x)\tan x-\sin4x=o(x^3).
-  $$
+$$
+f(x)=\frac{\sin4x}{\tan x}+\frac{R(x)}{\tan x}
+=\frac{\sin4x}{\tan x}+o(x^2).
+$$
 
-  由于 $\tan x\sim x$，当 $x\ne0$ 且趋于 $0$ 时，
+</Step>
+<Step>
 
-  $$
-  f(x)=\frac{\sin4x}{\tan x}+o(x^2).
-  $$
+### 为目标极限构造可计算的差
 
-  </Step>
-  <Step>
+$$
+\frac{f(x)-4}{x^2}
+=\frac{R(x)}{x^2\tan x}
++\frac{\sin4x-4\tan x}{x^2\tan x}.
+$$
 
-  ### 展开到二阶并求极限
+第一项为 $o(x^3)/(x^3+o(x^3))\to0$。对第二项，利用
 
-  使用
+$$
+\sin4x=4x-\frac{32}{3}x^3+o(x^3),\qquad
+\tan x=x+\frac{x^3}{3}+o(x^3),
+$$
 
-  $$
-  \sin4x=4x-\frac{32}{3}x^3+o(x^3),\qquad
-  \tan x=x+\frac{x^3}{3}+o(x^3),
-  $$
+得
 
-  得到
+$$
+\sin4x-4\tan x
+=\left(-\frac{32}{3}-\frac43\right)x^3+o(x^3)
+=-12x^3+o(x^3).
+$$
 
-  $$
-  \begin{aligned}
-  \sin4x-4\tan x
-  &=\left(-\frac{32}{3}-\frac43\right)x^3+o(x^3)\\
-  &=-12x^3+o(x^3).
-  \end{aligned}
-  $$
+</Step>
+<Step>
 
-  故
+### 代回得到答案
 
-  $$
-  \frac{f(x)-4}{x^2}
-  =\frac{f(x)\tan x-\sin4x}{x^2\tan x}
-   +\frac{\sin4x-4\tan x}{x^2\tan x}
-  \longrightarrow 0-12=\boxed{-12}.
-  $$
+由于 $x^2\tan x\sim x^3$，目标极限就是 $0+(-12)=-12$。
 
-  </Step>
+</Step>
 </Steps>
 
-<Callout type="idea" title="展开阶数">分母最终为三阶无穷小，因此 $\sin4x$ 和 $\tan x$ 必须保留到 $x^3$ 项。</Callout>
+<Callout type="idea" title="反求未知函数的通用方法">
+
+若 $f(x)g(x)-h(x)=o(x^m)$ 且 $g(x)\sim c x^r$（$c\ne0$），则 $f(x)=h(x)/g(x)+o(x^{m-r})$。再根据目标表达式决定所需展开阶数。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -259,21 +401,61 @@ $$
 
 <Solution>
 
-由题设
+**参考答案：C．$\displaystyle\frac43$。**
 
-$ \sin2x+xf(x)=x^3+o(x^3)$。
+**解题思路：**已知极限直接给出 $\sin2x+xf(x)$ 的三阶主项，因此能反推出 $f(x)$ 的二阶展开；与 $2\cos x$ 相加后，常数项会自动抵消。
+
+<Steps>
+<Step>
+
+### 由题设得到精确到三阶的等式
+
+$$
+\sin2x+xf(x)=x^3+o(x^3).
+$$
 
 又
 
-$ \sin2x=2x-\frac43x^3+o(x^3)$，
+$$
+\sin2x=2x-\frac{(2x)^3}{6}+o(x^3)
+=2x-\frac43x^3+o(x^3).
+$$
 
 所以
 
-$ f(x)=-2+\frac73x^2+o(x^2)$。
+$$
+xf(x)=-2x+\frac73x^3+o(x^3),
+\quad
+f(x)=-2+\frac73x^2+o(x^2).
+$$
 
-同时 $ 2\cos x=2-x^2+o(x^2)$，故
+</Step>
+<Step>
 
-$ \frac{2\cos x+f(x)}{x^2}=\frac{\frac43x^2+o(x^2)}{x^2}\to\frac43$。
+### 合并余弦的二阶展开
+
+$$
+2\cos x=2-x^2+o(x^2).
+$$
+
+因而
+
+$$
+2\cos x+f(x)
+=\left(-1+\frac73\right)x^2+o(x^2)
+=\frac43x^2+o(x^2).
+$$
+
+除以 $x^2$ 后极限为 $4/3$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="未知函数无需可导">
+
+本题不曾假设 $f$ 在零点可导，不能擅自写 $f'(0)$、$f''(0)$；以上展开来自题设的极限关系，完全不需要这些导数存在。
+
+</Callout>
 
 </Solution>
 
@@ -287,44 +469,96 @@ $ \frac{2\cos x+f(x)}{x^2}=\frac{\frac43x^2+o(x^2)}{x^2}\to\frac43$。
 
 <Solution>
 
-**答案：** $(I)\ \dfrac12\ln a$；$(II)\ -\dfrac12$。
+**参考答案：**
 
-**解析：** (I) 由
+$$
+\boxed{\text{(I)}\ \lim_{x\to0}\frac{f(x)}{x^2}=\frac12\ln a},
+\qquad
+\boxed{\text{(II)}\ \lim_{x\to3a}\frac{f(x)}{x-3a}=-\frac12}.
+$$
 
-$$\lim_{x\to0}\frac{\ln\left(1+\frac{f(x)}{\sin x}\right)}{a^x-1}=\frac12,$$
+**解题思路：**(I) 把复合对数极限还原为里面的无穷小，再拆成 $f(x)/x^2$；(II) 把两个有限商极限翻译为三次多项式在两点的零点和导数条件，确定整个多项式。
 
-且
+<Steps>
+<Step>
 
-$$a^x-1=x\ln a+o(x),$$
+### (I) 从对数极限反推出 $f(x)$ 的主项
 
-可得
+由于 $a>0$ 且 $a\ne1$，有 $a^x-1\sim x\ln a$，故
 
-$$\ln\left(1+\frac{f(x)}{\sin x}\right)=\frac12x\ln a+o(x).$$
+$$
+\ln\left(1+\frac{f(x)}{\sin x}\right)
+=\frac12x\ln a+o(x).
+$$
 
-右端趋于 $0$，故 $\frac{f(x)}{\sin x}\to0$，于是利用 $\ln(1+u)\sim u$，有
+右端趋于零，因此由指数函数连续性可得 $f(x)/\sin x\to0$。继而使用 $e^u-1\sim u$，得到
 
-$$\frac{f(x)}{\sin x}=\frac12x\ln a+o(x).$$
+$$
+\frac{f(x)}{\sin x}
+=\exp\left[\frac12x\ln a+o(x)\right]-1
+=\frac12x\ln a+o(x).
+$$
 
-因此
+所以
 
-$$\lim_{x\to0}\frac{f(x)}{x^2} =\lim_{x\to0}\frac{\sin x}{x}\left(\frac12\ln a+o(1)\right) =\frac12\ln a.$$
+$$
+\frac{f(x)}{x^2}
+=\frac{\sin x}{x}\,\frac{f(x)/\sin x}{x}
+\longrightarrow1\cdot\frac12\ln a.
+$$
 
-(II) 由
-$$\lim_{x \to 2a} \frac{f(x)}{x - 2a} = \lim_{x \to 4a} \frac{f(x)}{x - 4a} = 1 \quad (a \neq 0),$$
-可知 $f(2a) = f(4a) = 0$ (否则极限为 $\infty$).
-因而 $x - 2a, x - 4a$ 均为 $f(x)$ 的因式, 又 $f(x)$ 是三次多项式, 故可令
-$$f(x) = A(x - 2a)(x - 4a)(x - B),$$
-其中 $A, B$ 为待定常数. 由
-$$\lim_{x \to 2a} \frac{f(x)}{x - 2a} = \lim_{x \to 2a} \frac{A(x - 2a)(x - 4a)(x - B)}{x - 2a} = -2Aa(2a - B),$$
-知
-$$-2Aa(2a - B) = 1. \quad \text{①}$$
-由
-$$\lim_{x \to 4a} \frac{f(x)}{x - 4a} = \lim_{x \to 4a} \frac{A(x - 2a)(x - 4a)(x - B)}{x - 4a} = 2Aa(4a - B),$$
-知
-$$2Aa(4a - B) = 1. \quad \text{②}$$
+</Step>
+<Step>
 
-联立 ①式和 ②式, 解得 $A = \frac{1}{2a^2}, B = 3a$, 从而 $f(x) = \frac{1}{2a^2}(x - 2a)(x - 4a)(x - 3a)$, 故
-$$\lim_{x \to 3a} \frac{f(x)}{x - 3a} = \lim_{x \to 3a} \frac{\frac{1}{2a^2}(x - 2a)(x - 4a)(x - 3a)}{x - 3a} = -\frac{1}{2}.$$
+### (II) 把有限商极限转成函数值与导数条件
+
+多项式连续；题设中的两个极限都有限，因此 $f(2a)=f(4a)=0$。并且
+
+$$
+f'(2a)=\lim_{x\to2a}\frac{f(x)-f(2a)}{x-2a}=1,
+\qquad f'(4a)=1.
+$$
+
+设三次多项式为
+
+$$
+f(x)=(x-2a)(x-4a)(Ax+B).
+$$
+
+将 $x=2a$、$4a$ 分别代入导数条件，得
+
+$$
+-2a(2aA+B)=1,
+\qquad 2a(4aA+B)=1.
+$$
+
+相减（$a\ne0$）解得 $A=1/(2a^2)$、$B=-3/(2a)$，于是
+
+$$
+f(x)=\frac{(x-2a)(x-3a)(x-4a)}{2a^2}.
+$$
+
+</Step>
+<Step>
+
+### (II) 约去零点因子并计算
+
+$$
+\begin{aligned}
+\lim_{x\to3a}\frac{f(x)}{x-3a}
+&=\lim_{x\to3a}\frac{(x-2a)(x-4a)}{2a^2}\\
+&=\frac{a(-a)}{2a^2}=-\frac12.
+\end{aligned}
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="两种极限条件对应两种信息">
+
+像 $\lim_{x\to c}f(x)/(x-c)=L$ 这样的有限极限，对多项式而言意味着 **$f(c)=0$ 且 $f'(c)=L$**。本题正是把两组“零点 + 导数”条件用于构造三次式。
+
+</Callout>
 
 </Solution>
 
@@ -341,10 +575,50 @@ $\lim\limits_{x \to \infty} \frac{\mathrm{e}^{\sin \frac{1}{x}} - 1}{\left(1 + \
 
 <Solution>
 
-**解析**：令 $\frac{1}{x}=t$, 则原式 $=\lim_{t\to 0}\frac{\mathrm{e}^{\sin t}-1}{(1+t)^k-(1+t)}=\lim_{t\to 0}\frac{\sin t}{(1+t)[(1+t)^{k-1}-1]}$
-$=\lim_{t\to 0}\frac{t}{(k-1)t(1+t)}=\frac{1}{k-1}=a\neq 0,$
+**参考答案：A．$k\ne1$。** 此时 $\displaystyle a=\frac1{k-1}$，确为有限非零常数。
 
-故 $k\neq 1$, 选项 A 正确.
+**解题思路：**设 $t=1/x\to0^+$，把无穷远极限转化为零点处的无穷小比较。分子一次项系数为 $1$；分母一次项系数为 $k-1$，只需保证其不为零。
+
+<Steps>
+<Step>
+
+### 换元并求主要项
+
+当 $t\to0^+$ 时，
+
+$$
+e^{\sin t}-1\sim\sin t\sim t,
+$$
+
+而对于任意固定实数 $k$，
+
+$$
+(1+t)^k-(1+t)
+=\bigl[1+kt+O(t^2)\bigr]-(1+t)
+=(k-1)t+O(t^2).
+$$
+
+若 $k\ne1$，分母首项不消失，于是
+
+$$
+a=\lim_{t\to0^+}\frac{e^{\sin t}-1}{(1+t)^k-(1+t)}=\frac1{k-1}\ne0.
+$$
+
+</Step>
+<Step>
+
+### 单独检查特殊值 $k=1$
+
+若 $k=1$，分母对所有充分大的 $x$ 都恒等于 $0$，原商根本无定义，因而不可能满足题设。故充要条件为 $k\ne1$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="不能只检查正负范围">
+
+$k=0$ 或 $k<0$ 都可以，所得极限可能是负数，但题设只要求 $a\ne0$，并没有要求 $a>0$。
+
+</Callout>
 
 </Solution>
 
@@ -361,19 +635,76 @@ $=\lim_{t\to 0}\frac{t}{(k-1)t(1+t)}=\frac{1}{k-1}=a\neq 0,$
 
 <Solution>
 
-**解析：**
-$$\begin{aligned} \lim_{x\to+\infty} x^a\ln\frac{\arctan(x+1)}{\arctan x} &= \lim_{x\to+\infty} x^a\ln\left[\frac{\arctan(x+1)}{\arctan x}+1-1\right] \\ &= \lim_{x\to+\infty} x^a \frac{\arctan(x+1)-\arctan x}{\arctan x}, \end{aligned}$$
-由拉格朗日中值定理,有
-$$\arctan(x+1)-\arctan x=\frac{1}{1+\xi^2}, \quad x<\xi<x+1,$$
-故原极限 $=\lim_{x\to+\infty}\frac{x^a}{(1+\xi^2)\arctan x}=\frac{2}{\pi}\lim_{x\to+\infty}\frac{x^a}{1+\xi^2}=b.$
+**参考答案：A．$\displaystyle a=2,\ b=\frac2\pi$（四个选项中唯一符合题设的一项）。**
 
-所以 $a=2, b=\frac{2}{\pi}$. 选项 A 正确.
+**解题思路：**反正切函数在 $+\infty$ 接近常数 $\pi/2$，但它在相距 $1$ 的两个自变量处的差是 $x^{-2}$ 量级。求出对数的主项即可判定 $a$ 的取值。
+
+<Steps>
+<Step>
+
+### 对数先转化为函数值之差
+
+记 $u(x)=\arctan(x+1)/\arctan x$。由于 $u(x)\to1$，有 $\ln u(x)\sim u(x)-1$，因而
+
+$$
+\ln\frac{\arctan(x+1)}{\arctan x}
+\sim\frac{\arctan(x+1)-\arctan x}{\arctan x}.
+$$
+
+</Step>
+<Step>
+
+### 用中值定理识别二阶主项
+
+存在 $\xi_x\in(x,x+1)$，使得
+
+$$
+\arctan(x+1)-\arctan x=\frac1{1+\xi_x^2}.
+$$
+
+由于 $\xi_x/x\to1$，且 $\arctan x\to\pi/2$，便有
+
+$$
+\ln\frac{\arctan(x+1)}{\arctan x}
+\sim\frac{2}{\pi x^2}.
+$$
+
+因此
+
+$$
+x^a\ln\frac{\arctan(x+1)}{\arctan x}
+\sim\frac2\pi x^{a-2}.
+$$
+
+</Step>
+<Step>
+
+### 按 $a$ 的范围区分极限
+
+$$
+b=\begin{cases}
+0,&0<a<2,\\[2pt]
+\dfrac2\pi,&a=2,\\[2pt]
+\text{发散至 }+\infty,&a>2.
+\end{cases}
+$$
+
+四个备选答案中，只有 A 符合。特别地，若要求 $b$ 是**有限非零**常数，则必有 $a=2,\ b=2/\pi$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="原题条件存在不充分之处">
+
+原题只写“$a>0$，极限为 $b$”，未写 $b\ne0$。严格地说，当 $0<a<2$ 时同样有有限极限 $b=0$，所以**仅凭题设不能唯一确定 $a$**；选择题的 A 仍是所列四项中唯一正确的组合。本解析保留原题原选项，并明确指出这处条件缺失。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点3：积分主阶与两端条件的参数判别
+## 三、积分主项与双侧条件：绝对值和参数判别
 
 <Question id="selected-1103-classified-1031-lilin-2027-s2-q17" type="essay" points={10} tags="来源:李林六套卷, 考点:含绝对值积分与等价无穷小, 难度:中等">
 
@@ -387,66 +718,84 @@ $$
 
 <Solution>
 
-**参考答案：存在，且 $k=1$。**
+**参考答案：存在，且 $\boxed{k=1}$。** 对 $x\to0^+$ 和 $x\to0^-$ 均有
 
-<Tabs items={['换元与一致展开', '按绝对值分段']} defaultIndex={0}>
-  <Tab value="换元与一致展开">
+$$
+\int_0^{2x}|t-x|\sin t\,\mathrm dt
+=|x|^3+O(|x|^5),
+$$
 
-  令 $t=xu$。该换元对 $x>0$ 和 $x<0$ 均成立；注意 $\mathrm dt=x\,\mathrm du$，且 $|t-x|=|x||u-1|$。于是
+因而与 $|x|^3$ 等价。
 
-  $$
-  \begin{aligned}
-  F(x)&=\int_0^{2x}|t-x|\sin t\,\mathrm dt\\
-  &=|x|x\int_0^2|u-1|\sin(xu)\,\mathrm du.
-  \end{aligned}
-  $$
+**解题思路：**绝对值与反向积分区间是本题的陷阱。最稳妥的方法是统一令 $t=xu$，把上下限变为固定的 $0$ 和 $2$，保留微分中的符号 $x$，再使用在固定区间上一致成立的正弦展开。
 
-  当 $x\to0$ 时，$\sin(xu)=xu+O(|x|^3)$ 在 $0\le u\le2$ 上一致成立，故
+<Tabs items={['方法一：统一换元（推荐）', '方法二：左右方向分别验证']} defaultIndex={0}>
+<Tab value="方法一：统一换元（推荐）">
 
-  $$
-  \begin{aligned}
-  F(x)
-  &=|x|x^2\int_0^2|u-1|u\,\mathrm du+O(|x|^5)\\
-  &=|x|^3\left[\int_0^1(1-u)u\,\mathrm du+\int_1^2(u-1)u\,\mathrm du\right]
-  +O(|x|^5)\\
-  &=|x|^3\left(\frac16+\frac56\right)+O(|x|^5)
-  =|x|^3+O(|x|^5).
-  \end{aligned}
-  $$
+设 $F(x)=\int_0^{2x}|t-x|\sin t\,\mathrm dt$。令 $t=xu$，对 $x\ne0$ 的正负两种情况均有
 
-  因而 $\displaystyle\lim_{x\to0}\frac{F(x)}{|x|^3}=1$，故 $k=1$。
+$$
+F(x)=|x|x\int_0^2|u-1|\sin(xu)\,\mathrm du.
+$$
 
-  </Tab>
-  <Tab value="按绝对值分段">
+当 $u\in[0,2]$ 时，$\sin(xu)=xu+O(|x|^3)$ 的误差估计在整个区间上统一成立。因此
 
-  先把 $\sin t$ 替换为一阶主部 $t$：利用 $|\sin t-t|\le C|t|^3$，可验证误差为 $O(|x|^5)$。因此只需计算
+$$
+\begin{aligned}
+F(x)
+&=|x|x\int_0^2|u-1|\left[xu+O(|x|^3)\right]\mathrm du\\
+&=|x|^3\int_0^2|u-1|u\,\mathrm du+O(|x|^5).
+\end{aligned}
+$$
 
-  $$
-  J(x)=\int_0^{2x}|t-x|t\,\mathrm dt.
-  $$
+其中
 
-  当 $x>0$ 时，按 $t=x$ 分段：
+$$
+\begin{aligned}
+\int_0^2|u-1|u\,\mathrm du
+&=\int_0^1(1-u)u\,\mathrm du+\int_1^2(u-1)u\,\mathrm du\\
+&=\frac16+\frac56=1.
+\end{aligned}
+$$
 
-  $$
-  J(x)=\int_0^x(x-t)t\,\mathrm dt
-  +\int_x^{2x}(t-x)t\,\mathrm dt=x^3.
-  $$
+于是 $F(x)=|x|^3+O(|x|^5)$，故 $k=1$。
 
-  当 $x<0$ 时，积分方向反向，且在 $[2x,x]$ 上 $|t-x|=x-t$，在 $[x,0]$ 上 $|t-x|=t-x$：
+</Tab>
+<Tab value="方法二：左右方向分别验证">
 
-  $$
-  J(x)=\int_0^x(t-x)t\,\mathrm dt
-  +\int_x^{2x}(x-t)t\,\mathrm dt=-x^3=|x|^3.
-  $$
+由 $\sin t=t+O(t^3)$，在 $0$ 与 $2x$ 之间的整个积分区间内，可得
 
-  综上 $J(x)=|x|^3$，加上高阶误差即可得到 $F(x)\sim|x|^3$。
+$$
+F(x)=J(x)+O(|x|^5),\qquad
+J(x)=\int_0^{2x}|t-x|\,t\,\mathrm dt.
+$$
 
-  </Tab>
+若 $x>0$，以 $t=x$ 为分界点，
+
+$$
+J(x)=\int_0^x(x-t)t\,\mathrm dt
++\int_x^{2x}(t-x)t\,\mathrm dt=x^3=|x|^3.
+$$
+
+若 $x<0$，积分方向反过来，再按 $t=x$ 分段，
+
+$$
+\begin{aligned}
+J(x)
+&=\int_0^x(t-x)t\,\mathrm dt
++\int_x^{2x}(x-t)t\,\mathrm dt\\
+&=-x^3=|x|^3.
+\end{aligned}
+$$
+
+两侧共同满足 $F(x)=|x|^3+O(|x|^5)$，因此两侧极限都给出同一个 $k=1$。
+
+</Tab>
 </Tabs>
 
-<Callout type="warn" title="符号关键">
+<Callout type="warn" title="负方向不能简单套用正方向结果">
 
-$x<0$ 时上限 $2x<0$，积分方向与通常正向相反；必须同时处理绝对值与积分方向，不能直接把 $x^3$ 当作双侧主部。
+当 $x<0$ 时，$2x<0$，积分 $\int_0^{2x}$ 是反向积分。写 $t=xu$ 时，$\mathrm dt=x\,\mathrm du$，**不能把它擅自改成 $|x|\,\mathrm du$**；恰恰是这个符号使两侧主项统一为 $|x|^3$。
 
 </Callout>
 
@@ -467,70 +816,70 @@ $$
 
 **参考答案：**$\boxed{2<a<6}$。
 
+**解题思路：**同一个参数要同时满足两个端点的极限条件。先对分子分别求 $x\to0^+$ 和 $x\to+\infty$ 时的主导阶，再与 $x^a$ 比较；不能把小量端的等价式直接搬到无穷远处。
+
 <Steps>
-  <Step>
+<Step>
 
-  ### 考察 $x\to0^+$：得到 $a<6$
+### 小量端：$x\to0^+$
 
-  当 $t\to0$ 时，$\ln(1+t^2)\sim t^2$，故
+因为 $\ln(1+t^2)=t^2+O(t^4)$，积分可逐项估计：
 
-  $$
-  \int_0^{x^2}\ln(1+t^2)\,\mathrm dt
-  \sim\int_0^{x^2}t^2\,\mathrm dt=\frac{x^6}{3}.
-  $$
+$$
+\begin{aligned}
+\int_0^{x^2}\ln(1+t^2)\,\mathrm dt
+&=\int_0^{x^2}\bigl(t^2+O(t^4)\bigr)\,\mathrm dt\\
+&=\frac{x^6}{3}+O(x^{10}).
+\end{aligned}
+$$
 
-  因此
+所以
 
-  $$
-  F(x)\sim\frac13x^{6-a}\qquad(x\to0^+).
-  $$
+$$
+F(x)=\frac13x^{6-a}\bigl(1+O(x^4)\bigr).
+$$
 
-  它趋于 $0$ 的充要条件为 $6-a>0$，即 **$a<6$**。特别地 $a=6$ 时极限为 $\frac13$，不能取等号。
+该极限为 $0$ 当且仅当 $6-a>0$，即 $a<6$。注意 $a=6$ 时极限为 $1/3$。
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### 考察 $x\to+\infty$：得到 $a>2$
+### 无穷远端：$x\to+\infty$
 
-  令 $R=x^2$。由洛必达法则，
+令 $R=x^2$。分子积分上限趋于无穷，不能再用 $\ln(1+t^2)\sim t^2$。由洛必达法则，
 
-  $$
-  \begin{aligned}
-  \lim_{R\to+\infty}
-  \frac{\int_0^R\ln(1+t^2)\,\mathrm dt}{R\ln R}
-  &=\lim_{R\to+\infty}
-  \frac{\ln(1+R^2)}{\ln R+1}=2.
-  \end{aligned}
-  $$
+$$
+\lim_{R\to+\infty}\frac{\int_0^R\ln(1+t^2)\,\mathrm dt}{R\ln R}
+=\lim_{R\to+\infty}\frac{\ln(1+R^2)}{\ln R+1}=2.
+$$
 
-  从而
+因此
 
-  $$
-  \int_0^{x^2}\ln(1+t^2)\,\mathrm dt
-  \sim2x^2\ln(x^2)=4x^2\ln x.
-  $$
+$$
+\int_0^{x^2}\ln(1+t^2)\,\mathrm dt
+\sim2x^2\ln(x^2)=4x^2\ln x,
+$$
 
-  故
+从而 $F(x)\sim4x^{2-a}\ln x$。由于正幂函数增长快于对数函数，此式趋于 $0$ 的充要条件是 $a>2$；$a=2$ 时发散。
 
-  $$
-  F(x)\sim4x^{2-a}\ln x\qquad(x\to+\infty).
-  $$
+</Step>
+<Step>
 
-  利用 $\ln x=o(x^\varepsilon)$（任意 $\varepsilon>0$），该式趋于 $0$ 当且仅当 $a>2$；$a=2$ 时发散为 $+\infty$。
+### 取两个条件的交集
 
-  </Step>
-  <Step>
+$$
+a<6,\qquad a>2
+\quad\Longrightarrow\quad\boxed{a\in(2,6)}.
+$$
 
-  ### 取交集
-
-  同时满足 $a<6$ 与 $a>2$，得到
-
-  $$
-  \boxed{a\in(2,6)}.
-  $$
-
-  </Step>
+</Step>
 </Steps>
+
+<Callout type="idea" title="同一积分的两端有不同尺度">
+
+变上限积分的主阶由积分区间与被积函数在该区间的行为共同决定。本题在 $0$ 附近为 $x^6$ 量级，在无穷远处却为 $x^2\ln x$ 量级，这正是产生双侧区间限制的原因。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -541,33 +890,89 @@ $$
 
 <Solution>
 
-**答案：** $a=1$。
+**参考答案：**$\boxed{a=1}$。
 
-**解析：** 由洛必达法则，
+**解题思路：**原式是积分除以区间长度。只要证明被积函数在无穷远处趋于 $a$，便可用洛必达法则（或积分平均值的极限）把原极限化为 $a$。真正的难点是两项都含 $x$ 和 $\ln x$，必须保留相减后的常数项。
 
-$$1=\lim_{x\to+\infty} \left[(x+a)^{1+\frac1x}-x^{1+\frac1{x+a}}\right].$$
+<Steps>
+<Step>
 
-下面直接比较两项的渐近展开。因为 $\frac{\ln x}{x}\to0$，
+### 先将积分极限转为被积函数极限
 
-$$\begin{aligned} (x+a)^{1+\frac1x} &=(x+a)\exp\left(\frac{\ln(x+a)}x\right)\\ &=x+a+\frac{x+a}{x}\ln(x+a) +O\left(\frac{(\ln x)^2}{x}\right)\\ &=x+a+\ln(x+a)+o(1), \end{aligned}$$
+记
 
-而
+$$
+g(t)=(t+a)^{1+1/t}-t^{1+1/(t+a)}.
+$$
 
-$$\begin{aligned} x^{1+\frac1{x+a}} &=x\exp\left(\frac{\ln x}{x+a}\right)\\ &=x+\frac{x}{x+a}\ln x +O\left(\frac{(\ln x)^2}{x}\right)\\ &=x+\ln x+o(1). \end{aligned}$$
+由于 $a>-1$，当 $t\ge1$ 时各底数均为正且 $g$ 连续。若 $g(t)\to L$，则
 
-因此
+$$
+\lim_{x\to+\infty}\frac{\int_1^x g(t)\,\mathrm dt}{x}
+=\lim_{x\to+\infty}g(x)=L.
+$$
 
-$$(x+a)^{1+\frac1x}-x^{1+\frac1{x+a}} =a+\ln\left(1+\frac ax\right)+o(1)\to a.$$
+</Step>
+<Step>
 
-题设极限等于 $1$，故
+### 展开两个幂指函数到常数量级
 
-$$\boxed{a=1}.$$
+由 $e^u=1+u+O(u^2)$ 且 $\ln(x+a)/x=O(\ln x/x)$，
+
+$$
+\begin{aligned}
+(x+a)^{1+1/x}
+&=(x+a)e^{\ln(x+a)/x}\\
+&=x+a+\frac{x+a}{x}\ln(x+a)
+  +O\!\left(\frac{(\ln x)^2}{x}\right)\\
+&=x+a+\ln(x+a)+o(1).
+\end{aligned}
+$$
+
+同样，
+
+$$
+\begin{aligned}
+x^{1+1/(x+a)}
+&=xe^{\ln x/(x+a)}\\
+&=x+\frac{x}{x+a}\ln x
+ +O\!\left(\frac{(\ln x)^2}{x}\right)\\
+&=x+\ln x+o(1).
+\end{aligned}
+$$
+
+其中 $a\ln x/x\to0$，故乘子 $1+O(1/x)$ 不影响常数阶。
+
+</Step>
+<Step>
+
+### 作差、代回条件
+
+$$
+\begin{aligned}
+g(x)
+&=a+\ln(x+a)-\ln x+o(1)\\
+&=a+\ln\left(1+\frac ax\right)+o(1)
+\longrightarrow a.
+\end{aligned}
+$$
+
+题设极限为 $1$，于是 $a=1$，并满足 $a>-1$、$a\ne0$ 的前提。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="不要仅写两项都趋于正无穷">
+
+相减型极限需将两项展开到**足够抵消后的阶数**。这里主导的 $x$ 项和 $\ln x$ 项全部抵消，剩下的常数 $a$ 才是决定性信息。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点4：双侧极限与无穷远参数匹配
+## 四、分段及无穷远极限的参数约束
 
 <Question id="selected-1103-math-1364b7-055" type="essay">
 
@@ -575,25 +980,56 @@ $$\boxed{a=1}.$$
 
 <Solution>
 
-**答案：** $ \frac{e-e^{-1}}{2}$
+**参考答案：**$\boxed{a=\dfrac{e-e^{-1}}2}$；此时原极限为 $e$。
 
-**解析：** 分别求左右极限。
+**解题思路：**含 $e^{1/x}$ 和 $|x|$ 的双侧极限一定分左右讨论。$x\to0^+$ 与 $x\to0^-$ 时，指数项的增长方向和绝对值的表达式均不同。
 
-当 $ x\to0^+$ 时，
+<Tabs items={['分左右极限（推荐）', '用符号统一记忆']} defaultIndex={0}>
+<Tab value="分左右极限（推荐）">
 
-$ \frac{2+e^{1/x}}{1+e^{4/x}}\to0,\qquad (1+|x|)^{1/x}=(1+x)^{1/x}\to e$，
+当 $x\to0^+$，有 $e^{1/x}\to+\infty$，且
 
-故右极限为 $ e$。
+$$
+\frac{2+e^{1/x}}{1+e^{4/x}}
+=\frac{2e^{-4/x}+e^{-3/x}}{e^{-4/x}+1}\longrightarrow0,
+$$
 
-当 $ x\to0^-$ 时，第一项中的分式趋于 $ 2$，且
+又 $(1+|x|)^{1/x}=(1+x)^{1/x}\to e$，故右极限为 $e$。
 
-$ (1+|x|)^{1/x}=(1-x)^{1/x}\to e^{-1}$，
+当 $x\to0^-$，有 $e^{1/x},e^{4/x}\to0$，所以分式趋于 $2$；此时 $|x|=-x$，
 
-故左极限为 $ 2a+e^{-1}$。
+$$
+(1+|x|)^{1/x}=(1-x)^{1/x}
+=\exp\left(\frac{\ln(1-x)}x\right)\longrightarrow e^{-1}.
+$$
 
-令左右极限相等，得 $ 2a+e^{-1}=e$，所以
+故左极限为 $2a+e^{-1}$。两者相等的充要条件为
 
-$ a=\frac{e-e^{-1}}2$。
+$$
+2a+e^{-1}=e\quad\Longleftrightarrow\quad
+\boxed{a=\frac{e-e^{-1}}2}.
+$$
+
+</Tab>
+<Tab value="用符号统一记忆">
+
+设 $s=\operatorname{sgn}(x)$，则 $|x|=sx$，而
+
+$$
+\lim_{x\to0^s}(1+|x|)^{1/x}
+=\exp\left(\lim_{x\to0^s}\frac{\ln(1+sx)}x\right)=e^s.
+$$
+
+第一项分式在 $s=1$ 时趋于 $0$，在 $s=-1$ 时趋于 $2$，因此两侧分别为 $e$ 与 $2a+e^{-1}$，依旧得到 $a=(e-e^{-1})/2$。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="存在双侧极限的判据">
+
+仅求出右极限并不足够。存在有限双侧极限当且仅当**左右极限均存在且相等**；参数题通常要靠这条等式反求未知量。
+
+</Callout>
 
 </Solution>
 
@@ -605,19 +1041,58 @@ $ a=\frac{e-e^{-1}}2$。
 
 <Solution>
 
-**答案：** $a=-1,\ b=0$
+**参考答案：**$\boxed{a=-1,\quad b=0}$。
 
-**解析：** 当 $x\to\infty$ 时，
+**解题思路：**先提取立方根的最高次幂 $x^6$，再对 $(1-u)^{1/3}$ 作小量展开。结果中 $x^2$ 项用于确定 $a$，常数项用于确定 $b$。
 
-$$\sqrt[3]{1-x^6} =-x^2\left(1-\frac1{x^6}\right)^{1/3} =-x^2+\frac{1}{3x^4}+o\left(\frac1{x^4}\right).$$
+<Steps>
+<Step>
 
-因此
+### 提取主导项并展开
 
-$$\sqrt[3]{1-x^6}-ax^2-b =-(1+a)x^2-b+o(1).$$
+当 $x\to+\infty$ 时，$1-x^6<0$，实数立方根满足
 
-要使极限为 $0$，必须有
+$$
+\sqrt[3]{1-x^6}=-x^2\left(1-\frac1{x^6}\right)^{1/3}.
+$$
 
-$$a=-1,\qquad b=0.$$
+利用 $(1+u)^{1/3}=1+u/3+O(u^2)$，得到
+
+$$
+\begin{aligned}
+\sqrt[3]{1-x^6}
+&=-x^2\left(1-\frac{1}{3x^6}+O(x^{-12})\right)\\
+&=-x^2+\frac1{3x^4}+O(x^{-10}).
+\end{aligned}
+$$
+
+</Step>
+<Step>
+
+### 比较趋于零所需的系数
+
+$$
+\sqrt[3]{1-x^6}-ax^2-b
+=-(1+a)x^2-b+\frac1{3x^4}+O(x^{-10}).
+$$
+
+要使整个表达式趋于 $0$，先须 $1+a=0$（否则二次项发散），再须 $b=0$（否则极限为 $-b$）。
+
+</Step>
+<Step>
+
+### 回代检验
+
+取 $a=-1,b=0$ 时，原式 $=\dfrac1{3x^4}+O(x^{-10})\to0$，故两条件也充分。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="无穷远的参数配平顺序">
+
+遇到“函数 $-ax^m-b$ 趋于 $0$”，应依次消掉**最高次增长项**、**常数项**，不能只比较第一项的等价无穷大就直接确定所有参数。
+
+</Callout>
 
 </Solution>
 
@@ -629,16 +1104,58 @@ $$a=-1,\qquad b=0.$$
 
 <Solution>
 
-**答案：** $a=-2,\ b=2$
+**参考答案：**$\boxed{a=-2,\quad b=2}$。
 
-**解析：** 由 $\lim_{x\to 0^+}[x]=0, \lim_{x\to 0^-}[x]=-1$, 有
-$$\lim_{x\to 0^+}\left\{a[x]+\frac{\ln\left(1+e^{\frac{2}{x}}\right)}{\ln\left(1+e^{\frac{1}{x}}\right)}\right\}=\lim_{x\to 0^+}\frac{\ln\left(1+e^{\frac{2}{x}}\right)}{\ln\left(1+e^{\frac{1}{x}}\right)}=\lim_{x\to 0^+}\frac{\ln\left[e^{\frac{2}{x}}\left(1+e^{-\frac{2}{x}}\right)\right]}{\ln\left[e^{\frac{1}{x}}\left(1+e^{-\frac{1}{x}}\right)\right]}$$
+**解题思路：**取整函数 $[x]$ 在 $0$ 的左右侧取值不同；对数比值也应分两侧估计，正侧用“取出大指数”，负侧用 $\ln(1+u)\sim u$。
 
-$$\begin{aligned} &= \lim_{x\to 0^+} \frac{2 + x\ln\left(1 + e^{-\frac{2}{x}}\right)}{1 + x\ln\left(1 + e^{-\frac{1}{x}}\right)} = 2 = b, \end{aligned}$$
+<Steps>
+<Step>
 
-$$\lim_{x\to 0^-} \left( a[x] + \frac{\ln\left(1 + e^{\frac{2}{x}}\right)}{\ln\left(1 + e^{\frac{1}{x}}\right)} \right) = -a + \lim_{x\to 0^-} \frac{e^{\frac{2}{x}}}{e^{\frac{1}{x}}} = -a + \lim_{x\to 0^-} e^{\frac{1}{x}} = -a + 0 = 2,$$
+### 右极限：先求出 $b$
 
-故 $a = -2, b = 2$.
+当 $0<x<1$ 时，$[x]=0$。令 $u=1/x\to+\infty$，则
+
+$$
+\begin{aligned}
+\frac{\ln(1+e^{2u})}{\ln(1+e^u)}
+&=\frac{2u+\ln(1+e^{-2u})}
+{u+\ln(1+e^{-u})}\\
+&\longrightarrow2.
+\end{aligned}
+$$
+
+因此题设双侧极限若存在，必有 $b=2$。
+
+</Step>
+<Step>
+
+### 左极限：反求 $a$
+
+当 $-1<x<0$ 时，$[x]=-1$；令 $v=e^{1/x}\to0^+$，则
+
+$$
+\frac{\ln(1+e^{2/x})}{\ln(1+e^{1/x})}
+=\frac{\ln(1+v^2)}{\ln(1+v)}
+\sim\frac{v^2}{v}=v\longrightarrow0.
+$$
+
+左极限为 $-a$，所以 $-a=b=2$，即 $a=-2$。
+
+</Step>
+<Step>
+
+### 验证双侧一致
+
+取 $a=-2$ 时，左右极限均为 $2$，故原极限存在，结论成立。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="两个不同的无穷小尺度">
+
+$x\to0^+$ 时指数 $e^{1/x}$ 极大，不能写 $\ln(1+e^{1/x})\sim e^{1/x}$；后者只适用于指数趋于 $0$ 的 $x\to0^-$ 一侧。
+
+</Callout>
 
 </Solution>
 
@@ -650,39 +1167,67 @@ $$\lim_{x\to 0^-} \left( a[x] + \frac{\ln\left(1 + e^{\frac{2}{x}}\right)}{\ln\l
 
 <Solution>
 
-**答案：** $\sqrt{2}$
+**参考答案：**$\boxed{a=\sqrt2}$。
 
-**解析：** 设
+**解题思路：**等式右边是长度为 $1$ 的滑动区间积分，利用 $f(t)\to e^{-1}$ 可先求出其极限；左边是 $1^\infty$ 型幂指极限，取对数转为二阶小量。
 
-$$L=\lim_{x\to\infty}\left(\cos\frac ax\right)^{x^2}.$$
+<Tabs items={['对数展开（推荐）', '积分估计与等价式']} defaultIndex={0}>
+<Tab value="对数展开（推荐）">
 
-取对数，利用 $\ln\cos u\sim-\frac{u^2}{2}$ $(u\to0)$，得
+对固定 $a>0$，当 $x$ 足够大时 $\cos(a/x)>0$，因此
 
-$$\ln L =\lim_{x\to\infty}x^2\ln\left(\cos\frac ax\right) =-\frac{a^2}{2}.$$
+$$
+\begin{aligned}
+\ln\left(\cos\frac ax\right)^{x^2}
+&=x^2\ln\left(\cos\frac ax\right)\\
+&=x^2\left(-\frac{a^2}{2x^2}+O(x^{-4})\right)
+\longrightarrow-\frac{a^2}{2}.
+\end{aligned}
+$$
 
-故
+左侧极限为 $e^{-a^2/2}$。
 
-$$L=e^{-a^2/2}.$$
+由于 $f(t)\to1/e$，任给 $\varepsilon>0$，充分大的 $x$ 满足在 $t\in[x,x+1]$ 上有 $|f(t)-e^{-1}|<\varepsilon$，故
 
-另一方面，由积分中值定理，存在 $\xi_x\in(x,x+1)$ 使得
+$$
+\left|\int_x^{x+1}f(t)\,\mathrm dt-\frac1e\right|
+\le\int_x^{x+1}|f(t)-e^{-1}|\,\mathrm dt
+<\varepsilon.
+$$
 
-$$\int_x^{x+1}f(t)\,\mathrm{d}t=f(\xi_x).$$
+即右侧极限为 $e^{-1}$。由 $e^{-a^2/2}=e^{-1}$ 得 $a^2=2$，结合 $a>0$ 得 $a=\sqrt2$。
 
-当 $x\to\infty$ 时，$\xi_x\to\infty$，所以
+</Tab>
+<Tab value="积分估计与等价式">
 
-$$\lim_{x\to\infty}\int_x^{x+1}f(t)\,\mathrm{d}t=\frac1e.$$
+还可由积分中值定理得某个 $\xi_x\in(x,x+1)$ 满足
 
-于是
+$$
+\int_x^{x+1}f(t)\,\mathrm dt=f(\xi_x)\to\frac1e.
+$$
 
-$$e^{-a^2/2}=e^{-1}.$$
+同时利用
 
-由于 $a>0$，故 $a=\sqrt2$。
+$$
+\ln\cos u\sim-\frac{u^2}{2}\quad(u\to0),
+$$
+
+立即得到幂指极限 $e^{-a^2/2}$。令其等于 $e^{-1}$，仍得 $a=\sqrt2$。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="滑动区间积分的常用结论">
+
+若 $f(x)\to L$ 且 $h>0$ 固定，则 $\displaystyle\int_x^{x+h}f(t)\,\mathrm dt\to hL$；无须先找到 $f$ 的原函数。本题对应 $h=1$。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点5：高阶泰勒系数与多项式逼近
+## 五、高阶泰勒消元与多项式逼近
 
 <Question id="selected-1103-math-1364b7-034" type="essay">
 
@@ -690,21 +1235,70 @@ $$e^{-a^2/2}=e^{-1}.$$
 
 <Solution>
 
-**答案：** $ -\frac12$
+**参考答案：**$\boxed{-\dfrac12}$。
 
-**解析：** 设
+**解题思路：**幂指数为 $1/x^2$，底数必趋于 $1$，且偏离 $1$ 的主项为 $-x^2$。由此先求 $f(x)/x$ 的二阶主项，再把 $f(x)$ 与 $\sin^3x\sim x^3$ 比较。
 
-$ u(x)=\cos x+\frac{f(x)}x-1$。
+<Steps>
+<Step>
 
-由 $ [1+u(x)]^{1/x^2}\to e^{-1}$，得
+### 对幂指极限取对数
 
-$ \frac{u(x)}{x^2}\to-1$。
+设 $B(x)=\cos x+f(x)/x$。题设极限是正数 $e^{-1}$；因此 $x$ 充分接近 $0$ 时，底数可按实数幂理解且 $B(x)>0$。取对数得
 
-又 $ \cos x-1\sim-\frac12x^2$，故
+$$
+\frac{\ln B(x)}{x^2}\longrightarrow-1,
+\qquad\text{即}\qquad
+\ln B(x)=-x^2+o(x^2).
+$$
 
-$ \frac{f(x)}x\sim-\frac12x^2$，即 $ f(x)\sim-\frac12x^3$。
+指数两边可知
 
-因 $ \sin^3x\sim x^3$，所求极限为 $ -\frac12$。
+$$
+B(x)=\exp[-x^2+o(x^2)]
+=1-x^2+o(x^2).
+$$
+
+</Step>
+<Step>
+
+### 扣除余弦已知的二阶项
+
+利用 $\cos x=1-x^2/2+o(x^2)$，
+
+$$
+\begin{aligned}
+\frac{f(x)}x
+&=B(x)-\cos x\\
+&=\left[1-x^2+o(x^2)\right]
+-\left[1-\frac{x^2}{2}+o(x^2)\right]\\
+&=-\frac{x^2}{2}+o(x^2).
+\end{aligned}
+$$
+
+所以 $f(x)=-\dfrac12x^3+o(x^3)$。
+
+</Step>
+<Step>
+
+### 与 $\sin^3x$ 比较
+
+因为 $(\sin x/x)^3\to1$，
+
+$$
+\lim_{x\to0}\frac{f(x)}{\sin^3x}
+=\lim_{x\to0}\frac{-\frac12x^3+o(x^3)}{x^3(\sin x/x)^3}
+=\boxed{-\frac12}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="为何不能直接写“底数 $\sim1$”">
+
+只知道 $B(x)\to1$ 不足以确定 $f(x)$ 的三阶信息；本题要保留底数相对 $1$ 的**二阶偏差**。$1^\infty$ 型必须优先看“指数 $\times$ 对数底数”。
+
+</Callout>
 
 </Solution>
 
@@ -721,15 +1315,59 @@ $ \frac{f(x)}x\sim-\frac12x^2$，即 $ f(x)\sim-\frac12x^3$。
 
 <Solution>
 
-取对数：
+**参考答案：**选 **B**，$\boxed{a=1,\ b=1,\ c=\tfrac12}$。
 
-$ \ln f(x)=\frac12\bigl[\ln(1+x)-\ln(1-x)\bigr]=x+O(x^3)$。
+**解题思路：**对根式取对数，可把商和平方根化成 $\ln(1+x)$、$\ln(1-x)$ 的差。先得到 $\ln f(x)$ 的前两阶，再用指数函数恢复 $f(x)$ 的二阶系数。
+
+<Tabs items={['对数—指数法（推荐）', '二项式乘积法']} defaultIndex={0}>
+<Tab value="对数—指数法（推荐）">
+
+对 $|x|<1$，$f(x)>0$，故
+
+$$
+\begin{aligned}
+\ln f(x)
+&=\frac12\bigl[\ln(1+x)-\ln(1-x)\bigr]\\
+&=\frac12\left[(x-\frac{x^2}{2}+O(x^3))
+-(-x-\frac{x^2}{2}+O(x^3))\right]\\
+&=x+O(x^3).
+\end{aligned}
+$$
 
 因此
 
-$ f(x)=e^{x+O(x^3)}=1+x+\frac12x^2+o(x^2)$。
+$$
+f(x)=e^{x+O(x^3)}
+=1+x+\frac{x^2}{2}+O(x^3).
+$$
 
-故 $ a=1,b=1,c=\frac12$。
+与 $a+bx+cx^2$ 比较得到 $a=1,b=1,c=1/2$。
+
+</Tab>
+<Tab value="二项式乘积法">
+
+$$
+\begin{aligned}
+(1+x)^{1/2}&=1+\frac x2-\frac{x^2}{8}+O(x^3),\\
+(1-x)^{-1/2}&=1+\frac x2+\frac{3x^2}{8}+O(x^3).
+\end{aligned}
+$$
+
+两式相乘，二次项为 $-1/8+3/8+1/4=1/2$，故
+
+$$
+\sqrt{\frac{1+x}{1-x}}
+=1+x+\frac{x^2}{2}+O(x^3).
+$$
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="对数法为何更省计算">
+
+若函数是多个幂函数或根式的乘积与商，先取对数把乘除转成加减，往往更容易观察低次项相消。本题两个对数的 $x^2$ 项恰好抵消。
+
+</Callout>
 
 </Solution>
 
@@ -741,12 +1379,75 @@ $ f(x)=e^{x+O(x^3)}=1+x+\frac12x^2+o(x^2)$。
 
 <Solution>
 
-**答案：** $a=1,\ b=0,\ c=-\dfrac13$。
+**参考答案：**$\boxed{a=1,\quad b=0,\quad c=-\dfrac13}$。
 
-**解析：** 依题意, 有 $\arctan x - (ax + bx^2 + cx^3) = o(x^3)$.
-又 $\arctan x = x - \frac{x^3}{3} + o(x^3)$, 则
-$$x - \frac{x^3}{3} + o(x^3) - (ax + bx^2 + cx^3) = (1-a)x - bx^2 - \left(\frac{1}{3} + c\right)x^3 + o(x^3),$$
-即 $1-a = 0, -b = 0, \frac{1}{3} + c = 0$, 故 $a = 1, b = 0, c = -\frac{1}{3}$.
+**解题思路：**误差是比 $x^3$ 高阶的无穷小，意思是
+
+$$
+\arctan x-(ax+bx^2+cx^3)=o(x^3).
+$$
+
+因此必须逐项匹配 $x,x^2,x^3$ 的系数，不能只让差值趋于 $0$。
+
+<Steps>
+<Step>
+
+### 求 $\arctan x$ 的三阶泰勒展开
+
+由导数 $\dfrac{\mathrm d}{\mathrm dx}\arctan x=\dfrac1{1+x^2}$ 及几何级数
+
+$$
+\frac1{1+x^2}=1-x^2+O(x^4),
+$$
+
+从 $0$ 积分到 $x$ 得
+
+$$
+\arctan x=x-\frac{x^3}{3}+O(x^5).
+$$
+
+</Step>
+<Step>
+
+### 按阶数配平误差
+
+$$
+\begin{aligned}
+&\arctan x-(ax+bx^2+cx^3)\\
+&\qquad=(1-a)x-bx^2+\left(-\frac13-c\right)x^3+O(x^5).
+\end{aligned}
+$$
+
+要使它属于 $o(x^3)$，上述一次、二次和三次项系数都须为零：
+
+$$
+1-a=0,\qquad b=0,\qquad-\frac13-c=0.
+$$
+
+故 $a=1,b=0,c=-1/3$。
+
+</Step>
+<Step>
+
+### 验证误差的阶数
+
+代回后，余差为 $O(x^5)$，因此
+
+$$
+\frac{\arctan x-\left(x-\frac{x^3}{3}\right)}{x^3}
+=O(x^2)\to0.
+$$
+
+这就验证了题目所要求的“比 $x^3$ 高阶”。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="$o(x^3)$ 与 $O(x^3)$ 不同">
+
+允许误差为 $O(x^3)$ 时，三次项系数可以不匹配；要求 $o(x^3)$ 则三次项也必须消去。这是泰勒近似题最常见的漏判点。
+
+</Callout>
 
 </Solution>
 

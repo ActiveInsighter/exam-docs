@@ -1,13 +1,11 @@
 ---
-title: "第二节 极限的基本性质｜收敛判别、极限运算与逻辑辨析"
-description: "对照真题核心题目第二节，精选数列收敛性、保号性、极限存在性、乘积运算与复合极限充要关系题目。"
+title: "2. 极限的基本性质"
+description: "精选 10 道极限性质题，重写逻辑论证、正反例、左右极限和充分必要条件的完整推导。"
 ---
 
-# 第二节 极限的基本性质｜收敛判别、极限运算与逻辑辨析
+精选 **10 道题**。围绕“收敛与有界的差别、左右极限、充分必要关系”组织；每题给出明确结论与必要的证明或反例。
 
-精选 **10 道题**，对应「真题核心题目」的同名小节。按核心命题考点归类，题干、选项、答案、解析及原有 MDX 组件均未改写。
-
-## 考点1：数列收敛性、保号性与反例
+## 一、数列收敛性与极限保序：判定和反例
 
 <Question id="selected-1103-math-0ed1ba-027" type="single">
 
@@ -20,18 +18,28 @@ description: "对照真题核心题目第二节，精选数列收敛性、保号
 
 <Solution>
 
-**解析：** 对于选项 A: 取 $M = \dfrac{a + 1}{2}$, 则 $M > 1$, 令 $x_n = a_n - \dfrac{a + 1}{2}$, 则
-$$\lim_{n\to\infty} x_n = \lim_{n\to\infty} \left(a_n - \dfrac{a + 1}{2}\right) = a - \dfrac{a + 1}{2} = \dfrac{a - 1}{2} > 0.$$
-由极限的保号性, 可知当 $n$ 充分大时, 有 $x_n = a_n - \dfrac{a + 1}{2} > 0$, 即
-$$a_n > \dfrac{a + 1}{2} = M > 1.$$
+**答案：D（错误命题）。**
 
-对于选项 B: 令 $x_n = b_n - a_n$, 则
-$$\lim_{n\to\infty} x_n = \lim_{n\to\infty} (b_n - a_n) = b - a > 0,$$
-由极限的保号性, 可知当 $n$ 充分大时, $x_n > 0$, 即 $a_n < b_n$.
+**判断要点：** 收敛只保证与极限之差最终小于**固定的正数**，不保证误差收敛得比 $1/n$ 更快。
 
-对于选项 C: 令 $x_n = N - a_n$, 则 $x_n \geqslant 0 (n = 1, 2, \cdots)$, 由极限的保号性, 得 $N - a = \lim_{n\to\infty} x_n \geqslant 0$, 即 $a \leqslant N$, 同理可得 $M \leqslant a$.
+- **A 正确。** 取 $M=(a+1)/2$，则 $1<M<a$；由 $a_n\to a$ 的保号性，充分大的 $n$ 满足 $a_n>M$。
+- **B 正确。** $b_n-a_n\to b-a>0$，所以当 $n$ 足够大时 $b_n-a_n>0$，即 $a_n<b_n$。
+- **C 正确。** 对每个 $n$ 有 $M\le a_n\le N$，取极限得到 $M\le a\le N$，这是极限的保序性（非严格不等号可以保留）。
+- **D 错误。** 取 $a_n=2-2/n$，则 $a_n\to2\ne0$，但对每个 $n\ge1$，
 
-对于选项 D: 取 $a_n = 2 - \dfrac{2}{n}$, 则 $\lim_{n\to\infty} \left(2 - \dfrac{2}{n}\right) = 2 \neq 0$. 显然, $a_n = 2 - \dfrac{2}{n} \leqslant 2 - \dfrac{1}{n}$, 故选 D.
+
+
+$$
+a_n=2-\frac2n<2-\frac1n=a-\frac1n.
+$$
+
+  因此题干声称的“大 $n$ 时 $a_n>a-1/n$”不成立。
+
+<Callout type="warn" title="保号性不能代替收敛速度结论">
+
+由 $a_n\to a$ 可以断言：对每个固定的 $\varepsilon>0$，最终有 $|a_n-a|<\varepsilon$；但当右侧换成随 $n$ 缩小的 $1/n$ 时，就不能直接使用极限定义。
+
+</Callout>
 
 </Solution>
 
@@ -48,7 +56,27 @@ $$\lim_{n\to\infty} x_n = \lim_{n\to\infty} (b_n - a_n) = b - a > 0,$$
 
 <Solution>
 
-**解析：** 对于选项 C：用反证法，若 $\lim_{n \to \infty} (a_n - b_n)$ 存在，则 $\lim_{n \to \infty} [(a_n - b_n) + (a_n + b_n)] = \lim_{n \to \infty} 2a_n$，极限存在，与已知 $\lim_{n \to \infty} a_n$ 不存在相矛盾，故选 C。
+**答案：C。** 若两列本身都不收敛，但和数列收敛，则差数列必不收敛。
+
+**核心证明（反证法）：** 假设 $a_n+b_n$ 与 $a_n-b_n$ 都存在有限极限，那么
+
+$$
+a_n=\frac{(a_n+b_n)+(a_n-b_n)}2,\qquad
+b_n=\frac{(a_n+b_n)-(a_n-b_n)}2.
+$$
+
+右边均为收敛数列的线性组合，因此 $a_n$ 和 $b_n$ 都收敛，与题设矛盾。所以 **C 必然成立，D 必然错误**。
+
+**为什么 A、B 都不能断定？** 当 $a_n+b_n$ 不收敛时，差数列可以出现两种情况：
+
+- 取 $a_n=b_n=(-1)^n$，则和数列 $2(-1)^n$ 不收敛，而差数列恒为 $0$，故 A 不成立。
+- 取 $a_n=(-1)^n$、$b_n=-(-1)^n$ 不适用此处（两者之和为零）。改取 $a_n=(-1)^n$、$b_n=2(-1)^n$，则和数列 $3(-1)^n$ 不收敛，差数列 $-(-1)^n$ 也不收敛，故 B 不成立。
+
+<Callout type="idea" title="和差关系可以直接反推原数列">
+
+已知“和与差都收敛”，必能推出“原来的两个数列都收敛”。这是一种可逆的线性变换，适合处理极限存在性的逻辑选择题。
+
+</Callout>
 
 </Solution>
 
@@ -65,15 +93,53 @@ $$\lim_{n\to\infty} x_n = \lim_{n\to\infty} (b_n - a_n) = b - a > 0,$$
 
 <Solution>
 
-**解析：** 用反证法. 假设 $\lim_{n\to\infty} y_n$ 不存在, 由 $\{y_n\}$ 单调增加, 知 $\lim_{n\to\infty} y_n = +\infty$.
+**答案：B。** 两个数列都收敛到同一个有限常数，但该常数不一定是零。
 
-又 $\lim_{n\to\infty} (x_n - y_n) = 0$, 故 $\lim_{n\to\infty} x_n = +\infty$, 这与 $\{x_n\}$ 单调减少矛盾, 故 $\lim_{n\to\infty} y_n$ 存在.
+**解题思路：** 用“单调有界定理”，关键是从 $x_n-y_n\to0$ 得到两列各自的界。
 
-同理可证 $\lim_{n\to\infty} x_n$ 存在.
+<Steps>
+<Step>
 
-由 $\lim_{n\to\infty} (x_n - y_n) = 0$, 知 $\lim_{n\to\infty} x_n = \lim_{n\to\infty} y_n$, 故选项 B 正确. 选项 C, D 不正确.
+### 用差数列有界性构造上下界
 
-$\lim_{n\to\infty} x_n$ 与 $\lim_{n\to\infty} y_n$ 均存在, 但不一定是无穷小. 选项 A 不正确.
+令 $d_n=x_n-y_n$。已知 $d_n\to0$，所以 $\{d_n\}$ 有界，存在常数 $C>0$，使得 $|d_n|\le C$（对所有 $n$ 成立）。
+
+因为 $x_n$ 单调减少，$x_n\le x_1$；又 $y_n=x_n-d_n$，故
+
+$$
+y_1\le y_n\le x_1+C.
+$$
+
+于是单调增加的 $\{y_n\}$ 有上界。
+
+</Step>
+<Step>
+
+### 应用单调有界定理
+
+同理，因为 $y_n\ge y_1$，$x_n=y_n+d_n\ge y_1-C$，而 $x_n\le x_1$，故单调减少的 $\{x_n\}$ 也有下界。
+
+由单调有界定理，存在有限实数 $A,B$，使
+
+$$
+x_n\to A,\qquad y_n\to B.
+$$
+
+</Step>
+<Step>
+
+### 确定两个极限的关系
+
+由极限运算法则，$0=\lim(x_n-y_n)=A-B$，因此 $A=B$，所以选择 B。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="为什么不能选 A？">
+
+取 $x_n=y_n=2$，满足两列单调（非严格意义）且差趋于零，但公共极限为 $2$ 而非零。即使要求严格增减，也可以取 $x_n=2+1/n$、$y_n=2-1/n$，其公共极限仍为 $2$。
+
+</Callout>
 
 </Solution>
 
@@ -94,15 +160,33 @@ $\lim_{n\to\infty} x_n$ 与 $\lim_{n\to\infty} y_n$ 均存在, 但不一定是�
 
 <Solution>
 
-**解析：** 取 $x_n = n, \arctan x_n = \arctan n$，则 $\{\arctan n\}$ 收敛且单调，但 $\{x_n\}$ 发散，故 (1),(2) 不正确。
-由于 $\arcsin x$ 是连续函数，当 $\{x_n\}$ 收敛时，$\lim_{n\to\infty} \arcsin x_n = \arcsin(\lim_{n\to\infty} x_n)$ 存在，故 (3) 正确。
-又 $\arcsin x$ 单调递增且有界，当 $\{x_n\}$ 单调时，$\{\arcsin x_n\}$ 单调有界，所以，$\{\arcsin x_n\}$ 收敛，(4) 正确。故选 B。
+**答案：B（③④）。**
+
+**逐条分析：**
+
+1. **① 错误。** 取 $x_n=n$，则 $\arctan x_n\to\pi/2$，但 $x_n\to+\infty$，并不收敛到有限实数。$\arctan$ 有水平渐近线，不能把其极限 $\pi/2$ 直接代入反函数 $\tan$。
+2. **② 错误。** 同一个反例 $x_n=n$ 也适用：$\arctan n$ 严格递增，但 $n$ 发散。**单调不等于收敛**，还需要有界。
+3. **③ 正确。** 若 $x_n\in[-1,1]$ 且 $x_n\to a$，由区间闭性知 $a\in[-1,1]$。$\arcsin x$ 在整个闭区间 $[-1,1]$ 上连续，故
+
+
+
+$$
+\arcsin x_n\longrightarrow\arcsin a.
+$$
+
+4. **④ 正确。** $\{x_n\}$ 单调且始终在 $[-1,1]$ 内，所以由单调有界定理知 $x_n\to a\in[-1,1]$，再由 ③ 得 $\arcsin x_n\to\arcsin a$。也可直接利用 $\arcsin$ 的递增性与有界性。
+
+<Callout type="idea" title="连续复合极限的边界问题">
+
+$\arctan:\mathbb R\to(-\pi/2,\pi/2)$ 虽然连续且可逆，但收敛值可能落在其**值域的边界外侧**（如 $\pi/2$），对应的原数列可以发散；而 $\arcsin$ 的定义域 $[-1,1]$ 是紧区间，连续性可以直接保证极限传递。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：极限存在性、左右极限与乘积运算
+## 二、极限的存在性：左右极限与数列运算
 
 <Question id="selected-1103-math-1364b7-006" type="single">
 
@@ -115,17 +199,33 @@ $\lim_{n\to\infty} x_n$ 与 $\lim_{n\to\infty} y_n$ 均存在, 但不一定是�
 
 <Solution>
 
-考察左右极限：
+**答案：D。** 第四个极限存在，且等于 $\displaystyle\boxed{\frac\pi2}$。
 
-A 中 $ \frac{\sin x}{|x|}\to\operatorname{sgn}x$，而 $ \arctan\frac1{|x|}\to\frac\pi2$，左右极限相反；
+**解题思路：** 本题所有差异都来自绝对值和 $\arctan(1/x)$ 的**左右极限**。不能把 $x\to0$ 与 $x\to0^+$ 混用。
 
-B、C 中 $ \arctan\frac1x$ 的左右极限分别为 $ \pm\frac\pi2$，故极限不存在；
+当 $x\to0^+$ 时，$\sin x/x\to1$，$|\sin x|/|x|\to1$，且 $\arctan(1/x)\to\pi/2$；当 $x\to0^-$ 时，$\sin x/x\to1$，$|\sin x|/|x|\to1$，但 $\arctan(1/x)\to-\pi/2$。另外 $\arctan(1/|x|)\to\pi/2$（两侧相同）。
 
-D 中
+| 选项 | $x\to0^-$ 的极限 | $x\to0^+$ 的极限 | 判断 |
+| --- | ---: | ---: | --- |
+| A | $-\pi/2$ | $\pi/2$ | 不存在 |
+| B | $-\pi/2$ | $\pi/2$ | 不存在 |
+| C | $-\pi/2$ | $\pi/2$ | 不存在 |
+| D | $\pi/2$ | $\pi/2$ | **存在** |
 
-$ \frac{|\sin x|}{x}\sim\operatorname{sgn}x,\qquad \arctan\frac1x\to\operatorname{sgn}x\cdot\frac\pi2$，
+对 D 可直接写为
 
-乘积的左右极限均为 $ \frac\pi2$，故极限存在。
+$$
+\frac{|\sin x|}{x}\arctan\frac1x
+=\frac{|\sin x|}{|x|}\cdot\frac{|x|}{x}\cdot\arctan\frac1x.
+$$
+
+其中第一因子趋于 $1$，后两因子的符号在两侧**同时反转**，乘积均趋于 $\pi/2$。
+
+<Callout type="warn" title="绝对值的位置不可随意调换">
+
+$\sin x/|x|$ 在左右两侧异号，而 $|\sin x|/x$ 也异号；只有与第二个因子在左右两侧同样异号时，负号才会抵消。
+
+</Callout>
 
 </Solution>
 
@@ -142,18 +242,38 @@ $ \frac{|\sin x|}{x}\sim\operatorname{sgn}x,\qquad \arctan\frac1x\to\operatornam
 
 <Solution>
 
-若 $ 1/x_n\to0$，则
-$$
- y_n=(x_ny_n)\frac1{x_n}\to0,
-$$
-故（D）正确。
+**答案：D。**
 
-（A）可取 $ x_n=n,y_n=0$；（C）可取 $ x_n=0,y_n=n$。对（B），令
+**关键推导：** 已知 $x_ny_n\to0$，如果再有 $1/x_n\to0$，则 $x_n\ne0$ 在充分大的 $n$ 上成立，并且
+
 $$
- x_{2k}=k,\quad y_{2k}=\frac1{k^2},\qquad
-x_{2k-1}=\frac1{k^2},\quad y_{2k-1}=k,
+y_n=(x_ny_n)\cdot\frac1{x_n}\longrightarrow0\cdot0=0.
 $$
-则 $ x_n,y_n$ 均无界，而 $ x_ny_n\to0$。
+
+因此 D 正确。
+
+**其余选项的反例：**
+
+- **A 错误。** 取 $x_n=n$，$y_n=0$，则 $x_n$ 发散、$x_ny_n=0$，但 $y_n$ 收敛。
+- **C 错误。** 取 $x_n=0$，$y_n=n$，则 $x_n$ 有界且 $x_ny_n=0$，但 $y_n$ 不是无穷小。
+- **B 错误。** 令 $k=1,2,\dots$，并取
+
+
+
+$$
+\begin{aligned}
+  x_{2k}&=k,&y_{2k}&=\frac1{k^2},\\
+  x_{2k-1}&=\frac1{k^2},&y_{2k-1}&=k.
+  \end{aligned}
+$$
+
+  这时 $x_{2k}y_{2k}=x_{2k-1}y_{2k-1}=1/k\to0$，但 $x_n$ 和 $y_n$ 都无界，因此不能由 $x_n$ 无界推出 $y_n$ 有界。
+
+<Callout type="idea" title="有界、无界、无穷小、无穷大之间的区别">
+
+“无界”只表示能取到任意大的绝对值，并不意味着 $|x_n|\to\infty$；“$1/x_n\to0$”则直接表明 $|x_n|\to\infty$（从某项起 $x_n\ne0$）。后者提供了更强的信息。
+
+</Callout>
 
 </Solution>
 
@@ -170,13 +290,27 @@ $$
 
 <Solution>
 
-**解析：** 若取 $x_n = n, y_n = -n$, 则 $\{x_n\}$ 与 $\{y_n\}$ 均无界, 但 $\{x_n + y_n\}$ 有界, 故排除选项 A.
+**答案：D。** 这里的“无穷大数列”按教材定义是指 $|x_n|\to+\infty$，并不要求恒为正数。
 
-若取 $x_n = n[1 + (-1)^n], y_n = n[1 - (-1)^n]$, 则 $\{x_n\}$ 与 $\{y_n\}$ 均无界, 但 $x_n y_n = 0$, 即 $\{x_n y_n\}$ 有界, 故排除选项 B.
+**验证 D：** 若 $\{x_n\}$、$\{y_n\}$ 均为无穷大数列，则任给 $M>0$，对充分大的 $n$，有 $|x_n|>\sqrt M$ 且 $|y_n|>\sqrt M$，从而
 
-若取 $x_n = n, y_n = 0$, 则 $\{x_n\}$ 无界, $\{y_n\}$ 有界, 但 $\{x_n y_n\}$ 有界, 故排除选项 C.
+$$
+|x_ny_n|=|x_n|\,|y_n|>M.
+$$
 
-故选 D.
+因此 $|x_ny_n|\to+\infty$，乘积仍是无穷大数列。
+
+**反例排除其余选项：**
+
+- **A 错。** $x_n=n$、$y_n=-n$ 都无界，但 $x_n+y_n\equiv0$。
+- **B 错。** 取 $x_n=n[1+(-1)^n]$、$y_n=n[1-(-1)^n]$。偶数项只有 $x_n$ 非零，奇数项只有 $y_n$ 非零，两列均无界，但 $x_ny_n\equiv0$。
+- **C 错。** $x_n=n$ 无界、$y_n=0$ 有界，乘积恒为零。
+
+<Callout type="warn" title="核心区分：无界不等于无穷大">
+
+如 $x_n=n[1+(-1)^n]$ 虽然无界，但在全部奇数项上为零，所以 $|x_n|$ 并不趋于无穷大。不能把“出现任意大项”误读为“从某项起每一项都很大”。
+
+</Callout>
 
 </Solution>
 
@@ -193,22 +327,64 @@ $$
 
 <Solution>
 
-**解析：** 对于选项 D：由于
-$$\frac{1}{n^2} \cdot n < \frac{1}{1^2} + \frac{1}{2^2} + \cdots + \frac{1}{n^2} < \frac{1}{1^2} \cdot n,$$
-$$\sqrt[n]{\frac{1}{n}} < \left(\frac{1}{1^2} + \frac{1}{2^2} + \cdots + \frac{1}{n^2}\right)^{\frac{1}{n}} < \sqrt[n]{n},$$
-且 $\lim_{n\to\infty} \sqrt[n]{n} = 1$，$\lim_{n\to\infty} \sqrt[n]{\frac{1}{n}} = \lim_{n\to\infty} \frac{1}{\sqrt[n]{n}} = 1$，故由夹逼准则，可知原极限等于 $1$。选项 D 正确。
-对于选项 A：当 $x \to 1^-$ 时，有 $\frac{1}{1-x} \to +\infty$，$2^{\frac{1}{1-x}} \to +\infty$，故 $\lim_{x\to 1^-} \frac{1}{1 + 2^{\frac{1}{1-x}}} = 0$；当 $x \to 1^+$ 时，有 $\frac{1}{1-x} \to -\infty$，$2^{\frac{1}{1-x}} \to 0$，故 $\lim_{x\to 1^+} \frac{1}{1 + 2^{\frac{1}{1-x}}} = 1$，由此可知原极限不存在。
-对于选项 B：令 $f(x) = \left(1 + \frac{\sin x}{x}\right)^x$，若取 $x_n = n\pi, y_n = \left(2n + \frac{1}{2}\right)\pi (n = 1, 2, \cdots)$，则当 $n \to \infty$ 时，有 $x_n \to +\infty$，$y_n \to +\infty$。由于
-$$\lim_{n\to\infty} f(x_n) = \lim_{n\to\infty} \left(1 + \frac{0}{n\pi}\right)^{n\pi} = 1,$$
-$$\lim_{n\to\infty} f(y_n) = \lim_{n\to\infty} \left[1 + \frac{1}{\left(2n + \frac{1}{2}\right)\pi}\right]^{(2n+\frac{1}{2})\pi} = e,$$
-故由海涅定理，可知 $\lim_{x\to +\infty} \left(1 + \frac{\sin x}{x}\right)^x$ 不存在。
-对于选项 C：由于数列 $\{n + (-1)^n(n + 1)\}$ 无界，故 $\lim_{n\to\infty} [n + (-1)^n(n + 1)]$ 不存在。
+**答案：D。** 第四个极限存在，值为 $\boxed{1}$。
+
+<Tabs items={['逐项判别（推荐）', 'D 的另一种证明']} defaultIndex={0}>
+<Tab value="逐项判别（推荐）">
+
+**A：左右极限不同。** $x\to1^-$ 时 $1/(1-x)\to+\infty$，故 $2^{1/(1-x)}\to+\infty$，原式趋于 $0$；$x\to1^+$ 时幂指数趋于 $-\infty$，原式趋于 $1$。故不存在。
+
+**B：振荡导致极限不存在。** $x\to+\infty$ 时，
+
+$$
+\ln\left(1+\frac{\sin x}{x}\right)^x
+=x\ln\left(1+\frac{\sin x}{x}\right)
+=\sin x+O(1/x).
+$$
+
+沿 $x_n=2n\pi$，原式趋于 $1$；沿 $y_n=2n\pi+\pi/2$，原式趋于 $e$。不同趋近序列给出不同极限，故不存在。
+
+**C：奇偶子列不一致。** 设 $u_n=n+(-1)^n(n+1)$，则
+
+$$
+u_{2k}=4k+1\to+\infty,\qquad u_{2k-1}=-1.
+$$
+
+故不存在有限极限。
+
+**D：夹逼。** 记 $S_n=\sum_{k=1}^n 1/k^2$，则
+
+$$
+1\le S_n\le1+\sum_{k=2}^n\frac1{k(k-1)}<2.
+$$
+
+所以 $1\le S_n^{1/n}<2^{1/n}\to1$，即极限为 $1$。
+
+</Tab>
+<Tab value="D 的另一种证明">
+
+因为 $1\le S_n<2$，故 $0\le\ln S_n<\ln2$。于是
+
+$$
+0\le\ln(S_n^{1/n})=\frac{\ln S_n}{n}<\frac{\ln2}{n}\to0.
+$$
+
+由指数函数连续性，$S_n^{1/n}\to e^0=1$。这种取对数的方法可推广到“有界正数列的 $n$ 次方根极限”。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="B 不能直接套用 $(1+u)^{1/u}\to e$">
+
+在 B 中，底数为 $1+\sin x/x$，指数是 $x$，所以“底数增量 $\times$ 指数”约为 $\sin x$，没有极限。不能把它误判为固定的 $e$。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点3：复合极限与充分必要条件
+## 三、极限条件之间的充要关系
 
 <Question id="selected-1103-classified-1031-lilin-2027-s1-q02" type="single" points={5} tags="来源:李林六套卷, 考点:极限与复合函数, 难度:中等">
 
@@ -233,32 +409,64 @@ $$
 
 <Solution>
 
-**充分性**：若第一个极限为 $k$，则 $f(x)\to b$，且
+**答案：C（充分必要条件）。**
+
+**解题核心：** $e^u$ 在 $u=b$ 处可导且导数 $e^b\ne0$，因此其增量与 $u-b$ 等价；两个差商极限可以互相推出。
+
+<Tabs items={['方法一：增量等价（推荐）', '方法二：积分形式避免除零']} defaultIndex={0}>
+<Tab value="方法一：增量等价（推荐）">
+
+**充分性：** 若
 
 $$
-\frac{e^{f(x)}-e^b}{x-a}
-=\frac{e^{f(x)}-e^b}{f(x)-b}\cdot\frac{f(x)-b}{x-a}
-\longrightarrow e^b k.
+\frac{f(x)-b}{x-a}\to k,
 $$
 
-其中在 $f(x)=b$ 时，上式的第一个商可用连续延拓定义为 $e^b$，不影响结论。
-
-**必要性**：反过来，若第二个极限为 $ke^b$，则
+则 $f(x)-b\to0$，即 $f(x)\to b$。利用指数函数在 $b$ 处的线性近似：
 
 $$
-e^{f(x)}-e^b=(x-a)\bigl(ke^b+o(1)\bigr)\longrightarrow0.
+e^{f(x)}-e^b=e^b(f(x)-b)+o(f(x)-b).
 $$
 
-指数函数在实数上严格单调且连续，故 $f(x)\to b$。再利用
+两边除以 $x-a$，得到
 
 $$
-\frac{f(x)-b}{x-a}
-=\frac{f(x)-b}{e^{f(x)}-e^b}\cdot
-\frac{e^{f(x)}-e^b}{x-a}
-\longrightarrow e^{-b}\cdot ke^b=k.
+\frac{e^{f(x)}-e^b}{x-a}\to e^bk.
 $$
 
-零分母处的商同样按连续延拓理解。因此两个命题互相推出，选 **C**。
+**必要性：** 若右侧极限是 $ke^b$，则 $e^{f(x)}\to e^b$，由对数函数连续性有 $f(x)\to b$。又当 $t\to b$ 时
+
+$$
+\frac{t-b}{e^t-e^b}\to e^{-b}.
+$$
+
+故组合差商的极限为 $e^{-b}\cdot ke^b=k$。所以两条件互相推出。
+
+</Tab>
+<Tab value="方法二：积分形式避免除零">
+
+利用微积分基本定理，将指数函数的增量写为
+
+$$
+e^{f(x)}-e^b=(f(x)-b)\int_0^1e^{b+t(f(x)-b)}\,\mathrm dt.
+$$
+
+令 $H(x)=\int_0^1e^{b+t(f(x)-b)}\,\mathrm dt$，有 $H(x)>0$。当任一题设差商有有限极限时，都能推出 $f(x)\to b$，于是 $H(x)\to e^b$。因此
+
+$$
+\frac{e^{f(x)}-e^b}{x-a}=H(x)\frac{f(x)-b}{x-a}.
+$$
+
+两边差商极限相差因子 $e^b$，且因子不为零，从而构成充要条件；这也避免了在 $f(x)=b$ 时直接除以 $f(x)-b$ 的问题。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="一般结论">
+
+如果 $\varphi$ 在 $b$ 附近可逆、可导且 $\varphi'(b)\ne0$，则在相应连续性条件下，$\frac{f(x)-b}{x-a}\to k$ 与 $\frac{\varphi(f(x))-\varphi(b)}{x-a}\to k\varphi'(b)$ 等价。本题 $\varphi(t)=e^t$。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -274,15 +482,37 @@ $$
 
 <Solution>
 
-记条件 P 为 $ \lim_{x\to0}\frac{|f(x)|}{x}$ 存在，条件 Q 为 $ \lim_{x\to0}\frac{f(x)}x=0$。
+**答案：A（充分必要条件）。** 记
 
-若 P 成立，由于右侧分母为正、左侧分母为负，而分子非负，两侧有限极限相等只能等于 $ 0$。于是 $ |f(x)|/|x|\to0$，从而 Q 成立。
+$$
+P:\ \lim_{x\to0}\frac{|f(x)|}{x}\ \text{存在有限极限},\qquad
+Q:\ \lim_{x\to0}\frac{f(x)}x=0.
+$$
 
-反之，若 Q 成立，则
+**证明 $P\Rightarrow Q$：** 设前一极限为 $L$。由于 $|f(x)|\ge0$，当 $x>0$ 时 $|f(x)|/x\ge0$，其右极限必须满足 $L\ge0$；当 $x<0$ 时 $|f(x)|/x\le0$，其左极限必须满足 $L\le0$。左右极限相等，只可能有 $L=0$。
 
-$ \left|\frac{|f(x)|}{x}\right|=\left|\frac{f(x)}x\right|\to0$，
+因此
 
-故 P 也成立。因此 P 是 Q 的充分必要条件。
+$$
+\left|\frac{f(x)}x\right|=\frac{|f(x)|}{|x|}
+=\left|\frac{|f(x)|}{x}\right|\longrightarrow0,
+$$
+
+从而 $f(x)/x\to0$，即 $Q$ 成立。
+
+**证明 $Q\Rightarrow P$：** 若 $f(x)/x\to0$，则由绝对值连续性
+
+$$
+\left|\frac{|f(x)|}{x}\right|=\left|\frac{f(x)}x\right|\to0.
+$$
+
+由夹逼准则 $|f(x)|/x\to0$，故 $P$ 成立。综上，$P\Longleftrightarrow Q$。
+
+<Callout type="warn" title="本题最关键的是分母没有绝对值">
+
+$|f(x)|/x$ 在正半轴非负、负半轴非正；因此它的**双侧有限极限**只能是零。若把分母也换为 $|x|$，结论就不再相同，例如 $f(x)=x$ 时 $|f(x)|/|x|\to1$，但 $f(x)/x\to1$ 而不是零。
+
+</Callout>
 
 </Solution>
 

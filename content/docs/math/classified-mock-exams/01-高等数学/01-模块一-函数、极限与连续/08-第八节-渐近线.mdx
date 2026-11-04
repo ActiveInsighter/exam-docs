@@ -1,13 +1,11 @@
 ---
-title: "第八节 渐近线｜三类渐近线判别、截距展开与参数曲线"
-description: "精选考研风格的水平、铅垂、斜渐近线判定题，包含多分支计数、泰勒展开提取斜率截距、参数曲线、积分渐近与综合辨析。"
+title: "8. 渐近线"
+description: "19 道渐近线题全部完成重构：定义域端点与铅直线、正负无穷的斜率截距、参数曲线、高斯尾积分、指数对数及全部渐近线判定。"
 ---
 
-# 第八节 渐近线｜三类渐近线判别、截距展开与参数曲线
+精选 **19 道题**，本节已经逐题重构。按 **定义域端点与铅直/水平渐近线 → 正负无穷方向的斜率与截距 → 参数曲线与积分尾项 → 综合渐近线与极值辨析** 组织；尤其强调绝对值符号、渐近截距的低阶项与不同分支的核对。
 
-精选 **19 道题**，对照「真题核心题目」同名小节与核心考点分类，原题题干、选项、答案、解析及 MDX 组件完整保留。
-
-## 考点1：定义域边界、水平铅垂渐近线与条数
+## 一、渐近线条数：有限边界与正负无穷两端
 
 <Question id="selected-1103-classified-1031-math-c5b6ed-001" type="single" points={5} tags="来源:张宇8套卷">
 
@@ -24,59 +22,59 @@ $$
 
 <Solution>
 
-曲线为
+**参考答案：选 D。** 曲线共有 **3 条不同的渐近线**：
 
 $$
-y=\frac{e^x+1}{2e^x-1}.
+\boxed{x=-\ln2,\qquad y=\frac12,\qquad y=-1}.
 $$
 
-当
+**解题思路：**先解使分母为零的点，判断铅直渐近线；再分别考察 $x\to+\infty$ 和 $x\to-\infty$，由于 $e^x$ 在两个方向上的表现不同，会得到两条不同的水平渐近线。
+
+<Steps>
+<Step>
+
+### 求铅直渐近线
+
+分母 $2e^x-1=0$ 当且仅当 $x=-\ln2$。此时分子 $e^x+1=\tfrac32\ne0$，故
 
 $$
-2e^x-1=0
+\lim_{x\to(-\ln2)^-}y=-\infty,
+\qquad\lim_{x\to(-\ln2)^+}y=+\infty.
 $$
 
-时，得
+因此 $x=-\ln2$ 是一条铅直渐近线。
+
+</Step>
+<Step>
+
+### 求正、负无穷两端的渐近线
+
+$x\to+\infty$ 时，分子分母同除以 $e^x$：
 
 $$
-x=\ln\frac12=-\ln2,
+\lim_{x\to+\infty}y
+=\lim_{x\to+\infty}\frac{1+e^{-x}}{2-e^{-x}}=\frac12.
 $$
 
-且函数在该点附近趋于无穷，因此
+所以 $y=\tfrac12$ 是水平渐近线。
+
+$x\to-\infty$ 时，$e^x\to0$，从而
 
 $$
-x=-\ln2
+\lim_{x\to-\infty}y
+=\lim_{x\to-\infty}\frac{e^x+1}{2e^x-1}=-1.
 $$
 
-是铅直渐近线。
+所以 $y=-1$ 是另一条水平渐近线。
 
-又有
+</Step>
+</Steps>
 
-$$
-\lim_{x\to+\infty}\frac{e^x+1}{2e^x-1}=\frac12,
-$$
+<Callout type="idea" title="同一函数可以有两条水平渐近线">
 
-故
+求水平渐近线必须分开计算 $+\infty$ 和 $-\infty$ 的极限。两侧极限不同就得到两条不同的水平渐近线，不能因都叫“水平”而只计一条。
 
-$$
-y=\frac12
-$$
-
-是一条水平渐近线；同时
-
-$$
-\lim_{x\to-\infty}\frac{e^x+1}{2e^x-1}=-1,
-$$
-
-故
-
-$$
-y=-1
-$$
-
-也是一条水平渐近线。
-
-因此共有 3 条渐近线，选 D。
+</Callout>
 
 </Solution>
 
@@ -102,24 +100,54 @@ $$
 
 <Solution>
 
-**答案：D。** 共 $\boxed{3}$ 条：$\boxed{x=0,\ x=e,\ y=0}$。
+**参考答案：选 D。** 参数曲线共有 **3 条渐近线**：
 
-**过程**：在 $t\ne\pm1$ 的原定义域内，
+$$
+\boxed{x=0,\qquad x=e,\qquad y=0}.
+$$
+
+**解题思路：**参数曲线不能只看消去参数后的代数式。先保留原定义域 $t\ne\pm1$，再检查参数在被排除点、$+\infty$、$-\infty$ 的行为，区分有限缺点与无穷分支。
+
+<Steps>
+<Step>
+
+### 化简参数式，同时记住被排除点
+
+原式为
+
+$$
+x=e^t,\qquad
+y=\frac{t(t+1)}{(t-1)(t+1)}e^{-t}.
+$$
+
+在 $t\ne-1,1$ 时，
 
 $$
 y=\frac{t}{t-1}e^{-t}.
 $$
 
-| 参数趋向 | 横、纵坐标的极限 | 结论 |
+**注意：**$t=-1$ 仍不属于原参数式的定义域，即使约分后右侧可以代入。
+
+</Step>
+<Step>
+
+### 检查参数的四种临界趋向
+
+| 参数趋向 | 曲线坐标的行为 | 判断 |
 | --- | --- | --- |
-| $t\to1$ | $x\to e$，$\vert y\vert \to+\infty$ | 垂直渐近线 $x=e$ |
-| $t\to-1$ | $x\to e^{-1}$，$y\to e/2$ | 可去间断点，不是渐近线 |
-| $t\to-\infty$ | $x\to0^+$，$y\to+\infty$ | 垂直渐近线 $x=0$ |
-| $t\to+\infty$ | $x\to+\infty$，$y\to0$ | 水平渐近线 $y=0$ |
+| $t\to1^\pm$ | $x=e^t\to e$，$\frac{t}{t-1}e^{-t}\to\pm\infty$ | 铅直渐近线 $x=e$ |
+| $t\to-1$ | $x\to e^{-1}$，$y\to\frac{e}{2}$ | 仅为有限缺点，不是渐近线 |
+| $t\to-\infty$ | $x\to0^+$，$\frac{t}{t-1}\to1$，$e^{-t}\to+\infty$ | 铅直渐近线 $x=0$ |
+| $t\to+\infty$ | $x\to+\infty$，$\frac{t}{t-1}e^{-t}\to0$ | 水平渐近线 $y=0$ |
 
-<Callout type="warn" title="可去间断点不算渐近线">
+这四种极限已覆盖所有可能使曲线走向无穷远的参数方向；$t=-1$ 的有限缺点不能再产生第四条渐近线。
 
-$t=-1$ 虽使原参数式的分母为零，但分子同时为零，约去公因子后有有限极限 $e/2$，不能误判为 $x=e^{-1}$。
+</Step>
+</Steps>
+
+<Callout type="warn" title="参数曲线的渐近线不只来自分母为零">
+
+$t\to-\infty$ 时虽然没有参数分母为零，但 $(x,y)\to(0,+\infty)$，因此仍有铅直渐近线 $x=0$；相反，$t=-1$ 虽使原式未定义，却只有有限极限，不能算作铅直渐近线。
 
 </Callout>
 
@@ -137,23 +165,57 @@ $t=-1$ 虽使原参数式的分母为零，但分子同时为零，约去公因�
 
 <Solution>
 
-定义域为 $ |x|>1$。当 $ x\to1^+$ 或 $ x\to-1^-$ 时，函数趋于正无穷，因此有两条铅直渐近线
+**参考答案：选 A。** 共有 **4 条渐近线**：
 
-$ x=1,\qquad x=-1$。
+$$
+\boxed{x=-1,\quad x=1,\quad y=-x,\quad y=x}.
+$$
 
-当 $ x\to+\infty$ 时，
+**解题思路：**根号下条件决定了两个互不连通的定义域分支。有限边界点处找铅直渐近线；两端无穷远处先识别 $\sqrt{x^2}=|x|$，再分别得到两条斜渐近线。
 
-$ \frac{x^2+1}{\sqrt{x^2-1}}-x\to0$，
+<Steps>
+<Step>
 
-故有斜渐近线 $ y=x$。
+### 两条铅直渐近线
 
-当 $ x\to-\infty$ 时，
+定义域为 $x^2-1>0$，即 $x<-1$ 或 $x>1$。从定义域内靠近边界时，分子 $x^2+1\to2>0$，分母 $\sqrt{x^2-1}\to0^+$，所以
 
-$ \frac{x^2+1}{\sqrt{x^2-1}}+x\to0$，
+$$
+\lim_{x\to-1^-}y=+\infty,\qquad
+\lim_{x\to1^+}y=+\infty.
+$$
 
-故有斜渐近线 $ y=-x$。
+得到 $x=-1$ 与 $x=1$。
 
-共四条。
+</Step>
+<Step>
+
+### 两条斜渐近线
+
+当 $|x|\to\infty$ 时，
+
+$$
+\begin{aligned}
+y&=\frac{x^2+1}{\sqrt{x^2-1}}
+=|x|\frac{1+x^{-2}}{\sqrt{1-x^{-2}}}\\
+&=|x|\left(1+\frac{3}{2x^2}+O(x^{-4})\right)
+=|x|+O(|x|^{-1}).
+\end{aligned}
+$$
+
+- $x\to+\infty$ 时 $|x|=x$，因此 $y-x\to0$，得斜渐近线 $y=x$。
+- $x\to-\infty$ 时 $|x|=-x$，因此 $y+x\to0$，得斜渐近线 $y=-x$。
+
+四条互不重合，故总数为 $4$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="根式在负无穷端的符号陷阱">
+
+$\sqrt{x^2}=|x|$，并非始终等于 $x$。若把负无穷端的 $|x|$ 误写成 $x$，就会漏掉或算错 $y=-x$ 这一支。
+
+</Callout>
 
 </Solution>
 
@@ -170,23 +232,63 @@ $ \frac{x^2+1}{\sqrt{x^2-1}}+x\to0$，
 
 <Solution>
 
-当 $ x\to0$ 时，分子趋于 $ 1$，分母趋于 $ 0$，故 $ x=0$ 为铅直渐近线。
+**参考答案：选 C。** 共有 **3 条渐近线**：
 
-当 $ x\to+\infty$ 时，分母按指数增长，故
+$$
+\boxed{x=0,\qquad y=0,\qquad y=x-\frac12}.
+$$
 
-$ y\to0$，
+**解题思路：**在有限点 $x=0$ 检查分母零点；正无穷端利用指数增长得到水平线；负无穷端把分母趋于 $-1$ 与根式的线性渐近展开结合，确定斜率和截距。
 
-所以 $ y=0$ 为水平渐近线。
+<Steps>
+<Step>
 
-当 $ x\to-\infty$ 时，
+### 有限点与正无穷端
 
-$ \sqrt{x^2-x+1}=-x+\frac12+o(1)$，
+$x^2-x+1=(x-\tfrac12)^2+\tfrac34>0$，所以分子处处为正。唯一有限定义域缺点为 $x=0$。当 $x\to0$ 时，分子趋于 $1$，而 $e^x-1\sim x$，故
 
-且 $ e^x-1\to-1$，从而
+$$
+y\sim\frac1x\quad(x\to0),
+$$
 
-$ y=x-\frac12+o(1)$。
+由此 $x=0$ 是铅直渐近线。
 
-故还有斜渐近线 $ y=x-\frac12$。共三条。
+当 $x\to+\infty$ 时，分子至多以一次方增长，而分母 $e^x-1$ 指数增长，所以 $\lim_{x\to+\infty}y=0$，得到水平渐近线 $y=0$。
+
+</Step>
+<Step>
+
+### 在 $x\to-\infty$ 求斜渐近线
+
+由于此时 $-x>0$，
+
+$$
+\begin{aligned}
+\sqrt{x^2-x+1}
+&=-x\sqrt{1-\frac1x+\frac1{x^2}}\\
+&=-x+\frac12+O\left(\frac1{|x|}\right).
+\end{aligned}
+$$
+
+同时 $1/(e^x-1)=-1+O(e^x)$，而 $|x|e^x\to0$，故
+
+$$
+\begin{aligned}
+y&=\left(-x+\frac12+O(|x|^{-1})\right)\left(-1+O(e^x)\right)\\
+&=x-\frac12+o(1).
+\end{aligned}
+$$
+
+所以 $\lim_{x\to-\infty}[y-(x-\tfrac12)]=0$，得 $y=x-\tfrac12$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="指数分母在负无穷端的处理">
+
+$x\to-\infty$ 时不要把 $e^x-1$ 简化成 $e^x$；真正起主导作用的是常数 $-1$。先写 $e^x-1=-1+o(1)$，再注意误差与分子相乘是否仍趋零。
+
+</Callout>
 
 </Solution>
 
@@ -197,7 +299,7 @@ $ y=x-\frac12+o(1)$。
 曲线
 
 $$
- y=\arctan\frac{x^2+x+1}{(x-1)(x+2)}
+y=\arctan\frac{x^2+x+1}{(x-1)(x+2)}
 $$
 
 渐近线的条数是
@@ -209,28 +311,57 @@ $$
 
 <Solution>
 
-函数的定义域为
+**参考答案：选 A。** 曲线只有 **1 条渐近线**：
+
 $$
- x\ne1,-2.
-$$
-当 $ x\to\pm\infty$ 时，
-$$
- \frac{x^2+x+1}{(x-1)(x+2)}	o1,
-$$
-因而
-$$
- y\to\arctan1=\frac\pi4.
-$$
-所以曲线有一条水平渐近线
-$$
- y=\frac\pi4.
+\boxed{y=\frac\pi4}.
 $$
 
-当 $ x\to1^\pm$ 或 $ x\to-2^\pm$ 时，分式趋于 $ \pm\infty$，但
+**解题思路：**$\arctan$ 把整个实数轴映射到有界区间 $(-\pi/2,\pi/2)$。因此分式即便在某些点趋无穷，函数值本身也不会趋无穷；接着只需查看两端是否存在水平渐近线。
+
+<Steps>
+<Step>
+
+### 有限缺点不是铅直渐近线
+
+令
+
 $$
- \arctan(\pm\infty)=\pm\frac\pi2
+g(x)=\frac{x^2+x+1}{(x-1)(x+2)}.
 $$
-为有限值，因此 $ x=1$ 和 $ x=-2$ 都不是竖直渐近线。函数整体有界，也不可能存在斜渐近线。故渐近线只有一条，选 A。
+
+$x=1,-2$ 为原函数定义域缺点。因分子 $x^2+x+1=(x+\tfrac12)^2+\tfrac34>0$，靠近两个缺点时 $g(x)$ 可趋 $+\infty$ 或 $-\infty$，但
+
+$$
+\lim_{u\to+\infty}\arctan u=\frac\pi2,
+\qquad\lim_{u\to-\infty}\arctan u=-\frac\pi2.
+$$
+
+函数值始终有界，故**没有任何铅直渐近线**。
+
+</Step>
+<Step>
+
+### 在正负无穷端求极限
+
+分子分母都是二次多项式且最高次系数为 $1$，因此
+
+$$
+\lim_{x\to\pm\infty}g(x)=1,
+\qquad
+\lim_{x\to\pm\infty}\arctan g(x)=\arctan1=\frac\pi4.
+$$
+
+两端得到的是**同一条**水平渐近线 $y=\pi/4$；函数有界，不能再有斜率非零的斜渐近线，故仅此一条。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="先看外层函数是否有界">
+
+判别铅直渐近线看的是整个 $y=f(x)$ 是否在有限点附近无界，而不是内层分式是否发散。$\arctan$、$\tanh$ 等有界外函数尤其容易设陷阱。
+
+</Callout>
 
 </Solution>
 
@@ -247,24 +378,72 @@ $$
 
 <Solution>
 
-**解析：** 当 $x = \pm 1$ 时, 函数没有定义, 且当 $x \to 1$ 时, $y \to \infty$, 故 $x = 1$ 为铅直渐近线. 同理, $x = -1$ 为铅直渐近线.
-由 $\lim_{x \to +\infty} y = \lim_{x \to +\infty} \left[\frac{1}{x - 1} + \ln(1 + e^{-x})\right] = 0$, 知有水平渐近线 $y = 0$.
-又
+**参考答案：选 D。** 共有 **4 条渐近线**：
+
+$$
+\boxed{x=-1,\qquad x=1,\qquad y=0,\qquad y=-x}.
+$$
+
+**解题思路：**$|x|$ 决定 $x=\pm1$ 两个铅直分支；对 $x\to+\infty$，对数项趋零；对 $x\to-\infty$，应用恒等式 $\ln(1+e^{-x})=-x+\ln(1+e^x)$，直接显出斜渐近线。
+
+<Tabs items={['按渐近线类型逐项求解', '负无穷端的快速恒等变形']} defaultIndex={0}>
+<Tab value="按渐近线类型逐项求解">
+
+**铅直渐近线。**在 $x=1$ 或 $x=-1$ 附近，$|x|-1\to0$，所以 $1/(|x|-1)$ 的绝对值趋无穷；与此同时 $\ln(1+e^{-x})$ 在两点邻域连续且有限，因此得到 $x=1$ 和 $x=-1$ 两条铅直渐近线。
+
+**正无穷端。**当 $x\to+\infty$，
+
+$$
+\frac1{|x|-1}=\frac1{x-1}\to0,
+\qquad\ln(1+e^{-x})\to0,
+$$
+
+故 $y=0$ 为水平渐近线。
+
+**负无穷端。**当 $x\to-\infty$，有 $|x|=-x$，于是
+
 $$
 \begin{aligned}
-\lim_{x \to -\infty} \frac{y}{x} &= \lim_{x \to -\infty} \left[\frac{1}{x(|x| - 1)} + \frac{\ln(1 + e^{-x})}{x}\right] = 0 + \lim_{x \to -\infty} \frac{e^{-x}}{1 + e^{-x}} = -1, \\
-\lim_{x \to -\infty} (y + x) &= \lim_{x \to -\infty} \left[\frac{1}{|x| - 1} + \ln(1 + e^{-x}) + x\right] \\
-&= \lim_{x \to -\infty} [\ln(1 + e^{-x}) + \ln e^x] \\
-&= \lim_{x \to -\infty} \ln[(1 + e^{-x}) \cdot e^x] = \lim_{x \to -\infty} \ln(e^x + 1) = 0,
+y+x&=\frac1{-x-1}+\ln(1+e^{-x})+x\\
+&=\frac1{-x-1}+\ln(1+e^x)\longrightarrow0.
 \end{aligned}
 $$
-故 $y = -x$ 为斜渐近线. 选项 D 正确.
+
+因此 $y=-x$ 为斜渐近线。
+
+</Tab>
+<Tab value="负无穷端的快速恒等变形">
+
+直接提取 $e^{-x}$：
+
+$$
+\ln(1+e^{-x})
+=\ln\!\left[e^{-x}(1+e^x)\right]
+=-x+\ln(1+e^x).
+$$
+
+当 $x\to-\infty$，后面的余项 $\ln(1+e^x)\to0$，另一项 $1/(|x|-1)\to0$，故
+
+$$
+f(x)=-x+o(1).
+$$
+
+这不仅给出斜率 $-1$，也直接给出截距 $0$，无需分两次使用洛必达法则。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="对数和指数的无穷远分支">
+
+恒等式 $\ln(1+e^u)=u+\ln(1+e^{-u})$ 对实数 $u$ 恒成立，能把趋于 $+\infty$ 的指数项转成线性主项与趋零余项，是找斜渐近线的高效工具。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：斜渐近线的一阶主项与截距精算
+## 二、斜渐近线：一次主项、泰勒展开与精确截距
 
 <Question id="selected-1103-classified-1031-lilin-2027-s5-q11" type="blank" points={5} tags="来源:李林六套卷, 考点:无穷远处的斜渐近线, 难度:基础">
 
@@ -278,40 +457,54 @@ $$
 
 <Solution>
 
-**答案：$\boxed{y=2x+\dfrac14}$。**
+**参考答案：**
+
+$$
+\boxed{a=2,\quad b=\frac14,\qquad y=2x+\frac14}.
+$$
+
+**解题思路：**给定的极限等于 $0$，本质上就是渐近线定义 $y-(ax+b)\to0$。先除以 $x$ 确定斜率 $a$，再有理化确定截距 $b$。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 先匹配一次项系数
+### 求斜率 $a$
 
-  因为 $x\to+\infty$，有
+令 $F(x)=\sqrt{4x^2+\frac a2x+1}$。因为 $x\to+\infty$，有
 
-  $$
-  \lim_{x\to+\infty}\frac{\sqrt{4x^2+\frac a2x+1}}x=2.
-  $$
+$$
+\lim_{x\to+\infty}\frac{F(x)}x
+=\lim_{x\to+\infty}\sqrt{4+\frac{a}{2x}+\frac1{x^2}}=2.
+$$
 
-  原极限若为 $0$，减去的直线 $ax+b$ 必须具有同样的斜率，故 $\boxed{a=2}$。
+题设 $F(x)-ax-b\to0$，因此 $F(x)/x-a-b/x\to0$，取极限便得 $2-a=0$，即 $a=2$。
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### 有理化求截距
+### 求截距 $b$
 
-  代入 $a=2$：
+将 $a=2$ 代回根式，得到 $F(x)=\sqrt{4x^2+x+1}$。要使 $F(x)-2x-b\to0$，须有
 
-  $$
-  \begin{aligned}
-  b&=\lim_{x\to+\infty}\left(\sqrt{4x^2+x+1}-2x\right)\\
-  &=\lim_{x\to+\infty}\frac{x+1}{\sqrt{4x^2+x+1}+2x}\\
-  &=\frac14.
-  \end{aligned}
-  $$
+$$
+\begin{aligned}
+b&=\lim_{x\to+\infty}[F(x)-2x]\\
+&=\lim_{x\to+\infty}\frac{(4x^2+x+1)-4x^2}{\sqrt{4x^2+x+1}+2x}\\
+&=\lim_{x\to+\infty}\frac{1+x^{-1}}{\sqrt{4+x^{-1}+x^{-2}}+2}
+=\frac14.
+\end{aligned}
+$$
 
-  故所求斜渐近线为 $\boxed{y=2x+\frac14}$。
+因 $F(x)-(2x+\tfrac14)\to0$，所求斜渐近线即 $y=2x+\tfrac14$。
 
-  </Step>
+</Step>
 </Steps>
+
+<Callout type="warn" title="参数既在根号内又在直线内">
+
+不能把根号内的 $a$ 当成已知常数直接求截距：先由最高阶项确定 $a=2$，再代回根式求 $b$，才不会把两个角色混淆。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -328,32 +521,72 @@ $$
 
 <Solution>
 
-**答案：** 见解析
-
-**解析：** 设斜渐近线为
-
-$$
-y=ax+b.
-$$
-
-由题给曲线表达式，计算得
-
-$$
-a=\lim_{x\to+\infty}\frac{y}{x}=-1.
-$$
-
-再令 $v=1/x\to0^+$，有
-
-$$
-b=\lim_{x\to+\infty}(y+x)
-=-\frac12.
-$$
-
-因此斜渐近线为
+**参考答案：**斜渐近线为
 
 $$
 \boxed{y=-x-\frac12}.
 $$
+
+**解题思路：**曲线只给出 $x>0$，故研究 $x\to+\infty$。令 $u=1/x\to0^+$，把积分与指数都展开到足以精确确定常数项的阶数；斜率来自 $1/u$ 项，截距来自常数项。
+
+<Tabs items={['泰勒展开法（推荐）', '斜率、截距极限法']} defaultIndex={0}>
+<Tab value="泰勒展开法（推荐）">
+
+令 $u=1/x$。当 $u\to0$ 时，
+
+$$
+e^{t^2}=1+t^2+O(t^4),\qquad
+\int_0^u e^{t^2}\,dt=u+\frac{u^3}{3}+O(u^5).
+$$
+
+又由指数展开，
+
+$$
+1-e^u=-u-\frac{u^2}{2}-\frac{u^3}{6}+O(u^4)
+=-u\left(1+\frac u2+O(u^2)\right).
+$$
+
+所以
+
+$$
+\begin{aligned}
+y&=\frac{1+u+O(u^3)}{-u(1+u/2+O(u^2))}\\
+&=-\frac1u(1+u+O(u^3))\left(1-\frac u2+O(u^2)\right)\\
+&=-\frac1u-\frac12+O(u).
+\end{aligned}
+$$
+
+换回 $u=1/x$，有 $y=-x-\frac12+O(1/x)$，故 $y+x+\frac12\to0$，所求斜渐近线成立。
+
+</Tab>
+<Tab value="斜率、截距极限法">
+
+设分子为 $N(u)=1+\int_0^u e^{t^2}\,dt$，分母为 $D(u)=1-e^u$，则
+
+$$
+\lim_{x\to+\infty}\frac yx
+=\lim_{u\to0^+}\frac{uN(u)}{D(u)}=-1.
+$$
+
+要得到截距，写 $y+x$：
+
+$$
+\begin{aligned}
+\lim_{x\to+\infty}(y+x)
+&=\lim_{u\to0^+}\frac{uN(u)+D(u)}{uD(u)}.
+\end{aligned}
+$$
+
+利用 $N(u)=1+u+O(u^3)$、$D(u)=-u-\frac12u^2+O(u^3)$，分子为 $\frac12u^2+O(u^3)$，分母为 $-u^2+O(u^3)$，所以截距 $b=-\frac12$。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="渐近线需要的展开精度">
+
+若函数 $y$ 的分母是一阶无穷小 $O(u)$，要算出展开后的**常数项**，通常必须把分子、分母都保留到能确定商中 $u^0$ 的阶数；只求 $\lim y/x$ 只能确定斜率，不能确定截距。
+
+</Callout>
 
 </Solution>
 
@@ -365,17 +598,69 @@ $$
 
 <Solution>
 
-**答案：** $ y=x-1$。
+**参考答案：**斜渐近线为
 
-**解析：** 令 $ u=\frac1x$。当 $ u\to0$ 时，
+$$
+\boxed{y=x-1}.
+$$
 
-$ \ln(\sin u+\cos u)=u-u^2+O(u^3)$。
+**解题思路：**令 $u=1/x$，问题转化为 $u\to0$ 的局部展开。因为函数外面乘了 $x^2=u^{-2}$，要同时求出斜率与截距，就必须将对数展开到 $u^2$ 项。
 
-所以
+<Tabs items={['泰勒展开法', '用导数求展开系数']} defaultIndex={0}>
+<Tab value="泰勒展开法">
 
-$ y=x^2\left(\frac1x-\frac1{x^2}+O\left(\frac1{x^3}\right)\right)=x-1+O\left(\frac1x\right)$。
+当 $u\to0$ 时，
 
-故斜渐近线为 $ y=x-1$。
+$$
+\begin{aligned}
+\sin u+\cos u&=1+u-\frac{u^2}{2}+O(u^3),\\
+v&=\sin u+\cos u-1=u-\frac{u^2}{2}+O(u^3).
+\end{aligned}
+$$
+
+由 $\ln(1+v)=v-\frac{v^2}{2}+O(v^3)$，得到
+
+$$
+\ln(\sin u+\cos u)
+=\left(u-\frac{u^2}{2}\right)-\frac{u^2}{2}+O(u^3)
+=u-u^2+O(u^3).
+$$
+
+故
+
+$$
+y=x^2\left(\frac1x-\frac1{x^2}+O(x^{-3})\right)
+=x-1+O(x^{-1}).
+$$
+
+因此 $\lim_{x\to\pm\infty}[y-(x-1)]=0$。
+
+</Tab>
+<Tab value="用导数求展开系数">
+
+设 $g(u)=\ln(\sin u+\cos u)$，因 $g(0)=0$ 且 $\sin u+\cos u>0$ 在 $0$ 的邻域成立，可对 $g$ 求导：
+
+$$
+g'(u)=\frac{\cos u-\sin u}{\sin u+\cos u},\quad g'(0)=1.
+$$
+
+进一步令 $h(u)=\sin u+\cos u$，用 $g''=h''/h-(h'/h)^2$，在 $u=0$ 处得 $g''(0)=-1-1=-2$。故
+
+$$
+g(u)=g(0)+g'(0)u+\frac{g''(0)}2u^2+o(u^2)
+=u-u^2+o(u^2).
+$$
+
+乘以 $x^2$ 后得到 $y=x-1+o(1)$，同样确认斜渐近线。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="求截距时不能只展开到一阶">
+
+$\ln(\sin u+\cos u)\sim u$ 只会推出 $y\sim x$，说明斜率是 $1$，却不能得到截距 $-1$。必须继续求到 $u^2$ 项。
+
+</Callout>
 
 </Solution>
 
@@ -387,23 +672,74 @@ $ y=x^2\left(\frac1x-\frac1{x^2}+O\left(\frac1{x^3}\right)\right)=x-1+O\left(\fr
 
 <Solution>
 
-**答案：** $ y=-\frac12x+\frac{11}{24}$。
+**参考答案：**斜渐近线为
 
-**解析：** 有
+$$
+\boxed{y=-\frac12x+\frac{11}{24}}.
+$$
 
-$ x\ln\left(1+\frac1x\right)-1=-\frac1{2x}+\frac1{3x^2}+O\left(\frac1{x^3}\right)$。
+**解题思路：**本题是“乘方—指数—对数”的复合极限。先将 $(1+1/x)^x/e$ 写为指数函数，再对对数与指数依次展开到 $x^{-2}$ 项；外面的 $x^2$ 恰好把它们转换成斜率项和截距项。
 
-因此
+<Steps>
+<Step>
 
-$ \frac{\left(1+\frac1x\right)^x}{e}=\exp\left[-\frac1{2x}+\frac1{3x^2}+O\left(\frac1{x^3}\right)\right]$，
+### 化为指数形式
 
-展开得
+令 $u=1/x\to0^+$，则
 
-$ \frac{\left(1+\frac1x\right)^x}{e}-1=-\frac1{2x}+\frac{11}{24x^2}+O\left(\frac1{x^3}\right)$。
+$$
+\frac{(1+1/x)^x}{e}
+=\exp\left(\frac{\ln(1+u)}{u}-1\right).
+$$
 
-故
+由 $\ln(1+u)=u-\frac12u^2+\frac13u^3+O(u^4)$，
 
-$ y=-\frac12x+\frac{11}{24}+O\left(\frac1x\right)$。
+$$
+\frac{\ln(1+u)}u-1
+=-\frac u2+\frac{u^2}3+O(u^3).
+$$
+
+</Step>
+<Step>
+
+### 再展开外层指数函数
+
+令 $z=-\frac u2+\frac{u^2}3+O(u^3)$，则 $z=O(u)$。利用 $e^z=1+z+\frac12z^2+O(z^3)$，得
+
+$$
+\begin{aligned}
+e^z-1
+&=\left(-\frac u2+\frac{u^2}3\right)
++\frac12\left(\frac{u^2}4\right)+O(u^3)\\
+&=-\frac u2+\left(\frac13+\frac18\right)u^2+O(u^3)\\
+&=-\frac u2+\frac{11}{24}u^2+O(u^3).
+\end{aligned}
+$$
+
+</Step>
+<Step>
+
+### 乘回 $x^2$ 并验证
+
+因为 $u=1/x$，
+
+$$
+\begin{aligned}
+y&=x^2\left(-\frac{1}{2x}+\frac{11}{24x^2}+O(x^{-3})\right)\\
+&=-\frac12x+\frac{11}{24}+O(x^{-1}).
+\end{aligned}
+$$
+
+于是 $\lim_{x\to+\infty}\left[y-\left(-\frac12x+\frac{11}{24}\right)\right]=0$，得到答案。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="11/24 中的 1/8 从哪里来">
+
+截距不仅来自对数的二阶项 $1/3$，还来自外层指数的 $z^2/2$ 所贡献的 $1/8$。遗漏后者会把截距错写为 $1/3$。
+
+</Callout>
 
 </Solution>
 
@@ -420,9 +756,53 @@ $ y=-\frac12x+\frac{11}{24}+O\left(\frac1x\right)$。
 
 <Solution>
 
-**解析：** 由 $\lim_{x \to +\infty} e^x [1 + x + f(x)] = \lim_{x \to +\infty} \frac{1 + x + f(x)}{e^{-x}}$ 存在, 知
-$$\lim_{x \to +\infty} [f(x) + x + 1] = \lim_{x \to +\infty} [f(x) - (-x - 1)] = 0,$$
-故 $y = f(x)$ 有斜渐近线 $y = -x - 1$. 故选 D.
+**参考答案：选 D。** 斜渐近线为
+
+$$
+\boxed{y=-x-1}.
+$$
+
+**解题思路：**已知 $e^x[1+x+f(x)]$ 收敛到有限常数，而 $e^x\to+\infty$。因此括号内必须趋于 $0$，且可精确写出误差的衰减速度；渐近线的定义立即得证。
+
+<Steps>
+<Step>
+
+### 从乘积有限极限推出余项趋零
+
+设题给极限为 $L\in\mathbb R$，则
+
+$$
+e^x[1+x+f(x)]=L+o(1)\qquad(x\to+\infty).
+$$
+
+两边乘以 $e^{-x}$，得到
+
+$$
+1+x+f(x)=Le^{-x}+o(e^{-x})\longrightarrow0.
+$$
+
+</Step>
+<Step>
+
+### 识别斜渐近线并排除其余选项
+
+由上式，
+
+$$
+\lim_{x\to+\infty}[f(x)-(-x-1)]
+=\lim_{x\to+\infty}[f(x)+x+1]=0.
+$$
+
+因此 $y=-x-1$ 满足斜渐近线定义，斜率为 $-1$、截距为 $-1$，选 D。与其余三个候选直线之差均不趋零，不能是所求渐近线。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="由极限反推函数的渐近表达式">
+
+若 $\lim_{x\to+\infty}g(x)[f(x)-(ax+b)]$ 为有限实数，且 $|g(x)|\to+\infty$，则 $f(x)-(ax+b)\to0$。本题取 $g(x)=e^x$，得到比一般的 $o(1)$ 更强的指数级误差估计。
+
+</Callout>
 
 </Solution>
 
@@ -433,34 +813,56 @@ $$\lim_{x \to +\infty} [f(x) + x + 1] = \lim_{x \to +\infty} [f(x) - (-x - 1)] =
 曲线
 
 $$
- y=3x+\frac{\ln x}{2x}+1
+y=3x+\frac{\ln x}{2x}+1
 $$
 
 的渐近线方程为 <Blank answer="x=0， y=3x+1" kind="text" />。
 
 <Solution>
 
-**答案：** $ x=0$，$ y=3x+1$
+**参考答案：**共有两条渐近线：铅直渐近线 $\boxed{x=0}$，斜渐近线 $\boxed{y=3x+1}$。
 
-**解析：** 函数定义域为 $ x>0$。当 $ x\to0^+$ 时，
-$$
- \frac{\ln x}{2x}\to-\infty,
-$$
-从而 $ y\to-\infty$，故
-$$
- x=0
-$$
-是竖直渐近线。
+**解题思路：**定义域为 $x>0$，所以只需检查左端点 $0^+$ 是否出现无界函数值，以及 $x\to+\infty$ 时能否与某条直线的距离趋于零。这里不能仅凭 $y/x\to3$ 就断定截距为 $1$，还要检验差值极限。
 
-当 $ x\to+\infty$ 时，
+<Steps>
+<Step>
+
+### 第一步：检查铅直渐近线
+
+当 $x\to0^+$ 时，$\ln x\to-\infty$ 且 $2x\to0^+$。对于充分接近 $0$ 的 $x$，有 $\ln x<-1$，故 $\ln x/(2x)<-1/(2x)\to-\infty$。于是
+
 $$
- y-(3x+1)=\frac{\ln x}{2x}\to0,
+\lim_{x\to0^+}\left(3x+1+\frac{\ln x}{2x}\right)=-\infty.
 $$
-所以
+
+因此 $x=0$ 是铅直渐近线。
+
+</Step>
+<Step>
+
+### 第二步：检查无穷远处的斜渐近线
+
+记斜渐近线为 $y=kx+b$。由 $\ln x/x\to0$，
+
 $$
- y=3x+1
+\begin{aligned}
+k&=\lim_{x\to+\infty}\frac{y}{x}
+=3+\lim_{x\to+\infty}\left(\frac1x+\frac{\ln x}{2x^2}\right)=3,\\
+b&=\lim_{x\to+\infty}(y-3x)
+=\lim_{x\to+\infty}\left(1+\frac{\ln x}{2x}\right)=1.
+\end{aligned}
 $$
-是斜渐近线。
+
+故 $y=3x+1$ 是斜渐近线。因定义域只包括正半轴，无须检查 $x\to-\infty$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="渐近线检查顺序">
+
+先看**定义域内有限端点的单侧极限**，再按 $k=\lim y/x$、$b=\lim(y-kx)$ 检查无穷远。斜率与截距均为有限常数，才能确定一条斜渐近线。
+
+</Callout>
 
 </Solution>
 
@@ -477,23 +879,57 @@ $$
 
 <Solution>
 
-当 $ |x|\to\infty$ 时，
+**参考答案：选 B。**斜渐近线为 $\boxed{y=x\ln2+\tfrac12}$。
 
-$ y-x\ln2=x\ln\left(1+\frac1{2(x-1)}\right)$。
+**解题思路：**这是典型的“线性增长量乘对数”模型。先从对数中提取常数 $\ln2$，确定斜率，再对剩余项使用 $\ln(1+u)\sim u$ 精确求出截距。
 
-利用 $ \ln(1+u)\sim u$，得
+<Steps>
+<Step>
 
-$ \lim_{|x|\to\infty}[y-x\ln2]=\lim_{|x|\to\infty}\frac{x}{2(x-1)}=\frac12$。
+### 第一步：确定无穷远分支与斜率
 
-故斜渐近线为
+当 $x\to\pm\infty$ 时，$2+1/(x-1)>0$，原函数有定义。由于
 
-$ y=x\ln2+\frac12$。
+$$
+\lim_{x\to\pm\infty}\frac{y}{x}
+=\lim_{x\to\pm\infty}\ln\left(2+\frac1{x-1}\right)=\ln2,
+$$
+
+候选斜渐近线的斜率为 $k=\ln2\ne0$。
+
+</Step>
+<Step>
+
+### 第二步：求截距而非直接忽略低阶项
+
+利用对数性质，
+
+$$
+\begin{aligned}
+b&=\lim_{x\to\pm\infty}\bigl(y-x\ln2\bigr)\\
+&=\lim_{x\to\pm\infty}x\ln\left(1+\frac{1}{2(x-1)}\right)\\
+&=\lim_{x\to\pm\infty}\frac{x}{2(x-1)}
+\frac{\ln(1+\frac{1}{2(x-1)})}{\frac{1}{2(x-1)}}
+=\frac12.
+\end{aligned}
+$$
+
+正、负无穷两个方向都得到同一条直线 $y=x\ln2+\frac12$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="常见错误">
+
+$\ln(2+1/(x-1))\to\ln2$ 只说明斜率，**不能**将整个对数直接换成 $\ln2$ 求截距；因为被忽略的 $O(1/x)$ 项乘上 $x$，恰好贡献常数 $1/2$。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点3：参数方程、广义积分与无穷远分支
+## 三、综合题：参数方程、积分渐近与无穷远分支
 
 <Question id="selected-1103-classified-1031-tangjiafeng-2027-s3-q14" type="blank" points={5} tags="来源:汤家凤八套卷, 考点:斜渐近线与高斯积分, 难度:中等">
 
@@ -507,46 +943,68 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
-\boxed{y=-\sqrt\pi\,x-\frac{\sqrt\pi}{2}},\qquad
-\boxed{y=\sqrt\pi\,x+\frac{\sqrt\pi}{2}}.
+\boxed{\begin{aligned}
+x\to-\infty &: \quad y=-\sqrt\pi\,x-\frac{\sqrt\pi}{2},\\
+x\to+\infty &: \quad y=\sqrt\pi\,x+\frac{\sqrt\pi}{2}.
+\end{aligned}}
 $$
 
-**过程**：记 $F(x)=\int_0^xe^{-t^2}\,\mathrm dt$。由高斯积分可知
+**解题思路：**变上限积分 $F(x)=\int_0^xe^{-t^2}\,\mathrm dt$ 在正、负无穷处趋向相反的常数。但原式乘了 $2x+1$，仅知道 $F(x)$ 的极限不足以求出截距；必须证明**高斯积分的尾差乘以 $x$ 仍趋于零**。
+
+<Steps>
+<Step>
+
+### 第一步：求积分在两端的极限
+
+由高斯积分 $\int_{-\infty}^{+\infty}e^{-t^2}\,\mathrm dt=\sqrt\pi$，以及被积函数为偶函数，得
 
 $$
 \lim_{x\to+\infty}F(x)=\frac{\sqrt\pi}{2},\qquad
 \lim_{x\to-\infty}F(x)=-\frac{\sqrt\pi}{2}.
 $$
 
-对于 $x\to\pm\infty$，由于高斯尾积分衰减快于 $1/|x|$，有
+于是斜率 $k_+=\sqrt\pi$，$k_-=-\sqrt\pi$，它们分别来自 $y/x=(2+1/x)F(x)$ 的极限。
+
+</Step>
+<Step>
+
+### 第二步：控制高斯尾差
+
+当 $x>0$，因为 $t\ge x$ 蕴含 $1\le t/x$，所以
 
 $$
-\lim_{x\to+\infty}x\left(F(x)-\frac{\sqrt\pi}{2}\right)=0,
-\quad
-\lim_{x\to-\infty}x\left(F(x)+\frac{\sqrt\pi}{2}\right)=0.
+0\le\int_x^{+\infty}e^{-t^2}\,\mathrm dt
+\le\frac1x\int_x^{+\infty}t e^{-t^2}\,\mathrm dt
+=\frac{e^{-x^2}}{2x}.
 $$
 
-因此
+故 $x\bigl(F(x)-\sqrt\pi/2\bigr)\to0$。由 $F$ 为奇函数，负无穷方向同样有 $x\bigl(F(x)+\sqrt\pi/2\bigr)\to0$。
+
+</Step>
+<Step>
+
+### 第三步：计算两侧截距
 
 $$
 \begin{aligned}
-y-\left(\sqrt\pi\,x+\frac{\sqrt\pi}{2}\right)
-&=(2x+1)\left(F(x)-\frac{\sqrt\pi}{2}\right)\to0
-&& (x\to+\infty),\\
-y-\left(-\sqrt\pi\,x-\frac{\sqrt\pi}{2}\right)
-&=(2x+1)\left(F(x)+\frac{\sqrt\pi}{2}\right)\to0
-&& (x\to-\infty).
+\lim_{x\to+\infty}\bigl(y-\sqrt\pi x\bigr)
+&=\lim_{x\to+\infty}\left[(2x+1)\left(F(x)-\frac{\sqrt\pi}{2}\right)+\frac{\sqrt\pi}{2}\right]=\frac{\sqrt\pi}{2},\\
+\lim_{x\to-\infty}\bigl(y+\sqrt\pi x\bigr)
+&=\lim_{x\to-\infty}\left[(2x+1)\left(F(x)+\frac{\sqrt\pi}{2}\right)-\frac{\sqrt\pi}{2}\right]=-\frac{\sqrt\pi}{2}.
 \end{aligned}
 $$
 
-这就证明两条直线均为斜渐近线。
+斜率与截距均已确定，得到题首两条直线。
 
-<Callout type="idea" title="尾积分估计">
+</Step>
+</Steps>
 
-若 $x>0$，则 $0<\int_x^\infty e^{-t^2}\,\mathrm dt\le \frac{e^{-x^2}}{2x}$；负无穷一侧由奇偶性得到相同结论。这样可直接控制截距极限。
+<Callout type="idea" title="可迁移的积分型渐近线方法">
+
+若 $F(x)\to L$ 且 $x[F(x)-L]\to0$，那么 $(ax+b)F(x)$ 的渐近线就是 $y=aLx+bL$。本题在 $\pm\infty$ 两侧使用不同的极限 $L$。
 
 </Callout>
 
@@ -569,35 +1027,56 @@ $$
 
 <Solution>
 
-**答案：$\displaystyle\boxed{y=\frac{x}{2}-\frac34}$。**
+**参考答案：**唯一的斜渐近线为 $\boxed{y=\dfrac x2-\dfrac34}$。
 
-对于参数曲线的斜渐近线 $y=kx+b$，需考察曲线上 $|x|\to\infty$ 的分支，并计算 $k=\lim y/x$、$b=\lim(y-kx)$。
+**解题思路：**参数曲线不能直接令 $t\to\infty$ 就认定 $x\to\infty$。必须**先找导致 $|x(t)|\to\infty$ 的参数分支**，再在各分支计算 $y/x$ 与 $y-kx$。
 
-当 $t\to1$ 时，$|x|\to\infty$，且
+<Steps>
+<Step>
+
+### 第一步：定位可能的无穷远分支
 
 $$
-\frac{y}{x}
-=\frac{t}{t^2-1}\cdot\frac{t-1}{t^2}
-=\frac1{t(t+1)}\longrightarrow\frac12.
+x(t)=\frac{t^2}{t-1},\qquad y(t)=\frac{t}{(t-1)(t+1)}.
 $$
 
-因此斜率 $k=1/2$。再计算截距：
+$t\to1^\pm$ 时，$|x(t)|\to\infty$ 且 $|y(t)|\to\infty$，可能产生斜渐近线。$t\to\pm\infty$ 时 $|x(t)|\to\infty$ 但 $y(t)\to0$，对应水平渐近线而非斜渐近线。$t\to-1$ 时 $x(t)\to-1/2$，不是斜渐近线分支。
+
+</Step>
+<Step>
+
+### 第二步：求斜率
+
+在 $t\to1$ 时，
+
+$$
+k=\lim\frac{y(t)}{x(t)}
+=\lim_{t\to1}\frac{t}{t^2-1}\cdot\frac{t-1}{t^2}
+=\lim_{t\to1}\frac1{t(t+1)}=\frac12.
+$$
+
+</Step>
+<Step>
+
+### 第三步：消去截距中的零分母
 
 $$
 \begin{aligned}
-y-\frac{x}{2}
+y(t)-\frac{x(t)}2
 &=\frac{t}{(t-1)(t+1)}-\frac{t^2}{2(t-1)}\\
-&=\frac{2t-t^2(t+1)}{2(t-1)(t+1)}\\
-&=-\frac{t(t+2)}{2(t+1)}
-\longrightarrow-\frac34\qquad(t\to1).
+&=\frac{2t-t^2(t+1)}{2(t-1)(t+1)}
+=-\frac{t(t+2)}{2(t+1)}.
 \end{aligned}
 $$
 
-故所求斜渐近线为 $\boxed{y=x/2-3/4}$。
+所以 $b=\lim_{t\to1}(y-x/2)=-3/4$。两侧参数趋近 $1$ 得到相同的 $k,b$，故斜渐近线是 $y=x/2-3/4$。
 
-<Callout type="info" title="检查其他无穷远分支">
+</Step>
+</Steps>
 
-当 $t\to\pm\infty$ 时，$|x|\to\infty$ 而 $y\to0$，对应的是水平渐近线 $y=0$，不是本题要求的斜渐近线。
+<Callout type="warn" title="参数曲线的分支容易漏判">
+
+严格地说，该曲线还可在 $t\to\pm\infty$ 时趋近水平渐近线 $y=0$，在 $t\to-1$ 时有铅直渐近线 $x=-1/2$；但题目只要求**斜**渐近线，不能将它们混入填空答案。
 
 </Callout>
 
@@ -610,25 +1089,64 @@ $$
 
 <Solution>
 
-**答案：** $x + y + \frac{1}{3} = 0$
+**参考答案：**$\boxed{x+y+\frac13=0}$，等价于 $\boxed{y=-x-\frac13}$。
 
-**解析：** 由已知可得, 当且仅当 $t \to -1$ 时, $x \to \infty$. 故
+**解题思路：**先判断什么参数值使横坐标趋于无穷，再利用参数式中 $y/x$ 的简化关系直接求斜率，最后在 $y-kx$ 中因式分解消掉趋零因子。
+
+<Steps>
+<Step>
+
+### 第一步：确定无穷远分支
+
+参数为
+
+$$
+x=\frac{t}{1+t^3},\qquad y=\frac{t^2}{1+t^3}.
+$$
+
+实数范围内分母 $1+t^3=0$ 当且仅当 $t=-1$；且分子在此处非零，故 $t\to-1^\pm$ 时 $|x|\to\infty$。反之，当 $|t|\to\infty$ 时，$x\to0$，不能由此确定斜渐近线。
+
+</Step>
+<Step>
+
+### 第二步：求斜率
+
+对 $t\ne0,-1$，有 $y/x=t$，因此
+
+$$
+k=\lim_{t\to-1}\frac{y(t)}{x(t)}=\lim_{t\to-1}t=-1.
+$$
+
+</Step>
+<Step>
+
+### 第三步：求截距
 
 $$
 \begin{aligned}
-k &= \lim_{x \to \infty} \frac{y}{x} = \lim_{t \to -1} \frac{t^2}{1+t^3} \cdot \frac{1+t^3}{t} = \lim_{t \to -1} t = -1, \\
-b &= \lim_{x \to \infty} (y - kx) = \lim_{t \to -1} \left(\frac{t^2}{1+t^3} + \frac{t}{1+t^3}\right) \\
-&= \lim_{t \to -1} \frac{t(t+1)}{(t+1)(t^2 - t + 1)} = \lim_{t \to -1} \frac{t}{t^2 - t + 1} = -\frac{1}{3}.
+b&=\lim_{t\to-1}\bigl(y(t)+x(t)\bigr)
+=\lim_{t\to-1}\frac{t^2+t}{1+t^3}\\
+&=\lim_{t\to-1}\frac{t(t+1)}{(t+1)(t^2-t+1)}
+=\lim_{t\to-1}\frac{t}{t^2-t+1}=-\frac13.
 \end{aligned}
 $$
 
-故所求斜渐近线方程为 $y = -x - \frac{1}{3}$, 即 $x + y + \frac{1}{3} = 0$.
+因此直线 $y=-x-1/3$ 与两侧无穷远分支的纵向差均趋于 $0$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="快速核验">
+
+直接考察 $x+y+1/3$：令 $t\to-1$，$x+y\to-1/3$，所以曲线到直线 $x+y+1/3=0$ 的距离也趋于 $0$（距离为 $|x+y+1/3|/\sqrt2$）。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点4：非典型函数的完整渐近线与极值辨析
+## 四、复杂函数：渐近线的完整判定与极值辨析
 
 <Question id="selected-1103-classified-1031-liyongle-2027-s4-q01" type="single" points={5} tags="来源:李永乐六套卷, 考点:函数极值与渐近线, 难度:中等" number={1}>
 
@@ -641,52 +1159,79 @@ $$
 
 <Solution>
 
-**答案：B。**
+**参考答案：选 B。**函数在 $(0,+\infty)$ 内恰有一个极小值、没有极大值，也没有任何直线渐近线。极小点为 $x=\alpha$，其中 $\ln\alpha+\alpha+1=0$；极小值为 $f(\alpha)=e^{-\alpha}$。
+
+**解题思路：**幂指函数先取对数以简化导数。渐近线需分别考虑 $x\to0^+$ 与 $x\to+\infty$；尤其在无穷远处，要将“斜率存在”和“截距存在”分开检验。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 判断极值
+### 第一步：由对数导数判断单调性与极值
 
-  令 $g(x)=\ln f(x)=\dfrac{x\ln x}{x+1}$。因 $f(x)>0$，故 $f'$ 与 $g'$ 同号，而
+令
 
-  $$
-  g'(x)=\frac{\ln x+x+1}{(x+1)^2}.
-  $$
+$$
+g(x)=\ln f(x)=\frac{x\ln x}{x+1},\qquad
+f'(x)=f(x)g'(x).
+$$
 
-  分子 $h(x)=\ln x+x+1$ 在 $(0,+\infty)$ 上满足 $h'(x)=1/x+1>0$，且由负无穷增至正无穷，因此有且仅有一个零点。于是 $f$ 先减后增，只有**一个极小值**。
+因为 $f(x)>0$，$f'(x)$ 与 $g'(x)$ 同号。商法则给出
 
-  </Step>
-  <Step>
+$$
+g'(x)=\frac{\ln x+x+1}{(x+1)^2}.
+$$
 
-  ### 判断渐近线
+设 $h(x)=\ln x+x+1$，则 $h'(x)=1/x+1>0$，而 $h(0^+)=-\infty$、$h(+\infty)=+\infty$。所以存在唯一的 $\alpha>0$ 使 $h(\alpha)=0$，导数在 $\alpha$ 左负右正，函数只有一个极小值。由 $\ln\alpha=-\alpha-1$ 得
 
-  当 $x\to0^+$，由 $x\ln x\to0$ 得 $f(x)=e^{x\ln x/(x+1)}\to1$，无竖直渐近线。
+$$
+g(\alpha)=\frac{\alpha(-\alpha-1)}{1+\alpha}=-\alpha,
+\qquad f(\alpha)=e^{-\alpha}.
+$$
 
-  当 $x\to+\infty$ 时，
+</Step>
+<Step>
 
-  $$
-  \frac{f(x)}x=\exp\!\left(-\frac{\ln x}{x+1}\right)\longrightarrow1,
-  $$
+### 第二步：有限端点不存在铅直渐近线
 
-  因此若存在斜渐近线，其斜率只能为 $1$。但
+因为 $x\ln x\to0$，
 
-  $$
-  \begin{aligned}
-  f(x)-x
-  &=x\left[\exp\!\left(-\frac{\ln x}{x+1}\right)-1\right]\\
-  &\sim-\frac{x\ln x}{x+1}\sim-\ln x\longrightarrow-\infty.
-  \end{aligned}
-  $$
+$$
+\lim_{x\to0^+}f(x)
+=\exp\left(\lim_{x\to0^+}\frac{x\ln x}{x+1}\right)=1,
+$$
 
-  截距不趋于有限常数，故无斜渐近线；又 $f(x)\sim x\to\infty$，也无水平渐近线。因此选 **B**。
+因此 $x=0$ 不是铅直渐近线；函数在 $(0,+\infty)$ 内连续，其他有限点也不产生铅直渐近线。
 
-  </Step>
+</Step>
+<Step>
+
+### 第三步：排除无穷远处的水平与斜渐近线
+
+将 $f$ 写成
+
+$$
+f(x)=x\exp\left(-\frac{\ln x}{x+1}\right).
+$$
+
+令 $u=\ln x/(x+1)\to0^+$，则 $f(x)/x=e^{-u}\to1$，所以 $f(x)\to+\infty$，排除水平渐近线。若有斜渐近线，其斜率只能为 $k=1$；但
+
+$$
+\begin{aligned}
+f(x)-x
+&=x(e^{-u}-1)
+=-\frac{x\ln x}{x+1}\cdot\frac{1-e^{-u}}{u}
+\longrightarrow-\infty,
+\end{aligned}
+$$
+
+故截距不是有限数，不存在斜渐近线。选 B。
+
+</Step>
 </Steps>
 
-<Callout type="warn" title="斜渐近线判据">
+<Callout type="warn" title="一阶等价不等于斜渐近线">
 
-仅有 $f(x)/x\to1$，还不能断定 $y=x+b$ 是渐近线；必须继续验证 $f(x)-x\to b$，其中 $b$ 为有限常数。
+$f(x)\sim x$ 只说明相对误差趋零；这里 $f(x)-x\sim-\ln x\to-\infty$，绝对误差并不趋于常数，因而不能写成 $y=x$ 的渐近线。
 
 </Callout>
 
@@ -699,30 +1244,89 @@ $$
 
 <Solution>
 
-**答案：** 铅直渐近线 $x=-\frac12$；斜渐近线 $y=2x\ln2+\frac14\ln2+1$ 与 $y=-2x\ln2-\frac14\ln2-1$。
-
-**解析：** 函数 $y = \sqrt{4x^2 + x}\ln\left(2 + \frac{1}{x}\right)$ 在 $\left[-\frac{1}{2}, 0\right]$ 上没有定义。由于 $\lim\limits_{x \to \left(-\frac{1}{2}\right)^-} y = -\infty$,
+**参考答案：**全部渐近线共有三条：
 
 $$
-\lim_{x \to 0^+} y = \lim_{x \to 0^+} \sqrt{4x^2 + x}\ln\left(2 + \frac{1}{x}\right) = \lim_{x \to 0^+} \sqrt{4x^2 + x}\ln(2x + 1) - \lim_{x \to 0^+} (\sqrt{4x + 1} \cdot \sqrt{x}\ln x) = 0,
+\boxed{x=-\frac12},\qquad
+\boxed{y=2(\ln2)x+\frac14\ln2+1},\qquad
+\boxed{y=-2(\ln2)x-\frac14\ln2-1}.
 $$
 
-故 $x = -\frac{1}{2}$ 是铅直渐近线。
+**解题思路：**先**求准确的实数定义域**，避免误把根式或对数的某个单独边界当成定义域端点；随后检查有限端点的单侧极限，最后分别在 $+\infty$ 和 $-\infty$ 展开根式与对数的一次修正项，求斜率与截距。
+
+<Steps>
+<Step>
+
+### 第一步：解定义域，并查有限端点
+
+由 $4x^2+x=x(4x+1)\ge0$，得 $x\le-1/4$ 或 $x\ge0$。又由 $2+1/x>0$（且 $x\ne0$），得 $x<-1/2$ 或 $x>0$。两条件取交集：
+
+$$
+D=(-\infty,-\tfrac12)\cup(0,+\infty).
+$$
+
+当 $x\to-\tfrac12^-$，$2+1/x\to0^+$，而 $\sqrt{4x^2+x}\to1/\sqrt2>0$，故 $y\to-\infty$，于是 $x=-1/2$ 是铅直渐近线。
+
+另一方面，当 $x\to0^+$，
+
+$$
+y=\sqrt{x}\sqrt{1+4x}\,\ln\left(2+\frac1x\right).
+$$
+
+其中 $\sqrt{1+4x}\to1$，而 $\sqrt{x}\ln(1/x)\to0$，故 $y\to0$；$x=0$ 不是铅直渐近线。
+
+</Step>
+<Step>
+
+### 第二步：检查正无穷方向
+
+在 $x\to+\infty$ 时，利用 $\sqrt{1+z}=1+z/2+O(z^2)$ 与 $\ln(1+z)=z+O(z^2)$，有
 
 $$
 \begin{aligned}
-k &= \lim_{x \to +\infty} \frac{y}{x} = \lim_{x \to +\infty} \frac{|x|}{x} \sqrt{4 + \frac{1}{x}}\ln\left(2 + \frac{1}{x}\right) = 2\ln 2, \\
-b &= \lim_{x \to +\infty} [y - (2\ln 2)x] \\
-&= \lim_{x \to +\infty} (\sqrt{4x^2 + x} - 2x)\ln\left(2 + \frac{1}{x}\right) + \lim_{x \to +\infty} 2x\left[\ln\left(2 + \frac{1}{x}\right) - \ln 2\right] \\
-&= \lim_{x \to +\infty} \frac{x}{\sqrt{4x^2 + x} + 2x}\ln\left(2 + \frac{1}{x}\right) + \lim_{x \to +\infty} 2x\ln\left(1 + \frac{1}{2x}\right) = \frac{1}{4}\ln 2 + 1.
+\sqrt{4x^2+x}&=2x+\frac14+O(x^{-1}),\\
+\ln\left(2+\frac1x\right)&=\ln2+\frac1{2x}+O(x^{-2}).
 \end{aligned}
 $$
 
-同理, 可求得 $\lim\limits_{x \to -\infty} \frac{y}{x} = -2\ln 2$, $\lim\limits_{x \to -\infty} [y + (2\ln 2)x] = -\frac{1}{4}\ln 2 - 1$, 所以曲线有两条斜渐近线为
+相乘得
 
 $$
-y = (2\ln 2)x + \frac{1}{4}\ln 2 + 1,\ y = -(2\ln 2)x - \frac{1}{4}\ln 2 - 1.
+y=2(\ln2)x+\frac14\ln2+1+O(x^{-1}),
 $$
+
+所以第一条斜渐近线为 $y=2(\ln2)x+\frac14\ln2+1$。
+
+</Step>
+<Step>
+
+### 第三步：检查负无穷方向
+
+这时 $\sqrt{4x^2+x}=|x|\sqrt{4+1/x}=-x\sqrt{4+1/x}$。因此
+
+$$
+\begin{aligned}
+\sqrt{4x^2+x}&=-2x-\frac14+O(|x|^{-1}),\\
+\ln\left(2+\frac1x\right)&=\ln2+\frac1{2x}+O(x^{-2}),
+\end{aligned}
+$$
+
+从而
+
+$$
+y=-2(\ln2)x-\frac14\ln2-1+O(|x|^{-1}).
+$$
+
+第二条斜渐近线为 $y=-2(\ln2)x-\frac14\ln2-1$。两端的斜率非零且均无水平渐近线，故三条已穷尽。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="根式在负无穷处的符号">
+
+$\sqrt{x^2}=|x|$，而不是 $x$。本题两条斜渐近线斜率符号相反，正是由 $|x|$ 在正负无穷方向取值不同造成的。
+
+</Callout>
 
 </Solution>
 
@@ -734,19 +1338,62 @@ $$
 
 <Solution>
 
-**答案：** $ x=0$，$ y=x$。
+**参考答案：**全部渐近线为铅直渐近线 $\boxed{x=0}$ 与斜渐近线 $\boxed{y=x}$，没有水平渐近线。
 
-**解析：** 当 $ x\to0^+$ 时，$ x^3e^{1/x}\to+\infty$；当 $ x\to0^-$ 时，$ x^3e^{-1/x}\to-\infty$，故 $ x=0$ 为铅直渐近线。
+**解题思路：**$x=0$ 是唯一的有限定义域缺口，需检查单侧发散；无穷远处令 $u=1/x$，把两个指数配对展开。由于奇次项完全抵消，最前面的非零项为 $u^2$，决定斜率为 $1$。
 
-当 $ |x|\to\infty$ 时，
+<Tabs items={['泰勒展开法', '极限判别法']} defaultIndex={0}>
+<Tab value="泰勒展开法">
 
-$ e^{\frac1x}+e^{-\frac1x}-2=\frac1{x^2}+O\left(\frac1{x^4}\right)$。
+### 第一步：确定铅直渐近线
 
-于是
+当 $x\to0^+$ 时，$e^{1/x}$ 主导其余项，$x^3e^{1/x}\to+\infty$，所以 $y\to+\infty$；当 $x\to0^-$ 时，$e^{-1/x}$ 主导且 $x^3<0$，于是 $y\to-\infty$。故 $x=0$ 为铅直渐近线。
 
-$ y=x+O\left(\frac1x\right)$，
+### 第二步：展开并读出斜渐近线
 
-故斜渐近线为 $ y=x$。
+设 $u=1/x\to0$，由指数函数的泰勒展开，
+
+$$
+e^u+e^{-u}-2=u^2+\frac{u^4}{12}+O(u^6).
+$$
+
+因此当 $x\to\pm\infty$，
+
+$$
+\begin{aligned}
+y&=x^3\left(\frac1{x^2}+\frac1{12x^4}+O(x^{-6})\right)\\
+&=x+\frac1{12x}+O(x^{-3}).
+\end{aligned}
+$$
+
+故 $y-x\to0$，在两个无穷远方向共有同一条斜渐近线 $y=x$。
+
+</Tab>
+<Tab value="极限判别法">
+
+计算无穷远斜率：
+
+$$
+k=\lim_{x\to\pm\infty}\frac yx
+=\lim_{u\to0}\frac{e^u+e^{-u}-2}{u^2}=1.
+$$
+
+再求截距，把差式改写为
+
+$$
+y-x=\frac{e^u+e^{-u}-2-u^2}{u^3}.
+$$
+
+由于对称性使三阶项为零，分子为 $O(u^4)$，分式为 $O(u)\to0$，故 $b=0$。有限端点 $x=0$ 的单侧发散如前所述。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="偶函数结构带来奇次项消失">
+
+$e^u+e^{-u}$ 是偶函数，展开式只有偶次幂。若忽略这一结构，只估计 $e^u+e^{-u}-2=O(u^2)$，仍不能保证截距极限，必须进一步识别四阶余项。
+
+</Callout>
 
 </Solution>
 

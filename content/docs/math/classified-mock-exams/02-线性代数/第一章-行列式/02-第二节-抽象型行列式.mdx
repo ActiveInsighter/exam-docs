@@ -1,13 +1,11 @@
 ---
-title: "第二节 抽象型行列式｜列线性组合、伴随矩阵、正交结构与矩阵多项式"
-description: "对照真题的线性组合、反对角分块、伴随矩阵行列式、逆矩阵运算及正交矩阵约束，精选综合题和辨析题，保留原题组件。"
+title: "2. 抽象型行列式"
+description: "抽象型行列式29题：列组合、分块行列式、伴随矩阵、正交结构与矩阵多项式；答案先行、推导详解及常见误区。"
 ---
 
-# 第二节 抽象型行列式｜列线性组合、伴随矩阵、正交结构与矩阵多项式
+本节收录 **29 道**模拟与练习题，保留原始题干、选项、正确答案与稳定题目 ID。**29 道已全部完成解析重写**，先给出结论，再展示关键思路、分步推导与常见误区，必要时提供两种解法。
 
-参照「真题核心题目」同名小节的考点与命题风格，精选 **29 道高质量模拟与练习原题**。题干、选项、答案、解析、公式与原 MDX 组件均未改动。
-
-## 考点1：列线性性、基变换及结构行列式
+## 考点一｜列组合、基变换、初等变换与分块行列式
 
 <Question id="selected-1103-classified-1031-lilin-2027-s6-q15" type="blank" points={5} tags="来源:李林六套卷, 考点:矩阵分解与行列式, 难度:中等">
 
@@ -22,50 +20,69 @@ $$
 
 <Solution>
 
-**答案：$\boxed{\dfrac{22}{5}}$。**
+**答案：** $\boxed{\dfrac{22}{5}}$。
+
+**思路：** 新列向量都来自 $A$ 的列线性组合，所以将 $B$ 写成 $AM$；再将 $A^{-1}+B^{-1}$ 提取公因子，化为两个易算的行列式之比。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 将 $B$ 写成 $A$ 与系数矩阵的乘积
+  ### 构造列系数矩阵并检查可逆性
 
-  对照列向量的系数，
+  逐列比较题目给出的 $B$，得
 
-  $$
-  B=AM,\qquad
-  M=\begin{pmatrix}
-  1&0&0\\2&2&1\\0&1&3
-  \end{pmatrix},\qquad |M|=5.
-  $$
 
-  故 $B$ 可逆，并且 $B^{-1}=M^{-1}A^{-1}$。
 
-  </Step>
-  <Step>
+$$
+B=AM,\quad
+  M=\begin{pmatrix}1&0&0\\2&2&1\\0&1&3\end{pmatrix}.
+$$
 
-  ### 提取公共因子并计算行列式
+  沿第 $1$ 行展开：
 
-  $$
-  \begin{aligned}
+
+
+$$
+|M|=\begin{vmatrix}2&1\\1&3\end{vmatrix}=5\ne0.
+$$
+
+  因 $|A|=1\ne0$，所以 $A,B$ 均可逆，并且 $B^{-1}=M^{-1}A^{-1}$。
+
+</Step>
+<Step>
+
+  ### 因式分解并计算
+
+
+
+$$
+\begin{aligned}
   |A^{-1}+B^{-1}|
-  &=|(E+M^{-1})A^{-1}|\\
-  &=\frac{|M+E|}{|M|}\cdot\frac1{|A|}.
+  &=|(E_3+M^{-1})A^{-1}|\\
+  &=|M^{-1}(M+E_3)|\,|A^{-1}|\\
+  &=\frac{|M+E_3|}{|M|\,|A|}.
   \end{aligned}
-  $$
+$$
 
   其中
 
-  $$
-  |M+E|=
-  \begin{vmatrix}
-  2&0&0\\2&3&1\\0&1&4
-  \end{vmatrix}=2(12-1)=22.
-  $$
 
-  因此 $\boxed{|A^{-1}+B^{-1}|=22/5}$。
 
-  </Step>
+$$
+|M+E_3|=\begin{vmatrix}2&0&0\\2&3&1\\0&1&4\end{vmatrix}
+  =2(12-1)=22.
+$$
+
+  因此 $|A^{-1}+B^{-1}|=\boxed{22/5}$。
+
+</Step>
 </Steps>
+
+<Callout type="warn" title="注意逆矩阵的乘法顺序">
+
+由 $B=AM$ 得 $B^{-1}=M^{-1}A^{-1}$，顺序必须反过来。并且一般不能把 $A^{-1}+B^{-1}$ 错写成 $(A+B)^{-1}$。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -82,62 +99,160 @@ $$
 
 <Solution>
 
-**答案：$\boxed8$。**
+**答案：** $\boxed{8}$。
 
-**过程**：记一次行变换与列变换对应的矩阵分别为
+**解题路线：** 行变换用左乘初等矩阵表示，列变换用右乘初等矩阵表示。先从 $BD$ 反推出 $AC$，再减单位矩阵求行列式。
+
+<Steps>
+<Step>
+
+  ### 将两次初等变换分别记为左乘和右乘
+
+
 
 $$
-R=\begin{pmatrix}1&1&0\\0&1&0\\0&0&1\end{pmatrix},\qquad
-S=\begin{pmatrix}1&0&0\\-2&1&0\\0&0&1\end{pmatrix}.
+R=\begin{pmatrix}1&1&0\\0&1&0\\0&0&1\end{pmatrix},\quad
+  S=\begin{pmatrix}1&0&0\\-2&1&0\\0&0&1\end{pmatrix}.
 $$
 
-则 $B=RA$、$D=CS$，所以 $AC=R^{-1}(BD)S^{-1}$。代入
+  依题意 $B=RA$、$D=CS$，因此
+
+
+
+$$
+BD=RACS\quad\Longrightarrow\quad
+  AC=R^{-1}(BD)S^{-1}.
+$$
+
+</Step>
+<Step>
+
+  ### 代入已知对角矩阵计算 $AC$
+
+
+
+$$
+R^{-1}=\begin{pmatrix}1&-1&0\\0&1&0\\0&0&1\end{pmatrix},\quad
+  S^{-1}=\begin{pmatrix}1&0&0\\2&1&0\\0&0&1\end{pmatrix}.
+$$
+
+  故
+
+
 
 $$
 \begin{aligned}
-AC&=\begin{pmatrix}1&-1&0\\0&1&0\\0&0&1\end{pmatrix}
-\begin{pmatrix}1&0&0\\0&2&0\\0&0&3\end{pmatrix}
-\begin{pmatrix}1&0&0\\2&1&0\\0&0&1\end{pmatrix}\\
-&=\begin{pmatrix}-3&-2&0\\4&2&0\\0&0&3\end{pmatrix}.
-\end{aligned}
+  AC&=R^{-1}\operatorname{diag}(1,2,3)S^{-1}\\
+  &=\begin{pmatrix}1&-2&0\\0&2&0\\0&0&3\end{pmatrix}
+  \begin{pmatrix}1&0&0\\2&1&0\\0&0&1\end{pmatrix}\\
+  &=\begin{pmatrix}-3&-2&0\\4&2&0\\0&0&3\end{pmatrix}.
+  \end{aligned}
 $$
 
-故
+</Step>
+<Step>
+
+  ### 减单位矩阵并按块求行列式
+
+
 
 $$
-|AC-E_3|=\begin{vmatrix}-4&-2&0\\4&1&0\\0&0&2\end{vmatrix}
-=2\big[(-4)\cdot1-(-2)\cdot4\big]=\boxed8.
+\begin{aligned}
+  |AC-E_3|
+  &=\begin{vmatrix}-4&-2&0\\4&1&0\\0&0&2\end{vmatrix}\\
+  &=2\bigl[(-4)\cdot1-(-2)\cdot4\bigr]
+  =\boxed8.
+  \end{aligned}
 $$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="不可拆开做行列式减法">
+
+一般 $|AC-E_3|\ne|AC|-|E_3|$。必须先求出矩阵 $AC-E_3$，才能计算其行列式。
+
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-7ff068-011" type="essay">
+<Question id="selected-1103-math-7ff068-011" type="essay" tags="科目:线性代数, 章节:行列式, 考点:基变换与相似矩阵">
 
 设$A$是3阶矩阵，$\alpha_1,\alpha_2,\alpha_3$是3维线性无关列向量，且满足$A\alpha_1=\alpha_1+2\alpha_2+\alpha_3$，$A\alpha_2=2\alpha_1+\alpha_2+\alpha_3$，$A\alpha_3=\alpha_1+\alpha_2+2\alpha_3$，则$|A|=$
 
 <Solution>
 
-**答案：** $ -4$
+**参考答案：** $\boxed{|A|=-4}$。
 
-**解析：** 令
-$ P=[\alpha_1,\alpha_2,\alpha_3]$。
+**核心方法：** 三个已知列向量线性无关，可以构成一组基。把线性变换 $A$ 对这组基的作用写成系数矩阵，得到与 $A$ 相似的矩阵。
 
-由于$\alpha_1,\alpha_2,\alpha_3$线性无关，所以$P$可逆。由题设有
-$ AP=P\begin{bmatrix}1&2&1\\2&1&1\\1&1&2\end{bmatrix}$。
+<Steps>
+<Step>
 
-因此
-$ P^{-1}AP=\begin{bmatrix}1&2&1\\2&1&1\\1&1&2\end{bmatrix}$，
-从而
-$ |A|=\begin{vmatrix}1&2&1\\2&1&1\\1&1&2\end{vmatrix}=-4$。
+  ### 用线性无关列向量组成可逆矩阵
 
-## 强化部分
+  记
+
+
+
+$$
+P=(\alpha_1,\alpha_2,\alpha_3).
+$$
+
+  因为 $\alpha_1,\alpha_2,\alpha_3$ 线性无关，所以 $|P|\ne0$。把题目三个等式按列拼起来：
+
+
+
+$$
+AP=P\underbrace{\begin{pmatrix}
+  1&2&1\\
+  2&1&1\\
+  1&1&2
+  \end{pmatrix}}_{M}.
+$$
+
+  注意 $M$ 的第 $j$ 列来自 $A\alpha_j$ 在基 $P$ 下的坐标。
+
+</Step>
+<Step>
+
+  ### 由相似关系与行列式计算
+
+
+
+$$
+P^{-1}AP=M\quad\Longrightarrow\quad |A|=|M|.
+$$
+
+  沿第 $1$ 行展开：
+
+
+
+$$
+\begin{aligned}
+  |M|&=1\begin{vmatrix}1&1\\1&2\end{vmatrix}
+  -2\begin{vmatrix}2&1\\1&2\end{vmatrix}
+  +1\begin{vmatrix}2&1\\1&1\end{vmatrix}\\
+  &=1(2-1)-2(4-1)+(2-1)
+  =\boxed{-4}.
+  \end{aligned}
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="通用结论">
+
+如果 $P=(\alpha_1,\ldots,\alpha_n)$ 可逆且 $AP=PM$，则 $A=PMP^{-1}$，两者行列式、迹、特征值相同。无需解出 $A$ 的具体各项。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-7ff068-015" type="single">
+<Question id="selected-1103-math-7ff068-015" type="single" tags="科目:线性代数, 章节:行列式, 考点:相似矩阵与行列式">
 
 设$A=[\alpha_1,\alpha_2,\alpha_3]$，$\alpha_1,\alpha_2,\alpha_3$为线性无关的3维列向量，$P$为3阶矩阵，且$PA=[-\alpha_1,-2\alpha_2,-3\alpha_3]$，则$|P-E|=$( )  
 
@@ -148,26 +263,54 @@ $ |A|=\begin{vmatrix}1&2&1\\2&1&1\\1&1&2\end{vmatrix}=-4$。
 
 <Solution>
 
-因为$A=[\alpha_1,\alpha_2,\alpha_3]$可逆，且
-$ PA=A\operatorname{diag}(-1,-2,-3)$，
-所以
-$ P=A\operatorname{diag}(-1,-2,-3)A^{-1}$。
+**答案：** 选 **D**，$\boxed{|P-E_3|=-24}$。
 
-故$P$与$\operatorname{diag}(-1,-2,-3)$相似，$P$的特征值为$-1,-2,-3$。
+**解题思路：** 把三列的等式合成一个矩阵等式，发现 $P$ 与已知对角矩阵相似；减单位阵会使每个特征值减 $1$。
 
-于是$P-E$的特征值为$-2,-3,-4$，从而
-$ |P-E|=(-2)(-3)(-4)=-24$，故选D。
+<Tabs items={['解法一｜直接取行列式', '解法二｜相似与特征值']} defaultIndex={0}>
+<Tab value="解法一｜直接取行列式">
+
+  记 $\Lambda=\operatorname{diag}(-1,-2,-3)$。题设 $PA=A\Lambda$，故
+
+
+
+$$
+(P-E_3)A=A(\Lambda-E_3).
+$$
+
+  因为 $A=(\alpha_1,\alpha_2,\alpha_3)$ 的列向量线性无关，$|A|\ne0$。两边取行列式并约去 $|A|$，得
+
+
+
+$$
+|P-E_3|=|\Lambda-E_3|
+  =(-2)(-3)(-4)=\boxed{-24}.
+$$
+
+</Tab>
+<Tab value="解法二｜相似与特征值">
+
+  从 $PA=A\Lambda$ 得 $P=A\Lambda A^{-1}$，因此 $P-E_3=A(\Lambda-E_3)A^{-1}$。$P$ 的特征值是 $-1,-2,-3$，所以 $P-E_3$ 的特征值是 $-2,-3,-4$，其乘积为 $-24$。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="避免矩阵字母相近造成混淆">
+
+本题的 $A$ 是由三列线性无关向量构成的基矩阵，$P$ 才是未知矩阵；不要把 $PA=A\Lambda$ 错写成 $AP=A\Lambda$。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-c1d28a-004" type="single">
+<Question id="selected-1103-math-c1d28a-004" type="single" tags="科目:线性代数, 章节:行列式, 考点:分块反对角行列式">
 
 设 $ A$ 是 $ m$ 阶矩阵，$ B$ 是 $ n$ 阶矩阵，且 $ |A|=a,|B|=b$，若
 
 $$
- C=\begin{bmatrix}
+C=\begin{bmatrix}
 0 & 3A\\
 -B & 0
 \end{bmatrix},
@@ -182,44 +325,75 @@ $$
 
 <Solution>
 
-矩阵 $ C$ 的两个列块宽度分别为 $ n$ 和 $ m$。将前 $ n$ 列与后 $ m$ 列整体交换，需要进行 $ mn$ 次相邻列交换，因此行列式乘以
+**答案：** 选 **D**，
+
 $$
- (-1)^{mn}.
+\boxed{|C|=(-1)^{(m+1)n}3^mab}.
 $$
-交换后得到分块对角矩阵
+
+**关键：** 该分块矩阵整体为 $(m+n)$ 阶；左侧列块宽为 $n$，右侧列块宽为 $m$。交换两列块会产生 $mn$ 次相邻列交换的符号。
+
+<Steps>
+<Step>
+
+  ### 整体交换两组列
+
+  将前 $n$ 列与后 $m$ 列交换位置，得到
+
+
+
 $$
- \begin{bmatrix}
-3A&0\\
-0&-B
-\end{bmatrix}.
+C\xrightarrow{\text{交换列块}}
+  \begin{pmatrix}3A&0\\0&-B\end{pmatrix}.
 $$
-于是
+
+  因为总共跨越 $mn$ 对列，故
+
+
+
 $$
- (-1)^{mn}|C|
-=|3A|\,|-B|.
+(-1)^{mn}|C|=
+  \left|\begin{pmatrix}3A&0\\0&-B\end{pmatrix}\right|.
 $$
-分别计算
+
+</Step>
+<Step>
+
+  ### 分别计算两个对角块
+
+  对 $m$ 阶矩阵 $A$ 与 $n$ 阶矩阵 $B$，有
+
+
+
 $$
- |3A|=3^m|A|=3^ma,
-\qquad
-|-B|=(-1)^n|B|=(-1)^nb.
+|3A|=3^m|A|=3^ma,\qquad
+  |-B|=(-1)^n|B|=(-1)^nb.
 $$
-所以
+
+  因此
+
+
+
 $$
- (-1)^{mn}|C|=(-1)^n3^mab,
+(-1)^{mn}|C|=(-1)^n3^mab,
 $$
-从而
-$$
- |C|=(-1)^{mn+n}3^mab
-=(-1)^{(m+1)n}3^mab.
-$$
-故选 D。A、B 忽略了矩阵阶数对数乘行列式的影响；C 忽略了块 $ -B$ 额外产生的因子 $ (-1)^n$。
+
+  两边同乘 $(-1)^{mn}$，整理得 $|C|=(-1)^{mn+n}3^mab=(-1)^{(m+1)n}3^mab$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="选项辨析">
+
+选项 C 少了 $|-B|$ 带来的 $(-1)^n$；选项 B 同时忽略了列块交换与负号影响；选项 A 把 $|3A|$ 当成 $3|A|$，只有特殊阶数才可能成立。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b9ebfd-002" type="single">
+<Question id="selected-1103-math-b9ebfd-002" type="single" tags="科目:线性代数, 章节:行列式, 考点:列线性性">
 
 设 $\beta_1,\beta_2,\alpha_1,\alpha_2,\alpha_3$ 均是 $4$ 维列向量，且
 
@@ -240,42 +414,68 @@ $$
 
 <Solution>
 
-由列表示可得
+**答案：** 选 **D**，$\boxed{|A+B|=32}$。
 
-$$
-A+B=(\beta_1+\beta_2,\,2\alpha_1,\,4\alpha_2,\,2\alpha_3).
-$$
+**解题关键：** 行列式对单独一列是线性的，但对整个矩阵并不具有加法性。先把 $A+B$ 写成列向量形式，再提取每列的常数因子。
 
-因此
+<Steps>
+<Step>
+
+  ### 按对应列相加
+
+
 
 $$
 \begin{aligned}
-|A+B|
-&=16|\beta_1+\beta_2,\alpha_1,\alpha_2,\alpha_3|\\
-&=16\Bigl(|\beta_1,\alpha_1,\alpha_2,\alpha_3|+|\beta_2,\alpha_1,\alpha_2,\alpha_3|\Bigr).
-\end{aligned}
+  A+B
+  &=(\beta_1+\beta_2,\,2\alpha_1,\,4\alpha_2,\,2\alpha_3),\\
+  |A+B|
+  &=2\cdot4\cdot2\,|\beta_1+\beta_2,\alpha_1,\alpha_2,\alpha_3|\\
+  &=16|\beta_1+\beta_2,\alpha_1,\alpha_2,\alpha_3|.
+  \end{aligned}
 $$
 
-又
+</Step>
+<Step>
+
+  ### 只对第一列应用线性性
+
+
 
 $$
-|\beta_2,\alpha_1,\alpha_2,\alpha_3|
-=\frac13|\beta_2,\alpha_1,3\alpha_2,\alpha_3|=1,
+\begin{aligned}
+  |\beta_1+\beta_2,\alpha_1,\alpha_2,\alpha_3|
+  &=|\beta_1,\alpha_1,\alpha_2,\alpha_3|\\
+  &\quad+|\beta_2,\alpha_1,\alpha_2,\alpha_3|.
+  \end{aligned}
 $$
 
-故
+  第一项为 $1$。由 $|B|=3$，将其第三列的因子 $3$ 提出，得
+
+
 
 $$
-|A+B|=16(1+1)=32.
+3=3|\beta_2,\alpha_1,\alpha_2,\alpha_3|
+  \quad\Longrightarrow\quad
+  |\beta_2,\alpha_1,\alpha_2,\alpha_3|=1.
 $$
 
-**技巧：** 看到矩阵按列给出时，优先直接对“列”做加法，再利用行列式对单列的线性性拆分。
+  所以 $|A+B|=16(1+1)=\boxed{32}$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="反例提醒">
+
+不要写 $|A+B|=|A|+|B|=4$。即使 $A,B$ 是同阶方阵，行列式一般也不满足整体可加性；本题能拆开，是因为已经把**第一列**的和单独提取出来。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b9ebfd-024" type="blank">
+<Question id="selected-1103-math-b9ebfd-024" type="blank" tags="科目:线性代数, 章节:行列式, 考点:基变换与相似">
 
 设 $A$ 是 $3$ 阶方阵，$\alpha_1,\alpha_2,\alpha_3$ 线性无关，且
 
@@ -289,54 +489,64 @@ $$
 
 <Solution>
 
-**答案：** $2$
+**答案：** $\boxed{|A|=2}$。
 
-**解析：** 令
+**思路：** $A$ 在一组线性无关向量上的作用已知。把这些向量并成可逆矩阵 $P$，得到 $AP=PC$，则 $|A|=|C|$。
 
-$$
-P=(\alpha_1,\alpha_2,\alpha_3).
-$$
+<Steps>
+<Step>
 
-由于三个向量线性无关，$P$ 可逆。由题设
+  ### 找到在基 $P$ 下的表示矩阵
 
-$$
-AP=P
-\begin{pmatrix}
-1&0&1\\
-1&1&0\\
-0&1&1
-\end{pmatrix}.
-$$
+  令 $P=(\alpha_1,\alpha_2,\alpha_3)$。由三个向量线性无关知 $|P|\ne0$。逐列比较得
 
-记右侧系数矩阵为 $C$，则
+
 
 $$
-P^{-1}AP=C,
+AP=(A\alpha_1,A\alpha_2,A\alpha_3)
+  =P\underbrace{\begin{pmatrix}
+  1&0&1\\
+  1&1&0\\
+  0&1&1
+  \end{pmatrix}}_{C}.
 $$
 
-所以 $A$ 与 $C$ 相似，从而
+</Step>
+<Step>
+
+  ### 取行列式并约去 $|P|$
+
+
 
 $$
-|A|=|C|=\begin{vmatrix}
-1&0&1\\
-1&1&0\\
-0&1&1
-\end{vmatrix}=2.
+|A|\,|P|=|P|\,|C|
+  \quad\Longrightarrow\quad |A|=|C|.
 $$
 
-**另一种方法：** 也可直接对列行列式
+  按第一行展开可得
+
+
 
 $$
-|A|\,|\alpha_1,\alpha_2,\alpha_3|
+|C|=1\begin{vmatrix}1&0\\1&1\end{vmatrix}
+  +1\begin{vmatrix}1&1\\0&1\end{vmatrix}
+  =1+1=\boxed2.
 $$
 
-利用列的线性性化简；由于 $|\alpha_1,\alpha_2,\alpha_3|\ne0$，最后同样得到 $|A|=2$。
+</Step>
+</Steps>
+
+<Callout type="idea" title="从循环置换看结构">
+
+这里 $C=E_3+Q$，其中 $Q$ 把基向量依次循环移动。直接计算 $|E_3+Q|=2$；相比求未知矩阵 $A$ 的九个元素，先换基是最直接的方法。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b9ebfd-025" type="blank">
+<Question id="selected-1103-math-b9ebfd-025" type="blank" tags="科目:线性代数, 章节:行列式, 考点:共享列与逆矩阵和">
 
 设 $\alpha,\beta,\alpha_1,\alpha_2,\alpha_3$ 均为 $4$ 维列向量，
 
@@ -349,50 +559,63 @@ $$
 
 <Solution>
 
-**答案：** $12$
+**参考答案：** $\boxed{12}$。
 
-**解析：** 因为 $|A|,|B|\ne0$，二者均可逆。先化简：
+**解题思路：** $A$ 与 $B$ 只有第一列不同。先用逆矩阵恒等式把所求式化成 $|A+B|$，再按列提取公因子、利用行列式对单列的线性性。
 
-$$
-A^{-1}+B^{-1}=B^{-1}(A+B)A^{-1}.
-$$
+<Steps>
+<Step>
 
-因此
+  ### 把逆矩阵之和化为乘积
 
-$$
-|A^{-1}+B^{-1}|=|B|^{-1}|A+B||A|^{-1}.
-$$
+  因为 $|A|=2$、$|B|=1$ 均非零，两矩阵可逆。保持矩阵乘法的顺序，有
 
-又
+
 
 $$
-A+B=(\alpha+\beta,2\alpha_1,2\alpha_2,2\alpha_3),
+B^{-1}(A+B)A^{-1}=B^{-1}+A^{-1}.
 $$
 
-所以
+  因而
+
+
+
+$$
+|A^{-1}+B^{-1}|=\frac{|A+B|}{|A||B|}.
+$$
+
+</Step>
+<Step>
+
+  ### 利用只有一列不同的结构
+
+
 
 $$
 \begin{aligned}
-|A+B|
-&=2^3|\alpha+\beta,\alpha_1,\alpha_2,\alpha_3|\\
-&=8(|A|+|B|)\\
-&=8(2+1)=24.
-\end{aligned}
+  |A+B|
+  &=|\alpha+\beta,2\alpha_1,2\alpha_2,2\alpha_3|\\
+  &=2^3|\alpha+\beta,\alpha_1,\alpha_2,\alpha_3|\\
+  &=8\bigl(|A|+|B|\bigr)=8(2+1)=24.
+  \end{aligned}
 $$
 
-故
+  从而 $|A^{-1}+B^{-1}|=24/(2\cdot1)=\boxed{12}$。
 
-$$
-|A^{-1}+B^{-1}|=1\cdot24\cdot\frac12=12.
-$$
+</Step>
+</Steps>
 
-**技巧：** 这类题的核心是两次“结构化”：先把逆矩阵的和变成乘积，再利用两个矩阵只有一列不同来使用行列式线性性。
+<Callout type="warn" title="为什么不能直接写逆矩阵的和？">
+
+一般情况下 $(A+B)^{-1}\ne A^{-1}+B^{-1}$。只有通过 $B^{-1}(A+B)A^{-1}$ 这种乘积形式，才能合法地把行列式拆成因子相乘。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：伴随矩阵、逆矩阵及乘积行列式
+## 考点二｜伴随矩阵、逆矩阵与乘积行列式
 
 <Question id="selected-1103-classified-1031-tangjiafeng-2027-s3-q15" type="blank" points={5} tags="来源:汤家凤八套卷, 考点:秩一矩阵与行列式, 难度:基础">
 
@@ -400,37 +623,54 @@ $$
 
 <Solution>
 
-**答案：**$\boxed{5}$。
+**参考答案：** $\boxed{5}$。
 
-<Tabs items={['特征值法', '行列式引理']}>
-  <Tab value="特征值法">
+**核心结构：** $A=\alpha\beta^{\mathrm T}$ 是秩一矩阵，而且 $\beta^{\mathrm T}\alpha=(\alpha,\beta)=2$。先化简 $A^2$，再求行列式。
 
-  **过程：**
+<Tabs items={['方法一｜特征值法','方法二｜秩一行列式公式']} defaultIndex={0}>
+<Tab value="方法一｜特征值法">
 
-  $$
-  A^2=\boldsymbol\alpha(\boldsymbol\beta^{\mathrm T}\boldsymbol\alpha)\boldsymbol\beta^{\mathrm T}=2A.
-  $$
+  **第 1 步：**
 
-  由于 $\boldsymbol\beta^{\mathrm T}\boldsymbol\alpha=2\ne0$，$A$ 为秩一矩阵，且
 
-  $$
-  A\boldsymbol\alpha=2\boldsymbol\alpha.
-  $$
 
-  所以 $A$ 的特征值为一个 $2$ 及 $n-1$ 个 $0$（当 $n=1$ 时无零特征值）。$A^2+E$ 对应的特征值为 $5$ 和 $1$，故其行列式为 $5$。
+$$
+A^2=\alpha(\beta^{\mathrm T}\alpha)\beta^{\mathrm T}=2A.
+$$
 
-  </Tab>
-  <Tab value="行列式引理">
+  **第 2 步：** 由于 $A\alpha=2\alpha$ 且 $\alpha\ne0$，$2$ 是 $A$ 的一个特征值；$r(A)=1$，其余 $n-1$ 个特征值均为 $0$（按代数重数计算）。于是 $A^2+E$ 的特征值为 $5$ 与 $n-1$ 个 $1$。
 
-  因 $A^2=2A$，由秩一矩阵的行列式引理 $\det(E+uv^{\mathrm T})=1+v^{\mathrm T}u$，得
+  **第 3 步：** 取特征值之积：
 
-  $$
-  |A^2+E|=|E+2\boldsymbol\alpha\boldsymbol\beta^{\mathrm T}|
-  =1+2\boldsymbol\beta^{\mathrm T}\boldsymbol\alpha=5.
-  $$
 
-  </Tab>
+
+$$
+|A^2+E|=5\cdot1^{n-1}=\boxed{5}.
+$$
+
+</Tab>
+<Tab value="方法二｜秩一行列式公式">
+
+  使用 $\det(E+uv^{\mathrm T})=1+v^{\mathrm T}u$，并令 $u=2\alpha$，$v=\beta$：
+
+
+
+$$
+\begin{aligned}
+  |A^2+E|&=|E+2\alpha\beta^{\mathrm T}|\\
+  &=1+\beta^{\mathrm T}(2\alpha)\\
+  &=1+2\times2=\boxed{5}.
+  \end{aligned}
+$$
+
+</Tab>
 </Tabs>
+
+<Callout type="idea" title="通用结论">
+
+对任意列向量 $u,v$，若 $A=uv^{\mathrm T}$，记 $c=v^{\mathrm T}u$，则 $A^2=cA$，并有 $|E+tA|=1+tc$。不必真的写出 $n\times n$ 的矩阵。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -454,97 +694,143 @@ $A_{ij}$ 为 $a_{ij}$ 的代数余子式，则 $A_{11}+A_{22}+A_{33}=$（　）�
 
 <Solution>
 
-**答案：D，$\boxed{3}$。**
+**参考答案：** **D**，$\boxed{3}$。
+
+**破题关键：** 题目没有给出 $A$ 的具体元素，但给出了它在一组基上的作用。应先写出相似矩阵，再把三个主对角代数余子式之和识别为伴随矩阵的迹。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 在已知基下写出相似矩阵
+  ### 在给定向量组构成的基下写出矩阵
 
-  令 $P=(\alpha_1,\alpha_2,\alpha_3)$。由三个向量线性无关可知 $P$ 可逆，且
+  因 $\alpha_1,\alpha_2,\alpha_3$ 线性无关，令 $P=(\alpha_1,\alpha_2,\alpha_3)$，则 $P$ 可逆。由 $A\alpha_i$ 的三个等式逐列比较，得到
 
-  $$
-  AP=P\begin{pmatrix}
-  1&0&-1\\
-  0&1&0\\
-  0&-1&1
-  \end{pmatrix}=PC.
-  $$
 
-  所以 $A=PCP^{-1}$，其中 $C$ 为上式矩阵。
 
-  </Step>
-  <Step>
+$$
+AP=PC,\qquad C=\begin{pmatrix}1&0&-1\\0&1&0\\0&-1&1\end{pmatrix}.
+$$
 
-  ### 把代数余子式之和化为伴随矩阵的迹
+  故 $A=PCP^{-1}$。
 
-  $A_{11}+A_{22}+A_{33}=\operatorname{tr}(A^*)$。由于 $A$ 与 $C$ 相似，伴随矩阵也相似，即 $A^*=PC^*P^{-1}$，故
+</Step>
+<Step>
 
-  $$
-  \operatorname{tr}(A^*)=\operatorname{tr}(C^*).
-  $$
+  ### 求伴随矩阵的迹
 
-  $C$ 的三个主对角二阶子式分别为
+  $A_{11}+A_{22}+A_{33}=\operatorname{tr}(A^*)$。由于 $|A|=|C|=1\ne0$，有
 
-  $$
-  \begin{vmatrix}1&0\\-1&1\end{vmatrix}=1,\qquad
-  \begin{vmatrix}1&-1\\0&1\end{vmatrix}=1,\qquad
-  \begin{vmatrix}1&0\\0&1\end{vmatrix}=1.
-  $$
 
-  因而 $\operatorname{tr}(C^*)=1+1+1=\boxed{3}$。
 
-  </Step>
+$$
+A^*=|A|A^{-1}=P(|C|C^{-1})P^{-1}=PC^*P^{-1}.
+$$
+
+  相似矩阵的迹相等。因此只需算 $C$ 的三个二阶主子式：
+
+
+
+$$
+\begin{aligned}
+  \operatorname{tr}(C^*)
+  &=\begin{vmatrix}1&0\\-1&1\end{vmatrix}
+   +\begin{vmatrix}1&-1\\0&1\end{vmatrix}
+   +\begin{vmatrix}1&0\\0&1\end{vmatrix}\\
+  &=1+1+1=\boxed{3}.
+  \end{aligned}
+$$
+
+</Step>
 </Steps>
 
-<Callout type="idea" title="可用特征值快速检验">
+<Callout type="idea" title="更快的判断">
 
-$C-E$ 严格幂零，$C$ 的特征值均为 $1$。对应的伴随矩阵特征值亦均为 $1$，其迹应为 $3$。
+$C=E+N$，其中 $N^3=O$，故 $C$ 的三个特征值全为 $1$。伴随矩阵 $C^*$ 的三个特征值也全为 $1$，迹自然为 $3$；这可作为快速复核。
 
 </Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-7ff068-014" type="essay">
+<Question id="selected-1103-math-7ff068-014" type="essay" tags="科目:线性代数, 章节:行列式, 考点:相似矩阵与分块行列式">
 
 已知3阶矩阵$A,B$相似，$\lambda_1=1$，$\lambda_2=2$为$A$的两个特征值，行列式$|B|=2$，则行列式$\begin{vmatrix}(A+E)^{-1}&O\\O&(2B)^*\end{vmatrix}=$
 
 <Solution>
 
-**答案：** $ \frac{64}{3}$
+**参考答案：**
 
-**解析：** $A,B$相似，所以
-$ |A|=|B|=2$。
+$$
+\boxed{\dfrac{64}{3}}.
+$$
 
-设$A$的第三个特征值为$\lambda_3$，则
-$ 1\cdot2\cdot\lambda_3=|A|=2$，
-故$ \lambda_3=1$。
+**解题思路：** 分块对角行列式等于两块行列式的乘积；分别通过特征值与伴随矩阵公式计算。
 
-因此$A+E$的特征值为$2,3,2$，于是
-$ |A+E|=12$，
-所以
-$ |(A+E)^{-1}|=\frac1{12}$。
+<Steps>
+<Step>
 
-对3阶矩阵$2B$，有
-$ |2B|=2^3|B|=16$。
+  ### 利用相似性补全特征值
 
-又3阶矩阵$C$满足$|C^*|=|C|^2$，故
-$ |(2B)^*|=16^2=256$。
+  $A$ 与 $B$ 相似，所以 $|A|=|B|=2$。若 $A$ 的第三个特征值是 $\lambda_3$，则
 
-分块对角矩阵的行列式等于各对角块行列式之积，所以
-$ \begin{vmatrix}(A+E)^{-1}&O\\O&(2B)^*\end{vmatrix}=\frac1{12}\cdot256=\frac{64}{3}$。
+
+
+$$
+1\cdot2\cdot\lambda_3=|A|=2\quad\Rightarrow\quad\lambda_3=1.
+$$
+
+  因此 $A+E$ 的特征值是 $2,3,2$，从而
+
+
+
+$$
+|(A+E)^{-1}|=\frac1{|A+E|}=\frac1{12}.
+$$
+
+</Step>
+<Step>
+
+  ### 计算伴随矩阵块的行列式
+
+  $2B$ 为三阶矩阵，故
+
+
+
+$$
+|2B|=2^3|B|=16,\qquad |(2B)^*|=|2B|^{3-1}=16^2=256.
+$$
+
+</Step>
+<Step>
+
+  ### 合并两个对角块
+
+
+
+$$
+\left|\begin{matrix}(A+E)^{-1}&O\\O&(2B)^*\end{matrix}\right|
+  =\frac1{12}\times256=\boxed{\frac{64}{3}}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="注意阶数和特征值重数">
+
+$A$ 的特征值 $1$ 出现两次。对三阶矩阵 $C$，$|C^*|=|C|^2$，而不是 $|C|^3$。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-c1d28a-002" type="single">
+<Question id="selected-1103-math-c1d28a-002" type="single" tags="科目:线性代数, 章节:行列式, 考点:伴随矩阵标量与数乘">
 
 设 $ A$ 是 $ n$ 阶矩阵，则
 
 $$
- \left|\,|A^\ast|A\,\right|=
+\left|\,|A^\ast|A\,\right|=
 $$
 
 <Option>$ |A|^{n^2}$</Option>
@@ -554,36 +840,60 @@ $$
 
 <Solution>
 
-对任意 $ n$ 阶矩阵 $ A$，伴随矩阵满足
+**参考答案：** **C**，$\boxed{|A|^{n^2-n+1}}$。
+
+**核心区分：** $|A^*|$ 是一个**标量**。题目实际求的是标量 $|A^*|$ 乘以整个 $n$ 阶矩阵 $A$ 后的行列式。
+
+<Steps>
+<Step>
+
+  ### 先求标量 $|A^*|$
+
+  对 $n$ 阶矩阵 $A$，恒有
+
+
+
 $$
- |A^\ast|=|A|^{n-1}.
+|A^*|=|A|^{n-1}.
 $$
-又因为 $ |A^\ast|$ 是一个数，而对数乘矩阵有
+
+</Step>
+<Step>
+
+  ### 使用数乘行列式公式
+
+  $|tA|=t^n|A|$，因此
+
+
+
 $$
- |kA|=k^n|A|,
+\begin{aligned}
+  \bigl|\,|A^*|A\,\bigr|
+  &=(|A^*|)^n|A|\\
+  &=(|A|^{n-1})^n|A|\\
+  &=\boxed{|A|^{n^2-n+1}}.
+  \end{aligned}
 $$
-所以
-$$
- \begin{aligned}
-\left|\,|A^\ast|A\,\right|
-&=|A^\ast|^n|A|\\
-&=\left(|A|^{n-1}\right)^n|A|\\
-&=|A|^{n(n-1)+1}\\
-&=|A|^{n^2-n+1}.
-\end{aligned}
-$$
-故选 C。A、B、D 的指数均未同时考虑“数乘矩阵使行列式乘以该数的 $ n$ 次方”以及 $ |A^\ast|=|A|^{n-1}$ 两条性质。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="不要把两层竖线看成一层">
+
+外层的 $|\cdot|$ 是对整个矩阵取行列式；内层 $|A^*|$ 已经变成一个数。若只写 $|A^*||A|$，就漏掉了标量缩放的 $n$ 次幂。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-c1d28a-003" type="single">
+<Question id="selected-1103-math-c1d28a-003" type="single" tags="科目:线性代数, 章节:行列式, 考点:伴随矩阵的缩放">
 
 设 $ A$ 是 $ n$ 阶矩阵，则
 
 $$
- |(2A)^\ast|=
+|(2A)^\ast|=
 $$
 
 <Option>$ 2^n|A^\ast|$</Option>
@@ -593,33 +903,56 @@ $$
 
 <Solution>
 
-对于 $ n$ 阶矩阵，伴随矩阵中的每个元素都是一个 $ n-1$ 阶子式。将 $ A$ 的所有元素乘以 $ 2$ 后，每个 $ n-1$ 阶子式均乘以 $ 2^{n-1}$，故
+**参考答案：** **C**，$\boxed{2^{n^2-n}|A^*|}$。
+
+**解题思路：** “矩阵整体乘 2”会让伴随矩阵的每个代数余子式乘以 $2^{n-1}$；而对这个 $n$ 阶伴随矩阵再取行列式，还需再乘 $n$ 次。
+
+<Tabs items={['方法一｜伴随矩阵缩放','方法二｜直接使用行列式恒等式']} defaultIndex={0}>
+<Tab value="方法一｜伴随矩阵缩放">
+
+  对任意 $n$ 阶矩阵和标量 $t$，成立 $(tA)^*=t^{n-1}A^*$（即使 $A$ 不可逆也成立）。所以
+
+
+
 $$
- (2A)^\ast=2^{n-1}A^\ast.
+\begin{aligned}
+  |(2A)^*|&=|2^{n-1}A^*|\\
+  &=(2^{n-1})^n|A^*|\\
+  &=\boxed{2^{n(n-1)}|A^*|}.
+  \end{aligned}
 $$
-两边取行列式，注意 $ A^\ast$ 仍是 $ n$ 阶矩阵，因此
+
+</Tab>
+<Tab value="方法二｜直接使用行列式恒等式">
+
+  直接套用 $|C^*|=|C|^{n-1}$（取 $C=2A$）：
+
+
+
 $$
- |(2A)^\ast|
-=|2^{n-1}A^\ast|
-=\left(2^{n-1}\right)^n|A^\ast|
-=2^{n(n-1)}|A^\ast|.
+\begin{aligned}
+  |(2A)^*|&=|2A|^{n-1}\\
+  &=(2^n|A|)^{n-1}\\
+  &=2^{n(n-1)}|A|^{n-1}\\
+  &=\boxed{2^{n^2-n}|A^*|}.
+  \end{aligned}
 $$
-即
-$$
- |(2A)^\ast|=2^{n^2-n}|A^\ast|.
-$$
-故选 C。B 只计算了伴随矩阵本身的数乘倍数，未再对其取行列式；A、D 的指数也不符合上述缩放规律。
+
+</Tab>
+</Tabs>
+
+**自检：** 当 $n=2$ 时，$(2A)^*=2A^*$，故行列式应乘 $2^2$，与一般公式中 $n^2-n=2$ 一致。
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-c1d28a-008" type="blank">
+<Question id="selected-1103-math-c1d28a-008" type="blank" tags="科目:线性代数, 章节:行列式, 考点:逆矩阵的行列式">
 
 设
 
 $$
- A=\begin{bmatrix}
+A=\begin{bmatrix}
 1 & 2 & 3\\
 0 & 1 & 0\\
 -2 & 4 & 8
@@ -630,70 +963,105 @@ $$
 
 <Solution>
 
-**答案：** $ -\frac47$
+**参考答案：** $\boxed{-\dfrac47}$。
 
-**解析：** 先计算 $ |A|$。按第二行展开，得到
+**解题思路：** 题目给出的是三阶矩阵；不必求出 $A^{-1}$ 的具体各项，只要求出 $|A|$ 即可。
+
+<Steps>
+<Step>
+
+  ### 求行列式并验证可逆
+
+  第二行只有中间元素 $1$ 非零，沿第二行展开：
+
+
+
 $$
- |A|=
-\begin{vmatrix}
-1&3\\
--2&8
-\end{vmatrix}
-=8+6=14.
+|A|=\begin{vmatrix}1&3\\-2&8\end{vmatrix}=8+6=14\ne0.
 $$
-因此 $ A$ 可逆，并且
+
+  因而 $|A^{-1}|=\dfrac1{14}$。
+
+</Step>
+<Step>
+
+  ### 处理数乘逆矩阵
+
+  对三阶矩阵，整体乘以 $-2$，行列式需乘 $(-2)^3$：
+
+
+
 $$
- |A^{-1}|=\frac1{|A|}=\frac1{14}.
+|-2A^{-1}|=(-2)^3|A^{-1}|=-8\cdot\frac1{14}=\boxed{-\frac47}.
 $$
-由于 $ -2A^{-1}$ 是三阶矩阵，数乘矩阵的行列式满足
-$$
- |-2A^{-1}|=(-2)^3|A^{-1}|.
-$$
-故
-$$
- |-2A^{-1}|=-8\cdot\frac1{14}=-\frac47.
-$$
-易错点：对三阶矩阵整体乘以 $ -2$，行列式应乘以 $ (-2)^3$，而不是只乘 $ -2$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="一式通用">
+
+若 $n$ 阶 $A$ 可逆，则 $|tA^{-1}|=\dfrac{t^n}{|A|}$。此题只需取 $t=-2,n=3$。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b9ebfd-011" type="blank">
+<Question id="selected-1103-math-b9ebfd-011" type="blank" tags="科目:线性代数, 章节:行列式, 考点:逆矩阵加法转乘积">
 
 设 $A,B$ 均为 $n$ 阶方阵，且 $|A|=|B|=|A^{-1}+B|=2$，则 $|A+B^{-1}|=$ <Blank answer="2" kind="math" />。
 
 <Solution>
 
-**答案：** $2$
+**参考答案：** $\boxed{2}$。
 
-**解析：** 由 $|A|=|B|=2\ne0$，知 $A,B$ 均可逆。
+**难点：** 已知的是 $|A^{-1}+B|$，所求却是 $|A+B^{-1}|$。二者的矩阵值一般不同，但可通过左右乘矩阵得到可比较的乘积。
 
-把目标式化为矩阵乘积：
+<Steps>
+<Step>
+
+  ### 检查可逆并构造恒等式
+
+  因 $|A|=|B|=2\ne0$，$A,B$ 均可逆。注意乘法顺序：
+
+
+
+$$
+B^{-1}(A^{-1}+B)A
+  =B^{-1}A^{-1}A+B^{-1}BA
+  =B^{-1}+A.
+$$
+
+</Step>
+<Step>
+
+  ### 对两边取行列式
+
+
 
 $$
 \begin{aligned}
-A+B^{-1}
-&=B^{-1}(BA+E)\\
-&=B^{-1}(B+A^{-1})A.
-\end{aligned}
+  |A+B^{-1}|&=|B^{-1}|\,|A^{-1}+B|\,|A|\\
+  &=\frac1{2}\times2\times2\\
+  &=\boxed{2}.
+  \end{aligned}
 $$
 
-因此
+</Step>
+</Steps>
 
-$$
-|A+B^{-1}|
-=|B^{-1}|\,|B+A^{-1}|\,|A|
-=\frac12\cdot2\cdot2=2.
-$$
+<Callout type="warn" title="矩阵的和不可随意拆成行列式之和">
 
-**技巧：** $|A\pm B|$ 本身没有“拆开公式”。遇到逆矩阵时，经常通过左右乘一个可逆矩阵，把“和”转化为“积”。
+通常 $|X+Y|\ne|X|+|Y|$。本题能够计算，是因为 $A+B^{-1}$ 与 $A^{-1}+B$ 之间存在**可逆因子夹乘**关系。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b9ebfd-012" type="blank">
+<Question id="selected-1103-math-b9ebfd-012" type="blank" tags="科目:线性代数, 章节:行列式, 考点:伴随矩阵与逆矩阵">
 
 设 $|A|=2,\ |B|=-2$，其中 $A,B$ 均为 $n$ 阶方阵，则
 
@@ -705,42 +1073,69 @@ $$
 
 <Solution>
 
-**答案：** $(-4)^{n-1}$
-
-**解析：** 由于 $|A|,|B|$ 均非零，
+**参考答案：**
 
 $$
-A^*=|A|A^{-1}=2A^{-1},
+\boxed{(-4)^{n-1}}.
 $$
 
+**思路：** 已知 $|A|,|B|$，应优先将伴随矩阵化为逆矩阵，从而提取公共乘积 $A^{-1}B^{-1}$。
+
+<Steps>
+<Step>
+
+  ### 把伴随矩阵写成逆矩阵
+
+  由于 $|A|=2\ne0$、$|B|=-2\ne0$，二者可逆：
+
+
+
 $$
-B^*=|B|B^{-1}=-2B^{-1}.
+A^*=|A|A^{-1}=2A^{-1},\qquad
+  B^*=|B|B^{-1}=-2B^{-1}.
 $$
 
-所以
+</Step>
+<Step>
+
+  ### 合并同类矩阵并取行列式
+
+
 
 $$
-A^{-1}B^*-A^*B^{-1}=-4A^{-1}B^{-1}.
+A^{-1}B^*-A^*B^{-1}
+  =-2A^{-1}B^{-1}-2A^{-1}B^{-1}
+  =-4A^{-1}B^{-1}.
 $$
 
-取行列式：
+  故
+
+
 
 $$
 \begin{aligned}
-|-4A^{-1}B^{-1}|
-&=(-4)^n|A|^{-1}|B|^{-1}\\
-&=(-4)^n\cdot\frac12\cdot\left(-\frac12\right)\\
-&=(-4)^{n-1}.
-\end{aligned}
+  |-4A^{-1}B^{-1}|
+  &=(-4)^n|A|^{-1}|B|^{-1}\\
+  &=(-4)^n\cdot\frac12\cdot\left(-\frac12\right)\\
+  &=(-4)^n\left(-\frac14\right)
+  =\boxed{(-4)^{n-1}}.
+  \end{aligned}
 $$
 
-**易错点：** 对 $n$ 阶矩阵，$|-4C|=(-4)^n|C|$，不是 $-4|C|$。
+</Step>
+</Steps>
+
+<Callout type="warn" title="维数与符号须同时核对">
+
+本题的结果随 $n$ 的奇偶性变号；$|-4C|=(-4)^n|C|$，不能误写成 $-4|C|$。对伴随矩阵、逆矩阵求行列式前先确定原矩阵可逆。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b9ebfd-018" type="single" number={1}>
+<Question id="selected-1103-math-b9ebfd-018" type="single" tags="科目:线性代数, 章节:行列式, 考点:伴随矩阵的迹与特征值">
 
 设 $A$ 是 $3$ 阶可逆矩阵，$A^{-1}$ 的特征值为 $3,2,1$，则 $A$ 的主对角线元素对应的代数余子式之和
 
@@ -755,39 +1150,61 @@ $$
 
 <Solution>
 
-$A_{11},A_{22},A_{33}$ 正是伴随矩阵 $A^*$ 的主对角线元素，因此其和为 $\operatorname{tr}(A^*)$，也就是 $A^*$ 的特征值之和。
+**参考答案：** **D**，$\boxed{1}$。
 
-由 $A^{-1}$ 的特征值为 $3,2,1$，得 $A$ 的特征值为
+**解题思路：** 三个主对角代数余子式相加就是 $\operatorname{tr}(A^*)$。把已知的 $A^{-1}$ 的特征值转化为 $A^*$ 的特征值即可。
 
-$$
-\frac13,\quad\frac12,\quad1.
-$$
+<Steps>
+<Step>
 
-所以
+  ### 确定 $|A|$
 
-$$
-|A|=\frac13\cdot\frac12\cdot1=\frac16.
-$$
+  $A^{-1}$ 的特征值是 $3,2,1$，所以
 
-对可逆矩阵，$A^*=|A|A^{-1}$，因此 $A^*$ 的特征值为
+
 
 $$
-\frac12,\quad\frac13,\quad\frac16.
+|A^{-1}|=3\cdot2\cdot1=6,\qquad |A|=\frac16.
 $$
 
-故
+</Step>
+<Step>
+
+  ### 求伴随矩阵的迹
+
+  $A^*=|A|A^{-1}=\frac16A^{-1}$，因此 $A^*$ 的特征值是
+
+
 
 $$
-A_{11}+A_{22}+A_{33}=\frac12+\frac13+\frac16=1.
+\frac16\cdot3=\frac12,\qquad \frac16\cdot2=\frac13,\qquad \frac16\cdot1=\frac16.
 $$
 
-**知识点：** $\operatorname{tr}(A)$ 等于特征值之和，$|A|$ 等于特征值之积；可逆时 $A^*=|A|A^{-1}$。
+  因为迹等于特征值之和，
+
+
+
+$$
+A_{11}+A_{22}+A_{33}
+  =\operatorname{tr}(A^*)
+  =\frac12+\frac13+\frac16
+  =\boxed{1}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="三阶矩阵的快速法">
+
+若 $A$ 可逆，则 $\operatorname{tr}(A^*)=|A|\operatorname{tr}(A^{-1})$。本题可直接算 $\frac16(3+2+1)=1$。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b9ebfd-019" type="single">
+<Question id="selected-1103-math-b9ebfd-019" type="single" tags="科目:线性代数, 章节:行列式, 考点:伴随矩阵与数乘逆矩阵">
 
 设 $A$ 是 $3$ 阶方阵，$A^*$ 是 $A$ 的伴随矩阵，$|A|=\dfrac12$，则
 
@@ -802,42 +1219,45 @@ $$
 
 <Solution>
 
-由 $|A|=1/2\ne0$，$A$ 可逆，并且
+**参考答案：** **C**，$\boxed{-\dfrac14}$。
+
+**第一步：用伴随矩阵公式统一为 $A^{-1}$。** 因 $|A|=\frac12\ne0$，所以 $A$ 可逆，且
 
 $$
-A^*=|A|A^{-1}=\frac12A^{-1}.
-$$
-
-同时
-
-$$
+A^*=|A|A^{-1}=\frac12A^{-1},\qquad
 (2A)^{-1}=\frac12A^{-1}.
 $$
 
-于是
+**第二步：化简差矩阵。**
 
 $$
 (2A)^{-1}-2A^*
-=\frac12A^{-1}-A^{-1}
+=\frac12A^{-1}-2\cdot\frac12A^{-1}
 =-\frac12A^{-1}.
 $$
 
-因为 $A$ 为 $3$ 阶矩阵，
+**第三步：按三阶矩阵计算行列式。**
 
 $$
-\left|-\frac12A^{-1}\right|
-=\left(-\frac12\right)^3|A|^{-1}
-=-\frac18\cdot2
-=-\frac14.
+\begin{aligned}
+|(2A)^{-1}-2A^*|
+&=\left|-\frac12A^{-1}\right|\\
+&=\left(-\frac12\right)^3\frac1{|A|}\\
+&=-\frac18\cdot2=\boxed{-\frac14}.
+\end{aligned}
 $$
 
-故选 C。
+<Callout type="warn" title="此题常见两处失误">
+
+一是将 $2A^*$ 误写为 $(2A)^*$；二是忘记 $-\frac12$ 要按矩阵的阶数取三次幂。两个细节任一出错，符号和数值都会改变。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b9ebfd-021" type="blank" number={1}>
+<Question id="selected-1103-math-b9ebfd-021" type="blank" tags="科目:线性代数, 章节:行列式, 考点:分块列交换与伴随矩阵">
 
 设 $A,B$ 均为 $n$ 阶方阵，$|A|=6$，$|B|=1$，
 
@@ -852,39 +1272,87 @@ $$
 
 <Solution>
 
-**答案：** $(-1)^n6^{2n-1}$
-
-**解析：** 对这个 $2n$ 阶分块矩阵交换左右两个块列，相当于进行 $n^2$ 次列交换，因此
+**参考答案：**
 
 $$
-|C|=(-1)^{n^2}
-\left|\left(\frac B2\right)^{-1}\right|\,|3A^*|.
+\boxed{(-1)^n6^{2n-1}}.
 $$
 
-分别计算：
+**解题思路：** 分块矩阵左下角是可逆块，右下角是零块；交换两个**块列**即可得到分块上三角形式，但要计入符号 $(-1)^{n^2}$。
+
+<Steps>
+<Step>
+
+  ### 处理分块列交换的符号
+
+  设 $X=3A^*$、$Y=(B/2)^{-1}$。将两个宽度均为 $n$ 的块列互换，等价于 $n^2$ 次普通列交换，故
+
+
+
+$$
+\begin{aligned}
+  |C|&=\left|\begin{matrix}A&X\\Y&O\end{matrix}\right|
+  =(-1)^{n^2}\left|\begin{matrix}X&A\\O&Y\end{matrix}\right|\\
+  &=(-1)^{n^2}|X||Y|=(-1)^n|X||Y|.
+  \end{aligned}
+$$
+
+</Step>
+<Step>
+
+  ### 分别计算两个因子的行列式
+
+  因 $|A|=6$、$|B|=1$，有
+
+
+
+$$
+|3A^*|=3^n|A^*|=3^n6^{n-1},
+$$
+
+  以及
+
+
 
 $$
 \left|\left(\frac B2\right)^{-1}\right|
-=|2B^{-1}|=2^n|B|^{-1}=2^n,
+  =\frac1{|B/2|}
+  =\frac1{2^{-n}|B|}=2^n.
 $$
 
+</Step>
+<Step>
+
+  ### 合并系数和指数
+
+
+
 $$
-|3A^*|=3^n|A^*|=3^n|A|^{n-1}=3^n6^{n-1}.
+|C|=(-1)^n\cdot3^n6^{n-1}\cdot2^n
+  =(-1)^n6^n6^{n-1}
+  =\boxed{(-1)^n6^{2n-1}}.
 $$
 
-于是
+</Step>
+</Steps>
+
+<Callout type="idea" title="分块反对角行列式公式">
+
+对同阶方块 $X,Y$，恒有
 
 $$
-|C|=(-1)^{n^2}2^n3^n6^{n-1}=(-1)^n6^{2n-1}.
+\left|\begin{matrix}O&X\\Y&O\end{matrix}\right|=(-1)^n|X||Y|.
 $$
 
-这里使用了 $n^2$ 与 $n$ 奇偶性相同，即 $(-1)^{n^2}=(-1)^n$。
+更一般地，当右下块为零时，上式仍可通过块列交换直接推广到本题；无需假设 $X,Y$ 可交换。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b9ebfd-022" type="blank">
+<Question id="selected-1103-math-b9ebfd-022" type="blank" tags="科目:线性代数, 章节:行列式, 考点:矩阵方程因式分解">
 
 设 $A,B$ 均为 $3$ 阶方阵，满足
 
@@ -906,65 +1374,81 @@ $$
 
 <Solution>
 
-**答案：** $\dfrac12$
+**参考答案：** $\boxed{\dfrac12}$。
 
-**解析：** 整理原式：
+**关键思路：** 原方程虽含 $A^2B$，但可以把含 $B$ 的项合并，因式分解后再约去可逆矩阵。
+
+<Steps>
+<Step>
+
+  ### 整理原矩阵方程
+
+  从 $A^2B-A-B=E$ 得
+
+
 
 $$
 (A^2-E)B=A+E.
 $$
 
-即
+  因为 $A^2-E=(A+E)(A-E)$，故
+
+
 
 $$
 (A+E)(A-E)B=A+E.
 $$
 
-计算可知
+</Step>
+<Step>
+
+  ### 先确认 $A+E$ 可逆
+
+
 
 $$
-A+E=\begin{pmatrix}
-2&0&1\\
-0&3&0\\
--2&0&2
-\end{pmatrix},
+A+E=\begin{pmatrix}2&0&1\\0&3&0\\-2&0&2\end{pmatrix},
 $$
 
-其行列式非零，因此 $A+E$ 可逆，可约去左侧的 $A+E$：
+
 
 $$
-(A-E)B=E.
+|A+E|=3\begin{vmatrix}2&1\\-2&2\end{vmatrix}
+  =3(4+2)=18\ne0.
 $$
 
-取行列式：
+  因此可在等式**左侧**乘 $(A+E)^{-1}$，得到 $(A-E)B=E$。
+
+</Step>
+<Step>
+
+  ### 计算 $|B|$
+
+
 
 $$
-|A-E|\,|B|=1.
+\begin{aligned}
+  |A-E|&=\begin{vmatrix}0&0&1\\0&1&0\\-2&0&0\end{vmatrix}=2,\\
+  |A-E|\,|B|&=|E|=1.
+  \end{aligned}
 $$
 
-而
+  所以 $|B|=\boxed{\frac12}$。
 
-$$
-|A-E|=\begin{vmatrix}
-0&0&1\\
-0&1&0\\
--2&0&0
-\end{vmatrix}=2,
-$$
+</Step>
+</Steps>
 
-所以
+<Callout type="warn" title="消去矩阵不是消去普通因子">
 
-$$
-|B|=\frac12.
-$$
+只有在 $|A+E|\ne0$ 时，才能从 $(A+E)X=A+E$ 得出 $X=E$。此外，矩阵乘法不满足一般交换律，因式分解时必须保持 $B$ 位于右侧。
 
-**技巧：** 矩阵方程中能因式分解时先因式分解，但“约去矩阵”前必须确认该矩阵可逆。
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b9ebfd-023" type="blank">
+<Question id="selected-1103-math-b9ebfd-023" type="blank" tags="科目:线性代数, 章节:行列式, 考点:伴随矩阵的特征值">
 
 设 $A$ 是 $3$ 阶方阵，且满足
 
@@ -976,47 +1460,80 @@ $$
 
 <Solution>
 
-**答案：** $126$
+**参考答案：** $\boxed{126}$。
 
-**解析：** 三个行列式条件分别说明
+**思路：** $|A-tE|=0$ 说明 $t$ 是 $A$ 的特征值。题目给出的三个行列式分别确定三阶矩阵的三个互异特征值，因此无需求出 $A$ 本身。
 
-$$
-1,\quad -2,\quad -\frac32
-$$
+<Steps>
+<Step>
 
-都是 $A$ 的特征值。因为 $A$ 为 $3$ 阶矩阵，这就是全部三个特征值。
+  ### 从三个零行列式提取特征值
 
-因此
 
-$$
-|A|=1\cdot(-2)\cdot\left(-\frac32\right)=3\ne0.
-$$
-
-于是 $A^*=|A|A^{-1}$ 的特征值分别为
 
 $$
-3,\quad -\frac32,\quad -2.
+|A-E|=0\Rightarrow\lambda_1=1,\qquad
+  |A+2E|=0\Rightarrow\lambda_2=-2.
 $$
 
-故 $2A^*-3E$ 的特征值为
+  又因 $2A+3E=2(A+\frac32E)$，有
+
+
 
 $$
-3,\quad -6,\quad -7.
+|2A+3E|=0\Rightarrow\lambda_3=-\frac32.
 $$
 
-因此
+  三者互不相同，恰好是 $A$ 的全部特征值，故 $|A|=1\cdot(-2)\cdot(-\frac32)=3$，$A$ 可逆。
+
+</Step>
+<Step>
+
+  ### 把特征值映射到 $2A^*-3E$
+
+  由 $A^*=|A|A^{-1}=3A^{-1}$，对每个非零特征值 $\lambda_i$，$A^*$ 的对应特征值为 $3/\lambda_i$：
+
+
 
 $$
-|2A^*-3E|=3\cdot(-6)\cdot(-7)=126.
+3,\quad-\frac32,\quad-2.
 $$
 
-**知识点：** 若 $\lambda$ 是 $A$ 的特征值，则多项式 $p(A)$ 的对应特征值为 $p(\lambda)$。
+  因而 $2A^*-3E$ 的特征值分别为
+
+
+
+$$
+2\cdot3-3=3,\quad
+  2\left(-\frac32\right)-3=-6,\quad
+  2(-2)-3=-7.
+$$
+
+</Step>
+<Step>
+
+  ### 取特征值之积
+
+
+
+$$
+|2A^*-3E|=3\cdot(-6)\cdot(-7)=\boxed{126}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="特征值法的通用路径">
+
+先由 $|A-\lambda E|=0$ 确定 $\lambda$；再用 $|A|=\prod\lambda_i$ 和 $A^*=|A|A^{-1}$；最后利用 $p(A)$ 的特征值为 $p(\lambda_i)$。注意使用逆矩阵前必须证明 $|A|\ne0$。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点3：正交结构、矩阵幂与可逆性综合判定
+## 考点三｜正交结构、特征值、矩阵多项式与可逆性
 
 <Question id="selected-1103-classified-1031-tangjiafeng-2027-s1-q06" type="single" points={5} tags="来源:汤家凤八套卷, 考点:奇数阶正交矩阵与行列式, 难度:中等">
 
@@ -1029,57 +1546,138 @@ $$
 
 <Solution>
 
-**答案：C，$\boxed{|A|\,|B|=-1}$。**
+**参考答案：** **C**，$\boxed{-1}$。
 
-**过程**：设矩阵阶数为奇数 $n$。正交性给出 $A^{\mathrm T}A=E$、$BB^{\mathrm T}=E$。观察恒等式
+**破题点：** $A,B$ 都是奇数阶正交矩阵，因此 $A^{-1}=A^{\mathrm T}$、$B^{-1}=B^{\mathrm T}$，并且 $(-1)^n=-1$。
+
+<Tabs items={['方法一｜转置恒等式','方法二｜正交矩阵的行列式']} defaultIndex={0}>
+<Tab value="方法一｜转置恒等式">
+
+  **第一步：构造矩阵恒等式。**
+
+
 
 $$
-A^{\mathrm T}(A-B)B^{\mathrm T}
-=B^{\mathrm T}-A^{\mathrm T}=-(A-B)^{\mathrm T}.
+\begin{aligned}
+  A^{\mathrm T}(A-B)B^{\mathrm T}
+  &=A^{\mathrm T}AB^{\mathrm T}-A^{\mathrm T}BB^{\mathrm T}\\
+  &=B^{\mathrm T}-A^{\mathrm T}
+  =-(A-B)^{\mathrm T}.
+  \end{aligned}
 $$
 
-两边取行列式：
+  **第二步：取行列式并约去非零因子。** 设阶数 $n$ 为奇数：
+
+
 
 $$
 |A|\,|A-B|\,|B|=(-1)^n|A-B|=-|A-B|.
 $$
 
-因为 $|A-B|=2\ne0$，可约去该因子，得到
+  已知 $|A-B|=2\ne0$，故 $\boxed{|A||B|=-1}$。
+
+</Tab>
+<Tab value="方法二｜正交矩阵的行列式">
+
+  因为正交矩阵的行列式只能取 $\pm1$。若 $|A||B|=1$，则 $|A|=|B|$。设 $Q=A^{\mathrm T}B$，其为奇数阶正交矩阵，且
+
+
 
 $$
-\boxed{|A|\cdot|B|=-1}.
+|Q|=|A||B|=1.
 $$
 
-<Callout type="idea" title="不必求出两个正交矩阵">本题的数值 $2$ 仅用于说明 $A-B$ 可逆；任何非零的 $|A-B|$ 都能推出同样结论。</Callout>
+  奇数阶实正交矩阵 $Q$ 至少有一个实特征值 $\pm1$，且其非实特征值成共轭对；$|Q|=1$ 迫使 $1$ 为其特征值。因此 $|E-Q|=0$。
+
+  又
+
+
+
+$$
+|A-B|=|A|\,|E-A^{\mathrm T}B|=|A|\,|E-Q|=0,
+$$
+
+  与题设 $|A-B|=2$ 矛盾。故两者行列式必须异号，乘积为 $\boxed{-1}$。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="为什么必须有奇数阶和非零条件？">
+
+转置推导得到 $|A||B|=(-1)^n$ 的前提是 $|A-B|\ne0$。若 $n$ 为偶数，右端改为 $+1$；若 $|A-B|=0$，不可约去该因子。
+
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-7ff068-016" type="essay">
+<Question id="selected-1103-math-7ff068-016" type="essay" tags="科目:线性代数, 章节:行列式, 考点:幂等矩阵与秩">
 
 设$A$是$n$阶实对称矩阵，$r(A)=r$，且满足$A^2=A$，$f(x)=x^2-2x-3$，则$|f(A)-6E|=$
 
 <Solution>
 
-**答案：** $ (-10)^r(-9)^{n-r}=(-1)^n10^r9^{n-r}$
+**参考答案：**
 
-**解析：** 由$A^2=A$，有
-$ f(A)-6E=A^2-2A-3E-6E=-A-9E$。
+$$
+\boxed{(-10)^r(-9)^{n-r}=(-1)^n10^r9^{n-r}}.
+$$
 
-又$A$为实对称矩阵，可以正交对角化。由$A^2=A$知其特征值只能满足
-$ \lambda^2=\lambda$，
-即$\lambda=0$或$1$。
+**解题思路：** 先用幂等条件 $A^2=A$ 简化矩阵多项式，再利用实对称矩阵的特征值与秩之间的联系确定各因子出现次数。
 
-由于$r(A)=r$，特征值$1$恰有$r$个，特征值$0$有$n-r$个。因此$-A-9E$的特征值分别为$-10$（$r$个）和$-9$（$n-r$个）。
+<Steps>
+<Step>
 
-故
-$ |f(A)-6E|=(-10)^r(-9)^{n-r}$。
+  ### 化简所求矩阵
+
+
+
+$$
+f(A)-6E=A^2-2A-3E-6E=A^2-2A-9E=-A-9E.
+$$
+
+</Step>
+<Step>
+
+  ### 确定 $A$ 的特征值及重数
+
+  若 $A\alpha=\lambda\alpha$ 且 $\alpha\ne0$，由 $A^2=A$ 得
+
+
+
+$$
+\lambda^2=\lambda\Rightarrow\lambda\in\{0,1\}.
+$$
+
+  $A$ 为实对称矩阵，可正交对角化；其秩为 $r$，故非零特征值 $1$ 恰有 $r$ 个，特征值 $0$ 有 $n-r$ 个（均按代数重数计）。
+
+</Step>
+<Step>
+
+  ### 求 $-A-9E$ 的行列式
+
+  对应特征值依次为 $-1-9=-10$（$r$ 个）和 $-0-9=-9$（$n-r$ 个），于是
+
+
+
+$$
+|f(A)-6E|=(-10)^r(-9)^{n-r}=\boxed{(-1)^n10^r9^{n-r}}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="幂等矩阵的结构">
+
+更一般地，满足 $A^2=A$ 的矩阵都可对角化，故即使删去“实对称”条件，上述特征值重数与结论仍成立。证明可由 $x(x-1)$ 没有重根得到。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-7ff068-017" type="single">
+<Question id="selected-1103-math-7ff068-017" type="single" tags="科目:线性代数, 章节:行列式, 考点:特征值与参数行列式">
 
 设$A$为3阶矩阵，若$|E-A|=|E+A|=|2E-A|=0$，则$|3E-A|=$( )  
 
@@ -1090,23 +1688,35 @@ $ |f(A)-6E|=(-10)^r(-9)^{n-r}$。
 
 <Solution>
 
-由
-$ |E-A|=0$，知$1$是$A$的特征值；
-由
-$ |E+A|=0$，知$-1$是$A$的特征值；
-由
-$ |2E-A|=0$，知$2$是$A$的特征值。
+**参考答案：** **C**，$\boxed{8}$。
 
-$A$为3阶矩阵，且这三个特征值互不相同，所以其全部特征值就是$1,-1,2$。
+**第一步：用特征值定义读取三个条件。** 对任意 $t$，$|tE-A|=0$ 当且仅当 $t$ 是 $A$ 的特征值。因此
 
-因此
-$ |3E-A|=(3-1)(3+1)(3-2)=2\cdot4\cdot1=8$，故选C。
+$$
+|E-A|=0\Rightarrow1\in\sigma(A),\quad
+|E+A|=0\Rightarrow-1\in\sigma(A),\quad
+|2E-A|=0\Rightarrow2\in\sigma(A).
+$$
+
+**第二步：利用阶数排除其他可能。** 三个值互不相同，而 $A$ 为三阶矩阵，故 $1,-1,2$ 恰好是其全部特征值，各出现一次。
+
+**第三步：计算所求行列式。** $3E-A$ 的特征值为 $3-\lambda_i$，于是
+
+$$
+|3E-A|=(3-1)(3+1)(3-2)=2\cdot4\cdot1=\boxed{8}.
+$$
+
+<Callout type="warn" title="处理 $|E+A|=0$ 的符号">
+
+$|E+A|=0$ 对应的是特征值 $-1$，不是 $1$。这是此类题最容易导致选错答案的地方。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b9ebfd-003" type="single">
+<Question id="selected-1103-math-b9ebfd-003" type="single" tags="科目:线性代数, 章节:行列式, 考点:伴随矩阵等式与余子式">
 
 设 $3$ 阶矩阵 $A=(a_{ij})_{3\times3}$ 满足 $A^T=kA^*$（$k>0$），若 $a_{11}=a_{12}=a_{13}=c>0$，则 $c=(\quad)$。
 
@@ -1117,123 +1727,186 @@ $ |3E-A|=(3-1)(3+1)(3-2)=2\cdot4\cdot1=8$，故选C。
 
 <Solution>
 
-先取行列式。因为 $A$ 为 $3$ 阶矩阵，
+**参考答案：** **A**，$\boxed{\dfrac{\sqrt3}{3k}}$。
+
+**解题思路：** 先避免在尚未证明可逆时就写出 $A^*=|A|A^{-1}$。利用 $A^T=kA^*$ 与第一行的非零元素先锁定 $|A|$，再用行列式方程求出 $c$。
+
+<Steps>
+<Step>
+
+  ### 从第一行展开证明 $|A|>0$
+
+  $A^*$ 的 $(j,i)$ 元素是 $A$ 的 $(i,j)$ 代数余子式 $A_{ij}$。因此由 $A^T=kA^*$ 逐项比较，得到 $a_{ij}=kA_{ij}$。沿第一行展开：
+
+
 
 $$
-|A^*|=|A|^2,
+\begin{aligned}
+  |A|&=\sum_{j=1}^{3}a_{1j}A_{1j}\\
+  &=\frac1k\sum_{j=1}^{3}a_{1j}^{\,2}
+  =\frac{3c^2}{k}>0.
+  \end{aligned}
 $$
 
-所以
+  故 $A$ 可逆且 $|A|\ne0$。
+
+</Step>
+<Step>
+
+  ### 对矩阵关系取行列式
+
+  对三阶矩阵 $|A^*|=|A|^2$，故
+
+
 
 $$
 |A|=|A^T|=|kA^*|=k^3|A|^2.
 $$
 
-因此
+  由 $|A|>0$ 可约去一个 $|A|$，从而 $|A|=k^{-3}$。
 
-$$
-|A|=0\quad\text{或}\quad |A|=\frac1{k^3}.
-$$
+</Step>
+<Step>
 
-由 $A^T=kA^*$，比较元素得 $a_{ji}=kA_{ji}$，即 $A_{ij}=a_{ij}/k$。按第 $1$ 行展开：
+  ### 联立求解 $c$
 
-$$
-|A|=\sum_{j=1}^3a_{1j}A_{1j}
-=\frac1k\sum_{j=1}^3a_{1j}^2
-=\frac{3c^2}{k}>0.
-$$
 
-故只能取 $|A|=1/k^3$，于是
 
 $$
 \frac{3c^2}{k}=\frac1{k^3}
-\quad\Longrightarrow\quad
-c=\frac1{\sqrt3\,k}=\frac{\sqrt3}{3k}.
+  \quad\Rightarrow\quad c^2=\frac1{3k^2}.
 $$
 
-**知识点：** 对 $n$ 阶矩阵，$|A^*|=|A|^{n-1}$；而 $|kA|=k^n|A|$，不要漏掉指数 $n$。
+  因 $c>0,k>0$，取正根：
+
+
+
+$$
+c=\frac1{\sqrt3\,k}=\boxed{\frac{\sqrt3}{3k}}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="两个前提缺一不可">
+
+取行列式会出现 $|A|=0$ 与 $|A|=k^{-3}$ 两个代数分支。必须先使用题中 $c>0$ 排除零分支；最后又要用 $c>0$ 选择平方根的正号。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b9ebfd-009" type="blank">
+<Question id="selected-1103-math-b9ebfd-009" type="blank" tags="科目:线性代数, 章节:行列式, 考点:正交矩阵与负特征值">
 
 设 $A$ 是 $n$ 阶方阵，且 $AA^T=E$，$|A|<0$，则 $|A+E|=$ <Blank answer="0" kind="math" />。
 
 <Solution>
 
-**答案：** $0$
+**参考答案：** $\boxed{0}$。
 
-**解析：** 由 $AA^T=E$，有
+**解题思路：** 正交矩阵的行列式只能是 $\pm1$。题给负号，故 $|A|=-1$；再建立 $|A+E|$ 与自身的恒等关系。
+
+<Tabs items={['方法一｜行列式恒等式','方法二｜负一特征值']} defaultIndex={0}>
+<Tab value="方法一｜行列式恒等式">
+
+  由 $AA^T=E$，先得 $|A|^2=1$，结合 $|A|<0$，得 $|A|=-1$。另一方面
+
+
 
 $$
 A+E=A+AA^T=A(E+A^T).
 $$
 
-取行列式：
+  取行列式并利用转置不改变行列式：
+
+
 
 $$
-|A+E|=|A|\,|E+A^T|.
+\begin{aligned}
+  |A+E|&=|A|\,|E+A^T|\\
+  &=-|(E+A)^T|\\
+  &=-|A+E|.
+  \end{aligned}
 $$
 
-又
+  故 $2|A+E|=0$，即 $\boxed{|A+E|=0}$。
+
+</Tab>
+<Tab value="方法二｜负一特征值">
+
+  实正交矩阵的特征值在单位圆上，非实特征值成共轭对，其乘积为 $1$；实特征值只能是 $\pm1$。因为 $|A|=-1$，$-1$ 必是其特征值，因此 $A+E$ 有零特征值，
+
+
 
 $$
-|E+A^T|=|(E+A)^T|=|E+A|,
+|A+E|=\boxed{0}.
 $$
 
-故
+</Tab>
+</Tabs>
 
-$$
-(1-|A|)|A+E|=0.
-$$
+<Callout type="idea" title="方法选择">
 
-因为 $|A|<0$，所以 $1-|A|\ne0$，从而
+做填空题优先第一种方法：只用 $AA^T=E$、行列式乘法与转置性质，对阶数没有额外限制，也不依赖对正交矩阵复特征值的讨论。
 
-$$
-|A+E|=0.
-$$
-
-**补充：** 由 $AA^T=E$ 其实还可知 $|A|^2=1$，结合 $|A|<0$ 得 $|A|=-1$。
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b9ebfd-010" type="blank">
+<Question id="selected-1103-math-b9ebfd-010" type="blank" tags="科目:线性代数, 章节:行列式, 考点:幂等矩阵的可逆性">
 
 设 $A$ 是 $n$ 阶方阵，$E$ 是 $n$ 阶单位矩阵，且 $A^2=A$，$A\ne E$，则 $|A|=$ <Blank answer="0" kind="math" />。
 
 <Solution>
 
-**答案：** $0$
+**参考答案：** $\boxed{0}$。
 
-**解析：** 由
+**核心观察：** $A^2=A$ 表示 $A$ 是幂等矩阵；如果它可逆，则只能是单位矩阵，与 $A\ne E$ 矛盾。
 
-$$
-A^2=A
-$$
+<Tabs items={['方法一｜反证与可逆性','方法二｜特征值']} defaultIndex={0}>
+<Tab value="方法一｜反证与可逆性">
 
-得到
+  由 $A^2=A$ 得
+
+
 
 $$
 A(A-E)=O.
 $$
 
-若 $A$ 可逆，则左乘 $A^{-1}$ 得 $A-E=O$，即 $A=E$，与题设矛盾。因此 $A$ 不可逆，故
+  假设 $|A|\ne0$，则 $A$ 可逆。在等式左侧乘以 $A^{-1}$，得到 $A-E=O$，即 $A=E$，与题设矛盾。因此 $A$ 不可逆：
+
+
 
 $$
-|A|=0.
+\boxed{|A|=0}.
 $$
 
-**另一种理解：** 幂等矩阵的特征值只能是 $0$ 或 $1$。若 $A\ne E$，至少有一个特征值不是 $1$，只能为 $0$，所以行列式为 $0$。
+</Tab>
+<Tab value="方法二｜特征值">
+
+  幂等矩阵满足 $A^2=A$，其特征值 $\lambda$ 只能满足 $\lambda^2=\lambda$，故为 $0$ 或 $1$。因 $x(x-1)$ 无重根，$A$ 可对角化。
+
+  如果所有特征值都是 $1$，则 $A$ 相似于 $E$，从而 $A=E$，与题设矛盾。所以至少有一个特征值为 $0$，行列式为 $\boxed{0}$。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="不要把幂等矩阵等同于单位矩阵">
+
+$A^2=A$ 不代表 $A=E$；例如 $\operatorname{diag}(1,0)$ 也幂等。额外条件 $A\ne E$ 正是确保零特征值存在的关键。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b9ebfd-031" type="essay" number={1}>
+<Question id="selected-1103-math-b9ebfd-031" type="essay" tags="科目:线性代数, 考点:特征值与矩阵多项式">
 
 设矩阵 $A$ 为 $3$ 阶非零实矩阵，$A^T=A^*$，且
 
@@ -1249,76 +1922,87 @@ $$
 
 <Solution>
 
-**答案：** $-3$
-
-**解析：** 先确定 $|A|$。
-
-由 $A^T=A^*$ 取行列式：
+**参考答案：**
 
 $$
-|A|=|A^T|=|A^*|=|A|^2,
+\boxed{|A^2-A-3E|=-3}.
 $$
 
-故 $|A|=0$ 或 $1$。
+**核心思路：** 条件 $A^T=A^*$ 不仅给出 $|A|\in\{0,1\}$，还可结合“非零实矩阵”排除 $|A|=0$；接着利用 $|E\pm A|=0$ 确定特征值，最后对矩阵多项式使用特征值映射。
 
-下面排除 $|A|=0$。由 $A^T=A^*$ 可得每个元素满足
+<Steps>
+<Step>
 
-$$
-a_{ij}=A_{ij}.
-$$
+### 第一步：证明 $|A|=1$
 
-因为 $A$ 是非零矩阵，至少存在一行含非零元素。设第 $r$ 行非零，则按第 $r$ 行展开：
-
-$$
-|A|=\sum_{j=1}^3a_{rj}A_{rj}
-=\sum_{j=1}^3a_{rj}^2>0.
-$$
-
-所以 $|A|=1$。
-
-又
+三阶矩阵满足 $|A^*|=|A|^2$。由 $A^T=A^*$ 取行列式，有
 
 $$
-|E+A|=0
+|A|=|A|^2,
 $$
 
-说明 $-1$ 是 $A$ 的特征值；
+故 $|A|=0$ 或 $|A|=1$。这里 **不能直接认定** $A$ 可逆。
+
+设 $A=(a_{ij})$，记元素 $a_{ij}$ 的代数余子式为 $C_{ij}$。因为 $(A^*)_{ji}=C_{ij}$，等式 $A^T=A^*$ 等价于
 
 $$
-|E-A|=0
+a_{ij}=C_{ij}\qquad(1\le i,j\le3).
 $$
 
-说明 $1$ 是 $A$ 的特征值。设第三个特征值为 $\lambda_3$，则
+由于 $A\ne O$，必存在一行（设为第 $r$ 行）至少有一个非零元素。沿该行展开：
 
 $$
-1=|A|=(-1)\cdot1\cdot\lambda_3,
+|A|=\sum_{j=1}^3a_{rj}C_{rj}
+=\sum_{j=1}^3a_{rj}^{\,2}>0.
 $$
 
-故 $\lambda_3=-1$。
+因此只能有 $|A|=1$。
 
-因此 $A$ 的三个特征值为 $-1,1,-1$。对多项式
+</Step>
+<Step>
 
-$$
-p(t)=t^2-t-3,
-$$
+### 第二步：确定三个特征值
 
-矩阵 $A^2-A-3E=p(A)$ 的特征值分别为
-
-$$
-p(-1)=-1,\qquad p(1)=-3,\qquad p(-1)=-1.
-$$
-
-所以
+由 $|E-A|=0$ 知 $1$ 是 $A$ 的特征值；由 $|E+A|=0$ 知 $-1$ 也是 $A$ 的特征值。设第三个特征值为 $\lambda$，按代数重数计有
 
 $$
-|A^2-A-3E|=(-1)(-3)(-1)=-3.
+1=|A|=1\cdot(-1)\cdot\lambda,
+\qquad \lambda=-1.
 $$
+
+所以 $A$ 的三个特征值（按重数计）为 $1,-1,-1$。
+
+</Step>
+<Step>
+
+### 第三步：求矩阵多项式的行列式
+
+令 $f(t)=t^2-t-3$。矩阵 $f(A)=A^2-A-3E$ 的特征值是 $f(1),f(-1),f(-1)$，其中
+
+$$
+f(1)=-3,\qquad f(-1)=-1.
+$$
+
+因此
+
+$$
+|A^2-A-3E|=(-3)\cdot(-1)^2=\boxed{-3}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="易错点：非零矩阵不等于可逆矩阵">
+
+本题能证明 $|A|\ne0$，关键在于 **实矩阵的平方和为正**，而非单凭 $A\ne O$。若略过这一步，就无法确定第三个特征值。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b9ebfd-032" type="essay">
+<Question id="selected-1103-math-b9ebfd-032" type="essay" tags="科目:线性代数, 考点:伴随矩阵与可逆性">
 
 设矩阵 $A$ 为 $3$ 阶非零实矩阵，且
 
@@ -1336,74 +2020,71 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（I）$A$ 可逆；
-
-（II）$k^3+k^6$。
-
-**解析：** **（I）证明可逆。**
-
-由 $A^T=kA^*$ 比较对应元素，得到
+（I）$A$ 可逆；（II）
 
 $$
-a_{ij}=kA_{ij}.
+\boxed{|A^{-1}|+|(A^*)^{-1}|=k^3+k^6}.
 $$
 
-因为 $A$ 是非零矩阵，至少有一行含非零元素。设第 $r$ 行非零，则按该行展开：
+**核心思路：** 先利用 $A^T=kA^*$ 在元素层面建立“元素—代数余子式”关系，严格证明 $|A|\ne0$；再取行列式确定 $|A|$。
+
+<Steps>
+<Step>
+
+### （I）证明 $A$ 可逆
+
+设 $A=(a_{ij})$，$C_{ij}$ 为 $a_{ij}$ 的代数余子式。由 $A^T=kA^*$ 及 $(A^*)_{ji}=C_{ij}$，得到
 
 $$
-|A|=\sum_{j=1}^3a_{rj}A_{rj}
-=\frac1k\sum_{j=1}^3a_{rj}^2.
+a_{ij}=kC_{ij}.
 $$
 
-右端非零，因此 $|A|\ne0$，故 $A$ 可逆。
-
-**（II）计算目标式。**
-
-直接对
+$A$ 为非零实矩阵，故至少存在一行（记为第 $r$ 行）非零。沿此行展开行列式：
 
 $$
-A^T=kA^*
+|A|=\sum_{j=1}^3a_{rj}C_{rj}
+=\frac1k\sum_{j=1}^3a_{rj}^{\,2}.
 $$
 
-取行列式：
+因为 $k\ne0$ 且平方和严格大于 $0$，所以 $|A|\ne0$，即 $A$ 可逆。
+
+</Step>
+<Step>
+
+### （II）确定 $|A|$ 并计算目标式
+
+三阶矩阵满足 $|A^*|=|A|^2$。对 $A^T=kA^*$ 取行列式，得
 
 $$
-|A|=k^3|A^*|=k^3|A|^2.
+|A|=|A^T|=|kA^*|=k^3|A^*|=k^3|A|^2.
 $$
 
-由（I）知 $|A|\ne0$，所以
+由（I）知 $|A|\ne0$，可约去 $|A|$，得到
 
 $$
-|A|=\frac1{k^3}.
+|A|=\frac1{k^3},\qquad |A^*|=|A|^2=\frac1{k^6}.
 $$
 
 于是
 
 $$
-|A^{-1}|=\frac1{|A|}=k^3.
+\begin{aligned}
+|A^{-1}|+|(A^*)^{-1}|
+&=\frac1{|A|}+\frac1{|A^*|}\\
+&=k^3+k^6.
+\end{aligned}
 $$
 
-又因为 $A^*$ 为 $3$ 阶矩阵，
+</Step>
+</Steps>
 
-$$
-|A^*|=|A|^2=\frac1{k^6},
-$$
+<Callout type="idea" title="可推广的技巧">
 
-所以
+对 $n$ 阶矩阵有 $|A^*|=|A|^{n-1}$、$|kA^*|=k^n|A^*|$；但 **必须先证明可逆**，才能安全地将等式中的 $|A|$ 约去，或使用 $A^*=|A|A^{-1}$。
 
-$$
-|(A^*)^{-1}|=\frac1{|A^*|}=k^6.
-$$
-
-最终
-
-$$
-|A^{-1}|+|(A^*)^{-1}|=k^3+k^6.
-$$
-
-**技巧总结：** 遇到 $A^T=kA^*$，先从“元素关系”证明 $|A|\ne0$，再取行列式求 $|A|$；这样逻辑最稳，也避免在尚未证明可逆前使用 $A^*=|A|A^{-1}$。
+</Callout>
 
 </Solution>
 

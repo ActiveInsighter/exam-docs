@@ -1,15 +1,13 @@
 ---
-title: "第二节 协方差与相关系数｜线性组合、非线性相关与联合正态独立性"
-description: "按真题中协方差双线性、样本和的重叠、非线性函数不相关与不独立、二维正态的线性变换及高阶矩等考点，分层精选高质量模拟题与练习题。"
+title: "2. 协方差与相关系数"
+description: "26道协方差与相关系数题已全部重写：示性变量、等相关和、联合正态、非线性不相关、联合密度与混合矩。"
 ---
 
-# 第二节 协方差与相关系数｜线性组合、非线性相关与联合正态独立性
+本节精选 **26 道**模拟与练习原题，**全部完成解析重构**。体系覆盖示性变量计数、等相关变量求和、样本中心化、不相关与独立、最小二乘预测、次序统计量、二维正态线性变换及联合密度的混合矩计算。每题先给明确**参考答案**，再使用分步推导、可选多解法及易错点核查解释答案为什么成立。
 
-依照「真题核心题目」同名小节的考点与命题风格精选 **26 道高质量模拟、练习原题**。题干、选项、答案、解析、公式及原有交互组件保持原样。
+## 考点一｜协方差双线性、等相关矩阵与重叠样本和
 
-## 考点1：协方差双线性、重叠样本和与相关系数
-
-<Question id="selected-1103-classified-1031-math-c06546-016" type="blank" points={5} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-c06546-016" type="blank" points={5} tags="来源:张宇8套卷, 考点:伯努利变量完全相关">
 
 设随机变量 $X$ 和 $Y$ 均服从 $B\left(1,\frac12\right)$，且 $D(X+Y)=1$，则 $X$ 和 $Y$ 的相关系数
 
@@ -23,39 +21,48 @@ $$
 
 <Solution>
 
-**答案：** $1$
+**参考答案：** $\boxed{\rho_{XY}=1}$。
 
-**解析：** 由
+**解题思路：** 单看两个边缘分布无法判断独立与否；题目另给 $D(X+Y)$，可从方差展开式反推出协方差。
 
-$$
-X,Y\sim B\left(1,\frac12\right)
-$$
+<Steps>
+<Step>
 
-可知
+  ### 由伯努利分布确定边缘方差
 
-$$
-DX=DY=\frac14.
-$$
+  因 $X,Y\sim B(1,1/2)$，
 
-又
+
 
 $$
-D(X+Y)=DX+DY+2\operatorname{Cov}(X,Y)=1,
+EX=EY=\frac12,\qquad DX=DY=\frac12\left(1-\frac12\right)=\frac14.
 $$
 
-所以
+</Step>
+<Step>
+
+  ### 从和的方差求相关系数
+
+
 
 $$
-\operatorname{Cov}(X,Y)=\frac14.
+1=D(X+Y)=DX+DY+2\operatorname{Cov}(X,Y)
+  =\frac12+2\operatorname{Cov}(X,Y),
 $$
 
-从而
+  因此 $\operatorname{Cov}(X,Y)=1/4$。代入定义得
+
+
 
 $$
-\rho_{XY}
-=\frac{\operatorname{Cov}(X,Y)}{\sqrt{DX\,DY}}
-=1.
+\rho_{XY}=\frac{\operatorname{Cov}(X,Y)}{\sqrt{DX\,DY}}
+  =\frac{1/4}{1/4}=\boxed1.
 $$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="等号的实际含义">本题 $X,Y$ 均为 $0$ 或 $1$，且具有相同均值和方差。$\rho=1$ 表示完全正线性相关，由 $D(X-Y)=DX+DY-2\operatorname{Cov}(X,Y)=0$ 可知 $X=Y$ 几乎处处成立；它们绝非独立。</Callout>
 
 </Solution>
 
@@ -67,38 +74,63 @@ $$
 
 <Solution>
 
-**答案：**$\dfrac{a^2-b^2}{a^2+b^2}$。
+**参考答案：** $\boxed{\rho_{UV}=\dfrac{a^2-b^2}{a^2+b^2}}$（$\sigma^2>0$）。
 
-**解题过程**：由独立性知 $\operatorname{Cov}(X,Y)=0$，所以
+**解题思路：** 展开两种线性组合的协方差；由于 $X,Y$ 独立，交叉项消失。均值 $\mu$ 在求协方差时不起作用。
+
+<Steps>
+<Step>
+
+  ### 计算协方差
+
+  设 $U=aX+bY$、$V=aX-bY$。由 $\operatorname{Cov}(X,Y)=0$，
+
+
 
 $$
 \begin{aligned}
-\operatorname{Cov}(U,V)
-&=\operatorname{Cov}(aX+bY,aX-bY)\\
-&=a^2\operatorname{Var}(X)-b^2\operatorname{Var}(Y)
-=(a^2-b^2)\sigma^2.
-\end{aligned}
+  \operatorname{Cov}(U,V)
+  &=\operatorname{Cov}(aX+bY,aX-bY)\\
+  &=a^2DX-b^2DY\\
+  &=(a^2-b^2)\sigma^2.
+  \end{aligned}
 $$
 
-同时
+</Step>
+<Step>
+
+  ### 计算两种线性组合的方差
+
+
 
 $$
-\operatorname{Var}(U)=\operatorname{Var}(V)=(a^2+b^2)\sigma^2.
+DU=a^2DX+b^2DY=(a^2+b^2)\sigma^2,
 $$
 
-代入相关系数定义，得
+
 
 $$
-\rho_{UV}=\frac{\operatorname{Cov}(U,V)}{\sqrt{\operatorname{Var}(U)\operatorname{Var}(V)}}
-=\frac{a^2-b^2}{a^2+b^2}.
+DV=a^2DX+b^2DY=(a^2+b^2)\sigma^2.
 $$
 
-注意结果与均值 $\mu$ 无关；正态分布假设也不是推导该相关系数所必需的。
+  当 $\sigma^2>0$ 时，$a,b\ne0$ 保证这两个方差均为正，所以
+
+
+
+$$
+\rho_{UV}=\frac{(a^2-b^2)\sigma^2}{(a^2+b^2)\sigma^2}
+  =\boxed{\frac{a^2-b^2}{a^2+b^2}}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="info" title="拓展与边界">当 $|a|=|b|$ 时，$\rho_{UV}=0$；由于 $(U,V)$ 是联合正态向量，此时还能推出**独立**。若 $\sigma^2=0$，$U,V$ 退化为常数，相关系数无定义。</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-classified-1031-math-66038b-008" type="single" points={5} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-66038b-008" type="single" points={5} tags="来源:张宇8套卷, 考点:等相关变量求和">
 
 设随机变量 $X_1,X_2,\ldots,X_{2n}$ 满足条件：
 
@@ -123,58 +155,56 @@ $$
 
 <Solution>
 
-由
+**参考答案：D。** $\boxed{\rho_{\xi\eta}=\dfrac{n\rho}{1+(n-1)\rho}}$。
 
-$$
-EX_i=0,
-\qquad
-DX_i=1,
-$$
+**解题思路：** 两组各有 $n$ 个变量，跨组任意一对的协方差都为 $\rho$，因此协方差一共有 $n^2$ 项；同组方差还须计入 $\binom n2$ 对内部协方差。
 
-且 $i\ne j$ 时相关系数为 $\rho$，可知
+<Steps>
+<Step>
 
-$$
-\operatorname{Cov}(X_i,X_j)=\rho.
-$$
+  ### 计算两组和之间的协方差
 
-因此
+  题中 $DX_i=1$、$\rho_{ij}=\rho$（$i\ne j$），所以 $\operatorname{Cov}(X_i,X_j)=\rho$。由协方差的双线性性，
+
+
 
 $$
 \begin{aligned}
-\operatorname{Cov}(\xi,\eta)
-&=\operatorname{Cov}\left(\sum_{i=1}^nX_i,\sum_{j=n+1}^{2n}X_j\right)\\
-&=\sum_{i=1}^n\sum_{j=n+1}^{2n}\operatorname{Cov}(X_i,X_j)\\
-&=n^2\rho.
-\end{aligned}
+  \operatorname{Cov}(\xi,\eta)
+  &=\sum_{i=1}^n\sum_{j=n+1}^{2n}\operatorname{Cov}(X_i,X_j)\\
+  &=n^2\rho.
+  \end{aligned}
 $$
 
-又
+</Step>
+<Step>
+
+  ### 计算两个和的方差
+
+
 
 $$
 \begin{aligned}
-D\xi
-&=D\left(\sum_{i=1}^nX_i\right)\\
-&=\sum_{i=1}^nDX_i+2\sum_{1\le i<j\le n}\operatorname{Cov}(X_i,X_j)\\
-&=n+2\binom n2\rho\\
-&=n+n(n-1)\rho.
-\end{aligned}
+  D\xi
+  &=\sum_{i=1}^nDX_i+2\sum_{1\le i<j\le n}\operatorname{Cov}(X_i,X_j)\\
+  &=n+2\binom n2\rho=n[1+(n-1)\rho].
+  \end{aligned}
 $$
 
-同理
+  同理 $D\eta=n[1+(n-1)\rho]$。于是
 
-$$
-D\eta=n+n(n-1)\rho.
-$$
 
-故
 
 $$
 \rho_{\xi\eta}
-=\frac{n^2\rho}{n+n(n-1)\rho}
-=\frac{n\rho}{1+(n-1)\rho}.
+  =\frac{n^2\rho}{n[1+(n-1)\rho]}
+  =\boxed{\frac{n\rho}{1+(n-1)\rho}}.
 $$
 
-选（D）。
+</Step>
+</Steps>
+
+<Callout type="warn" title="共同相关系数的可行范围">$2n$ 个变量的等相关矩阵必须半正定，因此（$n\ge2$ 时）$-1/(2n-1)\le\rho\le1$；这个范围内 $D\xi>0$，公式成立。不能把所有两两相关系数任意指定为某个负数。</Callout>
 
 </Solution>
 
@@ -194,67 +224,66 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
 \boxed{D(Y)=D(Z)=n\sigma^2},\qquad
 \boxed{\rho_{YZ}=\frac{n-m}{n}}\quad(\sigma^2>0).
 $$
 
-**过程：**
+**核心观察：** $Y$ 与 $Z$ 各是 $n$ 项独立样本之和，但它们共享 $X_{m+1},\ldots,X_n$ 共 $n-m$ 项。协方差只由共同项贡献。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 求两个随机和的方差
+  ### （1）分别求方差
 
-  各项相互独立，故方差直接相加：
+  独立随机变量之和的方差等于各项方差之和：
 
-  $$
-  D(Y)=\sum_{i=1}^n D(X_i)=n\sigma^2,\qquad
-  D(Z)=\sum_{k=1}^n D(X_{m+k})=n\sigma^2.
-  $$
 
-  </Step>
-  <Step>
 
-  ### 识别两个求和区间的重叠部分
+$$
+D(Y)=\sum_{i=1}^nDX_i=n\sigma^2,
+  \quad D(Z)=\sum_{k=1}^nDX_{m+k}=n\sigma^2.
+$$
 
-  将两组下标展开：
+</Step>
+<Step>
 
-  $$
-  \begin{aligned}
-  Y&=\underbrace{\sum_{i=1}^{m}X_i}_{U}+\underbrace{\sum_{i=m+1}^{n}X_i}_{V},\\
-  Z&=\underbrace{\sum_{i=m+1}^{n}X_i}_{V}+\underbrace{\sum_{i=n+1}^{m+n}X_i}_{W}.
-  \end{aligned}
-  $$
+  ### （2）分离重叠的变量
 
-  由于 $U,V,W$ 由互不相交的独立样本构成，三者相互独立。因此
+  定义
 
-  $$
-  \operatorname{Cov}(Y,Z)=\operatorname{Cov}(U+V,V+W)=D(V)=(n-m)\sigma^2.
-  $$
 
-  </Step>
-  <Step>
 
-  ### 代入相关系数公式
+$$
+A=\sum_{i=1}^mX_i,\quad
+  B=\sum_{i=m+1}^nX_i,\quad
+  C=\sum_{i=n+1}^{n+m}X_i.
+$$
+
+  有 $Y=A+B$、$Z=B+C$。因这三组指标不相交，$A,B,C$ 相互独立。因此
+
+
+
+$$
+\operatorname{Cov}(Y,Z)=\operatorname{Cov}(A+B,B+C)=DB
+  =(n-m)\sigma^2.
+$$
 
   当 $\sigma^2>0$ 时，
 
-  $$
-  \rho_{YZ}=\frac{\operatorname{Cov}(Y,Z)}{\sqrt{D(Y)D(Z)}}
-  =\frac{(n-m)\sigma^2}{n\sigma^2}=\frac{n-m}{n}.
-  $$
 
-  </Step>
+
+$$
+\rho_{YZ}=\frac{(n-m)\sigma^2}{\sqrt{n\sigma^2}\sqrt{n\sigma^2}}
+  =\boxed{\frac{n-m}{n}}.
+$$
+
+</Step>
 </Steps>
 
-<Callout type="info" title="边界条件">
-
-若 $\sigma^2=0$，则 $Y,Z$ 都是常量，相关系数因分母为零而**无定义**；题目给出的相关系数默认总体方差为正。
-
-</Callout>
+<Callout type="idea" title="重叠求和的速算">两个独立同分布样本和分别包含 $r$、$s$ 项，若恰有 $k$ 个共同项且总体方差大于零，则相关系数为 $k/\sqrt{rs}$。若 $\sigma^2=0$，两和均为常量，相关系数无定义。</Callout>
 
 </Solution>
 </Question>
@@ -274,120 +303,127 @@ $$
 
 <Solution>
 
-**答案：A，$\boxed{-2}$。**
+**参考答案：A。** $\boxed{-2}$。
 
-**过程**：独立同分布样本满足 $D(X_i)=4$，而
+**解题思路：** 原始样本 $X_i$ 相互独立，但中心化后的 $Y_i=X_i-\bar X$ 由于共用了样本均值，不再相互独立；先求其协方差，再用双线性性质。
+
+<Tabs items={['方法一：中心化协方差公式（推荐）','方法二：利用中心化之和为零']}>
+<Tab value="方法一：中心化协方差公式（推荐）">
+
+  本题 $n=4$、总体方差 $\sigma^2=4$，且
+
+
 
 $$
-D(\overline X)=\frac44=1,\qquad
-\operatorname{Cov}(X_i,\overline X)=\frac14D(X_i)=1.
+D\bar X=\frac{\sigma^2}{n}=1,\qquad
+  \operatorname{Cov}(X_i,\bar X)=\frac{\sigma^2}{n}=1.
 $$
 
-对 $i\ne j$，由协方差双线性性质可得
+  当 $i\ne j$ 时，
+
+
 
 $$
 \begin{aligned}
-\operatorname{Cov}(Y_i,Y_j)
-&=\operatorname{Cov}(X_i-\overline X,X_j-\overline X)\\
-&=0-1-1+1=-1.
-\end{aligned}
+  \operatorname{Cov}(Y_i,Y_j)
+  &=\operatorname{Cov}(X_i-\bar X,X_j-\bar X)\\
+  &=0-1-1+1=-1.
+  \end{aligned}
 $$
 
-因 $1,2$ 与 $3,4$ 的下标互不相同，故
+  对于题目中互异的指标，四个交叉协方差均为 $-1$，于是
+
+
 
 $$
 \begin{aligned}
-\operatorname{Cov}(2Y_1-Y_2,Y_3+Y_4)
-&=2(-1)+2(-1)-(-1)-(-1)\\
-&=\boxed{-2}.
-\end{aligned}
+  &\operatorname{Cov}(2Y_1-Y_2,Y_3+Y_4)\\
+  &\quad=2(-1)+2(-1)-(-1)-(-1)=\boxed{-2}.
+  \end{aligned}
 $$
 
-<Callout type="idea" title="快速结论">
+</Tab>
+<Tab value="方法二：利用中心化之和为零">
 
-样本量为 $n$、总体方差为 $\sigma^2$ 时，中心化样本 $Y_i=X_i-\overline X$ 满足 $\operatorname{Cov}(Y_i,Y_j)=-\sigma^2/n\ (i\ne j)$。
+  因 $Y_1+Y_2+Y_3+Y_4=0$，故 $Y_3+Y_4=-(Y_1+Y_2)$。又 $DY_i=\sigma^2(1-1/n)=3$，$\operatorname{Cov}(Y_1,Y_2)=-1$，所以
 
-</Callout>
+
+
+$$
+\begin{aligned}
+  &\operatorname{Cov}(2Y_1-Y_2,Y_3+Y_4)\\
+  &=-\operatorname{Cov}(2Y_1-Y_2,Y_1+Y_2)\\
+  &=-[2DY_1+\operatorname{Cov}(Y_1,Y_2)-DY_2]\\
+  &=-[6-1-3]=\boxed{-2}.
+  \end{aligned}
+$$
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="中心化造成相关">通用结论：对独立同分布样本，$\operatorname{Cov}(Y_i,Y_j)=\sigma^2(\delta_{ij}-1/n)$；$\delta_{ij}$ 为克罗内克符号。均值项不可随意忽略。</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-b3d1d8-017" type="essay">
+<Question id="selected-1103-math-b3d1d8-017" type="essay" tags="科目:概率论与数理统计, 考点:重叠样本和相关系数">
 
 设 $ X_1,X_2,\cdots,X_{12}$ 是取自总体 $ X$ 的一个简单随机样本，$ EX=\mu,DX=\sigma$。记 $ Y_1=X_1+\cdots+X_8$，$ Y_2=X_5+\cdots+X_{12}$，求 $ Y_1$ 与 $ Y_2$ 的相关系数。
 
 <Solution>
 
-**答案：**
+**参考答案：** $\boxed{\rho_{Y_1Y_2}=\dfrac12}$（总体方差 $DX=\sigma>0$）。
+
+**关键观察：** 两个和各包含 $8$ 项，它们共有 $X_5,X_6,X_7,X_8$ 四项；不重合的样本指标之间协方差为零。
+
+<Steps>
+<Step>
+
+  ### 先算两个和的方差
+
+  简单随机样本相互独立且方差同为题中的 $\sigma$，故
+
+
 
 $$
- \boxed{\rho_{Y_1Y_2}=\frac12}.
+DY_1=\sum_{i=1}^{8}DX_i=8\sigma,\qquad
+  DY_2=\sum_{j=5}^{12}DX_j=8\sigma.
 $$
 
-**解析：** 由于 $ X_1,X_2,\cdots,X_{12}$ 是简单随机样本，所以各随机变量相互独立且同分布。题中 $ DX=\sigma$ 表示总体方差；无论将其记为 $ \sigma$ 还是通常记作 $ \sigma^2$，最终相关系数均相同。
+</Step>
+<Step>
 
-有
+  ### 再算协方差
 
-$$
- Y_1=X_1+X_2+\cdots+X_8,
-$$
+  按 $Y_1=\sum_{i=1}^8X_i$、$Y_2=\sum_{j=5}^{12}X_j$ 展开，只有同一随机变量与自身相乘时才对协方差有贡献，因此
 
-$$
- Y_2=X_5+X_6+\cdots+X_{12}.
-$$
 
-两个和式中共同包含的随机变量是
 
 $$
- X_5,X_6,X_7,X_8,
-$$
-
-共4个。由独立性，只有相同下标项之间的协方差不为零，因此
-
-$$
- \begin{aligned}
 \operatorname{Cov}(Y_1,Y_2)
-&=\operatorname{Cov}
-\left(\sum_{i=1}^{8}X_i,
-\sum_{j=5}^{12}X_j\right)\\
-&=\sum_{i=5}^{8}DX_i\\
-&=4\sigma.
-\end{aligned}
+  =\sum_{i=5}^{8}DX_i=4\sigma.
 $$
 
-另一方面，
+  所以
+
+
 
 $$
- DY_1=\sum_{i=1}^{8}DX_i=8\sigma,
-$$
-
-$$
- DY_2=\sum_{i=5}^{12}DX_i=8\sigma.
-$$
-
-故相关系数为
-
-$$
- \begin{aligned}
 \rho_{Y_1Y_2}
-&=\frac{\operatorname{Cov}(Y_1,Y_2)}
-{\sqrt{DY_1}\sqrt{DY_2}}\\
-&=\frac{4\sigma}{\sqrt{8\sigma}\sqrt{8\sigma}}\\
-&=\frac12.
-\end{aligned}
+  =\frac{4\sigma}{\sqrt{8\sigma\cdot8\sigma}}
+  =\boxed{\frac12}.
 $$
 
-因此
+</Step>
+</Steps>
 
-$$
- \boxed{\rho_{Y_1Y_2}=\frac12}.
-$$
+<Callout type="info" title="题目记号">原题写 $DX=\sigma$，直接将 $\sigma$ 作为**方差**使用即可，不必误改成标准差。若 $\sigma=0$，两个和退化为常数，相关系数没有定义；题目通常默认方差为正。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-4327b0-045" type="essay" number={1}>
+<Question id="selected-1103-math-4327b0-045" type="essay" tags="科目:概率论与数理统计, 考点:不相关不独立的反例">
 
 设随机变量 $X_1$ 与 $X_2$ 相互独立，且 $X_1 \sim B(1,p)$，$X_2 \sim B(2,p)$，其中 $0<p<1$，令 $Y_1=2X_1+X_2$，$Y_2=X_1-X_2$。
 
@@ -397,139 +433,165 @@ $(II)$ 问 $Y_1$ 与 $Y_2$ 是否相互独立？并说明理由。
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：**
 
-**解析：** (I) 由 $X_{1}$ 与 $X_{2}$ 相互独立及 $X_{1}\sim B(1,p), X_{2}\sim B(2,p)$, 可知
-$\operatorname{Cov}(X_{1},X_{2})=0, DX_{1}=p(1-p), DX_{2}=2p(1-p)$.
-由于
+（I）$\boxed{\rho_{Y_1Y_2}=0}$；
+
+（II）$\boxed{Y_1\text{ 与 }Y_2\text{ 不独立}}$（$0<p<1$）。
+
+**解题思路：** 协方差为零只能说明不相关。判断独立性还须比较某些事件的联合概率和边缘概率乘积。
+
+<Steps>
+<Step>
+
+  ### （I）求协方差及相关系数
+
+  由于 $X_1\sim B(1,p)$、$X_2\sim B(2,p)$ 独立，
+
+
+
+$$
+DX_1=p(1-p),\quad DX_2=2p(1-p),\quad \operatorname{Cov}(X_1,X_2)=0.
+$$
+
+  故
+
+
 
 $$
 \begin{aligned}
-\operatorname{Cov}(Y_{1},Y_{2}) &=\operatorname{Cov}(2X_{1}+X_{2}, X_{1}-X_{2})=2DX_{1}-DX_{2}-\operatorname{Cov}(X_{1},X_{2}) \\
-&=2p(1-p)-2p(1-p)=0,
-\end{aligned}
+  \operatorname{Cov}(Y_1,Y_2)
+  &=\operatorname{Cov}(2X_1+X_2,X_1-X_2)\\
+  &=2DX_1-DX_2=0.
+  \end{aligned}
 $$
 
-故
+  并且
+
+
 
 $$
-\rho_{Y_{1}Y_{2}}=\frac{\operatorname{Cov}(Y_{1},Y_{2})}{\sqrt{DY_{1}}\sqrt{DY_{2}}}=0.
+DY_1=4DX_1+DX_2=6p(1-p)>0,
 $$
 
-(II) 由于
+
 
 $$
-\{Y_{1}=0\}=\{2X_{1}+X_{2}=0\}=\{X_{1}=0, X_{2}=0\},
+DY_2=DX_1+DX_2=3p(1-p)>0.
 $$
 
-$$
-\{Y_{2}=0\}=\{X_{1}-X_{2}=0\}=\{X_{1}=0, X_{2}=0\} \cup \{X_{1}=1, X_{2}=1\},
-$$
+  因此 $\rho_{Y_1Y_2}=\boxed0$。
 
-且 $\{Y_{1}=0\} \subset \{Y_{2}=0\}, P\{Y_{2}=0\} < 1$, 故
+</Step>
+<Step>
 
-$$
-P\{Y_{1}=0, Y_{2}=0\}=P\{Y_{1}=0\},
-$$
+  ### （II）构造否定独立性的事件
 
-$$
-P\{Y_{1}=0\} \cdot P\{Y_{2}=0\} < P\{Y_{1}=0\},
-$$
+  因 $X_1,X_2$ 均为非负整数，
 
-从而
+
 
 $$
-P\{Y_{1}=0, Y_{2}=0\} \neq P\{Y_{1}=0\} \cdot P\{Y_{2}=0\},
+\{Y_1=0\}=\{X_1=0,X_2=0\},\qquad
+  P(Y_1=0)=(1-p)^3>0.
 $$
 
-即 $Y_{1}$ 与 $Y_{2}$ 不相互独立.
+  $Y_1=0$ 必然推出 $Y_2=0$。但 $P(Y_2=0)<1$，例如
+
+
+
+$$
+P(Y_2\ne0)\ge P(X_1=1,X_2=0)=p(1-p)^2>0.
+$$
+
+  因此
+
+
+
+$$
+\begin{aligned}
+  P(Y_1=0,Y_2=0)&=P(Y_1=0)\\
+  &>P(Y_1=0)P(Y_2=0).
+  \end{aligned}
+$$
+
+  与独立性的必要条件矛盾，故 $Y_1,Y_2$ 不独立。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="考研常见误区">“不相关 $\Rightarrow$ 独立”仅在**联合正态**等特定条件下成立。本题虽由独立二项变量线性组合而成，$(Y_1,Y_2)$ 不是联合正态向量，零协方差不足以推出独立。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b3d1d8-020" type="essay">
+<Question id="selected-1103-math-b3d1d8-020" type="essay" tags="科目:概率论与数理统计, 考点:计数互补与线性相关">
 
 将一颗骰子重复投掷 $ n$ 次，随机变量 $ X$ 表示出现点数小于3的次数，$ Y$ 表示出现点数不小于3的次数。求 $ 3X+Y$ 与 $ X-3Y$ 的相关系数。
 
 <Solution>
 
-**答案：**
+**参考答案：** $\boxed{\rho_{3X+Y,\,X-3Y}=1}$（$n\ge1$）。
+
+**解题思路：** 这两个计数互补，满足 $X+Y=n$，因此题目中的两个表达式其实是同一个随机变量 $X$ 的正斜率仿射函数。
+
+<Steps>
+<Step>
+
+  ### 消去冗余变量 $Y$
+
+  每次掷骰子的点数必然属于“小于 $3$”或“不小于 $3$”之一，故 $X+Y=n$，即 $Y=n-X$。设
+
+
 
 $$
- \boxed{\rho_{3X+Y,\,X-3Y}=1}.
+U=3X+Y=n+2X,\qquad
+  V=X-3Y=4X-3n.
 $$
 
-**解析：** 每次投掷的点数或者小于3，或者不小于3，因此
+  两式联立可见 $V=2U-5n$，所以它们完全正线性相关。
+
+</Step>
+<Step>
+
+  ### 用相关系数定义核算
+
+  $X\sim B(n,1/3)$，当 $n\ge1$ 时 $DX=2n/9>0$。因此
+
+
 
 $$
- X+Y=n,
-\qquad Y=n-X.
+\operatorname{Cov}(U,V)=2\cdot4DX=8DX,
 $$
 
-于是
+
 
 $$
- 3X+Y=3X+n-X=n+2X,
+DU=4DX,\qquad DV=16DX.
 $$
 
-以及
+  代入定义得到
+
+
 
 $$
- X-3Y=X-3(n-X)=4X-3n.
+\rho_{UV}=\frac{8DX}{\sqrt{4DX}\sqrt{16DX}}
+  =\boxed1.
 $$
 
-记
+</Step>
+</Steps>
 
-$$
- U=3X+Y=n+2X,
-\qquad
-V=X-3Y=4X-3n.
-$$
-
-由于 $ n$ 为常数，且 $ n>0$ 时 $ X\sim B\left(n,\frac13\right)$，故 $ DX>0$。由线性变换的协方差和方差公式，
-
-$$
- \operatorname{Cov}(U,V)
-=2\cdot4\,DX=8DX,
-$$
-
-$$
- DU=2^2DX=4DX,
-\qquad
-DV=4^2DX=16DX.
-$$
-
-所以
-
-$$
- \begin{aligned}
-\rho_{UV}
-&=\frac{\operatorname{Cov}(U,V)}{\sqrt{DU}\sqrt{DV}}\\
-&=\frac{8DX}{\sqrt{4DX}\sqrt{16DX}}\\
-&=1.
-\end{aligned}
-$$
-
-从本质上看，$ V$ 是 $ U$ 的正线性函数：
-
-$$
- V=2U-5n,
-$$
-
-故二者完全正相关。因此
-
-$$
- \boxed{\rho_{3X+Y,\,X-3Y}=1}.
-$$
+<Callout type="idea" title="完全线性相关的快速判断">若 $V=aU+b$ 且 $DU>0$，则 $\rho_{UV}=\operatorname{sgn}(a)$；当 $a>0$ 时为 $1$，当 $a<0$ 时为 $-1$。这里 $a=2>0$。</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：非线性函数、示性变量与不相关不独立
+## 考点二｜不相关与独立、非线性函数及次序统计量
 
-<Question id="selected-1103-classified-1031-math-c06546-009" type="single" points={5} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-c06546-009" type="single" points={5} tags="来源:张宇8套卷, 考点:最小二乘线性预测">
 
 设 $X$ 与 $Y$ 为具有二阶矩的随机变量，且 $DX\ne0$，若记
 
@@ -546,48 +608,92 @@ $$
 
 <Solution>
 
-展开得
+**参考答案：A。** 在 $DX>0$ 且 $DY>0$ 时，驻点处
 
 $$
-G(a,b)
-=E(Y^2)-2aEY-2bE(XY)+a^2+2abEX+b^2E(X^2).
+\boxed{G_{\min}=(1-\rho_{XY}^2)DY}.
 $$
 
-驻点满足
+**解题思路：** 这是用 $a+bX$ 对 $Y$ 做最佳均方线性预测。先优化截距 $a$ 消去均值，再对斜率 $b$ 配方。
+
+<Tabs items={['方法一：中心化配方（推荐）','方法二：偏导求驻点']}>
+<Tab value="方法一：中心化配方（推荐）">
+
+  记 $\mu_X=EX$、$\mu_Y=EY$。平方损失可分解为
+
+
+
+$$
+\begin{aligned}
+  G(a,b)
+  &=E\bigl[(Y-\mu_Y)-b(X-\mu_X)\bigr]^2\\
+  &\quad+(\mu_Y-a-b\mu_X)^2.
+  \end{aligned}
+$$
+
+  对给定 $b$，第二项在 $a=\mu_Y-b\mu_X$ 时为零。此时
+
+
+
+$$
+G=DY-2b\operatorname{Cov}(X,Y)+b^2DX.
+$$
+
+  因 $DX>0$，配方为
+
+
+
+$$
+G=DX\left(b-\frac{\operatorname{Cov}(X,Y)}{DX}\right)^2
+  +DY-\frac{\operatorname{Cov}^2(X,Y)}{DX}.
+$$
+
+  最优斜率为 $b_*=\operatorname{Cov}(X,Y)/DX$，于是
+
+
+
+$$
+G_{\min}=DY-\frac{\operatorname{Cov}^2(X,Y)}{DX}
+  =\boxed{(1-\rho_{XY}^2)DY}.
+$$
+
+</Tab>
+<Tab value="方法二：偏导求驻点">
+
+  由
+
+
+
+$$
+G=E(Y^2)-2aEY-2bE(XY)+a^2+2abEX+b^2E(X^2)
+$$
+
+  得到驻点方程
+
+
 
 $$
 \begin{cases}
-\dfrac{\partial G}{\partial a}=-2EY+2a+2bEX=0,\\[4pt]
-\dfrac{\partial G}{\partial b}=-2E(XY)+2aEX+2bE(X^2)=0.
-\end{cases}
+  a+bEX=EY,\\
+  aEX+bE(X^2)=E(XY).
+  \end{cases}
 $$
 
-即
+  两式相减并使用 $E(XY)-EX\,EY=\operatorname{Cov}(X,Y)$ 得
+
+
 
 $$
-\begin{cases}
-a+bEX=EY,\\
-aEX+bE(X^2)=E(XY).
-\end{cases}
+b_*=\frac{\operatorname{Cov}(X,Y)}{DX},\qquad
+  a_*=EY-b_*EX.
 $$
 
-解得
+  因为 $G$ 关于 $a,b$ 的二次型的 Hessian 为 $2\begin{pmatrix}1&EX\\EX&E(X^2)\end{pmatrix}$，其顺序主子式为 $2>0$ 与 $4DX>0$，故驻点是唯一全局最小点。代回同样得到 $G_{\min}=DY-\operatorname{Cov}^2(X,Y)/DX$。
 
-$$
-b=\frac{\operatorname{Cov}(X,Y)}{DX},
-\qquad
-a=EY-\frac{\operatorname{Cov}(X,Y)}{DX}EX.
-$$
+</Tab>
+</Tabs>
 
-代回得
-
-$$
-G(a,b)
-=DY-\frac{\operatorname{Cov}^2(X,Y)}{DX}
-=(1-\rho_{XY}^2)DY.
-$$
-
-选（A）。
+<Callout type="warn" title="原题的边界条件">题目只明说 $DX\ne0$，但未保证 $DY>0$。若 $DY=0$，则 $Y$ 几乎处处为常数，最小值仍为 $0$；此时 $\rho_{XY}$ **无定义**，选项 A 的写法只能在默认 $DY>0$ 时使用。</Callout>
 
 </Solution>
 
@@ -610,54 +716,107 @@ $$
 
 <Solution>
 
-**答案：B，$\boxed{\rho_{UV}=\dfrac13}$。**
+**参考答案：B。**
+
+$$
+\boxed{\rho_{UV}=\frac13}.
+$$
+
+**核心思路：** $U,V$ 是两种“事件发生次数”，但它们共享取值 $X=1$ 的样本，因此不独立。先对**同一次抽样**计算示性变量的协方差，再利用各次抽样独立求和。
+
+<Tabs items={['示性变量法（推荐）', '多项分布计数法']}>
+<Tab value="示性变量法（推荐）">
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 化为各次抽样的示性变量
+    ### 每次抽样只产生一对指标
 
-  令 $A_i=\boldsymbol1_{\{X_i\in\{0,1\}\}}$、$B_i=\boldsymbol1_{\{X_i\in\{1,2\}\}}$。则 $U=\sum_{i=1}^n A_i$，$V=\sum_{i=1}^n B_i$，且
+    令 $A_i=\boldsymbol1_{\{X_i\in\{0,1\}\}}$，$B_i=\boldsymbol1_{\{X_i\in\{1,2\}\}}$，则 $U=\sum_{i=1}^n A_i$、$V=\sum_{i=1}^n B_i$。由原分布律：
 
-  $$
-  E(A_i)=E(B_i)=\frac12,\qquad
-  E(A_iB_i)=P(X_i=1)=\frac13.
-  $$
 
-  因而
 
-  $$
-  D(A_i)=D(B_i)=\frac14,\qquad
-  \operatorname{Cov}(A_i,B_i)=\frac13-\frac14=\frac1{12}.
-  $$
+$$
+P(A_i=1)=\frac16+\frac13=\frac12,\quad
+    P(B_i=1)=\frac13+\frac16=\frac12.
+$$
 
-  </Step>
-  <Step>
+    所以 $D(A_i)=D(B_i)=1/4$。注意 $A_iB_i=1$ 当且仅当 $X_i=1$，故
 
-  ### 利用独立同分布求协方差与相关系数
 
-  不同抽样相互独立，故 $\operatorname{Cov}(A_i,B_j)=0$（$i\ne j$）。于是
 
-  $$
-  D(U)=D(V)=\frac n4,\qquad
-  \operatorname{Cov}(U,V)=\frac n{12}.
-  $$
+$$
+E(A_iB_i)=\frac13,\qquad
+    \operatorname{Cov}(A_i,B_i)=\frac13-\frac14=\frac1{12}.
+$$
 
-  从而
+</Step>
+<Step>
 
-  $$
-  \rho_{UV}=
-  \frac{\operatorname{Cov}(U,V)}{\sqrt{D(U)D(V)}}
-  =\frac{n/12}{n/4}=\boxed{\frac13}.
-  $$
+    ### 跨次独立，协方差直接累加
 
-  </Step>
+    若 $i\ne j$，则 $A_i$ 与 $B_j$ 独立。因此
+
+
+
+$$
+\begin{aligned}
+    DU&=n\cdot\frac14=\frac n4,\\
+    DV&=\frac n4,\\
+    \operatorname{Cov}(U,V)
+    &=\sum_{i,j=1}^n\operatorname{Cov}(A_i,B_j)
+    =n\cdot\frac1{12}=\frac n{12}.
+    \end{aligned}
+$$
+
+    最终
+
+
+
+$$
+\rho_{UV}=\frac{n/12}{\sqrt{(n/4)(n/4)}}=\boxed{\frac13}.
+$$
+
+</Step>
 </Steps>
+
+</Tab>
+<Tab value="多项分布计数法">
+
+  对一次抽样，四类计数 $(N_0,N_1,N_2,N_3)$ 服从多项分布。不同类别的计数满足
+
+
+
+$$
+\operatorname{Cov}(N_i,N_j)=-np_ip_j\quad(i\ne j),
+  \qquad DN_i=np_i(1-p_i).
+$$
+
+  利用 $U=N_0+N_1$、$V=N_1+N_2$，并设 $p_0=p_2=1/6,p_1=1/3$，有
+
+
+
+$$
+\begin{aligned}
+  \operatorname{Cov}(U,V)
+  &=\operatorname{Cov}(N_0,N_1)+\operatorname{Cov}(N_0,N_2)\\
+  &\quad+DN_1+\operatorname{Cov}(N_1,N_2)\\
+  &=n\left(-\frac1{18}-\frac1{36}+\frac29-\frac1{18}\right)
+  =\frac n{12}.
+  \end{aligned}
+$$
+
+  $U,V\sim B(n,1/2)$，故各自方差为 $n/4$，相关系数仍为 $1/3$。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="为什么不是负相关？">同一个类别的计数 $N_i,N_j$（$i\ne j$）确实负相关，但 $U,V$ **共同包含** $N_1$，这一正方差项超过互斥类别带来的负协方差。不能直接套用“多项分布计数负相关”的结论。</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-classified-1031-math-c5b6ed-009" type="single" points={5} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-c5b6ed-009" type="single" points={5} tags="来源:张宇8套卷, 考点:互斥事件计数与相关系数">
 
 设随机试验 $E$ 有三种两两不相容的结果 $A,B,C$，且每次试验三种结果发生的概率分别为
 
@@ -674,68 +833,71 @@ $$
 
 <Solution>
 
-令
+**参考答案：C。**
 
 $$
-X_i=\begin{cases}1,&\text{第 }i\text{ 次试验出现 }A,\\0,&\text{否则},\end{cases}
+\boxed{\rho_{XY}=-\frac1{\sqrt{10}}=-\frac{\sqrt{10}}{10}}.
 $$
 
-$$
-Y_i=\begin{cases}1,&\text{第 }i\text{ 次试验出现 }B,\\0,&\text{否则},\end{cases}
-\qquad i=1,2.
-$$
+**核心思路：** $A,B$ 在**同一次试验中互斥**，但不同次试验相互独立。将次数写成示性变量之和，便能避免枚举全部两次试验结果。
 
-则
+<Steps>
+<Step>
 
-$$
-X=X_1+X_2,\qquad Y=Y_1+Y_2.
-$$
+  ### 计算单次试验的方差与协方差
 
-由于
+  设 $I_i=\boldsymbol1_{\{\text{第 }i\text{ 次为 }A\}}$、$J_i=\boldsymbol1_{\{\text{第 }i\text{ 次为 }B\}}$，则
+
+
 
 $$
-P(A)=\frac16,\qquad P(B)=\frac13,
+X=I_1+I_2,\quad Y=J_1+J_2,
 $$
 
-有
+  且 $E I_i=1/6$、$E J_i=1/3$。两结果不相容，故 $I_iJ_i=0$，从而
+
+
 
 $$
-EX=\frac13,\qquad EY=\frac23,
+\operatorname{Cov}(I_i,J_i)=0-\frac16\cdot\frac13=-\frac1{18}.
 $$
 
-$$
-DX=2\cdot\frac16\cdot\frac56=\frac5{18},
-$$
+</Step>
+<Step>
+
+  ### 跨次独立并求相关系数
+
+  由二项分布的方差公式
+
+
 
 $$
-DY=2\cdot\frac13\cdot\frac23=\frac49.
+DX=2\cdot\frac16\cdot\frac56=\frac5{18},\qquad
+  DY=2\cdot\frac13\cdot\frac23=\frac49.
 $$
 
-同一次试验中 $A,B$ 不相容，因此
+  跨次协方差均为零，故
+
+
 
 $$
-\operatorname{Cov}(X_i,Y_i)
-=E(X_iY_i)-EX_iEY_i
-=-\frac1{18}.
+\operatorname{Cov}(X,Y)=\sum_{i=1}^{2}\operatorname{Cov}(I_i,J_i)
+  =-\frac19.
 $$
 
-不同次试验独立，故
+  于是
+
+
 
 $$
-\operatorname{Cov}(X,Y)
-=2\operatorname{Cov}(X_1,Y_1)
-=-\frac19.
+\rho_{XY}=\frac{-1/9}{\sqrt{(5/18)(4/9)}}
+  =-\frac1{\sqrt{10}}.
 $$
 
-于是
+</Step>
+</Steps>
 
-$$
-\rho_{XY}
-=\frac{-1/9}{\sqrt{(5/18)(4/9)}}
-=-\frac{\sqrt{10}}{10}.
-$$
-
-故选 C。
+<Callout type="idea" title="可推广到任意重复次数">若独立试验重复 $n\ge1$ 次，且两互斥结果的单次概率分别为 $p_A,p_B$，则 $\rho_{XY}=-\sqrt{\dfrac{p_Ap_B}{(1-p_A)(1-p_B)}}$，与 $n$ 无关。负号源于同一次试验无法同时出现两种结果。</Callout>
 
 </Solution>
 
@@ -747,59 +909,69 @@ $$
 
 <Solution>
 
-**答案：**$\boxed{\dfrac12}$。
+**参考答案：**
 
-“不相关”等价于 $\operatorname{Cov}(X,Y)=0$，即 $E(XY)=E(X)E(Y)$。
+$$
+\boxed{k=\frac12}.
+$$
 
-<Steps>
-  <Step>
+**核心思路：** “不相关”意味着 $\operatorname{Cov}(X,|X-k|)=0$。绝对值函数以 $k$ 为界分段；或者利用均匀分布围绕 $1/2$ 的对称性，将计算大幅简化。
 
-  ### 计算 $E(Y)$ 与 $E(XY)$
+<Tabs items={['中心化积分法（推荐）', '直接计算两个期望']}>
+<Tab value="中心化积分法（推荐）">
 
-  因 $X\sim U(0,1)$，密度在 $(0,1)$ 上为 $1$，以 $x=k$ 为分界点去掉绝对值：
+  因为 $EX=1/2$，所以
 
-  $$
-  \begin{aligned}
-  E(Y)
-  &=\int_0^k(k-x)\,\mathrm dx+\int_k^1(x-k)\,\mathrm dx\\
-  &=\frac{k^2+(1-k)^2}{2}=k^2-k+\frac12,\\[3pt]
-  E(XY)
-  &=\int_0^kx(k-x)\,\mathrm dx+\int_k^1x(x-k)\,\mathrm dx\\
-  &=\frac{k^3}{3}-\frac k2+\frac13.
+
+
+$$
+\begin{aligned}
+  \operatorname{Cov}(X,|X-k|)
+  &=E\big[(X-\tfrac12)|X-k|\big]\\
+  &=\int_0^k(x-\tfrac12)(k-x)\,\mathrm dx
+    +\int_k^1(x-\tfrac12)(x-k)\,\mathrm dx\\
+  &=\frac{4k^3-6k^2+1}{12}\\
+  &=\frac{(2k-1)(2k^2-2k-1)}{12}.
   \end{aligned}
-  $$
+$$
 
-  </Step>
-  <Step>
+  令上式为零，候选根为 $1/2$ 和 $(1\pm\sqrt3)/2$。由于 $k\in(0,1)$，后两根均不合法，所以 $k=1/2$。
 
-  ### 令协方差为零并筛选参数
+</Tab>
+<Tab value="直接计算两个期望">
 
-  $E(X)=\frac12$，故
+  先拆绝对值：
 
-  $$
-  \begin{aligned}
-  \operatorname{Cov}(X,Y)
-  &=E(XY)-\frac12E(Y)\\
-  &=\frac{4k^3-6k^2+1}{12}
-  =\frac{(2k-1)(2k^2-2k-1)}{12}.
+
+
+$$
+\begin{aligned}
+  E|X-k|&=\int_0^k(k-x)\,\mathrm dx+\int_k^1(x-k)\,\mathrm dx
+  =k^2-k+\frac12,\\
+  E[X|X-k|]&=\int_0^kx(k-x)\,\mathrm dx+\int_k^1x(x-k)\,\mathrm dx
+  =\frac{k^3}{3}-\frac k2+\frac13.
   \end{aligned}
-  $$
+$$
 
-  所以 $k=\frac12$ 或 $k=\frac{1\pm\sqrt3}{2}$。后两根不属于 $(0,1)$，唯一有效解为 $\boxed{k=\frac12}$。
+  代入 $\operatorname{Cov}(X,Y)=E(XY)-EX\,EY$，即得
 
-  </Step>
-</Steps>
 
-<Callout type="idea" title="对称性验证">
 
-当 $k=\frac12$ 时，$|X-\frac12|$ 关于区间中点对称，而 $X-\frac12$ 关于中点反对称，因此 $E[(X-\frac12)|X-\frac12|]=0$，与计算结果一致。
+$$
+\operatorname{Cov}(X,Y)=\frac{4k^3-6k^2+1}{12}=0,
+$$
 
-</Callout>
+  解得唯一符合 $0<k<1$ 的根 $k=1/2$。
+
+</Tab>
+</Tabs>
+
+<Callout type="info" title="对称性为何有效">当 $k=1/2$，被积函数 $(x-1/2)|x-1/2|$ 关于 $x=1/2$ 是奇对称函数，积分必为零。**但只证明 $k=1/2$ 可行还不够**，还需利用方程或单调性排除其他 $k$。</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-b4d337-020" type="essay">
+<Question id="selected-1103-math-b4d337-020" type="essay" tags="科目:概率论与数理统计, 考点:伯努利函数与相关性判别">
 
 设随机变量$X$和$Y$相互独立且服从相同的分布，$X \sim \begin{pmatrix}0&1\\p&q\end{pmatrix}$，$p+q=1,0<p<1$，又$Z=\begin{cases}1,&X+Y\text{为奇数}\\0,&X+Y\text{为偶数}\end{cases}$。
 (1) 求$XZ$的分布律；
@@ -807,69 +979,86 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-(1)
+（1）$XZ$ 服从参数为 $pq$ 的伯努利分布：
+
 $$
- XZ\sim
-\begin{pmatrix}
-0&1\\
-1-pq&pq
-\end{pmatrix}.
+\boxed{P(XZ=0)=1-pq,\quad P(XZ=1)=pq}.
 $$
 
-(2) 当
-$$
- p\ne\frac12
-$$
-时，$X$和$Z$相关；当$p=\frac12$时不相关。
+（2）$X,Z$ 相关的充要条件为
 
-**解析：** (1) $Z=1$当且仅当$X\ne Y$。而$XZ=1$必须同时满足$X=1$且$Z=1$，这等价于
 $$
- X=1,\quad Y=0.
-$$
-由独立性，
-$$
- P\{XZ=1\}=qp=pq.
-$$
-故
-$$
- P\{XZ=0\}=1-pq.
+\boxed{p\ne\frac12}\qquad(0<p<1).
 $$
 
-(2) 有
+**核心思路：** $X,Y$ 取 $0$ 或 $1$，而 $X+Y$ 为奇数当且仅当两者取值不同。先求 $XZ$ 的分布，再求 $\operatorname{Cov}(X,Z)$ 判别是否相关。
+
+<Steps>
+<Step>
+
+  ### 先化简 $Z$ 的事件条件
+
+  已知 $P(X=0)=p$、$P(X=1)=q=1-p$，$Y$ 与 $X$ 同分布且独立。$Z=1$ 当且仅当 $(X,Y)=(0,1)$ 或 $(1,0)$；故
+
+
+
 $$
- E(X)=q,
+P(Z=1)=2pq,\qquad EZ=2pq.
 $$
-且
+
+</Step>
+<Step>
+
+  ### 求乘积 $XZ$ 的分布律
+
+  要使 $XZ=1$，必须 $X=1,Z=1$，这又等价于 $X=1,Y=0$。利用独立性
+
+
+
 $$
- E(Z)=P\{X\ne Y\}=pq+qp=2pq.
+P(XZ=1)=qp=pq,\qquad P(XZ=0)=1-pq.
 $$
-又由(1)
-$$
- E(XZ)=pq.
-$$
-所以
+
+  因此 $XZ\sim B(1,pq)$，且 $E(XZ)=pq$。
+
+</Step>
+<Step>
+
+  ### 用协方差判断相关
+
+  $EX=q$，所以
+
+
+
 $$
 \begin{aligned}
- \operatorname{Cov}(X,Z)
-&=E(XZ)-E(X)E(Z)\\
-&=pq-2pq^2\\
-&=pq(1-2q)\\
-&=pq(2p-1).
-\end{aligned}
+  \operatorname{Cov}(X,Z)
+  &=E(XZ)-EX\,EZ\\
+  &=pq-2pq^2=pq(1-2q)=pq(2p-1).
+  \end{aligned}
 $$
-由于$0<p<1$，有$pq>0$，故
+
+  由于 $0<p<1$，$pq>0$，且 $DX=pq>0$、$DZ=2pq(1-2pq)>0$，相关系数存在。由此
+
+
+
 $$
- \operatorname{Cov}(X,Z)\ne0
-\iff p\ne\frac12.
+X,Z\text{ 相关}\iff\operatorname{Cov}(X,Z)\ne0
+  \iff p\ne\frac12.
 $$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="反常识的特殊值">$p=q=1/2$ 时，不仅 $X,Z$ 不相关，而且实际上**独立**：对 $X=0$ 和 $X=1$，条件概率 $P(Z=1\mid X)=1/2$ 均相同。一般情况下“不相关”不能直接推出独立，这里是特殊对称结构。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b4d337-038" type="single">
+<Question id="selected-1103-math-b4d337-038" type="single" tags="科目:概率论与数理统计, 考点:概率积分变换与协方差">
 
 设连续型随机变量$X$与$Y$独立同分布，且其分布函数$F(x)$为严格单调增加函数，若$E(X)$存在，且$E(|X-Y|)=1$，则$X$与$F(X)$的协方差为( )
 
@@ -880,58 +1069,111 @@ $$
 
 <Solution>
 
-由于$F$连续且严格递增，概率积分变换给出
+**参考答案：B。**
+
 $$
- F(X)\sim U(0,1),
+\boxed{\operatorname{Cov}(X,F(X))=\frac14}.
 $$
-所以
+
+**核心思路：** $F(X)$ 是均匀变量，关键不在于计算具体密度，而在于把 $E[XF(X)]$ 与独立同分布样本的最大值联系起来。
+
+<Tabs items={['最大值恒等式（推荐）', '独立同分布对称性']}>
+<Tab value="最大值恒等式（推荐）">
+
+<Steps>
+<Step>
+
+    ### 利用概率积分变换
+
+    $F$ 连续（题设甚至严格递增），故 $F(X)\sim U(0,1)$，于是
+
+
+
 $$
- E[F(X)]=\frac12.
+E[F(X)]=\frac12.
 $$
-又因为$X,Y$独立同分布且连续，
+
+    又因 $Y$ 与 $X$ 独立同分布，条件于 $X$ 可得
+
+
+
 $$
- E[\max(X,Y)]
-=E[X;X>Y]+E[Y;Y>X].
+E\big[X\boldsymbol1_{\{Y<X\}}\big]=E[XF(X)].
 $$
-两项相等，并且
+
+</Step>
+<Step>
+
+    ### 用最大值联系绝对差
+
+    由于连续独立同分布，$P(X=Y)=0$，且两者对称，
+
+
+
+$$
+E[\max(X,Y)]=2E[XF(X)].
+$$
+
+    另一方面，恒等式 $\max(X,Y)=(X+Y+|X-Y|)/2$ 给出
+
+
+
+$$
+E[\max(X,Y)]=EX+\frac12E|X-Y|=EX+\frac12.
+$$
+
+    从而 $E[XF(X)]=\frac12EX+\frac14$，代回协方差定义：
+
+
+
+$$
+\operatorname{Cov}(X,F(X))=E[XF(X)]-EX\,EF(X)=\boxed{\frac14}.
+$$
+
+</Step>
+</Steps>
+
+</Tab>
+<Tab value="独立同分布对称性">
+
+  对连续独立同分布 $X,Y$，使用
+
+
+
+$$
+E|X-Y|
+  =2E[(X-Y)\boldsymbol1_{\{X>Y\}}].
+$$
+
+  这是由交换 $X,Y$ 的对称性得到的。对右端两个期望分别条件化：
+
+
+
 $$
 \begin{aligned}
- E[X;X>Y]
-&=E\bigl[X P(Y<X\mid X)\bigr]\\
-&=E[XF(X)].
-\end{aligned}
+  E[X\boldsymbol1_{\{X>Y\}}]&=E[XF(X)],\\
+  E[Y\boldsymbol1_{\{X>Y\}}]&=E[X(1-F(X))].
+  \end{aligned}
 $$
-故
+
+  因此 $E|X-Y|=2E[X(2F(X)-1)]$，即
+
+
+
 $$
- E[\max(X,Y)]=2E[XF(X)].
+\operatorname{Cov}(X,F(X))=\frac14E|X-Y|=\boxed{\frac14}.
 $$
-另一方面
-$$
- \max(X,Y)=\frac{X+Y+|X-Y|}{2},
-$$
-所以
-$$
- E[\max(X,Y)]=E(X)+\frac12E|X-Y|=E(X)+\frac12.
-$$
-因此
-$$
- E[XF(X)]=\frac12E(X)+\frac14.
-$$
-从而
-$$
-\begin{aligned}
- \operatorname{Cov}(X,F(X))
-&=E[XF(X)]-E(X)E[F(X)]\\
-&=\left(\frac12E(X)+\frac14\right)-\frac12E(X)\\
-&=\frac14.
-\end{aligned}
-$$
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="先看矩是否存在">题设 $E|X-Y|=1$ 且 $E(X)$ 存在，保证上述各期望有意义。若换成没有一阶绝对矩的分布，则不能随意使用含 $EX$ 的协方差公式。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b3d1d8-022" type="essay">
+<Question id="selected-1103-math-b3d1d8-022" type="essay" tags="科目:概率论与数理统计, 考点:圆盘均匀分布与不相关">
 
 设二维连续型随机变量 $ (X,Y)$ 在区域 $ D=\{(x,y)\mid x^2+y^2\le1\}$ 上服从均匀分布。
 
@@ -941,204 +1183,183 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（Ⅰ）$ X$ 与 $ Y$ 不相互独立；
+（Ⅰ）$\boxed{X\text{ 与 }Y\text{ 不独立}}$。
+
+（Ⅱ）$\boxed{\rho_{XY}=0}$，因此本题是“**不相关但不独立**”的典型例子。
+
+**核心思路：** 均匀分布在**圆盘**内，其支持集不是矩形，两个坐标被约束 $X^2+Y^2\le1$ 耦合；但圆盘的轴对称性又令 $E(XY)=0$。
+
+<Steps>
+<Step>
+
+  ### 写出联合密度和边缘密度
+
+  圆盘 $D=\{(x,y):x^2+y^2\le1\}$ 面积为 $\pi$，所以
 
 
-（Ⅱ）
-
-$$
- \boxed{\rho_{XY}=0}.
-$$
-
-**解析：** 单位圆域的面积为 $ \pi$，所以联合密度为
-
-$$
- f(x,y)=\begin{cases}
-\frac1\pi,&x^2+y^2\le1,\\[2mm]
-0,&\text{其他}.
-\end{cases}
-$$
-
-### （Ⅰ）判断独立性
-
-对 $ -1<x<1$，$ X$ 的边缘密度为
 
 $$
- \begin{aligned}
-f_X(x)
-&=\int_{-\sqrt{1-x^2}}^{\sqrt{1-x^2}}\frac1\pi\,dy\\
-&=\frac{2\sqrt{1-x^2}}\pi.
-\end{aligned}
+f_{X,Y}(x,y)=\begin{cases}\frac1\pi,&x^2+y^2\le1,\\0,&\text{其他}.
+  \end{cases}
 $$
 
-类似地，
+  对 $|x|<1$，沿竖线积分得
+
+
 
 $$
- f_Y(y)=\frac{2\sqrt{1-y^2}}\pi,
-\qquad -1<y<1.
+f_X(x)=\frac1\pi\int_{-\sqrt{1-x^2}}^{\sqrt{1-x^2}}\mathrm dy
+  =\frac{2\sqrt{1-x^2}}\pi.
 $$
 
-若 $ X,Y$ 相互独立，则应有
+  同理 $f_Y(y)=2\sqrt{1-y^2}/\pi$（$|y|<1$）。
+
+</Step>
+<Step>
+
+  ### 判断是否独立
+
+  若独立，联合密度应几乎处处等于 $f_X(x)f_Y(y)$。在 $(3/4,3/4)$ 附近，两个边缘密度都严格为正；但 $x^2+y^2>1$，联合密度为零，因此二者不可能独立。
+
+</Step>
+<Step>
+
+  ### 求相关系数并确认分母非零
+
+  圆盘分别关于两坐标轴对称，故 $EX=EY=0$；函数 $xy$ 沿任一坐标反射均变号，因此 $E(XY)=0$，即 $\operatorname{Cov}(X,Y)=0$。
+
+  用极坐标核实 $DX$：
+
+
 
 $$
- f(x,y)=f_X(x)f_Y(y)
+\begin{aligned}
+  DX=EX^2
+  &=\frac1\pi\int_0^{2\pi}\!\cos^2\theta\,\mathrm d\theta
+  \int_0^1r^3\,\mathrm dr\\
+  &=\frac1\pi\cdot\pi\cdot\frac14=\frac14.
+  \end{aligned}
 $$
 
-在相应范围内成立。但例如取
+  对称地 $DY=1/4$，故
+
+
 
 $$
- x=y=\frac34,
+\rho_{XY}=\frac0{\sqrt{(1/4)(1/4)}}=\boxed0.
 $$
 
-则
+</Step>
+</Steps>
 
-$$
- x^2+y^2=\frac98>1,
-$$
-
-因而
-
-$$
- f\left(\frac34,\frac34\right)=0,
-$$
-
-而
-
-$$
- f_X\left(\frac34\right)f_Y\left(\frac34\right)>0.
-$$
-
-两者不相等，所以 $ X$ 与 $ Y$ 不独立。
-
-### （Ⅱ）求相关系数
-
-由圆域关于两坐标轴对称，且联合密度为常数，有
-
-$$
- EX=EY=0.
-$$
-
-同理，被积函数 $ xy$ 关于 $ x$ 或 $ y$ 均为奇函数，因此
-
-$$
- E(XY)
-=\frac1\pi\iint_{x^2+y^2\le1}xy\,dxdy
-=0.
-$$
-
-所以
-
-$$
- \operatorname{Cov}(X,Y)
-=E(XY)-EXEY=0.
-$$
-
-为确认相关系数的分母非零，可计算
-
-$$
- \begin{aligned}
-DX=EX^2
-&=\frac1\pi\int_0^{2\pi}\int_0^1
-r^2\cos^2\theta\,r\,drd\theta\\
-&=\frac1\pi\left(\int_0^1r^3\,dr\right)
-\left(\int_0^{2\pi}\cos^2\theta\,d\theta\right)\\
-&=\frac1\pi\cdot\frac14\cdot\pi\\
-&=\frac14.
-\end{aligned}
-$$
-
-同理
-
-$$
- DY=\frac14.
-$$
-
-于是
-
-$$
- \rho_{XY}
-=\frac{\operatorname{Cov}(X,Y)}{\sqrt{DX}\sqrt{DY}}
-=0.
-$$
-
-因此，$ X$ 与 $ Y$ 虽然不独立，但不相关，即
-
-$$
- \boxed{\rho_{XY}=0}.
-$$
+<Callout type="idea" title="考场速判">“圆盘不独立”可直接用支撑区域非矩形判断，但应在**概率密度意义**上给出正面积的反例区域；“圆盘不相关”可直接利用奇偶对称性判断，最后确认两边方差非零。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-4327b0-046" type="essay">
+<Question id="selected-1103-math-4327b0-046" type="essay" tags="科目:概率论与数理统计, 考点:分段示性变量的联合分布">
 
 设 $X$ 是连续型随机变量，且 $P\{X\leqslant a\}=P\{X>b\}=\frac{1}{4}$，令
+
 $$
 X_1=\begin{cases} -1, & X\leqslant a, \\ 1, & X>a, \end{cases} \quad X_2=\begin{cases} -1, & X\leqslant b, \\ 1, & X>b. \end{cases}
 $$
+
 求：$(I)$ $(X_1,X_2)$ 的联合分布及边缘分布；
 
 $(II)$ $\operatorname{Cov}(X_1,X_2), D(X_1-X_2)$。
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：**
 
-**解析：** (I) 由
+（Ⅰ）联合分布律（含边缘分布）为：
 
-$$
-P\{X\leqslant b\}=1-P\{X>b\}=\frac{3}{4}, P\{X\leqslant a\}=\frac{1}{4},
-$$
-
-知 $a<b$, 故
-
-$$
-P\{X_{1}=-1, X_{2}=-1\}=P\{X\leqslant a, X\leqslant b\}=P\{X\leqslant a\}=\frac{1}{4},
-$$
-
-$$
-P\{X_{1}=-1, X_{2}=1\}=P\{X\leqslant a, X>b\}=0,
-$$
-
-$$
-P\{X_{1}=1, X_{2}=-1\}=P\{X>a, X\leqslant b\}=P\{a<X\leqslant b\}=\frac{1}{2},
-$$
-
-$$
-P\{X_{1}=1, X_{2}=1\}=1-\frac{1}{4}-0-\frac{1}{2}=\frac{1}{4} .
-$$
-
-从而 $(X_1, X_2)$ 的联合分布与边缘分布为
-
-| $X_1 \backslash X_2$ | $-1$ | $1$ | $X_1$ 的边缘 |
+| $X_1\backslash X_2$ | $-1$ | $1$ | $P(X_1=\cdot)$ |
 | :---: | :---: | :---: | :---: |
-| $-1$ | $\frac{1}{4}$ | $0$ | $\frac{1}{4}$ |
-| $1$ | $\frac{1}{2}$ | $\frac{1}{4}$ | $\frac{3}{4}$ |
-| $X_2$ 的边缘 | $\frac{3}{4}$ | $\frac{1}{4}$ | |
+| $-1$ | $\tfrac14$ | $0$ | $\tfrac14$ |
+| $1$ | $\tfrac12$ | $\tfrac14$ | $\tfrac34$ |
+| $P(X_2=\cdot)$ | $\tfrac34$ | $\tfrac14$ | $1$ |
 
-(II)由(I)知,
-
-$$
-EX_1 = \frac{1}{2}, E(X_1^2) = 1, EX_2 = -\frac{1}{2}, E(X_2^2) = 1,
-$$
-
-故 $DX_1 = DX_2 = \frac{3}{4}, E(X_1X_2) = 0$, 从而
+（Ⅱ）
 
 $$
-\operatorname{Cov}(X_1, X_2) = E(X_1X_2) - EX_1 \cdot EX_2 = \frac{1}{4},
+\boxed{\operatorname{Cov}(X_1,X_2)=\frac14,\qquad D(X_1-X_2)=1}.
 $$
+
+**核心思路：** 先利用概率大小确定 $a<b$，再按 $(-\infty,a]$、$(a,b]$、$(b,\infty)$ 三段填表；最后由分布律计算混合矩。
+
+<Steps>
+<Step>
+
+  ### 为什么一定有 $a<b$
+
+  $P(X\le a)=1/4$，而 $P(X\le b)=1-P(X>b)=3/4$。分布函数非减，且 $1/4<3/4$，因此 $a<b$。于是当 $X\le a$ 时，必有 $X\le b$。
+
+</Step>
+<Step>
+
+  ### 将三个区间映射成三组取值
+
+
+
 $$
-D(X_1 - X_2) = DX_1 - 2\operatorname{Cov}(X_1, X_2) + DX_2 = 1.
+\begin{array}{c|c|c}
+  \text{区间}&(X_1,X_2)&\text{概率}\\\hline
+  X\le a&(-1,-1)&1/4\\
+  a<X\le b&(1,-1)&3/4-1/4=1/2\\
+  X>b&(1,1)&1/4
+  \end{array}
 $$
+
+  组合 $(-1,1)$ 不可能出现；将三组结果按行列求和即得参考答案中的联合与边缘分布表。
+
+</Step>
+<Step>
+
+  ### 混合矩和线性组合方差
+
+  由边缘分布，$EX_1=1/2$，$EX_2=-1/2$；两者取值均为 $\pm1$，所以
+
+
+
+$$
+DX_1=DX_2=1-\frac14=\frac34.
+$$
+
+  联合分布给出
+
+
+
+$$
+E(X_1X_2)=\frac14-\frac12+\frac14=0.
+$$
+
+  因此
+
+
+
+$$
+\begin{aligned}
+  \operatorname{Cov}(X_1,X_2)&=0-(\tfrac12)(-\tfrac12)=\frac14,\\
+  D(X_1-X_2)&=DX_1+DX_2-2\operatorname{Cov}(X_1,X_2)\\
+  &=\frac34+\frac34-\frac12=\boxed1.
+  \end{aligned}
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="不能以边缘分布替代联合分布">尽管 $E(X_1X_2)=0$，仍有 $EX_1\,EX_2=-1/4$，所以协方差非零。尤其不能由两个边缘分布直接假设 $X_1,X_2$ 独立。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b4d337-039" type="single">
+<Question id="selected-1103-math-b4d337-039" type="single" tags="科目:概率论与数理统计, 考点:指数次序统计量相关系数">
 
 设随机变量$X,Y$独立同分布于参数为1的指数分布，令$Z=\max\{X,Y\}$，$W=\min\{X,Y\}$，则$Z$与$W$的相关系数为( )
 
@@ -1149,46 +1370,95 @@ $$
 
 <Solution>
 
-两个独立$E(1)$随机变量的最小值
+**参考答案：C。**
+
 $$
- W=\min\{X,Y\}\sim E(2),
+\boxed{\rho_{ZW}=\frac1{\sqrt5}=\frac{\sqrt5}{5}}.
 $$
-故
+
+**核心思路：** 两个独立指数寿命的**最早发生时刻**与“之后到第二个发生的等待时间”独立。若记这段新增等待时间为 $T$，则 $Z=W+T$，可直接计算方差和协方差。
+
+<Tabs items={['指数分布无记忆性（推荐）', '联合密度验证']}>
+<Tab value="指数分布无记忆性（推荐）">
+
+<Steps>
+<Step>
+
+    ### 先求最小值的分布
+
+    $X,Y$ 独立且均服从率为 $1$ 的指数分布，故 $w\ge0$ 时
+
+
+
 $$
- E(W)=\frac12,\qquad D(W)=\frac14.
+P(W>w)=P(X>w,Y>w)=e^{-2w}.
 $$
-由指数分布的无记忆性，在先坏掉的那个时刻之后，另一个随机变量的剩余寿命$V$仍服从$E(1)$，且与$W$独立。因此
+
+    因此 $W\sim E(2)$，$EW=1/2$，$DW=1/4$。
+
+</Step>
+<Step>
+
+    ### 用无记忆性构造剩余等待时间
+
+    当先结束的一个寿命达到 $W$ 后，另一个的剩余时间 $T=Z-W$ 仍服从 $E(1)$，且与 $W$ 独立。因此
+
+
+
 $$
- Z=W+V,
+DT=1,\qquad DZ=D(W+T)=\frac14+1=\frac54,
 $$
-其中
+
+
+
 $$
- D(V)=1.
+\operatorname{Cov}(Z,W)=\operatorname{Cov}(W+T,W)=DW=\frac14.
 $$
-于是
+
+    所以
+
+
+
 $$
- D(Z)=D(W)+D(V)=\frac14+1=\frac54,
+\rho_{ZW}=\frac{1/4}{\sqrt{(5/4)(1/4)}}=\frac1{\sqrt5}.
 $$
-且
+
+</Step>
+</Steps>
+
+</Tab>
+<Tab value="联合密度验证">
+
+  由独立同分布的两变量次序统计量公式，$0<w<z$ 时
+
+
+
 $$
- \operatorname{Cov}(Z,W)
-=\operatorname{Cov}(W+V,W)=D(W)=\frac14.
+f_{W,Z}(w,z)=2e^{-w}e^{-z}.
 $$
-因此
+
+  令 $T=Z-W$，即 $z=w+t$，雅可比绝对值为 $1$，从而
+
+
+
 $$
- \rho_{ZW}
-=\frac{1/4}{\sqrt{(5/4)(1/4)}}
-=\frac1{\sqrt5}
-=\frac{\sqrt5}{5}.
+f_{W,T}(w,t)=2e^{-2w}e^{-t},\qquad w,t>0.
 $$
+
+  它分解为 $E(2)$ 与 $E(1)$ 的密度之积，严密验证 $W\perp T$，其余计算与第一种方法相同。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="最大值和最小值并不独立">独立的是 $W$ 和 **间隔** $Z-W$，不是 $Z$ 和 $W$。后两者共享 $W$，协方差为 $1/4>0$。</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点3：二维正态独立性、联合密度与混合分布相关性
+## 考点三｜二维正态线性变换、高阶矩与条件密度
 
-<Question id="selected-1103-classified-1031-math-fdf71b-010" type="single" points={5} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-fdf71b-010" type="single" points={5} tags="来源:张宇8套卷, 考点:完全线性相关与组合方差">
 
 设随机变量 $X,Y,Z$ 满足 $DX=DZ$，$DY=4DX$，且 $\rho_{XY}=-1$，$\rho_{XZ}=\dfrac12$，则 $X$ 与 $Y+Z$ 的相关系数为
 
@@ -1199,42 +1469,73 @@ $$
 
 <Solution>
 
-由 $\rho_{XY}=-1$，存在 $a>0,b$ 使 $P\{Y=-aX+b\}=1$，且
+**参考答案：B。**
 
 $$
-\rho_{YZ}=-\rho_{XZ}=-\frac12.
+\boxed{\rho_{X,Y+Z}=-\frac{\sqrt3}{2}}.
 $$
 
-所以
+**核心思路：** $\rho_{XY}=-1$ 表示 $Y$ 与 $X$ **完全负线性相关**，因此可先把 $Y$ 写成 $X$ 的线性函数，再求 $Y+Z$ 的方差。
+
+<Steps>
+<Step>
+
+  ### 将完全负相关转化成确定的线性关系
+
+  设 $DX=DZ=s^2>0$，题设 $DY=4s^2$，故 $\sqrt{DY/DX}=2$。由相关系数等于 $-1$ 的等号条件，存在常数 $c$ 使
+
+
 
 $$
-\operatorname{Cov}(X,Y+Z)
-=\operatorname{Cov}(X,Y)+\operatorname{Cov}(X,Z)
-=-2DX+\frac12DX=-\frac32DX,
+Y=-2X+c\quad\text{（几乎处处）}.
 $$
 
-且
+  因而 $\operatorname{Cov}(Y,Z)=-2\operatorname{Cov}(X,Z)$。
+
+</Step>
+<Step>
+
+  ### 逐项展开协方差与方差
+
+  $\rho_{XZ}=1/2$、$DX=DZ=s^2$，所以
+
+
 
 $$
-D(Y+Z)=DY+DZ+2\operatorname{Cov}(Y,Z)
-=4DX+DX-2DX=3DX.
+\operatorname{Cov}(X,Z)=\frac12s^2,\qquad
+  \operatorname{Cov}(Y,Z)=-s^2.
 $$
 
-因此
+  因此
+
+
 
 $$
-\rho_{X,Y+Z}
-=\frac{-\frac32DX}{\sqrt{DX\cdot3DX}}
-=-\frac{\sqrt3}{2}.
+\begin{aligned}
+  \operatorname{Cov}(X,Y+Z)&=-2s^2+\frac12s^2=-\frac32s^2,\\
+  D(Y+Z)&=4s^2+s^2+2(-s^2)=3s^2.
+  \end{aligned}
 $$
 
-故选 B。
+  最后
+
+
+
+$$
+\rho_{X,Y+Z}=\frac{-\frac32s^2}{\sqrt{s^2\cdot3s^2}}
+  =\boxed{-\frac{\sqrt3}{2}}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="满相关系数可减少一个随机变量">若 $\rho_{XY}=1$ 或 $-1$ 且方差均正，则 $Y=aX+b$ 几乎处处成立，$a$ 的正负由相关系数符号决定，$|a|=\sqrt{DY/DX}$。这比重复展开三变量协方差更稳妥。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-classified-1031-math-6178b5-008" type="single" points={5} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-6178b5-008" type="single" points={5} tags="来源:张宇8套卷, 考点:联合正态线性变换独立性">
 
 设 $(X,Y)$ 服从二维正态分布，$EX=\mu_1$，$DX=\sigma_1^2$，$EY=\mu_2$，$DY=\sigma_2^2$，$\rho_{XY}=\rho$，且 $\mu_1\ne\mu_2$，$\sigma_1\ne\sigma_2$。记
 
@@ -1251,44 +1552,59 @@ $$
 
 <Solution>
 
-因为 $(X,Y)$ 服从二维正态分布，所以
-
-$$
-\xi=aX+bY,
-\qquad
-\eta=aX-bY
-$$
-
-也联合服从二维正态分布。
-
-因此
-
-$$
-\xi,\eta\text{ 独立}
-\Longleftrightarrow
-\operatorname{Cov}(\xi,\eta)=0.
-$$
-
-计算得
-
-$$
-\operatorname{Cov}(aX+bY,aX-bY)
-=a^2\sigma_1^2-b^2\sigma_2^2.
-$$
-
-故
-
-$$
-a^2\sigma_1^2=b^2\sigma_2^2,
-$$
-
-即
+**参考答案：A。**
 
 $$
 \boxed{\frac{a^2}{b^2}=\frac{\sigma_2^2}{\sigma_1^2}}.
 $$
 
-选（A）。
+**核心思路：** 二维正态向量的任意线性组合仍然联合正态，因此“独立”等价于“协方差为零”；均值不同并不影响结果。
+
+<Steps>
+<Step>
+
+  ### 明确独立性判据适用的前提
+
+  因 $(X,Y)$ 联合正态，$(\xi,\eta)=(aX+bY,aX-bY)$ 也联合正态，所以
+
+
+
+$$
+\xi\perp\eta\iff\operatorname{Cov}(\xi,\eta)=0.
+$$
+
+  这里不需要 $X,Y$ 原本独立，也不需要 $\mu_1=\mu_2$。
+
+</Step>
+<Step>
+
+  ### 展开并观察交叉项抵消
+
+
+
+$$
+\begin{aligned}
+  \operatorname{Cov}(\xi,\eta)
+  &=\operatorname{Cov}(aX+bY,aX-bY)\\
+  &=a^2DX-ab\operatorname{Cov}(X,Y)\\
+  &\quad+ab\operatorname{Cov}(Y,X)-b^2DY\\
+  &=a^2\sigma_1^2-b^2\sigma_2^2.
+  \end{aligned}
+$$
+
+  令该式等于零，并利用 $ab\ne0$、$\sigma_1,\sigma_2>0$，得到
+
+
+
+$$
+a^2\sigma_1^2=b^2\sigma_2^2
+  \iff\boxed{\frac{a^2}{b^2}=\frac{\sigma_2^2}{\sigma_1^2}}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="易错点">交叉项是 $-ab\operatorname{Cov}(X,Y)$ 与 $+ab\operatorname{Cov}(Y,X)$，**正好抵消**。因此本题结论与原相关系数 $\rho$ 无关，与均值 $\mu_1,\mu_2$ 也无关。非正态情形一般只能由独立推出零协方差，不能反推。</Callout>
 
 </Solution>
 
@@ -1305,44 +1621,63 @@ $$
 
 <Solution>
 
-**答案：A。** $\boxed{a=2,\ b=1}$。
-
-**过程**：题设给出 $E(X)=E(Y)=1$、$D(X)=1$、$D(Y)=4$、相关系数 $\rho=1/2$，从而
+**参考答案：A。**
 
 $$
-\operatorname{Cov}(X,Y)=\rho\sqrt{D(X)D(Y)}=1.
+\boxed{a=2,\qquad b=1}.
 $$
+
+**核心思路：** 求两个未知数需要两条条件：正态分布的中位数等于均值，将尾概率 $1/2$ 转成**均值方程**；线性组合独立转成**零协方差方程**。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 用对称性求均值条件
+  ### 读取二维正态的矩参数
 
-  $aX+bY$ 仍是正态变量，且 $P(aX+bY>3)=1/2$，故其均值为 $3$，即
+  记 $L=aX+bY$、$M=2X-Y$。题给 $EX=EY=1$、$DX=1$、$DY=4$、$\rho_{XY}=1/2$，故
 
-  $$
-  E(aX+bY)=a+b=3.
-  $$
 
-  </Step>
-  <Step>
 
-  ### 由独立性求协方差条件
+$$
+\operatorname{Cov}(X,Y)=\frac12\sqrt{1\cdot4}=1.
+$$
 
-  对联合正态变量的线性组合，独立等价于协方差为零，所以
+</Step>
+<Step>
 
-  $$
-  \begin{aligned}
+  ### 用正态分布的中心对称性
+
+  $L$ 为正态变量。若 $DL>0$，则 $P(L>3)=1/2$ 强制 $EL=3$；若 $DL=0$，$L$ 是常数且 $P(L>3)$ 只能是 $0$ 或 $1$，与题设矛盾。因此
+
+
+
+$$
+a+b=EL=3.
+$$
+
+</Step>
+<Step>
+
+  ### 独立等价于零协方差并联立求解
+
+  两个线性组合联合正态，故
+
+
+
+$$
+\begin{aligned}
   0&=\operatorname{Cov}(2X-Y,aX+bY)\\
-  &=2aD(X)+(2b-a)\operatorname{Cov}(X,Y)-bD(Y)\\
+  &=2aDX+(2b-a)\operatorname{Cov}(X,Y)-bDY\\
   &=2a+(2b-a)-4b=a-2b.
   \end{aligned}
-  $$
+$$
 
-  解联立方程 $a+b=3$、$a-2b=0$，得 $a=2$、$b=1$。
+  联立 $a+b=3$ 与 $a=2b$，得 $b=1,a=2$。此时 $DL=4+4+4=12>0$，确实满足所用概率条件。
 
-  </Step>
+</Step>
 </Steps>
+
+<Callout type="info" title="高频通法">对于非退化正态 $T\sim N(\mu,\sigma^2)$，$P(T>c)=1/2$ 等价于 $\mu=c$；但这对任意非正态分布不成立。使用独立当且仅当协方差零也依赖**联合正态**前提。</Callout>
 
 </Solution>
 </Question>
@@ -1358,58 +1693,74 @@ $$
 
 <Solution>
 
-**答案：B。** $E(X^2Y^2)=147$。
+**参考答案：B。**
+
+$$
+\boxed{E(X^2Y^2)=147}.
+$$
+
+**核心思路：** 先由零协方差求出参数 $b$，再利用联合正态带来的独立性，将四阶乘积矩拆成两个**二阶矩的乘积**。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 利用联合正态与零协方差求 $b$
+  ### 计算原协方差
 
-  相关系数给出
 
-  $$
-  \operatorname{Cov}(U,V)
-  =\rho_{UV}\sqrt{D(U)D(V)}
+
+$$
+\operatorname{Cov}(U,V)=\rho_{UV}\sqrt{DU\,DV}
   =\frac12\sqrt{4\cdot1}=1.
-  $$
+$$
 
-  $(X,Y)$ 是联合正态变量，因此相互独立当且仅当协方差为零。计算得
+</Step>
+<Step>
 
-  $$
-  \begin{aligned}
-  \operatorname{Cov}(X,Y)
-  &=\operatorname{Cov}(U-bV,2U+V)\\
-  &=2D(U)+\operatorname{Cov}(U,V)
-    -2b\operatorname{Cov}(U,V)-bD(V)\\
+  ### 求 $b$ 并确认独立性
+
+  $X=U-bV$，$Y=2U+V$ 都是联合正态变量的线性组合。由于题设 $X\perp Y$，其协方差必须为零：
+
+
+
+$$
+\begin{aligned}
+  0&=\operatorname{Cov}(U-bV,2U+V)\\
+  &=2DU+(1-2b)\operatorname{Cov}(U,V)-bDV\\
   &=8+1-2b-b=9-3b.
   \end{aligned}
-  $$
+$$
 
   故 $b=3$。
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### 用独立性计算二阶矩乘积
+  ### 先求二阶矩，再求四阶混合矩
 
-  此时 $X=U-3V$、$Y=2U+V$，二者均值为零，且
+  原变量均值均为零，所以 $EX=EY=0$。代入 $b=3$，
 
-  $$
-  D(X)=4+9-6=7,\qquad
-  D(Y)=16+1+4=21.
-  $$
 
-  因 $X,Y$ 独立，
 
-  $$
-  E(X^2Y^2)=E(X^2)E(Y^2)
-  =D(X)D(Y)=7\times21=\boxed{147}.
-  $$
+$$
+\begin{aligned}
+  DX&=D(U-3V)=4+9-6=7,\\
+  DY&=D(2U+V)=16+1+4=21.
+  \end{aligned}
+$$
 
-  </Step>
+  因 $X,Y$ 独立，函数 $X^2,Y^2$ 也独立，于是
+
+
+
+$$
+E(X^2Y^2)=E(X^2)E(Y^2)=DX\,DY
+  =7\times21=\boxed{147}.
+$$
+
+</Step>
 </Steps>
 
-<Callout type="warn" title="零协方差与独立">“不相关即独立”一般不成立；本题因原变量服从**二维正态分布**，线性变换后仍联合正态，才可以使用此结论。</Callout>
+<Callout type="warn" title="两个不同的“平方”">$E(X^2Y^2)$ 不是 $[E(XY)]^2$，也不是 $E(X^2)E(Y^2)$ 在任意情况下都成立；本题能够分解的原因是**独立**，而不是仅仅不相关。</Callout>
 
 </Solution>
 </Question>
@@ -1425,49 +1776,77 @@ $$
 
 <Solution>
 
-**答案：D。** $\boxed{\rho_{UV}=1/\sqrt{15}}$。
+**参考答案：D。**
 
-**过程**：二维正态随机变量不相关即可推出独立，因此 $X\sim N(0,4)$ 与 $Y\sim N(0,1)$ 独立，且 $E(X^2)=4$、$E(X^4)=3\cdot4^2=48$。
+$$
+\boxed{\rho_{UV}=\frac1{\sqrt{15}}=\frac{\sqrt{15}}{15}}.
+$$
+
+**核心思路：** 二维正态分布中 $\rho_{XY}=0$ 推出 $X,Y$ 独立。计算 $U=X+Y$ 与 $V=X^2Y$ 的相关系数，需要**三阶奇矩为零**与**正态四阶矩**。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 计算协方差
+  ### 提取标准正态矩
 
-  $E(U)=E(V)=0$，所以
 
-  $$
-  \begin{aligned}
-  \operatorname{Cov}(U,V)&=E[(X+Y)X^2Y]\\
-  &=E(X^3)E(Y)+E(X^2)E(Y^2)=4.
+
+$$
+EX=EY=0,\quad EX^2=4,\quad EY^2=1,\quad EX^3=0,
+$$
+
+
+
+$$
+EX^4=3(DX)^2=3\cdot 4^2=48.
+$$
+
+  由于联合正态且不相关，$X\perp Y$，因此含 $X,Y$ 的乘积期望可以分解。
+
+</Step>
+<Step>
+
+  ### 计算 $U,V$ 的均值、方差与协方差
+
+  $EU=0$，$EV=EX^2\,EY=0$；且
+
+
+
+$$
+DU=DX+DY=5,
+$$
+
+
+
+$$
+DV=E(X^4Y^2)=EX^4\,EY^2=48.
+$$
+
+  另一方面
+
+
+
+$$
+\begin{aligned}
+  \operatorname{Cov}(U,V)
+  &=E[(X+Y)X^2Y]\\
+  &=EX^3\,EY+EX^2\,EY^2=0+4=4.
   \end{aligned}
-  $$
-
-  </Step>
-  <Step>
-
-  ### 计算方差与相关系数
-
-  $$
-  D(U)=4+1=5,\qquad
-  D(V)=E(X^4Y^2)=48.
-  $$
+$$
 
   故
 
-  $$
-  \rho_{UV}=\frac{4}{\sqrt{5\cdot48}}
-  =\frac1{\sqrt{15}}=\frac{\sqrt{15}}{15}.
-  $$
 
-  </Step>
+
+$$
+\rho_{UV}=\frac4{\sqrt{5\cdot48}}
+  =\boxed{\frac1{\sqrt{15}}}.
+$$
+
+</Step>
 </Steps>
 
-<Callout type="info" title="正态分布的四阶中心矩">
-
-对 $Z\sim N(0,\sigma^2)$，有 $E(Z^4)=3\sigma^4$；不能把四阶矩误写成 $[E(Z^2)]^2$。
-
-</Callout>
+<Callout type="idea" title="正态四阶矩要熟记">对 $T\sim N(0,\sigma^2)$，$E(T^4)=3\sigma^4$，而 $[E(T^2)]^2=\sigma^4$。漏掉系数 $3$ 会直接改变相关系数；切勿仅以 $U,V$ 不再联合正态为由判断它们独立。</Callout>
 
 </Solution>
 </Question>
@@ -1493,93 +1872,116 @@ $$
 
 <Solution>
 
-**答案：A，$\boxed{\rho_{UV}=\dfrac{29}{\sqrt{2761}}}$。**
+**参考答案：A。**
 
-**过程**：利用比例变量将二重积分化为矩的乘积。
+$$
+\boxed{\rho_{UV}=\frac{29}{\sqrt{2761}}}.
+$$
+
+**核心思路：** 条件密度含 $x^{-3}y^2$，显示 $Y$ 是 $X$ 的**随机比例**。设 $W=Y/X$，先证明 $W$ 与 $X$ 独立，再把 $U=X(1+W)$、$V=X(1-W)$ 化成矩的运算。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 构造独立变量
+  ### 通过变量替换识别独立性
 
-  令 $W=Y/X$。由 $0<Y<X$，对固定 $X=x$ 作变换 $y=xw$，得
+  固定 $X=x>0$，令 $y=xw$、$0<w<1$，变量替换给出
 
-  $$
-  f_{W\mid X}(w\mid x)
-  =\frac{3(xw)^2}{x^3}\cdot x=3w^2,
-  \quad 0<w<1.
-  $$
 
-  该密度不依赖 $x$，所以 $W$ 与 $X$ 独立，且
 
-  $$
-  E(W)=\int_0^1 3w^3\,\mathrm dw=\frac34,\qquad
-  E(W^2)=\int_0^1 3w^4\,\mathrm dw=\frac35.
-  $$
+$$
+f_{W\mid X}(w\mid x)
+  =\frac{3(xw)^2}{x^3}\cdot x=3w^2.
+$$
 
-  指数分布 $X\sim E(2)$ 满足
+  其右端与 $x$ 无关，所以 $W\perp X$，且
 
-  $$
-  E(X)=\frac12,\qquad E(X^2)=\frac12.
-  $$
 
-  </Step>
-  <Step>
 
-  ### 计算 $U,V$ 的均值和方差
+$$
+EW=\int_0^1 3w^3\,\mathrm dw=\frac34,\qquad
+  EW^2=\int_0^1 3w^4\,\mathrm dw=\frac35.
+$$
 
-  因 $U=X(1+W)$、$V=X(1-W)$，利用独立性得到
+  $X\sim E(2)$，所以 $EX=1/2,\ EX^2=2/2^2=1/2$。
 
-  $$
-  \begin{aligned}
-  E(U)&=\frac12\left(1+\frac34\right)=\frac78,&
-  E(V)&=\frac12\left(1-\frac34\right)=\frac18,\\
-  E(U^2)&=\frac12\left(1+2\cdot\frac34+\frac35\right)=\frac{31}{20},&
-  E(V^2)&=\frac12\left(1-2\cdot\frac34+\frac35\right)=\frac1{20}.
-  \end{aligned}
-  $$
+</Step>
+<Step>
 
-  故
+  ### 分别求 $U,V$ 的期望与方差
 
-  $$
-  D(U)=\frac{31}{20}-\left(\frac78\right)^2=\frac{251}{320},\qquad
-  D(V)=\frac1{20}-\left(\frac18\right)^2=\frac{11}{320}.
-  $$
+  由独立性和 $U=X(1+W)$、$V=X(1-W)$，
 
-  </Step>
-  <Step>
 
-  ### 计算协方差与相关系数
 
-  由 $UV=X^2-Y^2=X^2(1-W^2)$，有
+$$
+EU=\frac12\left(1+\frac34\right)=\frac78,\quad
+  EV=\frac12\left(1-\frac34\right)=\frac18.
+$$
 
-  $$
-  E(UV)=\frac12\left(1-\frac35\right)=\frac15.
-  $$
 
-  于是
 
-  $$
-  \operatorname{Cov}(U,V)=\frac15-\frac78\cdot\frac18=\frac{29}{320}.
-  $$
+$$
+EU^2=\frac12\left(1+\frac32+\frac35\right)=\frac{31}{20},
+$$
+
+
+
+$$
+EV^2=\frac12\left(1-\frac32+\frac35\right)=\frac1{20}.
+$$
 
   因此
 
-  $$
-  \rho_{UV}=\frac{\operatorname{Cov}(U,V)}{\sqrt{D(U)D(V)}}
-  =\frac{29/320}{\sqrt{251\cdot11}/320}
-  =\boxed{\frac{29}{\sqrt{2761}}}.
-  $$
 
-  </Step>
+
+$$
+DU=\frac{31}{20}-\frac{49}{64}=\frac{251}{320},\qquad
+  DV=\frac1{20}-\frac1{64}=\frac{11}{320}.
+$$
+
+</Step>
+<Step>
+
+  ### 求协方差并写成标准相关系数
+
+  $UV=X^2(1-W^2)$，故
+
+
+
+$$
+E(UV)=\frac12\left(1-\frac35\right)=\frac15.
+$$
+
+  于是
+
+
+
+$$
+\operatorname{Cov}(U,V)=\frac15-\frac78\cdot\frac18
+  =\frac{29}{320}.
+$$
+
+  最终
+
+
+
+$$
+\rho_{UV}=\frac{29/320}{\sqrt{(251/320)(11/320)}}
+  =\boxed{\frac{29}{\sqrt{2761}}}.
+$$
+
+</Step>
 </Steps>
 
-<Callout type="idea" title="比例变量简化积分">遇到 $f_{Y\mid X}(y\mid x)$ 仅依赖 $y/x$ 的条件密度时，考虑令 $W=Y/X$。先检验独立性，往往能将繁琐二重积分化为简单乘积。</Callout>
+<Callout type="idea" title="代替直接计算二重积分">对具有比例型条件密度 $f_{Y\mid X}(y\mid x)=x^{-1}g(y/x)$ 的题，优先尝试 $W=Y/X$；只要变换后条件密度与 $x$ 无关，就可严格推出 $W$ 与 $X$ 独立。不要在未经检验时把 $X,Y$ 直接当独立变量。</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-b4d337-032" type="essay">
+## 考点四｜伯努利联合分布、二维混合矩与正态对称性
+
+<Question id="selected-1103-math-b4d337-032" type="essay" tags="科目:概率论与数理统计, 考点:伯努利联合分布与协方差">
 
 设随机变量$X \sim B(1,\frac{1}{4})$，随机变量$Y \sim B(1,\frac{1}{6})$且$\text{Cov}(X,Y)=\frac{1}{24}$。求：
 (1) 二维随机变量$(X,Y)$的概率分布；
@@ -1588,273 +1990,225 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-(1)
+（1）$(X,Y)$ 的联合分布律：
+
+| $X\backslash Y$ | $0$ | $1$ | 行和 |
+| :---: | :---: | :---: | :---: |
+| $0$ | $\frac23$ | $\frac1{12}$ | $\frac34$ |
+| $1$ | $\frac16$ | $\frac1{12}$ | $\frac14$ |
+| 列和 | $\frac56$ | $\frac16$ | $1$ |
+
+（2）$\displaystyle\boxed{\rho_{XY}=\frac1{\sqrt{15}}=\frac{\sqrt{15}}{15}}$。
+
+（3）$\displaystyle\boxed{P(XY=0)=\frac{11}{12}}$。
+
+**核心思路：** 两个变量都只能取 $0,1$，故 $XY$ 也是 $0,1$ 变量，且 $E(XY)=P(X=1,Y=1)$。利用协方差反推出这一个单元格，再用边缘分布补齐整个 $2\times2$ 表。
+
+<Steps>
+<Step>
+
+  ### 由协方差确定联合概率的右下角
+
+  $EX=1/4$、$EY=1/6$。于是
+
+
 
 $$
-
-\begin{array}{c|cc}
- &Y=0&Y=1\\ \hline
-X=0&\frac23&\frac1{12}\\[1mm]
-X=1&\frac16&\frac1{12}
-\end{array}
-$$
-
-(2)
-$$
- \rho_{XY}=\frac1{\sqrt{15}}.
-$$
-
-(3)
-$$
- P\{XY=0\}=\frac{11}{12}.
-$$
-
-**解析：** 由边缘分布，
-$$
- E(X)=\frac14,\qquad E(Y)=\frac16.
-$$
-又
-$$
- \operatorname{Cov}(X,Y)=E(XY)-E(X)E(Y)=\frac1{24},
-$$
-故
-$$
- E(XY)=\frac1{24}+\frac1{24}=\frac1{12}.
-$$
-因为$X,Y$均只取0、1，所以$XY=1$当且仅当$X=Y=1$，即
-$$
- P\{X=1,Y=1\}=\frac1{12}.
-$$
-再利用边缘概率，
-$$
- P\{X=1,Y=0\}=\frac14-\frac1{12}=\frac16,
-$$
-$$
- P\{X=0,Y=1\}=\frac16-\frac1{12}=\frac1{12},
-$$
-最后
-$$
- P\{X=0,Y=0\}=1-\frac1{12}-\frac16-\frac1{12}=\frac23.
+\begin{aligned}
+  P(X=1,Y=1)&=E(XY)\\
+  &=\operatorname{Cov}(X,Y)+EX\,EY\\
+  &=\frac1{24}+\frac14\cdot\frac16=\frac1{12}.
+  \end{aligned}
 $$
 
-又
+</Step>
+<Step>
+
+  ### 由边缘概率求其余三个单元格
+
+
+
 $$
- D(X)=\frac14\cdot\frac34=\frac3{16},
+\begin{aligned}
+  P(1,0)&=P(X=1)-P(1,1)=\frac14-\frac1{12}=\frac16,\\
+  P(0,1)&=P(Y=1)-P(1,1)=\frac16-\frac1{12}=\frac1{12},\\
+  P(0,0)&=1-\frac1{12}-\frac16-\frac1{12}=\frac23.
+  \end{aligned}
 $$
+
+  四格都非负，且行、列和分别吻合给定伯努利分布，联合分布律即为上表。
+
+</Step>
+<Step>
+
+  ### 求相关系数与乘积为零的概率
+
+
+
 $$
- D(Y)=\frac16\cdot\frac56=\frac5{36}.
+DX=\frac14\left(1-\frac14\right)=\frac3{16},\qquad
+  DY=\frac16\left(1-\frac16\right)=\frac5{36}.
 $$
-因此
+
+  所以
+
+
+
 $$
- \rho_{XY}
-=\frac{1/24}{\sqrt{(3/16)(5/36)}}
-=\frac1{\sqrt{15}}.
+\rho_{XY}=\frac{1/24}{\sqrt{(3/16)(5/36)}}=\frac1{\sqrt{15}}.
 $$
-而
+
+  $XY=1$ 当且仅当 $(X,Y)=(1,1)$，故
+
+
+
 $$
- P\{XY=0\}=1-P\{XY=1\}=1-\frac1{12}=\frac{11}{12}.
+P(XY=0)=1-\frac1{12}=\boxed{\frac{11}{12}}.
 $$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="有边缘分布不代表独立">若误认为独立，则 $P(1,1)$ 会等于 $P(X=1)P(Y=1)=1/24$；但本题实际值是 $1/12$。题目专门给了非零协方差，就是为了确定这一额外关联信息。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b3d1d8-015" type="essay">
+<Question id="selected-1103-math-b3d1d8-015" type="essay" tags="科目:概率论与数理统计, 考点:二维连续型混合矩与协方差">
 
 设二维随机变量 $ (X,Y)$ 的联合密度函数为
 
 $$
- f(x,y)=\begin{cases}
+f(x,y)=\begin{cases}
 8xy,&0<y<x,\ 0<x<1,\\
 0,&\text{其他}。
 \end{cases}
 $$
 
-
 试求：（Ⅰ）数学期望 $ EX,EY$；（Ⅱ）方差 $ DX,DY$；（Ⅲ）协方差 $ \operatorname{Cov}(X,Y)$，$ D(5X-3Y)$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（Ⅰ）
+（Ⅰ）$\displaystyle\boxed{EX=\frac45,\quad EY=\frac8{15}}$。
+
+（Ⅱ）$\displaystyle\boxed{DX=\frac2{75},\quad DY=\frac{11}{225}}$。
+
+（Ⅲ）$\displaystyle\boxed{\operatorname{Cov}(X,Y)=\frac4{225},\quad D(5X-3Y)=\frac{43}{75}}$。
+
+**核心思路：** 二维密度给定在三角形 $0<y<x<1$ 上。为避免每个期望重复积分，可一次推导 $E(X^rY^s)$ 的通式；随后用二阶矩与协方差的基本恒等式收尾。
+
+<Tabs items={['混合矩通式（推荐）', '比例变量拆分']}>
+<Tab value="混合矩通式（推荐）">
+
+<Steps>
+<Step>
+
+    ### 建立通用混合矩
+
+    对所需的非负整数 $r,s$，
 
 
-$$
- \boxed{EX=\frac45,\qquad EY=\frac8{15}}.
-$$
-
-（Ⅱ）
-
-$$
- \boxed{DX=\frac2{75},\qquad DY=\frac{11}{225}}.
-$$
-
-（Ⅲ）
-
-$$
- \boxed{\operatorname{Cov}(X,Y)=\frac4{225}},
-$$
-
-$$
- \boxed{D(5X-3Y)=\frac{43}{75}}.
-$$
-
-**解析：** 随机变量的取值区域为
 
 $$
- 0<x<1,\qquad 0<y<x.
+\begin{aligned}
+    E(X^rY^s)
+    &=\int_0^1\int_0^x x^r y^s\,(8xy)\,\mathrm dy\,\mathrm dx\\
+    &=\frac8{s+2}\int_0^1x^{r+s+3}\,\mathrm dx\\
+    &=\boxed{\frac8{(s+2)(r+s+4)}}.
+    \end{aligned}
 $$
 
-先验证密度归一化：
+    特别地取 $r=s=0$，结果为 $1$，也就检验了密度归一化。
+
+</Step>
+<Step>
+
+    ### 直接代入求一阶、二阶和交叉矩
+
+
 
 $$
- \begin{aligned}
-\int_0^1\int_0^x8xy\,dy\,dx
-&=\int_0^1 8x\left[\frac{y^2}{2}\right]_0^x dx\\
-&=\int_0^1 4x^3\,dx=1.
-\end{aligned}
+\begin{array}{c|ccccc}
+    \text{矩}&EX&EY&EX^2&EY^2&E(XY)\\\hline
+    \text{值}&\frac45&\frac8{15}&\frac23&\frac13&\frac49
+    \end{array}
 $$
 
-（Ⅰ）计算数学期望。
+    因此
+
+
 
 $$
- \begin{aligned}
-EX
-&=\int_0^1\int_0^x x\cdot8xy\,dy\,dx\\
-&=\int_0^1 8x^2\left[\frac{y^2}{2}\right]_0^x dx\\
-&=\int_0^1 4x^4\,dx\\
-&=\frac45.
-\end{aligned}
+\begin{aligned}
+    DX&=\frac23-\left(\frac45\right)^2=\frac2{75},\\
+    DY&=\frac13-\left(\frac8{15}\right)^2=\frac{11}{225},\\
+    \operatorname{Cov}(X,Y)&=\frac49-\frac45\cdot\frac8{15}=\frac4{225}.
+    \end{aligned}
 $$
 
-同理，
+</Step>
+<Step>
+
+    ### 展开线性组合的方差
+
+
 
 $$
- \begin{aligned}
-EY
-&=\int_0^1\int_0^x y\cdot8xy\,dy\,dx\\
-&=\int_0^1 8x\left[\frac{y^3}{3}\right]_0^x dx\\
-&=\frac83\int_0^1x^4\,dx\\
-&=\frac8{15}.
-\end{aligned}
+\begin{aligned}
+    D(5X-3Y)
+    &=25DX+9DY-30\operatorname{Cov}(X,Y)\\
+    &=25\cdot\frac2{75}+9\cdot\frac{11}{225}-30\cdot\frac4{225}\\
+    &=\boxed{\frac{43}{75}}.
+    \end{aligned}
 $$
 
-因此
+</Step>
+</Steps>
+
+</Tab>
+<Tab value="比例变量拆分">
+
+  先求 $f_X(x)=\int_0^x8xy\,\mathrm dy=4x^3$（$0<x<1$）。令 $W=Y/X$，$y=xw$，则
+
+
 
 $$
- \boxed{EX=\frac45,\qquad EY=\frac8{15}}.
+f_{X,W}(x,w)=8x(xw)\cdot x=8x^3w=(4x^3)(2w),
+  \quad0<x,w<1.
 $$
 
-（Ⅱ）先计算二阶原点矩。
+  因而 $X\perp W$、$f_W(w)=2w$，且 $Y=XW$。由此
+
+
 
 $$
- \begin{aligned}
-EX^2
-&=\int_0^1\int_0^x x^2\cdot8xy\,dy\,dx\\
-&=\int_0^1 8x^3\left[\frac{y^2}{2}\right]_0^x dx\\
-&=4\int_0^1x^5\,dx\\
-&=\frac23.
-\end{aligned}
+EX^t=\frac4{t+4},\qquad EW^s=\frac2{s+2},
 $$
 
-故
+
 
 $$
- \begin{aligned}
-DX
-&=EX^2-(EX)^2\\
-&=\frac23-\left(\frac45\right)^2\\
-&=\frac2{75}.
-\end{aligned}
+E(X^rY^s)=E(X^{r+s})\,E(W^s)
+  =\frac8{(r+s+4)(s+2)},
 $$
 
-再计算
+  与第一种方法得到的混合矩通式完全一致。
 
-$$
- \begin{aligned}
-EY^2
-&=\int_0^1\int_0^x y^2\cdot8xy\,dy\,dx\\
-&=\int_0^1 8x\left[\frac{y^4}{4}\right]_0^x dx\\
-&=2\int_0^1x^5\,dx\\
-&=\frac13.
-\end{aligned}
-$$
+</Tab>
+</Tabs>
 
-因此
-
-$$
- \begin{aligned}
-DY
-&=EY^2-(EY)^2\\
-&=\frac13-\left(\frac8{15}\right)^2\\
-&=\frac{11}{225}.
-\end{aligned}
-$$
-
-所以
-
-$$
- \boxed{DX=\frac2{75},\qquad DY=\frac{11}{225}}.
-$$
-
-（Ⅲ）先计算混合矩：
-
-$$
- \begin{aligned}
-E(XY)
-&=\int_0^1\int_0^xxy\cdot8xy\,dy\,dx\\
-&=\int_0^1 8x^2\left[\frac{y^3}{3}\right]_0^x dx\\
-&=\frac83\int_0^1x^5\,dx\\
-&=\frac49.
-\end{aligned}
-$$
-
-故
-
-$$
- \begin{aligned}
-\operatorname{Cov}(X,Y)
-&=E(XY)-EXEY\\
-&=\frac49-\frac45\cdot\frac8{15}\\
-&=\frac4{225}.
-\end{aligned}
-$$
-
-利用线性组合方差公式，
-
-$$
- D(aX+bY)=a^2DX+b^2DY+2ab\operatorname{Cov}(X,Y),
-$$
-
-得到
-
-$$
- \begin{aligned}
-D(5X-3Y)
-&=25DX+9DY-30\operatorname{Cov}(X,Y)\\
-&=25\cdot\frac2{75}
-+9\cdot\frac{11}{225}
--30\cdot\frac4{225}\\
-&=\frac{43}{75}.
-\end{aligned}
-$$
-
-因此
-
-$$
- \boxed{\operatorname{Cov}(X,Y)=\frac4{225}},
-\qquad
-\boxed{D(5X-3Y)=\frac{43}{75}}.
-$$
+<Callout type="warn" title="方差公式的系数">$D(aX+bY)=a^2DX+b^2DY+2ab\operatorname{Cov}(X,Y)$。取 $a=5,b=-3$ 时，交叉项系数是 **$-30$**，不要漏掉负号或因子 $2$。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-4327b0-043" type="essay">
+<Question id="selected-1103-math-4327b0-043" type="essay" tags="科目:概率论与数理统计, 考点:正态对称性与线性组合独立">
 
 设随机变量 $X_1$ 与 $X_2$ 相互独立，且均服从 $N(0,1)$，$X_3$ 的分布律为 $P\{X_3=-1\}=\frac{1}{4}$，$P\{X_3=1\}=\frac{3}{4}$，且 $X_1$ 与 $X_3$ 相互独立。
 
@@ -1866,61 +2220,87 @@ $(III)$ $(X_1+X_2)^2$ 与 $(X_1-X_2)^2$ 是否相互独立？说明理由。
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：**
 
-**解析：** (I) 用定义法.
+（Ⅰ）$\displaystyle\boxed{f_Z(z)=\frac1{\sqrt{2\pi}}e^{-z^2/2},\quad z\in\mathbb R}$，即 $Z\sim N(0,1)$。
+
+（Ⅱ）$\displaystyle\boxed{\rho_{X_1Z}=\frac12}$。
+
+（Ⅲ）$\boxed{(X_1+X_2)^2\text{ 与 }(X_1-X_2)^2\text{ 相互独立}}$。
+
+**核心思路：** 第一问利用标准正态关于零对称，第三问利用**正态向量线性变换后的零协方差蕴含独立**。注意题目只规定了 $X_1$ 与 $X_3$ 独立，并未规定 $X_2$ 与 $X_3$ 的关系，但本题三问均不需要后者。
+
+<Steps>
+<Step>
+
+  ### （Ⅰ）分情况求 $Z=X_1X_3$ 的分布
+
+  由于 $X_1\perp X_3$，对任意 $z$，
+
+
+
 $$
 \begin{aligned}
-F_Z(z) &= P\{Z \leqslant z\} = P\{X_1 X_3 \leqslant z\} \\
-&= P\{X_1 X_3 \leqslant z, X_3 = -1\} + P\{X_1 X_3 \leqslant z, X_3 = 1\} \\
-&= P\{-X_1 \leqslant z, X_3 = -1\} + P\{X_1 \leqslant z, X_3 = 1\} \\
-&= P\{X_3 = -1\}P\{X_1 \geqslant -z\} + P\{X_3 = 1\}P\{X_1 \leqslant z\} \\
-&= \frac{1}{4}(1 - P\{X_1 < -z\}) + \frac{3}{4}P\{X_1 \leqslant z\} \\
-&= \frac{1}{4}[1 - \Phi(-z)] + \frac{3}{4}\Phi(z) = \frac{1}{4}\Phi(z) + \frac{3}{4}\Phi(z) = \Phi(z),
-\end{aligned}
-$$
-其中, $\Phi(z)$ 为 $N(0, 1)$ 的分布函数, 故
-$$
-f_Z(z) = \Phi'(z) = \frac{1}{\sqrt{2\pi}}\mathrm{e}^{-\frac{z^2}{2}}, \quad -\infty < z < +\infty.
+  F_Z(z)
+  &=P(X_3=1)P(X_1\le z)+P(X_3=-1)P(-X_1\le z)\\
+  &=\frac34\Phi(z)+\frac14[1-\Phi(-z)].
+  \end{aligned}
 $$
 
-(Ⅱ) $\operatorname{Cov}(Z, X_1) = \operatorname{Cov}(X_1 X_3, X_1) = E(X_1 X_3 \cdot X_1) - E(X_1 X_3)EX_1$
+  标准正态分布对称，$1-\Phi(-z)=\Phi(z)$，故 $F_Z(z)=\Phi(z)$。求导得
+
+
 
 $$
-= E(X_1^2 X_3) - (EX_1)^2 EX_3.
+f_Z(z)=\frac{e^{-z^2/2}}{\sqrt{2\pi}},\qquad -\infty<z<\infty.
 $$
 
-由 $X_1 \sim N(0, 1)$, 知 $EX_1 = 0, DX_1 = 1$. 又 $X_1^2$ 与 $X_3$ 相互独立, 所以
+</Step>
+<Step>
+
+  ### （Ⅱ）求 $X_1$ 与 $Z$ 的相关系数
+
+  $EX_1=0$、$EX_1^2=1$，又
+
+
 
 $$
-E(X_1^2 X_3) = E(X_1^2)EX_3,
+EX_3=-\frac14+\frac34=\frac12.
 $$
 
-$$
-E(X_1^2) = DX_1 + (EX_1)^2 = 1 + 0^2 = 1,
-$$
+  因为 $X_1$ 和 $X_3$ 独立，
+
+
 
 $$
-EX_3 = (-1) \times \frac{1}{4} + 1 \times \frac{3}{4} = \frac{1}{2},
+\begin{aligned}
+  \operatorname{Cov}(X_1,Z)
+  &=E(X_1^2X_3)-EX_1\,E(X_1X_3)\\
+  &=EX_1^2\,EX_3=\frac12.
+  \end{aligned}
 $$
 
+  而 $DX_1=DZ=1$，故 $\rho_{X_1Z}=1/2$。
+
+</Step>
+<Step>
+
+  ### （Ⅲ）先证和与差独立，再作用平方函数
+
+  令 $S=X_1+X_2$、$T=X_1-X_2$。由于 $X_1,X_2$ **独立标准正态**，$(S,T)$ 联合正态，且
+
+
+
 $$
-\operatorname{Cov}(Z, X_1) = \frac{1}{2}.
+\operatorname{Cov}(S,T)=D(X_1)-D(X_2)=1-1=0.
 $$
 
-又 $Z \sim N(0, 1)$, 故 $DZ = 1$, 从而
+  因此 $S\perp T$。独立随机变量分别经过可测函数变换后仍独立，于是 $S^2\perp T^2$，即题述两平方变量相互独立。
 
-$$
-\rho_{X_1 Z} = \frac{\operatorname{Cov}(Z, X_1)}{\sqrt{DZ} \sqrt{DX_1}} = \frac{\frac{1}{2}}{\sqrt{1} \times \sqrt{1}} = \frac{1}{2}.
-$$
+</Step>
+</Steps>
 
-(III) 由 $X_1$ 与 $X_2$ 均服从 $N(0, 1)$, 知 $\overline{X} = \frac{X_1 + X_2}{2}$ 与样本方差 $S^2$ 相互独立, 而
-
-$$
-S^2 = \left( X_1 - \frac{X_1 + X_2}{2} \right)^2 + \left( X_2 - \frac{X_1 + X_2}{2} \right)^2 = \frac{(X_1 - X_2)^2}{2},
-$$
-
-所以 $X_1 + X_2$ 与 $(X_1 - X_2)^2$ 相互独立, 故 $(X_1 + X_2)^2$ 与 $(X_1 - X_2)^2$ 相互独立.
+<Callout type="warn" title="正态条件只作用于线性组合">$S,T$ 是联合正态，零协方差推出独立；$S^2,T^2$ 一般不构成联合正态向量，但这里的独立性是通过对**已经独立的 $S,T$ 分别平方**得到的，并非直接套用平方变量的“零协方差”判据。</Callout>
 
 </Solution>
 

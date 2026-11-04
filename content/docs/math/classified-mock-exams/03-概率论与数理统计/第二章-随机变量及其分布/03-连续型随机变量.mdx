@@ -1,13 +1,11 @@
 ---
-title: "第三节 连续型随机变量｜概率密度归一化、正态指数模型与二维条件密度"
-description: "对照真题中密度与分布函数、正态标准化、指数无记忆性、二维联合密度及边缘条件分布的高频考点，精选计算严谨且有区分度的原题。"
+title: "3. 连续型随机变量"
+description: "18道连续型随机变量专项题全部重写：边缘与条件密度、积分区域、联合分布函数、二维正态及变量和的密度。"
 ---
 
-# 第三节 连续型随机变量｜概率密度归一化、正态指数模型与二维条件密度
+本节 **18 道**连续型随机变量练习均已完整重写：前半部分处理密度归一化、正态参数与寿命分布，后半部分围绕二维联合密度、边缘与条件密度、联合分布函数、二维正态条件参数和变量和的分布，统一采用“答案先行—确定支持域—列式计算—结论检验”的形式。原题、选项和资源路径均予保留。
 
-依照「真题核心题目」同名小节的考点与命题风格精选 **18 道高质量模拟、练习原题**。题干、选项、答案、解析、公式及原有交互组件保持原样。
-
-## 考点1：密度归一化、正态参数与分段积分推断
+## 考点一｜密度归一化、正态参数与分段积分
 
 <Question id="selected-1103-classified-1031-tangjiafeng-2027-s8-q09" type="single" points={5} tags="来源:汤家凤八套卷, 考点:概率密度归一化与随机变量方差, 难度:中等">
 
@@ -26,61 +24,92 @@ $$
 
 <Solution>
 
-**答案：B，$\boxed{a=2,\ D(X+|X|)=2}$。**
+**参考答案：B，$\boxed{a=2,\quad D(X+|X|)=2}$。**
 
-**过程：**
+**核心思路：** 先用密度积分归一化求出 $a$，再注意 $X+|X|$ 在负半轴恒为 $0$、正半轴等于 $2X$。求方差时必须同时计算一阶矩和二阶矩。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 求归一化常数
+  ### 由归一化确定 $a$
 
-  被积函数为偶函数，故
+  $|x|e^{-2|x|}$ 为偶函数，故
 
-  $$
-  1=2a\int_0^\infty xe^{-2x}\,\mathrm dx
-   =2a\cdot\frac1{2^2}=\frac a2
-   \quad\Longrightarrow\quad \boxed{a=2}.
-  $$
 
-  </Step>
-  <Step>
 
-  ### 求变换后的矩
-
-  记 $Z=X+|X|$。按 $X$ 的符号，
-
-  $$
-  Z=\begin{cases}0,&X\le0,\\2X,&X>0.\end{cases}
-  $$
-
-  由 $\int_0^\infty x^m e^{-2x}\,\mathrm dx=m!/2^{m+1}$，得
-
-  $$
-  \begin{aligned}
-  E(Z)&=\int_0^\infty(2x)\cdot2xe^{-2x}\,\mathrm dx
-  =4\cdot\frac{2!}{2^3}=1,\\
-  E(Z^2)&=\int_0^\infty(2x)^2\cdot2xe^{-2x}\,\mathrm dx
-  =8\cdot\frac{3!}{2^4}=3.
+$$
+\begin{aligned}
+  1&=\int_{-\infty}^{\infty}a|x|e^{-2|x|}\,\mathrm dx\\
+   &=2a\int_0^\infty xe^{-2x}\,\mathrm dx
+   =2a\cdot\frac{1!}{2^2}=\frac a2.
   \end{aligned}
-  $$
+$$
 
-  </Step>
-  <Step>
+  因此 $\boxed{a=2}$，密度已确定。
 
-  ### 求方差
+</Step>
+<Step>
 
-  $$
-  D(Z)=E(Z^2)-[E(Z)]^2=3-1=\boxed{2}.
-  $$
+  ### 分段写出新随机变量
 
-  </Step>
+  记 $Z=X+|X|$。由绝对值定义，
+
+
+
+$$
+Z=\begin{cases}
+  0,&X\le0,\\
+  2X,&X>0.
+  \end{cases}
+$$
+
+  这说明 $Z$ 不再是纯连续型变量：因为 $f_X$ 对称且 $P(X=0)=0$，有 $P(Z=0)=P(X\le0)=1/2$。不过题目只求方差，无需先求 $Z$ 的完整分布。
+
+</Step>
+<Step>
+
+  ### 求 $EZ$、$E(Z^2)$ 并相减
+
+  利用 $\int_0^\infty x^ne^{-2x}\,\mathrm dx=n!/2^{n+1}$，
+
+
+
+$$
+\begin{aligned}
+  EZ&=\int_0^\infty(2x)\cdot2xe^{-2x}\,\mathrm dx
+      =4\cdot\frac{2!}{2^3}=1,\\
+  E(Z^2)&=\int_0^\infty(2x)^2\cdot2xe^{-2x}\,\mathrm dx
+      =8\cdot\frac{3!}{2^4}=3.
+  \end{aligned}
+$$
+
+  所以
+
+
+
+$$
+D(X+|X|)=DZ=E(Z^2)-(EZ)^2=3-1=\boxed2.
+$$
+
+</Step>
 </Steps>
+
+<Callout type="idea" title="不用分段积分的对称性捷径">
+
+因原密度关于 $0$ 对称，$EX=E(X|X|)=0$。于是 $EZ=E|X|=1$，且
+
+$$
+E(Z^2)=E\left(2X^2+2X|X|\right)=2E(X^2)=3.
+$$
+
+这里奇函数与偶密度的乘积积分为 $0$，可以减少计算。
+
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-3c342e-006" type="single">
+<Question id="selected-1103-math-3c342e-006" type="single" tags="科目:概率论与数理统计, 考点:正态密度峰值与参数">
 
 设随机变量$X$服从正态分布，其概率密度$f(x)$在$x=1$处有驻点，且$f(1)=1$，则$X$服从( )
 
@@ -91,47 +120,140 @@ $$
 
 <Solution>
 
-设$X\sim N(\mu,\sigma^2)$，则
-$$
- f(x)=\frac{1}{\sqrt{2\pi}\sigma}
-\exp\left[-\frac{(x-\mu)^2}{2\sigma^2}\right].
-$$
-正态密度唯一的驻点也是最大值点$x=\mu$。已知$x=1$处有驻点，故$\mu=1$。
+**参考答案：C，$\displaystyle\boxed{X\sim N\!\left(1,\frac1{2\pi}\right)}$。**
 
-又
+**核心思路：** 正态密度唯一的驻点就是其对称中心（均值），驻点处的函数值则决定标准差。
+
+<Steps>
+<Step>
+
+  ### 利用驻点确定均值
+
+  设 $X\sim N(\mu,\sigma^2)$，其中 $\sigma>0$。密度为
+
+
+
 $$
- f(1)=\frac{1}{\sqrt{2\pi}\sigma}=1,
+f(x)=\frac1{\sqrt{2\pi}\sigma}
+  \exp\left[-\frac{(x-\mu)^2}{2\sigma^2}\right].
 $$
-所以
+
+  对 $x$ 求导得到
+
+
+
 $$
- \sigma=\frac{1}{\sqrt{2\pi}},\qquad
-\sigma^2=\frac{1}{2\pi}.
+f'(x)=-\frac{x-\mu}{\sigma^2}f(x).
 $$
-因此$X\sim N(1,\frac{1}{2\pi})$，故选C。
+
+  由于对任意实数 $x$ 都有 $f(x)>0$，所以 $f'(x)=0$ 当且仅当 $x=\mu$。题设驻点在 $x=1$，故 $\boxed{\mu=1}$。
+
+</Step>
+<Step>
+
+  ### 利用峰值确定方差
+
+  在 $x=\mu=1$ 处指数因子为 $1$，因此
+
+
+
+$$
+1=f(1)=\frac1{\sqrt{2\pi}\sigma}
+  \quad\Longrightarrow\quad
+  \sigma=\frac1{\sqrt{2\pi}}.
+$$
+
+  正态分布 $N(\mu,\sigma^2)$ 的第二个参数是**方差**而非标准差，故
+
+
+
+$$
+\boxed{\sigma^2=\frac1{2\pi}}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="容易把标准差误写成第二个参数">
+
+选项 B 的 $1/\sqrt{2\pi}$ 是 $\sigma$，不是 $\sigma^2$；题目要求的是 $N(\mu,\sigma^2)$，故必须选 C。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3db062-009" type="blank">
+<Question id="selected-1103-math-3db062-009" type="blank" tags="科目:概率论与数理统计, 考点:正态参数识别与标准化">
 
 设 $X\sim N(\mu,\sigma^2)$，$f(x)$ 为 $X$ 的概率密度，当 $x=1$ 时，$f(x)$ 取得最大值 $\frac{1}{2\sqrt{2\pi}}$，则 $P\{X<3\}=$ <Blank answer="\Phi(1)" kind="text" placeholder="输入文字或 LaTeX" /> (用标准正态分布函数 $\Phi(x)$ 表示)。
 
 <Solution>
 
-**答案：** $\Phi(1)$
+**参考答案：** $\boxed{\Phi(1)}$。
 
-**解析：** 由已知, 有 $f(x) = \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{(x-\mu)^2}{2\sigma^2}}$, 在 $x = \mu = 1$ 处, $f(x)$ 取得最大值, 即
+**核心思路：** 正态密度峰值出现的位置就是均值；峰值高度是 $1/(\sigma\sqrt{2\pi})$，可据此恢复标准差，再做标准化。
+
+<Steps>
+<Step>
+
+  ### 从峰值位置读出 $\mu$
+
+  对 $X\sim N(\mu,\sigma^2)$（$\sigma>0$），密度
+
+
+
 $$
-f(\mu) = \frac{1}{\sqrt{2\pi}\sigma} = \frac{1}{2\sqrt{2\pi}},
+f(x)=\frac1{\sigma\sqrt{2\pi}}
+  \exp\!\left[-\frac{(x-\mu)^2}{2\sigma^2}\right]
 $$
-故 $\mu = 1, \sigma = 2$, 即 $X \sim N(1, 4)$, 所以 $P\{X < 3\} = P\left\{\frac{X-1}{2} < 1\right\} = \Phi(1)$.
+
+  在 $x=\mu$ 处达到唯一最大值。既然题设最大值在 $x=1$，必有 $\mu=1$。
+
+</Step>
+<Step>
+
+  ### 从峰值高度读出 $\sigma$
+
+  题设给出 $\max f=1/(2\sqrt{2\pi})$，故
+
+
+
+$$
+\frac1{\sigma\sqrt{2\pi}}=\frac1{2\sqrt{2\pi}}
+  \quad\Longrightarrow\quad \sigma=2.
+$$
+
+  因而 $X\sim N(1,4)$。
+
+</Step>
+<Step>
+
+  ### 标准化求概率
+
+  令 $Z=(X-1)/2\sim N(0,1)$。由于连续型变量在单点处的概率为 $0$，
+
+
+
+$$
+P(X<3)=P\left(Z<\frac{3-1}{2}\right)
+  =P(Z<1)=\boxed{\Phi(1)}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="正态密度读参数的口诀">
+
+“峰在 $\mu$，峰高 $1/(\sigma\sqrt{2\pi})$。” 只知道峰的位置与高度，就能唯一恢复正态分布的两个参数。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-328a62-017" type="blank">
+<Question id="selected-1103-math-328a62-017" type="blank" tags="科目:概率论与数理统计, 考点:分布函数平移积分">
 
 设 $ F(x)$ 是连续型随机变量 $ X$ 的分布函数，常数 $ a>0$，则
 
@@ -145,67 +267,96 @@ $$
 
 <Solution>
 
-**答案：** 按现有题面，积分值不能由已知条件唯一确定。若原题积分上下限应为 $ -\infty$ 与 $ +\infty$，则答案为 $ a$。
+**参考答案：按题面给定的有限积分区间，积分值无法由 $a$ 单独确定。** 题中填空所给“若积分区间为整个实轴，则答案为 $a$”是对一种可能原题的说明，**不能当作现有题面结果**。
 
-**解析：** 按题面所给有限积分区间，令 $ f(t)$ 为 $ X$ 的概率密度，则
+**核心思路：** $F(x+a)-F(x)=P(x<X\le x+a)$ 是一个滑动窗口概率；对 $x\in[-a,a]$ 积分后，不同位置的随机变量 $X$ 得到的窗口覆盖时长不同，因此答案依赖 $X$ 的分布。
 
-$$
- F(x+a)-F(x)=\int_x^{x+a}f(t)\,dt.
-$$
+<Steps>
+<Step>
 
-从而
+  ### 用密度把积分表示为加权平均
 
-$$
- I=\int_{-a}^{a}\int_x^{x+a}f(t)\,dt\,dx.
-$$
+  令 $f$ 为连续型随机变量 $X$ 的密度。则
 
-交换积分次序后，积分值等于某个依赖于 $ X$ 分布的加权平均，不能仅由 $ a$ 决定。具体地，若 $ X\sim U(0,a)$，则对每个 $ t\in(0,a)$，可取的 $ x$ 区间长度均为 $ a$，故
+
 
 $$
- I=a.
+\begin{aligned}
+  I&=\int_{-a}^{a}[F(x+a)-F(x)]\,\mathrm dx\\
+   &=\int_{-a}^{a}\left[\int_x^{x+a}f(t)\,\mathrm dt\right]\mathrm dx.
+  \end{aligned}
 $$
 
-但若 $ X\sim U(3a,4a)$，则当 $ -a\le x\le a$ 时有
+  由于被积函数非负，可以交换积分顺序：
+
+
 
 $$
- x+a\le2a<3a,
+I=\int_{-\infty}^{\infty}w_a(t)f(t)\,\mathrm dt,
+  \qquad
+  w_a(t)=\operatorname{length}\bigl([-a,a]\cap[t-a,t]\bigr).
 $$
 
-所以
+  覆盖长度由两个区间的相对位置决定，具体是
+
+
 
 $$
- F(x+a)=F(x)=0,
-\qquad
-I=0.
+w_a(t)=\begin{cases}
+  0,&t\le-a,\\
+  t+a,&-a<t<0,\\
+  a,&0\le t\le a,\\
+  2a-t,&a<t<2a,\\
+  0,&t\ge2a.
+  \end{cases}
 $$
 
-同一题设可得到不同结果，说明当前题面条件不足。
+  它显然不是常数，故 $I=E[w_a(X)]$ 不能只靠 $a$ 确定。
 
-本题常见的正确形式是
+</Step>
+<Step>
+
+  ### 用两种合法连续分布构造反例
+
+  - 若 $X\sim U(0,a)$，则 $w_a(X)=a$ 几乎处处，得到 $I=a$。
+  - 若 $X\sim U(3a,4a)$，则 $w_a(X)=0$ 几乎处处，得到 $I=0$。
+
+  在相同的 $a>0$ 下，两个结果不同，严密证明了题面**缺少条件或积分限有误**。
+
+</Step>
+</Steps>
+
+<Accordions>
+<Accordion title="若原题的积分限实际是 $-\infty$ 到 $+\infty$">
+
+  对正确的全轴形式
+
+
 
 $$
- \int_{-\infty}^{+\infty}[F(x+a)-F(x)]\,dx.
+J=\int_{-\infty}^{\infty}[F(x+a)-F(x)]\,\mathrm dx,
 $$
 
-此时由
+  仍用同样的换序思想：固定 $t$ 时，满足 $x<t\le x+a$ 的所有 $x$ 构成长度恰为 $a$ 的区间 $[t-a,t)$。因此
+
+
 
 $$
- F(x+a)-F(x)=\int_x^{x+a}f(t)\,dt
+J=\int_{-\infty}^{\infty}\left[\int_{t-a}^{t}\mathrm dx\right]f(t)\,\mathrm dt
+    =a\int_{-\infty}^{\infty}f(t)\,\mathrm dt
+    =\boxed a.
 $$
 
-并交换积分次序，对每个固定的 $ t$，变量 $ x$ 的取值区间为
+  该结论对所有连续分布都成立，但**不能**直接移用到题面 $[-a,a]$ 的积分。
 
-$$
- t-a\le x\le t,
-$$
+</Accordion>
+</Accordions>
 
-长度恒为 $ a$。因此
+<Callout type="warn" title="题面核对提示">
 
-$$
- \int_{-\infty}^{+\infty}[F(x+a)-F(x)]\,dx
-=a\int_{-\infty}^{+\infty}f(t)\,dt
-=a.
-$$
+本题原始数学表达式中的积分限为 $[-a,a]$，与常见的“全轴平移分布函数积分恒等式”并不相同。保留原题与现有结构化填空答案，同时明确标注条件不足，避免记住错误的普适结论。
+
+</Callout>
 
 </Solution>
 
@@ -217,135 +368,250 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
-\boxed{\sigma^2=\frac9{\bigl(1+\sqrt{1+6\ln2}\bigr)^2}}.
+\boxed{\sigma^2=\frac{9}{\bigl(1+\sqrt{1+6\ln2}\bigr)^2}}.
 $$
+
+**核心思路：** $\sigma$ 同时控制 $X$ 的均值和标准差，不能只把它看作正态密度中的尺度参数。改令 $t=1/\sigma>0$，把求最大概率问题化成**单变量函数求极大值**。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 标准化并求导
+  ### 标准化，改用更简单的参数 $t$
 
-  记标准正态分布函数为 $\Phi$，密度为 $\varphi$。令
+  由 $X\sim N(\sigma,\sigma^2)$，
 
-  $$
-  g(\sigma)=P(1<X<2)
-  =\Phi\!\left(\frac2\sigma-1\right)-\Phi\!\left(\frac1\sigma-1\right).
-  $$
 
-  利用 $\Phi'=\varphi$，有
 
-  $$
-  g'(\sigma)=\frac1{\sigma^2}\left[\varphi\!\left(\frac1\sigma-1\right)
-  -2\varphi\!\left(\frac2\sigma-1\right)\right].
-  $$
-
-  </Step>
-  <Step>
-
-  ### 解驻点方程
-
-  令 $t=1/\sigma>0$，由 $g'(\sigma)=0$ 得
-
-  $$
-  \begin{aligned}
-  \varphi(t-1)&=2\varphi(2t-1)\\
-  \Longleftrightarrow\quad
-  (2t-1)^2-(t-1)^2&=2\ln2\\
-  \Longleftrightarrow\quad
-  3t^2-2t-2\ln2&=0.
+$$
+\begin{aligned}
+  P(1<X<2)
+  &=\Phi\!\left(\frac{2-\sigma}{\sigma}\right)
+   -\Phi\!\left(\frac{1-\sigma}{\sigma}\right)\\
+  &=\Phi\!\left(\frac2\sigma-1\right)
+   -\Phi\!\left(\frac1\sigma-1\right).
   \end{aligned}
-  $$
+$$
 
-  其唯一正根为
+  令 $t=1/\sigma$，记 $h(t)=\Phi(2t-1)-\Phi(t-1)$；$t>0$ 与 $\sigma>0$ 一一对应，因此求 $h$ 的最大值即可。
 
-  $$
-  t_0=\frac{1+\sqrt{1+6\ln2}}3.
-  $$
+</Step>
+<Step>
 
-  </Step>
-  <Step>
+  ### 求导并解驻点方程
 
-  ### 判断极大值
+  记标准正态密度为 $\varphi(u)=(2\pi)^{-1/2}e^{-u^2/2}$。有
 
-  由正态密度的指数形式可知，$g'(\sigma)$ 与
 
-  $$
-  (2t-1)^2-(t-1)^2-2\ln2
-  =3t^2-2t-2\ln2
-  $$
 
-  同号。该二次式对 $0<t<t_0$ 为负，对 $t>t_0$ 为正。注意 $t=1/\sigma$ 的方向与 $\sigma$ 相反：当 $\sigma<1/t_0$ 时，$g'(\sigma)>0$；当 $\sigma>1/t_0$ 时，$g'(\sigma)<0$。故 $g$ 在 $\sigma_0=1/t_0$ 处取唯一最大值，
+$$
+h'(t)=2\varphi(2t-1)-\varphi(t-1).
+$$
 
-  $$
-  \sigma_0^2=\boxed{\frac9{\bigl(1+\sqrt{1+6\ln2}\bigr)^2}}.
-  $$
+  令 $h'(t)=0$，即 $2\varphi(2t-1)=\varphi(t-1)$。利用密度的指数形式并取对数，
 
-  </Step>
+
+
+$$
+\begin{aligned}
+  2e^{-(2t-1)^2/2}&=e^{-(t-1)^2/2}\\
+  \Longleftrightarrow\quad(2t-1)^2-(t-1)^2&=2\ln2\\
+  \Longleftrightarrow\quad3t^2-2t-2\ln2&=0.
+  \end{aligned}
+$$
+
+  其唯一正根是
+
+
+
+$$
+t_0=\frac{1+\sqrt{1+6\ln2}}3.
+$$
+
+</Step>
+<Step>
+
+  ### 严格判断最大值并还原 $\sigma^2$
+
+  由于 $\varphi(t-1)>0$，$h'(t)$ 与
+
+
+
+$$
+2\exp\left[-\frac{3t^2-2t}{2}\right]-1
+$$
+
+  同号。对 $t>0$，上式在 $0<t<t_0$ 为正，在 $t>t_0$ 为负，所以 $h$ 先增后减，$t_0$ 是唯一全局最大值点。
+
+  因为 $\sigma=1/t$，最终
+
+
+
+$$
+\sigma^2=\frac1{t_0^2}
+  =\boxed{\frac9{\bigl(1+\sqrt{1+6\ln2}\bigr)^2}}.
+$$
+
+</Step>
 </Steps>
+
+<Callout type="warn" title="不能忽略均值也随参数改变">
+
+本题的分布是 $N(\sigma,\sigma^2)$，当 $\sigma$ 变化时，分布中心和分散程度**同时变化**；若误把均值固定，则最优化方程会改变。
+
+</Callout>
 
 </Solution>
 </Question>
 
-## 考点2：寿命分布的条件概率、截断正态与正态线性组合
+## 考点二｜寿命条件概率、截断正态与线性组合
 
-<Question id="selected-1103-math-3c342e-010" type="essay">
+<Question id="selected-1103-math-3c342e-010" type="essay" tags="科目:概率论与数理统计, 考点:威布尔寿命与条件概率">
 
 设某种元件的使用寿命$T$的分布函数为$F(t)=\begin{cases}1-e^{-(\frac{t}{\theta})^m},&t \geq 0\\0,&t<0\end{cases}$，其中$\theta,m$为大于零的参数。求概率$P\{T>t\}$与$P\{T>s+t | T>s\}$，其中$s>0,t>0$。
 
 <Solution>
 
-**答案：**
+**参考答案：** 对 $t\ge0$，
 
 $$
- P\{T>t\}=e^{-\left(\frac{t}{\theta}\right)^m},
-$$
-$$
- P\{T>s+t\mid T>s\}
-=\exp\left\{-\frac{(s+t)^m-s^m}{\theta^m}\right\}.
+\boxed{P(T>t)=\exp\!\left[-\left(\frac t\theta\right)^m\right]}.
 $$
 
-**解析：** 由分布函数直接得生存函数
+对 $s>0,t>0$，
+
 $$
- P\{T>t\}=1-F(t)=e^{-\left(\frac{t}{\theta}\right)^m}.
+\boxed{P(T>s+t\mid T>s)
+=\exp\!\left[-\frac{(s+t)^m-s^m}{\theta^m}\right]}.
 $$
-又因$s,t>0$，事件$\{T>s+t\}\subset\{T>s\}$，所以
+
+**核心思路：** 这是 Weibull（威布尔）寿命分布。求“寿命超过某时刻”先用**生存函数** $S(t)=1-F(t)$；求“已存活 $s$ 后再存活 $t$”则用条件概率和事件包含关系。
+
+<Steps>
+<Step>
+
+  ### 写出生存函数
+
+  因 $t\ge0$ 时
+
+
+
 $$
- P\{T>s+t\mid T>s\}
-=\frac{P\{T>s+t\}}{P\{T>s\}}.
+F(t)=1-\exp\!\left[-\left(\frac t\theta\right)^m\right],
 $$
-代入生存函数，得
+
+  故
+
+
+
 $$
- P\{T>s+t\mid T>s\}=\frac{e^{-\left(\frac{s+t}{\theta}\right)^m}}{e^{-\left(\frac{s}{\theta}\right)^m}}
-=\exp\left\{-\frac{(s+t)^m-s^m}{\theta^m}\right\}.
+S(t)=P(T>t)=1-F(t)
+   =\exp\!\left[-\left(\frac t\theta\right)^m\right].
 $$
-当$m=1$时，该式才退化为与$s$无关的指数分布无记忆性。
+
+  这里 $\theta>0,m>0$，所以对所有有限的 $s>0$ 都有 $S(s)>0$，条件概率定义有效。
+
+</Step>
+<Step>
+
+  ### 用包含关系写出条件概率
+
+  由于 $s,t>0$，$\{T>s+t\}\subset\{T>s\}$。因此
+
+
+
+$$
+\begin{aligned}
+  P(T>s+t\mid T>s)
+  &=\frac{P(T>s+t)}{P(T>s)}\\
+  &=\frac{S(s+t)}{S(s)}\\
+  &=\frac{\exp[-((s+t)/\theta)^m]}{\exp[-(s/\theta)^m]}\\
+  &=\exp\!\left[-\frac{(s+t)^m-s^m}{\theta^m}\right].
+  \end{aligned}
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="与指数分布无记忆性的联系">
+
+当 $m=1$ 时，上式变为 $e^{-t/\theta}=P(T>t)$，与已经使用了多久的 $s$ 无关，这就是指数分布的无记忆性。若 $m>1$，给定额外存活时间 $t$ 时，上式随 $s$ 增大而减小；若 $0<m<1$，则随 $s$ 增大而增大。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3db062-014" type="essay">
+<Question id="selected-1103-math-3db062-014" type="essay" tags="科目:概率论与数理统计, 考点:指数分布与独立重复试验">
 
 设随机变量 $X$ 服从参数为 $\lambda$ 的指数分布，对 $X$ 进行三次独立重复观察，至少有一次观测值大于 $3$ 的概率为 $\frac{26}{27}$，求 $\lambda$ 的值.
 
 <Solution>
 
-**答案：** $\lambda=\frac13\ln\frac32$
+**参考答案：** $\displaystyle\boxed{\lambda=\frac13\ln\frac32}$。
 
-**解析：** 由已知,得 $X$ 的概率密度为 $f(x)=\begin{cases} \lambda e^{-\lambda x}, & x>0, \\ 0, & x\leqslant 0 \end{cases} (\lambda>0)$。令 $Y$ 为对 $X$ 作三次独立重复观察中,事件 $\{X>3\}$ 发生的次数,则 $Y\sim B(3,p)$,且
+**核心思路：** “至少有一次大于 $3$”先取反面——“三次均不大于 $3$”。由指数分布求一次的尾概率，再利用三次观察的独立性即可。
+
+<Steps>
+<Step>
+
+  ### 求单次超过阈值的概率
+
+  按指数分布的速率参数记法，$X\sim\mathrm{Exp}(\lambda)$，密度为 $f(x)=\lambda e^{-\lambda x}$（$x\ge0,\lambda>0$），因此
+
+
+
 $$
-p=P\{X>3\}=\int_{3}^{+\infty}\lambda e^{-\lambda x}\mathrm{d}x=e^{-3\lambda}.
+p=P(X>3)=\int_3^{\infty}\lambda e^{-\lambda x}\,\mathrm dx=e^{-3\lambda}.
 $$
 
-依题设,
+</Step>
+<Step>
+
+  ### 使用独立性求至少一次成功
+
+  设三次观察值为 $X_1,X_2,X_3$，相互独立且与 $X$ 同分布。令 $A_i=\{X_i>3\}$。则
+
+
+
 $$
-P\{Y\geqslant 1\}=1-P\{Y=0\}=1-(1-p)^3=\frac{26}{27},
+\begin{aligned}
+  P(A_1\cup A_2\cup A_3)
+  &=1-P(A_1^c\cap A_2^c\cap A_3^c)\\
+  &=1-(1-p)^3=\frac{26}{27}.
+  \end{aligned}
 $$
 
-故 $p=\frac{2}{3}$,由 $p=\frac{2}{3}=e^{-3\lambda}$,得 $\lambda=-\frac{1}{3}\ln\frac{2}{3}$。
+  故 $(1-p)^3=1/27$。由于 $0<p<1$，得 $1-p=1/3$，即 $p=2/3$。
+
+</Step>
+<Step>
+
+  ### 解出指数分布参数
+
+
+
+$$
+e^{-3\lambda}=\frac23
+  \quad\Longrightarrow\quad
+  -3\lambda=\ln\frac23
+  \quad\Longrightarrow\quad
+  \boxed{\lambda=\frac13\ln\frac32}.
+$$
+
+  该值为正，满足指数分布参数条件。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="“至少一次”与“恰好一次”不同">
+
+$1-(1-p)^3$ 表示至少一次成功；$\binom31p(1-p)^2$ 才是恰好一次成功。此题不需要逐个列出成功一次、两次、三次的概率。
+
+</Callout>
 
 </Solution>
 
@@ -372,28 +638,85 @@ $$
 
 <Solution>
 
-由密度归一性
+**参考答案：A。**
 
 $$
-\int_0^{+\infty}\frac1{C\sqrt{2\pi}\sigma}
- e^{-\frac{(x-\mu)^2}{2\sigma^2}}\,dx=1.
+\boxed{C=\Phi\!\left(\frac\mu\sigma\right),\qquad
+EX=\mu+\sigma\frac{\varphi(\mu/\sigma)}{\Phi(\mu/\sigma)}}.
 $$
 
-令 $t=(x-\mu)/\sigma$，可得
+**核心思路：** 题给的密度是把 $N(\mu,\sigma^2)$ 在 $x<0$ 的部分截掉，再对非负半轴重新**归一化**得到的截断正态分布。归一化常数是原正态变量落在 $[0,\infty)$ 的概率，而不是任意多加一个 $\mu$。
+
+<Steps>
+<Step>
+
+  ### 标准化求归一化常数 $C$
+
+  由 $\int_{-\infty}^{\infty}f(x)\,\mathrm dx=1$，
+
+
 
 $$
-C=\Phi\!\left(\frac\mu\sigma\right).
+C=\int_0^{\infty}\frac1{\sigma\sqrt{2\pi}}
+      \exp\!\left[-\frac{(x-\mu)^2}{2\sigma^2}\right]\mathrm dx.
 $$
 
-再计算期望：
+  令 $t=(x-\mu)/\sigma$，则下限变为 $-\mu/\sigma$，所以
+
+
 
 $$
-EX
-=\mu+\frac{\sigma}{\Phi(\mu/\sigma)}
-\varphi\!\left(\frac\mu\sigma\right).
+\begin{aligned}
+  C&=\int_{-\mu/\sigma}^{\infty}\varphi(t)\,\mathrm dt
+    =1-\Phi\!\left(-\frac\mu\sigma\right)\\
+   &=\boxed{\Phi\!\left(\frac\mu\sigma\right)},
+  \end{aligned}
 $$
 
-故选 A。
+  这里用到了标准正态分布的对称性 $\Phi(-u)=1-\Phi(u)$。
+
+</Step>
+<Step>
+
+  ### 在同一变量替换下计算 $EX$
+
+
+
+$$
+\begin{aligned}
+  EX
+  &=\frac1C\int_0^{\infty}x\frac1\sigma
+   \varphi\!\left(\frac{x-\mu}{\sigma}\right)\mathrm dx\\
+  &=\frac1C\int_{-\mu/\sigma}^{\infty}(\mu+\sigma t)\varphi(t)\,\mathrm dt\\
+  &=\mu+\frac\sigma C\int_{-\mu/\sigma}^{\infty}t\varphi(t)\,\mathrm dt.
+  \end{aligned}
+$$
+
+  因 $\varphi'(t)=-t\varphi(t)$，
+
+
+
+$$
+\int_b^{\infty}t\varphi(t)\,\mathrm dt
+  =[-\varphi(t)]_b^{\infty}=\varphi(b).
+$$
+
+  取 $b=-\mu/\sigma$，再用 $\varphi(-u)=\varphi(u)$ 得
+
+
+
+$$
+EX=\boxed{\mu+\sigma\frac{\varphi(\mu/\sigma)}{\Phi(\mu/\sigma)}}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="截断正态分布的直觉校验">
+
+$\varphi(\mu/\sigma)>0$ 且 $\Phi(\mu/\sigma)>0$，故截去负半轴后必有 $EX>\mu$，符合“去掉较小值会抬高均值”的直觉。选项 B 在修正项多乘 $\mu$，量纲也不合理。
+
+</Callout>
 
 </Solution>
 
@@ -410,31 +733,72 @@ $$
 
 <Solution>
 
-**答案：A，$Y\sim N(\mu,2)$。**
+**参考答案：A，$\boxed{Y\sim N(\mu,2)}$。**
 
-已知 $Y\mid X=x\sim N(x,1)$，因此条件矩母函数为
+**核心思路：** 已知 $X\sim N(\mu,1)$ 且 $Y\mid X=x\sim N(x,1)$，相当于在 $X$ 上再叠加一份方差为 $1$ 的独立正态噪声。要证明 $Y$ 仍是正态分布，除了求均值、方差，还需利用条件分布或特征函数。
+
+<Tabs items={['独立正态噪声构造法', '条件特征函数法']}>
+<Tab value="独立正态噪声构造法">
+
+  令 $Z=Y-X$。在给定 $X=x$ 时，$Z=Y-x$，所以
+
+
 
 $$
-E(e^{tY}\mid X)=\exp\!\left(tX+\frac{t^2}{2}\right).
+Z\mid X=x\sim N(0,1),
 $$
 
-对 $X$ 取期望，且 $X\sim N(\mu,1)$，得到
+  其条件分布不依赖 $x$。因此 $Z$ 与 $X$ 独立，且 $Z\sim N(0,1)$。于是
+
+
+
+$$
+Y=X+Z,
+  \quad EX=\mu,\ EZ=0,
+  \quad DX=DZ=1.
+$$
+
+  独立正态随机变量的和仍服从正态分布，其均值、方差分别相加：
+
+
+
+$$
+\boxed{Y\sim N(\mu+0,1+1)=N(\mu,2)}.
+$$
+
+</Tab>
+<Tab value="条件特征函数法">
+
+  设 $t\in\mathbb R$。条件正态分布的特征函数为
+
+
+
+$$
+E(e^{itY}\mid X)=\exp\!\left(itX-\frac{t^2}{2}\right).
+$$
+
+  再对 $X$ 取期望，
+
+
 
 $$
 \begin{aligned}
-M_Y(t)
-&=E\bigl[E(e^{tY}\mid X)\bigr]\\
-&=e^{t^2/2}E(e^{tX})\\
-&=e^{t^2/2}e^{\mu t+t^2/2}
-=\exp(\mu t+t^2).
-\end{aligned}
+  \varphi_Y(t)
+  &=E[E(e^{itY}\mid X)]\\
+  &=e^{-t^2/2}E(e^{itX})\\
+  &=e^{-t^2/2}e^{i\mu t-t^2/2}
+   =\exp(i\mu t-t^2).
+  \end{aligned}
 $$
 
-这正是均值为 $\mu$、方差为 $2$ 的正态分布的矩母函数。
+  这恰是 $N(\mu,2)$ 的特征函数，分布由特征函数唯一确定。
 
-<Callout type="idea" title="另一种理解">
+</Tab>
+</Tabs>
 
-令 $Z=Y-X$。由于 $Z\mid X=x\sim N(0,1)$ 不依赖于 $x$，故 $Z$ 与 $X$ 独立，且 $Y=X+Z$。于是均值相加、方差相加，立即得到相同结论。
+<Callout type="warn" title="条件方差不等于边缘方差">
+
+$D(Y\mid X=x)=1$ 不代表 $DY=1$；全方差公式给出 $DY=E[D(Y\mid X)]+D[E(Y\mid X)]=1+DX=2$。但只用均值、方差两个数字不能单独证明正态性。
 
 </Callout>
 
@@ -453,50 +817,112 @@ $$
 
 <Solution>
 
-**答案：$\boxed{\dfrac12[1-\Phi(1)]}$。**
+**参考答案：** $\displaystyle\boxed{\frac{1-\Phi(1)}2}$。
+
+**核心思路：** 对两个独立标准正态变量作正交线性变换，所得两个新变量仍联合正态；若协方差为 $0$，便可拆开联合概率。
+
+<Tabs items={['协方差与联合正态（推荐）', '正交变换法']}>
+<Tab value="协方差与联合正态（推荐）">
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 作正交线性变换
+    ### 定义两个线性组合
 
-  令 $U=X+2Y$、$V=2X-Y$。因 $(X,Y)$ 为二维正态向量，$(U,V)$ 也联合服从正态分布，且
+    令
 
-  $$
-  E(U)=E(V)=0,\quad D(U)=D(V)=1+4=5,
-  $$
 
-  $$
-  \operatorname{Cov}(U,V)=2D(X)-2D(Y)=0.
-  $$
 
-  联合正态分布中**不相关即独立**，所以 $U,V$ 相互独立。
+$$
+U=X+2Y,\qquad V=2X-Y.
+$$
 
-  </Step>
-  <Step>
+    因 $X,Y$ 相互独立，且均为标准正态，$(X,Y)$ 为二维联合正态向量；其任何线性变换 $(U,V)$ 仍是联合正态向量。
 
-  ### 分解联合概率
+</Step>
+<Step>
 
-  $U/\sqrt5$、$V/\sqrt5$ 均服从 $N(0,1)$，于是
+    ### 算方差和协方差
 
-  $$
-  \begin{aligned}
-  P(U>\sqrt5,V<0)
-  &=P\left(\frac U{\sqrt5}>1\right)P\left(\frac V{\sqrt5}<0\right)\\
-  &=[1-\Phi(1)]\cdot\frac12
-  =\boxed{\frac{1-\Phi(1)}2}.
-  \end{aligned}
-  $$
 
-  </Step>
+
+$$
+EU=EV=0,\qquad DU=DX+4DY=5,
+    \qquad DV=4DX+DY=5.
+$$
+
+    又由独立性 $\operatorname{Cov}(X,Y)=0$，
+
+
+
+$$
+\begin{aligned}
+    \operatorname{Cov}(U,V)
+    &=\operatorname{Cov}(X+2Y,2X-Y)\\
+    &=2DX-2DY=2-2=0.
+    \end{aligned}
+$$
+
+    因 $(U,V)$ **联合正态**，不相关即可推出独立。
+
+</Step>
+<Step>
+
+    ### 标准化并分离概率
+
+    $U/\sqrt5$、$V/\sqrt5$ 都服从 $N(0,1)$，于是
+
+
+
+$$
+\begin{aligned}
+    P(X+2Y>\sqrt5,\ 2X-Y<0)
+    &=P(U>\sqrt5,V<0)\\
+    &=P(U>\sqrt5)P(V<0)\\
+    &=[1-\Phi(1)]\cdot\Phi(0)
+     =\boxed{\frac{1-\Phi(1)}2}.
+    \end{aligned}
+$$
+
+</Step>
 </Steps>
 
-<Callout type="warn" title="适用前提">协方差为零一般不能推出独立；此处能够推出独立，是因为 $(U,V)$ **联合正态**。</Callout>
+</Tab>
+<Tab value="正交变换法">
+
+  令
+
+
+
+$$
+\begin{pmatrix}U_0\\V_0\end{pmatrix}
+  =\frac1{\sqrt5}\begin{pmatrix}1&2\\2&-1\end{pmatrix}
+  \begin{pmatrix}X\\Y\end{pmatrix}.
+$$
+
+  系数矩阵的行向量长度均为 $1$，内积为 $(2-2)/5=0$，故为正交矩阵。二维标准正态向量在正交变换下仍服从二维标准正态分布，因而 $U_0,V_0$ 相互独立，且各自服从 $N(0,1)$。
+
+  原事件写成 $\{U_0>1,V_0<0\}$，所以概率立即为
+
+
+
+$$
+P(U_0>1)P(V_0<0)=[1-\Phi(1)]\cdot\frac12.
+$$
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="零协方差推出独立的适用范围">
+
+一般随机变量仅有 $\operatorname{Cov}(U,V)=0$ 时，不能推出独立。本题还具备 $U,V$ **联合正态** 这一决定性条件；先说明此条件再拆分概率才严密。
+
+</Callout>
 
 </Solution>
 </Question>
 
-## 考点3：二维联合密度、积分支持域与边缘和条件分布
+## 考点三｜二维分布：边缘密度、条件密度及联合分布函数
 
 <Question id="selected-1103-classified-1031-lilin-2027-s3-q22" type="essay" points={12} tags="来源:李林六套卷, 考点:二维密度与条件概率, 难度:较难">
 
@@ -515,89 +941,83 @@ $$
 
 <Solution>
 
-**参考答案：**
+**参考答案：** $\boxed{k=1}$，$\boxed{E(X)=1}$，$\boxed{P\{XY>2\mid XY>E(XY)\}=e^{-1}}$。
 
-$$
-\boxed{k=1},\qquad \boxed{E(X)=1},\qquad
-\boxed{P\{XY>2\mid XY>E(XY)\}=e^{-1}}.
-$$
+**解题主线：** 联合密度中出现 $e^{-xy}$，可直接对区域 $xy>t$ 积分，先确定乘积 $T=XY$ 的分布，再算条件概率。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 用密度归一化求 $k$ 和 $E(X)$
+  ### 第一步：联合密度归一化与边缘分布
 
-  由总概率为 $1$，
+  对 $x>0$，先对 $y$ 积分，有
 
-  $$
-  \begin{aligned}
-  1&=k\int_0^\infty\int_0^\infty xe^{-x}e^{-xy}\,\mathrm dy\,\mathrm dx\\
-   &=k\int_0^\infty e^{-x}\,\mathrm dx=k.
+
+
+$$
+\begin{aligned}
+  1&=k\int_0^{\infty}\int_0^{\infty}xe^{-x}e^{-xy}\,\mathrm dy\,\mathrm dx\\
+   &=k\int_0^{\infty}xe^{-x}\frac1x\,\mathrm dx=k.
   \end{aligned}
-  $$
+$$
 
-  因此 $k=1$。对 $y$ 积分，得 $X$ 的边缘密度
+  所以 $k=1$，并且
 
-  $$
-  f_X(x)=\int_0^\infty xe^{-x(1+y)}\,\mathrm dy=e^{-x},\qquad x>0.
-  $$
 
-  所以 $X$ 服从率参数为 $1$ 的指数分布，$\boxed{E(X)=1}$。
 
-  </Step>
-  <Step>
+$$
+f_X(x)=\int_0^{\infty}xe^{-x(1+y)}\,\mathrm dy
+  =e^{-x}\quad(x>0).
+$$
 
-  ### 求乘积 $T=XY$ 的分布
+  于是 $X\sim\mathrm{Exp}(1)$，$E(X)=1$。
 
-  对 $t>0$，利用原联合密度直接计算尾概率：
+</Step>
+<Step>
 
-  $$
-  \begin{aligned}
-  P(T>t)
-  &=\int_0^\infty\int_{t/x}^\infty xe^{-x(1+y)}\,\mathrm dy\,\mathrm dx\\
-  &=\int_0^\infty e^{-x-t}\,\mathrm dx=e^{-t}.
+  ### 第二步：求 $T=XY$ 的尾分布
+
+  取 $t\ge0$。联合密度的支撑在第一象限，事件 $XY>t$ 等价于 $y>t/x$，所以
+
+
+
+$$
+\begin{aligned}
+  P(T>t)&=\int_0^{\infty}\!\int_{t/x}^{\infty}xe^{-x}e^{-xy}\,\mathrm dy\,\mathrm dx\\
+  &=\int_0^{\infty}e^{-x}e^{-t}\,\mathrm dx=e^{-t}.
   \end{aligned}
-  $$
+$$
 
-  因而 $T=XY\sim\mathrm{Exp}(1)$，从而 $E(XY)=E(T)=1$。
+  因此 $T\sim\mathrm{Exp}(1)$，特别地 $E(XY)=E(T)=1$。这里**不能**使用 $E(XY)=EX\cdot EY$，因为尚未证实 $X,Y$ 独立。
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### 利用事件包含关系求条件概率
+  ### 第三步：利用条件概率与事件包含关系
 
-  因为 $\{T>2\}\subset\{T>1\}$，故
+  由于 $\{T>2\}\subset\{T>1\}$，
 
-  $$
-  \begin{aligned}
-  P\{XY>2\mid XY>E(XY)\}
-  &=P(T>2\mid T>1)\\
-  &=\frac{P(T>2)}{P(T>1)}
-   =\frac{e^{-2}}{e^{-1}}
-   =\boxed{e^{-1}}.
-  \end{aligned}
-  $$
 
-  </Step>
+
+$$
+P(T>2\mid T>1)=\frac{P(T>2)}{P(T>1)}
+  =\frac{e^{-2}}{e^{-1}}=\boxed{e^{-1}}.
+$$
+
+</Step>
 </Steps>
 
-<Accordions>
-  <Accordion title="换元法：还可证明 X 与 XY 相互独立">
+<Callout type="idea" title="另一种观察：乘积变量可直接换元">
 
-  令 $T=XY$，作变换 $(x,y)\mapsto(x,t)$，其中 $y=t/x$，雅可比绝对值为 $1/x$。于是
+令 $T=XY$，变换 $(x,y)\mapsto(x,t)$ 的雅可比绝对值为 $1/x$，于是
 
-  $$
-  \begin{aligned}
-  f_{X,T}(x,t)
-  &=f_{X,Y}\!\left(x,\frac tx\right)\frac1x\\
-  &=e^{-x}e^{-t},\qquad x>0,\ t>0.
-  \end{aligned}
-  $$
+$$
+f_{X,T}(x,t)=xe^{-x-t}\frac1x=e^{-x}e^{-t},\qquad x,t>0.
+$$
 
-  该联合密度可分解为两个标准指数分布的密度之积，因此 $X$ 与 $T=XY$ 相互独立。注意：原变量 $X$ 与 $Y$ 本身**并不独立**。
+这同时证明 $X$ 与 $T=XY$ 独立，却**不表示**原来的 $X$ 与 $Y$ 独立。
 
-  </Accordion>
-</Accordions>
+</Callout>
 
 </Solution>
 </Question>
@@ -627,58 +1047,61 @@ $$
 
 <Solution>
 
-**答案**：当 $0<y<1$ 时，
+**参考答案：** 非零部分为 $\boxed{-\dfrac1{(1-x)\ln(1-y)}}$；完整条件密度是
 
 $$
-\boxed{f_{X\mid Y}(x\mid y)=
-\begin{cases}
--\dfrac{1}{(1-x)\ln(1-y)},&0<x<y,\\
+f_{X\mid Y}(x\mid y)=\begin{cases}
+-\dfrac1{(1-x)\ln(1-y)},&0<x<y<1,\\[5pt]
 0,&\text{其他}.
-\end{cases}}
+\end{cases}
 $$
+
+**关键是先确定积分上下限，而不是把整个单位正方形当作支持域。**
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 对 $x$ 积分求 $Y$ 的边缘密度
+  ### 固定 $y$，计算分母 $f_Y(y)$
 
-  固定 $y\in(0,1)$，只有 $0<x<y$ 时联合密度非零，故
+  由 $0<x<y<1$，固定 $0<y<1$ 后 $x$ 只能位于 $(0,y)$，故
 
-  $$
-  \begin{aligned}
-  f_Y(y)&=\int_{-\infty}^{+\infty}f(x,y)\,dx
-  =\int_0^y\frac1{1-x}\,dx\\
-  &=-\ln(1-y)>0.
-  \end{aligned}
-  $$
 
-  </Step>
-  <Step>
 
-  ### 用条件密度定义相除
+$$
+f_Y(y)=\int_0^y\frac{\mathrm dx}{1-x}
+  =[-\ln(1-x)]_0^y=-\ln(1-y)>0.
+$$
 
-  对 $0<x<y<1$，
+</Step>
+<Step>
 
-  $$
-  f_{X\mid Y}(x\mid y)
-  =\frac{f(x,y)}{f_Y(y)}
-  =-\frac1{(1-x)\ln(1-y)}.
-  $$
+  ### 代入条件密度公式
 
-  其他 $x$ 处，联合密度为 $0$，故条件密度亦为 $0$。
+  $f_{X\mid Y}(x\mid y)=f(x,y)/f_Y(y)$，故当 $0<x<y<1$ 时，
 
-  </Step>
+
+
+$$
+f_{X\mid Y}(x\mid y)
+  =\frac{1/(1-x)}{-\ln(1-y)}
+  =\boxed{-\frac1{(1-x)\ln(1-y)}}.
+$$
+
+  当 $x$ 不在该区间内时，条件密度取 $0$。
+
+</Step>
 </Steps>
 
-<Callout type="info" title="归一化检查">
+<Callout type="success" title="归一化自检">
 
-对固定的 $y\in(0,1)$，
+对任意固定的 $0<y<1$，有
 
 $$
-\int_0^y-\frac1{(1-x)\ln(1-y)}\,dx=1,
+\int_0^y f_{X\mid Y}(x\mid y)\,\mathrm dx
+=\frac{-\ln(1-y)}{-\ln(1-y)}=1.
 $$
 
-说明所得条件密度在正确的支撑区间上积分为 $1$。
+分母 $-\ln(1-y)$ 为正，确保密度非负；这两点是检查条件密度的最有效办法。
 
 </Callout>
 
@@ -705,48 +1128,62 @@ $$
 
 <Solution>
 
-**答案：B，$\boxed{\dfrac8{17}}$。**
+**参考答案：B，$\boxed{\dfrac8{17}}$。** 归一化常数为 $\boxed{k=\dfrac54}$。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 根据归一化求 $k$
+  ### 第一步：确认三角形支持域并求 $k$
 
-  联合密度非零的区域为 $0<x<1,\ 0<y<1-x$，故
+  支持域 $0<x<1,\ 0<y<1-x$，据总概率为 $1$，
 
-  $$
-  \begin{aligned}
-  1&=\int_0^1\mathrm dx\int_0^{1-x}[k(1+x)+y] \,\mathrm dy\\
-  &=k\int_0^1(1-x^2)\,\mathrm dx
-    +\frac12\int_0^1(1-x)^2\,\mathrm dx\\
+
+
+$$
+\begin{aligned}
+  1&=\int_0^1\!\int_0^{1-x}[k(1+x)+y]\,\mathrm dy\,\mathrm dx\\
+  &=k\int_0^1(1-x^2)\,\mathrm dx+\frac12\int_0^1(1-x)^2\,\mathrm dx\\
   &=\frac{2k}{3}+\frac16.
   \end{aligned}
-  $$
+$$
 
-  所以 $\boxed{k=5/4}$。
+  解得 $k=5/4$，且此时密度非负。
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### 条件分布：固定 $X=1/2$
+  ### 第二步：固定 $X=1/2$ 后取积分比值
 
-  在该条件下，$Y$ 的可取范围为 $0<y<1/2$。条件概率可用联合密度在相应区间上的积分之比计算，不必先写出完整的边缘密度：
+  固定 $x=1/2$，可取的 $y$ 满足 $0<y<1/2$，且
 
-  $$
-  \begin{aligned}
-  P\!\left(Y<\frac14\mid X=\frac12\right)
-  &=\frac{\int_0^{1/4}f(1/2,y)\,\mathrm dy}
-  {\int_0^{1/2}f(1/2,y)\,\mathrm dy}\\[3pt]
-  &=\frac{\int_0^{1/4}(15/8+y)\,\mathrm dy}
-  {\int_0^{1/2}(15/8+y)\,\mathrm dy}\\
-  &=\frac{1/2}{17/16}=\boxed{\frac8{17}}.
+
+
+$$
+f\left(\frac12,y\right)=\frac54\cdot\frac32+y=\frac{15}{8}+y.
+$$
+
+  依据连续型条件密度，分子是 $0<Y<1/4$ 对应的密度截面积，分母是所有允许的 $Y$ 范围：
+
+
+
+$$
+\begin{aligned}
+  P\left(Y<\frac14\mid X=\frac12\right)
+  &=\frac{\displaystyle\int_0^{1/4}(15/8+y)\,\mathrm dy}
+  {\displaystyle\int_0^{1/2}(15/8+y)\,\mathrm dy}\\
+  &=\frac{15/32+1/32}{15/16+1/8}
+  =\frac{1/2}{17/16}=\boxed{\frac8{17}}.
   \end{aligned}
-  $$
+$$
 
-  </Step>
+</Step>
 </Steps>
 
-<Callout type="warn" title="零概率事件的条件概率">$P(X=1/2)=0$ 不意味着条件概率不可求。本题使用连续型随机变量的**条件密度** $f_{Y\mid X}(y\mid x)=f(x,y)/f_X(x)$。</Callout>
+<Callout type="warn" title="条件在零概率事件上如何理解">
+
+虽然 $P(X=1/2)=0$，但 $f_X(1/2)=17/16>0$，可以由条件密度 $f_{Y\mid X}(y\mid1/2)$ 定义相应条件分布；切不可直接把 $P(X=1/2)$ 放到普通条件概率的分母中。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -764,83 +1201,102 @@ $$
 
 <Solution>
 
-**答案：**（1）$\boxed{a=40}$；（2）$\boxed{X,Y\text{ 不独立，且相关}}$，协方差为 $\boxed{160/6237>0}$。
+**参考答案：** （1）$\boxed{a=40}$；（2）$\boxed{X,Y\text{ 不独立，且相关}}$，具体地
 
-**过程：**
+$$
+\boxed{\operatorname{Cov}(X,Y)=\frac{160}{6237}>0},
+$$
+
+故二者**相关（正协方差）**。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 确定支持域和归一化常数
+  ### 第一步：画清曲边区域并归一化
 
-  由 $x\le y\le\sqrt x$ 可知支持域为 $0\le x\le1,\ x\le y\le\sqrt x$。因此
+  $x\le y\le\sqrt x$ 迫使 $0\le x\le1$，因此
 
-  $$
-  \begin{aligned}
-  1&=a\int_0^1\int_x^{\sqrt x}x^2y\,\mathrm dy\,\mathrm dx\\
-   &=\frac a2\int_0^1(x^3-x^4)\,\mathrm dx
-   =\frac a2\left(\frac14-\frac15\right)=\frac a{40}.
+
+
+$$
+\begin{aligned}
+  1&=a\int_0^1\!\int_x^{\sqrt x}x^2y\,\mathrm dy\,\mathrm dx\\
+  &=\frac a2\int_0^1(x^3-x^4)\,\mathrm dx
+  =\frac a2\left(\frac14-\frac15\right)=\frac a{40}.
   \end{aligned}
-  $$
+$$
 
-  故 $\boxed{a=40}$。
+  所以 $a=40$。
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### 求边缘密度并判断独立性
+  ### 第二步：计算边缘密度并判断独立性
 
-  积分得到
+  先固定 $x$：
 
-  $$
-  f_X(x)=\begin{cases}20(x^3-x^4),&0<x<1,\\0,&\text{其他},\end{cases}
-  $$
 
-  固定 $0<y<1$ 时，有 $y^2\le x\le y$，所以
 
-  $$
-  f_Y(y)=\begin{cases}
-  \displaystyle 40y\int_{y^2}^{y}x^2\,\mathrm dx
-  =\frac{40}{3}(y^4-y^7),&0<y<1,\\
-  0,&\text{其他}.
+$$
+f_X(x)=\begin{cases}20(x^3-x^4),&0<x<1,\\0,&\text{其他}.
   \end{cases}
-  $$
+$$
 
-  联合密度只在曲边区域 $x\le y\le\sqrt x$ 内非零，而两边缘密度之积在整个单位开方形内严格为正；因此 $f(x,y)\ne f_X(x)f_Y(y)$（在正测度集合上），$X,Y$ **不独立**。
+  再固定 $y$，由 $x\le y\le\sqrt x$ 可等价写成 $y^2\le x\le y$（$0<y<1$），所以
 
-  </Step>
-  <Step>
 
-  ### 计算协方差判断相关性
 
-  $$
-  \begin{aligned}
-  E(X)&=20\int_0^1(x^4-x^5)\,\mathrm dx=\frac23,\\
-  E(Y)&=\frac{40}{3}\int_0^1(y^5-y^8)\,\mathrm dy=\frac{20}{27},\\
+$$
+f_Y(y)=\begin{cases}\dfrac{40}{3}(y^4-y^7),&0<y<1,\\0,&\text{其他}.
+  \end{cases}
+$$
+
+  两个边缘密度在 $(0,1)$ 均严格为正，但在单位方形中满足 $y<x$ 的部分，联合密度恒为零，故 $f(x,y)\ne f_X(x)f_Y(y)$，二者**不独立**。
+
+</Step>
+<Step>
+
+  ### 第三步：用协方差判断是否相关
+
+  分别计算
+
+
+
+$$
+\begin{aligned}
+  EX&=20\int_0^1(x^4-x^5)\,\mathrm dx=\frac23,\\
+  EY&=\frac{40}{3}\int_0^1(y^5-y^8)\,\mathrm dy=\frac{20}{27},\\
   E(XY)&=40\int_0^1x^3\left(\int_x^{\sqrt x}y^2\,\mathrm dy\right)\mathrm dx
   =\frac{40}{77}.
   \end{aligned}
-  $$
+$$
 
   因而
 
-  $$
+
+
+$$
+\begin{aligned}
   \operatorname{Cov}(X,Y)
-  =\frac{40}{77}-\frac23\cdot\frac{20}{27}
-  =\boxed{\frac{160}{6237}>0}.
-  $$
+  &=E(XY)-EX\,EY\\
+  &=\frac{40}{77}-\frac{40}{81}
+  =\boxed{\frac{160}{6237}}>0.
+  \end{aligned}
+$$
 
-  协方差非零，说明二者**相关（且为正相关）**。
-
-  </Step>
+</Step>
 </Steps>
 
-<Callout type="warn" title="概念区分">不独立不能直接推出相关。要判定相关性，须另算协方差；本题算得协方差严格为正。</Callout>
+<Callout type="warn" title="不独立与相关是两个不同的问题">
+
+只凭联合支持域非矩形，可以否定独立性，却不能直接判断协方差是否为零。这里计算得协方差严格大于零，才可以认定二者相关。
+
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-78e870-010" type="essay">
+<Question id="selected-1103-math-78e870-010" type="essay" tags="科目:概率论与数理统计, 考点:三角区域均匀分布与条件密度">
 
 已知二维随机变量$(X,Y)$在以点$(0,0),(1,-1),(1,1)$为顶点的三角形区域上服从均匀分布。
 (1) 求边缘概率密度$f_X(x),f_Y(y)$及条件概率密度$f_{X|Y}(x|y),f_{Y|X}(y|x)$，并判断$X$与$Y$是否相互独立；
@@ -848,97 +1304,117 @@ $$
 
 <Solution>
 
-**答案：**
-
-三角形区域为
+**参考答案：** 联合密度在三角形 $D=\{(x,y):0<x<1,\ -x<y<x\}$ 内为 $1$，区域外为 $0$。边缘与条件密度分别为
 
 $$
- D=\{(x,y):0<x<1,-x<y<x\},
-$$
-面积为1，因此联合密度$f(x,y)=1$（$(x,y)\in D$）。
-
-(1)
-$$
- f_X(x)=
-\begin{cases}
-2x,&0<x<1,\\
-0,&\text{其他},
-\end{cases}
+\boxed{f_X(x)=\begin{cases}2x,&0<x<1,\\0,&\text{其他},\end{cases}\qquad
+f_Y(y)=\begin{cases}1-|y|,&|y|<1,\\0,&\text{其他};\end{cases}}
 $$
 
 $$
- f_Y(y)=
-\begin{cases}
-1-|y|,&-1<y<1,\\
-0,&\text{其他}.
-\end{cases}
+\boxed{f_{X\mid Y}(x\mid y)=\begin{cases}\dfrac1{1-|y|},&|y|<x<1,\ |y|<1,\\0,&\text{其他},\end{cases}}
 $$
 
 $$
- f_{X|Y}(x|y)=
-\begin{cases}
-\frac1{1-|y|},&|y|<x<1,\\
-0,&\text{其他},
-\end{cases}
+\boxed{f_{Y\mid X}(y\mid x)=\begin{cases}\dfrac1{2x},&-x<y<x,\ 0<x<1,\\0,&\text{其他}.\end{cases}}
 $$
 
+二者**不独立**，但两个所求概率均为 $\boxed{3/4}$。
+
+<Steps>
+<Step>
+
+  ### 确定密度常数与区域的两种写法
+
+  三角形以 $(0,0),(1,-1),(1,1)$ 为顶点，面积 $S=\tfrac12\cdot2\cdot1=1$。因是均匀分布，$f_{X,Y}=1/S=1$（仅在 $D$ 内）。
+
+  区域既可写成 $0<x<1,\ -x<y<x$，也可写成 $-1<y<1,\ |y|<x<1$。先换好积分顺序，可减少后续错误。
+
+</Step>
+<Step>
+
+  ### 求两个边缘密度
+
+  固定 $x$，纵向截线长 $2x$：
+
+
+
 $$
- f_{Y|X}(y|x)=
-\begin{cases}
-\frac1{2x},&-x<y<x,\\
-0,&\text{其他}.
-\end{cases}
+f_X(x)=\int_{-x}^x1\,\mathrm dy=2x\quad(0<x<1).
 $$
 
-$X,Y$不相互独立。
+  固定 $y$，横向截线长 $1-|y|$：
 
-(2)
+
+
 $$
- P\left\{X>\frac12\mid Y>0\right\}=\frac34,
-\qquad
-P\left\{X>\frac12\right\}=\frac34.
+f_Y(y)=\int_{|y|}^1 1\,\mathrm dx=1-|y|\quad(|y|<1).
 $$
 
-**解析：** (1) 对$0<x<1$，固定$x$后$y$的取值长度为$2x$，故
-$$
- f_X(x)=\int_{-x}^x1\,dy=2x.
-$$
-固定$y\in(-1,1)$后，有$|y|<x<1$，所以
-$$
- f_Y(y)=\int_{|y|}^1 1\,dx=1-|y|.
-$$
-条件密度由
-$$
- f_{X|Y}(x|y)=\frac{f(x,y)}{f_Y(y)},\qquad
-f_{Y|X}(y|x)=\frac{f(x,y)}{f_X(x)}
-$$
-直接得到。
+</Step>
+<Step>
 
-联合密度的支撑区域为三角形，并不是两个一维支撑区间的直积，因此$X,Y$不独立。
+  ### 用联合密度除以边缘密度
 
-(2) 由于区域关于$x$轴对称，$P\{Y>0\}=\frac12$。同时
+  对 $|y|<1$，
+
+
+
 $$
- P\left\{X>\frac12,Y>0\right\}
-=\int_{1/2}^1\int_0^xdy\,dx
-=\int_{1/2}^1x\,dx
-=\frac38.
+f_{X\mid Y}(x\mid y)=\frac{f_{X,Y}(x,y)}{f_Y(y)}
+  =\frac1{1-|y|},\qquad |y|<x<1.
 $$
-所以
+
+  对 $0<x<1$，
+
+
+
 $$
- P\left\{X>\frac12\mid Y>0\right\}
-=\frac{3/8}{1/2}=\frac34.
+f_{Y\mid X}(y\mid x)=\frac{f_{X,Y}(x,y)}{f_X(x)}
+  =\frac1{2x},\qquad -x<y<x.
 $$
-又
+
+  两个条件分布都可看作“已知截线后，在该截线上均匀取点”。联合支持域为三角形，边缘支持域的直积却是矩形，因此 $X,Y$ 不独立。
+
+</Step>
+<Step>
+
+  ### 计算两个概率
+
+  由于几何区域关于 $x$ 轴对称，$P(Y>0)=1/2$。另有
+
+
+
 $$
- P\left\{X>\frac12\right\}
-=\int_{1/2}^12x\,dx=\frac34.
+P\left(X>\frac12,Y>0\right)
+  =\int_{1/2}^1\!\int_0^x1\,\mathrm dy\,\mathrm dx
+  =\frac38.
 $$
+
+  因此
+
+
+
+$$
+P\left(X>\frac12\mid Y>0\right)=\frac{3/8}{1/2}=\boxed{\frac34}.
+$$
+
+  而 $P(X>1/2)=\int_{1/2}^1 2x\,\mathrm dx=\boxed{3/4}$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="为什么两个概率相等却不代表独立">
+
+此处只是事件 $\{X>1/2\}$ 与 $\{Y>0\}$ 恰好独立：给定任何固定的 $x>0$，$Y\mid X=x$ 在 $(-x,x)$ 上对称，因而 $P(Y>0\mid X=x)=1/2$。但这不能推广为随机变量 $X,Y$ 相互独立。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-78e870-019" type="essay">
+<Question id="selected-1103-math-78e870-019" type="essay" tags="科目:概率论与数理统计, 考点:二维正态条件分布反推参数">
 
 设二维正态随机变量$(X,Y)$的概率密度为$f(x,y)$，已知条件概率密度$f_{X|Y}(x|y)=Ae^{-\frac{2}{3}(x-\frac{y}{2})^2}$和$f_{Y|X}(y|x)=Be^{-\frac{2}{3}(y-\frac{x}{2})^2}$。求：
 (1) 常数$A$和$B$；
@@ -947,192 +1423,190 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-(1)
 $$
- A=B=\sqrt{\frac{2}{3\pi}}.
-$$
-
-(2)
-$$
- f_X(x)=f_Y(x)=\frac1{\sqrt{2\pi}}e^{-x^2/2}.
-$$
-即$X,Y$均服从$N(0,1)$。
-
-(3)
-$$
- f(x,y)=\frac1{\pi\sqrt3}
-\exp\left[-\frac23(x^2-xy+y^2)\right].
+\boxed{A=B=\sqrt{\frac{2}{3\pi}}},\qquad
+\boxed{f_X(x)=f_Y(x)=\frac1{\sqrt{2\pi}}e^{-x^2/2}},
 $$
 
-**解析：** 由条件密度指数项
 $$
- -\frac23\left(x-\frac y2\right)^2
-$$
-与正态密度标准形式比较，条件方差为$\frac34$，故
-$$
- A=B=\frac1{\sqrt{2\pi\cdot3/4}}=\sqrt{\frac2{3\pi}}.
+\boxed{f_{X,Y}(x,y)=\frac1{\pi\sqrt3}
+\exp\!\left[-\frac23(x^2-xy+y^2)\right]}.
 $$
 
-二维正态条件均值给出
-$$
- \frac{\operatorname{Cov}(X,Y)}{\operatorname{Var}(Y)}=\frac12,
-\qquad
-\frac{\operatorname{Cov}(X,Y)}{\operatorname{Var}(X)}=\frac12.
-$$
-因此$\operatorname{Var}(X)=\operatorname{Var}(Y)$且$\rho=\frac12$。又条件方差满足
-$$
- \operatorname{Var}(X)(1-\rho^2)=\frac34,
-$$
-故$\operatorname{Var}(X)=\operatorname{Var}(Y)=1$。由条件均值无常数项知边缘均值均为0，所以$X,Y\sim N(0,1)$。
+即两边缘均为 $N(0,1)$，相关系数 $\rho=1/2$。
 
-将$\rho=\frac12$代入二维标准正态联合密度公式即可得到(3)。
+<Steps>
+<Step>
+
+  ### 第一步：归一化两个条件密度
+
+  由 $\int_{-\infty}^{\infty}e^{-au^2}\,\mathrm du=\sqrt{\pi/a}$，其中 $a=2/3$，得
+
+
+
+$$
+A\sqrt{\frac{3\pi}{2}}=1,\qquad B\sqrt{\frac{3\pi}{2}}=1,
+$$
+
+  因此 $A=B=\sqrt{2/(3\pi)}$。
+
+  同时比较指数项 $-(x-m)^2/(2v)$，可读出
+
+
+
+$$
+\begin{aligned}
+  X\mid(Y=y)&\sim N(y/2,\,3/4),\\
+  Y\mid(X=x)&\sim N(x/2,\,3/4).
+  \end{aligned}
+$$
+
+</Step>
+<Step>
+
+  ### 第二步：由二维正态的条件公式反推出参数
+
+  设 $EX=\mu_X,EY=\mu_Y,\operatorname{Var}X=s_X^2,\operatorname{Var}Y=s_Y^2$，记相关系数 $\rho$。二维正态的条件均值为
+
+
+
+$$
+E(X\mid Y=y)=\mu_X+\rho\frac{s_X}{s_Y}(y-\mu_Y).
+$$
+
+  与 $y/2$ 比较，且利用另一条件均值 $x/2$，得到
+
+
+
+$$
+\rho\frac{s_X}{s_Y}=\rho\frac{s_Y}{s_X}=\frac12,
+  \quad \mu_X=\frac12\mu_Y,\quad\mu_Y=\frac12\mu_X.
+$$
+
+  故 $\mu_X=\mu_Y=0$，$s_X=s_Y$，$\rho=1/2$。由条件方差
+
+
+
+$$
+\frac34=s_X^2(1-\rho^2)
+  =\frac34s_X^2
+$$
+
+  得 $s_X^2=s_Y^2=1$，即所求边缘密度。
+
+</Step>
+<Step>
+
+  ### 第三步：写出并核验联合密度
+
+  将 $\mu_X=\mu_Y=0,s_X=s_Y=1,\rho=1/2$ 代入二维正态密度
+
+
+
+$$
+f(x,y)=\frac1{2\pi\sqrt{1-\rho^2}}
+  \exp\!\left[-\frac{x^2-2\rho xy+y^2}{2(1-\rho^2)}\right]
+$$
+
+  便得到答案。代回 $f(x,y)/f_Y(y)$，恰恢复给定的 $f_{X\mid Y}(x\mid y)$，相反方向同理。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="参数含义">$N(\mu,\sigma^2)$ 的第二个参数是**方差**。题中 $3/4$ 是条件方差，不是边缘方差，也不能直接写成 $\rho=3/4$。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3ab794-018" type="essay">
+<Question id="selected-1103-math-3ab794-018" type="essay" tags="科目:概率论与数理统计, 考点:菱形均匀分布与条件密度">
 
 设二维连续型随机变量 $ (X,Y)$ 在区域 $ D$ 上服从均匀分布，其中
 
 $$
- D=\{(x,y)\mid |x+y|\le1,\ |x-y|\le1\},
+D=\{(x,y)\mid |x+y|\le1,\ |x-y|\le1\},
 $$
-
 
 求 $ X$ 的边缘密度 $ f_X(x)$ 与在 $ X=0$ 条件下，关于 $ Y$ 的条件密度 $ f_{Y\mid X}(y\mid0)$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
- f_X(x)=\begin{cases}
-1-|x|,&|x|\le1,\\
-0,&\text{其他},
-\end{cases}
+\boxed{f_X(x)=\begin{cases}1-|x|,&|x|<1,\\0,&\text{其他},\end{cases}}
 $$
 
+$$
+\boxed{f_{Y\mid X}(y\mid0)=\begin{cases}\dfrac12,&|y|<1,\\0,&\text{其他}.\end{cases}}
+$$
+
+<Steps>
+<Step>
+
+  ### 识别菱形并求联合密度
+
+  联合约束 $|x+y|\le1,\ |x-y|\le1$ 可化为 $|x|+|y|\le1$；其顶点为 $(\pm1,0),(0,\pm1)$，两条对角线均长 $2$，面积为 $2$。因此
 
 
 
 $$
- f_{Y\mid X}(y\mid0)=\begin{cases}
-\frac12,&|y|\le1,\\
-0,&\text{其他}。
-\end{cases}
+f_{X,Y}(x,y)=\begin{cases}\frac12,&|x|+|y|<1,\\0,&\text{其他}.
+  \end{cases}
 $$
 
-**解析：** 区域 $ D$ 由两组不等式
+</Step>
+<Step>
+
+  ### 固定 $x$，从纵向截线求边缘密度
+
+  当 $|x|<1$ 时，允许的 $y$ 为
+
+
 
 $$
- -1\le x+y\le1,
-\qquad
--1\le x-y\le1
+-(1-|x|)<y<1-|x|.
 $$
 
-确定，是以
+  积分区间长度为 $2(1-|x|)$，故
+
+
 
 $$
- (1,0),\quad(0,1),\quad(-1,0),\quad(0,-1)
+f_X(x)=\int_{-(1-|x|)}^{1-|x|}\frac12\,\mathrm dy=1-|x|.
 $$
 
-为顶点的菱形，面积为
+  当 $|x|\ge1$ 时没有正长度截线，密度取 $0$。校验：$\int_{-1}^1(1-|x|)\,\mathrm dx=1$。
+
+</Step>
+<Step>
+
+  ### 固定 $X=0$ 求条件密度
+
+  因 $f_X(0)=1>0$，对 $|y|<1$，有
+
+
 
 $$
- S_D=\frac{2\times2}{2}=2.
+f_{Y\mid X}(y\mid0)
+  =\frac{f_{X,Y}(0,y)}{f_X(0)}
+  =\frac{1/2}{1}=\frac12.
 $$
 
-因而联合密度为
+  它恰是 $U(-1,1)$ 的密度，积分为 $1$。
 
-$$
- f_{X,Y}(x,y)=\begin{cases}
-\frac12,&(x,y)\in D,\\
-0,&\text{其他}。
-\end{cases}
-$$
+</Step>
+</Steps>
 
-对固定的 $ x$，由原不等式可得
-
-$$
- -1-x\le y\le1-x,
-\qquad
-x-1\le y\le x+1.
-$$
-
-因此，当 $ -1\le x<0$ 时，
-
-$$
- -1-x\le y\le x+1,
-$$
-
-截线长度为
-
-$$
- 2(1+x).
-$$
-
-当 $ 0\le x\le1$ 时，
-
-$$
- x-1\le y\le1-x,
-$$
-
-截线长度为
-
-$$
- 2(1-x).
-$$
-
-所以
-
-$$
- f_X(x)=\begin{cases}
-1+x,&-1\le x<0,\\
-1-x,&0\le x\le1,\\
-0,&\text{其他},
-\end{cases}
-$$
-
-即
-
-$$
- f_X(x)=\begin{cases}
-1-|x|,&|x|\le1,\\
-0,&\text{其他}。
-\end{cases}
-$$
-
-当 $ X=0$ 时，区域截线为
-
-$$
- -1\le y\le1.
-$$
-
-又
-
-$$
- f_X(0)=1,
-$$
-
-故条件密度为
-
-$$
- f_{Y\mid X}(y\mid0)
-=\frac{f_{X,Y}(0,y)}{f_X(0)}
-=\begin{cases}
-\frac12,&|y|\le1,\\
-0,&\text{其他}。
-\end{cases}
-$$
+<Callout type="idea" title="几何法的通用模板">二维均匀分布在 $D$ 上时，边缘密度等于“对应截线长度 / 面积”；给定 $X=x$ 后，另一坐标在该截线上服从均匀分布（截线长度非零时）。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-cd3f5c-011" type="essay">
+<Question id="selected-1103-math-cd3f5c-011" type="essay" tags="科目:概率论与数理统计, 考点:边缘密度与和的联合变换">
 
 设二维随机变量 $(X, Y)$ 的概率密度为 $f(x, y) = \begin{cases} xe^{-y}, & 0 < x < y < +\infty, \\ 0, & \text{其他.} \end{cases}$ 求：
 
@@ -1144,51 +1618,126 @@ $(III)$ $Z = X + Y$ 的概率密度 $f_Z(z)$。
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：**
 
-**解析：** (I) 由支撑区域 $0<x<y$，先求边缘密度：
-
-$$
-f_X(x)=\begin{cases}
-\displaystyle\int_x^{+\infty}xe^{-y}\,\mathrm dy=xe^{-x},&x>0,\\
-0,&x\le0,
-\end{cases}
-$$
+（Ⅰ）
 
 $$
-f_Y(y)=\begin{cases}
-\displaystyle\int_0^yxe^{-y}\,\mathrm dx=\frac12y^2e^{-y},&y>0,\\
-0,&y\le0.
-\end{cases}
+\boxed{f_X(x)=\begin{cases}xe^{-x},&x>0,\\0,&\text{其他},\end{cases}\quad
+f_Y(y)=\begin{cases}\dfrac{y^2}{2}e^{-y},&y>0,\\0,&\text{其他}.\end{cases}}
 $$
 
-显然 $f(x,y)\ne f_X(x)f_Y(y)$，故 $X,Y$ 不独立。
+$X,Y$ **不独立**。
 
-(II) 计算联合分布函数 $F(x,y)=P\{X\le x,Y\le y\}$。当 $x<0$ 或 $y<0$ 时，$F(x,y)=0$。
-
-当 $0\le y<x$ 时，限制 $X\le x$ 自动满足，只需积分 $0<v\le y,0<u<v$：
+（Ⅱ）
 
 $$
-F(x,y)=\int_0^y\int_0^v ue^{-v}\,\mathrm du\,\mathrm dv
-=1-\left(\frac12y^2+y+1\right)e^{-y}.
+\boxed{F_{X,Y}(x,y)=\begin{cases}
+0,&x\le0\text{ 或 }y\le0,\\
+1-(y^2/2+y+1)e^{-y},&0<y\le x,\\
+1-(x+1)e^{-x}-\dfrac{x^2}{2}e^{-y},&0<x<y.
+\end{cases}}
 $$
 
-当 $0\le x<y$ 时，积分区域为 $0<u\le x,u<v\le y$：
+（Ⅲ）
 
 $$
-F(x,y)=\int_0^x\int_u^y ue^{-v}\,\mathrm dv\,\mathrm du
-=1-(x+1)e^{-x}-\frac12x^2e^{-y}.
-$$
-
-(III) 对 $Z=X+Y$，由 $0<x<y$ 且 $y=z-x$ 得 $0<x<z/2$。因此
-
-$$
-f_Z(z)=\begin{cases}
-\displaystyle\int_0^{z/2}xe^{-(z-x)}\,\mathrm dx
-=e^{-z}+\left(\frac z2-1\right)e^{-z/2},&z>0,\\
+\boxed{f_Z(z)=\begin{cases}
+e^{-z}+\left(\dfrac z2-1\right)e^{-z/2},&z>0,\\
 0,&z\le0.
-\end{cases}
+\end{cases}}
 $$
+
+<Steps>
+<Step>
+
+  ### 第一步：先核验密度和边缘分布
+
+  联合支持域为 $0<x<y$，有
+
+
+
+$$
+\int_0^{\infty}\!\int_0^y xe^{-y}\,\mathrm dx\,\mathrm dy
+  =\frac12\int_0^{\infty}y^2e^{-y}\,\mathrm dy=1.
+$$
+
+  对 $x$、$y$ 分别积分，得
+
+
+
+$$
+f_X(x)=\int_x^{\infty}xe^{-y}\,\mathrm dy=xe^{-x},\quad x>0,
+$$
+
+
+
+$$
+f_Y(y)=\int_0^y xe^{-y}\,\mathrm dx=\frac{y^2}{2}e^{-y},\quad y>0.
+$$
+
+  当 $0<y<x$ 时 $f(x,y)=0$，而此时边缘乘积严格为正，故 $X,Y$ 不独立。
+
+</Step>
+<Step>
+
+  ### 第二步：分 $y\le x$ 与 $x<y$ 求联合分布函数
+
+  记积分变量为 $u,v$，则
+
+
+
+$$
+F(x,y)=\int_0^{\min(x,y)}\!\int_u^y ue^{-v}\,\mathrm dv\,\mathrm du
+  \qquad(x,y>0).
+$$
+
+  - 若 $0<y\le x$，条件 $X\le x$ 自动满足；积分到 $y$ 得
+
+
+
+$$
+F(x,y)=\frac12\int_0^y v^2e^{-v}\,\mathrm dv
+  =1-\left(1+y+\frac{y^2}{2}\right)e^{-y}.
+$$
+
+  - 若 $0<x<y$，先对 $v$ 积分，得
+
+
+
+$$
+\begin{aligned}
+  F(x,y)&=\int_0^x u(e^{-u}-e^{-y})\,\mathrm du\\
+  &=1-(x+1)e^{-x}-\frac{x^2}{2}e^{-y}.
+  \end{aligned}
+$$
+
+  两支在 $y=x$ 处相同，且 $F\to1$ 当 $x,y\to\infty$。
+
+</Step>
+<Step>
+
+  ### 第三步：固定和 $Z=X+Y=z$，确定积分范围
+
+  令 $y=z-x$，约束 $0<x<y$ 等价于 $0<x<z/2$。对 $z>0$，
+
+
+
+$$
+\begin{aligned}
+  f_Z(z)&=\int_0^{z/2} f_{X,Y}(x,z-x)\,\mathrm dx\\
+  &=e^{-z}\int_0^{z/2}xe^x\,\mathrm dx\\
+  &=e^{-z}\left[(x-1)e^x\right]_0^{z/2}\\
+  &=e^{-z}+\left(\frac z2-1\right)e^{-z/2}.
+  \end{aligned}
+$$
+
+  对 $z\le0$，$f_Z(z)=0$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="卷积公式使用边界">只有在 $X,Y$ 独立时，才能直接用 $\int f_X(x)f_Y(z-x)\,\mathrm dx$。本题不独立，必须用联合密度 $f_{X,Y}(x,z-x)$ 积分。</Callout>
 
 </Solution>
 

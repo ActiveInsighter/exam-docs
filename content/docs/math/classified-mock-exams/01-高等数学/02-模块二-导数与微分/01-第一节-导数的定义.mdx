@@ -1,13 +1,11 @@
 ---
-title: "第一节 导数的定义｜变形差商、左右导数与导函数连续性"
-description: "对齐真题核心题目导数定义考点，精选差商等价换元、可导充要条件、分段参数函数、振荡函数、积分平均函数与局部性质判断。"
+title: "1. 导数的定义"
+description: "22 道导数定义专题题已全部逐题重构：差商换元、左右导数、可导性判定、振荡项、积分平均与导函数连续性。"
 ---
 
-# 第一节 导数的定义｜变形差商、左右导数与导函数连续性
+精选 **22 道题**，全部完成答案核对与解析重写。按 **变形差商与必要充分条件 → 左右导数与分段参数函数 → 幂次振荡函数的导函数连续性 → 积分平均函数的求导证明 → 单点导数与邻域性质** 分组，每题先给答案再展开推导。
 
-精选 **22 道题**，对照「真题核心题目」同名小节与核心考点分类，原题题干、选项、答案、解析及 MDX 组件完整保留。
-
-## 考点1：差商等价变换与导数存在的充要条件
+## 一、变形差商：等价增量与导数的定义
 
 <Question id="selected-1103-classified-1031-lilin-2027-s1-q11" type="blank" points={5} tags="来源:李林六套卷, 考点:导数定义, 难度:基础">
 
@@ -21,26 +19,54 @@ $$
 
 <Solution>
 
-**答案：**$6$。
+**参考答案：**$\boxed{f'(1)=6}$，并且条件还隐含 $f(1)=3$。
 
-**解题过程**：因为 $\ln x\to0$ 且所给极限存在，由 $f$ 在 $1$ 处连续，可得
+**解题思路：**题目给出的分母不是 $x-1$，而是与 $x-1$ 等价的 $\ln x$。应先用“极限存在且分母趋于零”和连续性确定 $f(1)$，再将已知分子拆成标准差商所需的 $f(x)-f(1)$。
+
+<Steps>
+<Step>
+
+### 第一步：由连续性确定函数在基点的值
+
+当 $x\to1$ 时，$\ln x\to0$。所给分式趋于有限的 $1$，于是分子必须趋于零，即
 
 $$
-f(1)-5+2=0,\qquad f(1)=3.
+\lim_{x\to1}[f(x)-5x+2]=0.
 $$
 
-于是
+由于 $f$ 在 $x=1$ 处连续，得到 $f(1)-5+2=0$，所以 $f(1)=3$。
+
+</Step>
+<Step>
+
+### 第二步：还原导数定义
+
+对 $x\ne1$，有
 
 $$
 \begin{aligned}
 \frac{f(x)-f(1)}{x-1}
-&=\frac{f(x)-5x+2}{x-1}+5\\
-&=\frac{f(x)-5x+2}{\ln x}\cdot\frac{\ln x}{x-1}+5
-\longrightarrow 1\cdot1+5=6.
+&=\frac{f(x)-5x+2+5(x-1)}{x-1}\\
+&=\frac{f(x)-5x+2}{\ln x}\cdot\frac{\ln x}{x-1}+5.
 \end{aligned}
 $$
 
-故 $f'(1)=6$。这里不仅能求导数，还由差商极限证明了导数的存在。
+因为 $\lim_{x\to1}\ln x/(x-1)=1$，故
+
+$$
+f'(1)=\lim_{x\to1}\frac{f(x)-f(1)}{x-1}=1\times1+5=6.
+$$
+
+此计算不仅给出导数数值，也通过有限差商极限证明了导数确实存在。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="同类题通法">
+
+若 $\phi(x)\sim c(x-a)$ 且 $\lim_{x\to a}[f(x)-g(x)]/\phi(x)=L$，在 $f(a)=g(a)$ 的前提下可得 $f'(a)-g'(a)=cL$（其中 $g$ 在 $a$ 处可导）。本题 $g(x)=5x-2$、$c=1$。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -66,29 +92,62 @@ $$
 
 <Solution>
 
-**答案：C（$1$）。**
+**参考答案：选 C。**所求极限为 $\boxed{1}$。
 
-令 $t=2x-1$，原条件化为
+**解题思路：**先把已知极限变为标准的 $f'(1)$，再利用可导函数在 $1$ 附近的一阶近似。题目求的是两个靠近 $1$ 的函数值之差，应在**同一基点**做展开，而不是分别套用洛必达法则。
+
+<Steps>
+<Step>
+
+### 第一步：从给定条件读出 $f'(1)$
+
+令 $t=2x-1$，则 $x-1=(t-1)/2$，所以
 
 $$
-\lim_{t\to1}\frac{f(t)}{t-1}=1.
+2=\lim_{x\to1}\frac{f(2x-1)}{x-1}
+=2\lim_{t\to1}\frac{f(t)}{t-1}.
 $$
 
-由 $f$ 连续知 $f(1)=0$，进而 $f'(1)=1$。令 $u=\sin x$，则当 $x\to0$ 时
+因此 $\lim_{t\to1}f(t)/(t-1)=1$。又因 $f$ 连续，$f(1)=0$，从而
+
+$$
+f'(1)=\lim_{t\to1}\frac{f(t)-f(1)}{t-1}=1.
+$$
+
+</Step>
+<Step>
+
+### 第二步：计算两个函数值之差
+
+令 $u=\sin x$，则 $u\to0$、$u/x\to1$，且
+
+$$
+(1+u)^2=1+2u+u^2.
+$$
+
+由 $f'(1)=1$，有局部展开 $f(1+h)=f(1)+h+o(h)$。分别代入 $h=2u+u^2$ 和 $h=u$，得到
 
 $$
 \begin{aligned}
-f\bigl[(1+u)^2\bigr]-f(1+u)
-&=f'(1)\bigl[(1+u)^2-(1+u)\bigr]+o(|u|)\\
-&=u+u^2+o(|u|).
+f((1+u)^2)&=2u+u^2+o(u),\\
+f(1+u)&=u+o(u),\\
+f((1+u)^2)-f(1+u)&=u+u^2+o(u).
 \end{aligned}
 $$
 
-因为 $\sin x/x\to1$，所求极限为 $1$。
+于是
 
-<Callout type="info" title="为何可以相减余项？">
+$$
+\lim_{x\to0}\frac{f((1+\sin x)^2)-f(1+\sin x)}x
+=\lim_{x\to0}\frac{u+u^2+o(u)}u\cdot\frac ux=1.
+$$
 
-两个自变量与 $1$ 的距离都为 $O(|u|)$，故分别使用 $f(1+h)=f(1)+f'(1)h+o(|h|)$ 时，余项之差仍为 $o(|u|)$。
+</Step>
+</Steps>
+
+<Callout type="warn" title="余项为什么是同阶的">
+
+两个自变量偏离 $1$ 的量分别为 $2u+u^2$ 和 $u$，均为 $O(u)$，因此各自的一阶展开余项都是 $o(u)$；相减后仍为 $o(u)$。不需要额外假设 $f''(1)$ 存在。
 
 </Callout>
 
@@ -106,49 +165,46 @@ $$
 
 <Solution>
 
-**答案：C。** 选项 C 中的极限存在（指有限极限）当且仅当 $f'(0)$ 存在，且两者相等。
+**参考答案：选 C。**当 $f(0)=0$ 时，
+
+$$
+\boxed{f'(0)\text{ 存在}\iff
+\lim_{x\to0}\frac{f(e^x-1)}x\text{ 存在且有限}.}
+$$
+
+**解题思路：**“充分必要条件”必须双向成立。选项 C 的自变量增量 $e^x-1$ 与 $x$ 等价，且在零点附近可逆，因此与原始差商严格等价；其余选项只测到对称差、某个组合差或绝对值，均可能丢失方向信息。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 证明 C 的充要性
+### 第一步：证明 C 的充分性和必要性
 
-  设 $t=e^x-1$，则当 $x\to0$ 时 $t\to0$，且 $x=\ln(1+t)$ 是零点附近的一一对应变量代换。
+令 $t=e^x-1$，则 $x=\ln(1+t)$，当 $x\to0$ 时 $t\to0$，而且 $t$ 可从正、负两侧趋近 $0$。因此
 
-  因为 $f(0)=0$，可写为
+$$
+\frac{f(e^x-1)}x
+=\frac{f(t)-f(0)}t\cdot\frac{t}{\ln(1+t)}.
+$$
 
-  $$
-  \frac{f(e^x-1)}x
-  =\frac{f(t)-f(0)}t\cdot\frac{t}{\ln(1+t)}.
-  $$
+因 $t/\ln(1+t)\to1\ne0$，一个因子的有限极限存在当且仅当整个乘积的有限极限存在，并且极限相同。故 C 与 $f'(0)$ 存在等价。
 
-  其中 $t/\ln(1+t)\to1$。于是
+</Step>
+<Step>
 
-  $$
-  \lim_{x\to0}\frac{f(e^x-1)}x
-  \text{ 存在}
-  \quad\Longleftrightarrow\quad
-  \lim_{t\to0}\frac{f(t)-f(0)}t=f'(0)
-  \text{ 存在}.
-  $$
+### 第二步：逐项构造反例
 
-  反向推理也成立，因为第二个因子趋于非零常数 $1$。
+- **A 不充分：**定义 $f(0)=0$，$f(x)=1$（$x\ne0$），则对于非零 $x$，$f(2x)-f(x)=0$，A 的极限为 $0$，但 $f$ 在 $0$ 不连续，当然不可导。
+- **B 不充分：**取 $f(x)=|x|$，则 $[f(x)-f(-x)]/(2x)=0$ 恒成立，但其左、右导数分别为 $-1$ 和 $1$。
+- **D 不必要：**取 $f(x)=x$，则 $f'(0)=1$，而 $|f(x)|/x=|x|/x$ 的左右极限分别为 $-1$ 与 $1$，两侧极限不存在。
 
-  </Step>
-  <Step>
+由此，A、B 均不能保证可导，D 甚至不满足必要性。
 
-  ### 用反例排除其余选项
-
-  - **A 不是充分条件**：取 $f(0)=0$，$f(x)=1$（$x\ne0$），则对任意非零 $x$，$[f(2x)-f(x)]/x=0$，但 $f$ 在零点不连续，更不可导。
-  - **B 不是充分条件**：取 $f(x)=|x|$，对称差商恒为 $0$，但左右导数分别为 $-1$ 和 $1$。
-  - **D 不是必要条件**：取 $f(x)=x$，则 $f'(0)=1$，而 $|f(x)|/x$ 的左右极限分别为 $-1$ 与 $1$，故极限不存在。
-
-  </Step>
+</Step>
 </Steps>
 
-<Callout type="idea" title="判断导数的定义等价式">
+<Callout type="idea" title="等价增量判据">
 
-必须同时验证充分性与必要性。把增量换成与 $x$ 等价且在零点附近可逆的变量，通常能得到充要条件；对称差商只控制左右两侧的平均变化。
+对于 $f(0)=0$，若 $\phi(0)=0$，$\phi(x)/x\to c\ne0$，且 $\phi$ 在 $0$ 附近能覆盖基点两侧的小邻域，则 $f(\phi(x))/x$ 的有限极限与 $f'(0)$ 的存在等价。单侧增量或对称差商一般不具备这种性质。
 
 </Callout>
 
@@ -160,7 +216,7 @@ $$
 若极限
 
 $$
- \lim_{h\to0}\frac{f(a-h^2)-f(a+h^2)}{e^{h^2}-1}=A,
+\lim_{h\to0}\frac{f(a-h^2)-f(a+h^2)}{e^{h^2}-1}=A,
 $$
 
 则函数 $ f(x)$ 在 $ x=a$ 处
@@ -172,43 +228,57 @@ $$
 
 <Solution>
 
-令 $ t=h^2$，则当 $ h\to0$ 时，$ t\to0^+$，原极限可写为
-$$
- \lim_{t\to0^+}\frac{f(a-t)-f(a+t)}{e^t-1}=A.
-$$
-由于
-$$
- e^t-1\sim t\qquad(t\to0^+),
-$$
-故已知条件只说明
-$$
- \lim_{t\to0^+}\frac{f(a-t)-f(a+t)}{t}=A.
-$$
-它仅限制了 $ a$ 点两侧函数值之差，并不能分别保证左、右导数存在，更不能保证二者相等。
+**参考答案：选 A。**已知极限存在，并不能确定 $f$ 在 $a$ 处可导；甚至不能由此确定任意一侧的导数。
 
-例如，任取常数 $ c\ne-\frac A2$，在 $ a$ 的邻域内定义
-$$
- f(a)=0,
-\qquad
-f(a+t)=ct,
-\qquad
-f(a-t)=(A+c)t
-\quad(t>0).
-$$
-则
-$$
- \frac{f(a-t)-f(a+t)}{e^t-1}
-=\frac{At}{e^t-1}\to A,
-$$
-但
-$$
- f'_+(a)=c,
-\qquad
-f'_-(a)=-(A+c),
-$$
-且由 $ c\ne-\frac A2$ 可知两者不相等，所以 $ f(x)$ 在 $ x=a$ 处不一定可导。
+**解题思路：**将 $h^2$ 看成正增量 $t$，原极限仅比较 $a-t$ 与 $a+t$ **两个函数值之间的差**，并不分别比较它们与 $f(a)$ 的差。用一个连续但有尖点的函数，能直接否定“必可导”及两个单侧导数必为 $A$ 的说法。
 
-因此（A）正确；（B）、（C）把所给极限误认为某一侧导数；（D）则错误地断定了可导性。
+<Steps>
+<Step>
+
+### 第一步：准确改写已知极限
+
+令 $t=h^2>0$，则 $h\to0$ 相当于 $t\to0^+$。因为 $e^t-1\sim t$，所以题设等价于
+
+$$
+\lim_{t\to0^+}\frac{f(a-t)-f(a+t)}t=A.
+$$
+
+注意：这**不是** $[f(a+t)-f(a)]/t$ 或 $[f(a-t)-f(a)]/(-t)$ 的极限，不能直接当作任一侧导数。
+
+</Step>
+<Step>
+
+### 第二步：构造对所有 $A$ 都成立的反例
+
+在 $a$ 附近定义
+
+$$
+f(a+s)=-\frac A2s+|s|,\qquad f(a)=0.
+$$
+
+对任意 $t>0$，
+
+$$
+f(a-t)-f(a+t)
+=\left(\frac A2t+t\right)-\left(-\frac A2t+t\right)=At.
+$$
+
+故原极限为 $\lim_{t\to0^+}At/(e^t-1)=A$，满足题设。但是
+
+$$
+f'_+(a)=1-\frac A2,\qquad f'_-(a)=-1-\frac A2,
+$$
+
+两者永远相差 $2$，所以函数在 $a$ 不可导。两侧导数也不由已知极限分别确定。进一步地，若只把此例的 $f(a)$ 改为 $1$、其他点函数值不变，则原极限仍为 $A$，但 $f$ 在 $a$ 不连续，两侧导数都不存在；这直接排除了 B、C 的任何必然性。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="平方增量不代表完整差商">
+
+$h^2\ge0$ 使变元只从 $t>0$ 接近零；原式又是对称点 $a-t$ 与 $a+t$ 的差。没有 $f(a)$，也没有左右导数单独收敛的信息，不能据此断言可导。
+
+</Callout>
 
 </Solution>
 
@@ -229,37 +299,53 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**$\boxed{9f'(1)}$。
+
+**解题思路：**题中有三个趋近 $1$ 的自变量，且函数值的常数项系数为 $1+1-2=0$，故适合统一在 $1$ 处作**一阶可导展开**。由于只假设 $f'(1)$ 存在，不能调用未知的二阶导数或高阶泰勒公式。
+
+<Steps>
+<Step>
+
+### 第一步：应用导数定义的局部展开
+
+可导性等价于：当 $u\to0$ 时，
 
 $$
- 9f'(1)
+f(1+u)=f(1)+f'(1)u+o(u).
 $$
 
-**解析：** 由 $ f(x)$ 在 $ x=1$ 处可导，得
+这里三个增量分别为 $u_1=x$、$u_2=2\sin x$、$u_3=-3\tan x$。它们都与 $x$ 同阶，因此相应余项均可写成 $o(x)$（若 $f'(1)=0$ 也成立）。
+
+</Step>
+<Step>
+
+### 第二步：代入并整理
+
 $$
- f(1+u)=f(1)+f'(1)u+o(u)\qquad(u\to0).
-$$
-分别取
-$$
- u=x,\qquad u=2\sin x,
-\qquad u=-3\tan x,
-$$
-则
-$$
- \begin{aligned}
+\begin{aligned}
 f(1+x)&=f(1)+f'(1)x+o(x),\\
 f(1+2\sin x)&=f(1)+2f'(1)\sin x+o(x),\\
 f(1-3\tan x)&=f(1)-3f'(1)\tan x+o(x).
 \end{aligned}
 $$
-代入原式，常数项相消，得到
+
+三式按 $1,1,-2$ 的系数相加，常数项消去，得到
+
 $$
- \begin{aligned}
-&\lim_{x\to0}\frac{f'(1)x+2f'(1)\sin x+6f'(1)\tan x+o(x)}x\\
-&=f'(1)\left(1+2\lim_{x\to0}\frac{\sin x}{x}
-+6\lim_{x\to0}\frac{\tan x}{x}\right)=9f'(1).
+\begin{aligned}
+&\lim_{x\to0}\frac{f(1+x)+f(1+2\sin x)-2f(1-3\tan x)}x\\
+&=f'(1)\lim_{x\to0}\left(1+2\frac{\sin x}x+6\frac{\tan x}x\right)=9f'(1).
 \end{aligned}
 $$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="差商型极限速算">
+
+若 $u_j(x)\to0$、$u_j(x)/x\to c_j$，且 $\sum_j a_j=0$，那么 $\sum_j a_j f(1+u_j(x))/x\to f'(1)\sum_j a_jc_j$。本题 $c_j=1,2,-3$、$a_j=1,1,-2$，所以系数是 $1+2+6=9$。
+
+</Callout>
 
 </Solution>
 
@@ -276,20 +362,45 @@ $$
 
 <Solution>
 
-**解析：** $\lim_{x\to 0} \frac{f(a+x^3)-f(a)}{\tan x^3} = \lim_{x\to 0} \frac{f(a+x^3)-f(a)}{x^3} = f'(a)$, 故选项 D 正确.
+**参考答案：选 D。**其中极限若存在且有限，就能推出 $f'(a)$ 存在；A、B、C 都不是充分条件。
 
-对于选项 A，令 $h=1/|x|$，则 $x\to\infty$ 时 $h\to0^+$，原极限仅能确定右差商
+**解题思路：**能证明可导的关键是获得在 $a$ 处**双侧的标准差商**。D 中 $h=x^3$ 能从正、负两侧遍历零附近，且 $\tan h\sim h$；A 只能得到右导数，B 的分母阶数不匹配，C 的对称差商会掩盖尖点。
+
+<Steps>
+<Step>
+
+### 第一步：证明 D 一定充分
+
+令 $h=x^3$，则 $x\to0$ 时 $h\to0$，正负两侧均被覆盖。原式变为
+
 $$
-\lim_{h\to0^+}\frac{f(a+h)-f(a)}{h}
+\frac{f(a+x^3)-f(a)}{\tan x^3}
+=\frac{f(a+h)-f(a)}h\cdot\frac{h}{\tan h}.
 $$
-存在，即只能保证右导数存在，不能保证左、右导数相等，因此不足以推出 $f'(a)$ 存在。
 
-对于选项 B, $\lim_{x\to 0} \frac{f(a+x^3)-f(a)}{x^2} = \lim_{x\to 0} \frac{f(a+x^3)-f(a)}{x^3} \cdot x$ 存在, 有可能 $\lim_{x\to 0} \frac{f(a+x^3)-f(a)}{x^3}$ 为 $\infty$ (因 $0\cdot\infty$ 型极限可能存在), 故排除选项 B.
+因为 $h/\tan h\to1\ne0$，若左侧极限存在且有限，则标准差商极限也必存在且等于它。故 $f'(a)$ 存在。
 
-对于选项 C,
-$$\lim_{\Delta x\to 0} \frac{f(a+\Delta x) - f(a-\Delta x)}{2\Delta x}$$
-$$= \lim_{\Delta x\to 0} \left[ \frac{f(a+\Delta x)-f(a)}{\Delta x} \cdot \frac{1}{2} + \frac{f(a-\Delta x)-f(a)}{-\Delta x} \cdot \frac{1}{2} \right]$$
-存在不能确定 $\lim_{\Delta x\to 0} \frac{f(a+\Delta x)-f(a)}{\Delta x}$ 与 $\lim_{\Delta x\to 0} \frac{f(a-\Delta x)-f(a)}{-\Delta x}$ 均存在. 故排除选项 C.
+</Step>
+<Step>
+
+### 第二步：用同一个反例排除其余三项
+
+取 $f(x)=|x-a|$，此函数在 $a$ 连续，但左导数为 $-1$、右导数为 $1$，所以不可导。
+
+- **A：**令 $h=1/|x|\to0^+$，则 $|x|[f(a+h)-f(a)]=|x|h=1$，极限存在，却只得到右导数。
+- **B：**有 $[f(a+x^3)-f(a)]/x^2=|x^3|/x^2=|x|\to0$，极限存在，但标准差商的左右极限仍不等。
+- **C：**$[f(a+\Delta x)-f(a-\Delta x)]/(2\Delta x)=0$，对称差商恒存在，却无法识别 $|x-a|$ 的尖点。
+
+因此只有 D 符合题意。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="存在有限极限的含义">
+
+B 中极限为零不能推出函数变化量是 $o(|h|)$：把 $h=x^3$ 代入后，分母 $x^2=|h|^{2/3}$，与导数要求的分母 $h$ 不同。分母的阶数不能随意替换。
+
+</Callout>
 
 </Solution>
 
@@ -305,31 +416,66 @@ $ \lim_{x\to0}\frac{f(x)+x}{1-\cos x}=2$，
 
 <Solution>
 
-**答案：** $ 2$。
+**参考答案：**$\boxed{f''(0)=2}$；同时可求得 $f(0)=0$、$f'(0)=-1$。
 
-**解析：** 因为 $ 1-\cos x\sim\frac{x^2}{2}$，所以
+**解题思路：**分母 $1-\cos x$ 是二阶无穷小，原极限为有限非零常数，说明分子 $f(x)+x$ 也从二阶开始。先确定常数项和一次项，再比较二阶泰勒系数。
 
-$ f(x)+x\sim x^2$。
+<Steps>
+<Step>
 
-特别地，$ f(0)=0$，且
+### 第一步：还原二阶主项
 
-$ f(x)=-x+x^2+o(x^2)$。
+因
 
-与二阶泰勒展开
+$$
+1-\cos x=\frac{x^2}{2}+o(x^2),
+$$
 
-$ f(x)=f(0)+f'(0)x+\frac12f''(0)x^2+o(x^2)$
+题设 $[f(x)+x]/(1-\cos x)\to2$ 意味着
 
-比较系数，得
+$$
+f(x)+x=2(1-\cos x)+o(1-\cos x)=x^2+o(x^2).
+$$
 
-$ f'(0)=-1,\qquad \frac12f''(0)=1$。
+故
 
-故 $ f''(0)=2$。
+$$
+f(x)=-x+x^2+o(x^2).
+$$
+
+</Step>
+<Step>
+
+### 第二步：利用二阶可导性匹配系数
+
+$f$ 在 $0$ 处存在二阶导数，因而其在 $0$ 处可写成 Peano 形式的二阶展开：
+
+$$
+f(x)=f(0)+f'(0)x+\frac12f''(0)x^2+o(x^2).
+$$
+
+与上式逐项比较，常数项为零，一次项系数为 $-1$，二次项系数为 $1$，得到
+
+$$
+f(0)=0,\qquad f'(0)=-1,\qquad \frac12f''(0)=1.
+$$
+
+因此 $f''(0)=2$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="不展开也能验证">
+
+先利用极限确定 $f(0)=0$、$f'(0)=-1$，再代入二阶导数定义的等价式 $\displaystyle f''(0)=\lim_{x\to0}\frac{2[f(x)-f(0)-f'(0)x]}{x^2}=2$。它与系数比较完全一致。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：左右导数、绝对值与参数复合函数
+## 二、左右导数：绝对值与参数复合函数
 
 <Question id="selected-1103-classified-1031-math-c06546-002" type="single" points={5} tags="来源:张宇8套卷">
 
@@ -342,31 +488,63 @@ $ f'(0)=-1,\qquad \frac12f''(0)=1$。
 
 <Solution>
 
-由于题目中含有 $|\ln(1+x)|$，讨论 $F(x)$ 在 $x=0$ 处的可导性，应分别考察左右导数。
+**参考答案：选 B。**$F$ 在 $0$ 处可导的**充要条件**为 $f(0)=0$；此时 $F'(0)=f'(0)$。
 
-当 $x\to0^+$ 时，$|\ln(1+x)|=\ln(1+x)$，所以
+**解题思路：**$|\ln(1+x)|$ 在 $0$ 左右的表达式不同，函数 $F$ 是否可导由左右导数能否相等决定。关键不在 $f$ 是否可导（它已可导），而在 $f(0)$ 是否消除了绝对值带来的尖点。
 
-$$
-F_+'(0)
-=\lim_{x\to0^+}\frac{f(x)[1-\ln(1+x)]-f(0)}x
-=f'(0)-f(0).
-$$
+<Steps>
+<Step>
 
-当 $x\to0^-$ 时，$|\ln(1+x)|=-\ln(1+x)$，所以
+### 第一步：计算右导数
 
-$$
-F_-'(0)
-=\lim_{x\to0^-}\frac{f(x)[1+\ln(1+x)]-f(0)}x
-=f'(0)+f(0).
-$$
-
-若 $F(x)$ 在 $x=0$ 处可导，则
+因 $F(0)=f(0)$，当 $x>0$ 且接近 $0$ 时，$\ln(1+x)>0$，所以
 
 $$
-F_+'(0)=F_-'(0),
+\begin{aligned}
+F'_+(0)
+&=\lim_{x\to0^+}\frac{f(x)(1-\ln(1+x))-f(0)}x\\
+&=\lim_{x\to0^+}\frac{f(x)-f(0)}x
+-\lim_{x\to0^+}f(x)\frac{\ln(1+x)}x\\
+&=f'(0)-f(0).
+\end{aligned}
 $$
 
-从而 $f(0)=0$。此时 $F'(0)=f'(0)$，故选（B）。
+</Step>
+<Step>
+
+### 第二步：计算左导数
+
+当 $x<0$ 且接近 $0$ 时，$\ln(1+x)<0$，因此 $|\ln(1+x)|=-\ln(1+x)$，有
+
+$$
+\begin{aligned}
+F'_-(0)
+&=\lim_{x\to0^-}\frac{f(x)(1+\ln(1+x))-f(0)}x\\
+&=f'(0)+f(0).
+\end{aligned}
+$$
+
+</Step>
+<Step>
+
+### 第三步：比较两侧并判断选项
+
+$$
+F\text{ 在 }0\text{ 可导}
+\iff f'(0)-f(0)=f'(0)+f(0)
+\iff f(0)=0.
+$$
+
+若 $f(0)=0$，两侧导数同为 $f'(0)$；若 $f(0)\ne0$，两侧导数不相等。于是 A、C 不成立，D 没有加上可导前提，不能作为普遍结论；正确项为 B。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="绝对值尖点的消除">
+
+当 $g(x)\sim|x|$ 而 $f$ 在原点连续时，乘积 $f(x)g(x)$ 可导往往要求 $f(0)=0$；这是因为 $f(x)=f(0)+o(1)$，非零的 $f(0)|x|$ 会保留尖点。
+
+</Callout>
 
 </Solution>
 
@@ -392,54 +570,85 @@ $$
 
 <Solution>
 
-**答案：C。**
+**参考答案：选 C。**$f'(0)=0$ 且 $f'$ 在 $0$ 连续，但 $f''(0)$ 不存在，即 $f'$ 在 $0$ 不可导。
+
+**解题思路：**先按参数 $t$ 的正负消去绝对值，将函数写成按 $x$ 分段的显式表达式；再把“$f'(0)$ 存在”“$f'$ 连续”“$f''(0)$ 存在”分开核验。一次可导与导函数连续，并不蕴含二阶可导。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 消去参数并分段展开
+### 第一步：消参并求分段表达式
 
-  当 $t\ge0$ 时，$x=t$、$y=t(e^t-1)$；当 $t<0$ 时，$x=3t$、$y=t(1-e^t)$。于是
+若 $t\ge0$，则 $|t|=t$、$|e^t-1|=e^t-1$，所以 $x=t$、$y=t(e^t-1)$。
 
-  $$
-  f(x)=\begin{cases}
-  x(e^x-1),&x\ge0,\\[3pt]
-  \dfrac x3(1-e^{x/3}),&x<0.
-  \end{cases}
-  $$
+若 $t<0$，则 $|t|=-t$、$|e^t-1|=1-e^t$，所以 $x=3t$、$y=t(1-e^t)$。
 
-  利用 $e^z=1+z+\frac12z^2+O(z^3)$，得到
+因此
 
-  $$
-  f(x)=\begin{cases}
-  x^2+\dfrac12x^3+O(x^4),&x\to0^+,\\[4pt]
-  -\dfrac19x^2-\dfrac1{54}x^3+O(x^4),&x\to0^-.
-  \end{cases}
-  $$
+$$
+f(x)=\begin{cases}
+x(e^x-1),&x\ge0,\\[3pt]
+\dfrac{x}{3}(1-e^{x/3}),&x<0.
+\end{cases}
+$$
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### 判定一阶导数与二阶导数
+### 第二步：判断 $f'(0)$ 与 $f'$ 的连续性
 
-  因为 $f(0)=0$，故
+由 $f(0)=0$，并用 $e^u=1+u+u^2/2+O(u^3)$，
 
-  $$
-  f'(0)=\lim_{x\to0}\frac{f(x)-f(0)}x=0.
-  $$
+$$
+f(x)=\begin{cases}
+x^2+\dfrac{x^3}{2}+O(x^4),&x\to0^+,\\[3pt]
+-\dfrac{x^2}{9}-\dfrac{x^3}{54}+O(x^4),&x\to0^-.
+\end{cases}
+$$
 
-  两侧 $f'(x)\to0$，所以 $f'$ 在 $0$ 处连续。但是
+可见 $f(x)/x\to0$，故 $f'(0)=0$。而在 $x\ne0$ 的两侧分别求导，
 
-  $$
-  \lim_{x\to0^+}\frac{f'(x)-f'(0)}x=2,
-  \qquad
-  \lim_{x\to0^-}\frac{f'(x)-f'(0)}x=-\frac29.
-  $$
+$$
+f'(x)=\begin{cases}
+e^x-1+xe^x,&x>0,\\[3pt]
+\dfrac13(1-e^{x/3})-\dfrac x9e^{x/3},&x<0,
+\end{cases}
+$$
 
-  左右极限不同，因此 $f''(0)$ 不存在，即 $f'(x)$ 在 $0$ 处不可导。
+两侧均趋于 $0=f'(0)$，因此 $f'$ 在原点连续。
 
-  </Step>
+</Step>
+<Step>
+
+### 第三步：检查 $f'$ 自身是否可导
+
+对两侧导函数在 $0$ 附近展开，
+
+$$
+f'(x)=\begin{cases}
+2x+O(x^2),&x\to0^+,\\
+-\dfrac{2x}{9}+O(x^2),&x\to0^-.
+\end{cases}
+$$
+
+故
+
+$$
+\lim_{x\to0^+}\frac{f'(x)-f'(0)}x=2,
+\qquad
+\lim_{x\to0^-}\frac{f'(x)-f'(0)}x=-\frac29.
+$$
+
+左右二阶导数不相同，故 $f''(0)$ 不存在，选 C。
+
+</Step>
 </Steps>
+
+<Callout type="warn" title="三个概念的逻辑关系">
+
+$f''(0)$ 存在 $\Rightarrow$ $f'$ 在 $0$ 连续，但反过来不成立。本题正是反例：导函数两侧趋于相同值，但导函数的左右差商极限不相等。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -479,39 +688,62 @@ $$
 
 <Solution>
 
-对于①，取
+**参考答案：选 B，仅②正确。**①与③错误；②可以推出 $f'(0)=0$。
+
+**解题思路：**判断可导性首先要关注 $f(0)$，因为标准差商是 $[f(x)-f(0)]/x$。对①构造连续但有尖点（或导数发散）的例子；②中的 $x^2$ 是比 $x$ 高一阶的量，足以压低标准差商；③则忽略了函数在原点可能有非零常数项。
+
+<Steps>
+<Step>
+
+### 第一步：反驳①
+
+取 $f(x)=|x|^{2/3}$，它在 $0$ 连续且 $f(0)=0$。注意 $\sqrt[3]{x}$ 在负数时也有定义，并且
 
 $$
-f(x)=x^{2/3},
+\frac{f(x)}{\sqrt[3]{x}}=
+\begin{cases}
+x^{1/3},&x>0,\\
+-|x|^{1/3},&x<0,
+\end{cases}
+\longrightarrow0.
 $$
 
-则 $f(x)$ 在 $x=0$ 处连续，且
+但标准差商 $f(x)/x$ 在正侧趋于 $+\infty$，负侧趋于 $-\infty$，不可导。因此①不成立。
+
+</Step>
+<Step>
+
+### 第二步：证明②
+
+若 $f(x)/x^2\to0$，则 $f(x)=x^2o(1)\to0$。由原点连续性，$f(0)=0$。于是
 
 $$
-\lim_{x\to0}\frac{f(x)}{\sqrt[3]{x}}=0,
+\frac{f(x)-f(0)}x=x\frac{f(x)}{x^2}\longrightarrow0.
 $$
 
-但 $f(x)$ 在 $x=0$ 处不可导，所以①错误。
+故 $f'(0)$ 存在且等于 $0$，②正确。
 
-对于②，由
+</Step>
+<Step>
 
-$$
-\lim_{x\to0}f(x)=f(0),\qquad
-\lim_{x\to0}\frac{f(x)}{x^2}=0,
-$$
+### 第三步：反驳③
 
-可知 $f(0)=0$，于是
+即使 $f$ 在原点可导，也可能 $f(0)\ne0$。例如取常值函数 $f(x)=1$，则 $f'(0)=0$，但
 
 $$
-f'(0)=\lim_{x\to0}\frac{f(x)-f(0)}x
-=\lim_{x\to0}x\frac{f(x)}{x^2}=0,
+\frac{f(x)}{\sqrt[3]{x}}=\frac1{\sqrt[3]{x}}
 $$
 
-故②正确。
+在 $x\to0$ 时没有有限极限，更不可能等于 $0$，所以③错误。
 
-对于③，取 $f(x)=1$，则 $f$ 在 $0$ 处可导，但题设极限不为 $0$，故③错误。
+</Step>
+</Steps>
 
-因此选 B。
+<Callout type="idea" title="从已知阶数读出可导性">
+
+若 $f$ 在 $0$ 连续且 $f(x)=o(x)$，则 $f(0)=0$ 且 $f'(0)=0$。②给出更强的 $f(x)=o(x^2)$；①只给出 $f(x)=o(|x|^{1/3})$，强度不足。
+
+</Callout>
 
 </Solution>
 
@@ -522,7 +754,7 @@ $$
 设
 
 $$
- f(x)=
+f(x)=
 \begin{cases}
 x^2\sin\frac1x,&x>0,\\[2mm]
 ax+b,&x\le0,
@@ -538,45 +770,61 @@ $$
 
 <Solution>
 
-函数在 $ x=0$ 处可导，首先必须在该点连续。
+**参考答案：选 A。**$\boxed{a=0,\ b=0}$。此时 $f'(0)=0$。
 
-当 $ x\to0^+$ 时，
+**解题思路：**分段函数在衔接点可导，必须同时满足**函数值连续**和**左右导数相等**。右侧虽然含振荡项 $\sin(1/x)$，但前面的 $x^2$ 足以使右差商趋于零；左侧则是直线，导数直接为 $a$。
+
+<Steps>
+<Step>
+
+### 第一步：先用连续性确定 $b$
+
+当 $x\to0^+$，利用 $|\sin(1/x)|\le1$，有
+
 $$
- \left|x^2\sin\frac1x\right|\le x^2\to0,
-$$
-所以
-$$
- \lim_{x\to0^+}f(x)=0.
-$$
-而
-$$
- f(0)=b,
-$$
-故连续性要求
-$$
- b=0.
+|x^2\sin(1/x)|\le x^2\longrightarrow0.
 $$
 
-在 $ b=0$ 时，右导数为
+而 $f(0)=b$，左侧 $ax+b\to b$。因此在原点连续的必要且充分条件是 $b=0$。
+
+</Step>
+<Step>
+
+### 第二步：在 $b=0$ 下求右导数
+
+由定义，
+
 $$
- f'_+(0)
-=\lim_{x\to0^+}\frac{x^2\sin\frac1x-0}{x}
-=\lim_{x\to0^+}x\sin\frac1x=0.
-$$
-左侧函数为 $ f(x)=ax$，所以
-$$
- f'_-(0)=a.
-$$
-要使 $ f'(0)$ 存在，必须有
-$$
- f'_-(0)=f'_+(0),
-$$
-即
-$$
- a=0.
+\begin{aligned}
+f'_+(0)
+&=\lim_{h\to0^+}\frac{h^2\sin(1/h)-0}{h}\\
+&=\lim_{h\to0^+}h\sin(1/h)=0.
+\end{aligned}
 $$
 
-因此 $ a=0,b=0$，选择（A）。选项（C）只保证了连续性，没有保证左右导数相等；（B）、（D）中的 $ b=1$ 使函数在原点不连续。
+最后一个极限由夹逼定理成立，因为 $|h\sin(1/h)|\le|h|$。
+
+</Step>
+<Step>
+
+### 第三步：求左导数并匹配
+
+当 $h<0$，$f(h)=ah$，所以
+
+$$
+f'_-(0)=\lim_{h\to0^-}\frac{ah-0}{h}=a.
+$$
+
+可导当且仅当 $a=f'_+(0)=0$。联同 $b=0$，得到 $a=b=0$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="振荡函数不一定妨碍可导">
+
+$\sin(1/x)$ 本身在原点附近无极限，但 $x^2\sin(1/x)$ 的一阶差商是 $x\sin(1/x)\to0$。判断可导看的是**差商整体**，不是某一因子是否振荡。
+
+</Callout>
 
 </Solution>
 
@@ -593,14 +841,66 @@ $$
 
 <Solution>
 
-**解析：** 利用导数的定义, 有
-$$F'_+(0) = \lim_{x\to 0^+} \frac{F(x)-F(0)}{x-0} = \lim_{x\to 0^+} \frac{f(x)(1+|\sin x|) - f(0)}{x}$$
+**参考答案：选 C。**$\boxed{f(0)=0}$ 是 $F(x)=f(x)(1+|\sin x|)$ 在 $x=0$ 处可导的**充分必要条件**。满足时 $F'(0)=f'(0)$。
 
-$$= \lim_{x\to 0^+} \frac{f(x)-f(0)}{x} + \lim_{x\to 0^+} \frac{f(x)\sin x}{x} = f'_+(0) + f(0).$$
+**解题思路：**$|\sin x|$ 在 $0$ 左右分别等于 $\sin x$ 和 $-\sin x$，因此应计算 $F$ 的两个单侧导数。条件 $f$ 一阶连续可导保证 $f$ 在原点连续且左右导数相等；剩下唯一的障碍来自尖点项的系数 $f(0)$。
 
-同理,可得 $F'_{-}(0) = f'_{-}(0) - f(0)$,故
-$$F(x) \text{ 在 } x=0 \text{ 处可导} \iff F'_{-}(0) = F'_{+}(0) \iff f(0) = 0,$$
-故选 C.
+<Steps>
+<Step>
+
+### 第一步：计算右导数
+
+$F(0)=f(0)$。当 $x\to0^+$ 时 $\sin x>0$，故
+
+$$
+\begin{aligned}
+F'_+(0)
+&=\lim_{x\to0^+}\frac{f(x)(1+\sin x)-f(0)}x\\
+&=\lim_{x\to0^+}\frac{f(x)-f(0)}x+
+\lim_{x\to0^+}f(x)\frac{\sin x}x\\
+&=f'(0)+f(0).
+\end{aligned}
+$$
+
+</Step>
+<Step>
+
+### 第二步：计算左导数
+
+当 $x\to0^-$ 时 $\sin x<0$，因此 $|\sin x|=-\sin x$。同理，
+
+$$
+\begin{aligned}
+F'_-(0)
+&=\lim_{x\to0^-}\frac{f(x)(1-\sin x)-f(0)}x\\
+&=f'(0)-f(0).
+\end{aligned}
+$$
+
+</Step>
+<Step>
+
+### 第三步：检验两个方向都成立
+
+$$
+\begin{aligned}
+F\text{ 在 }0\text{ 处可导}
+&\iff F'_+(0)=F'_-(0)\\
+&\iff f'(0)+f(0)=f'(0)-f(0)\\
+&\iff f(0)=0.
+\end{aligned}
+$$
+
+若 $f(0)=0$，两侧导数都存在且等于 $f'(0)$，证明了充分性；若 $F$ 可导则必有 $f(0)=0$，证明了必要性，因此选 C。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="同构考点">
+
+本题与乘子 $1-|\ln(1+x)|$ 的可导性判定本质相同：$|\sin x|\sim|x|$、$|\ln(1+x)|\sim|x|$，两者都在原点带尖点。光滑因子在尖点处取零值，就能消去其一阶影响。
+
+</Callout>
 
 </Solution>
 
@@ -617,10 +917,68 @@ $$F(x) \text{ 在 } x=0 \text{ 处可导} \iff F'_{-}(0) = F'_{+}(0) \iff f(0) =
 
 <Solution>
 
-**解析：**
-$$f'_{+}(0) = \lim_{x\to 0^+} \frac{\cos\sqrt{|x|}-1}{x} = \lim_{x\to 0^+} \frac{-\frac{1}{2}|x|}{x} = -\frac{1}{2},$$
-$$f'_{-}(0) = \lim_{x\to 0^-} \frac{\cos\sqrt{|x|}-1}{x} = \lim_{x\to 0^-} \frac{-\frac{1}{2}|x|}{x} = \frac{1}{2},$$
-故 $f(x)=\cos\sqrt{|x|}$ 在 $x=0$ 处不可导, 选项 D 正确.
+**参考答案：D。** 只有 $f(x)=\cos\sqrt{|x|}$ 在 $x=0$ 处不可导；其左、右导数分别为 $\frac12$ 和 $-\frac12$。
+
+**解题思路：** 四个函数都在原点连续；判断可导性应直接比较 $[f(x)-f(0)]/x$ 的双侧极限。关键是把 $\sin u\sim u$ 与 $\cos u-1\sim-u^2/2$ 中的 $u$ 换成 $|x|$ 或 $\sqrt{|x|}$。
+
+<Steps>
+<Step>
+
+  ### 分别计算四个差商
+
+  - A：$f(0)=0$，且 $|\sin|x||\le |x|$，所以
+
+
+
+$$
+\left|\frac{|x|\sin|x|}{x}\right|\le |x|\longrightarrow0.
+$$
+
+  - B：$f(0)=0$，利用 $|\sin u|\le |u|$，
+
+
+
+$$
+\left|\frac{|x|\sin\sqrt{|x|}}x\right|\le\sqrt{|x|}\longrightarrow0.
+$$
+
+  - C：$\cos|x|=\cos x$，因此 $f'(0)=-\sin0=0$。
+
+  故 A、B、C 均在 $0$ 处可导，且导数都为 $0$。
+
+</Step>
+<Step>
+
+  ### 检验 D 的左右导数
+
+  因 $\cos u=1-\frac12u^2+O(u^4)$，取 $u=\sqrt{|x|}$ 得
+
+
+
+$$
+\cos\sqrt{|x|}-1=-\frac{|x|}{2}+O(x^2).
+$$
+
+  所以
+
+
+
+$$
+\frac{f(x)-f(0)}x=-\frac{|x|}{2x}+O(x),
+$$
+
+
+
+$$
+f'_+(0)=-\frac12,\qquad f'_-(0)=\frac12.
+$$
+
+  左右导数不相等，D 不可导。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="快速辨型">包含绝对值的函数未必不可导。关键看局部主项：$|x|^p$ 在原点的差商为 $\operatorname{sgn}(x)|x|^{p-1}$；当 $p>1$ 时趋于 $0$，而当 $p=1$ 时通常产生尖点。</Callout>
 
 </Solution>
 
@@ -642,37 +1000,86 @@ $ \begin{cases}x=2t+|t|,\\y=|t|\tan t
 
 <Solution>
 
-当 $ t\geq0$ 时，$ x=3t$，故 $ t=\frac x3$，且
+**参考答案：C。** $f$ 在原点连续、可导，且 $f'$ 在原点连续；但 $f''(0)$ 不存在。
 
-$ f(x)=\frac x3\tan\frac x3\qquad(x\geq0)$。
+**解题思路：** 参数方程中 $x=2t+|t|$ 要按 $t$ 的正负分别消参。所得 $f$ 在原点两侧均以二次项为主，因此一阶导数可衔接，而二阶导数对应的系数不同。
 
-当 $ t<0$ 时，$ x=t$，且
+<Steps>
+<Step>
 
-$ f(x)=-x\tan x\qquad(x<0)$。
+  ### 分段消去参数
 
-因此
+  当 $t<0$，$|t|=-t$，故 $x=t$、$y=-t\tan t$；当 $t\ge0$，$x=3t$、$y=t\tan t$。因此原点附近
 
-$ f(x)=\begin{cases}-x\tan x,&x<0,\\[1mm]\frac x3\tan\frac x3,&x\geq0.
-\end{cases}$
 
-由 $ \tan u\sim u$，可知 $ f(x)\to0=f(0)$，故连续。两侧导数均趋于零，所以 $ f'(0)=0$，且 $ f'(x)$ 在零点连续。
 
-但由局部展开
+$$
+f(x)=\begin{cases}
+  -x\tan x,&x<0,\\[2pt]
+  \dfrac{x}{3}\tan\dfrac{x}{3},&x\ge0.
+  \end{cases}
+$$
 
-$ f(x)\sim\begin{cases}-x^2,&x<0,\\[1mm]\frac{x^2}{9},&x>0,
-\end{cases}$
+  两支在 $x\to0$ 时都趋于 $0=f(0)$，故连续。
 
-可得
+</Step>
+<Step>
 
-$ f''_-(0)=-2,\qquad f''_+(0)=\frac29$。
+  ### 求导并检查导函数连续
 
-二者不相等，因此 $ f''(0)$ 不存在。
+  由 $\tan u\sim u$，
+
+
+
+$$
+f'(0)=\lim_{x\to0}\frac{f(x)}x
+  =\lim_{x\to0}\begin{cases}
+  -\tan x,&x<0,\\
+  \frac13\tan(x/3),&x>0
+  \end{cases}=0.
+$$
+
+  对两支分别求导：
+
+
+
+$$
+f'(x)=\begin{cases}
+  -\tan x-x\sec^2x,&x<0,\\[2pt]
+  \dfrac13\tan\dfrac{x}{3}+\dfrac{x}{9}\sec^2\dfrac{x}{3},&x>0.
+  \end{cases}
+$$
+
+  两边的极限均为 $0=f'(0)$，因此 $f'$ 在原点连续。
+
+</Step>
+<Step>
+
+  ### 再用导数定义判断二阶可导性
+
+  从 $f'(x)$ 的表达式得到
+
+
+
+$$
+\begin{aligned}
+  \lim_{x\to0^-}\frac{f'(x)-f'(0)}x&=-1-1=-2,\\
+  \lim_{x\to0^+}\frac{f'(x)-f'(0)}x&=\frac19+\frac19=\frac29.
+  \end{aligned}
+$$
+
+  两个单侧极限不等，故 $\boxed{f''(0)\text{ 不存在}}$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="高阶导数要对一阶导数再取差商">由 $f(x)\sim c_\pm x^2$ 可以提示二阶导数的左右差异，但严谨求 $f''(0)$ 时应计算 $\lim_{x\to0^\pm}[f'(x)-f'(0)]/x$。</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点3：振荡函数的可导性与导数连续性
+## 三、振荡函数：可导性与导函数连续性
 
 <Question id="selected-1103-classified-1031-liyongle-2027-s5-q01" type="single" points={5} tags="来源:李永乐六套卷, 考点:导数定义与导函数连续性, 难度:中等" number={1}>
 
@@ -692,41 +1099,63 @@ $$
 
 <Solution>
 
-**答案：C。** $f'(0)=0$，但 $\lim_{x\to0}f'(x)$ 不存在。
+**参考答案：C。** 对所有 $1<\lambda\le2$，函数在 $x=0$ 处可导，$f'(0)=0$，但 $f'$ 在 $0$ 处不连续。
+
+**解题思路：** 把“函数在原点可导”和“导函数在原点连续”拆成两个问题。前者对原函数作差商，后者先求 $x\ne0$ 处的导数，再考察其极限。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 先用定义判断原点处可导性
+  ### 用差商求 $f'(0)$
 
-  因为 $|f(x)|\le |x|^\lambda\to0$，所以 $f$ 在原点连续。进一步，
+  显然 $|f(x)|\le |x|^\lambda\to0$，所以 $f$ 在 $0$ 连续。又
 
-  $$
-  \left|\frac{f(x)-f(0)}x\right|
-  =\left||x|^{\lambda-1}\operatorname{sgn}(x)\cos\frac1x\right|
-  \le |x|^{\lambda-1}\to0.
-  $$
 
-  因 $\lambda>1$，故 $\boxed{f'(0)=0}$。
 
-  </Step>
-  <Step>
+$$
+\left|\frac{f(x)-f(0)}x\right|
+  =|x|^{\lambda-1}\left|\cos\frac1x\right|
+  \le |x|^{\lambda-1}\longrightarrow0
+$$
 
-  ### 计算去心邻域的导数并检验连续性
+  （因为 $\lambda>1$），故 $\boxed{f'(0)=0}$。
 
-  对 $x\ne0$，
+</Step>
+<Step>
 
-  $$
-  f'(x)=\lambda|x|^{\lambda-1}\operatorname{sgn}(x)\cos\frac1x
+  ### 求 $x\ne0$ 处的导数
+
+  链式法则给出
+
+
+
+$$
+f'(x)=\lambda|x|^{\lambda-1}\operatorname{sgn}(x)\cos\frac1x
   +|x|^{\lambda-2}\sin\frac1x.
-  $$
+$$
 
-  第一项趋于 $0$。取 $x_n=(\frac\pi2+2n\pi)^{-1}\to0^+$，有 $\sin(1/x_n)=1$，第二项为 $x_n^{\lambda-2}$：当 $1<\lambda<2$ 时趋于 $+\infty$；当 $\lambda=2$ 时恒等于 $1$。再取 $y_n=(\frac{3\pi}2+2n\pi)^{-1}\to0^+$，第二项对应为 $-y_n^{\lambda-2}$。两列值不可能有共同极限，因此 $f'$ 在原点不连续。
+  第一项绝对值不超过 $\lambda|x|^{\lambda-1}$，趋于 $0$。决定连续性的是第二项。
 
-  </Step>
+</Step>
+<Step>
+
+  ### 用两个数列证明极限不存在
+
+  取正数列
+
+
+
+$$
+x_n=\frac1{\pi/2+2n\pi},\qquad
+  y_n=\frac1{3\pi/2+2n\pi}.
+$$
+
+  两者都趋于 $0$，而 $\sin(1/x_n)=1$、$\sin(1/y_n)=-1$。当 $1<\lambda<2$ 时，振荡项的绝对值 $|x|^{\lambda-2}$ 趋于无穷；当 $\lambda=2$ 时，振荡项分别等于 $1$ 和 $-1$。因而无论哪种情形，$f'(x)$ 都不能趋于 $f'(0)=0$。
+
+</Step>
 </Steps>
 
-<Callout type="warn" title="可导不代表导函数连续">判断 $f'(0)$ 必须用差商极限；判断导函数连续才使用 $\lim_{x\to0}f'(x)$，二者不能互换。</Callout>
+<Callout type="idea" title="幂次与振荡项的分界">对 $|x|^\lambda\cos(1/x)$，原点可导的门槛是 $\lambda>1$；导函数连续需要 $\lambda>2$。本题特意限定 $1<\lambda\le2$，所以一定选 C。</Callout>
 
 </Solution>
 </Question>
@@ -736,7 +1165,7 @@ $$
 设函数
 
 $$
- f(x)=
+f(x)=
 \begin{cases}
 x^\lambda\sin\frac1{x^2},&x\ne0,\\[2mm]
 0,&x=0
@@ -747,55 +1176,60 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：** $\boxed{\lambda\in\mathbb Z,\ \lambda\ge4}$。
+
+**解题思路：** 连续的是**导函数** $f'$，不仅是原函数 $f$。应先判定 $f'(0)$ 是否存在，再比较 $\lim_{x\to0}f'(x)$ 与 $f'(0)$。
+
+<Steps>
+<Step>
+
+  ### 由定义计算 $f'(0)$
+
+  因 $f(0)=0$，
+
+
 
 $$
- \lambda\ge4,
-\qquad \lambda\in\mathbb Z.
+f'(0)=\lim_{x\to0}\frac{f(x)}x
+  =\lim_{x\to0}x^{\lambda-1}\sin\frac1{x^2}.
 $$
 
-**解析：** 先考察 $ f'(0)$ 是否存在。由导数定义，
+  若 $\lambda>1$，由夹逼定理可得 $f'(0)=0$；若整数 $\lambda\le1$，振荡因子不能产生有限差商极限，因此原点不可导。
+
+</Step>
+<Step>
+
+  ### 计算去心邻域导数
+
+  对 $x\ne0$，
+
+
+
 $$
- f'(0)
-=\lim_{x\to0}\frac{f(x)-f(0)}x
-=\lim_{x\to0}x^{\lambda-1}\sin\frac1{x^2}.
-$$
-当 $ \lambda>1$ 时，由有界量与无穷小的乘积仍为无穷小，得
-$$
- f'(0)=0.
+\begin{aligned}
+  f'(x)
+  &=\lambda x^{\lambda-1}\sin\frac1{x^2}
+  -2x^{\lambda-3}\cos\frac1{x^2}.
+  \end{aligned}
 $$
 
-对 $ x\ne0$，
-$$
- \begin{aligned}
-f'(x)
-&=\lambda x^{\lambda-1}\sin\frac1{x^2}
-+x^\lambda\cos\frac1{x^2}\left(-\frac2{x^3}\right)\\
-&=\lambda x^{\lambda-1}\sin\frac1{x^2}
--2x^{\lambda-3}\cos\frac1{x^2}.
-\end{aligned}
-$$
-要使导函数在 $ x=0$ 处连续，必须有
-$$
- \lim_{x\to0}f'(x)=f'(0)=0.
-$$
-第一项在 $ \lambda>1$ 时趋于零；第二项趋于零的充要条件为
-$$
- \lambda-3>0,
-$$
-即
-$$
- \lambda>3.
-$$
-因为 $ \lambda$ 为整数，故
-$$
- \lambda\ge4.
-$$
-当 $ \lambda=3$ 时，第二项为
-$$
- -2\cos\frac1{x^2},
-$$
-极限不存在；当 $ \lambda<3$ 时更不可能连续。
+  当 $\lambda>1$ 时，第一项趋于 $0$。若 $\lambda>3$，第二项的绝对值至多 $2|x|^{\lambda-3}\to0$，于是 $\lim_{x\to0}f'(x)=0=f'(0)$。
+
+</Step>
+<Step>
+
+  ### 核查边界及必要性
+
+  - $\lambda=3$ 时，第二项是 $-2\cos(1/x^2)$，在 $0$ 附近持续振荡，极限不存在。
+  - $1<\lambda<3$ 时，第二项振幅 $2|x|^{\lambda-3}$ 不趋于零，甚至在适当数列上无界；第一项趋于零，不能抵消它。
+  - $\lambda\le1$ 时，$f'(0)$ 本身不存在。
+
+  因此充要条件是 $\lambda>3$；取整数即 $\boxed{\lambda\ge4}$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="为什么不是 $\lambda\ge3$？">把 $x^\lambda\sin(1/x^2)$ 求导时，$1/x^2$ 再求导引入 $x^{-3}$，需要 $\lambda-3>0$，而非 $\lambda-3\ge0$。</Callout>
 
 </Solution>
 
@@ -804,7 +1238,11 @@ $$
 <Question id="selected-1103-math-b65261-080" type="single">
 
 设
-$$f(x) = \begin{cases} \frac{1}{(x-1)^\alpha} \sin \frac{1}{(x-1)^\beta}, & x>1, \\ 0, & x \leqslant 1 \end{cases}$$
+
+$$
+f(x) = \begin{cases} \frac{1}{(x-1)^\alpha} \sin \frac{1}{(x-1)^\beta}, & x>1, \\ 0, & x \leqslant 1 \end{cases}
+$$
+
 ($\alpha<0, \beta>0$)，若 $f'(x)$ 在 $x=1$ 处连续，则 ( )。
 
 <Option correct>$\alpha < -1$ 且 $\alpha+\beta < -1$</Option>
@@ -814,27 +1252,60 @@ $$f(x) = \begin{cases} \frac{1}{(x-1)^\alpha} \sin \frac{1}{(x-1)^\beta}, & x>1,
 
 <Solution>
 
-**解析：** $f'_{+}(1) = \lim_{x \to 1^+} \frac{f(x) - f(1)}{x - 1} = \lim_{x \to 1^+} \frac{1}{(x - 1)^{\alpha+1}} \sin \frac{1}{(x - 1)^\beta}$。
+**参考答案：A。** $\boxed{\alpha<-1,\quad\alpha+\beta<-1}$。
 
-当 $\alpha + 1 < 0$ 时, $f'_{+}(1) = 0$; 当 $\alpha + 1 \geqslant 0$ 时, $f'_{+}(1)$ 不存在.
+**解题思路：** 令 $h=x-1>0$、$p=-\alpha>0$、$q=\beta>0$，就变成 $h^p\sin(h^{-q})$ 在拼接点 $h=0$ 的导数连续性问题。依次检查右导数和右侧导函数极限。
 
-$f'_{-}(1) = \lim_{x \to 1^-} \frac{f(x) - f(1)}{x - 1} = \lim_{x \to 1^-} \frac{0 - 0}{x - 1} = 0$,
+<Steps>
+<Step>
 
-故当 $\alpha < -1$ 时, 有
+  ### 检查 $x=1$ 处可导
 
-$$f'(x) = \begin{cases} \frac{-\alpha}{(x - 1)^{\alpha+1}} \sin \frac{1}{(x - 1)^\beta} + \frac{-\beta}{(x - 1)^{\alpha+\beta+1}} \cos \frac{1}{(x - 1)^\beta}, & x > 1, \\ 0, & x \leqslant 1, \end{cases}$$
+  左边函数恒为 $0$，所以 $f(1)=f'_-(1)=0$。右侧差商为
 
-$\lim_{x \to 1^+} f'(x) = \lim_{x \to 1^+} \left[ \frac{-\alpha}{(x - 1)^{\alpha+1}} \sin \frac{1}{(x - 1)^\beta} + \frac{-\beta}{(x - 1)^{\alpha+\beta+1}} \cos \frac{1}{(x - 1)^\beta} \right]$。
 
-当 $\alpha + 1 < 0$ 且 $\alpha + \beta + 1 < 0$ 时, 有 $\lim_{x \to 1^+} f'(x) = 0$, 而 $\lim_{x \to 1^-} f'(x) = 0$, 即当 $\alpha < -1$ 且 $\alpha + \beta < -1$ 时,
 
-$\lim_{x \to 1} f'(x) = 0 = f'(1)$, 从而 $f'(x)$ 在 $x = 1$ 处连续. 选项 A 正确.
+$$
+\frac{f(1+h)-f(1)}h=h^{p-1}\sin(h^{-q}),\qquad h>0.
+$$
+
+  其极限等于 $0$ 当且仅当 $p>1$，故原点处可导要求 $\alpha=-p<-1$，且此时 $f'(1)=0$。
+
+</Step>
+<Step>
+
+  ### 检查 $f'$ 在拼接点连续
+
+  对 $h>0$，
+
+
+
+$$
+f'(1+h)=p h^{p-1}\sin(h^{-q})
+  -q h^{p-q-1}\cos(h^{-q}).
+$$
+
+  前一项在 $p>1$ 时趋于 $0$。后一项要趋于 $0$，须有 $p-q-1>0$；若等于 $0$，则振荡不收敛；若小于 $0$，则沿余弦取 $\pm1$ 的数列不趋于 $0$。因此
+
+
+
+$$
+p-q>1\iff -\alpha-\beta>1
+  \iff \alpha+\beta<-1.
+$$
+
+  左侧 $f'(x)=0$，故两个条件成立时 $\lim_{x\to1}f'(x)=f'(1)=0$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="一般化判据">对 $h>0$ 的 $h^p\sin(h^{-q})$，若左侧接常数 $0$，在拼接点可导的条件为 $p>1$，导函数连续的条件为 $p>q+1$。由于 $q>0$，后者自动蕴含前者。</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点4：积分定义函数的求导与连续性
+## 四、积分定义函数：求导与连续性
 
 <Question id="selected-1103-classified-1031-math-6d85d7-017" type="essay" points={10} tags="来源:张宇8套卷">
 
@@ -860,75 +1331,107 @@ $$
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：**
 
-**解析：** 由题设
+（1）$\boxed{g'(0)=\frac12 f''(0)}$。
 
-$$
-g(x)=
-\begin{cases}
-f'(0),&x=0,\\
-\dfrac{f(x)}x,&x\ne0.
-\end{cases}
-$$
+（2）在 $f(0)=0$ 且 $f\in C^2(\mathbb R)$ 时，$\boxed{g'\in C(\mathbb R)}$，尤其 $g'(0)=\frac12f''(0)$。
 
-#### （1）证明 $g'(0)=\dfrac12f''(0)$
+**解题思路：** 第（1）问抓住 $f(0)=0$ 与二阶展开；第（2）问要证明的是 **$g'$ 的连续性**，不仅是 $g$ 可导。两种方法都可行，积分平均法更简洁。
 
-由导数定义，
+<Steps>
+<Step>
 
-$$
-\begin{aligned}
-g'(0)
-&=\lim_{x\to0}\frac{g(x)-g(0)}x\\
-&=\lim_{x\to0}\frac{\frac{f(x)}x-f'(0)}x\\
-&=\lim_{x\to0}\frac{f(x)-xf'(0)}{x^2}.
-\end{aligned}
-$$
+  ### （1）由二阶 Peano 展开求 $g'(0)$
 
-由于 $f(0)=0$，该式为 $0/0$ 型。由洛必达法则，
+  $f''(0)$ 存在且 $f(0)=0$，在 $x\to0$ 时有
+
+
 
 $$
-g'(0)
-=\lim_{x\to0}\frac{f'(x)-f'(0)}{2x}
-=\frac12f''(0).
+f(x)=xf'(0)+\frac{x^2}{2}f''(0)+o(x^2).
 $$
 
-#### （2）证明 $g'(x)$ 在 $(-\infty,+\infty)$ 上连续
+  从而 $x\ne0$ 时
 
-对 $x\ne0$，
 
-$$
-g'(x)
-=\left(\frac{f(x)}x\right)'
-=\frac{xf'(x)-f(x)}{x^2}.
-$$
-
-因为 $f\in C^2(\mathbb R)$，所以 $g'(x)$ 在 $x\ne0$ 处连续。
-
-在 $x=0$ 处，由（1）
 
 $$
-g'(0)=\frac12f''(0).
+g(x)=\frac{f(x)}x
+  =f'(0)+\frac{x}{2}f''(0)+o(x).
 $$
 
-而
+  结合 $g(0)=f'(0)$，直接按定义求导：
+
+
+
+$$
+\boxed{g'(0)=\lim_{x\to0}\frac{g(x)-g(0)}x=\frac12f''(0)}.
+$$
+
+</Step>
+<Step>
+
+  ### （2）把商函数化为导数的积分平均
+
+  因 $f(0)=0$，由微积分基本定理，对任意 $x\ne0$，
+
+
+
+$$
+f(x)=\int_0^x f'(u)\,du
+  =x\int_0^1 f'(tx)\,dt.
+$$
+
+  而在 $x=0$ 时，$\int_0^1 f'(0)\,dt=f'(0)=g(0)$。因此统一写成
+
+
+
+$$
+\boxed{g(x)=\int_0^1 f'(tx)\,dt}\qquad(x\in\mathbb R).
+$$
+
+  由于 $f''$ 连续，可以在积分号内对 $x$ 求导，得到
+
+
+
+$$
+\boxed{g'(x)=\int_0^1 t f''(tx)\,dt}.
+$$
+
+  被积函数 $t f''(tx)$ 关于 $(x,t)$ 连续；在任意 $x$ 的紧邻域与 $t\in[0,1]$ 上一致连续，故参数积分关于 $x$ 连续。因此 $g'$ 在全实数轴连续。取 $x=0$ 还可核对
+
+
+
+$$
+g'(0)=f''(0)\int_0^1t\,dt=\frac12f''(0).
+$$
+
+</Step>
+</Steps>
+
+<Tabs items={['方法一：积分平均（推荐）','方法二：直接求极限']}>
+<Tab value="方法一：积分平均（推荐）">
+
+  $g'(x)=\int_0^1 t f''(tx)\,dt$。由 $f''$ 连续，可直接令 $x\to0$ 得 $g'(x)\to\frac12 f''(0)=g'(0)$；同时 $x\ne0$ 处连续显然成立。这避免两次商式求极限。
+
+</Tab>
+<Tab value="方法二：直接求极限">
+
+  对 $x\ne0$，$g'(x)=[xf'(x)-f(x)]/x^2$。由 $f\in C^2$，分子分母都趋于 $0$，洛必达法则给出
+
+
 
 $$
 \lim_{x\to0}g'(x)
-=\lim_{x\to0}\frac{xf'(x)-f(x)}{x^2}.
+  =\lim_{x\to0}\frac{x f''(x)}{2x}
+  =\frac12f''(0)=g'(0).
 $$
 
-再次使用洛必达法则，
+</Tab>
+</Tabs>
 
-$$
-\lim_{x\to0}g'(x)
-=\lim_{x\to0}\frac{f'(x)+xf''(x)-f'(x)}{2x}
-=\lim_{x\to0}\frac{f''(x)}2
-=\frac12f''(0)
-=g'(0).
-$$
-
-故 $g'(x)$ 在整个 $(-\infty,+\infty)$ 上连续。
+<Callout type="warn" title="条件不能随意削弱">第（1）问仅需 $f''(0)$ 存在；第（2）问为保证积分号下求导并取极限，使用了题设的全局连续二阶导数条件。两问的假设不同。</Callout>
 
 </Solution>
 
@@ -950,82 +1453,81 @@ $$
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：** $\boxed{g'(0)=\dfrac13f'(0)}$，且 $\boxed{\lim_{x\to0}g'(x)=g'(0)}$，所以 $g$ 在原点可导、$g'$ 在原点连续。
 
-**解析：** 由
+**解题思路：** 已知的仅是 $f$ 在原点可导，不能假设 $f'$ 在原点附近处处存在或连续。先写 $f(t)=f'(0)t+o(t)$，再利用积分的渐近展开；对 $x\ne0$ 的 $g$ 求导只使用 $f$ 的连续性和变限积分公式。
 
-$$
-g(x)=\frac1{x^2}\int_0^x t f(t)\,dt\qquad(x\ne0),
-$$
+<Steps>
+<Step>
 
-先考察 $x\to0$ 时的极限：
+  ### 求积分的主项
 
-$$
-\lim_{x\to0}g(x)
-=\lim_{x\to0}\frac{\int_0^x t f(t)\,dt}{x^2}
-=\lim_{x\to0}\frac{xf(x)}{2x}
-=\frac12f(0)=0=g(0).
-$$
+  记 $a=f'(0)$。因 $f(0)=0$ 且 $f$ 在 $0$ 处可导，
 
-故 $g$ 在 $x=0$ 处连续。
 
-当 $x\ne0$ 时，求导得
 
 $$
-g'(x)
-=\frac{x^3f(x)-2x\int_0^x t f(t)\,dt}{x^4}
-=\frac{f(x)}x-\frac{2}{x^3}\int_0^x t f(t)\,dt.
+f(t)=at+o(t),\qquad t\to0.
 $$
 
-在 $x=0$ 处，
+  因此
+
+
 
 $$
-g'(0)
-=\lim_{x\to0}\frac{g(x)-g(0)}x
-=\lim_{x\to0}\frac{\int_0^x t f(t)\,dt}{x^3}.
+\begin{aligned}
+  I(x)&=\int_0^x t f(t)\,dt
+  =\int_0^x[at^2+o(t^2)]\,dt\\
+  &=\frac{a}{3}x^3+o(x^3),\qquad x\to0.
+  \end{aligned}
 $$
 
-使用洛必达法则，
+  这一展开对 $x\to0^+$ 和 $x\to0^-$ 都成立。
+
+</Step>
+<Step>
+
+  ### 用定义求 $g'(0)$
+
+  由 $g(0)=0$，$x\ne0$ 时 $g(x)=I(x)/x^2$，故
+
+
 
 $$
-g'(0)
-=\lim_{x\to0}\frac{xf(x)}{3x^2}
-=\frac13\lim_{x\to0}\frac{f(x)-f(0)}x
-=\frac13f'(0).
+g(x)=\frac{a}{3}x+o(x),\qquad
+  g'(0)=\lim_{x\to0}\frac{g(x)-g(0)}x
+  =\boxed{\frac a3}.
 $$
 
-再考察 $g'(x)$ 的极限：
+</Step>
+<Step>
+
+  ### 求去心邻域导数并证明连续
+
+  $f$ 在原点某邻域内连续，所以 $I'(x)=xf(x)$；当 $x\ne0$ 时
+
+
 
 $$
-\lim_{x\to0}g'(x)
-=\lim_{x\to0}\left[
-\frac{f(x)}x-\frac{2}{x^3}\int_0^x t f(t)\,dt
-\right].
+g'(x)=\frac{I'(x)}{x^2}-\frac{2I(x)}{x^3}
+  =\frac{f(x)}x-\frac{2I(x)}{x^3}.
 $$
 
-因为 $f(0)=0$，有
+  利用 $f(x)/x\to a$ 与 $I(x)/x^3\to a/3$，得到
+
+
 
 $$
-\lim_{x\to0}\frac{f(x)}x=f'(0),
+\lim_{x\to0}g'(x)=a-\frac{2a}{3}
+  =\frac a3=g'(0).
 $$
 
-而
+  由此证明原点处导函数连续。
 
-$$
-\lim_{x\to0}\frac{\int_0^x t f(t)\,dt}{x^3}
-=\frac13f'(0).
-$$
+</Step>
+</Steps>
 
-故
-
-$$
-\lim_{x\to0}g'(x)
-=f'(0)-\frac23f'(0)
-=\frac13f'(0)
-=g'(0).
-$$
-
-所以 $g(x)$ 在 $x=0$ 处可导，并且 $g'(x)$ 在 $x=0$ 处连续。
+<Callout type="idea" title="带权积分的换元理解">令 $t=xu$ 可写成 $g(x)=\int_0^1u f(xu)\,du$。原点处的线性主项为 $a x\int_0^1u^2\,du=ax/3$；这也解释了系数 $1/3$ 的来源。</Callout>
 
 </Solution>
 
@@ -1036,7 +1538,7 @@ $$
 设 $ f(x)$ 连续且
 
 $$
- \lim_{x\to0}\frac{f(x)}x=2,
+\lim_{x\to0}\frac{f(x)}x=2,
 \qquad
 \varphi(x)=\int_0^1f(xt)\,dt,
 $$
@@ -1045,84 +1547,102 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
- \varphi'(x)=
-\begin{cases}
-\frac{xf(x)-\int_0^x f(t)\,dt}{x^2},&x\ne0,\\[4mm]
-1,&x=0.
-\end{cases}
+\boxed{\varphi'(x)=\begin{cases}
+\dfrac{x f(x)-\displaystyle\int_0^x f(t)\,dt}{x^2},&x\ne0,\\[7pt]
+1,&x=0,
+\end{cases}}
 $$
+
+并且 $\boxed{\varphi'\text{ 在整个 }\mathbb R\text{ 上连续}}$。
+
+**解题思路：** 只知道 $f$ **连续**，并不知道它处处可导，不能直接对 $f(xt)$ 求导。先用 $u=xt$ 把 $\varphi$ 写为变限积分的平均值，再分别研究 $x\ne0$ 与 $x=0$。
+
+<Steps>
+<Step>
+
+  ### 确定原点的函数值和局部展开
+
+  已知 $f(x)/x\to2$，所以 $f(x)\to0$；结合 $f$ 连续得 $f(0)=0$。更精确地，
 
 
 
-
-并且 $ \varphi'(x)$ 在 $ ( -\infty,+\infty)$ 上连续。
-
-**解析：** 由
 $$
- \lim_{x\to0}\frac{f(x)}x=2
-$$
-以及 $ f$ 在 $ 0$ 处连续，知
-$$
- f(0)=0.
+f(x)=2x+o(x),\qquad x\to0.
 $$
 
-当 $ x\ne0$ 时，作变量代换 $ u=xt$，有
+  当 $x\ne0$ 时，以 $u=xt$ 换元（$x$ 为负时同样成立）得
+
+
+
 $$
- \varphi(x)
-=\int_0^1f(xt)\,dt
-=\frac1x\int_0^x f(u)\,du.
-$$
-因此
-$$
- \varphi'(x)
-=-\frac1{x^2}\int_0^x f(u)\,du+\frac{f(x)}x
-=\frac{xf(x)-\int_0^x f(u)\,du}{x^2}.
+\varphi(x)=\int_0^1 f(xt)\,dt
+  =\frac1x\int_0^x f(u)\,du.
 $$
 
-下面求 $ x=0$ 处的导数。由已知条件可写成
+</Step>
+<Step>
+
+  ### 对 $x\ne0$ 处求导
+
+  设 $F(x)=\int_0^x f(u)\,du$。因 $f$ 连续，微积分基本定理保证 $F'(x)=f(x)$。于是
+
+
+
 $$
- f(x)=2x+o(x)\qquad(x\to0).
-$$
-于是
-$$
- \int_0^x f(u)\,du
-=\int_0^x[2u+o(u)]\,du
-=x^2+o(x^2).
-$$
-故
-$$
- \varphi(x)
-=\frac1x\int_0^x f(u)\,du
-=x+o(x).
-$$
-又 $ \varphi(0)=f(0)=0$，所以
-$$
- \varphi'(0)
-=\lim_{x\to0}\frac{\varphi(x)-\varphi(0)}x
-=1.
+\boxed{\varphi'(x)=\frac{x f(x)-F(x)}{x^2}},\qquad x\ne0.
 $$
 
-最后讨论连续性。当 $ x\ne0$ 时，由 $ f$ 连续可知 $ \varphi'(x)$ 连续。且当 $ x\to0$ 时，
+</Step>
+<Step>
+
+  ### 单独计算 $\varphi'(0)$
+
+  利用 $f(u)=2u+o(u)$，可得
+
+
+
 $$
- xf(x)=2x^2+o(x^2),
+F(x)=\int_0^x f(u)\,du=x^2+o(x^2).
 $$
-从而
+
+  所以 $\varphi(x)=x+o(x)$。又 $\varphi(0)=f(0)=0$，从导数定义得到
+
+
+
 $$
- \varphi'(x)
-=\frac{2x^2+o(x^2)-[x^2+o(x^2)]}{x^2}
-\to1
-=\varphi'(0).
+\boxed{\varphi'(0)=\lim_{x\to0}\frac{\varphi(x)}x=1}.
 $$
-因此 $ \varphi'(x)$ 在 $ x=0$ 处也连续，故它在整个实数轴上连续。
+
+</Step>
+<Step>
+
+  ### 验证导函数在全实数轴连续
+
+  对 $x\ne0$，上述导数式由连续函数 $f$ 和 $F$ 构成，故 $\varphi'$ 在这些点连续。原点处由 $x f(x)=2x^2+o(x^2)$ 与 $F(x)=x^2+o(x^2)$，
+
+
+
+$$
+\lim_{x\to0}\varphi'(x)
+  =\lim_{x\to0}\frac{x^2+o(x^2)}{x^2}
+  =1=\varphi'(0).
+$$
+
+  因而 $\varphi'$ 在 $\mathbb R$ 上连续。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="本题不要求 $f$ 自身处处可导">$\varphi(x)$ 是 $f$ 的积分平均，连续性已足够保证其在 $x\ne0$ 处可导。若直接写 $\varphi'(x)=\int_0^1t f'(xt)\,dt$，则额外假设了题目没有给出的 $f'$ 存在性。</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点5：单点导数符号与局部性质
+## 五、单点导数符号与局部性质
 
 <Question id="selected-1103-math-e41b6a-005" type="single">
 
@@ -1135,38 +1655,44 @@ $$
 
 <Solution>
 
-由
+**参考答案：C。** 存在 $\delta>0$，使得 $a$ 右侧充分近时 $f(x)>f(a)$，左侧充分近时 $f(x)<f(a)$。
+
+**解题思路：** $f'(a)>0$ 是 $a$ 点差商的正极限，不是断言 $f'$ 在整个邻域内都为正。直接使用极限的保号性即可推出题中结论。
+
+<Steps>
+<Step>
+
+  ### 差商极限保号
+
+
+
 $$
- f'(a)=\lim_{x\to a}\frac{f(x)-f(a)}{x-a}>0,
-$$
-根据极限的保号性，存在 $ \delta>0$，使得当
-$$
- 0<|x-a|<\delta
-$$
-时，有
-$$
- \frac{f(x)-f(a)}{x-a}>0.
+f'(a)=\lim_{x\to a}\frac{f(x)-f(a)}{x-a}>0.
 $$
 
-当 $ x\in(a,a+\delta)$ 时，$ x-a>0$，故
+  令 $\varepsilon=f'(a)/2>0$，由极限定义可知存在 $\delta>0$，当 $0<|x-a|<\delta$ 时，
+
+
+
 $$
- f(x)-f(a)>0,
-$$
-即
-$$
- f(x)>f(a).
+\frac{f(x)-f(a)}{x-a}>f'(a)-\varepsilon
+  =\frac12f'(a)>0.
 $$
 
-当 $ x\in(a-\delta,a)$ 时，$ x-a<0$。为了使上述商为正，必须有
-$$
- f(x)-f(a)<0,
-$$
-即
-$$
- f(x)<f(a).
-$$
+</Step>
+<Step>
 
-因此（C）正确。（A）、（B）把 $ a$ 错误地视为局部极值点；（D）与导数为正所表示的局部变化方向相反。
+  ### 分别判断 $a$ 的左右
+
+  - 若 $a<x<a+\delta$，分母 $x-a>0$，由差商为正知 $f(x)-f(a)>0$。
+  - 若 $a-\delta<x<a$，分母 $x-a<0$，由差商为正知 $f(x)-f(a)<0$。
+
+  两者恰与选项 C 一致。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="不要把点导数与区间单调性混淆">$f'(a)>0$ 保证的是与 **$f(a)$ 比较** 的左右高低关系；它不保证 $f$ 在 $a$ 附近整个区间严格单调，因为题目没有要求邻域内各点的导数均为正。</Callout>
 
 </Solution>
 
@@ -1183,21 +1709,62 @@ $$
 
 <Solution>
 
-**解析：** 由
+**参考答案：D。** $f$ 在 $x_0$ 的某个去心左邻域和去心右邻域**分别**严格递增，但这不保证跨越 $x_0$ 的连续性或可导性。
+
+**解题思路：** 导函数在两侧都趋于 $1>0$，由极限保号性可知在两侧足够近的位置 $f'(x)>0$，再用拉格朗日中值定理判断每侧单调性。至于 $f(x_0)$ 及左右极限，题设没有约束。
+
+<Steps>
+<Step>
+
+  ### 利用正导数判断两个单侧区间
+
+  由 $\lim_{x\to x_0^-}f'(x)=\lim_{x\to x_0^+}f'(x)=1$，可取 $\delta>0$，使得
+
+
+
 $$
-\lim_{x\to x_0^-}f'(x)=\lim_{x\to x_0^+}f'(x)=1,
+f'(x)>\frac12>0,
+  \qquad x\in(x_0-\delta,x_0)\cup(x_0,x_0+\delta).
 $$
-可知在 $x_0$ 的充分小去心邻域内有 $f'(x)>0$。
 
-由极限的保号性, 知 $f(x)$ 分别在 $x_0$ 的去心左邻域与去心右邻域内单调递增. 选项 D 正确.
+  在任一侧小区间中任取 $u<v$，中值定理给出
 
-由 $\lim_{x \to x_0} f'(x) = 1$ 可知, 不能保证 $f(x)$ 在 $x_0$ 处可导, 也不能保证 $f(x)$ 在 $x_0$ 处连续和极限存在.
 
-例如: $f(x) = \begin{cases} x + 1, & x > 0, \\ x, & x \leqslant 0, \end{cases}$ 则当 $x \neq 0$ 时, $f'(x) = 1$,
 
-$\lim_{x \to 0^-} f'(x) = \lim_{x \to 0^+} f'(x) = 1$,
+$$
+f(v)-f(u)=f'(\xi)(v-u)>0,
+$$
 
-但 $\lim_{x \to 0^-} f(x) = 0 \neq \lim_{x \to 0^+} f(x) = 1$, 所以 $\lim_{x \to 0} f(x)$ 不存在, $f(x)$ 在 $x = 0$ 处不连续, 不可导. 故排除选项 A, B, C.
+  所以两侧**分别**严格递增，D 正确。
+
+</Step>
+<Step>
+
+  ### 用反例排除其余选项
+
+  取 $x_0=0$，并令
+
+
+
+$$
+f(x)=\begin{cases}x,&x\le0,\\x+1,&x>0.\end{cases}
+$$
+
+  对任意 $x\ne0$，都有 $f'(x)=1$，完全满足导数极限条件；但
+
+
+
+$$
+\lim_{x\to0^-}f(x)=0,
+  \qquad\lim_{x\to0^+}f(x)=1.
+$$
+
+  该函数在原点的双侧极限不存在，更不连续、不可导。因此 A、B、C 中声称的原点性质都不是必然结论。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="判断原则">$\lim_{x\to x_0}f'(x)=L$ 约束的是**去心邻域**的变化率；如果另有 $f$ 在 $x_0$ 连续，才可进一步结合中值定理推出 $f'(x_0)=L$。本题未给连续条件。</Callout>
 
 </Solution>
 

@@ -1,143 +1,229 @@
 ---
-title: "第二节 大数定律｜样本矩、示性函数与非同分布序列的依概率收敛"
-description: "围绕真题以函数变换后样本均值求极限的命题风格，精选二阶矩、样本频率、几何平均、条件模型及非同分布随机变量序列的收敛证明。"
+title: "2. 大数定律"
+description: "12道大数定律题全部重构：平方均值、几何平均、经验频率、条件模型与独立非同分布序列的证明。"
 ---
 
-# 第二节 大数定律｜样本矩、示性函数与非同分布序列的依概率收敛
+本节保留 **12 道**模拟与练习原题，**全部完成解析重构**。以辛钦大数定律和切比雪夫型弱大数定律为两条主线，系统解释样本函数均值、几何平均、计数示性变量、含共同潜变量的条件收敛，以及非同分布独立序列。每道题先给参考答案，再分步核对所用定律的前提。
 
-依照「真题核心题目」同名小节的考点与命题风格精选 **12 道高质量模拟、练习原题**。题干、选项、答案、解析、公式及原有交互组件保持原样。
+## 考点一｜样本函数均值、平方均值与总体矩
 
-## 考点1：样本均值、平方均值与矩型极限
-
-<Question id="selected-1103-math-97235a-001" type="blank">
+<Question id="selected-1103-math-97235a-001" type="blank" tags="科目:概率论与数理统计, 考点:指数分布二阶矩与大数定律">
 
 设总体$X$服从参数为2的指数分布，$X_1,X_2,\cdots,X_n,\cdots$为来自总体$X$的简单随机样本，则$Y_n=\frac{1}{n}\sum_{i=1}^{n}X_i^2$依概率收敛于<Blank answer="((1)/(2))" kind="math" />。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
- \frac12.
+\boxed{Y_n\xrightarrow{P}\frac12}.
 $$
 
-**解析：** 参数为$2$的指数分布满足
+**核心思路：** 对样本的**平方**求平均，极限应是 $EX^2$，而不是 $(EX)^2$。先算总体的二阶原点矩，再应用辛钦大数定律。
+
+<Steps>
+<Step>
+
+  ### 求指数分布的二阶原点矩
+
+  对率参数为 $\lambda=2$ 的指数分布，
+
+
+
 $$
- E(X)=\frac12,\qquad D(X)=\frac14.
+EX=\frac1\lambda=\frac12,\qquad DX=\frac1{\lambda^2}=\frac14.
 $$
-因此
+
+  利用 $EX^2=DX+(EX)^2$ 得
+
+
+
 $$
- E(X^2)=D(X)+[E(X)]^2
-=\frac14+\frac14
-=\frac12.
+EX^2=\frac14+\frac14=\boxed{\frac12}.
 $$
-由于$X_1^2,X_2^2,\cdots$独立同分布且数学期望存在，由辛钦大数定律，
+
+</Step>
+<Step>
+
+  ### 对变换后的样本应用大数定律
+
+  令 $Z_i=X_i^2$。因 $X_i$ 独立同分布，$Z_i$ 也独立同分布，且
+
+
+
 $$
- \frac1n\sum_{i=1}^n X_i^2\xrightarrow{P}E(X^2)=\frac12.
+E|Z_i|=EX_i^2=\frac12<\infty.
 $$
+
+  故由辛钦大数定律
+
+
+
+$$
+Y_n=\frac1n\sum_{i=1}^{n}Z_i\xrightarrow{P}EZ_1=\frac12.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="通法：样本函数的均值">若 $X_i$ 独立同分布且 $E|g(X_1)|<\infty$，则 $n^{-1}\sum_i g(X_i)\xrightarrow{P}Eg(X_1)$。本题取 $g(x)=x^2$。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-97235a-002" type="blank">
+<Question id="selected-1103-math-97235a-002" type="blank" tags="科目:概率论与数理统计, 考点:独立非同分布随机变量的弱大数定律">
 
 设$X_1,X_2,\cdots,X_n,\cdots$是来自总体$X$的简单随机样本，$X$服从$[-\pi,\pi]$上的均匀分布，记$Y_k=\cos(kX_k)$，$k=1,2,\cdots,n,\cdots$，则$\frac{1}{n}\sum_{k=1}^{n}Y_k^2$依概率收敛于<Blank answer="((1)/(2))" kind="math" />。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
- \frac12.
+\boxed{\frac1n\sum_{k=1}^n\cos^2(kX_k)\xrightarrow{P}\frac12}.
 $$
 
-**解析：** 对任意正整数$k$，
+**关键观察：** $Y_k$ 的定义含 $k$，不应未经说明就套用同分布大数定律。更稳妥的办法是证明 $Y_k^2$ 独立、方差统一有界，使用切比雪夫不等式。
+
+<Steps>
+<Step>
+
+  ### 逐项求期望
+
+  因 $X_k\sim U[-\pi,\pi]$，用恒等式 $\cos^2 u=(1+\cos2u)/2$，得
+
+
+
 $$
 \begin{aligned}
- E(Y_k^2)
-&=E[\cos^2(kX_k)]\\
-&=\frac1{2\pi}\int_{-\pi}^{\pi}\cos^2(kx)\,dx
-=\frac12.
-\end{aligned}
+  E(Y_k^2)&=\frac1{2\pi}\int_{-\pi}^{\pi}\cos^2(kx)\,\mathrm dx\\
+  &=\frac12+\frac1{4\pi}\int_{-\pi}^{\pi}\cos(2kx)\,\mathrm dx=\frac12.
+  \end{aligned}
 $$
-又$0\le Y_k^2\le1$，故各$Y_k^2$方差一致有界。由独立随机变量的大数定律，
+
+  最后一项为零使用了 $k$ 为正整数。
+
+</Step>
+<Step>
+
+  ### 验证方差条件并估计偏差概率
+
+  令 $Z_k=Y_k^2$，则 $0\le Z_k\le1$，从而 $DZ_k\le1/4$。由 $X_k$ 独立知 $Z_k$ 独立。
+
+  于是对 $\overline Z_n=n^{-1}\sum_{k=1}^nZ_k$，
+
+
+
 $$
- \frac1n\sum_{k=1}^n\left(Y_k^2-EY_k^2\right)\xrightarrow{P}0.
+E\overline Z_n=\frac12,\qquad
+  D\overline Z_n=\frac1{n^2}\sum_{k=1}^nDZ_k\le\frac1{4n}.
 $$
-而
+
+</Step>
+<Step>
+
+  ### 得到依概率收敛
+
+  任取 $\varepsilon>0$，
+
+
+
 $$
- \frac1n\sum_{k=1}^nEY_k^2=\frac12,
+P\left(\left|\overline Z_n-\frac12\right|\ge\varepsilon\right)
+  \le\frac1{4n\varepsilon^2}\longrightarrow0.
 $$
-所以
-$$
- \frac1n\sum_{k=1}^nY_k^2\xrightarrow{P}\frac12.
-$$
+
+  即极限为 $1/2$。
+
+</Step>
+</Steps>
+
+<Callout type="info" title="更深一步">由于均匀分布在完整整数个周期上的不变性，$\cos(kX_k)$ 实际与 $\cos X_1$ 同分布。本题也能套用辛钦大数定律，但“独立且有界方差”路线更易推广到真正不同分布的情形。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-6164d8-008" type="blank">
+<Question id="selected-1103-math-6164d8-008" type="blank" tags="科目:概率论与数理统计, 考点:样本均值与样本二阶矩">
 
 随机从数集 $ \{1,2,3,4,5\}$ 中有放回地取出 $ n$ 个数 $ X_1,X_2,\cdots,X_n$，则当 $ n\to\infty$ 时
 
 $$
- \overline X=\frac1n\sum_{i=1}^{n}X_i
+\overline X=\frac1n\sum_{i=1}^{n}X_i
 $$
 
 依概率收敛于 <Blank answer="3" kind="math" />；
 
 $$
- \frac1n\sum_{i=1}^{n}X_i^2
+\frac1n\sum_{i=1}^{n}X_i^2
 $$
 
 依概率收敛于 <Blank answer="11" kind="math" />。
 
 <Solution>
 
-**答案：** $ 3$；$ 11$
+**参考答案：** 两空依次为
 
-**解析：** 因为是有放回抽取，所以 $ X_1,X_2,\cdots$ 相互独立同分布，并且
 $$
- P\{X_i=k\}=\frac15,
-\qquad k=1,2,3,4,5.
-$$
-于是
-$$
- EX_i
-=\frac{1+2+3+4+5}{5}
-=3.
-$$
-由辛钦大数定律，
-$$
- \frac1n\sum_{i=1}^{n}X_i\xrightarrow{P}EX_i=3.
+\boxed{3},\qquad\boxed{11}.
 $$
 
-再令
+**核心思路：** 有放回抽样使 $X_i$ 相互独立同分布。平均值收敛到总体期望，平方平均值则收敛到总体二阶原点矩。
+
+<Steps>
+<Step>
+
+  ### 确定离散均匀总体
+
+  $P(X_i=j)=1/5$，$j=1,2,3,4,5$。故
+
+
+
 $$
- Y_i=X_i^2.
+EX_i=\frac{1+2+3+4+5}{5}=\boxed{3}.
 $$
-则 $ Y_1,Y_2,\cdots$ 仍相互独立同分布，且
+
+</Step>
+<Step>
+
+  ### 分别计算两个统计量的理论中心
+
+  对 $Z_i=X_i^2$，
+
+
+
 $$
- EY_i=EX_i^2
-=\frac{1^2+2^2+3^2+4^2+5^2}{5}
-=\frac{55}{5}
-=11.
+EZ_i=EX_i^2
+  =\frac{1^2+2^2+3^2+4^2+5^2}{5}
+  =\frac{55}{5}=\boxed{11}.
 $$
-再次应用辛钦大数定律，
+
+</Step>
+<Step>
+
+  ### 两次应用辛钦大数定律
+
+  因 $X_i$ 与 $Z_i$ 都是独立同分布且均值有限的序列，
+
+
+
 $$
- \frac1n\sum_{i=1}^{n}X_i^2
-=\frac1n\sum_{i=1}^{n}Y_i
-\xrightarrow{P}11.
+\frac1n\sum_{i=1}^nX_i\xrightarrow{P}3,
+  \qquad
+  \frac1n\sum_{i=1}^nX_i^2\xrightarrow{P}11.
 $$
-因此两空依次为 $ 3$ 和 $ 11$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="常见混淆">$EX^2=11$，但 $(EX)^2=9$；“平方均值”并非“均值平方”。只有方差为零时二者才相等。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-16d998-003" type="single">
+<Question id="selected-1103-math-16d998-003" type="single" tags="科目:概率论与数理统计, 考点:辛钦大数定律及二阶矩">
 
 设 $X_1,X_2,\cdots$ 是独立同分布随机变量序列，且 $E(X_i^2)<+\infty$，则对任意 $\varepsilon>0$ 有（ ）。
 
@@ -148,31 +234,60 @@ $$
 
 <Solution>
 
-令 $Y_i=X_i^2$。由于 $X_i$ 独立同分布，所以 $Y_i$ 也独立同分布。又因为
+**参考答案：** 第 **C** 项，
 
 $$
-E|Y_i|=E(X_i^2)<+\infty,
+\boxed{\lim_{n\to\infty}P\left(\left|\frac1n\sum_{i=1}^nX_i^2-EX_1^2\right|<\varepsilon\right)=1}.
 $$
 
-由辛钦大数定律，
+**解题关键：** 题目仅保证 $EX_i^2<\infty$，**不要求四阶矩存在**；因此应对 $Y_i=X_i^2$ 使用只需一阶绝对矩有限的辛钦大数定律。
+
+<Steps>
+<Step>
+
+  ### 变换为新的独立同分布序列
+
+  取 $Y_i=X_i^2$。因为 $X_i$ 独立同分布，所以 $Y_i$ 也独立同分布，而且
+
+
 
 $$
-\frac1n\sum_{i=1}^nY_i\xrightarrow{P}EY_i.
+E|Y_i|=EX_i^2<\infty.
 $$
 
-即
+</Step>
+<Step>
+
+  ### 写出依概率收敛的定义式
+
+  辛钦大数定律得
+
+
 
 $$
-\lim_{n\to\infty}P\left\{\left|\frac1n\sum_{i=1}^nX_i^2-E(X_i^2)\right|<\varepsilon\right\}=1.
+\frac1n\sum_{i=1}^{n}Y_i\xrightarrow{P}EY_1=EX_1^2.
 $$
 
-故选 C。
+  因此任意 $\varepsilon>0$，
+
+
+
+$$
+P\left(\left|\frac1n\sum_{i=1}^{n}X_i^2-EX_1^2\right|<\varepsilon\right)\to1.
+$$
+
+</Step>
+</Steps>
+
+**逐项辨析：** B 的概率极限写成 $0$，恰好与大数定律相反；A、D 都要求样本平方均值趋于零，但一般其极限是 $EX_1^2$。例如若 $X_i\equiv1$，则样本平方均值恒为 $1$，足以否定这两项。
+
+<Callout type="idea" title="考点辨识">若改用切比雪夫估计 $D(Y_i)=D(X_i^2)$，就需要 $EX_i^4<\infty$。本题只有二阶矩，直接用辛钦大数定律更恰当。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-b4d337-040" type="single">
+<Question id="selected-1103-math-b4d337-040" type="single" tags="科目:概率论与数理统计, 考点:泊松分布矩与绝对偏差">
 
 设总体$X$服从参数为$\lambda(\lambda>0)$的泊松分布，$X_1,X_2,\cdots,X_n$为来自总体$X$的简单随机样本，且对任意的正数$\varepsilon$，有$\lim\limits_{n \to \infty}P\{|\frac{1}{n}\sum_{i=1}^{n}X_i^2-2|<\varepsilon\}=1$，则$D[|X-D(X)|]=$( )
 
@@ -183,51 +298,94 @@ $$
 
 <Solution>
 
-由大数定律，
-$$
- \frac1n\sum_{i=1}^nX_i^2\xrightarrow{P}E(X^2).
-$$
-题设极限表明
-$$
- E(X^2)=2.
-$$
-对$X\sim P(\lambda)$，
-$$
- E(X^2)=D(X)+[E(X)]^2=\lambda+\lambda^2.
-$$
-因此
-$$
- \lambda^2+\lambda=2,
-$$
-由$\lambda>0$得$\lambda=1$。于是$D(X)=1$。
+**参考答案：** 第 **C** 项，
 
-令
 $$
- Y=|X-D(X)|=|X-1|.
+\boxed{D(|X-DX|)=1-\frac4{e^2}}.
 $$
-首先
+
+**核心思路：** 先从平方样本均值的依概率极限识别泊松参数 $\lambda$；再分别求 $E|X-1|$ 与 $E(X-1)^2$。
+
+<Steps>
+<Step>
+
+  ### 由大数定律倒求泊松参数
+
+  已知 $X\sim P(\lambda)$，则
+
+
+
 $$
- E(Y^2)=E[(X-1)^2]=D(X)=1.
+EX=DX=\lambda,\qquad EX^2=\lambda^2+\lambda.
 $$
-再求$E(Y)$。由于$E(X-1)=0$，负部分只在$X=0$时出现，且
+
+  样本平方独立同分布、期望有限，故由辛钦大数定律
+
+
+
 $$
- E[(1-X);X<1]=P\{X=0\}=e^{-1}.
+\frac1n\sum_{i=1}^n X_i^2\xrightarrow{P}\lambda^2+\lambda.
 $$
-均值为0意味着正部分期望也为$e^{-1}$，故
+
+  而题设极限为常数 $2$。依概率极限唯一，所以
+
+
+
 $$
- E|X-1|=\frac2e.
+\lambda^2+\lambda=2
+  \quad\Longrightarrow\quad \lambda=1
 $$
-因此
+
+  （另一个根 $-2$ 不符合 $\lambda>0$）。
+
+</Step>
+<Step>
+
+  ### 求绝对偏差的期望
+
+  此时 $DX=1$。令 $W=|X-1|$。因为 $E(X-1)=0$，且对整数型 $X\ge0$，负偏差只在 $X=0$ 时发生，
+
+
+
 $$
- D(Y)=E(Y^2)-[E(Y)]^2
-=1-\frac4{e^2}.
+E(1-X)_+=P(X=0)=e^{-1},
 $$
+
+  而 $E(X-1)_+=E(1-X)_+$。因此
+
+
+
+$$
+EW=E(X-1)_++E(1-X)_+=\frac2e.
+$$
+
+</Step>
+<Step>
+
+  ### 计算目标方差
+
+
+
+$$
+EW^2=E(X-1)^2=DX+(EX-1)^2=1,
+$$
+
+
+
+$$
+DW=EW^2-(EW)^2=1-\frac4{e^2}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="绝对值不能直接移出方差">$D(|X-1|)$ 一般不等于 $D(X-1)$。虽然两者的平方相同，但绝对值会改变**均值**，本题关键是计算 $E|X-1|=2/e$。</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：对数变换、示性函数与条件大数定律
+## 考点二｜几何平均、经验频率与条件大数定律
 
 <Question id="selected-1103-classified-1031-math-ed4edb-008" type="single" points={5} tags="来源:张宇8套卷">
 
@@ -244,46 +402,80 @@ $$
 
 <Solution>
 
-令
+**参考答案：** 第 **B** 项，
 
 $$
-Y_n=\left(\prod_{k=1}^nX_k\right)^{1/n}
-=\exp\left(\frac1n\sum_{k=1}^n\ln X_k\right).
+\boxed{\left(\prod_{k=1}^nX_k\right)^{1/n}\xrightarrow{P}e^{-1}}.
 $$
 
-记
+**核心技巧：** 乘积开 $n$ 次方不适合直接用大数定律；先取对数把**几何平均数化为算术平均数**，再借助连续映射定理还原。
+
+<Steps>
+<Step>
+
+  ### 将几何平均转化为对数样本均值
+
+  $X_k\sim U[0,1]$ 且 $P(X_k=0)=0$，故对于每个有限 $n$，$X_1,\ldots,X_n$ 几乎处处为正。于是
+
+
 
 $$
-\xi_k=\ln X_k.
+G_n=\left(\prod_{k=1}^nX_k\right)^{1/n}
+  =\exp\left(\frac1n\sum_{k=1}^n\ln X_k\right).
 $$
 
-则 $\xi_k$ 相互独立且同分布，并且
+</Step>
+<Step>
+
+  ### 计算对数随机变量的期望并应用大数定律
+
+  令 $Y_k=\ln X_k$，则 $Y_k$ 独立同分布，且
+
+
 
 $$
-E\xi_k=\int_0^1\ln x\,dx=-1.
+E|Y_k|=\int_0^1(-\ln x)\,\mathrm dx=1<\infty,
 $$
 
-由辛钦大数定律，
+
 
 $$
-\frac1n\sum_{k=1}^n\xi_k\xrightarrow{P}-1.
+EY_k=\int_0^1\ln x\,\mathrm dx
+  =[x\ln x-x]_0^1=-1.
 $$
 
-又指数函数连续，所以
+  因此
+
+
 
 $$
-Y_n
-=\exp\left(\frac1n\sum_{k=1}^n\xi_k\right)
-\xrightarrow{P}e^{-1}.
+\frac1n\sum_{k=1}^{n}\ln X_k\xrightarrow{P}-1.
 $$
 
-故选（B）。
+</Step>
+<Step>
+
+  ### 对极限取指数
+
+  指数函数在每点连续，故
+
+
+
+$$
+G_n=\exp\left(\frac1n\sum_{k=1}^{n}\ln X_k\right)
+  \xrightarrow{P}\exp(-1)=\boxed{e^{-1}}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="几何平均不趋于算术平均">虽然 $EX_k=1/2$，但这并不意味着 $G_n\to1/2$。几何平均的极限是 $\exp(E\ln X)=e^{-1}$；对数可积是此处应用大数定律的重要前提。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-97235a-011" type="single">
+<Question id="selected-1103-math-97235a-011" type="single" tags="科目:概率论与数理统计, 考点:经验频率与示性函数">
 
 设总体$X$服从参数为1的泊松分布，$X_1,X_2,\cdots,X_n,\cdots$为来自总体$X$的简单随机样本。记$v_n(1)$为$n$个观测值中不大于1的个数，则$\frac{v_n(1)}{n}$依概率收敛于( )
 
@@ -294,37 +486,62 @@ $$
 
 <Solution>
 
-定义示性变量
+**参考答案：** 第 **B** 项，$\boxed{2/e}$。
+
+**核心思路：** “不大于 $1$ 的个数”是若干**示性变量**之和，除以 $n$ 得到经验频率。大数定律说明经验频率趋向对应事件的真实概率。
+
+<Steps>
+<Step>
+
+  ### 将计数改写为样本均值
+
+  令
+
+
+
 $$
- I_i=I\{X_i\le1\}.
+I_i=\mathbf1_{\{X_i\le1\}},\qquad
+  v_n(1)=\sum_{i=1}^n I_i.
 $$
-则
+
+  由于 $X_i$ 是独立同分布的泊松样本，$I_i$ 也独立同分布于伯努利分布，其均值为 $P(X\le1)$。
+
+</Step>
+<Step>
+
+  ### 算出对应事件的概率
+
+  若 $X\sim P(1)$，则 $P(X=j)=e^{-1}/j!$，所以
+
+
+
 $$
- v_n(1)=\sum_{i=1}^n I_i,
+EI_i=P(X\le1)=P(X=0)+P(X=1)
+  =e^{-1}+e^{-1}=\frac2e.
 $$
-而$I_i$独立同分布，且
+
+</Step>
+<Step>
+
+  ### 应用辛钦大数定律
+
+
+
 $$
-\begin{aligned}
- E(I_i)
-&=P(X_i\le1)\\
-&=P(X_i=0)+P(X_i=1)\\
-&=e^{-1}+e^{-1}
-=\frac2e.
-\end{aligned}
+\frac{v_n(1)}n=\frac1n\sum_{i=1}^n I_i
+  \xrightarrow{P}EI_1=\boxed{\frac2e}.
 $$
-由辛钦大数定律，
-$$
- \frac{v_n(1)}n
-=\frac1n\sum_{i=1}^nI_i
-\xrightarrow{P}\frac2e.
-$$
-故选B。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="通用经验分布函数">对任意阈值 $t$，$F_n(t)=n^{-1}\sum_i\mathbf1_{\{X_i\le t\}}$ 是经验分布函数。若样本独立同分布，则 $F_n(t)\xrightarrow{P}F_X(t)$；本题取 $t=1$。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-97235a-012" type="essay">
+<Question id="selected-1103-math-97235a-012" type="essay" tags="科目:概率论与数理统计, 考点:泊松过程首到时刻与大数定律">
 
 设$t(\geq 0)$时刻已进入某商场的顾客人数是$N_t$，$N$服从参数为$\frac{t}{2}$的泊松分布，令$T$表示第1个顾客到来的时刻。
 (1) 求$T$的概率密度；
@@ -332,106 +549,197 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-(1)
+（1）首位顾客到达时间 $T$ 的概率密度为
+
 $$
- f_T(t)=
-\begin{cases}
-\frac12e^{-t/2},&t>0,\\[2mm]
-0,&\text{其他}.
-\end{cases}
+\boxed{f_T(t)=\begin{cases}\dfrac12e^{-t/2},&t>0,\\[2mm]0,&t\le0;\end{cases}}
 $$
 
-(2)
+（2）平方到达时间样本均值的依概率极限为
+
 $$
- a=8.
+\boxed{a=8}.
 $$
 
-**解析：** (1) 对$t\ge0$，事件$\{T>t\}$表示在时刻$t$之前没有顾客到达，即$N_t=0$。因此
-$$
- P(T>t)=P(N_t=0)
-=e^{-t/2}.
-$$
-所以
-$$
- F_T(t)=P(T\le t)=1-e^{-t/2},\qquad t\ge0.
-$$
-求导得
-$$
- f_T(t)=\frac12e^{-t/2},\qquad t>0.
-$$
-故$T$服从参数为$\frac12$的指数分布。
+**解题关键：** 把“第一个人到达的时间超过 $t$”转换为“截至时刻 $t$ 到达人数为零”，从泊松计数的零点概率得到等待时间分布。
 
-(2) 对参数为$\lambda=\frac12$的指数分布，
+<Steps>
+<Step>
+
+  ### 由无人到达事件求生存函数
+
+  已知 $N_t\sim P(t/2)$。对 $t\ge0$，
+
+
+
 $$
- E(T)=\frac1\lambda=2,
-\qquad
-D(T)=\frac1{\lambda^2}=4.
+\{T>t\}=\{N_t=0\},
 $$
-于是
+
+  因此
+
+
+
 $$
- E(T^2)=D(T)+[E(T)]^2=4+4=8.
+P(T>t)=P(N_t=0)=\exp(-t/2).
 $$
-由于$T_1^2,T_2^2,\cdots$独立同分布且数学期望存在，由辛钦大数定律，
+
+  故
+
+
+
 $$
- \frac1n\sum_{i=1}^nT_i^2\xrightarrow{P}E(T^2)=8.
+F_T(t)=\begin{cases}0,&t<0,\\1-e^{-t/2},&t\ge0.\end{cases}
 $$
-因此
+
+</Step>
+<Step>
+
+  ### 求导得到密度
+
+  对 $t>0$，
+
+
+
 $$
- a=8.
+f_T(t)=F_T'(t)=\frac12e^{-t/2}.
 $$
+
+  从而 $T\sim\operatorname{Exp}(1/2)$（参数为**率**）。
+
+</Step>
+<Step>
+
+  ### 求二阶矩并识别大数定律极限
+
+  指数分布率参数为 $1/2$ 时，
+
+
+
+$$
+ET=\frac1{1/2}=2,\qquad DT=\frac1{(1/2)^2}=4,
+$$
+
+
+
+$$
+ET^2=DT+(ET)^2=4+4=8.
+$$
+
+  因 $T_1,T_2,\ldots$ 独立同分布，且 $ET^2<\infty$，
+
+
+
+$$
+\frac1n\sum_{i=1}^nT_i^2\xrightarrow{P}ET^2=\boxed{8}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="易错：计数参数与等待时间参数">$N_t$ 的泊松参数是 $t/2$，对应的到达率是 $1/2$，不是 $2$；所以首到时间均值为 $2$，二阶原点矩为 $8$，而不是方差 $4$。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-97235a-010" type="blank">
+<Question id="selected-1103-math-97235a-010" type="blank" tags="科目:概率论与数理统计, 考点:条件大数定律与随机极限">
 
 设$X \sim N(0,1)$，在$X=x$的条件下，总体$Y \sim N(x,1)$，记$Y_1,Y_2,\cdots,Y_n,\cdots$为取自总体$Y$的简单随机样本，则$\frac{1}{n}\sum_{i=1}^{n}Y_i^2$依概率收敛于<Blank answer="1+X^2" kind="math" />。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
- 1+X^2.
+\boxed{\frac1n\sum_{i=1}^nY_i^2\xrightarrow{P}1+X^2}.
 $$
 
-**解析：** 在给定$X=x$的条件下，$Y_i$独立同分布于$N(x,1)$。因此
+**最重要的辨析：** 极限是**随机变量** $1+X^2$，不是常数 $2$。这里所有 $Y_i$ 在给定公共潜变量 $X$ 后才独立同分布；不应把它们无条件地当成独立样本。
+
+<Tabs items={['条件大数定律','条件方差直接验证']}>
+<Tab value="条件大数定律">
+
+  固定 $X=x$，$Y_i\mid X=x\sim N(x,1)$，所以
+
+
+
 $$
- E(Y_i^2\mid X=x)
-=D(Y_i\mid X=x)+[E(Y_i\mid X=x)]^2
-=1+x^2.
+E(Y_i^2\mid X=x)=D(Y_i\mid X=x)
+  +[E(Y_i\mid X=x)]^2=1+x^2.
 $$
-由条件下的辛钦大数定律，
+
+  对每个固定 $x$，条件下的 $Y_i^2$ 独立同分布且期望有限，故
+
+
+
 $$
- \frac1n\sum_{i=1}^nY_i^2\xrightarrow{P}1+x^2
-\qquad (X=x\text{给定}).
+\frac1n\sum_{i=1}^nY_i^2\xrightarrow{P}1+x^2
+  \qquad\text{（给定 }X=x\text{）}.
 $$
-去掉条件记号后，极限写为随机变量
+
+  对条件概率积分后，得到无条件的依概率收敛，极限为 $1+X^2$。
+
+</Tab>
+<Tab value="条件方差直接验证">
+
+  在 $X$ 给定时，
+
+
+
 $$
- 1+X^2.
+E(Y_i^2\mid X)=1+X^2,
+  \qquad D(Y_i^2\mid X)=2+4X^2.
 $$
+
+  条件独立使得
+
+
+
+$$
+D\left(\left.\frac1n\sum_{i=1}^nY_i^2\right|X\right)
+  =\frac{2+4X^2}{n}.
+$$
+
+  条件切比雪夫不等式再取期望，得到
+
+
+
+$$
+\begin{aligned}
+  &P\left(\left|\frac1n\sum_{i=1}^nY_i^2-(1+X^2)\right|\ge\varepsilon\right)\\
+  &\qquad\le\frac{E(2+4X^2)}{n\varepsilon^2}
+  =\frac6{n\varepsilon^2}\longrightarrow0,
+  \end{aligned}
+$$
+
+  因 $EX^2=1$，故严格证明了结论。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="为何不能直接写成 2">虽然无条件地 $EY_i^2=E(1+X^2)=2$，但各 $Y_i$ 共享同一个随机 $X$，因而无条件下相关；样本均值无法通过增加样本数消除这个共同的随机中心。$2$ 是极限随机变量的期望，并非样本平方均值的依概率极限。</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点3：独立非同分布序列的方差控制与收敛证明
+## 考点三｜独立非同分布序列的方差控制与证明
 
-<Question id="selected-1103-math-6164d8-003" type="single">
+<Question id="selected-1103-math-6164d8-003" type="single" tags="科目:概率论与数理统计, 考点:非同分布变量差的弱大数定律">
 
 设随机变量 $ X_1,X_2,\cdots,X_n,\cdots$ 相互独立，记
 
 $$
- Y_n=X_{2n}-X_{2n-1}\qquad(n\ge1),
+Y_n=X_{2n}-X_{2n-1}\qquad(n\ge1),
 $$
 
 根据大数定律，当 $ n\to\infty$ 时
 
 $$
- \frac1n\sum_{i=1}^{n}Y_i
+\frac1n\sum_{i=1}^{n}Y_i
 $$
 
 依概率收敛到零，只要 $ \{X_n,n\ge1\}$
@@ -443,49 +751,69 @@ $$
 
 <Solution>
 
-由于 $ X_1,X_2,\cdots$ 相互独立，而各个 $ Y_i$ 分别由互不重叠的随机变量对 $ (X_{2i-1},X_{2i})$ 构成，所以 $ Y_1,Y_2,\cdots$ 也相互独立。
+**参考答案：** 第 **B** 项，即 $X_n$ 具有**相同的有限期望与方差**即可保证所需结论。
 
-若所有 $ X_n$ 有相同的数学期望 $ \mu$ 和相同的方差 $ \sigma^2$，则
 $$
- EY_i=EX_{2i}-EX_{2i-1}=\mu-\mu=0,
+\boxed{\frac1n\sum_{i=1}^n(X_{2i}-X_{2i-1})\xrightarrow{P}0}.
 $$
-并且
-$$
- DY_i=DX_{2i}+DX_{2i-1}=2\sigma^2.
-$$
-于是
-$$
- E\left(\frac1n\sum_{i=1}^{n}Y_i\right)=0,
-$$
-且
-$$
- D\left(\frac1n\sum_{i=1}^{n}Y_i\right)
-=\frac1{n^2}\sum_{i=1}^{n}DY_i
-=\frac{2\sigma^2}{n}\to0.
-$$
-由切比雪夫不等式，任取 $ \varepsilon>0$，
-$$
- P\left\{\left|\frac1n\sum_{i=1}^{n}Y_i\right|\ge\varepsilon\right\}
-\le\frac{2\sigma^2}{n\varepsilon^2}\to0.
-$$
-因此
-$$
- \frac1n\sum_{i=1}^{n}Y_i\xrightarrow{P}0.
-$$
-故选（B）。
 
-（A）不能保证各 $ Y_i$ 的期望为零；（C）、（D）仅说明分布类型相同，未明确保证所需期望、方差存在。
+**核心思路：** 把两个相邻变量作差后，由于所用变量组互不重叠，各差值依然独立；共同的期望使差的期望为零，共同的有限方差则保证平均值方差趋于零。
+
+<Steps>
+<Step>
+
+  ### 验证差值序列独立且中心化
+
+  令 $Y_i=X_{2i}-X_{2i-1}$。随机向量 $(X_{2i-1},X_{2i})$ 取自互不相交的独立变量组，因此 $Y_i$ 相互独立。
+
+  如果 $EX_j=\mu$、$DX_j=\sigma^2<\infty$，则
+
+
+
+$$
+EY_i=\mu-\mu=0,\qquad
+  DY_i=DX_{2i}+DX_{2i-1}=2\sigma^2.
+$$
+
+</Step>
+<Step>
+
+  ### 用切比雪夫不等式完成依概率收敛证明
+
+  对 $S_n=n^{-1}\sum_{i=1}^nY_i$，
+
+
+
+$$
+ES_n=0,\qquad DS_n=\frac{2\sigma^2}{n}.
+$$
+
+  对任意 $\varepsilon>0$，
+
+
+
+$$
+P(|S_n|\ge\varepsilon)
+  \le\frac{2\sigma^2}{n\varepsilon^2}\longrightarrow0.
+$$
+
+  故 $S_n\xrightarrow{P}0$。
+
+</Step>
+</Steps>
+
+**为什么其他选项不足：** A 仅保证各自期望存在，不保证相邻两项的期望差为零；C、D 只说明每个 $X_n$ 同属离散型或连续型分布类别，并没有共同的分布或统一的矩条件。题目问的是**充分条件**，不要求这些条件是必要的。
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-6164d8-007" type="blank">
+<Question id="selected-1103-math-6164d8-007" type="blank" tags="科目:概率论与数理统计, 考点:独立变量中心化均值的收敛">
 
 设随机变量序列 $ X_1,X_2,\cdots,X_n,\cdots$ 相互独立，
 
 $$
- EX_i=\mu_i,
+EX_i=\mu_i,
 \qquad
 DX_i=2,
 \qquad i=1,2,\cdots,
@@ -494,49 +822,77 @@ $$
 则当 $ n\to\infty$ 时，
 
 $$
- \frac1n\sum_{i=1}^{n}(X_i-\mu_i)
+\frac1n\sum_{i=1}^{n}(X_i-\mu_i)
 $$
 
 依概率收敛于 <Blank answer="0" kind="math" />。
 
 <Solution>
 
-**答案：** $ 0$
+**参考答案：**
 
-**解析：** 令
 $$
- Y_n=\frac1n\sum_{i=1}^{n}(X_i-\mu_i).
+\boxed{0}.
 $$
-则
+
+**核心思路：** 虽然 $X_i$ 未必同分布，逐项中心化后期望全为零，而方差统一为 $2$。独立性保证其均值的方差为 $2/n$，所以仍有弱大数定律。
+
+<Steps>
+<Step>
+
+  ### 构造中心化样本均值
+
+  设
+
+
+
 $$
- EY_n
-=\frac1n\sum_{i=1}^{n}(EX_i-\mu_i)
-=0.
+S_n=\frac1n\sum_{i=1}^n(X_i-\mu_i).
 $$
-由各随机变量相互独立，
+
+  利用 $EX_i=\mu_i$，得
+
+
+
 $$
- DY_n
-=\frac1{n^2}\sum_{i=1}^{n}DX_i
-=\frac1{n^2}\cdot2n
-=\frac2n.
+ES_n=\frac1n\sum_{i=1}^n(EX_i-\mu_i)=0.
 $$
-任取 $ \varepsilon>0$，由切比雪夫不等式，
+
+</Step>
+<Step>
+
+  ### 求方差并得到显式概率上界
+
+  随机变量互相独立，且平移不改变方差，故
+
+
+
 $$
- P\{|Y_n|\ge\varepsilon\}
-\le\frac{DY_n}{\varepsilon^2}
-=\frac2{n\varepsilon^2}\to0.
+DS_n=\frac1{n^2}\sum_{i=1}^nD(X_i-\mu_i)
+  =\frac{2n}{n^2}=\frac2n.
 $$
-因此
+
+  因此对任意 $\varepsilon>0$，
+
+
+
 $$
- Y_n\xrightarrow{P}0,
+P(|S_n|\ge\varepsilon)
+  \le\frac{2}{n\varepsilon^2}\to0.
 $$
-即所求依概率极限为 $ 0$。
+
+  这就是 $S_n\xrightarrow{P}0$ 的定义。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="非同分布大数定律的常用充分条件">更一般地，若变量独立且 $\frac1{n^2}\sum_{i=1}^nDX_i\to0$，则 $\frac1n\sum_{i=1}^n(X_i-EX_i)\xrightarrow{P}0$。本题所有方差为 $2$，直接满足该条件。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-16d998-009" type="essay">
+<Question id="selected-1103-math-16d998-009" type="essay" tags="科目:概率论与数理统计, 考点:切比雪夫型弱大数定律证明">
 
 设随机变量序列 $X_1,X_2,\cdots$ 相互独立，$X_i$ 的分布律为
 
@@ -552,68 +908,79 @@ $$
 
 <Solution>
 
-**答案：** 成立，即 $\dfrac1n\sum_{i=1}^nX_i\xrightarrow{P}0$。
-
-**解析：** 由分布律的对称性，
+**参考答案：** 命题成立，即
 
 $$
-EX_i=(-ia)\frac1{2i^2}+(ia)\frac1{2i^2}=0.
+\boxed{\frac1n\sum_{i=1}^nX_i\xrightarrow{P}0},
 $$
 
-又
+也就是对每个 $\varepsilon>0$，
 
 $$
-E(X_i^2)=i^2a^2\left(\frac1{2i^2}+\frac1{2i^2}\right)=a^2,
+\boxed{\lim_{n\to\infty}P\left(\left|\frac1n\sum_{i=1}^nX_i\right|\ge\varepsilon\right)=0}.
 $$
 
-因此
+**证明思路：** $X_i$ 取值的绝对值随 $i$ 增长，但非零概率按 $1/i^2$ 减小，因此所有变量的方差竟然保持常数 $a^2$；配合独立性即可应用切比雪夫型弱大数定律。
+
+<Steps>
+<Step>
+
+  ### 由对称分布求期望
+
+
 
 $$
-DX_i=a^2.
+EX_i=(-ia)\frac1{2i^2}+0\left(1-\frac1{i^2}\right)
+  +(ia)\frac1{2i^2}=0.
 $$
 
-记
+</Step>
+<Step>
+
+  ### 求第二阶矩和方差
+
+
 
 $$
-S_n=\frac1n\sum_{i=1}^nX_i.
+\begin{aligned}
+  EX_i^2&=(ia)^2\left(\frac1{2i^2}+\frac1{2i^2}\right)
+  =a^2,\\
+  DX_i&=EX_i^2-(EX_i)^2=a^2.
+  \end{aligned}
 $$
 
-由于 $X_1,X_2,\cdots$ 相互独立，
+  方差不依赖 $i$，虽不是同分布序列，也有统一的二阶矩控制。
+
+</Step>
+<Step>
+
+  ### 对平均值应用切比雪夫不等式
+
+  令 $\overline X_n=\frac1n\sum_{i=1}^nX_i$。独立性给出
+
+
 
 $$
-ES_n=0,
+E\overline X_n=0,\qquad
+  D\overline X_n=\frac1{n^2}\sum_{i=1}^nDX_i
+  =\frac{a^2}{n}.
 $$
 
-且
+  所以
+
+
 
 $$
-DS_n
-=\frac1{n^2}\sum_{i=1}^nDX_i
-=\frac{na^2}{n^2}
-=\frac{a^2}{n}\to0.
+0\le P(|\overline X_n|\ge\varepsilon)
+  \le\frac{a^2}{n\varepsilon^2}\longrightarrow0.
 $$
 
-由切比雪夫不等式，
+  由夹逼原理，所求极限确为零。
 
-$$
-P\{|S_n|\ge\varepsilon\}
-=P\{|S_n-ES_n|\ge\varepsilon\}
-\le\frac{DS_n}{\varepsilon^2}
-=\frac{a^2}{n\varepsilon^2}
-\to0.
-$$
+</Step>
+</Steps>
 
-因此
-
-$$
-\lim_{n\to\infty}P\left\{\left|\frac1n\sum_{i=1}^nX_i\right|\ge\varepsilon\right\}=0,
-$$
-
-即
-
-$$
-\frac1n\sum_{i=1}^nX_i\xrightarrow{P}0.
-$$
+<Callout type="info" title="证明中的逻辑界限">这里用的是独立但**不一定同分布**随机变量的切比雪夫型大数定律，不能直接写“$X_i$ 独立同分布”。参数 $a$ 固定即可（$a=0$ 时结论显然）。</Callout>
 
 </Solution>
 

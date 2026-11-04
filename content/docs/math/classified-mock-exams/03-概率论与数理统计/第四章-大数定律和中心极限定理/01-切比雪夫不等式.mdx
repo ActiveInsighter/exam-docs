@@ -1,13 +1,11 @@
 ---
-title: "第一节 切比雪夫不等式｜偏差概率界、协方差修正与最优方差"
-description: "参照历年真题的二阶矩条件和样本平方均值偏差界，精选单侧事件放缩、中心识别、相关变量方差计算及方差最优化问题。"
+title: "1. 切比雪夫不等式"
+description: "8道切比雪夫不等式题全部重构：期望中心、参数反推、相关变量方差、卡方与二项尾界。"
 ---
 
-# 第一节 切比雪夫不等式｜偏差概率界、协方差修正与最优方差
+本节保留 **8 道**精选题，**全部完成重构**。从期望中心与尾概率界入手，进而掌握协方差修正的方差计算、最优线性组合、卡方平方和的偏差界，以及二项和的集中概率；解答均先列参考答案，再交代不等式的使用条件、计算步骤及估计界与实际概率的区别。
 
-依照「真题核心题目」同名小节的考点与命题风格精选 **8 道高质量模拟、练习原题**。题干、选项、答案、解析、公式及原有交互组件保持原样。
-
-## 考点1：期望中心与偏差事件的切比雪夫界
+## 考点一｜期望中心、偏差概率与题设逻辑
 
 <Question id="selected-1103-classified-1031-tangjiafeng-2027-s1-q16" type="blank" points={5} tags="来源:汤家凤八套卷, 考点:切比雪夫不等式, 难度:基础">
 
@@ -15,33 +13,64 @@ description: "参照历年真题的二阶矩条件和样本平方均值偏差界
 
 <Solution>
 
-**答案：$\boxed{\dfrac14}$。**
-
-**过程**：卡方分布 $X\sim\chi^2(2)$ 满足
+**参考答案：**
 
 $$
-E(X)=2,\qquad D(X)=4.
+\boxed{P(X>6)\le\frac14}.
 $$
 
-因 $X\ge0$，事件 $\{X-2<-4\}=\{X<-2\}$ 不可能发生，故
+**核心思路：** 先用卡方分布的参数得到 $EX,DX$，然后将单侧尾事件包含于以均值为中心的双侧偏差事件；题目要求的是**切比雪夫给出的界**，并非精确尾概率。
+
+<Steps>
+<Step>
+
+  ### 由卡方分布的自由度求前两阶矩
+
+  对 $X\sim\chi^2(\nu)$，$EX=\nu$、$DX=2\nu$。取 $\nu=2$，得
+
+
 
 $$
-P(X>6)=P(X-2>4)\le P(|X-2|\ge4).
+EX=2,\qquad DX=4.
 $$
 
-由切比雪夫不等式，
+</Step>
+<Step>
+
+  ### 将单侧事件放大为双侧事件
+
+
 
 $$
-P(|X-E(X)|\ge4)\le\frac{D(X)}{4^2}
-=\frac4{16}=\boxed{\frac14}.
+\{X>6\}=\{X-2>4\}\subseteq\{|X-2|\ge4\}.
 $$
 
-<Callout type="info" title="不等式与实际概率">题目要求的是由切比雪夫不等式给出的上界，并非精确概率。事实上 $\chi^2(2)$ 的尾概率是 $P(X>6)=e^{-3}$，小于 $1/4$。</Callout>
+  由切比雪夫不等式，对于 $t>0$，
+
+
+
+$$
+P(|X-EX|\ge t)\le\frac{DX}{t^2}.
+$$
+
+  令 $t=4$ 得
+
+
+
+$$
+P(X>6)\le P(|X-2|\ge4)
+  \le\frac4{16}=\boxed{\frac14}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="info" title="检验上界的意义">事实上 $\chi^2(2)$ 是率为 $1/2$ 的指数分布，$P(X>6)=e^{-3}\approx0.0498$，小于 $1/4$。切比雪夫界一般偏宽，它的优点是不必使用完整密度函数。</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-classified-1031-math-66038b-016" type="blank" points={5} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-66038b-016" type="blank" points={5} tags="来源:张宇8套卷, 考点:切比雪夫界与题设条件辨析">
 
 设随机变量 $X$ 服从 $[-1,a]$ 上的均匀分布，如果由切比雪夫不等式得
 
@@ -61,67 +90,72 @@ $$
 
 <Solution>
 
-**答案：** $(3,2)$
-
-**解析：** 因为
+**参考答案（按原题预设的等号取界方式）：**
 
 $$
-X\sim U[-1,a],
+\boxed{(a,\varepsilon)=(3,2)}.
 $$
 
-所以
+**重要说明：** 题干只说“由切比雪夫不等式得 $P(|X-1|<\varepsilon)\ge2/3$”，**严格按字面无法唯一确定** $(a,\varepsilon)$。原答案 $(3,2)$ 隐含额外约定：偏差中心 $1$ 恰好是 $EX$，并且把切比雪夫给出的下界**取为 $2/3$**。以下先按这一命题意图推导，再说明为什么原条件不足。
+
+<Steps>
+<Step>
+
+  ### 按标准切比雪夫形式识别偏差中心
+
+  若 $X\sim U[-1,a]$，则
+
+
 
 $$
-EX=\frac{a-1}{2},
-\qquad
-DX=\frac{(a+1)^2}{12}.
+EX=\frac{-1+a}{2},\qquad DX=\frac{(a+1)^2}{12}.
 $$
 
-题中切比雪夫不等式写成以 $1$ 为中心，因此应有
+  标准双侧切比雪夫不等式是
+
+
 
 $$
-EX=1,
+P(|X-EX|<\varepsilon)\ge1-\frac{DX}{\varepsilon^2}.
 $$
 
-且
+  **若额外要求**所给中心 $1$ 等于均值，则 $(-1+a)/2=1$，故 $a=3$、$DX=4/3$。
+
+</Step>
+<Step>
+
+  ### 在“下界恰为 $2/3$”的额外约定下求半径
+
+  若再将右端下界设为 $2/3$，有
+
+
 
 $$
-1-\frac{DX}{\varepsilon^2}=\frac23.
+1-\frac{4/3}{\varepsilon^2}=\frac23
+  \quad\Longrightarrow\quad\varepsilon^2=4.
 $$
 
-于是
+  因 $\varepsilon>0$，得 $\varepsilon=2$，因此获得原预设答案 $(3,2)$。
 
-$$
-\begin{cases}
-\dfrac{a-1}{2}=1,\\[4pt]
-1-\dfrac{(a+1)^2}{12\varepsilon^2}=\dfrac23.
-\end{cases}
-$$
+</Step>
+</Steps>
 
-解得
+<Callout type="warn" title="原题存在条件不足：请勿把不等式当等式">
 
-$$
-a=3,
-\qquad
-\varepsilon=2.
-$$
+即便固定 $a=3$，任意 $\varepsilon\ge2$ 都可由切比雪夫不等式得到**至少 $2/3$** 的下界。例如 $\varepsilon=3$ 时，切比雪夫下界是 $1-\frac{4/3}{9}=\frac{23}{27}>\frac23$，仍满足题意，但 $(a,\varepsilon)\ne(3,2)$。因此 $(3,2)$ 只是题目所预设的一组参数，而非原不等式能唯一推出的结论；若用于正式题库，建议补充“下界恰为 $2/3$”等条件。
 
-故
-
-$$
-(a,\varepsilon)=(3,2).
-$$
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-6164d8-001" type="single">
+<Question id="selected-1103-math-6164d8-001" type="single" tags="科目:概率论与数理统计, 考点:尾概率上界与补事件">
 
 设随机变量 $ X$ 的方差存在，并且满足不等式
 
 $$
- P\{|X-EX|\ge3\}\le\frac29,
+P\{|X-EX|\ge3\}\le\frac29,
 $$
 
 则一定有
@@ -133,40 +167,62 @@ $$
 
 <Solution>
 
-由对立事件关系，
-$$
- P\{|X-EX|<3\}=1-P\{|X-EX|\ge3\}.
-$$
-题设给出
-$$
- P\{|X-EX|\ge3\}\le\frac29,
-$$
-因此
-$$
- P\{|X-EX|<3\}
-\ge 1-\frac29
-=\frac79.
-$$
-故（D）一定成立。
+**参考答案：D。**
 
-切比雪夫不等式只能给出
 $$
- P\{|X-EX|\ge3\}\le\frac{DX}{9},
+\boxed{P\{|X-EX|<3\}\ge\frac79}.
 $$
-但由事件概率不超过 $ \frac29$ 不能反推出 $ DX=2$ 或 $ DX\ne2$，所以（A）、（C）均不一定成立；（B）与上面的结论相反。
+
+**核心思路：** 题目**已经直接给出尾事件概率的上界**，不需要倒用切比雪夫不等式。取对立事件即可得到确定结论。
+
+<Steps>
+<Step>
+
+  ### 先识别互补事件
+
+  设 $A=\{|X-EX|\ge3\}$，则其对立事件是 $A^c=\{|X-EX|<3\}$，注意边界一边是“$\ge$”，另一边必须是“$<$”。
+
+</Step>
+<Step>
+
+  ### 直接取补集并处理不等号方向
+
+  由题设 $P(A)\le2/9$，
+
+
+
+$$
+P(A^c)=1-P(A)\ge1-\frac29=\boxed{\frac79}.
+$$
+
+  故 D 正确，B 的严格小于式与之相反。
+
+</Step>
+<Step>
+
+  ### 说明为什么不能确定 $DX$
+
+  切比雪夫不等式给出 $P(A)\le DX/9$，与题设 $P(A)\le2/9$ 是**两个上界**，不能据此反推 $DX=2$，更不能反推 $DX\ne2$。
+
+  可用反例同时排除 A、C 的“必然”：若 $X$ 以 $1/2$ 概率取 $\sqrt2$、以 $1/2$ 概率取 $-\sqrt2$，则 $DX=2$ 且 $P(A)=0$；若 $X\equiv0$，则 $DX=0$ 且 $P(A)=0$。两者都满足题设，方差却不同。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="不等式题的逻辑方向">从 $u\le a$ 与 $u\le b$ **不能**推出 $a=b$。只有明确给出等号条件或最优上界时，才可能进一步推断方差；本题可直接使用概率的补事件规则，不必借助切比雪夫不等式。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-6164d8-005" type="single">
+<Question id="selected-1103-math-6164d8-005" type="single" tags="科目:概率论与数理统计, 考点:均值方差与切比雪夫界">
 
 设随机变量 $ X_1,X_2,\cdots,X_n$ 相互独立同分布，其密度函数为偶函数，且 $ DX_i=1$，$ i=1,\cdots,n$，则对任意 $ \varepsilon>0$，根据切比雪夫不等式直接可得
 
 <Option>
 
 $$
- P\left\{\left|\frac1n\sum_{i=1}^{n}X_i-n\right|<\varepsilon\right\}
+P\left\{\left|\frac1n\sum_{i=1}^{n}X_i-n\right|<\varepsilon\right\}
 \ge1-\frac1{\varepsilon^2};
 $$
 
@@ -174,7 +230,7 @@ $$
 <Option>
 
 $$
- P\left\{\left|\frac1n\sum_{i=1}^{n}X_i-n\right|<\varepsilon\right\}
+P\left\{\left|\frac1n\sum_{i=1}^{n}X_i-n\right|<\varepsilon\right\}
 \ge1-\frac1{n\varepsilon^2};
 $$
 
@@ -182,7 +238,7 @@ $$
 <Option correct>
 
 $$
- P\left\{\left|\frac1n\sum_{i=1}^{n}X_i\right|<\varepsilon\right\}
+P\left\{\left|\frac1n\sum_{i=1}^{n}X_i\right|<\varepsilon\right\}
 \ge1-\frac1{n\varepsilon^2};
 $$
 
@@ -190,7 +246,7 @@ $$
 <Option>
 
 $$
- P\left\{\left|\frac1n\sum_{i=1}^{n}X_i\right|<\varepsilon\right\}
+P\left\{\left|\frac1n\sum_{i=1}^{n}X_i\right|<\varepsilon\right\}
 \ge1-\frac1{\varepsilon^2}。
 $$
 
@@ -198,42 +254,72 @@ $$
 
 <Solution>
 
-密度函数为偶函数，因此随机变量关于原点对称，从而
+**参考答案：** 第 **C** 项，即
+
 $$
- EX_i=0.
+\boxed{P\left(\left|\frac1n\sum_{i=1}^{n}X_i\right|<\varepsilon\right)\ge 1-\frac1{n\varepsilon^2}}.
 $$
-令
+
+**核心思路：** 切比雪夫不等式以**期望为中心**，首先确定样本均值的期望为零，再计算其方差为 $1/n$。
+
+<Steps>
+<Step>
+
+  ### 用密度的偶对称性求均值
+
+  已知 $f(x)=f(-x)$，且 $DX_i=1<\infty$，因此一阶绝对矩存在。被积函数 $xf(x)$ 为奇函数，故
+
+
+
 $$
- \overline X=\frac1n\sum_{i=1}^{n}X_i.
+EX_i=\int_{-\infty}^{\infty}xf(x)\,\mathrm dx=0.
 $$
-由独立性及 $ DX_i=1$，有
+
+</Step>
+<Step>
+
+  ### 计算独立样本均值的方差
+
+  记 $\overline X_n=\frac1n\sum_{i=1}^nX_i$。则
+
+
+
 $$
- E\overline X=0,
+E\overline X_n=0,\qquad D\overline X_n=\frac1{n^2}\sum_{i=1}^nDX_i=\frac1n.
 $$
-以及
+
+  这里**必须使用相互独立**才能消掉协方差项。
+
+</Step>
+<Step>
+
+  ### 应用切比雪夫不等式并匹配选项
+
+
+
 $$
- D\overline X
-=\frac1{n^2}\sum_{i=1}^{n}DX_i
-=\frac1n.
+P(|\overline X_n|\ge\varepsilon)
+  \le\frac{D\overline X_n}{\varepsilon^2}
+  =\frac1{n\varepsilon^2}.
 $$
-由切比雪夫不等式，
-$$
- P\{|\overline X-E\overline X|\ge\varepsilon\}
-\le\frac{D\overline X}{\varepsilon^2}
-=\frac1{n\varepsilon^2}.
-$$
-因此
-$$
- P\left\{\left|\frac1n\sum_{i=1}^{n}X_i\right|<\varepsilon\right\}
-\ge1-\frac1{n\varepsilon^2}.
-$$
-故选（C）。
+
+  取补事件，得到上述 C 项。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="两个干扰点">
+
+- A、B 把偏差中心错写成了 $n$；真正的中心是 $E\overline X_n=0$。
+- D 忽略均值方差缩小到 $1/n$。当右侧下界为负数时不等式仍成立，只是估计不够有用。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：相关变量的方差、平方和界与最优化
+## 考点二｜相关变量组合的方差与最优切比雪夫界
 
 <Question id="selected-1103-classified-1031-liyongle-2027-s1-q16" type="blank" points={5} tags="来源:李永乐六套卷, 考点:切比雪夫不等式与方差最优化, 难度:中等">
 
@@ -247,51 +333,68 @@ $$
 
 <Solution>
 
-**答案：$\displaystyle\boxed{\frac{13}{16}}$（在 $a=1$ 时取得）。**
-
-由协方差与相关系数的关系，
+**参考答案：**
 
 $$
-\operatorname{Cov}(X,Y)
-=\rho_{XY}\sqrt{D(X)D(Y)}
-=-\frac12\sqrt{4\cdot1}=-1.
+\boxed{\max_{a\in\mathbb R}k(a)=\frac{13}{16}},\qquad\boxed{a=1}.
 $$
 
-设 $Z=X+aY$，则 $E(Z)=0$，且
+**核心思路：** 题目要最大化的不是实际概率，而是切比雪夫不等式产生的**可保证下界**；因此要最小化 $D(X+aY)$。
+
+<Steps>
+<Step>
+
+  ### 把相关系数转化为协方差
+
+
+
+$$
+\operatorname{Cov}(X,Y)=\rho_{XY}\sqrt{DX\,DY}
+  =-\frac12\sqrt{4\times1}=-1.
+$$
+
+</Step>
+<Step>
+
+  ### 写出线性组合方差并配方
+
+  设 $Z_a=X+aY$，利用 $EX=EY=0$，可得 $EZ_a=0$，且
+
+
 
 $$
 \begin{aligned}
-D(Z)
-&=D(X)+a^2D(Y)+2a\operatorname{Cov}(X,Y)\\
-&=4+a^2-2a=(a-1)^2+3.
-\end{aligned}
+  DZ_a&=DX+a^2DY+2a\operatorname{Cov}(X,Y)\\
+  &=4+a^2-2a=(a-1)^2+3.
+  \end{aligned}
 $$
 
-由切比雪夫不等式，
+  最小方差在 $a=1$ 时取到，为 $3$。
+
+</Step>
+<Step>
+
+  ### 代回概率下界
+
+
 
 $$
-P\{|Z|\ge4\}\le\frac{D(Z)}{16},
+\begin{aligned}
+  P(|Z_a|<4)
+  &=1-P(|Z_a-EZ_a|\ge4)\\
+  &\ge1-\frac{DZ_a}{4^2}
+  =\frac{13}{16}-\frac{(a-1)^2}{16}.
+  \end{aligned}
 $$
 
-因而
+  因此 $\max k(a)=13/16$。
 
-$$
-P\{|Z|<4\}\ge1-\frac{(a-1)^2+3}{16}
-=:k(a).
-$$
+</Step>
+</Steps>
 
-显然 $D(Z)$ 在 $a=1$ 时最小，故
+<Callout type="idea" title="通用最优化公式">当 $DY>0$ 时，使 $D(X+aY)$ 最小的系数是 $a_*=-\operatorname{Cov}(X,Y)/DY$；其最小值为 $DX-\operatorname{Cov}(X,Y)^2/DY$。这是最优线性组合与最小均方误差问题常见的同一个配方结构。</Callout>
 
-$$
-\max_{a\in\mathbb R}k(a)
-=1-\frac3{16}=\boxed{\frac{13}{16}}.
-$$
-
-<Callout type="info" title="估计界不是实际概率">
-
-这里优化的是**切比雪夫不等式给出的下界**，并非断言真实的 $P\{|X+aY|<4\}$ 一定等于 $13/16$。题目只给出前两阶矩与相关系数，不能据此确定真实概率。
-
-</Callout>
+**核查：** $13/16$ 只是由已知二阶矩能给出的切比雪夫下界，不等于真实概率的必然取值。
 
 </Solution>
 </Question>
@@ -311,106 +414,155 @@ $$
 
 <Solution>
 
-**答案：A。** 利用 $D(2X-Y)=3\sigma^2$ 及切比雪夫不等式。
+**参考答案：** 第 **A** 项，$\boxed{1/3}$。
+
+**解题主线：** 先从 $Y$ 的密度看出 $Y\overset d=2a-X$，由已知 $D(X+Y)$ 求协方差，最后计算目标中心化变量的方差。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 由对称密度求 $Y$ 的期望与方差
+  ### 识别 $Y$ 的分布变换
 
-  因 $Y$ 的密度为 $f(2a-y)$，所以 $2a-Y$ 与 $X$ **同分布**（并非断言二者相等）。于是
+  若 $X'$ 与 $X$ 同分布，则 $2a-X'$ 的密度是 $f(2a-y)$。因此
 
-  $$
-  E(Y)=2a-\mu,\qquad D(Y)=\sigma^2.
-  $$
 
-  由 $D(X+Y)=3\sigma^2$，
 
-  $$
-  3\sigma^2=\sigma^2+\sigma^2+2\operatorname{Cov}(X,Y)
-  \quad\Longrightarrow\quad
-  \operatorname{Cov}(X,Y)=\frac{\sigma^2}{2}.
-  $$
+$$
+EY=2a-\mu,\qquad DY=\sigma^2.
+$$
 
-  </Step>
-  <Step>
+  **注意：** 这里只是同分布关系，并非说 $Y=2a-X$；题目给定的 $D(X+Y)=3\sigma^2$ 还包含二者的相关信息。
 
-  ### 计算目标变量的方差并应用不等式
+</Step>
+<Step>
 
-  设 $Z=2X-Y$，则
+  ### 由和的方差反推协方差
 
-  $$
-  E(Z)=2\mu-(2a-\mu)=3\mu-2a,
-  $$
 
-  $$
-  \begin{aligned}
-  D(Z)&=4D(X)+D(Y)-4\operatorname{Cov}(X,Y)\\
+
+$$
+3\sigma^2=D(X+Y)=2\sigma^2+2\operatorname{Cov}(X,Y),
+$$
+
+  故 $\operatorname{Cov}(X,Y)=\sigma^2/2$。
+
+</Step>
+<Step>
+
+  ### 对指定线性组合使用切比雪夫不等式
+
+  令 $Z=2X-Y$，则
+
+
+
+$$
+EZ=2\mu-(2a-\mu)=3\mu-2a,
+$$
+
+
+
+$$
+\begin{aligned}
+  DZ&=4DX+DY-4\operatorname{Cov}(X,Y)\\
   &=4\sigma^2+\sigma^2-2\sigma^2=3\sigma^2.
   \end{aligned}
-  $$
+$$
 
-  由切比雪夫不等式（不需要假设 $X,Y$ 独立），
+  因 $\sigma>0$，
 
-  $$
-  P\{|Z-E(Z)|\ge3\sigma\}
-  \le\frac{D(Z)}{(3\sigma)^2}
-  =\boxed{\frac13}.
-  $$
 
-  </Step>
+
+$$
+P\bigl(|Z-EZ|\ge3\sigma\bigr)
+  \le\frac{DZ}{9\sigma^2}=\boxed{\frac13}.
+$$
+
+</Step>
 </Steps>
+
+<Callout type="warn" title="易错：不能默认 X、Y 独立">如果把 $\operatorname{Cov}(X,Y)$ 直接写成零，就会得到错误方差 $5\sigma^2$。这道题的关键恰恰是利用已知的和方差恢复协方差。</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-97235a-008" type="blank">
+<Question id="selected-1103-math-97235a-008" type="blank" tags="科目:概率论与数理统计, 考点:卡方平方和与偏差概率">
 
 设$X_1,X_2,\cdots,X_n(n>2)$是来自总体$X \sim N(0,1)$的简单随机样本，由切比雪夫不等式得$P\{0<\sum_{i=1}^{n}X_i^2<2n\}$不小于<Blank answer="1-((2)/(n))" kind="math" />。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
- 1-\frac2n.
+\boxed{P\left(0<\sum_{i=1}^{n}X_i^2<2n\right)\ge1-\frac2n}\qquad(n>2).
 $$
 
-**解析：** 令
+**核心思路：** 平方和的均值是 $n$、方差是 $2n$；要求的区间 $(0,2n)$ 正好是以 $n$ 为中心、半宽度为 $n$ 的区间。
+
+<Steps>
+<Step>
+
+  ### 求单个正态变量平方的矩
+
+  由 $X_i\sim N(0,1)$，$EX_i^2=1$、$EX_i^4=3$，故
+
+
+
 $$
- S=\sum_{i=1}^{n}X_i^2.
-$$
-因$X_i\sim N(0,1)$，有
-$$
- E(X_i^2)=1,
-\qquad
-D(X_i^2)=E(X_i^4)-[E(X_i^2)]^2=3-1=2.
-$$
-故
-$$
- E(S)=n,
-\qquad
-D(S)=2n.
-$$
-又$S>0$几乎处处成立，因此
-$$
- \{0<S<2n\}=\{|S-n|<n\}
-$$
-除零概率事件外等价。由切比雪夫不等式，
-$$
- P(|S-n|<n)
-\ge1-\frac{D(S)}{n^2}
-=1-\frac{2n}{n^2}
-=1-\frac2n.
+D(X_i^2)=EX_i^4-(EX_i^2)^2=3-1=2.
 $$
 
-## 强化部分
+</Step>
+<Step>
+
+  ### 求平方和的期望与方差
+
+  设 $S_n=\sum_{i=1}^nX_i^2$。样本独立，所以各平方项独立，有
+
+
+
+$$
+ES_n=n,\qquad DS_n=2n.
+$$
+
+  也可以识别 $S_n\sim\chi^2(n)$，直接读取其期望与方差。
+
+</Step>
+<Step>
+
+  ### 把目标事件写成偏差事件
+
+
+
+$$
+\{0<S_n<2n\}=\{|S_n-n|<n\}.
+$$
+
+  因而
+
+
+
+$$
+\begin{aligned}
+  P(0<S_n<2n)
+  &=1-P(|S_n-n|\ge n)\\
+  &\ge1-\frac{DS_n}{n^2}
+  =1-\frac2n.
+  \end{aligned}
+$$
+
+</Step>
+</Steps>
+
+<Callout type="info" title="为什么要求 n>2">切比雪夫给出的数值下界 $1-2/n$ 在 $n>2$ 时为正，因而有非平凡信息；不等式本身对较小的正整数 $n$ 仍成立，但下界可能不比零更有用。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-16d998-004" type="blank" number={1}>
+## 考点三｜二项和的集中概率与区间偏差
+
+<Question id="selected-1103-math-16d998-004" type="blank" tags="科目:概率论与数理统计, 考点:二项分布可加性与切比雪夫界">
 
 设随机变量 $X_i\sim B(i,0.2)\ (i=1,2,\cdots,10)$，且 $X_1,X_2,\cdots,X_{10}$ 相互独立。根据切比雪夫不等式，有
 
@@ -424,41 +576,68 @@ $$
 
 <Solution>
 
-**答案：** $0.648$
-
-**解析：** 因为各随机变量的成功概率均为 $0.2$，且相互独立，所以二项分布具有可加性：
+**参考答案：**
 
 $$
-\sum_{i=1}^{10}X_i\sim B\left(\sum_{i=1}^{10}i,0.2\right)=B(55,0.2).
+\boxed{0.648}.
 $$
 
-记
+**核心思路：** 把十个不同试验次数的二项随机变量相加，其成功概率相同且独立，所以总数仍服从二项分布；再将区间端点与均值配对。
+
+<Tabs items={['利用二项分布可加性','直接利用期望和方差']}>
+<Tab value="利用二项分布可加性">
+
+  设 $S=\sum_{i=1}^{10}X_i$。由于每个 $X_i\sim B(i,0.2)$ 且相互独立，
+
+
 
 $$
-S=\sum_{i=1}^{10}X_i,
+S\sim B\left(\sum_{i=1}^{10}i,0.2\right)=B(55,0.2).
 $$
 
-则
+  因而
+
+
 
 $$
-ES=55\times0.2=11,
-\qquad
-DS=55\times0.2\times0.8=8.8.
+ES=55\times0.2=11,\qquad DS=55\times0.2\times0.8=8.8.
 $$
 
-又
+</Tab>
+<Tab value="直接利用期望和方差">
+
+  不必先写出 $S$ 的分布，利用独立性和矩的可加性即可：
+
+
 
 $$
-6<S<16\iff |S-11|<5.
+ES=\sum_{i=1}^{10}0.2i=11,
 $$
 
-由切比雪夫不等式，
+
 
 $$
-P\{|S-11|<5\}\ge1-\frac{8.8}{25}=0.648.
+DS=\sum_{i=1}^{10}i(0.2)(0.8)
+  =0.16\times55=8.8.
 $$
 
-因此填 $0.648$。
+</Tab>
+</Tabs>
+
+区间以 $11$ 为中心，
+
+$$
+\{6<S<16\}=\{|S-11|<5\}.
+$$
+
+因此切比雪夫不等式给出
+
+$$
+P(6<S<16)\ge1-\frac{8.8}{5^2}
+=1-0.352=\boxed{0.648}.
+$$
+
+<Callout type="warn" title="区分下界与精确概率">这里的 $0.648$ 是**由切比雪夫不等式得到的保证下界**，不是直接计算 $S\sim B(55,0.2)$ 的准确区间概率。所用事件是严格的 $6<S<16$，与公式中的 $|S-11|<5$ 恰好一致。</Callout>
 
 </Solution>
 
