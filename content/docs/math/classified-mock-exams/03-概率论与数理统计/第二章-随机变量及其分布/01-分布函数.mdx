@@ -1,15 +1,13 @@
 ---
-title: "第一节 分布函数｜合法性判定、跳跃概率与混合型随机变量的分段构造"
-description: "参照历年真题的分布函数性质、加权混合、离散概率跳跃、截尾分布、分段求解及随机变量变换考点，精选高区分度模拟与练习原题。"
+title: "1. 分布函数"
+description: "15道分布函数练习，完整重构分布函数性质、跳跃概率、混合模型、分段积分及随机变量变换。"
 ---
 
-# 第一节 分布函数｜合法性判定、跳跃概率与混合型随机变量的分段构造
+本节收录 **15 道**分布函数分类练习，现已**全部重写答案与推导**，覆盖合法性、左右极限与跳跃概率、分段密度积分、混合模型、截尾变换与概率积分变换。保留原题题干、选项、结构化答案、稳定题目 ID 及图片资源。
 
-参照「真题核心题目」同名小节的考点、题型与命题风格精选 **15 道模拟与练习原题**；所有 Question 组件连同题干、选项、答案、解析、公式及嵌套结构均保留原文。
+## 考点一｜分布函数性质、正态模型与混合分布
 
-## 考点1：分布函数的必要性质、单点概率与混合分布
-
-<Question id="selected-1103-math-3db062-002" type="single">
+<Question id="selected-1103-math-3db062-002" type="single" tags="科目:概率论与数理统计, 考点:分布函数合法性">
 
 下列函数中, 可作为某一随机变量的分布函数的是 $(\quad)$.
 
@@ -20,17 +18,40 @@ description: "参照历年真题的分布函数性质、加权混合、离散概
 
 <Solution>
 
-$F(x)$ 要成为某一随机变量的分布函数, 必满足以下三个条件:
-① $0 \leqslant F(x) \leqslant 1, F(+\infty)=1, F(-\infty)=0$;
-② $F(x)$ 是单调不减函数;
-③ $F(x)$ 右连续, 即 $\lim _{x \to a^+} F(x)=F(a)$.
-只有 B 满足以上三个条件, 而选项 A 和 C 中 $F(x)$ 不满足 $F(+\infty)=1$, 选项 D 中 $F(x)$ 不一定单调不减, 故选 B.
+**参考答案：** 正确选项为 **B**，即 $\boxed{F(x)=\frac1\pi\arctan x+\frac12}$。
+
+### 一、掌握分布函数的三个关键性质
+
+任意随机变量的分布函数 $F(x)=P(X\le x)$ 必须满足：
+
+1. **单调不减：** $x_1<x_2\Rightarrow F(x_1)\le F(x_2)$。
+2. **右连续：** $\lim_{t\downarrow x}F(t)=F(x)$。
+3. **两端极限：** $\lim_{x\to-\infty}F(x)=0$、$\lim_{x\to+\infty}F(x)=1$。
+
+满足这三条便能保证它是某个随机变量的分布函数。
+
+### 二、逐项验证
+
+- **A：** $\frac1{1+x^2}$ 在 $x>0$ 时下降，且 $F(+\infty)=0\ne1$，不合法。
+- **B：** $\arctan x$ 严格递增且连续；它的两端极限为 $-\frac\pi2$、$\frac\pi2$，所以 $F(-\infty)=0$、$F(+\infty)=1$，合法。
+- **C：** $x>0$ 时 $F(x)=\frac12(1-e^{-x})$，故 $F(+\infty)=\frac12\ne1$，不合法。
+- **D：** 只给出了 $\int_{-\infty}^{+\infty}f(t)\,\mathrm dt=1$，**没有**要求 $f(t)\ge0$，因此积分累积值未必单调不减，不能保证合法。
+
+### 三、对 D 构造具体反例
+
+令 $f(t)=2$（$0<t<1$），$f(t)=-1$（$1<t<2$），其他位置取 $0$，则积分总量 $2-1=1$，却有 $F(1)=2$、$F(2)=1$，违反分布函数的取值范围和单调性。
+
+<Callout type="idea" title="题目中的积分式何时正确">
+
+若额外给出 $f(t)\ge0$（几乎处处）并且积分为 $1$，则 D 的表达式才是有效的绝对连续分布函数。本题缺少的正是非负性条件。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3db062-003" type="single">
+<Question id="selected-1103-math-3db062-003" type="single" tags="科目:概率论与数理统计, 考点:单点概率与分布函数连续性">
 
 设 $X$ 是随机变量, 对任意实数 $x$, $P\{X=x\}=0$ 的充分必要条件是 $(\quad)$.
 
@@ -41,13 +62,46 @@ $F(x)$ 要成为某一随机变量的分布函数, 必满足以下三个条件:
 
 <Solution>
 
-$F(x)=P\{X \leqslant x\}$, 对任意实数 $x, F(x+0)=F(x)$ (右连续). 又 $P\{X=x\}=F(x)-F(x-0)$, 故 $P\{X=x\}=0 \Longleftrightarrow F(x)-F(x-0)=0 \Longleftrightarrow F(x-0)=F(x) \Longleftrightarrow F(x)$ 在 $x$ 处连续. 选项 B 正确.
+**参考答案：** 正确选项为 **B**：$F(x)$ 在整个实数轴上连续。
+
+### 一、从分布函数的左右极限出发
+
+对任意 $x$，分布函数为 $F(x)=P(X\le x)$。它必然右连续，但左极限一般满足
+
+$$
+F(x^-)=\lim_{t\uparrow x}F(t)=P(X<x).
+$$
+
+两者相减得到**单点概率公式**：
+
+$$
+\boxed{P(X=x)=F(x)-F(x^-).}
+$$
+
+### 二、证明充分性与必要性
+
+- **充分性：** 若 $F$ 处处连续，则 $F(x)=F(x^-)$，故每个单点都满足 $P(X=x)=0$。
+- **必要性：** 若对所有 $x$ 都有 $P(X=x)=0$，由上式知 $F(x)=F(x^-)$。再结合分布函数原本就具备的右连续性，可知 $F$ 在每一点都连续。
+
+因此两者等价，答案为 B。
+
+### 三、解释为什么其他选项不对
+
+- **A：** 密度函数是否连续不是必要条件；例如均匀分布的密度在区间端点可不连续，但分布函数依然连续。
+- **C：** 离散型随机变量至少有某个取值概率为正，与题设矛盾。
+- **D：** “不是离散型”可能是含原子质量的混合分布，依然可存在 $P(X=x)>0$。
+
+<Callout type="warn" title="分布函数连续不等于必有密度">
+
+例如康托分布的分布函数连续，但不存在通常意义上的概率密度。这里考查的是**是否存在单点概率**，不是密度函数存在与否。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3db062-006" type="single">
+<Question id="selected-1103-math-3db062-006" type="single" tags="科目:概率论与数理统计, 考点:对称密度与分布函数">
 
 设 $f(x)$ 为随机变量 $X$ 的概率密度, 且 $f(1-x) = f(1+x)$, $\int_{1}^{2} f(x)\mathrm{d}x = 0.4$, $X$ 的分布函数为 $F(x)$, 则 $F(0) = (\quad)$.
 
@@ -58,13 +112,40 @@ $F(x)=P\{X \leqslant x\}$, 对任意实数 $x, F(x+0)=F(x)$ (右连续). 又 $P\
 
 <Solution>
 
-由 $f(1-x)=f(1+x)$, 知 $f(x)$ 关于 $x=1$ 对称，因此
+**参考答案：** 正确选项为 **A**，$\boxed{F(0)=0.1}$。
+
+### 一、识别密度函数的对称中心
+
+条件 $f(1-x)=f(1+x)$ 对任意 $x$ 成立，说明密度关于直线 $x=1$ 对称。因为总概率为 $1$、密度在单点上的积分为零，所以中心左侧和右侧各占一半：
 
 $$
-F(0)=P\{X \leqslant 0\}=\int_{-\infty}^0 f(x) \mathrm{d} x=0.5-0.4=0.1,
+\int_{-\infty}^{1}f(t)\,\mathrm dt
+=\int_1^{+\infty}f(t)\,\mathrm dt=\frac12.
 $$
 
-故选 A.
+### 二、利用已知的右侧区间概率
+
+对称映射 $t\mapsto2-t$ 会把 $[1,2]$ 映射到 $[0,1]$，故
+
+$$
+\int_0^1f(t)\,\mathrm dt=\int_1^2f(t)\,\mathrm dt=0.4.
+$$
+
+### 三、扣除区间 $[0,1]$ 的概率
+
+$$
+\begin{aligned}
+F(0)&=P(X\le0)=\int_{-\infty}^{0}f(t)\,\mathrm dt\\
+&=\int_{-\infty}^{1}f(t)\,\mathrm dt-\int_0^1f(t)\,\mathrm dt\\
+&=\frac12-0.4=\boxed{0.1}.
+\end{aligned}
+$$
+
+<Callout type="idea" title="中心对称的区间配对法">
+
+若密度关于 $x=a$ 对称，那么区间 $[a,a+h]$ 与 $[a-h,a]$ 的概率相等。配合“左半边概率为 $\frac12$”，往往无需求出密度函数的显式表达式。
+
+</Callout>
 
 </Solution>
 
@@ -87,17 +168,36 @@ $$
 
 <Solution>
 
-**答案：D，$\boxed{0.8}$。**
+**参考答案**：选 **D**，$E(X)=\boxed{0.8}$。
 
-**过程**：注意 $\Phi(2x-1)=\Phi\!\left(\frac{x-1/2}{1/2}\right)$ 是 $N(1/2,1/4)$ 的分布函数，而 $\Phi\!\left(\frac{x-1}{2}\right)$ 是 $N(1,4)$ 的分布函数。
+### 一、识别两个正态分布
 
-因此题给 $F$ 是权重分别为 $0.4$、$0.6$ 的两种正态分布的混合，其期望为各成分期望的加权和：
+标准正态分布函数满足：若 $Z\sim N(\mu,\sigma^2)$，则 $P(Z\le x)=\Phi\!\left(\frac{x-\mu}{\sigma}\right)$。据此分别改写题中的自变量：
 
 $$
-E(X)=0.4\cdot\frac12+0.6\cdot1=\boxed{0.8}.
+\Phi(2x-1)=\Phi\!\left(\frac{x-\frac12}{\frac12}\right),\qquad
+\Phi\!\left(\frac{x-1}{2}\right)=\Phi\!\left(\frac{x-1}{2}\right).
 $$
 
-<Callout type="idea" title="混合分布">若 $F=\sum_i p_iF_i$，其中 $p_i\ge0$ 且 $\sum_i p_i=1$，只要对应期望存在，就有 $E(X)=\sum_i p_iE(X_i)$。</Callout>
+因此两个成分分别为 $N(\frac12,\frac14)$ 与 $N(1,4)$，其均值依次是 $\frac12$ 和 $1$。
+
+### 二、按混合权重求期望
+
+分布函数 $F(x)=0.4F_1(x)+0.6F_2(x)$ 表示以概率 $0.4$、$0.6$ 选取上述两种分布，而不是令两个正态随机变量相加。引入表示选择哪种分布的指标 $I$，由全期望公式，
+
+$$
+\begin{aligned}
+E(X)&=E\!\left[E(X\mid I)\right]\\
+&=0.4\times\frac12+0.6\times 1\\
+&=0.2+0.6=\boxed{0.8}.
+\end{aligned}
+$$
+
+<Callout type="idea" title="混合分布的快捷公式">
+
+若 $F=\sum_i w_iF_i$、$w_i\ge0$ 且 $\sum_iw_i=1$，则在各期望存在时，$E(X)=\sum_iw_i\mu_i$。**混合分布的方差不能简单地对成分方差加权**，因为还须计入成分均值间的波动。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -119,46 +219,49 @@ $$
 
 <Solution>
 
-由
+**参考答案**：选 **B**，$\boxed{E(Y)=\mu(\sigma+1),\quad D(Y)=\sigma^4}$。
+
+### 一、从分布函数倒推随机变量变换
+
+因为题设 $\sigma>0$，对任意 $y$ 均有
 
 $$
-P\{Y\le y\}
-=G(y)
-=F\left(\frac{y-\mu}{\sigma}\right)
-=P\left\{X\le\frac{y-\mu}{\sigma}\right\}
-=P\{\sigma X+\mu\le y\},
+\begin{aligned}
+G(y)&=F\!\left(\frac{y-\mu}{\sigma}\right)
+=P\!\left\{X\le\frac{y-\mu}{\sigma}\right\}\\
+&=P\{\sigma X+\mu\le y\}.
+\end{aligned}
 $$
 
-可知
+故 $Y$ 与 $\sigma X+\mu$ **同分布**，记为 $Y\overset{d}=\sigma X+\mu$。求期望与方差只依赖分布，无须两随机变量在同一概率空间中逐点相等。
+
+### 二、应用线性变换公式
 
 $$
-Y\overset d=\sigma X+\mu.
+\begin{aligned}
+E(Y)&=E(\sigma X+\mu)=\sigma E(X)+\mu=\boxed{\mu(\sigma+1)},\\
+D(Y)&=D(\sigma X+\mu)=\sigma^2D(X)=\boxed{\sigma^4}.
+\end{aligned}
 $$
 
-故
+<Callout type="warn" title="易错点：方差中的常数因子要平方">
 
-$$
-EY=\sigma EX+\mu=\mu(\sigma+1),
-$$
+题中 $\sigma$ 已是 $X$ 的标准差，而 $Y$ 又以 $\sigma$ 倍放大了 $X$，所以方差从 $\sigma^2$ 变为 $\sigma^2\cdot\sigma^2=\sigma^4$。不能把 $F$ 的参数 $\mu,\sigma$ 直接当作 $Y$ 的均值、标准差。
 
-$$
-DY=\sigma^2DX=\sigma^4.
-$$
-
-选（B）。
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：阶梯分布、分段密度、端点原子与函数构造
+## 考点二｜阶梯型分布、端点原子与分段密度
 
-<Question id="selected-1103-math-328a62-011" type="blank">
+<Question id="selected-1103-math-328a62-011" type="blank" tags="科目:概率论与数理统计, 考点:阶梯分布与函数分布">
 
 设离散型随机变量 $ X$ 的分布函数
 
 $$
- F(x)=\begin{cases}
+F(x)=\begin{cases}
 0,&x<-1,\\
 0.4,&-1\le x<0,\\
 0.7,&0\le x<1,\\
@@ -166,263 +269,262 @@ $$
 \end{cases}
 $$
 
-
 则随机变量 $ |X|$ 的分布函数为 <Blank answer="F_{|X|}(y)= \begin{cases} 0,&amp;y&lt;0,\\ 0.3,&amp;0\le y&lt;1,\\ 1,&amp;y\ge1. \end{cases}" kind="text" placeholder="输入文字或 LaTeX" />。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
- F_{|X|}(y)=
-\begin{cases}
-0,&y<0,\\
-0.3,&0\le y<1,\\
+\boxed{F_{|X|}(y)=\begin{cases}
+0,&y<0,\\[1mm]
+0.3,&0\le y<1,\\[1mm]
 1,&y\ge1.
-\end{cases}
+\end{cases}}
 $$
 
-**解析：** 分布函数在各跳跃点的跳跃大小等于对应点的概率。由题给 $ F(x)$ 可得
+### 一、从阶梯分布函数读出每个取值的概率
+
+离散型随机变量在 $x_0$ 处的概率是分布函数在该点的**跳跃量**，即 $P(X=x_0)=F(x_0)-F(x_0-)$。本题只有 $-1,0,1$ 三个跳点：
+
+| $x$ | $-1$ | $0$ | $1$ |
+| :--: | :--: | :--: | :--: |
+| $P(X=x)$ | $0.4$ | $0.7-0.4=0.3$ | $1-0.7=0.3$ |
+
+### 二、将取值按绝对值合并
+
+令 $Y=|X|$。不同的 $X$ 可能对应相同的 $Y$，所以要将对应概率相加：
 
 $$
- P\{X=-1\}=F(-1)-F(-1-)=0.4,
+P(Y=0)=P(X=0)=0.3,
+\qquad P(Y=1)=P(X=-1)+P(X=1)=0.7.
 $$
 
-$$
- P\{X=0\}=F(0)-F(0-)=0.7-0.4=0.3,
-$$
+故 $Y$ 的分布律为 $P(Y=0)=0.3$，$P(Y=1)=0.7$。由 $F_Y(y)=P(Y\le y)$，先在 $y=0$ 跳至 $0.3$，再在 $y=1$ 跳至 $1$，即可得到开头的分段表达式。
 
-$$
- P\{X=1\}=F(1)-F(1-)=1-0.7=0.3.
-$$
+<Callout type="idea" title="另一种求法：直接写事件">
 
-因此
+由于 $P(|X|\le y)=P(-y\le X\le y)$，也可按 $y<0$、$0\le y<1$、$y\ge1$ 三段分析；注意区间端点使用“$\le$”，分布函数必须**右连续**。
 
-$$
- P\{|X|=0\}=P\{X=0\}=0.3,
-$$
-
-$$
- P\{|X|=1\}=P\{X=-1\}+P\{X=1\}=0.4+0.3=0.7.
-$$
-
-故 $ |X|$ 只可能取 $ 0,1$，其分布函数为
-
-$$
- F_{|X|}(y)=P\{|X|\le y\}
-=
-\begin{cases}
-0,&y<0,\\
-0.3,&0\le y<1,\\
-1,&y\ge1.
-\end{cases}
-$$
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-328a62-018" type="essay" number={1}>
+<Question id="selected-1103-math-328a62-018" type="essay" tags="科目:概率论与数理统计, 考点:随机变量定义与分布函数">
 
 袋中装有大小相同的10只球，编号为 $ 0,1,2,\cdots,9$，从中任取一只，观察其号码，按“大于5”“等于5”“小于5”三种情况定义一个随机变量 $ X$，并写出 $ X$ 的分布律和分布函数。
 
 <Solution>
 
-**答案：**
-
-可定义
-
+**参考答案**：可定义
 
 $$
- X=\begin{cases}
-1,&\text{所取球的号码大于 }5,\\
-0,&\text{所取球的号码等于 }5,\\
--1,&\text{所取球的号码小于 }5.
+X=\begin{cases}
+-1,&\text{所取号码小于 }5,\\
+0,&\text{所取号码等于 }5,\\
+1,&\text{所取号码大于 }5.
 \end{cases}
 $$
 
-其分布律为
+此时分布律为
 
-| $ X$ | $ -1$ | $ 0$ | $ 1$ |
-|---:|---:|---:|---:|
-| $ P$ | $ \frac12$ | $ \frac1{10}$ | $ \frac25$ |
+| $X$ | $-1$ | $0$ | $1$ |
+| :--: | :--: | :--: | :--: |
+| $P(X=x)$ | $\frac12$ | $\frac1{10}$ | $\frac25$ |
 
-分布函数为
+其分布函数为
 
 $$
- F(x)=\begin{cases}
-0,&x<-1,\\[1mm]
-\frac12,&-1\le x<0,\\[2mm]
-\frac35,&0\le x<1,\\[2mm]
+\boxed{F_X(x)=\begin{cases}
+0,&x<-1,\\
+\frac12,&-1\le x<0,\\
+\frac35,&0\le x<1,\\
 1,&x\ge1.
-\end{cases}
+\end{cases}}
 $$
 
-**解析：** 号码小于 $ 5$ 的球为 $ 0,1,2,3,4$，共有 $ 5$ 只；号码等于 $ 5$ 的球有 $ 1$ 只；号码大于 $ 5$ 的球为 $ 6,7,8,9$，共有 $ 4$ 只。由于每只球被取到的概率相等，故
+### 解题过程
 
-$$
- P\{X=-1\}=\frac5{10}=\frac12,
-$$
+<Steps>
+<Step>
 
-$$
- P\{X=0\}=\frac1{10},
-$$
+  ### 第一步：给三类结果指定数值
 
-$$
- P\{X=1\}=\frac4{10}=\frac25.
-$$
+  题意只要求区分“小于、等于、大于5”，可自选三个不同的实数。这里选 $-1,0,1$，便于从小到大排列，**编码不是唯一的**。
 
-由分布函数的定义
+</Step>
+<Step>
 
-$$
- F(x)=P\{X\le x\},
-$$
+  ### 第二步：统计每类号码
 
-按 $ x$ 经过随机变量的三个可能取值 $ -1,0,1$ 分段累加概率，即得上述分布函数。
+  小于5的号码为 $0,1,2,3,4$，共5个；等于5的只有一个；大于5的为 $6,7,8,9$，共4个。球等可能抽取，因此三类概率依次为 $5/10$、$1/10$、$4/10$，相加等于1。
 
-题目只要求按三种情况定义随机变量，因此具体取值并不唯一；只要给三种情况赋予三个互不相同的实数，并据此正确写出分布律和分布函数即可。这里采用 $ -1,0,1$ 的自然编码。
+</Step>
+<Step>
+
+  ### 第三步：累加得到分布函数
+
+  分布函数定义为 $F_X(x)=P(X\le x)$。在 $x$ 未达到 $-1$ 时概率为0，经过 $-1$ 时累计至 $1/2$；经过0时再加 $1/10$，累计至 $3/5$；经过1时达到1。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="定义随机变量与求分布的区别">
+
+题目不是在求原始球号码的分布，而是求**按事件分类编码之后**的随机变量的分布。若采用其他三个不同数值，必须重新按数值从小到大排列并写出相应分布函数。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-328a62-021" type="essay">
+<Question id="selected-1103-math-328a62-021" type="essay" tags="科目:概率论与数理统计, 考点:混合分布函数与原子概率">
 
 向直线上掷一随机点，假设随机点落入区间 $ ( -\infty,0]$、$ (0,1]$ 和 $ (1,+\infty)$ 的概率分别为 $ 0.2,0.5$ 和 $ 0.3$，并且随机点在区间 $ (0,1]$ 上分布均匀。设随机点落入 $ ( -\infty,0]$ 得0分，落入 $ (1,+\infty)$ 得1分，而落入 $ (0,1]$ 坐标为 $ x$ 的点得 $ x$ 分。试求得分 $ X$ 的分布函数 $ F(x)$。
 
 <Solution>
 
-**答案：**
+**参考答案**：得分 $X$ 的分布函数为
 
 $$
- F(x)=\begin{cases}
+\boxed{F_X(x)=\begin{cases}
 0,&x<0,\\[1mm]
 0.2+0.5x,&0\le x<1,\\[1mm]
 1,&x\ge1.
-\end{cases}
+\end{cases}}
 $$
 
-**解析：** 得分随机变量 $ X$ 的取值范围为 $ [0,1]$。其中：
+它是同时含有连续部分和离散概率质量的**混合型分布**。
 
-- 随机点落入 $ ( -\infty,0]$ 时，$ X=0$，故在 $ 0$ 处有概率质量 $ 0.2$；
-- 随机点落入 $ (1,+\infty)$ 时，$ X=1$，故在 $ 1$ 处有概率质量 $ 0.3$；
-- 随机点落入 $ (0,1]$ 时，得分等于随机点坐标，并且条件分布为 $ (0,1]$ 上的均匀分布，这一部分的总概率为 $ 0.5$。
+### 一、分清三种得分来源
 
-当 $ x<0$ 时，得分不可能小于等于 $ x$，所以
+| 随机点所在区域 | 区域概率 | 对应得分 | 对分布的贡献 |
+| --- | ---: | --- | --- |
+| $(-\infty,0]$ | $0.2$ | 固定为0 | $P(X=0)=0.2$ |
+| $(0,1]$ | $0.5$ | 等于落点坐标 | $(0,1)$ 上均匀连续部分，总质量 $0.5$ |
+| $(1,+\infty)$ | $0.3$ | 固定为1 | $P(X=1)=0.3$ |
 
-$$
- F(x)=P\{X\le x\}=0.
-$$
+### 二、按阈值计算 $P(X\le x)$
 
-当 $ 0\le x<1$ 时，事件 $ \{X\le x\}$ 包括两部分：一是落入 $ ( -\infty,0]$ 而得 $ 0$ 分，概率为 $ 0.2$；二是落入 $ (0,1]$ 且坐标不超过 $ x$。由条件均匀分布，
+<Steps>
+<Step>
 
-$$
- P\{X\le x,\,X\in(0,1]\}
-=0.5\cdot\frac{x-0}{1-0}
-=0.5x.
-$$
+  ### 情形一：$x<0$
 
-因此
+  得分不可能小于0，所以 $F_X(x)=0$。
 
-$$
- F(x)=0.2+0.5x,
-\qquad 0\le x<1.
-$$
+</Step>
+<Step>
 
-当 $ x\ge1$ 时，所有可能得分都不超过 $ x$，故
+  ### 情形二：$0\le x<1$
 
-$$
- F(x)=1.
-$$
+  “得分不超过 $x$”包含固定得0分的情形，以及落于 $(0,x]$ 的均匀部分。因为“落在 $(0,1]$ 内”这一条件下均匀分布，
 
-特别地，
+
 
 $$
- F(0)=0.2,
-\qquad
-F(1-)=0.7,
-\qquad
-F(1)=1,
+F_X(x)=0.2+0.5\,P(U\le x)=0.2+0.5x,\quad U\sim U(0,1).
 $$
 
-可见分布函数分别在 $ 0$ 和 $ 1$ 处有大小为 $ 0.2$ 和 $ 0.3$ 的跳跃。
+</Step>
+<Step>
+
+  ### 情形三：$x\ge1$
+
+  全部得分均不超过1，所以 $F_X(x)=1$。
+
+</Step>
+</Steps>
+
+### 三、检查两端跳跃
+
+$$
+F_X(0)-F_X(0-)=0.2,
+\qquad F_X(1)-F_X(1-)=1-0.7=0.3.
+$$
+
+两个跳跃量分别对应得0分、1分的原子概率；在 $0<x<1$ 上的密度为 $f_X(x)=0.5$。$0.2+\int_0^1 0.5\,dx+0.3=1$，满足归一化。
+
+<Callout type="warn" title="不要把三个区域都当作连续分布">
+
+分布函数在0、1处不连续，不存在一个在整个实数上积分就能恢复全部概率的普通密度函数。题设的“区间内均匀”仅适用于条件事件“随机点落在 $(0,1]$”。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-328a62-014" type="blank">
+<Question id="selected-1103-math-328a62-014" type="blank" tags="科目:概率论与数理统计, 考点:密度空隙与分位阈值">
 
 设随机变量 $ X$ 的概率密度为
 
 $$
- f(x)=\begin{cases}
+f(x)=\begin{cases}
 \frac13,&0\le x\le1,\\
 \frac29,&3\le x\le6,\\
 0,&\text{其他},
 \end{cases}
 $$
 
-
 若 $ k$ 满足概率等式 $ P\{|X|\ge|k|\}=\frac23$，则 $ k$ 的取值范围是 <Blank answer="k\in[-3,-1]\cup[1,3]" kind="text" placeholder="输入文字或 LaTeX" />。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
- k\in[-3,-1]\cup[1,3].
+\boxed{k\in[-3,-1]\cup[1,3]}.
 $$
 
-**解析：** 由密度的支撑集可知 $ X\ge0$，故
+### 一、去掉绝对值并转化为尾概率
+
+因为 $X$ 的密度只在 $[0,1]$ 与 $[3,6]$ 非零，故 $X\ge0$ 几乎必然成立。令 $t=|k|\ge0$，则
 
 $$
- |X|=X.
+P(|X|\ge|k|)=P(X\ge t)=\frac23.
 $$
 
-令
+先计算右侧整个区间 $[3,6]$ 的概率质量：
 
 $$
- t=|k|\ge0,
+P(3\le X\le6)=\int_3^6\frac29\,dx=\frac23.
 $$
 
-则题设条件化为
+### 二、利用密度为零的间隔确定全部解
+
+密度在 $(1,3)$ 上恒为0，所以把阈值 $t$ 放在 $[1,3]$ 内任一位置，事件 $\{X\ge t\}$ 仍完整包含右侧区间且不包含左侧区间的正概率，因而尾概率一直为 $2/3$。区间外则不同：
 
 $$
- P\{X\ge t\}=\frac23.
+P(X\ge t)=\begin{cases}
+1,&t\le0,\\[1mm]
+\frac23+\frac{1-t}{3},&0<t<1,\\[1mm]
+\frac23,&1\le t\le3,\\[1mm]
+\frac{2(6-t)}9,&3<t<6,\\[1mm]
+0,&t\ge6.
+\end{cases}
 $$
 
-区间 $ [3,6]$ 上的总概率为
+可见等式当且仅当 $1\le t\le3$ 成立，因此
 
 $$
- \int_3^6\frac29\,dx
-=\frac29\times3
-=\frac23.
+1\le|k|\le3\iff\boxed{k\in[-3,-1]\cup[1,3]}.
 $$
 
-当 $ 1\le t\le3$ 时，区间 $ (1,3)$ 上密度为 $ 0$，而事件 $ X\ge t$ 恰好保留 $ [3,6]$ 上的全部概率，因此
+<Callout type="idea" title="连续分布的分位数不一定唯一">
 
-$$
- P\{X\ge t\}=\frac23.
-$$
+如果某段区间的密度为0，分布函数在该区间恒定，某个分位概率可能对应**一整段阈值**，而不是单独的一个数。本题正是如此。
 
-当 $ 0\le t<1$ 时，还会包含 $ [t,1]$ 上的正概率，故概率大于 $ \frac23$；当 $ t>3$ 时，只保留 $ [t,6]$ 的一部分，故概率小于 $ \frac23$。所以
-
-$$
- 1\le |k|\le3.
-$$
-
-即
-
-$$
- k\in[-3,-1]\cup[1,3].
-$$
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3db062-013" type="essay">
+<Question id="selected-1103-math-3db062-013" type="essay" tags="科目:概率论与数理统计, 考点:连续性与反正弦密度">
 
 设连续型随机变量 $X$ 的分布函数为
 
@@ -437,26 +539,91 @@ $(III)$ $P\left\{|X|<\frac{a}{2}\right\}$。
 
 <Solution>
 
-**答案：** $(I)\;k_1=\frac12,\ k_2=\frac1\pi;\quad (II)\;f_X(x)=\begin{cases}\frac1{\pi\sqrt{a^2-x^2}},&|x|<a,\\0,&|x|\ge a;\end{cases}\quad (III)\;\frac13$
+**参考答案：**
 
-**解析：** (I) 由分布函数 $F(x)$ 的性质, 有
 $$
-F(-a+0) = F(-a), F(a+0) = F(a),
+\boxed{k_1=\frac12,\qquad k_2=\frac1\pi}.
 $$
-得 $k_1 = \frac{1}{2}, k_2 = \frac{1}{\pi}$.
 
-(II) $f(x)=F'(x)=\begin{cases} \frac{1}{\pi\sqrt{a^2-x^2}}, & |x|<a, \\ 0, & |x|\geqslant a. \end{cases}$
+$$
+\boxed{f_X(x)=\begin{cases}
+\dfrac{1}{\pi\sqrt{a^2-x^2}},&-a<x<a,\\[2mm]
+0,&\text{其他}.
+\end{cases}}
+$$
 
-(III) $P\left\{|X|<\frac{a}{2}\right\}=P\left\{-\frac{a}{2}<X<\frac{a}{2}\right\}=F\left(\frac{a}{2}\right)-F\left(-\frac{a}{2}\right)$
-$=\frac{1}{2}+\frac{1}{\pi}\arcsin\frac{1}{2}-\left[\frac{1}{2}+\frac{1}{\pi}\arcsin\left(-\frac{1}{2}\right)\right]=\frac{1}{3}.$
+$$
+\boxed{P\!\left(|X|<\frac a2\right)=\frac13}.
+$$
+
+### 解题过程
+
+<Steps>
+<Step>
+
+  ### （Ⅰ）利用连续性确定常数
+
+  题目明确 $X$ 为连续型，故 $F$ 在 $-a$ 与 $a$ 都必须连续。由 $\arcsin(-1)=-\pi/2$、$\arcsin(1)=\pi/2$，分别得到
+
+
+
+$$
+k_1-\frac{\pi}{2}k_2=0,
+  \qquad k_1+\frac{\pi}{2}k_2=1.
+$$
+
+  联立方程得到 $k_1=1/2$、$k_2=1/\pi$。第二个等式对应右端总概率为1，第一个等式对应左端概率从0连续开始。
+
+</Step>
+<Step>
+
+  ### （Ⅱ）在开区间内求导
+
+  在 $-a<x<a$，由链式法则，
+
+
+
+$$
+f_X(x)=F'(x)=\frac1\pi\cdot\frac{1/a}{\sqrt{1-(x/a)^2}}
+  =\frac1{\pi\sqrt{a^2-x^2}}.
+$$
+
+  在该区间之外分布函数常值，密度取0。端点处密度可任意定义而不影响分布；虽然表达式在端点附近发散，但为可积奇点：$\int_{-a}^a f_X(x)\,dx=1$。
+
+</Step>
+<Step>
+
+  ### （Ⅲ）用分布函数求对称区间概率
+
+  连续性保证端点单点概率为0，故
+
+
+
+$$
+\begin{aligned}
+  P\!\left(|X|<\frac a2\right)
+  &=F\!\left(\frac a2\right)-F\!\left(-\frac a2\right)\\
+  &=\frac1\pi\left[\arcsin\frac12-\arcsin\!\left(-\frac12\right)\right]\\
+  &=\frac1\pi\left(\frac\pi6+\frac\pi6\right)=\frac13.
+  \end{aligned}
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="分布函数只要求右连续，但连续型要求处处连续">
+
+如果题目没有“连续型”限制，$-a$ 或 $a$ 处可能存在跳跃概率。这里可以使用两端的连续条件解出两个常数，正是因为已给出连续型随机变量这一前提。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点3：随机变量变换、截尾与概率积分变换
+## 考点三｜截尾变换、条件混合与概率积分变换
 
-<Question id="selected-1103-math-3db062-022" type="single">
+<Question id="selected-1103-math-3db062-022" type="single" tags="科目:概率论与数理统计, 考点:截尾随机变量与混合分布">
 
 设随机变量 $X$ 服从参数为 $\lambda$ 的指数分布，$G(x)$ 是区间 $[0,1]$ 上的均匀分布的分布函数，记 $Y=G(X)$，则 $(\quad)$。
 
@@ -467,30 +634,65 @@ $=\frac{1}{2}+\frac{1}{\pi}\arcsin\frac{1}{2}-\left[\frac{1}{2}+\frac{1}{\pi}\ar
 
 <Solution>
 
-由已知, 可得 $X$ 的分布函数为
+**参考答案**：选 **D**。$Y$ 的分布函数在 $y=1$ 处有跳跃，跳跃量为 $\boxed{e^{-\lambda}}$。
+
+### 一、理解变换 $Y=G(X)$ 的含义
+
+区间 $[0,1]$ 上均匀分布的分布函数为
+
 $$
-F(x) = \begin{cases} 1 - \mathrm{e}^{-\lambda x}, & x > 0, \\ 0, & x \leqslant 0. \end{cases}
+G(x)=\begin{cases}
+0,&x<0,\\
+x,&0\le x<1,\\
+1,&x\ge1.
+\end{cases}
 $$
-区间 $[0, 1]$ 上的均匀分布的分布函数为
+
+由于 $X$ 为参数 $\lambda>0$ 的指数随机变量，$X\ge0$ 几乎必然成立，故
+
 $$
-G(x) = \begin{cases} 0, & x < 0, \\ x, & 0 \leqslant x \leqslant 1, \\ 1, & x > 1. \end{cases}
+Y=G(X)=\min(X,1)\quad\text{（几乎必然）}.
 $$
-记 $Y = G(X)$ 的分布函数为 $H(y)$，则：
-当 $y < 0$ 时, $H(y) = P\{Y \leqslant y\} = P\{G(X) \leqslant y\} = 0$;
-当 $y \geqslant 1$ 时, $H(y) = P\{Y \leqslant y\} = P\{G(X) \leqslant y\} = 1$;
-当 $0 \leqslant y < 1$ 时, $H(y) = P\{Y \leqslant y\} = P\{G(X) \leqslant y\} = P\{X \leqslant y\} = 1 - \mathrm{e}^{-\lambda y}$。
-故 $Y = G(X)$ 的分布函数为
+
+也就是说，$X<1$ 时保留原值，$X\ge1$ 时把所有取值合并到 $Y=1$。
+
+### 二、逐段写出 $Y$ 的分布函数
+
+记 $H(y)=P(Y\le y)$。对 $0\le y<1$，事件 $\{Y\le y\}$ 等价于 $\{X\le y\}$；其他取值段则由 $0\le Y\le1$ 立即判定。因此
+
 $$
-H(y) = \begin{cases} 0, & y < 0, \\ 1 - \mathrm{e}^{-\lambda y}, & 0 \leqslant y < 1, \\ 1, & y \geqslant 1. \end{cases}
+\boxed{H(y)=\begin{cases}
+0,&y<0,\\
+1-e^{-\lambda y},&0\le y<1,\\
+1,&y\ge1.
+\end{cases}}
 $$
-由此可知, $y = 1$ 是 $Y$ 的分布函数 $H(y)$ 的间断点. 选项 D 正确.
-由 $H(y)$ 知, $Y$ 不服从区间 $[0, 1]$ 上的均匀分布, $Y$ 既不是连续型随机变量, 也不是离散型随机变量. 排除选项 A, B, C.
+
+在 $y=1$ 处，
+
+$$
+H(1)-H(1-)=1-(1-e^{-\lambda})=\boxed{e^{-\lambda}}>0.
+$$
+
+这也等于 $P(Y=1)=P(X\ge1)$。
+
+### 三、辨析其他选项
+
+- A 错：$H(y)$ 不等于均匀分布在 $(0,1)$ 的分布函数 $y$。
+- B 错：$Y=1$ 有正概率，不是通常意义上的纯连续型随机变量。
+- C 错：$Y$ 在 $(0,1)$ 内仍有连续部分，也不是纯离散型随机变量。
+
+<Callout type="idea" title="截尾变换产生原子概率">
+
+将连续型变量的一个取值区间**压缩成同一数值**，所得分布一般是“连续部分＋原子质量”的混合分布；不能因为原变量连续，就认定变换后仍连续。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3c342e-003" type="single">
+<Question id="selected-1103-math-3c342e-003" type="single" tags="科目:概率论与数理统计, 考点:绝对值变换与正态概率">
 
 设$X \sim N(0,1)$，$Y=X+|X|$，则$P\{Y>1\}=$( )
 
@@ -501,29 +703,41 @@ $$
 
 <Solution>
 
-由
+**参考答案**：选 **B**，$\boxed{P(Y>1)=1-\Phi(1/2)}$。
+
+### 一、先把绝对值分段展开
+
 $$
- Y=X+|X|=
-\begin{cases}
+Y=X+|X|=\begin{cases}
 0,&X\le0,\\
 2X,&X>0.
 \end{cases}
 $$
-因此
+
+因此 $Y$ 是把 $X$ 的所有非正值压缩成0，把所有正值放大为2。特别地，若 $X\le0$，根本不可能使 $Y>1$。
+
+### 二、将事件换回标准正态变量
+
 $$
- \{Y>1\}=\{2X>1\}=\left\{X>\frac12\right\}.
+\begin{aligned}
+\{Y>1\}&=\{X>0,\ 2X>1\}
+=\left\{X>\frac12\right\},\\
+P(Y>1)&=P\!\left(X>\frac12\right)
+=\boxed{1-\Phi\!\left(\frac12\right)}.
+\end{aligned}
 $$
-又$X\sim N(0,1)$，故
-$$
- P\{Y>1\}=P\left\{X>\frac12\right\}=1-\Phi\left(\frac12\right).
-$$
-故选B。
+
+<Callout type="warn" title="变换后并不仍然服从正态分布">
+
+$P(Y=0)=P(X\le0)=1/2$，因此 $Y$ 在0处有原子概率。计算题目只需做**事件等价变换**，不能凭 $X$ 为标准正态就把 $Y$ 当成某个新的正态变量。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3c342e-018" type="single">
+<Question id="selected-1103-math-3c342e-018" type="single" tags="科目:概率论与数理统计, 考点:混合均匀分布与全概率">
 
 设随机变量$X$的概率分布为$P\{X=1\}=a$，$P\{X=2\}=1-a$。在给定$X=i$的条件下，随机变量$Y$服从均匀分布$U(0,i)$，$i=1,2$，且当$0 \leq y<1$时，$Y$的分布函数为$F_Y(y)=\frac{2}{3}y$，则$a=$( )
 
@@ -534,195 +748,221 @@ $$
 
 <Solution>
 
-对$0\le y<1$，由全概率公式，
+**参考答案**：选 **A**，$\boxed{a=\frac13}$。
+
+### 一、依条件分布写出混合分布函数
+
+题目先随机选定 $X\in\{1,2\}$，然后根据 $X$ 的取值决定 $Y$ 的均匀分布区间。因此需要对事件 $\{X=1\}$、$\{X=2\}$ 使用**全概率公式**：
+
 $$
- F_Y(y)
-=P\{Y\le y\mid X=1\}P\{X=1\}
-+P\{Y\le y\mid X=2\}P\{X=2\}.
+F_Y(y)=a\,P(Y\le y\mid X=1)+(1-a)\,P(Y\le y\mid X=2).
 $$
-因
+
+对 $0\le y<1$，两个条件分布函数都处在各自的均匀段内，故
+
 $$
- Y\mid(X=1)\sim U(0,1),\qquad
-Y\mid(X=2)\sim U(0,2),
+P(Y\le y\mid X=1)=y,\qquad
+P(Y\le y\mid X=2)=\frac y2.
 $$
-故
+
+### 二、比较系数求参数
+
 $$
- F_Y(y)=ay+(1-a)\frac y2
-=\frac{1+a}{2}y.
+\begin{aligned}
+F_Y(y)&=ay+\frac{1-a}{2}y\\
+&=\frac{1+a}{2}y.
+\end{aligned}
 $$
-题设给出
+
+与题设 $F_Y(y)=\frac23y$ 比较，可得
+
 $$
- F_Y(y)=\frac23y,
+\frac{1+a}{2}=\frac23
+\quad\Longrightarrow\quad
+\boxed{a=\frac13}.
 $$
-因此
-$$
- \frac{1+a}{2}=\frac23,
-$$
-解得
-$$
- a=\frac13.
-$$
-故选A。
+
+检验：$0\le a\le1$ 成立，另一种类型的选择概率为 $1-a=2/3$。
+
+<Callout type="idea" title="由小区间内的密度斜率反推混合权重">
+
+也可在 $(0,1)$ 上求导：两种条件均匀密度分别为 $1$、$1/2$，混合密度为 $a+(1-a)/2=2/3$。本题分布函数已在该区间给出，直接比较 $y$ 的系数最快。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-328a62-029" type="essay">
+<Question id="selected-1103-math-328a62-029" type="essay" tags="科目:概率论与数理统计, 考点:密度积分与概率积分变换">
 
 已知随机变量 $ X$ 的概率密度
 
 $$
- f(x)=\begin{cases}
+f(x)=\begin{cases}
 x,&0\le x<1,\\
 2-x,&1\le x<2,\\
 0,&\text{其他},
 \end{cases}
 $$
 
-
 （Ⅰ）求分布函数 $ F(x)$；（Ⅱ）令 $ Y=F(X)$，求 $ Y$ 的分布函数 $ F_Y(y)$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（Ⅰ）
-
+（Ⅰ）$X$ 的分布函数为
 
 $$
- F(x)=
-\begin{cases}
+\boxed{F(x)=\begin{cases}
 0,&x<0,\\[1mm]
-\frac{x^2}{2},&0\le x<1,\\[2mm]
-2x-\frac{x^2}{2}-1,&1\le x<2,\\[2mm]
+\dfrac{x^2}{2},&0\le x<1,\\[2mm]
+2x-\dfrac{x^2}{2}-1,&1\le x<2,\\[2mm]
 1,&x\ge2.
-\end{cases}
+\end{cases}}
 $$
 
-（Ⅱ）
+（Ⅱ）$Y=F(X)$ **服从 $U(0,1)$**，即
 
 $$
- F_Y(y)=
-\begin{cases}
+\boxed{F_Y(y)=\begin{cases}
 0,&y<0,\\
 y,&0\le y<1,\\
 1,&y\ge1.
-\end{cases}
+\end{cases}}
 $$
 
-即
+### （Ⅰ）由密度积分得到分布函数
+
+按定义 $F(x)=\int_{-\infty}^{x}f(t)\,dt$。首先检查归一性：
 
 $$
- Y=F(X)\sim U(0,1).
+\int_0^1 t\,dt+\int_1^2(2-t)\,dt=\frac12+\frac12=1.
 $$
 
-**解析：** （Ⅰ）由分布函数的定义
+再按 $x$ 的位置分段积分：
+
+<Steps>
+<Step>
+
+  ### 当 $0\le x<1$
+
+  只累加左侧三角形的一部分：
+
+
 
 $$
- F(x)=P\{X\le x\}=\int_{-\infty}^{x}f(t)\,dt.
+F(x)=\int_0^x t\,dt=\frac{x^2}{2}.
 $$
 
-当 $ x<0$ 时，
+</Step>
+<Step>
+
+  ### 当 $1\le x<2$
+
+  要先计入左半部分的质量 $1/2$，再积分右半部分：
+
+
 
 $$
- F(x)=0.
+\begin{aligned}
+  F(x)&=\frac12+\int_1^x(2-t)\,dt\\
+  &=\frac12+\left[2t-\frac{t^2}{2}\right]_1^x
+  =2x-\frac{x^2}{2}-1.
+  \end{aligned}
 $$
 
-当 $ 0\le x<1$ 时，
+</Step>
+<Step>
+
+  ### 区间之外与端点
+
+  $x<0$ 时 $F=0$，$x\ge2$ 时 $F=1$。另外 $F(1-)=F(1)=1/2$、$F(2-)=F(2)=1$，所以 $F$ 连续，符合题设的连续型分布。
+
+</Step>
+</Steps>
+
+### （Ⅱ）计算 $F(X)$ 的分布
+
+<Tabs items={['方法一：概率积分变换', '方法二：分段求反函数']} defaultIndex={0}>
+<Tab value="方法一：概率积分变换">
+
+  **定理**：若随机变量的分布函数 $F$ 连续，则 $F(X)\sim U(0,1)$。本题 $F$ 在整个实轴连续，因此立即有 $F_Y(y)=y$（$0\le y\le1$），再补上 $y<0$、$y>1$ 两端即可。
+
+</Tab>
+<Tab value="方法二：分段求反函数">
+
+  $F$ 在 $(0,2)$ 上严格递增。若 $0\le y\le1/2$，由 $y=x^2/2$ 解得 $x=\sqrt{2y}$；若 $1/2<y\le1$，由 $y=2x-x^2/2-1=1-(2-x)^2/2$ 解得 $x=2-\sqrt{2(1-y)}$。因此对 $0<y<1$，
+
+
 
 $$
- F(x)=\int_0^x t\,dt=\frac{x^2}{2}.
+\begin{aligned}
+  P(Y\le y)&=P(F(X)\le y)\\
+  &=P(X\le F^{-1}(y))=F(F^{-1}(y))=y.
+  \end{aligned}
 $$
 
-当 $ 1\le x<2$ 时，
+  再补边界，得到上面的分布函数。
 
-$$
- \begin{aligned}
-F(x)
-&=\int_0^1t\,dt+\int_1^x(2-t)\,dt\\
-&=\frac12+\left(2x-\frac{x^2}{2}-\frac32\right)\\
-&=2x-\frac{x^2}{2}-1.
-\end{aligned}
-$$
+</Tab>
+</Tabs>
 
-当 $ x\ge2$ 时，
+<Callout type="warn" title="不要误把 $Y=F(X)$ 看作 $Y=X$">
 
-$$
- F(x)=1.
-$$
+概率积分变换得出的均匀性，依赖于**原分布函数连续**。若 $X$ 是离散型，$F(X)$ 一般并不服从 $U(0,1)$。
 
-于是
-
-$$
- F(x)=
-\begin{cases}
-0,&x<0,\\[1mm]
-\frac{x^2}{2},&0\le x<1,\\[2mm]
-2x-\frac{x^2}{2}-1,&1\le x<2,\\[2mm]
-1,&x\ge2.
-\end{cases}
-$$
-
-在连接点处有
-
-$$
- F(1-)=F(1)=\frac12,
-\qquad
-F(2-)=F(2)=1,
-$$
-
-故 $ F(x)$ 连续；并且在 $ [0,2]$ 上严格递增。
-
-（Ⅱ）由于 $ F(x)$ 连续且在随机变量 $ X$ 的取值区间 $ [0,2]$ 上严格递增，故对 $ 0\le y<1$，存在唯一的 $ x_y\in[0,2)$，使得
-
-$$
- F(x_y)=y.
-$$
-
-于是
-
-$$
- \begin{aligned}
-F_Y(y)
-&=P\{Y\le y\}\\
-&=P\{F(X)\le y\}\\
-&=P\{X\le x_y\}\\
-&=F(x_y)\\
-&=y.
-\end{aligned}
-$$
-
-再结合 $ 0\le F(X)\le1$，可得
-
-$$
- F_Y(y)=
-\begin{cases}
-0,&y<0,\\
-y,&0\le y<1,\\
-1,&y\ge1.
-\end{cases}
-$$
-
-因此 $ Y=F(X)$ 服从区间 $ (0,1)$ 上的均匀分布。这也是概率积分变换的直接应用：当随机变量 $ X$ 的分布函数连续时，$ F(X)\sim U(0,1)$。
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3db062-023" type="blank" number={1}>
+<Question id="selected-1103-math-3db062-023" type="blank" tags="科目:概率论与数理统计, 考点:正态分布函数的拐点">
 
 设随机变量 $X \sim N(\mu, \sigma^2), \sigma>0$，$(x_0, y_0)$ 为其分布函数曲线 $y=F(x)$ 的拐点，则 $x_0=$ <Blank answer="\mu" kind="text" placeholder="输入文字或 LaTeX" />，$y_0=$ <Blank answer="1/2" kind="math" />。
 
 <Solution>
 
-**答案：** $\mu, \frac{1}{2}$
+**参考答案**：分布函数曲线的拐点为 $\boxed{(x_0,y_0)=(\mu,\frac12)}$。
 
-**解析：** 由 $X \sim N(\mu, \sigma^2)$，得其概率密度为 $f(x) = \frac{1}{\sqrt{2\pi}\sigma}\mathrm{e}^{-\frac{(x-\mu)^2}{2\sigma^2}}$，则
+### 一、把分布函数的二阶导数与密度联系起来
+
+正态分布 $X\sim N(\mu,\sigma^2)$ 的密度为
+
 $$
-F^{\prime\prime}(x_0) = f^{\prime}(x_0) = \frac{1}{\sqrt{2\pi}\sigma} \cdot \mathrm{e}^{-\frac{(x_0-\mu)^2}{2\sigma^2}} \cdot \frac{-2(x_0 - \mu)}{2\sigma^2} = 0,
+f(x)=\frac1{\sqrt{2\pi}\sigma}
+\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)>0.
 $$
-故 $x_0 = \mu$，$F(x_0) = y_0 = \frac{1}{2}$。
+
+由 $F'(x)=f(x)$，对密度求导即可得到分布函数二阶导数：
+
+$$
+F''(x)=f'(x)
+=-\frac{x-\mu}{\sigma^2}f(x).
+$$
+
+### 二、通过凹凸性改变确定拐点
+
+由于 $f(x)>0$ 且 $\sigma>0$，$F''(x)$ 的符号由 $-(x-\mu)$ 决定：
+
+- $x<\mu$ 时，$F''(x)>0$，分布函数曲线下凸（斜率递增）；
+- $x>\mu$ 时，$F''(x)<0$，分布函数曲线上凸（斜率递减）。
+
+故 $x=\mu$ 处凹凸性确实发生改变，是唯一拐点的横坐标。正态分布关于 $\mu$ 对称，因而
+
+$$
+F(\mu)=P(X\le\mu)=P\!\left(\frac{X-\mu}{\sigma}\le0\right)=\Phi(0)=\frac12.
+$$
+
+综上，$x_0=\mu$、$y_0=1/2$。
+
+<Callout type="idea" title="图像记忆">
+
+分布函数的斜率是密度 $f$；正态密度在均值处达到峰值，所以分布函数也恰在均值处从“斜率递增”转为“斜率递减”。仅令 $F''=0$ 还不够，需确认二阶导数变号。
+
+</Callout>
 
 </Solution>
 

@@ -1,13 +1,11 @@
 ---
-title: "第六节 公共解与同解｜零空间包含、秩判据与交空间求解"
-description: "以真题中的同解与秩关系、公共非零解的维数判据、参数讨论及分块矩阵零空间为核心，筛选具有代表性与区分度的完整原题。"
+title: "6. 公共解与同解"
+description: "公共解与同解19道题：行空间与零空间、秩判别、联立求公共解、非齐次解集包含以及交叉应用；全19题完成详解重构。"
 ---
 
-# 第六节 公共解与同解｜零空间包含、秩判据与交空间求解
+本节收录 **19 道**公共解与同解专项习题，按“零空间包含与行空间等价 → 交空间与公共非零解 → 非齐次同解与秩判据”组织。**全19题均已完成**参考答案前置、完整推导、关键反例与方法辨析；保留全部原题、结构化答案及稳定题目 ID。
 
-参照「真题核心题目」同名小节的考点、题型与命题风格精选 **19 道模拟与练习原题**；所有 Question 组件连同选项、题干、答案、解析、公式及嵌套结构均保留原文。
-
-## 考点1：同解的本质、行空间等价与零空间包含
+## 考点一｜零空间包含、行空间等价与同解判别
 
 <Question id="selected-1103-classified-1031-tangjiafeng-2027-s6-q05" type="single" points={5} tags="来源:汤家凤八套卷, 考点:齐次线性方程组同解条件, 难度:中等">
 
@@ -28,16 +26,27 @@ description: "以真题中的同解与秩关系、公共非零解的维数判据
 
 <Solution>
 
-**答案：C，$\boxed{3}$ 个（①②③正确，④错误）。**
+**参考答案：** **C**，正确的有 $\boxed{3}$ 个：①②③正确，④错误。
 
-**过程**：令 $\ker A=\{\boldsymbol x:A\boldsymbol x=0\}$，题设“$A$ 的解都是 $B$ 的解”即 $\ker A\subseteq\ker B$。
+**核心思路：** 将“$Ax=0$ 的解都是 $Bx=0$ 的解”翻译成 $\ker A\subseteq\ker B$；再用**零空间包含**和**秩—零度定理**逐条判断。
 
-- **① 正确**：增广堆叠方程的解集是 $\ker A\cap\ker B=\ker A$。
-- **② 正确：**$A,B$ 作用于相同维数的未知向量空间。由秩–零度定理，$r(A)=r(B)$ 蕴含 $\dim\ker A=\dim\ker B$。再由包含关系，得 $\ker A=\ker B$。
-- **③ 正确**：若 $A\boldsymbol x=B\boldsymbol x=0$，显然满足两个组合方程；反之，若 $(A+B)\boldsymbol x=(2A-B)\boldsymbol x=0$，两式相加得 $3A\boldsymbol x=0$，从而 $A\boldsymbol x=B\boldsymbol x=0$。
-- **④ 错误**：秩相同仅说明零空间维数相同，方向未必相同。例如 $A=\begin{pmatrix}1&0\\0&0\end{pmatrix}$、$B=\begin{pmatrix}0&0\\0&1\end{pmatrix}$，二者均秩为 $1$，零空间却不同。
+| 命题 | 结论 | 关键理由 |
+| --- | --- | --- |
+| ① | 正确 | 堆叠矩阵的解空间为 $\ker A\cap\ker B=\ker A$。 |
+| ② | 正确 | 零空间包含且 $r(A)=r(B)$；两矩阵的未知量维数相同，故零空间维数相同，包含关系升级为相等。 |
+| ③ | 正确 | 已有 $Ax=0\Rightarrow Bx=0$；反过来若 $(A+B)x=(2A-B)x=0$，两式相加得 $3Ax=0$，再得 $Bx=0$。 |
+| ④ | 错误 | 只有秩相同，无法确定零空间的方向。 |
 
-因此正确命题有 $3$ 个。
+④ 的反例：取
+
+$$
+A=\begin{pmatrix}1&0\\0&0\end{pmatrix},\qquad
+B=\begin{pmatrix}0&0\\0&1\end{pmatrix}.
+$$
+
+二者秩都为1，但 $\ker A=\operatorname{span}\{(0,1)^T\}$，$\ker B=\operatorname{span}\{(1,0)^T\}$，不是同解方程组。
+
+<Callout type="idea" title="零空间维数判据">当 $\ker A\subseteq\ker B$ 已知时，$Ax=0$ 与 $Bx=0$ 同解的充要条件是两者零空间维数相等，亦即 $r(A)=r(B)$（未知量列数相同）。单独的“秩相等”则不够。</Callout>
 
 </Solution>
 </Question>
@@ -53,35 +62,48 @@ description: "以真题中的同解与秩关系、公共非零解的维数判据
 
 <Solution>
 
-**答案：D。**
+**参考答案：** **D**（错误命题）。
 
-由 $BX=0\implies ABX=0$，总有 $\ker B\subseteq\ker(AB)$。两方程组都是关于 $s$ 维未知向量 $X$ 的齐次方程组，故秩—零度定理给出
+**核心思路：** 总有 $\ker B\subseteq\ker(AB)$；判断是否同解只需看维数是否相等。这里 $B$ 的像空间可以避开 $A$ 的零空间，即使 $A$ 在全空间并非单射。
+
+<Steps>
+<Step>
+
+  ### 给出同解的精确判据
+
+  因 $Bx=0\Rightarrow ABx=0$，故 $\ker B\subseteq\ker(AB)$。两方程组未知向量都属于 $\mathbb R^s$。由秩—零度定理，
+
+
 
 $$
 \begin{aligned}
-\ker B=\ker(AB)
-&\iff\dim\ker B=\dim\ker(AB)\\
-&\iff s-r(B)=s-r(AB)\\
-&\iff r(AB)=r(B).
-\end{aligned}
+  \ker B=\ker(AB)
+  &\iff \dim\ker B=\dim\ker(AB)\\
+  &\iff s-r(B)=s-r(AB)\\
+  &\iff r(B)=r(AB).
+  \end{aligned}
 $$
 
-因此 **A、B 均成立**。若 $r(A)=n$，则 $A$ 列满秩、$\ker A=\{0\}$，所以 $ABX=0\iff BX=0$，**C 也成立**。
+  所以 A、B 均正确。
 
-**D 的反例**：取
+</Step>
+<Step>
 
-$$
-A=\begin{pmatrix}1&0\end{pmatrix}_{1\times2},\qquad
-B=\begin{pmatrix}1\\0\end{pmatrix}_{2\times1}.
-$$
+  ### 检验满列秩条件
 
-则 $AB=(1)$，故 $ABX=0$ 与 $BX=0$ 的解均为 $X=0$；但 $r(A)=1<2=n$。所以 D 错误。
+  若 $r(A)=n$，则 $\ker A=\{0\}$。由 $ABx=0$ 得 $Bx\in\ker A$，必有 $Bx=0$，因此 C 正确。
 
-<Callout type="idea" title="本质区别">
+</Step>
+<Step>
 
-两方程组同解只要求 $A$ 在 $B$ 的像空间 $\operatorname{Im}B$ 上为单射，不要求 $A$ 在整个 $\mathbb R^n$ 上为单射。
+  ### 构造否定 D 的反例
 
-</Callout>
+  取 $A=\begin{pmatrix}1&0\end{pmatrix}$（$1\times2$）、$B=\begin{pmatrix}1\\0\end{pmatrix}$（$2\times1$）。则 $AB=(1)$，两个齐次方程组都只有零解；但 $r(A)=1<2=n$，否定 D。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="几何理解">$ABx=0$ 与 $Bx=0$ 同解，等价于 $\ker A\cap\operatorname{Col}(B)=\{0\}$；没有要求 $\ker A$ 本身只能含零向量。</Callout>
 
 </Solution>
 </Question>
@@ -105,25 +127,23 @@ $$
 
 <Solution>
 
-**答案：B。** 正确命题为 $\boxed{\text{①③}}$。
+**参考答案：** **B**，正确命题为 $\boxed{\text{①③}}$。
 
-| 命题 | 判断 | 依据 |
+**核心思路：** 抓住实矩阵的两个基本事实：$\ker(A^TA)=\ker A$；列满秩 $\iff A^TA$ 正定可逆。对“秩相等”“解集包含”则不能误判为同解。
+
+| 命题 | 判断 | 详细依据 |
 | --- | --- | --- |
-| ① | **正确** | $r(B)=n$ 意味着 $\ker B=\{0\}$，故 $BAx=0\Leftrightarrow Ax=0$；同时 $A^{\mathrm T}Ax=0\Leftrightarrow x^{\mathrm T}A^{\mathrm T}Ax=\Vert Ax\Vert ^2=0\Leftrightarrow Ax=0$。 |
-| ② | **错误** | 秩相等仅保证零空间维数相同。比如 $A=(1,0)$、$B=(0,1)$，二者秩都为 $1$，但解空间不同。 |
-| ③ | **正确** | $r(A)=n$，所以 $x^{\mathrm T}A^{\mathrm T}Ax=\Vert Ax\Vert ^2>0$（$x\ne0$），从而 $A^{\mathrm T}A$ 正定可逆，对每个 $b\in\mathbb R^n$ 都有唯一解。 |
-| ④ | **错误** | $\ker A\subseteq\ker B$ 意味着 $\operatorname{Row}(B)\subseteq\operatorname{Row}(A)$，因此应有 $r\binom AB=r(A)$，不一定等于 $r(B)$。 |
+| ① | 正确 | $r(B)=n$ 表明 $\ker B=\{0\}$，所以 $BAx=0\iff Ax=0$；又 $A^TAx=0\iff\|Ax\|^2=0\iff Ax=0$。 |
+| ② | 错误 | $A=(1,0),B=(0,1)$ 的秩同为1，但前者解为 $x_1=0$，后者解为 $x_2=0$。 |
+| ③ | 正确 | $r(A)=n$ 表明对 $x\ne0$，$x^TA^TAx=\|Ax\|^2>0$，故 $A^TA$ 可逆，$A^TAx=b$ 对任意 $b\in\mathbb R^n$ 都有唯一解。 |
+| ④ | 错误 | 已知 $\ker A\subseteq\ker B$，意味着 $\operatorname{Row}(B)\subseteq\operatorname{Row}(A)$；正确的结论应是 $r\!\begin{pmatrix}A\\B\end{pmatrix}=r(A)$，不一定等于 $r(B)$。 |
 
-<Callout type="warn" title="“同秩”与“同解”不能混淆">
-
-要比较两个齐次方程组的解集，应比较**零空间**，不能只看矩阵的秩。
-
-</Callout>
+<Callout type="warn" title="必要条件不等于充分条件">若两个齐次方程组同解，秩必相同；但秩相同只说明零空间的维数相同，仍可能是两个不同的子空间。</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-91edf7-023" type="single">
+<Question id="selected-1103-math-91edf7-023" type="single" tags="科目:线性代数, 考点:行空间等价与同解">
 
 设 $A,B$ 均为 $m\times n$ 矩阵，则 $Ax=0$ 与 $Bx=0$ 同解的充分必要条件是 ( ).
 
@@ -134,26 +154,48 @@ $$
 
 <Solution>
 
-**解析：** 对于选项 B: 若 $Ax = 0$ 与 $Bx = 0$ 同解,考虑方程组
-$$ (\text{I}) Ax = 0, (\text{II}) \begin{cases} Ax = 0, \\ Bx = 0, \end{cases} (\text{III}) Bx = 0, $$
-则 $(\text{I}), (\text{II}), (\text{III})$ 同解,故 $r(A) = r\begin{pmatrix} A \\ B \end{pmatrix} = r(B)$,即 $A, B$ 的行向量组等价;反之,若 $A, B$ 的行向量组等价,记
-$$ A = \begin{pmatrix} \alpha_1 \\ \alpha_2 \\ \vdots \\ \alpha_m \end{pmatrix}, B = \begin{pmatrix} \beta_1 \\ \beta_2 \\ \vdots \\ \beta_m \end{pmatrix}, $$
-即列向量组 $\alpha_1^T, \alpha_2^T, \cdots, \alpha_m^T$ 与 $\beta_1^T, \beta_2^T, \cdots, \beta_m^T$ 等价。故存在矩阵 $P, Q$,使得
-$$ (\alpha_1^T, \alpha_2^T, \cdots, \alpha_m^T) = (\beta_1^T, \beta_2^T, \cdots, \beta_m^T) P, $$
-$$ (\beta_1^T, \beta_2^T, \cdots, \beta_m^T) = (\alpha_1^T, \alpha_2^T, \cdots, \alpha_m^T) Q, $$
-所以 $A = P^T B, B = Q^T A$,故由 $Ax = 0$ 得 $Bx = Q^T Ax = 0$;反之,由 $Bx = 0$,得
-$$ Ax = P^T Bx = 0, $$
-即 $Ax = 0$ 与 $Bx = 0$ 同解。故选 B。
-对于选项 A,由选项 B 的证明知显然不正确。
-对于选项 C,相当于 $r(A) = r(B)$,它是必要条件而非充分条件。
-对于选项 D,举反例。如
-$$ A = \begin{pmatrix} 1 & 0 & 0 \\ 2 & 0 & 0 \end{pmatrix}, B = \begin{pmatrix} 2 & 0 & 0 \\ 1 & 0 & 0 \end{pmatrix}, $$
-显然, $Ax = 0, Bx = 0$ 同解,但 $A^T x = 0$ 与 $B^T x = 0$ 不同解。
+**参考答案：** **B**，$\boxed{\operatorname{Row}(A)=\operatorname{Row}(B)}$，即 $A,B$ 的**行向量组等价**。
+
+**核心思路：** 齐次方程组的解集是系数矩阵的零空间；在实数域上，零空间的正交补恰是**行空间**。
+
+<Tabs items={['方法一：正交补（推荐）','方法二：互相线性表出']}>
+<Tab value="方法一：正交补（推荐）">
+
+  对任意实矩阵 $A$，$\operatorname{Row}(A)=(\ker A)^\perp$。因此
+
+
+
+$$
+\begin{aligned}
+  Ax=0\text{ 与 }Bx=0\text{ 同解}
+  &\iff\ker A=\ker B\\
+  &\iff(\ker A)^\perp=(\ker B)^\perp\\
+  &\iff\operatorname{Row}(A)=\operatorname{Row}(B).
+  \end{aligned}
+$$
+
+  这正是选项 B。
+
+</Tab>
+<Tab value="方法二：互相线性表出">
+
+  若 $A$ 的每一行都是 $B$ 各行的线性组合，且反过来也成立，则存在适当矩阵 $P,Q$，使 $A=PB$、$B=QA$。于是 $Ax=0\Rightarrow Bx=QAx=0$，反向同理，故同解。
+
+  反之，若两方程组同解，则其行空间作为零空间的正交补相同，故彼此的行可互相线性表出。
+
+</Tab>
+</Tabs>
+
+**排除其他选项：**
+
+- A：列空间相同并不要求零空间相同，例如 $A=\begin{pmatrix}1&0\\0&0\end{pmatrix}$，$B=\begin{pmatrix}1&1\\0&0\end{pmatrix}$ 的列空间相同，零空间却不同。
+- C：矩阵等价只要求秩相同，远弱于行空间相同。
+- D：取 $A=\begin{pmatrix}1&0\\0&0\end{pmatrix}$、$B=\begin{pmatrix}1&0\\1&0\end{pmatrix}$，则 $Ax=0$、$Bx=0$ 同解（都为 $x_1=0$），但 $A^Tx=0$ 为 $x_1=0$，$B^Tx=0$ 为 $x_1+x_2=0$，不同解。
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-634359-012" type="single">
+<Question id="selected-1103-math-634359-012" type="single" tags="科目:线性代数, 考点:列空间等价与转置同解">
 
 设3维列向量组$\alpha_1,\alpha_2,\alpha_3$与$\beta_1,\beta_2,\beta_3$等价，记$A=[\alpha_1,\alpha_2,\alpha_3]$，$B=[\beta_1,\beta_2,\beta_3]$，则下列结论：  
 ①$Ax=0$与$Bx=0$同解；  
@@ -169,26 +211,39 @@ $$ A = \begin{pmatrix} 1 & 0 & 0 \\ 2 & 0 & 0 \end{pmatrix}, B = \begin{pmatrix}
 
 <Solution>
 
-两向量组等价意味着它们张成相同的列空间，即
-$$
- \operatorname{Col}(A)=\operatorname{Col}(B).
-$$
-因此两者的正交补相同：
-$$
- N(A^T)=\operatorname{Col}(A)^\perp
-=\operatorname{Col}(B)^\perp=N(B^T),
-$$
-故②正确。
+**参考答案：** **C**，正确的是 $\boxed{\text{②④}}$。
 
-④中的方程组等价于同时满足$A^Tx=0$与$B^Tx=0$。由于这两个方程组本来同解，所以④也正确。
+**核心思路：** 题给两组**列向量组等价**，即 $\operatorname{Col}(A)=\operatorname{Col}(B)$。这保证的是 $A^Tx=0$、$B^Tx=0$ 同解，而不是 $Ax=0$、$Bx=0$ 同解。
 
-但列向量组等价只说明列空间相同，并不保证同一个系数向量$x$在两组生成元下给出同样的线性关系，因此$N(A)$与$N(B)$未必相同，①错误，进而③也未必成立。故选C。
+1. 由 $\operatorname{Col}(A)=\operatorname{Col}(B)$，取正交补可得
+
+
+
+$$
+\ker A^T=\operatorname{Col}(A)^\perp
+   =\operatorname{Col}(B)^\perp=\ker B^T.
+$$
+
+   因此 **②正确**。
+2. ④ 是 $A^Tx=0$ 与 $B^Tx=0$ 的联合方程组，它的解集为 $\ker A^T\cap\ker B^T=\ker A^T$，所以 **④正确**。
+3. 两组列向量即使张成相同空间，各列间的依赖关系也可以不同，因此**①未必成立**；而③是把 $Ax=0$ 和 $Bx=0$ 同时要求，亦未必与单独 $Ax=0$ 同解。
+
+**反例（同时否定①③）：** 令
+
+$$
+A=\begin{pmatrix}1&0&0\\0&0&0\\0&0&0\end{pmatrix},\quad
+B=\begin{pmatrix}1&1&0\\0&0&0\\0&0&0\end{pmatrix}.
+$$
+
+二者列空间都为 $\operatorname{span}\{(1,0,0)^T\}$；但 $Ax=0$ 只要求 $x_1=0$，$Bx=0$ 要求 $x_1+x_2=0$。取 $x=(0,1,0)^T$ 可见它满足 $Ax=0$ 却不满足 $Bx=0$，故①、③均不成立。
+
+<Callout type="warn" title="行组和列组要分清">列空间相同 $\iff A^T x=0$ 与 $B^Tx=0$ 同解；行空间相同 $\iff Ax=0$ 与 $Bx=0$ 同解。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-634359-013" type="single">
+<Question id="selected-1103-math-634359-013" type="single" tags="科目:线性代数, 考点:冗余方程与列空间">
 
 设$A$为$m\times n$矩阵，$e=[1,1,\cdots,1]^T$，若方程组$Ay=e$有解，则对于  
 $(I)\ A^Tx=0$  
@@ -203,85 +258,103 @@ $(II)\ \begin{cases}A^Tx=0,\\e^Tx=0,\end{cases}$
 
 <Solution>
 
-因$Ay=e$有解，存在$y_0$使
+**参考答案：** **D**，方程组（I）与（II）$\boxed{\text{完全同解}}$。
+
+**核心思路：** 已知 $Ay=e$ 有解，意味着 $e$ 是 $A$ 的列向量的线性组合。因此 $e^Tx=0$ 是 $A^Tx=0$ 的**自动推论**，新增方程并不增加约束。
+
+由 $Ay=e$ 有解，存在某个 $y_0$ 使 $Ay_0=e$。任取（I）的解 $x$，有
+
 $$
- Ay_0=e.
+e^Tx=(Ay_0)^Tx=y_0^TA^Tx=0.
 $$
-若$x$是(I)的解，则$A^Tx=0$，于是
-$$
- e^Tx=(Ay_0)^Tx=y_0^TA^Tx=0.
-$$
-故(I)的每个解自动满足(II)新增的方程，因此(I)的解都是(II)的解。反过来，(II)显然包含条件$A^Tx=0$，故(II)的解也都是(I)的解。两者同解，选D。
+
+故（I）的每个解都满足（II）新增的方程。反过来，（II）本身包含了 $A^Tx=0$，所以（II）的所有解当然也是（I）的解。两方向均成立，所以（I）与（II）同解。
+
+<Callout type="idea" title="推广公式">若 $c\in\operatorname{Col}(A)$，则 $A^Tx=0\Rightarrow c^Tx=0$。更一般地，向一个齐次方程组增加其原有行向量的线性组合，不会改变解集。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-634359-014" type="essay">
+<Question id="selected-1103-math-634359-014" type="essay" tags="科目:线性代数, 考点:新增方程的同解判别">
 
 设齐次线性方程组
+
 $$
- (I)\begin{cases}
+(I)\begin{cases}
 x_1+3x_3+5x_4=0,\\
 x_1-x_2-2x_3+2x_4=0,\\
 2x_1-x_2+x_3+3x_4=0,
 \end{cases}
 $$
+
 在线性方程组(I)的基础上增添一个方程$ax_1+bx_2+cx_3+dx_4=0$，得
+
 $$
- (II)\begin{cases}
+(II)\begin{cases}
 x_1+3x_3+5x_4=0,\\
 x_1-x_2-2x_3+2x_4=0,\\
 2x_1-x_2+x_3+3x_4=0,\\
 ax_1+bx_2+cx_3+dx_4=0.
 \end{cases}
 $$
+
 问$a,b,c,d$满足什么条件时，方程组(I),(II)是同解方程组？并求出此时方程组(II)的通解。
 
 <Solution>
 
-**答案：**
-
-$ c=3a+5b$，$d$任意；通解为
+**参考答案：** $\boxed{c=3a+5b}$，其中 $a,b,d$ 任意；此时（II）的通解为
 
 $$
- x=t\begin{bmatrix}-3\\-5\\1\\0\end{bmatrix},\qquad t\in\mathbb R.
+\boxed{\boldsymbol x=t(-3,-5,1,0)^T,\quad t\in\mathbb R}.
 $$
 
-**解析：** 原始文本漏掉了第三个方程$2x_1-x_2+x_3+3x_4=0$，此处按原题补回。
+**核心思路：** 先求原方程组（I）的**完整通解**；新增的一个线性方程不改变解集，当且仅当原基础解系的每个向量都能满足它。
 
-对(I)作消元。由第一式得
+<Steps>
+<Step>
+
+  ### 解原齐次方程组（I）
+
+  第一式给 $x_1=-3x_3-5x_4$；代入第二式得 $x_2=-5x_3-3x_4$。代入第三式：
+
+
+
 $$
- x_1=-3x_3-5x_4.
-$$
-代入第二式得
-$$
- x_2=-5x_3-3x_4.
-$$
-再代入第三式：
-$$
- 2(-3x_3-5x_4)-(-5x_3-3x_4)+x_3+3x_4=-4x_4=0,
-$$
-故$x_4=0$，于是$x_1=-3x_3,x_2=-5x_3$。所以(I)的通解为
-$$
- x=t\begin{bmatrix}-3\\-5\\1\\0\end{bmatrix}.
+\begin{aligned}
+  0&=2x_1-x_2+x_3+3x_4\\
+  &=2(-3x_3-5x_4)-(-5x_3-3x_4)+x_3+3x_4\\
+  &=-4x_4.
+  \end{aligned}
 $$
 
-要使新增方程不缩小解集，只需上述基础解向量也满足新增方程，即
+  因此 $x_4=0$，$x_1=-3x_3$、$x_2=-5x_3$，令 $x_3=t$ 即得通解 $t(-3,-5,1,0)^T$。
+
+</Step>
+<Step>
+
+  ### 判断新增方程是否冗余
+
+  只需让基础解向量 $(-3,-5,1,0)^T$ 满足新增方程 $ax_1+bx_2+cx_3+dx_4=0$。代入得
+
+
+
 $$
- -3a-5b+c=0.
+-3a-5b+c=0\quad\Longleftrightarrow\quad c=3a+5b.
 $$
-故
-$$
- c=3a+5b,
-$$
-而$d$不受限制。此时(II)与(I)同解，通解同上。
+
+  参数 $d$ 乘以恒为零的 $x_4$，因而没有限制。这一条件也充分：满足它时（I）的每个解满足新增方程，而（II）的解本来就满足（I），故两者同解。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="新增方程同解判据">若 $A x=0$ 的基础解系为 $\xi_1,\ldots,\xi_k$，则增添 $u^Tx=0$ 后同解的充要条件是 $u^T\xi_j=0$ 对所有 $j$ 成立。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-634359-025" type="single">
+<Question id="selected-1103-math-634359-025" type="single" tags="科目:线性代数, 考点:分块方程组与零空间">
 
 设$A$为$n$阶实矩阵，则( ).  
 
@@ -292,34 +365,41 @@ $$
 
 <Solution>
 
-将$2n$维未知向量分块记为$\begin{bmatrix}u\\v\end{bmatrix}$。
+**参考答案：** **C**。
 
-C左侧方程组为
+**核心思路：** 把 $2n$ 维未知向量分块为 $\binom uv$，并利用实矩阵恒等式
+
 $$
- \begin{cases}Au+A^TAv=0,\\A^TAv=0.
-\end{cases}
-$$
-第二式满足
-$$
- v^TA^TAv=\|Av\|^2=0,
-$$
-故$Av=0$，进而第一式给$Au=0$。所以左侧解集为
-$$
- N(A)\times N(A).
+\boxed{A^TAz=0\iff Az=0}.
 $$
 
-C右侧方程组为
+**证明 C 的两个方程组同解：**
+
+- 左侧方程组为 $Au+A^TAv=0,\ A^TAv=0$。由第二式 $Av=0$，再由第一式得 $Au=0$。
+- 右侧方程组为 $A^TAu+Av=0,\ Av=0$。由第二式得 $Av=0$，再由第一式知 $A^TAu=0$，亦即 $Au=0$。
+
+故两者解集都为 $\ker A\times\ker A$，C 正确。
+
+**排除其余选项：**
+
+- A、B 都声称相应齐次方程组只有零解，但题设没有说 $A$ 可逆。取 $A=0$ 即可得到非零解，因此均错误。
+- D 左侧方程组先由 $Av=0$ 得 $A^TAv=0$，再由 $AA^TAu=0$ 左乘 $(Au)^T$，得 $\|A^TAu\|^2=0$，因而 $Au=0$；故解集为 $\ker A\times\ker A$。右侧仅要求 $A^2u=0$ 和 $Av=0$，未必相同。例如
+
+
+
 $$
- \begin{cases}A^TAu+Av=0,\\Av=0.
-\end{cases}
+A=\begin{pmatrix}0&1\\0&0\end{pmatrix},\qquad A^2=0,\quad A\ne0.
 $$
-由第二式及第一式得$A^TAu=0$，而$N(A^TA)=N(A)$，故$Au=0$。因此右侧解集同样是$N(A)\times N(A)$，两者同解，选C。
+
+  取 $u=(0,1)^T,v=0$，满足 D 右侧方程组，却不满足左侧，因为 $Au=(1,0)^T\ne0$。
+
+<Callout type="warn" title="平方矩阵不能随意消去">一般 $A^2u=0$ **不能推出** $Au=0$；但对实矩阵 $A^TAu=0$ **一定推出** $Au=0$，关键在 $\|Au\|^2$ 非负。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-634359-026" type="single">
+<Question id="selected-1103-math-634359-026" type="single" tags="科目:线性代数, 考点:多项式矩阵关系与同解">
 
 设$A,B$为$n$阶矩阵，且$A$满足$A^2-A=3E$，则与$\begin{bmatrix}A\\B\end{bmatrix}x=0$不一定同解的是( ).  
 
@@ -330,41 +410,34 @@ $$
 
 <Solution>
 
+**参考答案：** **D**，该选项的方程组不一定与原方程组同解。
+
+**核心思路：** $A^2-A=3E$ 意味着 $A$ 可逆，因此 $\binom AB x=0$ 只有零解。逐个检查候选方程组是否也只有零解。
+
 由
-$$
- A^2-A=3E
-$$
-知$A$可逆，因此原方程组$Ax=0,Bx=0$只有零解。
 
-只需判断各选项对应方程组是否也一定只有零解。
+$$
+A(A-E)=3E,
+$$
 
-A中若$(A-B)x=0$，则$Bx=Ax$。第二式给
-$$
- A(I+B)x=0\Rightarrow (I+B)x=0.
-$$
-结合$Bx=Ax$可得$(A+I)x=0$。而$-1$不是多项式$\lambda^2-\lambda-3$的根，所以$A+I$可逆，故$x=0$。
+知 $A$ 可逆；此外，$A+E$ 与 $A-3E$ 也可逆，因为若 $Ax=-x$ 或 $Ax=3x$ 对某非零 $x$ 成立，代入 $A^2-A=3E$ 分别得到 $2x=3x$ 或 $6x=3x$，均矛盾。
 
-B同理可化出$(A-3E)x=0$，而$3$也不是$\lambda^2-\lambda-3$的根，故$x=0$。
+| 选项 | 方程组推导 | 是否同解 |
+| --- | --- | --- |
+| A | $(A-B)x=0\Rightarrow Bx=Ax$；$(A+AB)x=0\Rightarrow A(E+B)x=0\Rightarrow (E+B)x=0\Rightarrow(A+E)x=0$。 | $A+E$ 可逆，只有零解，**同解**。 |
+| B | $(A+B)x=0\Rightarrow Bx=-Ax$；$(A+AB-B)x=0\Rightarrow(2A-A^2)x=(A-3E)x=0$。 | $A-3E$ 可逆，只有零解，**同解**。 |
+| C | $(A-B)x=0$ 与 $(2A+B)x=0$ 相加得 $3Ax=0$。 | $A$ 可逆，只有零解，**同解**。 |
+| D | 取 $B=-A$，则 $A+B=0$ 且 $BA+B^2=-A^2+A^2=0$。 | 此时任意 $x$ 都是解，**不同解**。 |
 
-C由两式相加直接得$3Ax=0$，所以$x=0$。
-
-D则不一定。例如取$B=-A$，则
-$$
- A+B=O,
-$$
-且
-$$
- BA+B^2=-A^2+A^2=O,
-$$
-于是任意$x$都是解，显然与原方程组不同解。因此选D。
+<Callout type="idea" title="代数关系替代特征值计算">若矩阵满足多项式恒等式，判断 $A-cE$ 是否可逆，可以直接假设 $(A-cE)x=0$、代回原恒等式寻找矛盾，无需显式求特征值。</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：多个方程组的公共非零解与参数条件
+## 考点二｜零空间交集、公共非零解与参数讨论
 
-<Question id="selected-1103-classified-1031-math-6178b5-015" type="blank" points={5} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-6178b5-015" type="blank" points={5} tags="来源:张宇8套卷, 考点:公共非零解与满列秩">
 
 已知线性方程组（I）
 
@@ -389,156 +462,237 @@ $$
 
 <Solution>
 
-**答案：** $a\ne-1$
+**参考答案：** $\boxed{a\ne-1}$。
 
-**解析：** 记两个齐次线性方程组的系数矩阵分别为 $A,B$。
+**核心思路：** 两组齐次方程没有非零公共解，当且仅当**联立所有方程**后的系数矩阵列满秩（此题为4）。不能只比较原两个方程组各自的秩。
 
-题设“没有非零公共解”等价于
+<Tabs items={['方法一：四阶子式（推荐）','方法二：临界值构造非零公共解']}>
+<Tab value="方法一：四阶子式（推荐）">
 
-$$
-\begin{pmatrix}A\\B\end{pmatrix}x=0
-$$
+  将（I）与（II）合并，系数矩阵为
 
-只有零解，即增广后的系数矩阵列满秩。
 
-对
 
 $$
-\begin{pmatrix}A\\B\end{pmatrix}
+M(a)=\begin{pmatrix}
+  1&-1&3&-2\\1&1&-1&-6\\3&a&1&-2\\0&2&-5&a-1\\1&-1&2&0
+  \end{pmatrix}.
 $$
 
-作初等行变换可化为
+  取第1、3、4、5行构成四阶子式（按题中行次从1计），直接展开可得
+
+
 
 $$
-\begin{pmatrix}
-1&-1&3&-2\\
-0&1&-2&-2\\
-0&0&-1&2\\
-0&0&0&a+1\\
-0&0&0&0
-\end{pmatrix}.
+\det\begin{pmatrix}1&-1&3&-2\\3&a&1&-2\\0&2&-5&a-1\\1&-1&2&0\end{pmatrix}=2(a+1).
 $$
 
-其秩为 $4$ 的充要条件是
+  因此 $a\ne-1$ 时有非零四阶子式，$r(M)=4$，只能有零解。
+
+</Tab>
+<Tab value="方法二：临界值构造非零公共解">
+
+  还须检查 $a=-1$ 是否确实存在非零公共解。代入可直接验证
+
+
 
 $$
-a+1\ne0.
+M(-1)\begin{pmatrix}2\\6\\2\\1\end{pmatrix}=0.
 $$
 
-故
+  该向量非零，故 $a=-1$ 必须排除。结合方法一的充分性，最终得到 $a\ne-1$。
 
-$$
-\boxed{a\ne-1}.
-$$
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="子式法的逻辑">某个四阶子式非零可以证明列满秩；但该子式为零不代表秩一定下降。这里额外验证了唯一候选值 $a=-1$ 的非零公共解，才能得到完整充要条件。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-634359-022" type="essay">
+<Question id="selected-1103-math-634359-022" type="essay" tags="科目:线性代数, 考点:基础解系与零空间交集">
 
 设四元齐次线性方程组
+
 $$
- (I)\begin{cases}2x_1+3x_2-x_3=0,\\x_1+2x_2+x_3-x_4=0,
+(I)\begin{cases}2x_1+3x_2-x_3=0,\\x_1+2x_2+x_3-x_4=0,
 \end{cases}
 $$
+
 且四元齐次线性方程组$(II)$的一个基础解系为
+
 $$
- \xi_1=\begin{bmatrix}2\\-1\\k+2\\1\end{bmatrix},\qquad
+\xi_1=\begin{bmatrix}2\\-1\\k+2\\1\end{bmatrix},\qquad
 \xi_2=\begin{bmatrix}-1\\2\\4\\k+8\end{bmatrix}.
 $$
+
 若方程组$(I)$与$(II)$没有非零公共解，则$k$的取值范围为
 
 <Solution>
 
-**答案：** $ k\neq-1$
+**参考答案：** $\boxed{k\ne-1}$。
 
-**解析：** 先求(I)的基础解系。令$x_3=s,x_4=t$，解得
-$$
- x=s\begin{bmatrix}5\\-3\\1\\0\end{bmatrix}
-+t\begin{bmatrix}-3\\2\\0\\1\end{bmatrix}.
-$$
-记这两个基向量为$\eta_1,\eta_2$。
+**核心思路：** “没有非零公共解”等价于两个齐次方程组的解空间交集只有零向量。已知方程组（II）的基础解系，最直接的办法是把它的通解代入（I），检查系数是否只能全为零。
 
-两个二维子空间在$\mathbb R^4$中没有非零公共向量，当且仅当
+<Tabs items={['方法一：将（II）的通解代入（I）','方法二：四向量构造行列式']}>
+<Tab value="方法一：将（II）的通解代入（I）">
+
+    设（II）的任意解为 $x=s\xi_1+t\xi_2$。把 $\xi_1,\xi_2$ 分别代入（I）的两条左端，得到
+
+
+
 $$
- \eta_1,\eta_2,\xi_1,\xi_2
+A\xi_1=\begin{pmatrix}-(k+1)\\k+1\end{pmatrix},\qquad
+    A\xi_2=\begin{pmatrix}0\\-(k+1)\end{pmatrix},
+    \quad A=\begin{pmatrix}2&3&-1&0\\1&2&1&-1\end{pmatrix}.
 $$
-四个向量线性无关，即其组成的4阶行列式非零。计算得
+
+    因此公共解对应的系数满足
+
+
+
 $$
- \det[\eta_1,\eta_2,\xi_1,\xi_2]=(k+1)^2.
+\begin{pmatrix}-(k+1)&0\\k+1&-(k+1)\end{pmatrix}
+    \begin{pmatrix}s\\t\end{pmatrix}=0.
 $$
-故必须且只需$k\neq-1$。
+
+    由 $\xi_1,\xi_2$ 为基础解系（线性无关），$x=0$ 当且仅当 $s=t=0$。故要使公共解只有零解，以上二阶矩阵必须可逆：
+
+
+
+$$
+\det\begin{pmatrix}-(k+1)&0\\k+1&-(k+1)\end{pmatrix}
+    =(k+1)^2\ne0\iff\boxed{k\ne-1}.
+$$
+
+</Tab>
+<Tab value="方法二：四向量构造行列式">
+
+    （I）令 $x_3=u,x_4=v$，解得
+
+
+
+$$
+x=u\begin{pmatrix}5\\-3\\1\\0\end{pmatrix}
+     +v\begin{pmatrix}-3\\2\\0\\1\end{pmatrix}
+    =u\eta_1+v\eta_2.
+$$
+
+    两个解空间均为 $\mathbb R^4$ 中的二维子空间；它们仅交于零向量，当且仅当 $\eta_1,\eta_2,\xi_1,\xi_2$ 线性无关。直接计算
+
+
+
+$$
+\det(\eta_1,\eta_2,\xi_1,\xi_2)=(k+1)^2.
+$$
+
+    故 $k\ne-1$。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="方法选择">一组方程的基础解系已知时，优先使用“**把这组通解代入另一组方程**”；通常比求两个基础解系再计算高阶行列式更简洁。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-634359-023" type="essay">
+<Question id="selected-1103-math-634359-023" type="essay" tags="科目:线性代数, 考点:由基础解系反求矩阵与公共解">
 
 已知$A,B$均是$2\times4$矩阵，$Ax=0$的基础解系是
+
 $$
- \alpha_1=\begin{bmatrix}1\\1\\2\\1\end{bmatrix},\qquad
+\alpha_1=\begin{bmatrix}1\\1\\2\\1\end{bmatrix},\qquad
 \alpha_2=\begin{bmatrix}0\\-3\\1\\0\end{bmatrix},
 $$
+
 $Bx=0$的基础解系是
+
 $$
- \beta_1=\begin{bmatrix}1\\3\\0\\2\end{bmatrix},\qquad
+\beta_1=\begin{bmatrix}1\\3\\0\\2\end{bmatrix},\qquad
 \beta_2=\begin{bmatrix}1\\2\\-1\\a\end{bmatrix}.
 $$
+
 (1) 求矩阵$A$；  
 (2) 如果$Ax=0$和$Bx=0$有非零公共解，求$a$的值及所有非零公共解。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-(1) 可取
+（1）$A$ 不唯一，例如可取
+
 $$
- A=\begin{bmatrix}1&0&0&-1\\0&1&3&-7\end{bmatrix};
-$$
-(2) $ a=3$，所有非零公共解为
-$$
- x=t\begin{bmatrix}1\\4\\1\\1\end{bmatrix},\qquad t\neq0.
+\boxed{A=\begin{pmatrix}1&0&0&-1\\0&1&3&-7\end{pmatrix}}.
 $$
 
-**解析：** (1) 因$Ax=0$的解空间为$\operatorname{span}\{\alpha_1,\alpha_2\}$，矩阵$A$并不唯一，只要其行空间是该解空间的正交补即可。设行向量$r=(p,q,r,s)$，要求
-$$
- \begin{cases}p+q+2r+s=0,\\-3q+r=0.
-\end{cases}
-$$
-由$r=3q$、$p=-7q-s$可取两组独立行向量
-$$
- (1,0,0,-1),\qquad(0,1,3,-7),
-$$
-故可取题给答案中的$A$。
+（2）$\boxed{a=3}$，所有非零公共解为
 
-(2) 两个二维解空间在$\mathbb R^4$中有非零公共向量，当且仅当四个基向量
 $$
- \alpha_1,\alpha_2,\beta_1,\beta_2
+\boxed{x=t(1,4,1,1)^{\mathrm T},\qquad t\ne0}.
 $$
-线性相关。计算
-$$
- \det[\alpha_1,\alpha_2,\beta_1,\beta_2]=4(a-3).
-$$
-故$a=3$。
 
-此时解线性组合相等关系可得公共方向向量
+**核心思路：** $Ax=0$ 的基础解系决定的是 $A$ 的**零空间**，而不是矩阵 $A$ 的具体数值；公共解则是两个二维零空间的交向量。
+
+<Steps>
+<Step>
+
+    ### （1）由零空间反求一组行向量
+
+    $A$ 的每个行向量都必须与 $\alpha_1,\alpha_2$ 正交。设一行为 $(p,q,r,s)$，则
+
+
+
 $$
- \alpha_1-\alpha_2
-=2\beta_1-\beta_2
-=\begin{bmatrix}1\\4\\1\\1\end{bmatrix}.
+\begin{cases}p+q+2r+s=0,\\-3q+r=0.\end{cases}
+    \quad\Longrightarrow\quad r=3q,\ p=-7q-s.
 $$
-因此所有非零公共解为
+
+    取 $(q,s)=(0,-1)$ 与 $(1,0)$，分别得到 $(1,0,0,-1)$ 和 $(-7,1,3,0)$；后者加上前者的 $7$ 倍，就得到 $(0,1,3,-7)$。二行线性无关，故所给 $A$ 秩为 $2$，其零空间维数为 $4-2=2$，恰为已知两向量张成的空间。
+
+</Step>
+<Step>
+
+    ### （2）判定两个零空间何时相交
+
+    两个二维子空间 $\operatorname{span}\{\alpha_1,\alpha_2\}$ 与 $\operatorname{span}\{\beta_1,\beta_2\}$ 在 $\mathbb R^4$ 中有非零交向量，当且仅当四个向量线性相关。按列组成矩阵，计算得
+
+
+
 $$
- x=t\begin{bmatrix}1\\4\\1\\1\end{bmatrix},\quad t\neq0.
+\det(\alpha_1,\alpha_2,\beta_1,\beta_2)=4(a-3).
 $$
+
+    因而必须且只需 $\boxed{a=3}$。
+
+</Step>
+<Step>
+
+    ### 求交空间的方向
+
+    当 $a=3$ 时，直接验证
+
+
+
+$$
+\alpha_1-\alpha_2
+    =2\beta_1-\beta_2
+    =\begin{pmatrix}1\\4\\1\\1\end{pmatrix}.
+$$
+
+    该向量非零，而且两组基础解系的合并矩阵在 $a=3$ 时秩为 $3$，所以交空间维数为 $2+2-3=1$。故全部非零公共解正是它的非零倍数。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="矩阵 A 是否唯一">仅给齐次方程组的基础解系，不能唯一确定系数矩阵。将 $A$ 左乘任意可逆 $2\times2$ 矩阵，仍得到相同解集；所以第（1）问写出满足条件的一组矩阵即可。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-d9189c-016" type="essay">
+<Question id="selected-1103-math-d9189c-016" type="essay" tags="科目:线性代数, 考点:联立方程组求公共解">
 
 设有方程组① $\begin{cases} x_1+x_2=0, \\ x_2-x_4=0 \end{cases}$ 与方程组② $\begin{cases} x_1-x_2+x_3=0, \\ x_2-x_3+x_4=0 \end{cases}$ 求：
 
@@ -548,26 +702,64 @@ $$
 
 <Solution>
 
-**答案：** (I) ①的基础解系可取 $(-1,1,0,1)^T,(0,0,1,0)^T$；②的基础解系可取 $(0,1,1,0)^T,(-1,-1,0,1)^T$。(II) 非零公共解为 $k(-1,1,2,1)^T$，$k\ne0$。
+**参考答案：**
 
-**解析：** (I) 方程组 ① 的系数矩阵为 $A = \begin{pmatrix} 1 & 1 & 0 & 0 \\ 0 & 1 & 0 & -1 \end{pmatrix}$, 可求得基础解系为
+（I）方程组①的一组基础解系为 $\{(-1,1,0,1)^{\mathrm T},(0,0,1,0)^{\mathrm T}\}$；方程组②的一组基础解系为 $\{(0,1,1,0)^{\mathrm T},(-1,0,1,1)^{\mathrm T}\}$。
 
-$$\alpha_1 = (-1, 1, 0, 1)^{T}, \alpha_2 = (0, 0, 1, 0)^{T}.$$
+（II）全部非零公共解为
 
-方程组 ② 的系数矩阵为 $B = \begin{pmatrix} 1 & -1 & 1 & 0 \\ 0 & 1 & -1 & 1 \end{pmatrix}$, 解得基础解系为
+$$
+\boxed{x=t(-1,1,2,1)^{\mathrm T},\quad t\ne0}.
+$$
 
-$$\beta_1 = (0, 1, 1, 0)^{T}, \beta_2 = (-1, -1, 0, 1)^{T}.$$
+**核心思路：** 各求基础解系时分别选自由变量；求公共解时不能只比较两组基向量，而要把两组**所有方程联立**。
 
-(II)求方程组 ① 与 ② 的非零公共解,就是求 $\begin{pmatrix} A \\ B \end{pmatrix} x = 0$ 的非零解.
+<Steps>
+<Step>
 
-$$\begin{pmatrix} A \\ B \end{pmatrix} = \begin{pmatrix} 1 & 1 & 0 & 0 \\ 0 & 1 & 0 & -1 \\ 1 & -1 & 1 & 0 \\ 0 & 1 & -1 & 1 \end{pmatrix} \longrightarrow \begin{pmatrix} 1 & 1 & 0 & 0 \\ 0 & 1 & 0 & -1 \\ 0 & -2 & 1 & 0 \\ 0 & 0 & -1 & 2 \end{pmatrix} \longrightarrow \begin{pmatrix} 1 & 1 & 0 & 0 \\ 0 & 1 & 0 & -1 \\ 0 & 0 & 1 & -2 \\ 0 & 0 & 0 & 0 \end{pmatrix}$$
+    ### 解方程组①
 
-得基础解系 $\eta = (-1, 1, 2, 1)^{T}$，故非零公共解为 $k(-1, 1, 2, 1)^{T}$ ($k$ 是不为零的任意常数).
+    由 $x_1=-x_2$、$x_4=x_2$，设 $x_2=t,x_3=s$，则
+
+
+
+$$
+x=t\begin{pmatrix}-1\\1\\0\\1\end{pmatrix}
+      +s\begin{pmatrix}0\\0\\1\\0\end{pmatrix}.
+$$
+
+    两向量线性无关，构成①的基础解系。
+
+</Step>
+<Step>
+
+    ### 解方程组②
+
+    由 $x_2-x_3+x_4=0$ 得 $x_3=x_2+x_4$；代入第一式得 $x_1=-x_4$。设 $x_2=s,x_4=t$，得到
+
+
+
+$$
+x=s\begin{pmatrix}0\\1\\1\\0\end{pmatrix}
+      +t\begin{pmatrix}-1\\0\\1\\1\end{pmatrix}.
+$$
+
+    这两个向量线性无关，故为②的基础解系。
+
+</Step>
+<Step>
+
+    ### 联立求公共解
+
+    将①的通解 $(-t,t,s,t)^{\mathrm T}$ 代入②的第一式，得到 $-t-t+s=0$，即 $s=2t$；②的第二式此时自动满足。因此公共解为 $t(-1,1,2,1)^{\mathrm T}$。题目要求**非零**公共解，故 $t\ne0$。
+
+</Step>
+</Steps>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-d9189c-039" type="essay">
+<Question id="selected-1103-math-d9189c-039" type="essay" tags="科目:线性代数, 考点:零空间包含与秩">
 
 设 $A=\begin{pmatrix} -1 & 0 & 1 \\ -1 & 1 & a \end{pmatrix}$，$B=\begin{pmatrix} -1 & 1 \\ -1 & 1 \\ b & 2 \end{pmatrix}$.
 
@@ -577,29 +769,63 @@ $$\begin{pmatrix} A \\ B \end{pmatrix} = \begin{pmatrix} 1 & 1 & 0 & 0 \\ 0 & 1 
 
 <Solution>
 
-**答案：** (I) $a=4,b=-2$；(II) 仍有 $a=4,b=-2$，全部非零公共解为 $k(1,-3,1)^T$，$k\ne0$。
+**参考答案：** （I）$\boxed{a=4,\ b=-2}$。（II）仍为 $\boxed{a=4,\ b=-2}$，全部非零公共解为 $\boxed{X=t(1,-3,1)^{\mathrm T},\ t\ne0}$。
 
-**解析：** ( I ) 由 $A$ 有 $2$ 阶非零子式 $\begin{vmatrix}-1&0\\-1&1\end{vmatrix}$, 且 $A$ 是 $2\times 3$ 矩阵, 知 $r(A)=2$, 从而 $AX=0$ 有 $3-r(A)=3-2=1$ 个基础解系.
-由 $AX=0$ 的解均是 $B^{T}X=0$ 的解, 但这两个方程组不同解, 知 $B^{T}X=0$ 的基础解系中至少有两个解向量, 故 $r(B^{T})\le 3-2=1$. 又 $B$ 是非零矩阵, 故 $r(B^{T})=r(B)\ge 1$, 即 $r(B^{T})=1$.
-由 $B^{T}=\begin{pmatrix}-1&-1&b\\1&1&2\end{pmatrix}\to\begin{pmatrix}-1&-1&b\\0&0&2+b\end{pmatrix}$, 知 $b=-2$.
-由 $A=\begin{pmatrix}-1&0&1\\-1&1&a\end{pmatrix}\to\begin{pmatrix}-1&0&1\\0&1&a-1\end{pmatrix}$, 得 $AX=0$ 的基础解系为 $(x_1,x_2,x_3)^{T}=(1,1-a,1)^{T}$.
-将其代入 $B^{T}X=0$, 即 $-x_1-x_2-2x_3=0$, 得 $a=4$.
+**核心思路：** 先写出 $AX=0$ 的通解，再代入 $B^{\mathrm T}X=0$。第（I）问多了“**不同解**”的条件，需要另外检验两个零空间维数不同。
 
-( II ) 由题设, 知方程组 $\begin{cases}AX=0,\\B^{T}X=0\end{cases}$ 有非零解, 从而知 $r\begin{pmatrix}A\\B^{T}\end{pmatrix}<3$, 对 $\begin{pmatrix}A\\B^{T}\end{pmatrix}$ 作初等行变换, 有
-$$\begin{pmatrix}A\\B^{T}\end{pmatrix}=\begin{pmatrix}-1&0&1\\-1&1&a\\-1&-1&b\\1&1&2\end{pmatrix}\to\begin{pmatrix}-1&0&1\\0&1&a-1\\0&0&a+b-2\\0&0&4-a\end{pmatrix}.$$
-故 $a+b-2=0,4-a=0$, 解得 $a=4,b=-2$.
-当 $a=4,b=-2$ 时,
+<Steps>
+<Step>
 
-$$\begin{pmatrix} A \\ B^T \end{pmatrix} \rightarrow \begin{pmatrix} -1 & 0 & 1 \\ 0 & 1 & 3 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{pmatrix},$$
+    ### 写出 A 的零空间
 
-解得 $(x_1, x_2, x_3)^T = k(1, -3, 1)^T (k \neq 0)$ 为全部非零公共解.
+    $A$ 的前两列构成非零的 $2$ 阶子式，故 $r(A)=2$，$\dim\ker A=1$。两行方程解得
+
+
+
+$$
+X=t\begin{pmatrix}1\\1-a\\1\end{pmatrix},\qquad t\in\mathbb R.
+$$
+
+</Step>
+<Step>
+
+    ### 将该通解代入 B 的转置方程
+
+
+
+$$
+B^{\mathrm T}=\begin{pmatrix}-1&-1&b\\1&1&2\end{pmatrix}.
+$$
+
+    代入非零方向向量，得到两个条件
+
+
+
+$$
+-1-(1-a)+b=a+b-2=0,\qquad
+    1+(1-a)+2=4-a=0.
+$$
+
+    因而 $a=4,b=-2$。这同时是第（II）问存在非零公共解的充分必要条件；此时方向向量为 $(1,-3,1)^{\mathrm T}$。
+
+</Step>
+<Step>
+
+    ### 额外检查第（I）问的“不同解”
+
+    当 $b=-2$ 时，$B^{\mathrm T}$ 的两行互为相反数，故 $r(B^{\mathrm T})=1$，$\dim\ker B^{\mathrm T}=2$；而 $\dim\ker A=1$。所以虽有 $\ker A\subset\ker B^{\mathrm T}$，两者并不相等，确实不同解。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="解题技巧">对三元两方程的齐次组，已知其零空间只有一个方向时，判断两个方程组是否存在非零公共解，可直接用这个方向代入另一组方程，避免对四行增广矩阵做全面消元。</Callout>
 
 </Solution>
 </Question>
 
-## 考点3：多方程组联立、秩的非对称性与结构扩展
+## 考点三｜非齐次同解、乘积秩与正交结构
 
-<Question id="selected-1103-classified-1031-math-56d40c-021" type="essay" points={12} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-56d40c-021" type="essay" points={12} tags="来源:张宇8套卷, 考点:同解包含与二次型对角化">
 
 设矩阵 $A,B$ 满足：对任意 $x_1,x_2,x_3$，均有
 
@@ -636,168 +862,97 @@ $$
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：**
 
-**解析：**
+（1）$\boxed{a=1,\ b=-1}$。
 
-#### （1）求 $a,b$
-
-由题意
+（2）取
 
 $$
-A=
-\begin{pmatrix}
-1&2\\
-1&-1\\
-2&a
-\end{pmatrix},
-\qquad
-B=
-\begin{pmatrix}
-1&2&3\\
-b&-2&-3
-\end{pmatrix}.
-$$
-
-题设“$A^Tx=0$ 的解均为 $Bx=0$ 的解且它们有不同解”意味着
-
-$$
-r\begin{pmatrix}A^T\\B\end{pmatrix}=r(A^T)=2\ne1=r(B).
-$$
-
-因此
-
-$$
-b=-1.
-$$
-
-再对
-
-$$
-\begin{pmatrix}A^T\\B\end{pmatrix}
-=
-\begin{pmatrix}
-1&1&2\\
-2&-1&a\\
-1&2&3\\
--1&-2&-3
-\end{pmatrix}
-$$
-
-作初等行变换，可化为
-
-$$
-\begin{pmatrix}
-1&1&2\\
-0&-3&a-4\\
-0&1&1\\
-0&0&0
-\end{pmatrix}.
-$$
-
-为了使其秩仍为 $2$，第二、三行必须线性相关，因此
-
-$$
-a-4=-3,
-$$
-
-从而
-
-$$
-a=1.
-$$
-
-故
-
-$$
-\boxed{a=1,\qquad b=-1}.
-$$
-
-#### （2）正交变换化标准形
-
-代入 $a=1,b=-1$，有
-
-$$
-BA=
-\begin{pmatrix}
-1&2&3\\
--1&-2&-3
-\end{pmatrix}
-\begin{pmatrix}
-1&2\\
-1&-1\\
-2&1
-\end{pmatrix}
-=
-\begin{pmatrix}
-9&3\\
--9&-3
-\end{pmatrix}.
-$$
-
-二次型只由矩阵的对称部分决定，令
-
-$$
-C=\frac12\left[BA+(BA)^T\right]
-=
-\begin{pmatrix}
-9&-3\\
--3&-3
-\end{pmatrix}.
-$$
-
-特征方程为
-
-$$
-|\lambda E-C|
-=\lambda^2-6\lambda-36=0,
-$$
-
-故特征值
-
-$$
-\lambda_1=3+3\sqrt5,
-\qquad
-\lambda_2=3-3\sqrt5.
-$$
-
-对应可取特征向量
-
-$$
-\xi_1=(1,2-\sqrt5)^T,
-\qquad
-\xi_2=(1,2+\sqrt5)^T.
-$$
-
-且
-
-$$
-\|\xi_1\|=\sqrt{10-4\sqrt5},
-\qquad
-\|\xi_2\|=\sqrt{10+4\sqrt5}.
-$$
-
-故可取正交矩阵
-
-$$
-Q=
-\begin{pmatrix}
-\dfrac1{\sqrt{10-4\sqrt5}}&\dfrac1{\sqrt{10+4\sqrt5}}\\[8pt]
+\boxed{Q=\begin{pmatrix}
+\dfrac1{\sqrt{10-4\sqrt5}}&\dfrac1{\sqrt{10+4\sqrt5}}\\[6pt]
 \dfrac{2-\sqrt5}{\sqrt{10-4\sqrt5}}&\dfrac{2+\sqrt5}{\sqrt{10+4\sqrt5}}
-\end{pmatrix}.
+\end{pmatrix}},
 $$
 
-经正交变换
-
-$$
-x=Qy,
-$$
-
-二次型化为标准形
+则 $Q^{\mathrm T}Q=I$，在 $x=Qy$ 下，标准形为
 
 $$
 \boxed{f=(3+3\sqrt5)y_1^2+(3-3\sqrt5)y_2^2}.
 $$
+
+**核心思路：** “$\ker A^{\mathrm T}\subsetneq\ker B$”先用于求参数；求二次型标准形时，$BA$ 未必对称，必须先取它的**对称部分**再进行正交对角化。
+
+<Steps>
+<Step>
+
+    ### （1）由真包含推出 B 的秩为 1
+
+
+
+$$
+A=\begin{pmatrix}1&2\\1&-1\\2&a\end{pmatrix},\quad
+    B=\begin{pmatrix}1&2&3\\b&-2&-3\end{pmatrix}.
+$$
+
+    $A$ 的前两行组成非零子式，故 $r(A^{\mathrm T})=2$，$\dim\ker A^{\mathrm T}=1$。由真包含，$\dim\ker B>1$，即 $r(B)<2$。$B$ 的首行非零，所以 $r(B)=1$，其两行成比例；比较第二、三列，比例为 $-1$，故 $\boxed{b=-1}$。
+
+</Step>
+<Step>
+
+    ### 由行空间包含求 a
+
+    真包含还意味着 $B$ 的每个行向量都是 $A^{\mathrm T}$ 行向量的线性组合（零空间包含与行空间反向包含）。令
+
+
+
+$$
+(1,2,3)=u(1,1,2)+v(2,-1,a).
+$$
+
+    由前两分量解得 $u=5/3,v=-1/3$；比较第三分量：$10/3-a/3=3$，得 $\boxed{a=1}$。
+
+</Step>
+<Step>
+
+    ### （2）求二次型的对称矩阵
+
+    代入参数，得到
+
+
+
+$$
+BA=\begin{pmatrix}9&3\\-9&-3\end{pmatrix},\quad
+    C=\frac{BA+(BA)^{\mathrm T}}2
+     =\begin{pmatrix}9&-3\\-3&-3\end{pmatrix}.
+$$
+
+    因为标量 $x^{\mathrm T}BAx=x^{\mathrm T}Cx$，可对**实对称矩阵** $C$ 正交对角化。
+
+</Step>
+<Step>
+
+    ### 求正交特征向量并写出标准形
+
+
+
+$$
+\det(\lambda I-C)=\lambda^2-6\lambda-36=0,
+    \quad \lambda_{1,2}=3\pm3\sqrt5.
+$$
+
+    对应可取特征向量 $v_1=(1,2-\sqrt5)^{\mathrm T}$、$v_2=(1,2+\sqrt5)^{\mathrm T}$。其内积为 $1+(2-\sqrt5)(2+\sqrt5)=0$，范数平方为 $10\mp4\sqrt5$。将二向量单位化作列，便得到上面的 $Q$，满足
+
+
+
+$$
+Q^{\mathrm T}CQ=\operatorname{diag}(3+3\sqrt5,3-3\sqrt5).
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="易错点">$BA$ 不对称时，不能直接拿 $BA$ 的特征值当作二次型的标准形系数；正确对象是 $\frac12(BA+(BA)^{\mathrm T})$。</Callout>
 
 </Solution>
 
@@ -826,98 +981,77 @@ $$
 
 <Solution>
 
-**答案：**（1）$\boxed{a=-1,\ b=2}$。（2）可取
+**参考答案：** （1）$\boxed{a=-1,\ b=2}$。
+
+（2）可取正交矩阵
 
 $$
 \boxed{Q=\begin{pmatrix}
 \frac1{\sqrt6}&\frac1{\sqrt2}&\frac1{\sqrt3}\\
 \frac2{\sqrt6}&0&-\frac1{\sqrt3}\\
 \frac1{\sqrt6}&-\frac1{\sqrt2}&\frac1{\sqrt3}
-\end{pmatrix}},\qquad
-\boxed{f=6y_1^2+2y_2^2}.
+\end{pmatrix}},
+\qquad \boxed{f=6y_1^2+2y_2^2}.
 $$
 
+**核心思路：** 两个非齐次方程组有两个不同的公共解，意味着它们的公共解集至少有一个自由参数；求出参数后对对称矩阵 $A^{\mathrm T}B+B^{\mathrm T}A$ 做正交特征分解。
+
 <Steps>
-  <Step>
+<Step>
 
-  ### （1）利用公共解不唯一确定参数
+    ### （1）公共解至少两组，必有自由变量
 
-  合并两个方程组，得到
+    联立四个方程：
 
-  $$
-  \begin{cases}
-  x_1+ax_3=1,\\
-  x_2+x_3=1,\\
-  x_1+bx_2+x_3=3,\\
-  b(x_2+x_3)=2.
-  \end{cases}
-  $$
 
-  由第二、四式及 $b\ne0$，立即得 $b=2$。再由第二式 $x_2=1-x_3$，代入第三式得 $x_1=1+x_3$。代入第一式得到
 
-  $$
-  (a+1)x_3=0.
-  $$
+$$
+x_1+ax_3=1,\quad x_2+x_3=1,\quad
+    x_1+bx_2+x_3=3,\quad b(x_2+x_3)=2.
+$$
 
-  如果 $a\ne-1$，则 $x_3=0$，公共解只有一个；题设要求至少两个不同的公共解，所以必须 $a=-1$。此时 $x_3$ 自由取值，确有无穷多个公共解。
+    第二式与第四式给出 $b=2$；继而 $x_2=1-x_3$，第三式变为 $x_1=1+x_3$。代入第一式：$(a+1)x_3=0$。若 $a\ne-1$，则 $x_3=0$，公共解唯一；为至少有两组不同公共解，必须 $a=-1$。此时 $x_3$ 任意，条件也充分。
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### （2）求二次型对应的对称矩阵
+    ### （2）求对称矩阵与特征值
 
-  代入 $a=-1,b=2$，计算
+    把 $a=-1,b=2$ 代入，得到
 
-  $$
-  C=A^{\mathrm T}B+B^{\mathrm T}A
-  =\begin{pmatrix}2&2&0\\2&4&2\\0&2&2\end{pmatrix}.
-  $$
 
-  特征多项式为
 
-  $$
-  \det(\lambda E-C)=\lambda(\lambda-2)(\lambda-6),
-  $$
+$$
+C=A^{\mathrm T}B+B^{\mathrm T}A
+    =\begin{pmatrix}2&2&0\\2&4&2\\0&2&2\end{pmatrix}.
+$$
 
-  故特征值为 $6,2,0$。
+    由 $\det(\lambda I-C)=\lambda(\lambda-2)(\lambda-6)$，三个特征值为 $6,2,0$。
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### 选取正交单位特征向量
+    ### 单位化特征向量，组成 Q
 
-  对应于 $6,2,0$ 的特征向量可分别取
+    对应特征值 $6,2,0$ 的特征向量分别取
 
-  $$
-  \boldsymbol v_1=(1,2,1)^{\mathrm T},\quad
-  \boldsymbol v_2=(1,0,-1)^{\mathrm T},\quad
-  \boldsymbol v_3=(1,-1,1)^{\mathrm T}.
-  $$
 
-  这三个向量两两正交，模长分别为 $\sqrt6,\sqrt2,\sqrt3$。单位化并依次作列向量，得到
 
-  $$
-  Q=\begin{pmatrix}
-  \frac1{\sqrt6}&\frac1{\sqrt2}&\frac1{\sqrt3}\\
-  \frac2{\sqrt6}&0&-\frac1{\sqrt3}\\
-  \frac1{\sqrt6}&-\frac1{\sqrt2}&\frac1{\sqrt3}
-  \end{pmatrix},\qquad
-  Q^{\mathrm T}CQ=\operatorname{diag}(6,2,0).
-  $$
+$$
+v_1=(1,2,1)^{\mathrm T},\quad
+    v_2=(1,0,-1)^{\mathrm T},\quad
+    v_3=(1,-1,1)^{\mathrm T}.
+$$
 
-  从而
+    三向量两两正交，长度依次为 $\sqrt6,\sqrt2,\sqrt3$。单位化后依次作为 $Q$ 的三列，则 $Q^{\mathrm T}CQ=\operatorname{diag}(6,2,0)$，故 $f=6y_1^2+2y_2^2$。
 
-  $$
-  \boxed{f(\boldsymbol x)=f(Q\boldsymbol y)=6y_1^2+2y_2^2}.
-  $$
-
-  </Step>
+</Step>
 </Steps>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-classified-1031-math-fdf71b-005" type="single" points={5} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-fdf71b-005" type="single" points={5} tags="来源:张宇8套卷, 考点:乘积矩阵的秩与公共非零解">
 
 设 3 阶矩阵 $A,B$ 满足 $r(BA)<r(AB)$，对于以下结论：
 
@@ -934,87 +1068,158 @@ $$
 
 <Solution>
 
-已知 $r(BA)<r(AB)$。若 $r(AB)=r(BA)+1$，则只能有 $r(BA)\le1$、$r(AB)\le2$。于是
+**参考答案：** **C**（①不一定正确，②一定正确）。
+
+**核心思路：** 判断“必有非零公共解”时，联立两组齐次方程，考察上下堆叠矩阵是否满列秩；对于“不一定正确”的命题，要给出一个满足题设却没有公共非零解的反例。
+
+<Steps>
+<Step>
+
+    ### 先限制两个乘积的秩
+
+    $AB$ 为 $3\times3$ 矩阵。如果 $r(AB)=3$，则 $A,B$ 均可逆，必有 $r(BA)=3$，与 $r(BA)<r(AB)$ 矛盾。因此
+
+
+
+$$
+r(AB)\le2,\qquad r(BA)\le1.
+$$
+
+</Step>
+<Step>
+
+    ### 证明②必正确
+
+    由于 $r(ABA)\le r(BA)\le1$，$r(BAB)\le r(BA)\le1$，所以
+
+
 
 $$
 r\begin{pmatrix}ABA\\BAB\end{pmatrix}
-\le r(ABA)+r(BAB)
-\le r(BA)+r(BA)\le2<3,
+    \le r(ABA)+r(BAB)\le2<3.
 $$
 
-所以
+    这个堆叠矩阵有 $3$ 列而秩小于 $3$，对应齐次方程存在非零解，故②正确。
+
+</Step>
+<Step>
+
+    ### 构造反例否定①的必然性
+
+    取
+
+
 
 $$
-\begin{pmatrix}ABA\\BAB\end{pmatrix}x=0
+A=\begin{pmatrix}0&0&0\\0&0&1\\0&1&0\end{pmatrix},\qquad
+    B=\begin{pmatrix}0&0&0\\0&0&1\\1&0&0\end{pmatrix}.
 $$
 
-必有非零解，结论②正确。
+    则
 
-而
+
 
 $$
-\begin{pmatrix}AB\\BA\end{pmatrix}x=0
+AB=\begin{pmatrix}0&0&0\\1&0&0\\0&0&1\end{pmatrix},\qquad
+    BA=\begin{pmatrix}0&0&0\\0&1&0\\0&0&0\end{pmatrix},
 $$
 
-可能只有零解，因此结论①不一定成立。其余秩差为 2 或 3 的情形均会导出矛盾。故选 C。
+    满足 $r(BA)=1<2=r(AB)$。但 $ABx=0$ 要求 $x_1=x_3=0$，而 $BAx=0$ 要求 $x_2=0$，两组唯一的公共解为零向量。因此①不一定正确。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="考研判定技巧">“必然存在公共非零解”可用 $r\binom{M}{N}<n$；“可能不存在”给出一个 $r\binom{M}{N}=n$ 的反例即可。只比较 $r(M)$ 和 $r(N)$，通常不足以断言二者是否有公共非零解。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-d9189c-018" type="essay">
+<Question id="selected-1103-math-d9189c-018" type="essay" tags="科目:线性代数, 考点:非齐次方程组同解条件">
 
 设有方程组
-$$① \begin{cases} x_1 - x_4 = -2, \\ x_2 - x_4 = -4, \\ -4x_2 - x_3 + 6x_4 = 21, \end{cases} \qquad ② \begin{cases} x_1 + ax_2 - x_3 - x_4 = -5, \\ bx_2 - x_3 - 2x_4 = -11, \\ x_3 - 2x_4 = -c + 1. \end{cases}$$
+
+$$
+① \begin{cases} x_1 - x_4 = -2, \\ x_2 - x_4 = -4, \\ -4x_2 - x_3 + 6x_4 = 21, \end{cases} \qquad ② \begin{cases} x_1 + ax_2 - x_3 - x_4 = -5, \\ bx_2 - x_3 - 2x_4 = -11, \\ x_3 - 2x_4 = -c + 1. \end{cases}
+$$
+
 $(I)$ 求方程组①的通解；
 $(II)$ 当 $a,b,c$ 为何值时，方程组①与②同解。
 
 <Solution>
 
-**答案：** (I) $x=(-2,-4,-5,0)^T+k(1,1,2,1)^T$；(II) $a=2,b=4,c=6$。
+**参考答案：**
 
-**解析：** (I) 对方程组 ① 的增广矩阵作初等行变换,
+（I）方程组①的通解为
+
 $$
-\overline{A}_1 = \begin{pmatrix} 1 & 0 & 0 & -1 & \vdots & -2 \\ 0 & 1 & 0 & -1 & \vdots & -4 \\ 0 & -4 & -1 & 6 & \vdots & 21 \end{pmatrix} \longrightarrow \begin{pmatrix} 1 & 0 & 0 & -1 & \vdots & -2 \\ 0 & 1 & 0 & -1 & \vdots & -4 \\ 0 & 0 & 1 & -2 & \vdots & -5 \end{pmatrix},
+\boxed{x=(-2,-4,-5,0)^{\mathrm T}+t(1,1,2,1)^{\mathrm T},\quad t\in\mathbb R}.
 $$
-解得方程组 ① 的通解为
+
+（II）两个方程组同解当且仅当 $\boxed{a=2,\ b=4,\ c=6}$。
+
+**核心思路：** 先求出①的全体解，再利用参数 $t$ 的任意性确定②的系数；最后必须检查②**没有额外解**，否则只能证明“①的解都是②的解”，还不能叫同解。
+
+<Steps>
+<Step>
+
+    ### （I）解①
+
+    前两式直接给出 $x_1=t-2$、$x_2=t-4$（令 $x_4=t$）；代入第三式
+
+
+
 $$
-(x_1, x_2, x_3, x_4)^{T} = (-2, -4, -5, 0)^{T} + k(1, 1, 2, 1)^{T} (k \text{ 为任意常数})
+-4(t-4)-x_3+6t=21\quad\Longrightarrow\quad x_3=2t-5.
 $$
-(II) 将方程组 ① 的通解 $x_1 = -2+k,\ x_2 = -4+k,\ x_3 = -5+2k,\ x_4 = k$ 代入方程组 ② 的第一个方程，得
+
+    因此①有一个自由参数，通解如上。
+
+</Step>
+<Step>
+
+    ### （II）由①的通解反求 a、b、c
+
+    把 $x=(t-2,t-4,2t-5,t)^{\mathrm T}$ 代入②的三式，化简为
+
+
+
 $$
-(-2+k) + a(-4+k) - (-5+2k) - k = -5
+\begin{aligned}
+    (a-2)t+3-4a&=-5,\\
+    (b-4)t+5-4b&=-11,\\
+    -5&=1-c.
+    \end{aligned}
 $$
-由 $k$ 的任意性,可得 $a = 2$. 同样将方程组 ① 的通解代入方程组 ② 的第二个方程，得
-$$
-b(-4+k) - (-5+2k) - 2k = -11
-$$
-解得 $b = 4$.
-将方程组 ① 的通解代入方程组 ② 中的第三个方程，得 $(-5+2k) - 2k = -c+1$,解得 $c = 6$，故方程组 ② 为
+
+    等式须对一切实数 $t$ 成立，所以 $a=2,b=4,c=6$。
+
+</Step>
+<Step>
+
+    ### 核验这三个参数确实使两组同解
+
+    ②变成
+
+
+
 $$
 \begin{cases}
-x_1 + 2x_2 - x_3 - x_4 = -5, \\
-4x_2 - x_3 - 2x_4 = -11, \\
-x_3 - 2x_4 = -5.
-\end{cases}
-$$
-对其增广矩阵作初等行变换，得
-
-$$
-\begin{pmatrix} 1 & 2 & -1 & -1 & \vdots & -5 \\ 0 & 4 & -1 & -2 & \vdots & -11 \\ 0 & 0 & 1 & -2 & \vdots & -5 \end{pmatrix} \longrightarrow \begin{pmatrix} 1 & 0 & 0 & -1 & \vdots & -2 \\ 0 & 1 & 0 & -1 & \vdots & -4 \\ 0 & 0 & 1 & -2 & \vdots & -5 \end{pmatrix},
+    x_1+2x_2-x_3-x_4=-5,\\
+    4x_2-x_3-2x_4=-11,\\
+    x_3-2x_4=-5.
+    \end{cases}
 $$
 
-故方程组 ② 的通解为
-$$
-(x_1, x_2, x_3, x_4)^{T} = (-2, -4, -5, 0)^{T} + k(1, 1, 2, 1)^{T}
-$$
-与方程组 ① 的通解相同.
-综上所述, 当 $a = 2, b = 4, c = 6$ 时, 方程组 ① 与 ② 同解.
+    由第三式 $x_3=2x_4-5$；代入第二式得 $x_2-x_4=-4$；再代入第一式得 $x_1-x_4=-2$。这正是①的通解条件，因此两组**互相包含**，确实同解。
+
+</Step>
+</Steps>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-d9189c-040" type="essay">
+<Question id="selected-1103-math-d9189c-040" type="essay" tags="科目:线性代数, 考点:非齐次解集包含与秩">
 
 设 $A=\begin{pmatrix} 2 & 0 & 0 & 2 \\ 1 & 1 & 0 & 3 \\ 0 & 1 & 3 & 5 \end{pmatrix}$，$B=\begin{pmatrix} 1 & 0 & 1 & 2 \\ 0 & 2 & 0 & 4 \\ 0 & -1 & a-1 & a-3 \end{pmatrix}$，$\alpha=\begin{pmatrix} 2 \\ 2 \\ 1 \end{pmatrix}$，$\beta=\begin{pmatrix} 1 \\ 2 \\ -1 \end{pmatrix}$.
 
@@ -1024,25 +1229,60 @@ $$
 
 <Solution>
 
-**答案：** (I) 结论成立；(II) $a=1$。
+**参考答案：** （I）对**任意实数 $a$**，$AX=\alpha$ 的每个解都是 $BX=\beta$ 的解。（II）$\boxed{a=1}$。
 
-**解析：** (I) 对 $(A, \boldsymbol{\alpha})$ 作初等行变换, 有
-$$\begin{aligned} (A, \boldsymbol{\alpha}) &= \begin{pmatrix} 2 & 0 & 0 & 2 & \vdots & 2 \\ 1 & 1 & 0 & 3 & \vdots & 2 \\ 0 & 1 & 3 & 5 & \vdots & 1 \end{pmatrix} \rightarrow \begin{pmatrix} 1 & 0 & 0 & 1 & \vdots & 1 \\ 1 & 1 & 0 & 3 & \vdots & 2 \\ 0 & 1 & 3 & 5 & \vdots & 1 \end{pmatrix} \\ &\rightarrow \begin{pmatrix} 1 & 0 & 0 & 1 & \vdots & 1 \\ 0 & 1 & 0 & 2 & \vdots & 1 \\ 0 & 1 & 3 & 5 & \vdots & 1 \end{pmatrix} \rightarrow \begin{pmatrix} 1 & 0 & 0 & 1 & \vdots & 1 \\ 0 & 1 & 0 & 2 & \vdots & 1 \\ 0 & 0 & 1 & 1 & \vdots & 0 \end{pmatrix}. \end{aligned}$$
+**核心思路：** 先参数化 $AX=\alpha$ 的全部解证明包含关系；要使两组不同解，须让 $BX=\beta$ 的解集维数更大，即让矩阵 $B$ 的秩下降。
 
-令 $x_4 = 1$, 得 $A X = \boldsymbol{0}$ 的一个基础解系为 $(-1, -2, -1, 1)^T$.
-令 $x_4 = 0$, 得 $A X = \boldsymbol{\alpha}$ 的一个特解为 $(1, 1, 0, 0)^T$.
-故 $A X = \boldsymbol{\alpha}$ 的通解为
-$$k \begin{pmatrix} -1 \\ -2 \\ -1 \\ 1 \end{pmatrix} + \begin{pmatrix} 1 \\ 1 \\ 0 \\ 0 \end{pmatrix} = \begin{pmatrix} -k + 1 \\ -2k + 1 \\ -k \\ k \end{pmatrix}.$$
+<Steps>
+<Step>
 
-计算
-$$\begin{aligned} B \begin{pmatrix} -k + 1 \\ -2k + 1 \\ -k \\ k \end{pmatrix} &= \begin{pmatrix} 1 & 0 & 1 & 2 \\ 0 & 2 & 0 & 4 \\ 0 & -1 & a - 1 & a - 3 \end{pmatrix} \begin{pmatrix} -k + 1 \\ -2k + 1 \\ -k \\ k \end{pmatrix} \\ &= \begin{pmatrix} (-k + 1) - k + 2k \\ 2(-2k + 1) + 4k \\ -(-2k + 1) - (a - 1)k + (a - 3)k \end{pmatrix} = \begin{pmatrix} 1 \\ 2 \\ -1 \end{pmatrix}. \end{aligned}$$
+    ### （I）求 A 方程组的全部解
 
-故 $A X = \boldsymbol{\alpha}$ 的解均是 $B X = \boldsymbol{\beta}$ 的解.
- (II) 由 (I) 知, $A X = \boldsymbol{\alpha}$ 的解均是 $B X = \boldsymbol{\beta}$ 的解, 但 $A X = \boldsymbol{\alpha}$ 与 $B X = \boldsymbol{\beta}$ 不同解, 故 $A X = \boldsymbol{\alpha}$ 的解集是 $B X = \boldsymbol{\beta}$ 的解集的真子集, 从而 $A X = \boldsymbol{0}$ 的解集是 $B X = \boldsymbol{0}$ 的解集的真子集.
-由 (I) 知, $r(A) = 3$, 故 $r(B) < 3$. 又 $B$ 有 $2$ 阶非零子式 $\begin{pmatrix} 1 & 0 \\ 0 & 2 \end{pmatrix}$. 所以 $r(B) \ge 2$, 故 $r(B) = 2$.
-对 $B$ 作初等行变换, 有
-$$B = \begin{pmatrix} 1 & 0 & 1 & 2 \\ 0 & 2 & 0 & 4 \\ 0 & -1 & a - 1 & a - 3 \end{pmatrix} \rightarrow \begin{pmatrix} 1 & 0 & 1 & 2 \\ 0 & 1 & 0 & 2 \\ 0 & -1 & a - 1 & a - 3 \end{pmatrix} \rightarrow \begin{pmatrix} 1 & 0 & 1 & 2 \\ 0 & 1 & 0 & 2 \\ 0 & 0 & a - 1 & a - 1 \end{pmatrix}.$$
-由 $r(B) = 2$, 知 $a - 1 = 0$, 即 $a = 1$.
+    第一式得 $x_1+x_4=1$；由第二式得 $x_2+2x_4=1$；代入第三式得 $x_3+x_4=0$。令 $x_4=t$，有
+
+
+
+$$
+X=\begin{pmatrix}1-t\\1-2t\\-t\\t\end{pmatrix},\qquad t\in\mathbb R.
+$$
+
+    将它代入 $B$ 的三行，分别得到
+
+
+
+$$
+\begin{aligned}
+    x_1+x_3+2x_4&=1,\\
+    2x_2+4x_4&=2,\\
+    -x_2+(a-1)x_3+(a-3)x_4&=-1.
+    \end{aligned}
+$$
+
+    因此 $AX=\alpha\Rightarrow BX=\beta$，与参数 $a$ 无关。
+
+</Step>
+<Step>
+
+    ### （II）比较 B 的秩与解空间维数
+
+    对 $BX=\beta$ 作等价行变换，得到
+
+
+
+$$
+\begin{cases}
+    x_1+x_3+2x_4=1,\\
+    x_2+2x_4=1,\\
+    (a-1)(x_3+x_4)=0.
+    \end{cases}
+$$
+
+    若 $a\ne1$，第三式给出 $x_3=-x_4$，继而 $x_1=1-x_4$，恰好与 $AX=\alpha$ 同解。若 $a=1$，第三式恒成立，$B$ 只有两个独立约束，解集是二维仿射空间，真包含 $A$ 的一维解集，故不同解。于是 $\boxed{a=1}$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="必要与充分的区别">证明一组解被另一组包含，不代表两组同解。此题需继续比较系数矩阵秩或检验是否产生新的自由变量，才能判断“不同解”。</Callout>
 
 </Solution>
 </Question>

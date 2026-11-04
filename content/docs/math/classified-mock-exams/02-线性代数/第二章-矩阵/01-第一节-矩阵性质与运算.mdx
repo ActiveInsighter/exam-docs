@@ -1,13 +1,11 @@
 ---
-title: "第一节 矩阵性质与运算｜初等变换、矩阵幂、秩与矩阵方程"
+title: "1. 矩阵性质与运算"
 description: "聚焦真题对矩阵乘法非交换性、初等矩阵与等价、特殊矩阵幂、投影和幂零、分块运算及矩阵方程的综合考查。"
 ---
 
-# 第一节 矩阵性质与运算｜初等变换、矩阵幂、秩与矩阵方程
+参照「真题核心题目」同名小节的考点与命题风格，精选 **37 道高质量模拟与练习原题**。完整保留原题题干、选项、标准答案与稳定 ID；**全节 37 道题**已按“参考答案—核心思路—推导过程—易错辨析”重写解析。部分典型题使用多解法 Tabs 和逐步推导 Steps。
 
-参照「真题核心题目」同名小节的考点与命题风格，精选 **37 道高质量模拟与练习原题**。题干、选项、答案、解析、公式与原 MDX 组件均未改动。
-
-## 考点1：矩阵乘法、初等变换与等价关系
+## 考点一｜矩阵乘法、初等变换、等价与可逆性
 
 <Question id="selected-1103-classified-1031-math-56d40c-005" type="single" points={5} tags="来源:张宇8套卷">
 
@@ -36,39 +34,48 @@ $$
 
 <Solution>
 
-记
+**参考答案：D。**
 
 $$
-\alpha_1=(1,1,1)^T,\qquad
-\alpha_2=(1,2,1)^T.
+\boxed{A=\begin{pmatrix}1&0&1\\0&1&0\end{pmatrix}}.
 $$
 
-题中矩阵等式可写为
+**思路：** 左侧 $3\times3$ 矩阵的三列，恰好依次是右侧 $3\times2$ 矩阵的第 $1$ 列、第 $2$ 列、第 $1$ 列。矩阵乘法的“逐列线性组合”正好给出 $A$ 的三列。
+
+设
 
 $$
-(\alpha_1,\alpha_2,\alpha_1)
-=(\alpha_1,\alpha_2)A.
+\alpha=\begin{pmatrix}1\\1\\1\end{pmatrix},\qquad
+\beta=\begin{pmatrix}1\\2\\1\end{pmatrix}.
 $$
 
-由于 $\alpha_1,\alpha_2$ 线性无关，因此三个列向量相对于极大线性无关组 $(\alpha_1,\alpha_2)$ 的坐标分别为
+题设即
 
 $$
-\binom10,\qquad
-\binom01,\qquad
-\binom10.
+(\alpha,\beta,\alpha)=(\alpha,\beta)A.
 $$
 
-所以
+把 $A$ 按列写为 $A=(x_1,x_2,x_3)$，则依次有
 
 $$
-A=
-\begin{pmatrix}
-1&0&1\\
-0&1&0
-\end{pmatrix}.
+(\alpha,\beta)x_1=\alpha,\quad
+(\alpha,\beta)x_2=\beta,\quad
+(\alpha,\beta)x_3=\alpha.
 $$
 
-故选 D。
+因 $\alpha,\beta$ 线性无关，每列的表示系数唯一，故
+
+$$
+x_1=\binom10,\qquad x_2=\binom01,\qquad x_3=\binom10.
+$$
+
+从而得到所求 $A$，故选 D。
+
+<Callout type="idea" title="解题技巧：先看列，不必硬做乘法">
+
+对 $M=(\alpha_1,\ldots,\alpha_r)$，$MX$ 的第 $j$ 列是 $M$ 的各列按照 $X$ 第 $j$ 列给出的系数做线性组合。此题无需计算逆矩阵，而且右侧矩阵不是方阵，不能直接写“左乘其逆”。
+
+</Callout>
 
 </Solution>
 
@@ -95,33 +102,60 @@ $$
 
 <Solution>
 
-由
+**参考答案：B（充分非必要条件）。**
+
+真正的充要条件是
 
 $$
-B\ne C,\qquad AB=AC
+\boxed{a=1\ \text{或}\ a=7}.
 $$
 
-可得
+**思路：** $AB=AC$ 且 $B\ne C$ 的本质是 $A$ 有非零的零空间，也就是 $A$ 不可逆。
+
+<Steps>
+<Step>
+
+### 将存在性问题转化为矩阵可逆性
+
+由 $AB=AC$ 得
 
 $$
-A(B-C)=0,
+A(B-C)=O.
 $$
 
-即 $Ax=0$ 有非零解，从而 $r(A)<3$。
+由于 $B\ne C$，矩阵 $B-C$ 至少有一列非零；因此 $Ax=0$ 存在非零解，等价于 $|A|=0$。
 
-又
+反过来，若 $|A|=0$，取非零向量 $x$ 满足 $Ax=0$，令 $D$ 的第一列为 $x$、其余列为零，取 $B=D,C=O$，便有 $B\ne C$ 且 $AB=AC$。故此转化是 **充要** 的。
+
+</Step>
+<Step>
+
+### 计算行列式并判断条件关系
 
 $$
-|A|=4(a-1)(a-7).
+\begin{aligned}
+|A|
+&=\begin{vmatrix}2&a-6&-2\\a+3&1&-4\\4&2&-4\end{vmatrix}\\
+&=4(a-1)(a-7).
+\end{aligned}
 $$
 
-当 $a=1$ 时确有 $r(A)<3$；但 $a=7$ 时也有 $r(A)<3$。所以“$a=1$”是存在两个不同矩阵 $B,C$ 使 $AB=AC$ 的充分非必要条件。故选 B。
+所以所求性质成立当且仅当 $a=1$ 或 $a=7$。其中 $a=1$ 一定使性质成立（充分），但 $a=7$ 也成立（非必要）。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="易错点：可消去律有前提">
+
+只有 $A$ 可逆时，$AB=AC$ 才能推出 $B=C$。本题恰好考查此推理的逆向条件：存在 $B\ne C$ 且 $AB=AC$ 当且仅当 $A$ 不可逆。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3e7cb1-010" type="single">
+<Question id="selected-1103-math-3e7cb1-010" type="single" tags="科目:线性代数, 考点:初等行列变换">
 
 设$A$为3阶矩阵，将$A$的第1行加到第2行得到$B$，再将$B$的第2列的-1倍加到第1列得到$C$，记$P=\begin{bmatrix}1&1&0\\0&1&0\\0&0&1\end{bmatrix}$，则$C=$( )  
 
@@ -132,21 +166,60 @@ $$
 
 <Solution>
 
-$P^T=\begin{bmatrix}1&0&0\\1&1&0\\0&0&1\end{bmatrix}$，左乘$P^T$正好把第1行加到第2行，所以
-$ B=P^TA$。
+**参考答案：D。**
 
-又
-$ (P^T)^{-1}=\begin{bmatrix}1&0&0\\-1&1&0\\0&0&1\end{bmatrix}$。
-右乘$(P^T)^{-1}$的作用是把第2列的$-1$倍加到第1列，所以
-$ C=B(P^T)^{-1}=P^TA(P^T)^{-1}$。
+$$
+\boxed{C=P^TA(P^T)^{-1}}.
+$$
 
-故选D。
+**思路：** 行变换靠 **左乘**，列变换靠 **右乘**；把每次变换分别表示为初等矩阵。
+
+<Steps>
+<Step>
+
+### 第一次变换：第 1 行加到第 2 行
+
+题中
+
+$$
+P^T=\begin{pmatrix}1&0&0\\1&1&0\\0&0&1\end{pmatrix},
+$$
+
+因此左乘 $P^T$ 正好执行 $r_2\leftarrow r_2+r_1$，得到
+
+$$
+B=P^TA.
+$$
+
+</Step>
+<Step>
+
+### 第二次变换：第 2 列的 $-1$ 倍加到第 1 列
+
+$$
+(P^T)^{-1}=\begin{pmatrix}1&0&0\\-1&1&0\\0&0&1\end{pmatrix}.
+$$
+
+右乘此矩阵后，第 $1$ 列变为“旧第 $1$ 列减去旧第 $2$ 列”，即 $c_1\leftarrow c_1-c_2$。故
+
+$$
+C=B(P^T)^{-1}=P^TA(P^T)^{-1}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="快速辨认">
+
+左乘初等矩阵改变行；右乘初等矩阵改变列。列操作不能简单把同行操作的矩阵放到右边，还必须准确检查初等矩阵的转置与逆。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3e7cb1-011" type="single">
+<Question id="selected-1103-math-3e7cb1-011" type="single" tags="科目:线性代数, 考点:矩阵等价与秩">
 
 设3阶矩阵$A$与$B$等价，则下列结论正确的是( )  
 
@@ -157,18 +230,55 @@ $ C=B(P^T)^{-1}=P^TA(P^T)^{-1}$。
 
 <Solution>
 
-矩阵等价只保证$r(A)=r(B)$，一般需要同时进行初等行、列变换，即存在可逆矩阵$P,Q$使$PAQ=B$，但不一定仅靠左乘或右乘一个可逆矩阵即可，故A、B不一定成立。
+**参考答案：D。**
 
-若$r(A)=2$，虽然$r(B)=2$，但两者行空间未必相同，因此不一定只靠初等行变换得到$B$，C错误。
+**关键定义：** $A$ 与 $B$ 等价当且仅当 $r(A)=r(B)$；一般有可逆矩阵 $P,Q$ 使 $B=PAQ$，不能据此省略任意一侧。
 
-若$r(A)=3$，则$A,B$均为3阶可逆矩阵。取
-$ Q=A^{-1}B$，则$Q$可逆且$AQ=B$。右乘可逆矩阵等价于一系列初等列变换，故D正确。
+<Steps>
+<Step>
+
+### 分析 A、B、C：只做一类初等变换通常不够
+
+只做初等 **行** 变换保持行空间不变；只做初等 **列** 变换保持列空间不变。
+
+例如取
+
+$$
+A=\operatorname{diag}(1,1,0),\qquad
+B=\operatorname{diag}(1,0,1).
+$$
+
+二者秩都是 $2$，所以等价。但它们的行空间不同，不能仅靠初等行变换由 $A$ 得到 $B$；列空间也不同，不能仅靠初等列变换得到 $B$。因此 A、B 两项均非普遍成立，C 也错误。
+
+</Step>
+<Step>
+
+### 分析 D：满秩时可以只做列变换
+
+若 $r(A)=3$，等价性保证 $r(B)=3$，二者均可逆。令
+
+$$
+Q=A^{-1}B,
+$$
+
+则 $Q$ 可逆且 $AQ=B$。任何可逆矩阵均可表示为有限个初等矩阵的乘积，故右乘 $Q$ 等价于一系列初等列变换。
+
+所以 D 正确。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="辨析三个概念">
+
+矩阵**等价**只要求秩相同；“可只经行变换得到”要求行空间相同；“可只经列变换得到”要求列空间相同。满秩方阵是两者都能实现的特殊情况。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3e7cb1-012" type="single">
+<Question id="selected-1103-math-3e7cb1-012" type="single" tags="科目:线性代数, 考点:初等矩阵乘法次序">
 
 设$A=\begin{bmatrix}a_{11}&a_{12}&a_{13}\\a_{21}&a_{22}&a_{23}\\a_{31}&a_{32}&a_{33}\end{bmatrix}$，$B=\begin{bmatrix}a_{21}&a_{22}&a_{23}\\a_{11}&a_{12}&a_{13}\\a_{31}+a_{11}&a_{32}+a_{12}&a_{33}+a_{13}\end{bmatrix}$，$P_1=\begin{bmatrix}0&1&0\\1&0&0\\0&0&1\end{bmatrix}$，$P_2=\begin{bmatrix}1&0&1\\0&1&0\\0&0&1\end{bmatrix}$，则( ).  
 
@@ -179,21 +289,65 @@ $ Q=A^{-1}B$，则$Q$可逆且$AQ=B$。右乘可逆矩阵等价于一系列初�
 
 <Solution>
 
-由于$P_1^2=E$，故$P_1^9=P_1$。左乘$P_1$交换第1、2行。
+**参考答案：C。**
 
-又
-$ P_2^T=\begin{bmatrix}1&0&0\\0&1&0\\1&0&1\end{bmatrix}$，左乘$P_2^T$表示把第1行加到第3行。
+$$
+\boxed{B=P_1^9P_2^TA}.
+$$
 
-因此先左乘$P_2^T$，再左乘$P_1$时需注意矩阵乘法次序：
-$ P_1P_2^TA=\begin{bmatrix}a_{21}&a_{22}&a_{23}\\a_{11}&a_{12}&a_{13}\\a_{31}+a_{11}&a_{32}+a_{12}&a_{33}+a_{13}\end{bmatrix}=B$。
+**思路：** 目标 $B$ 先交换第 $1$、$2$ 行，再将原第 $1$ 行加到第 $3$ 行。为准确保留“原第 $1$ 行”，应先实施加行，再实施交换。
 
-故$P_1^9P_2^TA=B$，选C。
+<Steps>
+<Step>
+
+### 判断初等矩阵的作用
+
+$P_1$ 交换第 $1$、$2$ 行，并且 $P_1^2=E$，所以
+
+$$
+P_1^9=P_1.
+$$
+
+同时
+
+$$
+P_2^T=\begin{pmatrix}1&0&0\\0&1&0\\1&0&1\end{pmatrix}
+$$
+
+左乘 $P_2^T$ 对应 $r_3\leftarrow r_3+r_1$。
+
+</Step>
+<Step>
+
+### 复合变换并核对三行
+
+先左乘 $P_2^T$，将旧第 $1$ 行加到第 $3$ 行；再左乘 $P_1$，交换前两行。于是
+
+$$
+P_1P_2^TA=
+\begin{pmatrix}
+a_{21}&a_{22}&a_{23}\\
+a_{11}&a_{12}&a_{13}\\
+a_{31}+a_{11}&a_{32}+a_{12}&a_{33}+a_{13}
+\end{pmatrix}=B.
+$$
+
+从而 $B=P_1^9P_2^TA$，即 C。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="顺序陷阱">
+
+作用在 $A$ 上的初等矩阵 **从右向左** 执行。若写成 $P_2^TP_1A$，则第三行加入的是交换后的第 $1$ 行（原第 $2$ 行），结果不同。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3e7cb1-024" type="single" number={1}>
+<Question id="selected-1103-math-3e7cb1-024" type="single" tags="科目:线性代数, 考点:反对称矩阵与二次型">
 
 设$A$是$n$阶矩阵，则下列说法错误的是( ).  
 
@@ -204,19 +358,55 @@ $ P_1P_2^TA=\begin{bmatrix}a_{21}&a_{22}&a_{23}\\a_{11}&a_{12}&a_{13}\\a_{31}+a_
 
 <Solution>
 
-A正确：若对任意$\xi$都有$A\xi=0$，取$\xi=e_i$即可知$A$的每一列均为0。
+**参考答案：B（错误命题）。**
 
-B错误。取非零反对称矩阵，例如
-$ A=\begin{bmatrix}0&1\\-1&0\end{bmatrix}$，
-则对任意实列向量$\xi$都有$\xi^TA\xi=0$，但$A\neq O$。
+**判题核心：** “任意向量的二次型恒为零”只能推出矩阵的**对称部分**为零，不能推出原矩阵为零。
 
-C中若对任意$B$均有$A^TB=O$，取$B=E$即得$A^T=O$；D同理取$B=E$即可得$A=O$。故选B。
+<Steps>
+<Step>
+
+### 反例否定 B
+
+取
+
+$$
+A=\begin{pmatrix}0&1\\-1&0\end{pmatrix}\ne O,
+\qquad x=\binom uv.
+$$
+
+则
+
+$$
+x^TAx=(u,v)\binom{v}{-u}=uv-vu=0
+$$
+
+对任意实数 $u,v$ 均成立。因此 B 错误。
+
+事实上 $x^TAx=x^T\tfrac{A+A^T}{2}x$。若对所有实向量 $x$ 都为零，则 $A+A^T=O$，即 $A$ 可以是非零反对称矩阵。
+
+</Step>
+<Step>
+
+### 验证其余三项
+
+- **A：正确。** 依次代入标准基向量 $e_1,\ldots,e_n$，得到 $Ae_i=0$，即 $A$ 的每一列均为零。
+- **C：正确。** 在“对任意 $B$”中取 $B=E$，立得 $A^T=O$，故 $A=O$。
+- **D：正确。** 同样取 $B=E$，有 $E^TAE=A=O$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="通用判断技巧">
+
+遇到“对任意向量/矩阵”，优先代入 **标准基向量** 或 **单位矩阵**；对 $x^TAx$ 这种二次型，则要额外想到“反对称部分自动抵消”。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3e7cb1-029" type="single">
+<Question id="selected-1103-math-3e7cb1-029" type="single" tags="科目:线性代数, 考点:可交换矩阵与转置">
 
 设$A$是$n$阶矩阵，$E+A$是可逆矩阵，则下列等式不成立的是( ).  
 
@@ -227,26 +417,85 @@ C中若对任意$B$均有$A^TB=O$，取$B=E$即得$A^T=O$；D同理取$B=E$即�
 
 <Solution>
 
-$A+E$与$A-E$都是$A$的多项式，因此二者可交换，A成立。
+**参考答案：D（通常不成立）。**
 
-若可逆矩阵$M$与$N$可交换，则$M^{-1}$也与$N$可交换，因此B成立。
+**思路：** $A+E$ 与 $A-E$ 同为 $A$ 的多项式，必可交换；其逆矩阵与伴随矩阵也继承这一交换关系。但 **转置** 不具有这样的普遍交换性。
 
-又
-$ (A+E)^*=|A+E|(A+E)^{-1}$，
-故C也成立。
+<Steps>
+<Step>
 
-但转置矩阵$(A+E)^T=A^T+E$一般并不与$A-E$可交换，所以D不一定成立。
+### 证明 A、B、C 成立
+
+直接展开可见
+
+$$
+(A+E)(A-E)=A^2-E=(A-E)(A+E),
+$$
+
+故 A 成立。
+
+设 $M=A+E$、$N=A-E$，有 $MN=NM$，且 $M$ 可逆。两边适当乘以 $M^{-1}$，得到
+
+$$
+M^{-1}N=NM^{-1},
+$$
+
+故 B 成立。
+
+又 $M^*=|M|M^{-1}$，所以
+
+$$
+M^*N=|M|M^{-1}N=|M|NM^{-1}=NM^*,
+$$
+
+故 C 成立。
+
+</Step>
+<Step>
+
+### 以反例说明 D 错误
+
+取
+
+$$
+A=\begin{pmatrix}0&1\\0&0\end{pmatrix},
+\qquad A+E=\begin{pmatrix}1&1\\0&1\end{pmatrix},
+$$
+
+其中 $A+E$ 可逆，但 $A^T\ne A$，并且
+
+$$
+[A^T,A]=A^TA-AA^T
+=\begin{pmatrix}-1&0\\0&1\end{pmatrix}\ne O.
+$$
+
+因此
+
+$$
+(A+E)^T(A-E)-(A-E)(A+E)^T=A^TA-AA^T\ne O.
+$$
+
+D 不成立。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="区分四种运算">
+
+“同一个矩阵的多项式互相可交换”，但 $A^T$ 不一定是 $A$ 的多项式。不要误以为转置、逆、伴随都无条件保持交换性质。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-207dd4-005" type="single">
+<Question id="selected-1103-math-207dd4-005" type="single" tags="科目:线性代数, 考点:初等列变换">
 
 设
 
 $$
- A=\begin{bmatrix}
+A=\begin{bmatrix}
 a_{11}&a_{12}&a_{13}\\
 a_{21}&a_{22}&a_{23}\\
 a_{31}&a_{32}&a_{33}
@@ -260,7 +509,7 @@ a_{33}&a_{32}&a_{31}+a_{32}
 $$
 
 $$
- P_1=\begin{bmatrix}
+P_1=\begin{bmatrix}
 1&0&0\\
 1&1&0\\
 0&0&1
@@ -288,38 +537,58 @@ $$
 
 <Solution>
 
-设 $ A$ 的三个列向量依次为
-$$
- A=(\alpha_1,\alpha_2,\alpha_3).
-$$
-矩阵右乘初等矩阵对应对列实施初等变换。先计算
-$$
- AP_1
-=(\alpha_1+\alpha_2,\alpha_2,\alpha_3),
-$$
-因为 $ P_1$ 的第一列为 $ (1,1,0)^T$，故第一列变为 $ \alpha_1+\alpha_2$，其余两列不变。
+**参考答案：B。**
 
-再右乘 $ P_3$，即交换第 1、3 列，得到
 $$
- AP_1P_3
-=(\alpha_3,\alpha_2,\alpha_1+\alpha_2).
+\boxed{B=AP_1P_3}.
 $$
-这正是题中矩阵 $ B$ 的三列，因此
+
+**关键思路：** 矩阵乘法右乘初等矩阵时，跟踪 **列向量** 最简单。
+
+设 $A=(\alpha_1,\alpha_2,\alpha_3)$。题中 $B$ 的列为
+
 $$
- B=AP_1P_3.
+B=(\alpha_3,\alpha_2,\alpha_1+\alpha_2).
 $$
+
+<Steps>
+<Step>
+
+### 先构造列线性组合
+
+因为 $P_1$ 的第一列是 $(1,1,0)^T$，所以
+
+$$
+AP_1=(\alpha_1+\alpha_2,\alpha_2,\alpha_3).
+$$
+
+</Step>
+<Step>
+
+### 再交换第 1、3 列
+
+右乘 $P_3$ 恰好交换第 $1$ 与第 $3$ 列，得
+
+$$
+AP_1P_3=(\alpha_3,\alpha_2,\alpha_1+\alpha_2)=B.
+$$
+
 故选 B。
 
-错误选项分析：A、C、D 所对应的列交换、列相加顺序不同，均不能得到列向量组
-$$
- (\alpha_3,\alpha_2,\alpha_1+\alpha_2).
-$$
+</Step>
+</Steps>
+
+<Callout type="idea" title="快速核验矩阵乘积次序">
+
+右乘 $P_1P_3$ 时，先作用的是 $P_1$，再作用 $P_3$。对于矩阵 $AP_1P_3$，不要将其误读为“先右乘 $P_3$”。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-a304ec-001" type="single">
+<Question id="selected-1103-math-a304ec-001" type="single" tags="科目:线性代数, 考点:初等行列变换">
 
 设 $A=(a_{ij})_{3\times 3}$，$B=\begin{pmatrix} a_{21} & a_{22}+a_{23} & a_{23} \\ a_{31} & a_{32}+a_{33} & a_{33} \\ a_{11} & a_{12}+a_{13} & a_{13} \end{pmatrix}$，$P=\begin{pmatrix} 0 & 1 & 0 \\ 0 & 0 & 1 \\ 1 & 0 & 0 \end{pmatrix}$，$Q=\begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 1 & 1 \end{pmatrix}$，则 $B=(\quad)$.
 
@@ -330,18 +599,57 @@ $$
 
 <Solution>
 
-**解析：** 根据矩阵乘法及初等矩阵,得
+**参考答案：B。**
 
-$$PAQ = \begin{pmatrix} 0 & 1 & 0 \\ 0 & 0 & 1 \\ 1 & 0 & 0 \end{pmatrix} \begin{pmatrix} a_{11} & a_{12} & a_{13} \\ a_{21} & a_{22} & a_{23} \\ a_{31} & a_{32} & a_{33} \end{pmatrix} \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 1 & 1 \end{pmatrix}$$
+$$
+\boxed{B=PAQ}.
+$$
 
-$$= \begin{pmatrix} a_{21} & a_{22} & a_{23} \\ a_{31} & a_{32} & a_{33} \\ a_{11} & a_{12} & a_{13} \end{pmatrix} \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 1 & 1 \end{pmatrix} = \begin{pmatrix} a_{21} & a_{22} + a_{23} & a_{23} \\ a_{31} & a_{32} + a_{33} & a_{33} \\ a_{11} & a_{12} + a_{13} & a_{13} \end{pmatrix} = B.$$
+**思路：** 左侧 $P$ 控制行的循环移位，右侧 $Q$ 控制列的线性组合。分两步计算最不易出错。
 
-故选 B。
+<Steps>
+<Step>
+
+### 左乘 $P$：循环调整行顺序
+
+由 $P$ 的行向量可知，$PA$ 的三行依次为原矩阵的第 $2$、第 $3$、第 $1$ 行，即
+
+$$
+PA=\begin{pmatrix}
+a_{21}&a_{22}&a_{23}\\
+a_{31}&a_{32}&a_{33}\\
+a_{11}&a_{12}&a_{13}
+\end{pmatrix}.
+$$
+
+</Step>
+<Step>
+
+### 右乘 $Q$：第 2 列加上第 3 列
+
+$Q$ 的三列为 $e_1,e_2+e_3,e_3$，所以右乘 $Q$ 后列向量依次为“旧第 $1$ 列”“旧第 $2$ 列 + 旧第 $3$ 列”“旧第 $3$ 列”。因此
+
+$$
+PAQ=\begin{pmatrix}
+a_{21}&a_{22}+a_{23}&a_{23}\\
+a_{31}&a_{32}+a_{33}&a_{33}\\
+a_{11}&a_{12}+a_{13}&a_{13}
+\end{pmatrix}=B.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="避免把行、列初等矩阵放反">
+
+$PAQ$ 中的 $P$ 在左边，调整的是 **行**；$Q$ 在右边，调整的是 **列**。不能仅看 $P,Q$ 都是初等矩阵就交换顺序。
+
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-a304ec-034" type="single">
+<Question id="selected-1103-math-a304ec-034" type="single" tags="科目:线性代数, 考点:可逆矩阵与矩阵乘积">
 
 下列选项中命题正确的是（ ）.
 
@@ -360,19 +668,86 @@ $$= \begin{pmatrix} a_{21} & a_{22} & a_{23} \\ a_{31} & a_{32} & a_{33} \\ a_{1
 
 <Solution>
 
-**解析：** 对于命题①: 由 $ABC = E$, 知 $|A||B||C| = 1$, 故 $A, B, C$ 可逆.
-等式 $ABC = E$ 两边左乘 $A^{-1}$, 得 $BC = A^{-1}$, 再右乘 $A$, 得 $BCA = E$.
-等式 $ABC = E$ 两边右乘 $C^{-1}$, 得 $AB = C^{-1}$, 再左乘 $C$, 得 $CAB = E$.
-故 $BCA = CAB$. 命题① 正确.
-对于命题②: 取 $A = \begin{pmatrix} 0 & 0 \\ 0 & 1 \end{pmatrix}, B = \begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix}$, 则 $A, B$ 均不可逆, 但 $A+B = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$ 可逆. 故命题②不正确.
-对于命题③: 由 $A, B$ 均不可逆, 知 $|A| = |B| = 0$, 从而 $|AB| = |A||B| = 0$, 故 $AB$ 必不可逆, 命题③ 正确.
-对于命题④: 由 $(AB)^2 = E$, 即 $(AB)(AB) = E$, 知 $A, B$ 均可逆, 从而 $ABA = B^{-1}$. 故 $BABA = E$, 即 $(BA)^2 = E$. 命题④ 正确.
-综上所述, 选项 B 正确.
+**参考答案：B（①③④）。**
+
+**思路：** 分别使用“方阵乘积可逆”“两个奇异矩阵之和不一定奇异”“行列式乘法公式”判断四个命题。
+
+<Steps>
+<Step>
+
+### 命题①：正确
+
+$ABC=E$ 且 $A,B,C$ 均为同阶方阵，因此
+
+$$
+|A||B||C|=1,
+$$
+
+三个矩阵均可逆。由 $ABC=E$ 得
+
+$$
+BC=A^{-1}\ \Longrightarrow\ BCA=E,
+$$
+
+同理 $AB=C^{-1}$，所以 $CAB=E$。于是 $BCA=CAB$。
+
+</Step>
+<Step>
+
+### 命题②：错误
+
+考虑两个不可逆矩阵
+
+$$
+A=\begin{pmatrix}1&0\\0&0\end{pmatrix},\qquad
+B=\begin{pmatrix}0&0\\0&1\end{pmatrix}.
+$$
+
+二者行列式均为 $0$，但 $A+B=E$ 可逆。故“不可逆 + 不可逆 = 不可逆”不是定理。
+
+</Step>
+<Step>
+
+### 命题③：正确
+
+$|A|=|B|=0$，故
+
+$$
+|AB|=|A||B|=0,
+$$
+
+从而 $AB$ 不可逆。
+
+</Step>
+<Step>
+
+### 命题④：正确
+
+$(AB)^2=E$ 说明 $AB$ 可逆，故 $A,B$ 均可逆。利用相似关系
+
+$$
+BA=A^{-1}(AB)A,
+$$
+
+可得
+
+$$
+(BA)^2=A^{-1}(AB)^2A=A^{-1}EA=E.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="重要结论">
+
+对于同阶方阵，只要 $AB$ 可逆，则 $A,B$ 各自都可逆；此时 $AB$ 与 $BA$ 相似。因此关于 $AB$ 的矩阵多项式恒等式，常可以转移到 $BA$。
+
+</Callout>
 
 </Solution>
 </Question>
 
-## 考点2：幂零、投影、秩一矩阵与高次矩阵幂
+## 考点二｜幂零、幂等、正交投影与高次矩阵幂
 
 <Question id="selected-1103-classified-1031-math-6178b5-005" type="single" points={5} tags="来源:张宇8套卷">
 
@@ -389,56 +764,68 @@ $$= \begin{pmatrix} a_{21} & a_{22} & a_{23} \\ a_{31} & a_{32} & a_{33} \\ a_{1
 
 <Solution>
 
-设
+**参考答案：D（①③④）。**
+
+**核心认识：** $A^TA=E_2$ 表示 $A$ 的两列为单位正交向量；$P=AA^T$ 是到 $A$ 的列空间上的 **正交投影矩阵**，满足 $P^2=P=P^T$。
+
+<Steps>
+<Step>
+
+### 判断①：正确
+
+令 $A=(u_1,u_2)$，则
 
 $$
-A=(\alpha_1,\alpha_2).
+A^TA=\begin{pmatrix}u_1^Tu_1&u_1^Tu_2\\u_2^Tu_1&u_2^Tu_2\end{pmatrix}=E_2.
 $$
 
-由
+因此 $u_1^Tu_2=0$，且 $\|u_1\|=\|u_2\|=1$。
+
+</Step>
+<Step>
+
+### 判断②：错误
+
+由 $\beta=AA^T\alpha$，直接取
 
 $$
-A^TA=E
+x=A^T\alpha
 $$
 
-可知 $A$ 的两个列向量正交且均为单位向量，因此结论①正确。
+即可满足 $Ax=AA^T\alpha=\beta$。所以方程 **一定有解**，即使 $\beta=0$ 也成立。
 
-又
+</Step>
+<Step>
 
-$$
-\beta=AA^T\alpha=A(A^T\alpha),
-$$
-
-所以 $\beta$ 可由 $A$ 的列向量线性表示，因此方程
+### 判断③：正确
 
 $$
-Ax=\beta
+A^T\beta=A^TAA^T\alpha=E_2A^T\alpha=A^T\alpha.
 $$
 
-有解，结论②错误。
+</Step>
+<Step>
 
-并且
+### 判断④：正确
 
-$$
-A^T(\alpha-\beta)
-=A^T\alpha-A^TAA^T\alpha
-=0,
-$$
-
-故③正确。
-
-同时
+由于 $P=AA^T$ 是对称幂等矩阵，$P(I-P)=O$，所以
 
 $$
 \beta^T(\alpha-\beta)
-=\alpha^TAA^T\alpha
--\alpha^TAA^TAA^T\alpha
-=0,
+=(P\alpha)^T(I-P)\alpha
+=\alpha^TP(I-P)\alpha=0.
 $$
 
-故 $\beta$ 与 $\alpha-\beta$ 正交，④正确。
+从而 $\beta$ 与 $\alpha-\beta$ 正交。
 
-因此正确的是①③④，选（D）。
+</Step>
+</Steps>
+
+<Callout type="idea" title="几何图像">
+
+$\alpha=\underbrace{P\alpha}_{\beta}+\underbrace{(I-P)\alpha}_{\alpha-\beta}$，分解出的两部分分别平行、垂直于 $A$ 的列空间，构成正交分解。
+
+</Callout>
 
 </Solution>
 
@@ -455,55 +842,59 @@ $$
 
 <Solution>
 
-由
+**参考答案：C（错误结论）。**
+
+**关键化简：** 令 $N=A-B$，题设恰好等价于
 
 $$
-A^2+B^2=AB+BA
+N^2=(A-B)^2=A^2-AB-BA+B^2=O,
+\qquad N\ne O.
 $$
 
-得
+这是一道 **三阶非零平方零矩阵** 的性质题。
+
+<Steps>
+<Step>
+
+### 判断秩（A 正确）
+
+由 $N^2=O$ 知 $\operatorname{Im}N\subseteq\ker N$，所以
 
 $$
-(A-B)^2=0.
+r(N)\le 3-r(N)\quad\Longrightarrow\quad r(N)\le1.
 $$
 
-因此
+又 $N\ne O$，因此 $r(N)=1$。
+
+</Step>
+<Step>
+
+### 判断特征值与迹（B 正确，C 错误）
+
+若 $Nv=\lambda v$，$v\ne0$，则
 
 $$
-r(A-B)+r(A-B)\le3,
+0=N^2v=\lambda^2v
+\quad\Longrightarrow\quad\lambda=0.
 $$
 
-即
+所以 $N$ 的特征值全为零，迹也为零。C 声称其可以有非零特征值，必定错误。
 
-$$
-r(A-B)\le1.
-$$
+</Step>
+<Step>
 
-又 $A\ne B$，故 $r(A-B)\ge1$，于是
+### 判断相似对角化（D 正确）
 
-$$
-r(A-B)=1.
-$$
+若 $N$ 可对角化，因全部特征值都为 $0$，则 $N$ 相似于零对角矩阵，只能有 $N=O$，与 $A\ne B$ 矛盾。因此 $N$ 不可相似对角化。
 
-所以（A）正确。
+</Step>
+</Steps>
 
-设 $A-B$ 的特征值为 $\lambda$，由 $(A-B)^2=0$ 得
+<Callout type="idea" title="方法总结">
 
-$$
-\lambda^2=0,
-$$
+对于 $N^2=O$，应立即联想三件事：像空间包含于核空间、全部特征值为零、非零时不可能对角化。在 $n$ 维空间有通用估计 $r(N)\le\lfloor n/2\rfloor$。
 
-故所有特征值均为 $0$，从而其迹为 $0$。（B）正确，（C）错误。
-
-若 $A-B$ 可相似对角化，则因其特征值均为 $0$，其相似标准形只能为零矩阵，于是
-
-$$
-A-B=0,
-$$
-
-与 $A\ne B$ 矛盾，故（D）正确。
-
-选（C）。
+</Callout>
 
 </Solution>
 
@@ -534,268 +925,451 @@ $$
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：**
 
-**解析：** （1）先计算
+（1）对所有整数 $n\ge3$，成立 $\boxed{A^n=A^{n-2}+A^2-E}$。
+
+（2）
 
 $$
-A^2=
-\begin{pmatrix}
-1&0&0\\
-1&1&0\\
-1&0&1
-\end{pmatrix},
+\boxed{
+A^{99}=\begin{pmatrix}1&0&0\\50&0&1\\49&1&0\end{pmatrix},
+\quad
+A^{100}=\begin{pmatrix}1&0&0\\50&1&0\\50&0&1\end{pmatrix}
+}.
+$$
+
+（3）$A^2-E$ 与 $A^{100}-E$ 均非零，且乘积为零，因而互为零因子。
+
+**核心思路：** 找到 $A^2$ 与单位矩阵的差 $N$，利用 $N^2=O$ 和 $AN=NA=N$，把大指数幂降为一次式。
+
+<Steps>
+<Step>
+
+### 第一步：计算基础矩阵并发现结构
+
+直接乘法得到
+
+$$
+A^2=\begin{pmatrix}1&0&0\\1&1&0\\1&0&1\end{pmatrix}
+=E+N,
 \qquad
-A^3=
-\begin{pmatrix}
-1&0&0\\
-2&0&1\\
-1&1&0
-\end{pmatrix}.
+N=\begin{pmatrix}0&0&0\\1&0&0\\1&0&0\end{pmatrix}.
 $$
 
-从而
+验证
 
 $$
-A^3=A+A^2-E.
+N^2=O,\qquad AN=NA=N.
 $$
 
-**（2 分）**
+于是当 $m\ge0$ 时，$A^mN=N$（包括 $m=0$，其中 $A^0=E$）。
 
-用数学归纳法。假设 $n=k\ge3$ 时
+</Step>
+<Step>
 
-$$
-A^k=A^{k-2}+A^2-E.
-$$
+### 第二步：（1）证明递推关系
 
-则
+对任意 $n\ge3$，
 
 $$
 \begin{aligned}
-A^{k+1}
-&=AA^k\\
-&=A(A^{k-2}+A^2-E)\\
-&=A^{k-1}+A^3-A\\
-&=A^{k-1}+A^2-E.
+A^n
+&=A^{n-2}A^2\\
+&=A^{n-2}(E+N)\\
+&=A^{n-2}+N\\
+&=A^{n-2}+A^2-E.
 \end{aligned}
 $$
 
-故对任意 $n\ge3$，均有
+所以递推恒等式成立。
+
+</Step>
+<Step>
+
+### 第三步：（2）计算 $A^{99}$、$A^{100}$
+
+<Tabs items={['幂零矩阵法（推荐）', '递推式累加法']} defaultIndex={0}>
+<Tab value="幂零矩阵法（推荐）">
+
+因为 $N^2=O$，用二项式定理：
 
 $$
-\boxed{A^n=A^{n-2}+A^2-E}.
+A^{2m}=(A^2)^m=(E+N)^m=E+mN.
 $$
 
-**（4 分）**
-
-（2）由（1），有
+又 $AN=N$，故
 
 $$
-A^{100}-A^{98}=A^2-E,
+A^{2m+1}=A(E+mN)=A+mN.
 $$
 
-$$
-A^{98}-A^{96}=A^2-E,
-$$
+取 $m=49$ 和 $m=50$，有
 
 $$
-\cdots
+A^{99}=A+49N=
+\begin{pmatrix}1&0&0\\50&0&1\\49&1&0\end{pmatrix},
 $$
 
 $$
-A^4-A^2=A^2-E.
+A^{100}=E+50N=
+\begin{pmatrix}1&0&0\\50&1&0\\50&0&1\end{pmatrix}.
 $$
 
-将上述 49 个等式相加，得
+</Tab>
+<Tab value="递推式累加法">
+
+由（1），同奇偶性的相邻幂相减都是 $N$：
 
 $$
-A^{100}-A^2=49(A^2-E).
+A^{2m}-A^{2m-2}=N,\qquad
+A^{2m+1}-A^{2m-1}=N.
 $$
 
-因此
+分别从 $A^0=E$ 和 $A^1=A$ 开始累加，得到
 
 $$
-A^{100}=A^2+49(A^2-E)
-=\begin{pmatrix}
-1&0&0\\
-50&1&0\\
-50&0&1
-\end{pmatrix}.
+A^{2m}=E+mN,\qquad A^{2m+1}=A+mN.
 $$
 
-**（6 分）**
+代入 $m=49,50$ 得到同一答案。
 
-又
+</Tab>
+</Tabs>
 
-$$
-A^{-1}=
-\begin{pmatrix}
-1&0&0\\
-0&0&1\\
--1&1&0
-\end{pmatrix},
-$$
+</Step>
+<Step>
 
-所以
+### 第四步：（3）严格验证零因子
+
+由（2）及 $A^2=E+N$，
 
 $$
-A^{99}=A^{100}A^{-1}
-=\begin{pmatrix}
-1&0&0\\
-50&0&1\\
-49&1&0
-\end{pmatrix}.
+A^2-E=N\ne O,
+\qquad A^{100}-E=50N\ne O.
 $$
 
-**（8 分）**
-
-（3）由（1），取 $n=102$，有
+并且
 
 $$
-A^{102}-A^{100}-(A^2-E)=0.
+(A^2-E)(A^{100}-E)=N(50N)=50N^2=O.
 $$
 
-即
+二者均非零而乘积为零，满足题目定义。
 
-$$
-A^{100}(A^2-E)-(A^2-E)=0,
-$$
+</Step>
+</Steps>
 
-从而
+<Callout type="warn" title="证明零因子不能只写乘积为零">
 
-$$
-(A^{100}-E)(A^2-E)=0.
-$$
+题目把“两个矩阵都非零”写入定义，故必须分别指出 $A^2-E\ne O$ 与 $A^{100}-E\ne O$。通过 $N$ 的显式表达可一次性验证。
 
-**（10 分）**
-
-由（2）可知
-
-$$
-A^{100}-E\ne0,
-\qquad
-A^2-E\ne0.
-$$
-
-因此 $A^{100}-E$ 与 $A^2-E$ 均为非零矩阵，而其乘积为零，故它们是零因子。
-
-**（12 分）**
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3e7cb1-002" type="essay">
+<Question id="selected-1103-math-3e7cb1-002" type="essay" tags="科目:线性代数, 考点:幂零矩阵与二项式">
 
 设$A=\begin{bmatrix}1&1\\0&1\end{bmatrix}$，$B=\begin{bmatrix}-1&1\\0&-1\end{bmatrix}$，则$A^9-B^9=$
 
 <Solution>
 
-**答案：** $ \begin{bmatrix}2&0\\0&2\end{bmatrix}$
+**参考答案：**
 
-**解析：** 令$N=\begin{bmatrix}0&1\\0&0\end{bmatrix}$，则$N^2=O$，且
-$ A=E+N,\qquad B=-E+N=-(E-N)$。
+$$
+\boxed{A^9-B^9=\begin{pmatrix}2&0\\0&2\end{pmatrix}=2E}.
+$$
 
-因此
-$ A^9=(E+N)^9=E+9N$，
-而
-$ B^9=-\,(E-N)^9=-E+9N$。
+**思路：** 两个矩阵都由数量矩阵与相同的幂零矩阵构成；使用 $N^2=O$ 的简化二项式公式。
 
-故
-$ A^9-B^9=(E+9N)-(-E+9N)=2E=\begin{bmatrix}2&0\\0&2\end{bmatrix}$。
+令
+
+$$
+N=\begin{pmatrix}0&1\\0&0\end{pmatrix},\qquad N^2=O.
+$$
+
+则
+
+$$
+A=E+N,\qquad B=-E+N=-(E-N).
+$$
+
+由于 $E$ 与 $N$ 可交换，且 $N^2=O$，有
+
+$$
+(E\pm N)^m=E\pm mN\qquad(m\in\mathbb N).
+$$
+
+特别地，
+
+$$
+A^9=E+9N,\qquad B^9=-(E-N)^9=-E+9N.
+$$
+
+相减得
+
+$$
+A^9-B^9=(E+9N)-(-E+9N)=2E.
+$$
+
+<Callout type="idea" title="推广">
+
+当 $N^2=O$ 时，$(aE+N)^m=a^mE+ma^{m-1}N$。这种“数量矩阵 + 幂零矩阵”的形式，比逐次计算矩阵高次幂快得多。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3e7cb1-003" type="blank">
+<Question id="selected-1103-math-3e7cb1-003" type="blank" tags="科目:线性代数, 考点:矩阵幂的周期性">
 
 $A=\begin{bmatrix}0&0&-1\\0&1&0\\1&0&0\end{bmatrix}$，则$A^{13}=$<Blank answer="\begin{bmatrix}0&amp;0&amp;-1\\0&amp;1&amp;0\\1&amp;0&amp;0\end{bmatrix}" kind="text" placeholder="输入文字或 LaTeX" />．
 
 <Solution>
 
-**答案：** $ \begin{bmatrix}0&0&-1\\0&1&0\\1&0&0\end{bmatrix}$
+**参考答案：**
 
-**解析：** 计算得
-$ A^2=\begin{bmatrix}-1&0&0\\0&1&0\\0&0&-1\end{bmatrix}$，从而$A^4=E$。
+$$
+\boxed{A^{13}=\begin{pmatrix}0&0&-1\\0&1&0\\1&0&0\end{pmatrix}}.
+$$
 
-因为$13=4\times3+1$，所以
-$ A^{13}=(A^4)^3A=A$。
+**思路：** 判断矩阵幂的周期，无需逐次连乘 $13$ 次。
+
+直接计算
+
+$$
+A^2=\begin{pmatrix}-1&0&0\\0&1&0\\0&0&-1\end{pmatrix}.
+$$
+
+于是
+
+$$
+A^4=(A^2)^2=E.
+$$
+
+因 $13=4\times3+1$，故
+
+$$
+A^{13}=(A^4)^3A=E^3A=A,
+$$
+
+即所求结果。
+
+<Callout type="warn" title="判断周期的方法">
+
+$A^4=E$ 就足以得到 $A^{4m+1}=A$；并不必额外断言 $4$ 是所有可能的最小正周期。本题直接套用周期关系最稳妥。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3e7cb1-018" type="essay">
+<Question id="selected-1103-math-3e7cb1-018" type="essay" tags="科目:线性代数, 考点:幂等矩阵与多项式">
 
 设$A$是$n$阶矩阵，满足$A^2=A$，则$(A-2E)^3-3A=$
 
 <Solution>
 
-**答案：** $ 4A-8E$
+**参考答案：**
 
-**解析：** 由$A^2=A$可得$A^3=A$。展开：
-$ (A-2E)^3=A^3-6A^2+12A-8E$。
+$$
+\boxed{(A-2E)^3-3A=4A-8E}.
+$$
 
-于是
-$ (A-2E)^3-3A=A-6A+12A-3A-8E=4A-8E$。
+**核心思路：** 幂等矩阵 $A^2=A$，所有正整数次幂都可化为 $A$，因此复杂多项式可以降为一次式。
+
+<Tabs items={['直接展开（推荐）', '投影多项式法']} defaultIndex={0}>
+<Tab value="直接展开（推荐）">
+
+先由 $A^2=A$ 得 $A^3=A$。因为 $A$ 与 $E$ 可交换，利用二项式公式：
+
+$$
+(A-2E)^3=A^3-6A^2+12A-8E.
+$$
+
+故
+
+$$
+\begin{aligned}
+(A-2E)^3-3A
+&=A-6A+12A-8E-3A\\
+&=4A-8E.
+\end{aligned}
+$$
+
+</Tab>
+<Tab value="投影多项式法">
+
+令 $p(t)=(t-2)^3-3t$。对于任何幂等矩阵 $A$，有
+
+$$
+p(A)=p(0)(E-A)+p(1)A,
+$$
+
+因为 $A^m=A$（$m\ge1$）。计算
+
+$$
+p(0)=-8,\qquad p(1)=-4.
+$$
+
+从而
+
+$$
+p(A)=-8(E-A)-4A=4A-8E.
+$$
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="常见矩阵恒等式">
+
+$A^2=A$ 称为幂等；常可先把 $p(A)$ 简化为 $\alpha A+\beta E$，不必逐项硬算矩阵幂。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3e7cb1-025" type="blank">
+<Question id="selected-1103-math-3e7cb1-025" type="blank" tags="科目:线性代数, 考点:上三角矩阵高次幂">
 
 $A=\begin{bmatrix}1&1&-1\\0&1&1\\0&0&1\end{bmatrix}$，则$A^{10}=$<Blank answer="\begin{bmatrix}1&amp;10&amp;35\\0&amp;1&amp;10\\0&amp;0&amp;1\end{bmatrix}" kind="text" placeholder="输入文字或 LaTeX" />．
 
 <Solution>
 
-**答案：** $ \begin{bmatrix}1&10&35\\0&1&10\\0&0&1\end{bmatrix}$
+**参考答案：**
 
-**解析：** 写成$A=E+N$，其中
-$ N=\begin{bmatrix}0&1&-1\\0&0&1\\0&0&0\end{bmatrix}$，
-且
-$ N^2=\begin{bmatrix}0&0&1\\0&0&0\\0&0&0\end{bmatrix},\qquad N^3=O$。
+$$
+\boxed{A^{10}=\begin{pmatrix}1&10&35\\0&1&10\\0&0&1\end{pmatrix}}.
+$$
 
-由二项式展开，
-$ A^{10}=E+10N+\binom{10}{2}N^2$。
+**思路：** 把上三角矩阵写为 $A=E+N$，利用严格上三角矩阵的幂零性截断二项式展开。
 
-代入得
-$ A^{10}=\begin{bmatrix}1&10&-10+45\\0&1&10\\0&0&1\end{bmatrix}=\begin{bmatrix}1&10&35\\0&1&10\\0&0&1\end{bmatrix}$。
+令
+
+$$
+N=A-E=\begin{pmatrix}0&1&-1\\0&0&1\\0&0&0\end{pmatrix}.
+$$
+
+计算
+
+$$
+N^2=\begin{pmatrix}0&0&1\\0&0&0\\0&0&0\end{pmatrix},
+\qquad N^3=O.
+$$
+
+因此二项式展开只需保留前 3 项：
+
+$$
+\begin{aligned}
+A^{10}&=(E+N)^{10}\\
+&=E+\binom{10}{1}N+\binom{10}{2}N^2\\
+&=E+10N+45N^2.
+\end{aligned}
+$$
+
+分别计算各非对角元，特别是第一行第三列：
+
+$$
+(A^{10})_{13}=10(-1)+45(1)=35.
+$$
+
+故
+
+$$
+A^{10}=\begin{pmatrix}1&10&35\\0&1&10\\0&0&1\end{pmatrix}.
+$$
+
+<Callout type="warn" title="易错点：二项式系数与原有非对角元同时存在">
+
+$(1,3)$ 元不仅来自 $45N^2$，也有 $10N$ 带来的 $-10$，必须相加为 $35$，不能误写为 $45$。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3e7cb1-028" type="essay">
+<Question id="selected-1103-math-3e7cb1-028" type="essay" tags="科目:线性代数, 考点:实对称矩阵正定性">
 
 设$A$为$n(n\geq2)$阶实对称矩阵，且满足$E-2A+A^2-2A^3=0$，其中$E$为$n$阶单位矩阵，则$A=$
 
 <Solution>
 
-**答案：** $ \frac12E$
+**参考答案：**
 
-**解析：** 因$A$为实对称矩阵，存在正交矩阵将其对角化，且全部特征值均为实数。若$\lambda$为任一特征值，则
-$ 1-2\lambda+\lambda^2-2\lambda^3=0$。
+$$
+\boxed{A=\frac12E}.
+$$
 
-因
-$ 1-2\lambda+\lambda^2-2\lambda^3=-(2\lambda-1)(\lambda^2+1)$，
-而$\lambda$为实数，所以只能有
-$ \lambda=\frac12$。
+**核心思路：** 题目强调 $A$ 是 **实对称矩阵**，因而可正交对角化、特征值均为实数。把矩阵多项式方程化为实数方程即可。
 
-所有特征值均为$\frac12$，实对称矩阵又可正交对角化，因此
-$ A=\frac12E$。
+<Steps>
+<Step>
+
+### 第一步：分解矩阵多项式
+
+题设
+
+$$
+E-2A+A^2-2A^3=O
+$$
+
+可以因式分解为
+
+$$
+(E-2A)(E+A^2)=O.
+$$
+
+注意矩阵多项式的各因子均由同一个 $A$ 构成，所以可以按通常的代数规则整理。
+
+</Step>
+<Step>
+
+### 第二步：利用实对称性证明 $E+A^2$ 可逆
+
+由于 $A^T=A$，对于任意非零实列向量 $x$，
+
+$$
+x^T(E+A^2)x=x^Tx+(Ax)^T(Ax)=\|x\|^2+\|Ax\|^2>0.
+$$
+
+故 $E+A^2$ 正定，特别地可逆。
+
+</Step>
+<Step>
+
+### 第三步：消去可逆因子
+
+由 $(E-2A)(E+A^2)=O$，在右侧乘以 $(E+A^2)^{-1}$，得到
+
+$$
+E-2A=O,\qquad A=\frac12E.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="另一种方法：特征值法">
+
+对任意实特征值 $\lambda$，有 $(1-2\lambda)(1+\lambda^2)=0$。因 $1+\lambda^2>0$，所以每个特征值都是 $1/2$；实对称矩阵可正交对角化，故 $A=E/2$。这与上面利用正定性的证明等价。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-207dd4-001" type="single">
+<Question id="selected-1103-math-207dd4-001" type="single" tags="科目:线性代数, 考点:秩一矩阵与乘积恒等式">
 
 设 $ n$ 维行向量
 
 $$
- \alpha=\left(\frac12,0,\cdots,0,\frac12\right),
+\alpha=\left(\frac12,0,\cdots,0,\frac12\right),
 $$
 
 矩阵 $ A=E-\alpha^T\alpha$，$ B=E+2\alpha^T\alpha$，则 $ AB=$
@@ -807,46 +1381,67 @@ $$
 
 <Solution>
 
-记
-$$
- P=\alpha^T\alpha.
-$$
-由于 $ \alpha$ 是行向量，故
-$$
- P^2=\alpha^T\alpha\alpha^T\alpha
-=\alpha^T(\alpha\alpha^T)\alpha.
-$$
-而
-$$
- \alpha\alpha^T
-=\left(\frac12\right)^2+\left(\frac12\right)^2
-=\frac12,
-$$
-所以
-$$
- P^2=\frac12P.
-$$
-于是
-$$
- AB=(E-P)(E+2P)
-=E+P-2P^2
-=E+P-2\cdot\frac12P
-=E.
-$$
-因此选 B。
+**参考答案：B。**
 
-错误选项分析：A、C 均与直接计算结果不符；D 忽略了 $ P^2=\frac12P$ 所产生的抵消项。
+$$
+\boxed{AB=E}.
+$$
+
+**核心思路：** 不要把 $\alpha^T\alpha$ 当成普通数字。令 $P=\alpha^T\alpha$，先求 $P^2$，再化简两个矩阵的乘积。
+
+<Steps>
+<Step>
+
+### 先求行向量的内积
+
+$\alpha$ 是 $1\times n$ 行向量，因此 $\alpha\alpha^T$ 才是标量，而 $\alpha^T\alpha$ 是 $n\times n$ 矩阵。根据题设，
+
+$$
+\alpha\alpha^T=\left(\frac12\right)^2+\left(\frac12\right)^2=\frac12.
+$$
+
+</Step>
+<Step>
+
+### 利用结合律求 $P^2$
+
+$$
+\begin{aligned}
+P^2&=(\alpha^T\alpha)(\alpha^T\alpha)\\
+&=\alpha^T(\alpha\alpha^T)\alpha\\
+&=\frac12\alpha^T\alpha=\frac12P.
+\end{aligned}
+$$
+
+所以
+
+$$
+\begin{aligned}
+AB&=(E-P)(E+2P)\\
+&=E+P-2P^2\\
+&=E+P-P=E.
+\end{aligned}
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="通法：秩一矩阵的幂">
+
+对任意列向量 $u$、行向量 $v^T$，有 $(uv^T)^k=(v^Tu)^{k-1}uv^T$（$k\ge1$）。本题关键是 $\alpha\alpha^T=\tfrac12$，而不是 $1$。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-207dd4-019" type="essay">
+<Question id="selected-1103-math-207dd4-019" type="essay" tags="科目:线性代数, 考点:分块对角矩阵与高次幂">
 
 设
 
 $$
- A=\begin{bmatrix}
+A=\begin{bmatrix}
 1&1&0&0\\
 1&1&0&0\\
 0&0&1&0\\
@@ -858,216 +1453,522 @@ $$
 
 <Solution>
 
-**答案：**
-
-当 $ n\ge1$ 时，
+**参考答案：** 对所有正整数 $n$，
 
 $$
- A^n=
-\begin{bmatrix}
+\boxed{A^n=\begin{pmatrix}
 2^{n-1}&2^{n-1}&0&0\\
 2^{n-1}&2^{n-1}&0&0\\
 0&0&1&0\\
 0&0&n&1
-\end{bmatrix}.
+\end{pmatrix}}.
 $$
 
-**解析：** 将 $ A$ 写成分块对角矩阵
+若把 $n=0$ 也纳入讨论，则 $A^0=E_4$，**不能**将 $n=0$ 直接代入上式。
+
+**思路：** 按照原矩阵的上下两组坐标作分块对角分解，分别处理“平方后为自身倍数”和“幂零扰动”两种结构。
+
+<Steps>
+<Step>
+
+### 识别分块结构
+
 $$
- A=
-\begin{bmatrix}
-B&0\\
-0&C
-\end{bmatrix},
-\qquad
-B=\begin{bmatrix}1&1\\1&1\end{bmatrix},
-\qquad
-C=\begin{bmatrix}1&0\\1&1\end{bmatrix}.
-$$
-于是
-$$
- A^n=
-\begin{bmatrix}
-B^n&0\\
-0&C^n
-\end{bmatrix}.
-$$
-对于矩阵 $ B$，有
-$$
- B^2=2B,
-$$
-故由归纳法可得
-$$
- B^n=2^{n-1}B
-=\begin{bmatrix}
-2^{n-1}&2^{n-1}\\
-2^{n-1}&2^{n-1}
-\end{bmatrix}.
+A=\begin{pmatrix}B&O\\O&C\end{pmatrix},\quad
+B=\begin{pmatrix}1&1\\1&1\end{pmatrix},\quad
+C=\begin{pmatrix}1&0\\1&1\end{pmatrix}.
 $$
 
-对于矩阵 $ C$，令
+分块对角矩阵相乘仍为分块对角矩阵，故 $A^n=\operatorname{diag}(B^n,C^n)$。
+
+</Step>
+<Step>
+
+### 计算第一个方块的幂
+
+直接计算得
+
 $$
- N=\begin{bmatrix}0&0\\1&0\end{bmatrix},
+B^2=\begin{pmatrix}2&2\\2&2\end{pmatrix}=2B.
 $$
-则
+
+因此 $B^3=2B^2=2^2B$，归纳可得
+
 $$
- C=E_2+N,
-\qquad N^2=0.
+B^n=2^{n-1}B\qquad(n\ge1).
 $$
-由二项式展开
+
+</Step>
+<Step>
+
+### 计算第二个方块的幂并合并
+
+令 $N=\begin{pmatrix}0&0\\1&0\end{pmatrix}$，则 $C=E_2+N$、$N^2=O$。由于 $E_2$ 与 $N$ 可交换，二项式展开只留下前两项：
+
 $$
- C^n=(E_2+N)^n=E_2+nN
-=\begin{bmatrix}1&0\\n&1\end{bmatrix}.
+C^n=(E_2+N)^n=E_2+nN=\begin{pmatrix}1&0\\n&1\end{pmatrix}.
 $$
-因此
-$$
- A^n=
-\begin{bmatrix}
-2^{n-1}&2^{n-1}&0&0\\
-2^{n-1}&2^{n-1}&0&0\\
-0&0&1&0\\
-0&0&n&1
-\end{bmatrix}.
-$$
+
+将 $B^n,C^n$ 放回原来的对角方块，即得参考答案。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="检查指数范围">
+
+公式 $B^n=2^{n-1}B$ 只对 $n\ge1$ 成立。$B$ 不可逆，不应把该式不加说明地延伸到 $n=0$ 或负整数。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-a304ec-007" type="blank" number={1}>
+<Question id="selected-1103-math-a304ec-007" type="blank" tags="科目:线性代数, 考点:秩一矩阵幂">
 
 设 $\alpha = (1, 2, 3)^T, \beta = (1, \frac{1}{2}, \frac{1}{3})^T, A = \alpha\beta^T$, 则 $A^n = $<Blank answer="3^{n-1} \begin{pmatrix} 1 &amp; \dfrac{1}{2} &amp; \dfrac{1}{3} \\ 2 &amp; 1 &amp; \dfrac{2}{3} \\ 3 &amp; \dfrac{3}{2} &amp; 1 \end{pmatrix}" kind="text" placeholder="输入文字或 LaTeX" />.
 
 <Solution>
 
-**答案：** $3^{n-1} \begin{pmatrix} 1 & \dfrac{1}{2} & \dfrac{1}{3} \\ 2 & 1 & \dfrac{2}{3} \\ 3 & \dfrac{3}{2} & 1 \end{pmatrix}$
+**参考答案：** 当 $n\ge1$ 时，
 
-**解析：** 由 $A = \alpha \beta^{\mathrm{T}}$, 知 $r(A) = 1, k = \beta^{\mathrm{T}}\alpha = 3$, 故 $A^n = k^{n-1}A = 3^{n-1} \begin{pmatrix} 1 & \dfrac{1}{2} & \dfrac{1}{3} \\ 2 & 1 & \dfrac{2}{3} \\ 3 & \dfrac{3}{2} & 1 \end{pmatrix}$
+$$
+\boxed{A^n=3^{n-1}\begin{pmatrix}
+1&\frac12&\frac13\\
+2&1&\frac23\\
+3&\frac32&1
+\end{pmatrix}}.
+$$
+
+**思路：** 题目已将矩阵写成列向量乘行向量的形式，即 $A=\alpha\beta^T$，这是计算高次幂的典型秩一结构。
+
+<Steps>
+<Step>
+
+### 求决定幂次的标量
+
+$$
+\beta^T\alpha=(1,\tfrac12,\tfrac13)
+\begin{pmatrix}1\\2\\3\end{pmatrix}
+=1+1+1=3.
+$$
+
+</Step>
+<Step>
+
+### 化简乘积并写出通项
+
+$$
+A^2=\alpha\beta^T\alpha\beta^T
+=\alpha(\beta^T\alpha)\beta^T=3A.
+$$
+
+因此 $A^3=3A^2=3^2A$，由数学归纳法知 $A^n=3^{n-1}A$。再计算外积
+
+$$
+A=\begin{pmatrix}1\\2\\3\end{pmatrix}
+(1,\tfrac12,\tfrac13)
+=\begin{pmatrix}1&\frac12&\frac13\\2&1&\frac23\\3&\frac32&1\end{pmatrix},
+$$
+
+代入即得答案。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="记住一个结构，而不是一道题">
+
+若 $A=uv^T$，则 $A^2=(v^Tu)A$。当 $v^Tu\ne0$ 时，$A^n=(v^Tu)^{n-1}A$；当 $v^Tu=0$ 时，则 $A^2=O$（下一题正是这个特例）。
+
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-a304ec-008" type="blank">
+<Question id="selected-1103-math-a304ec-008" type="blank" tags="科目:线性代数, 考点:幂零矩阵与二项式">
 
 设 $\alpha = (2, -1, 3)^T, \beta = (1, 2, 0)^T, A = \alpha\beta^T, E$ 是 $3$ 阶单位矩阵, 则 $(A + E)^n = $<Blank answer="\begin{pmatrix} 2n+1 &amp; 4n &amp; 0 \\ -n &amp; -2n+1 &amp; 0 \\ 3n &amp; 6n &amp; 1 \end{pmatrix}" kind="text" placeholder="输入文字或 LaTeX" />.
 
 <Solution>
 
-**答案：** $\begin{pmatrix} 2n+1 & 4n & 0 \\ -n & -2n+1 & 0 \\ 3n & 6n & 1 \end{pmatrix}$
+**参考答案：** 对非负整数 $n$，
 
-**解析：** 由于 $A^2 = (\alpha \beta^{\mathrm{T}})(\alpha \beta^{\mathrm{T}}) = \alpha (\beta^{\mathrm{T}}\alpha) \beta^{\mathrm{T}}$,
+$$
+\boxed{(A+E)^n=\begin{pmatrix}
+1+2n&4n&0\\-n&1-2n&0\\3n&6n&1
+\end{pmatrix}}.
+$$
 
-且 $\beta^{\mathrm{T}}\alpha = (1, 2, 0) \begin{pmatrix} 2 \\ -1 \\ 3 \end{pmatrix} = 0$, 故 $A^2 = O$.
+**思路：** 先检验秩一矩阵 $A=\alpha\beta^T$ 的平方是否为零，再使用二项式公式。
 
-又因为 $A = \begin{pmatrix} 2 \\ -1 \\ 3 \end{pmatrix} (1, 2, 0) = \begin{pmatrix} 2 & 4 & 0 \\ -1 & -2 & 0 \\ 3 & 6 & 0 \end{pmatrix}$,
+<Steps>
+<Step>
 
-所以 $(A+E)^n = E^n + C_n^1 E^{n-1}A = E + nA = \begin{pmatrix} 2n+1 & 4n & 0 \\ -n & -2n+1 & 0 \\ 3n & 6n & 1 \end{pmatrix}$.
+### 证明 $A$ 是二阶幂零矩阵
+
+$$
+\beta^T\alpha=(1,2,0)\begin{pmatrix}2\\-1\\3\end{pmatrix}=2-2=0.
+$$
+
+因此
+
+$$
+A^2=(\alpha\beta^T)(\alpha\beta^T)=\alpha(\beta^T\alpha)\beta^T=O.
+$$
+
+</Step>
+<Step>
+
+### 展开并写成具体矩阵
+
+因为 $E$ 与 $A$ 可交换，且 $A^k=O$（$k\ge2$），
+
+$$
+(E+A)^n=\sum_{k=0}^n\binom nk A^k=E+nA.
+$$
+
+而
+
+$$
+A=\begin{pmatrix}2\\-1\\3\end{pmatrix}(1,2,0)
+=\begin{pmatrix}2&4&0\\-1&-2&0\\3&6&0\end{pmatrix},
+$$
+
+所以 $E+nA$ 即为所求结果。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="不要把两类秩一矩阵混为一谈">
+
+本题 $\beta^T\alpha=0$，故 $A^2=O$；上一题 $\beta^T\alpha=3$，故 $A^2=3A$。先算这个内积，比直接计算 $A^n$ 快得多。
+
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-a304ec-009" type="blank">
+<Question id="selected-1103-math-a304ec-009" type="blank" tags="科目:线性代数, 考点:矩阵多项式与高次幂">
 
 设 $A = \begin{pmatrix} 1 & 0 & 1 \\ 0 & 2 & 0 \\ 1 & 0 & 1 \end{pmatrix}$, 则 $A^n = $<Blank answer="\begin{pmatrix} 2^{n-1} &amp; 0 &amp; 2^{n-1} \\ 0 &amp; 2^n &amp; 0 \\ 2^{n-1} &amp; 0 &amp; 2^{n-1} \end{pmatrix}" kind="text" placeholder="输入文字或 LaTeX" />.
 
 <Solution>
 
-**答案：** $\begin{pmatrix} 2^{n-1} & 0 & 2^{n-1} \\ 0 & 2^n & 0 \\ 2^{n-1} & 0 & 2^{n-1} \end{pmatrix}$
+**参考答案：** 当 $n\ge1$ 时，
 
-**解析：** $r(A) = 2$, 先求 $A^2$, 找出 $A^n$ 的规律。
-$$A^2 = \begin{pmatrix} 1 & 0 & 1 \\ 0 & 2 & 0 \\ 1 & 0 & 1 \end{pmatrix} \begin{pmatrix} 1 & 0 & 1 \\ 0 & 2 & 0 \\ 1 & 0 & 1 \end{pmatrix} = \begin{pmatrix} 2 & 0 & 2 \\ 0 & 4 & 0 \\ 2 & 0 & 2 \end{pmatrix} = 2A,$$
-即 $A^2 = 2A$, 从而 $A^3 = 2A^2 = 2^2 A, \dots, A^n = 2^{n-1}A$, 故
-$$A^n = \begin{pmatrix} 2^{n-1} & 0 & 2^{n-1} \\ 0 & 2^n & 0 \\ 2^{n-1} & 0 & 2^{n-1} \end{pmatrix}.$$
+$$
+\boxed{A^n=\begin{pmatrix}
+2^{n-1}&0&2^{n-1}\\
+0&2^n&0\\
+2^{n-1}&0&2^{n-1}
+\end{pmatrix}}.
+$$
+
+**思路：** 矩阵虽不是秩一矩阵，但它满足低次多项式关系 $A^2=2A$，因此高次幂立即降阶。
+
+<Steps>
+<Step>
+
+### 先平方寻找结构
+
+$$
+A^2=\begin{pmatrix}2&0&2\\0&4&0\\2&0&2\end{pmatrix}
+=2\begin{pmatrix}1&0&1\\0&2&0\\1&0&1\end{pmatrix}=2A.
+$$
+
+</Step>
+<Step>
+
+### 利用递推关系得到一般项
+
+由 $A^2=2A$，
+
+$$
+A^n=A^{n-2}A^2=2A^{n-1}=\cdots=2^{n-1}A
+\qquad(n\ge1).
+$$
+
+把原矩阵乘以 $2^{n-1}$，得到上面的具体矩阵。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="进一步理解">
+
+令 $P=\tfrac12A$，便有 $P^2=P$。所以 $P$ 是幂等矩阵，而 $A=2P$。这是矩阵 $A$ 的非零特征值全部为 $2$ 时可能出现的一种典型结构；但不能仅由特征值就省略对角化条件。
+
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-a304ec-010" type="blank">
+<Question id="selected-1103-math-a304ec-010" type="blank" tags="科目:线性代数, 考点:矩阵幂的降阶计算">
 
 设 $A = \begin{pmatrix} 1 & 1 & 1 \\ 0 & 1 & 1 \\ 0 & 0 & -1 \end{pmatrix}$, 则 $A^{18} = $<Blank answer="\begin{pmatrix} 1 &amp; 18 &amp; 9 \\ 0 &amp; 1 &amp; 0 \\ 0 &amp; 0 &amp; 1 \end{pmatrix}" kind="text" placeholder="输入文字或 LaTeX" />.
 
 <Solution>
 
-**答案：** $\begin{pmatrix} 1 & 18 & 9 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix}$
+**参考答案：**
 
-**解析：** $A^{18} = (A^2)^9$,
+$$
+\boxed{A^{18}=\begin{pmatrix}
+1&18&9\\0&1&0\\0&0&1
+\end{pmatrix}}.
+$$
 
-$$A^2 = \begin{pmatrix}1 & 2 & 1 \\ 0 & 1 & 0 \\ 0 & 0 & 1\end{pmatrix}.$$
+**核心思路：** 先计算 $A^2$，消去原矩阵中的 $-1$ 对角元，再把 $A^2$ 写成 $E+N$，使 $N^2=O$。
 
-记
+<Tabs items={['方法一｜平方后使用二项式','方法二｜建立递推公式']} defaultIndex={0}>
+<Tab value="方法一｜平方后使用二项式">
 
-$$B = \begin{pmatrix}0 & 2 & 1 \\ 0 & 0 & 0 \\ 0 & 0 & 0\end{pmatrix},$$
+$$
+A^2=\begin{pmatrix}1&2&1\\0&1&0\\0&0&1\end{pmatrix}
+=E+N,
+\qquad
+N=\begin{pmatrix}0&2&1\\0&0&0\\0&0&0\end{pmatrix}.
+$$
 
-则 $A^2 = E + B$, 且 $B^2 = O.$
+注意到 $N$ 仅第一行可能非零，且第一列全为零，因此 $N^2=O$。于是
 
-$$A^{18} = (E + B)^9 = E + 9B = \begin{pmatrix}1 & 18 & 9 \\ 0 & 1 & 0 \\ 0 & 0 & 1\end{pmatrix}.$$
+$$
+A^{18}=(A^2)^9=(E+N)^9=E+9N
+=\begin{pmatrix}1&18&9\\0&1&0\\0&0&1\end{pmatrix}.
+$$
+
+</Tab>
+<Tab value="方法二｜建立递推公式">
+
+记 $T=A^2$。直接计算 $T-E=N$ 且 $(T-E)^2=O$，故
+
+$$
+T^{k+1}=T^kT=(E+kN)(E+N)=E+(k+1)N.
+$$
+
+以 $T^1=E+N$ 为起点，归纳得到 $T^k=E+kN$。取 $k=9$ 即得同样答案。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="易错点：指数是9而不是18">
+
+这里求的是 $(A^2)^9$，使用二项式展开时的系数为 $9$；若直接把 $A^{18}$ 当作 $(E+N)^{18}$，会多乘一倍。
+
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-a304ec-011" type="blank">
+<Question id="selected-1103-math-a304ec-011" type="blank" tags="科目:线性代数, 考点:相似矩阵与幂运算">
 
 设 $B = \begin{pmatrix} 0 & -1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 1 \end{pmatrix}, A = P^{-1}BP$, 则 $A^4 - 2B^2 = $<Blank answer="\begin{pmatrix} 3 &amp; 0 &amp; 0 \\ 0 &amp; 3 &amp; 0 \\ 0 &amp; 0 &amp; -1 \end{pmatrix}" kind="text" placeholder="输入文字或 LaTeX" />.
 
 <Solution>
 
-**答案：** $\begin{pmatrix} 3 & 0 & 0 \\ 0 & 3 & 0 \\ 0 & 0 & -1 \end{pmatrix}$
+**参考答案：**
 
-**解析：** 由 $A = P^{-1}BP$, 有 $A^2 = P^{-1}BP \cdot P^{-1}BP = P^{-1}B^2P$, 一般地, 有 $A^n = P^{-1}B^n P$, 所以 $A^4 = P^{-1}B^4 P.$
+$$
+\boxed{A^4-2B^2=\begin{pmatrix}3&0&0\\0&3&0\\0&0&-1\end{pmatrix}}.
+$$
 
-由
+**思路：** 题设 $A=P^{-1}BP$ 表明 $A$ 与 $B$ 相似（隐含 $P$ 可逆）。多次连乘时，中间的 $PP^{-1}$ 全部抵消。
 
-$$B = \begin{pmatrix}0 & -1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 1\end{pmatrix},$$
+<Steps>
+<Step>
 
-得
+### 将 $A^4$ 转化为 $B^4$
 
-$$B^2 = \begin{pmatrix}-1 & 0 & 0 \\ 0 & -1 & 0 \\ 0 & 0 & 1\end{pmatrix},$$
+$$
+A^4=(P^{-1}BP)^4=P^{-1}B^4P.
+$$
 
-故 $B^4 = (B^2)^2 = E$, 所以 $A^4 = P^{-1}EP = E$, 于是
+</Step>
+<Step>
 
-$$A^4 - 2B^2 = E - 2B^2 = \begin{pmatrix}3 & 0 & 0 \\ 0 & 3 & 0 \\ 0 & 0 & -1\end{pmatrix}.$$
+### 先求较低次幂
+
+$$
+B^2=\begin{pmatrix}-1&0&0\\0&-1&0\\0&0&1\end{pmatrix},
+\qquad B^4=(B^2)^2=E_3.
+$$
+
+所以
+
+$$
+A^4=P^{-1}E_3P=E_3.
+$$
+
+</Step>
+<Step>
+
+### 代入求值
+
+$$
+A^4-2B^2=E_3-2\operatorname{diag}(-1,-1,1)
+=\operatorname{diag}(3,3,-1).
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="相似矩阵的幂">
+
+一般地，$A=P^{-1}BP$ 蕴含 $A^k=P^{-1}B^kP$（$k\ge0$）。特别是当 $B^k=E$ 时，不必知道 $P$，直接有 $A^k=E$。
+
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-a304ec-038" type="blank">
+<Question id="selected-1103-math-a304ec-038" type="blank" tags="科目:线性代数, 考点:全一矩阵与奇偶次幂">
 
 设 $A = \begin{pmatrix} 1 & -1 & -1 & -1 \\ -1 & 1 & -1 & -1 \\ -1 & -1 & 1 & -1 \\ -1 & -1 & -1 & 1 \end{pmatrix}$，则 $A^n(n \geqslant 1) =$ <Blank answer="\begin{cases} 4^{k-1}\mathbf{A}, &amp; n = 2k - 1, \\ 4^k\mathbf{E}, &amp; n = 2k \end{cases} (k = 1, 2, \cdots)" kind="text" placeholder="输入文字或 LaTeX" />.
 
 <Solution>
 
-**答案：** $\begin{cases} 4^{k-1}\mathbf{A}, & n = 2k - 1, \\ 4^k\mathbf{E}, & n = 2k \end{cases} (k = 1, 2, \cdots).$
+**参考答案：** 对 $n\ge1$，
 
-**解析：** 找出 $\mathbf{A}^n$ 的规律.
+$$
+\boxed{A^n=\begin{cases}
+4^{k-1}A,&n=2k-1,\\
+4^kE_4,&n=2k,
+\end{cases}\quad k=1,2,\ldots}.
+$$
 
-$$\mathbf{A}^2 = \begin{pmatrix} 1 & -1 & -1 & -1 \\ -1 & 1 & -1 & -1 \\ -1 & -1 & 1 & -1 \\ -1 & -1 & -1 & 1 \end{pmatrix} \begin{pmatrix} 1 & -1 & -1 & -1 \\ -1 & 1 & -1 & -1 \\ -1 & -1 & 1 & -1 \\ -1 & -1 & -1 & 1 \end{pmatrix} = \begin{pmatrix} 4 & 0 & 0 & 0 \\ 0 & 4 & 0 & 0 \\ 0 & 0 & 4 & 0 \\ 0 & 0 & 0 & 4 \end{pmatrix} = 4\mathbf{E},$$
+**思路：** 发现原矩阵为“单位矩阵与全 1 矩阵的线性组合”，从而用一个简单恒等式推出 $A^2=4E_4$。
 
-$$\mathbf{A}^3 = \begin{pmatrix} 1 & -1 & -1 & -1 \\ -1 & 1 & -1 & -1 \\ -1 & -1 & 1 & -1 \\ -1 & -1 & -1 & 1 \end{pmatrix} \cdot 4\mathbf{E} = 4\mathbf{A},$$
+<Steps>
+<Step>
 
-故 $\mathbf{A}^n = \begin{cases} 4^{k-1}\mathbf{A}, & n = 2k - 1, \\ 4^k\mathbf{E}, & n = 2k \end{cases} (k = 1, 2, \cdots).$
+### 将 $A$ 写成结构矩阵
+
+记 $J$ 为 $4\times4$ 全 1 矩阵，则
+
+$$
+A=2E_4-J.
+$$
+
+由于 $J$ 的每一行有四个 1，所以 $J^2=4J$。
+
+</Step>
+<Step>
+
+### 计算平方并按奇偶分组
+
+$$
+\begin{aligned}
+A^2&=(2E_4-J)^2\\
+&=4E_4-4J+J^2=4E_4.
+\end{aligned}
+$$
+
+因此
+
+$$
+A^{2k}=(A^2)^k=4^kE_4,
+$$
+
+$$
+A^{2k-1}=(A^2)^{k-1}A=4^{k-1}A.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="同类题的快速观察法">
+
+对角元相等、非对角元也相等的 $m$ 阶矩阵，常写成 $aE_m+bJ_m$。只需记住 $J_m^2=mJ_m$，便可快速化简平方、幂、行列式等问题。
+
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-a304ec-042" type="essay" number={1}>
+<Question id="selected-1103-math-a304ec-042" type="essay" tags="科目:线性代数, 考点:分块矩阵幂与递推">
 
 设 $A = \begin{pmatrix} 0 & 0 & 0 & 1 \\ 0 & 0 & 0 & 2 \\ 0 & 0 & 0 & 3 \\ 3 & 2 & 1 & 0 \end{pmatrix}$，求 $A^n(n \geqslant 1)$。
 
 <Solution>
 
-**答案：** $A^n=\begin{cases}\begin{pmatrix}O&10^{k-1}\alpha\\10^{k-1}\beta^T&0\end{pmatrix},&n=2k-1,\\\begin{pmatrix}10^{k-1}\alpha\beta^T&O\\O&10^k\end{pmatrix},&n=2k,\end{cases}$ 其中 $\alpha=(1,2,3)^T,\ \beta^T=(3,2,1)$。
+**参考答案：** 设
 
-**解析：** 利用分块矩阵表达 $A$。令 $\alpha = (1, 2, 3)^{\mathrm{T}}$, $\beta^{\mathrm{T}} = (3, 2, 1)$, 则
-$$A = \begin{pmatrix} \mathbf{O} & \alpha \\ \beta^{\mathrm{T}} & 0 \end{pmatrix}, A^2 = \begin{pmatrix} \mathbf{O} & \alpha \\ \beta^{\mathrm{T}} & 0 \end{pmatrix} \begin{pmatrix} \mathbf{O} & \alpha \\ \beta^{\mathrm{T}} & 0 \end{pmatrix} = \begin{pmatrix} \alpha \beta^{\mathrm{T}} & \mathbf{O} \\ \mathbf{O} & \beta^{\mathrm{T}}\alpha \end{pmatrix},$$
-$$A^3 = \begin{pmatrix} \alpha \beta^{\mathrm{T}} & \mathbf{O} \\ \mathbf{O} & \beta^{\mathrm{T}}\alpha \end{pmatrix} \begin{pmatrix} \mathbf{O} & \alpha \\ \beta^{\mathrm{T}} & 0 \end{pmatrix} = \begin{pmatrix} \mathbf{O} & \alpha \beta^{\mathrm{T}}\alpha \\ \beta^{\mathrm{T}}\alpha \beta^{\mathrm{T}} & 0 \end{pmatrix} = \begin{pmatrix} \mathbf{O} & (\beta^{\mathrm{T}}\alpha)\alpha \\ (\beta^{\mathrm{T}}\alpha)\beta^{\mathrm{T}} & 0 \end{pmatrix} = \beta^{\mathrm{T}}\alpha A,$$
-$$A^4 = \beta^{\mathrm{T}}\alpha A^2, \cdots$$
-又 $\alpha \beta^{\mathrm{T}} = \begin{pmatrix} 1 \\ 2 \\ 3 \end{pmatrix} (3, 2, 1) = \begin{pmatrix} 3 & 2 & 1 \\ 6 & 4 & 2 \\ 9 & 6 & 3 \end{pmatrix}$, $\beta^{\mathrm{T}}\alpha = (3, 2, 1) \begin{pmatrix} 1 \\ 2 \\ 3 \end{pmatrix} = 10$,
-$$A^n = \begin{cases} \begin{pmatrix} \mathbf{O} & 10^{k-1}\alpha \\ 10^{k-1}\beta^{\mathrm{T}} & \mathbf{O} \end{pmatrix}, & n = 2k - 1, \\ \begin{pmatrix} 10^{k-1}\alpha\beta^{\mathrm{T}} & \mathbf{O} \\ \mathbf{O} & 10^k \end{pmatrix}, & n = 2k \end{cases} \quad (k = 1, 2, \cdots).$$
+$$
+\alpha=\begin{pmatrix}1\\2\\3\end{pmatrix},\quad
+\beta^T=(3,2,1),\quad
+D=\alpha\beta^T=\begin{pmatrix}3&2&1\\6&4&2\\9&6&3\end{pmatrix}.
+$$
+
+对所有正整数 $n$，
+
+$$
+\boxed{A^n=\begin{cases}
+\begin{pmatrix}O_{3\times3}&10^{k-1}\alpha\\10^{k-1}\beta^T&0\end{pmatrix},&n=2k-1,\\[6pt]
+\begin{pmatrix}10^{k-1}D&O_{3\times1}\\O_{1\times3}&10^k\end{pmatrix},&n=2k,
+\end{cases}\quad k=1,2,\ldots}.
+$$
+
+**思路：** 这是一道非对角分块矩阵幂的题目。不能对各块分别取幂；应先真正按块相乘，得到低次幂之间的关系。
+
+<Steps>
+<Step>
+
+### 写成分块矩阵并求平方
+
+$$
+A=\begin{pmatrix}O_{3\times3}&\alpha\\\beta^T&0\end{pmatrix}.
+$$
+
+因为
+
+$$
+\beta^T\alpha=(3,2,1)\begin{pmatrix}1\\2\\3\end{pmatrix}=3+4+3=10,
+$$
+
+所以
+
+$$
+A^2=\begin{pmatrix}\alpha\beta^T&O_{3\times1}\\O_{1\times3}&10\end{pmatrix}
+=\begin{pmatrix}D&O\\O&10\end{pmatrix}.
+$$
+
+</Step>
+<Step>
+
+### 找到三次幂的简洁关系
+
+$$
+A^3=A^2A
+=\begin{pmatrix}O&D\alpha\\10\beta^T&0\end{pmatrix}.
+$$
+
+注意 $D\alpha=\alpha(\beta^T\alpha)=10\alpha$，所以 $A^3=10A$。
+
+</Step>
+<Step>
+
+### 利用 $A^3=10A$ 得出通项
+
+连续乘以 $A$ 得 $A^{m+2}=10A^m$（$m\ge1$），故
+
+$$
+A^{2k-1}=10^{k-1}A,\qquad
+A^{2k}=10^{k-1}A^2.
+$$
+
+再代入 $A$ 与 $A^2$ 的分块表达式，即得到参考答案。检验 $k=1$ 时分别还原 $A^1$ 和 $A^2$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="两类容易漏掉的细节">
+
+上式里每个 $O$ 的维数并不相同：左上为 $3\times3$，右上为 $3\times1$，左下为 $1\times3$；同时 $A^3=10A$ 只推出 $A^{m+2}=10A^m$（$m\ge1$），并不意味着 $A^2=10E_4$。
+
+</Callout>
 
 </Solution>
 </Question>
 
-## 考点3：矩阵结构、分块运算与矩阵方程
+## 考点三｜特殊矩阵、分块运算与矩阵方程
 
 <Question id="selected-1103-classified-1031-liyongle-2027-s4-q06" type="single" points={5} tags="来源:李永乐六套卷, 考点:对称矩阵与秩, 难度:中等">
 
@@ -1084,20 +1985,24 @@ $$A^n = \begin{cases} \begin{pmatrix} \mathbf{O} & 10^{k-1}\alpha \\ 10^{k-1}\be
 
 <Solution>
 
-**答案：C，共 $\boxed{3}$ 个。**
+**参考答案：C，共有 $3$ 个正确命题（①②③）。**
 
-由 $A^2=B^2=E$ 得 $A^{-1}=A$、$B^{-1}=B$。
+**核心思路：** 先从 $A^2=B^2=E$ 得到 $A^{-1}=A$、$B^{-1}=B$。前三项用正交矩阵定义、相似变换和秩的不变性证明；第四项只需一个反例推翻。
 
-| 命题 | 判定 | 理由 |
+| 命题 | 结论 | 论证 |
 | --- | --- | --- |
-| ① | **正确** | $(AB)^{\mathrm T}AB=BA^2B=B^2=E$，故 $AB$ 正交。 |
-| ② | **正确** | $A(BA)A^{-1}=AB$，故二者相似。 |
-| ③ | **正确** | $A+B=A(E+AB)$，左乘可逆矩阵不改变秩。 |
-| ④ | **错误** | 取 $A=B=E$，则 $r(A+B)=n$，而 $r(A-B)=0$。 |
+| ① $AB$ 正交 | 正确 | 由实对称性有 $A^T=A,B^T=B$，故 $(AB)^TAB=BA^2B=B^2=E$。 |
+| ② $AB\sim BA$ | 正确 | $A(BA)A^{-1}=ABA^2=AB$，且 $A$ 可逆。 |
+| ③ $r(A+B)=r(E+AB)$ | 正确 | $A+B=A(E+AB)$，左乘可逆矩阵 $A$ 不改变秩。 |
+| ④ $r(A+B)=r(A-B)$ | 错误 | 取 $A=B=E$，则 $r(A+B)=n$，而 $r(A-B)=0$。 |
 
-故①②③正确、④错误，选 C。
+因此正确命题数是 $3$，选 C。
 
-<Callout type="idea" title="判断矩阵恒等命题">证明秩相等，优先寻找可逆矩阵乘积；否定“一定相等”，只需一个满足条件的反例。</Callout>
+<Callout type="idea" title="考场策略：将等式改写为可逆因子乘积">
+
+判断秩是否相等，优先尝试写成 $X=PYQ$，其中 $P,Q$ 可逆；证明两个矩阵相似，则需要写出 $X=PYP^{-1}$。两种形式不要混淆。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -1113,77 +2018,133 @@ $$A^n = \begin{cases} \begin{pmatrix} \mathbf{O} & 10^{k-1}\alpha \\ 10^{k-1}\be
 
 <Solution>
 
-**答案**：D。
+**参考答案：D。** $BA=-B$ **不一定**成立，其余三项均由题设必然推出。
+
+**思路：** 分块乘法先确定 $A,B$ 的全部约束；注意 $AB=-B$ 不能随意交换因子次序。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 写出必要且充分的条件
+### 平方分块矩阵
 
-  按分块矩阵乘法，
+$$
+M^2=\begin{pmatrix}A&B\\O&E_n\end{pmatrix}^2
+=\begin{pmatrix}A^2&AB+B\\O&E_n\end{pmatrix}.
+$$
 
-  $$
-  M^2=\begin{pmatrix}A^2&AB+B\\O&E_n\end{pmatrix}.
-  $$
+题设 $M^2=E_{2n}$，故
 
-  故 $M^2=E_{2n}$ 等价于 $A^2=E_n$、$(A+E_n)B=O$。前者保证 $A^{-1}=A$（选项 A）；后者给出 $AB=-B$（选项 B）。
+$$
+A^2=E_n,\qquad (A+E_n)B=O.
+$$
 
-  </Step>
-  <Step>
+由第一个等式立即得到 $A^{-1}=A$（A 必然成立）；第二个等式给出 $AB=-B$（B 必然成立）。
 
-  ### 用零空间证明秩约束
+</Step>
+<Step>
 
-  因 $(A+E_n)B=O$，$B$ 的列空间包含在 $A+E_n$ 的零空间中，故
+### 证明秩不等式
 
-  $$
-  r(B)\le\dim\ker(A+E_n)=n-r(A+E_n),
-  $$
+由 $(A+E_n)B=O$ 知 $B$ 的每个列向量都属于 $A+E_n$ 的零空间。于是
 
-  于是选项 C 必成立。
+$$
+r(B)\le\dim\ker(A+E_n)=n-r(A+E_n),
+$$
 
-  </Step>
-  <Step>
+即
 
-  ### 构造反例否定 D
+$$
+r(A+E_n)+r(B)\le n.
+$$
 
-  取 $n=2$，令
+因此 C 也必然成立。
 
-  $$
-  A=\begin{pmatrix}-1&0\\0&1\end{pmatrix},\qquad
-  B=\begin{pmatrix}0&1\\0&0\end{pmatrix}.
-  $$
+</Step>
+<Step>
 
-  此时 $A^2=E_2$ 且 $AB=-B$，满足题设；但 $BA=B\ne-B$。故不一定成立的是 D。
+### 反例推翻 $BA=-B$
 
-  </Step>
+取
+
+$$
+A=\begin{pmatrix}-1&0\\0&1\end{pmatrix},\qquad
+B=\begin{pmatrix}0&1\\0&0\end{pmatrix}.
+$$
+
+直接验证 $A^2=E_2$、$AB=-B$，故对应 $M^2=E_4$；然而
+
+$$
+BA=\begin{pmatrix}0&1\\0&0\end{pmatrix}=B\ne-B.
+$$
+
+故 D 不一定成立。
+
+</Step>
 </Steps>
+
+<Callout type="warn" title="矩阵相乘一般不满足交换律">
+
+$(A+E)B=O$ 只能推出 $AB=-B$，除非有额外的交换条件，否则不能推出 $B(A+E)=O$ 或 $BA=-B$。
+
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-3e7cb1-016" type="essay">
+<Question id="selected-1103-math-3e7cb1-016" type="essay" tags="科目:线性代数, 考点:正交矩阵的元素约束">
 
 设2阶正交矩阵$A$的主对角线元素满足$a_{11}+2=a_{22}$，则$A=$
 
 <Solution>
 
-**答案：** $ \begin{bmatrix}-1&0\\0&1\end{bmatrix}$
+**参考答案：**
 
-**解析：** 正交矩阵每个元素的绝对值不超过$1$，故
-$ -1\le a_{11},a_{22}\le1$。
-又$a_{22}=a_{11}+2$，只有
-$ a_{11}=-1,\qquad a_{22}=1$。
+$$
+\boxed{A=\begin{pmatrix}-1&0\\0&1\end{pmatrix}}.
+$$
 
-第1行单位长度给出$(-1)^2+a_{12}^2=1$，所以$a_{12}=0$；同理$a_{21}=0$。
+**思路：** 对正交矩阵，行向量和列向量均是单位向量，每个元素的绝对值至多为 $1$。题设主对角线上两元素恰好相差 $2$，因此两者都必须取端点值。
 
-因此
-$ A=\begin{bmatrix}-1&0\\0&1\end{bmatrix}$。
+<Steps>
+<Step>
+
+### 用正交性限定对角元
+
+因 $A^TA=E_2$，各列长均为 $1$，于是
+
+$$
+-1\le a_{11}\le1,\qquad -1\le a_{22}\le1.
+$$
+
+题设给出 $a_{22}=a_{11}+2$，唯一可能是
+
+$$
+a_{11}=-1,\qquad a_{22}=1.
+$$
+
+</Step>
+<Step>
+
+### 再利用单位向量条件确定非对角元
+
+令 $A=\begin{pmatrix}-1&b\\c&1\end{pmatrix}$。第一行长度为 $1$，故 $(-1)^2+b^2=1$，从而 $b=0$；第一列长度为 $1$，故 $(-1)^2+c^2=1$，从而 $c=0$。
+
+所得矩阵满足 $A^TA=E_2$，故答案成立且唯一。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="更一般的性质">
+
+正交矩阵中，某一行或某一列若有元素的绝对值等于 $1$，则同一行或列的其余元素必为 $0$。此题正是利用这一性质直接确定整矩阵。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3e7cb1-030" type="single">
+<Question id="selected-1103-math-3e7cb1-030" type="single" tags="科目:线性代数, 考点:基变换与矩阵表示">
 
 设$A$为2阶方阵，$\alpha$为2维非零列向量，且$\alpha$不是$A$的特征向量，$P=[\alpha,A\alpha]$，$A^2\alpha+A\alpha-2\alpha=0$，若矩阵$B$满足$AP=PB$，则$B=$( ).  
 
@@ -1194,238 +2155,443 @@ $ A=\begin{bmatrix}-1&0\\0&1\end{bmatrix}$。
 
 <Solution>
 
-因$\alpha$不是$A$的特征向量，所以$\alpha,A\alpha$线性无关，从而$P=[\alpha,A\alpha]$可逆。
+**参考答案：D。**
 
-按列计算
-$ AP=[A\alpha,A^2\alpha]$。
+$$
+\boxed{B=\begin{pmatrix}0&2\\1&-1\end{pmatrix}}.
+$$
 
-由题设
-$ A^2\alpha=2\alpha-A\alpha$。
+**核心思路：** $P=(\alpha,A\alpha)$ 是换基矩阵，$AP=PB$ 意味着 $B$ 的两列分别是 $A\alpha$、$A^2\alpha$ 在基 $\{\alpha,A\alpha\}$ 下的坐标。
 
-因此在基$\{\alpha,A\alpha\}$下，$A\alpha$的坐标为$\begin{bmatrix}0\\1\end{bmatrix}$，$A^2\alpha$的坐标为$\begin{bmatrix}2\\-1\end{bmatrix}$，故
-$ B=\begin{bmatrix}0&2\\1&-1\end{bmatrix}$。
+<Steps>
+<Step>
 
-选D。
+### 说明 $P$ 可逆
+
+因为 $\alpha$ 不是 $A$ 的特征向量，$A\alpha$ 不可能是 $\alpha$ 的倍数，所以两个二维列向量 $\alpha,A\alpha$ 线性无关，$P$ 可逆。
+
+</Step>
+<Step>
+
+### 利用题设关系分列写出 $AP$
+
+给定 $A^2\alpha+A\alpha-2\alpha=0$，于是
+
+$$
+A^2\alpha=2\alpha-A\alpha.
+$$
+
+从而
+
+$$
+\begin{aligned}
+AP&=(A\alpha,A^2\alpha)\\
+&=(\alpha,A\alpha)
+\begin{pmatrix}0&2\\1&-1\end{pmatrix}.
+\end{aligned}
+$$
+
+由于 $AP=PB$ 且 $P$ 可逆，故 $B$ 正是上式右端的系数矩阵。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="区分矩阵的列与行">
+
+第一列的坐标为 $(0,1)^T$；第二列为 $(2,-1)^T$。把坐标按行排放会误选 B 或其他干扰项。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3e7cb1-031" type="essay">
+<Question id="selected-1103-math-3e7cb1-031" type="essay" tags="科目:线性代数, 考点:伴随矩阵与舒尔补">
 
 设$A$为$n$阶可逆矩阵，$\alpha$为$n$维列向量，$b$为常数.记分块矩阵$P=\begin{bmatrix}E&0\\-\alpha^TA^*&|A|\end{bmatrix}$，$Q=\begin{bmatrix}A&\alpha\\\alpha^T&b\end{bmatrix}$，其中$A^*$是矩阵$A$的伴随矩阵，$E$为$n$阶单位矩阵.  
 (1) 计算并化简$PQ$；(2) 证明：矩阵$Q$可逆的充分必要条件是$\alpha^TA^{-1}\alpha\neq b$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-(1) $ PQ=\begin{bmatrix}A&\alpha\\O&|A|\left(b-\alpha^TA^{-1}\alpha\right)\end{bmatrix}$；  
-(2) $Q$可逆$\Longleftrightarrow\alpha^TA^{-1}\alpha\neq b$。
+（1）
 
-**解析：** (1) 直接作分块矩阵乘法：
-$ PQ=\begin{bmatrix}E&0\\-\alpha^TA^*&|A|\end{bmatrix}\begin{bmatrix}A&\alpha\\\alpha^T&b\end{bmatrix}$
-$ =\begin{bmatrix}A&\alpha\\-\alpha^TA^*A+|A|\alpha^T&-\alpha^TA^*\alpha+|A|b\end{bmatrix}$。
+$$
+\boxed{PQ=\begin{pmatrix}A&\alpha\\O_{1\times n}&|A|\bigl(b-\alpha^TA^{-1}\alpha\bigr)\end{pmatrix}}.
+$$
 
-由伴随矩阵基本公式
-$ A^*A=|A|E$，
-故左下块为
-$ -\alpha^T|A|E+|A|\alpha^T=O$。
+（2）
 
-又因$A$可逆，
-$ A^*=|A|A^{-1}$，
-所以右下块为
-$ |A|\left(b-\alpha^TA^{-1}\alpha\right)$。
+$$
+\boxed{Q\text{ 可逆}\iff\alpha^TA^{-1}\alpha\ne b}.
+$$
 
-因此
-$ PQ=\begin{bmatrix}A&\alpha\\O&|A|\left(b-\alpha^TA^{-1}\alpha\right)\end{bmatrix}$。
+**核心思路：** 利用伴随矩阵恒等式 $A^*A=|A|E$ 消去乘积的左下块，再用分块上三角矩阵的行列式判断可逆性。
 
-(2) $P$为分块下三角矩阵，且
-$ |P|=|E|\cdot|A|=|A|\neq0$，
-所以$P$可逆。因此
-$ Q\text{可逆}\Longleftrightarrow PQ\text{可逆}$。
+<Steps>
+<Step>
 
-而$PQ$为分块上三角矩阵，故
-$ |PQ|=|A|\cdot|A|\left(b-\alpha^TA^{-1}\alpha\right)=|A|^2\left(b-\alpha^TA^{-1}\alpha\right)$。
+### （1）直接进行分块矩阵乘法
 
-由于$|A|\neq0$，所以
-$ |PQ|\neq0\Longleftrightarrow b-\alpha^TA^{-1}\alpha\neq0$。
+$$
+\begin{aligned}
+PQ
+&=\begin{pmatrix}E&0\\-\alpha^TA^*&|A|\end{pmatrix}
+\begin{pmatrix}A&\alpha\\\alpha^T&b\end{pmatrix}\\
+&=\begin{pmatrix}
+A&\alpha\\
+-\alpha^TA^*A+|A|\alpha^T&-\alpha^TA^*\alpha+|A|b
+\end{pmatrix}.
+\end{aligned}
+$$
 
-即
-$ Q\text{可逆}\Longleftrightarrow\alpha^TA^{-1}\alpha\neq b$。
+因为 $A^*A=|A|E$，故左下块为零。又 $A$ 可逆，$A^*=|A|A^{-1}$，所以右下块化为 $|A|(b-\alpha^TA^{-1}\alpha)$，得到（1）。
+
+</Step>
+<Step>
+
+### （2）先判断 $P$ 的可逆性
+
+$P$ 为分块下三角矩阵，其右下块是 $1\times1$ 的标量 $|A|$，所以
+
+$$
+|P|=|E_n|\cdot|A|=|A|\ne0.
+$$
+
+因此 $Q$ 可逆，当且仅当 $PQ$ 可逆。
+
+</Step>
+<Step>
+
+### 通过分块上三角行列式得到充要条件
+
+$$
+|PQ|=|A|\cdot|A|\bigl(b-\alpha^TA^{-1}\alpha\bigr)
+=|A|^2\bigl(b-\alpha^TA^{-1}\alpha\bigr).
+$$
+
+由于 $|A|\ne0$，所以
+
+$$
+|PQ|\ne0\iff b-\alpha^TA^{-1}\alpha\ne0,
+$$
+
+即为待证条件。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="知识点：Schur 补（舒尔补）">
+
+更直接的行列式公式是
+
+$$
+\det\begin{pmatrix}A&\alpha\\\alpha^T&b\end{pmatrix}
+=|A|\left(b-\alpha^TA^{-1}\alpha\right),
+$$
+
+其中 $A$ 必须可逆。这种“主块可逆 + 舒尔补非零”的结构是分块矩阵可逆性的常用判据。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-3e7cb1-032" type="essay">
+<Question id="selected-1103-math-3e7cb1-032" type="essay" tags="科目:线性代数, 考点:可交换矩阵的求解">
 
 求与$A=\begin{bmatrix}1&1\\0&1\end{bmatrix}$可交换的全部2阶矩阵.
 
 <Solution>
 
-**答案：** $ X=\begin{bmatrix}a&b\\0&a\end{bmatrix}$，其中$a,b$为任意常数。
+**参考答案：** 与 $A$ 可交换的全部 $2$ 阶矩阵是
 
-**解析：** 设
-$ X=\begin{bmatrix}a&b\\c&d\end{bmatrix}$。
+$$
+\boxed{X=\begin{pmatrix}a&b\\0&a\end{pmatrix},\quad a,b\in\mathbb R}
+$$
 
-由$AX=XA$，有
-$ \begin{bmatrix}1&1\\0&1\end{bmatrix}\begin{bmatrix}a&b\\c&d\end{bmatrix}=\begin{bmatrix}a&b\\c&d\end{bmatrix}\begin{bmatrix}1&1\\0&1\end{bmatrix}$。
+（若讨论复矩阵，也可取 $a,b\in\mathbb C$）。
 
-即
-$ \begin{bmatrix}a+c&b+d\\c&d\end{bmatrix}=\begin{bmatrix}a&a+b\\c&c+d\end{bmatrix}$。
+**思路：** 设 $X$ 为一般矩阵，代入 $AX=XA$ 比较对应元素；再指出所得条件既必要也充分。
 
-比较对应元素得
-$ c=0,\qquad d=a$。
+<Steps>
+<Step>
 
-因此全部可交换矩阵为
-$ X=\begin{bmatrix}a&b\\0&a\end{bmatrix}$。
+### 代入一般矩阵
+
+设 $X=\begin{pmatrix}a&b\\c&d\end{pmatrix}$，则
+
+$$
+AX=\begin{pmatrix}a+c&b+d\\c&d\end{pmatrix},
+\qquad
+XA=\begin{pmatrix}a&a+b\\c&c+d\end{pmatrix}.
+$$
+
+</Step>
+<Step>
+
+### 比较对应元素并反向验证
+
+由 $AX=XA$ 得
+
+$$
+a+c=a,\qquad b+d=a+b,\qquad d=c+d.
+$$
+
+这些等式等价于 $c=0$、$d=a$，而 $a,b$ 不受限制。因此 $X=\begin{pmatrix}a&b\\0&a\end{pmatrix}$。代入后两边相等，故该形式充分且必要。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="结构理解：与 Jordan 块可交换">
+
+$A=E_2+N$，其中 $N=\begin{pmatrix}0&1\\0&0\end{pmatrix}$、$N^2=O$。上面的全部解正好是 $X=aE_2+bN$，即 $N$ 的一次多项式。遇到 Jordan 块的交换子问题，可先尝试这一结构。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-207dd4-021" type="essay">
+<Question id="selected-1103-math-207dd4-021" type="essay" tags="科目:线性代数, 考点:矩阵乘积取逆与交换">
 
 设 $ A,B,C$ 均为 $ n$ 阶矩阵，其中 $ C$ 可逆，且 $ ABA=C^{-1}$，证明 $ BAC=CAB$。
 
 <Solution>
 
-**答案：**
-
-结论成立，即
+**参考答案：**
 
 $$
- BAC=CAB.
+\boxed{BAC=CAB=A^{-1}},
 $$
 
-**解析：** 由 $ C$ 可逆可知 $ C^{-1}$ 可逆。又
-$$
- ABA=C^{-1},
-$$
-所以矩阵 $ ABA$ 可逆。取行列式得
-$$
- |A|^2|B|=|C^{-1}|\ne0,
-$$
-从而
-$$
- |A|\ne0,\qquad |B|\ne0.
-$$
-因此 $ A,B$ 均可逆。
+因此 $BAC=CAB$。
 
-对等式 $ ABA=C^{-1}$ 两边取逆，得
+**思路：** 等式 $ABA=C^{-1}$ 表明 $ABA$ 可逆。先据此推出 $A,B$ 均可逆，然后把 $C$ 写成 $A^{-1}B^{-1}A^{-1}$，分别化简两边。
+
+<Steps>
+<Step>
+
+### 证明 $A,B$ 都可逆
+
+由 $C$ 可逆可知 $C^{-1}$ 可逆，因此
+
 $$
- C=(ABA)^{-1}=A^{-1}B^{-1}A^{-1}.
+0\ne|C^{-1}|=|ABA|=|A|^2|B|.
 $$
-于是
+
+于是 $|A|\ne0$、$|B|\ne0$，故 $A,B$ 均可逆。
+
+</Step>
+<Step>
+
+### 求出 $C$ 的逆乘积表达式
+
+对 $ABA=C^{-1}$ 两边取逆（注意逆矩阵中乘积顺序反转），
+
 $$
- \begin{aligned}
-BAC
-&=BA\left(A^{-1}B^{-1}A^{-1}\right)\\
-&=BB^{-1}A^{-1}\\
-&=A^{-1},
+C=(ABA)^{-1}=A^{-1}B^{-1}A^{-1}.
+$$
+
+</Step>
+<Step>
+
+### 分别化简 $BAC$ 与 $CAB$
+
+$$
+\begin{aligned}
+BAC&=BA(A^{-1}B^{-1}A^{-1})
+=BB^{-1}A^{-1}=A^{-1},\\
+CAB&=(A^{-1}B^{-1}A^{-1})AB
+=A^{-1}B^{-1}B=A^{-1}.
 \end{aligned}
 $$
-而
-$$
- \begin{aligned}
-CAB
-&=\left(A^{-1}B^{-1}A^{-1}\right)AB\\
-&=A^{-1}B^{-1}B\\
-&=A^{-1}.
-\end{aligned}
-$$
-故
-$$
- BAC=CAB.
-$$
+
+两式相等，证毕。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="乘积取逆顺序必须倒置">
+
+$(XYZ)^{-1}=Z^{-1}Y^{-1}X^{-1}$，不能在没有交换律条件的情况下直接逐个取逆并维持原来的因子次序。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-207dd4-022" type="essay">
+<Question id="selected-1103-math-207dd4-022" type="essay" tags="科目:线性代数, 考点:对称和反对称矩阵乘积">
 
 若 $ A$ 是对称矩阵，$ B$ 是反对称矩阵，则 $ AB$ 是反对称矩阵的充要条件是 $ AB=BA$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
- AB\text{ 为反对称矩阵}\Longleftrightarrow AB=BA.
+\boxed{AB\text{ 是反对称矩阵}\iff AB=BA}.
 $$
 
-**解析：** 因为 $ A$ 是对称矩阵、$ B$ 是反对称矩阵，所以
+**思路：** 反对称矩阵的定义是 $X^T=-X$。本题的全部关键只有一次转置：$A^T=A$，$B^T=-B$，所以 $(AB)^T=-BA$。
+
+<Steps>
+<Step>
+
+### 证明必要性
+
+假设 $AB$ 为反对称矩阵，则
+
 $$
- A^T=A,\qquad B^T=-B.
+(AB)^T=-AB.
 $$
 
-**必要性**：若 $ AB$ 是反对称矩阵，则
+另一方面，由乘积转置法则，
+
 $$
- (AB)^T=-AB.
-$$
-另一方面，
-$$
- (AB)^T=B^TA^T=(-B)A=-BA.
-$$
-故
-$$
- -BA=-AB,
-$$
-即
-$$
- AB=BA.
+(AB)^T=B^TA^T=(-B)A=-BA.
 $$
 
-**充分性**：若 $ AB=BA$，则
-$$
- (AB)^T=B^TA^T=-BA=-AB.
-$$
-因此 $ AB$ 是反对称矩阵。
+比较两式得 $BA=AB$。
 
-综上，
+</Step>
+<Step>
+
+### 证明充分性
+
+反过来，假设 $AB=BA$，则
+
 $$
- AB\text{ 为反对称矩阵}\Longleftrightarrow AB=BA.
+(AB)^T=B^TA^T=-BA=-AB.
 $$
+
+这正是 $AB$ 反对称的定义，故充分性成立。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="对比记忆：两种矩阵的乘积何时具有特殊对称性">
+
+对实对称 $A$ 和实反对称 $B$，$AB$ 为反对称矩阵当且仅当 $A$ 与 $B$ 可交换。无需假设 $A$ 或 $B$ 可逆。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-a304ec-036" type="blank" number={1}>
+<Question id="selected-1103-math-a304ec-036" type="blank" tags="科目:线性代数, 考点:分块矩阵的伴随矩阵">
 
 设 $A, B$ 是 $n$ 阶方阵， $|A|=2, |B|=3, A^*, B^*$ 分别是 $A, B$ 的伴随矩阵， $C = \begin{pmatrix} A & O \\ O & B \end{pmatrix}$，则 $C$ 的伴随矩阵 $C^* =$ <Blank answer="\begin{pmatrix} 3A^* &amp; O \\ O &amp; 2B^* \end{pmatrix}" kind="text" placeholder="输入文字或 LaTeX" />.
 
 <Solution>
 
-**答案：** $\begin{pmatrix} 3A^* & O \\ O & 2B^* \end{pmatrix}$
+**参考答案：**
 
-**解析：** 由 $C \cdot C^* = |C|E$, 得
-$$C^* = |C| C^{-1} = \begin{vmatrix} A & O \\ O & B \end{vmatrix} \begin{pmatrix} A & O \\ O & B \end{pmatrix}^{-1}$$
-$$= |A||B| \begin{pmatrix} A^{-1} & O \\ O & B^{-1} \end{pmatrix} = \begin{pmatrix} |A| A^{-1} |B| & O \\ O & |B| B^{-1} |A| \end{pmatrix}$$
-$$= \begin{pmatrix} |B| A^* & O \\ O & |A| B^* \end{pmatrix} = \begin{pmatrix} 3A^* & O \\ O & 2B^* \end{pmatrix}.$$
-**知识点与技巧：** $\begin{pmatrix} A & O \\ O & B \end{pmatrix}^{-1} = \begin{pmatrix} A^{-1} & O \\ O & B^{-1} \end{pmatrix}$, $\begin{pmatrix} O & A \\ B & O \end{pmatrix}^{-1} = \begin{pmatrix} O & B^{-1} \\ A^{-1} & O \end{pmatrix}$ (其中 $A, B$ 均可逆).
+$$
+\boxed{C^*=\begin{pmatrix}3A^*&O\\O&2B^*\end{pmatrix}}.
+$$
+
+**思路：** 块对角矩阵的逆仍为块对角矩阵，再利用可逆矩阵的伴随公式 $X^*=|X|X^{-1}$。
+
+<Steps>
+<Step>
+
+### 判断可逆并求分块逆矩阵
+
+由 $|A|=2$、$|B|=3$，知 $A,B$ 均可逆。因此
+
+$$
+|C|=|A||B|=6,\qquad
+C^{-1}=\begin{pmatrix}A^{-1}&O\\O&B^{-1}\end{pmatrix}.
+$$
+
+</Step>
+<Step>
+
+### 计算 $C$ 的伴随矩阵
+
+$$
+\begin{aligned}
+C^*&=|C|C^{-1}\\
+&=6\begin{pmatrix}A^{-1}&O\\O&B^{-1}\end{pmatrix}\\
+&=\begin{pmatrix}3(2A^{-1})&O\\O&2(3B^{-1})\end{pmatrix}\\
+&=\begin{pmatrix}3A^*&O\\O&2B^*\end{pmatrix}.
+\end{aligned}
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="伴随矩阵不能逐块机械照搬">
+
+一般 **不是** $C^*=\operatorname{diag}(A^*,B^*)$。每个对角块都要额外乘以另一个块的行列式，这是由于 $|C|=|A||B|$。
+
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-a304ec-047" type="essay">
+<Question id="selected-1103-math-a304ec-047" type="essay" tags="科目:线性代数, 考点:分块正交矩阵">
 
 设分块矩阵 $P = \begin{pmatrix} A & C \\ O & B \end{pmatrix}$ 为正交矩阵，$A, B$ 分别是 $m$ 阶和 $n$ 阶方阵，证明：$A$ 与 $B$ 是正交矩阵。
 
 <Solution>
 
-**答案：** $A^TA=E_m$ 且 $B^TB=E_n$，所以 $A,B$ 均为正交矩阵。
+**参考答案：** $A^TA=E_m$ 且 $B^TB=E_n$，故 $A,B$ 都是正交矩阵；进一步还能推出 $C=O$。
 
-**解析：** 要证 $\mathbf{A}, \mathbf{B}$ 是正交矩阵，只要证 $\mathbf{A}^{\mathrm{T}}\mathbf{A} = \mathbf{E}_m, \mathbf{B}^{\mathrm{T}}\mathbf{B} = \mathbf{E}_n$。
-依题设, $\mathbf{P}^{\mathrm{T}}\mathbf{P} = \mathbf{E}$, 则
+**思路：** 正交矩阵满足 $P^TP=E_{m+n}$。用分块乘法展开后，先从左上块识别 $A$ 正交，再利用 $A$ 可逆消去右上块 $C$。
 
-$$\begin{aligned} \mathbf{P}^{\mathrm{T}}\mathbf{P} &= \begin{pmatrix} \mathbf{A} & \mathbf{C} \\ \mathbf{O} & \mathbf{B} \end{pmatrix}^{\mathrm{T}} \begin{pmatrix} \mathbf{A} & \mathbf{C} \\ \mathbf{O} & \mathbf{B} \end{pmatrix} = \begin{pmatrix} \mathbf{A}^{\mathrm{T}} & \mathbf{O} \\ \mathbf{C}^{\mathrm{T}} & \mathbf{B}^{\mathrm{T}} \end{pmatrix} \begin{pmatrix} \mathbf{A} & \mathbf{C} \\ \mathbf{O} & \mathbf{B} \end{pmatrix} \\ &= \begin{pmatrix} \mathbf{A}^{\mathrm{T}}\mathbf{A} & \mathbf{A}^{\mathrm{T}}\mathbf{C} \\ \mathbf{C}^{\mathrm{T}}\mathbf{A} & \mathbf{C}^{\mathrm{T}}\mathbf{C} + \mathbf{B}^{\mathrm{T}}\mathbf{B} \end{pmatrix} = \mathbf{E} = \begin{pmatrix} \mathbf{E}_m & \mathbf{O} \\ \mathbf{O} & \mathbf{E}_n \end{pmatrix}, \end{aligned}$$
+<Tabs items={['方法一｜先算转置乘积','方法二｜利用反向乘积']} defaultIndex={0}>
+<Tab value="方法一｜先算转置乘积">
 
-故
-$$\mathbf{A}^{\mathrm{T}}\mathbf{A} = \mathbf{E}_m, \mathbf{A}^{\mathrm{T}}\mathbf{C} = \mathbf{O}, \mathbf{C}^{\mathrm{T}}\mathbf{A} = \mathbf{O}, \mathbf{C}^{\mathrm{T}}\mathbf{C} + \mathbf{B}^{\mathrm{T}}\mathbf{B} = \mathbf{E}_n.$$
-由于 $\mathbf{P}$ 是正交矩阵, 故 $\mathbf{P}$ 可逆, $|\mathbf{P}| = |\mathbf{A}| |\mathbf{B}| \neq 0$, 因此 $|\mathbf{A}| \neq 0, \mathbf{A}$ 可逆, 从而 $\mathbf{A}^{\mathrm{T}}$ 可逆. 由 $\mathbf{A}^{\mathrm{T}}\mathbf{C} = \mathbf{O}$ 知 $\mathbf{C} = \mathbf{O}$, 所以 $\mathbf{B}^{\mathrm{T}}\mathbf{B} = \mathbf{E}_n$, 于是 $\mathbf{A}, \mathbf{B}$ 是正交矩阵.
+由
+
+$$
+P^T=\begin{pmatrix}A^T&O\\C^T&B^T\end{pmatrix}
+$$
+
+得到
+
+$$
+P^TP=\begin{pmatrix}
+A^TA&A^TC\\C^TA&C^TC+B^TB
+\end{pmatrix}
+=\begin{pmatrix}E_m&O\\O&E_n\end{pmatrix}.
+$$
+
+比较各块：
+
+$$
+A^TA=E_m,\quad A^TC=O,\quad C^TC+B^TB=E_n.
+$$
+
+第一式表明 $A$ 正交，因而 $A^T$ 可逆；由第二式得 $C=O$；第三式随即化为 $B^TB=E_n$，表明 $B$ 正交。
+
+</Tab>
+<Tab value="方法二｜利用反向乘积">
+
+由 $PP^T=E_{m+n}$，分块展开为
+
+$$
+PP^T=\begin{pmatrix}
+AA^T+CC^T&CB^T\\BC^T&BB^T
+\end{pmatrix}
+=\begin{pmatrix}E_m&O\\O&E_n\end{pmatrix}.
+$$
+
+因此 $BB^T=E_n$，直接说明方阵 $B$ 正交；由 $CB^T=O$ 和 $B^T$ 可逆得到 $C=O$。再由 $AA^T+CC^T=E_m$ 得 $AA^T=E_m$，所以 $A$ 正交。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="拓展：正交分块三角矩阵必为分块对角矩阵">
+
+这里不仅得到 $A,B$ 各自正交，还推得非对角块 $C=O$。其本质是正交性迫使不同列组之间正交，而对角方块已具有满秩的列空间。
+
+</Callout>
 
 </Solution>
 </Question>

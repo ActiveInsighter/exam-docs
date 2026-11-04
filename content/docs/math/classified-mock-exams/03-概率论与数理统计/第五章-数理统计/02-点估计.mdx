@@ -1,13 +1,11 @@
 ---
-title: "第二节 点估计｜矩估计与极大似然、次序统计量及无偏有效性"
-description: "对照真题的矩估计与最大似然完整推导，突出参数支持集约束、离散频数似然、绝对误差模型、无偏修正与估计量有效性比较。"
+title: "2. 点估计"
+description: "26道点估计练习题全部重构：矩估计、最大似然、无偏性、次序统计量、含参支持集与联合模型。"
 ---
 
-# 第二节 点估计｜矩估计与极大似然、次序统计量及无偏有效性
+本节 **26 道**高质量模拟与练习原题均已完成解析重构，依次涵盖矩估计与最大似然、参数支持集与次序统计量、估计量无偏性和效率、截尾寿命模型及二维条件模型。大题先列分问参考答案，再从似然函数、样本分布与期望方差公式分步推导，并明确参数域及边界极值是否存在。
 
-参照「真题核心题目」同名小节的命题风格及考点精选 **26 道高质量模拟、练习原题**。题干、选项、答案、解析、数学公式和交互组件均保持原始内容。
-
-## 考点1：矩估计、无偏校正及有效性比较
+## 考点一｜无偏估计、矩估计与似然估计基础
 
 <Question id="selected-1103-classified-1031-lilin-2027-s1-q09" type="single" points={5} tags="来源:李林六套卷, 考点:无偏估计, 难度:基础">
 
@@ -26,28 +24,53 @@ $$
 
 <Solution>
 
-标准化得 $Z_i=(X_i-\mu)/\sigma\sim N(0,1)$。标准正态变量的绝对值服从半正态分布，并且
+**参考答案：A。**
 
 $$
-E|Z_i|=2\int_0^{\infty}\frac{z}{\sqrt{2\pi}}e^{-z^2/2}\,\mathrm dz
-=\sqrt{\frac2\pi}.
+\boxed{k=\frac1n\sqrt{\frac\pi2}}.
 $$
 
-所以
+**核心思路**：把 $|X_i-\mu|$ 除以 $\sigma$ 后得到标准正态变量的绝对值，其期望为 $\sqrt{2/\pi}$；无偏估计要求统计量期望恰为 $\sigma$。
+
+<Steps>
+<Step>
+
+  ### 标准化并求绝对正态变量的期望
+
+  令 $Z_i=(X_i-\mu)/\sigma\sim N(0,1)$。由对称性，
+
+
+
+$$
+\begin{aligned}
+  E|Z_i|
+  &=2\int_0^\infty z\frac1{\sqrt{2\pi}}e^{-z^2/2}\,\mathrm dz\\
+  &=\frac2{\sqrt{2\pi}}\left[-e^{-z^2/2}\right]_{0}^{\infty}
+  =\sqrt{\frac2\pi}.
+  \end{aligned}
+$$
+
+  因 $\sigma>0$，有 $E|X_i-\mu|=\sigma\sqrt{2/\pi}$。
+
+</Step>
+<Step>
+
+  ### 使用无偏性解系数
+
+
 
 $$
 E\widehat\sigma
-=k\sum_{i=1}^{n}E|X_i-\mu|
-=kn\sigma\sqrt{\frac2\pi}.
+  =k\sum_{i=1}^{n}E|X_i-\mu|
+  =kn\sigma\sqrt{\frac2\pi}.
 $$
 
-无偏性要求 $E\widehat\sigma=\sigma$；由于 $\sigma>0$，得到
+  令 $E\widehat\sigma=\sigma$，两边约去 $\sigma>0$，得到 $k=n^{-1}\sqrt{\pi/2}$。
 
-$$
-k=\frac1n\sqrt{\frac\pi2}.
-$$
+</Step>
+</Steps>
 
-故选 **A**。
+<Callout type="idea" title="估计尺度与估计方差不同">这是对标准差 $\sigma$ 的无偏估计，利用的是**一阶绝对中心矩**；样本方差公式所涉及的二阶矩用于估计 $\sigma^2$，不能把它的无偏修正直接套用于 $\sigma$。</Callout>
 
 </Solution>
 </Question>
@@ -63,28 +86,49 @@ $$
 
 <Solution>
 
-**答案：C，充分必要条件。**
-
-$\hat\theta$ 无偏意味着 $E(\hat\theta)=\theta$。利用方差恒等式，
+**参考答案：C，充分必要条件。**
 
 $$
-D(\hat\theta)=E(\hat\theta^2)-[E(\hat\theta)]^2,
+\boxed{D(\hat\theta)>0\ \Longleftrightarrow\ E(\hat\theta^2)\ne\theta^2}.
 $$
 
-即
+**核心思路**：对无偏估计量 $\hat\theta$，平方后的偏差恰好等于其自身的方差。利用 $D(Y)=E(Y^2)-(EY)^2$ 一步完成双向证明。
+
+<Steps>
+<Step>
+
+  ### 利用已知无偏性
+
+  已知 $E\hat\theta=\theta$。在二阶矩存在且有限的通常题设下，
+
+
 
 $$
-\boxed{E(\hat\theta^2)=\theta^2+D(\hat\theta)}.
+E(\hat\theta^2)
+  =[E\hat\theta]^2+D(\hat\theta)
+  =\theta^2+D(\hat\theta).
 $$
 
-由于方差非负，$\hat\theta^2$ **不是** $\theta^2$ 的无偏估计量等价于
+  因而 $\hat\theta^2$ 估计 $\theta^2$ 时的偏差为
+
+
 
 $$
-E(\hat\theta^2)\ne\theta^2
-\quad\Longleftrightarrow\quad D(\hat\theta)>0.
+\operatorname{Bias}(\hat\theta^2;\theta^2)
+  =E(\hat\theta^2)-\theta^2=D(\hat\theta)\ge0.
 $$
 
-两条件互相推出，所以选 **C**。这里默认方差存在且有限。
+</Step>
+<Step>
+
+  ### 分别判断充分性和必要性
+
+  若 $D(\hat\theta)>0$，则 $E(\hat\theta^2)>\theta^2$，所以平方后不是无偏估计，这是**充分性**。反过来，若平方后不是无偏估计，即 $E(\hat\theta^2)\ne\theta^2$，上述恒等式给出 $D(\hat\theta)\ne0$；方差非负，故必有 $D(\hat\theta)>0$，这是**必要性**。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="条件与边界">该论证要求 $\hat\theta$ 的二阶矩存在且有限。方差为零时 $\hat\theta=\theta$ 几乎处处，平方仍是无偏估计；不应将“无偏估计量的平方总是无偏”当作结论。</Callout>
 
 </Solution>
 </Question>
@@ -103,73 +147,82 @@ $$
 
 <Solution>
 
-**参考答案：**
+**参考答案**：分别记矩估计和最大似然估计为 $\widehat\theta_{\mathrm M}$ 与 $\widehat\theta_{\mathrm{ML}}$，则
 
 $$
-\boxed{\hat\theta_{\mathrm M}=\sqrt{\frac1{2n}\sum_{i=1}^nX_i^2}},\qquad
-\boxed{\hat\theta=\frac1n\sum_{i=1}^n|X_i|},\qquad
-\boxed{E(\hat\theta)=\theta}.
+\boxed{\widehat\theta_{\mathrm M}=\sqrt{\frac1{2n}\sum_{i=1}^{n}X_i^2}},\qquad
+\boxed{\widehat\theta_{\mathrm{ML}}=\frac1n\sum_{i=1}^{n}|X_i|},\qquad
+\boxed{E\widehat\theta_{\mathrm{ML}}=\theta}.
 $$
 
-**过程：**
+题目给定的是以 $0$ 为中心、尺度参数为 $\theta$ 的双指数（拉普拉斯）分布。$EX=0$ 不含未知参数，故矩估计应选二阶原点矩。
 
-<Steps>
-  <Step>
+<Tabs items={['方法一：矩估计','方法二：最大似然估计与期望']} defaultIndex={0}>
+<Tab value="方法一：矩估计">
 
-  ### 矩估计
+  **第一步：计算含 $\theta$ 的总体矩。** 由密度的偶对称性及积分换元 $u=x/\theta$，
 
-  密度关于原点对称，$E(X)=0$ 无法用于估计 $\theta$，需取二阶原点矩：
 
-  $$
-  E(X^2)=\frac1\theta\int_0^\infty x^2e^{-x/\theta}\,dx
-  =\theta^2\Gamma(3)=2\theta^2.
-  $$
 
-  令 $\frac1n\sum X_i^2=2\theta^2$，得上述矩估计量。
-
-  </Step>
-  <Step>
-
-  ### 最大似然估计
-
-  似然函数及对数似然为
-
-  $$
-  \begin{aligned}
-  L(\theta)&=(2\theta)^{-n}\exp\!\left(-\frac{\sum_{i=1}^n|x_i|}{\theta}\right),\\
-  \ell(\theta)&=-n\ln(2\theta)-\frac{\sum_{i=1}^n|x_i|}{\theta}.
+$$
+\begin{aligned}
+  EX^2&=\frac1{2\theta}\int_{-\infty}^{\infty}x^2e^{-|x|/\theta}\,\mathrm dx
+  =\frac1\theta\int_0^\infty x^2e^{-x/\theta}\,\mathrm dx\\
+  &=\theta^2\int_0^\infty u^2e^{-u}\,\mathrm du=2\theta^2.
   \end{aligned}
-  $$
+$$
 
-  记 $S=\sum_{i=1}^n|x_i|$。当 $S>0$ 时，
+  **第二步：总体矩与样本矩相等。** 令 $n^{-1}\sum X_i^2=EX^2=2\theta^2$，并由参数域 $\theta>0$ 取正根，得
 
-  $$
-  \ell'(\theta)=\frac{S-n\theta}{\theta^2},
-  $$
 
-  因而 $\ell$ 在 $\theta=S/n$ 处由增转减，取到唯一最大值，得到 $\hat\theta=S/n$。
 
-  </Step>
-  <Step>
+$$
+\widehat\theta_{\mathrm M}=\sqrt{\frac{1}{2n}\sum_{i=1}^{n}X_i^2}.
+$$
 
-  ### 计算期望
+</Tab>
+<Tab value="方法二：最大似然估计与期望">
 
-  $$
-  E|X|=\frac1\theta\int_0^\infty xe^{-x/\theta}\,dx=\theta,
-  $$
+  **第一步：写出完整似然函数。** 对一组观测值 $x_1,\ldots,x_n$，令 $A=\sum_{i=1}^{n}|x_i|$，则
 
-  由样本同分布及期望的线性性，
 
-  $$
-  E(\hat\theta)=\frac1n\sum_{i=1}^n E|X_i|=\theta.
-  $$
 
-  因此 $\hat\theta$ 是 $\theta$ 的**无偏估计量**。
+$$
+L(\theta)=(2\theta)^{-n}e^{-A/\theta},\qquad
+  \ell(\theta)=-n\ln(2\theta)-\frac A\theta.
+$$
 
-  </Step>
-</Steps>
+  **第二步：确定最大值而非仅求驻点。** 当 $A>0$ 时，
 
-<Callout type="info" title="极端样本">若所有观测值恰为 $0$，则 $S=0$，且 $L(\theta)=(2\theta)^{-n}$ 在 $\theta>0$ 上没有最大值；但对该连续分布，此事件概率为 $0$，不影响通常写出的估计量。</Callout>
+
+
+$$
+\ell'(\theta)=\frac{A-n\theta}{\theta^2}.
+$$
+
+  导数在 $0<\theta<A/n$ 时为正，在 $\theta>A/n$ 时为负，故 $\theta=A/n$ 是唯一最大值点：
+
+
+
+$$
+\widehat\theta_{\mathrm{ML}}=\frac1n\sum_{i=1}^n|X_i|.
+$$
+
+  **第三步：计算估计量的期望。** 由对称性，
+
+
+
+$$
+E|X|=\frac1\theta\int_0^\infty xe^{-x/\theta}\,\mathrm dx
+  =\theta\int_0^\infty ue^{-u}\,\mathrm du=\theta.
+$$
+
+  因而 $E\widehat\theta_{\mathrm{ML}}=n^{-1}\sum E|X_i|=\theta$，所以最大似然估计量恰好**无偏**。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="极端样本与参数开区间">若全部观测值都为 $0$，则 $A=0$，似然函数随 $\theta\downarrow0$ 无界，因 $\theta=0$ 不在参数域内而没有最大值；但在此连续模型下该样本事件的概率为 $0$，通常定义的估计量仍几乎处处成立。</Callout>
 
 </Solution>
 </Question>
@@ -190,120 +243,174 @@ $$
 
 <Solution>
 
-**参考答案**：两种方法给出相同结果：
+**参考答案**：两种方法得到完全相同的估计量：
 
 $$
-\boxed{\widehat p=\frac{N_0+N_1}{n},\qquad
-\widehat q=\frac{N_0}{N_0+N_1}}.
+\boxed{\widehat p_{\mathrm M}=\widehat p_{\mathrm{ML}}=\frac{N_0+N_1}{n}},\qquad
+\boxed{\widehat q_{\mathrm M}=\widehat q_{\mathrm{ML}}=\frac{N_0}{N_0+N_1}}.
 $$
 
-<Tabs items={['方法一：矩估计', '方法二：最大似然估计']} defaultIndex={0}>
-  <Tab value="方法一：矩估计">
+其中 $N_0+N_1+N_2=n$，题设 $N_0,N_1,N_2>0$ 保证估计值都落在参数空间 $(0,1)^2$ 内。
 
-  **第一步**：计算总体前两阶原点矩。
+<Tabs items={['方法一：两阶矩估计','方法二：频数极大似然']} defaultIndex={0}>
+<Tab value="方法一：两阶矩估计">
 
-  $$
-  \begin{aligned}
-  E(X)&=p(1-q)+2(1-p)=2-p-pq,\\
-  E(X^2)&=p(1-q)+4(1-p)=4-3p-pq.
-  \end{aligned}
-  $$
+  **第一步：求总体前两阶矩。**
 
-  **第二步**：用样本矩替代总体矩：
 
-  $$
-  \overline X=\frac{N_1+2N_2}{n},\qquad
-  \overline{X^2}=\frac{N_1+4N_2}{n}.
-  $$
 
-  将它们分别与 $E(X)$、$E(X^2)$ 相等。两式相减得
+$$
+EX=p(1-q)+2(1-p)=2-p-pq,
+$$
 
-  $$
-  2-2p=\frac{2N_2}{n}\quad\Longrightarrow\quad
-  \widehat p=1-\frac{N_2}{n}=\frac{N_0+N_1}{n}.
-  $$
 
-  再由 $p(1-q)=P(X=1)$ 的对应矩方程（或将 $\widehat p$ 代回第一式）得
 
-  $$
-  \widehat{pq}=\frac{N_0}{n},\qquad
-  \widehat q=\frac{\widehat{pq}}{\widehat p}
-  =\boxed{\frac{N_0}{N_0+N_1}}.
-  $$
+$$
+EX^2=p(1-q)+4(1-p)=4-3p-pq.
+$$
 
-  </Tab>
-  <Tab value="方法二：最大似然估计">
+  **第二步：求样本前两阶矩。** 用频数写出
 
-  由于 $N_0+N_1+N_2=n$，样本似然函数为
 
-  $$
-  L(p,q)=(pq)^{N_0}[p(1-q)]^{N_1}(1-p)^{N_2}
-  =p^{N_0+N_1}(1-p)^{N_2}q^{N_0}(1-q)^{N_1}.
-  $$
 
-  对数似然函数可分成两个参数部分：
+$$
+M_1=\bar X=\frac{N_1+2N_2}{n},\qquad
+  M_2=\frac1n\sum X_i^2=\frac{N_1+4N_2}{n}.
+$$
 
-  $$
-  \ell=(N_0+N_1)\ln p+N_2\ln(1-p)
-  +N_0\ln q+N_1\ln(1-q).
-  $$
+  **第三步：联立并解出参数。** 由 $M_2-M_1=2(1-p)$，
 
-  对 $p,q$ 分别求偏导并令其为零，
 
-  $$
-  \frac{N_0+N_1}{p}-\frac{N_2}{1-p}=0,
-  \qquad \frac{N_0}{q}-\frac{N_1}{1-q}=0.
-  $$
 
-  解得
+$$
+\widehat p_{\mathrm M}=1-\frac{M_2-M_1}{2}
+  =1-\frac{N_2}{n}=\frac{N_0+N_1}{n}.
+$$
 
-  $$
-  \widehat p=\frac{N_0+N_1}{n},\qquad
-  \widehat q=\frac{N_0}{N_0+N_1}.
-  $$
+  又 $4M_1-2M_2=2p(1-q)$，等价于 $p(1-q)=N_1/n$，故
 
-  因为 $N_0,N_1,N_2>0$，该解位于 $(0,1)^2$ 内，且
 
-  $$
-  \frac{\partial^2\ell}{\partial p^2}<0,\qquad
-  \frac{\partial^2\ell}{\partial q^2}<0,
-  $$
 
-  而混合二阶偏导为零，故它是唯一的极大值点。
+$$
+\widehat q_{\mathrm M}=1-\frac{N_1/n}{\widehat p_{\mathrm M}}
+  =\frac{N_0}{N_0+N_1}.
+$$
 
-  </Tab>
-</Tabs>
+</Tab>
+<Tab value="方法二：频数极大似然">
 
-</Solution>
-</Question>
+  **第一步：写样本似然。** 对具有计数 $N_0,N_1,N_2$ 的样本，忽略与参数无关的多项式系数，
 
-<Question id="selected-1103-math-55a512-005" type="essay">
 
-设总体 $X$ 的概率密度为 $$f(x;\lambda)=\begin{cases} -\lambda^x\ln\lambda, & x\ge0, \\ 0, & x<0 \end{cases} \quad (0<\lambda<1)$$，$(X_1,X_2,\cdots,X_n)$ 为总体 $X$ 的简单随机样本，求 $\lambda$ 的矩估计量。
-
-<Solution>
-
-**答案：** $\widehat\lambda=\exp\!\left(-\frac1{\overline X}\right)$。
-
-**解析：**
 
 $$
 \begin{aligned}
-EX &= \int_{-\infty}^{+\infty} x \cdot f(x; \lambda)\mathrm{d}x = -\int_{0}^{+\infty} x \cdot \lambda^x \ln \lambda \mathrm{d}x \\
-&= -\int_{0}^{+\infty} x \mathrm{d}(\lambda^x) = -x\lambda^x \Big|_0^{+\infty} + \int_{0}^{+\infty} \lambda^x \mathrm{d}x \\
-&= \frac{\lambda^x}{\ln \lambda} \Big|_0^{+\infty} = -\frac{1}{\ln \lambda},
-\end{aligned}
+  L(p,q)&=(pq)^{N_0}[p(1-q)]^{N_1}(1-p)^{N_2}\\
+  &=p^{N_0+N_1}(1-p)^{N_2}q^{N_0}(1-q)^{N_1}.
+  \end{aligned}
 $$
 
-即 $EX = -\frac{1}{\ln \lambda}$，解得 $\lambda = \mathrm{e}^{-\frac{1}{EX}}$，故 $\lambda$ 的矩估计量为 $\widehat{\lambda} = \mathrm{e}^{-\frac{1}{\overline{X}}}$，其中 $\overline{X} = \frac{1}{n} \sum_{i=1}^n X_i$。
+  **第二步：对两个参数分别求最大值。** 对数似然分离为两个二项形式，
+
+
+
+$$
+\ell(p,q)=(N_0+N_1)\ln p+N_2\ln(1-p)
+  +N_0\ln q+N_1\ln(1-q).
+$$
+
+  分别令偏导为 $0$，得
+
+
+
+$$
+\frac{N_0+N_1}{p}-\frac{N_2}{1-p}=0,
+  \qquad \frac{N_0}{q}-\frac{N_1}{1-q}=0.
+$$
+
+  因而 $\widehat p_{\mathrm{ML}}=(N_0+N_1)/n$，$\widehat q_{\mathrm{ML}}=N_0/(N_0+N_1)$。
+
+  **第三步：核对极大值与参数范围。** $N_0,N_1,N_2$ 均正，所求解位于 $(0,1)^2$ 内；对数似然对 $p$、$q$ 的二阶偏导都严格小于 $0$ 且交叉偏导为 $0$，故唯一极大值成立。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="模型的概率意义">$p=P(X\in\{0,1\})$，$q=P(X=0\mid X\in\{0,1\})$。因此估计量也可以直接理解成对应频率：先估计“非 2”的比例，再估计“非 2 条件下取 0”的比例。这给两种代数推导提供了直观验证。</Callout>
+
+</Solution>
+</Question>
+
+<Question id="selected-1103-math-55a512-005" type="essay" tags="科目:概率论与数理统计, 考点:指数分布的矩估计">
+
+设总体 $X$ 的概率密度为 
+
+$$
+f(x;\lambda)=\begin{cases} -\lambda^x\ln\lambda, & x\ge0, \\ 0, & x<0 \end{cases} \quad (0<\lambda<1)
+$$
+
+，$(X_1,X_2,\cdots,X_n)$ 为总体 $X$ 的简单随机样本，求 $\lambda$ 的矩估计量。
+
+<Solution>
+
+**参考答案：**
+
+$$
+\boxed{\widehat\lambda_{\mathrm M}=\exp\left(-\frac1{\overline X}\right)},\qquad
+\overline X=\frac1n\sum_{i=1}^nX_i.
+$$
+
+**思路**：先识别密度中的指数分布参数，再用理论一阶矩等于样本一阶矩。
+
+<Steps>
+<Step>
+
+  ### 把密度化为标准形式
+
+  由于 $0<\lambda<1$，令 $a=-\ln\lambda>0$，则 $\lambda^x=e^{-ax}$，原密度成为
+
+
+
+$$
+f(x;\lambda)=ae^{-ax}\mathbf1_{\{x\ge0\}}.
+$$
+
+  即 $X$ 服从**率参数**为 $a$ 的指数分布，故 $E(X)=1/a=-1/\ln\lambda$。
+
+</Step>
+<Step>
+
+  ### 建立矩方程并反解参数
+
+  一阶矩方程为
+
+
+
+$$
+\overline X=-\frac1{\ln\lambda}
+  \quad\Longrightarrow\quad
+  \ln\widehat\lambda=-\frac1{\overline X}.
+$$
+
+  指数化得到上面的矩估计量。因 $X_i>0$ 几乎必然，$\overline X>0$ 几乎必然，所得估计满足 $0<\widehat\lambda<1$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="参数替换技巧">遇到 $\lambda^x$、$0<\lambda<1$ 时，先设 $a=-\ln\lambda$，可把较难的积分转为指数分布均值公式。矩估计具备参数变换下的直接代入性质；这里无需单独再求一次积分。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-55a512-006" type="essay">
+<Question id="selected-1103-math-55a512-006" type="essay" tags="科目:概率论与数理统计, 考点:矩估计与最大似然估计">
 
-设总体 $X$ 的概率密度为 $$f(x;\theta)=\begin{cases} \sqrt{\theta}\cdot x^{\sqrt{\theta}-1}, & 0\le x\le1, \\ 0, & \text{其他}, \end{cases}$$ 其中 $\theta>0$ 为未知参数，$(x_1,x_2,\cdots,x_n)$ 为 $X$ 的简单随机样本。求：
+设总体 $X$ 的概率密度为 
+
+$$
+f(x;\theta)=\begin{cases} \sqrt{\theta}\cdot x^{\sqrt{\theta}-1}, & 0\le x\le1, \\ 0, & \text{其他}, \end{cases}
+$$
+
+ 其中 $\theta>0$ 为未知参数，$(x_1,x_2,\cdots,x_n)$ 为 $X$ 的简单随机样本。求：
 
 (I) $\theta$ 的矩估计值；
 
@@ -311,110 +418,146 @@ $$
 
 <Solution>
 
-**答案：** 矩估计量 $\widehat\theta=\left(\frac{\overline X}{1-\overline X}\right)^2$；最大似然估计量 $\widehat\theta=\frac{n^2}{\left(\sum_{i=1}^n\ln X_i\right)^2}$。
-
-**解析：** (I) 由
+**参考答案**：设 $\overline x=n^{-1}\sum_{i=1}^n x_i$，则
 
 $$
-EX = \int_{-\infty}^{+\infty} x \cdot f(x; \theta)\mathrm{d}x = \int_{0}^{1} x \cdot \sqrt{\theta} \cdot x^{\sqrt{\theta}-1}\mathrm{d}x = \int_{0}^{1} \sqrt{\theta} x^{\sqrt{\theta}}\mathrm{d}x = \frac{\sqrt{\theta}}{\sqrt{\theta} + 1},
+\boxed{\widehat\theta_{\mathrm M}=\left(\frac{\overline x}{1-\overline x}\right)^2},\qquad
+\boxed{\widehat\theta_{\mathrm{ML}}=\frac{n^2}{\left(\sum_{i=1}^n\ln x_i\right)^2}}.
 $$
 
-解得 $\theta = \left(\frac{EX}{1-EX}\right)^2$，故 $\theta$ 的矩估计值为 $\widehat{\theta} = \left(\frac{\overline{X}}{1-\overline{X}}\right)^2$。
+下面以通常情况下的样本 $0<x_i<1$ 为前提（该条件以概率 $1$ 成立）。
 
-(II) 似然函数为 $L(\theta) = \prod_{i=1}^n \sqrt{\theta} x_i^{\sqrt{\theta}-1} = \theta^{\frac{n}{2}} \left(\prod_{i=1}^n x_i\right)^{\sqrt{\theta}-1}$，取对数，得
-$$\ln L(\theta) = \frac{n}{2}\ln\theta + (\sqrt{\theta}-1)\sum_{i=1}^n \ln x_i$$。
-令
-$$\frac{\mathrm{d}\ln L(\theta)}{\mathrm{d}\theta} = \frac{n}{2\theta} + \frac{1}{2\sqrt{\theta}}\sum_{i=1}^n \ln x_i = 0,$$
-得 $\theta$ 的最大似然估计值为
-$$\widehat{\theta} = \frac{n^2}{\left(\sum\limits_{i=1}^n \ln x_i\right)^2}$$。
+<Tabs items={['方法一：矩估计','方法二：最大似然估计']}>
+<Tab value="方法一：矩估计">
+
+  **第一步**：令 $a=\sqrt\theta>0$，密度为 $a x^{a-1}$，因此
+
+
+
+$$
+E(X)=\int_0^1 xa x^{a-1}\,\mathrm dx
+  =a\int_0^1x^a\,\mathrm dx
+  =\frac{a}{a+1}.
+$$
+
+  **第二步**：用 $\overline x$ 替换理论均值，得到 $\overline x=a/(a+1)$，所以
+
+
+
+$$
+\widehat a=\frac{\overline x}{1-\overline x},\qquad
+  \widehat\theta_{\mathrm M}=\widehat a^2.
+$$
+
+</Tab>
+<Tab value="方法二：最大似然估计">
+
+  在 $0<x_i<1$ 时，以 $a=\sqrt\theta$ 为参数的似然和对数似然为
+
+
+
+$$
+L(a)=a^n\prod_{i=1}^n x_i^{a-1},\quad
+  \ell(a)=n\ln a+(a-1)\sum_{i=1}^n\ln x_i.
+$$
+
+  令 $\ell'(a)=n/a+\sum\ln x_i=0$，解得
+
+
+
+$$
+\widehat a=-\frac{n}{\sum_{i=1}^n\ln x_i}>0.
+$$
+
+  又 $\ell''(a)=-n/a^2<0$，确为唯一极大值点。最后 $\widehat\theta_{\mathrm{ML}}=\widehat a^2$。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="不要忽略参数范围">这里 $\sum\ln x_i<0$，因此似然估计的 $\widehat a$ 为正；对数求导后要检查二阶导数和参数域。将 $\theta$ 换成 $\sqrt\theta$ 是一一对应的参数重标定，不改变最大似然位置。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-1ad160-005" type="blank" number={1}>
+<Question id="selected-1103-math-1ad160-005" type="blank" tags="科目:概率论与数理统计, 考点:样本方差无偏性">
 
 设 $ X_1,X_2,\cdots,X_n$ 是取自总体 $ X$ 的简单随机样本，$ a\sum_{i=1}^{n}X_i^2+b\bar X^2$ 是总体方差 $ \sigma^2$ 的无偏估计量，则 $a=$ <Blank answer="1/(n-1)" kind="math" />，$b=$ <Blank answer="-n/(n-1)" kind="math" />。
 
 <Solution>
 
-**答案：**
+**参考答案：**（假设 $n\ge2$）
 
 $$
- a=\frac1{n-1},\qquad b=-\frac{n}{n-1}.
+\boxed{a=\frac1{n-1}},\qquad
+\boxed{b=-\frac n{n-1}}.
 $$
 
-**解析：** 设总体均值为 $ EX=\mu$，则
+**关键：**“对未知总体均值、方差都无偏”意味着两个系数条件要同时成立。
+
+<Steps>
+<Step>
+
+  ### 写出两个基本期望
+
+  设 $\mu=E(X)$，$\sigma^2=D(X)$。利用 $E(X_i^2)=\sigma^2+\mu^2$ 以及 $D(\overline X)=\sigma^2/n$，有
+
+
 
 $$
- E(X_i^2)=\sigma^2+\mu^2,
+E\left(\sum_{i=1}^n X_i^2\right)=n(\sigma^2+\mu^2),\qquad
+  E(\overline X^2)=\frac{\sigma^2}n+\mu^2.
 $$
 
-所以
+</Step>
+<Step>
+
+  ### 比较 $\sigma^2$ 和 $\mu^2$ 的系数
+
+
 
 $$
- E\left(\sum_{i=1}^{n}X_i^2\right)=n(\sigma^2+\mu^2).
+E\left(a\sum X_i^2+b\overline X^2\right)
+  =\left(an+\frac bn\right)\sigma^2+(an+b)\mu^2.
 $$
 
-又因为
+  对一切未知 $\mu,\sigma^2$ 都等于 $\sigma^2$，必须满足
+
+
 
 $$
- E(\bar X)=\mu,
-\qquad
-D(\bar X)=\frac{\sigma^2}{n},
+\begin{cases}
+  an+b/n=1,\\an+b=0.
+  \end{cases}
 $$
 
-故
+  解得 $a=1/(n-1),\ b=-n/(n-1)$。
+
+</Step>
+<Step>
+
+  ### 用熟悉的样本方差验证
+
+
 
 $$
- E(\bar X^2)=\frac{\sigma^2}{n}+\mu^2.
+a\sum X_i^2+b\overline X^2
+  =\frac1{n-1}\left(\sum X_i^2-n\overline X^2\right)
+  =\frac1{n-1}\sum(X_i-\overline X)^2=S^2.
 $$
 
-于是
+  正是通常的无偏样本方差，因此结论一致。
 
-$$
- \begin{aligned}
-E\left(a\sum_{i=1}^{n}X_i^2+b\bar X^2\right)
-&=an(\sigma^2+\mu^2)+b\left(\frac{\sigma^2}{n}+\mu^2\right)\\
-&=\left(an+\frac bn\right)\sigma^2+(an+b)\mu^2.
-\end{aligned}
-$$
+</Step>
+</Steps>
 
-要使其对任意 $ \mu,\sigma^2$ 都等于 $ \sigma^2$，必须有
-
-$$
- \begin{cases}
-an+\frac bn=1,\\
-an+b=0.
-\end{cases}
-$$
-
-由第二式得 $ b=-an$，代入第一式：
-
-$$
- an-a=1,
-$$
-
-因此
-
-$$
- a=\frac1{n-1},
-\qquad
-b=-\frac{n}{n-1}.
-$$
-
-此时原估计量正好为
-
-$$
- \frac1{n-1}\sum_{i=1}^{n}X_i^2-\frac{n}{n-1}\bar X^2
-=\frac1{n-1}\sum_{i=1}^{n}(X_i-\bar X)^2=S^2.
-$$
+<Callout type="warn" title="样本容量限制">当 $n=1$ 时，上述两个方程互相矛盾，不存在符合题设、同时对任意未知均值与方差无偏的常数 $a,b$。题目的答案隐含 $n\ge2$。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-497447-023" type="single">
+<Question id="selected-1103-math-497447-023" type="single" tags="科目:概率论与数理统计, 考点:最优线性无偏组合">
 
 设总体$X$的未知参数$\theta$有两个相互独立的无偏估计量$\hat{\theta}_1$与$\hat{\theta}_2$，且$D(\hat{\theta}_2)=2D(\hat{\theta}_1)$，记$\hat{\theta}=a\hat{\theta}_1+b\hat{\theta}_2$，则以下使得$\hat{\theta}$最有效的是( )
 
@@ -425,46 +568,58 @@ $$
 
 <Solution>
 
-因为$\hat\theta_1,\hat\theta_2$均为$\theta$的无偏估计量，所以
-$$
- E(\hat\theta)=(a+b)\theta.
-$$
-要使$\hat\theta$仍为无偏估计量，必须满足
-$$
- a+b=1.
-$$
-四个选项中只有B、C满足这一条件。
+**参考答案：B。**
 
-设
 $$
- D(\hat\theta_1)=\sigma_0^2,
-\qquad D(\hat\theta_2)=2\sigma_0^2.
+\boxed{a=\frac23,\qquad b=\frac13}.
 $$
-由于二者相互独立，且$b=1-a$，有
+
+**思路**：在无偏的线性组合中，“最有效”即方差最小。由于两个估计量相互独立，组合方差没有协方差项。
+
+<Steps>
+<Step>
+
+  ### 先限制无偏性
+
+  设 $E(\widehat\theta_1)=E(\widehat\theta_2)=\theta$，则
+
+
+
 $$
- D(\hat\theta)
-=\sigma_0^2[a^2+2(1-a)^2].
+E(a\widehat\theta_1+b\widehat\theta_2)=(a+b)\theta.
 $$
-令
+
+  为对任意 $\theta$ 无偏，要求 $a+b=1$。四个选项中只有 B 和 C 满足这一条件。
+
+</Step>
+<Step>
+
+  ### 最小化方差
+
+  记 $v=D(\widehat\theta_1)>0$，则 $D(\widehat\theta_2)=2v$。取 $b=1-a$，有
+
+
+
 $$
- q(a)=a^2+2(1-a)^2=3a^2-4a+2,
+\begin{aligned}
+  D(\widehat\theta)
+  &=v\big[a^2+2(1-a)^2\big]\\
+  &=v\left[3\left(a-\frac23\right)^2+\frac23\right].
+  \end{aligned}
 $$
-则
-$$
- q'(a)=6a-4.
-$$
-令$q'(a)=0$得
-$$
- a=\frac23,
-\qquad b=\frac13.
-$$
-此时方差最小，估计量最有效，故选B。
+
+  平方项在 $a=2/3$ 取零，故 $b=1/3$；此时最小方差为 $2v/3$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="逆方差加权">两个独立无偏估计量的最优权重与其方差成反比，即 $a:b=(1/v):(1/(2v))=2:1$。所以**方差越小，权重越大**，本题可直接得到 $2/3$ 和 $1/3$。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-55a512-016" type="essay">
+<Question id="selected-1103-math-55a512-016" type="essay" tags="科目:概率论与数理统计, 考点:均匀分布的无偏估计">
 
 设总体 $X\sim U(0,\theta) \, (\theta>0)$, $(X_1,X_2,\cdots,X_n)$ 为 $X$ 的简单随机样本，$X_{(n)}=\max\{X_1,X_2,\cdots,X_n\}$。
 
@@ -474,29 +629,84 @@ $(II)$ 当 $n\ge 2$ 时，$\widehat{\theta}_1$ 和 $\widehat{\theta}_2$ 哪一�
 
 <Solution>
 
-**答案：** $\widehat\theta_1=2\overline X$ 与 $\widehat\theta_2=\frac{n+1}{n}X_{(n)}$ 均无偏；当 $n\ge2$ 时 $\widehat\theta_2$ 更有效。
+**参考答案：**
 
-**解析：** (I) 由已知, 得 $X$ 的概率密度为
-$$f_0(x) = \begin{cases} \frac{1}{\theta}, & 0 < x < \theta, \\ 0, & \text{其他}, \end{cases}$$
-$$f_{X_{(n)}}(x) = F'_{X_{(n)}}(x) = \begin{cases} \frac{n x^{n-1}}{\theta^n}, & 0 < x < \theta, \\ 0, & \text{其他}, \end{cases}$$
-所以
-$$E(2\overline{X}) = E\left(\frac{2}{n} \sum_{i=1}^{n} X_i\right) = \frac{2}{n} \cdot n \cdot \frac{\theta}{2} = \theta,$$
-$$E\left(\frac{n+1}{n} X_{(n)}\right) = \frac{n+1}{n} \int_0^\theta \frac{n x^n}{\theta^n} dx = \frac{n+1}{n} \cdot \frac{n}{n+1} \theta = \theta,$$
-故 $\widehat{\theta}_1, \widehat{\theta}_2$ 是 $\theta$ 的无偏估计。
+（I）$\widehat\theta_1=2\overline X$、$\widehat\theta_2=(n+1)X_{(n)}/n$ **均为无偏估计**。
 
-(II) $$D\widehat{\theta}_1 = D(2\overline{X}) = \frac{4}{n} \cdot \frac{\theta^2}{12} = \frac{\theta^2}{3n},$$
+（II）当 $n\ge2$ 时，
 
-$$E(X_{(n)}^2) = \int_0^\theta \frac{nx^{n+1}}{\theta^n} dx = \frac{n}{n+2}\theta^2,$$
-$$D\widehat{\theta}_2 = \left(\frac{n+1}{n}\right)^2 \{E(X_{(n)}^2) - [EX_{(n)}]^2\} = \frac{\theta^2}{n(n+2)}.$$
-当 $n \ge 2$ 时，$D\widehat{\theta}_2 < D\widehat{\theta}_1$，故 $\widehat{\theta}_2$ 比 $\widehat{\theta}_1$ 有效。
+$$
+\boxed{D(\widehat\theta_1)=\frac{\theta^2}{3n}},\qquad
+\boxed{D(\widehat\theta_2)=\frac{\theta^2}{n(n+2)}};
+\qquad\boxed{\widehat\theta_2\text{ 更有效}}.
+$$
+
+<Steps>
+<Step>
+
+  ### 证明第一个估计量无偏
+
+  因 $X\sim U(0,\theta)$，故 $E(X)=\theta/2$、$D(X)=\theta^2/12$。于是
+
+
+
+$$
+E(2\overline X)=2\cdot\frac\theta2=\theta,
+  \qquad D(2\overline X)=\frac{4D(X)}n=\frac{\theta^2}{3n}.
+$$
+
+</Step>
+<Step>
+
+  ### 利用最大次序统计量的分布
+
+  对 $0\le x\le\theta$，
+
+
+
+$$
+P(X_{(n)}\le x)=\prod_{i=1}^nP(X_i\le x)
+  =\left(\frac x\theta\right)^n,
+$$
+
+  因而 $f_{X_{(n)}}(x)=nx^{n-1}/\theta^n$，直接积分可得
+
+
+
+$$
+E(X_{(n)})=\frac{n\theta}{n+1},\qquad
+  E(X_{(n)}^2)=\frac{n\theta^2}{n+2}.
+$$
+
+  所以 $E(\widehat\theta_2)=((n+1)/n)E(X_{(n)})=\theta$。
+
+</Step>
+<Step>
+
+  ### 计算第二个估计量的方差并比较
+
+
+
+$$
+D(X_{(n)})=\frac{n\theta^2}{(n+1)^2(n+2)},
+  \quad
+  D(\widehat\theta_2)=\frac{\theta^2}{n(n+2)}.
+$$
+
+  因 $n\ge2$ 时 $n+2>3$，故 $1/[n(n+2)]<1/(3n)$。两者同为无偏估计量，因此方差较小的 $\widehat\theta_2$ 更有效。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="记住均匀分布最大值的两矩">对 $U(0,\theta)$ 样本，$E(X_{(n)}^k)=n\theta^k/(n+k)$（$k>-n$）。一次记住通式，可以迅速处理最大值校偏与方差问题。$n=1$ 时两估计量相同。</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：参数型支持集、次序统计量与极大似然
+## 考点二｜含参支持集、次序统计量与最大似然边界
 
-<Question id="selected-1103-classified-1031-math-ed4edb-022" type="essay" points={12} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-ed4edb-022" type="essay" points={12} tags="来源:张宇8套卷, 考点:区间支持集与MLE不唯一">
 
 设总体 $X$ 的概率密度为
 
@@ -528,169 +738,71 @@ $$
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：**
 
-**解析：** （1）因为
-
-$$
-EX=\int_{\theta-1/2}^{\theta+1/2}x\,dx
-=\frac12x^2\bigg|_{\theta-1/2}^{\theta+1/2}
-=\theta,
-$$
-
-且
+（1）矩估计量为 $\boxed{\widehat\theta_M=\overline X}$；**全部**最大似然估计量组成闭区间
 
 $$
-E\bar X=EX=\theta,
+\boxed{\widehat\theta_L\in\left[X_{(n)}-\frac12,\ X_{(1)}+\frac12\right]}.
 $$
 
-故矩估计量为
+（2）$\boxed{(X_{(1)}+X_{(n)})/2\text{ 是 }\theta\text{ 的无偏估计量}}$，并且它是一个最大似然估计量。
+
+<Steps>
+<Step>
+
+  ### 从总体中心求矩估计
+
+  $X\sim U(\theta-1/2,\theta+1/2)$，所以 $E(X)=\theta$。一阶矩方程 $\overline X=\theta$ 直接给出 $\widehat\theta_M=\overline X$。
+
+</Step>
+<Step>
+
+  ### 支持集决定似然的可行区间
+
+  密度高度恒为 $1$，故
+
+
 
 $$
-\boxed{\hat\theta_M=\bar X}.
+L(\theta)=\prod_{i=1}^n\mathbf1_{\{\theta-1/2\le x_i\le\theta+1/2\}}
+  =\mathbf1_{\{x_{(n)}-1/2\le\theta\le x_{(1)}+1/2\}}.
 $$
 
-**（2 分）**
+  因所有样本都落在长度为 $1$ 的区间内，$x_{(n)}-x_{(1)}\le1$，该可行区间非空。区间内 $L(\theta)=1$、区间外为零，故**每个可行参数都使似然取到最大值**；不能只报告一个点而遗漏全部解。
 
-设 $x_1,x_2,\ldots,x_n$ 为样本值，则似然函数为
+</Step>
+<Step>
 
-$$
-L(\theta)
-=\prod_{i=1}^nf(x_i;\theta)
-=
-\begin{cases}
-1,&\theta-\dfrac12\le x_1,x_2,\ldots,x_n\le\theta+\dfrac12,\\
-0,&\text{其他}.
-\end{cases}
-$$
+  ### 证明中程数无偏
 
-即
+  令 $U_i=X_i-(\theta-1/2)$，则 $U_i\sim U(0,1)$，并且
+
+
 
 $$
-L(\theta)
-=
-\begin{cases}
-1,&\theta-\dfrac12\le X_{(1)}\le X_{(n)}\le\theta+\dfrac12,\\
-0,&\text{其他}.
-\end{cases}
+E(U_{(1)})=\frac1{n+1},\qquad
+  E(U_{(n)})=\frac n{n+1}.
 $$
 
-**（3 分）**
+  因此
 
-由最大似然估计的定义，全部最大似然估计量满足
 
-$$
-\hat\theta_L-\frac12\le X_{(1)},
-$$
-
-$$
-\hat\theta_L+\frac12\ge X_{(n)}.
-$$
-
-也就是
-
-$$
-\boxed{X_{(n)}-\frac12\le\hat\theta_L\le X_{(1)}+\frac12}.
-$$
-
-**（5 分）**
-
-（2）
-
-$$
-\frac{X_{(1)}+X_{(n)}}2
-$$
-
-恰为区间
-
-$$
-\left[X_{(n)}-\frac12,\ X_{(1)}+\frac12\right]
-$$
-
-的中点，因此它也是 $\theta$ 的一个最大似然估计量。
-
-**（6 分）**
-
-总体分布函数为
-
-$$
-F(x;\theta)=
-\begin{cases}
-0,&x<\theta-\dfrac12,\\[4pt]
-x-\theta+\dfrac12,&\theta-\dfrac12\le x<\theta+\dfrac12,\\[4pt]
-1,&x\ge\theta+\dfrac12.
-\end{cases}
-$$
-
-因此最小次序统计量的密度为
-
-$$
-f_{(1)}(x)
-=n[1-F(x;\theta)]^{n-1}f(x;\theta)
-=
-\begin{cases}
-n\left(\dfrac12+\theta-x\right)^{n-1},&\theta-\dfrac12\le x<\theta+\dfrac12,\\[6pt]
-0,&\text{其他},
-\end{cases}
-$$
-
-最大次序统计量的密度为
-
-$$
-f_{(n)}(x)
-=n[F(x;\theta)]^{n-1}f(x;\theta)
-=
-\begin{cases}
-n\left(x+\dfrac12-\theta\right)^{n-1},&\theta-\dfrac12\le x<\theta+\dfrac12,\\[6pt]
-0,&\text{其他}.
-\end{cases}
-$$
-
-**（8 分）**
-
-于是
 
 $$
 \begin{aligned}
-E[X_{(1)}]
-&=\int_{\theta-1/2}^{\theta+1/2}
-xn\left(\frac12+\theta-x\right)^{n-1}dx\\
-&=\theta+\frac12-\frac{n}{n+1},
-\end{aligned}
+  E\left(\frac{X_{(1)}+X_{(n)}}2\right)
+  &=\theta-\frac12+\frac12\left(\frac1{n+1}+\frac n{n+1}\right)\\
+  &=\theta.
+  \end{aligned}
 $$
 
-$$
-\begin{aligned}
-E[X_{(n)}]
-&=\int_{\theta-1/2}^{\theta+1/2}
-xn\left(x+\frac12-\theta\right)^{n-1}dx\\
-&=\theta-\frac12+\frac{n}{n+1}.
-\end{aligned}
-$$
+  该中程数还等于全部最大似然估计区间的中点，故同时属于最大似然估计集合。
 
-**（10 分）**
+</Step>
+</Steps>
 
-所以
-
-$$
-\begin{aligned}
-E\left[\frac{X_{(1)}+X_{(n)}}2\right]
-&=\frac12\left(E[X_{(1)}]+E[X_{(n)}]\right)\\
-&=\frac12\left(
-\theta+\frac12-\frac{n}{n+1}
-+\theta-\frac12+\frac{n}{n+1}
-\right)\\
-&=\theta.
-\end{aligned}
-$$
-
-因此
-
-$$
-\boxed{\frac{X_{(1)}+X_{(n)}}2\text{ 是 }\theta\text{ 的无偏估计量}}.
-$$
-
-**（12 分）**
+<Callout type="warn" title="最大似然估计可能不唯一">均匀分布位置参数的似然在可行区间上是一个**平台**，没有必要强行通过求导寻找唯一驻点；中程数、左端点和右端点都能最大化似然，但它们的偏差性质可以不同。</Callout>
 
 </Solution>
 
@@ -717,64 +829,50 @@ $$
 
 <Solution>
 
-**答案：C，$\boxed{\widehat\theta_1=X_{(1)},\quad\widehat\theta_2=\dfrac12X_{(n)}}$。** 其中 $X_{(1)}=\min_iX_i$，$X_{(n)}=\max_iX_i$。
+**参考答案：C。**
 
-<Steps>
-  <Step>
+$$
+\boxed{\widehat\theta_1=X_{(1)}=\min_iX_i},\qquad
+\boxed{\widehat\theta_2=\frac{X_{(n)}}2=\frac12\max_iX_i}.
+$$
 
-  ### 写出受样本取值约束的似然函数
+**突破点**：本题的分布区间随 $\theta$ 的正负发生变化，必须分两段列出样本相容条件。
 
-  因样本独立，
+<Tabs items={['当参数为负','当参数为正']}>
+<Tab value="当参数为负">
 
-  $$
-  L(\theta)=|\theta|^{-n}\mathbf1\{\theta\le X_{(1)},\ X_{(n)}\le\theta+|\theta|\}.
-  $$
+  若 $\theta<0$，则 $|\theta|=-\theta$、$\theta+|\theta|=0$，因此 $X\sim U(\theta,0)$。样本出现的可行条件为
 
-  不能直接对 $\log L$ 求导而忽略指示函数；本题最大值由**支撑区间的边界**确定。
 
-  </Step>
-  <Step>
 
-  ### 当 $\theta<0$ 时
+$$
+\theta\le x_{(1)},\qquad x_{(n)}\le0.
+$$
 
-  此时 $\theta+|\theta|=0$，即 $X\sim U(\theta,0)$。样本相容要求 $\theta\le X_{(1)}\le X_{(n)}\le0$。
+  在可行域 $\theta\le x_{(1)}<0$，有 $L(\theta)=(-\theta)^{-n}$。随着 $\theta$ 增大，区间长度 $-\theta$ 缩短、密度增大；最大值在可行上界 $\widehat\theta_1=x_{(1)}$ 取得。
 
-  在相容范围内 $L(\theta)=(-\theta)^{-n}$，它随 $\theta$ 增大而增大，故取最大的可行参数
+</Tab>
+<Tab value="当参数为正">
 
-  $$
-  \boxed{\widehat\theta_1=X_{(1)}}.
-  $$
+  若 $\theta>0$，则总体为 $U(\theta,2\theta)$。样本可行条件
 
-  </Step>
-  <Step>
 
-  ### 当 $\theta>0$ 时
 
-  此时 $\theta+|\theta|=2\theta$，即 $X\sim U(\theta,2\theta)$。样本相容要求
+$$
+\theta\le x_{(1)},\qquad x_{(n)}\le2\theta,
+$$
 
-  $$
-  \frac{X_{(n)}}2\le\theta\le X_{(1)}.
-  $$
+  即 $x_{(n)}/2\le\theta\le x_{(1)}$。可行域内 $L(\theta)=\theta^{-n}$ 随 $\theta$ 严格递减，故取最小可行值 $\widehat\theta_2=x_{(n)}/2$。
 
-  在此范围内 $L(\theta)=\theta^{-n}$，它随 $\theta$ 增大而减小，故取最小的可行参数
+</Tab>
+</Tabs>
 
-  $$
-  \boxed{\widehat\theta_2=\frac{X_{(n)}}2}.
-  $$
-
-  </Step>
-</Steps>
-
-<Callout type="warn" title="易错点">
-
-参数同时决定**密度高度**与**分布区间**。判断最大似然估计时，先写出所有样本落入支撑区间的条件，再在可行范围内优化。
-
-</Callout>
+<Callout type="warn" title="先确定支撑集再优化">密度中含有 $|\theta|$ 时，不是对 $\log|\theta|$ 求导即可。必须先把“所有观测值均落在支持区间内”的指示函数写出来；忽略它会错把不可行参数当成候选最大值。连续模型的端点取值不影响概率分布，但应依题设密度代表元理解似然边界。</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-classified-1031-math-6d85d7-010" type="single" points={5} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-6d85d7-010" type="single" points={5} tags="来源:张宇8套卷, 考点:拉普拉斯分布中位数估计">
 
 已知总体 $X$ 的概率密度为
 
@@ -791,33 +889,46 @@ $x_1\le x_2\le\cdots\le x_{10}$ 是来自该总体的简单随机样本的观察
 
 <Solution>
 
-样本似然函数为
+**参考答案：D，**$\boxed{\widehat\theta=(x_5+x_6)/2}$ 是一个最大似然估计值。
+
+更完整的结论是：**全部**最大似然估计值构成区间 $\boxed{[x_5,x_6]}$。
+
+<Steps>
+<Step>
+
+  ### 将最大化似然变成绝对偏差最小化
+
+  由拉普拉斯密度，十个观测值的似然函数为
+
+
 
 $$
-L(\theta)
-=\prod_{i=1}^{10}\frac12e^{-|x_i-\theta|}
-=\frac1{2^{10}}e^{-\sum_{i=1}^{10}|x_i-\theta|}.
+L(\theta)=2^{-10}\exp\left(-\sum_{i=1}^{10}|x_i-\theta|\right).
 $$
 
-最大化 $L(\theta)$ 等价于最小化
+  指数函数单调递增，最大化 $L$ 等价于最小化 $Q(\theta)=\sum_{i=1}^{10}|x_i-\theta|$。
+
+</Step>
+<Step>
+
+  ### 利用排序后的配对结构
+
+  对每个 $i=1,\ldots,5$，三角不等式给出
+
+
 
 $$
-\sum_{i=1}^{10}|x_i-\theta|.
+|x_i-\theta|+|x_{11-i}-\theta|\ge x_{11-i}-x_i.
 $$
 
-当样本量为偶数时，所有中位数区间
+  等号当且仅当 $\theta\in[x_i,x_{11-i}]$。五个区间的交集正好为 $[x_5,x_6]$，所以 $Q$ 在这个区间内同取最小值。
 
-$$
-\theta\in[x_5,x_6]
-$$
+</Step>
+</Steps>
 
-都使该和取得最小值，因此都是最大似然估计值。选项中
+选项 D 的 $\frac{x_5+x_6}2$ 在中位数区间内，因而正确；A、B 的二分之一倍数未必属于该区间，C 更无一般保证。
 
-$$
-\frac{x_5+x_6}{2}\in[x_5,x_6],
-$$
-
-故选（D）。
+<Callout type="idea" title="样本中位数而非均值">最小化绝对偏差和得到**中位数**；最小化平方偏差和得到**均值**。偶数个观测值时，中位数是两个中心次序统计量之间的整个闭区间，而平均值只是其中一个常见代表。</Callout>
 
 </Solution>
 
@@ -842,86 +953,65 @@ $X_1,\ldots,X_n$ 是来自总体的简单随机样本。
 
 <Solution>
 
-**答案（原卷常规口径）：**
+**参考答案（常规考研约定）：**
 
 $$
-\boxed{\hat\theta=X_{(1)}=\min\{X_1,\ldots,X_n\}},
+\boxed{\widehat\theta=X_{(1)}=\min(X_1,\ldots,X_n)},
 $$
 
 $$
-\boxed{
-f_{\hat\theta}(t)=\begin{cases}
-0,&t\le\theta,\\2n e^{-2n(t-\theta)},&t>\theta,
-\end{cases}
-\qquad E(\hat\theta)=\theta+\frac1{2n}.}
+\boxed{f_{\widehat\theta}(t)=
+\begin{cases}
+2n e^{-2n(t-\theta)},&t>\theta,\\
+0,&t\le\theta,
+\end{cases}}
+\qquad
+\boxed{E(\widehat\theta)=\theta+\frac1{2n}}.
 $$
-
-**过程：**
 
 <Steps>
-  <Step>
+<Step>
 
-  ### （1）写似然函数并分析参数范围
+  ### 分析似然在参数域内的单调性
 
-  记样本最小值 $x_{(1)}=\min_i x_i$。当 $\theta<x_{(1)}$ 时，
+  记 $x_{(1)}=\min_i x_i$。当 $\theta<x_{(1)}$ 时，
 
-  $$
-  L(\theta)=\prod_{i=1}^n2e^{-2(x_i-\theta)}
-  =2^n\exp\!\left(-2\sum_{i=1}^n x_i+2n\theta\right).
-  $$
 
-  $L(\theta)$ 在允许的区间 $(-\infty,x_{(1)})$ 上严格递增，最优边界是 $\theta\uparrow x_{(1)}$。按教科书采用的端点约定，估计量取 $X_{(1)}$。
 
-  </Step>
-  <Step>
+$$
+L(\theta)=2^n\exp\left(-2\sum_{i=1}^n x_i+2n\theta\right),
+$$
 
-  ### （2）求最小次序统计量的分布
+  因此 $\log L$ 关于 $\theta$ 的导数为 $2n>0$，在可行区间不断增大。最优位置是紧贴观测最小值的参数边界，按常规闭端点约定写为 $\widehat\theta=X_{(1)}$。
 
-  当 $t>\theta$ 时，利用样本独立性，
+</Step>
+<Step>
 
-  $$
-  \begin{aligned}
-  P(X_{(1)}>t)
+  ### 推出估计量的分布
+
+  由于 $X_i-\theta\sim\operatorname{Exp}(2)$ 且独立，对 $t>\theta$，
+
+
+
+$$
+\begin{aligned}
+  P(\widehat\theta>t)
   &=\prod_{i=1}^{n}P(X_i>t)\\
-  &=[e^{-2(t-\theta)}]^n=e^{-2n(t-\theta)}.
+  &=\exp[-2n(t-\theta)].
   \end{aligned}
-  $$
+$$
 
-  故
+  故 $\widehat\theta-\theta\sim\operatorname{Exp}(2n)$，从而密度如上，且 $E(\widehat\theta)=\theta+1/(2n)$。因此该估计量向上偏，偏差为 $1/(2n)$。
 
-  $$
-  F_{\hat\theta}(t)=\begin{cases}
-  0,&t\le\theta,\\
-  1-e^{-2n(t-\theta)},&t>\theta,
-  \end{cases}
-  $$
-
-  对 $t$ 求导即得上述密度。
-
-  </Step>
-  <Step>
-
-  ### 计算期望
-
-  由 $\hat\theta-\theta\sim\operatorname{Exp}(2n)$，直接得到
-
-  $$
-  E(\hat\theta)=\theta+\frac1{2n}.
-  $$
-
-  </Step>
+</Step>
 </Steps>
 
-<Callout type="warn" title="严格的最大似然边界问题">
-
-原题规定 $f(x;\theta)=0$ 当 $x\le\theta$。若逐字按此点值定义似然函数，则 $L(x_{(1)})=0$，且在 $\theta<x_{(1)}$ 上虽有上确界却**不取到最大值**，严格意义下不存在最大化点。考研常规答案 $X_{(1)}$ 是将边界点纳入密度代表元（例如把 $x>\theta$ 改为 $x\ge\theta$）后的最大似然估计，或按上确界意义取值。单点修改不影响总体分布，也不影响（2）的计算。
-
-</Callout>
+<Callout type="warn" title="严格意义下的最大似然边界">题干**明确**规定当 $x\le\theta$ 时密度为零，因此 $L(x_{(1)})=0$，而在 $\theta<x_{(1)}$ 上似然只有上确界、不能取到最大值。若逐字采用该密度代表元，**严格的最大似然估计不存在**。上述 $X_{(1)}$ 是统计教材通常采用的“允许端点”约定或上确界边界估计；调整密度在单个端点处的取值不改变任何概率或后续分布结论，但会改变逐点似然是否达到最大。</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-497447-009" type="essay">
+<Question id="selected-1103-math-497447-009" type="essay" tags="科目:概率论与数理统计, 考点:均匀分布倒数参数估计">
 
 设总体$X$服从$(0,\frac{1}{\theta}]$上的均匀分布，$\theta>0$为未知参数，$X_1,X_2,\cdots,X_n$为来自总体$X$的简单随机样本。求：
 (1) $\theta$的最大似然估计量$\hat{\theta}$；
@@ -930,77 +1020,83 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案**：记 $X_{(n)}=\max(X_1,\ldots,X_n)$，则
 
 $$
- \text{(1) }\hat\theta=\frac1{X_{(n)}};
-$$
-$$
- \text{(2) }F_{\hat\theta}(t)=
+\boxed{\widehat\theta=\frac1{X_{(n)}}},
+\qquad
+\boxed{F_{\widehat\theta}(t)=
 \begin{cases}
 0,&t<\theta,\\
-1-\left(\frac{\theta}{t}\right)^n,&t\ge\theta;
-\end{cases}
-$$
-$$
- \text{(3) }P\{\theta<\hat\theta\le\theta+1\}
-=1-\left(\frac{\theta}{\theta+1}\right)^n.
+1-\left(\dfrac\theta t\right)^n,&t\ge\theta,
+\end{cases}}
 $$
 
-**解析：** 总体密度为
 $$
- f(x;\theta)=\begin{cases}
-\theta,&0<x\le\frac1\theta,\\
-0,&\text{其他}.
-\end{cases}
-$$
-于是样本似然函数为
-$$
- L(\theta)=\theta^nI\left\{X_{(n)}\le\frac1\theta\right\}
-=\theta^nI\left\{\theta\le\frac1{X_{(n)}}\right\}.
-$$
-在允许范围内$L(\theta)$随$\theta$递增，所以
-$$
- \hat\theta=\frac1{X_{(n)}}.
+\boxed{P\{\theta<\widehat\theta\le\theta+1\}
+=1-\left(\frac\theta{\theta+1}\right)^n}.
 $$
 
-由于$0<X_{(n)}\le1/\theta$，故$\hat\theta\ge\theta$。当$t<\theta$时，
+<Steps>
+<Step>
+
+  ### 找出似然的边界极值
+
+  因 $X\sim U(0,1/\theta]$，密度为 $\theta$（位于 $0<x\le1/\theta$ 时）。故
+
+
+
 $$
- F_{\hat\theta}(t)=0.
+L(\theta)=\theta^n\mathbf1_{\{0<x_{(1)},\ \theta\le1/x_{(n)}\}}.
 $$
-当$t\ge\theta$时，
+
+  对已观察到的正样本，在允许区间 $0<\theta\le1/x_{(n)}$ 上似然单调递增，得 $\widehat\theta=1/X_{(n)}$。
+
+</Step>
+<Step>
+
+  ### 用反函数事件求分布函数
+
+  由 $0<X_i\le1/\theta$，$\widehat\theta\ge\theta$。当 $t\ge\theta$，
+
+
+
 $$
 \begin{aligned}
- F_{\hat\theta}(t)
-&=P\left(\frac1{X_{(n)}}\le t\right)\\
-&=P\left(X_{(n)}\ge\frac1t\right)\\
-&=1-P\left(X_{(n)}<\frac1t\right).
-\end{aligned}
+  P(\widehat\theta\le t)
+  &=P(X_{(n)}\ge1/t)\\
+  &=1-P(X_1<1/t,\ldots,X_n<1/t)\\
+  &=1-(\theta/t)^n.
+  \end{aligned}
 $$
-对$0<x\le1/\theta$，总体分布函数为$F_X(x)=\theta x$，故
+
+  当 $t<\theta$ 时该概率为零。
+
+</Step>
+<Step>
+
+  ### 通过分布函数取区间概率
+
+  因 $F_{\widehat\theta}(\theta)=0$，
+
+
+
 $$
- P\left(X_{(n)}<\frac1t\right)
-=\left(\frac\theta t\right)^n.
+P(\theta<\widehat\theta\le\theta+1)
+  =F_{\widehat\theta}(\theta+1)-F_{\widehat\theta}(\theta)
+  =1-\left(\frac\theta{\theta+1}\right)^n.
 $$
-因此
-$$
- F_{\hat\theta}(t)=1-\left(\frac\theta t\right)^n,
-\qquad t\ge\theta.
-$$
-最后，由连续性$P(\hat\theta=\theta)=0$，故
-$$
-\begin{aligned}
- P\{\theta<\hat\theta\le\theta+1\}
-&=F_{\hat\theta}(\theta+1)-F_{\hat\theta}(\theta)\\
-&=1-\left(\frac\theta{\theta+1}\right)^n.
-\end{aligned}
-$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="最大值遇到倒数时先反向不等号">当 $x,t>0$，$1/x\le t$ 等价于 $x\ge1/t$。求变换后的分布函数时先处理不等号的方向与支持集，可避免分段范围出错。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-497447-010" type="essay">
+<Question id="selected-1103-math-497447-010" type="essay" tags="科目:概率论与数理统计, 考点:均匀分布矩估计与MLE">
 
 设总体$X\sim U[\theta_0,\theta_0+\theta]$，其中$\theta_0$是已知常数，$\theta>0$是未知参数，$X_1,X_2,\cdots,X_n$是来自总体$X$的简单随机样本，求：
 (1) $\theta$的矩估计量$\hat{\theta}_1$及$E(\hat{\theta}_1)$；
@@ -1008,215 +1104,227 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案**：记 $X_{(n)}=\max(X_1,\ldots,X_n)$。
 
 $$
- \text{(1) }\hat\theta_1=2(\overline X-\theta_0),\qquad E(\hat\theta_1)=\theta;
-$$
-$$
- \text{(2) }\hat\theta_2=X_{(n)}-\theta_0,
-\qquad E(\hat\theta_2)=\frac{n}{n+1}\theta.
+\boxed{\widehat\theta_1=2(\overline X-\theta_0),\quad E(\widehat\theta_1)=\theta};
 $$
 
-**解析：** 均匀分布$U[\theta_0,\theta_0+\theta]$的均值为
 $$
- E(X)=\theta_0+\frac\theta2.
+\boxed{\widehat\theta_2=X_{(n)}-\theta_0,\quad E(\widehat\theta_2)=\frac n{n+1}\theta}.
 $$
-令$E(X)=\overline X$，得矩估计量
-$$
- \hat\theta_1=2(\overline X-\theta_0).
-$$
-其数学期望为
-$$
- E(\hat\theta_1)
-=2[E(\overline X)-\theta_0]
-=2\left(\theta_0+\frac\theta2-\theta_0\right)=\theta,
-$$
-故$\hat\theta_1$为无偏估计量。
 
-似然函数为
+**思路**：矩估计利用均值；最大似然估计利用样本最大值决定的最短可行区间。
+
+<Tabs items={['矩估计与无偏性','最大似然与偏差']}>
+<Tab value="矩估计与无偏性">
+
+  对 $X\sim U[\theta_0,\theta_0+\theta]$，总体均值为 $E(X)=\theta_0+\theta/2$，一阶矩方程为
+
+
+
 $$
- L(\theta)=\theta^{-n}
-I\{\theta\ge X_{(n)}-\theta_0\}.
+\overline X=\theta_0+\frac{\theta}2.
 $$
-因此
+
+  解得 $\widehat\theta_1=2(\overline X-\theta_0)$。利用 $E(\overline X)=E(X)$，有
+
+
+
 $$
- \hat\theta_2=X_{(n)}-\theta_0.
+E(\widehat\theta_1)=2\left(\theta_0+\frac\theta2-\theta_0\right)=\theta.
 $$
-令
+
+</Tab>
+<Tab value="最大似然与偏差">
+
+  给定样本，联合似然函数为
+
+
+
 $$
- U_i=\frac{X_i-\theta_0}{\theta}\sim U(0,1),
+L(\theta)=\theta^{-n}\mathbf1_{\{\theta\ge x_{(n)}-\theta_0\}},\qquad\theta>0.
 $$
-则
+
+  该函数在可行域内严格递减，因此极大值出现在最小可行参数 $\widehat\theta_2=x_{(n)}-\theta_0$（样本几乎必然使其为正）。
+
+  令 $U_i=(X_i-\theta_0)/\theta\sim U(0,1)$，则
+
+
+
 $$
- \frac{X_{(n)}-\theta_0}{\theta}=U_{(n)}.
+\widehat\theta_2=\theta U_{(n)},\qquad
+  P(U_{(n)}\le u)=u^n\quad(0\le u\le1).
 $$
-而$U_{(n)}$的均值为$\frac{n}{n+1}$，故
-$$
- E(\hat\theta_2)=\theta\frac{n}{n+1}.
-$$
+
+  故 $E(U_{(n)})=n/(n+1)$，即 $E(\widehat\theta_2)=n\theta/(n+1)$，偏差为 $-\theta/(n+1)$。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="矩估计不一定优于最大似然估计">本题矩估计无偏，最大似然估计有向下偏差；但“有偏”本身不能推出均方误差更大。若希望由最大值构造无偏估计，可采用 $\frac{n+1}{n}(X_{(n)}-\theta_0)$。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-497447-014" type="essay">
+<Question id="selected-1103-math-497447-014" type="essay" tags="科目:概率论与数理统计, 考点:联合样本最大似然与方差">
 
 设$X_1,X_2$为来自总体$X\sim U[0,2\theta]$的简单随机样本，$Y_1,Y_2,Y_3$为来自总体$Y\sim U[0,4\theta]$的简单随机样本，且两样本相互独立，其中$\theta(\theta>0)$是未知参数。利用样本$X_1,X_2,Y_1,Y_2,Y_3$，求$\theta$的最大似然估计量$\hat{\theta}$，并求$D(\hat{\theta})$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
- \hat\theta=
-\max\left\{\frac{X_1}{2},\frac{X_2}{2},
-\frac{Y_1}{4},\frac{Y_2}{4},\frac{Y_3}{4}\right\},
-$$
-$$
- D(\hat\theta)=\frac{5\theta^2}{252}.
+\boxed{\widehat\theta=
+\max\left\{\frac{X_1}2,\frac{X_2}2,\frac{Y_1}4,\frac{Y_2}4,\frac{Y_3}4\right\}},
+\qquad
+\boxed{D(\widehat\theta)=\frac{5\theta^2}{252}}.
 $$
 
-**解析：** 联合似然函数为
+<Steps>
+<Step>
+
+  ### 联合似然的可行区间
+
+  由于两组样本相互独立，联合似然为
+
+
+
 $$
- L(\theta)
-=\left(\frac1{2\theta}\right)^2
-\left(\frac1{4\theta}\right)^3
-I\left\{\theta\ge\frac{X_1}{2},\theta\ge\frac{X_2}{2},
-\theta\ge\frac{Y_1}{4},\theta\ge\frac{Y_2}{4},\theta\ge\frac{Y_3}{4}\right\}.
+L(\theta)=(2\theta)^{-2}(4\theta)^{-3}
+  \mathbf1_{\{\theta\ge X_1/2,X_2/2,Y_1/4,Y_2/4,Y_3/4\}}.
 $$
-在满足约束的范围内，$L(\theta)\propto\theta^{-5}$随$\theta$增大而减小，因此
+
+  在可行区间上 $L(\theta)\propto\theta^{-5}$ 严格递减，故应选择满足所有约束的最小 $\theta$，即上述五个标准化观测值中的最大值。
+
+</Step>
+<Step>
+
+  ### 统一标准化为五个独立均匀变量
+
+  令 $U_1=X_1/(2\theta),\ U_2=X_2/(2\theta)$，且 $U_{j+2}=Y_j/(4\theta)$（$j=1,2,3$）。五者独立，且均服从 $U(0,1)$。
+
+  写 $W=\max(U_1,\ldots,U_5)$，则 $\widehat\theta=\theta W$。对 $0\le w\le1$，
+
+
+
 $$
- \hat\theta=
-\max\left\{\frac{X_1}{2},\frac{X_2}{2},
-\frac{Y_1}{4},\frac{Y_2}{4},\frac{Y_3}{4}\right\}.
+P(W\le w)=\prod_{i=1}^{5}P(U_i\le w)=w^5,
+  \qquad f_W(w)=5w^4.
 $$
-令
+
+</Step>
+<Step>
+
+  ### 用一、二阶矩求方差
+
+
+
 $$
- U_1=\frac{X_1}{2\theta},\quad U_2=\frac{X_2}{2\theta},
-\quad V_j=\frac{Y_j}{4\theta},\quad j=1,2,3.
+E(W)=\int_0^1 5w^5\,\mathrm dw=\frac56,\qquad
+  E(W^2)=\int_0^1 5w^6\,\mathrm dw=\frac57.
 $$
-则这5个随机变量相互独立且均服从$U(0,1)$。所以
+
+  因而
+
+
+
 $$
- W=\frac{\hat\theta}{\theta}
+D(\widehat\theta)
+  =\theta^2\left[\frac57-\left(\frac56\right)^2\right]
+  =\frac{5\theta^2}{252}.
 $$
-是5个独立$U(0,1)$随机变量的最大值，分布函数为
-$$
- F_W(w)=w^5,\qquad 0\le w\le1,
-$$
-密度为$f_W(w)=5w^4$。于是
-$$
- E(W)=\frac56,
-\qquad E(W^2)=\frac57.
-$$
-故
-$$
- D(W)=\frac57-\frac{25}{36}=\frac5{252}.
-$$
-因此
-$$
- D(\hat\theta)=\theta^2D(W)=\frac{5\theta^2}{252}.
-$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="多组均匀样本可先统一尺度">两个总体的区间分别为 $(0,2\theta)$ 和 $(0,4\theta)$，虽然直接样本不同分布，除以各自长度系数后可统一成同分布 $U(0,\theta)$，再使用最大次序统计量通式。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-1ad160-014" type="essay">
+<Question id="selected-1103-math-1ad160-014" type="essay" tags="科目:概率论与数理统计, 考点:二项计数截尾与MLE">
 
 设某种电子器件的寿命（以小时计）$ T$ 服从指数分布，概率密度为
 
 $$
- f(t)=\begin{cases}
+f(t)=\begin{cases}
 \lambda e^{-\lambda t},&t>0,\\
 0,&\text{其他},
 \end{cases}
 $$
 
-
 其中 $ \lambda>0$ 未知。现从这批器件中任取 $ n$ 只在时刻 $ t=0$ 时投入独立寿命试验，试验进行到预定时间 $ T_0$ 结束，此时有 $ k\,(0<k<n)$ 只器件失效，试求 $ \lambda$ 的最大似然估计。
 
 <Solution>
 
-**答案：**
+**参考答案：**（只观测截至 $T_0$ 的失效总数 $k$，且 $0<k<n$）
 
 $$
- \hat\lambda_{\mathrm{ML}}
-=\frac1{T_0}\ln\frac{n}{n-k}
-=-\frac1{T_0}\ln\left(1-\frac kn\right).
-$$
-
-**解析：** 本题只给出在截止时刻 $ T_0$ 前失效的器件数 $ k$，因此把每只器件是否在 $ T_0$ 前失效作为观测结果。
-
-单只器件在 $ T_0$ 前失效的概率为
-
-$$
- p=P(T\le T_0)
-=1-e^{-\lambda T_0}.
-$$
-
-未失效的概率为
-
-$$
- 1-p=P(T>T_0)=e^{-\lambda T_0}.
-$$
-
-由独立性，失效器件数 $ K$ 服从二项分布
-
-$$
- K\sim B\left(n,1-e^{-\lambda T_0}\right).
-$$
-
-忽略与 $ \lambda$ 无关的组合数，似然函数为
-
-$$
- L(\lambda)
-\propto
-\left(1-e^{-\lambda T_0}\right)^k
-\left(e^{-\lambda T_0}\right)^{n-k}.
-$$
-
-令
-
-$$
- p=1-e^{-\lambda T_0},
-$$
-
-则二项分布中参数 $ p$ 的最大似然估计为
-
-$$
- \hat p=\frac kn.
-$$
-
-因此
-
-$$
- 1-e^{-\hat\lambda T_0}=\frac kn,
-$$
-
-即
-
-$$
- e^{-\hat\lambda T_0}=1-\frac kn=\frac{n-k}{n}.
-$$
-
-两边取对数，得到
-
-$$
- \hat\lambda_{\mathrm{ML}}
+\boxed{\widehat\lambda_{\mathrm{ML}}
 =-\frac1{T_0}\ln\left(1-\frac kn\right)
-=\frac1{T_0}\ln\frac{n}{n-k}.
+=\frac1{T_0}\ln\frac n{n-k}}.
 $$
 
-若另外记录了每只失效器件的具体失效时刻，则属于Ⅰ型截尾样本，似然函数及估计式会相应包含这些失效时刻；本题按题目给出的观测信息，仅利用失效总数 $ k$。
+<Steps>
+<Step>
+
+  ### 确认实际记录了什么
+
+  题干仅提供“到 $T_0$ 时已有 $k$ 只失效”，没有给每只器件的具体失效时刻。因此每只器件形成一个二值观测：$I_i=\mathbf1_{\{T_i\le T_0\}}$，而
+
+
+
+$$
+p=P(T_i\le T_0)=1-e^{-\lambda T_0}.
+$$
+
+  独立器件的失效计数 $K=\sum_{i=1}^nI_i\sim B(n,p)$。
+
+</Step>
+<Step>
+
+  ### 先对二项概率 $p$ 极大化
+
+
+
+$$
+L(p)\propto p^k(1-p)^{n-k},
+  \qquad \ell(p)=k\ln p+(n-k)\ln(1-p)+C.
+$$
+
+  因 $0<k<n$，求导得到 $k/p-(n-k)/(1-p)=0$，故 $\widehat p=k/n$；二阶导数为负，确保这是唯一极大值。
+
+</Step>
+<Step>
+
+  ### 将概率估计反解为寿命率
+
+  由 $1-e^{-\widehat\lambda T_0}=k/n$，
+
+
+
+$$
+\widehat\lambda=-\frac1{T_0}\ln(1-k/n).
+$$
+
+  当 $T_0>0$、$0<k<n$ 时，此值严格为正且有限，符合参数域。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="失效计数与失效时刻是两种不同观测">若同时知道 $k$ 只器件在 $T_0$ 之前的具体失效时刻 $t_1,\ldots,t_k$，其截尾试验似然会额外包含密度项，对应 $\widehat\lambda=k/[\sum_{i=1}^k t_i+(n-k)T_0]$。不能在“只给 $k$”的题目中擅自使用未观测的 $t_i$。</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点3：离散频数、删失样本及联合模型的似然推断
+## 考点三｜离散频数、截尾寿命与联合模型参数估计
 
-<Question id="selected-1103-classified-1031-math-c06546-010" type="single" points={5} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-c06546-010" type="single" points={5} tags="来源:张宇8套卷, 考点:截断几何分布MLE">
 
 设总体 $X$ 的分布为
 
@@ -1237,50 +1345,61 @@ $$
 
 <Solution>
 
-样本中有 $M$ 个取值为 $r+1$，其余 $n-M$ 个取值属于 $\{1,2,\ldots,r\}$，故
+**参考答案：B（常规内点情形）**。记 $S=\sum_{i=1}^n x_i$，则
 
 $$
-\sum_{i=1}^n x_i=M(r+1)+\sum_{x_i\ne r+1}x_i.
+\boxed{\widehat\theta=\frac{S-n}{S-M}}.
 $$
 
-似然函数为
+<Steps>
+<Step>
+
+  ### 正确处理最后一类截断取值
+
+  $x_i\le r$ 时概率为 $\theta^{x_i-1}(1-\theta)$，而 $x_i=r+1$ 时概率为 $\theta^r$，后者**没有** $(1-\theta)$ 因子。因此
+
+
 
 $$
-L(x_1,\ldots,x_n;\theta)
-=\prod_{i=1}^nP\{X_i=x_i\}
-=\theta^{\sum_{i=1}^n x_i-n}(1-\theta)^{n-M}.
+L(\theta)=\theta^{\sum_i(x_i-1)}(1-\theta)^{n-M}
+  =\theta^{S-n}(1-\theta)^{n-M}.
 $$
 
-于是
+</Step>
+<Step>
+
+  ### 对数似然与驻点
+
+  令 $A=S-n\ge0$、$B=n-M\ge0$，则
+
+
 
 $$
-\ln L
-=\left(\sum_{i=1}^n x_i-n\right)\ln\theta
-+(n-M)\ln(1-\theta).
+\ell(\theta)=A\ln\theta+B\ln(1-\theta),
+  \quad
+  \ell'(\theta)=\frac A\theta-\frac B{1-\theta}.
 $$
 
-令
+  当 $A>0,B>0$，唯一内点解为 $\widehat\theta=A/(A+B)=(S-n)/(S-M)$。又
+
+
 
 $$
-\frac{d\ln L}{d\theta}
-=\frac{\sum_{i=1}^n x_i-n}{\theta}
--\frac{n-M}{1-\theta}=0,
+\ell''(\theta)=-\frac A{\theta^2}-\frac B{(1-\theta)^2}<0,
 $$
 
-得到
+  故为严格最大值点。
 
-$$
-\hat\theta
-=\frac{\sum_{i=1}^n x_i-n}{\sum_{i=1}^n x_i-M}.
-$$
+</Step>
+</Steps>
 
-故选（B）。
+<Callout type="warn" title="题目未写出的边界例外">若 $S=n$（所有样本都取 $1$），则 $L=(1-\theta)^n$ 在开区间 $0<\theta<1$ 内不取到最大值，只在 $\theta\downarrow0$ 趋于上确界；选项 B 公式给出边界 $0$。若 $M=n$（全部取 $r+1$），最大值仅在 $\theta\uparrow1$ 趋近，上式给出 $1$。所以标准选择 B 对通常有内点极值的样本正确，但在题设严格开参数域上并非对每一种可能样本都存在 MLE。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-classified-1031-math-6178b5-022" type="essay" points={12} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-6178b5-022" type="essay" points={12} tags="来源:张宇8套卷, 考点:混合硬币模型及整数MLE">
 
 袋中有 $N$ 枚硬币，其中 $\theta$ 枚是普通硬币，即掷出正面和反面的概率各为 $\dfrac12$，其余的 $N-\theta$ 枚硬币两面都是正面。从袋中随机取一枚硬币，不查看它是何种硬币，连续掷两次，记下所得结果，然后将它放回袋中。记 $X$ 为将一枚硬币连续掷两次正面出现的次数。如此重复 $n$ 次，设记录结果中正面出现 0 次、1 次、2 次的次数分别为 $n_0,n_1,n_2$（$n_0+n_1+n_2=n$）。
 
@@ -1290,117 +1409,87 @@ $$
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：**
 
-**解析：** 设事件 $A$ 表示“取出的硬币是普通硬币”，则
-
-$$
-P(A)=\frac\theta N,
-\qquad
-P(\bar A)=\frac{N-\theta}{N}.
-$$
-
-随机变量 $X$ 表示连续掷两次正面出现的次数，因此
+（1）$X$ 的分布律为
 
 $$
-X\in\{0,1,2\}.
+\boxed{P(X=0)=\frac{\theta}{4N},\quad
+P(X=1)=\frac{\theta}{2N},\quad
+P(X=2)=1-\frac{3\theta}{4N}}.
 $$
 
-#### （1）求 $X$ 的分布律
-
-由全概率公式，
+（2）若先把 $\theta$ 视为连续比例参数，得到候选值
 
 $$
-P\{X=0\}
-=\frac\theta N\cdot\frac12\cdot\frac12
-=\frac\theta{4N},
+\boxed{\widetilde\theta=\frac{4N(n_0+n_1)}{3n}}.
 $$
 
-$$
-P\{X=1\}
-=\frac\theta N\left(\frac12\cdot\frac12+\frac12\cdot\frac12\right)
-=\frac\theta{2N},
-$$
+但题设 $\theta$ 表示**普通硬币的枚数**，应为整数 $\theta\in\{0,1,\ldots,N\}$；严格最大似然估计须在该有限集合内比较似然，**不能直接把非整数 $\widetilde\theta$ 当作硬币枚数**。
+
+<Steps>
+<Step>
+
+  ### 用全概率公式建立三点分布
+
+  每次抽到普通硬币的概率为 $\theta/N$，此时两掷正面数服从 $B(2,1/2)$；抽到双正面硬币的概率为 $1-\theta/N$，此时 $X=2$ 必然发生。因此
+
+
 
 $$
-P\{X=2\}
-=\frac\theta N\cdot\frac12\cdot\frac12
-+\frac{N-\theta}{N}
-=1-\frac{3\theta}{4N}.
+P(X=0)=\frac\theta N\cdot\frac14,\quad
+  P(X=1)=\frac\theta N\cdot\frac12,
 $$
 
-故分布律为
+  且 $P(X=2)=(1-\theta/N)+(\theta/N)/4=1-3\theta/(4N)$。三项相加为 $1$。
+
+</Step>
+<Step>
+
+  ### 将观测次数代入多项分布似然
+
+  令 $m=n_0+n_1$，忽略与 $\theta$ 无关的多项式系数，有
+
+
 
 $$
-\begin{array}{c|ccc}
-X&0&1&2\\ \hline
-P&\dfrac\theta{4N}&\dfrac\theta{2N}&1-\dfrac{3\theta}{4N}
-\end{array}.
+L(\theta)\propto
+  \left(\frac\theta{4N}\right)^{n_0}
+  \left(\frac\theta{2N}\right)^{n_1}
+  \left(1-\frac{3\theta}{4N}\right)^{n_2}
+  \propto\theta^{m}(4N-3\theta)^{n_2}.
 $$
 
-#### （2）求 $\theta$ 的最大似然估计
+  在连续参数放宽下，$\ell'(\theta)=m/\theta-3n_2/(4N-3\theta)$。设导数为零得到 $\widetilde\theta=4Nm/(3n)$。当 $m,n_2>0$，对数似然二阶导数严格为负。
 
-记录中 $X=0,1,2$ 的次数分别为
+</Step>
+<Step>
 
-$$
-n_0,n_1,n_2,
-\qquad
-n_0+n_1+n_2=n.
-$$
+  ### 还原整数约束，确定实际估计值
 
-似然函数为
+  真正允许的是 $0\le\theta\le N$ 的整数。将连续候选值截到 $[0,N]$，再在其相邻整数（或两端点）中比较 $\theta^m(4N-3\theta)^{n_2}$，取较大者；若并列，两者都是最大似然估计值。
 
-$$
-L(\theta)
-=\left(\frac\theta{4N}\right)^{n_0}
-\left(\frac\theta{2N}\right)^{n_1}
-\left(1-\frac{3\theta}{4N}\right)^{n_2}.
-$$
+  更严谨的统一表述为
 
-取对数：
+
 
 $$
-\ln L
-=n_0(\ln\theta-\ln4N)
-+n_1(\ln\theta-\ln2N)
-+n_2[\ln(4N-3\theta)-\ln4N].
+\boxed{\widehat\theta\in\underset{k\in\{0,1,\ldots,N\}}{\operatorname{arg\,max}}
+  k^{n_0+n_1}(4N-3k)^{n_2}}.
 $$
 
-令
+  其中零指数按原始似然含义处理。$m=0$ 时最优为 $0$，$n_2=0$ 时最优为 $N$。
 
-$$
-\frac{d\ln L}{d\theta}
-=\frac{n_0+n_1}{\theta}
--\frac{3n_2}{4N-3\theta}
-=0.
-$$
+</Step>
+</Steps>
 
-得到
-
-$$
-(4N-3\theta)(n_0+n_1)-3n_2\theta=0.
-$$
-
-利用
-
-$$
-n_0+n_1+n_2=n,
-$$
-
-解得
-
-$$
-\boxed{
-\hat\theta
-=\frac{4N(n_0+n_1)}{3n}
-}.
-$$
+<Callout type="warn" title="比例参数与计数参数的根本区别">若题目实际意图是让 $\theta/N$ 代表可连续变化的混合比例，则还要把 $\widetilde\theta$ 截到 $[0,N]$；若按“$\theta$ 枚硬币”逐字理解，则必须取整数并比较似然。这是原解答直接写 $4Nm/(3n)$ 时遗漏的合法性检查。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-classified-1031-math-c5b6ed-022" type="essay" points={12} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-c5b6ed-022" type="essay" points={12} tags="来源:张宇8套卷, 考点:指数寿命右截尾MLE">
 
 某种服务器无故障运行时间 $X$ 服从参数为 $\dfrac1\theta$ 的指数分布。为估计未知参数 $\theta$，现投入 $n$ 个同型号服务器同时运行，并记录故障发生时间。试验进行到 $k$ 个服务器发生故障时停止，$1\le k\le n$。用 $T_i\ (i=1,2,\ldots,k)$ 表示各个服务器发生故障的时间，现观测到 $k$ 个服务器发生故障的时间分别为
 
@@ -1420,107 +1509,79 @@ $$
 
 <Solution>
 
-**答案：** 见解析
-
-**解析：** 因为
+**参考答案：**（1）当第 $k$ 次失效时间为 $t_k$ 时，
 
 $$
-X\sim E\!\left(\frac1\theta\right),
+\boxed{\widehat\theta=\frac1k\left[\sum_{i=1}^kt_i+(n-k)t_k\right]}.
 $$
 
-故其概率密度为
+（2）全部 $n$ 台设备寿命均完整记录时，
 
 $$
-f(x)=
-\begin{cases}
-\displaystyle \frac1\theta e^{-x/\theta},&x>0,\\[4pt]
-0,&x\le0.
-\end{cases}
+\boxed{\widehat\theta_n=\frac1n\sum_{i=1}^nX_i=\overline X,\qquad
+E(\widehat\theta_n)=\theta},
 $$
 
-且
+因此 $\widehat\theta_n$ 是无偏估计量。
+
+<Steps>
+<Step>
+
+  ### 明确第 $k$ 次失效后的观测信息
+
+  给定前 $k$ 次失效时间 $t_1\le\cdots\le t_k$，其余 $n-k$ 台设备在 $t_k$ 时尚未失效，是**右截尾**观测。指数寿命的密度和生存函数分别为
+
+
 
 $$
-P\{X>t_k\}=e^{-t_k/\theta}.
+f(t;\theta)=\theta^{-1}e^{-t/\theta},\qquad
+  P(X>t)=e^{-t/\theta}.
 $$
 
-#### （1）求最大似然估计
+</Step>
+<Step>
 
-观察到 $k$ 台服务器分别在
+  ### 写出包含失效样本与未失效样本的似然
 
-$$
-t_1,t_2,\ldots,t_k
-$$
+  在忽略与 $\theta$ 无关的排列组合常数后，
 
-时刻发生故障，而其余 $n-k$ 台直到 $t_k$ 时仍未故障。因此似然函数可写为
 
-$$
-L(\theta)
-=C_n^k\prod_{i=1}^k f(t_i)
-\left[P\{X>t_k\}\right]^{n-k}.
-$$
-
-代入指数分布密度：
 
 $$
-L(\theta)
-=C_n^k\frac1{\theta^k}
-\exp\left\{-\frac{\sum_{i=1}^kt_i+(n-k)t_k}{\theta}\right\}.
+\begin{aligned}
+  L(\theta)
+  &\propto\prod_{i=1}^k f(t_i;\theta)\,[P(X>t_k)]^{n-k}\\
+  &=\theta^{-k}\exp\left(-\frac{A}{\theta}\right),
+  \end{aligned}
 $$
 
-取对数：
+  其中 $A=\sum_{i=1}^{k}t_i+(n-k)t_k$ 是**所有设备合计的观察暴露时间**：故障设备按故障时刻累计，其余设备按停止时刻累计。
+
+</Step>
+<Step>
+
+  ### 最大化对数似然并检验极值
+
+
 
 $$
-\ln L(\theta)
-=\ln C_n^k-k\ln\theta
--\frac{\sum_{i=1}^kt_i+(n-k)t_k}{\theta}.
+\ell(\theta)=-k\ln\theta-\frac A\theta+C,
+  \qquad\ell'(\theta)=\frac{A-k\theta}{\theta^2}.
 $$
 
-令导数为零：
+  因 $A>0$，导数在 $\theta<A/k$ 时为正、在其后为负，唯一极大值点为 $\widehat\theta=A/k$。
 
-$$
--\frac{k}{\theta}
-+\frac{\sum_{i=1}^kt_i+(n-k)t_k}{\theta^2}=0.
-$$
+</Step>
+<Step>
 
-得到
+  ### 检查全样本情形
 
-$$
-\boxed{
-\hat\theta
-=\frac1k\left[\sum_{i=1}^kt_i+(n-k)t_k\right]
-}.
-$$
+  当 $k=n$ 时，截尾项消失，$A=\sum_{i=1}^nX_i$，故 $\widehat\theta_n=\overline X$。指数分布率为 $1/\theta$，所以每个寿命 $E(X_i)=\theta$，进而 $E(\overline X)=\theta$。
 
-#### （2）判断无偏性
+</Step>
+</Steps>
 
-当 $k=n$ 时，
-
-$$
-\hat\theta_n
-=\frac1n\sum_{i=1}^{n}T_i.
-$$
-
-由于指数分布 $E(1/\theta)$ 的均值为
-
-$$
-EX=\theta,
-$$
-
-故
-
-$$
-E\hat\theta_n
-=E\left(\frac1n\sum_{i=1}^{n}T_i\right)
-=EX
-=\theta.
-$$
-
-因此
-
-$$
-\boxed{\hat\theta_n\text{ 是 }\theta\text{ 的无偏估计量}}.
-$$
+<Callout type="idea" title="类型Ⅱ截尾与类型Ⅰ截尾">“第 $k$ 次失效即停止”是按故障**个数**停止的Ⅱ型截尾；“到固定时间 $T_0$ 停止”是按**时间**停止的Ⅰ型截尾。两者的似然都包含未故障设备的生存函数，但终止时间的随机性不同。</Callout>
 
 </Solution>
 
@@ -1544,69 +1605,74 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
 \boxed{f_T(t)=\begin{cases}n\lambda e^{-n\lambda t},&t>0,\\0,&t\le0,\end{cases}}
-\quad \boxed{a=n},\quad
-\boxed{\widehat\lambda=\frac{n}{\sum_{i=1}^n x_i}=\frac1{\overline x}}.
+\qquad \boxed{a=n},
 $$
 
-**过程：**
+$$
+\boxed{\widehat\lambda_{\mathrm{ML}}=\frac n{\sum_{i=1}^nX_i}=\frac1{\overline X}}.
+$$
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 首次失效时刻的分布
+  ### 求首次失效时刻的生存函数
 
-  $T=\min\{X_1,\ldots,X_n\}$。由独立性，对 $t>0$，
+  $T=\min(X_1,\ldots,X_n)$。若 $t>0$，所有设备均存活到 $t$ 的概率为
 
-  $$
-  P(T>t)=\prod_{i=1}^nP(X_i>t)=(e^{-\lambda t})^n=e^{-n\lambda t}.
-  $$
 
-  因此 $T\sim E(n\lambda)$，求导得到上述密度。
 
-  </Step>
-  <Step>
+$$
+P(T>t)=\prod_{i=1}^nP(X_i>t)
+  =(e^{-\lambda t})^n=e^{-n\lambda t}.
+$$
 
-  ### 无偏估计
+  因此 $T\sim\operatorname{Exp}(n\lambda)$，对其分布函数 $1-e^{-n\lambda t}$ 求导便得题中密度。
 
-  因 $E(T)=1/(n\lambda)$，要使 $E(aT)=1/\lambda$，必须且只需
+</Step>
+<Step>
 
-  $$
-  \frac a{n\lambda}=\frac1\lambda\quad\Longrightarrow\quad\boxed{a=n}.
-  $$
+  ### 求无偏修正系数
 
-  </Step>
-  <Step>
+  率为 $n\lambda$ 的指数变量均值是 $1/(n\lambda)$。因此
 
-  ### 完整样本的最大似然估计
 
-  若全部样本寿命已观测，似然函数及其对数为
 
-  $$
-  L(\lambda)=\lambda^n\exp\!\left(-\lambda\sum_{i=1}^n x_i\right),\qquad
-  \ell(\lambda)=n\ln\lambda-\lambda\sum_{i=1}^n x_i.
-  $$
+$$
+E(aT)=\frac a{n\lambda}=\frac1\lambda
+  \quad\Longleftrightarrow\quad a=n.
+$$
 
-  解似然方程
+  这表明用首次失效时间估计**单台设备平均寿命**时，必须乘以设备数 $n$。
 
-  $$
-  \ell'(\lambda)=\frac n\lambda-\sum_{i=1}^n x_i=0
-  \quad\Longrightarrow\quad
-  \boxed{\widehat\lambda=\frac n{\sum_{i=1}^n x_i}}.
-  $$
+</Step>
+<Step>
 
-  $\ell''(\lambda)=-n/\lambda^2<0$，故这是唯一极大值点（样本和大于 $0$ 几乎必然成立）。
+  ### 用完整寿命样本求率的最大似然估计
 
-  </Step>
+  完整独立样本的似然为
+
+
+
+$$
+L(\lambda)=\lambda^n e^{-\lambda\sum_i x_i},\quad
+  \ell'(\lambda)=\frac n\lambda-\sum_i x_i.
+$$
+
+  令导数为零，得 $\widehat\lambda=n/\sum_i x_i$，而 $\ell''(\lambda)=-n/\lambda^2<0$，故是唯一极大值。
+
+</Step>
 </Steps>
+
+<Callout type="warn" title="区别率与平均寿命">题目三问中，（2）估计的是 $1/\lambda$，（3）估计的是 $\lambda$。最大似然估计 $1/\overline X$ 并不等于“$\lambda$ 的无偏估计”；事实上对 $n>1$，其期望为 $\frac n{n-1}\lambda$。</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-497447-019" type="essay">
+<Question id="selected-1103-math-497447-019" type="essay" tags="科目:概率论与数理统计, 考点:三点分布的估计量均方性质">
 
 设总体$X\sim\begin{pmatrix}0&1&2\\\frac{\theta}{4N}&\frac{\theta}{2N}&\frac{4N-3\theta}{4N}\end{pmatrix}$，其中$N>0$已知，$\theta>0$未知，设$X_1,X_2,\cdots,X_n$是来自总体$X$的简单随机样本，取到0的个数为$n_0$，取到1的个数为$n_1$，取到2的个数为$n_2$，即$n_0+n_1+n_2=n$。
 (1) 求$\theta$的矩估计量$\hat{\theta}_1$和最大似然估计量$\hat{\theta}_2$；
@@ -1615,122 +1681,111 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案**：设 $m=n_0+n_1$，在相容的参数范围 $0<\theta\le4N/3$ 内，
 
 $$
- \text{(1) }\hat\theta_1=N(2-\overline X),
-\qquad
-\hat\theta_2=\frac{4N(n_0+n_1)}{3n};
-$$
-$$
- \text{(2) }E(\hat\theta_1)=E(\hat\theta_2)=\theta;
-$$
-$$
- \text{(3) }D(\hat\theta_1)=\frac{\theta(3N-2\theta)}{2n},
-\qquad
-D(\hat\theta_2)=\frac{\theta(4N-3\theta)}{3n}.
+\boxed{\widehat\theta_1=N(2-\overline X)},\qquad
+\boxed{\widehat\theta_2=\frac{4Nm}{3n}},
 $$
 
-**解析：** 先计算总体均值：
 $$
-\begin{aligned}
- E(X)
-&=\frac{\theta}{2N}+2\cdot\frac{4N-3\theta}{4N}\\
-&=2-\frac\theta N.
-\end{aligned}
-$$
-因此
-$$
- \theta=N[2-E(X)].
-$$
-用$\overline X$代替$E(X)$，得矩估计量
-$$
- \hat\theta_1=N(2-\overline X).
+\boxed{E(\widehat\theta_1)=E(\widehat\theta_2)=\theta},
 $$
 
-样本似然函数为
 $$
- L(\theta)
-=\left(\frac{\theta}{4N}\right)^{n_0}
-\left(\frac{\theta}{2N}\right)^{n_1}
-\left(\frac{4N-3\theta}{4N}\right)^{n_2}.
-$$
-忽略与$\theta$无关的因子，
-$$
- \ln L(\theta)
-=(n_0+n_1)\ln\theta+n_2\ln(4N-3\theta)+C.
-$$
-令导数为0，得
-$$
- \frac{n_0+n_1}{\theta}
--\frac{3n_2}{4N-3\theta}=0.
-$$
-利用$n_0+n_1+n_2=n$，解得
-$$
- \hat\theta_2=\frac{4N(n_0+n_1)}{3n}.
+\boxed{D(\widehat\theta_1)=\frac{\theta(3N-2\theta)}{2n}},\qquad
+\boxed{D(\widehat\theta_2)=\frac{\theta(4N-3\theta)}{3n}}.
 $$
 
-由$E(\overline X)=E(X)$，立即有
+其中 $\widehat\theta_2$ 是常规代数表达式；样本全为 $2$ 时该值为 $0$，若严格限制 $\theta>0$，仅能在 $\theta\downarrow0$ 趋近似然上确界，不能称为开参数域内达到极大值的估计。
+
+<Steps>
+<Step>
+
+  ### 求一阶矩估计
+
+  由题目给定的三点分布，
+
+
+
 $$
- E(\hat\theta_1)=\theta.
-$$
-又$n_0+n_1$表示样本中事件$X\in\{0,1\}$发生的次数，而
-$$
- P\{X\in\{0,1\}\}
-=\frac\theta{4N}+\frac\theta{2N}
-=\frac{3\theta}{4N}.
-$$
-故
-$$
- n_0+n_1\sim B\left(n,\frac{3\theta}{4N}\right),
-$$
-从而
-$$
- E(\hat\theta_2)
-=\frac{4N}{3n}\cdot n\frac{3\theta}{4N}=\theta.
+E(X)=1\cdot\frac\theta{2N}+2\left(1-\frac{3\theta}{4N}\right)
+  =2-\frac\theta N.
 $$
 
-再算方差。先有
+  矩方程 $\overline X=2-\theta/N$ 解得 $\widehat\theta_1=N(2-\overline X)$，并立刻得到 $E(\widehat\theta_1)=\theta$。
+
+</Step>
+<Step>
+
+  ### 求频数形式的似然估计
+
+  设 $m=n_0+n_1$，则
+
+
+
 $$
-\begin{aligned}
- E(X^2)
-&=\frac\theta{2N}+4\cdot\frac{4N-3\theta}{4N}\\
-&=4-\frac{5\theta}{2N}.
-\end{aligned}
+L(\theta)\propto\theta^m(4N-3\theta)^{n-m}.
 $$
-所以
+
+  当 $0<m<n$ 时，$\ell'(\theta)=m/\theta-3(n-m)/(4N-3\theta)=0$，得 $\widehat\theta_2=4Nm/(3n)$；$\ell''<0$ 确认为最大值。
+
+  注意 $m\sim B(n,3\theta/(4N))$，所以 $E(\widehat\theta_2)=(4N/(3n))\cdot n(3\theta/(4N))=\theta$。
+
+</Step>
+<Step>
+
+  ### 求矩估计量的方差
+
+
+
 $$
-\begin{aligned}
- D(X)
-&=E(X^2)-[E(X)]^2\\
-&=4-\frac{5\theta}{2N}-\left(2-\frac\theta N\right)^2\\
-&=\frac{3\theta}{2N}-\frac{\theta^2}{N^2}.
-\end{aligned}
+E(X^2)=\frac\theta{2N}+4\left(1-\frac{3\theta}{4N}\right)
+  =4-\frac{5\theta}{2N},
 $$
-于是
+
+  从而
+
+
+
 $$
-\begin{aligned}
- D(\hat\theta_1)
-&=N^2D(\overline X)\\
-&=\frac{N^2}{n}D(X)\\
-&=\frac{\theta(3N-2\theta)}{2n}.
-\end{aligned}
+D(X)=E(X^2)-[E(X)]^2
+  =\frac{3\theta}{2N}-\frac{\theta^2}{N^2}.
 $$
-而
+
+  因样本独立，$D(\overline X)=D(X)/n$，故
+
+
+
 $$
-\begin{aligned}
- D(\hat\theta_2)
-&=\left(\frac{4N}{3n}\right)^2
-n\frac{3\theta}{4N}\left(1-\frac{3\theta}{4N}\right)\\
-&=\frac{\theta(4N-3\theta)}{3n}.
-\end{aligned}
+D(\widehat\theta_1)=N^2D(\overline X)
+  =\frac{\theta(3N-2\theta)}{2n}.
 $$
+
+</Step>
+<Step>
+
+  ### 求似然形式估计量的方差
+
+
+
+$$
+D(\widehat\theta_2)
+  =\left(\frac{4N}{3n}\right)^2\!n\frac{3\theta}{4N}
+  \left(1-\frac{3\theta}{4N}\right)
+  =\frac{\theta(4N-3\theta)}{3n}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="参数域与边界必须相容">由于 $P(X=2)=1-3\theta/(4N)$，要使三项成为概率分布，须有 $0<\theta\le4N/3$，而不能仅写“$\theta>0$”。当 $m=0$ 时开端点处不存在严格 MLE；若允许 $\theta=0$，则似然估计取 $0$。其余代数表达式作为统计量的期望与方差仍可逐式核验。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-497447-020" type="essay">
+<Question id="selected-1103-math-497447-020" type="essay" tags="科目:概率论与数理统计, 考点:多项分布无偏估计">
 
 设总体$X$的概率分布为
 
@@ -1742,64 +1797,74 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
- a_1=0,\qquad a_2=a_3=\frac1n,
-$$
-$$
- T=\frac{N_2+N_3}{n},
-\qquad D(T)=\frac{\theta(1-\theta)}{n}.
+\boxed{a_1=0,\qquad a_2=a_3=\frac1n},
 $$
 
-**解析：** 由于$(N_1,N_2,N_3)$服从多项分布，
 $$
- E(N_1)=n(1-\theta),
+\boxed{T=\frac{N_2+N_3}{n}},\qquad
+\boxed{D(T)=\frac{\theta(1-\theta)}n}.
 $$
-$$
- E(N_2)=n(\theta-\theta^2),
-\qquad E(N_3)=n\theta^2.
-$$
-故
+
+<Steps>
+<Step>
+
+  ### 把无偏性写成关于参数的恒等式
+
+  根据题目给出的三点分布，$E(N_1)=n(1-\theta)$，$E(N_2)=n(\theta-\theta^2)$，$E(N_3)=n\theta^2$。因此
+
+
+
 $$
 \begin{aligned}
- E(T)
-&=n\left[a_1(1-\theta)+a_2(\theta-\theta^2)+a_3\theta^2\right]\\
-&=na_1+n(-a_1+a_2)\theta+n(-a_2+a_3)\theta^2.
-\end{aligned}
+  E(T)
+  &=n\big[a_1(1-\theta)+a_2(\theta-\theta^2)+a_3\theta^2\big]\\
+  &=na_1+n(a_2-a_1)\theta+n(a_3-a_2)\theta^2.
+  \end{aligned}
 $$
-要求对一切$\theta\in(0,1)$都有$E(T)=\theta$，比较多项式系数得
+
+  该式需对所有 $0<\theta<1$ 恒等于 $\theta$，故分别比较常数项、一次项和二次项系数。
+
+</Step>
+<Step>
+
+  ### 求三个常数
+
+
+
 $$
- na_1=0,
-\qquad n(-a_1+a_2)=1,
-\qquad n(-a_2+a_3)=0.
+na_1=0,\qquad n(a_2-a_1)=1,\qquad n(a_3-a_2)=0.
 $$
-所以
+
+  唯一解为 $a_1=0,\ a_2=a_3=1/n$；于是 $T=(N_2+N_3)/n$。
+
+</Step>
+<Step>
+
+  ### 识别二项分布，直接求方差
+
+  由于 $P(X\ge2)=(\theta-\theta^2)+\theta^2=\theta$，$N_2+N_3$ 等于 $n$ 次独立试验中“$X\ge2$”事件发生的次数，因此
+
+
+
 $$
- a_1=0,
-\qquad a_2=a_3=\frac1n.
+N_2+N_3\sim B(n,\theta),\qquad
+  D(T)=\frac{n\theta(1-\theta)}{n^2}
+  =\frac{\theta(1-\theta)}n.
 $$
-因此
-$$
- T=\frac{N_2+N_3}{n}.
-$$
-注意
-$$
- P\{X=2\text{或}3\}
-=(\theta-\theta^2)+\theta^2=\theta,
-$$
-故$N_2+N_3\sim B(n,\theta)$。于是
-$$
- D(T)
-=\frac1{n^2}n\theta(1-\theta)
-=\frac{\theta(1-\theta)}{n}.
-$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="线性组合先找事件的示性变量">求出 $a_2=a_3$ 后，$N_2+N_3$ 可合并为同一事件的频数，立即变成二项分布。比直接展开多项分布的三个方差和全部协方差简单得多。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-497447-022" type="single">
+<Question id="selected-1103-math-497447-022" type="single" tags="科目:概率论与数理统计, 考点:泊松概率母函数与无偏性">
 
 设总体$X$服从参数为$\lambda(\lambda>0)$的泊松分布，取容量为1的简单随机样本$X_1$，其样本值$x_1=3$，则$e^{-2\lambda}$的无偏估计量与无偏估计值分别为( )
 
@@ -1810,30 +1875,64 @@ $$
 
 <Solution>
 
-若$X_1\sim P(\lambda)$，其概率母函数为
+**参考答案：D。**
+
 $$
- E(t^{X_1})=e^{\lambda(t-1)}.
+\boxed{\text{无偏估计量}=(-1)^{X_1}},\qquad
+\boxed{\text{当 }x_1=3\text{ 时估计值}=-1}.
 $$
-令$t=-1$，得
+
+**关键**：对泊松变量使用概率母函数；无偏估计量可以取负值，即使它所估计的参数函数恒为正。
+
+<Tabs items={['概率母函数法','直接级数法']}>
+<Tab value="概率母函数法">
+
+  若 $X_1\sim P(\lambda)$，其概率母函数为
+
+
+
 $$
- E[(-1)^{X_1}]
-=e^{\lambda(-1-1)}=e^{-2\lambda}.
+G_{X_1}(t)=E(t^{X_1})=e^{\lambda(t-1)}.
 $$
-因此$e^{-2\lambda}$的无偏估计量为
+
+  令 $t=-1$，可得
+
+
+
 $$
- (-1)^{X_1}.
+E[(-1)^{X_1}]=G_{X_1}(-1)=e^{-2\lambda}.
 $$
-当样本观测值$x_1=3$时，其无偏估计值为
+
+  所以统计量 $(-1)^{X_1}$ 对 $e^{-2\lambda}$ 无偏。代入观测 $x_1=3$，得到 $(-1)^3=-1$。
+
+</Tab>
+<Tab value="直接级数法">
+
+  按泊松分布公式，
+
+
+
 $$
- (-1)^3=-1.
+\begin{aligned}
+  E[(-1)^{X_1}]
+  &=\sum_{k=0}^{\infty}(-1)^k\frac{e^{-\lambda}\lambda^k}{k!}\\
+  &=e^{-\lambda}\sum_{k=0}^{\infty}\frac{(-\lambda)^k}{k!}\\
+  &=e^{-\lambda}e^{-\lambda}=e^{-2\lambda}.
+  \end{aligned}
 $$
-故选D。
+
+  该方法从指数函数的泰勒展开直接验证无偏性。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="估计值可在参数函数的值域之外">$e^{-2\lambda}>0$，但 $(-1)^{X_1}$ 在 $\{-1,1\}$ 中取值。无偏性只要求对重复抽样取数学期望后等于目标量，**不要求每一次观测代入的估计值都为正**。因此观测值为 $-1$ 并不矛盾。</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-497447-015" type="essay">
+<Question id="selected-1103-math-497447-015" type="essay" tags="科目:概率论与数理统计, 考点:二维条件模型极大似然与方差">
 
 设$X$服从参数为$\frac{2}{\theta}$的指数分布，在$X=x(x>0)$的条件下，$Y$的条件概率密度为$f_{Y|X}(y|x)=\begin{cases}\frac{1}{\theta}e^{-\frac{y-x}{\theta}},&0<x<y\\0,&\text{其他}\end{cases}$，其中$\theta$为大于0的参数，$(X_1,Y_1),(X_2,Y_2),\cdots,(X_n,Y_n)$是来自总体$(X,Y)$的简单随机样本。
 (1) 求$\theta$的最大似然估计量$\hat{\theta}$；
@@ -1841,72 +1940,102 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
+
+（1）$\displaystyle \boxed{\widehat\theta=\frac1{2n}\sum_{i=1}^n(X_i+Y_i)}$。
+
+（2）$\displaystyle \boxed{D(\widehat\theta)=\frac{\theta^2}{2n}}$。
+
+<Steps>
+<Step>
+
+  ### 第一步：先由条件密度写出联合密度
+
+  指数分布中的参数 $2/\theta$ 是**率参数**，因而
+
+
 
 $$
- \text{(1) }\hat\theta=\frac1{2n}\sum_{i=1}^n(X_i+Y_i);
-$$
-$$
- \text{(2) }D(\hat\theta)=\frac{\theta^2}{2n}.
+f_X(x)=\frac2\theta e^{-2x/\theta},\quad x>0.
 $$
 
-**解析：** 按指数分布“参数”为率参数理解，$X$的密度为
+  题设的 $f_{Y\mid X}(y\mid x)$ 只在 $0<x<y$ 时非零；两式相乘得
+
+
+
 $$
- f_X(x)=\frac2\theta e^{-2x/\theta},\qquad x>0.
-$$
-因此$(X,Y)$的联合密度为
-$$
-\begin{aligned}
- f(x,y)
-&=f_X(x)f_{Y|X}(y|x)\\
-&=\frac{2}{\theta^2}e^{-(x+y)/\theta},
-\qquad 0<x<y.
-\end{aligned}
-$$
-故样本似然函数关于$\theta$的部分为
-$$
- L(\theta)\propto\theta^{-2n}
-\exp\left[-\frac1\theta\sum_{i=1}^n(X_i+Y_i)\right].
-$$
-令对数似然函数导数为0，得
-$$
- \hat\theta=\frac1{2n}\sum_{i=1}^n(X_i+Y_i).
+f_{X,Y}(x,y)=\frac{2}{\theta^2}e^{-(x+y)/\theta},\qquad 0<x<y.
 $$
 
-再令$Z=Y-X$。由条件密度可知，在给定$X=x$时，$Z$的密度为
+  支持集与 $\theta$ 无关，因此可以直接对 $\theta>0$ 求似然极大值。
+
+</Step>
+<Step>
+
+  ### 第二步：最大化对数似然
+
+  记 $A=\sum_{i=1}^n(x_i+y_i)$，对落在联合支持集内的观测样本，
+
+
+
 $$
- f_Z(z)=\frac1\theta e^{-z/\theta},\qquad z>0,
+L(\theta)=2^n\theta^{-2n}e^{-A/\theta},\qquad
+  \ell(\theta)=n\ln2-2n\ln\theta-\frac A\theta.
 $$
-且不依赖于$x$，故$Z$与$X$独立，并且
+
+
+
 $$
- X\sim\operatorname{Exp}\left(\frac2\theta\right),
-\qquad Z\sim\operatorname{Exp}\left(\frac1\theta\right).
+\ell'(\theta)=-\frac{2n}{\theta}+\frac A{\theta^2}
+  =\frac{A-2n\theta}{\theta^2}.
 $$
-于是
+
+  由于 $A>0$，导数在 $\theta=A/(2n)$ 左侧为正、右侧为负，且两端似然均趋于零，所以它是全局唯一极大点，即上面的 $\widehat\theta$。
+
+</Step>
+<Step>
+
+  ### 第三步：构造独立的增量并计算方差
+
+  设 $Z=Y-X$。用变量变换 $(x,y)\mapsto(x,z=y-x)$（雅可比行列式为 $1$），得
+
+
+
 $$
- D(X)=\frac{\theta^2}{4},
-\qquad D(Z)=\theta^2.
+f_{X,Z}(x,z)=\frac2\theta e^{-2x/\theta}\cdot\frac1\theta e^{-z/\theta},\quad x,z>0.
 $$
-由于$Y=X+Z$，有
+
+  密度分解表明 $X$ 与 $Z$ 独立，且 $D(X)=\theta^2/4$、$D(Z)=\theta^2$。由于 $X+Y=2X+Z$，
+
+
+
 $$
- X+Y=2X+Z,
+D(X+Y)=4D(X)+D(Z)=2\theta^2.
 $$
-从而
+
+  各样本对独立，因此
+
+
+
 $$
- D(X+Y)=4D(X)+D(Z)=2\theta^2.
+D(\widehat\theta)=\frac1{4n^2}\sum_{i=1}^nD(X_i+Y_i)
+  =\boxed{\frac{\theta^2}{2n}}.
 $$
-各组样本相互独立，所以
-$$
- D(\hat\theta)
-=\frac{1}{4n^2}\cdot n\cdot2\theta^2
-=\frac{\theta^2}{2n}.
-$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="检验计算是否合理">
+
+$E(X)=\theta/2$、$E(Y-X)=\theta$，故 $E(X+Y)=2\theta$，从而 $E(\widehat\theta)=\theta$。估计量还是无偏的，但**无偏不等于无方差**；不要在计算 $D(X+Y)$ 时误认为 $X$ 与 $Y$ 独立。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-55a512-015" type="essay">
+<Question id="selected-1103-math-55a512-015" type="essay" tags="科目:概率论与数理统计, 考点:泊松模型无偏性与似然不变性">
 
 设总体 $X$ 服从参数为 $\lambda$ 的泊松分布，$(X_1,X_2,\cdots,X_n)$ 是总体 $X$ 的样本，$\overline{X}$ 是样本均值，$S^2$ 是样本方差。
 
@@ -1916,22 +2045,77 @@ $(II)$ 求概率 $P\{X\ge 1\}$ 的最大似然估计量。
 
 <Solution>
 
-**答案：** (I) $T$ 是 $\lambda$ 的无偏估计；(II) $P\{X\ge1\}$ 的最大似然估计量为 $1-e^{-\overline X}$。
+**参考答案：**
 
-**解析：** (I) 对任意具有有限二阶矩的总体，都有 $E\overline{X}=EX$，且按通常定义 $S^2=\frac{1}{n-1}\sum_{i=1}^n(X_i-\overline X)^2$ 时，$E(S^2)=DX$。
-本题 $X\sim P(\lambda)$，故 $E\overline X=\lambda$，$E(S^2)=\lambda$，于是
-$$E[C\overline{X} + (1-C)S^2] = CE\overline{X} + (1-C)E(S^2) = C\lambda + (1-C)\lambda = \lambda,$$
-即 $T$ 是 $\lambda$ 的无偏估计量。
+（I）当 $n\ge2$ 时，对任意 $C\in\mathbb R$，$\boxed{ET=\lambda}$，因此 $T=C\overline X+(1-C)S^2$ 是 $\lambda$ 的无偏估计。
 
-(II) 先求 $\lambda$ 的最大似然估计量。泊松分布的分布律为
-$$P\{X=x\}=\frac{\lambda^x}{x!}e^{-\lambda},\qquad x=0,1,2,\cdots.$$
-似然函数
-$$L(\lambda) = \prod_{i=1}^{n} \frac{\lambda^{x_i}}{x_i!} e^{-\lambda} = \left( \prod_{i=1}^{n} \frac{1}{x_i!} \right) \lambda^{n\overline{x}} \cdot e^{-n\lambda},$$
-取对数, 得
-$$\ln L(\lambda) = \ln \left( \prod_{i=1}^{n} \frac{1}{x_i!} \right) + n\overline{X}\ln\lambda - n\lambda,$$
-对 $\lambda$ 求导, 有
-$$\frac{d\ln L(\lambda)}{d\lambda} = \frac{n\overline{X}}{\lambda} - n = 0 \implies \widehat{\lambda} = \overline{X}$$
-为 $\lambda$ 的最大似然估计量。由于 $P\{X \ge 1\} = 1 - P\{X = 0\} = 1 - e^{-\lambda}$ 是 $\lambda$ 的单调函数, 根据最大似然估计量的不变性, 得 $1 - e^{-\overline{X}}$ 为 $P\{X \ge 1\}$ 的最大似然估计量。
+（II）$\displaystyle \boxed{\widehat{P\{X\ge1\}}=1-e^{-\overline X}}$。
+
+<Steps>
+<Step>
+
+  ### （I）分别计算两个统计量的期望
+
+  对泊松总体 $X\sim P(\lambda)$，其均值与方差相等：
+
+
+
+$$
+EX=DX=\lambda.
+$$
+
+  无偏样本方差的定义为 $S^2=\dfrac1{n-1}\sum_{i=1}^n(X_i-\overline X)^2$。由样本均值与无偏样本方差的基本性质，
+
+
+
+$$
+E\overline X=EX=\lambda,\qquad ES^2=DX=\lambda.
+$$
+
+  因而不论 $C$ 是否落在 $[0,1]$ 内，期望的线性性都给出
+
+
+
+$$
+ET=C\lambda+(1-C)\lambda=\boxed{\lambda}.
+$$
+
+</Step>
+<Step>
+
+  ### （II）先求基本参数的最大似然估计
+
+  设样本观测值为 $x_1,\ldots,x_n$，记 $s=\sum x_i$，则
+
+
+
+$$
+L(\lambda)=\frac{e^{-n\lambda}\lambda^s}{\prod_{i=1}^n x_i!},\quad\lambda\ge0.
+$$
+
+  当 $s>0$ 时，$\ell'(\lambda)=s/\lambda-n$，并且 $\ell''(\lambda)=-s/\lambda^2<0$，所以 $\widehat\lambda=s/n=\overline x$。若 $s=0$，似然 $e^{-n\lambda}$ 在 $\lambda=0$ 处最大，仍得到 $\widehat\lambda=\overline x=0$。
+
+</Step>
+<Step>
+
+  ### （II）使用最大似然估计的不变性
+
+  因 $P\{X\ge1\}=1-P\{X=0\}=1-e^{-\lambda}$，将 $\widehat\lambda$ 代入得到
+
+
+
+$$
+\boxed{\widehat p_{\mathrm{MLE}}=1-e^{-\overline X}}.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="边界与无偏性的区别">
+
+若题目严格限定 $\lambda>0$，且恰好所有观测均为零，则最大值在开放参数域内**不被取到**，只有 $\lambda\downarrow0$ 的似然上确界；常用含零的泊松参数域 $\lambda\ge0$ 时上述最大似然估计总成立。另外，第二问求的是最大似然估计，并不要求 $1-e^{-\overline X}$ 无偏。
+
+</Callout>
 
 </Solution>
 

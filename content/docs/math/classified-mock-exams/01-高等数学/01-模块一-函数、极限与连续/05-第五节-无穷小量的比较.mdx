@@ -1,13 +1,11 @@
 ---
-title: "第五节 无穷小量的比较｜等价判别、复合阶数与积分主项"
-description: "参照真题核心题目无穷小阶次判别，精选小 o 运算、等价关系、复合函数阶数、振荡项及积分型高阶比较。"
+title: "5. 无穷小量的比较"
+description: "13 道无穷小比较题全部重构，系统讲清等价与同阶、小 o 阶数、复合幂指展开、变上限积分及微分方程蕴含的阶数。"
 ---
 
-# 第五节 无穷小量的比较｜等价判别、复合阶数与积分主项
+精选 **13 道题**，本节解析已全部重新编写。按“定义及逻辑判断 → 复合展开和阶数排序 → 变上限积分 → 微分方程与隐含阶数”组织，逐题给出结论、首项推导、常见误区及适用条件。
 
-精选 **13 道题**，对应「真题核心题目」同名小节。按命题考点归类，完整保留原始题干、选项、答案、解析和 MDX 组件。
-
-## 考点1：等价关系、小 o 与极限逻辑
+## 一、等价与高阶无穷小：定义、反例与逻辑判断
 
 <Question id="selected-1103-math-1364b7-009" type="single">
 
@@ -25,17 +23,63 @@ description: "参照真题核心题目无穷小阶次判别，精选小 o 运算
 
 <Solution>
 
-由“$ f$ 是 $ g$ 的高阶无穷小”知 $ f=o(g)$。
+**参考答案：** 选 **B**，正确的结论有 **2 个**，分别是 **(2)、(3)**。
 
-(1) $ f+g\sim g$，一般不是 $ o(f)$，错误；
+**解题思路：** “$f$ 是 $g$ 的高阶无穷小”严格表示 $f=o(g)$，即 $f(x)/g(x)\to0$，同时 $g(x)\to0$。判断每个式子时，直接把它除以右边小 $o$ 所指的比较量，而不是凭表面阶数猜测。
 
-(2) $ \frac{fg}{g^2}=\frac fg\to0$，正确；
+<Steps>
+<Step>
 
-(3) 因 $ g\to0$ 且 $ \ln(1+g)\sim g$，故 $ f=o(\ln(1+g))$，正确；
+### 将题设翻译为极限
 
-(4) 由 $ f=o(g)$ 不能推出 $ f=o(g^2)$，错误。
+$$
+\frac{f(x)}{g(x)}\to0,\qquad g(x)\to0\quad(x\to0).
+$$
 
-所以正确结论有 $ 2$ 个。
+因此 $f$ 也趋于零。以下逐条检验。
+
+</Step>
+<Step>
+
+### 判断 (1) 与 (2)
+
+对于 (1)，若 $f+g=o(f)$，应有
+
+$$
+\frac{f+g}{f}=1+\frac gf\to0,
+$$
+
+但 $f=o(g)$ 意味着 $f/g\to0$，不可能同时让上式为零。故 (1) 错误。对于 (2)，
+
+$$
+\frac{fg}{g^2}=\frac fg\to0,
+$$
+
+所以 $fg=o(g^2)$，(2) 正确。
+
+</Step>
+<Step>
+
+### 判断 (3) 与 (4)
+
+因 $g(x)\to0$，在充分靠近零时有 $1+g(x)>0$，且 $\ln(1+g(x))\sim g(x)$。因此
+
+$$
+\frac{f(x)}{\ln(1+g(x))}
+=\frac{f(x)}{g(x)}\cdot
+\frac{g(x)}{\ln(1+g(x))}\to0,
+$$
+
+故 (3) 正确。对 (4)，仅由 $f=o(g)$ 无法推出 $f=o(g^2)$。例如取 $g(x)=x$、$f(x)=x^2$，满足题设但 $f/g^2\equiv1$，故 (4) 错误。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="高阶不具有任意的平方传递性">
+
+$ f=o(g)$ 与 $f=o(g^2)$ 是不同的要求：后者通常更强，必须另行验证。可以用 $f=x^2,g=x$ 这个极简反例快速排除错误选项。
+
+</Callout>
 
 </Solution>
 
@@ -57,15 +101,53 @@ description: "参照真题核心题目无穷小阶次判别，精选小 o 运算
 
 <Solution>
 
-由 $ \alpha\sim\beta$，有
+**参考答案：** 选 **B**，正确结论是 **③④**。
 
-$ \alpha-\beta=o(\alpha)$，故（3）正确；又 $ \alpha\sim\beta$，所以 $ o(\alpha)=o(\beta)$，故（4）也正确。
+**解题思路：** 等价无穷小 $\alpha\sim\beta$ 表示比值趋于 $1$，不表示两函数逐点相等。本题故意把**严格等式**与**渐近等价或小 $o$ 关系**混在一起。
 
-题设特别说明 $ \alpha$ 与 $ \beta$ 不相等，因此
+<Steps>
+<Step>
 
-$ \alpha+\beta=2\alpha$ 与 $ \alpha+\beta=2\beta$ 作为严格等式均不成立。
+### 由等价关系推导高阶差
 
-故正确的是③④。
+由 $\alpha(x)/\beta(x)\to1$（$x\to0$），得
+
+$$
+\frac{\alpha-\beta}{\beta}=\frac\alpha\beta-1\to0,
+$$
+
+所以 $\alpha-\beta=o(\beta)$，即 ④ 正确。
+
+同样因为 $\beta/\alpha\to1$，
+
+$$
+\frac{\alpha-\beta}{\alpha}=1-\frac\beta\alpha\to0,
+$$
+
+所以 $\alpha-\beta=o(\alpha)$，即 ③ 正确。
+
+</Step>
+<Step>
+
+### 排除把近似当成恒等的选项
+
+如果 ① 严格成立，便有 $\alpha+\beta=2\alpha$，即 $\beta=\alpha$，与题设“不相等”冲突；② 同理不成立。取具体例子 $\alpha(x)=x$、$\beta(x)=x+x^2$，则 $\alpha\sim\beta$，但
+
+$$
+\alpha+\beta=2x+x^2\ne2x,\qquad
+\alpha+\beta\ne2(x+x^2).
+$$
+
+因此正确序号只有 ③④。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="准确区分三种写法">
+
+$\alpha\sim\beta$ 意味着 $\alpha-\beta=o(\alpha)=o(\beta)$（这里的两个 $o$ 记号表示相同的渐近阶类），还可以写 $\alpha+\beta\sim2\alpha\sim2\beta$；但不能把其中的“$\sim$”直接改为“$=$”。
+
+</Callout>
 
 </Solution>
 
@@ -82,33 +164,65 @@ $ \alpha+\beta=2\alpha$ 与 $ \alpha+\beta=2\beta$ 作为严格等式均不成�
 
 <Solution>
 
-由展开式
+**参考答案：** 选 **D**，它是 $1/n$ 的**同阶但非等价无穷小**。
+
+关键比值为
+
 $$
- n\ln\left(1+\frac1n\right)
-=1-\frac1{2n}+O\left(\frac1{n^2}\right),
+\boxed{\lim_{n\to\infty}
+\frac{(1+1/n)^n-e}{1/n}=-\frac e2\ne1}.
 $$
-得
+
+**解题思路：** $ (1+1/n)^n\to e$，分子虽趋于零，但必须多算一阶误差才能知道与 $1/n$ 的关系。
+
+<Steps>
+<Step>
+
+### 对幂指表达式取对数
+
+利用 $\ln(1+t)=t-t^2/2+O(t^3)$，
+
 $$
- \left(1+\frac1n\right)^n
-=e\left[1-\frac1{2n}+O\left(\frac1{n^2}\right)\right].
+n\ln\left(1+\frac1n\right)
+=1-\frac1{2n}+O\left(\frac1{n^2}\right).
 $$
-所以
+
+</Step>
+<Step>
+
+### 将对数修正还原为函数值修正
+
 $$
- \left(1+\frac1n\right)^n-e
-=-\frac{e}{2n}+O\left(\frac1{n^2}\right),
+\begin{aligned}
+\left(1+\frac1n\right)^n
+&=e\exp\left(-\frac1{2n}+O(n^{-2})\right)\\
+&=e\left(1-\frac1{2n}+O(n^{-2})\right).
+\end{aligned}
 $$
-并且
+
+于是
+
 $$
- \lim_{n\to\infty}
-\frac{(1+1/n)^n-e}{1/n}=-\frac e2.
+\left(1+\frac1n\right)^n-e
+=-\frac{e}{2n}+O(n^{-2}).
 $$
-比值为非零有限常数但不等于 $ 1$，故二者同阶但不等价。
+
+除以 $1/n$ 并取极限，得到 $-e/2$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="同阶与等价并非同一概念">
+
+两个无穷小之比趋于**任意非零有限常数**时称同阶；只有比值趋于 **1** 才称等价。本题极限为 $-e/2$，说明它们同阶，但不能称为等价无穷小。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：复合函数、幂指表达式与阶数排序
+## 二、复合与幂指无穷小：局部主项及阶数排序
 
 <Question id="selected-1103-classified-1031-tangjiafeng-2027-s1-q01" type="single" points={5} tags="来源:汤家凤八套卷, 考点:无穷小阶数与泰勒展开, 难度:中等" number={1}>
 
@@ -129,63 +243,99 @@ $$
 
 <Solution>
 
-**答案：A，$\boxed{\gamma,\alpha,\beta}$。**
+**参考答案：** 选 **A**，三个无穷小的阶数由低到高为
 
-**过程**：分别找出首个非零泰勒项。
+$$
+\boxed{\gamma\;(2\text{ 阶})\;<\;\alpha\;(3\text{ 阶})\;<\;\beta\;(4\text{ 阶})}.
+$$
+
+**解题思路：** 不能仅看函数形式复杂程度，必须找到每个表达式关于 $x$ 的**首个非零项**。其中 $\beta$ 是两个幂指函数之差，尤其要先转为指数函数后比较指数差。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 计算 $\alpha$ 的阶数
+### 判断 $\gamma$ 的阶数
 
-  注意 $\ln(x+\sqrt{1+x^2})=\operatorname{arsinh}x$，因此
+有
 
-  $$
-  \begin{aligned}
-  \ln(x+\sqrt{1+x^2})&=x-\frac{x^3}{6}+O(x^5),\\
-  \tan x&=x+\frac{x^3}{3}+O(x^5).
-  \end{aligned}
-  $$
+$$
+\gamma=\sqrt{\cos x}-1
+=\frac{\cos x-1}{\sqrt{\cos x}+1}
+\sim-\frac{x^2}{4}.
+$$
 
-  相减得 $\alpha=-\frac12x^3+O(x^5)$，即三阶无穷小。
+所以 $\gamma$ 是二阶无穷小。
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### 计算 $\beta$ 的阶数
+### 判断 $\alpha$ 的阶数
 
-  写成指数差：
+由于 $\ln(x+\sqrt{1+x^2})=\operatorname{arsinh}x$，
 
-  $$
-  \beta=e^{x\ln\cos x}-e^{\ln(1+x)\ln\cos x}.
-  $$
+$$
+\begin{aligned}
+\ln(x+\sqrt{1+x^2})&=x-\frac{x^3}{6}+O(x^5),\\
+\tan x&=x+\frac{x^3}{3}+O(x^5).
+\end{aligned}
+$$
 
-  因 $x-\ln(1+x)=\frac12x^2+O(x^3)$，且 $\ln\cos x=-\frac12x^2+O(x^4)$，由指数函数的差分公式
+两式相减得到
 
-  $$
-  \beta=e^{\ln(1+x)\ln\cos x}
-  \big(e^{[x-\ln(1+x)]\ln\cos x}-1\big)
-  \sim-\frac14x^4.
-  $$
+$$
+\alpha=-\frac{x^3}{2}+O(x^5)\sim-\frac{x^3}{2},
+$$
 
-  因此 $\beta$ 为四阶无穷小。
+故 $\alpha$ 为三阶无穷小。
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### 计算 $\gamma$ 并排序
+### 判断 $\beta$ 的阶数
 
-  有
+当 $x$ 足够接近零时 $\cos x>0$。记 $L(x)=\ln\cos x$，则
 
-  $$
-  \gamma=\frac{\cos x-1}{\sqrt{\cos x}+1}
-  \sim-\frac14x^2.
-  $$
+$$
+\beta=e^{xL(x)}-e^{\ln(1+x)L(x)}.
+$$
 
-  所以 $\gamma$ 为二阶、$\alpha$ 为三阶、$\beta$ 为四阶；由低到高为 $\gamma,\alpha,\beta$。
+两指数之差为
 
-  </Step>
+$$
+[x-\ln(1+x)]L(x)
+=\left(\frac{x^2}{2}+O(x^3)\right)
+\left(-\frac{x^2}{2}+O(x^4)\right)
+=-\frac{x^4}{4}+o(x^4).
+$$
+
+又 $\ln(1+x)L(x)\to0$，故
+
+$$
+\begin{aligned}
+\beta&=e^{\ln(1+x)L(x)}
+\left(e^{[x-\ln(1+x)]L(x)}-1\right)\\
+&\sim-\frac{x^4}{4}.
+\end{aligned}
+$$
+
+因此 $\beta$ 是四阶无穷小，最后排序为 $\gamma,\alpha,\beta$。
+
+</Step>
 </Steps>
+
+<Callout type="idea" title="幂指差先化指数差">
+
+对于 $a(x)^{u(x)}-a(x)^{v(x)}$（$a(x)>0$），使用
+
+$$
+a(x)^{u(x)}-a(x)^{v(x)}
+=e^{v(x)\ln a(x)}
+\bigl(e^{(u(x)-v(x))\ln a(x)}-1\bigr).
+$$
+
+这样能把复杂差式的阶数归结为 $(u-v)\ln a$ 的阶数。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -201,15 +351,51 @@ $$
 
 <Solution>
 
-当 $ x\to0$ 时，
+**参考答案：C．同阶但非等价无穷小。** 两式之比趋于 $\dfrac{3e}{2}\ne1$。
 
-$ e-e^{\cos x}=e\bigl(1-e^{\cos x-1}\bigr)\sim \frac e2x^2$，
+**解题思路**：先把两个表达式分别化为 $x^2$ 的非零常数倍，再根据比值判断。阶数相同只保证比值趋于非零有限常数；要“等价”，该常数必须恰好为 $1$。
 
-而
+<Steps>
+<Step>
 
-$ \sqrt[3]{1+x^2}-1\sim\frac13x^2$。
+### 求分子的首项
 
-两者之比趋于 $ \frac{3e}{2}\ne1$，所以二者同阶但不等价。
+利用 $\cos x-1=-\dfrac{x^2}{2}+O(x^4)$ 以及 $e^u-1\sim u$（$u\to0$），有
+
+$$
+\begin{aligned}
+e-e^{\cos x}
+&=e\left[1-e^{\cos x-1}\right]\\
+&\sim-e(\cos x-1)\sim\frac e2x^2.
+\end{aligned}
+$$
+
+</Step>
+<Step>
+
+### 求分母的首项并比较
+
+对 $u=x^2$ 使用 $(1+u)^{1/3}-1\sim\dfrac{u}{3}$，得到
+
+$$
+\sqrt[3]{1+x^2}-1\sim\frac13x^2.
+$$
+
+所以
+
+$$
+\lim_{x\to0}\frac{e-e^{\cos x}}{\sqrt[3]{1+x^2}-1}
+=\frac{e/2}{1/3}=\frac{3e}{2}\ne1.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="判别模板">
+
+若 $f(x)\sim A x^m$、$g(x)\sim Bx^m$ 且 $AB\ne0$，则 $f/g\to A/B$：比值为 $1$ 才等价，非零且不为 $1$ 时仅同阶。指数外的常数 $e$ 不可漏掉。
+
+</Callout>
 
 </Solution>
 
@@ -226,19 +412,58 @@ $ \sqrt[3]{1+x^2}-1\sim\frac13x^2$。
 
 <Solution>
 
-设
+**参考答案：D．同阶但非等价无穷小。** 两式之比趋于 $\dfrac29$。
 
-$ A=(3+2\tan x)^x,\qquad B=3^x$。
+**解题思路**：幂指数同时含有 $x$ 时，先提取 $3^x$，再对差指数使用 $e^u-1\sim u$；振荡项 $x^3\cos(1/x)$ 只需估阶，不必求振荡函数本身的极限。
 
-则
+<Steps>
+<Step>
 
-$ A-B=3^x\left\{\exp\left[x\ln\left(1+\frac23\tan x\right)\right]-1\right\}\sim\frac23x^2$。
+### 化简幂指之差
 
-另一方面
+令 $u(x)=x\ln\left(1+\dfrac23\tan x\right)$。当 $x\to0$ 时，
 
-$ 3\sin^2x+x^3\cos\frac1x=3x^2+o(x^2)$。
+$$
+u(x)\sim x\cdot\frac23\tan x\sim\frac23x^2.
+$$
 
-两者之比趋于 $ \frac29\ne1$，所以同阶但不等价。
+因此
+
+$$
+\begin{aligned}
+(3+2\tan x)^x-3^x
+&=3^x\left[e^{u(x)}-1\right]\\
+&\sim1\cdot u(x)\sim\frac23x^2.
+\end{aligned}
+$$
+
+这里在 $x$ 足够接近 $0$ 时，$3+2\tan x>0$，幂指表达式有意义。
+
+</Step>
+<Step>
+
+### 处理含振荡因子的比较式
+
+由 $\sin^2x=x^2+o(x^2)$ 且 $|x^3\cos(1/x)|\le|x|^3=o(x^2)$，可得
+
+$$
+3\sin^2x+x^3\cos\frac1x=3x^2+o(x^2).
+$$
+
+于是原两式的比值趋于
+
+$$
+\frac{2/3}{3}=\frac29\ne1.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="振荡项不能直接替换成零">
+
+$\cos(1/x)$ 在 $x\to0$ 时没有极限，但它有界，因此 $x^3\cos(1/x)=o(x^2)$。判别阶数靠的是这一估计，而非认为 $\cos(1/x)\to0$。
+
+</Callout>
 
 </Solution>
 
@@ -259,14 +484,58 @@ $\alpha(x) = \tan x - \sin x, \beta(x) = \sqrt{1 + x^2} - \sqrt{1 - x^2}, \gamma
 
 <Solution>
 
-**解析**：当 $x\to 0$ 时,
-$$\beta(x)=\sqrt{1+x^2}-\sqrt{1-x^2}=\frac{2x^2}{\sqrt{1+x^2}+\sqrt{1-x^2}}\sim x^2,$$
+**参考答案：D．$\beta(x),\alpha(x),\gamma(x)$。** 三者分别为二阶、三阶、四阶无穷小。
 
-$$\alpha(x) = \tan x - \sin x = (1 - \cos x)\tan x \sim \frac{x^3}{2},$$
+**解题思路**：不要用“数值大小”代替“无穷小阶数”。对 $x\to0$，$|x|^2$ 衰减最慢（阶数最低），$|x|^4$ 衰减最快（阶数最高）。逐式找第一个非零主项即可。
 
-$$\begin{aligned} \gamma(x) &= \int_0^{1-\cos x} \sin t \, dt = -\cos t \Big|_0^{1-\cos x} \\ &= 1 - \cos(1 - \cos x) \sim \frac{(1 - \cos x)^2}{2} \sim \frac{x^4}{8}, \end{aligned}$$
+<Steps>
+<Step>
 
-故选项 D 正确。
+### $\beta(x)$：根式有理化，得到二阶
+
+$$
+\begin{aligned}
+\beta(x)
+&=\frac{(1+x^2)-(1-x^2)}{\sqrt{1+x^2}+\sqrt{1-x^2}}\\
+&=\frac{2x^2}{\sqrt{1+x^2}+\sqrt{1-x^2}}\sim x^2.
+\end{aligned}
+$$
+
+</Step>
+<Step>
+
+### $\alpha(x)$：提取 $1-\cos x$，得到三阶
+
+$$
+\begin{aligned}
+\alpha(x)&=\tan x-\sin x\\
+&=\tan x(1-\cos x)
+\sim x\cdot\frac{x^2}{2}=\frac12x^3.
+\end{aligned}
+$$
+
+</Step>
+<Step>
+
+### $\gamma(x)$：先积分，再展开复合函数
+
+令 $u=1-\cos x\sim x^2/2$，则
+
+$$
+\gamma(x)=\int_0^{u}\sin t\,\mathrm dt=1-\cos u
+\sim\frac{u^2}{2}\sim\frac{x^4}{8}.
+$$
+
+因此阶数由低到高为 $2<3<4$，对应 $\beta,\alpha,\gamma$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="复合阶数相乘">
+
+若 $u(x)\sim c x^p$，且 $1-\cos u\sim u^2/2$，则 $1-\cos u(x)\sim c^2x^{2p}/2$。本题积分上限本身就是二阶小量，因此最后出现四阶。
+
+</Callout>
 
 </Solution>
 
@@ -283,12 +552,71 @@ $$\begin{aligned} \gamma(x) &= \int_0^{1-\cos x} \sin t \, dt = -\cos t \Big|_0^
 
 <Solution>
 
-**解析：**
-$$\lim_{x \to 0} \frac{(1+x)^{\frac{2}{x}} - e^2[1 - \ln(1+x)]}{x}$$
+**参考答案：C．高阶无穷小。** 更精确地，题给表达式满足
 
-$$\begin{aligned} &= \lim_{x \to 0} \frac{e^{\frac{2}{x}\ln(1+x)} - e^2[1 - \ln(1+x)]}{x} = \lim_{x \to 0} \frac{e^{\frac{2}{x}\ln(1+x)} - e^2 + e^2\ln(1+x)}{x} \\ &= \lim_{x \to 0} \frac{e^{\frac{2}{x}\ln(1+x)} - e^2}{x} + e^2 = \lim_{x \to 0} e^2 \frac{e^{\frac{2}{x}\ln(1+x)-2} - 1}{x} + e^2 \\ &= e^2 \lim_{x \to 0} \frac{\frac{2}{x}\ln(1+x) - 2}{x} + e^2 = 2e^2 \lim_{x \to 0} \frac{\ln(1+x) - x}{x^2} + e^2 \\ &= 2e^2 \lim_{x \to 0} \frac{\frac{1}{1+x} - 1}{2x} + e^2 = -e^2 + e^2 = 0. \end{aligned}$$
+$$
+(1+x)^{2/x}-e^2[1-\ln(1+x)]\sim\frac{2e^2}{3}x^2.
+$$
 
-选项 C 正确。
+**解题思路**：题目比较的是该表达式与 $x$ 的阶数。由于两个部分的一阶项恰好抵消，仅展开到一次项不够，需要算到二次项。
+
+<Steps>
+<Step>
+
+### 先将变指数改写成指数函数
+
+在 $|x|<1$ 且 $x\ne0$ 时，设
+
+$$
+\delta(x)=\frac{2\ln(1+x)}x-2.
+$$
+
+由 $\ln(1+x)=x-\dfrac{x^2}{2}+\dfrac{x^3}{3}+O(x^4)$，
+
+$$
+\delta(x)=-x+\frac23x^2+O(x^3).
+$$
+
+因此
+
+$$
+(1+x)^{2/x}=e^2e^{\delta(x)}.
+$$
+
+</Step>
+<Step>
+
+### 展开到二阶，识别消去项
+
+$$
+\begin{aligned}
+e^{\delta(x)}
+&=1+\delta(x)+\frac{\delta(x)^2}{2}+O(x^3)\\
+&=1-x+\frac76x^2+O(x^3),\\
+1-\ln(1+x)&=1-x+\frac12x^2+O(x^3).
+\end{aligned}
+$$
+
+相减得
+
+$$
+\begin{aligned}
+&(1+x)^{2/x}-e^2[1-\ln(1+x)]\\
+&\quad=e^2\left(\frac76-\frac12\right)x^2+O(x^3)
+=\frac{2e^2}{3}x^2+O(x^3).
+\end{aligned}
+$$
+
+故它与 $x^2$ 同阶，却是 $x$ 的高阶无穷小。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="为什么不能只求原式的极限">
+
+原式趋于零并不能判断相对 $x$ 的阶数；必须求 $\lim_{x\to0}F(x)/x$，或直接像本题一样确定首个非零项。
+
+</Callout>
 
 </Solution>
 
@@ -305,21 +633,62 @@ $$\begin{aligned} &= \lim_{x \to 0} \frac{e^{\frac{2}{x}\ln(1+x)} - e^2[1 - \ln(
 
 <Solution>
 
-因为
+**参考答案：A．$a=\dfrac16,\ b=3$。**
 
-$ \ln\left(x+\sqrt{1+x^2}\right)=\operatorname{arsinh}x=x-\frac16x^3+O(x^5)$，
+**解题思路：**$\ln(x+\sqrt{1+x^2})$ 是反双曲正弦函数 $\operatorname{arsinh}x$。由于它的一次项为 $x$，与前面的 $x$ 相减后，一次项消失，首项来自三次项。
 
-所以
+<Tabs items={['直接求导与泰勒展开', '积分主项法']} defaultIndex={0}>
+<Tab value="直接求导与泰勒展开">
 
-$ x-\ln\left(x+\sqrt{1+x^2}\right)\sim\frac16x^3$。
+令 $h(x)=\ln(x+\sqrt{1+x^2})$。直接求导可得
 
-故 $ a=\frac16,\ b=3$。
+$$
+h'(x)=\frac1{\sqrt{1+x^2}}
+=1-\frac{x^2}{2}+O(x^4).
+$$
+
+又 $h(0)=0$，积分或由泰勒定理得
+
+$$
+h(x)=x-\frac{x^3}{6}+O(x^5).
+$$
+
+故
+
+$$
+x-h(x)=\frac{x^3}{6}+O(x^5)\sim\frac16x^3.
+$$
+
+</Tab>
+<Tab value="积分主项法">
+
+利用 $h(0)=0$ 与 $h'(t)=(1+t^2)^{-1/2}$，将差写为
+
+$$
+\begin{aligned}
+x-h(x)
+&=\int_0^x\left[1-\frac1{\sqrt{1+t^2}}\right]\mathrm dt\\
+&=\int_0^x\left(\frac{t^2}{2}+O(t^4)\right)\mathrm dt\\
+&=\frac{x^3}{6}+O(x^5).
+\end{aligned}
+$$
+
+这一方法不需要背诵反双曲函数的展开式。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="遇到对数与根式的组合">
+
+$\ln(x+\sqrt{1+x^2})$ 的导数特别简单；把表达式转成导数或积分，通常比直接多层展开对数更稳妥。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点3：积分型无穷小的主阶识别
+## 三、变上限积分：上限阶数与被积函数主项
 
 <Question id="selected-1103-math-1364b7-032" type="single">
 
@@ -332,23 +701,56 @@ $ x-\ln\left(x+\sqrt{1+x^2}\right)\sim\frac16x^3$。
 
 <Solution>
 
-由
+**参考答案：D．$\displaystyle(a,b)=\left(-\frac1{12},6\right)$。**
 
-$ \cos t^2=1-\frac12t^4+o(t^4)$，
+**解题思路**：两个指数项在 $t=0$ 处有共同的主要部分 $e^t$，应先提取 $e^t$ 后求指数差的主项；积分再使无穷小的阶数增加 $1$。
 
-得
+<Steps>
+<Step>
 
-$ t\cos t^2=t-\frac12t^5+o(t^5)$。
+### 确定指数的第一处差异
+
+$$
+\cos(t^2)=1-\frac{t^4}{2}+O(t^8),
+\qquad t\cos(t^2)=t-\frac{t^5}{2}+O(t^9).
+$$
 
 故
 
-$ e^{t\cos t^2}-e^t=e^t\left(e^{-t^5/2+o(t^5)}-1\right)\sim-\frac12t^5$。
+$$
+\Delta(t)=t[\cos(t^2)-1]=-\frac{t^5}{2}+O(t^9).
+$$
 
-积分得
+</Step>
+<Step>
 
-$ \int_0^x(e^{t\cos t^2}-e^t)dt\sim-\frac1{12}x^6$，
+### 提取公共指数，计算积分
 
-所以 $ (a,b)=\left(-\frac1{12},6\right)$。
+$$
+\begin{aligned}
+e^{t\cos(t^2)}-e^t
+&=e^t\left(e^{\Delta(t)}-1\right)\\
+&=-\frac12t^5+o(t^5).
+\end{aligned}
+$$
+
+再逐项积分，得到
+
+$$
+\int_0^x\left(e^{t\cos(t^2)}-e^t\right)\mathrm dt
+=-\frac1{12}x^6+o(x^6).
+$$
+
+从而 $a=-1/12$、$b=6$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="积分的符号与阶数">
+
+$\int_0^x t^5\,\mathrm dt=x^6/6$ 对 $x<0$ 也成立，不能把双侧积分误写成 $-|x|^6/6$；本题首项系数为负。
+
+</Callout>
 
 </Solution>
 
@@ -365,25 +767,40 @@ $ \int_0^x(e^{t\cos t^2}-e^t)dt\sim-\frac1{12}x^6$，
 
 <Solution>
 
-分别求主阶：
+**参考答案：D．$\displaystyle\int_0^{x-\tan x}\arctan t\,\mathrm dt$。** 四个选项分别是一阶、二阶、一阶、六阶无穷小。
 
-A：被积函数趋于 $ e^2$，故为一阶无穷小；
+**解题思路**：对变上限积分 $\int_0^{u(x)}f(t)\,\mathrm dt$，先看 $f(t)$ 在零点的首项，再看上限 $u(x)$ 的阶数。最后比较 $x$ 的指数，指数越大，阶数越高。
 
-B：被积函数趋于 $ 1$，上限 $ \ln(1+x^2)\sim x^2$，故为二阶；
+| 选项 | 被积函数与上限的主要部分 | 积分的等价主项 | 阶数 |
+| --- | --- | --- | --- |
+| A | $(1+t)^{2/t}\to e^2$；$\sin x\sim x$ | $e^2x$ | $1$ |
+| B | $\sqrt{\cos^3t}\to1$；$\ln(1+x^2)\sim x^2$ | $x^2$ | $2$ |
+| C | $e^{\cos t}-e^{\sin t}\to e-1$ | $(e-1)x$ | $1$ |
+| D | $\arctan t\sim t$；$x-\tan x\sim-x^3/3$ | $x^6/18$ | $6$ |
 
-C：被积函数在 $ t=0$ 的值为 $ e-1\ne0$，故为一阶；
+对于 D，设 $u(x)=x-\tan x$，由 $\arctan t=t+O(t^3)$ 得
 
-D：$ x-\tan x\sim-\frac13x^3$，且 $ \arctan t\sim t$，故
+$$
+\begin{aligned}
+\int_0^{u(x)}\arctan t\,\mathrm dt
+&=\frac{u(x)^2}{2}+O(u(x)^4)\\
+&\sim\frac12\left(-\frac{x^3}{3}\right)^2=\frac{x^6}{18}.
+\end{aligned}
+$$
 
-$ \int_0^{x-\tan x}\arctan tdt\sim\frac12(x-\tan x)^2\sim\frac1{18}x^6$。
+因此 D 比其他三项衰减得快，是最高阶。
 
-因此 D 阶数最高。
+<Callout type="idea" title="变上限积分的通法">
+
+若 $f(t)\sim c t^m$（$m$ 为非负整数、$c\ne0$），且 $u(x)\to0$，则 $\int_0^{u(x)}f(t)\,\mathrm dt\sim\dfrac{c}{m+1}[u(x)]^{m+1}$。注意代入的是上限的整体，不能漏掉平方或幂次。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点4：高阶无穷小的隐含结构
+## 四、隐藏阶数：微分方程初值与高阶相消
 
 <Question id="selected-1103-math-0ed1ba-025" type="single">
 
@@ -396,14 +813,50 @@ $ \int_0^{x-\tan x}\arctan tdt\sim\frac12(x-\tan x)^2\sim\frac1{18}x^6$。
 
 <Solution>
 
-**解析：** 依题设, 有
+**参考答案：D．$\displaystyle\ln\sqrt{1+x^2}$。**
 
-$$\lim_{x \to 0} y(x) = y(0) = 0, \quad \lim_{x \to 0} y'(x) = y'(0) = 0,$$
-$$\lim_{x \to 0} y''(x) = \lim_{x \to 0} [e^{3x} - 2y'(x) - y(x)] = 1,$$
+**解题思路**：本题不必先求解二阶微分方程。题目只要求 $y(x)$ 在 $x=0$ 附近的首个非零泰勒项；由初值和方程可直接得到 $y''(0)=1$。
 
-$$\begin{aligned} \text{故 } \lim_{x \to 0} \frac{\ln\sqrt{1+x^2}}{y(x)} &= \lim_{x \to 0} \frac{\frac{1}{2}\ln(1+x^2)}{y(x)} = \lim_{x \to 0} \frac{1}{2} \frac{x^2}{y(x)} \\ &= \frac{1}{2} \lim_{x \to 0} \frac{2x}{y'(x)} = \frac{1}{2} \lim_{x \to 0} \frac{2}{y''(x)} = \frac{1}{2} \times 2 = 1. \end{aligned}$$
+<Steps>
+<Step>
 
-选项 D 正确。
+### 由初值与方程求二阶导数
+
+题设给出 $y(0)=y'(0)=0$，且
+
+$$
+y''(x)=e^{3x}-2y'(x)-y(x).
+$$
+
+令 $x=0$，有 $y''(0)=1$。
+
+</Step>
+<Step>
+
+### 用带 Peano 余项的泰勒公式确定主项
+
+$$
+y(x)=y(0)+y'(0)x+\frac{y''(0)}2x^2+o(x^2)
+=\frac12x^2+o(x^2).
+$$
+
+候选项中
+
+$$
+\ln\sqrt{1+x^2}=\frac12\ln(1+x^2)
+=\frac12x^2+o(x^2),
+$$
+
+故与 $y(x)$ 等价。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="同阶不一定等价">
+
+$\sin(x^2)\sim x^2$ 与 $\ln(1+x^2)\sim x^2$ 虽均为二阶小量，但它们和 $y\sim x^2/2$ 的比值趋于 $2$，故不等价；$\sin x$ 为一阶。
+
+</Callout>
 
 </Solution>
 
@@ -415,22 +868,42 @@ $ 1+x^2-e^{x^2}$ 当 $ x\to0$ 时是 $ x$ 的 <Blank answer="4" kind="math" /> �
 
 <Solution>
 
-**答案：** $ 4$
+**参考答案：$4$ 阶无穷小。**
 
-**解析：**
+**解题思路**：先将指数函数展开到 $x^4$，观察低阶项是否抵消；阶数由第一个非零项决定。
+
+<Steps>
+<Step>
+
+### 展开并相消
+
+将 $u=x^2$ 代入 $e^u=1+u+\dfrac{u^2}{2}+O(u^3)$，有
 
 $$
- e^{x^2}=1+x^2+\frac{x^4}{2}+o(x^4),
+e^{x^2}=1+x^2+\frac{x^4}{2}+O(x^6).
 $$
 
+故
 
-
-
-所以
 $$
- 1+x^2-e^{x^2}=-\frac{x^4}{2}+o(x^4).
+1+x^2-e^{x^2}=-\frac{x^4}{2}+O(x^6).
 $$
-故它是关于 $ x$ 的四阶无穷小。
+
+</Step>
+<Step>
+
+### 用比值给出严格结论
+
+$$
+\lim_{x\to0}\frac{1+x^2-e^{x^2}}{x^4}=-\frac12\ne0,
+$$
+
+所以该式是 $x$ 的四阶无穷小。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="常见的消去结构">$e^u-1-u\sim u^2/2$；若 $u=x^2$，其阶数变为 $x^4$，但本题前面有负号，主项为 $-x^4/2$。</Callout>
 
 </Solution>
 

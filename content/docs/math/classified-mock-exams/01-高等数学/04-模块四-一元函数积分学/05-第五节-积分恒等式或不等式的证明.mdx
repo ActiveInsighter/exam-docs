@@ -1,13 +1,11 @@
 ---
-title: "第五节 积分恒等式与不等式证明｜区间平均、凸性估计、分部积分与加权比较"
-description: "对标真题的单调函数平均值、凸函数积分夹逼、分部积分估计与积分恒等式，精选具有证明链条与方法迁移价值的原题。"
+title: "5. 积分恒等式或不等式的证明"
+description: "19道积分恒等式与不等式已全部重构：单调性、凸性、二阶误差、周期性、换元对称及定积分恒等式。"
 ---
 
-# 第五节 积分恒等式与不等式证明｜区间平均、凸性估计、分部积分与加权比较
+精选 **19 道原题，已全部完成解析重构**。题干与题目 ID 保持不变，证明题按照“参考结论 → 核心思路 → 严密推导 → 方法对照或易错点”展开。原题中条件不充分或结论有误之处保留原文，并在解析中给出反例、必要前提或可成立的修正结论。
 
-参照「真题核心题目」本节考点筛选 **19 道代表性原题**，题目原文、选项、解析及 MDX 组件原样保留。
-
-## 考点1：区间平均值、单调性与积分比较
+## 考点一：单调函数与区间平均值不等式
 
 <Question id="selected-1103-math-818f1a-121" type="essay">
 
@@ -19,27 +17,85 @@ $(II)$ 若 $\int_0^1 f(t) dt \geqslant 0, f(0) \leqslant 1, x_0 \in (0, 1), x_n 
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：**
 
-**解析：** **证明：** (I) 当 $x\in(0,1)$ 时，由 $f(x)$ 单调递减，有
-$$\int_0^x f(t)\mathrm{d}t < \int_0^x f(0)\mathrm{d}t = xf(0).$$
+（Ⅰ）对每个 $0<x<1$，
 
-令 $g(x) = \frac{\int_0^x f(t)\mathrm{d}t}{x}$，则有
-$$g'(x) = \frac{xf(x) - \int_0^x f(t)\mathrm{d}t}{x^2} = \frac{xf(x) - xf(\xi)}{x^2}$$
-$$= \frac{x[f(x) - f(\xi)]}{x^2} < 0,\quad 0 < \xi < x,$$
-故 $g(x)$ 单调递减，从而有
-$$g(x) = \frac{\int_0^x f(t)\mathrm{d}t}{x} > g(1) = \frac{\int_0^1 f(t)\mathrm{d}t}{1},$$
-即 $x\int_0^1 f(t)\mathrm{d}t < \int_0^x f(t)\mathrm{d}t$。
+$$
+\boxed{x\int_0^1f(t)\,\mathrm dt
+<\int_0^x f(t)\,\mathrm dt<xf(0)}.
+$$
 
-(II) 先证明 $x_n\in(0,1)$。
-当 $n=1$ 时，由 (I) 知
-$$0 \leqslant x_0\int_0^1 f(t)\mathrm{d}t < x_1 = \int_0^{x_0} f(t)\mathrm{d}t < x_0 f(0) \leqslant x_0 < 1.$$
-假设当 $n=k$ 时，有 $x_k\in(0,1)$，则当 $n=k+1$ 时，
-$$0 \leqslant x_k\int_0^1 f(t)\mathrm{d}t < x_{k+1} = \int_0^{x_k} f(t)\mathrm{d}t < x_k f(0) \leqslant x_k < 1.$$
-由数学归纳法，知 $x_n\in(0,1)$。
-由 $x_n = \int_0^{x_{n-1}} f(t)\mathrm{d}t < x_{n-1}f(0) \leqslant x_{n-1}$，知 $\{x_n\}$ 单调递减，故 $\lim\limits_{n\to\infty} x_n$ 存在，记 $\lim\limits_{n\to\infty} x_n = a$，则 $a\geqslant 0$。由
-$$x_n = \int_0^{x_{n-1}} f(t)\mathrm{d}t, \text{有 } a = \int_0^a f(t)\mathrm{d}t.$$
-若 $a\in(0,1)$，则 $a = \int_0^a f(t)\mathrm{d}t < af(0) \leqslant a$ (矛盾)，故 $a=0$，即 $\lim\limits_{n\to\infty} x_n = 0$。
+（Ⅱ）数列 $\{x_n\}$ **严格递减且始终在 $(0,1)$ 内**，因而极限存在，并且
+
+$$
+\boxed{\lim_{n\to\infty}x_n=0}.
+$$
+
+**解题思路：** 从严格递减性出发，先证明**左端区间平均值** $A(x)=x^{-1}\int_0^xf$ 随区间长度增加而下降。这个平均值结论同时保证递推数列的**正性、递减性**，并排除非零极限。
+
+<Steps>
+<Step>
+
+    ### 证明（Ⅰ）：比较区间平均值
+
+    对 $x\in(0,1)$，由于 $f(t)<f(0)$ 对 $t\in(0,x]$ 成立，有
+
+
+
+$$
+\int_0^x f(t)\,\mathrm dt<xf(0).
+$$
+
+    再定义 $A(x)=\dfrac1x\int_0^x f(t)\,\mathrm dt$。微分得
+
+
+
+$$
+A'(x)=\frac{xf(x)-\int_0^xf(t)\,\mathrm dt}{x^2}
+    =\frac1{x^2}\int_0^x\bigl[f(x)-f(t)\bigr]\,\mathrm dt<0.
+$$
+
+    因为 $x<1$，所以 $A(x)>A(1)=\int_0^1 f(t)\,\mathrm dt$。两边乘正数 $x$，即得第一重严格不等式。
+
+</Step>
+<Step>
+
+    ### 证明（Ⅱ）：递推数列始终为正且严格下降
+
+    记 $I=\int_0^1f(t)\,\mathrm dt\ge0$。对任意 $x\in(0,1)$，（Ⅰ）说明
+
+
+
+$$
+0\le xI<\int_0^xf(t)\,\mathrm dt<xf(0)\le x<1.
+$$
+
+    因 $x_0\in(0,1)$，归纳可得 $0<x_{n+1}<x_n<1$。因此 $\{x_n\}$ 有下界 $0$ 且严格递减，存在极限 $L\ge0$。
+
+</Step>
+<Step>
+
+    ### 由极限方程排除正极限
+
+    由于 $f$ 连续，映射 $F(x)=\int_0^xf(t)\,\mathrm dt$ 连续。对 $x_{n+1}=F(x_n)$ 取极限得
+
+
+
+$$
+L=F(L)=\int_0^L f(t)\,\mathrm dt.
+$$
+
+    若 $0<L<1$，再用（Ⅰ）便有 $L=F(L)<Lf(0)\le L$，矛盾。又 $L\le x_0<1$，只能 $L=0$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="方法迁移">
+
+形如 $x_{n+1}=\int_0^{x_n}f(t)\,\mathrm dt$ 的递推，通常按“**先不变区间 → 再单调有界 → 最后固定点排除**”证明，不要一开始直接猜极限为零。
+
+</Callout>
 
 </Solution>
 
@@ -51,14 +107,66 @@ $$x_n = \int_0^{x_{n-1}} f(t)\mathrm{d}t, \text{有 } a = \int_0^a f(t)\mathrm{d
 
 <Solution>
 
-**答案：** 见解析
+**参考结论：** 当 $a<b$ 且 $f$ 在 $[a,b]$ 上连续、单调不减时，
 
-**解析：** **证明：** 利用单调性证明. 令
-$$F(x) = \int_a^x t f(t)\mathrm{d}t - \frac{a+x}{2} \int_a^x f(t)\mathrm{d}t, \quad a \leqslant x \leqslant b,$$
-则
-$$\begin{aligned} F'(x) &= x f(x) - \frac{1}{2} \int_a^x f(t)\mathrm{d}t - \frac{a+x}{2} f(x) \\ &= \frac{x-a}{2} f(x) - \frac{1}{2} \int_a^x f(t)\mathrm{d}t \\ &= \frac{x-a}{2} f(x) - \frac{1}{2} f(\xi)(x-a) \quad (\text{这里利用积分中值定理}) \\ &= \frac{x-a}{2} [f(x) - f(\xi)] \geqslant 0 \quad (\text{因 } f(x) \text{ 单调增加}), \end{aligned}$$
-其中 $a \leqslant \xi \leqslant x$, 所以 $F(x)$ 单调增加, 故 $F(b) \ge F(a) = 0$, 即
-$$\int_a^b x f(x)\mathrm{d}x \ge \frac{a+b}{2} \int_a^b f(x)\mathrm{d}x.$$
+$$
+\boxed{\int_a^b xf(x)\,\mathrm dx
+\ge\frac{a+b}{2}\int_a^b f(x)\,\mathrm dx}.
+$$
+
+**解题思路：** 把 $x$ 看成单调增加的权重，把积分差写成**区间中点两侧的配对差**；右半段的函数值不小于左半段，所以配对项非负。
+
+<Tabs items={['方法一：对称配对（推荐）', '方法二：双重积分']} defaultIndex={0}>
+<Tab value="方法一：对称配对（推荐）">
+
+    令 $m=(a+b)/2$，将待证不等式移项。按中点拆分并对右半区间做换元 $x\mapsto a+b-x$，得
+
+
+
+$$
+\begin{aligned}
+    &\int_a^b(x-m)f(x)\,\mathrm dx\\
+    &=\int_a^m(x-m)f(x)\,\mathrm dx
+    +\int_m^b(x-m)f(x)\,\mathrm dx\\
+    &=\int_a^m(m-x)\bigl[f(a+b-x)-f(x)\bigr]\,\mathrm dx.
+    \end{aligned}
+$$
+
+    对 $x\in[a,m]$，有 $a+b-x\ge x$。由 $f$ 单调不减，$f(a+b-x)-f(x)\ge0$；又 $m-x\ge0$，故整段积分非负，证毕。
+
+</Tab>
+<Tab value="方法二：双重积分">
+
+    根据 $f$ 单调不减，任意 $x,t\in[a,b]$ 都有
+
+
+
+$$
+(x-t)[f(x)-f(t)]\ge0.
+$$
+
+    两边在正方形 $[a,b]^2$ 上积分，展开得到
+
+
+
+$$
+\begin{aligned}
+    0&\le\int_a^b\!\int_a^b(x-t)[f(x)-f(t)]\,\mathrm dx\,\mathrm dt\\
+     &=2(b-a)\int_a^b xf(x)\,\mathrm dx
+       -(a+b)(b-a)\int_a^b f(x)\,\mathrm dx.
+    \end{aligned}
+$$
+
+    因 $b-a>0$，两边除以 $2(b-a)$ 就是题目不等式。
+
+</Tab>
+</Tabs>
+
+<Callout type="info" title="等号条件">
+
+若 $f$ 为常数，两边相等；在连续、单调不减条件下，如 $f$ 非常数，则上述配对差在正测度集合上为正，因而严格大于。
+
+</Callout>
 
 </Solution>
 
@@ -71,13 +179,53 @@ $\int_{0}^{a}f(x)\mathrm{d}x>af\left(\frac{a}{2}\right).$
 
 <Solution>
 
-**答案：** 见解析
+**参考结论：**
 
-**解析：** **证明：** 利用泰勒公式, 将 $f(x)$ 在 $x = \frac{a}{2}$ 处展开为
-$$f(x) = f\left(\frac{a}{2}\right) + f'\left(\frac{a}{2}\right)\left(x - \frac{a}{2}\right) + \frac{f''(\xi)}{2!}\left(x - \frac{a}{2}\right)^2$$
-$$> f\left(\frac{a}{2}\right) + f'\left(\frac{a}{2}\right)\left(x - \frac{a}{2}\right) \quad \left(\xi \text{介于} \frac{a}{2} \text{与 } x \text{ 之间}\right),$$
-积分,得
-$$\begin{aligned} \int_0^a f(x)\mathrm{d}x &> \int_0^a \left[ f\left(\frac{a}{2}\right) + f'\left(\frac{a}{2}\right)\left(x - \frac{a}{2}\right) \right] \mathrm{d}x \\ &= \left[ f\left(\frac{a}{2}\right) \cdot x + \frac{1}{2} f'\left(\frac{a}{2}\right) \left(x - \frac{a}{2}\right)^2 \right]\Big|_0^a = af\left(\frac{a}{2}\right). \end{aligned}$$
+$$
+\boxed{\int_0^a f(x)\,\mathrm dx>a f\!\left(\frac a2\right)}.
+$$
+
+**解题思路：** $f''>0$ 表示函数**严格凸**。在区间中点处作切线，图像（除切点）严格位于切线上方；将切线在对称区间上积分，其中一次项恰好消失。
+
+<Steps>
+<Step>
+
+    ### 第一步：写出切线下界
+
+    记 $m=a/2$。由 $f''(x)>0$ 知 $f'$ 严格递增。于是对 $x\ne m$，函数满足严格的切线不等式
+
+
+
+$$
+f(x)>f(m)+f'(m)(x-m).
+$$
+
+    在 $x=m$ 处为等号，这一个点不影响积分的严格性。
+
+</Step>
+<Step>
+
+    ### 第二步：积分并利用对称性
+
+
+
+$$
+\begin{aligned}
+    \int_0^a f(x)\,\mathrm dx
+      &>\int_0^a\left[f(m)+f'(m)(x-m)\right]\,\mathrm dx\\
+      &=af(m)+f'(m)\left[\frac{(x-m)^2}{2}\right]_{0}^{a}\\
+      &=af(m)=af\!\left(\frac a2\right).
+    \end{aligned}
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="拓展：中点积分不等式">
+
+同样的论证对任意 $a<b$ 成立：严格凸函数满足 $\frac1{b-a}\int_a^bf>f((a+b)/2)$。题设的 $f(x)>0$ **不是证明所必需**的条件。
+
+</Callout>
 
 </Solution>
 
@@ -101,68 +249,77 @@ $$
 
 <Solution>
 
-**参考结论：**（Ⅰ）$f''(x)\ge0$；（Ⅱ）上述不等式成立，依据是 $f$ 的凸性与 Jensen 不等式。
+**参考答案：**
+
+$$
+\boxed{f''(x)\ge0\quad(x\in\mathbb R)},
+\qquad
+\boxed{\int_0^1f(x^n)\,\mathrm dx\ge f\!\left(\frac1{n+1}\right)}.
+$$
+
+**解题思路：** （Ⅰ）将题设的非负对称差分除以 $h^2$ 并取极限；（Ⅱ）利用凸函数**切线在图像下方**，把积分中 $x^n$ 的平均值 $1/(n+1)$ 选为切点，使一次误差积分为零。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 用对称二阶差商证明（Ⅰ）
+    ### （Ⅰ）由对称二阶差分得到凸性
 
-  根据二阶导数的对称差商公式，
+    对每个 $h\ne0$，题设保证
 
-  $$
-  f''(x)=\lim_{h\to0}\frac{f(x+h)-2f(x)+f(x-h)}{h^2}.
-  $$
 
-  由于分子按题设非负、$h^2>0$（$h\ne0$），其极限仍非负，故 $f''(x)\ge0$。
 
-  </Step>
-  <Step>
+$$
+\frac{f(x+h)-2f(x)+f(x-h)}{h^2}\ge0.
+$$
 
-  ### 转化为凸函数的积分不等式
+    因 $f$ 二阶可导，左端随 $h\to0$ 收敛到 $f''(x)$，故 $f''(x)\ge0$。于是 $f'$ 单调不减，$f$ 是凸函数。
 
-  二阶可导函数满足 $f''\ge0$，故 $f$ 为凸函数。令 $X$ 在区间 $[0,1]$ 上服从均匀分布，则
+</Step>
+<Step>
 
-  $$
-  \mathbb E(X^n)=\int_0^1x^n\,\mathrm dx=\frac1{n+1}.
-  $$
+    ### （Ⅱ）选择平均值作为切点
 
-  由 Jensen 不等式，
+    令 $c=\dfrac1{n+1}$，则 $\int_0^1x^n\,\mathrm dx=c$。由凸函数的切线性质，对任意 $u$ 有
 
-  $$
-  f\bigl(\mathbb E(X^n)\bigr)
-  \le\mathbb E\bigl[f(X^n)\bigr]
-  =\int_0^1f(x^n)\,\mathrm dx.
-  $$
 
-  代入 $\mathbb E(X^n)=1/(n+1)$ 即得证。
 
-  </Step>
+$$
+f(u)\ge f(c)+f'(c)(u-c).
+$$
+
+    取 $u=x^n$ 并在 $[0,1]$ 上积分：
+
+
+
+$$
+\begin{aligned}
+    \int_0^1f(x^n)\,\mathrm dx
+    &\ge f(c)+f'(c)\left(\int_0^1x^n\,\mathrm dx-c\right)\\
+    &=f(c)=f\!\left(\frac1{n+1}\right).
+    \end{aligned}
+$$
+
+</Step>
 </Steps>
 
 <Accordions>
-  <Accordion title="不用概率术语的证明">
+<Accordion title="替代解法：Jensen 不等式">
 
-记 $c=1/(n+1)$。凸函数在 $c$ 处的切线位于图像下方，即对 $t\in[0,1]$，
-
-$$
-f(t)\ge f(c)+f'(c)(t-c).
-$$
-
-令 $t=x^n$，两端在 $[0,1]$ 上积分，得
-
-$$
-\int_0^1f(x^n)\,\mathrm dx
-\ge f(c)+f'(c)\left(\int_0^1x^n\,\mathrm dx-c\right)=f(c).
-$$
+    令 $X\sim U[0,1]$，取随机变量 $Y=X^n$，则 $\mathbb E Y=1/(n+1)$。凸函数的 Jensen 不等式给出 $f(\mathbb E Y)\le\mathbb E f(Y)$，恰好就是（Ⅱ）。此法可以迁移到任何积分权重或随机变量的平均值问题。
 
 </Accordion>
 </Accordions>
 
+<Callout type="warn" title="常见误区">
+
+不能直接把 $f(\int_0^1x^n\,\mathrm dx)$ 当作 $\int_0^1f(x^n)\,\mathrm dx$；二者一般不相等，**凸性**才保证正确的不等号方向。
+
+</Callout>
+
 </Solution>
 </Question>
 
-## 考点2：凸函数、Hermite–Hadamard 估计与二阶导数控制
+## 考点二：凸凹性、切线与弦线夹逼、二阶导数误差估计
 
 <Question id="selected-1103-math-818f1a-103" type="essay">
 
@@ -172,25 +329,84 @@ $f\left(\frac{a+b}{2}\right) < \frac{1}{b-a} \int_a^b f(x) \mathrm{d}x < \frac{f
 
 <Solution>
 
-**答案：** 见解析
+**参考结论：** 对 $a<b$，严格凸函数 $f$ 满足
 
-**解析：** **证明：** 由已知得, $y=f(x)$ 的图形如图 3-10 所示.
-在点 $\left(\frac{a+b}{2}, f\left(\frac{a+b}{2}\right)\right)$ 处切线方程为
-$$y = f\left(\frac{a+b}{2}\right) + f'\left(\frac{a+b}{2}\right)\left(x - \frac{a+b}{2}\right),$$
-曲线的切线在曲线的下方, 故
-$$f(x) \geqslant f\left(\frac{a+b}{2}\right) + f'\left(\frac{a+b}{2}\right)\left(x - \frac{a+b}{2}\right),$$
-对上式两端分别积分, 得
-$$\int_a^b f(x)\mathrm{d}x > f\left(\frac{a+b}{2}\right)(b-a) + f'\left(\frac{a+b}{2}\right)\cdot \int_a^b \left(x - \frac{a+b}{2}\right)\mathrm{d}x$$
-$$= f\left(\frac{a+b}{2}\right)(b-a)+0,$$
-即 $f\left(\frac{a+b}{2}\right) < \frac{1}{b-a}\int_a^b f(x)\mathrm{d}x$.
+$$
+\boxed{f\!\left(\frac{a+b}{2}\right)
+<\frac1{b-a}\int_a^bf(x)\,\mathrm dx
+<\frac{f(a)+f(b)}2}.
+$$
 
-又 $\mathrm{AB}$ 直线段在曲线 $y=f(x)$ 上方, 故 $f(x) \leqslant f(a) + \frac{f(b)-f(a)}{b-a}\cdot(x-a)$,
-对上式两端分别积分, 得
-$$\int_a^b f(x)\mathrm{d}x < f(a)(b-a) + \frac{f(b)-f(a)}{b-a}\int_a^b (x-a)\mathrm{d}x$$
-$$= \frac{f(a)+f(b)}{2}\cdot(b-a),$$
-即 $\frac{1}{b-a}\int_a^b f(x)\mathrm{d}x < \frac{f(a)+f(b)}{2}$.
+这是 **Hermite–Hadamard 不等式的严格形式**。
 
-综上所述, 所证不等式成立.
+**解题思路：** 中点切线给出函数图像的**下界**；连接两端点的弦线给出**上界**。因为题设 $f''>0$，图像在切点以外严格高于切线，在端点之间严格低于弦线。
+
+<Steps>
+<Step>
+
+    ### 下界：积分中点处的切线
+
+    取 $m=(a+b)/2$。严格凸性保证对 $x\ne m$ 有
+
+
+
+$$
+f(x)>f(m)+f'(m)(x-m).
+$$
+
+    两边在 $[a,b]$ 上积分，并注意 $\int_a^b(x-m)\,\mathrm dx=0$，得到
+
+
+
+$$
+\int_a^bf(x)\,\mathrm dx>(b-a)f(m).
+$$
+
+</Step>
+<Step>
+
+    ### 上界：积分端点连成的弦线
+
+    对 $x\in(a,b)$，将 $x$ 表示为 $a,b$ 的凸组合：
+
+
+
+$$
+x=\frac{b-x}{b-a}a+\frac{x-a}{b-a}b.
+$$
+
+    严格凸性保证
+
+
+
+$$
+f(x)<\frac{b-x}{b-a}f(a)+\frac{x-a}{b-a}f(b).
+$$
+
+    积分得
+
+
+
+$$
+\int_a^b f(x)\,\mathrm dx
+    <\frac{b-a}{2}\bigl[f(a)+f(b)\bigr].
+$$
+
+</Step>
+<Step>
+
+    ### 合并不等式
+
+    两端分别除以正数 $b-a$，即得题目所求的两个严格不等式。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="考试识别法">
+
+出现“$f''\ge0$、区间积分平均值、中点值、端点平均值”时，优先联想到**切线—弦线双重夹逼**。若仅 $f''\ge0$，两个不等号都改为 $\le$，线性函数可取等号。
+
+</Callout>
 
 </Solution>
 
@@ -206,125 +422,86 @@ $(II)$ 记 $M = \max_{x \in [a,b]} |f''(x)|$，证明：$\left|\int_a^b f(x)\mat
 
 <Solution>
 
-**答案：** 见解析
-
-**解析：** **证明：** (I) $\int_a^b (x - a)(x - b)f''(x) \, \mathrm{d}x = \int_a^b (x - a)(x - b) \, \mathrm{d}f'(x)$
+**参考结论：** 记 $L=b-a>0$，则
 
 $$
-= (x - a)(x - b)f'(x) \Big|_a^b - \int_a^b (2x - a - b)f'(x) \, \mathrm{d}x
+\boxed{\int_a^bf(x)\,\mathrm dx
+=\frac{L}{2}\bigl[f(a)+f(b)\bigr]
++\frac12\int_a^b(x-a)(x-b)f''(x)\,\mathrm dx},
 $$
 
+并且当 $M=\max_{[a,b]}|f''|$ 时，
 
 $$
-= \int_a^b (a + b - 2x)f'(x) \, \mathrm{d}x = \int_a^b (a + b - 2x) \, \mathrm{d}f(x)
+\boxed{\left|\int_a^bf(x)\,\mathrm dx-\frac{L}{2}\bigl[f(a)+f(b)\bigr]\right|
+\le\frac{ML^3}{12}}.
 $$
 
+**解题思路：** 这是**梯形求积公式及其误差估计**。构造在两端都为零的权函数 $p(x)=(x-a)(x-b)$，两次分部积分把 $f''$ 转化为原函数积分和端点值；再用 $|f''|\le M$ 给出误差上界。
 
-$$
-= (a + b - 2x)f(x) \Big|_a^b + 2\int_a^b f(x) \, \mathrm{d}x
-$$
+<Steps>
+<Step>
 
+    ### （Ⅰ）第一次分部积分：从 $f''$ 降到 $f'$
 
-$$
-= (a - b)[f(a) + f(b)] + 2\int_a^b f(x) \, \mathrm{d}x.
-$$
+    令 $p(x)=(x-a)(x-b)$，则 $p(a)=p(b)=0$，$p'(x)=2x-a-b$。记 $J=\int_a^bp(x)f''(x)\,\mathrm dx$，有
 
-
-故
-
-$$
-\int_a^b f(x) \, \mathrm{d}x = \frac{1}{2}(b - a)[f(a) + f(b)] + \frac{1}{2}\int_a^b (x - a)(x - b)f''(x) \, \mathrm{d}x.
-$$
-
-
-(II) 证法1 由 (I) 有
-
-$$
-\left| \int_a^b f(x) \, \mathrm{d}x - \frac{1}{2}(b - a)[f(a) + f(b)] \right| = \left| \frac{1}{2}\int_a^b (x - a)(x - b)f''(x) \, \mathrm{d}x \right|
-$$
-
-
-$$
-\le \frac{1}{2}\int_a^b |x - a| \, |x - b| \, |f''(x)| \, \mathrm{d}x
-$$
-
-
-$$
-\le \frac{M}{2}\int_a^b (x - a)(b - x) \, \mathrm{d}x = \frac{M}{4}\int_a^b (b - x) \, \mathrm{d}(x - a)^2
-$$
-
-
-$$
-= \frac{M}{4} \left[ (b - x)(x - a)^2 \Big|_a^b + \int_a^b (x - a)^2 \, \mathrm{d}x \right]
-$$
-
-
-$$
-= \frac{M}{4} \cdot \frac{1}{3} (x - a)^3 \Big|_a^b = \frac{M}{4} \cdot \frac{1}{3} (b - a)^3 = \frac{(b - a)^3}{12} M.
-$$
-
-
-证法2 应用泰勒公式证明.
-将 $f(u)$ 在 $x \in (a,b)$ 处展开,再代入端点 $u = a, u = b$,有
-
-$$
-f(a) = f(x) + f'(x)(a - x) + \frac{f''(\xi_1)}{2!} (a - x)^2, \quad \text{①}
-$$
-
-
-$$
-f(b) = f(x) + f'(x)(b-x) + \frac{f''(\xi_2)}{2!}(b-x)^2, \tag{2}
-$$
-
-
-其中 $\xi_1 \in (a,x)$, $\xi_2 \in (x,b)$。
-
-①+②, 得
-
-
-$$
-f(a)+f(b) = 2f(x) + f'(x)(a+b-2x) + \frac{1}{2}f''(\xi_1)(a-x)^2 + \frac{1}{2}f''(\xi_2)(b-x)^2.
-$$
-
-
-上式两边从 $a$ 到 $b$ 积分, 得
 
 
 $$
 \begin{aligned}
-\int_a^b [f(a) + f(b)]\mathrm{d}x &= 2\int_a^b f(x)\mathrm{d}x + \int_a^b (a + b - 2x)f'(x)\mathrm{d}x + \\
-&\quad \frac{1}{2}\int_a^b [f''(\xi_1)(a - x)^2 + f''(\xi_2)(b - x)^2]\mathrm{d}x,
-\end{aligned} \tag{3}
+    J&=\bigl[p(x)f'(x)\bigr]_a^b
+     -\int_a^bp'(x)f'(x)\,\mathrm dx\\
+     &=-\int_a^b(2x-a-b)f'(x)\,\mathrm dx.
+    \end{aligned}
 $$
 
+</Step>
+<Step>
 
-而
+    ### （Ⅰ）第二次分部积分：得到恒等式
 
-
-$$
-\begin{aligned}
-\int_a^b [f(a) + f(b)]\mathrm{d}x &= (b - a)[f(a) + f(b)], \\
-\int_a^b (a + b - 2x)f'(x)\mathrm{d}x &= \int_a^b (a + b - 2x)\mathrm{d}f(x) \\
-&= (a + b - 2x)f(x)\Big|_a^b + 2\int_a^b f(x)\mathrm{d}x \\
-&= (a - b)[f(a) + f(b)] + 2\int_a^b f(x)\mathrm{d}x.
-\end{aligned}
-$$
-
-
-将其代入 ③ 式, 整理可得
 
 
 $$
 \begin{aligned}
-\left|\int_a^b f(x)\mathrm{d}x - \frac{1}{2}(b - a)[f(a) + f(b)]\right| &= \frac{1}{8}\left|\int_a^b [f''(\xi_1)(a - x)^2 + f''(\xi_2)(b - x)^2]\mathrm{d}x\right| \\
-&\le \frac{1}{8}\left[\int_a^b |f''(\xi_1)|(a - x)^2\mathrm{d}x + \int_a^b |f''(\xi_2)|(b - x)^2\mathrm{d}x\right] \\
-&\le \frac{M}{8}\left[\int_a^b (a - x)^2\mathrm{d}x + \int_a^b (b - x)^2\mathrm{d}x\right] \\
-&= \frac{M}{8} \cdot \frac{2}{3}(b - a)^3 = \frac{(b - a)^3}{12}M.
-\end{aligned}
+    J&=-\bigl[(2x-a-b)f(x)\bigr]_a^b
+    +2\int_a^b f(x)\,\mathrm dx\\
+    &=-L\bigl[f(a)+f(b)\bigr]
+     +2\int_a^b f(x)\,\mathrm dx.
+    \end{aligned}
 $$
 
+    移项并除以 $2$，就得到（Ⅰ）的等式。
 
-**注：** 若 $f(x)\ge 0$, 则 $\left|\int_a^b f(x)\mathrm{d}x - \frac{1}{2}(b-a)[f(a)+f(b)]\right|\le \frac{(b-a)^3}{12}M$, 可看作用梯形的面积 $\frac{1}{2}(b-a)[f(a)+f(b)]$ 作为 $\int_a^b f(x)\mathrm{d}x$ 的近似值, 其绝对误差不超过 $\frac{(b-a)^3}{12}M$。
+</Step>
+<Step>
+
+    ### （Ⅱ）估计余项
+
+    由于 $x\in[a,b]$ 时 $|(x-a)(x-b)|=(x-a)(b-x)$，
+
+
+
+$$
+\begin{aligned}
+    |E|&=\left|\frac12\int_a^b(x-a)(x-b)f''(x)\,\mathrm dx\right|\\
+       &\le\frac M2\int_a^b(x-a)(b-x)\,\mathrm dx\\
+       &=\frac M2\cdot\frac{L^3}{6}
+        =\frac{ML^3}{12}.
+    \end{aligned}
+$$
+
+    其中置 $u=x-a$ 后，核积分变为 $\int_0^L u(L-u)\,\mathrm du=L^3/6$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="常数 1/12 是最优的">
+
+取 $f(x)=x^2$，则 $M=2$，其梯形公式的误差绝对值恰为 $L^3/6=ML^3/12$，说明在只有二阶导数上界的条件下，这个常数不能再缩小。
+
+</Callout>
 
 </Solution>
 
@@ -340,79 +517,110 @@ $(II)$ 若对任意的 $x \in [0,+\infty)$，有 $f(x)=f(x+1)$，$n$ 为正整�
 
 <Solution>
 
-**答案：** 见解析
+**参考结论：**
 
-**解析：**
+$$
+\boxed{\left|\int_0^1f(x)\,\mathrm dx-f\!\left(\frac12\right)\right|\le\frac1{24}},
+$$
 
-(I) 由带拉格朗日余项的泰勒公式，对任意 $x\in[0,1]$，存在介于 $x$ 与 $\frac12$ 之间的 $\xi_x$，使
+若另有周期 $f(x+1)=f(x)$，则对任何正整数 $n$，
+
 $$
-f(x)=f\left(\frac12\right)+f'\left(\frac12\right)\left(x-\frac12\right)
-+\frac{f''(\xi_x)}{2}\left(x-\frac12\right)^2.
+\boxed{\left|\int_0^n f(x)\,\mathrm dx\right|
+\le n\left(\frac16+|f(0)|\right)}.
 $$
-两端在 $[0,1]$ 上积分。因为
+
+事实上，利用端点相等可证明更强的界 $n\bigl(|f(0)|+\frac1{12}\bigr)$。
+
+**解题思路：** （Ⅰ）在区间中点处作二阶泰勒估计，一次项积分为零；（Ⅱ）先借周期性把任意 $n$ 段化为 $n$ 倍一周期积分，再用端点值相等时的**梯形误差公式**进行估计。
+
+<Tabs items={['（Ⅰ）中点误差', '（Ⅱ）周期积分估计']} defaultIndex={0}>
+<Tab value="（Ⅰ）中点误差">
+
+    记 $m=\tfrac12$。由二阶导数绝对值不超过 $1$，对所有 $x\in[0,1]$，可用带积分余项的泰勒公式（或泰勒中值定理）得到
+
+
+
 $$
-\int_0^1\left(x-\frac12\right)\,\mathrm{d}x=0,
+\left|f(x)-f(m)-f'(m)(x-m)\right|
+    \le\frac12(x-m)^2.
 $$
-所以
+
+    把 $f(x)-f(m)$ 的积分拆为一次项及余项，由
+
+
+
 $$
-\int_0^1f(x)\,\mathrm{d}x-f\left(\frac12\right)
-=\frac12\int_0^1f''(\xi_x)\left(x-\frac12\right)^2\,\mathrm{d}x.
+\int_0^1(x-m)\,\mathrm dx=0
 $$
-由 $|f''(x)|\le1$，得
+
+    可得
+
+
+
 $$
 \begin{aligned}
-\left|\int_0^1f(x)\,\mathrm{d}x-f\left(\frac12\right)\right|
-&\le\frac12\int_0^1\left(x-\frac12\right)^2\,\mathrm{d}x \\
-&=\frac1{24}.
-\end{aligned}
+    \left|\int_0^1f(x)\,\mathrm dx-f(m)\right|
+    &\le\frac12\int_0^1(x-m)^2\,\mathrm dx\\
+    &=\frac12\cdot\frac1{12}=\frac1{24}.
+    \end{aligned}
 $$
-故结论成立。
 
-(II) 由 $f(x+1)=f(x)$ 可知 $f(1)=f(0)$、$f'(1)=f'(0)$，并且
+    例如 $f(x)=x^2/2$ 时取等号，因此 $1/24$ 也是精确的最佳常数。
+
+</Tab>
+<Tab value="（Ⅱ）周期积分估计">
+
+    周期性保证 $f(1)=f(0)$，并且每一个长度为 $1$ 的区间积分相同：
+
+
+
 $$
-\int_0^n f(x)\,\mathrm{d}x=n\int_0^1 f(x)\,\mathrm{d}x.
+\int_0^n f(x)\,\mathrm dx=n\int_0^1f(x)\,\mathrm dx.
 $$
-对 $x\in[0,1]$，分别在 $0$ 与 $1$ 处使用泰勒公式：
+
+    对 $[0,1]$ 两次分部积分可得梯形公式
+
+
+
 $$
-f(x)=f(0)+f'(0)x+\frac{f''(\xi_1)}{2}x^2,
+\int_0^1f(x)\,\mathrm dx
+    =\frac{f(0)+f(1)}2
+    +\frac12\int_0^1x(x-1)f''(x)\,\mathrm dx.
 $$
-$$
-f(x)=f(1)+f'(1)(x-1)+\frac{f''(\xi_2)}{2}(x-1)^2,
-$$
-其中 $\xi_1\in(0,x)$，$\xi_2$ 介于 $x$ 与 $1$ 之间。分别积分得
-$$
-\int_0^1f(x)\,\mathrm{d}x
-=f(0)+\frac12f'(0)+\frac12\int_0^1f''(\xi_1)x^2\,\mathrm{d}x,
-$$
-$$
-\int_0^1f(x)\,\mathrm{d}x
-=f(1)-\frac12f'(1)+\frac12\int_0^1f''(\xi_2)(x-1)^2\,\mathrm{d}x.
-$$
-两式相加，并利用 $f(1)=f(0)$、$f'(1)=f'(0)$，得到
-$$
-\int_0^1f(x)\,\mathrm{d}x-f(0)
-=\frac14\int_0^1\left[f''(\xi_1)x^2+f''(\xi_2)(x-1)^2\right]\,\mathrm{d}x.
-$$
-因此
+
+    代入 $f(1)=f(0)$，并用 $|f''(x)|\le1$：
+
+
+
 $$
 \begin{aligned}
-\left|\int_0^1f(x)\,\mathrm{d}x-f(0)\right|
-&\le\frac14\int_0^1\left[x^2+(1-x)^2\right]\,\mathrm{d}x \\
-&=\frac16.
-\end{aligned}
+    \left|\int_0^1f(x)\,\mathrm dx-f(0)\right|
+    &\le\frac12\int_0^1x(1-x)\,\mathrm dx\\
+    &=\frac1{12}.
+    \end{aligned}
 $$
-于是
+
+    三角不等式于是给出
+
+
+
 $$
-\left|\int_0^1f(x)\,\mathrm{d}x\right|
-\le |f(0)|+\frac16.
+\left|\int_0^n f(x)\,\mathrm dx\right|
+    \le n\left(|f(0)|+\frac1{12}\right)
+    \le n\left(|f(0)|+\frac16\right),
 $$
-最终
-$$
-\left|\int_0^n f(x)\,\mathrm{d}x\right|
-=n\left|\int_0^1 f(x)\,\mathrm{d}x\right|
-\le n\left(\frac16+|f(0)|\right).
-$$
-故结论成立。
+
+    从而证明题目要求。
+
+</Tab>
+</Tabs>
+
+<Callout type="info" title="两种数值积分估计不要混淆">
+
+中点公式的误差上界是 $M(b-a)^3/24$；梯形公式误差上界是 $M(b-a)^3/12$。二者对应不同近似值，必须先看题目将积分与**中点函数值**还是**端点平均值**作比较。
+
+</Callout>
 
 </Solution>
 
@@ -436,61 +644,83 @@ $$
 
 <Solution>
 
-**参考结论：**$f''(x)\ge0$，且 $\displaystyle\int_{-1}^{1}f(x)\,\mathrm dx\le f(0)+f(1)$。
+**参考答案：**
+
+$$
+\boxed{f''(x)\ge0\quad(\forall x\in\mathbb R)},
+\qquad
+\boxed{\int_{-1}^{1}f(x)\,\mathrm dx\le f(0)+f(1)}.
+$$
+
+**解题思路：** （Ⅰ）把中点凸性条件写成对称二阶差分，再取极限；（Ⅱ）函数凸时，图像在**连接 $(0,f(0))$ 与 $(1,f(1))$ 的弦线下方**，在 $[0,1]$ 积分后用偶性扩展到 $[-1,1]$。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 由中点不等式推出二阶导数非负
+    ### （Ⅰ）中点凸性推出二阶导数非负
 
-  在题设中取 $x=t-h$、$y=t+h$，得到
+    在给定不等式中令 $x=t-h$、$y=t+h$，得到
 
-  $$
-  f(t-h)-2f(t)+f(t+h)\ge0.
-  $$
 
-  对 $h\ne0$ 除以 $h^2$，并利用 $f$ 的二阶可导性：
 
-  $$
-  f''(t)=\lim_{h\to0}\frac{f(t+h)-2f(t)+f(t-h)}{h^2}\ge0.
-  $$
+$$
+f(t-h)-2f(t)+f(t+h)\ge0.
+$$
 
-  由于 $t$ 任意，结论对全体实数成立。
+    对 $h\ne0$ 除以 $h^2$ 后令 $h\to0$，由二阶连续可导性可知
 
-  </Step>
-  <Step>
 
-  ### 由凸性建立弦线估计
 
-  由（Ⅰ）知 $f$ 为凸函数，所以对任意 $0\le x\le1$，
+$$
+f''(t)=\lim_{h\to0}\frac{f(t-h)-2f(t)+f(t+h)}{h^2}\ge0.
+$$
 
-  $$
-  f(x)=f\bigl[(1-x)\cdot0+x\cdot1\bigr]
-  \le (1-x)f(0)+xf(1).
-  $$
+    由于 $t$ 任意，$f$ 在全体实数上凸。
 
-  对上式从 $0$ 到 $1$ 积分：
+</Step>
+<Step>
 
-  $$
-  \int_0^1f(x)\,\mathrm dx
-  \le\int_0^1\bigl[(1-x)f(0)+xf(1)\bigr]\,\mathrm dx
-  =\frac{f(0)+f(1)}2.
-  $$
+    ### （Ⅱ）用弦线给出逐点上界
 
-  最后利用 $f$ 是偶函数，
+    对 $0\le x\le1$，由凸性可得
 
-  $$
-  \int_{-1}^1f(x)\,\mathrm dx
-  =2\int_0^1f(x)\,\mathrm dx
-  \le\boxed{f(0)+f(1)}.
-  $$
 
-  </Step>
+
+$$
+f(x)=f((1-x)\cdot0+x\cdot1)
+    \le(1-x)f(0)+xf(1).
+$$
+
+    从 $0$ 到 $1$ 积分：
+
+
+
+$$
+\int_0^1f(x)\,\mathrm dx
+    \le f(0)\int_0^1(1-x)\,\mathrm dx
+       +f(1)\int_0^1x\,\mathrm dx
+    =\frac{f(0)+f(1)}2.
+$$
+
+</Step>
+<Step>
+
+    ### 利用偶性完成原区间的证明
+
+
+
+$$
+\int_{-1}^1f(x)\,\mathrm dx
+    =2\int_0^1f(x)\,\mathrm dx
+    \le f(0)+f(1).
+$$
+
+</Step>
 </Steps>
 
-<Callout type="info" title="等号条件">
+<Callout type="info" title="等号及冗余条件">
 
-等号成立当且仅当 $f$ 在 $[0,1]$ 上等于连接 $(0,f(0))$ 与 $(1,f(1))$ 的弦线；结合 $f$ 的偶性与在 $0$ 处可导，等号条件进一步化为 $f$ 在 $[-1,1]$ 上为常数。题设的“非负”并不是本不等式成立所必需的条件。
+结合题设中 $f$ 的二阶可导性与偶性，可证明等号成立当且仅当 $f$ 在 $[-1,1]$ 上为常数；$f\ge0$ 对上述不等式的成立并非必要。
 
 </Callout>
 
@@ -503,28 +733,86 @@ $$
 
 <Solution>
 
-**答案：** 见解析
+**参考结论：** 在 $a<b$ 且 $x\in(a,b)$ 时，
 
-**解析：** **证明：** 先证 $f(x) > 0$. 由 $f(a) = f(b) = 0$ 及罗尔定理,知存在 $x_0 \in (a,b)$,使得 $f'(x_0) = 0$, 由 $f''(x) < 0$,知 $f'(x)$ 单调递减,则当 $x \in (a,x_0)$ 时,$f'(x) > f'(x_0) = 0$,从而 $f(x)$ 单调递增,故 $f(x) > f(a) = 0$;当 $x \in (x_0,b)$ 时,$f'(x) < f'(x_0) = 0$,知 $f(x)$ 单调递减,故 $f(x) > f(b) = 0$,综上所述,当 $x \in (a,b)$ 时,$f(x) > 0$.
+$$
+\boxed{0<f(x)<\frac2{b-a}\int_a^bf(t)\,\mathrm dt}.
+$$
 
-下证 $f(x) < \frac{2}{b - a} \int_a^b f(x) \, \mathrm{d}x$.
+**解题思路：** $f''<0$ 说明 $f$ **严格凹**。端点函数值均为零，所以图像严格高于两端点的弦线，可先证明 $f(x)>0$；随后把 $(a,0)$、$(x,f(x))$、$(b,0)$ 连成三角形，图像严格高于三角形的两条斜边，比较面积即可。
 
-应用泰勒公式,将 $f(x)$ 在 $x = t \in (a,b)$ 处展开,有
-$$f(x) = f(t) + f'(t)(x - t) + \frac{f''(\xi)}{2!} (x - t)^2,$$
-其中 $\xi$ 介于 $x$ 与 $t$ 之间.
+<Steps>
+<Step>
 
-由 $f''(x) < 0$,知 $f''(\xi) < 0$,故 $f(x) < f(t) + f'(t)(x - t)$.
-在 $[a,b]$ 上,上式两边同时对 $t$ 积分,得
-$$\int_a^b f(x) \, \mathrm{d}t < \int_a^b f(t) \, \mathrm{d}t + \int_a^b f'(t)(x - t) \, \mathrm{d}t,$$
-即
-$$(b - a)f(x) < \int_a^b f(t) \, \mathrm{d}t + (x - t)f(t) \Big|_a^b + \int_a^b f(t) \, \mathrm{d}t = 2\int_a^b f(t) \, \mathrm{d}t,$$
-故 $f(x) < \frac{2}{b - a} \int_a^b f(x) \, \mathrm{d}x$,所证不等式成立.
+    ### 先证明内点函数值为正
+
+    对任意 $t\in(a,b)$，它是端点 $a,b$ 的非平凡凸组合：
+
+
+
+$$
+t=\frac{b-t}{b-a}a+\frac{t-a}{b-a}b.
+$$
+
+    严格凹性给出
+
+
+
+$$
+f(t)>\frac{b-t}{b-a}f(a)+\frac{t-a}{b-a}f(b)=0.
+$$
+
+</Step>
+<Step>
+
+    ### 固定内点，分别比较左右两部分面积
+
+    固定 $x\in(a,b)$。在 $a<t<x$，由严格凹性得
+
+
+
+$$
+f(t)>\frac{t-a}{x-a}f(x).
+$$
+
+    在 $x<t<b$，同理有
+
+
+
+$$
+f(t)>\frac{b-t}{b-x}f(x).
+$$
+
+    两段积分后相加，
+
+
+
+$$
+\begin{aligned}
+    \int_a^bf(t)\,\mathrm dt
+    &>f(x)\int_a^x\frac{t-a}{x-a}\,\mathrm dt
+      +f(x)\int_x^b\frac{b-t}{b-x}\,\mathrm dt\\
+    &=\frac{x-a}{2}f(x)+\frac{b-x}{2}f(x)\\
+    &=\frac{b-a}{2}f(x).
+    \end{aligned}
+$$
+
+    除以 $(b-a)/2>0$ 即证。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="几何含义">
+
+题目右边的系数 $2/(b-a)$ 来自**三角形面积公式**：固定内点处的函数值是三角形高度，底边长是 $b-a$，积分面积严格大于三角形面积。无需预先求出 $f$ 的具体表达式。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点3：分部积分、导数约束与积分型不等式
+## 考点三：积分估计、范数不等式与数值求积误差
 
 <Question id="selected-1103-math-a932d3-009" type="essay">
 
@@ -534,33 +822,62 @@ $ |f(x)|\leq\frac12\int_{a}^{b}|f'(t)|\,dt$。
 
 <Solution>
 
-**答案：** 不等式成立。
+**参考结论：** 对每个 $x\in(a,b)$，
 
-**解析：** 由 $f(a)=0$，
+$$
+\boxed{|f(x)|\le\frac12\int_a^b|f'(t)|\,\mathrm dt}.
+$$
 
-$ f(x)=\int_{a}^{x}f'(t)\,dt$，
+**解题思路：** 两端函数值均为零，使 $f(x)$ 能分别写成**从左端积过去**和**从右端积回来**的导数积分。将这两个上界相加，自然出现系数 $1/2$。
 
-故
+<Steps>
+<Step>
 
-$ |f(x)|\leq\int_{a}^{x}|f'(t)|\,dt$。
+    ### 从两个端点分别估计 $|f(x)|$
 
-又由 $f(b)=0$，
+    由微积分基本定理和 $f(a)=0$，
 
-$ f(x)=-\int_{x}^{b}f'(t)\,dt$，
 
-故
 
-$ |f(x)|\leq\int_{x}^{b}|f'(t)|\,dt$。
+$$
+f(x)=\int_a^x f'(t)\,\mathrm dt,
+    \qquad |f(x)|\le\int_a^x|f'(t)|\,\mathrm dt.
+$$
 
-记
+    同理由 $f(b)=0$，
 
-$ A=\int_{a}^{x}|f'(t)|\,dt$，$ B=\int_{x}^{b}|f'(t)|\,dt$，
 
-则 $|f(x)|\leq\min\{A,B\}$。而
 
-$ \min\{A,B\}\leq\frac{A+B}{2}=\frac12\int_{a}^{b}|f'(t)|\,dt$，
+$$
+f(x)=-\int_x^bf'(t)\,\mathrm dt,
+    \qquad |f(x)|\le\int_x^b|f'(t)|\,\mathrm dt.
+$$
 
-结论得证。
+</Step>
+<Step>
+
+    ### 将左右估计合并
+
+    两个不等式相加得
+
+
+
+$$
+2|f(x)|\le\int_a^x|f'(t)|\,\mathrm dt
+    +\int_x^b|f'(t)|\,\mathrm dt
+    =\int_a^b|f'(t)|\,\mathrm dt.
+$$
+
+    两端除以 $2$，结论成立。
+
+</Step>
+</Steps>
+
+<Callout type="info" title="常数的含义">
+
+$\int_a^b|f'|$ 是函数在区间内的总变差；函数必须从 $0$ 上升至 $f(x)$，再回到 $0$，总变差至少是 $2|f(x)|$。这解释了系数 $1/2$ 从何而来。
+
+</Callout>
 
 </Solution>
 
@@ -576,19 +893,50 @@ $ \left|\int_{0}^{1}f(x)\,dx\right|\leq\frac{M}{2}$，
 
 <Solution>
 
-**答案：** 不等式成立。
+**参考结论：** 设 $M=\max_{0\le x\le1}|f'(x)|$，则
 
-**解析：** 由 $f(0)=0$，对 $x\in[0,1]$ 有
+$$
+\boxed{\left|\int_0^1 f(x)\,\mathrm dx\right|\le\frac M2}.
+$$
 
-$ f(x)=\int_{0}^{x}f'(t)\,dt$，
+**解题思路：** 由 $f(0)=0$，可以用导数绝对值上界得到 $|f(x)|\le Mx$，再用积分三角不等式结束证明。关键是**先从导数界控制函数值**。
 
-故
+<Steps>
+<Step>
 
-$ |f(x)|\leq\int_{0}^{x}|f'(t)|\,dt\leq Mx$。
+    ### 用牛顿—莱布尼茨公式估计函数
 
-因此
+    对任意 $x\in[0,1]$，
 
-$ \left|\int_{0}^{1}f(x)\,dx\right|\leq\int_{0}^{1}|f(x)|\,dx\leq M\int_{0}^{1}x\,dx=\frac M2$。
+
+
+$$
+|f(x)|=\left|\int_0^x f'(t)\,\mathrm dt\right|
+    \le\int_0^x|f'(t)|\,\mathrm dt\le Mx.
+$$
+
+</Step>
+<Step>
+
+    ### 积分得出目标上界
+
+
+
+$$
+\left|\int_0^1 f(x)\,\mathrm dx\right|
+    \le\int_0^1|f(x)|\,\mathrm dx
+    \le M\int_0^1x\,\mathrm dx
+    =\frac M2.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="检验精度与推广">
+
+当 $f(x)=Mx$ 或 $f(x)=-Mx$ 时取等号，所以常数 $1/2$ **不能减小**。在 $[a,b]$ 上若 $f(a)=0$ 且 $|f'|\le M$，同理有 $\left|\int_a^bf\right|\le M(b-a)^2/2$。
+
+</Callout>
 
 </Solution>
 
@@ -602,29 +950,69 @@ $ \int_{a}^{b}f^2(x)\,dx\leq\frac{(b-a)^2}{2}\int_{a}^{b}[f'(x)]^2\,dx$。
 
 <Solution>
 
-**答案：** 不等式成立。
+**参考结论：** 对 $a<b$，
 
-**解析：** 由 $f(a)=0$，
+$$
+\boxed{\int_a^b f^2(x)\,\mathrm dx
+\le\frac{(b-a)^2}{2}\int_a^b[f'(x)]^2\,\mathrm dx}.
+$$
 
-$ f(x)=\int_{a}^{x}f'(t)\,dt$。
+**解题思路：** 已知 $f(a)=0$，先把 $f(x)$ 写成导数的积分；用**柯西—施瓦茨不等式**平方估计，再对 $x$ 积分。系数 $(b-a)^2/2$ 来自 $\int_a^b(x-a)\,\mathrm dx$。
 
-由柯西—施瓦茨不等式，
+<Steps>
+<Step>
 
-$ f^2(x)\leq(x-a)\int_{a}^{x}[f'(t)]^2\,dt$。
+    ### 第一步：把函数值改写为导数积分
 
-进一步有
 
-$ f^2(x)\leq(x-a)\int_{a}^{b}[f'(t)]^2\,dt$。
 
-两端在 $[a,b]$ 上积分：
+$$
+f(x)=f(x)-f(a)=\int_a^x f'(t)\,\mathrm dt.
+$$
 
-$ \int_{a}^{b}f^2(x)\,dx\leq\left[\int_{a}^{b}(x-a)\,dx\right]\int_{a}^{b}[f'(t)]^2\,dt$。
+</Step>
+<Step>
 
-而
+    ### 第二步：对每个 $x$ 应用积分型柯西不等式
 
-$ \int_{a}^{b}(x-a)\,dx=\frac{(b-a)^2}{2}$，
 
-故结论成立。
+
+$$
+\begin{aligned}
+    f^2(x)
+    &=\left(\int_a^x1\cdot f'(t)\,\mathrm dt\right)^2\\
+    &\le\left(\int_a^x1\,\mathrm dt\right)
+      \left(\int_a^x[f'(t)]^2\,\mathrm dt\right)\\
+    &\le(x-a)\int_a^b[f'(t)]^2\,\mathrm dt.
+    \end{aligned}
+$$
+
+    第二个不等号利用 $[f'(t)]^2\ge0$，扩大积分区间到 $[a,b]$。
+
+</Step>
+<Step>
+
+    ### 第三步：对 $x$ 积分完成证明
+
+
+
+$$
+\begin{aligned}
+    \int_a^bf^2(x)\,\mathrm dx
+    &\le\left(\int_a^b(x-a)\,\mathrm dx\right)
+      \int_a^b[f'(t)]^2\,\mathrm dt\\
+    &=\frac{(b-a)^2}{2}\int_a^b[f'(t)]^2\,\mathrm dt.
+    \end{aligned}
+$$
+
+</Step>
+</Steps>
+
+<Callout type="info" title="知识点：一维积分范数估计">
+
+这是一类 Poincaré 型不等式的简便版本，其思想是利用已知端点值来控制 $f$ 的大小。题给的 $1/2$ 系数由上述直接估计即可得到，无须计算最优常数。
+
+</Callout>
 
 </Solution>
 
@@ -635,98 +1023,89 @@ $ \int_{a}^{b}(x-a)\,dx=\frac{(b-a)^2}{2}$，
 设 $ f(x)$ 在 $ [0,1]$ 连续，且对任意 $ x,y\in[0,1]$ 均有
 
 $$
- |f(x)-f(y)|\le M|x-y|,
+|f(x)-f(y)|\le M|x-y|,
 $$
 
 $ M$ 为正的常数，求证：
 
 $$
- \left|\int_0^1f(x)\,dx-\frac1n\sum_{k=1}^nf\left(\frac kn\right)\right|
+\left|\int_0^1f(x)\,dx-\frac1n\sum_{k=1}^nf\left(\frac kn\right)\right|
 \le\frac M{2n}.
 $$
 
 <Solution>
 
-**答案：**
+**参考结论：** 对任意正整数 $n$，右端点矩形求积公式满足
 
 $$
- \left|\int_0^1f(x)\,dx-\frac1n\sum_{k=1}^nf\left(\frac kn\right)\right|
-\le\frac M{2n}.
+\boxed{\left|\int_0^1f(x)\,\mathrm dx
+-\frac1n\sum_{k=1}^nf\!\left(\frac kn\right)\right|
+\le\frac M{2n}}.
 $$
 
-**解析：** 将区间 $ [0,1]$ 等分为 $ n$ 个小区间，则
+**解题思路：** 将 $[0,1]$ 等分为 $n$ 段，把积分改写为各小区间的积分和；在第 $k$ 段用**右端点函数值**代替 $f(x)$。题设的 Lipschitz 条件正好控制单段误差，最终累加。
+
+<Steps>
+<Step>
+
+    ### 分段表示总误差
+
+    记 $I_k=[(k-1)/n,k/n]$，则
+
+
 
 $$
- \int_0^1f(x)\,dx
-=
-\sum_{k=1}^n
-\int_{\frac{k-1}{n}}^{\frac kn}f(x)\,dx.
+\begin{aligned}
+    E_n&=\int_0^1f(x)\,\mathrm dx
+    -\frac1n\sum_{k=1}^nf\!\left(\frac kn\right)\\
+    &=\sum_{k=1}^n\int_{(k-1)/n}^{k/n}
+    \left[f(x)-f\!\left(\frac kn\right)\right]\,\mathrm dx.
+    \end{aligned}
 $$
 
-同时，
+</Step>
+<Step>
+
+    ### 对单个区间估计误差
+
+    在 $x\in I_k$ 时，$x\le k/n$。由题设
+
+
 
 $$
- \frac1n\sum_{k=1}^nf\left(\frac kn\right)
-=
-\sum_{k=1}^n
-\int_{\frac{k-1}{n}}^{\frac kn}
-f\left(\frac kn\right)dx.
+\left|f(x)-f\!\left(\frac kn\right)\right|
+    \le M\left(\frac kn-x\right).
 $$
 
-因此
+    因此单段误差绝对值至多为
+
+
 
 $$
- \begin{aligned}
-&\left|\int_0^1f(x)\,dx-\frac1n\sum_{k=1}^nf\left(\frac kn\right)\right|\\
-&\quad=
-\left|
-\sum_{k=1}^n
-\int_{\frac{k-1}{n}}^{\frac kn}
-\left[f(x)-f\left(\frac kn\right)\right]dx
-\right|\\
-&\quad\le
-\sum_{k=1}^n
-\int_{\frac{k-1}{n}}^{\frac kn}
-\left|f(x)-f\left(\frac kn\right)\right|dx.
-\end{aligned}
+M\int_{(k-1)/n}^{k/n}\left(\frac kn-x\right)\,\mathrm dx
+    =\frac M{2n^2}.
 $$
 
-由题设的 Lipschitz 条件，
+</Step>
+<Step>
+
+    ### 累加 $n$ 段误差
+
+
 
 $$
- \left|f(x)-f\left(\frac kn\right)\right|
-\le
-M\left|x-\frac kn\right|.
+|E_n|\le\sum_{k=1}^n\frac M{2n^2}
+    =\frac M{2n}.
 $$
 
-当
+</Step>
+</Steps>
 
-$$
- x\in\left[\frac{k-1}{n},\frac kn\right]
-$$
+<Callout type="idea" title="误差阶和等号检验">
 
-时，
+该估计说明右端点矩形法的整体误差为 $O(1/n)$。取 $f(x)=Mx$，有 $\int_0^1f=M/2$，右端点和为 $M(n+1)/(2n)$，误差绝对值恰是 $M/(2n)$，所以常数准确。
 
-$$
- \left|x-\frac kn\right|=\frac kn-x.
-$$
-
-故
-
-$$
- \begin{aligned}
-&\left|\int_0^1f(x)\,dx-\frac1n\sum_{k=1}^nf\left(\frac kn\right)\right|\\
-&\quad\le
-M\sum_{k=1}^n
-\int_{\frac{k-1}{n}}^{\frac kn}
-\left(\frac kn-x\right)dx\\
-&\quad=
-M\sum_{k=1}^n\frac1{2n^2}\\
-&\quad=\frac M{2n}.
-\end{aligned}
-$$
-
-故所证不等式成立。
+</Callout>
 
 </Solution>
 
@@ -737,75 +1116,82 @@ $$
 设函数 $ f(x)$ 与 $ g(x)$ 在区间 $ [a,b]$ 上连续，证明：
 
 $$
- \left[\int_a^bf(x)g(x)\,dx\right]^2
+\left[\int_a^bf(x)g(x)\,dx\right]^2
 \le
 \int_a^bf^2(x)\,dx\int_a^bg^2(x)\,dx.
 $$
 
 <Solution>
 
-**答案：**
+**参考结论：**
 
 $$
- \left[\int_a^bf(x)g(x)\,dx\right]^2
-\le
-\int_a^bf^2(x)\,dx\int_a^bg^2(x)\,dx.
+\boxed{\left(\int_a^bf(x)g(x)\,\mathrm dx\right)^2
+\le\left(\int_a^bf^2(x)\,\mathrm dx\right)
+\left(\int_a^bg^2(x)\,\mathrm dx\right)}.
 $$
 
-**解析：** 对任意实数 $ \lambda$，由平方非负可得
+这就是**积分型柯西—施瓦茨不等式**。
+
+**解题思路：** 任何实函数的平方积分都非负。对连续函数 $f,g$ 构造 $\int_a^b(f-\lambda g)^2\,\mathrm dx$，通过选择最合适的参数 $\lambda$ 得出结论。必须单独处理 $\int g^2=0$ 的情况，避免除零。
+
+<Tabs items={['方法一：最小二乘法（推荐）', '方法二：判别式法']} defaultIndex={0}>
+<Tab value="方法一：最小二乘法（推荐）">
+
+    简记
+
+
 
 $$
- \int_a^b\bigl[f(x)-\lambda g(x)\bigr]^2\,dx\ge0.
+A=\int_a^bf^2(x)\,\mathrm dx,\quad
+    B=\int_a^bf(x)g(x)\,\mathrm dx,\quad
+    C=\int_a^bg^2(x)\,\mathrm dx.
 $$
 
-展开得
+    若 $C=0$，由 $g^2\ge0$ 且连续可知 $g\equiv0$，此时 $B=0$，结论显然成立。
+
+    若 $C>0$，取 $\lambda=B/C$，由
+
+
 
 $$
- \int_a^bf^2(x)\,dx
--2\lambda\int_a^bf(x)g(x)\,dx
-+\lambda^2\int_a^bg^2(x)\,dx
-\ge0.
+0\le\int_a^b(f-\lambda g)^2\,\mathrm dx
+    =A-2\lambda B+\lambda^2C
+    =A-\frac{B^2}{C}
 $$
 
-记
+    得 $B^2\le AC$，正是所证不等式。
+
+</Tab>
+<Tab value="方法二：判别式法">
+
+    对任何实数 $\lambda$，都有
+
+
 
 $$
- A=\int_a^bf^2(x)\,dx,
-\qquad
-B=\int_a^bf(x)g(x)\,dx,
-\qquad
-C=\int_a^bg^2(x)\,dx.
+0\le\int_a^b(f(x)-\lambda g(x))^2\,\mathrm dx
+    =C\lambda^2-2B\lambda+A.
 $$
 
-于是对任意 $ \lambda\in\mathbb R$，均有
+    当 $C>0$ 时，二次多项式对所有 $\lambda$ 非负，判别式必须满足
+
+
 
 $$
- C\lambda^2-2B\lambda+A\ge0.
+\Delta=(-2B)^2-4AC\le0,
 $$
 
-若 $ C=0$，由于 $ g^2(x)\ge0$ 且连续，所以 $ g(x)\equiv0$，从而 $ B=0$，所证不等式显然成立。
+    因而 $B^2\le AC$。当 $C=0$ 时如方法一直接处理即可。
 
-若 $ C>0$，上述关于 $ \lambda$ 的二次式恒非负，因此其判别式不大于零：
+</Tab>
+</Tabs>
 
-$$
- (-2B)^2-4AC\le0.
-$$
+<Callout type="info" title="等号条件">
 
-故
+若 $g\not\equiv0$，等号成立当且仅当存在常数 $\lambda$ 使 $f(x)=\lambda g(x)$ 在 $[a,b]$ 上恒成立；若 $g\equiv0$，两边恒为零，同样取等号（对 $f$ 无要求）。
 
-$$
- B^2\le AC,
-$$
-
-即
-
-$$
- \left[\int_a^bf(x)g(x)\,dx\right]^2
-\le
-\int_a^bf^2(x)\,dx\int_a^bg^2(x)\,dx.
-$$
-
-这就是积分形式的柯西—施瓦茨不等式。
+</Callout>
 
 </Solution>
 
@@ -816,7 +1202,7 @@ $$
 设 $ f(x)$ 在 $ [a,b]$ 有连续的导数，求证：
 
 $$
- \max_{[a,b]}|f(x)|
+\max_{[a,b]}|f(x)|
 \le
 \frac1{b-a}\left|\int_a^bf(x)\,dx\right|
 +\int_a^b|f'(x)|\,dx.
@@ -824,87 +1210,94 @@ $$
 
 <Solution>
 
-**答案：**
+**参考结论：** 对 $a<b$，有
 
 $$
- \max_{[a,b]}|f(x)|
-\le
-\frac1{b-a}\left|\int_a^bf(x)\,dx\right|
-+\int_a^b|f'(x)|\,dx.
+\boxed{\max_{x\in[a,b]}|f(x)|
+\le\frac1{b-a}\left|\int_a^bf(t)\,\mathrm dt\right|
++\int_a^b|f'(t)|\,\mathrm dt}.
 $$
 
-**解析：** 任取 $ x\in[a,b]$。对任意 $ t\in[a,b]$，由牛顿—莱布尼茨公式，
+**解题思路：** 将函数拆成“**区间平均值** + **相对平均值的偏差**”。偏差来自各点函数值的变化，而总变化量由 $\int|f'|$ 统一控制；最后对 $x$ 取最大值。
+
+<Steps>
+<Step>
+
+    ### 第一步：引入区间平均值
+
+    令
+
+
 
 $$
- f(x)-f(t)=\int_t^x f'(u)\,du.
+\bar f=\frac1{b-a}\int_a^bf(t)\,\mathrm dt.
 $$
 
-于是
+    对任意 $x\in[a,b]$，直接相减可得
+
+
 
 $$
- f(x)
-=
-\frac1{b-a}\int_a^bf(t)\,dt
-+
-\frac1{b-a}\int_a^b\bigl[f(x)-f(t)\bigr]dt.
+f(x)-\bar f=\frac1{b-a}\int_a^b\bigl[f(x)-f(t)\bigr]\,\mathrm dt.
 $$
 
-两边取绝对值，得
+</Step>
+<Step>
+
+    ### 第二步：利用导数的绝对积分控制偏差
+
+    由牛顿—莱布尼茨公式，对于任意 $x,t\in[a,b]$，
+
+
 
 $$
- \begin{aligned}
-|f(x)|
-&\le
-\frac1{b-a}\left|\int_a^bf(t)\,dt\right|
-+
-\frac1{b-a}\int_a^b|f(x)-f(t)|\,dt.
-\end{aligned}
+|f(x)-f(t)|=\left|\int_t^x f'(u)\,\mathrm du\right|
+    \le\int_a^b|f'(u)|\,\mathrm du.
 $$
 
-又因为
+    故
+
+
 
 $$
- |f(x)-f(t)|
-=
-\left|\int_t^xf'(u)\,du\right|
-\le
-\int_a^b|f'(u)|\,du,
+\begin{aligned}
+    |f(x)-\bar f|
+    &\le\frac1{b-a}\int_a^b|f(x)-f(t)|\,\mathrm dt\\
+    &\le\int_a^b|f'(u)|\,\mathrm du.
+    \end{aligned}
 $$
 
-所以
+</Step>
+<Step>
+
+    ### 第三步：加回平均值并取最大值
+
+    三角不等式给出
+
+
 
 $$
- \begin{aligned}
-|f(x)|
-&\le
-\frac1{b-a}\left|\int_a^bf(t)\,dt\right|
-+
-\frac1{b-a}\int_a^b
-\left(\int_a^b|f'(u)|\,du\right)dt\\
-&=
-\frac1{b-a}\left|\int_a^bf(t)\,dt\right|
-+
-\int_a^b|f'(u)|\,du.
-\end{aligned}
+|f(x)|\le|\bar f|+|f(x)-\bar f|
+    \le\frac1{b-a}\left|\int_a^bf(t)\,\mathrm dt\right|
+    +\int_a^b|f'(u)|\,\mathrm du.
 $$
 
-该不等式对任意 $ x\in[a,b]$ 都成立。又因 $ f$ 连续，$ |f|$ 在闭区间上能取得最大值，因此
+    右端与 $x$ 无关；因为连续函数 $|f|$ 在紧区间上存在最大值，故对 $x$ 取最大即得结论。
 
-$$
- \max_{[a,b]}|f(x)|
-\le
-\frac1{b-a}\left|\int_a^bf(x)\,dx\right|
-+
-\int_a^b|f'(x)|\,dx.
-$$
+</Step>
+</Steps>
 
-证毕。
+<Callout type="idea" title="可迁移的证明模板">
+
+求 $\max|f|$ 时，如果已知的是 $\int f$ 和 $\int|f'|$，优先写 $f(x)=\bar f+[f(x)-\bar f]$。这种“**平均值 + 振幅**”分解在微分不等式、函数估计题中十分常见。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点4：周期与对称换元、积分恒等式
+## 考点四：周期函数、迭代积分与对称换元恒等式
 
 <Question id="selected-1103-math-a932d3-003" type="essay">
 
@@ -912,23 +1305,60 @@ $$
 
 <Solution>
 
-**答案：** 该命题成立。
+**参考结论：** 命题成立。在 $f$ 在实轴上连续、$T>0$ 的条件下，
 
-**解析：** **必要性：** 若 $f(x+T)=f(x)$，则令
+$$
+\boxed{f(x+T)=f(x)\ (\forall x\in\mathbb R)
+\iff \int_a^{a+T}f(x)\,\mathrm dx\text{ 不依赖 }a.}
+$$
 
-$ F(a)=\int_{a}^{a+T}f(x)\,dx$。
+**核心思路：** 把“任意起点、固定长度区间上的积分”记为函数 $F(a)$。积分为常数等价于 $F'(a)=0$，而连续性使变限积分求导成立。
 
-由变上、下限积分求导公式，
+<Steps>
+<Step>
 
-$ F'(a)=f(a+T)-f(a)=0$，
+### 必要性：由周期性推出积分与起点无关
 
-故 $F(a)$ 为常数。
+设 $f(x+T)=f(x)$。记
 
-**充分性：** 若对任意 $a$，$ F(a)=\int_{a}^{a+T}f(x)\,dx$ 均为同一常数，则 $F'(a)=0$。由连续性，
+$$
+F(a)=\int_a^{a+T} f(x)\,\mathrm dx.
+$$
 
-$ 0=F'(a)=f(a+T)-f(a)$，
+由莱布尼茨公式（上下限同时依赖 $a$），
 
-所以对任意 $a$ 均有 $f(a+T)=f(a)$，即 $f$ 以 $T$ 为周期。
+$$
+F'(a)=f(a+T)\cdot1-f(a)\cdot1=0.
+$$
+
+故 $F$ 在整个实轴上为常数。
+
+</Step>
+<Step>
+
+### 充分性：由积分恒定反推周期性
+
+反过来，若对一切实数 $a$，$F(a)=C$，则 $F'(a)=0$。利用 $f$ 连续，
+
+$$
+0=F'(a)=f(a+T)-f(a).
+$$
+
+这对任意 $a$ 都成立，即 $f(a+T)=f(a)$；因此 $T$ 是 $f$ 的一个周期。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="知识点：定积分的端点求导">
+
+$$
+\frac{\mathrm d}{\mathrm da}\int_{u(a)}^{v(a)}f(t)\,\mathrm dt
+=f(v(a))v'(a)-f(u(a))u'(a).
+$$
+
+本题的关键不是把积分算出来，而是对**起点** $a$ 求导。$T$ 只是一个周期，不一定是最小正周期。
+
+</Callout>
 
 </Solution>
 
@@ -942,25 +1372,59 @@ $ \int_{0}^{x}\left[\int_{0}^{t}f(u)\,du\right]dt=\int_{0}^{x}f(t)(x-t)\,dt$。
 
 <Solution>
 
-**答案：** 该恒等式成立。
+**参考结论：** 对一切实数 $x$，恒有
 
-**解析：** 令
+$$
+\boxed{\int_0^x\!\left(\int_0^t f(u)\,\mathrm du\right)\mathrm dt
+=\int_0^x(x-t)f(t)\,\mathrm dt.}
+$$
 
-$ F(t)=\int_{0}^{t}f(u)\,du$，则 $F'(t)=f(t)$，且 $F(0)=0$。
+**解题思路：** 二重变限积分可用分部积分“消去内层积分”，也可对两边分别求导。后一方法尤其适用于含参数的积分恒等式。
 
-对左端分部积分：
+<Tabs items={['方法一：分部积分','方法二：构造函数求导']} defaultIndex={0}>
+<Tab value="方法一：分部积分">
 
-$ \int_{0}^{x}F(t)\,dt=\left.tF(t)\right|_{0}^{x}-\int_{0}^{x}tF'(t)\,dt$，
+令 $F(t)=\int_0^t f(u)\,\mathrm du$。由连续性，$F'(t)=f(t)$，且 $F(0)=0$。分部积分得
 
-即
+$$
+\begin{aligned}
+\int_0^xF(t)\,\mathrm dt
+&=\left[tF(t)\right]_0^x-\int_0^x tF'(t)\,\mathrm dt\\
+&=x\int_0^x f(t)\,\mathrm dt-\int_0^x tf(t)\,\mathrm dt\\
+&=\int_0^x(x-t)f(t)\,\mathrm dt.
+\end{aligned}
+$$
 
-$ \int_{0}^{x}F(t)\,dt=x\int_{0}^{x}f(t)\,dt-\int_{0}^{x}tf(t)\,dt$。
+由此得到题设恒等式。
 
-因此
+</Tab>
+<Tab value="方法二：构造函数求导">
 
-$ \int_{0}^{x}F(t)\,dt=\int_{0}^{x}(x-t)f(t)\,dt$，
+分别记等式左右两边为 $L(x)$、$R(x)$。微积分基本定理给出
 
-结论得证。
+$$
+L'(x)=\int_0^x f(t)\,\mathrm dt.
+$$
+
+对右端用莱布尼茨公式：
+
+$$
+\begin{aligned}
+R'(x)&=(x-x)f(x)+\int_0^x\frac{\partial}{\partial x}[(x-t)f(t)]\,\mathrm dt\\
+&=\int_0^x f(t)\,\mathrm dt=L'(x).
+\end{aligned}
+$$
+
+又 $L(0)=R(0)=0$，故 $L(x)=R(x)$。
+
+</Tab>
+</Tabs>
+
+<Callout type="info" title="应用与适用范围">
+
+这是迭代积分（Volterra 积分）的一阶化简。积分上限为负时仍然成立：按定积分的**有向积分**约定运算即可，不必假设 $x\ge0$。
+
+</Callout>
 
 </Solution>
 
@@ -973,103 +1437,86 @@ $ \int_{0}^{x}F(t)\,dt=\int_{0}^{x}(x-t)f(t)\,dt$，
 （Ⅰ）
 
 $$
- \int_1^a\frac{f(x^2)}x\,dx
+\int_1^a\frac{f(x^2)}x\,dx
 =\frac12\int_1^{a^2}\frac{f(x)}x\,dx;
 $$
-
 
 （Ⅱ）又设
 
 $$
- f\left(\frac{a^2}x\right)=f(x)\qquad(x>0),
+f\left(\frac{a^2}x\right)=f(x)\qquad(x>0),
 $$
 
 则
 
 $$
- \int_a^{a^3}\frac{f(x)}x\,dx
+\int_a^{a^3}\frac{f(x)}x\,dx
 =\int_1^{a^2}\frac{f(x)}x\,dx.
 $$
 
 <Solution>
 
-**答案：**
+**参考结论：**
 
-（Ⅰ）结论成立。
+- **（Ⅰ）成立。** 对任意 $a>0$，$\displaystyle \int_1^a\frac{f(x^2)}x\,\mathrm dx=\frac12\int_1^{a^2}\frac{f(u)}u\,\mathrm du$。
+- **（Ⅱ）按题面条件不成立。** 即使 $f(a^2/x)=f(x)$，也不能保证题设两个积分相等；下面给出满足全部条件的反例。
 
+<Steps>
+<Step>
 
-（Ⅱ）按现有题面条件，结论一般不成立；题面应存在条件或积分限的缺漏。
+### （Ⅰ）平方代换，完整处理积分限
 
-**解析：**
+设 $u=x^2$。由于 $x>0$，有 $\mathrm du=2x\,\mathrm dx$，故 $\mathrm dx/x=\mathrm du/(2u)$。当 $x=1$ 时 $u=1$；当 $x=a$ 时 $u=a^2$。于是
 
-### （Ⅰ）
-
-
-
-
-令
 $$
- u=x^2.
-$$
-则
-$$
- du=2x\,dx,
-\qquad
-\frac{dx}{x}=\frac{du}{2u}.
-$$
-当 $ x=1$ 时，$ u=1$；当 $ x=a$ 时，$ u=a^2$。因此
-$$
- \begin{aligned}
-\int_1^a\frac{f(x^2)}x\,dx
-&=\frac12\int_1^{a^2}\frac{f(u)}u\,du\\
-&=\frac12\int_1^{a^2}\frac{f(x)}x\,dx.
+\begin{aligned}
+\int_1^a\frac{f(x^2)}x\,\mathrm dx
+&=\frac12\int_1^{a^2}\frac{f(u)}u\,\mathrm du.
 \end{aligned}
 $$
-故结论成立。
 
-### （Ⅱ）
+这里 $a<1$ 时积分限虽然递减，代换依然有效。
 
-现有条件
-$$
- f\left(\frac{a^2}{x}\right)=f(x)
-$$
-仅表示函数在对数变量下关于 $ \ln a$ 对称，并不足以推出题中两个积分相等。
+</Step>
+<Step>
 
-取任意 $ a>0$ 且 $ a\ne1$，令
+### （Ⅱ）构造反例，检验题面真伪
+
+取 $a=e$，$f(x)=(\ln x-1)^2$（$x>0$）。显然 $f$ 连续，并且
+
 $$
- f(x)=(\ln x-\ln a)^2.
+f\!\left(\frac{e^2}{x}\right)
+=(2-\ln x-1)^2=(\ln x-1)^2=f(x).
 $$
-则 $ f(x)$ 在 $ (0,+\infty)$ 连续，并且
+
+以 $t=\ln x$ 代换，得到
+
 $$
- \begin{aligned}
-f\left(\frac{a^2}{x}\right)
-&=\left(\ln\frac{a^2}{x}-\ln a\right)^2\\
-&=(\ln a-\ln x)^2\\
-&=(\ln x-\ln a)^2\\
-&=f(x).
+\begin{aligned}
+\int_e^{e^3}\frac{f(x)}x\,\mathrm dx
+&=\int_1^3(t-1)^2\,\mathrm dt=\frac83,\\
+\int_1^{e^2}\frac{f(x)}x\,\mathrm dx
+&=\int_0^2(t-1)^2\,\mathrm dt=\frac23.
 \end{aligned}
 $$
-设
+
+两值不同，故（Ⅱ）并非题设条件的必然结论；在核对或更正原题之前，不能把它当成可证明命题。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="重要：原题第二问存在条件或积分限问题">
+
+条件 $f(a^2/x)=f(x)$ 描述的是对数坐标下关于 $\ln a$ 的镜像对称，并**不**意味着对数坐标下的平移周期性。真正可由该对称性推出的等式之一是
+
 $$
- A=\ln a.
+\int_1^{a^2}\frac{f(x)}x\,\mathrm dx
+=2\int_1^{a}\frac{f(x)}x\,\mathrm dx,
 $$
-作代换 $ u=\ln x$，则 $ dx/x=du$。于是
-$$
- \begin{aligned}
-\int_a^{a^3}\frac{f(x)}x\,dx
-&=\int_A^{3A}(u-A)^2\,du\\
-&=\frac{8A^3}{3},
-\end{aligned}
-$$
-而
-$$
- \begin{aligned}
-\int_1^{a^2}\frac{f(x)}x\,dx
-&=\int_0^{2A}(u-A)^2\,du\\
-&=\frac{2A^3}{3}.
-\end{aligned}
-$$
-当 $ a\ne1$ 时，$ A\ne0$，两者不相等。因此（Ⅱ）按现有题面无法证明，原题应存在印刷或转录错误。
+
+可用 $x\mapsto a^2/x$ 验证。切勿为了得到题给答案而添加没有依据的换元。
+
+</Callout>
 
 </Solution>
 
@@ -1085,19 +1532,74 @@ $(II)$ 计算 $\int_{-\frac{\pi}{4}}^{\frac{\pi}{4}} \frac{\mathrm{d}x}{(1+\math
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：**
 
-**解析：** **证明：** $(\mathrm{I})\int_{-a}^{a}\frac{f(x)}{1+g(x)}\mathrm{d}x=\int_{-a}^{0}\frac{f(x)}{1+g(x)}\mathrm{d}x+\int_{0}^{a}\frac{f(x)}{1+g(x)}\mathrm{d}x.$
-又 $\int_{-a}^{0}\frac{f(x)}{1+g(x)}\mathrm{d}x\overset{x=-t}{=}\int_{a}^{0}\frac{f(-t)}{1+g(-t)}\mathrm{d}(-t)=\int_{0}^{a}\frac{f(-x)}{1+g(-x)}\mathrm{d}x.$
-由 $g(x)\cdot g(-x)=1, f(-x)=f(x)$，有
-$$\int_{-a}^{a}\frac{f(x)}{1+g(x)}\mathrm{d}x=\int_{0}^{a}\left[\frac{f(-x)}{1+g(-x)}+\frac{f(x)}{1+g(x)}\right]\mathrm{d}x$$
-$$=\int_{0}^{a}\frac{f(x)[1+g(x)]+f(x)[1+g(-x)]}{[1+g(-x)][1+g(x)]}\mathrm{d}x$$
-$$=\int_{0}^{a}\frac{f(x)[2+g(x)+g(-x)]}{2+g(x)+g(-x)}\mathrm{d}x$$
-$$=\int_{0}^{a}f(x)\mathrm{d}x.$$
-**解：** $(\mathrm{II})$ 取 $g(x)=\mathrm{e}^x, f(x)=\frac{1}{\cos^2 x}$，则
-$g(x)\cdot g(-x)=\mathrm{e}^x\cdot\mathrm{e}^{-x}=1, f(-x)=f(x)$，
-故
-$$\int_{-\frac{\pi}{4}}^{\frac{\pi}{4}}\frac{\mathrm{d}x}{(1+\mathrm{e}^x)\cos^2 x}=\int_{0}^{\frac{\pi}{4}}\frac{\mathrm{d}x}{\cos^2 x}=\left.\tan x\right|_{0}^{\frac{\pi}{4}}=1.$$
+**（Ⅰ）** 当被积函数在 $[-a,a]$ 上有定义且可积（通常取 $a\ge0$，例如 $g(x)>0$）时，
+
+$$
+\boxed{\int_{-a}^a\frac{f(x)}{1+g(x)}\,\mathrm dx
+=\int_0^a f(x)\,\mathrm dx.}
+$$
+
+**（Ⅱ）** 所求积分为 $\boxed{1}$。
+
+**核心观察：** 对称区间的积分可以把 $x$ 与 $-x$ 处的被积函数成对相加。利用 $g(-x)=1/g(x)$，两项恰好合成 $f(x)$。
+
+<Steps>
+<Step>
+
+### （Ⅰ）拆分对称区间并反射换元
+
+先设 $a\ge0$（若 $a<0$，有向积分的两边同时变号，结论仍成立）。把负半轴部分作 $x=-t$ 的代换，再由偶性 $f(-t)=f(t)$，有
+
+$$
+\begin{aligned}
+I&=\int_{-a}^{a}\frac{f(x)}{1+g(x)}\,\mathrm dx\\
+&=\int_0^a f(x)\left[\frac1{1+g(x)}+\frac1{1+g(-x)}\right]\mathrm dx.
+\end{aligned}
+$$
+
+因 $g(x)g(-x)=1$，在分母非零时可化为
+
+$$
+\begin{aligned}
+\frac1{1+g(x)}+\frac1{1+g(-x)}
+&=\frac1{1+g(x)}+\frac{g(x)}{1+g(x)}\\
+&=1.
+\end{aligned}
+$$
+
+于是 $I=\int_0^a f(x)\,\mathrm dx$，第一问证毕。
+
+</Step>
+<Step>
+
+### （Ⅱ）识别可直接套用的函数
+
+取 $f(x)=\sec^2x$，$g(x)=e^x$。前者为连续偶函数，后者为正连续函数，并满足
+
+$$
+g(x)g(-x)=e^xe^{-x}=1.
+$$
+
+应用（Ⅰ），
+
+$$
+\begin{aligned}
+\int_{-\pi/4}^{\pi/4}\frac{\mathrm dx}{(1+e^x)\cos^2x}
+&=\int_0^{\pi/4}\sec^2x\,\mathrm dx\\
+&=\left[\tan x\right]_0^{\pi/4}=\boxed{1}.
+\end{aligned}
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="隐含条件：必须保证原积分有意义">
+
+题面仅写 $g(x)g(-x)=1$，并不能保证 $1+g(x)\ne0$。例如 $g(x)\equiv-1$ 就满足乘积条件，却使分母恒为零。因此第一问须附加“被积函数有定义且可积”之类的必要前提；第二问 $g(x)=e^x>0$ 则完全没有此问题。
+
+</Callout>
 
 </Solution>
 

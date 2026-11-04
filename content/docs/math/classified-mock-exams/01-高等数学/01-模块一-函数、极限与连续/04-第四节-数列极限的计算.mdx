@@ -1,13 +1,11 @@
 ---
-title: "第四节 数列极限的计算｜递推收敛、误差展开与黎曼和"
-description: "参照真题核心题目数列极限考点，精选递推数列收敛与精细极限、黎曼和、积分数列及高阶误差比较。"
+title: "4. 数列极限的计算"
+description: "17 道数列极限题全部重写，系统涵盖递推收敛与误差渐近、黎曼和、几何平均、积分数列及指数型极限。"
 ---
 
-# 第四节 数列极限的计算｜递推收敛、误差展开与黎曼和
+精选 **17 道题**，本节已全部深度重构。以“先证明收敛，再计算精细极限”为主线，串联递推映射、局部泰勒展开、黎曼和及积分数列；每题均按参考答案、解题思路、严谨过程和易错提示编排。
 
-精选 **17 道题**，对应「真题核心题目」同名小节。按命题考点归类，完整保留原始题干、选项、答案、解析和 MDX 组件。
-
-## 考点1：单调有界与不动点迭代
+## 一、递推数列：单调有界与不动点迭代
 
 <Question id="selected-1103-math-a9077b-004" type="essay">
 
@@ -15,25 +13,94 @@ description: "参照真题核心题目数列极限考点，精选递推数列收
 
 <Solution>
 
-**答案：** $ \lim_{n\to\infty}x_n=\sqrt a$
+**参考答案：**
 
-**解析：** 因 $ x_0>0$，由递推式可知所有 $ x_n>0$。由算术—几何平均值不等式，
+$$
+\boxed{\lim_{n\to\infty}x_n=\sqrt a}.
+$$
 
-$ x_{n+1}=\frac12\left(x_n+\frac{a}{x_n}\right)\ge\sqrt{x_n\cdot\frac{a}{x_n}}=\sqrt a$。
+同时，数列从 $x_1$ 开始单调不增，并以下界 $\sqrt a$ 有界，因此极限确实存在。
 
-故从 $ x_1$ 起恒有 $ x_n\ge\sqrt a$。进而
+**解题思路：** 递推式是求 $\sqrt a$ 的牛顿迭代。证明收敛时不能直接“设极限存在再代入”；要先证明数列从某一项起单调有界，再利用递推式解出极限。
 
-$ x_{n+1}-x_n=\frac{a-x_n^2}{2x_n}\le0$，
+<Tabs items={['方法一：单调有界定理（推荐）','方法二：误差恒等式']} defaultIndex={0}>
+<Tab value="方法一：单调有界定理（推荐）">
 
-所以 $ \{x_n\}_{n\ge1}$ 单调递减，且以下界 $ \sqrt a$ 有界，故其极限存在。
+<Steps>
+<Step>
 
-设 $ \lim_{n\to\infty}x_n=L$，则 $ L\ge\sqrt a>0$。对递推式取极限，得
+### 证明所有项为正且获得下界
 
-$ L=\frac12\left(L+\frac{a}{L}\right)$，
+由 $x_0>0$、$a>0$ 和递推式可归纳出 $x_n>0$。对任意 $n\ge0$，由算术—几何平均不等式，
 
-即 $ L^2=a$。因 $ L>0$，所以
+$$
+x_{n+1}=\frac12\left(x_n+\frac a{x_n}\right)
+\ge\sqrt{x_n\cdot\frac a{x_n}}=\sqrt a.
+$$
 
-$ L=\sqrt a$。
+故从 $x_1$ 起，$x_n\ge\sqrt a$。
+
+</Step>
+<Step>
+
+### 证明从 $x_1$ 起单调不增
+
+当 $n\ge1$ 时，由 $x_n\ge\sqrt a$ 得 $a-x_n^2\le0$。于是
+
+$$
+x_{n+1}-x_n=\frac{a-x_n^2}{2x_n}\le0.
+$$
+
+所以 $\{x_n\}_{n\ge1}$ 单调不增且有下界 $\sqrt a$，依单调有界定理极限存在。
+
+</Step>
+<Step>
+
+### 代入递推关系确定极限
+
+设 $x_n\to L\ge\sqrt a>0$，则
+
+$$
+L=\frac12\left(L+\frac aL\right)
+\quad\Longrightarrow\quad L^2=a.
+$$
+
+结合 $L>0$，得到 $L=\sqrt a$。
+
+</Step>
+</Steps>
+
+</Tab>
+<Tab value="方法二：误差恒等式">
+
+将递推式与 $\sqrt a$ 相减并配方：
+
+$$
+\begin{aligned}
+x_{n+1}-\sqrt a
+&=\frac{x_n^2+a-2x_n\sqrt a}{2x_n}\\
+&=\frac{(x_n-\sqrt a)^2}{2x_n}\ge0.
+\end{aligned}
+$$
+
+这一步直接说明 $x_1,x_2,\ldots$ 都不小于 $\sqrt a$。再对 $n\ge1$ 使用
+
+$$
+x_{n+1}-x_n=-\frac{(x_n-\sqrt a)(x_n+\sqrt a)}{2x_n}\le0,
+$$
+
+即可完成单调有界证明。设极限 $L>0$，依旧由 $L^2=a$ 得 $L=\sqrt a$。
+
+这个恒等式还能揭示局部的**二次收敛**：当 $x_n$ 已接近 $\sqrt a$ 时，下一步误差近似为原误差平方除以 $2\sqrt a$。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="初始项不一定在下界之上">
+
+题目只给出 $x_0>0$，并没有给 $x_0\ge\sqrt a$。因此不应声称整个数列自 $x_0$ 起递减；严格的结论是**从 $x_1$ 起**单调不增。
+
+</Callout>
 
 </Solution>
 
@@ -45,31 +112,61 @@ $ L=\sqrt a$。
 
 <Solution>
 
-**答案：** $ \lim_{n\to\infty}x_n=\sqrt c$
+**参考答案：**
 
-**解析：** 先证明区间 $ [0,\sqrt c]$ 在递推映射下保持不变。若 $ 0\le x_n\le\sqrt c$，显然 $ x_{n+1}>0$。又
+$$
+\boxed{\lim_{n\to\infty}x_n=\sqrt c}.
+$$
 
-$ \sqrt c-x_{n+1}=\sqrt c-\frac{c(1+x_n)}{c+x_n}=\frac{\sqrt c(\sqrt c-1)(\sqrt c-x_n)}{c+x_n}\ge0$，
+**解题思路：** 先验证区间 $[0,\sqrt c]$ 对递推映射封闭，再证明数列单调不减。这两步保证极限存在；最后才可以在递推式中取极限。
 
-故 $ x_{n+1}\le\sqrt c$。
+<Steps>
+<Step>
 
-另一方面，
+### 证明区间不变
 
-$ x_{n+1}-x_n=\frac{c(1+x_n)-x_n(c+x_n)}{c+x_n}=\frac{c-x_n^2}{c+x_n}\ge0$。
+设 $T(x)=\dfrac{c(1+x)}{c+x}$，其中 $c>1$。若 $0\le x\le\sqrt c$，分母为正，且 $T(x)>0$。进一步有
 
-所以 $ \{x_n\}$ 单调不减，且以上界 $ \sqrt c$ 有界，故极限存在。
+$$
+\begin{aligned}
+\sqrt c-T(x)
+&=\frac{\sqrt c(c+x)-c(1+x)}{c+x}\\
+&=\frac{\sqrt c(\sqrt c-1)(\sqrt c-x)}{c+x}\ge0.
+\end{aligned}
+$$
 
-设极限为 $ L$，则 $ 0\le L\le\sqrt c$，并且
+故 $T([0,\sqrt c])\subseteq[0,\sqrt c]$。由 $x_1$ 的范围归纳得到 $0\le x_n\le\sqrt c$（对所有 $n$）。
 
-$ L=\frac{c(1+L)}{c+L}$。
+</Step>
+<Step>
 
-化简得
+### 证明单调有界
 
-$ L^2=c$。
+直接用递推式比较相邻项：
 
-因 $ L\ge0$，故
+$$
+x_{n+1}-x_n
+=\frac{c(1+x_n)-x_n(c+x_n)}{c+x_n}
+=\frac{c-x_n^2}{c+x_n}\ge0.
+$$
 
-$ L=\sqrt c$。
+所以 $\{x_n\}$ 单调不减，且以上界 $\sqrt c$ 有界，故存在极限 $L\in[0,\sqrt c]$。
+
+</Step>
+<Step>
+
+### 确定唯一可能的极限
+
+由连续性，$L=\dfrac{c(1+L)}{c+L}$，即 $L^2=c$。结合 $L\ge0$，得到 $L=\sqrt c$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="分式递推题的判定顺序">
+
+先找不动点，再利用 $T(x)-x$ 的符号确定迭代方向；但**找出不动点不等于证明收敛**，还要验证迭代始终落在可控区间内。
+
+</Callout>
 
 </Solution>
 
@@ -89,46 +186,63 @@ $$
 
 <Solution>
 
-**答案：**（1）$\varphi$ 在 $[0,+\infty)$ 上严格递增，且 $0<\varphi(x)<x$（$x>0$）；（2）$\boxed{\lim_{n\to\infty}x_n=0}$。
+**参考答案：** （1）$\varphi$ 在 $[0,+\infty)$ 上严格递增，且对每个 $x>0$，$0<\varphi(x)<x$；（2）
 
-**过程：**
+$$
+\boxed{\lim_{n\to\infty}x_n=0}.
+$$
+
+**解题思路：** 先由积分上限求导证明单调性，再把 $0<\varphi(x)<x$ 转换成递推数列单调递减。极限值应在**证明收敛之后**求出。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 证明单调性与不等式
+### 求出函数并证明严格递增
 
-  直接求导及积分得
+利用变量代换 $u=t^2$，
 
-  $$
-  \varphi'(x)=xe^{-x^2},\qquad \varphi(x)=\frac12(1-e^{-x^2}).
-  $$
+$$
+\varphi(x)=\int_0^x te^{-t^2}\,\mathrm dt
+=\frac12\bigl(1-e^{-x^2}\bigr),\qquad
+\varphi'(x)=xe^{-x^2}.
+$$
 
-  当 $x>0$ 时 $\varphi'(x)>0$，故 $\varphi$ 在 $[0,+\infty)$ 上严格递增；又 $\varphi(0)=0$，从而 $\varphi(x)>0$。
+当 $x>0$ 时，$\varphi'(x)>0$；结合 $\varphi(0)=0$，可知 $\varphi$ 在 $[0,+\infty)$ 上严格递增，并且 $\varphi(x)>0$。
 
-  考虑 $h(x)=x-\varphi(x)$。对 $x\ge0$，函数 $xe^{-x^2}$ 的最大值为 $1/\sqrt{2e}<1$，因此
+</Step>
+<Step>
 
-  $$
-  h'(x)=1-xe^{-x^2}>0,\qquad h(0)=0.
-  $$
+### 证明 $\varphi(x)<x$
 
-  故 $h(x)>0$（$x>0$），即 $\boxed{0<\varphi(x)<x}$。
+令 $h(x)=x-\varphi(x)$。对 $t\ge0$，$te^{-t^2}$ 的最大值在 $t=1/\sqrt2$ 处取得，等于 $1/\sqrt{2e}<1$。因此
 
-  </Step>
-  <Step>
+$$
+h'(x)=1-xe^{-x^2}>0\quad(x\ge0),\qquad h(0)=0.
+$$
 
-  ### 证明极限存在并确定极限
+故当 $x>0$ 时 $h(x)>0$，即 $\varphi(x)<x$。
 
-  由（1）对每个 $x_n>0$ 都有
+</Step>
+<Step>
 
-  $$
-  0<x_{n+1}=\varphi(x_n)<x_n.
-  $$
+### 建立数列收敛并确定极限
 
-  因而 $\{x_n\}$ 单调递减且有下界 $0$，存在极限 $L\ge0$。利用 $\varphi$ 的连续性得 $L=\varphi(L)$。若 $L>0$，则由（1）有 $\varphi(L)<L$，矛盾。故唯一可能是 $L=0$。
+由于 $x_1>0$，逐项应用上述不等式可得
 
-  </Step>
+$$
+0<x_{n+1}=\varphi(x_n)<x_n.
+$$
+
+因此 $\{x_n\}$ 单调递减且以 $0$ 为下界，极限 $L\ge0$ 存在。利用连续性得 $L=\varphi(L)$。如果 $L>0$，则 $\varphi(L)<L$，与等式矛盾。因此只能 $L=0$。
+
+</Step>
 </Steps>
+
+<Callout type="warn" title="不要先把极限代入递推式">
+
+递推方程 $L=\varphi(L)$ 只描述**可能的极限**。本题必须先通过 $0<x_{n+1}<x_n$ 完成存在性证明，再解不动点方程。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -142,50 +256,67 @@ $$
 （Ⅱ）求
 
 $$
- \lim_{n\to\infty}\frac{x_nx_{n+1}}{x_n-x_{n+1}}.
+\lim_{n\to\infty}\frac{x_nx_{n+1}}{x_n-x_{n+1}}.
 $$
 
 <Solution>
 
-**答案：**
-
-（Ⅰ）
+**参考答案：**
 
 $$
- \lim_{n\to\infty}x_n=0.
+\boxed{\text{（Ⅰ）}\lim_{n\to\infty}x_n=0,\qquad
+\text{（Ⅱ）}\lim_{n\to\infty}\frac{x_nx_{n+1}}{x_n-x_{n+1}}=2}.
 $$
 
-（Ⅱ）
+**解题思路：** 第一问利用 $0<\ln(1+t)<t$ 建立单调有界；第二问的分母是一阶项相消后的二阶小量，必须保留 $\ln(1+t)$ 的二阶展开。
+
+<Steps>
+<Step>
+
+### 先证明收敛
+
+当 $t>0$ 时，$0<\ln(1+t)<t$。因 $x_1>0$，由归纳法有
+
 $$
- \lim_{n\to\infty}\frac{x_nx_{n+1}}{x_n-x_{n+1}}=2.
+0<x_{n+1}=\ln(1+x_n)<x_n.
 $$
 
-**解析：** 因为 $ x_1>0$，且对任意 $ u>0$ 有
-$$
- 0<\ln(1+u)<u,
-$$
-所以
-$$
- 0<x_{n+1}<x_n.
-$$
-故 $ \{x_n\}$ 单调递减且有下界 $ 0$，从而收敛。设极限为 $ l\ge0$，对递推式取极限：
-$$
- l=\ln(1+l).
-$$
-而 $ l-\ln(1+l)$ 在 $ [0,+\infty)$ 上仅在 $ l=0$ 时为零，因此 $ l=0$。
+故 $x_n\downarrow L\ge0$。连续性给出 $L=\ln(1+L)$。设 $g(t)=t-\ln(1+t)$，则 $g(0)=0$，而 $g'(t)=\frac{t}{1+t}>0$（$t>0$），所以非负解只有 $L=0$。
 
-再由
+</Step>
+<Step>
+
+### 精确计算第二个极限
+
+在 $x_n\to0^+$ 的前提下，
+
 $$
- x_n-x_{n+1}=x_n-\ln(1+x_n)
-\sim\frac{x_n^2}{2},
-\qquad
-x_{n+1}\sim x_n,
+\ln(1+x_n)=x_n-\frac{x_n^2}{2}+O(x_n^3).
 $$
-得
+
+于是
+
 $$
- \frac{x_nx_{n+1}}{x_n-x_{n+1}}
-\sim\frac{x_n^2}{x_n^2/2}=2.
+x_n-x_{n+1}=\frac{x_n^2}{2}+O(x_n^3),
+\qquad \frac{x_{n+1}}{x_n}=\frac{\ln(1+x_n)}{x_n}\to1.
 $$
+
+将原式改写为
+
+$$
+\frac{x_nx_{n+1}}{x_n-x_{n+1}}
+=\frac{x_{n+1}/x_n}{(x_n-x_{n+1})/x_n^2}
+\longrightarrow\frac{1}{1/2}=2.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="先看相邻项差的阶数">
+
+若 $x_{n+1}=x_n-ax_n^2+o(x_n^2)$、$a>0$，且 $x_n\to0$，则通常 $x_{n+1}/x_n\to1$，于是 $x_nx_{n+1}/(x_n-x_{n+1})\to1/a$。
+
+</Callout>
 
 </Solution>
 
@@ -197,33 +328,89 @@ $$
 
 <Solution>
 
-**答案：** $\lim\limits_{n\to\infty}x_n=0$。
+**参考答案：**
 
-**解析：** **证明：** 由 $x_{n+1} = \ln(e^{x_n} - 1) - \ln x_n = \ln \frac{e^{x_n} - 1}{x_n}$, 知 $e^{x_{n+1}} = \frac{e^{x_n} - 1}{x_n}$。
+$$
+\boxed{\lim_{n\to\infty}x_n=0}.
+$$
 
-由 $x_1 > 0$, 知 $e^{x_2} = \frac{e^{x_1} - 1}{x_1} > 1$ (利用当 $x > 0$ 时, $e^x - 1 > x$)，故 $x_2 > 0$。由归纳法, 知 $x_n > 0$, 即 $\{x_n\}$ 有下界。
+**解题思路：** 把对数差合为一个对数后，发现它正好是指数函数在区间 $[0,x_n]$ 上割线斜率的对数。拉格朗日中值定理直接给出 $0<x_{n+1}<x_n$。
 
-又由拉格朗日中值定理, 可得 $e^{x_{n+1}} = \frac{e^{x_n} - 1}{x_n} = \frac{e^{x_n} - e^0}{x_n - 0} = e^{\xi_n} < e^{x_n}$, 其中 $0 < \xi_n < x_n$。而 $e^x$ 是单调增加函数, 故 $x_{n+1} < x_n$, 即 $\{x_n\}$ 单调减少, 由单调有界准则, 知 $\lim_{n\to\infty} x_n$ 存在。
+<Tabs items={['方法一：中值定理（推荐）','方法二：积分平均值与不等式']} defaultIndex={0}>
+<Tab value="方法一：中值定理（推荐）">
 
-记 $\lim_{n\to\infty} x_n = a$, 由 $e^{x_{n+1}} = \frac{e^{x_n} - 1}{x_n}$ 变形为 $x_n e^{x_{n+1}} = e^{x_n} - 1$, 两边取极限 $(n\to\infty)$, 得
-$$a e^a = e^a - 1,$$
-考察
+<Steps>
+<Step>
 
-$$\phi(a)=e^a(1-a).$$
+### 将递推式写成割线斜率
 
-当 $a>0$ 时，$\phi'(a)=-ae^a<0$，且 $\phi(0)=1$，所以方程
+$$
+x_{n+1}=\ln\frac{e^{x_n}-1}{x_n}.
+$$
 
-$$ae^a=e^a-1$$
+当 $x_n>0$ 时，由拉格朗日中值定理存在 $\xi_n\in(0,x_n)$，使
 
-在 $a\ge0$ 上只有解 $a=0$。因此
+$$
+\frac{e^{x_n}-e^0}{x_n-0}=e^{\xi_n}.
+$$
 
-$$\lim_{n\to\infty}x_n=0.$$
+取自然对数便得 $x_{n+1}=\xi_n$，从而 $0<x_{n+1}<x_n$。
+
+</Step>
+<Step>
+
+### 证明极限存在
+
+由 $x_1>0$ 和上一步的严格不等式归纳知所有项为正且严格递减，因此 $x_n\to L\ge0$。
+
+</Step>
+<Step>
+
+### 排除正的极限
+
+不在 $L=0$ 时直接代入含 $\ln x_n$ 的原式；应使用等价的无奇点关系
+
+$$
+x_n e^{x_{n+1}}=e^{x_n}-1.
+$$
+
+取极限得到 $Le^L=e^L-1$。设 $g(t)=e^t(1-t)$，对 $t>0$ 有 $g'(t)=-te^t<0$，且 $g(0)=1$。故方程 $e^L(1-L)=1$ 在 $L\ge0$ 上只有 $L=0$。
+
+</Step>
+</Steps>
+
+</Tab>
+<Tab value="方法二：积分平均值与不等式">
+
+由
+
+$$
+\frac{e^x-1}{x}=\frac1x\int_0^x e^t\,\mathrm dt
+\quad(x>0)
+$$
+
+以及对 $0<t<x$ 有 $1<e^t<e^x$，积分并除以 $x$ 得
+
+$$
+1<\frac{e^x-1}{x}<e^x.
+$$
+
+取对数即得 $0<\ln\frac{e^x-1}{x}<x$。故数列正且递减。设极限 $L\ge0$，若 $L>0$，便有 $L=\ln\frac{e^L-1}{L}<L$，矛盾，所以 $L=0$。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="原式在零点未定义">
+
+不能未经处理就将 $x_n\to0$ 代入 $\ln(e^{x_n}-1)-\ln x_n$ 两项。先合并对数或改写成连续可延拓的关系式，才可以正确取极限。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：递推数列的高阶渐近与误差消去
+## 二、精细递推极限：三阶误差、倒数差与相邻项
 
 <Question id="selected-1103-classified-1031-lilin-2027-s4-q03" type="single" points={5} tags="来源:李林六套卷, 考点:递推数列与泰勒展开, 难度:中等">
 
@@ -248,30 +435,50 @@ $$
 
 <Solution>
 
-**答案：D（$\frac16$）。**
-
-令 $\delta_n=\frac\pi2-x_n$，则 $\delta_0=\frac\pi2-1\in(0,\frac\pi2)$。由递推关系
+**参考答案：** 选 **D**，即
 
 $$
-\delta_{n+1}=\delta_n-\sin\delta_n.
+\boxed{\frac16}.
 $$
 
-对 $0<t<\frac\pi2$ 有 $0<\sin t<t$，故 $0<\delta_{n+1}<\delta_n$。于是 $\delta_n$ 单调递减且有下界 $0$，设极限为 $\ell\ge0$。两端取极限得 $\sin\ell=0$，而 $0\le\ell\le\delta_0<\pi/2$，所以 $\ell=0$。
+**解题思路：** 目标分母是到 $\pi/2$ 的误差三次方。直接令 $\delta_n=\pi/2-x_n$，递推关系会变成 $\delta_{n+1}=\delta_n-\sin\delta_n$，其中一次项恰好抵消。
 
-根据题意 $y_{n+1}=\frac\pi2-x_{n+1}=\delta_{n+1}$。利用 $\sin t=t-\frac{t^3}{6}+O(t^5)$，得
+<Steps>
+<Step>
+
+### 建立误差递推并证明 $\delta_n\to0$
+
+由 $x_0=1$，可知 $\delta_0=\pi/2-1\in(0,\pi/2)$。因为 $\cos x_n=\sin\delta_n$，
+
+$$
+\delta_{n+1}=\frac\pi2-(x_n+\cos x_n)
+=\delta_n-\sin\delta_n.
+$$
+
+对 $0<t<\pi/2$ 有 $0<\sin t<t$，所以 $0<\delta_{n+1}<\delta_n$。由单调有界定理，$\delta_n\to\ell\ge0$，取极限得 $\sin\ell=0$。又 $0\le\ell<\pi/2$，故 $\ell=0$。
+
+</Step>
+<Step>
+
+### 用三阶泰勒项计算
+
+题设给出 $y_{n+1}=\pi/2-x_{n+1}=\delta_{n+1}$。于是
 
 $$
 \begin{aligned}
-\lim_{n\to\infty}\frac{y_{n+1}}{(\frac\pi2-x_n)^3}
+\lim_{n\to\infty}\frac{y_{n+1}}{(\pi/2-x_n)^3}
 &=\lim_{n\to\infty}\frac{\delta_n-\sin\delta_n}{\delta_n^3}\\
-&=\lim_{t\to0^+}\frac{t-\sin t}{t^3}
-=\boxed{\frac16}.
+&=\lim_{t\to0^+}\frac{t-(t-t^3/6+O(t^5))}{t^3}
+=\frac16.
 \end{aligned}
 $$
 
-<Callout type="idea" title="设误差递推">
+</Step>
+</Steps>
 
-研究收敛到 $\pi/2$ 的递推数列时，先设 $\delta_n=\pi/2-x_n$，比直接展开 $x_{n+1}$ 更容易得到主导误差项。
+<Callout type="idea" title="一阶抵消后需升到三阶">
+
+本题 $\delta_{n+1}\sim\delta_n^3/6$，说明迭代的误差具有**三次收缩**特点。只用 $\sin t\sim t$ 会得到 $0/0$，无法求出系数。
 
 </Callout>
 
@@ -284,29 +491,59 @@ $$
 
 <Solution>
 
-**答案：** $ \frac12$
+**参考答案：**
 
-**解析：** 当 $ x<0$ 时，$ e^x>1+x$，故
+$$
+\boxed{\frac12}.
+$$
 
-$ x<e^x-1<0$。
+**解题思路：** 先证明负数递推项单调上升到 $0$；随后把两个倒数的差整理成“指数函数二阶余项 / 两个一阶量的乘积”。
 
-因此 $ x_n<x_{n+1}<0$，数列单调递增且以上界 $ 0$ 有界，故极限存在。设极限为 $ L\le0$，则
+<Steps>
+<Step>
 
-$ L=e^L-1$。
+### 证明 $x_n\uparrow0$
 
-由于方程 $ e^x-1=x$ 只有解 $ x=0$，所以 $ L=0$。
+对一切 $t<0$，严格凸性给出 $e^t>1+t$，且 $0<e^t<1$，于是
 
-于是
+$$
+t<e^t-1<0.
+$$
 
-$ \frac1{x_n}-\frac1{x_{n+1}}=\frac{x_{n+1}-x_n}{x_nx_{n+1}}=\frac{e^{x_n}-1-x_n}{x_n(e^{x_n}-1)}$。
+由于 $x_1<0$，逐项归纳得 $x_n<x_{n+1}<0$。数列单调递增且有上界 $0$，故收敛到某个 $L\le0$。由连续性有 $L=e^L-1$。考察 $h(t)=e^t-1-t$，它在 $t<0$ 时严格为正、在 $t=0$ 时为零，因此只能 $L=0$。
 
-当 $ x_n\to0$ 时，
+</Step>
+<Step>
 
-$ e^{x_n}-1-x_n\sim\frac{x_n^2}{2},\qquad e^{x_n}-1\sim x_n$。
+### 将倒数差转成可展开形式
 
-故所求极限为
+由递推式，
 
-$ \frac12$。
+$$
+\begin{aligned}
+\frac1{x_n}-\frac1{x_{n+1}}
+&=\frac{x_{n+1}-x_n}{x_nx_{n+1}}\\
+&=\frac{e^{x_n}-1-x_n}{x_n(e^{x_n}-1)}.
+\end{aligned}
+$$
+
+当 $x_n\to0^-$ 时，
+
+$$
+e^{x_n}-1-x_n=\frac{x_n^2}{2}+o(x_n^2),
+\qquad x_n(e^{x_n}-1)=x_n^2(1+o(1)).
+$$
+
+所以所求极限为 $\frac12$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="倒数的符号不能直接凭直觉判断">
+
+虽然 $x_n<0$，但 $x_{n+1}>x_n$，而 $1/x$ 在负半轴上是递减函数，所以 $1/x_n-1/x_{n+1}>0$。整理差式时保留分子次序可避免误写成 $-\tfrac12$。
+
+</Callout>
 
 </Solution>
 
@@ -322,49 +559,77 @@ $ \frac12$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（1）$ \lim_{n\to\infty}x_n=0$；
+$$
+\boxed{\text{（1）}\lim_{n\to\infty}x_n=0,\qquad
+\text{（2）}\lim_{n\to\infty}\frac{x_{n+1}}{x_n^2}=\frac12}.
+$$
 
-（2）$ \frac12$。
+**解题思路：** 先把递推关系改写为两个余弦值之差以判定单调性；第二问需要进一步证明 $x_{n+1}=o(x_n)$，才能断定二阶主项来自 $1-\cos x_n$。
 
-**解析：** 由递推关系，
+<Steps>
+<Step>
 
-$ x_{n+1}=\cos x_{n+1}-\cos x_n>0$。
+### 证明极限存在并求值
 
-因为 $ \cos x$ 在 $ \left(0,\frac\pi2\right)$ 上严格递减，所以
+根据题意，
 
-$ x_{n+1}<x_n$。
+$$
+x_{n+1}=\cos x_{n+1}-\cos x_n>0.
+$$
 
-因此 $ \{x_n\}$ 单调递减且以下界 $ 0$ 有界，故极限存在。设 $ x_n\to L\ge0$，对递推关系取极限，得
+因为 $\cos x$ 在 $(0,\pi/2)$ 上严格递减，所以 $x_{n+1}<x_n$。故 $\{x_n\}$ 正项单调递减，有极限 $L\ge0$。在原递推式中取极限可得 $\cos L-L=\cos L$，于是 $L=0$。
 
-$ \cos L-L=\cos L$，
+</Step>
+<Step>
 
-从而 $ L=0$。
+### 证明下一项比当前项小一个阶
 
-下面计算第二问。由拉格朗日中值定理，存在 $ \xi_n\in(x_{n+1},x_n)$，使
+在区间 $[x_{n+1},x_n]$ 对 $\cos x$ 用拉格朗日中值定理，存在 $\xi_n\in(x_{n+1},x_n)$，满足
 
-$ x_{n+1}=\cos x_{n+1}-\cos x_n=\sin\xi_n(x_n-x_{n+1})$。
+$$
+x_{n+1}=\sin\xi_n\,(x_n-x_{n+1}).
+$$
 
-因 $ 0<\xi_n<x_n$，故
+由于 $0<\xi_n<x_n$、$\sin\xi_n\le\xi_n$，
 
-$ 0<x_{n+1}<x_n(x_n-x_{n+1})<x_n^2$，
+$$
+0<x_{n+1}\le x_n(x_n-x_{n+1})<x_n^2,
+$$
 
-从而
+于是 $0<x_{n+1}/x_n<x_n\to0$。
 
-$ 0<\frac{x_{n+1}}{x_n}<x_n\to0$。
+</Step>
+<Step>
 
-再由
+### 提取二阶主项
 
-$ \frac{x_{n+1}}{x_n^2}=\frac{1-\cos x_n}{x_n^2}-\frac{1-\cos x_{n+1}}{x_{n+1}^2}\left(\frac{x_{n+1}}{x_n}\right)^2$，
+将递推式变为
 
-并利用
+$$
+x_{n+1}=(1-\cos x_n)-(1-\cos x_{n+1}).
+$$
 
-$ \frac{1-\cos t}{t^2}\to\frac12$，
+两边除以 $x_n^2$：
 
-得到
+$$
+\frac{x_{n+1}}{x_n^2}
+=\frac{1-\cos x_n}{x_n^2}
+-\frac{1-\cos x_{n+1}}{x_{n+1}^2}
+\left(\frac{x_{n+1}}{x_n}\right)^2.
+$$
 
-$ \lim_{n\to\infty}\frac{x_{n+1}}{x_n^2}=\frac12$。
+第一项趋于 $1/2$，第二项趋于 $(1/2)\cdot0=0$，所以极限为 $1/2$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="为什么要额外证明 $x_{n+1}/x_n\to0$">
+
+若两个自变量同时趋于零，不能未经比较就忽略 $1-\cos x_{n+1}$。先证明 $x_{n+1}=o(x_n)$，才可严格舍去其二阶项。
+
+</Callout>
 
 </Solution>
 
@@ -380,53 +645,77 @@ $ \lim_{n\to\infty}\frac{x_{n+1}}{x_n^2}=\frac12$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（1）$ \lim_{n\to\infty}x_n=0$；
+$$
+\boxed{\text{（1）}\lim_{n\to\infty}x_n=0,\qquad
+\text{（2）}\lim_{n\to\infty}\left(\frac1{x_n^2}-\frac1{x_nx_{n+1}}\right)=-\frac13}.
+$$
 
-（2）$ -\frac13$。
+**解题思路：** 先证明 $0<x_{n+1}<x_n<\pi/4$，保证递推有效且收敛；第二问把倒数差拆为 $\tan x-x$ 的三阶余项和相邻项的比值。
 
-**解析：** 递推式可写为
+<Steps>
+<Step>
 
-$ x_{n+1}=2x_n-\tan x_n$。
+### 确保每一步均落在定义区间
 
-当 $ 0<x<\frac\pi4$ 时，$ \tan x>x$，故
+设 $F(t)=2t-\tan t$。在 $0<t<\pi/4$ 上，
 
-$ x_{n+1}<x_n$。
+$$
+F'(t)=2-\sec^2t>0,\qquad F(0)=0,
+$$
 
-又令 $ q(x)=2x-\tan x$，则
+因而 $F(t)>0$。又 $\tan t>t$，故 $F(t)<t$。由 $x_{n+1}=F(x_n)$ 及初值条件归纳得
 
-$ q(0)=0,\qquad q'(x)=2-\sec^2x>0\quad\left(0<x<\frac\pi4\right)$，
+$$
+0<x_{n+1}<x_n<\frac\pi4.
+$$
 
-所以 $ q(x)>0$，即 $ x_{n+1}>0$。因此 $ \{x_n\}$ 单调递减且以下界 $ 0$ 有界，极限存在。
+</Step>
+<Step>
 
-设 $ x_n\to L\ge0$，则
+### 收敛并确定极限
 
-$ L+\tan L=2L$，
+单调有界性保证 $x_n\to L\ge0$。在递推式中取极限得到 $\tan L=L$；因为 $L\in[0,\pi/4)$，而 $\tan t>t$（$t>0$），所以 $L=0$。
 
-即 $ \tan L=L$。在 $ \left[0,\frac\pi4\right)$ 内只有解 $ L=0$。
+</Step>
+<Step>
 
-对于第二问，
+### 计算倒数差
 
-$ \frac1{x_n^2}-\frac1{x_nx_{n+1}}=\frac{x_{n+1}-x_n}{x_n^2x_{n+1}}=-\frac{\tan x_n-x_n}{x_n^3}\cdot\frac{x_n}{x_{n+1}}$。
+精确变形为
 
-又
+$$
+\frac1{x_n^2}-\frac1{x_nx_{n+1}}
+=\frac{x_{n+1}-x_n}{x_n^2x_{n+1}}
+=-\frac{\tan x_n-x_n}{x_n^3}
+\frac{x_n}{x_{n+1}}.
+$$
 
-$ \frac{\tan x_n-x_n}{x_n^3}\to\frac13$，
+由于 $\tan t=t+t^3/3+O(t^5)$，
 
-且
+$$
+\frac{\tan x_n-x_n}{x_n^3}\to\frac13,
+\qquad
+\frac{x_{n+1}}{x_n}=2-\frac{\tan x_n}{x_n}\to1.
+$$
 
-$ \frac{x_{n+1}}{x_n}=2-\frac{\tan x_n}{x_n}\to1$，
+乘积取极限，得到 $-1/3$。
 
-故
+</Step>
+</Steps>
 
-$ \lim_{n\to\infty}\left(\frac1{x_n^2}-\frac1{x_nx_{n+1}}\right)=-\frac13$。
+<Callout type="warn" title="尤其注意相减的先后顺序">
+
+$1/x_n^2-1/(x_nx_{n+1})$ 的分子是 $x_{n+1}-x_n<0$，故答案必须为负数。这是检查计算符号的快捷方法。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点3：黎曼和与乘积型极限
+## 三、数列与积分的互化：黎曼和、几何平均与对称性
 
 <Question id="selected-1103-classified-1031-math-fdf71b-001" type="single" points={5} tags="来源:张宇8套卷">
 
@@ -441,23 +730,70 @@ $$
 
 <Solution>
 
-由
+**参考答案：** 选 **B**，即
 
 $$
-\lim_{n\to\infty}\frac1n\sum_{i=1}^n\int_1^{i/n}\frac{\sin x}{x}\,dx
-=\int_0^1\left(\int_1^y\frac{\sin x}{x}\,dx\right)dy
+\boxed{\cos1-1}.
 $$
 
-交换积分次序，得
+**解题思路：** 把求和看成黎曼和，先还原为积分；随后交换三角区域内的积分次序，就能消去积分中的 $1/x$。
+
+<Tabs items={['方法一：黎曼和与换序（推荐）','方法二：分部积分']} defaultIndex={0}>
+<Tab value="方法一：黎曼和与换序（推荐）">
+
+<Steps>
+<Step>
+
+### 识别连续函数的黎曼和
+
+令 $F(y)=\int_1^y \dfrac{\sin x}{x}\,\mathrm dx$，并在 $x=0$ 处将 $\sin x/x$ 连续延拓为 $1$，则 $F$ 在 $[0,1]$ 上连续。因此
 
 $$
--\int_0^1dy\int_y^1\frac{\sin x}{x}\,dx
-=-\int_0^1dx\int_0^x\frac{\sin x}{x}\,dy
-=-\int_0^1\sin x\,dx
-=\cos1-1.
+\lim_{n\to\infty}\frac1n\sum_{i=1}^nF(i/n)=\int_0^1F(y)\,\mathrm dy.
 $$
 
-故选 B。
+</Step>
+<Step>
+
+### 交换积分次序
+
+由于 $y\in[0,1]$，有 $\int_1^y=-\int_y^1$。积分区域是 $0\le y\le x\le1$，故
+
+$$
+\begin{aligned}
+\int_0^1F(y)\,\mathrm dy
+&=-\int_0^1\!\left(\int_y^1\frac{\sin x}{x}\,\mathrm dx\right)\mathrm dy\\
+&=-\int_0^1\!\left(\int_0^x\mathrm dy\right)\frac{\sin x}{x}\,\mathrm dx\\
+&=-\int_0^1\sin x\,\mathrm dx=\cos1-1.
+\end{aligned}
+$$
+
+</Step>
+</Steps>
+
+</Tab>
+<Tab value="方法二：分部积分">
+
+由 $F'(y)=\sin y/y$（$y>0$）以及 $F(1)=0$，分部积分得
+
+$$
+\begin{aligned}
+\int_0^1F(y)\,\mathrm dy
+&=\bigl[yF(y)\bigr]_0^1-\int_0^1 yF'(y)\,\mathrm dy\\
+&=-\int_0^1\sin y\,\mathrm dy=\cos1-1.
+\end{aligned}
+$$
+
+注意 $F$ 在零点有界，所以边界项 $yF(y)\to0$。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="上限小于下限时先处理负号">
+
+因为 $i/n\le1$，所以 $\int_1^{i/n}$ 非正；答案也应非正。若直接把积分区间写成 $[i/n,1]$ 而漏掉负号，就会得到相反的结论。
+
+</Callout>
 
 </Solution>
 
@@ -477,39 +813,86 @@ $$
 
 <Solution>
 
-**答案：$\boxed{3}$。**
-
-**过程**：先估计分子常数项的贡献：
+**参考答案：**
 
 $$
-0\le\sum_{i=1}^{2n}\frac2{n^2}
+\boxed{3}.
+$$
+
+**解题思路：** 先将题目写成 $[0,2]$ 上的黎曼和；$i$ 对应 $n\cdot(i/n)$，$\sin^3(\pi i/n)$ 对应奇对称部分，而常数 $2$ 的总贡献趋于零。对称性比直接展开复杂三角积更快。
+
+<Steps>
+<Step>
+
+### 忽略量级不足的常数项
+
+由于 $0\le(1+\cos t)^2\le4$，
+
+$$
+0\le\sum_{i=1}^{2n}\frac{2}{n^2}
 \left(1+\cos\frac{\pi i}{n}\right)^2
-\le\frac{16}{n}\longrightarrow0.
+\le\frac{16}{n}\to0.
 $$
 
-其余项是区间 $[0,2]$ 上的黎曼和，故原极限等于
+所以这部分不影响极限。
+
+</Step>
+<Step>
+
+### 将其余部分化为黎曼积分
+
+设 $x_i=i/n$、$\Delta x=1/n$，则其余和为
 
 $$
-I=\int_0^2\bigl(x+\sin^3(\pi x)\bigr)\bigl(1+\cos(\pi x)\bigr)^2\,\mathrm dx.
+\sum_{i=1}^{2n}\frac1n
+\left(x_i+\sin^3(\pi x_i)\right)
+\left(1+\cos(\pi x_i)\right)^2.
 $$
 
-记 $w(x)=(1+\cos\pi x)^2$，则 $w(2-x)=w(x)$，而 $\sin^3[\pi(2-x)]=-\sin^3(\pi x)$。由关于 $x=1$ 的对称性，
+被积函数在 $[0,2]$ 上连续，故极限为
 
 $$
-\int_0^2xw(x)\,\mathrm dx=\int_0^2w(x)\,\mathrm dx,
-\qquad
+I=\int_0^2\left(x+\sin^3\pi x\right)
+(1+\cos\pi x)^2\,\mathrm dx.
+$$
+
+</Step>
+<Step>
+
+### 利用中心对称消去复杂项
+
+记 $w(x)=(1+\cos\pi x)^2$。则 $w(2-x)=w(x)$，但
+$\sin^3[\pi(2-x)]=-\sin^3(\pi x)$，所以
+
+$$
 \int_0^2\sin^3(\pi x)w(x)\,\mathrm dx=0.
+$$
+
+另一方面，将 $x$ 替换为 $2-x$ 后相加，有
+
+$$
+2\int_0^2xw(x)\,\mathrm dx
+=\int_0^2[x+(2-x)]w(x)\,\mathrm dx
+=2\int_0^2w(x)\,\mathrm dx.
 $$
 
 因此
 
 $$
 \begin{aligned}
-I&=\int_0^2(1+\cos\pi x)^2\,\mathrm dx\\
- &=\int_0^2\left(1+2\cos\pi x+\frac{1+\cos2\pi x}{2}\right)\mathrm dx\\
- &=\boxed{3}.
+I&=\int_0^2(1+2\cos\pi x+\cos^2\pi x)\,\mathrm dx\\
+&=2+0+1=3.
 \end{aligned}
 $$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="对称黎曼和的一般技巧">
+
+在 $[0,2a]$ 上，若 $w(2a-x)=w(x)$，则 $\int_0^{2a}xw(x)\,\mathrm dx=a\int_0^{2a}w(x)\,\mathrm dx$；若 $h(2a-x)=-h(x)$，则 $\int_0^{2a}h(x)w(x)\,\mathrm dx=0$。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -519,36 +902,72 @@ $$
 证明：
 
 $$
- \lim_{n\to\infty}\frac1n\sqrt[n]{n(n+1)\cdots(n+n-1)}=\frac4e.
+\lim_{n\to\infty}\frac1n\sqrt[n]{n(n+1)\cdots(n+n-1)}=\frac4e.
 $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
- \lim_{n\to\infty}\frac1n\sqrt[n]{n(n+1)\cdots(2n-1)}=\frac4e.
+\boxed{\lim_{n\to\infty}\frac1n\sqrt[n]{n(n+1)\cdots(2n-1)}=\frac4e}.
 $$
 
-**解析：** 令
+**解题思路：** 根号里是 $n$ 个正数的乘积，属于**几何平均型极限**。取自然对数将乘积转化为求和，再识别黎曼和。
+
+<Steps>
+<Step>
+
+### 消去根号外的 $1/n$
+
+设所求表达式为 $L_n$。因每个因子均为正，
+
 $$
- L_n=\frac1n\sqrt[n]{n(n+1)\cdots(2n-1)}
-=\left[\prod_{k=n}^{2n-1}\frac{k}{n}\right]^{1/n}.
+\begin{aligned}
+L_n
+&=\frac1n\left[\prod_{k=n}^{2n-1}k\right]^{1/n}\\
+&=\left[\prod_{k=n}^{2n-1}\frac{k}{n}\right]^{1/n}\\
+&=\left[\prod_{j=0}^{n-1}\left(1+\frac jn\right)\right]^{1/n}.
+\end{aligned}
 $$
-取对数：
+
+注意第二行是把 $n$ 个 $1/n$ 全部移入乘积后再开 $n$ 次方，不能把 $1/n$ 遗漏。
+
+</Step>
+<Step>
+
+### 取对数得到黎曼和
+
 $$
- \ln L_n
-=\frac1n\sum_{k=n}^{2n-1}\ln\frac{k}{n}.
+\ln L_n=\frac1n\sum_{j=0}^{n-1}\ln\left(1+\frac jn\right)
+\longrightarrow\int_0^1\ln(1+t)\,\mathrm dt.
 $$
-右端是函数 $ \ln x$ 在区间 $ [1,2]$ 上的黎曼和，因此
+
+因为 $\ln(1+t)$ 在 $[0,1]$ 上连续，左端是合法的左端点黎曼和。
+
+</Step>
+<Step>
+
+### 计算积分并还原
+
 $$
- \lim_{n\to\infty}\ln L_n
-=\int_1^2\ln x\,dx
-=\left[x\ln x-x\right]_1^2
-=2\ln2-1
-=\ln\frac4e.
+\begin{aligned}
+\int_0^1\ln(1+t)\,\mathrm dt
+&=\bigl[(1+t)\ln(1+t)-(1+t)\bigr]_0^1\\
+&=2\ln2-1=\ln\frac4e.
+\end{aligned}
 $$
-两边取指数即得结论。
+
+由指数函数的连续性，$L_n=e^{\ln L_n}\to4/e$，命题得证。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="几何平均转化为积分的模板">
+
+若 $f$ 在 $[a,b]$ 上连续且严格为正，则将 $\left(\prod f(x_{k,n})\right)^{1/n}$ 取对数，可先求 $\ln f$ 的黎曼和，再用指数函数还原。这里的连续与正值条件不可省略。
+
+</Callout>
 
 </Solution>
 
@@ -560,41 +979,86 @@ $$
 
 <Solution>
 
-**答案：** $1$。
+**参考答案：**
 
-**解析：** 设
+$$
+\boxed{1}.
+$$
 
-$$A_n=\frac{\ln(n+1)}{n},\qquad B_n=\frac{\ln n}{n+1}.$$
+**解题思路：** 两个根式都趋于 $1$，直接分别作等价替换会因相减而丢失主项。应将它们记成 $e^{A_n}$ 与 $e^{B_n}$，先对指数差 $A_n-B_n$ 作精确通分。
 
-由拉格朗日中值定理，
+<Steps>
+<Step>
 
-$$e^{A_n}-e^{B_n}=e^{\xi_n}(A_n-B_n),$$
+### 两个根式均改写为指数函数
 
-其中 $\xi_n$ 介于 $A_n$ 与 $B_n$ 之间。显然 $\xi_n\to0$，故 $e^{\xi_n}\to1$。
+定义
 
-又
+$$
+A_n=\frac{\ln(n+1)}n,\qquad B_n=\frac{\ln n}{n+1}.
+$$
 
-$$A_n-B_n =\frac{(n+1)\ln(n+1)-n\ln n}{n(n+1)} =\frac{n\ln\left(1+\frac1n\right)+\ln(n+1)}{n(n+1)}.$$
+则原分子是 $n(e^{A_n}-e^{B_n})$，且 $A_n,B_n\to0$。由指数函数的中值定理，存在位于 $A_n,B_n$ 之间的 $\xi_n\to0$，使
 
-因此原式等于
-$$\frac{e^{\xi_n}\left[n\ln\left(1+\frac1n\right)+\ln(n+1)\right]}{(n+1)\left(e^{1/n}-1\right)\ln n}.$$
-利用
+$$
+e^{A_n}-e^{B_n}=e^{\xi_n}(A_n-B_n).
+$$
 
-$$e^{1/n}-1\sim\frac1n,\qquad n\ln\left(1+\frac1n\right)\to1,$$
+因此 $e^{\xi_n}\to1$，问题转化为求 $A_n-B_n$ 的主项。
 
-可得
+</Step>
+<Step>
 
-$$\frac{n}{n+1}\cdot \frac{1+\ln(n+1)+o(1)}{\ln n} \to1.$$
+### 精确通分并比较主项
 
-所以所求极限为
+$$
+\begin{aligned}
+A_n-B_n
+&=\frac{(n+1)\ln(n+1)-n\ln n}{n(n+1)}\\
+&=\frac{n\ln(1+1/n)+\ln(n+1)}{n(n+1)}.
+\end{aligned}
+$$
 
-$$\boxed{1}.$$
+其中 $n\ln(1+1/n)\to1$，而 $\ln(n+1)\sim\ln n$，所以
+
+$$
+A_n-B_n\sim\frac{\ln n}{n^2}.
+$$
+
+注意这一步的对数因子 $\ln n$ 不能被误当作常数。
+
+</Step>
+<Step>
+
+### 处理分母并合并极限
+
+$\sqrt[n]e-1=e^{1/n}-1\sim1/n$。由以上两步，
+
+$$
+\begin{aligned}
+\frac{n(e^{A_n}-e^{B_n})}{(e^{1/n}-1)\ln n}
+&=e^{\xi_n}
+\frac{n(A_n-B_n)}{(e^{1/n}-1)\ln n}\\
+&\sim\frac{n\cdot(\ln n/n^2)}{(1/n)\ln n}=1.
+\end{aligned}
+$$
+
+故原极限为 $1$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="相减型表达式不能逐项等价替换">
+
+若只写 $\sqrt[n]{n+1}\sim1$、$\sqrt[n+1]n\sim1$，相减就变为无意义的 $1-1$。应先把“相减”转成指数的差，再比较其大小。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点4：积分数列与相邻项比值
+## 四、积分数列：Wallis 递推与指数型极限
 
 <Question id="selected-1103-classified-1031-lilin-2027-s1-q04" type="single" points={5} tags="来源:李林六套卷, 考点:数列极限, 难度:中等">
 
@@ -611,25 +1075,57 @@ $$
 
 <Solution>
 
-由 $a_n>0$ 及级数和为 $1$，得 $S_{n-1}<S_n$ 且 $S_{n-1},S_n\to1$。
+**参考答案：** 选 **C**，即
 
-对函数 $F(t)=e^t$ 和 $G(t)=t^e$，在 $[S_{n-1},S_n]$ 上应用**柯西中值定理**，存在 $\xi_n\in(S_{n-1},S_n)$，使
+$$
+\boxed{1}.
+$$
+
+**解题思路：** 题设 $a_n>0$ 且 $\sum a_n=1$，所以 $S_{n-1}$ 与 $S_n$ 从左侧同时逼近 $1$。这是典型的**相邻函数值差商之比**，可用柯西中值定理直接消去小间隔 $S_n-S_{n-1}$。
+
+<Steps>
+<Step>
+
+### 确认适用区间与收敛点
+
+因为各 $a_n>0$，$S_n$ 严格递增，且 $S_n\to1$。对充分大的 $n$，有
+
+$$
+0<S_{n-1}<S_n<1,
+$$
+
+因此 $t^e$ 在所需区间上可导，分母差也严格大于零。
+
+</Step>
+<Step>
+
+### 用柯西中值定理处理差商
+
+令 $F(t)=e^t$、$G(t)=t^e$，则存在 $\xi_n\in(S_{n-1},S_n)$ 使
 
 $$
 \frac{e^{S_n}-e^{S_{n-1}}}{S_n^e-S_{n-1}^e}
 =\frac{F'(\xi_n)}{G'(\xi_n)}
-=\frac{e^{\xi_n}}{e\xi_n^{e-1}}.
+=\frac{e^{\xi_n}}{e\,\xi_n^{e-1}}.
 $$
 
-夹逼可知 $\xi_n\to1$，故极限为 $\frac{e}{e}=1$，选 **C**。
+</Step>
+<Step>
 
-<Callout type="idea" title="通用结论">
+### 夹逼确定中值点的极限
 
-若 $x_n,y_n\to c$、$x_n\ne y_n$，并且 $F,G$ 在 $c$ 附近可导，$G'(c)\ne0$，则
+由 $S_{n-1}<\xi_n<S_n$ 以及两端均趋于 $1$，有 $\xi_n\to1$。所以目标极限等于
 
 $$
-\frac{F(x_n)-F(y_n)}{G(x_n)-G(y_n)}\longrightarrow\frac{F'(c)}{G'(c)}.
+\frac{e^1}{e\cdot1^{e-1}}=1.
 $$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="差分比的普适结论">
+
+若 $u_n\ne v_n$ 且都趋于 $c$，函数 $F,G$ 在 $c$ 邻域可导且导数连续，$G'(c)\ne0$，则 $\frac{F(u_n)-F(v_n)}{G(u_n)-G(v_n)}\to\frac{F'(c)}{G'(c)}$。即便相邻端点的间距趋于零，也不能将两项分别粗略替换为其极限。
 
 </Callout>
 
@@ -647,21 +1143,71 @@ $$
 
 <Solution>
 
-在 $ a_n$ 中令 $ x=\sin t$，则 $ dx=\cos t\,dt$，且 $ \sqrt{1-x^2}=\cos t$，所以
+**参考答案：** 选 **C**，即
 
-$ a_n=\int_0^{\frac\pi2}\sin^nt\cos^2t\,dt=b_n-b_{n+2}$。
+$$
+\boxed{e^{-1}}.
+$$
 
-由 Wallis 积分的递推公式
+**解题思路：** 题目的两个积分表面上不同，实际可通过 $x=\sin t$ 建立精确关系，再借 Wallis 积分的递推式把整个极限化成标准的指数型极限。
 
-$ b_{n+2}=\frac{n+1}{n+2}b_n$，
+<Steps>
+<Step>
 
-可得
+### 统一积分变量
 
-$ a_n=b_n\left(1-\frac{n+1}{n+2}\right)=\frac{b_n}{n+2}$。
+令 $x=\sin t$，$0\le t\le\pi/2$，则 $\mathrm dx=\cos t\,\mathrm dt$，且 $\sqrt{1-x^2}=\cos t$。因此
 
-于是
+$$
+\begin{aligned}
+a_n
+&=\int_0^{\pi/2}\sin^nt\cos^2t\,\mathrm dt\\
+&=\int_0^{\pi/2}\sin^nt(1-\sin^2t)\,\mathrm dt
+=b_n-b_{n+2}.
+\end{aligned}
+$$
 
-$ \left[\frac{(n+1)a_n}{b_n}\right]^n=\left(\frac{n+1}{n+2}\right)^n=\left(1-\frac1{n+2}\right)^n\to e^{-1}$。
+</Step>
+<Step>
+
+### 用 Wallis 递推消去积分
+
+记 $b_m=\int_0^{\pi/2}\sin^m t\,\mathrm dt$。分部积分可证（$m\ge2$）
+
+$$
+b_m=\frac{m-1}{m}b_{m-2}.
+$$
+
+取 $m=n+2$ 得
+
+$$
+b_{n+2}=\frac{n+1}{n+2}b_n,
+\qquad a_n=\frac{b_n}{n+2}.
+$$
+
+</Step>
+<Step>
+
+### 化为标准指数极限
+
+$$
+\begin{aligned}
+\left[\frac{(n+1)a_n}{b_n}\right]^n
+&=\left(\frac{n+1}{n+2}\right)^n
+=\left(1-\frac1{n+2}\right)^n.
+\end{aligned}
+$$
+
+取对数，$n\ln(1-1/(n+2))\to-1$，故原式趋于 $e^{-1}$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="积分数列先找递推比值">
+
+对于 $\int_0^{\pi/2}\sin^nt\,\mathrm dt$、$\int_0^{\pi/2}\cos^nt\,\mathrm dt$，优先用分部积分建立相隔两项的关系，再处理 $n$ 次幂；不必先求积分的渐近式。
+
+</Callout>
 
 </Solution>
 
@@ -673,23 +1219,57 @@ $ \left[\frac{(n+1)a_n}{b_n}\right]^n=\left(\frac{n+1}{n+2}\right)^n=\left(1-\fr
 
 <Solution>
 
-**答案：** $ e^{-2}$
+**参考答案：**
 
-**解析：** 在 $ 0<t<1$ 上，$ |\ln t|=-\ln t$。由
+$$
+\boxed{e^{-2}}.
+$$
 
-$ \int_0^1t^n\,dt=\frac1{n+1}$
+**解题思路：** 先把 $a_n$ 算成准确的有理式，再将 $(n^2a_n)^n$ 视为 $1^\infty$ 型极限；核心不在粗略判断 $n^2a_n\to1$，而在保留 $1/n$ 量级的修正。
 
-关于 $ n$ 求导，得
+<Tabs items={['方法一：分部积分（推荐）','方法二：参数积分求导']} defaultIndex={0}>
+<Tab value="方法一：分部积分（推荐）">
 
-$ \int_0^1t^n\ln t\,dt=-\frac1{(n+1)^2}$。
+因为 $0<t<1$ 时 $|\ln t|=-\ln t$，故
 
-所以
+$$
+a_n=-\int_0^1 t^n\ln t\,\mathrm dt.
+$$
 
-$ a_n=\frac1{(n+1)^2}$。
+在 $[\varepsilon,1]$ 上分部积分，取 $u=-\ln t$、$\mathrm dv=t^n\,\mathrm dt$，再令 $\varepsilon\to0^+$；利用 $\varepsilon^{n+1}|\ln\varepsilon|\to0$，可得
+
+$$
+a_n=\frac{1}{n+1}\int_0^1t^n\,\mathrm dt
+=\frac1{(n+1)^2}.
+$$
 
 于是
 
-$ (n^2a_n)^n=\left(\frac{n}{n+1}\right)^{2n}\to e^{-2}$。
+$$
+(n^2a_n)^n=\left(1+\frac1n\right)^{-2n}
+\longrightarrow e^{-2}.
+$$
+
+</Tab>
+<Tab value="方法二：参数积分求导">
+
+对参数 $s>-1$，设 $F(s)=\int_0^1 t^s\,\mathrm dt=(s+1)^{-1}$。在任意紧子区间上可利用控制函数证明可对 $s$ 求导，于是
+
+$$
+F'(s)=\int_0^1t^s\ln t\,\mathrm dt
+=-\frac1{(s+1)^2}.
+$$
+
+取 $s=n$，得到 $a_n=-F'(n)=(n+1)^{-2}$，随后同样得到 $e^{-2}$。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="仅知底数趋于 1 不能确定极限">
+
+$\lim n^2a_n=1$ 并不能推出 $(n^2a_n)^n\to1$。因为指数 $n\to\infty$，必须进一步研究 $n\ln(n^2a_n)\to-2$。
+
+</Callout>
 
 </Solution>
 
@@ -701,31 +1281,69 @@ $ (n^2a_n)^n=\left(\frac{n}{n+1}\right)^{2n}\to e^{-2}$。
 
 <Solution>
 
-**答案：** $ e^{-1}$
+**参考答案：**
 
-**解析：** 令 $ x=\tan t$，则
+$$
+\boxed{e^{-1}}.
+$$
 
-$ a_n=\int_0^{\frac\pi2}\cos^{2n-2}t\,dt$。
+**解题思路：** 利用 $x=\tan t$ 将无穷区间积分化为 Wallis 积分，先精确求出相邻项比值，再处理增长量约为 $2n$ 的指数。
 
-由 Wallis 积分递推公式，
+<Steps>
+<Step>
 
-$ \int_0^{\frac\pi2}\cos^{m}t\,dt=\frac{m-1}{m}\int_0^{\frac\pi2}\cos^{m-2}t\,dt$，
+### 作三角代换
 
-可得
+令 $x=\tan t$，其中 $0\le t<\pi/2$，则 $1+x^2=\sec^2t$、$\mathrm dx=\sec^2t\,\mathrm dt$，故
 
-$ \frac{a_{n+1}}{a_n}=\frac{2n-1}{2n}=1-\frac1{2n}$。
+$$
+a_n=\int_0^{\pi/2}\cos^{2n-2}t\,\mathrm dt.
+$$
 
-又
+该积分对 $n\ge2$ 收敛，变换合法。
 
-$ \ln(1+e^{2n})=2n+\ln(1+e^{-2n})\sim2n$。
+</Step>
+<Step>
 
-因此
+### 求准确的相邻项比值
 
-$ \ln\left[\left(\frac{a_{n+1}}{a_n}\right)^{\ln(1+e^{2n})}\right]=\ln(1+e^{2n})\ln\left(1-\frac1{2n}\right)\to-1$。
+记 $I_m=\int_0^{\pi/2}\cos^m t\,\mathrm dt$。由分部积分，$I_m=(m-1)I_{m-2}/m$（$m\ge2$）。因此
 
-故所求极限为
+$$
+\frac{a_{n+1}}{a_n}
+=\frac{I_{2n}}{I_{2n-2}}
+=\frac{2n-1}{2n}=1-\frac1{2n}.
+$$
 
-$ e^{-1}$。
+</Step>
+<Step>
+
+### 转为对数极限
+
+设原式为 $L_n>0$，则
+
+$$
+\ln L_n=\ln(1+e^{2n})\,\ln\left(1-\frac1{2n}\right).
+$$
+
+注意
+
+$$
+\ln(1+e^{2n})=2n+\ln(1+e^{-2n})\sim2n,
+\qquad
+\ln\left(1-\frac1{2n}\right)\sim-\frac1{2n}.
+$$
+
+所以 $\ln L_n\to-1$，由指数连续性得 $L_n\to e^{-1}$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="$1^\infty$ 型必先取对数">
+
+一般若 $u_n=1+c/n+o(1/n)>0$，且 $v_n/n\to\lambda$，则 $u_n^{v_n}\to e^{c\lambda}$。本题 $c=-1/2$、$\lambda=2$。
+
+</Callout>
 
 </Solution>
 

@@ -1,15 +1,13 @@
 ---
-title: "第二节 矩阵相似与相似对角化｜重根判别、相似构造与矩阵幂"
-description: "按照真题中相似不变量、可对角化充要条件、重特征值参数讨论、特征基与矩阵幂递推的命题层次，精选原题并保留原生 MDX 组件。"
+title: "2. 矩阵相似与相似对角化"
+description: "32道相似与对角化模拟题，覆盖相似不变量、重特征值、伴随谱映射、矩阵幂与参数求解；全部题目已重构。"
 ---
 
-# 第二节 矩阵相似与相似对角化｜重根判别、相似构造与矩阵幂
+本节共 **32 道**模拟与练习原题，按“相似不变量与充要条件 → 对角化与重根判别 → 特征基、矩阵幂和参数问题”组织。**本节32题全部完成重构**，每题提供先答案后推导的逻辑解析，涉及重根的矩阵幂、基变换及伴随谱的题目加入方法辨析。题干、选项、稳定题目 ID 及判分答案不变。
 
-参照「真题核心题目」同名小节的考点、题型与命题风格精选 **32 道模拟与练习原题**；所有 Question 组件连同选项、题干、答案、解析、公式及嵌套结构均保留原文。
+## 考点一｜相似关系、谱不变量与矩阵变换性质
 
-## 考点1：相似不变量与相似变换的性质辨析
-
-<Question id="selected-1103-classified-1031-math-56d40c-007" type="single" points={5} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-56d40c-007" type="single" points={5} tags="来源:张宇8套卷, 考点:最小多项式与对角化">
 
 若 $A$ 为 $n$ 阶矩阵，且满足
 
@@ -26,45 +24,56 @@ $$
 
 <Solution>
 
-由
+**参考答案：选 C。** 条件 $A^2-A-2E=0$ 能保证 $A$ 可相似对角化，但不保证一定有特征值 $2$。
+
+**核心思路**：把矩阵多项式分解成两个互异的一次因子。满足无重根多项式方程的矩阵必可对角化。
+
+<Tabs items={['最小多项式法（推荐）', '特征子空间直和法']}>
+<Tab value="最小多项式法（推荐）">
+
+  已知
+
+
 
 $$
-A^2-A-2E=0
+A^2-A-2E=(A-2E)(A+E)=O.
 $$
 
-得
+  于是 $A$ 的最小多项式 $m_A(t)$ 整除 $(t-2)(t+1)$。因为右边的两个根 $2,-1$ 互异，$m_A(t)$ 没有重根，所以 $A$ 可相似对角化。
+
+  这里仅能得知 $A$ 的特征值**属于** $\{2,-1\}$，不意味着两个特征值必须同时出现。例如 $A=-E$ 也满足题设，故 D 错误；同理它不必等于 $2E$。
+
+</Tab>
+<Tab value="特征子空间直和法">
+
+  设 $U=\ker(A-2E)$、$V=\ker(A+E)$。由于
+
+
 
 $$
-(E+A)(2E-A)=0.
+E=\frac13\bigl[(A+E)-(A-2E)\bigr],
 $$
 
-因此
+  任取 $x$，可分解成
+
+
 
 $$
-r(E+A)+r(2E-A)\le n.
+x=\frac13(A+E)x-\frac13(A-2E)x.
 $$
 
-另一方面，
+  由 $(A-2E)(A+E)=O$ 可知第一项属于 $U$；由 $(A+E)(A-2E)=O$ 可知第二项属于 $V$。若 $x\in U\cap V$，则 $Ax=2x$ 且 $Ax=-x$，所以 $x=0$。
 
-$$
-r(E+A)+r(2E-A)
-\ge r\bigl((E+A)+(2E-A)\bigr)
-=r(3E)=n,
-$$
+  故 $\mathbb R^n=U\oplus V$，从两个特征子空间选基即可把 $A$ 对角化。
 
-故
+</Tab>
+</Tabs>
 
-$$
-r(E+A)+r(2E-A)=n.
-$$
+<Callout type="warn" title="为什么 A 不是必然对称？">
 
-令 $r(E+A)=r$，则 $r(2E-A)=n-r$。当 $0<r<n$ 时，$A$ 的特征值只有 $-1$ 与 $2$，且两个特征子空间的维数之和为 $n$，所以 $A$ 有 $n$ 个线性无关的特征向量。
+取 $P=\begin{pmatrix}1&1\\0&1\end{pmatrix}$，$D=\operatorname{diag}(2,-1)$，令 $A=PDP^{-1}=\begin{pmatrix}2&-3\\0&-1\end{pmatrix}$。它满足题设方程，却不是对称矩阵。
 
-端点情形 $r=0$ 或 $r=n$ 时，分别有 $A=-E$ 或 $A=2E$。
-
-因此无论何种情况，$A$ 都可相似对角化。
-
-故选 C。
+</Callout>
 
 </Solution>
 
@@ -81,43 +90,47 @@ $$
 
 <Solution>
 
-**答案：D。** 相似关系具有传递性。
+**参考答案：选 D。** 若 $A,B$ 都与同一个对角矩阵相似，则 $A\sim B$。
+
+**核心思路**：相似关系具有传递性；比较选项时要区分“相同特征值”“共用特征向量”和“具有同一对角标准形”。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 直接证明 D
+  ### 严格验证 D
 
-  若 $A=PDP^{-1}$、$B=QDQ^{-1}$，其中 $P,Q$ 均可逆，$D$ 为同一个对角矩阵，则
+  若 $A=PDP^{-1}$、$B=QDQ^{-1}$（$P,Q$ 可逆），则
 
-  $$
-  B=QP^{-1}A\,(QP^{-1})^{-1}.
-  $$
 
-  因而 $A\sim B$，D 是充分条件。
 
-  </Step>
-  <Step>
+$$
+B=(QP^{-1})A(QP^{-1})^{-1}.
+$$
 
-  ### 给出 A、B、C 的反例
+  因此 $A$ 与 $B$ 相似，D 确实是充分条件。
 
-  - **A 错误：**$A=\begin{pmatrix}1&1\\0&1\end{pmatrix}$，$B=E_2$ 的特征值均为 $1,1$，但前者不可对角化，后者可对角化，故不相似。
-  - **B 错误**：取 $A=E_n$、$B=2E_n$。二者的所有非零向量均为特征向量，但特征值不同，故不相似。
-  - **C 错误**：取 $A=E_n$、$B=-E_n$。显然 $A^2=B^2=E_n$，而 $A,B$ 的特征值不同，故不相似。
+</Step>
+<Step>
 
-  </Step>
+  ### 对 A、B、C 分别举反例
+
+  - **A 不充分**：取 $A=\begin{pmatrix}1&1\\0&1\end{pmatrix}$、$B=E_2$。二者特征值均为 $1,1$，但 $A$ 不可对角化而 $B$ 可对角化，不相似。
+  - **B 不充分**：取 $A=E_2$、$B=2E_2$。两者的全部非零向量都是特征向量，仍因特征值不同而不相似。
+  - **C 不充分**：取 $A=E_2$、$B=-E_2$。它们满足 $A^2=B^2=E_2$，但特征值不同，不相似。
+
+</Step>
 </Steps>
 
-<Callout type="info" title="核心辨析">
+<Callout type="idea" title="常用充分条件">
 
-“特征值相同”仅说明特征多项式相同，并不决定 Jordan 结构；“均可对角化且特征值相同（计重数）”才足以推出相似。
+对于两个**都可对角化**的同阶矩阵，若其特征值（含代数重数）完全相同，则它们都相似于同一对角矩阵，因而相似。去掉“可对角化”这个前提，结论一般不成立。
 
 </Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-classified-1031-math-66038b-006" type="single" points={5} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-66038b-006" type="single" points={5} tags="来源:张宇8套卷, 考点:相似与合同的区别">
 
 设 $A$ 为 $n$ 阶实对称矩阵，$B$ 为 $n$ 阶可逆矩阵，$Q$ 为 $n$ 阶正交矩阵，则下列矩阵中一定与 $A$ 有相同的特征值的是
 
@@ -128,23 +141,62 @@ $$
 
 <Solution>
 
-因为 $Q$ 为正交矩阵，
+**参考答案：选 A。** 必与 $A$ 有相同特征值的是 $B^{-1}Q^{\mathrm T}AQB$。
+
+**核心思路**：只有可写成 $S^{-1}AS$ 的矩阵，才能直接凭相似关系断定特征值不变。左右分别乘不互为逆的矩阵，通常只是一般等价或合同变换，不能保证谱不变。
+
+<Steps>
+<Step>
+
+  ### 直接证明 A
+
+  因 $Q$ 正交，$Q^{\mathrm T}=Q^{-1}$；因 $B$ 可逆，$S=QB$ 也可逆。所以
+
+
 
 $$
-Q^T=Q^{-1}.
+B^{-1}Q^{\mathrm T}AQB
+  =(QB)^{-1}A(QB)=S^{-1}AS.
 $$
 
-又 $B$ 可逆，所以 $QB$ 可逆，并且
+  它与 $A$ 相似，特征值完全相同。
+
+</Step>
+<Step>
+
+  ### 为什么其余选项不能保证？
+
+  对 B、C，取 $A=E_2$、$Q=E_2$、$B=2E_2$：
+
+
 
 $$
-B^{-1}Q^TAQB
-=B^{-1}Q^{-1}AQB
-=(QB)^{-1}A(QB).
+(B^{-1})^{\mathrm T}Q^{\mathrm T}AQB^{-1}=\tfrac14E_2,
+  \qquad B^{\mathrm T}Q^{\mathrm T}AQB=4E_2,
 $$
 
-因此 $B^{-1}Q^TAQB$ 与 $A$ 相似，必有相同的特征值。
+  都不与 $A$ 同谱。
 
-其余选项本质上是合同变换形式，而合同矩阵不一定有相同的特征值，故选（A）。
+  对 D，取 $A=Q=E_2$、$B=\begin{pmatrix}1&1\\0&1\end{pmatrix}$，则
+
+
+
+$$
+BQ^{\mathrm T}AQ(B^{\mathrm T})^{-1}
+  =B(B^{\mathrm T})^{-1}
+  =\begin{pmatrix}0&1\\-1&1\end{pmatrix}.
+$$
+
+  此矩阵的迹为 $1$，而 $\operatorname{tr}(A)=2$；迹不同便不可能具有相同的全部特征值。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="相似不等于合同">
+
+$S^{-1}AS$ 是相似变换，保留特征值；$S^{\mathrm T}AS$ 是合同变换，通常只保留实对称矩阵的惯性指数，不保留具体特征值。
+
+</Callout>
 
 </Solution>
 
@@ -171,64 +223,61 @@ $$
 
 <Solution>
 
-**答案：C。**
+**参考答案：选 C。** 题设矩阵 $A$ 相似于 $\operatorname{diag}(1,1,2)$；四个选项中只有 C 满足相同的特征空间维数条件。
+
+**核心思路**：先在给定的三个线性无关向量构成的基下表示 $A$，确定重特征值 $1$ 的特征子空间维数；逐项比较，不只看对角线。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 将线性变换写成矩阵
+  ### 把 $A$ 化为易分析的相似矩阵
 
-  记 $P=(\boldsymbol\alpha_1,\boldsymbol\alpha_2,\boldsymbol\alpha_3)$，由三向量线性无关知 $P$ 可逆。根据三列对应关系，
+  令 $P=(\alpha_1,\alpha_2,\alpha_3)$，它可逆。由三条条件可得
 
-  $$
-  AP=P\underbrace{\begin{pmatrix}1&0&0\\0&1&0\\2&5&2\end{pmatrix}}_{M},
+
+
+$$
+AP=P\underbrace{\begin{pmatrix}1&0&0\\0&1&0\\2&5&2\end{pmatrix}}_{M},
   \qquad P^{-1}AP=M.
-  $$
+$$
 
-  矩阵 $M$ 的特征值为 $1,1,2$，且
+  $M$ 是下三角矩阵，特征值为 $1,1,2$。又
 
-  $$
-  \operatorname{rank}(M-I)=
-  \operatorname{rank}\begin{pmatrix}0&0&0\\0&0&0\\2&5&1\end{pmatrix}=1.
-  $$
 
-  所以 $\lambda=1$ 的特征空间维数为 $3-1=2$；再加上 $\lambda=2$ 的一个特征向量，$M$ 可对角化且
 
-  $$
-  M\sim\operatorname{diag}(1,1,2).
-  $$
+$$
+M-E=\begin{pmatrix}0&0&0\\0&0&0\\2&5&1\end{pmatrix},\qquad r(M-E)=1.
+$$
 
-  </Step>
-  <Step>
+  因此 $\dim\ker(M-E)=2$，即重特征值 $1$ 有两个线性无关特征向量；特征值 $2$ 另有一个。故 $A\sim M\sim\operatorname{diag}(1,1,2)$。
 
-  ### 依次排除选项
+</Step>
+<Step>
 
-  A、B 的对角线均为 $(1,1,2)$，但各自的 $C-I$（以 $C$ 表示候选矩阵）均有两行线性无关，即 $\operatorname{rank}(C-I)=2$，重特征值 $1$ 的特征空间只有一维，因此均不可对角化。
+  ### 核对四个候选矩阵
 
-  D 是下三角矩阵，对角线为 $1,-2,2$，特征值已与 $A$ 不同。
+  用 $C_i$ 表示第 $i$ 个选项中的矩阵：
 
-  对于 C，
+  - **A**：特征值也是 $1,1,2$，但 $r(C_A-E)=2$，所以 $\dim\ker(C_A-E)=1$，不可对角化。
+  - **B**：同样有 $r(C_B-E)=2$，特征值 $1$ 的特征向量只有一个独立方向。
+  - **C：**$C_C=\begin{pmatrix}1&0&0\\0&1&0\\-1&2&2\end{pmatrix}$，且 $r(C_C-E)=1$；它可对角化，且特征值计重数为 $1,1,2$，故 $C_C\sim A$。
+  - **D**：对角线为 $1,-2,2$，与 $A$ 的特征值不一致。
 
-  $$
-  C-I=\begin{pmatrix}0&0&0\\0&0&0\\-1&2&1\end{pmatrix},
-  \qquad \operatorname{rank}(C-I)=1.
-  $$
+  综上，只有 C 正确。
 
-  C 具有相同的特征值 $1,1,2$，且可对角化，故与 $A$ 均相似于 $\operatorname{diag}(1,1,2)$。
-
-  </Step>
+</Step>
 </Steps>
 
-<Callout type="idea" title="判断相似的关键">
+<Callout type="idea" title="重特征值的相似判断">
 
-仅有相同的特征值（或特征多项式）还不够；出现重特征值时，应同时比较特征空间维数或若尔当结构。
+出现二重特征值 $\lambda$ 时，除了检查特征值及其代数重数，还要计算 $\dim\ker(A-\lambda E)=n-r(A-\lambda E)$。本题可直接借此排除 A、B。
 
 </Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-dde9f5-019" type="single">
+<Question id="selected-1103-math-dde9f5-019" type="single" tags="科目:线性代数, 考点:逆转置伴随与相似">
 
 设$A,B$是$n$阶可逆矩阵，且$A\sim B$，则以下结论中：  
 (1)$A^{-1}\sim B^{-1}$；(2)$A^T\sim B^T$；(3)$A^*\sim B^*$；(4)$AB\sim BA$。  
@@ -241,42 +290,84 @@ $$
 
 <Solution>
 
-设
-$$
- B=P^{-1}AP.
-$$
-则
-$$
- B^{-1}=P^{-1}A^{-1}P,
-$$
-故(1)正确。
+**参考答案：选 D，四个结论都正确。**
 
-转置得
-$$
- B^T=P^TA^T(P^{-1})^T
-=\left((P^{-1})^T\right)^{-1}A^T(P^{-1})^T,
-$$
-故(2)正确。
+**核心思路**：用同一个相似变换矩阵处理逆、转置及伴随；对 $AB$ 与 $BA$，借助其中一个矩阵可逆直接构造相似关系。
 
-又相似矩阵行列式相等，且
-$$
- A^*=|A|A^{-1},\qquad B^*=|B|B^{-1},
-$$
-所以(3)正确。
+<Steps>
+<Step>
 
-因为$A$可逆，
-$$
- A^{-1}(AB)A=BA,
-$$
-故(4)也正确。
+  ### 证明 (1) 逆矩阵保持相似
 
-因此四个结论全都正确，选D。
+  由 $A\sim B$，存在可逆 $P$ 使 $B=P^{-1}AP$。两边求逆得
+
+
+
+$$
+B^{-1}=P^{-1}A^{-1}P.
+$$
+
+  故 $A^{-1}\sim B^{-1}$。
+
+</Step>
+<Step>
+
+  ### 证明 (2) 转置保持相似
+
+  取转置：
+
+
+
+$$
+B^{\mathrm T}=P^{\mathrm T}A^{\mathrm T}(P^{\mathrm T})^{-1}.
+$$
+
+  这也是相似变换，因此 $A^{\mathrm T}\sim B^{\mathrm T}$。
+
+</Step>
+<Step>
+
+  ### 证明 (3) 伴随矩阵保持相似
+
+  相似矩阵行列式相等，记 $|A|=|B|=d\ne0$。由
+
+
+
+$$
+A^*=dA^{-1},\qquad B^*=dB^{-1},
+$$
+
+  结合 (1) 得 $B^*=P^{-1}A^*P$，故 $A^*\sim B^*$。
+
+</Step>
+<Step>
+
+  ### 证明 (4) $AB$ 与 $BA$ 相似
+
+  由于 $A$ 可逆，
+
+
+
+$$
+A^{-1}(AB)A=BA.
+$$
+
+  因而 $AB\sim BA$。四个结论均真，应选 D。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="可逆性前提不可省略">
+
+本题的 $A,B$ 均可逆，故伴随矩阵可写成 $|A|A^{-1}$，也能通过 $A^{-1}$ 构造 $AB\sim BA$。对一般不可逆方阵，$AB$ 和 $BA$ 虽有相同特征多项式，却未必相似。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-dde9f5-031" type="single">
+<Question id="selected-1103-math-dde9f5-031" type="single" tags="科目:线性代数, 考点:AB与BA的特征向量对应">
 
 设$A,B$均为$n$阶矩阵，$|B|\neq0$，$\alpha$为$n$维非零列向量，则“$\alpha$是$AB$的特征向量”是“$B\alpha$是$BA$的特征向量”的( ).  
 
@@ -287,37 +378,64 @@ $$
 
 <Solution>
 
-因$|B|\neq0$，故$B$可逆，且$\alpha\neq0$时$B\alpha\neq0$。
+**参考答案：选 A，充分必要条件。**
 
-若$\alpha$是$AB$对应于$\lambda$的特征向量，则
-$$
- AB\alpha=\lambda\alpha.
-$$
-左乘$B$得
-$$
- BA(B\alpha)=\lambda(B\alpha),
-$$
-所以$B\alpha$是$BA$的特征向量。
+**核心思路**：因为 $B$ 可逆，$BA=B(AB)B^{-1}$；相似变换会把 $AB$ 的特征向量 $\alpha$ 一一对应到 $BA$ 的特征向量 $B\alpha$。
 
-反之，若
+<Steps>
+<Step>
+
+  ### 证明充分性
+
+  若 $\alpha$ 是 $AB$ 的特征向量，则 $\alpha\ne0$，并存在 $\lambda$ 使
+
+
+
 $$
- BA(B\alpha)=\lambda(B\alpha),
+AB\alpha=\lambda\alpha.
 $$
-则
+
+  两边左乘 $B$，得到
+
+
+
 $$
- B(AB\alpha)=B(\lambda\alpha).
+BA(B\alpha)=\lambda(B\alpha).
 $$
-由$B$可逆可约去$B$，得到
+
+  由于 $B$ 可逆，$B\alpha\ne0$，故它确为 $BA$ 的特征向量。
+
+</Step>
+<Step>
+
+  ### 证明必要性
+
+  反过来，若 $BA(B\alpha)=\lambda(B\alpha)$，则
+
+
+
 $$
- AB\alpha=\lambda\alpha.
+B(AB\alpha-\lambda\alpha)=0.
 $$
-所以两个命题互为充分必要条件，选A。
+
+  可逆矩阵 $B$ 的零空间只有零向量，因此 $AB\alpha=\lambda\alpha$。这说明 $\alpha$ 也是 $AB$ 的特征向量。
+
+  两个方向均成立，所以关系为充分必要条件。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="记住完整的变换关系">
+
+不仅有 $AB\sim BA$，还具有明确的特征向量对应：$AB\alpha=\lambda\alpha\Longleftrightarrow BA(B\alpha)=\lambda(B\alpha)$。这一步的关键是 $B$ 可逆，确保 $B\alpha$ 非零且能反向消去。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-e2436e-021" type="single" number={1}>
+<Question id="selected-1103-math-e2436e-021" type="single" tags="科目:线性代数, 考点:相似的逆与幂的性质">
 
 设 $A, B$ 是 $n$ 阶可逆矩阵，且 $A^{-1}\sim B^{-1}$，则下列结果：
 ① $AB\sim BA$； ② $A\sim B$； ③ $A^2\sim B^2$； ④ $A^T\sim B^T$
@@ -330,19 +448,77 @@ $$
 
 <Solution>
 
-**解析：** 利用矩阵相似的定义. 由
-$$BA = EBA = A^{-1}ABA = A^{-1}(AB)A,$$
-知 $AB \sim BA$. 由 $A^{-1} \sim B^{-1}$ 知, 存在可逆矩阵 $P$, 使得 $P^{-1}A^{-1}P = B^{-1}$, 两边同时求逆, 得
-$$P^{-1}AP = B,$$
-故 $A \sim B$. ①式两边同时取转置, 得 $P^TA^T(P^{-1})^T = B^T$, 即 $P^TA^T(P^T)^{-1} = B^T$, 故 $A^T \sim B^T$.
-又由 $P^{-1}AP \cdot P^{-1}AP = P^{-1}A^2P = B^2$, 可知 $A^2 \sim B^2$.
-综上所述, 选项 D 正确.
+**参考答案：选 D，四个结论全部正确。**
+
+**核心思路**：从 $A^{-1}\sim B^{-1}$ 出发，通过取逆、平方、转置得到多个相似关系；$AB\sim BA$ 则单独利用 $A$ 可逆。
+
+<Steps>
+<Step>
+
+  ### 由逆矩阵相似推出原矩阵相似
+
+  设 $B^{-1}=P^{-1}A^{-1}P$，其中 $P$ 可逆。两边取逆得到
+
+
+
+$$
+B=P^{-1}AP.
+$$
+
+  所以 ② $A\sim B$ 成立。
+
+</Step>
+<Step>
+
+  ### 推出平方与转置矩阵相似
+
+  将上述等式平方，得
+
+
+
+$$
+B^2=P^{-1}A^2P,
+$$
+
+  所以 ③ 成立。再取转置，得
+
+
+
+$$
+B^{\mathrm T}=P^{\mathrm T}A^{\mathrm T}(P^{\mathrm T})^{-1},
+$$
+
+  因此 ④ 成立。
+
+</Step>
+<Step>
+
+  ### 单独证明 $AB\sim BA$
+
+  因为 $A$ 可逆，直接有
+
+
+
+$$
+BA=A^{-1}(AB)A.
+$$
+
+  所以 ① 也成立。四项均正确，应选 D。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="相似的运算规律">
+
+若 $B=P^{-1}AP$，则对任意多项式 $f$ 都有 $f(B)=P^{-1}f(A)P$；若 $A$ 可逆，还可扩展到逆矩阵。转置时需将相似变换矩阵同时转置并调换左右位置。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：可对角化充要条件、重特征值与相似类
+## 考点二｜可对角化的充要条件、重特征值与相似类
 
 <Question id="selected-1103-classified-1031-lilin-2027-s2-q06" type="single" points={5} tags="来源:李林六套卷, 考点:相似矩阵与幂零, 难度:中等">
 
@@ -365,27 +541,57 @@ $$
 
 <Solution>
 
-**答案：D（四项全对）。**
+**参考答案：选 D，①②③④全部正确，共 $4$ 个。**
 
-设 $N=A-\lambda_0E$。因为 $A$ 与 $B$ 相似，所以 $N$ 与
+**核心思路**：把 $A-\lambda_0E$ 与 $B-\lambda_0E$ 相似，再利用后者是一个平方为零、秩为 $1$ 的幂零矩阵；尤其要注意非零列向量属于它的像空间。
+
+<Steps>
+<Step>
+
+  ### 平移相似矩阵，计算秩与幂
+
+  由 $A\sim B$，令 $N=A-\lambda_0E$，则 $N\sim J$，其中
+
+
 
 $$
-J=B-\lambda_0E=\begin{pmatrix}0&1&0\\0&0&0\\0&0&0\end{pmatrix}
+J=B-\lambda_0E=
+  \begin{pmatrix}0&1&0\\0&0&0\\0&0&0\end{pmatrix}.
 $$
 
-相似。由 $r(J)=1$、$J^2=0$，知
+  显然 $r(J)=1$，且 $J^2=O$。相似变换保持秩及矩阵多项式的零性，因此
+
+
 
 $$
-r(N)=1,\qquad N^2=0,\qquad N^3=0.
+r(N)=1,\qquad N^2=O,\qquad N^3=O.
 $$
 
-因此②③④成立。再看①：任取 $N$ 的非零列向量 $v=Ne_j\ne0$，均有
+  于是 ②③④ 成立。
+
+</Step>
+<Step>
+
+  ### 重点验证 ①：非零列向量确是特征向量
+
+  任取 $N$ 的第 $j$ 个非零列向量 $v=Ne_j\ne0$，因为 $N^2=O$，有
+
+
 
 $$
 (A-\lambda_0E)v=N(Ne_j)=N^2e_j=0.
 $$
 
-即 $Av=\lambda_0v$，所以 $v$ 确实是特征值 $\lambda_0$ 的非零特征向量。故①也成立，共 $4$ 个。
+  因而 $Av=\lambda_0v$。这正是“$v$ 为 $A$ 对应特征值 $\lambda_0$ 的非零特征向量”的定义，所以 ① 也正确。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="幂零矩阵的重要结论">
+
+若 $N^2=O$，则 $\operatorname{Im}N\subseteq\ker N$。因此 $N$ 的每个非零列向量都在 $\ker N$ 中。题目第①项实际考查的正是这一包含关系。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -412,52 +618,79 @@ $$
 
 <Solution>
 
-**答案：C（$a=c=0$，$b$ 任意）。**
+**参考答案：C，$\boxed{a=c=0}$，$b$ 可以取任意实数。**
 
-因 $A$ 为下三角矩阵，特征多项式为
+**核心思路**：三角矩阵可以直接读出特征值；遇到重复特征值，必须进一步检查特征子空间的维数。这里特征值 $1$ 和 $2$ 均为二重根，故要求
+
+$$
+\dim\ker(A-E)=2,\qquad \dim\ker(A-2E)=2.
+$$
+
+<Steps>
+<Step>
+
+  ### 确定特征值与判别条件
+
+  $A$ 为下三角阵，故
+
+
 
 $$
 |\lambda E-A|=(\lambda-1)^2(\lambda-2)^2.
 $$
 
-矩阵可对角化，当且仅当特征值 $1$ 和 $2$ 的特征子空间维数均为 $2$。
+  由于两个特征值的代数重数都是 $2$，$A$ 可对角化当且仅当 $r(A-E)=r(A-2E)=2$（此时两个特征空间各有两个线性无关向量）。
 
-<Steps>
-  <Step>
+</Step>
+<Step>
 
-  ### 考察特征值 $1$
+  ### 对二重特征值 $1$ 判秩
 
-  令 $X=(x_1,x_2,x_3,x_4)^{\mathrm T}$。由 $(A-E)X=0$ 得
 
-  $$
-  \begin{cases}
-  ax_1=0,\\
-  x_1+bx_2+x_3=0,\\
-  3x_1+2x_2+cx_3+x_4=0.
-  \end{cases}
-  $$
 
-  后两式总能唯一确定 $x_3,x_4$。要使自由变量 $x_1,x_2$ 均可任取，必须且只需 $a=0$，此时 $\dim\ker(A-E)=2$。
+$$
+A-E=\begin{pmatrix}
+  0&0&0&0\\ a&0&0&0\\ 1&b&1&0\\3&2&c&1
+  \end{pmatrix}.
+$$
 
-  </Step>
-  <Step>
+  后两行因分别含有第三、第四个主元位置而线性无关；第二行在 $a\ne0$ 时会额外增加一个主元。因此
 
-  ### 考察特征值 $2$
 
-  由 $(A-2E)X=0$，前两行依次给出 $x_1=0$、$x_2=0$，最后一行化为 $cx_3=0$，而 $x_4$ 始终自由。因此
 
-  $$
-  \dim\ker(A-2E)=2\iff c=0.
-  $$
+$$
+r(A-E)=2\iff a=0.
+$$
 
-  </Step>
+</Step>
+<Step>
+
+  ### 对二重特征值 $2$ 判秩
+
+
+
+$$
+A-2E=\begin{pmatrix}
+  -1&0&0&0\\a&-1&0&0\\1&b&0&0\\3&2&c&0
+  \end{pmatrix}.
+$$
+
+  前两行已经线性无关，第三行属于前两行的张成空间；当且仅当 $c=0$ 时，第四行也属于该空间。因此
+
+
+
+$$
+r(A-2E)=2\iff c=0.
+$$
+
+</Step>
 </Steps>
 
-综上，$A$ 可相似对角化的充要条件是 $a=c=0$；$b$ 不受限制。
+两条件同时满足就是 $a=c=0$，而 $b$ 不影响上述两个秩，故选 C。
 
-<Callout type="idea" title="判定原则">
+<Callout type="warn" title="容易误判的地方">
 
-对于重特征值，必须检查其**几何重数等于代数重数**；仅知道特征值均为实数，或满足 $a=c$，都不足以保证可对角化。
+“特征值全为实数”只保证可能在实数域上对角化，并不保证一定可对角化。**二重特征值必须有两个线性无关的特征向量**；也不要把不出现在限制条件中的 $b$ 误设为零。
 
 </Callout>
 
@@ -483,29 +716,85 @@ $$
 
 <Solution>
 
-**答案：B（正确的有 2 个：②、③）。**
+**参考答案：B，正确的是②、③，共 $\boxed{2}$ 个。**
 
-由 $AP=P\Lambda$，记 $P=(p_1,\ldots,p_n)$、$\Lambda=\operatorname{diag}(\lambda_1,\ldots,\lambda_n)$，则 $Ap_i=\lambda_i p_i$。又因 $P$ 可逆，各 $p_i\ne0$。
+**核心思路**：把条件 $P^{-1}AP=\Lambda$ 改写为 $AP=P\Lambda$。对角化说明存在一组特征向量基，但并不要求特征值互异，更不要求转置后的特征向量保持不变。
 
-| 命题 | 判断 | 理由 |
+| 命题 | 结论 | 关键理由 |
 | --- | --- | --- |
-| ① | **错误** | 可对角化只要求存在 $n$ 个线性无关的特征向量，特征值允许重复，例如 $A=E$。 |
-| ② | **正确** | $Ap_i=\lambda_i p_i$，且 $p_i$ 非零，所以 $P$ 的每一列都是特征向量。 |
-| ③ | **正确** | $(\omega E-A)^k=P(\omega E-\Lambda)^kP^{-1}$。对角阵中，对任意实数 $d$，$d^2=0$ 当且仅当 $d=0$，因此两方程组具有相同的零空间。 |
-| ④ | **错误** | 转置不改变特征多项式，但通常会改变特征向量。 |
+| ① 特征值均不相同 | 错误 | $A=E_n$ 可对角化，却只有特征值 $1$。 |
+| ② $P$ 的列向量都是特征向量 | 正确 | 比较 $AP=P\Lambda$ 的列向量。 |
+| ③ $\ker(\omega E-A)=\ker(\omega E-A)^2$ | 正确 | 对角坐标下，数 $d$ 与 $d^2$ 同时为零。 |
+| ④ $A$、$A^{\mathrm T}$ 特征向量相同 | 错误 | 转置保特征多项式，不保各特征空间。 |
 
-对④可取
+<Steps>
+<Step>
+
+  ### 验证②：按列读出特征向量
+
+  设 $P=(p_1,\ldots,p_n)$，$\Lambda=\operatorname{diag}(\lambda_1,\ldots,\lambda_n)$。由
+
+
+
+$$
+AP=P\Lambda
+$$
+
+  可得 $Ap_i=\lambda_i p_i$。又因 $P$ 可逆，$p_i\ne0$，故每个 $p_i$ 都是特征向量。
+
+</Step>
+<Step>
+
+  ### 验证③：利用同一个基变换
+
+
+
+$$
+\omega E-A=P(\omega E-\Lambda)P^{-1},\qquad
+  (\omega E-A)^2=P(\omega E-\Lambda)^2P^{-1}.
+$$
+
+  令 $X=PY$。两个齐次方程分别等价于
+
+
+
+$$
+(\omega-\lambda_i)y_i=0\quad\text{与}\quad
+  (\omega-\lambda_i)^2y_i=0\quad(i=1,\ldots,n).
+$$
+
+  对任意实数 $\omega-\lambda_i$，一次方和平方具有相同零点，所以两方程组同解。
+
+</Step>
+<Step>
+
+  ### 否定④：给出特征向量反例
+
+  取
+
+
 
 $$
 A=\begin{pmatrix}1&1\\0&2\end{pmatrix},\qquad
-A^{\mathrm T}=\begin{pmatrix}1&0\\1&2\end{pmatrix}.
+  A^{\mathrm T}=\begin{pmatrix}1&0\\1&2\end{pmatrix}.
 $$
 
-$A$ 的特征值 $1$ 对应特征向量 $(1,0)^{\mathrm T}$，但 $A^{\mathrm T}(1,0)^{\mathrm T}=(1,1)^{\mathrm T}$，故该向量不是 $A^{\mathrm T}$ 的特征向量。因此共有两项正确。
+  向量 $e_1=(1,0)^{\mathrm T}$ 是 $A$ 的特征值 $1$ 的特征向量，但
 
-<Callout type="info" title="考点辨析">
 
-可对角化不等于“特征值两两不同”；而 $A$ 与 $A^{\mathrm T}$ **特征值相同**，并不意味着**特征向量相同**。
+
+$$
+A^{\mathrm T}e_1=(1,1)^{\mathrm T}\ne e_1.
+$$
+
+  因而④不成立。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="延伸结论">
+
+若 $A$ 可对角化，则对任意正整数 $k$ 和任意标量 $t$，都有 $\ker(tE-A)^k=\ker(tE-A)$。反过来，仅检验某一个 $t$ 通常不足以断言 $A$ 可对角化。
 
 </Callout>
 
@@ -524,25 +813,61 @@ $$
 
 <Solution>
 
-**答案：**$\boxed{a=-2}$。
+**参考答案：$\boxed{a=-2}$。**
 
-**过程**：利用第三行展开特征行列式，可得
+**核心思路**：矩阵是分块上三角阵，特征值与 $a$ 无关。出现二重特征值 $1$ 时，要让对应特征空间有二维，就必须使 $r(A-E)=1$。
+
+<Steps>
+<Step>
+
+  ### 先找重特征值
+
+  沿第三行展开：
+
+
 
 $$
 \begin{aligned}
-|\lambda E-A|
-&=(\lambda-1)\bigl[\lambda(\lambda+2)-3\bigr]\\
-&=(\lambda+3)(\lambda-1)^2.
-\end{aligned}
+  |\lambda E-A|
+  &=(\lambda-1)\begin{vmatrix}\lambda+2&-1\\-3&\lambda\end{vmatrix}\\
+  &=(\lambda-1)(\lambda^2+2\lambda-3)\\
+  &=(\lambda-1)^2(\lambda+3).
+  \end{aligned}
 $$
 
-特征值 $1$ 的代数重数为 $2$，因此相似对角化要求 $\dim\ker(E-A)=2$，即 $r(E-A)=1$。而
+  因此 $1$ 是二重特征值，$-3$ 是单根。
+
+</Step>
+<Step>
+
+  ### 令二重特征值的几何重数为 $2$
+
+
 
 $$
-E-A=\begin{pmatrix}3&-1&-a\\-3&1&-2\\0&0&0\end{pmatrix}.
+A-E=\begin{pmatrix}-3&1&a\\3&-1&2\\0&0&0\end{pmatrix}.
 $$
 
-前两行须线性相关，且前两列恰互为相反数，所以第三列也必须互为相反数：$-a=2$，即 $a=-2$。此时 $r(E-A)=1$，另一个特征值 $-3$ 为单根，故条件也充分。
+  要使 $\dim\ker(A-E)=2$，由秩—零度定理必须有 $r(A-E)=1$。前两行非零且前两列恰为相反数，故要求第二行等于第一行的相反数：
+
+
+
+$$
+2=-a\quad\Longrightarrow\quad a=-2.
+$$
+
+  取 $a=-2$ 时两行确实互为相反数，秩为 $1$，所以这是充分条件。
+
+</Step>
+</Steps>
+
+特征值 $-3$ 为单根，自然贡献一个线性无关特征向量；加上 $\lambda=1$ 对应的两个特征向量，总计 $3$ 个，矩阵可对角化。
+
+<Callout type="idea" title="快捷判别">
+
+三阶矩阵的特征值为 $\lambda,\lambda,\mu$（$\lambda\ne\mu$）时，可以相似对角化的充要条件为 $r(A-\lambda E)=1$，不必把全部特征向量解出来。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -563,84 +888,105 @@ $$
 
 <Solution>
 
-**答案：**（1）$\boxed{a=-3\text{ 或 }a=1}$；$a=-3$ 时不可相似对角化，$a=1$ 时可以相似对角化。
+**参考答案：**
+
+（1）出现重特征值时，$\boxed{a=1\text{ 或 }a=-3}$。其中 **$a=1$ 时可相似对角化，$a=-3$ 时不可相似对角化**。
 
 （2）当 $a=1$ 时，可取
 
 $$
-\boxed{P=\begin{pmatrix}1&1&-1\\0&1&0\\1&0&1\end{pmatrix},\qquad P^{-1}AP=\operatorname{diag}(-3,1,1)}.
+\boxed{P=\begin{pmatrix}1&1&-1\\0&1&0\\1&0&1\end{pmatrix}},
+\qquad \boxed{P^{-1}AP=\operatorname{diag}(-3,1,1)}.
 $$
 
-**过程：**
+**核心思路**：先由特征多项式确定参数，再对二重特征值比较代数重数和几何重数，最后以特征向量为列构造 $P$。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 找出重特征值对应的参数
+  ### 第一步：确定使特征值重合的参数
 
-  沿第二行展开特征行列式：
+  利用第二行的零元素：
 
-  $$
-  \begin{aligned}
+
+
+$$
+\begin{aligned}
   |\lambda E-A|
   &=(\lambda-a)\begin{vmatrix}\lambda+1&2\\2&\lambda+1\end{vmatrix}\\
-  &=(\lambda-a)(\lambda+3)(\lambda-1).
+  &=(\lambda-a)[(\lambda+1)^2-4]\\
+  &=(\lambda-a)(\lambda-1)(\lambda+3).
   \end{aligned}
-  $$
+$$
 
-  因此仅当 $a=-3$ 或 $a=1$ 时出现重特征值。
+  所以仅当 $a=1$ 或 $a=-3$ 时存在二重特征值。
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### 比较代数重数与几何重数
+  ### 第二步：分别判断能否对角化
 
-  - **$a=-3$：** $-3$ 是二重特征值，且
+  **当 $a=1$ 时**：特征值 $1$ 为二重根，
 
-    $$
-    -3E-A=\begin{pmatrix}-2&-2&2\\0&0&0\\2&-2&-2\end{pmatrix},\qquad
-    r(-3E-A)=2.
-    $$
 
-    故 $\dim\ker(-3E-A)=1<2$，不可以相似对角化。
 
-  - **$a=1$：** $1$ 是二重特征值，且
+$$
+A-E=\begin{pmatrix}-2&2&-2\\0&0&0\\-2&2&-2\end{pmatrix},
+  \qquad r(A-E)=1.
+$$
 
-    $$
-    E-A=\begin{pmatrix}2&-2&2\\0&0&0\\2&-2&2\end{pmatrix},\qquad r(E-A)=1.
-    $$
+  因而 $\dim\ker(A-E)=2$，与其代数重数相等，可以对角化。
 
-    故 $\dim\ker(E-A)=2$，恰等于其代数重数；另一特征值 $-3$ 为单根，所以可以相似对角化。
+  **当 $a=-3$ 时**：特征值 $-3$ 为二重根，
 
-  </Step>
-  <Step>
 
-  ### 取特征向量并组成 $P$
 
-  当 $a=1$ 时，分别解两个特征方程，得到
+$$
+A+3E=\begin{pmatrix}2&2&-2\\0&0&0\\-2&2&2\end{pmatrix},
+  \qquad r(A+3E)=2.
+$$
 
-  $$
-  \begin{aligned}
-  \lambda=-3:&\quad \boldsymbol\alpha_1=(1,0,1)^{\mathrm T};\\
-  \lambda=1:&\quad \boldsymbol\alpha_2=(1,1,0)^{\mathrm T},\quad
-  \boldsymbol\alpha_3=(-1,0,1)^{\mathrm T}.
-  \end{aligned}
-  $$
+  因而 $\dim\ker(A+3E)=1<2$，不可对角化。
 
-  三向量线性无关，将它们按目标对角元顺序排列成列：
+</Step>
+<Step>
 
-  $$
-  P=(\boldsymbol\alpha_1,\boldsymbol\alpha_2,\boldsymbol\alpha_3).
-  $$
+  ### 第三步：构造相似变换矩阵
 
-  由 $AP=P\operatorname{diag}(-3,1,1)$ 得所求结论。
+  令 $a=1$。解 $(A+3E)X=0$ 可取
 
-  </Step>
+
+
+$$
+p_1=(1,0,1)^{\mathrm T}\quad(\lambda=-3).
+$$
+
+  解 $(A-E)X=0$ 即 $x_1-x_2+x_3=0$，取
+
+
+
+$$
+p_2=(1,1,0)^{\mathrm T},\qquad p_3=(-1,0,1)^{\mathrm T}
+  \quad(\lambda=1).
+$$
+
+  这三个特征向量线性无关。令 $P=(p_1,p_2,p_3)$，则
+
+
+
+$$
+AP=(Ap_1,Ap_2,Ap_3)
+  =P\operatorname{diag}(-3,1,1).
+$$
+
+  由 $P$ 可逆即得所求。
+
+</Step>
 </Steps>
 
-<Callout type="idea" title="判断准则">
+<Callout type="warn" title="重特征值不等于不能对角化">
 
-特征值的**代数重数**由特征多项式确定；**几何重数**等于 $n-r(\lambda E-A)$。只有两者对每个特征值均相等，矩阵才可相似对角化。
+关键不是“有没有重根”，而是**每个特征值的特征向量个数是否达到代数重数**。本题 $a=1$ 与 $a=-3$ 都有重根，但结论完全不同。
 
 </Callout>
 
@@ -663,54 +1009,71 @@ $$
 
 <Solution>
 
-**答案：**（1）$\boxed{a=-3,\ b=0,\ \lambda=-1}$；（2）$\boxed{A\text{ 不可对角化}}$。
+**参考答案：**
+
+（1）$\boxed{a=-3,\ b=0,\ \lambda=-1}$。
+
+（2）$\boxed{A\text{ 不能相似对角化}}$。
+
+**核心思路**：先代入已知特征向量确定参数；再求特征多项式。若三阶矩阵只有一个特征值 $\lambda$，它可对角化当且仅当 $A=\lambda E$。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 代入特征向量方程
+  ### 利用 $A\alpha=\lambda\alpha$ 求参数
 
-  由 $A\boldsymbol\alpha=\lambda\boldsymbol\alpha$，逐行比较：
+  给定 $\alpha=(1,1,-1)^{\mathrm T}$，直接计算
 
-  $$
-  \begin{cases}
-  2-1-2=\lambda,\\
-  5+a-3=\lambda,\\
-  -1+b+2=-\lambda.
-  \end{cases}
-  $$
 
-  因此 $\lambda=-1$、$a=-3$、$b=0$，于是
 
-  $$
-  A=\begin{pmatrix}2&-1&2\\5&-3&3\\-1&0&-2\end{pmatrix}.
-  $$
+$$
+A\alpha=
+  \begin{pmatrix}
+  2-1-2\\5+a-3\\-1+b+2
+  \end{pmatrix}
+  =\begin{pmatrix}-1\\a+2\\b+1\end{pmatrix}.
+$$
 
-  </Step>
-  <Step>
+  与 $\lambda(1,1,-1)^{\mathrm T}$ 比较三个分量：
 
-  ### 比较代数重数与几何重数
 
-  计算特征多项式
 
-  $$
-  |\lambda E-A|=(\lambda+1)^3.
-  $$
+$$
+\lambda=-1,\qquad a+2=-1,\qquad b+1=1.
+$$
 
-  唯一特征值 $-1$ 的代数重数为 $3$，而
+  得 $a=-3,b=0$。
 
-  $$
-  r(A+E)=r\begin{pmatrix}3&-1&2\\5&-2&3\\-1&0&-1\end{pmatrix}=2,
-  $$
+</Step>
+<Step>
 
-  故 $\dim\ker(A+E)=1$，其几何重数小于代数重数，$A$ 不可对角化。
+  ### 判断是否可以对角化
 
-  </Step>
+  代回矩阵后，
+
+
+
+$$
+A=\begin{pmatrix}2&-1&2\\5&-3&3\\-1&0&-2\end{pmatrix},
+  \qquad |tE-A|=(t+1)^3.
+$$
+
+  唯一特征值是 $-1$（代数重数 $3$）。若 $A$ 可以对角化，则存在可逆 $P$ 使
+
+
+
+$$
+P^{-1}AP=\operatorname{diag}(-1,-1,-1)=-E,
+$$
+
+  从而 $A=P(-E)P^{-1}=-E$，但给定的 $A\ne-E$，矛盾。因此 **不可对角化**。
+
+</Step>
 </Steps>
 
-<Callout type="idea" title="一行判别">
+<Callout type="info" title="另一个检验方法">
 
-若 $3$ 阶矩阵只有特征值 $-1$ 且能对角化，则必有 $A=P(-E)P^{-1}=-E$；本题 $A\ne-E$，可直接排除。
+直接求 $A+E$ 可得 $r(A+E)=2$，于是 $\dim\ker(A+E)=1$；这也说明三重特征值 $-1$ 只有一个线性无关特征向量。
 
 </Callout>
 
@@ -733,56 +1096,80 @@ $$
 
 <Solution>
 
-**答案：**（1）所述列向量关系成立；（2）$\boxed{A\text{ 不可相似对角化}}$。
+**参考答案：**（1）题中三个线性方程均成立；（2）$\boxed{A\text{ 不可相似对角化}}$。
 
-**过程：**
+**核心思路：**$P^{-1}AP=J$ 等价于 $AP=PJ$。逐列比较可以识别普通特征向量和广义特征向量；$J$ 的非零上超对角元说明它不是对角阵且无法对角化。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 利用 $AP=PJ$ 比较列向量
+  ### 证明（1）：按列比较 $AP=PJ$
 
-  将等式改写为
+  记 $P=(\alpha_1,\alpha_2,\alpha_3)$。由
 
-  $$
-  AP=P\begin{pmatrix}1&0&0\\0&1&1\\0&0&1\end{pmatrix}.
-  $$
 
-  逐列比较，得
 
-  $$
-  \begin{cases}
-  A\boldsymbol\alpha_1=\boldsymbol\alpha_1,\\
-  A\boldsymbol\alpha_2=\boldsymbol\alpha_2,\\
-  A\boldsymbol\alpha_3=\boldsymbol\alpha_2+\boldsymbol\alpha_3.
-  \end{cases}
-  $$
+$$
+AP=P\begin{pmatrix}1&0&0\\0&1&1\\0&0&1\end{pmatrix}
+$$
 
-  将 $A$ 移项，立即得到（1）中的三个方程。
+  分别比较三列，得到
 
-  </Step>
-  <Step>
 
-  ### 比较代数重数与几何重数
 
-  令 $J=P^{-1}AP$，则 $\det(\lambda E-J)=(\lambda-1)^3$：唯一特征值为 $1$，代数重数为 $3$。
+$$
+A\alpha_1=\alpha_1,\qquad
+  A\alpha_2=\alpha_2,\qquad
+  A\alpha_3=\alpha_2+\alpha_3.
+$$
 
-  另一方面，
+  移项即为
 
-  $$
-  E-J=\begin{pmatrix}0&0&0\\0&0&-1\\0&0&0\end{pmatrix},\qquad
-  \dim\ker(E-J)=3-\operatorname{rank}(E-J)=2.
-  $$
 
-  因此特征值 $1$ 的几何重数仅为 $2<3$，不能找到三个线性无关的特征向量。$J$ 不可对角化，由相似性得 $A$ 也不可对角化。
 
-  </Step>
+$$
+(E-A)\alpha_1=0,\qquad
+  (E-A)\alpha_2=0,\qquad
+  (E-A)\alpha_3=-\alpha_2.
+$$
+
+</Step>
+<Step>
+
+  ### 证明（2）：几何重数小于代数重数
+
+  $J$ 的特征多项式是 $(\lambda-1)^3$，故 $A$ 的唯一特征值为 $1$，代数重数为 $3$。但是
+
+
+
+$$
+E-J=\begin{pmatrix}0&0&0\\0&0&-1\\0&0&0\end{pmatrix},
+  \qquad r(E-J)=1.
+$$
+
+  因 $E-A=P(E-J)P^{-1}$，可知 $r(E-A)=1$，所以
+
+
+
+$$
+\dim\ker(E-A)=3-1=2<3.
+$$
+
+  因此 $A$ 缺少一个线性无关的特征向量，不能相似对角化。
+
+</Step>
 </Steps>
+
+<Callout type="idea" title="理解广义特征向量">
+
+$\alpha_3$ 不是特征值 $1$ 的普通特征向量，因为 $(A-E)\alpha_3=\alpha_2\ne0$；但 $(A-E)^2\alpha_3=0$，所以它是二阶广义特征向量。此类关系对应 Jordan 块，正是“不能对角化”的结构性原因。
+
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-classified-1031-math-6178b5-021" type="essay" points={12} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-6178b5-021" type="essay" points={12} tags="来源:张宇8套卷, 考点:不能对角化但可与Jordan块相似">
 
 设
 
@@ -810,140 +1197,98 @@ $$
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：**
 
-**解析：** 已知
+（1）$\boxed{A\text{ 不可相似对角化}}$。
 
-$$
-A=
-\begin{pmatrix}
--1&-2&6\\
--1&0&3\\
--1&-1&4
-\end{pmatrix},
-\qquad
-B=
-\begin{pmatrix}
-1&0&0\\
-0&1&0\\
-0&1&1
-\end{pmatrix}.
-$$
-
-#### （1）判断 $A$ 是否可相似对角化
-
-特征多项式为
+（2）可取
 
 $$
-|\lambda E-A|
-=
-\begin{vmatrix}
-\lambda+1&2&-6\\
-1&\lambda&-3\\
-1&1&\lambda-4
-\end{vmatrix}
-=(\lambda-1)^3.
+\boxed{P=\begin{pmatrix}-1&-1&2\\1&0&1\\0&0&1\end{pmatrix}},
+\qquad P^{-1}AP=\begin{pmatrix}1&0&0\\0&1&0\\0&1&1\end{pmatrix}=B.
 $$
 
-因此 $A$ 只有三重特征值
+**核心思路**：虽然 $A$ 不能对角化，但仍可能与指定的非对角矩阵 $B$ 相似。求 $P$ 时不必算 $P^{-1}$；只需设 $P$ 的列向量，解 $AP=PB$。
+
+<Steps>
+<Step>
+
+  ### 判断（1）：唯一三重特征值
+
+  计算特征多项式
+
+
 
 $$
-\lambda=1.
+|\lambda E-A|=(\lambda-1)^3.
 $$
 
-但显然
+  如果 $A$ 可以相似对角化，因其所有特征值都是 $1$，对角矩阵只能为 $E$，于是 $A=PEP^{-1}=E$。但原矩阵 $A\ne E$，所以不可对角化。
+
+</Step>
+<Step>
+
+  ### 翻译（2）：把矩阵方程化为列向量方程
+
+  记 $P=(p_1,p_2,p_3)$，$N=A-E$。由于 $P^{-1}AP=B$ 等价于 $AP=PB$，逐列得到
+
+
 
 $$
-A\ne E.
+Np_1=0,\qquad Np_2=p_3,\qquad Np_3=0.
 $$
 
-若 $A$ 可相似对角化，则只能相似于 $E$，从而必须有 $A=E$，矛盾。
+  这里 $Np_2=p_3$ 是本题的关键：第二列应取一个广义特征向量，第三列由其像得到。
 
-故
+</Step>
+<Step>
 
-$$
-\boxed{A\text{ 不可相似对角化}}.
-$$
+  ### 构造并检验 $P$
 
-#### （2）求 $P$ 使 $P^{-1}AP=B$
+  本题
 
-设
 
-$$
-P=(\alpha_1,\alpha_2,\alpha_3).
-$$
-
-由
 
 $$
-AP=PB
+N=\begin{pmatrix}-2&-2&6\\-1&-1&3\\-1&-1&3\end{pmatrix},
+  \qquad N^2=0,\quad r(N)=1.
 $$
 
-得
+  取
+
+
 
 $$
-A\alpha_1=\alpha_1,
+p_2=(-1,0,0)^{\mathrm T},\qquad
+  p_3=Np_2=(2,1,1)^{\mathrm T}.
 $$
 
-$$
-A\alpha_2=\alpha_2+\alpha_3,
-$$
+  再在 $\ker N$ 中选取一个与 $p_3$ 线性无关的特征向量
+
+
 
 $$
-A\alpha_3=\alpha_3.
+p_1=(-1,1,0)^{\mathrm T}.
 $$
 
-方程
+  于是 $Np_1=Np_3=0$，且
+
+
 
 $$
-(A-E)x=0
+\det(p_1,p_2,p_3)=1\ne0.
 $$
 
-的一个基础解系可取
+  故 $P$ 可逆；由三个列向量方程立即得到 $AP=PB$，即所求相似关系。
 
-$$
-\xi_1=
-\begin{pmatrix}-1\\1\\0\end{pmatrix},
-\qquad
-\xi_2=
-\begin{pmatrix}3\\0\\1\end{pmatrix}.
-$$
+</Step>
+</Steps>
 
-取
+<Callout type="warn" title="理解两问并不矛盾">
 
-$$
-\alpha_1=
-\begin{pmatrix}-1\\1\\0\end{pmatrix},
-\qquad
-\alpha_3=
-\begin{pmatrix}2\\1\\1\end{pmatrix}.
-$$
+相似于某矩阵 $B$，不意味着可以对角化；只有 $B$ 本身可对角化，才能推出 $A$ 可对角化。本题 $A$、$B$ 都含有一个 $2$ 阶 Jordan 块。
 
-再由
-
-$$
-(A-E)\alpha_2=\alpha_3
-$$
-
-可取
-
-$$
-\alpha_2=
-\begin{pmatrix}-1\\0\\0\end{pmatrix}.
-$$
-
-因此可取
-
-$$
-\boxed{
-P=
-\begin{pmatrix}
--1&-1&2\\
-1&0&1\\
-0&0&1
-\end{pmatrix}
-}.
-$$
+</Callout>
 
 </Solution>
 
@@ -962,26 +1307,62 @@ $$
 
 <Solution>
 
-**参考答案：$\boxed{a=-1,\ b=-2}$。**
+**参考答案：$\boxed{a=-1,\quad b=-2}$。**
 
-**过程：**
+**核心思路**：相似矩阵的迹、特征多项式及每个特征值的特征空间维数都相同。本题先用迹求 $b$，再利用 $B$ 中特征值 $1$ 的二重特征空间确定 $a$。
 
-1. **利用迹不变确定 $b$。** $\operatorname{tr}(A)=0$，$\operatorname{tr}(B)=2+b$，故 $b=-2$。
-2. **利用特征空间维数确定 $a$。** $B=\operatorname{diag}(1,1,-2)$，因此 $\dim\ker(E-B)=2$。矩阵相似保持零空间维数，必须有 $r(E-A)=1$。计算
+<Steps>
+<Step>
 
-   $$
-   \begin{aligned}
-   E-A&=\begin{pmatrix}1&-2&0\\-1&2&-a-1\\0&0&0\end{pmatrix}\\
-   &\xrightarrow{R_2\leftarrow R_2+R_1}\begin{pmatrix}1&-2&0\\0&0&-a-1\\0&0&0\end{pmatrix}.
-   \end{aligned}
-   $$
+  ### 利用相似不变量求 $b$
 
-   故 $r(E-A)=1$ 当且仅当 $a=-1$。
-3. **检验充分性。** 当 $a=-1$ 时，$A$ 的特征值为 $1,1,-2$，其中 $\dim\ker(E-A)=2$，所以 $A$ 可对角化并与 $B$ 相似。
 
-故所求 $a=-1$、$b=-2$。
 
-<Callout type="idea" title="重根情形必须看特征空间">仅比较迹、行列式或特征多项式不能保证矩阵相似；当存在二重特征值时，还需比较对应特征空间的维数。</Callout>
+$$
+\operatorname{tr}(A)=0+(-1)+1=0,\qquad
+  \operatorname{tr}(B)=1+1+b=2+b.
+$$
+
+  相似矩阵迹相等，故 $b=-2$。
+
+</Step>
+<Step>
+
+  ### 利用特征空间维数求 $a$
+
+  因 $B=\operatorname{diag}(1,1,-2)$，有 $\dim\ker(B-E)=2$，于是相似性要求 $r(A-E)=1$。计算
+
+
+
+$$
+A-E=\begin{pmatrix}-1&2&0\\1&-2&a+1\\0&0&0\end{pmatrix}
+  \xrightarrow{R_2\leftarrow R_2+R_1}
+  \begin{pmatrix}-1&2&0\\0&0&a+1\\0&0&0\end{pmatrix}.
+$$
+
+  因此
+
+
+
+$$
+r(A-E)=1\iff a+1=0\iff a=-1.
+$$
+
+</Step>
+<Step>
+
+  ### 检验充分性
+
+  当 $a=-1$ 时，$A$ 的特征多项式为 $(\lambda-1)^2(\lambda+2)$，且 $\dim\ker(A-E)=2$，所以 $A$ 可相似对角化为 $\operatorname{diag}(1,1,-2)=B$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="先比不变量，再比重特征值的维数">
+
+迹和行列式能快速确定部分参数，却通常不足以判断两个矩阵是否相似；遇到重特征值时，需额外检查 $r(A-\lambda E)$。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -997,40 +1378,47 @@ $$
 
 <Solution>
 
-**答案：D。**
+**参考答案：D，$\boxed{A\alpha\text{ 与 }A^2\alpha\text{ 线性无关}}$。**
 
-题设等价于
-
-$$
-A^2\boldsymbol\alpha\ne0,\qquad A^3\boldsymbol\alpha=0.
-$$
-
-设 $c_1A\boldsymbol\alpha+c_2A^2\boldsymbol\alpha=0$。两边左乘 $A$，有
+**核心思路**：把题干的“是否为方程的解”写成矩阵等式：
 
 $$
-c_1A^2\boldsymbol\alpha+c_2A^3\boldsymbol\alpha
-=c_1A^2\boldsymbol\alpha=0.
+A^2\alpha\ne0,\qquad A^2(A\alpha)=A^3\alpha=0.
 $$
 
-由 $A^2\boldsymbol\alpha\ne0$ 得 $c_1=0$，再回代得 $c_2=0$。故这两个向量**线性无关**，选 D。
+假设 $A\alpha$ 与 $A^2\alpha$ 线性相关，则存在标量 $u,v$，使
 
-<Callout type="idea" title="判定技巧">
+$$
+uA\alpha+vA^2\alpha=0.
+$$
 
-遇到 $A^k\boldsymbol\alpha\ne0$ 且 $A^{k+1}\boldsymbol\alpha=0$，可对疑似线性关系继续左乘 $A$，逐项消去系数。
+左乘一次 $A$，利用 $A^3\alpha=0$，得到
+
+$$
+u A^2\alpha+vA^3\alpha=uA^2\alpha=0.
+$$
+
+因 $A^2\alpha\ne0$，必有 $u=0$。再代回原等式，得 $vA^2\alpha=0$，所以 $v=0$。
+
+因此二者只能以零系数线性组合为零，必线性无关，选 D。
+
+<Callout type="idea" title="更强的结论：幂零链">
+
+事实上，$\alpha,A\alpha,A^2\alpha$ 这三个向量也线性无关。若它们有线性关系，依次左乘 $A^2$、$A$ 即可逐个消去系数。遇到 $A^k\alpha\ne0$ 而 $A^{k+1}\alpha=0$，可优先使用“左乘 $A$ 消项”的方法。
 
 </Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-729cce-005" type="single">
+<Question id="selected-1103-math-729cce-005" type="single" tags="科目:线性代数, 考点:用特征空间维数判别可对角化">
 
 下列矩阵中不能相似对角化的是
 
 <Option>
 
 $$
- \begin{bmatrix}
+\begin{bmatrix}
 1&2&0\\
 2&0&3\\
 0&3&0
@@ -1041,7 +1429,7 @@ $$
 <Option>
 
 $$
- \begin{bmatrix}
+\begin{bmatrix}
 0&0&0\\
 0&0&0\\
 1&2&3
@@ -1052,7 +1440,7 @@ $$
 <Option>
 
 $$
- \begin{bmatrix}
+\begin{bmatrix}
 0&0&0\\
 0&1&0\\
 0&2&3
@@ -1063,7 +1451,7 @@ $$
 <Option correct>
 
 $$
- \begin{bmatrix}
+\begin{bmatrix}
 0&0&0\\
 1&0&0\\
 0&2&3
@@ -1074,148 +1462,149 @@ $$
 
 <Solution>
 
-逐项判断。
+**参考答案：D。**
 
-（A）中的矩阵是实对称矩阵。实对称矩阵一定可以正交相似对角化，因此（A）可以相似对角化。
+**核心思路**：区分两类快速判定：实对称阵一定能正交对角化；三角阵的特征值在主对角线上，若出现重根则需计算对应特征空间维数。
 
-（B）中的矩阵为下三角矩阵，其特征值为
+| 选项 | 特征值与关键结构 | 是否可对角化 |
+| --- | --- | --- |
+| A | 实对称矩阵 | 可以，依据实对称矩阵谱定理 |
+| B | $0,0,3$，且 $r(B)=1$ | 可以：$\dim\ker B=2$ |
+| C | $0,1,3$ 两两不同 | 可以：有三个线性无关特征向量 |
+| D | $0,0,3$，且 $r(D)=2$ | **不可以：$\dim\ker D=1$** |
 
-$$
- 0,0,3.
-$$
+**具体推导：**
 
-对于 $ \lambda=0$，解
-
-$$
- \begin{bmatrix}
-0&0&0\\
-0&0&0\\
-1&2&3
-\end{bmatrix}
-\begin{bmatrix}
-x_1\\x_2\\x_3
-\end{bmatrix}=0,
-$$
-
-即
+对 B，矩阵只有最后一行非零，所以 $r(B)=1$，从而
 
 $$
- x_1+2x_2+3x_3=0.
+\dim\ker B=3-r(B)=2.
 $$
 
-其解空间维数为 $ 2$，等于特征值 $ 0$ 的代数重数。再加上特征值 $ 3$ 的一个特征向量，共有三个线性无关的特征向量，因此（B）可以相似对角化。
+这正好等于特征值 $0$ 的代数重数 $2$；特征值 $3$ 为单根，故 B 可对角化。
 
-（C）中的矩阵为下三角矩阵，三个特征值为
-
-$$
- 0,1,3,
-$$
-
-彼此不同，所以必有三个线性无关的特征向量，故（C）可以相似对角化。
-
-（D）中的矩阵为下三角矩阵，特征值为
+对 D，齐次方程 $DX=0$ 等价于
 
 $$
- 0,0,3.
+\begin{cases}
+x_1=0,\\ 2x_2+3x_3=0.
+\end{cases}
 $$
 
-对于 $ \lambda=0$，有
+因此只有一个自由变量：
 
 $$
- \begin{bmatrix}
-0&0&0\\
-1&0&0\\
-0&2&3
-\end{bmatrix}
-\begin{bmatrix}
-x_1\\x_2\\x_3
-\end{bmatrix}=0,
+\dim\ker D=1<2.
 $$
 
-即
+特征值 $0$ 缺少一个线性无关特征向量，所以 D 不可对角化，符合题意。
 
-$$
- x_1=0,
-\qquad
-2x_2+3x_3=0.
-$$
+<Callout type="warn" title="不要只数不同特征值">
 
-故属于特征值 $ 0$ 的特征子空间维数仅为 $ 1$，小于其代数重数 $ 2$。因此该矩阵没有三个线性无关的特征向量，不能相似对角化，应选（D）。
+B 与 D 都只有 $0,3$ 两个不同特征值，且特征多项式相同；但 B 可对角化、D 不可对角化。**相同特征多项式不保证相似，更不保证同时可对角化。**
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-dde9f5-015" type="essay">
+<Question id="selected-1103-math-dde9f5-015" type="essay" tags="科目:线性代数, 考点:含参矩阵的相似对角化">
 
 已知
+
 $$
- A=\begin{bmatrix}3&a&4\\2&-1&2\\-2&-a&-3\end{bmatrix},
+A=\begin{bmatrix}3&a&4\\2&-1&2\\-2&-a&-3\end{bmatrix},
 $$
+
 求$A$的特征值，问$a$为何值时，$A$不能相似于对角矩阵；$a$为何值时，$A$相似于对角矩阵，并求可逆矩阵$P$，使得$P^{-1}AP=\Lambda$。
 
 <Solution>
 
-**答案：**
-
-$A$的特征值为
+**参考答案：**$A$ 的特征值恒为 $\boxed{1,-1,-1}$。当 $\boxed{a\ne0}$ 时不能相似对角化；当 $\boxed{a=0}$ 时可以相似对角化。此时可取
 
 $$
- 1,-1,-1.
-$$
-当$a\neq0$时不能相似对角化；当$a=0$时可以相似对角化。可取
-$$
- P=\begin{bmatrix}
--2&0&-1\\
--1&1&0\\
-1&0&1
-\end{bmatrix},
-\qquad
-\Lambda=\begin{bmatrix}
-1&0&0\\
-0&-1&0\\
-0&0&-1
-\end{bmatrix}.
+\boxed{P=\begin{pmatrix}-2&0&-1\\-1&1&0\\1&0&1\end{pmatrix}},\qquad
+\boxed{P^{-1}AP=\Lambda=\operatorname{diag}(1,-1,-1)}.
 $$
 
-**解析：** 计算得
-$$
- |\lambda E-A|=(\lambda-1)(\lambda+1)^2,
-$$
-所以特征值恒为$1,-1,-1$。
+**核心思路**：特征多项式与参数无关，但 $-1$ 是二重特征值，要用 $r(A+E)$ 判断其特征空间是否为二维。
 
-对二重特征值$\lambda=-1$，
-$$
- A+E=\begin{bmatrix}4&a&4\\2&0&2\\-2&-a&-2\end{bmatrix}.
-$$
-其中所有二阶子式均含因子$a$；当$a\neq0$时$r(A+E)=2$，因此
-$$
- \dim N(A+E)=1<2,
-$$
-不能相似对角化。
+<Steps>
+<Step>
 
-当$a=0$时$r(A+E)=1$，故$\lambda=-1$有两个线性无关的特征向量。可取
-$$
- \xi_1=\begin{bmatrix}-2\\-1\\1\end{bmatrix}
-$$
-对应$\lambda=1$，以及
-$$
- \xi_2=\begin{bmatrix}0\\1\\0\end{bmatrix},
-\qquad
-\xi_3=\begin{bmatrix}-1\\0\\1\end{bmatrix}
-$$
-对应$\lambda=-1$。
+  ### 求特征值
 
-令$P=[\xi_1,\xi_2,\xi_3]$，则$|P|\neq0$，并有
+  展开行列式得
+
+
+
 $$
- P^{-1}AP=\operatorname{diag}(1,-1,-1).
+|\lambda E-A|=(\lambda-1)(\lambda+1)^2.
 $$
+
+  因此 $1$ 的代数重数为 $1$，$-1$ 的代数重数为 $2$，且两者与 $a$ 无关。
+
+</Step>
+<Step>
+
+  ### 分类判定可对角化条件
+
+
+
+$$
+A+E=\begin{pmatrix}4&a&4\\2&0&2\\-2&-a&-2\end{pmatrix}.
+$$
+
+  第一、三列完全相同；第一、二行若 $a\ne0$ 就线性无关（例如左上角二阶子式为 $-2a$），所以 $r(A+E)=2$。若 $a=0$，三行全为向量 $(1,0,1)$ 的倍数，故 $r(A+E)=1$。
+
+  因而
+
+
+
+$$
+\dim\ker(A+E)=\begin{cases}1,&a\ne0,\\2,&a=0.\end{cases}
+$$
+
+  重根 $-1$ 的几何重数达到 $2$ 当且仅当 $a=0$；这也就是可对角化的充要条件。
+
+</Step>
+<Step>
+
+  ### 当 $a=0$ 时构造特征向量矩阵
+
+  对 $\lambda=1$，可取 $p_1=(-2,-1,1)^{\mathrm T}$。对 $\lambda=-1$，解 $(A+E)X=0$ 即 $x_1+x_3=0$，可取
+
+
+
+$$
+p_2=(0,1,0)^{\mathrm T},\qquad p_3=(-1,0,1)^{\mathrm T}.
+$$
+
+  令 $P=(p_1,p_2,p_3)$，则 $\det P=-1\ne0$，并有
+
+
+
+$$
+AP=P\operatorname{diag}(1,-1,-1).
+$$
+
+  故所给 $P$ 满足要求。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="参数题的通法">
+
+先看特征多项式是否含参数，再对重复特征值求 $r(A-\lambda E)$。此题参数不改变特征值，只改变特征向量个数，直接追踪特征多项式会遗漏关键限制。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-e2436e-024" type="single">
+<Question id="selected-1103-math-e2436e-024" type="single" tags="科目:线性代数, 考点:Jordan块相似判别">
 
 下列矩阵中，与矩阵 $\begin{pmatrix} 1 & 1 & 0 \\ 0 & 1 & 1 \\ 0 & 0 & 1 \end{pmatrix}$ 相似的是 ( ).
 
@@ -1226,29 +1615,63 @@ $$
 
 <Solution>
 
-**解析：** 记已知条件矩阵及选项 $A, B, C, D$ 的矩阵分别为 $A, A_1, A_2, A_3, A_4$。由
-$$|\lambda E - A| = |\lambda E - A_1| = |\lambda E - A_2| = |\lambda E - A_3| = |\lambda E - A_4| = (\lambda - 1)^3,$$
-可知五个矩阵的特征值均为 $\lambda_1 = \lambda_2 = \lambda_3 = 1$。
+**参考答案：A。**
 
-由 $1E - A = \begin{pmatrix} 0 & -1 & 0 \\ 0 & 0 & -1 \\ 0 & 0 & 0 \end{pmatrix}$，知 $r(E - A) = 2$，故三重特征值 $1$ 只有一个线性无关的特征向量，所以 $A$ 不相似于对角矩阵。同理，$A_1, A_2, A_3, A_4$ 都不相似于对角矩阵。
+**核心思路**：题给矩阵 $J$ 是三阶、特征值全为 $1$ 的一个完整 Jordan 块。把候选矩阵写成 $I+N$：所有选项的 $N$ 都是严格上三角矩阵，因此 $N^3=0$。其中与 $J$ 相似的充要条件是 $N^2\ne0$，也等价于 $r(N)=2$。
 
-作为选择题，可用两个矩阵相似的必要条件，利用排除法。由
-$$1E - A_1 = \begin{pmatrix} 0 & -1 & 1 \\ 0 & 0 & -1 \\ 0 & 0 & 0 \end{pmatrix}, \text{知 } r(E - A_1) = 2,$$
-$$1E - A_2 = \begin{pmatrix} 0 & 0 & 1 \\ 0 & 0 & -1 \\ 0 & 0 & 0 \end{pmatrix}, \text{知 } r(E - A_2) = 1,$$
-$$1E - A_3 = \begin{pmatrix} 0 & -1 & 1 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{pmatrix}, \text{知 } r(E - A_3) = 1,$$
-$$1E - A_4 = \begin{pmatrix} 0 & 0 & 1 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{pmatrix}, \text{知 } r(E - A_4) = 1,$$
+<Tabs items={['方法一：看幂零指数', '方法二：比较零空间维数']}>
+<Tab value="方法一：看幂零指数">
 
-故只有 $r(E - A_1) = r(E - A) = 2$，而 $r(E - A)$ 与 $r(E - A_2), r(E - A_3), r(E - A_4)$ 均不相等，所以 $E - A$ 与 $E - A_2, E - A_3, E - A_4$ 均不相似，故选 A。
+  设 $N_0=J-E$，则
 
-**知识点 / 技巧：** 结论：
-① $A \sim B \Rightarrow r(A) = r(B)$；
-② $A \sim B \Rightarrow r(\lambda E - A) = r(\lambda E - B)$。
+
+
+$$
+N_0=\begin{pmatrix}0&1&0\\0&0&1\\0&0&0\end{pmatrix},
+  \qquad N_0^2=\begin{pmatrix}0&0&1\\0&0&0\\0&0&0\end{pmatrix}\ne0,
+  \quad N_0^3=0.
+$$
+
+  对任一选项的 $N=A_i-E$，均有形状
+
+
+
+$$
+N=\begin{pmatrix}0&p&q\\0&0&r\\0&0&0\end{pmatrix},
+  \qquad N^2=\begin{pmatrix}0&0&pr\\0&0&0\\0&0&0\end{pmatrix}.
+$$
+
+  要与 $N_0$ 具有相同的长度为 $3$ 的幂零链，必须且只需 $pr\ne0$。四个选项中，只有 **A 的 $p=r=1$**，故选 A。
+
+</Tab>
+<Tab value="方法二：比较零空间维数">
+
+  $J-E$ 的秩为 $2$。相似变换保持矩阵秩，故必要条件为
+
+
+
+$$
+r(A_i-E)=2.
+$$
+
+  A 的 $A_i-E$ 前两行独立，所以秩为 $2$；B、C、D 各只有一个独立非零行，秩均为 $1$。
+
+  且对于所有特征值均为 $1$ 的三阶严格上三角扰动，$r(A_i-E)=2$ 恰对应唯一的三阶 Jordan 块，故这一条件在本题也是充分的。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="别用“特征值相同”直接判断相似">
+
+这四个候选矩阵与 $J$ 的特征多项式均为 $(\lambda-1)^3$。相似必须保留的还有 $r(A-E),r((A-E)^2)$ 等结构；仅比较迹、行列式或特征值都不够。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-e2436e-030" type="single">
+<Question id="selected-1103-math-e2436e-030" type="single" tags="科目:线性代数, 考点:正交特征向量与对角化">
 
 设 $A$ 为 $2$ 阶实矩阵，$\alpha$ 与 $\beta$ 是 $A$ 的两个单位实特征向量，且满足 $\|\alpha+\beta\| = \|\alpha-\beta\|$，则（ ）.
 
@@ -1259,26 +1682,68 @@ $$1E - A_4 = \begin{pmatrix} 0 & 0 & 1 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{pmatrix}, 
 
 <Solution>
 
-**解析：** 由 $\|\boldsymbol{\alpha} + \boldsymbol{\beta}\| = \|\boldsymbol{\alpha} - \boldsymbol{\beta}\|,$ 知 $\|\boldsymbol{\alpha} + \boldsymbol{\beta}\|^2 = \|\boldsymbol{\alpha} - \boldsymbol{\beta}\|^2,$ 即内积相等.
-因 $(\boldsymbol{\alpha} + \boldsymbol{\beta}, \boldsymbol{\alpha} + \boldsymbol{\beta}) = (\boldsymbol{\alpha} - \boldsymbol{\beta}, \boldsymbol{\alpha} - \boldsymbol{\beta}),$ 故 $(\boldsymbol{\alpha} + \boldsymbol{\beta})^{T}(\boldsymbol{\alpha} + \boldsymbol{\beta}) = (\boldsymbol{\alpha} - \boldsymbol{\beta})^{T}(\boldsymbol{\alpha} - \boldsymbol{\beta}),$ 即 $\boldsymbol{\alpha}^{T}\boldsymbol{\alpha} + \boldsymbol{\alpha}^{T}\boldsymbol{\beta} + \boldsymbol{\beta}^{T}\boldsymbol{\alpha} + \boldsymbol{\beta}^{T}\boldsymbol{\beta} = \boldsymbol{\alpha}^{T}\boldsymbol{\alpha} - \boldsymbol{\alpha}^{T}\boldsymbol{\beta} - \boldsymbol{\beta}^{T}\boldsymbol{\alpha} + \boldsymbol{\beta}^{T}\boldsymbol{\beta},$ 从而 $2(\boldsymbol{\alpha}^{T}\boldsymbol{\beta} + \boldsymbol{\beta}^{T}\boldsymbol{\alpha}) = 0.$
-又 $\boldsymbol{\alpha}^{T}\boldsymbol{\beta} = \boldsymbol{\beta}^{T}\boldsymbol{\alpha},$ 故 $4\boldsymbol{\alpha}^{T}\boldsymbol{\beta} = 0,$ 于是 $\boldsymbol{\alpha}^{T}\boldsymbol{\beta} = 0.$ 所以 $\boldsymbol{\alpha}$ 与 $\boldsymbol{\beta}$ 正交(垂直).
-故 $A$ 是 $2$ 阶实对称矩阵, 从而 $A$ 必相似于对角矩阵, 选项 C 正确.
-由于 $A$ 的特征值未知, 故选项 A, B, D 不正确.
+**参考答案：C，$\boxed{A\text{ 必相似于对角矩阵}}$。**
 
-**知识点 / 技巧：** ① $\|\alpha + \beta\| = \|\alpha - \beta\|$, 如图 14-1 所示, 显然 $\alpha \perp \beta$.
-② 令 $Q = (\alpha, \beta)$, 则 $Q$ 为正交矩阵, 使得
-$Q^{-1}AQ = \Lambda = \text{diag}(\lambda_1, \lambda_2)$,
-其中 $\lambda_1, \lambda_2$ 为 $A$ 的特征值. 从而
-$$A = Q\Lambda Q^{-1}, A^{T} = (Q^{-1})^{T}\Lambda^{T}Q^{T} = Q\Lambda Q^{-1} = A.$$
-故 $A$ 是对称矩阵.
+**核心思路**：向量加减的模相等意味着两向量正交，而两个非零、正交的二维实特征向量必构成一组基。由此可直接构造对角化矩阵。
 
-图 14-1
+<Steps>
+<Step>
+
+  ### 从长度关系推出正交
+
+  将两边平方：
+
+
+
+$$
+\begin{aligned}
+  \|\alpha+\beta\|^2&=\|\alpha\|^2+2\alpha^{\mathrm T}\beta+\|\beta\|^2,\\
+  \|\alpha-\beta\|^2&=\|\alpha\|^2-2\alpha^{\mathrm T}\beta+\|\beta\|^2.
+  \end{aligned}
+$$
+
+  两式相等给出 $4\alpha^{\mathrm T}\beta=0$，故 $\alpha\perp\beta$。由于它们均为单位向量，必非零且线性无关。
+
+</Step>
+<Step>
+
+  ### 用特征向量作基直接对角化
+
+  设 $A\alpha=\lambda_1\alpha$，$A\beta=\lambda_2\beta$。令
+
+
+
+$$
+Q=(\alpha,\beta),\qquad Q^{\mathrm T}Q=E.
+$$
+
+  则 $Q$ 是可逆的正交矩阵，且
+
+
+
+$$
+AQ=Q\operatorname{diag}(\lambda_1,\lambda_2),
+  \qquad Q^{-1}AQ=\operatorname{diag}(\lambda_1,\lambda_2).
+$$
+
+  因而 C 必然正确。
+
+</Step>
+</Steps>
+
+**其余选项为什么不成立**？取 $A=0$ 则 $r(A)=0$；取 $A=E$ 则 $r(A)=2$；两者都可以任选一组标准正交基为特征向量，故 A、B 不能确定。再取 $A=-E$，它负定、不与正定单位阵合同，故 D 也不成立。
+
+<Callout type="info" title="更进一步">
+
+因为 $Q$ 正交且对角阵实对称，实际上 $A=Q\Lambda Q^{\mathrm T}$ 满足 $A^{\mathrm T}=A$；但本题**证明可对角化**时，无需先证明 $A$ 对称。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点3：构造特征基、伴随谱映射与矩阵高次幂
+## 考点三｜特征向量基变换、伴随谱映射与矩阵高次幂
 
 <Question id="selected-1103-classified-1031-tangjiafeng-2027-s2-q07" type="single" points={5} tags="来源:汤家凤八套卷, 考点:相似矩阵与伴随矩阵特征值, 难度:中等">
 
@@ -1297,29 +1762,64 @@ $$
 
 <Solution>
 
-**答案：B。**$A^*+E$ 的特征值为 $5,-3,0$。
+**参考答案：B，对角矩阵可取 $\boxed{\operatorname{diag}(5,-3,0)}$。**
 
-**过程：**$P$ 可逆。由题设逐列比较可得
+**核心思路**：题给 $P$ 的列向量线性无关，所以 $P$ 可逆。先写出 $P$ 基下的 $A$，再把 $A$ 的特征值映射到 $A^*+E$ 的特征值。
 
-$$
-P^{-1}AP=B=\begin{pmatrix}0&1&1\\1&0&-2\\0&0&4\end{pmatrix}.
-$$
+<Steps>
+<Step>
 
-这是分块上三角矩阵，其特征多项式为
+  ### 将已知列向量关系写成相似变换
 
-$$
-\det(\lambda E-B)=(\lambda-4)(\lambda^2-1),
-$$
+  由 $AP=(\alpha_2,\alpha_1,\alpha_1-2\alpha_2+4\alpha_3)$ 得
 
-所以 $A$ 的特征值为 $1,-1,4$，且 $\det A=-4\ne0$。由 $A^*=(\det A)A^{-1}$，若 $\lambda$ 为 $A$ 的特征值，则 $\det A/\lambda$ 为 $A^*$ 的对应特征值。
 
-因此 $A^*+E$ 的特征值依次为
 
 $$
-1-4=-3,\qquad 1+4=5,\qquad 1-1=0.
+P^{-1}AP=C=\begin{pmatrix}0&1&1\\1&0&-2\\0&0&4\end{pmatrix}.
 $$
 
-三个特征值互异，故矩阵可对角化；对角元的排列顺序不影响相似性，选 B。
+  这是分块上三角矩阵，所以
+
+
+
+$$
+|\lambda E-C|=(\lambda-4)(\lambda^2-1).
+$$
+
+  因此 $A$ 的特征值为 $1,-1,4$，$|A|=-4\ne0$。
+
+</Step>
+<Step>
+
+  ### 转化伴随矩阵与单位阵
+
+  $A^*=|A|A^{-1}=-4A^{-1}$。若 $A\xi=\lambda\xi$（$\lambda\ne0$），则
+
+
+
+$$
+(A^*+E)\xi=\left(1+\frac{|A|}{\lambda}\right)\xi.
+$$
+
+  依次代入 $\lambda=1,-1,4$，得到
+
+
+
+$$
+-3,\qquad 5,\qquad 0.
+$$
+
+  三个新特征值互不相同，所以 $A^*+E$ 可以对角化，并与 $\operatorname{diag}(5,-3,0)$ 相似。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="特征值映射公式">
+
+当 $A$ 可逆时，$A^*$ 的特征值为 $|A|/\lambda_i$。若再加 $cE$，则所有特征值变为 $|A|/\lambda_i+c$；这比直接求伴随矩阵更快。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -1336,38 +1836,78 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
-\boxed{\begin{pmatrix}-1&0&0\\0&-1&0\\6&-12&5\end{pmatrix}}.
+\boxed{P^{-1}(A^*+E)P=
+\begin{pmatrix}-1&0&0\\0&-1&0\\6&-12&5\end{pmatrix}}.
 $$
 
-**过程：**$|A|=2\cdot2\cdot(-1)=-4\ne0$，由 $A^*=|A|A^{-1}$ 可知，$A^*+E$ 在 $\boldsymbol\alpha_1,\boldsymbol\alpha_2,\boldsymbol\alpha_3$ 上的特征值分别为
+**核心思路**：先在原来的特征向量基下求出 $A^*+E$ 的对角表示，再做一次基变换。不要把新向量 $\alpha_1+\alpha_3$ 等误当成 $A$ 的特征向量。
+
+<Steps>
+<Step>
+
+  ### 原特征向量基下先求对角阵
+
+  令 $P_0=(\alpha_1,\alpha_2,\alpha_3)$，则
+
+
 
 $$
-\frac{-4}{2}+1=-1,\qquad -1,\qquad \frac{-4}{-1}+1=5.
+P_0^{-1}AP_0=\operatorname{diag}(2,2,-1),\qquad |A|=-4.
 $$
 
-令 $P_0=(\boldsymbol\alpha_1,\boldsymbol\alpha_2,\boldsymbol\alpha_3)$。有
+  因此
+
+
 
 $$
-P_0^{-1}(A^*+E)P_0=D=\operatorname{diag}(-1,-1,5).
+P_0^{-1}(A^*+E)P_0
+  =\operatorname{diag}\left(1-\frac42,1-\frac42,1+4\right)
+  =D=\operatorname{diag}(-1,-1,5).
 $$
 
-将新基在旧特征向量基中的坐标写成列，得
+</Step>
+<Step>
+
+  ### 写出新旧两组基的过渡矩阵
+
+  题给 $P=P_0C$，其中
+
+
 
 $$
-P=P_0C,\qquad
-C=\begin{pmatrix}1&0&0\\0&1&0\\1&-2&1\end{pmatrix},
-\qquad C^{-1}=\begin{pmatrix}1&0&0\\0&1&0\\-1&2&1\end{pmatrix}.
+C=\begin{pmatrix}1&0&0\\0&1&0\\1&-2&1\end{pmatrix},\qquad
+  C^{-1}=\begin{pmatrix}1&0&0\\0&1&0\\-1&2&1\end{pmatrix}.
 $$
 
-于是
+  注意 $C$ 的各列，恰是新基各向量在旧基下的坐标。
+
+</Step>
+<Step>
+
+  ### 完成基变换
+
+
 
 $$
-P^{-1}(A^*+E)P=C^{-1}DC
-=\boxed{\begin{pmatrix}-1&0&0\\0&-1&0\\6&-12&5\end{pmatrix}}.
+\begin{aligned}
+  P^{-1}(A^*+E)P
+  &=C^{-1}P_0^{-1}(A^*+E)P_0C\\
+  &=C^{-1}DC\\
+  &=\begin{pmatrix}-1&0&0\\0&-1&0\\6&-12&5\end{pmatrix}.
+  \end{aligned}
 $$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="相似基的顺序不能颠倒">
+
+由 $P=P_0C$ 得到的是 $C^{-1}DC$，不是 $CDC^{-1}$。推导一次完整的 $P^{-1}(\cdot)P$，可以避免把过渡矩阵左右乘顺序写反。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -1389,43 +1929,84 @@ $$
 
 <Solution>
 
-**答案：D，$\boxed{\begin{pmatrix}5&0&0\\0&5&0\\-3&3&2\end{pmatrix}}$。**
-
-**过程**：令 $P_0=(\boldsymbol\alpha_1,\boldsymbol\alpha_2,\boldsymbol\alpha_3)$，则
+**参考答案：D，即**
 
 $$
-P_0^{-1}AP_0=D=\operatorname{diag}(-1,-1,2),\qquad |A|=2.
+\boxed{\begin{pmatrix}5&0&0\\0&5&0\\-3&3&2\end{pmatrix}}.
 $$
 
-$A$ 可逆，故 $A^*=|A|A^{-1}=2A^{-1}$，因此
+**核心思路**：把复杂的矩阵表达式看作 $A$ 的有理函数，先在特征向量基下求值，再使用题给的“混合特征向量”构造过渡矩阵。
+
+<Steps>
+<Step>
+
+  ### 在特征向量基下求矩阵函数
+
+  令 $P_0=(\alpha_1,\alpha_2,\alpha_3)$，则
+
+
+
+$$
+P_0^{-1}AP_0=D_0=\operatorname{diag}(-1,-1,2),\qquad
+  |A|=(-1)(-1)2=2.
+$$
+
+  由 $A^*=2A^{-1}$，题目中的矩阵为
+
+
+
+$$
+F=(A^*)^2-2A^{-1}+A=4A^{-2}-2A^{-1}+A.
+$$
+
+  因而 $P_0^{-1}FP_0=f(D_0)$，其中 $f(t)=4t^{-2}-2t^{-1}+t$。计算
+
+
+
+$$
+f(-1)=4+2-1=5,\qquad f(2)=1-1+2=2.
+$$
+
+  故 $P_0^{-1}FP_0=D=\operatorname{diag}(5,5,2)$。
+
+</Step>
+<Step>
+
+  ### 求过渡矩阵并变基
+
+  已知 $P=P_0C$，其中
+
+
+
+$$
+C=\begin{pmatrix}1&0&0\\0&1&0\\1&-1&1\end{pmatrix},\qquad
+  C^{-1}=\begin{pmatrix}1&0&0\\0&1&0\\-1&1&1\end{pmatrix}.
+$$
+
+  因此
+
+
 
 $$
 \begin{aligned}
-P_0^{-1}[(A^*)^2-2A^{-1}+A]P_0
-&=4D^{-2}-2D^{-1}+D\\
-&=\operatorname{diag}(5,5,2)=H.
-\end{aligned}
+  P^{-1}FP&=C^{-1}DC\\
+  &=\begin{pmatrix}5&0&0\\0&5&0\\-3&3&2\end{pmatrix}.
+  \end{aligned}
 $$
 
-根据 $P$ 的列向量构成，$P=P_0T$，其中
+</Step>
+</Steps>
 
-$$
-T=\begin{pmatrix}1&0&0\\0&1&0\\1&-1&1\end{pmatrix},\qquad
-T^{-1}=\begin{pmatrix}1&0&0\\0&1&0\\-1&1&1\end{pmatrix}.
-$$
+<Callout type="idea" title="推广：矩阵函数与相似变换可交换">
 
-故所求矩阵为
+只要涉及到的逆矩阵存在，若 $A=P_0DP_0^{-1}$，则 $f(A)=P_0f(D)P_0^{-1}$。带有伴随、逆、幂的表达式先转成标量函数 $f(\lambda)$，能显著减少运算。
 
-$$
-T^{-1}HT=\boxed{\begin{pmatrix}5&0&0\\0&5&0\\-3&3&2\end{pmatrix}}.
-$$
-
-<Callout type="idea" title="思路">先在特征向量基下计算矩阵函数，再处理基变换 $T$，避免直接展开逆矩阵和伴随矩阵。</Callout>
+</Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-classified-1031-math-fdf71b-021" type="essay" points={12} tags="来源:张宇8套卷">
+<Question id="selected-1103-classified-1031-math-fdf71b-021" type="essay" points={12} tags="来源:张宇8套卷, 考点:利用伴随矩阵求高次幂">
 
 若矩阵 $A$ 的伴随矩阵
 
@@ -1455,97 +2036,89 @@ $$
 
 <Solution>
 
-**答案：** 见解析
-
-**解析：**
-
-#### （1）求 $a$
-
-因为矩阵 $A^*$ 与矩阵
+**参考答案：**（1）$\boxed{a=4}$。（2）
 
 $$
-B=\begin{pmatrix}
--1&0&0\\
-2&1&0\\
-0&0&-1
-\end{pmatrix}
+\boxed{A^{99}=\begin{pmatrix}3&2&-2\\0&-1&0\\4&2&-3\end{pmatrix}}.
 $$
 
-相似，所以二者特征值相同。$B$ 的特征多项式为
+**核心思路**：先利用相似不变量确定 $a$；再利用 $|A|>0$ 确定行列式符号。本题最大的简化在于 $A^*$ 恰为一个对合矩阵：$(A^*)^2=E$，因此无需求全部特征向量，也能算出 $A^{99}$。
+
+<Steps>
+<Step>
+
+  ### （1）比较特征多项式，确定 $a$
+
+  记题给伴随矩阵为 $C=A^*$。直接计算
+
+
 
 $$
-|\lambda E-B|=(\lambda+1)^2(\lambda-1),
+|\lambda E-C|=(\lambda+1)(\lambda^2-9+2a).
 $$
 
-故 $A^*$ 的特征值为 $-1,-1,1$。
+  $B$ 是下三角矩阵，其特征值为 $-1,1,-1$，故
 
-另一方面，题给 $A^*$ 的特征多项式为
 
-$$
-|\lambda E-A^*|=(\lambda+1)(\lambda^2-9+2a).
-$$
-
-比较得
 
 $$
-\lambda^2-9+2a=(\lambda+1)(\lambda-1),
+|\lambda E-B|=(\lambda+1)^2(\lambda-1)
+  =(\lambda+1)(\lambda^2-1).
 $$
 
-故
+  因 $C\sim B$，两者特征多项式相等，比较二次因子可得 $-9+2a=-1$，于是 $a=4$。
+
+</Step>
+<Step>
+
+  ### （2）用行列式确定 $A$ 与 $A^*$ 的关系
+
+  $a=4$ 时
+
+
 
 $$
-\boxed{a=4}.
+C=\begin{pmatrix}3&2&-2\\0&-1&0\\4&2&-3\end{pmatrix},
+  \qquad |C|=(-1)(-1)(1)=1.
 $$
 
-#### （2）求 $A^{99}$
+  三阶矩阵满足 $|A^*|=|A|^2$。结合 $|A|>0$ 得 $|A|=1$，因此
 
-由 $|A^*|=|A|^2=1$ 且 $|A|>0$，知
 
-$$
-|A|=1.
-$$
-
-若 $\lambda^*$ 为 $A^*$ 的特征值，则 $|A|/\lambda^*$ 为 $A$ 的对应特征值。因此 $A$ 的特征值为
 
 $$
--1,-1,1.
+A^*=|A|A^{-1}=A^{-1},\qquad A=C^{-1}.
 $$
 
-对 $\lambda=-1$，可取两个线性无关特征向量
+</Step>
+<Step>
+
+  ### 用对合性计算高次幂
+
+  直接相乘可检验
+
+
 
 $$
-\xi_1=(1,-2,0)^T,\qquad \xi_2=(1,0,2)^T.
+C^2=E.
 $$
 
-对 $\lambda=1$，可取特征向量
+  所以 $C^{-1}=C$，从而 $A=C$，并且 $A^2=E$。由于 $99$ 为奇数，
+
+
 
 $$
-\xi_3=(1,0,1)^T.
+A^{99}=(A^2)^{49}A=A=C.
 $$
 
-令
+</Step>
+</Steps>
 
-$$
-P=(\xi_1,\xi_2,\xi_3),
-$$
+<Callout type="warn" title="行列式的正负条件不能省略">
 
-则
+仅从 $|A^*|=1$ 可知 $|A|=\pm1$。题目明确给出 $|A|>0$，才允许断言 $|A|=1$。另外，相似性仅用于保证相同谱；不要把题给 $B$ 的非对角元素随意改写。
 
-$$
-P^{-1}AP=\operatorname{diag}(-1,-1,1).
-$$
-
-所以
-
-$$
-A^{99}
-=P\operatorname{diag}((-1)^{99},(-1)^{99},1^{99})P^{-1}
-=\boxed{\begin{pmatrix}
-3&2&-2\\
-0&-1&0\\
-4&2&-3
-\end{pmatrix}}.
-$$
+</Callout>
 
 </Solution>
 
@@ -1569,312 +2142,409 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
-\boxed{\operatorname{diag}(1,1,2^{2026},2^{2026})}.
+\boxed{Q^{-1}A^{2026}Q=\operatorname{diag}(1,1,2^{2026},2^{2026})}.
 $$
 
-**解析**：记 $\Lambda=P^{-1}AP=\operatorname{diag}(1,1,-2,2)$，则
+**核心思路**：先求 $A^{2026}$ 在原特征向量基下的表示。由于 $2026$ 是偶数，$-2$ 和 $2$ 的幂相等，新基虽混合了 $\alpha_3$、$\alpha_4$，仍由 $A^{2026}$ 的特征向量构成。
+
+<Steps>
+<Step>
+
+  ### 先对角化再取幂
+
+  设 $D=P^{-1}AP=\operatorname{diag}(1,1,-2,2)$，则
+
+
 
 $$
-A^{2026}=P\Lambda^{2026}P^{-1},\qquad
-\Lambda^{2026}=\operatorname{diag}(1,1,2^{2026},2^{2026}).
+P^{-1}A^{2026}P=D^{2026}
+  =\operatorname{diag}(1,1,2^{2026},2^{2026}).
 $$
 
-令 $C=P^{-1}Q$，由 $Q$ 的列向量定义可知
+</Step>
+<Step>
+
+  ### 说明为什么新基仍可直接使用
+
+  $\alpha_1,\alpha_2$ 都是 $A^{2026}$ 对应特征值 $1$ 的特征向量，故 $\alpha_1+2\alpha_2$ 仍是；$\alpha_3,\alpha_4$ 都是 $A^{2026}$ 对应特征值 $2^{2026}$ 的特征向量，故 $\alpha_3\pm\alpha_4$ 仍是。
+
+  题给 $Q$ 的四列线性无关（它们在 $P$ 基下的坐标变换行列式为 $-2\ne0$），因此四列构成特征向量基。
+
+</Step>
+</Steps>
+
+由每列对应的特征值依次为 $1,1,2^{2026},2^{2026}$，直接有
 
 $$
-C=\begin{pmatrix}
-1&0&0&0\\
-2&1&0&0\\
-0&0&1&1\\
-0&0&1&-1
-\end{pmatrix},\qquad \det C=-2\ne0.
+A^{2026}Q=Q\operatorname{diag}(1,1,2^{2026},2^{2026}),
 $$
 
-注意 $\Lambda^{2026}$ 在前两个坐标上的特征值**相同**，后两个坐标上的特征值也**相同**。因此 $C$ 的分块结构保证它与 $\Lambda^{2026}$ 可交换：
+左乘 $Q^{-1}$ 即得所求。
 
-$$
-C=\operatorname{diag}(C_1,C_2),\qquad
-\Lambda^{2026}=\operatorname{diag}(E_2,2^{2026}E_2).
-$$
+<Callout type="idea" title="特征值合并后可以在子空间内任意换基">
 
-于是
-
-$$
-\begin{aligned}
-Q^{-1}A^{2026}Q
-&=C^{-1}P^{-1}(P\Lambda^{2026}P^{-1})PC\\
-&=C^{-1}\Lambda^{2026}C\\
-&=\boxed{\operatorname{diag}(1,1,2^{2026},2^{2026})}.
-\end{aligned}
-$$
-
-<Callout type="idea" title="解题关键">
-
-无需展开 $C^{-1}$。先对角化后取偶数次幂：$(-2)^{2026}=2^{2026}$，使原来不同的两个特征值合并；在相同特征值对应的子空间内换基，不改变矩阵表示。
+$A$ 的特征值 $-2$ 与 $2$ 本不同，但偶次幂后对应同一个特征值。对一个**固定特征值**的特征向量作线性组合，仍是该特征值的特征向量；不同特征值对应的向量一般不能这样混合。
 
 </Callout>
 
 </Solution>
 </Question>
 
-<Question id="selected-1103-math-dde9f5-032" type="essay">
+<Question id="selected-1103-math-dde9f5-032" type="essay" tags="科目:线性代数, 考点:矩阵递推与特征向量分解">
 
 设
+
 $$
- \begin{bmatrix}x_n\\y_n\end{bmatrix}
+\begin{bmatrix}x_n\\y_n\end{bmatrix}
 =\begin{bmatrix}1&2\\4&3\end{bmatrix}
 \begin{bmatrix}x_{n-1}\\y_{n-1}\end{bmatrix}.
 $$
+
 (1) 当$\begin{cases}x_0=1\\y_0=2\end{cases}$时，求$x_{100},y_{100}$；  
 (2) 当$\begin{cases}x_0=1\\y_0=1\end{cases}$时，求$x_{100}$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-(1)
-$$
- x_{100}=5^{100},
-\qquad y_{100}=2\cdot5^{100}.
-$$
+（1）$\boxed{x_{100}=5^{100},\qquad y_{100}=2\cdot5^{100}}$。
 
-(2)
-$$
- x_{100}=\frac{2\cdot5^{100}+1}{3}.
-$$
+（2）$\boxed{x_{100}=\dfrac{2\cdot5^{100}+1}{3}}$。
 
-**解析：** 记
+**核心思路**：把二维线性递推写成 $v_n=M^nv_0$。利用矩阵的两组特征向量分解初始向量，矩阵幂便转化为标量 $5^n$ 与 $(-1)^n$。
+
+<Steps>
+<Step>
+
+  ### 求特征值与特征向量
+
+  记
+
+
+
 $$
- M=\begin{bmatrix}1&2\\4&3\end{bmatrix}.
-$$
-其特征值满足
-$$
- |\lambda E-M|=(\lambda-5)(\lambda+1),
-$$
-对应特征向量可分别取
-$$
- \xi_1=\begin{bmatrix}1\\2\end{bmatrix},
-\qquad
-\xi_2=\begin{bmatrix}1\\-1\end{bmatrix}.
+M=\begin{pmatrix}1&2\\4&3\end{pmatrix},\qquad
+  v_n=\begin{pmatrix}x_n\\y_n\end{pmatrix}=M^nv_0.
 $$
 
-(1) 初始向量恰为$\xi_1$，故
-$$
- \begin{bmatrix}x_n\\y_n\end{bmatrix}
-=M^n\xi_1
-=5^n\xi_1.
-$$
-令$n=100$即得答案。
+  特征多项式为
 
-(2) 将初始向量分解为
+
+
 $$
- \begin{bmatrix}1\\1\end{bmatrix}
-=\frac23\xi_1+\frac13\xi_2.
-$$
-因此
-$$
- \begin{bmatrix}x_n\\y_n\end{bmatrix}
-=\frac23 5^n\xi_1+\frac13(-1)^n\xi_2.
-$$
-于是
-$$
- x_n=\frac23 5^n+\frac13(-1)^n.
-$$
-当$n=100$时$(-1)^{100}=1$，故
-$$
- x_{100}=\frac{2\cdot5^{100}+1}{3}.
+|\lambda E-M|=(\lambda-5)(\lambda+1).
 $$
 
-### 相似理论
+  两个互异特征值及对应向量可取
+
+
+
+$$
+\lambda_1=5:\quad u_1=(1,2)^{\mathrm T};\qquad
+  \lambda_2=-1:\quad u_2=(1,-1)^{\mathrm T}.
+$$
+
+  因 $Mu_1=5u_1,Mu_2=-u_2$，初始值分解后即可递推。
+
+</Step>
+<Step>
+
+  ### （1）初始值恰为特征向量
+
+  $v_0=(1,2)^{\mathrm T}=u_1$，故
+
+
+
+$$
+v_n=M^nu_1=5^nu_1
+  =\begin{pmatrix}5^n\\2\cdot5^n\end{pmatrix}.
+$$
+
+  取 $n=100$ 得第一问。
+
+</Step>
+<Step>
+
+  ### （2）分解一般初始向量
+
+  写成 $v_0=c_1u_1+c_2u_2$：
+
+
+
+$$
+\begin{cases}c_1+c_2=1,\\2c_1-c_2=1.\end{cases}
+  \quad\Longrightarrow\quad c_1=\frac23,\ \ c_2=\frac13.
+$$
+
+  因此
+
+
+
+$$
+v_n=\frac23\,5^nu_1+\frac13(-1)^nu_2,
+  \qquad x_n=\frac23\,5^n+\frac13(-1)^n.
+$$
+
+  $n=100$ 为偶数，故 $(-1)^{100}=1$，得到第二问。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="通用公式">
+
+若 $M$ 有一组线性无关的特征向量 $u_1,\ldots,u_n$，且 $v_0=\sum c_iu_i$，则 $M^kv_0=\sum c_i\lambda_i^ku_i$。这是处理“矩阵递推求第 $100$ 项”最直接的做法。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-dde9f5-039" type="essay">
+<Question id="selected-1103-math-dde9f5-039" type="essay" tags="科目:线性代数, 考点:同时对角化与矩阵有理函数">
 
 设
+
 $$
- A=\begin{bmatrix}2&1&0\\1&2&0\\a&1&b\end{bmatrix}
+A=\begin{bmatrix}2&1&0\\1&2&0\\a&1&b\end{bmatrix}
 $$
+
 恰有2个不同的特征值且可相似对角化，$a>0$，$(A+E)(E-B)=E$。  
 (1)求$a,b$的值；  
 (2)求可以使$A,B$同时相似对角化的可逆矩阵$P$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
+
+（1）$\boxed{a=b=1}$。
+
+（2）可取
 
 $$
- a=1,
-\qquad b=1.
-$$
-可取
-$$
- P=\begin{bmatrix}
--1&0&1\\
-1&0&1\\
-0&1&1
-\end{bmatrix}.
-$$
-此时
-$$
- P^{-1}AP=\operatorname{diag}(1,1,3),
-$$
-并且
-$$
- P^{-1}BP=\operatorname{diag}\left(\frac12,\frac12,\frac34\right).
+\boxed{P=\begin{pmatrix}-1&0&1\\1&0&1\\0&1&1\end{pmatrix}},
 $$
 
-**解析：** $A$为分块下三角矩阵，其特征值为$1,3,b$。题设恰有两个不同特征值，所以
+使
+
 $$
- b=1\quad\text{或}\quad b=3.
+\boxed{P^{-1}AP=\operatorname{diag}(1,1,3)},\qquad
+\boxed{P^{-1}BP=\operatorname{diag}\left(\frac12,\frac12,\frac34\right)}.
 $$
 
-若$b=1$，则$\lambda=1$为二重特征值。要求可相似对角化，必须有
-$$
- \dim N(A-E)=2,
-$$
-即$r(A-E)=1$。此时
-$$
- A-E=\begin{bmatrix}1&1&0\\1&1&0\\a&1&0\end{bmatrix},
-$$
-故需$a=1$。
+**核心思路**：利用分块下三角结构读出 $A$ 的特征值；恰有两个不同特征值，则 $b$ 必等于 $1$ 或 $3$。对出现的二重根要求二维特征空间，确定参数后再根据 $B=E-(A+E)^{-1}$ 直接得到共同的特征向量。
 
-若$b=3$，类似地要求$\lambda=3$的特征子空间维数为2，可得$a=-1$，与$a>0$矛盾。
+<Steps>
+<Step>
 
-所以
-$$
- a=b=1.
-$$
-此时$\lambda=1$对应两个线性无关特征向量，可取
-$$
- \xi_1=\begin{bmatrix}-1\\1\\0\end{bmatrix},
-\qquad
-\xi_2=\begin{bmatrix}0\\0\\1\end{bmatrix},
-$$
-而$\lambda=3$可取
-$$
- \xi_3=\begin{bmatrix}1\\1\\1\end{bmatrix}.
-$$
-令$P=[\xi_1,\xi_2,\xi_3]$，即得题中$P$。
+  ### （1）先列出可能参数
 
-又
+  因为
+
+
+
 $$
- (A+E)(E-B)=E
+|\lambda E-A|=(\lambda-b)
+  \begin{vmatrix}\lambda-2&-1\\-1&\lambda-2\end{vmatrix}
+  =(\lambda-b)(\lambda-1)(\lambda-3),
 $$
-给出
+
+  要恰有两个不同特征值，只能 $b=1$ 或 $b=3$。
+
+</Step>
+<Step>
+
+  ### 用几何重数判定 $a,b$
+
+  **情形一：$b=1$。** $1$ 为二重根，要求 $r(A-E)=1$。此时
+
+
+
 $$
- B=E-(A+E)^{-1},
+A-E=\begin{pmatrix}1&1&0\\1&1&0\\a&1&0\end{pmatrix}.
 $$
-所以$B$是$A$的有理函数，必与$A$被同一个$P$对角化。若$A$的特征值为$\lambda$，则$B$对应特征值为
+
+  第三行需是第一行的倍数，故 $a=1$。
+
+  **情形二：$b=3$。** $3$ 为二重根，要求 $r(A-3E)=1$。此时
+
+
+
 $$
- 1-\frac1{\lambda+1}=\frac\lambda{\lambda+1},
+A-3E=\begin{pmatrix}-1&1&0\\1&-1&0\\a&1&0\end{pmatrix}.
 $$
-从而分别为$\frac12,\frac12,\frac34$。
+
+  第三行须与 $(-1,1,0)$ 成比例，得 $a=-1$，与 $a>0$ 矛盾。
+
+  所以唯一可行参数为 $a=b=1$。
+
+</Step>
+<Step>
+
+  ### （2）构造 $A$ 的特征向量基
+
+  当 $a=b=1$ 时，特征值 $1$ 的两个线性无关向量可取
+
+
+
+$$
+p_1=(-1,1,0)^{\mathrm T},\qquad p_2=(0,0,1)^{\mathrm T};
+$$
+
+  特征值 $3$ 的向量可取 $p_3=(1,1,1)^{\mathrm T}$。令 $P=(p_1,p_2,p_3)$，其列向量线性无关，于是
+
+
+
+$$
+P^{-1}AP=D=\operatorname{diag}(1,1,3).
+$$
+
+</Step>
+<Step>
+
+  ### 用 $B$ 与 $A$ 的函数关系求共同对角阵
+
+  题设 $(A+E)(E-B)=E$，故 $A+E$ 可逆且
+
+
+
+$$
+B=E-(A+E)^{-1}.
+$$
+
+  因而在同一个特征向量基下，
+
+
+
+$$
+\begin{aligned}
+  P^{-1}BP&=E-(D+E)^{-1}\\
+  &=\operatorname{diag}\left(1-\frac12,1-\frac12,1-\frac14\right)\\
+  &=\operatorname{diag}\left(\frac12,\frac12,\frac34\right).
+  \end{aligned}
+$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="同时对角化的常见充分条件">
+
+若 $A$ 可相似对角化，且 $B=f(A)$ 是在 $A$ 的谱上有定义的多项式或有理函数，则**同一组 $A$ 的特征向量也能对角化 $B$**。本题不必另求 $B$ 的特征向量。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-dde9f5-041" type="essay">
+<Question id="selected-1103-math-dde9f5-041" type="essay" tags="科目:线性代数, 考点:含参相似矩阵的百次幂">
 
 设
+
 $$
- A=\begin{bmatrix}-1&0&1\\1&2&0\\a&0&3\end{bmatrix},
+A=\begin{bmatrix}-1&0&1\\1&2&0\\a&0&3\end{bmatrix},
 \qquad
 B=\begin{bmatrix}1&b&0\\0&1&0\\0&0&2\end{bmatrix}
 $$
+
 相似，且$Ax=x+[b,-b,2b]^T$的一个解为$[0,-1,1]^T$。  
 (1)求$a,b$的值；  
 (2)求$A^{100}$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
+
+（1）$\boxed{a=-4,\quad b=1}$。
+
+（2）
 
 $$
- a=-4,
-\qquad b=1.
-$$
-并且
-$$
- A^{100}=
-\begin{bmatrix}
+\boxed{A^{100}=\begin{pmatrix}
 -199&0&100\\
 201-2^{100}&2^{100}&2^{100}-101\\
 -400&0&201
-\end{bmatrix}.
+\end{pmatrix}}.
 $$
 
-**解析：** 先利用给出的一个解。令
+**核心思路**：给定一个具体解，先将其代入方程求 $b$；利用相似矩阵的特征多项式求 $a$。求高次幂时不要直接连乘，而要利用最小多项式（或 Jordan 结构）把 $A^{100}$ 降为 $A-E$ 的二次多项式。
+
+<Steps>
+<Step>
+
+  ### 从已知解求 $b$
+
+  把 $x_0=(0,-1,1)^T$ 代入，
+
+
+
 $$
- x_0=\begin{bmatrix}0\\-1\\1\end{bmatrix}.
-$$
-则
-$$
- Ax_0=\begin{bmatrix}1\\-2\\3\end{bmatrix},
-$$
-而
-$$
- x_0+\begin{bmatrix}b\\-b\\2b\end{bmatrix}
-=\begin{bmatrix}b\\-1-b\\1+2b\end{bmatrix}.
-$$
-比较分量得
-$$
- b=1.
+Ax_0=(1,-2,3)^T,
+  \qquad x_0+(b,-b,2b)^T=(b,-1-b,1+2b)^T.
 $$
 
-由于$A\sim B$，二者特征多项式相同。$B$的特征多项式为
+  比较第一分量即得 $b=1$；其余两分量也同时成立。
+
+</Step>
+<Step>
+
+  ### 从相似关系求 $a$
+
+  $B$ 的特征多项式为 $(t-1)^2(t-2)$，而
+
+
+
 $$
- (\lambda-1)^2(\lambda-2).
-$$
-而
-$$
- |\lambda E-A|
-=(\lambda-2)(\lambda^2-2\lambda-3-a).
-$$
-比较得
-$$
- \lambda^2-2\lambda-3-a=(\lambda-1)^2,
-$$
-故
-$$
- a=-4.
+\det(tE-A)=(t-2)\bigl[(t+1)(t-3)-a\bigr]
+  =(t-2)(t^2-2t-3-a).
 $$
 
-此时$A$与$B$具有同样的Jordan结构，最小多项式为
+  由于 $A\sim B$，两者特征多项式相等，故 $-3-a=1$，即 $a=-4$。
+
+</Step>
+<Step>
+
+  ### 用多项式关系降幂
+
+  令 $D=A-E$。代入 $a=-4$ 可计算
+
+
+
 $$
- m_A(\lambda)=(\lambda-1)^2(\lambda-2).
+D=\begin{pmatrix}-2&0&1\\1&1&0\\-4&0&2\end{pmatrix},\qquad
+  D^2=\begin{pmatrix}0&0&0\\-1&1&1\\0&0&0\end{pmatrix},\qquad
+  D^3=D^2.
 $$
-设
+
+  因此对任意正整数 $n$，由 $(E+D)^n$ 的二项式展开，$D^k=D^2\ (k\ge2)$，得到
+
+
+
 $$
- A^n=c_0E+c_1A+c_2A^2.
+\begin{aligned}
+  A^n&=E+nD+\left(\sum_{k=2}^n\binom nk\right)D^2\\
+  &=E+n(A-E)+(2^n-1-n)(A-E)^2.
+  \end{aligned}
 $$
-为了与$x^n$在$\lambda=1$处函数值及一阶导数相同，并在$\lambda=2$处函数值相同，令
-$$
- \begin{cases}
-c_0+c_1+c_2=1,\\
-c_1+2c_2=n,\\
-c_0+2c_1+4c_2=2^n.
-\end{cases}
-$$
-解得
-$$
- c_0=2^n-2n,
-\quad c_1=-2^{n+1}+3n+2,
-\quad c_2=2^n-n-1.
-$$
-令$n=100$并代入$A$化简，即得答案矩阵。
+
+  代入 $n=100$，逐项相加便得到上面的矩阵。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="重特征值的高次幂技巧">
+
+本题 $B$ 中特征值 $1$ 的 $2\times2$ 块不是对角块，不能直接把 $A$ 当成可对角化矩阵。关系 $(A-E)^2(A-2E)=O$ 是正确的降幂入口；另一种做法是对 $t^n$ 在 $t=1$ 处匹配函数值与一阶导数、在 $t=2$ 处匹配函数值。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-e2436e-034" type="essay" number={1}>
+<Question id="selected-1103-math-e2436e-034" type="essay" tags="科目:线性代数, 考点:基变换下的特征向量">
 
 已知 $A = (\alpha_1, \alpha_2, \alpha_3)$ 是 $3$ 阶可逆矩阵，$B$ 是 $3$ 阶矩阵，且 $BA = (\alpha_1, -4\alpha_3, -\alpha_2)$。求：
 $(I)$ $B$ 的全部特征值；
@@ -1882,37 +2552,87 @@ $(II)$ 可逆矩阵 $P$ 和对角矩阵 $\Lambda$，使得 $P^{-1}BP = \Lambda$�
 
 <Solution>
 
-**答案：** $B$ 的特征值为 $1,2,-2$；对角化矩阵见解析。
+**参考答案：**
 
-**解析：** (I) 由已知, 有
-$$BA = B(\alpha_1, \alpha_2, \alpha_3) = (B\alpha_1, B\alpha_2, B\alpha_3)$$
-$$= (\alpha_1, -4\alpha_3, -\alpha_2) = (\alpha_1, \alpha_2, \alpha_3) \begin{pmatrix} 1 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & -4 & 0 \end{pmatrix}.$$
+（Ⅰ）$B$ 的全部特征值为 $\boxed{1,2,-2}$。
 
-记 $C = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & -4 & 0 \end{pmatrix}$ ，则 $BA = AC$ ，故 $A^{-1}BA = C$ 。
+（Ⅱ）可取
 
-又由于
-$$|\lambda E - C| = \begin{vmatrix} \lambda - 1 & 0 & 0 \\ 0 & \lambda & 1 \\ 0 & 4 & \lambda \end{vmatrix} = (\lambda - 1)(\lambda - 2)(\lambda + 2) = 0$$
+$$
+\boxed{P=\left(\alpha_1,\ -\frac12\alpha_2+\alpha_3,\ \frac12\alpha_2+\alpha_3\right)},\qquad
+\boxed{\Lambda=\operatorname{diag}(1,2,-2)}.
+$$
 
-得 $C$ 的特征值为 $\lambda_1 = 1, \lambda_2 = 2, \lambda_3 = -2$ ，也是 $B$ 的特征值。
-（II）求 $C$ 的特征向量。
-对于 $\lambda_1 = 1$ ，由 $(1E - C)x = 0$ ，得 $\boldsymbol{\xi}_1 = (1, 0, 0)^{\text{T}}$ ；
-对于 $\lambda_2 = 2$ ，由 $(2E - C)x = 0$ ，得 $\boldsymbol{\xi}_2 = \left(0, -\dfrac{1}{2}, 1\right)^{\text{T}}$ ；
-对于 $\lambda_3 = -2$ ，由 $(-2E - C)x = 0$ ，得 $\boldsymbol{\xi}_3 = \left(0, \dfrac{1}{2}, 1\right)^{\text{T}}$ 。
+**核心思路：**$A=(\alpha_1,\alpha_2,\alpha_3)$ 已经给出一组基。先把 $BA$ 的三列在这组基下写成坐标，就得到与 $B$ 相似的简易矩阵；然后把该矩阵的特征向量送回原坐标。
 
-令 $P_1 = (\boldsymbol{\xi}_1, \boldsymbol{\xi}_2, \boldsymbol{\xi}_3) = \begin{pmatrix} 1 & 0 & 0 \\ 0 & -\dfrac{1}{2} & \dfrac{1}{2} \\ 0 & 1 & 1 \end{pmatrix}$ ，则
-$$P_1^{-1}CP_1 = \boldsymbol{\Lambda} = \text{diag}(1, 2, -2)$$ 。①
+<Steps>
+<Step>
 
-将 $A^{-1}BA = C$ 代入 ① 式，得 $P_1^{-1}A^{-1}BAP_1 = \boldsymbol{\Lambda}$ ，即 $(AP_1)^{-1}B(AP_1) = \boldsymbol{\Lambda}$ 。令
-$$P = AP_1 = (\boldsymbol{\alpha}_1, \boldsymbol{\alpha}_2, \boldsymbol{\alpha}_3) \begin{pmatrix} 1 & 0 & 0 \\ 0 & -\dfrac{1}{2} & \dfrac{1}{2} \\ 0 & 1 & 1 \end{pmatrix}$$
-$$= \left(\boldsymbol{\alpha}_1, -\frac{1}{2}\boldsymbol{\alpha}_2 + \boldsymbol{\alpha}_3, \frac{1}{2}\boldsymbol{\alpha}_2 + \boldsymbol{\alpha}_3\right)$$ ，
+  ### 写出 $B$ 在 $A$ 的列向量基下的表示
 
-则 $P$ 为所求可逆矩阵，使得 $P^{-1}BP = \boldsymbol{\Lambda}$ 。
+  由 $BA=(\alpha_1,-4\alpha_3,-\alpha_2)$，可直接读出
+
+
+
+$$
+BA=AC,\quad
+  C=\begin{pmatrix}1&0&0\\0&0&-1\\0&-4&0\end{pmatrix}.
+$$
+
+  $A$ 可逆，所以 $C=A^{-1}BA$，故 $C$ 与 $B$ 相似。
+
+</Step>
+<Step>
+
+  ### 求 $C$ 的特征值与特征向量
+
+
+
+$$
+\det(tE-C)=(t-1)(t^2-4)=(t-1)(t-2)(t+2).
+$$
+
+  对应于 $1,2,-2$，分别可取
+
+
+
+$$
+v_1=(1,0,0)^T,\quad
+  v_2=(0,-1,2)^T,\quad
+  v_3=(0,1,2)^T.
+$$
+
+  三个特征值互异，三个特征向量必线性无关。
+
+</Step>
+<Step>
+
+  ### 换回 $B$ 的特征向量
+
+  因 $C v_i=\lambda_i v_i$ 且 $BA=AC$，故
+
+
+
+$$
+B(Av_i)=A(Cv_i)=\lambda_i(Av_i).
+$$
+
+  取 $P=A(v_1,\frac12v_2,\frac12v_3)$，就得到答案中的三列向量，且 $BP=P\Lambda$。因为 $A$ 及 $P$ 的三个列向量组均可逆，所以 $P^{-1}BP=\Lambda$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="识别 BA=AC 型试题">
+
+当题目给出 $BA$ 的列向量是 $A$ 的列向量的线性组合时，先求坐标矩阵 $C$，再作 $B=ACA^{-1}$；切忌先求未知的 $B$ 的具体元素。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-e2436e-046" type="essay">
+<Question id="selected-1103-math-e2436e-046" type="essay" tags="科目:线性代数, 考点:AB与BA及同时对角化">
 
 设 $A, B$ 均是 $n$ 阶矩阵.
 ($I$) 证明：$AB$ 与 $BA$ 有相同的特征值；
@@ -1920,45 +2640,78 @@ $$= \left(\boldsymbol{\alpha}_1, -\frac{1}{2}\boldsymbol{\alpha}_2 + \boldsymbol
 
 <Solution>
 
-**答案：** $AB$ 与 $BA$ 特征值相同；若 $AB=BA$ 且 $A$ 有 $n$ 个不同特征值，则 $B$ 可对角化。
+**参考答案：**
 
-**解析：** ( I ) $A, B$ 均是抽象矩阵,用特征值、特征向量的定义证明.
-设 $\lambda$ 是 $AB$ 的任一个特征值,$\xi$ 为 $AB$ 对应的特征向量,则
+（Ⅰ）$AB$ 与 $BA$ 具有**相同的特征多项式**，因而全部特征值及其代数重数均相同。
 
-$$
-AB\xi = \lambda\xi. \tag{1}
-$$
+（Ⅱ）若 $AB=BA$ 且 $A$ 有 $n$ 个互异特征值，则 $\boxed{B\text{ 可相似对角化}}$；并且 $A,B$ 可以由**同一个**可逆矩阵同时对角化。
 
-①式左乘 $B$,得 $BAB\xi = BA(B\xi) = \lambda B\xi$.
-若 $B\xi \neq 0$,上式表明 $\lambda$ 是 $BA$ 的特征值,$B\xi$ 为对应的特征向量;
-若 $B\xi = 0$,则由 $\lambda\xi = AB\xi = 0$,又 $\xi \neq 0$,得 $\lambda = 0$,即 $AB$ 有特征值 $0$,从而 $|AB| = 0$. 又 $|BA| = |AB| = 0$,即 $|0E - BA| = 0$,故 $BA$ 也有特征值 $0$.
-综上所述,$AB$ 与 $BA$ 有相同的特征值.
-( II ) 由 $A$ 有 $n$ 个不同特征值,知 $A \sim \Lambda$,即存在可逆矩阵 $P$,使得
+**核心思路**：第（Ⅰ）问用行列式恒等式；第（Ⅱ）问抓住“交换矩阵保持彼此特征子空间不变”，而 $A$ 的特征子空间均为一维。
 
-$$P^{-1}AP = \Lambda = \begin{pmatrix} \lambda_1 & & & \\ & \lambda_2 & & \\ & & \ddots & \\ & & & \lambda_n \end{pmatrix}.$$
+<Tabs items={['（Ⅰ）行列式恒等式（推荐）', '（Ⅰ）特征向量法'] }>
+<Tab value="（Ⅰ）行列式恒等式（推荐）">
 
-由 $AB = BA$,得
+  对任意 $n$ 阶矩阵 $X,Y$ 都有 Sylvester 恒等式
+
+
 
 $$
-(P^{-1}AP)(P^{-1}BP) = (P^{-1}BP)(P^{-1}AP), \tag{2}
+\det(E-XY)=\det(E-YX).
 $$
 
-令 $P^{-1}BP = (C_{ij})_{n \times n}$,代入 (2) 式,得
+  因而对 $t\ne0$，
 
-$$\begin{pmatrix} \lambda_1 & & & \\ & \lambda_2 & & \\ & & \ddots & \\ & & & \lambda_n \end{pmatrix} \begin{pmatrix} C_{11} & C_{12} & \cdots & C_{1n} \\ C_{21} & C_{22} & \cdots & C_{2n} \\ \vdots & \vdots & & \vdots \\ C_{n1} & C_{n2} & \cdots & C_{nn} \end{pmatrix} = \begin{pmatrix} C_{11} & C_{12} & \cdots & C_{1n} \\ C_{21} & C_{22} & \cdots & C_{2n} \\ \vdots & \vdots & & \vdots \\ C_{n1} & C_{n2} & \cdots & C_{nn} \end{pmatrix} \begin{pmatrix} \lambda_1 & & & \\ & \lambda_2 & & \\ & & \ddots & \\ & & & \lambda_n \end{pmatrix}$$
 
-比较等式两边元素,得 $\lambda_i C_{ij} = C_{ij}\lambda_j (i, j = 1, 2, \cdots, n)$.
-当 $i \neq j$ 时,有 $(\lambda_i - \lambda_j)C_{ij} = 0$,而 $\lambda_i \neq \lambda_j$,故 $C_{ij} = 0$,即
 
-$$P^{-1}BP = \begin{pmatrix} C_{11} & & & \\ & C_{22} & & \\ & & \ddots & \\ & & & C_{nn} \end{pmatrix},$$
+$$
+\det(tE-AB)=t^n\det(E-t^{-1}AB)
+  =t^n\det(E-t^{-1}BA)=\det(tE-BA).
+$$
 
-故 $B$ 相似于对角矩阵.
+  两边均是关于 $t$ 的 $n$ 次多项式，在所有非零 $t$ 处相等，故对 $t=0$ 也相等。这比只说明特征值集合相同更强，还保证代数重数相同。
+
+</Tab>
+<Tab value="（Ⅰ）特征向量法">
+
+  若 $ABv=\lambda v$ 且 $\lambda\ne0$，则 $Bv\ne0$，并有
+
+
+
+$$
+BA(Bv)=B(ABv)=\lambda Bv.
+$$
+
+  故每个非零特征值也是 $BA$ 的特征值；交换 $A,B$ 得反向包含。零特征值由 $\det(AB)=\det(BA)$ 同时为零来判定。此法说明特征值集合相同，但要证明代数重数也相同，仍以行列式恒等式最直接。
+
+</Tab>
+</Tabs>
+
+**（Ⅱ）证明同时对角化**：设 $A v_i=\lambda_i v_i$，$\lambda_1,\ldots,\lambda_n$ 两两不同。由 $AB=BA$，
+
+$$
+A(Bv_i)=B(Av_i)=\lambda_i Bv_i.
+$$
+
+可见 $Bv_i$ 落在 $A$ 的一维特征子空间 $\operatorname{span}\{v_i\}$ 中，因此存在标量 $\mu_i$ 使 $Bv_i=\mu_i v_i$（允许 $\mu_i=0$）。取 $P=(v_1,\ldots,v_n)$，则
+
+$$
+P^{-1}AP=\operatorname{diag}(\lambda_1,\ldots,\lambda_n),\qquad
+P^{-1}BP=\operatorname{diag}(\mu_1,\ldots,\mu_n).
+$$
+
+于是结论成立。
+
+<Callout type="warn" title="条件的作用">
+
+“$AB=BA$”本身不保证两个矩阵可对角化；“$A$ 有 $n$ 个互异特征值”使 $A$ 的每个特征子空间恰好一维，这是第（Ⅱ）问的关键。严格地说，对角化在包含这些特征值的数域上成立：若实矩阵 $A$ 含非实特征值，则这里得到的是**复数域上的对角化**；要保证实对角化，还需要 $A$ 的 $n$ 个特征值全为实数。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-e2436e-049" type="essay">
+<Question id="selected-1103-math-e2436e-049" type="essay" tags="科目:线性代数, 考点:含参相似与伴随矩阵齐次方程">
 
 设 $A = \begin{pmatrix} 2 & 1 & 0 \\ 1 & 2 & 0 \\ 0 & 0 & 1 \end{pmatrix}$ 与 $B = \begin{pmatrix} a & b & c \\ 0 & 1 & 0 \\ -1 & -2 & 4 \end{pmatrix}$ 相似.
 ($I$) 求 $a, b, c$ 的值；
@@ -1967,43 +2720,107 @@ $$P^{-1}BP = \begin{pmatrix} C_{11} & & & \\ & C_{22} & & \\ & & \ddots & \\ & &
 
 <Solution>
 
-**答案：** $a=0,b=-2,c=3$；相似变换与齐次方程通解见解析。
+**参考答案：**
 
-**解析：** (I) 由 $A \sim B$, 知
-$$\begin{cases} \mathrm{tr}(A) = \mathrm{tr}(B), \\ |A| = |B|, \end{cases} \quad \text{即} \begin{cases} 5 = a + 5, \\ 3 = 4a + c. \end{cases}$$
-解得 $a = 0, c = 3$.
+（Ⅰ）$\boxed{a=0,\ b=-2,\ c=3}$。
 
-由
+（Ⅱ）可取
 
-$$|\lambda E - A| = \begin{vmatrix} \lambda - 2 & -1 & 0 \\ -1 & \lambda - 2 & 0 \\ 0 & 0 & \lambda - 1 \end{vmatrix} = (\lambda - 1)^2(\lambda - 3) = 0,$$
+$$
+\boxed{P=\begin{pmatrix}
+-\frac12&-2&\frac32\\
+-\frac12&0&\frac32\\
+\frac12&1&-\frac12
+\end{pmatrix}},\qquad P^{-1}AP=B.
+$$
 
-得 $A$ 的特征值为 $\lambda_1 = \lambda_2 = 1, \lambda_3 = 3$.
+（Ⅲ）通解为
 
-由 $A$ 是实对称矩阵, 知 $A$ 必相似于对角矩阵, 故 $B = \begin{pmatrix} 0 & b & 3 \\ 0 & 1 & 0 \\ -1 & -2 & 4 \end{pmatrix}$ 也可对角化, 且 $B$ 与 $A$ 有相同的特征值, 为 $\mu_1 = \mu_2 = 1, \mu_3 = 3$. 由
+$$
+\boxed{X=s(-1,1,0)^T+t(0,0,1)^T,\quad s,t\in\mathbb R}.
+$$
 
-$$r(E - B) = r\begin{pmatrix} 1 & -b & -3 \\ 0 & 0 & 0 \\ 1 & 2 & -3 \end{pmatrix} = 1,$$
+**核心思路**：相似先看迹、行列式，再用重特征值的特征子空间维数确定参数；构造相似变换时把两矩阵分别对角化；伴随矩阵的特征向量与原可逆矩阵的特征向量相同。
 
-知 $b = -2$. 综上所述, $a = 0, b = -2, c = 3$.
+<Steps>
+<Step>
 
-(II) 由 $(E - A)X = 0$, 得特征向量 $\boldsymbol{\alpha}_1 = (-1, 1, 0)^{T}, \boldsymbol{\alpha}_2 = (0, 0, 1)^{T}$.
-由 $(3E - A)X = 0$, 得特征向量 $\boldsymbol{\alpha}_3 = (1, 1, 0)^{T}$.
-令 $P_1 = (\boldsymbol{\alpha}_1, \boldsymbol{\alpha}_2, \boldsymbol{\alpha}_3)$, 则 $P_1^{-1}AP_1 = \mathrm{diag}(1, 1, 3)$.
-由 $(E - B)X = 0$, 得特征向量 $\boldsymbol{\beta}_1 = (-2, 1, 0)^{T}, \boldsymbol{\beta}_2 = (3, 0, 1)^{T}$.
-由 $(3E - B)X = 0$, 得特征向量 $\boldsymbol{\beta}_3 = (1, 0, 1)^{T}$.
-令 $P_2 = (\boldsymbol{\beta}_1, \boldsymbol{\beta}_2, \boldsymbol{\beta}_3)$, 则 $P_2^{-1}BP_2 = \mathrm{diag}(1, 1, 3)$.
-故 $P_1^{-1}AP_1 = P_2^{-1}BP_2$, 即 $(P_1P_2^{-1})^{-1}A(P_1P_2^{-1}) = B$.
-令 $P = P_1P_2^{-1}$, 则 $P^{-1}AP = B$,
+  ### 利用相似不变量与几何重数求参数
 
-$$\begin{aligned} P = P_1P_2^{-1} &= \begin{pmatrix} -1 & 0 & 1 \\ 1 & 0 & 1 \\ 0 & 1 & 0 \end{pmatrix} \begin{pmatrix} -2 & 3 & 1 \\ 1 & 0 & 0 \\ 0 & 1 & 1 \end{pmatrix}^{-1} \\ &= \begin{pmatrix} -1 & 0 & 1 \\ 1 & 0 & 1 \\ 0 & 1 & 0 \end{pmatrix} \begin{pmatrix} 0 & 1 & 0 \\ \frac{1}{2} & 1 & -\frac{1}{2} \\ -\frac{1}{2} & -1 & \frac{3}{2} \end{pmatrix} \\ &= \begin{pmatrix} -\frac{1}{2} & -2 & \frac{3}{2} \\ -\frac{1}{2} & 0 & \frac{3}{2} \\ \frac{1}{2} & 1 & -\frac{1}{2} \end{pmatrix} \end{aligned}$$
+  $A$ 的特征值为 $1,1,3$。相似给出
 
-为所求可逆矩阵.
-(Ⅲ) 由 $|A| = 1 \times 1 \times 3 = 3$, 知 $A^*$ 的特征值为
-$$\frac{|A|}{\lambda_1} = 3, \quad \frac{|A|}{\lambda_2} = 3, \quad \frac{|A|}{\lambda_3} = 1,$$
-故 $(3E - A^*)$ 的特征值为 $0, 0, 2$, 于是 $r(3E - A^*) = 1$, 从而方程组 $(3E - A^*)X = 0$ 有两个基础解.
-由 $(3E - A^*)X = 0$, 即 $A^*X = 3X$, 知 $X$ 可取 $A^*$ 的特征值 $3$ 对应的特征向量,
-$$\alpha_1 = (-1, 1, 0)^{T}, \quad \alpha_2 = (0, 0, 1)^{T},$$
-即 $A$ 的特征值 $1$ 对应的特征向量, 故所求通解为
-$$k_1(-1, 1, 0)^{T} + k_2(0, 0, 1)^{T} \quad (k_1, k_2 \text{为任意常数}).$$
+
+
+$$
+\operatorname{tr}B=\operatorname{tr}A=5\ \Rightarrow\ a=0,\qquad
+  \det B=\det A=3\ \Rightarrow\ c=3.
+$$
+
+  此时
+
+
+
+$$
+E-B=\begin{pmatrix}1&-b&-3\\0&0&0\\1&2&-3\end{pmatrix}.
+$$
+
+  因 $A$ 是实对称矩阵，特征值 $1$ 的特征空间维数为 $2$；相似保持核空间维数，故 $r(E-B)=1$。比较第一、第三行，得 $-b=2$，于是 $b=-2$。
+
+</Step>
+<Step>
+
+  ### 用两组特征向量构造 $P$
+
+  令
+
+
+
+$$
+U=\begin{pmatrix}-1&0&1\\1&0&1\\0&1&0\end{pmatrix},\qquad
+  V=\begin{pmatrix}-2&3&1\\1&0&0\\0&1&1\end{pmatrix}.
+$$
+
+  $U$ 的三列分别是 $A$ 属于 $1,1,3$ 的特征向量；$V$ 的三列分别是 $B$ 属于 $1,1,3$ 的特征向量，故
+
+
+
+$$
+U^{-1}AU=V^{-1}BV=\operatorname{diag}(1,1,3).
+$$
+
+  因而令 $P=UV^{-1}$，有
+
+
+
+$$
+P^{-1}AP=(VU^{-1})A(UV^{-1})=B.
+$$
+
+  直接相乘即得到所列 $P$；可以另外验证 $AP=PB$、$\det P=-1\ne0$。
+
+</Step>
+<Step>
+
+  ### 通过伴随矩阵谱求齐次方程通解
+
+  $\det A=3\ne0$，所以 $A^*=3A^{-1}$。若 $Av=\lambda v$，则 $A^*v=\frac3\lambda v$。于是
+
+
+
+$$
+(3E-A^*)v=0\iff Av=v.
+$$
+
+  因此解空间就是 $A$ 对应特征值 $1$ 的特征空间，取其基 $(-1,1,0)^T,(0,0,1)^T$ 即得通解。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="构造 $P^{-1}AP=B$ 的通用模板">
+
+若 $U^{-1}AU=\Lambda$、$V^{-1}BV=\Lambda$，则要取 $P=UV^{-1}$，而不是 $V^{-1}U$。列向量必须按**相同特征值的顺序**对应。
+
+</Callout>
 
 </Solution>
 

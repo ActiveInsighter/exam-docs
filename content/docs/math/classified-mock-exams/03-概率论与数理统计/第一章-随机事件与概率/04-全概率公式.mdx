@@ -1,13 +1,11 @@
 ---
-title: "第四节 全概率公式与贝叶斯公式｜分层抽样、后验概率及多阶段随机试验"
-description: "对照真题的转移抽球、分批抽样与抽检后验问题，精选完备事件组辨析、贝叶斯反推、多阶段抽样及离散连续混合模型等高质量原题，保持题目原有组件不变。"
+title: "4. 全概率公式"
+description: "12道全概率与贝叶斯公式专项：分块条件、盒球模型、批次后验、分步转移、离散正态混合，完整重写答案与推导。"
 ---
 
-# 第四节 全概率公式与贝叶斯公式｜分层抽样、后验概率及多阶段随机试验
+本节共 **12 道**模拟与练习题，现已 **全部重写解析**。从全概率公式的逻辑前提出发，逐步过渡到批次后验、盒球抽样、随机转移及离散—连续混合事件。所有原题、选项与结构化答案维持不变，大题先给参考答案再展示必要的分步推理。
 
-参照「真题核心题目」同名小节的考点、题型与命题风格精选 **12 道模拟与练习原题**；所有 Question 组件连同题干、选项、答案、解析、公式及嵌套结构均保留原文。
-
-## 考点1：全概率分解的条件与概率加权推断
+## 考点一｜全概率分块条件、独立性与贝叶斯反推
 
 <Question id="selected-1103-classified-1031-math-c5b6ed-008" type="single" points={5} tags="来源:张宇8套卷">
 
@@ -36,55 +34,57 @@ $$
 
 <Solution>
 
-由题设
+**参考答案：** 仅结论 **②** 必然正确，共 **1 个**，选 **A**。
 
-$$
-P(B)=P(A_1)P(B\mid A_1)+P(A_2)P(B\mid A_2)
-$$
+### 一、把已知等式改写为交事件概率
 
-可写为
+由乘法公式，$P(A_i)P(B\mid A_i)=P(A_iB)$（题设已保证这些条件概率有定义），故
 
 $$
 P(B)=P(A_1B)+P(A_2B).
 $$
 
-两边同除以 $P(B)$，得到
+因为 $P(B)>0$，两边除以 $P(B)$，立即得到
 
 $$
-P(A_1\mid B)+P(A_2\mid B)=1,
+\boxed{P(A_1\mid B)+P(A_2\mid B)=1,}
 $$
 
-所以结论②正确。
+因此 **② 必然成立**。
 
-但该条件不能推出 $A_1,A_2$ 为完备事件组，故①不一定成立；也不能推出
+### 二、用一个反例同时排除其余结论
 
-$$
-P(A_1\mid\overline B)+P(A_2\mid\overline B)=1,
-$$
-
-故③不一定成立。
-
-又因为 $A_1\cap A_2\cap B$ 不一定为空，故
+取四个等可能的基本结果 $\Omega=\{1,2,3,4\}$，并设
 
 $$
-P(A_1\mid B)+P(A_2\mid B)
+B=\{1,2\},\qquad A_1=A_2=\{1\}.
 $$
 
-不一定等于
+则 $0<P(B)=\frac12<1$，而
 
 $$
-P((A_1\cup A_2)\mid B),
+P(A_1B)+P(A_2B)=\frac14+\frac14=\frac12=P(B),
 $$
 
-所以④也不一定成立。
+完全符合题设，但：
 
-仅有 1 个正确结论，故选 A。
+- **① 错：** $A_1,A_2$ 不互斥，也不覆盖 $\Omega$，不是完备事件组。
+- **③ 错：** $A_1,A_2\subseteq B$，所以 $P(A_1\mid\bar B)+P(A_2\mid\bar B)=0\ne1$。
+- **④ 错：** 左边由②等于 $1$；右边却是 $P(A_1\cup A_2\mid B)=P(\{1\}\mid\{1,2\})=\frac12$。
+
+故只有一条正确。
+
+<Callout type="warn" title="全概率公式的逆命题不成立">
+
+等式 $P(B)=P(A_1B)+P(A_2B)$ 只约束了落在 $B$ 内的概率总量，并不能反推出 $A_1,A_2$ 两两互斥或覆盖样本空间；它甚至允许交集和未覆盖部分的概率“抵消”。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-24f23f-008" type="single">
+<Question id="selected-1103-math-24f23f-008" type="single" tags="科目:概率论与数理统计, 考点:全概率公式适用条件">
 
 在全概率公式 $ P(B)=\sum_{i=1}^{n}P(A_i)P(B\mid A_i)$ 中，除了要求条件 $ B$ 是任意随机事件及 $ P(A_i)>0\,(i=1,2,\cdots,n)$ 之外，我们可以将其他条件改为
 
@@ -95,168 +95,252 @@ $$
 
 <Solution>
 
-全概率公式通常要求 $ A_1,A_2,\ldots,A_n$ 构成样本空间的完备事件组，即两两互不相容且
+**参考答案：** 正确选项为 **D**。
+
+### 一、全概率公式为什么需要“分割”
+
+经典条件是 $A_1,\ldots,A_n$ 两两互不相容、并集为 $\Omega$，且 $P(A_i)>0$。这样任意事件 $B$ 都可无重复、无遗漏地拆成
 
 $$
- \bigcup_{i=1}^{n}A_i=\Omega.
+B=\bigcup_{i=1}^n(BA_i),
 $$
 
-事实上，对给定事件 $ B$，不必要求这些事件覆盖整个样本空间，只要它们两两互不相容并覆盖 $ B$，即
+于是 $P(B)=\sum_iP(BA_i)=\sum_iP(A_i)P(B\mid A_i)$。
+
+### 二、针对固定的 $B$ 可以弱化覆盖条件
+
+实际上只要
 
 $$
- B\subseteq\bigcup_{i=1}^{n}A_i,
+A_iA_j=\varnothing\;(i\ne j),\qquad
+B\subseteq\bigcup_{i=1}^n A_i,
 $$
 
-就有
+就能保证 $BA_1,\ldots,BA_n$ 两两互斥且并成 $B$。因此公式仍成立，**不必覆盖整个 $\Omega$**，这正是选项 D。
 
-$$
- B=\bigcup_{i=1}^{n}(BA_i),
-$$
+### 三、排除其他选项
 
-且各 $ BA_i$ 两两互不相容。因此
+- **A、B：** 独立不是互斥。不同 $BA_i$ 可重叠，求和就可能重复计算。
+- **C：** 仅两两互斥而未覆盖 $B$，可能遗漏 $B$ 中未归入任何 $A_i$ 的部分。
+- **D：** 同时保证“无重复”和“无遗漏”，正确。
 
-$$
- P(B)
-=
-\sum_{i=1}^{n}P(BA_i)
-=
-\sum_{i=1}^{n}P(A_i)P(B\mid A_i).
-$$
+<Callout type="idea" title="记忆方式">
 
-故（D）正确。
+全概率的本质是对目标事件 $B$ 进行**互不重叠的分块**，而不是机械地要求所有分块一定覆盖整个样本空间。
 
-独立性不能代替互不相容性；仅有两两互不相容而不覆盖 $ B$，会遗漏 $ B$ 的一部分，所以（A）、（B）、（C）均不充分。
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-dd4719-010" type="blank">
+<Question id="selected-1103-math-dd4719-010" type="blank" tags="科目:概率论与数理统计, 考点:全概率与贝叶斯公式">
 
 设 $P(A)=0.1,\ P(B\mid A)=0.9,\ P(B\mid\bar A)=0.2$，则 $P(A\mid B)=$ <Blank answer="((1)/(3))" kind="math" /> .
 
 <Solution>
 
-**答案：** $\frac{1}{3}$
+**参考答案：** $\boxed{P(A\mid B)=\dfrac13}$。
 
-**解析：** 先由全概率公式求 $P(B)$：
+### 一、识别已知量和待求量
+
+题设给出 $P(A)$、$P(B\mid A)$、$P(B\mid\bar A)$，要求反向条件概率 $P(A\mid B)$。应先用全概率公式计算 $P(B)$，再使用贝叶斯公式。
+
+### 二、求事件 $B$ 的总概率
+
+$A,\bar A$ 构成完备事件组，且 $P(\bar A)=0.9$，所以
 
 $$
-P(B)=P(A)P(B\mid A)+P(\bar A)P(B\mid\bar A)
-=0.1\times0.9+0.9\times0.2=0.27.
+\begin{aligned}
+P(B)&=P(A)P(B\mid A)+P(\bar A)P(B\mid\bar A)\\
+&=0.1\times0.9+0.9\times0.2\\
+&=0.09+0.18=0.27.
+\end{aligned}
 $$
 
-再用 Bayes 公式：
+### 三、反推后验概率
 
 $$
-P(A\mid B)=\frac{P(A)P(B\mid A)}{P(B)}
-=\frac{0.1\times0.9}{0.27}=\frac{1}{3}.
+P(A\mid B)=\frac{P(AB)}{P(B)}
+=\frac{P(A)P(B\mid A)}{P(B)}
+=\frac{0.09}{0.27}=\boxed{\frac13}.
 $$
+
+<Callout type="idea" title="前向概率与后验概率">
+
+$P(B\mid A)=0.9$ 描述“假设 $A$ 发生时 $B$ 的概率”；所求 $P(A\mid B)$ 则是“观察到 $B$ 后 $A$ 的概率”。二者方向相反，不可直接互换。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-688c25-014" type="blank">
+<Question id="selected-1103-math-688c25-014" type="blank" tags="科目:概率论与数理统计, 考点:独立性判据">
 
 设$A$和$B$是概率不等于0和1的任意两个事件，且满足$P(B | A)+P(\bar{B} | \bar{A})=1$，则事件$A$和$B$一定<Blank answer="相互独立" kind="text" />。
 
 <Solution>
 
-**答案：** 相互独立
+**参考答案：** $A$ 和 $B$ 必定 **相互独立**。
 
-**解析：** 由
-$ P(B\mid A)+P(\bar B\mid\bar A)=1$，
-得到
-$ P(B\mid A)=1-P(\bar B\mid\bar A)=P(B\mid\bar A)$。
-再由全概率公式，
-$ P(B)=P(B\mid A)P(A)+P(B\mid\bar A)P(\bar A)$。
-由于两个条件概率相等，故
-$ P(B)=P(B\mid A)[P(A)+P(\bar A)]=P(B\mid A)$。
-因此$ P(B\mid A)=P(B)$，而$ 0<P(A)<1$，所以$A$与$B$相互独立。
+### 一、利用对立事件的条件概率关系
 
-## 强化部分
+由于 $0<P(A)<1$，以下两个条件概率都有定义。题设
+
+$$
+P(B\mid A)+P(\bar B\mid\bar A)=1
+$$
+
+等价于
+
+$$
+P(B\mid A)=1-P(\bar B\mid\bar A)=P(B\mid\bar A).
+$$
+
+这说明不论 $A$ 发生还是不发生，$B$ 的条件概率都相同。
+
+### 二、由全概率公式求 $P(B)$
+
+记共同值为 $q$，则
+
+$$
+\begin{aligned}
+P(B)&=P(A)P(B\mid A)+P(\bar A)P(B\mid\bar A)\\
+&=q\,[P(A)+P(\bar A)]=q.
+\end{aligned}
+$$
+
+于是 $P(B\mid A)=P(B)$，两边乘 $P(A)$ 得
+
+$$
+P(AB)=P(A)P(B).
+$$
+
+这是 $A$ 与 $B$ 独立的定义，结论成立。
+
+<Callout type="idea" title="可直接套用的独立性判据">
+
+当 $0<P(A)<1$ 时，$A$ 与 $B$ 独立，当且仅当 $P(B\mid A)=P(B\mid\bar A)$。本题正是这一判据的等价表述。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：不同箱型、产品批次与条件观察后的贝叶斯反推
+## 考点二｜批次选择、分层抽样与后验更新
 
-<Question id="selected-1103-math-688c25-019" type="blank">
+<Question id="selected-1103-math-688c25-019" type="blank" tags="科目:概率论与数理统计, 考点:放回抽样与贝叶斯更新">
 
 设有两批数量相同的零件，已知有一批产品全部合格，另一批产品有25%不合格，从这两批产品中任取1只，经检验是合格品，放回原处，并从原所在批次中再取1只，则这只产品是不合格品的概率为<Blank answer="((3)/(28))" kind="math" />。
 
 <Solution>
 
-**答案：** $ \frac3{28}$
+**参考答案：** 第二次抽到不合格品的概率为 $\boxed{\dfrac3{28}}$。
 
-**解析：** 设$A_1=$“来自全部合格的批次”，$A_2=$“来自有25%不合格品的批次”，$B=$“第一次抽到合格品”。两批数量相同，故
-$ P(A_1)=P(A_2)=\frac12$。
-又
-$ P(B\mid A_1)=1,\qquad P(B\mid A_2)=\frac34$。
-由贝叶斯公式，第一次检验合格后，所选批次为$A_2$的后验概率为
-$ P(A_2\mid B)=\frac{P(A_2)P(B\mid A_2)}{P(A_1)P(B\mid A_1)+P(A_2)P(B\mid A_2)}
-=\frac{\frac12\cdot\frac34}{\frac12+\frac12\cdot\frac34}=\frac37$。
-第一次抽出的零件已放回，因此若来自$A_2$批次，第二次抽到不合格品的概率仍为$ \frac14$。
-故所求概率为
-$ \frac37\cdot\frac14=\frac3{28}$。
+### 一、先对“选中哪一批”建立先验概率
+
+记 $A_1$ 为来自全部合格批次，$A_2$ 为来自不合格率 $25\%$ 的批次；记 $B$ 为第一次检验合格。由于两批数量相同，随机抽取一只产品相当于先等可能选择批次：
+
+$$
+P(A_1)=P(A_2)=\frac12,\quad
+P(B\mid A_1)=1,\quad P(B\mid A_2)=\frac34.
+$$
+
+### 二、第一次合格后更新批次概率
+
+观察到合格品会使“来自有次品批次”的概率下降。由全概率公式
+
+$$
+P(B)=\frac12\times1+\frac12\times\frac34=\frac78.
+$$
+
+贝叶斯公式给出
+
+$$
+P(A_2\mid B)
+=\frac{\frac12\times\frac34}{\frac78}
+=\boxed{\frac37}.
+$$
+
+### 三、考虑放回后的第二次抽样
+
+设 $D$ 为第二次抽到不合格品。若在 $A_1$ 批次则 $P(D\mid A_1,B)=0$；若在 $A_2$ 批次，由于放回，$P(D\mid A_2,B)=\frac14$。因此
+
+$$
+\begin{aligned}
+P(D\mid B)
+&=P(A_1\mid B)\cdot0+P(A_2\mid B)\cdot\frac14\\
+&=\frac37\cdot\frac14=\boxed{\frac3{28}}.
+\end{aligned}
+$$
+
+<Callout type="warn" title="放回不等于批次概率恢复一半">
+
+放回保持了**各批次内部**的合格比例，但第一次合格提供的信息没有消失，故第二次所用的批次权重仍是后验概率 $\frac37$，而不是原先的 $\frac12$。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-24f23f-017" type="blank">
+<Question id="selected-1103-math-24f23f-017" type="blank" tags="科目:概率论与数理统计, 考点:分层抽样与反向条件概率">
 
 三个箱子，第一个箱子中有4个黑球与1个白球，第二个箱中有3个黑球与3个白球，第三个箱中有3个黑球与5个白球。现随机地选取一个箱子从中任取1个球，则这个球为白球的概率是 <Blank answer="53/120" kind="math" />；若已发现取出的这个球是白球，则它不是取自第二个箱子的概率是 <Blank answer="33/53" kind="math" />。
 
 <Solution>
 
-**答案：** $ \frac{53}{120}$，$ \frac{33}{53}$
+**参考答案：** 抽到白球的概率为 $\boxed{\dfrac{53}{120}}$；已知抽到白球，它不是来自第二箱的概率为 $\boxed{\dfrac{33}{53}}$。
 
-**解析：** 设 $ A_i$ 表示选中第 $ i$ 个箱子，$ B$ 表示取出白球。由于三个箱子被等可能选中，故
+### 一、按箱子列出先验和白球比例
 
-$$
- P(A_1)=P(A_2)=P(A_3)=\frac13.
-$$
+记 $A_i$ 表示选取第 $i$ 箱，$W$ 表示抽中白球。随机选箱子，故 $P(A_i)=\frac13$。
 
-各箱取到白球的条件概率分别为
+| 箱子 | 白球数/总数 | $P(W\mid A_i)$ |
+| --- | --- | --- |
+| 第一箱 | $1/5$ | $\frac15$ |
+| 第二箱 | $3/6$ | $\frac12$ |
+| 第三箱 | $5/8$ | $\frac58$ |
 
-$$
- P(B\mid A_1)=\frac15,
-\qquad
-P(B\mid A_2)=\frac36=\frac12,
-\qquad
-P(B\mid A_3)=\frac58.
-$$
-
-由全概率公式，
+### 二、全概率公式求抽中白球的概率
 
 $$
- \begin{aligned}
-P(B)
-&=\sum_{i=1}^3P(A_i)P(B\mid A_i)\\
-&=\frac13\left(\frac15+\frac12+\frac58\right)\\
-&=\frac{53}{120}.
+\begin{aligned}
+P(W)&=\sum_{i=1}^{3}P(A_i)P(W\mid A_i)\\
+&=\frac13\left(\frac15+\frac12+\frac58\right)
+=\boxed{\frac{53}{120}}.
 \end{aligned}
 $$
 
-“不是取自第二个箱子”即事件 $ A_1\cup A_3$。由贝叶斯公式，
+### 三、已知是白球，反推不是第二箱
+
+先求第二箱的后验概率：
 
 $$
- \begin{aligned}
-P(A_1\cup A_3\mid B)
-&=\frac{P(A_1)P(B\mid A_1)+P(A_3)P(B\mid A_3)}{P(B)}\\
-&=\frac{\frac13\left(\frac15+\frac58\right)}{\frac{53}{120}}\\
-&=\frac{33}{53}.
-\end{aligned}
+P(A_2\mid W)=\frac{P(A_2)P(W\mid A_2)}{P(W)}
+=\frac{\frac13\cdot\frac12}{\frac{53}{120}}=\frac{20}{53}.
 $$
+
+故所求为其补事件：
+
+$$
+P(\bar A_2\mid W)=1-P(A_2\mid W)
+=\boxed{\frac{33}{53}}.
+$$
+
+<Callout type="idea" title="用补事件省去两项计算">
+
+若要求“不来自第 $i$ 类”，先用贝叶斯公式算“来自第 $i$ 类”，再取补通常比分别算其余类别更快。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-dd4719-025" type="essay" number={1}>
+<Question id="selected-1103-math-dd4719-025" type="essay" tags="科目:概率论与数理统计, 考点:随机选盒子的全概率">
 
 有 3 个盒子：第一个盒子中有 3 个黑球、1 个白球；第二个盒子中有 2 个黑球、3 个白球；第三个盒子中有 3 个黑球、2 个白球。
 
@@ -266,123 +350,121 @@ $(II)$ 已知取出的是白球，求此球来自第三个盒子的概率。
 
 <Solution>
 
-**答案：** $(I)\ \frac5{12}$；$(II)\ \frac8{25}$。
-
-**解析：** 设 $A=\{\text{取出白球}\}$，$B_i=\{\text{取到第 }i\text{ 个盒子}\}$。随机选盒子，故
+**参考答案：**
 
 $$
-P(B_1)=P(B_2)=P(B_3)=\frac{1}{3}.
+\boxed{\text{(I)}\;P(\text{白球})=\frac5{12};\qquad
+\text{(II)}\;P(\text{第三盒}\mid\text{白球})=\frac8{25}.}
 $$
 
-且
+### 一、建立分层抽样模型
+
+设 $H_i$ 为选中第 $i$ 个盒子，$W$ 为取出白球。题意“任取一个盒子”表示三个盒子等可能，$P(H_i)=\frac13$，白球比例为
 
 $$
-P(A\mid B_1)=\frac{1}{4},\quad
-P(A\mid B_2)=\frac{3}{5},\quad
-P(A\mid B_3)=\frac{2}{5}.
+P(W\mid H_1)=\frac14,\qquad
+P(W\mid H_2)=\frac35,\qquad
+P(W\mid H_3)=\frac25.
 $$
 
-$(I)$ 由全概率公式，
+### 二、求取出白球的概率 (I)
+
+三个盒子的白球事件互斥分解：
 
 $$
-P(A)=\sum_{i=1}^3P(B_i)P(A\mid B_i)
-=\frac{1}{3}\left(\frac{1}{4}+\frac{3}{5}+\frac{2}{5}\right)
-=\frac5{12}.
+\begin{aligned}
+P(W)&=\sum_{i=1}^{3}P(H_i)P(W\mid H_i)\\
+&=\frac13\left(\frac14+\frac35+\frac25\right)
+=\frac13\cdot\frac54
+=\boxed{\frac5{12}}.
+\end{aligned}
 $$
 
-$(II)$ 由 Bayes 公式，
+### 三、由白球反推盒子来源 (II)
 
 $$
-P(B_3\mid A)
-=\frac{P(B_3)P(A\mid B_3)}{P(A)}
-=\frac{\frac{1}{3}\cdot\frac{2}{5}}{\frac5{12}}
-=\frac8{25}.
+P(H_3\mid W)=\frac{P(H_3)P(W\mid H_3)}{P(W)}
+=\frac{\frac13\cdot\frac25}{\frac5{12}}
+=\boxed{\frac8{25}}.
 $$
+
+<Callout type="warn" title="先随机选盒子，不等于从所有球中等可能选球">
+
+三个盒子球数分别为 $4,5,5$，应按“每盒概率 $\frac13$”加权，而不能直接计算三盒白球总数除以球总数。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-24f23f-023" type="essay">
+<Question id="selected-1103-math-24f23f-023" type="essay" tags="科目:概率论与数理统计, 考点:超几何转移与贝叶斯">
 
 甲袋中有3个白球2个黑球，乙袋中有4个白球4个黑球，现从甲袋中任取2球放入乙袋，再从乙袋中取一球，求取出球是白球的概率 $ p$；如果已知从乙袋中取出的球是白球，求从甲袋中取出的球是一白一黑的概率 $ q$。
 
 <Solution>
 
-**答案：**
+**参考答案：** $\boxed{p=\dfrac{13}{25},\qquad q=\dfrac{15}{26}}$。
+
+### 一、根据转移白球的个数进行分类
+
+设 $A_k=\{\text{甲袋转入的两球中有 }k\text{ 个白球}\}$（$k=0,1,2$），$W=\{\text{从乙袋最终抽到白球}\}$。从甲袋 $3$ 白 $2$ 黑中不放回抽两球，
 
 $$
- p=\frac{13}{25},
-\qquad
-q=\frac{15}{26}.
+P(A_k)=\frac{\binom3k\binom2{2-k}}{\binom52}.
 $$
 
-**解析：** 设事件 $ A_i$ 表示“从甲袋转入乙袋的2个球中恰有 $ i$ 个白球”，其中 $ i=0,1,2$；设事件 $ B$ 表示“最后从乙袋取出的球为白球”。
+各类转移概率及之后从乙袋取白球的条件概率如下：
 
-从甲袋的5个球中任取2个，共有
+| $k$ | $P(A_k)$ | 乙袋白球数 | $P(W\mid A_k)$ |
+| --- | --- | --- | --- |
+| $0$ | $\frac1{10}$ | $4$ | $\frac4{10}$ |
+| $1$ | $\frac35$ | $5$ | $\frac5{10}$ |
+| $2$ | $\frac3{10}$ | $6$ | $\frac6{10}$ |
 
-$$
- \binom52=10
-$$
-
-种等可能取法，因此
-
-$$
- P(A_0)=\frac{\binom30\binom22}{\binom52}=\frac1{10},
-$$
+### 二、用全概率公式计算 $p$
 
 $$
- P(A_1)=\frac{\binom31\binom21}{\binom52}=\frac35,
-$$
-
-$$
- P(A_2)=\frac{\binom32\binom20}{\binom52}=\frac3{10}.
-$$
-
-若转入乙袋的白球数为 $ i$，则乙袋共有10个球，其中白球数为 $ 4+i$，故
-
-$$
- P(B\mid A_i)=\frac{4+i}{10}.
-$$
-
-由全概率公式，
-
-$$
- \begin{aligned}
-p=P(B)
-&=\sum_{i=0}^{2}P(A_i)P(B\mid A_i)\\
-&=\frac1{10}\cdot\frac4{10}
-+\frac35\cdot\frac5{10}
-+\frac3{10}\cdot\frac6{10}\\
-&=\frac1{25}+\frac3{10}+\frac9{50}\\
-&=\frac{13}{25}.
+\begin{aligned}
+p=P(W)
+&=\frac1{10}\cdot\frac4{10}+\frac35\cdot\frac5{10}
+ +\frac3{10}\cdot\frac6{10}\\
+&=\frac1{25}+\frac3{10}+\frac9{50}
+=\boxed{\frac{13}{25}}.
 \end{aligned}
 $$
 
-“从甲袋中取出的球是一白一黑”即事件 $ A_1$。由贝叶斯公式，
+### 三、用贝叶斯公式计算 $q$
+
+“一白一黑”就是 $A_1$，观察到乙袋抽出白球后，
 
 $$
- \begin{aligned}
-q=P(A_1\mid B)
-&=\frac{P(A_1)P(B\mid A_1)}{P(B)}\\
-&=\frac{\frac35\cdot\frac12}{\frac{13}{25}}\\
-&=\frac{15}{26}.
-\end{aligned}
+q=P(A_1\mid W)=\frac{P(A_1)P(W\mid A_1)}{P(W)}
+=\frac{\frac35\cdot\frac12}{\frac{13}{25}}
+=\boxed{\frac{15}{26}}.
 $$
 
-因此
+<Accordions>
+<Accordion title="另解：用指示变量期望快速求第一问">
+
+    设转移的白球个数为 $K$，它是从 $5$ 球中抽 $2$ 球的超几何变量，$E(K)=2\times\frac35=\frac65$。则
+
+
 
 $$
- p=\frac{13}{25},
-\qquad
-q=\frac{15}{26}.
+P(W)=E\left(\frac{4+K}{10}\right)=\frac{4+\frac65}{10}=\frac{13}{25}.
 $$
+
+    此法只求 $p$ 尤其高效；第二问仍用贝叶斯公式更直接。
+
+</Accordion>
+</Accordions>
 
 </Solution>
 
 </Question>
 
-<Question id="selected-1103-math-dd4719-023" type="essay" number={1}>
+<Question id="selected-1103-math-dd4719-023" type="essay" tags="科目:概率论与数理统计, 考点:独立重复试验与后验概率">
 
 设甲盒中有 4 个红球和 2 个白球，乙盒中有 2 个红球和 4 个白球。每次掷一枚均匀硬币：若正面出现，则从甲盒中任取一球；若反面出现，则从乙盒中任取一球。每次取出的球观看颜色后放回原盒中。
 
@@ -392,57 +474,77 @@ $(II)$ 若前两次都取得红球，求这两个红球都来自甲盒的概率�
 
 <Solution>
 
-**答案：** $(I)\ \frac{1}{2}$；$(II)\ \frac{4}{9}$。
+**参考答案：** $\boxed{\text{(I)}\;\dfrac12,\qquad\text{(II)}\;\dfrac49}$。
 
-**解析：** 设 $A_i=\{\text{第 }i\text{ 次取得红球}\}$，$B_i=\{\text{第 }i\text{ 次硬币为正面，即从甲盒取球}\}$。
+### 一、先算单次红球的总概率
 
-每一轮“掷硬币 + 取球 + 放回”彼此独立且分布相同。
-
-$(I)$ 单次取得红球的概率由全概率公式为
+设 $R_i$ 为第 $i$ 次得到红球，$H_i$ 为第 $i$ 次选择甲盒。每次掷硬币都是独立且均匀的，因此
 
 $$
-P(A_i)=\frac{1}{2}\cdot\frac{4}{6}+\frac{1}{2}\cdot\frac{2}{6}=\frac{1}{2}.
+P(R_i)=\frac12\cdot\frac46+\frac12\cdot\frac26
+=\boxed{\frac12}.
 $$
 
-由于各轮独立，
+### 二、(I) 利用各轮独立性
+
+每一轮重新掷硬币且抽球后放回，因此“前两次均得到红球”不会改变第三轮结果的分布，
 
 $$
-P(A_3\mid A_1A_2)=P(A_3)=\frac{1}{2}.
+P(R_3\mid R_1R_2)=P(R_3)=\boxed{\frac12}.
 $$
 
-$(II)$ 单轮既“来自甲盒”又“取到红球”的概率为
+### 三、(II) 由红球反推前两轮来源
+
+<Tabs items={['逐次贝叶斯法', '联合概率法']}>
+<Tab value="逐次贝叶斯法">
+
+    单次已知取得红球时，它来自甲盒的概率是
+
+
 
 $$
-P(A_iB_i)=\frac{1}{2}\cdot\frac{4}{6}=\frac{1}{3}.
+P(H_i\mid R_i)=\frac{\frac12\cdot\frac46}{\frac12}=\frac23.
 $$
 
-两轮独立，故
+    前两轮独立，故在前两次均为红球的条件下，两次都来自甲盒的概率为
+
+
 
 $$
-P(A_1A_2B_1B_2)=\left(\frac{1}{3}\right)^2.
+\left(\frac23\right)^2=\boxed{\frac49}.
 $$
 
-而
+</Tab>
+<Tab value="联合概率法">
+
+    一轮“甲盒且红球”的概率是 $P(H_iR_i)=\frac12\cdot\frac46=\frac13$。于是
+
+
 
 $$
-P(A_1A_2)=\left(\frac{1}{2}\right)^2.
+\begin{aligned}
+    P(H_1H_2\mid R_1R_2)
+    &=\frac{P(H_1R_1)P(H_2R_2)}{P(R_1)P(R_2)}\\
+    &=\frac{(\frac13)^2}{(\frac12)^2}=\boxed{\frac49}.
+    \end{aligned}
 $$
 
-因此
+</Tab>
+</Tabs>
 
-$$
-P(B_1B_2\mid A_1A_2)
-=\frac{(1/3)^2}{(1/2)^2}
-=\frac{4}{9}.
-$$
+<Callout type="warn" title="独立的是各次完整试验">
+
+只有因为每次**重新**掷硬币、抽球且放回，前两次和第三次才独立；若硬币只掷一次并固定选择一个盒子，第一问就不能如此处理。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点3：连续转移试验、后验分布与混合模型
+## 考点三｜多步转移与离散连续混合试验
 
-<Question id="selected-1103-math-24f23f-025" type="essay">
+<Question id="selected-1103-math-24f23f-025" type="essay" tags="科目:概率论与数理统计, 考点:逐级抽样与贝叶斯公式">
 
 甲盒内有3个白球与2个黑球，从中任取3个球放入空盒乙中，然后从乙盒内任取2个球放入空盒丙中，最后从丙盒内再任取1个球，试求：
 
@@ -452,82 +554,73 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：** $\boxed{\text{（Ⅰ）}\;\dfrac35,\qquad\text{（Ⅱ）}\;\dfrac16}$。
+
+### （Ⅰ）最后从丙盒取到白球的概率
+
+<Tabs items={['方法一：对称性（推荐）', '方法二：全概率公式']}>
+<Tab value="方法一：对称性（推荐）">
+
+    标记甲盒中任意一个原始球。它进入乙盒、进入丙盒并最终被取出的概率依次相乘：
+
+
 
 $$
- \text{（Ⅰ）}\ \frac35;
-\qquad
-\text{（Ⅱ）}\ \frac16.
+\frac35\times\frac23\times\frac12=\frac15.
 $$
 
-**解析：** **（Ⅰ）从丙盒内取出白球的概率**
+    这与该球颜色无关，说明甲盒最初的 $5$ 个球最终等可能被取中。甲盒有 $3$ 个白球，因此
 
-考察甲盒中的任意一个指定球。它最终被从丙盒取出的概率为
 
-$$
- \frac35\cdot\frac23\cdot\frac12=\frac15.
-$$
-
-这个概率对甲盒中的5个球完全相同，因此最终取出的球在甲盒原有的5个球中是等可能的。
-
-甲盒原有3个白球、2个黑球，所以最终从丙盒取出白球的概率为
 
 $$
- P(B)=\frac35,
+P(W)=3\times\frac15=\boxed{\frac35}.
 $$
 
-其中 $ B$ 表示“从丙盒取出的球为白球”。
+</Tab>
+<Tab value="方法二：全概率公式">
 
-也可由全概率公式验证。设 $ A_k$ 表示“第一次从甲盒取出的3个球中有 $ k$ 个白球”，其中 $ k=1,2,3$。则
+    令 $A_k$ 为初次抽出的 $3$ 球中恰有 $k$ 个白球，$k=1,2,3$，则
 
-$$
- P(A_k)=\frac{\binom3k\binom2{3-k}}{\binom53}.
-$$
 
-在事件 $ A_k$ 发生时，经过乙盒、丙盒的无偏随机抽取后，最后取到白球的概率仍为
 
 $$
- P(B\mid A_k)=\frac{k}{3}.
+P(A_k)=\frac{\binom3k\binom2{3-k}}{\binom53},\qquad
+    P(W\mid A_k)=\frac{k}{3}.
 $$
 
-故
+    因为 $P(A_1)=\frac3{10}$、$P(A_2)=\frac6{10}$、$P(A_3)=\frac1{10}$，
+
+
 
 $$
- P(B)=\sum_{k=1}^{3}P(A_k)\frac{k}{3}=\frac35.
+P(W)=\frac3{10}\cdot\frac13+\frac6{10}\cdot\frac23
+    +\frac1{10}\cdot1=\boxed{\frac35}.
 $$
 
-**（Ⅱ）已知最后取到白球，求第一次取到3个白球的概率**
+</Tab>
+</Tabs>
 
-设 $ A_3$ 表示“第一次从甲盒取到3个白球”。则
+### （Ⅱ）已知最终白球，反推初次抽到三个白球
 
-$$
- P(A_3)=\frac{\binom33\binom20}{\binom53}=\frac1{10}.
-$$
-
-若第一次取到的3个球全为白球，则之后无论怎样从乙盒向丙盒转移并从丙盒取球，最后取出的必为白球，故
+仍令 $A_3$ 表示第一次从甲盒抽到 $3$ 个白球，则
 
 $$
- P(B\mid A_3)=1.
+P(A_3)=\frac{\binom33\binom20}{\binom53}=\frac1{10}.
 $$
 
-由贝叶斯公式，
+若第一次全是白球，经过后续两次随机转移，最终一定抽到白球，因此 $P(W\mid A_3)=1$。由贝叶斯公式，
 
 $$
- \begin{aligned}
-P(A_3\mid B)
-&=\frac{P(A_3)P(B\mid A_3)}{P(B)}\\
-&=\frac{\frac1{10}\cdot1}{\frac35}\\
-&=\frac16.
-\end{aligned}
+P(A_3\mid W)=\frac{P(A_3)P(W\mid A_3)}{P(W)}
+=\frac{\frac1{10}}{\frac35}=\boxed{\frac16}.
 $$
 
-因此所求结果为
+<Callout type="idea" title="链式随机抽样的对称性">
 
-$$
- \text{（Ⅰ）}\ \frac35,
-\qquad
-\text{（Ⅱ）}\ \frac16.
-$$
+若每一步都在当前容器中**等可能且不区分颜色**抽取，最终的单球相当于从起始容器等可能抽取。可以先用这一不变量解决“最终颜色”问题，再通过贝叶斯公式处理“来源反推”。
+
+</Callout>
 
 </Solution>
 
@@ -550,25 +643,42 @@ $$
 
 <Solution>
 
-**答案：C。** $\boxed{\frac12}$。
+**参考答案：** 正确选项为 **C**，$\boxed{\dfrac12}$。
 
-**过程**：以 $X$ 的两个可能取值分组，由全概率公式和独立性，
+### 一、按离散变量 $X$ 的取值分类
+
+$X$ 以各 $\frac12$ 的概率取 $0$ 和 $2$；已知 $X,Y$ 独立，所以
 
 $$
 \begin{aligned}
 P(X+Y\le1)
 &=P(X=0)P(Y\le1)+P(X=2)P(Y\le-1)\\
-&=\tfrac12\Phi(1)+\tfrac12\Phi(-1).
+&=\frac12\Phi(1)+\frac12\Phi(-1),
 \end{aligned}
 $$
 
-标准正态分布关于 $0$ 对称，$\Phi(-1)=1-\Phi(1)$。因此
+其中 $\Phi$ 是标准正态分布函数。
+
+### 二、利用标准正态的对称性
+
+$Y\sim N(0,1)$ 关于零点对称，有
 
 $$
-P(X+Y\le1)=\tfrac12[\Phi(1)+1-\Phi(1)]=\boxed{\tfrac12}.
+\Phi(-1)=1-\Phi(1).
 $$
 
-无需查正态分布表。
+因此
+
+$$
+P(X+Y\le1)=\frac12[\Phi(1)+\Phi(-1)]
+=\frac12\times1=\boxed{\frac12}.
+$$
+
+<Callout type="idea" title="无需查正态分布表">
+
+出现相反参数 $a,-a$ 的两个标准正态分布函数时，先尝试恒等式 $\Phi(a)+\Phi(-a)=1$；本题恰由对称的离散取值生成这两个参数。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -584,27 +694,36 @@ $$
 
 <Solution>
 
-**答案：D（$\frac34$）。**
+**参考答案：** 正确选项为 **D**，$\boxed{\dfrac34}$。
 
-独立性给出 $E(XY)=E(X)E(Y)=\frac12\cdot0=0$。按 $X$ 的可能取值分类：
+### 一、先确定事件的阈值
 
-- $X=0$（概率 $\frac12$）时，恒有 $XY=0$，**必定满足** $XY\le0$。
-- $X=1$（概率 $\frac12$）时，要求 $Y\le0$。标准正态分布关于 $0$ 对称，故 $P(Y\le0)=\frac12$。
+$X\sim B(1,\frac12)$，故 $P(X=0)=P(X=1)=\frac12$。由独立性与标准正态均值为零，
 
-由独立性，
+$$
+E(XY)=E(X)E(Y)=\frac12\times0=0.
+$$
+
+因此问题转化为求 $P(XY\le0)$。
+
+### 二、分别讨论 $X=0$ 与 $X=1$
+
+- 当 $X=0$ 时，无论 $Y$ 为何值，都有 $XY=0\le0$，贡献概率 $\frac12$。
+- 当 $X=1$ 时，$XY\le0$ 等价于 $Y\le0$。由正态分布对称性，$P(Y\le0)=\frac12$，再乘独立的 $P(X=1)=\frac12$。
+
+于是
 
 $$
 \begin{aligned}
-P\{XY\le0\}
-&=P(X=0)+P(X=1,Y\le0)\\
+P(XY\le E(XY))&=P(X=0)+P(X=1,Y\le0)\\
 &=\frac12+\frac12\cdot\frac12
 =\boxed{\frac34}.
 \end{aligned}
 $$
 
-<Callout type="warn" title="零点的概率不能漏掉">
+<Callout type="warn" title="乘积并不一定是连续型随机变量">
 
-虽然 $Y$ 连续且 $P(Y=0)=0$，但 $XY$ 在 $0$ 处有概率质量 $P(XY=0)=P(X=0)=\frac12$，因此不能只取 $\frac12$。
+虽然 $Y$ 连续、$P(Y=0)=0$，但 $XY$ 在 $0$ 处有正概率 $P(XY=0)=P(X=0)=\frac12$。对“$\le$”与“$<$”的处理因此可能不同。
 
 </Callout>
 

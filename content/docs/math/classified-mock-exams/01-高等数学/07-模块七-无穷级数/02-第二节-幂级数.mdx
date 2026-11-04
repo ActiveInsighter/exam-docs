@@ -1,11 +1,9 @@
 ---
-title: "第二节 幂级数｜收敛域、泰勒展开、和函数与递推构造"
-description: "对照真题的收敛半径与端点判别、展开系数识别、逐项求导积分、系数递推及几何构造，精选跨方法综合命题。"
+title: "2. 幂级数"
+description: "32 道已重构的幂级数精选题：收敛半径及端点、泰勒展开和高阶导数、逐项求导积分、微分方程与几何面积求和；答案置顶、推导完整、附方法与易错提示。"
 ---
 
-# 第二节 幂级数｜收敛域、泰勒展开、和函数与递推构造
-
-参照「真题核心题目」本节的命题考点，精选 **32 道模拟与名师练习原题**。题干、选项、参考答案、解析与 MDX 组件结构均原样保留。
+参照「真题核心题目」的命题考点，精选 **32 道模拟与名师练习原题**，保留稳定题目 ID、原题及题型。本节 **32 道题已全部完成**逐题验算、完整解析重写和组件结构复核；保留原有题目编号、题干、选项及分类归档路径。
 
 ## 考点1：收敛半径、端点判断与级数变换
 
@@ -19,23 +17,57 @@ $$
 
 <Solution>
 
-**答案：** $(1-\sqrt2,1+\sqrt2)$
+**参考答案：** 收敛域为 $\boxed{(1-\sqrt2,\,1+\sqrt2)}$。
 
-**解析：** 由比值判别法，
+<Steps>
+<Step>
 
-$$
-\lim_{n\to\infty}\left|
-\frac{(-1)^{n+1}\frac{n+1}{2^{n+1}}(x-1)^{2(n+1)}}
-{(-1)^n\frac n{2^n}(x-1)^{2n}}
-\right|
-=\frac12(x-1)^2<1.
-$$
+  ### 识别真正的幂变量
 
-故收敛区间为 $(1-\sqrt2,1+\sqrt2)$。端点处化为 $\sum(-1)^n n$，发散，所以收敛域即
+  原式为
+
+
 
 $$
-(1-\sqrt2,1+\sqrt2).
+\sum_{n=1}^{\infty}n\left[-\frac{(x-1)^2}{2}\right]^n.
 $$
+
+  这是以 $t=-\dfrac{(x-1)^2}{2}$ 为变量的级数 $\sum_{n=1}^{\infty}nt^n$。不能仅凭原式有 $2n$ 次幂，就误将 $x-1$ 的收敛半径判为 $2$。
+
+</Step>
+<Step>
+
+  ### 根值或比值法判定内部收敛
+
+  固定 $x\ne1$，记第 $n$ 项为 $u_n$，则
+
+
+
+$$
+\lim_{n\to\infty}\left|\frac{u_{n+1}}{u_n}\right|
+  =\lim_{n\to\infty}\frac{n+1}{n}\frac{(x-1)^2}{2}
+  =\frac{(x-1)^2}{2}.
+$$
+
+  当 $(x-1)^2<2$ 时绝对收敛；当 $(x-1)^2>2$ 时发散。$x=1$ 时所有项为 $0$，也收敛。因此候选区间为 $1-\sqrt2<x<1+\sqrt2$。
+
+</Step>
+<Step>
+
+  ### 单独排除两个端点
+
+  当 $x=1\pm\sqrt2$ 时，$(x-1)^2=2$，原级数变为 $\sum_{n=1}^{\infty}(-1)^n n$。其一般项绝对值为 $n$，根本不趋于零，故两端均发散。
+
+  所以收敛域是 $\boxed{(1-\sqrt2,\,1+\sqrt2)}$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="常用模型">
+
+$\sum_{n=1}^{\infty}nt^n$ 在 $|t|<1$ 时收敛，且和为 $\dfrac{t}{(1-t)^2}$。求**收敛域**时只需判别 $|t|<1$，边界必须另验通项是否趋零。
+
+</Callout>
 
 </Solution>
 
@@ -64,39 +96,68 @@ $$
 
 <Solution>
 
-两个幂级数的收敛半径都为 1。
+**正确选项：A（发散）。**
 
-已知
+解题关键是：**条件收敛只能发生在幂级数的边界上，但还要利用端点正负号确定展开中心。**
 
-$$
-\sum_{n=0}^{\infty}\frac{(x-a)^n}{\ln(n+2)}
-$$
+<Steps>
+<Step>
 
-在 $x=-2$ 处条件收敛。条件收敛只能发生在收敛区间端点，因此
+  ### 比较两个级数的收敛半径
 
-$$
-|-2-a|=1.
-$$
+  对任意固定的常数 $a$，第一个幂级数的系数满足
 
-结合端点级数的符号可得
+
 
 $$
-a=-1.
+\lim_{n\to\infty}\sqrt[n]{\frac1{\ln(n+2)}}=1;
 $$
 
-对于第二个幂级数，其中心也是 $a=-1$，在
+  第二个幂级数的系数满足
+
+
 
 $$
-x=\frac12
+\lim_{n\to\infty}\sqrt[n]{\frac1{(n+2)^2}}=1.
 $$
 
-处到中心的距离为
+  由柯西—阿达马公式，**两者以 $a$ 为中心的收敛半径都为 $1$**。
+
+</Step>
+<Step>
+
+  ### 利用已知条件确定 $a$
+
+  第一个级数在 $x=-2$ 处条件收敛，故 $|-2-a|=1$，解得 $a=-1$ 或 $a=-3$。
+
+  - 若 $a=-3$，则 $-2-a=1$，端点级数为 $\sum_{n=0}^{\infty}\dfrac1{\ln(n+2)}$。因 $\ln(n+2)\le n+2$，故其一般项不小于 $\dfrac1{n+2}$，级数发散，**不符合条件收敛**。
+  - 若 $a=-1$，则 $-2-a=-1$，端点级数为 $\sum_{n=0}^{\infty}\dfrac{(-1)^n}{\ln(n+2)}$：正项幅值单调趋零，交错级数收敛；但绝对值级数发散，确属条件收敛。
+
+  因此只能有 $\boxed{a=-1}$。
+
+</Step>
+<Step>
+
+  ### 判断第二个级数在指定点的敛散性
+
+  第二个级数仍以 $-1$ 为中心，在 $x_2=\tfrac12$ 时
+
+
 
 $$
-\left|\frac12-(-1)\right|=\frac32>1.
+|x_2-a|=\left|\frac12+1\right|=\frac32>1.
 $$
 
-所以级数发散，选 A。
+  该点在收敛圆（区间）外，级数必发散，因此选 **A**。虽然第二个级数系数衰减较快，仍不能突破半径 $1$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="易错点">
+
+$|-2-a|=1$ 有**两个**候选中心。只写出此方程就直接确定 $a=-1$，缺少对 $a=-3$ 时正项端点发散的排除过程。
+
+</Callout>
 
 </Solution>
 
@@ -108,23 +169,74 @@ $$
 
 <Solution>
 
-**答案：** $ (-1,+\infty)$。
+**参考答案：** $\boxed{x\in(-1,+\infty)}$。
 
-**解析：** 令
+<Tabs items={['比值判别（推荐）', '根值判别与斯特林公式']}>
+<Tab value="比值判别（推荐）">
 
-$ u_n=\frac{n!}{n^n}e^{-nx}$。
+  记正项 $u_n(x)=\dfrac{n!}{n^n}e^{-nx}$。固定 $x\in\mathbb R$，计算
 
-由斯特林公式 $ (n!)^{1/n}\sim n/e$，得
 
-$ \lim_{n\to\infty}\sqrt[n]{u_n}=e^{-(x+1)}$。
 
-当 $ x>-1$ 时根值小于 1，级数收敛；当 $ x<-1$ 时根值大于 1，级数发散。
+$$
+\begin{aligned}
+  \frac{u_{n+1}(x)}{u_n(x)}
+  &=\frac{(n+1)!}{(n+1)^{n+1}}\frac{n^n}{n!}e^{-x}\\
+  &=\left(\frac{n}{n+1}\right)^n e^{-x}
+  \longrightarrow e^{-1-x}.
+  \end{aligned}
+$$
 
-当 $ x=-1$ 时，
+  当 $x>-1$ 时，比值极限小于 $1$，级数收敛；当 $x<-1$ 时，比值极限大于 $1$，级数发散。此法**不必先用斯特林公式**。
 
-$ u_n=\frac{n!e^n}{n^n}\sim\sqrt{2\pi n}\not\to0$，
+</Tab>
+<Tab value="根值判别与斯特林公式">
 
-故发散。因此收敛域为 $ (-1,+\infty)$。
+  由 $n!\sim\sqrt{2\pi n}\,(n/e)^n$ 可得
+
+
+
+$$
+\sqrt[n]{u_n(x)}=\frac{(n!)^{1/n}}{n}e^{-x}
+  \longrightarrow e^{-(x+1)}.
+$$
+
+  根值判别法同样给出分界点 $x=-1$。但根值等于 $1$ 时不能下结论，必须另查边界。
+
+</Tab>
+</Tabs>
+
+<Steps>
+<Step>
+
+  ### 验证临界点 $x=-1$
+
+  代入后
+
+
+
+$$
+u_n(-1)=\frac{n!e^n}{n^n}
+  \sim\sqrt{2\pi n}\longrightarrow+\infty.
+$$
+
+  一般项不仅不趋于零，甚至趋于无穷大，所以 $x=-1$ 处发散。
+
+</Step>
+<Step>
+
+  ### 合并结论
+
+  仅 $x>-1$ 时收敛，故收敛域为 $\boxed{(-1,+\infty)}$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="判断边界的基本顺序">
+
+根值或比值极限等于 $1$ 时，优先检查一般项是否趋零。若不趋零，可立即判发散，无需再使用复杂判别法。
+
+</Callout>
 
 </Solution>
 
@@ -135,7 +247,7 @@ $ u_n=\frac{n!e^n}{n^n}\sim\sqrt{2\pi n}\not\to0$，
 若级数
 
 $$
- \sum_{n=0}^{\infty}a_n(x-1)^n
+\sum_{n=0}^{\infty}a_n(x-1)^n
 $$
 
 在 $ x=-1$ 处收敛，则此级数在 $ x=2$ 处
@@ -147,21 +259,69 @@ $$
 
 <Solution>
 
-该幂级数的中心为 $ x_0=1$。在 $ x=-1$ 处，有
-$$
- |x-x_0|=|-1-1|=2.
-$$
-幂级数在距离中心为 $ 2$ 的点处收敛，说明其收敛半径满足
-$$
- R\ge2.
-$$
-而在 $ x=2$ 处，
-$$
- |x-x_0|=|2-1|=1<2\le R.
-$$
-幂级数在收敛区间内部必绝对收敛，因此在 $ x=2$ 处绝对收敛，故选 B。
+**正确选项：B（绝对收敛）。**
 
-A、C、D 均错误，因为 $ x=2$ 位于已知收敛点 $ x=-1$ 到幂级数中心距离所确定的内部区域内，其绝对收敛性可以确定。
+<Steps>
+<Step>
+
+  ### 找到展开中心与已知收敛点的距离
+
+  此幂级数以 $x_0=1$ 为中心。已知它在 $x=-1$ 收敛，而
+
+
+
+$$
+|-1-x_0|=|-2|=2.
+$$
+
+  由幂级数的阿贝尔定理（内部绝对收敛性质），**若某点收敛，则比该点更靠近展开中心的所有点都绝对收敛**。
+
+</Step>
+<Step>
+
+  ### 将待判断点放到半径内
+
+  对 $x=2$，有
+
+
+
+$$
+|2-x_0|=1<2=|-1-x_0|.
+$$
+
+  因而 $\sum_{n=0}^{\infty}a_n(2-1)^n=\sum_{n=0}^{\infty}a_n$ **必然绝对收敛**。
+
+</Step>
+</Steps>
+
+<Tabs items={['几何位置法', '直接比较法']}>
+<Tab value="几何位置法">
+
+  已知收敛点与中心相距 $2$，故收敛半径至少为 $2$；$x=2$ 与中心相距 $1$，严格位于内部，必绝对收敛。
+
+</Tab>
+<Tab value="直接比较法">
+
+  已知 $\sum_{n=0}^{\infty}a_n(-2)^n$ 收敛，所以它的项 $a_n(-2)^n\to0$，从而存在 $M>0$，使 $|a_n(-2)^n|\le M$。因此
+
+
+
+$$
+\sum_{n=0}^{\infty}|a_n|
+  =\sum_{n=0}^{\infty}|a_n(-2)^n|\,2^{-n}
+  \le M\sum_{n=0}^{\infty}2^{-n}<\infty.
+$$
+
+  这说明待判断级数绝对收敛，不必先求实际收敛半径。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="边界和内部要区分">
+
+已知点 $x=-1$ 可能仅条件收敛，但内部点 $x=2$ 一定绝对收敛。**不能把端点处的收敛类型直接搬到内部点。**
+
+</Callout>
 
 </Solution>
 
@@ -174,78 +334,144 @@ A、C、D 均错误，因为 $ x=2$ 位于已知收敛点 $ x=-1$ 到幂级数�
 <Option>
 
 若幂级数
+
 $$
- \sum_{n=0}^{\infty}a_nx^n
+\sum_{n=0}^{\infty}a_nx^n
 $$
+
 的收敛半径 $ R\ne0$，则
+
 $$
- \lim_{n\to\infty}\left|\frac{a_{n+1}}{a_n}\right|=R^{-1};
+\lim_{n\to\infty}\left|\frac{a_{n+1}}{a_n}\right|=R^{-1};
 $$
 
 </Option>
 <Option>
 
 若
+
 $$
- \lim_{n\to\infty}\left|\frac{a_{n+1}}{a_n}\right|
+\lim_{n\to\infty}\left|\frac{a_{n+1}}{a_n}\right|
 $$
+
 不存在，则
+
 $$
- \sum_{n=0}^{\infty}a_nx^n
+\sum_{n=0}^{\infty}a_nx^n
 $$
+
 不存在收敛半径；
 
 </Option>
 <Option>
 
 若
+
 $$
- \sum_{n=0}^{\infty}a_nx^n
+\sum_{n=0}^{\infty}a_nx^n
 $$
+
 的收敛域为 $ [-R,R]$，则
+
 $$
- \sum_{n=0}^{\infty}na_nx^{n-1}
+\sum_{n=0}^{\infty}na_nx^{n-1}
 $$
+
 的收敛域为 $ [-R,R]$；
 
 </Option>
-<Option correct>若</Option>
+<Option correct>
+
+若
+
 $$
- \sum_{n=0}^{\infty}a_nx^n
+\sum_{n=0}^{\infty}a_nx^n
 $$
+
 的收敛区间 $ (-R,R)$ 即它的收敛域，则
+
 $$
- \sum_{n=0}^{\infty}\frac{a_n}{n+1}x^{n+1}
+\sum_{n=0}^{\infty}\frac{a_n}{n+1}x^{n+1}
 $$
+
 的收敛域可能是 $ [-R,R]$。
+
+</Option>
 
 <Solution>
 
-幂级数逐项积分后收敛半径不变，但端点处的敛散性可能发生变化。原级数在两个端点均发散，逐项积分后，由于系数多了因子 $ \frac1{n+1}$，两个端点都有可能变为收敛，因此 D 正确。
+**正确选项：D。**
 
-例如取 $ R=1$，并令
-$$
- a_n=\cos\frac{n\pi}{2}.
-$$
-则在 $ x=1$ 与 $ x=-1$ 处，原级数的一般项均不趋于 $ 0$，所以两个端点都发散，原级数收敛域为 $ (-1,1)$。逐项积分后，在 $ x=\pm1$ 处所得级数本质上均为收敛的交错调和型级数，因此积分后级数的收敛域可以成为 $ [-1,1]$。
+<Steps>
+<Step>
 
-其余选项：
+  ### 先记住逐项求导、积分的核心规律
 
-- A 错误。比值极限存在时可用比值法求收敛半径，但收敛半径存在并不保证系数比值极限一定存在。
-- B 错误。任何幂级数都存在收敛半径，收敛半径由柯西—阿达马公式
+  对 $\sum_{n=0}^{\infty}a_nx^n$，在 $0<R<\infty$ 的情形下，逐项求导、积分均**不改变收敛半径**；但边界 $x=\pm R$ 是否收敛，需要重新判断。
+
+  因此，原级数在两个端点发散，积分后的级数**有可能**在两个端点同时收敛，D 的断言可以成立。
+
+</Step>
+<Step>
+
+  ### 构造反映 D 的明确例子
+
+  取 $a_n=(-1)^n$，则
+
+
+
 $$
- \frac1R=\limsup_{n\to\infty}\sqrt[n]{|a_n|}
+\sum_{n=0}^{\infty}a_nx^n=\sum_{n=0}^{\infty}(-x)^n,
 $$
-确定，不要求 $ \left|a_{n+1}/a_n\right|$ 的极限存在。
-- C 错误。逐项求导不改变收敛半径，但可能破坏端点收敛性。例如
+
+  收敛域恰为 $(-1,1)$：$x=1$ 时项为 $(-1)^n$，$x=-1$ 时项为 $1$，两端均发散。
+
+  逐项积分后得到
+
+
+
 $$
- \sum_{n=1}^{\infty}\frac{x^n}{n^2}
+\sum_{n=0}^{\infty}\frac{(-1)^n}{n+1}x^{n+1}.
 $$
-在 $ [-1,1]$ 上收敛，而其导数级数
+
+  $x=1$ 时为交错调和级数，收敛；$x=-1$ 时为负的调和级数，**发散**。此例只能说明“某个端点可能增加”，尚不能证明 D 所说的**两个端点同时增加**。
+
+  改取 $a_n=\cos\dfrac{n\pi}{2}$，则原级数在 $x=\pm1$ 处通项均不趋零（偶数指标的项交替为 $\pm1$），所以收敛域为 $(-1,1)$；逐项积分后，两个端点都化为四项周期交错、幅值按 $1/(n+1)$ 衰减的级数，均由狄利克雷判别法收敛。故积分后收敛域可以是 $[-1,1]$，D 成立。
+
+</Step>
+</Steps>
+
+<Accordions>
+<Accordion title="A：为什么系数比值极限不一定存在？">
+
+  柯西—阿达马公式是
+
+
+
 $$
- \sum_{n=1}^{\infty}\frac{x^{n-1}}n
+\frac1R=\limsup_{n\to\infty}\sqrt[n]{|a_n|}.
 $$
-在 $ x=1$ 处发散，故收敛域不再是 $ [-1,1]$。
+
+  系数比值极限存在是求半径的**充分方法**，不是必要条件。例如 $a_n=1$（偶数 $n$）、$a_n=2$（奇数 $n$），根值的极限为 $1$，故 $R=1$，但 $|a_{n+1}/a_n|$ 在 $2$ 与 $1/2$ 间交替，不存在极限。A 错。
+
+</Accordion>
+<Accordion title="B：比值极限不存在，为什么仍有收敛半径？">
+
+  任意幂级数均存在广义意义上的收敛半径 $R\in[0,+\infty]$，由系数的根上极限决定，不要求相邻系数比值极限存在。B 错。
+
+</Accordion>
+<Accordion title="C：逐项求导为什么可能破坏端点收敛？">
+
+  $\sum_{n=1}^{\infty}\dfrac{x^n}{n^2}$ 在 $[-1,1]$ 上绝对收敛；求导得到 $\sum_{n=1}^{\infty}\dfrac{x^{n-1}}n$，在 $x=1$ 处变成调和级数，发散。故 C 错。
+
+</Accordion>
+</Accordions>
+
+<Callout type="idea" title="判题技巧">
+
+“收敛半径不变”绝不等于“收敛域不变”。对于逐项微分、积分后的端点，要把 $x=R$ 和 $x=-R$ **分别代入检验**。
+
+</Callout>
 
 </Solution>
 
@@ -256,87 +482,101 @@ $$
 设
 
 $$
- \sum_{n=0}^{\infty}a_nx^n
+\sum_{n=0}^{\infty}a_nx^n
 $$
 
 满足
 
 $$
- \lim_{n\to\infty}\left|\frac{a_{n+1}}{a_n}\right|=3,
+\lim_{n\to\infty}\left|\frac{a_{n+1}}{a_n}\right|=3,
 $$
 
 又
 
 $$
- \sum_{n=0}^{\infty}b_nx^{2n}
+\sum_{n=0}^{\infty}b_nx^{2n}
 $$
 
 满足
 
 $$
- \lim_{n\to\infty}\frac{a_n}{b_n}=1,
+\lim_{n\to\infty}\frac{a_n}{b_n}=1,
 $$
 
 则
 
 $$
- \sum_{n=0}^{\infty}b_nx^{2n}
+\sum_{n=0}^{\infty}b_nx^{2n}
 $$
 
 的收敛半径 $R=$ <Blank answer="((1)/(sqrt(3)))" kind="math" />。
 
 <Solution>
 
-**答案：** $ \frac1{\sqrt3}$
+**参考答案：** $\boxed{R=\dfrac1{\sqrt3}}$。
 
-**解析：** 由
-$$
- \lim_{n\to\infty}\left|\frac{a_{n+1}}{a_n}\right|=3
-$$
-可知幂级数 $ \sum a_nx^n$ 的收敛半径为
-$$
- R_1=\frac13.
-$$
-等价地，
-$$
- \lim_{n\to\infty}\sqrt[n]{|a_n|}=3.
-$$
+<Steps>
+<Step>
 
-又因为
+  ### 由第一组系数确定指数增长率
+
+  题设 $\lim_{n\to\infty}\left|\dfrac{a_{n+1}}{a_n}\right|=3$，故原幂级数 $\sum a_nx^n$ 的收敛半径为 $1/3$。更直接地，由相邻项比值的极限得到
+
+
+
 $$
- \frac{a_n}{b_n}\longrightarrow1,
-$$
-所以
-$$
- \sqrt[n]{\left|\frac{a_n}{b_n}\right|}\longrightarrow1,
-$$
-从而
-$$
- \lim_{n\to\infty}\sqrt[n]{|b_n|}=3.
+\lim_{n\to\infty}\sqrt[n]{|a_n|}=3.
 $$
 
-考察级数
+  这里相邻比值的极限为正且有限，故上述根值结论成立。
+
+</Step>
+<Step>
+
+  ### 利用 $a_n/b_n\to1$ 转移增长率
+
+  $\dfrac{a_n}{b_n}\to1$ 表明两组系数从某一项起均非零，并且
+
+
+
 $$
- \sum_{n=0}^{\infty}b_nx^{2n}.
+\sqrt[n]{\left|\frac{a_n}{b_n}\right|}\longrightarrow1.
 $$
-由根值判别法，其一般项绝对值的 $ n$ 次方根为
+
+  所以 $\sqrt[n]{|b_n|}\to3$。
+
+</Step>
+<Step>
+
+  ### 注意幂次是 $2n$，而非 $n$
+
+  对待求级数的通项取 $n$ 次方根，
+
+
+
 $$
- \sqrt[n]{|b_nx^{2n}|}
-=\sqrt[n]{|b_n|}\,|x|^2
-\longrightarrow3|x|^2.
+\sqrt[n]{|b_nx^{2n}|}=\sqrt[n]{|b_n|}\,|x|^2
+  \longrightarrow3|x|^2.
 $$
-因此级数收敛的条件是
+
+  因此 $3|x|^2<1$ 时绝对收敛，而 $3|x|^2>1$ 时发散。幂级数收敛半径为
+
+
+
 $$
- 3|x|^2<1,
+\boxed{R=\frac1{\sqrt3}}.
 $$
-即
-$$
- |x|<\frac1{\sqrt3}.
-$$
-故收敛半径为
-$$
- R=\frac1{\sqrt3}.
-$$
+
+  本题只要求半径，无须判断 $x=\pm1/\sqrt3$ 两个端点。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="最常见计算错误">
+
+系数的增长率是 $3$，但变量为 $x^{2n}$，因此条件是 $3x^2<1$，而不是 $3|x|<1$；不能直接把第一个幂级数的半径 $1/3$ 当成答案。
+
+</Callout>
 
 </Solution>
 
@@ -353,9 +593,49 @@ $$
 
 <Solution>
 
-**解析：** 令 $x-1=t$, 当 $x=-1$ 时, 有 $t=-2$.
-依题意, $\sum_{n=1}^{\infty} a_n t^n$ 在 $t=-2$ 处条件收敛, 故 $t=-2$ 是其收敛区间的端点, 即 $\sum_{n=1}^{\infty} a_n t^n$ 的收敛区间为 $(-2,2)$, 故 $-2<x-1<2$, 即 $-1<x<3$.
-$\sum_{n=1}^{\infty} a_n(x-1)^n$ 在 $x=2$ 时为 $\sum_{n=1}^{\infty} a_n$, 显然 $x=2\in(-1,3)$, 故 $\sum_{n=1}^{\infty} a_n$ 绝对收敛. 选项 C 正确.
+**正确选项：C（绝对收敛）。**
+
+<Steps>
+<Step>
+
+  ### 从条件收敛定位收敛边界
+
+  幂级数 $\sum_{n=1}^{\infty}a_n(x-1)^n$ 的中心为 $x_0=1$。题设在 $x=-1$ **条件收敛**，故该点不可能位于收敛区间内部，只能是边界点。
+
+  因此其收敛半径为
+
+
+
+$$
+R=|-1-1|=2.
+$$
+
+  内部区间为 $1-2<x<1+2$，即 $(-1,3)$。注意 $x=3$ 的端点情况并未给出。
+
+</Step>
+<Step>
+
+  ### 将要求的数项级数对应到变量值
+
+  当 $x=2$ 时，$x-1=1$，原幂级数正好变为
+
+
+
+$$
+\sum_{n=1}^{\infty}a_n(x-1)^n\Big|_{x=2}
+  =\sum_{n=1}^{\infty}a_n.
+$$
+
+  由于 $|2-1|=1<2=R$，这一点位于收敛区间**内部**，所以级数必然绝对收敛。
+
+</Step>
+</Steps>
+
+<Callout type="info" title="一条通用原则">
+
+幂级数在边界上可能条件收敛，但在收敛半径以内必绝对收敛。遇到 $\sum a_n$、$\sum(-1)^na_n$ 等数项级数时，可令 $x-1=1$ 或 $x-1=-1$，转化为幂级数在指定点的收敛性。
+
+</Callout>
 
 </Solution>
 
@@ -371,52 +651,112 @@ $(III) \sum_{n=1}^{\infty} \left(1+\frac{1}{n}\right)^{-n^2} x^n$;   $(IV) \sum_
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：**
 
-**解析：** (I) 缺项，用比值法，
 $$
-\lim_{n\to\infty} \left|\frac{u_{n+1}(x)}{u_n(x)}\right| = \lim_{n\to\infty} \left|\frac{x^{(n+1)^2}}{2^{n+1}} \cdot \frac{2^n}{x^{n^2}}\right| = \lim_{n\to\infty} \left|x^{(n+1)^2-n^2} \cdot \frac{2^n}{2^{n+1}}\right| = \lim_{n\to\infty} \left|\frac{x^{2n+1}}{2}\right|
-$$
-
-当 $|x| < 1$ 时，$\lim_{n\to\infty} \left|\frac{x^{2n+1}}{2}\right| = 0 < 1$，级数收敛；
-
-当 $|x| > 1$ 时，$\lim_{n\to\infty} \left|\frac{x^{2n+1}}{2}\right| = +\infty$，级数发散；
-
-当 $|x| = 1$ 时，$\lim_{n\to\infty} \left|\frac{x^{2n+1}}{2}\right| = \frac{1}{2} < 1$，级数收敛，故收敛域为 $[-1, 1]$。
-
-(II) 缺项，用比值法，
-$$
-\lim_{n\to\infty} \left|\frac{u_{n+1}(x)}{u_n(x)}\right| = \lim_{n\to\infty} \left|\frac{x^{2(n+1)+1}}{3^{n+1} + (n+1)^2} \cdot \frac{3^n + n^2}{x^{2n+1}}\right|
-$$
-$$
-= \lim_{n\to\infty} \frac{3^n + n^2}{3^{n+1} + (n+1)^2} \cdot x^2 = \lim_{n\to\infty} \frac{1 + \frac{n^2}{3^n}}{1 + \frac{(n+1)^2}{3^{n+1}}} \cdot \frac{x^2}{3} = \frac{x^2}{3}
+\boxed{\begin{array}{c|c}
+\text{级数}&\text{收敛域}\\ \hline
+\mathrm{(I)}&[-1,1]\\
+\mathrm{(II)}&(-\sqrt3,\sqrt3)\\
+\mathrm{(III)}&(-e,e)\\
+\mathrm{(IV)}&[-1,1)
+\end{array}}
 $$
 
-当 $\frac{x^2}{3} < 1$ 时，即 $-\sqrt{3} < x < \sqrt{3}$，级数收敛。当 $x = \sqrt{3}$ 时，级数为 $\sum_{n=1}^\infty \frac{3^n \cdot \sqrt{3}}{3^n + n^2}$，由于
+<Steps>
+<Step>
+
+  ### （I）含 $n^2$ 次幂的缺项级数
+
+  设 $u_n=x^{n^2}/2^n$。若 $|x|\le1$，则 $|u_n|\le2^{-n}$，由几何级数比较可知**全都绝对收敛**。
+
+  若 $|x|>1$，有
+
+
+
 $$
-\lim_{n\to\infty} \frac{3^n \cdot \sqrt{3}}{3^n + n^2} = \lim_{n\to\infty} \frac{\sqrt{3}}{1 + \frac{n^2}{3^n}} = \sqrt{3} \neq 0
+|u_n|=\left(\frac{|x|^n}{2}\right)^n\not\longrightarrow0,
 $$
-故级数发散，同理 $x = -\sqrt{3}$ 时，级数发散，所以收敛域为 $(-\sqrt{3}, \sqrt{3})$。
 
-(III) 不缺项，用公式，$\lim_{n\to\infty} \sqrt[n]{|a_n|} = \lim_{n\to\infty} \left(1 + \frac{1}{n}\right)^{-n} = e^{-1}$，收敛半径 $R = e$。
+  级数发散。端点 $x=\pm1$ 已包含在第一种情形中，故收敛域为 $\boxed{[-1,1]}$。
 
-当 $x=\mathrm{e}$ 时, 级数为 $\sum_{n=1}^{\infty}\left(1+\frac{1}{n}\right)^{-n^{2}}\cdot\mathrm{e}^{n}$, 记 $b_{n}=\left(1+\frac{1}{n}\right)^{-n^{2}}\mathrm{e}^{n}=\left[\frac{\mathrm{e}}{\left(1+\frac{1}{n}\right)^{n}}\right]^{n}$, 由于 $\left(1+\frac{1}{n}\right)^{n}<\mathrm{e}$,
+</Step>
+<Step>
 
-故 $b_{n}>1$, 即 $\lim_{n\to\infty}b_{n}\neq 0$，所以级数发散. 同理, $x=-\mathrm{e}$ 也是发散点. 故收敛域为 $(-\mathrm{e},\mathrm{e})$.
+  ### （II）将 $x^{2n+1}$ 提取成几何级数
 
-(IV) $\qquad\sum_{n=2}^{\infty}\left(\frac{1}{n\ln n}+\frac{1}{2^{n}}\right)x^{n}=\sum_{n=2}^{\infty}\frac{x^{n}}{n\ln n}+\sum_{n=2}^{\infty}\frac{x^{n}}{2^{n}}$.
+  当 $x\ne0$，有
 
-对 $\sum_{n=2}^{\infty}\frac{x^{n}}{n\ln n}$ 用公式, $\lim_{n\to\infty}\frac{a_{n+1}}{a_{n}}=\lim_{n\to\infty}\frac{n\ln n}{(n+1)\ln(n+1)}=1$, 收敛半径 $R_{1}=1$.
 
-当 $x=1$ 时, $\sum_{n=2}^{\infty}\frac{1}{n\ln n}$ 发散; 当 $x=-1$ 时, $\sum_{n=2}^{\infty}\frac{(-1)^{n}}{n\ln n}$ 是交错级数, 且 $\lim_{n\to\infty}\frac{1}{n\ln n}=0$, $\left\{\frac{1}{n\ln n}\right\}(n\ge 2)$ 单调减少, 故收敛，所以收敛域为 $[-1,1)$.
 
-对 $\sum_{n=2}^{\infty}\frac{x^{n}}{2^{n}}, \lim_{n\to\infty}\frac{a_{n+1}}{a_{n}}=\frac{1}{2}$, 收敛半径 $R_{2}=2$. 当 $x=\pm 2$ 时, 级数发散, 收敛域为 $(-2,2)$.
+$$
+\left|\frac{u_{n+1}}{u_n}\right|
+  =|x|^2\frac{3^n+n^2}{3^{n+1}+(n+1)^2}
+  \longrightarrow\frac{x^2}{3},
+$$
 
-综上所述, 所求级数收敛域为 $[-1,1)$.
+  因而 $|x|<\sqrt3$ 时收敛，$|x|>\sqrt3$ 时发散；$x=0$ 时各项为零，当然收敛。
 
-**注：** (1) $\sum_{n=2}^{\infty}\frac{1}{n\ln n}$ 用积分判别法: 由于 $\int_{2}^{+\infty}\frac{\,\mathrm{d}x}{x\ln x}=\ln(\ln x)\Big|_{2}^{+\infty}=+\infty$, 反常积分发散, 故级数 $\sum_{n=2}^{\infty}\frac{1}{n\ln n}$ 发散.
+  当 $x=\pm\sqrt3$，
 
-(2) 设级数 $\sum_{n=0}^{\infty}a_{n}x^{n}$ 与 $\sum_{n=0}^{\infty}b_{n}x^{n}$ 的收敛半径分别为 $R_{1}$ 和 $R_{2}$, 则当 $R_{1}\neq R_{2}$ 时, $\sum_{n=0}^{\infty}(a_{n}+b_{n})x^{n}$ 的收敛半径 $R=\min\{R_{1}, R_{2}\}$.
+
+
+$$
+u_n=\frac{x^{2n+1}}{3^n+n^2}
+  =\frac{x}{1+n^2/3^n}\longrightarrow x\ne0,
+$$
+
+  两个端点均因通项不趋零而发散。因此收敛域为 $\boxed{(-\sqrt3,\sqrt3)}$。
+
+</Step>
+<Step>
+
+  ### （III）根值法得到半径 $e$
+
+  系数 $c_n=(1+1/n)^{-n^2}$ 满足
+
+
+
+$$
+\sqrt[n]{c_n}=\left(1+\frac1n\right)^{-n}\longrightarrow e^{-1}.
+$$
+
+  故 $R=e$。在 $x=e$，通项为
+
+
+
+$$
+u_n=\exp\!\left[n-n^2\ln\left(1+\frac1n\right)\right].
+$$
+
+  用 $\ln(1+t)=t-\tfrac12t^2+O(t^3)$，可知指数趋于 $\tfrac12$，于是 $u_n\to\sqrt e\ne0$；$x=-e$ 时通项交替变号但绝对值仍趋于 $\sqrt e$，同样发散。故收敛域为 $\boxed{(-e,e)}$。
+
+</Step>
+<Step>
+
+  ### （IV）拆成两个收敛半径不同的级数
+
+  原式等于
+
+
+
+$$
+\sum_{n=2}^{\infty}\frac{x^n}{n\ln n}
+  +\sum_{n=2}^{\infty}\left(\frac x2\right)^n.
+$$
+
+  第一项的半径为 $1$，第二项的半径为 $2$；所以组合级数的半径为 $1$。在 $x=1$，第一项为发散的 $\sum_{n\ge2}\frac1{n\ln n}$（积分判别法），第二项收敛，故总和发散。
+
+  在 $x=-1$，第一项为 $\sum_{n\ge2}\frac{(-1)^n}{n\ln n}$，满足莱布尼茨判别法；第二项为收敛的几何级数，故总和收敛。因此收敛域为 $\boxed{[-1,1)}$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="不同模型选不同判别法">
+
+（I）直接与几何级数比较；（II）用比值法并检查端点通项；（III）用根值法与对数展开；（IV）先拆项再检验端点。四类题不必生硬套用同一个公式。
+
+</Callout>
 
 </Solution>
 
@@ -433,22 +773,77 @@ $$
 
 <Solution>
 
-**解析：** 记 $u_n = \frac{1}{n^p\ln n}$，则由
+**正确选项：C（$p>1$）。**
+
+<Steps>
+<Step>
+
+  ### 先判断收敛半径
+
+  令 $a_n=1/(n^p\ln n)$。对任意实数 $p$，
+
+
+
 $$
-\lim_{n\to\infty} \frac{u_{n+1}}{u_n} = \lim_{n\to\infty} \frac{n^p\ln n}{(n+1)^p\ln(n+1)} = \lim_{n\to\infty} \frac{1}{\left(1+\dfrac{1}{n}\right)^p} \cdot \frac{\ln n}{\ln(n+1)} = 1,
+\sqrt[n]{|a_n|}
+  =\exp\!\left[-\frac{p\ln n+\ln(\ln n)}n\right]
+  \longrightarrow1.
 $$
-知收敛半径 $R = 1$,收敛区间为 $(-1, 1)$.
-若 $p > 1$, 当 $x = 1$ 时, $\frac{1}{n^p\ln n} < \frac{1}{n^p} (n \ge 3)$, 而 $\sum_{n=2}^{\infty} \frac{1}{n^p}$ 收敛,由比较判别法，知 $\sum_{n=2}^{\infty} \frac{1}{n^p\ln n}$ 收敛. 当 $x = -1$ 时, $\sum_{n=2}^{\infty} \frac{(-1)^n}{n^p\ln n}$ 为交错级数,由 $\left\{\frac{1}{n^p\ln n}\right\}$ 单调递减且趋于零,并根据莱布尼茨定理知收敛. 故收敛域为 $[-1, 1]$,选项 C 正确.
 
-对于选项 A: 若 $0 \leqslant p < 1$, 当 $x = 1$ 时, $\lim_{n \to \infty} \dfrac{\dfrac{1}{n^p \ln n}}{\dfrac{1}{n}} = \lim_{n \to \infty} \frac{n^{1-p}}{\ln n} = +\infty$, 而 $\sum_{n=2}^{\infty} \frac{1}{n}$ 发散, 由比较判别法知 $\sum_{n=2}^{\infty} \frac{1}{n^p \ln n}$ 发散;
+  所以幂级数的半径始终是 $R=1$。题目所说收敛域为 $[-1,1]$，其关键是**正端点 $x=1$ 必须收敛**。
 
-当 $x = -1$ 时, $\sum_{n=2}^{\infty} (-1)^n \frac{1}{n^p \ln n}$ 收敛, 故收敛域为 $[-1, 1)$.
+</Step>
+<Step>
 
-对于选项 B: 若 $p = 1$, 当 $x = 1$ 时, 原级数为 $\sum_{n=2}^{\infty} \frac{1}{n \ln n}$. 考虑 $\int_{2}^{+\infty} \frac{\,\mathrm{d}x}{x \ln x} = \ln (\ln x) \Big|_2^{+\infty} = +\infty$, 由积分判别法知, $\sum_{n=2}^{\infty} \frac{1}{n \ln n}$ 发散;
+  ### 在 $x=1$ 判断正项级数
 
-当 $x = -1$ 时, 原级数为 $\sum_{n=2}^{\infty} (-1)^n \frac{1}{n \ln n}$, 由莱布尼茨定理知收敛. 故收敛域为 $[-1, 1)$.
+  需判定
 
-对于选项 D: 若 $p < 0$, 则 $u_n \not\to 0 (n \to \infty)$. 幂级数在 $x=\pm1$ 处发散, 收敛域为 $(-1, 1)$.
+
+
+$$
+\sum_{n=2}^{\infty}\frac1{n^p\ln n}.
+$$
+
+  当 $p>1$ 时，对充分大的 $n$ 有 $1/(n^p\ln n)\le1/n^p$，而 $p$-级数收敛，故收敛。
+
+  当 $p=1$ 时，由
+
+
+
+$$
+\int_2^\infty\frac{\mathrm dt}{t\ln t}
+  =\lim_{b\to\infty}\bigl[\ln(\ln t)\bigr]_2^b=+\infty
+$$
+
+  可知发散。若 $p<1$，则 $n^{1-p}/\ln n\to\infty$，故对于充分大的 $n$，$\dfrac1{n^p\ln n}\ge\dfrac1n$，同样发散。
+
+  因此 **$x=1$ 收敛的充要条件是 $p>1$**。
+
+</Step>
+<Step>
+
+  ### 再核实负端点
+
+  若 $p>1$，在 $x=-1$ 时有
+
+
+
+$$
+\sum_{n=2}^{\infty}\left|\frac{(-1)^n}{n^p\ln n}\right|
+  =\sum_{n=2}^{\infty}\frac1{n^p\ln n}<\infty.
+$$
+
+  所以两端都绝对收敛，收敛域确为 $[-1,1]$，答案是 **C**。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="临界参数必须单独查">
+
+$p=1$ 时虽然多了一个 $\ln n$ 作分母，$\sum\frac1{n\ln n}$ **仍发散**。不要把 $p\ge1$ 误写成收敛条件；$p<0$ 时负端点甚至可能不满足通项趋零。
+
+</Callout>
 
 </Solution>
 
@@ -468,88 +863,107 @@ $$
 
 <Solution>
 
-**参考答案：**
+**参考答案：** 以 $x-1$ 为变量的展开式为
 
 $$
 \boxed{S(x)=4\sum_{n=0}^{\infty}(n+1)(2n+3)(x-1)^n},
-\qquad\boxed{0<x<2}.
+\qquad\boxed{x\in(0,2)}.
 $$
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 先求原级数的和函数
+  ### 由基本几何级数推出原和函数
 
-  令 $r=x/2$。在 $|r|<1$ 时，由几何级数逐项求导，
+  设 $u=x/2$。在 $|u|<1$ 时，
 
-  $$
-  \sum_{n=0}^{\infty}(n+1)r^n=\frac1{(1-r)^2}.
-  $$
 
-  再对 $r/(1-r)^2$ 求导，得到
 
-  $$
-  \sum_{n=0}^{\infty}(n+1)^2r^n
-  =\left(\frac{r}{(1-r)^2}\right)'
-  =\frac{1+r}{(1-r)^3}.
-  $$
+$$
+\sum_{n=0}^{\infty}u^n=\frac1{1-u},\qquad
+  \sum_{n=0}^{\infty}(n+1)u^n=\frac1{(1-u)^2}.
+$$
 
-  因而
+  再对 $\sum_{n=0}^{\infty}(n+1)u^{n+1}=\dfrac{u}{(1-u)^2}$ 求导，便得
 
-  $$
-  S(x)=\frac{1+x/2}{(1-x/2)^3}
-  =\frac{4(2+x)}{(2-x)^3},\qquad -2<x<2.
-  $$
 
-  </Step>
-  <Step>
 
-  ### 换中心并比较幂次
-
-  令 $t=x-1$，则
-
-  $$
-  S(x)=\frac{4(3+t)}{(1-t)^3},\qquad |t|<1.
-  $$
-
-  利用
-
-  $$
-  \frac1{(1-t)^3}=\sum_{n=0}^{\infty}\frac{(n+1)(n+2)}2t^n,
-  $$
-
-  展开后合并同次项（第二项将指标移动一位），有
-
-  $$
-  \begin{aligned}
-  S(x)
-  &=6\sum_{n=0}^{\infty}(n+1)(n+2)t^n
-    +2\sum_{n=1}^{\infty}n(n+1)t^n\\
-  &=4\sum_{n=0}^{\infty}(n+1)(2n+3)t^n.
+$$
+\begin{aligned}
+  S(x)&=\sum_{n=0}^{\infty}(n+1)^2u^n
+  =\frac{1+u}{(1-u)^3}\\
+  &=\frac{4(x+2)}{(2-x)^3},\qquad |x|<2.
   \end{aligned}
-  $$
+$$
 
-  代回 $t=x-1$，即得所求展开式。
+</Step>
+<Step>
 
-  </Step>
-  <Step>
+  ### 将函数改写为 $t=x-1$ 的有理式
 
-  ### 检查收敛半径及端点
+  令 $t=x-1$，则 $x=t+1$，且
 
-  系数 $a_n=4(n+1)(2n+3)$ 满足
 
-  $$
-  \lim_{n\to\infty}\left|\frac{a_n}{a_{n+1}}\right|=1,
-  $$
 
-  故新级数的收敛半径为 $R=1$，即 $0<x<2$。在 $x=0$、$x=2$ 处，通项的绝对值均为 $4(n+1)(2n+3)$，**不趋于零**，所以两个端点均发散。
+$$
+S(1+t)=\frac{4(t+3)}{(1-t)^3}.
+$$
 
-  </Step>
+  利用二阶求导得到的标准展开式
+
+
+
+$$
+\frac1{(1-t)^3}
+  =\sum_{n=0}^{\infty}\frac{(n+1)(n+2)}2t^n,\qquad |t|<1.
+$$
+
+</Step>
+<Step>
+
+  ### 合并系数，得到标准幂级数
+
+  将分子 $3+t$ 乘入；对 $n\ge1$，$t^n$ 系数为
+
+
+
+$$
+\begin{aligned}
+  a_n&=4\left[3\cdot\frac{(n+1)(n+2)}2+
+  \frac{n(n+1)}2\right]\\
+  &=4(n+1)(2n+3).
+  \end{aligned}
+$$
+
+  $n=0$ 时计算为 $12$，也符合上述公式，故
+
+
+
+$$
+S(x)=4\sum_{n=0}^{\infty}(n+1)(2n+3)(x-1)^n.
+$$
+
+</Step>
+<Step>
+
+  ### 对新级数独立判断收敛域
+
+  系数 $a_n$ 是关于 $n$ 的二次多项式，因而
+
+
+
+$$
+\lim_{n\to\infty}\left|\frac{a_{n+1}}{a_n}\right|=1.
+$$
+
+  新幂级数的收敛半径为 $R=1$，故 $0<x<2$ 时收敛。$x=0$ 或 $x=2$ 时一般项的绝对值均为 $4(n+1)(2n+3)$，不趋于零，所以端点发散。
+
+</Step>
 </Steps>
 
-<Callout type="warn" title="易错点">
+<Callout type="warn" title="原收敛域与重新展开的收敛域不同">
 
-原级数的收敛区间为 $(-2,2)$，而以 $x=1$ 为中心重新展开后的收敛域为 $(0,2)$；更换展开中心后，应重新判断收敛半径与端点，不能照搬原区间。
+原级数以 $x=0$ 为中心，收敛域 $(-2,2)$；新级数以 $x=1$ 为中心，收敛域 $(0,2)$。不能因为它们表示同一个和函数，就认为不同中心下的泰勒级数有相同收敛域。
 
 </Callout>
 
@@ -568,47 +982,70 @@ $$
 
 <Solution>
 
-**答案：$\boxed{2^{n-1}n!}$（$n>1$）。**
+**参考答案：** 对任意整数 $n>1$，$\boxed{f^{(n)}(0)=2^{n-1}n!}$。
 
-<Steps>
-  <Step>
+<Tabs items={['先求和再识别系数（推荐）', '直接求导法']}>
+<Tab value="先求和再识别系数（推荐）">
 
-  ### 先求和，再展开
+  当 $x$ 足够接近 $0$ 时，$|x/(1-x)|<1$。用等比级数求和：
 
-  $x$ 在 $0$ 附近满足 $\bigl|x/(1-x)\bigr|<1$，由等比级数求和公式，
 
-  $$
-  f(x)=\frac{x/(1-x)}{1-x/(1-x)}=\frac{x}{1-2x}.
-  $$
 
-  于是，当 $|x|<\frac12$ 时，
+$$
+f(x)=\frac{\frac{x}{1-x}}{1-\frac{x}{1-x}}
+  =\frac{x}{1-2x}.
+$$
 
-  $$
-  f(x)=x\sum_{j=0}^{\infty}(2x)^j
+  再在 $|x|<\tfrac12$ 内展开：
+
+
+
+$$
+\frac{x}{1-2x}
+  =x\sum_{k=0}^{\infty}(2x)^k
   =\sum_{n=1}^{\infty}2^{n-1}x^n.
-  $$
+$$
 
-  </Step>
-  <Step>
+  对照麦克劳林展开 $f(x)=\sum_{n\ge0}\dfrac{f^{(n)}(0)}{n!}x^n$，可读出
 
-  ### 读取麦克劳林系数
 
-  麦克劳林展开的一般形式为
 
-  $$
-  f(x)=\sum_{n=0}^{\infty}\frac{f^{(n)}(0)}{n!}x^n.
-  $$
-
-  比较 $x^n$ 的系数，得
-
-  $$
-  \frac{f^{(n)}(0)}{n!}=2^{n-1}
+$$
+\frac{f^{(n)}(0)}{n!}=2^{n-1}
   \quad\Longrightarrow\quad
-  \boxed{f^{(n)}(0)=n!2^{n-1}}.
-  $$
+  \boxed{f^{(n)}(0)=2^{n-1}n!}.
+$$
 
-  </Step>
-</Steps>
+</Tab>
+<Tab value="直接求导法">
+
+  把和函数改写为
+
+
+
+$$
+f(x)=\frac{x}{1-2x}=\frac12\left(\frac1{1-2x}-1\right).
+$$
+
+  当 $n\ge1$ 时，常数项求导为零，
+
+
+
+$$
+f^{(n)}(x)=\frac12\cdot 2^n n!(1-2x)^{-n-1}
+  =2^{n-1}n!(1-2x)^{-n-1}.
+$$
+
+  令 $x=0$，得到同样答案。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="高阶导数与系数">
+
+遇到 $f^{(n)}(0)$，通常先看能否写成 $\sum c_nx^n$；只要在 $0$ 附近确有泰勒展开，就有 $f^{(n)}(0)=n!c_n$。注意阶乘因子不能遗漏。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -619,25 +1056,78 @@ $$
 
 <Solution>
 
-**答案：** $ -1$。
+**参考答案：** $\boxed{-1}$。
 
-**解析：** 先作部分分式分解：
+<Steps>
+<Step>
 
-$ f(x)=\frac1{x+1}-\frac1{x^2}$。
+  ### 部分分式分解，寻找标准展开
 
-令 $ t=x-1$，则
+  观察分子与分母：
 
-$ \frac1{x+1}=\frac1{t+2}=\sum_{n=0}^{\infty}\frac{(-1)^n}{2^{n+1}}t^n$，
 
-$ -\frac1{x^2}=-\frac1{(1+t)^2}=-\sum_{n=0}^{\infty}(-1)^n(n+1)t^n$。
 
-所以
+$$
+f(x)=\frac{x^2-x-1}{x^2(x+1)}
+  =\frac1{x+1}-\frac1{x^2}.
+$$
 
-$ a_n=(-1)^n\left[\frac1{2^{n+1}}-(n+1)\right]$。
+  题设要求以 $x=1$ 为中心展开，故令 $t=x-1$，于是 $x=1+t$。
 
-从而
+</Step>
+<Step>
 
-$ \frac{(-1)^na_n}{\sqrt{n^2+1}}=\frac{2^{-(n+1)}-(n+1)}{\sqrt{n^2+1}}\longrightarrow-1$。
+  ### 两部分分别用几何级数展开
+
+  当 $|t|<1$ 时，
+
+
+
+$$
+\frac1{x+1}=\frac1{2+t}
+  =\sum_{n=0}^{\infty}\frac{(-1)^n}{2^{n+1}}t^n.
+$$
+
+  另一方面，由 $(1+t)^{-2}=\sum_{n=0}^{\infty}(-1)^n(n+1)t^n$，得
+
+
+
+$$
+-\frac1{x^2}=-\sum_{n=0}^{\infty}(-1)^n(n+1)t^n.
+$$
+
+  合并相同次幂，
+
+
+
+$$
+a_n=(-1)^n\left(\frac1{2^{n+1}}-(n+1)\right).
+$$
+
+</Step>
+<Step>
+
+  ### 代入系数并取极限
+
+
+
+$$
+\begin{aligned}
+  \lim_{n\to\infty}\frac{(-1)^na_n}{\sqrt{n^2+1}}
+  &=\lim_{n\to\infty}\frac{2^{-n-1}-(n+1)}{\sqrt{n^2+1}}\\
+  &=\lim_{n\to\infty}\frac{2^{-n-1}/n-1-1/n}{\sqrt{1+1/n^2}}\\
+  &=\boxed{-1}.
+  \end{aligned}
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="系数符号必须保留">
+
+$\dfrac1{x^2}=(1+t)^{-2}$ 的系数含 $(-1)^n(n+1)$，但原式前面还有一个**负号**。若丢掉这一负号，最终极限会错误地算成 $+1$。
+
+</Callout>
 
 </Solution>
 
@@ -648,87 +1138,90 @@ $ \frac{(-1)^na_n}{\sqrt{n^2+1}}=\frac{2^{-(n+1)}-(n+1)}{\sqrt{n^2+1}}\longright
 将函数
 
 $$
- f(x)=\frac{x-1}{4-x}
+f(x)=\frac{x-1}{4-x}
 $$
 
 在点 $ x_0=1$ 处展开成幂级数，并求 $ f^{(n)}(1)$。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
- \frac{x-1}{4-x}
+\boxed{\frac{x-1}{4-x}
 =\sum_{n=1}^{\infty}\frac{(x-1)^n}{3^n},
-\qquad |x-1|<3.
+\qquad |x-1|<3},
 $$
+
+$$
+\boxed{f^{(n)}(1)=\frac{n!}{3^n}\quad(n=1,2,\ldots)},
+\qquad f(1)=0.
+$$
+
+<Steps>
+<Step>
+
+  ### 将分母凑成 $1-u$
+
+  以 $x=1$ 为中心，令 $t=x-1$。则
 
 
 
-
-并且
 $$
- f^{(n)}(1)=\frac{n!}{3^n},
-\qquad n=1,2,\cdots.
-$$
-此外，
-$$
- f(1)=0.
+f(x)=\frac{t}{3-t}
+  =\frac{t/3}{1-t/3}.
 $$
 
-**解析：** 令
+  这一步把有理式化成标准几何级数模型 $1/(1-u)$。
+
+</Step>
+<Step>
+
+  ### 展开并移动指标
+
+  当 $|t/3|<1$ 时，
+
+
+
 $$
- t=x-1.
-$$
-则
-$$
- 4-x=3-t,
-$$
-从而
-$$
- \frac{x-1}{4-x}
-=\frac{t}{3-t}
-=\frac t3\cdot\frac1{1-\frac t3}.
-$$
-当
-$$
- \left|\frac t3\right|<1
-$$
-时，利用几何级数公式
-$$
- \frac1{1-u}=\sum_{k=0}^{\infty}u^k,
-\qquad |u|<1,
-$$
-得
-$$
- \begin{aligned}
-\frac{x-1}{4-x}
-&=\frac t3\sum_{k=0}^{\infty}\left(\frac t3\right)^k\\
-&=\sum_{k=0}^{\infty}\frac{t^{k+1}}{3^{k+1}}\\
-&=\sum_{n=1}^{\infty}\frac{(x-1)^n}{3^n}.
-\end{aligned}
-$$
-其收敛条件为
-$$
- |x-1|<3.
+\begin{aligned}
+  f(x)&=\frac t3\sum_{k=0}^{\infty}\left(\frac t3\right)^k
+  =\sum_{k=0}^{\infty}\frac{t^{k+1}}{3^{k+1}}\\
+  &=\sum_{n=1}^{\infty}\frac{(x-1)^n}{3^n}.
+  \end{aligned}
 $$
 
-另一方面，函数在 $ x=1$ 处的泰勒展开为
+  因此展开在 $|x-1|<3$，即 $-2<x<4$，成立。若还需完整的收敛域：在 $x=-2$、$x=4$，通项分别为 $(-1)^n$、$1$，均不趋零，故开区间即为收敛域。
+
+</Step>
+<Step>
+
+  ### 利用泰勒系数直接读取高阶导数
+
+  比较一般的泰勒展开
+
+
+
 $$
- f(x)=\sum_{n=0}^{\infty}\frac{f^{(n)}(1)}{n!}(x-1)^n.
+f(x)=\sum_{n=0}^{\infty}\frac{f^{(n)}(1)}{n!}(x-1)^n,
 $$
-比较同次幂系数可知，当 $ n\ge1$ 时，
+
+  可知 $f(1)=0$，且对 $n\ge1$ 有 $\frac{f^{(n)}(1)}{n!}=3^{-n}$。所以
+
+
+
 $$
- \frac{f^{(n)}(1)}{n!}=\frac1{3^n},
+\boxed{f^{(n)}(1)=\frac{n!}{3^n}}.
 $$
-所以
-$$
- f^{(n)}(1)=\frac{n!}{3^n}.
-$$
-常数项为零，故
-$$
- f(1)=0.
-$$
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="方法选择">
+
+求在某点的高阶导数，优先进行泰勒展开并读取系数，通常比连续做 $n$ 次求导更简洁。
+
+</Callout>
 
 </Solution>
 
@@ -740,13 +1233,71 @@ $$
 
 <Solution>
 
-**答案：** $\frac{1}{4n+1}$.
+**参考答案：** $\boxed{a_{4n+1}=\dfrac1{4n+1}}$（$n\ge1$）。
 
-**解析：** 记 $f(x) = \frac{1}{4}\ln\frac{1+x}{1-x} + \frac{1}{2}\arctan x - x$, 则
+<Tabs items={['先求导再积分（推荐）', '逐项展开并消去低次幂']}>
+<Tab value="先求导再积分（推荐）">
+
+  令
+
+
+
 $$
-f'(x) = \frac{1}{4}\left(\frac{1}{1+x} + \frac{1}{1-x}\right) + \frac{1}{2}\cdot\frac{1}{1+x^2} - 1 = \frac{1}{1-x^4} - 1 = \sum_{n=1}^{\infty} x^{4n}.
+F(x)=\frac14\ln\frac{1+x}{1-x}+\frac12\arctan x-x.
 $$
-故 $f(x) = f(x) - f(0) = \int_0^x f'(t) dt = \sum_{n=1}^{\infty} \frac{x^{4n+1}}{4n+1}$, $|x|<1$, 于是 $a_{4n+1} = \frac{1}{4n+1}$.
+
+  对 $F$ 求导，得到
+
+
+
+$$
+\begin{aligned}
+  F'(x)&=\frac1{2(1-x^2)}+\frac1{2(1+x^2)}-1\\
+  &=\frac1{1-x^4}-1
+  =\sum_{n=1}^{\infty}x^{4n},\qquad |x|<1.
+  \end{aligned}
+$$
+
+  又 $F(0)=0$，故在收敛区间内逐项积分：
+
+
+
+$$
+F(x)=\int_0^xF'(t)\,\mathrm dt
+  =\sum_{n=1}^{\infty}\frac{x^{4n+1}}{4n+1}.
+$$
+
+  比较系数便得 $\boxed{a_{4n+1}=1/(4n+1)}$。
+
+</Tab>
+<Tab value="逐项展开并消去低次幂">
+
+  在 $|x|<1$ 内，
+
+
+
+$$
+\frac14\ln\frac{1+x}{1-x}
+  =\frac12\sum_{k=0}^{\infty}\frac{x^{2k+1}}{2k+1},
+$$
+
+
+
+$$
+\frac12\arctan x
+  =\frac12\sum_{k=0}^{\infty}\frac{(-1)^k x^{2k+1}}{2k+1}.
+$$
+
+  同次项相加得到 $\tfrac12[1+(-1)^k]x^{2k+1}/(2k+1)$；仅在 $k$ 为偶数时保留，即形成 $x^{4n+1}/(4n+1)$。$k=0$ 的首项是 $x$，恰被题中的 $-x$ 抵消。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="结构识别技巧">
+
+对数、反正切混合出现，而展开只含 $x^{4n+1}$ 时，可优先求导：导数往往合并成 $1/(1-x^4)$，由等比级数一步得到系数。
+
+</Callout>
 
 </Solution>
 
@@ -766,34 +1317,71 @@ $$
 
 <Solution>
 
-**答案：$\boxed{\ln3}$。**
+**参考答案：** $\boxed{\ln3}$。
 
-将极限写成收敛的正项级数
+<Steps>
+<Step>
+
+  ### 把部分和极限改写成无穷级数
+
+  题目中的 $1$ 是 $k=0$ 项，后面分母依次为 $(2k+1)4^k$，故
+
+
 
 $$
-S=\sum_{k=0}^\infty\frac1{(2k+1)4^k}.
+S=\sum_{k=0}^{\infty}\frac1{(2k+1)4^k}.
 $$
 
-利用 $|x|<1$ 时的等比级数，在区间 $[0,x]$ 上逐项积分：
+  由于 $0<\dfrac1{(2k+1)4^k}\le4^{-k}$，级数绝对收敛，故原部分和极限就是 $S$。
+
+</Step>
+<Step>
+
+  ### 联想到 $1/(1-t^2)$ 的逐项积分
+
+  在 $|t|<1$ 时，
+
+
+
+$$
+\frac1{1-t^2}=\sum_{k=0}^{\infty}t^{2k}.
+$$
+
+  从 $0$ 到 $x$ 逐项积分，得到
+
+
+
+$$
+\sum_{k=0}^{\infty}\frac{x^{2k+1}}{2k+1}
+  =\int_0^x\frac{\mathrm dt}{1-t^2}
+  =\frac12\ln\frac{1+x}{1-x},\quad |x|<1.
+$$
+
+</Step>
+<Step>
+
+  ### 选取 $x=1/2$，注意前面的倍数
+
+  由于 $4^{-k}=2\,(1/2)^{2k+1}$，
+
+
 
 $$
 \begin{aligned}
-\frac1{1-t^2}&=\sum_{k=0}^\infty t^{2k},\\
-\int_0^x\frac{\mathrm dt}{1-t^2}
-&=\sum_{k=0}^\infty\frac{x^{2k+1}}{2k+1}
-=\frac12\ln\frac{1+x}{1-x}.
-\end{aligned}
+  S&=2\sum_{k=0}^{\infty}\frac{(1/2)^{2k+1}}{2k+1}\\
+  &=2\cdot\frac12\ln\frac{1+1/2}{1-1/2}
+  =\boxed{\ln3}.
+  \end{aligned}
 $$
 
-取 $x=1/2$，注意 $4^{-k}=2(1/2)^{2k+1}$，于是
+</Step>
+</Steps>
 
-$$
-\begin{aligned}
-S&=2\sum_{k=0}^\infty\frac{(1/2)^{2k+1}}{2k+1}\\
-&=2\cdot\frac12\ln\frac{1+1/2}{1-1/2}
-=\boxed{\ln3}.
-\end{aligned}
-$$
+<Callout type="warn" title="容易漏掉因子 2">
+
+$4^{-k}=(1/2)^{2k}$，而积分公式里是 $(1/2)^{2k+1}$，二者相差因子 $2$。若直接代入而不补这个因子，结果会错误地少一半。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -804,26 +1392,93 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：** 收敛域为 $\boxed{[-1,1]}$，和函数为
 
-当 $ |x|<1$ 时，
+$$
+\boxed{S(x)=
+\begin{cases}
+\displaystyle\frac{\arctan x}{x}
++\frac{2\sqrt2}{x}\operatorname{arctanh}\!\left(\frac{x}{\sqrt2}\right),&x\ne0,\\[8pt]
+3,&x=0.
+\end{cases}}
+$$
 
-$ S(x)=\frac{\arctan x}{x}+\frac{2\sqrt2}{x}\operatorname{arctanh}\frac{x}{\sqrt2}$，
+其中 $\operatorname{arctanh}t=\dfrac12\ln\dfrac{1+t}{1-t}$；该式在 $-1\le x\le1$ 均有意义。
 
-并按连续延拓定义 $ S(0)=3$。
+<Steps>
+<Step>
 
-**解析：** 将系数拆开：
+  ### 拆开两类系数
 
-$ \frac{(-2)^n+2}{2^n(2n+1)}=\frac{(-1)^n}{2n+1}+\frac{2^{1-n}}{2n+1}$。
+  化简得
 
-于是
 
-$ S_1=\sum_{n=0}^{\infty}\frac{(-1)^nx^{2n}}{2n+1}=\frac{\arctan x}{x}$，
 
-$ S_2=2\sum_{n=0}^{\infty}\frac{(x^2/2)^n}{2n+1}
-=\frac{2\sqrt2}{x}\operatorname{arctanh}\frac{x}{\sqrt2}$。
+$$
+\frac{(-2)^n+2}{2^n(2n+1)}
+  =\frac{(-1)^n}{2n+1}+\frac{2^{1-n}}{2n+1}.
+$$
 
-两部分共同的开区间为 $ |x|<1$。当 $ x\to0$ 时两部分极限分别为 1 和 2，故 $ S(0)=3$。
+  因而 $S(x)=S_1(x)+S_2(x)$，其中
+
+
+
+$$
+S_1(x)=\sum_{n=0}^{\infty}\frac{(-1)^nx^{2n}}{2n+1},\qquad
+  S_2(x)=2\sum_{n=0}^{\infty}\frac{(x^2/2)^n}{2n+1}.
+$$
+
+</Step>
+<Step>
+
+  ### 分别用逐项积分求和
+
+  在 $|x|<1$ 时，
+
+
+
+$$
+\arctan x=\sum_{n=0}^{\infty}\frac{(-1)^n x^{2n+1}}{2n+1},
+$$
+
+  从而 $S_1(x)=\arctan x/x$（$x\ne0$）。
+
+  再利用 $|z|<1$ 时
+
+
+
+$$
+\sum_{n=0}^{\infty}\frac{z^{2n+1}}{2n+1}
+  =\int_0^z\frac{\mathrm dt}{1-t^2}
+  =\operatorname{arctanh}z,
+$$
+
+  取 $z=x/\sqrt2$，便得
+
+
+
+$$
+S_2(x)=\frac{2\sqrt2}{x}
+  \operatorname{arctanh}\!\left(\frac{x}{\sqrt2}\right).
+$$
+
+</Step>
+<Step>
+
+  ### 检查端点，修正仅写 $|x|<1$ 的遗漏
+
+  $S_1$ 的半径为 $1$，在 $x=\pm1$ 时为交错级数 $\sum(-1)^n/(2n+1)$，均收敛；$S_2$ 在 $|x|\le1$ 上绝对收敛，因为其项不大于 $2^{1-n}$。因此**整个原级数在两个端点也收敛**，完整收敛域是 $[-1,1]$。
+
+  在 $x=\pm1$ 可由阿贝尔定理使用同一闭式；在 $x=0$ 两项分别趋于 $1$ 和 $2$，故 $S(0)=3$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="和函数公式与收敛域缺一不可">
+
+求和时逐项积分先在开区间操作，但端点可能收敛。不能因此只把 $(-1,1)$ 写成最终收敛域；本题在 $x=\pm1$ **条件收敛**。
+
+</Callout>
 
 </Solution>
 
@@ -835,19 +1490,62 @@ $ S_2=2\sum_{n=0}^{\infty}\frac{(x^2/2)^n}{2n+1}
 
 <Solution>
 
-**答案：**
+**参考答案：** 收敛域 $\boxed{[-1,1]}$；和函数 $\boxed{S(x)=\arctan x-x}$。
 
-收敛域为 $ [-1,1]$，和函数为
+<Steps>
+<Step>
 
-$ S(x)=\arctan x-x$。
+  ### 识别反正切的麦克劳林级数
 
-**解析：** 标准展开式为
+  在 $|x|<1$ 时，
 
-$ \arctan x=\sum_{n=0}^{\infty}(-1)^n\frac{x^{2n+1}}{2n+1}$。
 
-原级数从 $ n=1$ 开始，所以应减去首项 $ x$。
 
-在 $ |x|<1$ 内绝对收敛；在 $ x=\pm1$ 处均化为交错级数而收敛，故收敛域为闭区间。
+$$
+\frac1{1+x^2}=\sum_{n=0}^{\infty}(-1)^nx^{2n}.
+$$
+
+  从 $0$ 到 $x$ 逐项积分可得
+
+
+
+$$
+\arctan x=\sum_{n=0}^{\infty}\frac{(-1)^n x^{2n+1}}{2n+1}.
+$$
+
+</Step>
+<Step>
+
+  ### 处理求和指标从 $n=1$ 开始这一细节
+
+  标准级数从 $n=0$ 开始，首项为 $x$。原级数从 $n=1$ 开始，因此
+
+
+
+$$
+\sum_{n=1}^{\infty}\frac{(-1)^n x^{2n+1}}{2n+1}
+  =\arctan x-x.
+$$
+
+  特别地，$S(0)=0$，与公式一致。
+
+</Step>
+<Step>
+
+  ### 判定端点是否包含
+
+  在 $|x|<1$ 内绝对收敛，而 $|x|>1$ 时一般项绝对值为 $|x|^{2n+1}/(2n+1)$，不趋于零，故发散。
+
+  当 $x=1$ 时成为 $\sum_{n\ge1}\dfrac{(-1)^n}{2n+1}$；当 $x=-1$ 时成为 $\sum_{n\ge1}\dfrac{(-1)^{n+1}}{2n+1}$。二者都满足莱布尼茨判别法，故端点均收敛。由端点连续性仍有 $S(1)=\pi/4-1$、$S(-1)=1-\pi/4$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="不要漏减首项">
+
+$\arctan x$ 的标准展开从 $n=0$ 开始，而题目从 $n=1$ 开始；正确结果是 $\arctan x-x$，不是 $\arctan x$。
+
+</Callout>
 
 </Solution>
 
@@ -858,44 +1556,82 @@ $ \arctan x=\sum_{n=0}^{\infty}(-1)^n\frac{x^{2n+1}}{2n+1}$。
 幂级数
 
 $$
- x+\sum_{n=1}^{\infty}\frac{(-1)^nx^{2n+1}}{n!(2n+1)}
+x+\sum_{n=1}^{\infty}\frac{(-1)^nx^{2n+1}}{n!(2n+1)}
 $$
 
 的和函数及定义域是 <Blank answer="S(x)=\int_0^x e^{-t^2}\,dt, \qquad x\in(-\infty,+\infty)" kind="text" placeholder="输入文字或 LaTeX" />。
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
- S(x)=\int_0^x e^{-t^2}\,dt,
-\qquad x\in(-\infty,+\infty).
+\boxed{S(x)=\int_0^x e^{-t^2}\,\mathrm dt,
+\qquad x\in\mathbb R.}
 $$
 
-**解析：** 指数函数的麦克劳林展开为
+<Steps>
+<Step>
+
+  ### 补回 $n=0$ 项，识别指数函数
+
+  题目中的级数可合写成
+
+
+
 $$
- e^{-t^2}=\sum_{n=0}^{\infty}\frac{(-1)^nt^{2n}}{n!},
-\qquad t\in(-\infty,+\infty).
-$$
-在任意有限区间上逐项积分，得
-$$
- \int_0^x e^{-t^2}\,dt
-=\sum_{n=0}^{\infty}\frac{(-1)^nx^{2n+1}}{n!(2n+1)}.
-$$
-把 $ n=0$ 项分离出来，即
-$$
- \int_0^x e^{-t^2}\,dt
-=x+\sum_{n=1}^{\infty}\frac{(-1)^nx^{2n+1}}{n!(2n+1)}.
-$$
-所以和函数为
-$$
- S(x)=\int_0^x e^{-t^2}\,dt.
+S(x)=\sum_{n=0}^{\infty}\frac{(-1)^n x^{2n+1}}{n!(2n+1)}.
 $$
 
-由于 $ e^{-t^2}$ 的幂级数收敛半径为 $ +\infty$，逐项积分后的幂级数收敛半径仍为 $ +\infty$，故定义域为
+  注意 $n=0$ 项恰是 $x$，与原题开头单列的一项对应。
+
+</Step>
+<Step>
+
+  ### 在任意有界区间内逐项求导
+
+  由于指数级数对任意实数均绝对收敛，且在紧区间上一致收敛，可以对上述幂级数求导：
+
+
+
 $$
- (-\infty,+\infty).
+S'(x)=\sum_{n=0}^{\infty}\frac{(-1)^n x^{2n}}{n!}
+  =e^{-x^2}.
 $$
+
+  同时 $S(0)=0$，于是积分得到
+
+
+
+$$
+S(x)=S(0)+\int_0^xS'(t)\,\mathrm dt
+  =\boxed{\int_0^x e^{-t^2}\,\mathrm dt}.
+$$
+
+</Step>
+<Step>
+
+  ### 判断收敛域
+
+  对任意固定 $x$，除去 $x=0$ 的显然情况，级数相邻项绝对值之比为
+
+
+
+$$
+\left|\frac{u_{n+1}}{u_n}\right|
+  =\frac{x^2(2n+1)}{(n+1)(2n+3)}\longrightarrow0.
+$$
+
+  所以对所有 $x\in\mathbb R$ 均绝对收敛，收敛域为 $(-\infty,+\infty)$。
+
+</Step>
+</Steps>
+
+<Callout type="info" title="为什么保留积分表达式？">
+
+$\int_0^x e^{-t^2}\,\mathrm dt$ 没有初等函数形式的原函数，这是标准的完整答案；也可写成 $\frac{\sqrt\pi}{2}\operatorname{erf}(x)$，但本题无需引入误差函数。
+
+</Callout>
 
 </Solution>
 
@@ -911,114 +1647,139 @@ $(III) \sum_{n=0}^{\infty} \frac{n^2+1}{n!} x^n$;   $(IV) \sum_{n=0}^{\infty} \f
 
 <Solution>
 
-**答案：** 见解析
-
-**解析：** (I) 易求得 $\sum_{n=1}^{\infty}\frac{x^{n-1}}{n 2^{n}}$ 的收敛半径 $R=2$, 收敛域为 $[-2,2)$.
-
-令 $S(x)=\sum_{n=1}^{\infty}\frac{x^{n-1}}{n 2^{n}}$, 则 $x S(x)=\sum_{n=1}^{\infty}\frac{x^{n}}{n 2^{n}}$,
-
-$[x S(x)]'=\left[\sum_{n=1}^{\infty}\frac{1}{n}\left(\frac{x}{2}\right)^{n}\right]'=\sum_{n=1}^{\infty}\left[\frac{1}{n}\left(\frac{x}{2}\right)^{n}\right]'=\frac{1}{2}\sum_{n=1}^{\infty}\left(\frac{x}{2}\right)^{n-1}=\frac{1}{2}\cdot\frac{1}{1-\frac{x}{2}}=\frac{1}{2-x}$,
-
-两边同时积分, 得
-
-$x S(x)-0 S(0)=\int_{0}^{x}\frac{\,\mathrm{d}t}{2-t}=-\ln(2-x)+\ln 2$.
-
-当 $x\neq 0$ 时, $S(x)=-\frac{1}{x}\ln\left(1-\frac{x}{2}\right)$; 当 $x=0$ 时, $S(x)=\frac{1}{2}$, 故
+**参考答案：** 四个级数依次为
 
 $$
-S(x)=\begin{cases}-\dfrac{1}{x}\ln\left(1-\dfrac{x}{2}\right), & -2\leqslant x<0, 0<x<2, \\[6pt] \dfrac{1}{2}, & x=0.\end{cases}
+\boxed{\begin{array}{c|c|c}
+ & \text{收敛域}&\text{和函数 }S(x)\\ \hline
+\mathrm{(I)}&[-2,2)&-\dfrac{\ln(1-x/2)}x\ (x\ne0)\\[4pt]
+\mathrm{(II)}&(-1,1)&\dfrac1{(1-x)^2}-\dfrac4{1-x}-\dfrac4x\ln(1-x)\ (x\ne0)\\[4pt]
+\mathrm{(III)}&\mathbb R&(x^2+x+1)e^x\\[4pt]
+\mathrm{(IV)}&\mathbb R&\dfrac{\sin x-x\cos x}{2x^3}\ (x\ne0)
+\end{array}}
 $$
 
-(II) 先求收敛半径, 用公式
+其中特殊值为 $S_{\mathrm I}(0)=\tfrac12$、$S_{\mathrm{II}}(0)=1$、$S_{\mathrm{IV}}(0)=\tfrac16$；表中其他非零条件下的公式均可按连续延拓覆盖 $x=0$。
+
+<Steps>
+<Step>
+
+  ### （I）$1/n$ 对应对数展开
+
+
 
 $$
-\lim_{n\to\infty}\left|\frac{a_{n+1}}{a_{n}}\right|=\lim_{n\to\infty}\frac{(n+1-1)^{2}}{(n+1)+1}\cdot\frac{n+1}{(n-1)^{2}}=1,
+S_{\mathrm I}(x)
+  =\sum_{n=1}^{\infty}\frac{x^{n-1}}{n2^n},\qquad
+  xS_{\mathrm I}(x)=\sum_{n=1}^{\infty}\frac{(x/2)^n}{n}.
 $$
 
-故收敛半径 $R=1$, 当 $x=\pm 1$ 时, 由于一般式不趋于零，所以发散, 故收敛域为 $(-1,1)$.
+  基本公式 $-\ln(1-z)=\sum_{n=1}^{\infty}\frac{z^n}{n}$（$|z|<1$）给出
 
-令
 
-$$
-\begin{aligned}
-S(x) &= \sum_{n=0}^{\infty}\frac{(n-1)^{2}}{n+1}x^{n}=\sum_{n=0}^{\infty}\frac{(n+1-2)^{2}}{n+1}x^{n} \\
-&= \sum_{n=0}^{\infty}\left[(n+1)x^{n}-4x^{n}+4\frac{x^{n}}{n+1}\right] \\
-&= \sum_{n=0}^{\infty}(n+1)x^{n}-4\sum_{n=0}^{\infty}x^{n}+4\sum_{n=0}^{\infty}\frac{x^{n}}{n+1},
-\end{aligned}
-$$
-
-记 $S_{1}(x)=\sum_{n=0}^{\infty}(n+1)x^{n}, S_{2}(x)=4\sum_{n=0}^{\infty}x^{n}, S_{3}=4\sum_{n=0}^{\infty}\frac{x^{n}}{n+1}$,
-
-$S_1(x) = \sum_{n=0}^{\infty} (x^{n+1})' = \left(\sum_{n=0}^{\infty} x^{n+1}\right)' = \left(\frac{x}{1-x}\right)' = \frac{1}{(1-x)^2}, |x| < 1,$
-
-$S_2(x) = 4\sum_{n=0}^{\infty} x^n = \frac{4}{1-x}, |x| < 1, xS_3(x) = 4\sum_{n=0}^{\infty} \frac{x^{n+1}}{n+1},$
-
-则 $[xS_3(x)]' = 4\sum_{n=0}^{\infty} x^n = \frac{4}{1-x}$, 积分得 $xS_3(x) - 0 = -4\ln(1-x)$ $(-1 < x < 1)$,
-
-故
 
 $$
-\begin{aligned}
-S(x) &= S_1(x) - S_2(x) + S_3(x) = \frac{1}{(1-x)^2} - \frac{4}{1-x} - \frac{4}{x}\ln(1-x) \\
-&= \frac{4x-3}{(1-x)^2} - \frac{4}{x}\ln(1-x) \quad (|x| < 1 \text{ 且 } x \neq 0).
-\end{aligned}
+S_{\mathrm I}(x)=-\frac1x\ln\left(1-\frac x2\right),\quad x\ne0.
 $$
 
-当 $x = 0$ 时, $S(0) = 1$.
+  比值判别法得半径 $2$。$x=2$ 时为 $\sum 1/(2n)$，发散；$x=-2$ 时为 $\sum(-1)^{n-1}/(2n)$，条件收敛，和函数取连续边界值 $S_{\mathrm I}(-2)=\tfrac12\ln2$。$x=0$ 时原级数只有首项非零，得 $S_{\mathrm I}(0)=\tfrac12$。因此收敛域为 $\boxed{[-2,2)}$。
 
-(III) 由 $\lim_{n\to\infty} \frac{a_{n+1}}{a_n} = 0$, 知收敛半径 $R = +\infty$, 故收敛域为 $(-\infty, +\infty)$.
+</Step>
+<Step>
 
-令 $S(x) = \sum_{n=0}^{\infty} \frac{n^2+1}{n!} x^n$, 则
+  ### （II）拆系数，分别对应三个标准级数
+
+  先做代数拆分：
+
+
+
+$$
+\frac{(n-1)^2}{n+1}=(n+1)-4+\frac4{n+1}.
+$$
+
+  所以在 $|x|<1$ 内，
+
+
 
 $$
 \begin{aligned}
-S(x) &= \sum_{n=0}^{\infty} \frac{n^2}{n!} x^n + \sum_{n=0}^{\infty} \frac{x^n}{n!} = \sum_{n=1}^{\infty} \frac{n}{(n-1)!} x^n + e^x \\
-&= \sum_{n=1}^{\infty} \frac{n-1+1}{(n-1)!} x^n + e^x = \sum_{n=2}^{\infty} \frac{x^n}{(n-2)!} + \sum_{n=1}^{\infty} \frac{x^n}{(n-1)!} + e^x \\
-&= x^2 \sum_{n=2}^{\infty} \frac{x^{n-2}}{(n-2)!} + x \sum_{n=1}^{\infty} \frac{x^{n-1}}{(n-1)!} + e^x = x^2 e^x + x e^x + e^x, \quad x \in (-\infty, +\infty).
-\end{aligned}
+  S_{\mathrm{II}}(x)
+  &=\sum_{n=0}^{\infty}(n+1)x^n
+    -4\sum_{n=0}^{\infty}x^n
+    +4\sum_{n=0}^{\infty}\frac{x^n}{n+1}\\
+  &=\frac1{(1-x)^2}-\frac4{1-x}-\frac4x\ln(1-x),\quad x\ne0.
+  \end{aligned}
 $$
 
-**注：** $\sum_{n=0}^{\infty} \frac{x^n}{n!} = e^x, \quad x \in (-\infty, +\infty)$.
+  因为系数 $\frac{(n-1)^2}{n+1}\sim n$，收敛半径是 $1$；在 $x=\pm1$ 时通项不趋于零，均发散。$S_{\mathrm{II}}(0)$ 直接由 $n=0$ 项读出为 $1$。故收敛域为 $\boxed{(-1,1)}$。
 
-(IV) 级数 $\sum_{n=0}^{\infty} \frac{(-1)^n(n+1)}{(2n+3)!} x^{2n}$, 缺项, 用比值法,
+</Step>
+<Step>
+
+  ### （III）把 $n^2$ 分成 $n(n-1)+n$
+
+  指数函数的级数 $e^x=\sum_{n=0}^{\infty}\frac{x^n}{n!}$ 对所有 $x$ 收敛。由逐项求导或移项，
+
+
 
 $$
 \begin{aligned}
-\lim_{n\to\infty} \left| \frac{u_{n+1}(x)}{u_n(x)} \right| &= \lim_{n\to\infty} \left| \frac{(-1)^{n+1}(n+2)x^{2(n+1)}}{[2(n+1)+3]!} \cdot \frac{(2n+3)!}{(-1)^n(n+1)x^{2n}} \right| \\
-&= \lim_{n\to\infty} \frac{x^2}{2(n+1)(2n+5)} = 0 \quad (\text{对任意 } x),
-\end{aligned}
+  S_{\mathrm{III}}(x)
+  &=\sum_{n=0}^{\infty}\frac{n(n-1)+n+1}{n!}x^n\\
+  &=x^2e^x+xe^x+e^x
+  =\boxed{(x^2+x+1)e^x}.
+  \end{aligned}
 $$
 
-故收敛域为 $(-\infty, +\infty)$. 考虑到分母为 $(2n+3)!$, 用 $\sin x$ 的展开式,
-$$
-\sin x = \sum_{n=0}^{\infty} \frac{(-1)^n}{(2n+1)!} x^{2n+1} = x - \sum_{n=0}^{\infty} \frac{(-1)^n}{(2n+3)!} x^{2n+3},
-$$
-故
-$$
-\sum_{n=0}^{\infty} \frac{(-1)^n}{(2n+3)!}x^{2n+3}=x-\sin x.
-$$
-当 $x\neq0$ 时，两边同除以 $x$，得
-$$
-\sum_{n=0}^{\infty} \frac{(-1)^n}{(2n+3)!}x^{2n+2}=1-\frac{\sin x}{x}.
-$$
-两边对 $x$ 求导：
-$$
-\sum_{n=0}^{\infty} \frac{2(n+1)(-1)^n}{(2n+3)!}x^{2n+1}
-=\frac{\sin x-x\cos x}{x^2}.
-$$
-因此
-$$
-S(x)=\sum_{n=0}^{\infty} \frac{(-1)^n(n+1)}{(2n+3)!}x^{2n}
-=\frac{\sin x-x\cos x}{2x^3},\quad x\neq0.
-$$
-当 $x = 0$ 时, $S(0) = \frac{1}{6}$，所以
+  系数包含 $n!$，对任意固定 $x$，相邻项比值趋于 $0$，所以收敛域为 $\boxed{\mathbb R}$。
+
+</Step>
+<Step>
+
+  ### （IV）由正弦展开倒推出缺项级数
+
+  对任意实数 $x$，标准展开给出
+
+
 
 $$
-S(x) = \begin{cases}
-\frac{1}{2x^3}(\sin x - x\cos x), & x \neq 0, \\
-\frac{1}{6}, & x = 0.
-\end{cases}
+\sin x=x-\sum_{n=0}^{\infty}
+  \frac{(-1)^n x^{2n+3}}{(2n+3)!}.
 $$
+
+  故当 $x\ne0$ 时，
+
+
+
+$$
+\frac{x-\sin x}{x}
+  =\sum_{n=0}^{\infty}\frac{(-1)^n x^{2n+2}}{(2n+3)!}.
+$$
+
+  两边求导，再除以 $2x$：
+
+
+
+$$
+\begin{aligned}
+  \frac1{2x}\left(\frac{x-\sin x}{x}\right)'
+  &=\sum_{n=0}^{\infty}\frac{(-1)^n(n+1)x^{2n}}{(2n+3)!}\\
+  &=\boxed{\frac{\sin x-x\cos x}{2x^3}}.
+  \end{aligned}
+$$
+
+  $x=0$ 时按原级数，只有 $n=0$ 项，$S_{\mathrm{IV}}(0)=1/3!=1/6$。由阶乘分母或正弦的整函数展开，收敛域为 $\boxed{\mathbb R}$。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="常用幂级数求和模型">
+
+- $\dfrac1{n}$、$\dfrac1{n+1}$：从 $-\ln(1-x)$ 或 $\dfrac{-\ln(1-x)}x$ 入手。
+- $n$、$n^2$：对几何级数或指数级数求导。
+- $(2n+1)!$、$(2n+3)!$：从正弦、余弦级数移项并乘除适当幂次。
+
+</Callout>
 
 </Solution>
 
@@ -1038,87 +1799,169 @@ $$
 
 <Solution>
 
-**参考答案**：收敛域为 $[-1,1]$，且
+**参考答案：** 收敛域为 $\boxed{[-1,1]}$，和函数为
 
 $$
-\boxed{S(x)=\begin{cases}
-\dfrac{(1+x)\ln(1+x)+(1-x)\ln(1-x)-\ln(1+x^2)}4
-+\dfrac x2\arctan x,&|x|<1,\\[7pt]
-\dfrac\pi8+\dfrac{\ln2}4,&x=\pm1.
+\boxed{
+S(x)=\begin{cases}
+\displaystyle\frac{(1+x)\ln(1+x)+(1-x)\ln(1-x)-\ln(1+x^2)}4
++\frac x2\arctan x,&-1<x<1,\\[8pt]
+\displaystyle\frac\pi8+\frac{\ln2}{4},&x=\pm1.
 \end{cases}}
 $$
 
-**过程：**
-
 <Steps>
-  <Step>
+<Step>
 
-  ### 确定收敛域
+  ### 第一步：先判定内部收敛与两个端点
 
-  设 $u_n=x^{4n+2}/[(4n+1)(4n+2)]$。当 $x\ne0$，
+  第 $n$ 项为 $u_n(x)=\dfrac{x^{4n+2}}{(4n+1)(4n+2)}$。当 $x\ne0$ 时，
 
-  $$
-  \lim_{n\to\infty}\left|\frac{u_{n+1}}{u_n}\right|=|x|^4.
-  $$
 
-  因此 $|x|<1$ 收敛、$|x|>1$ 发散；当 $x=\pm1$ 时，一般项为 $O(n^{-2})$，仍绝对收敛。故收敛域为 $[-1,1]$。
 
-  </Step>
-  <Step>
+$$
+\lim_{n\to\infty}\left|\frac{u_{n+1}}{u_n}\right|
+  =|x|^4.
+$$
 
-  ### 逐项求导，将幂级数化成几何级数
+  所以 $|x|<1$ 时绝对收敛，$|x|>1$ 时发散；$x=0$ 时各项为 $0$。当 $x=\pm1$ 时，
 
-  在 $|x|<1$ 内两次逐项求导：
 
-  $$
-  S'(x)=\sum_{n=0}^\infty\frac{x^{4n+1}}{4n+1},\qquad
-  S''(x)=\sum_{n=0}^\infty x^{4n}=\frac1{1-x^4}.
-  $$
 
-  注意 $S(0)=S'(0)=0$。分解
+$$
+\sum_{n=0}^{\infty}|u_n(\pm1)|
+  =\sum_{n=0}^{\infty}\frac1{(4n+1)(4n+2)}
+  \le\sum_{n=0}^{\infty}\frac1{(4n+1)^2}<\infty.
+$$
 
-  $$
-  \frac1{1-t^4}=\frac14\left(\frac1{1-t}+\frac1{1+t}\right)+\frac1{2(1+t^2)},
-  $$
+  因而完整收敛域为 $\boxed{[-1,1]}$。
 
-  得
+</Step>
+<Step>
 
-  $$
-  S'(x)=\int_0^x\frac{\mathrm dt}{1-t^4}
-  =\frac14\ln\frac{1+x}{1-x}+\frac12\arctan x.
-  $$
+  ### 第二步：两次求导，消去复杂分母
 
-  </Step>
-  <Step>
+  在 $|x|<1$ 内可逐项求导：
 
-  ### 再积分得到和函数
 
-  $$
-  \begin{aligned}
-  S(x)&=\int_0^x S'(t)\,\mathrm dt\\
-  &=\frac14\big[(1+x)\ln(1+x)+(1-x)\ln(1-x)\big]\\
-  &\quad+\frac x2\arctan x-\frac14\ln(1+x^2).
+
+$$
+\begin{aligned}
+  S'(x)&=\sum_{n=0}^{\infty}\frac{x^{4n+1}}{4n+1},\\
+  S''(x)&=\sum_{n=0}^{\infty}x^{4n}
+  =\frac1{1-x^4}.
   \end{aligned}
-  $$
+$$
 
-  上式成立于 $-1<x<1$。
+  又 $S(0)=S'(0)=0$。因此只需对 $1/(1-x^4)$ 连续积分两次，并利用初值确定常数。
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### 求端点值
+  ### 第三步：部分分式拆解并第一次积分
 
-  原级数在两个端点绝对收敛。由阿贝尔定理，和函数在端点可由内部极限得到。用 $t\ln t\to0$（$t\to0^+$），
+  先整理成便于积分的形式：
 
-  $$
-  S(1)=S(-1)=\frac{2\ln2-\ln2}{4}+\frac\pi8
-  =\boxed{\frac\pi8+\frac{\ln2}4}.
-  $$
 
-  </Step>
+
+$$
+\frac1{1-t^4}
+  =\frac12\left(\frac1{1-t^2}+\frac1{1+t^2}\right).
+$$
+
+  于是
+
+
+
+$$
+\begin{aligned}
+  S'(x)&=\int_0^x\frac{\mathrm dt}{1-t^4}\\
+  &=\frac14\ln\frac{1+x}{1-x}+\frac12\arctan x,
+  \qquad |x|<1.
+  \end{aligned}
+$$
+
+</Step>
+<Step>
+
+  ### 第四步：再次积分并整理和函数
+
+  使用分部积分可得
+
+
+
+$$
+\int\ln\frac{1+x}{1-x}\,\mathrm dx
+  =(1+x)\ln(1+x)+(1-x)\ln(1-x)+C,
+$$
+
+
+
+$$
+\int\arctan x\,\mathrm dx
+  =x\arctan x-\frac12\ln(1+x^2)+C.
+$$
+
+  由 $S(0)=0$，积分常数为零，所以
+
+
+
+$$
+\begin{aligned}
+  S(x)&=\frac14\big[(1+x)\ln(1+x)+(1-x)\ln(1-x)\big]\\
+  &\quad+\frac x2\arctan x-\frac14\ln(1+x^2),\quad |x|<1.
+  \end{aligned}
+$$
+
+</Step>
+<Step>
+
+  ### 第五步：用阿贝尔定理求两个端点的和
+
+  由于原级数在 $\pm1$ 处绝对收敛，和函数在端点可取内部单侧极限。利用 $t\ln t\to0$（$t\to0^+$）和 $\arctan1=\pi/4$，得
+
+
+
+$$
+\begin{aligned}
+  S(1)=S(-1)
+  &=\frac{2\ln2-\ln2}{4}+\frac12\cdot\frac\pi4\\
+  &=\boxed{\frac{\ln2}{4}+\frac\pi8}.
+  \end{aligned}
+$$
+
+  此处 $S(-1)=S(1)$ 也可由原级数只含**偶数次幂**直接看出。
+
+</Step>
 </Steps>
 
-<Callout type="warn" title="端点单独判断">幂级数的收敛半径为 $1$ 不代表端点发散；本题分母为二次增长，$x=\pm1$ 处仍收敛。</Callout>
+<Tabs items={['求和主线：两次求导', '另一种表示：带核积分']}>
+<Tab value="求和主线：两次求导">
+
+  将两个分母 $(4n+1)(4n+2)$ 通过两次求导恰好全部消去，形成几何级数 $\sum x^{4n}$；再对 $1/(1-x^4)$ 分解与积分，逻辑最短。
+
+</Tab>
+<Tab value="另一种表示：带核积分">
+
+  根据 $S(0)=S'(0)=0$ 和 $S''(x)=1/(1-x^4)$，也可直接得到
+
+
+
+$$
+S(x)=\int_0^x\frac{x-t}{1-t^4}\,\mathrm dt,
+  \qquad |x|<1.
+$$
+
+  此式相当于一次合并两次积分；适合需要继续证明正性、单调性或求参数积分的题目。
+
+</Tab>
+</Tabs>
+
+<Callout type="warn" title="边界的函数值不能直接代入含 $\ln0$ 的公式">
+
+内点表达式中的 $\ln(1-x)$ 在 $x=1$ 不可直接代入。但 $\lim_{t\to0^+}t\ln t=0$，且原级数在端点收敛，故可通过极限计算 $S(\pm1)$。不要因此把端点错判为发散。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -1135,66 +1978,91 @@ $$
 
 <Solution>
 
-**答案**：收敛域为 $\boxed{[-1,1]}$，和函数为
+**参考答案：** 幂级数的收敛域为 $\boxed{[-1,1]}$，和函数为
 
 $$
-\boxed{S(x)=\ln(1+x^2)-7x\arctan x\qquad(-1\le x\le1)}.
+\boxed{S(x)=\ln(1+x^2)-7x\arctan x,\qquad -1\le x\le1.}
 $$
-
-**过程：**
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 判定收敛域
+  ### 第一步：求收敛半径并检查端点
 
-  系数绝对值满足 $\frac{5n+1}{n(2n-1)}\sim\frac{5}{2n}$，故关于 $x^2$ 的幂级数收敛半径为 $1$，即 $|x|<1$ 时绝对收敛，$|x|>1$ 时发散。
+  记 $c_n=\dfrac{5n+1}{n(2n-1)}$。因为
 
-  当 $x=\pm1$ 时，通项变成
 
-  $$
-  (-1)^n\frac{5n+1}{n(2n-1)}.
-  $$
 
-  其系数为正，趋于 $0$，且从充分大的 $n$ 起单调递减，故由莱布尼茨判别法端点也收敛（但不绝对收敛）。因此收敛域为 $[-1,1]$。
+$$
+c_n\sim\frac{5}{2n},\qquad
+  \lim_{n\to\infty}\left|\frac{c_{n+1}}{c_n}\right|=1,
+$$
 
-  </Step>
-  <Step>
+  以 $t=x^2$ 为变量的级数收敛半径为 $1$，所以 $|x|<1$ 时绝对收敛、$|x|>1$ 时发散。
 
-  ### 拆成两个标准幂级数
+  在 $x=\pm1$ 时，两端都变成 $\sum_{n=1}^\infty(-1)^nc_n$。$c_n>0$ 且 $c_n\to0$；此外 $c_n=-1/n+7/(2n-1)$，可知充分大的 $n$ 时递减，故莱布尼茨判别法给出两端收敛。而 $c_n\sim 5/(2n)$，故端点不绝对收敛。综上为 $[-1,1]$。
 
-  部分分式分解得
+</Step>
+<Step>
 
-  $$
-  \frac{5n+1}{n(2n-1)}=-\frac1n+\frac7{2n-1}.
-  $$
+  ### 第二步：对通项系数作部分分式分解
 
-  所以
 
-  $$
-  S(x)=\sum_{n=1}^\infty\frac{(-1)^{n-1}}{n}x^{2n}
-  +7\sum_{n=1}^\infty\frac{(-1)^n}{2n-1}x^{2n}.
-  $$
 
-  第一部分是 $\ln(1+x^2)$。第二部分在 $|x|<1$ 内可由几何级数逐项积分：
+$$
+\frac{5n+1}{n(2n-1)}=-\frac1n+\frac7{2n-1}.
+$$
 
-  $$
-  \begin{aligned}
-  \sum_{n=1}^\infty\frac{(-1)^n}{2n-1}x^{2n}
-  &=x\int_0^x\sum_{n=1}^\infty(-1)^nt^{2n-2}\,\mathrm dt\\
-  &=-x\int_0^x\frac{1}{1+t^2}\,\mathrm dt=-x\arctan x.
-  \end{aligned}
-  $$
+  因此在 $|x|<1$ 内可以分别求和：
 
-  </Step>
-  <Step>
 
-  ### 推广至端点
 
-  已知幂级数在 $x=\pm1$ 收敛，由阿贝尔定理可将内部求得的和函数连续延拓到两端点，故上式在 $[-1,1]$ 内均成立。
+$$
+S(x)=\underbrace{\sum_{n=1}^\infty\frac{(-1)^{n-1}x^{2n}}n}_{S_1(x)}
+  +7\underbrace{\sum_{n=1}^\infty\frac{(-1)^n x^{2n}}{2n-1}}_{S_2(x)}.
+$$
 
-  </Step>
+</Step>
+<Step>
+
+  ### 第三步：识别对数、反正切级数
+
+  对数展开 $\ln(1+u)=\sum_{n=1}^\infty(-1)^{n-1}u^n/n$，取 $u=x^2$，得 $S_1(x)=\ln(1+x^2)$。
+
+  又由反正切展开
+
+
+
+$$
+\arctan x=\sum_{k=0}^\infty\frac{(-1)^k x^{2k+1}}{2k+1},
+$$
+
+  令 $k=n-1$，得
+
+
+
+$$
+S_2(x)=-x\sum_{k=0}^\infty\frac{(-1)^k x^{2k+1}}{2k+1}
+  =-x\arctan x.
+$$
+
+  所以 $S(x)=\ln(1+x^2)-7x\arctan x$。
+
+</Step>
+<Step>
+
+  ### 第四步：将等式延伸到收敛端点
+
+  原级数在 $x=\pm1$ 都收敛；由阿贝尔定理，对 $x\to1^-$ 和 $x\to-1^+$ 分别取极限，和函数公式在两个端点仍成立。例如 $S(1)=\ln2-7\pi/4$。
+
+</Step>
 </Steps>
+
+<Callout type="warn" title="关键区别">
+
+在 $x=1$ 和 $x=-1$ 处，通项中均出现 $x^{2n}=1$，两端点的敛散性相同；不能直接依据 $(-1)^n$ 判为“绝对收敛”。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -1211,30 +2079,61 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
 $$
-\boxed{S(x)=-\frac{x}{x+2}-\ln\left(1+\frac x2\right),\quad -2<x<2.}
+\boxed{S(x)=-\frac{x}{x+2}-\ln\left(1+\frac{x}{2}\right),\qquad -2<x<2.}
 $$
 
-**过程**：对几何级数 $\frac1{1+x}=\sum_{n=0}^{\infty}(-1)^nx^n$ 逐项求导，得
+<Steps>
+<Step>
+
+  ### 先从已知和函数读出系数
+
+  由几何级数 $\dfrac1{1+x}=\sum_{n=0}^\infty(-1)^nx^n$（$|x|<1$），逐项求导，得
+
+
 
 $$
-a_n=(-1)^n(n+1).
+\frac1{(1+x)^2}=\sum_{n=0}^\infty(-1)^n(n+1)x^n.
 $$
 
-令 $t=-x/2$，当 $|x|<2$ 时，
+  比较系数即 $a_n=(-1)^n(n+1)$。这一步必须保留符号 $(-1)^n$。
+
+</Step>
+<Step>
+
+  ### 把目标级数拆成标准模型
+
+  令 $t=-x/2$，则
+
+
 
 $$
 \begin{aligned}
-S(x)&=\sum_{n=1}^{\infty}\frac{n+1}{n}t^n
-=\sum_{n=1}^{\infty}t^n+\sum_{n=1}^{\infty}\frac{t^n}{n}\\
-&=\frac{t}{1-t}-\ln(1-t)
-=-\frac{x}{x+2}-\ln\left(1+\frac x2\right).
-\end{aligned}
+  S(x)&=\sum_{n=1}^\infty\frac{n+1}{n}t^n\\
+  &=\sum_{n=1}^\infty t^n+\sum_{n=1}^\infty\frac{t^n}{n}\\
+  &=\frac{t}{1-t}-\ln(1-t).
+  \end{aligned}
 $$
 
-当 $x=\pm2$ 时，通项 $\frac{n+1}{n}(\mp1)^n$ 均不趋于零，故两端点都不收敛，收敛区间恰为 $(-2,2)$。
+  代回 $t=-x/2$，就得到答案中的有理项和对数项。
+
+</Step>
+<Step>
+
+  ### 给出公式的有效范围
+
+  两个基本级数都要求 $|t|<1$，即 $|x|<2$。当 $x=\pm2$ 时，目标级数的一般项绝对值为 $(n+1)/n\to1$，不满足必要条件 $u_n\to0$，故端点均发散。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="系数含有 (n+1)/n 时">
+
+优先拆成 $1+1/n$，分别对应几何级数和对数级数。对新级数的收敛域应重新由新变量 $t=-x/2$ 判断，不能沿用原式 $(-1,1)$。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -1251,7 +2150,7 @@ $$
 
 <Solution>
 
-**答案**：收敛域为 $\mathbb R$，且
+**参考答案：** $G(x)$ 对所有实数 $x$ 收敛，且
 
 $$
 \boxed{G(x)=x^2\sin x+3x\cos x-4\sin x+x},
@@ -1260,66 +2159,69 @@ $$
 $$
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 确定收敛域与基础级数
+  ### 先辨认正弦的泰勒级数
 
-  对固定的 $x$，通项绝对值之比为
+  令
 
-  $$
-  \left|\frac{u_{n+1}(x)}{u_n(x)}\right|
-  =\frac{(2n+3)^2|x|^2}{(2n+1)^2(2n+5)(2n+4)}\longrightarrow0.
-  $$
 
-  因此收敛半径为 $+\infty$，可在实数轴上逐项求导。由正弦级数，
 
-  $$
-  H(x):=\sum_{n=0}^{\infty}(-1)^n\frac{x^{2n+3}}{(2n+3)!}
-  =x-\sin x.
-  $$
+$$
+H(x)=\sum_{n=0}^\infty\frac{(-1)^n x^{2n+3}}{(2n+3)!}=x-\sin x.
+$$
 
-  </Step>
-  <Step>
+  阶乘比分母中再多两个连续因子，故对任意固定 $x$，原级数的相邻项绝对值之比趋于 $0$，收敛半径为无穷大；逐项微分是合法的。
 
-  ### 用微分算子生成系数 $(2n+1)^2$
+</Step>
+<Step>
 
-  记 $D=x\dfrac{\mathrm d}{\mathrm dx}$。对单项式 $x^{2n+3}$，
+  ### 用 $x\dfrac{\mathrm d}{\mathrm dx}$ 产生系数
 
-  $$
-  (D-2)x^{2n+3}=(2n+1)x^{2n+3}.
-  $$
+  设 $D=x\dfrac{\mathrm d}{\mathrm dx}$。由于 $D(x^{2n+3})=(2n+3)x^{2n+3}$，就有
 
-  故 $G=(D-2)^2H$。先计算
 
-  $$
-  (D-2)H=x(1-\cos x)-2(x-\sin x)
-  =-x-x\cos x+2\sin x.
-  $$
 
-  再作用一次算子，得
+$$
+(D-2)^2(x^{2n+3})=(2n+1)^2x^{2n+3}.
+$$
 
-  $$
-  \begin{aligned}
+  故所求 $G=(D-2)^2H$。第一次运算为
+
+
+
+$$
+(D-2)H=x(1-\cos x)-2(x-\sin x)=-x-x\cos x+2\sin x.
+$$
+
+  再作用一次：
+
+
+
+$$
+\begin{aligned}
   G(x)&=(D-2)(-x-x\cos x+2\sin x)\\
   &=x^2\sin x+3x\cos x-4\sin x+x.
   \end{aligned}
-  $$
+$$
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### 代入特殊点
+  ### 代值并快速核查
 
-  因为 $\sin(\pi/2)=1$、$\cos(\pi/2)=0$，
+  将 $\sin(\pi/2)=1$、$\cos(\pi/2)=0$ 代入上式，即 $G(\pi/2)=\pi^2/4+\pi/2-4$。
 
-  $$
-  G\left(\frac\pi2\right)=\boxed{\frac{\pi^2}{4}-4+\frac\pi2}.
-  $$
+  另在 $x\to0$ 时，上式的首个非零项为 $x^3/6$，与原级数 $n=0$ 项 $(1)^2x^3/3!$ 相符，可用来检查算子运算的符号。
 
-  </Step>
+</Step>
 </Steps>
 
-<Callout type="idea" title="系数生成技巧">当幂级数的系数含有 $2n+1$、$(2n+1)^2$ 等多项式因子时，算子 $x\,\mathrm d/\mathrm dx$ 往往比逐项拆分更简洁。</Callout>
+<Callout type="idea" title="通用算子方法">
+
+面对 $\sum P(n)c_nx^{kn+r}$，可以寻找 $D=x\dfrac{\mathrm d}{\mathrm dx}$ 的多项式 $Q(D)$，使 $Q(kn+r)=P(n)$，从已知基本级数直接构造目标和函数。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -1330,30 +2232,87 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-$ g(x)=\sum_{n=0}^{\infty}\frac{n+1}{(n+2)!}x^n$；
+$$
+\boxed{g(x)=\sum_{n=0}^\infty\frac{n+1}{(n+2)!}x^n\quad(x\in\mathbb R)},
+\qquad
+\boxed{\sum_{n=1}^\infty\frac{n}{(n+1)!}=1}.
+$$
 
-$ \sum_{n=1}^{\infty}\frac{n}{(n+1)!}=1$。
+<Steps>
+<Step>
 
-**解析：** 由
+  ### 处理 $x=0$ 处的可去奇点
 
-$ \frac{e^x-1}{x}=\sum_{n=0}^{\infty}\frac{x^n}{(n+1)!}$，
+  对 $x\neq0$，原函数为 $(e^x-1)/x$，看似在 $0$ 处无定义；但其幂级数是
 
-逐项求导得
 
-$ g(x)=\sum_{n=1}^{\infty}\frac{n}{(n+1)!}x^{n-1}
-=\sum_{n=0}^{\infty}\frac{n+1}{(n+2)!}x^n$。
 
-令 $ x=1$，
+$$
+\frac{e^x-1}{x}=\sum_{k=1}^\infty\frac{x^{k-1}}{k!}
+  =\sum_{n=0}^\infty\frac{x^n}{(n+1)!},
+$$
 
-$ \sum_{n=1}^{\infty}\frac{n}{(n+1)!}=g(1)$。
+  右边在全实轴收敛，并自然给出了在 $x=0$ 的连续延拓值 $1$。
 
-直接求导
+</Step>
+<Step>
 
-$ g(x)=\frac{xe^x-e^x+1}{x^2}$，
+  ### 逐项求导并调整下标
 
-故 $ g(1)=1$。
+  指数级数的收敛半径为无穷大，因此
+
+
+
+$$
+\begin{aligned}
+  g(x)&=\sum_{n=1}^\infty\frac{n}{(n+1)!}x^{n-1}\\
+  &=\sum_{m=0}^\infty\frac{m+1}{(m+2)!}x^m.
+  \end{aligned}
+$$
+
+  第二行只是把 $m=n-1$ 重编号，常数项为 $1/2$，与 $g(0)$ 一致。
+
+</Step>
+<Step>
+
+  ### 代入 $x=1$ 计算数项级数
+
+  直接按商的求导法则得
+
+
+
+$$
+g(x)=\frac{xe^x-e^x+1}{x^2}\quad(x\neq0).
+$$
+
+  由上述幂级数可在 $x=1$ 直接代值，故
+
+
+
+$$
+\sum_{n=1}^\infty\frac{n}{(n+1)!}=g(1)=\frac{e-e+1}{1}=1.
+$$
+
+</Step>
+</Steps>
+
+<Accordions>
+<Accordion title="另一种核对：裂项求和">
+
+  注意 $\dfrac{n}{(n+1)!}=\dfrac1{n!}-\dfrac1{(n+1)!}$。有限和
+
+
+
+$$
+\sum_{n=1}^N\frac{n}{(n+1)!}=1-\frac1{(N+1)!}\longrightarrow1.
+$$
+
+  与通过和函数求出的结果相同。
+
+</Accordion>
+</Accordions>
 
 </Solution>
 
@@ -1365,22 +2324,67 @@ $ g(x)=\frac{xe^x-e^x+1}{x^2}$，
 
 <Solution>
 
-**答案：** 见解析
+**参考答案：**
 
-**解析：**
+$$
+\boxed{\sin x+x\cos x=\sum_{n=0}^\infty(-1)^n\frac{2(n+1)}{(2n+1)!}x^{2n+1}\quad(x\in\mathbb R)},
+$$
+
+并且
+
+$$
+\boxed{\sum_{n=0}^\infty(-1)^n\frac{n+1}{(2n+1)!}=\frac{\sin1+\cos1}{2}}.
+$$
+
+<Steps>
+<Step>
+
+  ### 分别展开正弦与余弦
+
+  两个麦克劳林级数为
+
+
+
+$$
+\sin x=\sum_{n=0}^\infty\frac{(-1)^nx^{2n+1}}{(2n+1)!},\qquad
+  \cos x=\sum_{n=0}^\infty\frac{(-1)^nx^{2n}}{(2n)!}.
+$$
+
+  由于收敛半径均为无穷大，乘以 $x$ 并逐项相加不会改变其收敛范围。
+
+</Step>
+<Step>
+
+  ### 按相同幂次合并系数
+
+
 
 $$
 \begin{aligned}
-f(x) & = \sin x + x \cos x \\
-& = \sum_{n=0}^{\infty} (-1)^n \frac{x^{2n+1}}{(2n+1)!} + x \sum_{n=0}^{\infty} (-1)^n \frac{x^{2n}}{(2n)!} \\
-& = \sum_{n=0}^{\infty} (-1)^n \left[ \frac{1}{(2n+1)!} + \frac{1}{(2n)!} \right] x^{2n+1} \\
-& = \sum_{n=0}^{\infty} (-1)^n \frac{2(n+1)}{(2n+1)!} x^{2n+1}, x \in (-\infty, +\infty).
-\end{aligned}
+  \sin x+x\cos x
+  &=\sum_{n=0}^\infty(-1)^n
+  \left(\frac1{(2n+1)!}+\frac1{(2n)!}\right)x^{2n+1}\\
+  &=\sum_{n=0}^\infty(-1)^n
+  \frac{1+(2n+1)}{(2n+1)!}x^{2n+1}\\
+  &=2\sum_{n=0}^\infty(-1)^n\frac{n+1}{(2n+1)!}x^{2n+1}.
+  \end{aligned}
 $$
 
-令 $x = 1$, 则 $\sum_{n=0}^{\infty}(-1)^n \frac{n+1}{(2n+1)!} = \frac{1}{2}f(1) = \frac{1}{2}(\sin 1 + \cos 1)$ .
+</Step>
+<Step>
 
-**注：** $\frac{1}{(2n+1)!} + \frac{1}{(2n)!} = \frac{2(n+1)}{(2n+1)!}$ .
+  ### 选取 $x=1$ 读出所求常数和
+
+  所求数项级数缺少 $x^{2n+1}$ 因子，因此在上式令 $x=1$，再除以 $2$，得 $\frac12(\sin1+\cos1)$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="并项时不能漏掉阶乘换算">
+
+$1/(2n)!=(2n+1)/(2n+1)!$，不是 $1/(2n+1)!$。合并所得系数有因子 $2(n+1)$，最后求和时也必须除以 $2$。
+
+</Callout>
 
 </Solution>
 
@@ -1406,29 +2410,65 @@ $$
 
 <Solution>
 
-**答案：C（$e^{-x^2}$）。**
+**正确选项：C（$\boxed{e^{-x^2}}$）。**
 
-设 $F(x)=\sum_{n=0}^{\infty}a_nx^n$。在级数收敛区间内逐项求导，题设即
+<Tabs items={['方法一：转化为微分方程（推荐）', '方法二：逐项比较系数']} defaultIndex={0}>
+<Tab value="方法一：转化为微分方程（推荐）">
+
+  设 $F(x)=\sum_{n=0}^\infty a_nx^n$，则
+
+
+
+$$
+F'(x)=\sum_{n=0}^\infty(n+1)a_{n+1}x^n,\qquad
+  2xF(x)=\sum_{n=0}^\infty2a_nx^{n+1}.
+$$
+
+  所以题设即微分方程
+
+
 
 $$
 F'(x)+2xF(x)=0,\qquad F(0)=a_0=1.
 $$
 
-乘以积分因子 $e^{x^2}$，得到
+  乘以积分因子 $e^{x^2}$，得 $(e^{x^2}F(x))'=0$。解得 $e^{x^2}F(x)=C$，由初值 $F(0)=1$ 得 $C=1$，故 $F(x)=e^{-x^2}$。
+
+</Tab>
+<Tab value="方法二：逐项比较系数">
+
+  比较 $x^0$ 的系数，得 $a_1=0$；比较 $x^n$（$n\ge1$）的系数，得
+
+
 
 $$
-\frac{\mathrm d}{\mathrm dx}\bigl(e^{x^2}F(x)\bigr)=0.
+(n+1)a_{n+1}+2a_{n-1}=0.
 $$
 
-故 $e^{x^2}F(x)=1$，从而 $F(x)=e^{-x^2}$，选 **C**。
+  于是 $a_3=a_5=\cdots=0$，且
 
-<Accordions>
-  <Accordion title="系数递推校验">
 
-对 $x^n$ 比较系数，得 $(n+1)a_{n+1}+2a_{n-1}=0$（$n\ge1$），另有 $a_1=0$。因此所有奇数次系数为零，$a_{2k}=(-1)^k/k!$，与 $e^{-x^2}$ 的展开一致。
 
-</Accordion>
-</Accordions>
+$$
+a_{2k}=-\frac1k a_{2k-2}=\frac{(-1)^k}{k!}\quad(k\ge0).
+$$
+
+  因此
+
+
+
+$$
+F(x)=\sum_{k=0}^\infty\frac{(-1)^k}{k!}x^{2k}=e^{-x^2}.
+$$
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="遇到级数和导数同时出现">
+
+$\sum(n+1)a_{n+1}x^n$ 立即联想到 $F'$；$\sum a_nx^{n+1}$ 对应 $xF$。先识别这两项，比展开求通项更快。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -1440,30 +2480,89 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（1）
+（1）微分方程通解为
 
-$ y=e^{-x}\left[C+\frac{(-1)^{n-1}x^n}{n3^n}\right]$；
+$$
+\boxed{y(x)=e^{-x}\left(C+\frac{(-1)^{n-1}x^n}{n3^n}\right)},\qquad n\in\mathbb N_+.
+$$
 
-（2）
+（2）在收敛域 $\boxed{-3<x\le3}$ 内，
 
-$ \sum_{n=1}^{\infty}a_n(x)=e^{-x}\ln\left(1+\frac{x}{3}\right)$，$ -3<x\le3$。
+$$
+\boxed{\sum_{n=1}^\infty a_n(x)=e^{-x}\ln\left(1+\frac{x}{3}\right)}.
+$$
 
-**解析：** （1）乘以积分因子 $ e^x$，得
+<Steps>
+<Step>
 
-$ (e^xy)'=\frac{(-x)^{n-1}}{3^n}$。
+  ### 第一问：用积分因子消去左侧的 $y$
 
-积分即得通解。满足 $ y(0)=0$ 的特解为
+  因为方程为 $y'+y=e^{-x}(-x)^{n-1}/3^n$，两边乘以 $e^x$，左边恰成一个乘积导数：
 
-$ a_n(x)=e^{-x}\frac{(-1)^{n-1}x^n}{n3^n}$。
 
-（2）因此
 
-$ \sum_{n=1}^{\infty}a_n(x)=e^{-x}\sum_{n=1}^{\infty}(-1)^{n-1}\frac{(x/3)^n}{n}
-=e^{-x}\ln\left(1+\frac{x}{3}\right)$。
+$$
+(e^xy)'=\frac{(-x)^{n-1}}{3^n}=\frac{(-1)^{n-1}}{3^n}x^{n-1}.
+$$
 
-相应对数幂级数在 $ -1<t\le1$ 收敛，令 $ t=x/3$ 即得范围。
+  积分后得
+
+
+
+$$
+e^xy=C+\frac{(-1)^{n-1}x^n}{n3^n},
+$$
+
+  从而得到通解。特别强调，$n$ 是**固定的正整数参数**，这一步不是把 $n$ 当连续变量求导。
+
+</Step>
+<Step>
+
+  ### 第二问：由初始条件写出各项 $a_n(x)$
+
+  令 $x=0$，由 $y(0)=0$ 得 $C=0$，所以
+
+
+
+$$
+a_n(x)=e^{-x}\frac{(-1)^{n-1}}n\left(\frac{x}{3}\right)^n.
+$$
+
+  因此
+
+
+
+$$
+\sum_{n=1}^\infty a_n(x)=e^{-x}\sum_{n=1}^\infty\frac{(-1)^{n-1}}n\left(\frac{x}{3}\right)^n.
+$$
+
+  乘在级数外面的 $e^{-x}$ 对于固定 $x$ 是非零的有限常数，不改变敛散性。
+
+</Step>
+<Step>
+
+  ### 第三问：套用对数展开并逐一检查端点
+
+  利用
+
+
+
+$$
+\ln(1+t)=\sum_{n=1}^\infty\frac{(-1)^{n-1}t^n}{n},\qquad -1<t\le1,
+$$
+
+  取 $t=x/3$ 得和函数。$x=3$ 对应交错调和级数，收敛；$x=-3$ 对应 $-\sum1/n$，发散；$|x|>3$ 时通项不趋于零。因此收敛域确为 $(-3,3]$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="区分两个端点">
+
+不要把对数幂级数的收敛域写成 $[-3,3]$：$x=-3$ 的发散是由同号调和级数造成的，而 $x=3$ 可借交错判别法收敛。
+
+</Callout>
 
 </Solution>
 
@@ -1475,31 +2574,93 @@ $ \sum_{n=1}^{\infty}a_n(x)=e^{-x}\sum_{n=1}^{\infty}(-1)^{n-1}\frac{(x/3)^n}{n}
 
 <Solution>
 
-**答案：**
+**参考答案：** 该幂级数在 $\boxed{|x|<1}$ 时绝对收敛，其和函数为
 
-当 $ |x|<1$ 时级数收敛，且
+$$
+\boxed{S(x)=\sum_{n=1}^\infty a_nx^n=2\left(\frac1{\sqrt{1-x}}-1\right),\qquad |x|<1.}
+$$
 
-$ \sum_{n=1}^{\infty}a_nx^n=2\left(\frac1{\sqrt{1-x}}-1\right)$。
+<Steps>
+<Step>
 
-**解析：** 由递推式
+  ### 由递推式确定收敛半径
 
-$ a_{n+1}=\frac{n+1/2}{n+1}a_n$，
+  已知 $a_1=1$ 且
 
-可知 $ a_{n+1}/a_n\to1$，故幂级数收敛半径为 1。
 
-记 $ F(x)=\sum_{n=1}^{\infty}a_nx^n$。将递推式乘以 $ x^n$ 后求和：
 
-$ F'(x)-1=xF'(x)+\frac12F(x)$。
+$$
+\frac{a_{n+1}}{a_n}=\frac{n+\frac12}{n+1}\xrightarrow[n\to\infty]{}1.
+$$
 
-即
+  所有 $a_n$ 均为正数。对固定的 $x$，级数相邻项比值的绝对值趋于 $|x|$，所以 $|x|<1$ 绝对收敛，$|x|>1$ 发散，收敛半径为 $R=1$。
 
-$ (1-x)F'-\frac12F=1$。
+</Step>
+<Step>
 
-乘以积分因子 $ \sqrt{1-x}$，并用 $ F(0)=0$，得
+  ### 将递推关系乘 $x^n$ 并求和
 
-$ \sqrt{1-x}F(x)=2(1-\sqrt{1-x})$，
+  记 $S(x)=\sum_{n=1}^\infty a_nx^n$。在 $|x|<1$ 内逐项求导，
 
-所以得到结论。
+
+
+$$
+S'(x)=a_1+\sum_{n=1}^\infty(n+1)a_{n+1}x^n.
+$$
+
+  代入递推式得
+
+
+
+$$
+\begin{aligned}
+  S'(x)-1
+  &=\sum_{n=1}^\infty\left(n+\frac12\right)a_nx^n\\
+  &=xS'(x)+\frac12S(x).
+  \end{aligned}
+$$
+
+  即
+
+
+
+$$
+(1-x)S'(x)-\frac12S(x)=1,\qquad S(0)=0.
+$$
+
+</Step>
+<Step>
+
+  ### 解一阶线性微分方程
+
+  将方程除以 $1-x$，乘积分因子 $\sqrt{1-x}$，可化为
+
+
+
+$$
+\bigl[\sqrt{1-x}\,S(x)\bigr]'=\frac1{\sqrt{1-x}}.
+$$
+
+  从 $0$ 到 $x$ 积分：
+
+
+
+$$
+\sqrt{1-x}\,S(x)=2\bigl(1-\sqrt{1-x}\bigr),
+$$
+
+  整理得到 $S(x)=2((1-x)^{-1/2}-1)$。
+
+</Step>
+</Steps>
+
+<Accordions>
+<Accordion title="验证：系数递推与前两项">
+
+  答案的泰勒展开为 $2((1-x)^{-1/2}-1)=x+\frac34x^2+\frac58x^3+\cdots$。递推式给出 $a_2=\frac{3/2}{2}a_1=3/4$，$a_3=\frac{5/2}{3}a_2=5/8$，逐项一致。
+
+</Accordion>
+</Accordions>
 
 </Solution>
 
@@ -1511,29 +2672,63 @@ $ \sqrt{1-x}F(x)=2(1-\sqrt{1-x})$，
 
 <Solution>
 
-**答案：** 见解析
-
-**解析：** 令 $S(x)$ 表示该幂级数的和函数，则
+**参考答案：**
 
 $$
-\begin{aligned}
-S'(x) & = \sum_{n=1}^{\infty} n a_n x^{n-1} = \sum_{n=0}^{\infty} (n+1) a_{n+1} x^n, \\
-2x S(x) & = \sum_{n=0}^{\infty} 2a_n x^{n+1},
-\end{aligned}
+\boxed{\sum_{n=0}^\infty a_n=e^{-1}}.
 $$
 
-依题设, 有
+<Tabs items={['方法一：和函数满足的方程', '方法二：由系数递推求和']} defaultIndex={0}>
+<Tab value="方法一：和函数满足的方程">
+
+  题设保证 $F(x)=\sum_{n=0}^\infty a_nx^n$ 在所有实数 $x$ 上收敛，因此可以逐项求导：
+
+
+
 $$
-S'(x) + 2x S(x) = 0,
+F'(x)=\sum_{n=0}^\infty(n+1)a_{n+1}x^n,\qquad
+  2xF(x)=\sum_{n=0}^\infty2a_nx^{n+1}.
 $$
-解此一阶线性微分方程, 得
+
+  已知两者相加为零，故
+
+
+
 $$
-S(x) = C e^{-\int 2x \,\mathrm{d}x} = C e^{-x^2}.
+F'(x)+2xF(x)=0,\qquad F(0)=1.
 $$
-由 $a_0 = 1$, 知 $S(0) = a_0 = 1$, 得 $C = 1$，所以 $S(x) = e^{-x^2}$, 故
+
+  写成 $\bigl(e^{x^2}F(x)\bigr)'=0$，可知 $F(x)=Ce^{-x^2}$；由 $F(0)=1$ 得 $C=1$。最后令 $x=1$，得到 $\sum a_n=F(1)=e^{-1}$。
+
+</Tab>
+<Tab value="方法二：由系数递推求和">
+
+  比较各次幂系数：$a_1=0$；对 $n\ge1$ 有
+
+
+
 $$
-\sum_{n=0}^{\infty} a_n = S(1) = e^{-1}.
+(n+1)a_{n+1}+2a_{n-1}=0.
 $$
+
+  故 $a_{2k+1}=0$，且由 $a_0=1$ 归纳得 $a_{2k}=(-1)^k/k!$。因此
+
+
+
+$$
+\sum_{n=0}^\infty a_n=\sum_{k=0}^\infty\frac{(-1)^k}{k!}=e^{-1}.
+$$
+
+  此方法也直接说明数项级数绝对收敛。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="先问：所求的数项和是哪个自变量的值？">
+
+$\sum a_n$ 等于幂级数和函数 $F(1)$，而不是 $F(0)$。初值 $a_0=1$ 仅用于求微分方程的积分常数。
+
+</Callout>
 
 </Solution>
 
@@ -1549,36 +2744,93 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（1）
+（1）$\displaystyle\boxed{a_n=\frac1{(n+1)(n+2)}}$，幂级数在 $[-1,1]$ 上收敛，和函数为
 
-$ a_n=\frac1{(n+1)(n+2)}$，
+$$
+\boxed{S(x)=\begin{cases}
+\dfrac{(1-x)\ln(1-x)+x-\frac12x^2}{x^2},&-1\le x<1,\ x\neq0,\\[6pt]
+0,&x=0,\\[3pt]
+\dfrac12,&x=1.
+\end{cases}}
+$$
 
-$ S(x)=\frac{(1-x)\ln(1-x)+x-\frac{x^2}{2}}{x^2}$，$ |x|\le1$，且 $ S(0)=0$；
+（2）$\displaystyle\boxed{\sum_{n=1}^\infty\frac{(-1)^n}{n(n+1)2^n}=1-3\ln\frac32}$。
 
-（2）$ 1-3\ln\frac32$。
+<Steps>
+<Step>
 
-**解析：** （1）在 $ 0\le x\le1$ 上 $ x^n\ge x^{n+1}$，故
+  ### 利用围成面积确定通项
 
-$ a_n=\int_0^1(x^n-x^{n+1})\,\mathrm dx=\frac1{(n+1)(n+2)}$。
+  曲线 $y=t^n$ 与 $y=t^{n+1}$ 在 $t=0,1$ 相交，且 $0<t<1$ 时 $t^n>t^{n+1}$。因此
 
-再用
 
-$ \frac1{(n+1)(n+2)}=\frac1{n+1}-\frac1{n+2}$
 
-及对数幂级数求和，即得所示 $ S(x)$。由于 $ a_n=O(n^{-2})$，两端点均绝对收敛。
+$$
+a_n=\int_0^1(t^n-t^{n+1})\,\mathrm dt
+  =\frac1{n+1}-\frac1{n+2}=\frac1{(n+1)(n+2)}.
+$$
 
-（2）令 $ z=-1/2$，利用
+</Step>
+<Step>
 
-$ \frac1{n(n+1)}=\frac1n-\frac1{n+1}$，
+  ### 将面积系数转成对数级数
 
-得
+  对 $|x|<1$，令 $L(x)=-\ln(1-x)=\sum_{n=1}^\infty x^n/n$。有
 
-$ \sum_{n=1}^{\infty}\frac{z^n}{n(n+1)}
-=1+\left(\frac1z-1\right)\ln(1-z)$。
 
-代入 $ z=-1/2$，结果为 $ 1-3\ln(3/2)$。
+
+$$
+\sum_{n=1}^\infty\frac{x^n}{n+1}=\frac{L(x)-x}{x},\qquad
+  \sum_{n=1}^\infty\frac{x^n}{n+2}=\frac{L(x)-x-\frac12x^2}{x^2}.
+$$
+
+  相减可得
+
+
+
+$$
+S(x)=\frac{(1-x)\ln(1-x)+x-\frac12x^2}{x^2}.
+$$
+
+  $x=0$ 由原级数知 $S(0)=0$；系数 $a_n=O(n^{-2})$，故 $x=\pm1$ 都绝对收敛，阿贝尔定理可扩展到端点。特别地 $S(1)=\sum_{n=1}^\infty[1/(n+1)-1/(n+2)]=1/2$。
+
+</Step>
+<Step>
+
+  ### 第二问另用一个裂项公式
+
+  令 $z=-1/2$，注意
+
+
+
+$$
+\frac1{n(n+1)}=\frac1n-\frac1{n+1}.
+$$
+
+  所以在 $|z|<1$ 时
+
+
+
+$$
+\begin{aligned}
+  \sum_{n=1}^\infty\frac{z^n}{n(n+1)}
+  &=-\ln(1-z)-\frac{-\ln(1-z)-z}{z}\\
+  &=1+\left(\frac1z-1\right)\ln(1-z).
+  \end{aligned}
+$$
+
+  代入 $z=-1/2$，结果为 $1-3\ln(3/2)$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="两个级数的分母不同">
+
+第一问出现 $(n+1)(n+2)$，第二问却是 $n(n+1)$，虽然都可裂项，但**不能直接把第一问的 $S(-1/2)$ 当作第二问的答案**。
+
+</Callout>
 
 </Solution>
 
@@ -1592,35 +2844,95 @@ $ \sum_{n=1}^{\infty}\frac{z^n}{n(n+1)}
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（1）$ a_n=\frac{n-1}{2n(n+1)}$；
+（1）$\displaystyle\boxed{a_n=\frac{n-1}{2n(n+1)}}$（$n\ge2$）。
 
-（2）
+（2）收敛域为 $\boxed{[-1,1)}$，和函数为
 
-$ S(x)=-\left(\frac1x-\frac12\right)\ln(1-x)-1$，
+$$
+\boxed{S(x)=\begin{cases}
+-\left(\dfrac1x-\dfrac12\right)\ln(1-x)-1,&-1\le x<1,\ x\neq0,\\[6pt]
+0,&x=0.
+\end{cases}}
+$$
 
-收敛域为 $ [-1,1)$，并取 $ S(0)=0$。
+<Steps>
+<Step>
 
-**解析：** 曲线 $ y=x^{1/n}$ 在 $ (1,1)$ 处的切线为
+  ### 求切线并辨认上下边界
 
-$ y-1=\frac1n(x-1)$，即 $ y=(x+n-1)/n$。
+  $f(t)=t^{1/n}$ 的导数是 $f'(t)=\frac1n t^{1/n-1}$，所以 $t=1$ 处切线为
 
-因曲线为凹函数，切线位于其上方。所围面积为
 
-$ a_n=\int_0^1\left(\frac{x+n-1}{n}-x^{1/n}\right)\mathrm dx
-=\frac{n-1}{2n(n+1)}$。
 
-又
+$$
+y=1+\frac1n(t-1)=\frac{t+n-1}{n}.
+$$
 
-$ a_n=-\frac1{2n}+\frac1{n+1}$。
+  由于 $n\ge2$，$f''(t)<0$（$t>0$），函数图像下凹，切线在 $0<t<1$ 上位于曲线上方；两条曲线和 $y$ 轴围成的面积应为“切线减曲线”。
 
-利用对数级数求和，得
+</Step>
+<Step>
 
-$ S(x)=-\frac12\sum_{n=2}^{\infty}\frac{x^n}{n}+\sum_{n=2}^{\infty}\frac{x^n}{n+1}
-=-\left(\frac1x-\frac12\right)\ln(1-x)-1$。
+  ### 积分求 $a_n$
 
-由于 $ a_n\sim1/(2n)$，$ x=1$ 发散而 $ x=-1$ 条件收敛。
+
+
+$$
+\begin{aligned}
+  a_n&=\int_0^1\left(\frac{t+n-1}{n}-t^{1/n}\right)\mathrm dt\\
+  &=\left(1-\frac1{2n}\right)-\frac{n}{n+1}\\
+  &=\frac{n-1}{2n(n+1)}.
+  \end{aligned}
+$$
+
+  用 $n=2$ 验算得 $a_2=1/12>0$，说明面积积分方向正确。
+
+</Step>
+<Step>
+
+  ### 裂项求幂级数和函数
+
+  分解为
+
+
+
+$$
+a_n=-\frac1{2n}+\frac1{n+1}.
+$$
+
+  利用 $-\ln(1-x)=\sum_{n=1}^\infty x^n/n$（$|x|<1$），
+
+
+
+$$
+\begin{aligned}
+  S(x)
+  &=-\frac12\sum_{n=2}^\infty\frac{x^n}{n}+\sum_{n=2}^\infty\frac{x^n}{n+1}\\
+  &=\frac12\bigl[\ln(1-x)+x\bigr]
+  +\frac{-\ln(1-x)-x-\frac12x^2}{x}\\
+  &=-\left(\frac1x-\frac12\right)\ln(1-x)-1.
+  \end{aligned}
+$$
+
+  $x=0$ 用原级数直接得到 $S(0)=0$，上式在此处为可去奇点。
+
+</Step>
+<Step>
+
+  ### 判断端点
+
+  $a_n\sim1/(2n)$，因此 $R=1$；在 $x=1$，正项级数与调和级数同敛散而发散；在 $x=-1$，$a_n$ 最终递减且趋于零，$\sum_{n=2}^\infty(-1)^na_n$ 条件收敛。故收敛域为 $[-1,1)$，上式在 $x=-1$ 也可由阿贝尔定理使用。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="几何问题转级数的常见路线">
+
+先由导数写切线，再判断切线与曲线位置，积分求面积系数，最后识别 $1/n$ 型对数级数；收敛域要在**求出系数后**单独判定。
+
+</Callout>
 
 </Solution>
 
@@ -1632,50 +2944,71 @@ $ S(x)=-\frac12\sum_{n=2}^{\infty}\frac{x^n}{n}+\sum_{n=2}^{\infty}\frac{x^n}{n+
 
 <Solution>
 
-**答案：** 见解析
-
-**解析：** 由 $f(x) = x^n + n^2 x$ , 知 $f'(x) = nx^{n-1} + n^2$ , $f'(1) = n + n^2$ .
-故 $y = f(x)$ 在点 $(1, 1+n^2)$ 处的切线方程为
-$$
-y - (1 + n^2) = (n + n^2)(x - 1) .
-$$
-
-令 $y = 0, \text{得} a_n = x = \frac{n-1}{n(n+1)}$ , 故
-$$
-\sum_{n=1}^{\infty} a_n x^{n+1} = \sum_{n=1}^{\infty} \frac{n-1}{n(n+1)} x^{n+1} .
-$$
-
-由 $\lim_{n \to \infty} \left|\frac{a_{n+1}}{a_n}\right| = \lim_{n \to \infty} \left|\frac{n}{(n+1)(n+2)} \cdot \frac{n(n+1)}{n-1}\right| = 1$ , 知收敛半径 $R = 1$ .
-
-当 $x = -1$ 时, $\sum_{n=1}^{\infty} \frac{n-1}{n(n+1)}(-1)^{n+1}$ 为交错级数, $\lim_{n \to \infty} \frac{n-1}{n(n+1)} = 0$ , 且当 $n \ge 3$ 时, $a_n = \frac{n-1}{n(n+1)}$ 单调递减, 由莱布尼茨定理知, 当 $x = -1$ 时, 级数收敛.
-
-当 $x = 1$ 时, $\frac{n-1}{n(n+1)} = \frac{1}{n+1} - \frac{1}{n(n+1)}$ , 而 $\sum_{n=1}^{\infty} \frac{1}{n+1}$ 发散, $\sum_{n=1}^{\infty} \frac{1}{n(n+1)}$ 收敛.
-故当 $x = 1$ 时, 级数发散. 所以收敛域为 $[-1, 1)$ . 因
-$$
-S(x) = \sum_{n=1}^{\infty} \frac{n-1}{n(n+1)} x^{n+1} = \sum_{n=1}^{\infty} \frac{2}{n+1} x^{n+1} - \sum_{n=1}^{\infty} \frac{1}{n} x^{n+1} \overset{\text{记}}{=} S_1(x) - S_2(x) ,
-$$
-
-则 $S'_1(x) = 2 \sum_{n=1}^{\infty} x^n = \frac{2x}{1-x}$ ,
+**参考答案：** 收敛域为 $\boxed{[-1,1)}$，和函数为
 
 $$
-\int_0^x S_1'(t)dt = S_1(x) - S_1(0) = 2\int_0^x \frac{t}{1-t}dt = -2x - 2\ln(1-x).
+\boxed{S(x)=-2x-(2-x)\ln(1-x),\qquad -1\le x<1}.
 $$
 
-由 $S_1(0)=0$, 知
+<Steps>
+<Step>
+
+  ### 先从切线的横截距求 $a_n$
+
+  $f(t)=t^n+n^2t$，故 $f'(1)=n+n^2$。在 $t=1$ 处的切线为
+
+
+
 $$
-S_1(x) = -2x - 2\ln(1-x)
-$$
-$$
-S_2(x) = \sum_{n=1}^\infty \frac{1}{n}x^{n+1} = x\sum_{n=1}^\infty \frac{x^n}{n} \quad \text{记} \quad xS_3(x)
-$$
-$$
-S_3'(x) = \sum_{n=1}^\infty x^{n-1} = \frac{1}{1-x},
-$$
-$$
-\int_0^x S_3'(t)dt = S_3(x) - S_3(0) = S_3(x) = -\ln(1-x).
+y-(1+n^2)=(n+n^2)(t-1).
 $$
 
-故 $S(x) = -2x - 2\ln(1-x) + x\ln(1-x) = -2x - (2-x)\ln(1-x), x \in [-1, 1).$
+  令 $y=0$，得
+
+
+
+$$
+a_n=1-\frac{1+n^2}{n(n+1)}=\frac{n-1}{n(n+1)}
+  =\frac2{n+1}-\frac1n.
+$$
+
+  特别地 $a_1=0$，与 $n=1$ 时 $f(t)=2t$ 的切线横截距为 $0$ 一致。
+
+</Step>
+<Step>
+
+  ### 求收敛域
+
+  因为 $a_n\sim1/n$，由根值法或比值法得收敛半径 $R=1$；当 $|x|<1$ 时绝对收敛。当 $x=1$ 时 $a_n>0$ 且 $a_n\sim1/n$，故发散；当 $x=-1$ 时，$\sum a_n(-1)^{n+1}$ 是系数最终递减至零的交错级数，故收敛。于是收敛域为 $[-1,1)$。
+
+</Step>
+<Step>
+
+  ### 由裂项配合对数展开求和
+
+  对 $|x|<1$，
+
+
+
+$$
+\begin{aligned}
+  S(x)&=\sum_{n=1}^\infty\left(\frac2{n+1}-\frac1n\right)x^{n+1}\\
+  &=2\sum_{m=2}^\infty\frac{x^m}{m}-x\sum_{n=1}^\infty\frac{x^n}{n}\\
+  &=2[-\ln(1-x)-x]+x\ln(1-x)\\
+  &=-2x-(2-x)\ln(1-x).
+  \end{aligned}
+$$
+
+  $x=0$ 时该式为零，与原级数一致；$x=-1$ 时因原级数收敛，可以由阿贝尔定理把求和公式延伸过去，并得到 $S(-1)=2-3\ln2$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="注意幂次是 x 的 n+1 次方">
+
+裂项后 $\sum a_nx^{n+1}$ 比常见 $\sum a_nx^n$ 多一个 $x$。若把后者的求和公式直接照搬，最终会漏掉一项或出现错误的对数系数。
+
+</Callout>
 
 </Solution>
 

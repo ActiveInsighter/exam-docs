@@ -1,13 +1,11 @@
 ---
-title: "第一节 连续、偏导数与可微的定义｜路径极限、一阶主部与高阶偏导"
-description: "对标真题的连续—偏导—可微逻辑、全微分一阶主部、分段振荡函数可微性及混合偏导定义反例。"
+title: "1. 连续偏导数与可微的定义"
+description: "19道连续、偏导、可微与混合偏导题已全部重构，围绕二元极限、局部线性主部、振荡函数和混合偏导次序进行系统解析。"
 ---
 
-# 第一节 连续、偏导数与可微的定义｜路径极限、一阶主部与高阶偏导
+按「真题核心题目」相关考点精选 **19 道原题**，现已逐题重构。保留原题干、选项和结构化答案，按“正确答案 → 判定思路 → 严格推导 → 典型误区”组织解答，并区分连续、偏导存在、可微、偏导连续及混合偏导可交换的不同条件。
 
-按「真题核心题目」对应小节与考点精选题源中的 **19 道代表性原题**；完整题目组件和题干、选项、解析均原样保留。
-
-## 考点1：二元极限、路径判别与连续性
+## 考点一：二元极限、累次极限与路径判别
 
 <Question id="selected-1103-classified-1031-math-6178b5-003" type="single" points={5} tags="来源:张宇8套卷">
 
@@ -30,54 +28,62 @@ $$
 
 <Solution>
 
-当 $(x,y)$ 沿直线 $y=kx$（$k\ne0$）趋于 $(0,0)$ 时，
+**正确选项：D。** $f$ 自身不连续，但有界；它与趋于 $0$ 的 $\sin(x+y)$ 相乘后连续。
+
+<Steps>
+<Step>
+
+### 用不同路径检验 $f$ 的二元极限
+
+沿 $y=0$，$f(x,0)=0$；沿 $y=x\ne0$，有
 
 $$
-\lim_{x\to0}f(x,kx)
-=\lim_{x\to0}\frac{kx^2}{x^2+k^2x^2}
-=\frac{k}{1+k^2},
+f(x,x)=\frac{x^2}{2x^2}=\frac12.
 $$
 
-其值依赖于 $k$，因此
+两条路径的极限不同，故 $f$ 在原点处极限不存在，排除 A。
+
+</Step>
+<Step>
+
+### 按定义计算偏导数并判断有界性
 
 $$
-\lim_{(x,y)\to(0,0)}f(x,y)
+f_x(0,0)=\lim_{h\to0}\frac{f(h,0)-f(0,0)}h=0,
+\qquad
+f_y(0,0)=\lim_{h\to0}\frac{f(0,h)-f(0,0)}h=0.
 $$
 
-不存在，故 $f$ 在 $(0,0)$ 处不连续。
-
-另一方面，
+所以一阶偏导数存在，排除 B。由 $2|xy|\le x^2+y^2$，知
 
 $$
-f_x(0,0)
-=\lim_{x\to0}\frac{f(x,0)-f(0,0)}x=0,
+|f(x,y)|\le\frac12,
 $$
 
-同理
+包括原点也成立，故排除 C。
+
+</Step>
+<Step>
+
+### 夹逼乘积函数
+
+设 $g(x,y)=f(x,y)\sin(x+y)$。因 $g(0,0)=0$，且
 
 $$
-f_y(0,0)=0.
+|g(x,y)|\le\frac12|\sin(x+y)|
+\le\frac12(|x|+|y|)\longrightarrow0,
 $$
 
-当 $x^2+y^2\ne0$ 时，
+故 $g$ 在原点连续，D 正确。
 
-$$
-|f(x,y)|
-=\frac{|xy|}{x^2+y^2}
-\le\frac12,
-$$
+</Step>
+</Steps>
 
-故 $f$ 在原点邻域内有界。
+<Callout type="idea" title="重要区别">
 
-并且
+“函数不连续”并不意味着“与任一连续函数相乘仍不连续”。若 $f$ 局部有界而 $g\to0$，则 $fg\to0$；还需检查乘积在该点的函数值是否为 $0$。
 
-$$
-|f(x,y)\sin(x+y)|
-\le\frac12|x+y|
-\le\frac12(|x|+|y|)\to0.
-$$
-
-所以 $f(x,y)\sin(x+y)$ 在 $(0,0)$ 处连续，选（D）。
+</Callout>
 
 </Solution>
 
@@ -112,39 +118,51 @@ $$
 
 <Solution>
 
-当 $x\ne0$ 时，
+**正确选项：C，三个结论中恰有 $2$ 个正确（②、③）。**
+
+**解题思路：** 累次极限需先固定外层变量；某个固定的非零值下内层极限不存在，就无法建立该次序的累次极限。而二元联合极限可以直接用绝对值估计。
+
+<Steps>
+<Step>
+
+### 检查先 $y\to0$ 再 $x\to0$
+
+固定任一 $x\ne0$，令 $y\to0$，则
 
 $$
-\lim_{y\to0}f(x,y)
-=\lim_{y\to0}\left(x\cos\frac1y+y\cos\frac1x\right)
-=\lim_{y\to0}x\cos\frac1y
+f(x,y)=x\cos\frac1y+y\cos\frac1x.
 $$
 
-不存在，因此
+第二项趋于 $0$，第一项 $x\cos(1/y)$ 持续振荡，不存在极限。因此内层 $\lim_{y\to0}f(x,y)$ 在任何 $x\ne0$ 都不存在，①错误。
+
+</Step>
+<Step>
+
+### 交换极限次序
+
+同理，固定 $y\ne0$ 先令 $x\to0$ 时，$y\cos(1/x)$ 振荡，内层极限不存在。所以②断言“不存在”是正确的。
+
+</Step>
+<Step>
+
+### 联合极限用夹逼法
+
+对于 $xy\ne0$，有
 
 $$
-\lim_{x\to0}\lim_{y\to0}f(x,y)
+|f(x,y)|\le|x|+|y|\longrightarrow0;
 $$
 
-不存在，①错误。
+当 $xy=0$ 时按定义 $f=0$，同样满足估计。故联合极限为 $0$，③正确。
 
-同理，当 $y\ne0$ 时，先令 $x\to0$，其中 $y\cos\frac1x$ 不存在极限，故②正确。
+</Step>
+</Steps>
 
-另一方面，当 $xy\ne0$ 时，
+<Callout type="warn" title="不要把两个累次极限与二元极限混为一谈">
 
-$$
-|f(x,y)|
-\le |x|\left|\cos\frac1y\right|+|y|\left|\cos\frac1x\right|
-\le |x|+|y|\to0,
-$$
+即使联合极限存在，也不能直接推断累次极限一定存在：本题由于固定非零变量时函数持续振荡，两个累次极限都没有内层极限。
 
-而 $xy=0$ 时 $f(x,y)=0$。故
-
-$$
-\lim_{(x,y)\to(0,0)}f(x,y)=0,
-$$
-
-③正确。共有 2 个正确结论，选（C）。
+</Callout>
 
 </Solution>
 
@@ -157,7 +175,7 @@ $$
 <Option>
 
 $$
- f(x,y)=
+f(x,y)=
 \begin{cases}
 \frac{xy}{\sqrt{x^2+y^2}},&(x,y)\ne(0,0),\\[2mm]
 0,&(x,y)=(0,0);
@@ -168,7 +186,7 @@ $$
 <Option>
 
 $$
- f(x,y)=
+f(x,y)=
 \begin{cases}
 \frac{x^3-y^3}{x^2+y^2},&(x,y)\ne(0,0),\\[2mm]
 0,&(x,y)=(0,0);
@@ -179,7 +197,7 @@ $$
 <Option correct>
 
 $$
- f(x,y)=
+f(x,y)=
 \begin{cases}
 \frac{xy}{\sqrt{x^4+y^4}},&(x,y)\ne(0,0),\\[2mm]
 0,&(x,y)=(0,0);
@@ -190,7 +208,7 @@ $$
 <Option>
 
 $$
- f(x,y)=
+f(x,y)=
 \begin{cases}
 \sqrt{x^2+y^2}\sin\frac1{x^2+y^2},&(x,y)\ne(0,0),\\[2mm]
 0,&(x,y)=(0,0).
@@ -201,44 +219,62 @@ $$
 
 <Solution>
 
-判断二元函数在原点的连续性，需要考察
-$$
- \lim_{(x,y)\to(0,0)}f(x,y)
-$$
-是否等于 $ f(0,0)=0$。
+**正确选项：C。** C 沿路径 $y=x$ 的函数值恒为 $1/\sqrt2$，不趋于原点函数值 $0$；其余三项都连续。
 
-对于（A），由
-$$
- 2|xy|\le x^2+y^2
-$$
-可得
-$$
- \left|\frac{xy}{\sqrt{x^2+y^2}}\right|
-\le \frac{x^2+y^2}{2\sqrt{x^2+y^2}}
-=\frac12\sqrt{x^2+y^2}\to0,
-$$
-故在原点连续。
+<Tabs items={['逐项极限（推荐）', '齐次阶数速判']}>
+<Tab value="逐项极限（推荐）">
 
-对于（B），令 $ r=\sqrt{x^2+y^2}$，则 $ |x|\le r,|y|\le r$，从而
-$$
- \left|\frac{x^3-y^3}{x^2+y^2}\right|
-\le\frac{|x|^3+|y|^3}{x^2+y^2}
-\le\frac{2r^3}{r^2}=2r\to0,
-$$
-故在原点连续。
+令 $r=\sqrt{x^2+y^2}$，考虑 $(x,y)\to(0,0)$。
 
-对于（C），沿路径 $ y=x$ 趋于原点时，
-$$
- f(x,x)=\frac{x^2}{\sqrt{2x^4}}=\frac1{\sqrt2}\qquad(x\ne0),
-$$
-其极限不等于 $ 0$，故函数在原点不连续。
+- **A：** $2|xy|\le x^2+y^2$，故
 
-对于（D），
+
+
 $$
- \left|\sqrt{x^2+y^2}\sin\frac1{x^2+y^2}\right|
-\le\sqrt{x^2+y^2}\to0,
+\left|\frac{xy}{\sqrt{x^2+y^2}}\right|\le\frac r2\to0.
 $$
-故在原点连续。
+
+- **B：** $|x|,|y|\le r$，故
+
+
+
+$$
+\left|\frac{x^3-y^3}{x^2+y^2}\right|
+  \le\frac{|x|^3+|y|^3}{r^2}\le2r\to0.
+$$
+
+- **C：** 沿 $y=x\ne0$，
+
+
+
+$$
+\frac{xy}{\sqrt{x^4+y^4}}
+  =\frac{x^2}{\sqrt{2x^4}}=\frac1{\sqrt2}\ne0.
+$$
+
+- **D：**
+
+
+
+$$
+\left|r\sin\frac1{r^2}\right|\le r\to0.
+$$
+
+所以只有 C 在原点不连续。
+
+</Tab>
+<Tab value="齐次阶数速判">
+
+以 $r$ 计，A 的分子为二阶、分母一阶，整体 $O(r)$；B 为三阶除以二阶，整体 $O(r)$；D 是 $r$ 乘有界振荡因子。C 的分子与分母都为二阶，仅能得到 $O(1)$，无法保证趋于零，须选路径作反例。
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="快速判断的顺序">
+
+先用 $r$ 做统一上界尝试夹逼；若分子、分母同阶，再沿 $y=kx$ 等路径测试。只检验一条路径等于零，不能证明二元极限存在。
+
+</Callout>
 
 </Solution>
 
@@ -249,7 +285,7 @@ $$
 设
 
 $$
- z=f(x,y)=\sqrt{|xy|},
+z=f(x,y)=\sqrt{|xy|},
 $$
 
 则 $ f(x,y)$ 在点 $ (0,0)$ 处
@@ -261,43 +297,56 @@ $$
 
 <Solution>
 
-首先考察连续性。由基本不等式
-$$
- 2|xy|\le x^2+y^2
-$$
-可得
-$$
- 0\le \sqrt{|xy|}
-\le\frac1{\sqrt2}\sqrt{x^2+y^2}\to0.
-$$
-因此
-$$
- \lim_{(x,y)\to(0,0)}f(x,y)=0=f(0,0),
-$$
-函数在原点连续。
+**正确选项：B。** $f=\sqrt{|xy|}$ 在原点连续，且两个一阶偏导数都存在并等于 $0$；但不满足可微的 $o(r)$ 余项条件。
 
-再计算原点处的偏导数：
-$$
- f_x(0,0)=\lim_{h\to0}\frac{f(h,0)-f(0,0)}h=0,
-$$
-$$
- f_y(0,0)=\lim_{k\to0}\frac{f(0,k)-f(0,0)}k=0.
-$$
-故两个偏导数均存在。
+<Steps>
+<Step>
 
-若函数在原点可微，由于两个偏导数均为零，应有
-$$
- f(x,y)=o\left(\sqrt{x^2+y^2}\right).
-$$
-但沿路径 $ y=x$ 有
-$$
- \frac{|f(x,x)|}{\sqrt{x^2+x^2}}
-=\frac{|x|}{\sqrt2|x|}
-=\frac1{\sqrt2},
-$$
-其极限不为零，因此函数在原点不可微。
+### 证明连续性
 
-（A）错误，因为不满足可微的增量条件；（C）错误，因为两个偏导数均存在；（D）不是本题所考察的准确结论，且偏导函数在坐标轴上的一些非原点处甚至不存在。
+设 $r=\sqrt{x^2+y^2}$。由 $2|xy|\le x^2+y^2$，得
+
+$$
+0\le f(x,y)=\sqrt{|xy|}\le\frac r{\sqrt2}\longrightarrow0=f(0,0).
+$$
+
+所以原点连续。
+
+</Step>
+<Step>
+
+### 按定义求两偏导数
+
+因为 $f(h,0)=f(0,k)=0$，
+
+$$
+f_x(0,0)=\lim_{h\to0}\frac{f(h,0)-f(0,0)}h=0,
+\qquad
+f_y(0,0)=0.
+$$
+
+</Step>
+<Step>
+
+### 检查可微性所需的增量阶数
+
+若在原点可微，由偏导数都为 $0$，必须有 $f(x,y)=o(r)$。但沿 $y=x\ne0$，
+
+$$
+\frac{f(x,x)}{\sqrt{x^2+x^2}}
+=\frac{|x|}{\sqrt2|x|}=\frac1{\sqrt2}\ne0.
+$$
+
+故不可微，B 正确。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="偏导数存在不代表可微">
+
+偏导数仅检验两个坐标轴方向的增量；可微要求**所有方向共同满足**一个线性主部与 $o(r)$ 余项。本题的对角线方向正是反例。
+
+</Callout>
 
 </Solution>
 
@@ -323,36 +372,59 @@ $$
 
 <Solution>
 
-**解析：** 由于 $\arctan\dfrac{1}{\sqrt{x^2+y^2}}$ 有界，故
+**正确选项：C。** 函数在 $(0,0)$ 可微，且
 
 $$
-|f(x,y)|\leqslant \frac{\pi}{2}|y|\to0=f(0,0),
+\boxed{\mathrm df\big|_{(0,0)}=\frac\pi2\,\mathrm dy}.
 $$
 
-所以 $f$ 在 $(0,0)$ 处连续。又
+**解题思路：** 不必先计算复杂的非原点偏导数。沿坐标轴求原点偏导，再验证线性近似的误差相对距离 $r$ 趋于零。
+
+<Steps>
+<Step>
+
+### 求原点偏导数
+
+记 $r=\sqrt{x^2+y^2}$。因 $f(x,0)=0$，有 $f_x(0,0)=0$。另一方面，
 
 $$
-f_x'(0,0)=0,
+\begin{aligned}
+f_y(0,0)&=\lim_{h\to0}\frac{f(0,h)-f(0,0)}h\\
+&=\lim_{h\to0}\arctan\frac1{|h|}=\frac\pi2.
+\end{aligned}
 $$
 
+</Step>
+<Step>
+
+### 验证全微分的余项
+
+候选线性主部为 $L(x,y)=\frac\pi2 y$，因此
+
 $$
-f_y'(0,0)=\lim_{y\to0}\arctan\frac{1}{|y|}=\frac{\pi}{2}.
+\begin{aligned}
+\frac{|f(x,y)-L(x,y)|}{r}
+&=\frac{|y|}{r}\left|\arctan\frac1r-\frac\pi2\right|\\
+&\le\left|\arctan\frac1r-\frac\pi2\right|\longrightarrow0.
+\end{aligned}
 $$
 
-令 $\rho=\sqrt{x^2+y^2}$，则
+所以 $f(x,y)=\frac\pi2 y+o(r)$，满足原点可微的定义。
 
-$$
-\frac{f(x,y)-f(0,0)-f_x'(0,0)x-f_y'(0,0)y}{\rho}
-=\frac{y}{\rho}\left(\arctan\frac{1}{\rho}-\frac{\pi}{2}\right).
-$$
+</Step>
+</Steps>
 
-其中 $\left|\dfrac{y}{\rho}\right|\leqslant1$，且 $\arctan\dfrac{1}{\rho}\to\dfrac{\pi}{2}$，故上式趋于 $0$。因此 $f$ 在 $(0,0)$ 处可微，选 C。
+<Callout type="idea" title="有界因子乘小量">
+
+这里 $|y|/r\le1$，而括号中的角度差趋于 $0$，乘积就趋于 $0$。证明可微时无需对非原点的偏导数作复杂求导。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点2：一阶高阶小量、可微性与全微分
+## 考点二：一阶高阶无穷小、可微性与全微分
 
 <Question id="selected-1103-classified-1031-liyongle-2027-s5-q04" type="single" points={5} tags="来源:李永乐六套卷, 考点:二元极限与小o记号, 难度:较难">
 
@@ -375,63 +447,71 @@ $$
 
 <Solution>
 
-**答案：C。** 两式相加只能推出一阶小量 $f(x,y)-x+2y=o(r)$。
+**正确选项：C。** 题设只能保证
+
+$$
+\boxed{f(x,y)-x+2y=o\!\left(\sqrt{x^2+y^2}\right)}
+$$
+
+的**去心极限**，不能确定 $f(0,0)$，更不能把一阶小量提高为二阶小量。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 合并题设极限
+### 将两个极限改写为小 $o$ 式
 
-  记 $r=\sqrt{x^2+y^2}$。由题设，
+设 $r=\sqrt{x^2+y^2}$，$g(x,y)=f(-x,-y)$。题设分别给出
 
-  $$
-  f(x,y)+f(-x,-y)=o(r),
-  $$
+$$
+f+g=o(r),\qquad f-g-2x+4y=o(r).
+$$
 
-  $$
-  f(x,y)-f(-x,-y)-2x+4y=o(r).
-  $$
+两式相加，得到
 
-  两式相加，得
+$$
+2f-2x+4y=o(r)
+\quad\Longrightarrow\quad
+f-x+2y=o(r).
+$$
 
-  $$
-  2f(x,y)-2x+4y=o(r),
-  \quad\text{即}\quad
-  \boxed{f(x,y)-x+2y=o(r)}.
-  $$
+</Step>
+<Step>
 
-  </Step>
-  <Step>
+### 比较目标分母的大小
 
-  ### 与目标分母比较
+因为 $r\le|x|+|y|\le|x|+2|y|$，
 
-  因为 $|x|+2|y|\ge\sqrt{x^2+y^2}=r$，所以
+$$
+\left|\frac{f(x,y)-x+2y}{|x|+2|y|}\right|
+\le\frac{|f(x,y)-x+2y|}{r}\to0.
+$$
 
-  $$
-  \left|\frac{f(x,y)-x+2y}{|x|+2|y|}\right|
-  \le \frac{|f(x,y)-x+2y|}{r}\longrightarrow0.
-  $$
+所以 C 必然成立。
 
-  故 C 成立。
-
-  </Step>
+</Step>
 </Steps>
 
 <Accordions>
-  <Accordion title="其他选项的反例">
+<Accordion title="为什么其余三个选项均不一定成立？">
 
-  **排除 A、B：** 取 $f(x,y)=x-2y$（在非原点处），单独定义 $f(0,0)=1$。两个题设极限都为 $0$，但 $f(0,0)\ne0$ 且函数在原点不连续。
+**A、B 的反例：** 对非原点令 $f(x,y)=x-2y$，单独指定 $f(0,0)=1$。题设的两个分式在去心邻域均为 $0$，但 $f(0,0)\ne0$，函数也不连续。
 
-  **排除 D：** 对非原点取 $f(x,y)=x-2y+(x^2+y^2)^{3/4}=x-2y+r^{3/2}$，在原点取 $f(0,0)=0$。此时两个题设分子分别为 $2r^{3/2}$ 和 $0$，都满足条件；但
+**D 的反例：** 令 $f(x,y)=x-2y+r^{3/2}$（原点可取 $0$）。则 $f+f(-x,-y)=2r^{3/2}=o(r)$，另一题设分子为 $0$；但
 
-  $$
-  \frac{f(x,y)-x+2y}{x^2+y^2}=r^{-1/2}\longrightarrow+\infty.
-  $$
+$$
+\frac{f-x+2y}{x^2+y^2}=\frac{r^{3/2}}{r^2}=r^{-1/2}\to+\infty.
+$$
 
-  </Accordion>
+故分母换成 $r^2$ 就不能保证极限为零。
+
+</Accordion>
 </Accordions>
 
-<Callout type="warn" title="去心极限不控制函数值">题设没有给出 $f(0,0)$ 的值；$o(r)$ 也不能直接替换为 $o(r^2)$。</Callout>
+<Callout type="warn" title="去心极限不能决定点值">
+
+题设没有出现 $f(0,0)$，而 $\lim_{(x,y)\to(0,0)}$ 不代入中心点。因此对函数原点值的任何断言，都必须额外有连续性等条件。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -458,13 +538,21 @@ $$
 
 <Solution>
 
-**关键**：题设正是函数在 $(1,0)$ 处的一阶线性近似。由连续性先得 $f(1,0)=-1$，令 $h=x-1$、$k=y$，则
+**正确选项：D，极限为** $\boxed{7}$。
+
+**解题思路：** 题设分母是到 $(1,0)$ 的距离，极限为零说明分子没有常数项和一阶剩余项，即明确给出 $f$ 在该点的可微线性近似。
+
+<Tabs items={['一阶展开法（推荐）', '全微分与方向变化法']}>
+<Tab value="一阶展开法（推荐）">
+
+记 $h=x-1,\ k=y$。题设说明
 
 $$
-f(1+h,k)=-1+h-2k+o\!\left(\sqrt{h^2+k^2}\right).
+f(1+h,k)=(1+h)-2k-2+o\!\left(\sqrt{h^2+k^2}\right)
+=-1+h-2k+o(r).
 $$
 
-分别沿两个方向取点：
+将 $(h,k)=(3u,0)$、$(0,2u)$ 分别代入，得
 
 $$
 \begin{aligned}
@@ -473,14 +561,31 @@ f(1,2u)&=-1-4u+o(|u|).
 \end{aligned}
 $$
 
-因此
+相减再除以 $u$，极限为 $3+4=7$。
+
+</Tab>
+<Tab value="全微分与方向变化法">
+
+连续性保证 $f(1,0)=-1$；由一阶展开，
 
 $$
-\lim_{u\to0}\frac{f(1+3u,0)-f(1,2u)}{u}
-=\lim_{u\to0}\frac{7u+o(|u|)}{u}=7.
+f_x(1,0)=1,\qquad f_y(1,0)=-2.
 $$
 
-选 **D**。也可由 $f_x(1,0)=1,\ f_y(1,0)=-2$ 直接计算 $3f_x-2f_y=7$。
+分子中两个点分别沿向量 $(3,0)$ 与 $(0,2)$ 变化，故极限为
+
+$$
+3f_x(1,0)-2f_y(1,0)=3-2(-2)=7.
+$$
+
+</Tab>
+</Tabs>
+
+<Callout type="idea" title="使用题设极限的标准操作">
+
+遇到 $[f(a+h,b+k)-\text{某线性式}]/\sqrt{h^2+k^2}\to0$，先把 $f$ 写成“函数值＋线性主部＋$o(r)$”，再按目标路径代入；这样比逐个重算导数更清晰。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -503,28 +608,64 @@ $$
 
 <Solution>
 
-**答案：$\boxed{2}$。**
-
-**过程**：由给定的二元极限可写成
+**参考答案：**
 
 $$
-f(x,y)=2x-y+3-\bigl((x-1)^2+y^2\bigr)+o\bigl((x-1)^2+y^2\bigr)
+\boxed{\displaystyle\lim_{h\to0}
+\frac{f(e^{2h},h)-f(1,-h)}h=2}.
 $$
 
-（$x\to1,y\to0$）。由于 $e^{2h}-1=2h+O(h^2)$，分别代入 $\bigl(e^{2h},h\bigr)$ 和 $(1,-h)$，有
+**解题思路：** 题设二元极限给出关于 $(1,0)$ 的**二阶余项展开**；本题目标只涉及一阶差商，因此只需要保留两点函数值的一阶主部。
+
+<Steps>
+<Step>
+
+### 写出题设的局部展开
+
+设 $r^2=(x-1)^2+y^2$。由
+
+$$
+\frac{f(x,y)-2x+y-3}{r^2}\to-1
+$$
+
+可知
+
+$$
+f(x,y)=2x-y+3-r^2+o(r^2).
+$$
+
+特别地，由连续性或上述展开可得 $f(1,0)=5$。
+
+</Step>
+<Step>
+
+### 分别沿两条路径代入
+
+因 $e^{2h}=1+2h+O(h^2)$，当 $(x,y)=(e^{2h},h)$ 时 $r^2=O(h^2)$，故
 
 $$
 \begin{aligned}
-f(e^{2h},h)&=2e^{2h}-h+3+O(h^2)=5+3h+O(h^2),\\
-f(1,-h)&=5+h+O(h^2).
+f(e^{2h},h)&=2e^{2h}-h+3+O(h^2)\\
+&=5+3h+O(h^2).
 \end{aligned}
 $$
 
-两式相减后除以 $h$，得
+同理 $(x,y)=(1,-h)$，得到
 
 $$
-\lim_{h\to0}\frac{f(e^{2h},h)-f(1,-h)}h=\boxed{2}.
+f(1,-h)=5+h+O(h^2).
 $$
+
+相减：$f(e^{2h},h)-f(1,-h)=2h+O(h^2)$，除以 $h$ 后极限为 $2$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="分子里的 $+3$ 不可忽略">
+
+题设是 $f-2x+y-3$，所以应移项为 $f=2x-y+3-r^2+o(r^2)$。常数项虽然最终相消，移项符号错误会直接影响对局部展开的理解。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -535,57 +676,68 @@ $$
 
 <Solution>
 
-**答案：**
+**参考答案：**
 
-（1）对任意有限常数 $a$，$f$ 在 $ (0,0)$ 处连续；
+（1）对题设任意有限常数 $a$，$f$ 均在 $(0,0)$ 处连续。
 
-（2）当且仅当 $ a=-1$ 时，$f$ 在 $ (0,0)$ 处可微，且
+（2）$f$ 在原点可微当且仅当
 
-$ df\big|_{(0,0)}=0$。
+$$
+\boxed{a=-1},\qquad
+\boxed{\mathrm df\big|_{(0,0)}=0}.
+$$
 
-**解析：** 记
+**解题思路：** 设 $r=\sqrt{x^2+y^2}$。题设控制了 $f$ 相对于 $r$ 的一阶行为；连续性只需 $f\to0$，但可微性要求 $f$ 的主部是一个关于 $(x,y)$ 的线性函数。
 
-$ r=\sqrt{x^2+y^2}$。
+<Steps>
+<Step>
 
-题设极限等价于
+### 化简题设并判断连续性
 
-$ f(x,y)=r+ar+o(r)=(1+a)r+o(r)$。
+题设等价于
 
-因此
+$$
+\frac{f-r}{r}\to a
+\quad\Longleftrightarrow\quad
+f=(1+a)r+o(r).
+$$
 
-$ \lim_{(x,y)\to(0,0)}f(x,y)=0=f(0,0)$，
+无论 $a$ 为何有限常数，右端均趋于 $0$，恰等于 $f(0,0)=0$，因此连续。
 
-所以无论 $a$ 取何有限值，函数均在原点连续。
+</Step>
+<Step>
 
-若 $f$ 在原点可微，则存在一次线性函数
+### 证明可微的必要条件
 
-$ L(x,y)=Ax+By$，
+若可微，则在原点两个偏导数必须存在。由展开沿 $y=0$，有
 
-使
+$$
+f(h,0)=(1+a)|h|+o(|h|).
+$$
 
-$ f(x,y)=Ax+By+o(r)$。
+因此差商 $f(h,0)/h$ 的左右极限分别为 $1+a$ 与 $-(1+a)$。要使 $f_x(0,0)$ 存在，必有 $1+a=0$，即 $a=-1$。
 
-于是沿单位方向 $ (\cos\theta,\sin\theta)$ 有
+</Step>
+<Step>
 
-$ \frac{f}{r}\to A\cos\theta+B\sin\theta$。
+### 验证充分性并写出全微分
 
-但题设给出该极限与方向无关，恒为 $ 1+a$。
+若 $a=-1$，则 $f(x,y)=o(r)$，于是
 
-将方向改为相反方向，线性函数值变号，因此只能有
+$$
+f(x,y)-f(0,0)-0\cdot x-0\cdot y=o(r).
+$$
 
-$ A=B=0$，
+这正是原点可微的定义，此时 $f_x=f_y=0$，故 $\mathrm df|_{(0,0)}=0$。
 
-同时
+</Step>
+</Steps>
 
-$ 1+a=0$。
+<Callout type="idea" title="径向主部为什么通常不可微？">
 
-故必要条件是 $ a=-1$。
+$r=\sqrt{x^2+y^2}$ 与方向无关，却不是 $(x,y)$ 的线性函数。当 $f$ 的首项是 $c r$，只有 $c=0$ 才可能在原点有一阶线性近似。
 
-当 $ a=-1$ 时，
-
-$ f(x,y)=o(r)$，
-
-这正说明 $f$ 在原点可微且其全微分为零。
+</Callout>
 
 </Solution>
 
@@ -597,33 +749,58 @@ $ f(x,y)=o(r)$，
 
 <Solution>
 
-**答案：** $ dz\big|_{(1,0)}=3dx-dy$。
+**参考答案：**
 
-**解析：** 题设分子按原文应理解为
+$$
+\boxed{\mathrm dz\big|_{(1,0)}=3\,\mathrm dx-\mathrm dy}.
+$$
 
-$ f(x,y)-3x+y+5$。
+**解题思路：** 二元极限的分母是距离的平方；极限有限说明分子是二阶小量，故 $f$ 的一阶主部可以直接从其中的线性表达式读出。
 
-有限极限说明
+<Steps>
+<Step>
 
-$ f(x,y)=3x-y-5+\frac14[(x-1)^2+y^2]+o((x-1)^2+y^2)$。
+### 整理有限极限得到局部展开
+
+令 $h=x-1,\ k=y$，$r^2=h^2+k^2$。题设说明
+
+$$
+f(x,y)-3x+y+5=\frac14r^2+o(r^2).
+$$
 
 因此
 
-$ f(1,0)=-2$，
+$$
+\begin{aligned}
+f(1+h,k)
+&=3(1+h)-k-5+\frac14(h^2+k^2)+o(r^2)\\
+&=-2+3h-k+o(r).
+\end{aligned}
+$$
 
-且一阶增量为
+这里 $r^2=o(r)$，所以二阶项合并进入可微性的余项。
 
-$ 3(x-1)-y$。
+</Step>
+<Step>
 
-所以
+### 确定一阶偏导与全微分
 
-$ f_x(1,0)=3$，
+由连续性 $f(1,0)=-2$，一阶主部是 $3h-k$，因此
 
-$ f_y(1,0)=-1$，
+$$
+f_x(1,0)=3,\qquad f_y(1,0)=-1.
+$$
 
-从而
+根据全微分定义 $\mathrm dz=f_x\,\mathrm dx+f_y\,\mathrm dy$，得到参考答案。
 
-$ dz\big|_{(1,0)}=3dx-dy$。
+</Step>
+</Steps>
+
+<Callout type="warn" title="两次移项都要检查符号">
+
+$f-3x+y+5$ 移项后是 $f=3x-y-5+\cdots$，不是 $3x+y+5$。先求出中心点值 $f(1,0)=-2$ 可以迅速校验常数符号。
+
+</Callout>
 
 </Solution>
 
@@ -640,43 +817,70 @@ $ dz\big|_{(1,0)}=3dx-dy$。
 
 <Solution>
 
-**解析：** 由 $f(x,y)=x+(y-1)\arcsin\sqrt{\frac{|x|}{y}}$, 知 $\lim\limits_{\substack{x\to 0 \\ y\to 1}}f(x,y)=0=f(0,1)$,
-
-
-$$
-\lim_{\Delta x\to 0^+}\frac{f(0+\Delta x,1)-f(0,1)}{\Delta x}=\lim_{\Delta x\to 0^+}\frac{0+\Delta x+(1-1)\arcsin\sqrt{\frac{\Delta x}{1}}-0}{\Delta x}=1,
-$$
-
-
+**正确选项：C。** 函数在 $(0,1)$ 处可微，且
 
 $$
-\lim_{\Delta x \to 0^{-}} \frac{f(0 + \Delta x, 1) - f(0, 1)}{\Delta x} = \lim_{\Delta x \to 0^{-}} \frac{0 + \Delta x + (1 - 1) \arcsin \sqrt{\frac{-\Delta x}{1}} - 0}{\Delta x} = 1,
+\boxed{f_x(0,1)=1,\qquad f_y(0,1)=0,\qquad \left.\mathrm df\right|_{(0,1)}=\mathrm dx}.
 $$
 
-故 $f_x'(0, 1) = 1$。
+**核心思路：** 先用坐标轴差商确定候选线性主部，再验证剩余项是 $o(\rho)$，不能把“偏导存在”当成“必然可微”。
 
+<Steps>
+<Step>
+
+### 沿坐标轴求偏导数
+
+因为 $f(0,1)=0$，并且 $y=1$ 时含反正弦的项恰好消失，所以
 
 $$
-f_y'(0, 1) = \lim_{\Delta y \to 0} \frac{0 + (1 + \Delta y - 1) \arcsin \sqrt{\frac{0}{1 + \Delta y}} - 0}{\Delta y} = 0,
+f(h,1)=h,\qquad f_x(0,1)=\lim_{h\to0}\frac{f(h,1)}h=1.
 $$
 
-又
+另一方面，$x=0$ 时 $\arcsin\sqrt{|x|/y}=0$，故
+
+$$
+f(0,1+k)=0,\qquad f_y(0,1)=0.
+$$
+
+候选的全微分只能是 $\mathrm dx$。
+
+</Step>
+<Step>
+
+### 用二元增量检验可微
+
+记 $x=h$、$y=1+k$，令 $\rho=\sqrt{h^2+k^2}$。在 $(0,1)$ 的足够小邻域内，$1+k>0$ 且反正弦的自变量属于 $[0,1]$。于是
 
 $$
 \begin{aligned}
-&\lim_{\substack{\Delta x \to 0 \\ \Delta y \to 0}} \frac{f(0 + \Delta x, 1 + \Delta y) - f(0, 1) - [f_x'(0, 1)\Delta x + f_y'(0, 1)\Delta y]}{\sqrt{(\Delta x)^2 + (\Delta y)^2}} \\
-&= \lim_{\substack{\Delta x \to 0 \\ \Delta y \to 0}} \frac{\Delta x + (1 + \Delta y - 1) \arcsin \sqrt{\frac{|\Delta x|}{1 + \Delta y}} - (1 \cdot \Delta x + 0 \cdot \Delta y)}{\sqrt{(\Delta x)^2 + (\Delta y)^2}} \\
-&= \lim_{\substack{\Delta x \to 0 \\ \Delta y \to 0}} \left( \arcsin \sqrt{\frac{|\Delta x|}{1 + \Delta y}} \frac{\Delta y}{\sqrt{(\Delta x)^2 + (\Delta y)^2}} \right) = 0 \quad \left( \text{因为 } \left| \frac{\Delta y}{\sqrt{(\Delta x)^2 + (\Delta y)^2}} \right| \leqslant 1, \arcsin \sqrt{\frac{|\Delta x|}{1 + \Delta y}} \to 0 \right),
+&f(h,1+k)-f(0,1)-(1\cdot h+0\cdot k)\\
+&\qquad=k\arcsin\sqrt{\frac{|h|}{1+k}}.
 \end{aligned}
 $$
 
-故 $f(x, y)$ 在点 $(0, 1)$ 处可微, 且 $\left.\mathrm{d}f\right|_{(0, 1)} = 1 \cdot \mathrm{d}x + 0 \cdot \mathrm{d}y = \mathrm{d}x$。选项 C 正确。
+利用 $|k|/\rho\le1$，有
+
+$$
+0\le\frac{|k|}{\rho}\arcsin\sqrt{\frac{|h|}{1+k}}
+\le\arcsin\sqrt{\frac{|h|}{1+k}}\longrightarrow0.
+$$
+
+因此余项为 $o(\rho)$，按定义可微。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="容易忽略的关键">
+
+$\sqrt{|x|}$ 本身在 $x=0$ 不可导，但它在本题中乘了趋于 $0$ 的因子 $(y-1)$；这个乘积恰好比距离 $\rho$ 高阶。判断整个函数的可微性应看**全增量**，而不是孤立地判断每个因子的可导性。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点3：分段函数、振荡因子与可微性条件
+## 考点三：分段函数、振荡因子与可微性判定
 
 <Question id="selected-1103-classified-1031-lilin-2027-s6-q18" type="essay" points={12} tags="来源:李林六套卷, 考点:二元函数在原点的可微性, 难度:中等">
 
@@ -694,70 +898,72 @@ $$
 
 <Solution>
 
-**参考答案：**$\boxed{b=0,\quad a\in\mathbb R}$，即 **$a$ 可取任意实数**。
+**参考答案：**
+
+$$
+\boxed{b=0,\qquad a\in\mathbb R}.
+$$
+
+**解题思路：** 原点处沿两坐标轴的函数值恒为 $0$，故若可微，一阶线性主部必为 $0$。随后沿特殊路径找出 $b$ 的必要条件，再用统一的模长估计证明其充分性。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 求原点处的偏导数
+### 确定可微性要求的线性主部
 
-  因为 $f(x,0)=f(0,y)=0$，所以
+由 $\sin(xy^2)=0$（当 $x=0$ 或 $y=0$）得
 
-  $$
-  f_x(0,0)=f_y(0,0)=0.
-  $$
+$$
+f(h,0)=f(0,h)=f(0,0)=0.
+$$
 
-  若 $f$ 在原点可微，其全微分只能是零线性映射，故必须满足
+所以 $f_x(0,0)=f_y(0,0)=0$。设 $r=\sqrt{x^2+y^2}$，可微性等价于
 
-  $$
-  \lim_{(x,y)\to(0,0)}\frac{f(x,y)}{\sqrt{x^2+y^2}}=0.
-  $$
+$$
+\boxed{\lim_{(x,y)\to(0,0)}\frac{f(x,y)}r=0}.
+$$
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### 证明必要条件 $b=0$
+### 沿 $y=x$ 找出 $b$ 的必要条件
 
-  沿路径 $y=x=t>0$ 趋于原点，代入得
+取 $x=y=t>0$，则 $xy^2=t^3$、$r=\sqrt2t$。代入后
 
-  $$
-  f(t,t)=(2t^2+a\sqrt t+b)\frac{\sin(t^3)}{2t^2}.
-  $$
+$$
+\begin{aligned}
+\frac{f(t,t)}{\sqrt2t}
+&=\frac{(2t^2+a\sqrt t+b)\sin(t^3)}{2\sqrt2\,t^3}\\
+&=\frac{2t^2+a\sqrt t+b}{2\sqrt2}\cdot\frac{\sin(t^3)}{t^3}
+\longrightarrow\frac{b}{2\sqrt2}.
+\end{aligned}
+$$
 
-  由于 $\sin(t^3)\sim t^3$，
+要使上述极限为 $0$，必有 $b=0$。
 
-  $$
-  \frac{f(t,t)}{\sqrt{t^2+t^2}}
-  =\frac{2t^2+a\sqrt t+b}{2\sqrt2}\cdot\frac{\sin(t^3)}{t^3}
-  \longrightarrow\frac{b}{2\sqrt2}.
-  $$
+</Step>
+<Step>
 
-  可微性要求此极限为 $0$，因此 $\boxed{b=0}$。
+### 用统一上界证明 $b=0$ 已足够
 
-  </Step>
-  <Step>
+由 $|\sin(xy^2)|\le |x|y^2$，以及 $|x|\le r$、$y^2\le r^2$，当 $b=0$ 时
 
-  ### 证明 $b=0$ 时任意 $a$ 均充分
+$$
+\begin{aligned}
+\frac{|f(x,y)|}{r}
+&\le \bigl(r^2+|a|\sqrt{|x|}\bigr)\frac{|x|y^2}{r^3}\\
+&\le r^2+|a|\sqrt r\longrightarrow0.
+\end{aligned}
+$$
 
-  令 $r=\sqrt{x^2+y^2}$。由 $|\sin u|\le|u|$ 及 $|x|\le r$、$|y|\le r$，当 $b=0$ 时，
+这是对**所有趋近原点的路径**都成立的估计。因此对每个固定的实数 $a$，函数在原点可微且全微分为 $0$。
 
-  $$
-  \begin{aligned}
-  \frac{|f(x,y)|}{r}
-  &\le \bigl(r^2+|a|\sqrt{|x|}\bigr)
-  \frac{|x|y^2}{r^3}\\
-  &\le r^2+|a|\sqrt r\longrightarrow0.
-  \end{aligned}
-  $$
-
-  因此对任意固定实数 $a$，$f(x,y)=o(r)$，从而 $f$ 在原点可微。
-
-  </Step>
+</Step>
 </Steps>
 
-<Callout type="warn" title="必要性与充分性都要验证">
+<Callout type="warn" title="为什么不是 $a=0$？">
 
-仅通过 $x$ 轴、$y$ 轴算出偏导数为零，并不能推出二元函数可微。应检验 $f(x,y)=o(\sqrt{x^2+y^2})$；这里根式项 $\sqrt{|x|}$ 的确不妨碍可微，因此不能误判为 $a=0$。
+出现 $\sqrt{|x|}$ 并不自动导致函数不可微。它与 $\sin(xy^2)/(x^2+y^2)$ 相乘后，贡献至多为 $O(r^{3/2})$，相对一阶尺度 $r$ 仍是高阶无穷小。只有常数项 $b$ 会留下不可忽略的一阶贡献。
 
 </Callout>
 
@@ -779,43 +985,55 @@ $$
 
 <Solution>
 
-**答案：$\boxed{a>\dfrac12}$。**
+**正确答案：**
+
+$$
+\boxed{a>\frac12}.
+$$
+
+**判定依据：** 设 $r=\sqrt{x^2+y^2}$。题目所给函数在原点的振荡幅度是 $r^{2a}$，而可微性需要剩余项比 $r$ 更小，即需要 $r^{2a}=o(r)$。
 
 <Steps>
-  <Step>
+<Step>
 
-  ### 由可微定义得到充分条件
+### 先证充分性：$a>\tfrac12$
 
-  记 $r=\sqrt{x^2+y^2}$。当 $a>\dfrac12$ 时，
+在非原点处 $f(x,y)=r^{2a}\sin(1/r^2)$。因为 $2a-1>0$，
 
-  $$
-  \frac{|f(x,y)-f(0,0)|}{\sqrt{x^2+y^2}}
-  =r^{2a-1}\left|\sin\frac1{r^2}\right|
-  \le r^{2a-1}\longrightarrow0.
-  $$
+$$
+\frac{|f(x,y)-f(0,0)|}{r}
+=r^{2a-1}\left|\sin\frac1{r^2}\right|
+\le r^{2a-1}\longrightarrow0.
+$$
 
-  因此 $f(x,y)=o(r)$，在原点可微，且 $\mathrm df(0,0)=0$。
+故 $f=o(r)$，原点处可微，且 $f_x(0,0)=f_y(0,0)=0$。
 
-  </Step>
-  <Step>
+</Step>
+<Step>
 
-  ### 通过一条坐标轴证明必要性
+### 再证必要性：$a\le\tfrac12$ 不可能可微
 
-  若 $f$ 在原点可微，则偏导数 $f_x(0,0)$ 必须存在。沿 $y=0$，有
+令 $y=0$、$x=h>0$，则 $x$ 方向差商为
 
-  $$
-  \frac{f(h,0)-f(0,0)}h
-  =\frac{|h|^{2a}\sin(1/h^2)}h.
-  $$
+$$
+\frac{f(h,0)-f(0,0)}h=h^{2a-1}\sin\frac1{h^2}.
+$$
 
-  当 $a\le\dfrac12$ 时，选择使 $\sin(1/h^2)=1$ 与 $\sin(1/h^2)=-1$ 的正数列 $h\to0^+$，差商分别沿相反方向振荡（$a<\frac12$ 时振幅还会无界），故偏导数不存在，更不可能可微。
+取两列趋于 $0$ 的正数
 
-  </Step>
+$$
+h_n=\left(\frac\pi2+2n\pi\right)^{-1/2},\qquad
+k_n=\left(\frac{3\pi}2+2n\pi\right)^{-1/2}.
+$$
+
+沿 $h_n$，差商为 $h_n^{2a-1}$；沿 $k_n$，为 $-k_n^{2a-1}$。若 $a=\frac12$，它们分别为 $1,-1$；若 $a<\frac12$，绝对值发散。因此 $f_x(0,0)$ 不存在，当然也不可能可微。
+
+</Step>
 </Steps>
 
-<Callout type="warn" title="判断尺度">
+<Callout type="idea" title="振荡函数的一阶临界指数">
 
-二元函数在原点可微的余项必须是 $o(\sqrt{x^2+y^2})$，不能只证明 $f(x,y)\to0$。本题临界值 $a=\frac12$ 虽有连续性，却没有可微性。
+对形如 $r^p\sin(r^{-q})$、原点取 $0$ 的函数，要判断**原点可微性**，先比较 $r^p$ 与距离 $r$；本题 $p=2a$，所以临界值为 $p=1$。不要把“连续（只需趋于 $0$）”与“可微（需除以 $r$ 后仍趋于 $0$）”混为一谈。
 
 </Callout>
 
@@ -851,67 +1069,66 @@ $$
 
 <Solution>
 
-设
+**正确选项：C。** $F_1=f|f|$、$F_2=fg$、$F_3=f|g|$ 在 $P_0$ **一定可微**；$F_4=|f|g$ 则**不一定可微**。
+
+**核心方法：** 用“局部线性主部加高阶余项”统一处理四个函数，而不是直接对不可微的因子套用乘积求导法则。
+
+令 $h=(\Delta x,\Delta y)$、$\rho=\|h\|$。由 $f(P_0)=0$ 且 $f$ 可微，存在一个线性函数 $L(h)$，使
 
 $$
-P_0=(x_0,y_0),
+f(P_0+h)=L(h)+o(\rho),\qquad |f(P_0+h)|=O(\rho).
 $$
 
-由于 $f$ 在 $P_0$ 可微且 $f(P_0)=0$，当 $(\Delta x,\Delta y)\to(0,0)$ 时，
+同时由 $g$ 在 $P_0$ 连续，记 $g_0=g(P_0)$，有 $g(P_0+h)=g_0+o(1)$；$|g(P_0+h)|=|g_0|+o(1)$。
+
+<Steps>
+<Step>
+
+### 判断 $F_1=f|f|$
 
 $$
-f(x_0+\Delta x,y_0+\Delta y)
-=A\Delta x+B\Delta y+o\!\left(\sqrt{(\Delta x)^2+(\Delta y)^2}\right).
+|F_1(P_0+h)|=|f(P_0+h)|^2=O(\rho^2)=o(\rho).
 $$
 
-又因为 $g$ 在 $P_0$ 连续，所以 $g(x_0+\Delta x,y_0+\Delta y)$ 在该点附近有界。
+故 $F_1$ 可微，微分为 $0$。
 
-对于
+</Step>
+<Step>
 
-$$
-F_1=f|f|,
-$$
-
-有 $F_1(P_0)=0$，且其增量是比 $\sqrt{(\Delta x)^2+(\Delta y)^2}$ 更高阶的无穷小，故 $F_1$ 在 $P_0$ 可微。
-
-对于
+### 判断 $F_2=fg$ 与 $F_3=f|g|$
 
 $$
-F_2=fg,
+\begin{aligned}
+F_2(P_0+h)&=[L(h)+o(\rho)][g_0+o(1)]\\
+&=g_0L(h)+o(\rho),\\
+F_3(P_0+h)&=[L(h)+o(\rho)][|g_0|+o(1)]\\
+&=|g_0|L(h)+o(\rho).
+\end{aligned}
 $$
 
-由 $g$ 的连续性，
+因此二者也一定可微，其线性主部分别是 $g_0L(h)$ 与 $|g_0|L(h)$。
+
+</Step>
+<Step>
+
+### 用反例排除 $F_4=|f|g$ 的必然可微性
+
+在 $P_0=(0,0)$ 取 $f(x,y)=x$、$g(x,y)=1+|x|$。此时 $f$ 可微并在原点为 $0$，$g$ 连续而不可微，但
 
 $$
-F_2(x_0+\Delta x,y_0+\Delta y)
-=g(P_0)(A\Delta x+B\Delta y)+o(\rho),
+F_4(x,y)=|x|(1+|x|)=|x|+x^2.
 $$
 
-其中
+沿 $x$ 轴的左右差商分别趋于 $1$ 与 $-1$，故 $F_4$ 在原点**不可微**。因此题设不能保证 $F_4$ 可微。
 
-$$
-\rho=\sqrt{(\Delta x)^2+(\Delta y)^2},
-$$
+</Step>
+</Steps>
 
-故 $F_2$ 在 $P_0$ 可微。
+<Callout type="warn" title="“不一定可微”与“一定不可微”不同">
 
-同理，$|g|$ 在 $P_0$ 连续，所以
+本题只能排除 $F_4$ 的**必然性**，不能宣称它对每一组 $f,g$ 都不可微。例如 $f=x^2$、$g=|x|$ 时，$|f|g=|x|^3$ 反而可微。选择题应理解为“根据给定条件能够保证哪些函数可微”。
 
-$$
-F_3=f|g|
-$$
-
-也在 $P_0$ 可微。
-
-而
-
-$$
-F_4=|f|g
-$$
-
-中由于绝对值作用在 $f$ 上，其偏导数不一定存在，因此不一定可微。
-
-故只有 $F_1,F_2,F_3$ 一定可微，选 C。
+</Callout>
 
 </Solution>
 
@@ -922,7 +1139,7 @@ $$
 设
 
 $$
- z=f(x,y)=
+z=f(x,y)=
 \begin{cases}
 (x^2+y^2)\sin\frac1{\sqrt{x^2+y^2}},&x^2+y^2\ne0,\\[2mm]
 0,&x^2+y^2=0,
@@ -938,43 +1155,63 @@ $$
 
 <Solution>
 
-记
-$$
- r=\sqrt{x^2+y^2}.
-$$
-当 $ (x,y)\ne(0,0)$ 时，
-$$
- f(x,y)=r^2\sin\frac1r.
-$$
-由
-$$
- |f(x,y)|\le r^2\to0
-$$
-知函数在原点连续。
+**正确选项：C。** 原点的两个偏导数均存在且为 $0$，函数在原点可微；但是偏导函数在原点附近**不连续**，故 A 错。
 
-原点处的两个偏导数为
+令 $r=\sqrt{x^2+y^2}$。非原点处
+
 $$
- f_x(0,0)=\lim_{h\to0}\frac{h^2\sin(1/|h|)}h
-=\lim_{h\to0}h\sin\frac1{|h|}=0,
-$$
-同理
-$$
- f_y(0,0)=0.
+f(x,y)=r^2\sin\frac1r,\qquad f(0,0)=0.
 $$
 
-进一步，若以
-$$
- L(x,y)=f_x(0,0)x+f_y(0,0)y=0
-$$
-作为线性主部，则
-$$
- \frac{|f(x,y)-f(0,0)-L(x,y)|}{\sqrt{x^2+y^2}}
-=\frac{|r^2\sin(1/r)|}{r}
-\le r\to0.
-$$
-所以 $ f$ 在原点可微。
+<Steps>
+<Step>
 
-（A）错误。虽然原点处偏导数存在，但偏导函数在原点附近发生振荡，并不连续。例如在 $ y=0,x\ne0$ 时，$ f_x(x,0)$ 含有振荡项 $ \cos(1/|x|)$。因此正确选项为（C）。
+### 用偏导定义求原点处偏导数
+
+当 $h\ne0$ 时，$f(h,0)=h^2\sin(1/|h|)$，从而
+
+$$
+f_x(0,0)=\lim_{h\to0}\frac{f(h,0)}h
+=\lim_{h\to0}h\sin\frac1{|h|}=0.
+$$
+
+交换 $x,y$ 同理得 $f_y(0,0)=0$。
+
+</Step>
+<Step>
+
+### 用一阶余项直接证明可微
+
+候选线性主部为 $0$，且
+
+$$
+\frac{|f(x,y)-f(0,0)|}{r}
+=r\left|\sin\frac1r\right|\le r\longrightarrow0.
+$$
+
+故 $f(x,y)=o(r)$，原点处可微。
+
+</Step>
+<Step>
+
+### 检验偏导数是否连续
+
+在 $x>0,\ y=0$ 上，直接求导得到
+
+$$
+f_x(x,0)=2x\sin\frac1x-\cos\frac1x.
+$$
+
+第一项趋于 $0$，第二项却随 $x\to0^+$ 振荡、无极限，因而 $f_x(x,y)$ 在 $(0,0)$ 处不连续。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="常用反例模型">
+
+$r^2\sin(1/r)$ 说明：**可微不必有连续偏导数**。判断可微看函数值的 $o(r)$；判断偏导连续则需另行分析**导函数**的极限，这两件事的振荡量级不同。
+
+</Callout>
 
 </Solution>
 
@@ -985,7 +1222,7 @@ $$
 设
 
 $$
- f(x,y)=|x-y|\varphi(x,y),
+f(x,y)=|x-y|\varphi(x,y),
 $$
 
 其中 $ \varphi(x,y)$ 在点 $ (0,0)$ 处连续且 $ \varphi(0,0)=0$，则 $ f(x,y)$ 在点 $ (0,0)$ 处
@@ -997,35 +1234,54 @@ $$
 
 <Solution>
 
-由于 $ \varphi(x,y)$ 在原点连续且 $ \varphi(0,0)=0$，故
-$$
- \varphi(x,y)\to0\qquad((x,y)\to(0,0)).
-$$
-又
-$$
- |x-y|\le |x|+|y|\le\sqrt2\sqrt{x^2+y^2},
-$$
-所以
-$$
- |f(x,y)|
-\le\sqrt2\sqrt{x^2+y^2}\,|\varphi(x,y)|.
-$$
-从而
-$$
- \frac{|f(x,y)-f(0,0)|}{\sqrt{x^2+y^2}}
-\le\sqrt2|\varphi(x,y)|\to0.
-$$
-这说明
-$$
- f(x,y)=o\left(\sqrt{x^2+y^2}\right),
-$$
-故函数在原点可微，且其全微分为零。
+**正确选项：C。** $f$ 在原点可微，且
 
-也可直接验证
 $$
- f_x(0,0)=f_y(0,0)=0.
+\boxed{f_x(0,0)=f_y(0,0)=0,\qquad \mathrm df\big|_{(0,0)}=0}.
 $$
-因此（A）、（B）、（D）均错误，正确答案为（C）。
+
+**解题关键：** 由 $\varphi$ 连续且 $\varphi(0,0)=0$，可写成 $\varphi(x,y)=o(1)$；而 $|x-y|=O(r)$。两者相乘便是 $o(r)$。
+
+<Steps>
+<Step>
+
+### 控制非光滑因子 $|x-y|$
+
+设 $r=\sqrt{x^2+y^2}$。柯西—施瓦茨不等式给出
+
+$$
+|x-y|\le\sqrt2\,r.
+$$
+
+由 $\varphi(x,y)\to0$，
+
+$$
+\frac{|f(x,y)|}{r}
+=\frac{|x-y|}{r}\,|\varphi(x,y)|
+\le\sqrt2\,|\varphi(x,y)|\longrightarrow0.
+$$
+
+</Step>
+<Step>
+
+### 对照可微定义得出结论
+
+因为 $f(0,0)=0$，上式正是
+
+$$
+f(x,y)-f(0,0)=0\cdot x+0\cdot y+o(r).
+$$
+
+它已经给出合法的线性主部，所以函数可微，两偏导数都为 $0$。
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="不能对 $|x-y|$ 机械套求导法则">
+
+$|x-y|$ 在直线 $x=y$ 上可能不可微，但题目研究的是与趋于零的 $\varphi$ 的乘积。**可微性属于整个乘积**：零因子可以消去非光滑部分的一阶影响，无须额外假定 $\varphi$ 可导。
+
+</Callout>
 
 </Solution>
 
@@ -1042,29 +1298,84 @@ $$
 
 <Solution>
 
-**解析：** 对于选项 D：当选项 D 中条件成立时，有
-$$f_x'(x_0, y_0) = \lim_{\Delta x \to 0} \frac{\Delta f}{\Delta x} = \lim_{\Delta x \to 0} \left[ \frac{1}{\Delta x} \cdot (\Delta x)^2 \sin \frac{1}{(\Delta x)^2} \right] = 0,$$
-$$f_y'(x_0, y_0) = \lim_{\Delta y \to 0} \frac{\Delta f}{\Delta y} = \lim_{\Delta y \to 0} \left[ \frac{1}{\Delta y} \cdot (\Delta y)^2 \sin \frac{1}{(\Delta y)^2} \right] = 0,$$
-$$\lim_{\substack{\Delta x \to 0 \\ \Delta y \to 0}} \frac{\Delta f - df}{\rho} = \lim_{\substack{\Delta x \to 0 \\ \Delta y \to 0}} \frac{\left[ (\Delta x)^2 + (\Delta y)^2 \right] \sin \frac{1}{(\Delta x)^2 + (\Delta y)^2}}{\sqrt{(\Delta x)^2 + (\Delta y)^2}}$$
-$$= \lim_{\substack{\Delta x \to 0 \\ \Delta y \to 0}} \left[ (\Delta x)^2 + (\Delta y)^2 \right]^{\frac{1}{2}} \cdot \sin \frac{1}{(\Delta x)^2 + (\Delta y)^2} = 0.$$
-由可微的定义，知 $f(x, y)$ 在点 $(x_0, y_0)$ 处可微，且 $df = 0$，选项 D 正确.
+**正确选项：D。** 以 $\rho=\sqrt{(\Delta x)^2+(\Delta y)^2}$ 表示自变量增量的长度。要推出可微且 $\mathrm df=0$，必须并且只需满足
 
-对于选项 A：由 $f_x'(x_0, y_0) = f_y'(x_0, y_0) = 0$，知偏导数存在，但不能推出 $f(x, y)$ 在点 $(x_0, y_0)$ 处可微.
+$$
+\boxed{\Delta f=o(\rho)}.
+$$
 
-对于选项 B：$\Delta f = \frac{\Delta x \Delta y}{\sqrt{(\Delta x)^2 + (\Delta y)^2}}$，当 $\Delta y = 0$ 时，$\Delta f = 0$；当 $\Delta x = 0$ 时，$\Delta f = 0$，故 $f_x'(x_0, y_0) = \lim_{\Delta x \to 0} \frac{\Delta f}{\Delta x} = 0, f_y'(x_0, y_0) = \lim_{\Delta y \to 0} \frac{\Delta f}{\Delta y} = 0$，由此可知
-$$\lim_{\substack{\Delta x \to 0 \\ \Delta y \to 0}} \frac{\Delta f - df}{\rho} = \lim_{\substack{\Delta x \to 0 \\ \Delta y \to 0}} \frac{\frac{\Delta x \Delta y}{\sqrt{(\Delta x)^2 + (\Delta y)^2}}}{\sqrt{(\Delta x)^2 + (\Delta y)^2}} = \lim_{\substack{\Delta x \to 0 \\ \Delta y \to 0}} \frac{\Delta x \Delta y}{(\Delta x)^2 + (\Delta y)^2}$$
-不存在，即 $f(x, y)$ 在点 $(x_0, y_0)$ 处不可微.
+下面逐项判断，注意四个选项的“沿坐标轴差商”和“任意路径的线性逼近”不是一回事。
 
-对于选项 C：由于 $\Delta f = \frac{\sin\left[(\Delta x)^2 + (\Delta y)^2\right]}{\sqrt{(\Delta x)^2 + (\Delta y)^2}}$，故 $f_x'(x_0, y_0) = \lim_{\Delta x \to 0} \frac{\sin(\Delta x)^2}{|\Delta x| \cdot \Delta x} = \lim_{\Delta x \to 0} \frac{\Delta x}{|\Delta x|}$，
-又因为
-$$\lim_{\Delta x \to 0^+} \frac{\Delta x}{|\Delta x|} = 1, \quad \lim_{\Delta x \to 0^-} \frac{\Delta x}{|\Delta x|} = -1,$$
-所以 $f_x'(x_0, y_0)$ 不存在. 同理，$f_y'(x_0, y_0)$ 不存在. 故 $f(x, y)$ 在点 $(x_0, y_0)$ 处不可微.
+<Steps>
+<Step>
+
+### D：满足一阶高阶余项（正确）
+
+D 中 $\Delta f=\rho^2\sin(1/\rho^2)$，因此
+
+$$
+\frac{|\Delta f|}{\rho}
+=\rho\left|\sin\frac1{\rho^2}\right|\le\rho\longrightarrow0.
+$$
+
+故直接符合可微定义，全微分为 $0$。
+
+</Step>
+<Step>
+
+### A：只有偏导为零，信息不足
+
+偏导数都等于 $0$，仅表明沿两坐标轴的变化率为 $0$。例如
+
+$$
+\Delta f=\frac{\Delta x\,\Delta y}{\rho}
+$$
+
+在坐标轴上的偏导数均为 $0$，但沿 $\Delta x=\Delta y=t\ne0$，$\Delta f/\rho=1/2$，故不可微。
+
+</Step>
+<Step>
+
+### B：余项不是 $o(\rho)$
+
+对 B 的增量，
+
+$$
+\frac{\Delta f}{\rho}
+=\frac{\Delta x\,\Delta y}{(\Delta x)^2+(\Delta y)^2}.
+$$
+
+沿 $\Delta y=0$ 值为 $0$，沿 $\Delta y=\Delta x\ne0$ 值为 $1/2$，极限不存在，因而不满足可微性。
+
+</Step>
+<Step>
+
+### C：连一阶偏导数都不存在
+
+沿 $\Delta y=0$，C 的 $x$ 方向差商为
+
+$$
+\frac{\sin((\Delta x)^2)}{|\Delta x|\,\Delta x}
+\sim\frac{\Delta x}{|\Delta x|}
+\qquad(\Delta x\to0).
+$$
+
+左右极限分别为 $1$ 与 $-1$；故 $f_x$ 不存在，更谈不上可微。
+
+</Step>
+</Steps>
+
+<Callout type="idea" title="一眼识别阶数">
+
+将增量改写为 $\rho$ 的形式最省事：D 为 $O(\rho^2)$，一定是 $o(\rho)$；B 虽为 $O(\rho)$，但未必是 $o(\rho)$；C 也只是 $O(\rho)$，甚至有方向差商跳变。
+
+</Callout>
 
 </Solution>
 
 </Question>
 
-## 考点4：偏导定义与混合偏导次序
+## 考点四：混合偏导数的定义与求导次序
 
 <Question id="selected-1103-classified-1031-liyongle-2027-s6-q04" type="single" points={5} tags="来源:李永乐六套卷, 考点:混合偏导数与定义法, 难度:中等">
 
@@ -1086,29 +1397,64 @@ $$
 
 <Solution>
 
-**答案**：C，$\boxed{(-1,1)}$。
+**正确选项：C。** 按照 $f_{xy}=\partial_y(f_x)$、$f_{yx}=\partial_x(f_y)$ 的记号约定，
 
-**过程**：先求沿坐标轴的一阶偏导。由于 $f(0,y)=f(x,0)=0$，有
+$$
+\boxed{f_{xy}(0,0)=-1,\qquad f_{yx}(0,0)=1}.
+$$
+
+**解题关键：** 混合偏导数在原点应按**两次单变量差商**定义求，不能先在非原点写复杂的二阶导数，再直接代入原点。
+
+<Steps>
+<Step>
+
+### 求 $y$ 轴上的 $f_x(0,y)$
+
+因 $f(0,y)=0$，对固定的 $y\ne0$，
 
 $$
 \begin{aligned}
-f_x(0,y)&=\lim_{h\to0}\frac{f(h,y)-f(0,y)}h
-=\lim_{h\to0}\frac{y(h^2-y^2)}{h^2+y^2}=-y\quad(y\ne0),\\
-f_y(x,0)&=\lim_{h\to0}\frac{f(x,h)-f(x,0)}h
-=\lim_{h\to0}\frac{x(x^2-h^2)}{x^2+h^2}=x\quad(x\ne0).
+f_x(0,y)
+&=\lim_{h\to0}\frac{f(h,y)-f(0,y)}h\\
+&=\lim_{h\to0}\frac{y(h^2-y^2)}{h^2+y^2}=-y.
 \end{aligned}
 $$
 
-而 $f_x(0,0)=f_y(0,0)=0$。再按偏导数定义得到
+而 $f_x(0,0)=0$，故
+
+$$
+f_{xy}(0,0)=\lim_{y\to0}\frac{f_x(0,y)-f_x(0,0)}y=-1.
+$$
+
+</Step>
+<Step>
+
+### 求 $x$ 轴上的 $f_y(x,0)$
+
+同理由 $f(x,0)=0$，固定 $x\ne0$ 得
 
 $$
 \begin{aligned}
-f''_{xy}(0,0)&=\lim_{y\to0}\frac{f_x(0,y)-f_x(0,0)}y=-1,\\
-f''_{yx}(0,0)&=\lim_{x\to0}\frac{f_y(x,0)-f_y(0,0)}x=1.
+f_y(x,0)
+&=\lim_{h\to0}\frac{f(x,h)-f(x,0)}h\\
+&=\lim_{h\to0}\frac{x(x^2-h^2)}{x^2+h^2}=x.
 \end{aligned}
 $$
 
-<Callout type="warn" title="混合偏导不一定相等">在原点，两个混合偏导虽都存在，但不相等；不能只凭“二阶偏导存在”就套用混合偏导交换顺序的定理。</Callout>
+因 $f_y(0,0)=0$，所以
+
+$$
+f_{yx}(0,0)=\lim_{x\to0}\frac{f_y(x,0)-f_y(0,0)}x=1.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="为什么不违反混合偏导交换定理？">
+
+定理的常用充分条件是混合偏导在邻域中具有适当的连续性。这里只能证明两种次序的混合偏导**在该点存在**，不满足可直接交换次序的条件；因此 $-1\ne1$ 完全可能。
+
+</Callout>
 
 </Solution>
 </Question>
@@ -1124,14 +1470,65 @@ $$
 
 <Solution>
 
-**解析：** 依题设, 有 $f_x'(0,0) = \lim_{x \to 0} \frac{f(x,0) - f(0,0)}{x} = \lim_{x \to 0} \frac{0 - 0}{x} = 0$.
-同理, $f_y'(0,0) = 0$.
-当 $x^2 + y^2 \neq 0$ 时, 有
-$$f_x'(x,y) = \frac{2x(y^4 - y^2)}{(x^2 + y^4)^2} \sin(xy^2) + \frac{(x^2 + y^2)y^2}{x^2 + y^4} \cos(xy^2).$$
-故 $f_{xy}''(0,0) = \lim_{y \to 0} \frac{f_x'(0,y) - f_x'(0,0)}{y} = \lim_{y \to 0} \frac{1}{y}$ 不存在.
-当 $x^2 + y^2 \neq 0$ 时, 有
-$$f_y'(x,y) = \frac{2y(x^2 + y^4) - (x^2 + y^2)4y^3}{(x^2 + y^4)^2} \sin(xy^2) + \frac{(x^2 + y^2)2xy}{x^2 + y^4} \cos(xy^2).$$
-故 $f_{yx}''(0,0) = \lim_{x \to 0} \frac{f_y'(x,0) - f_y'(0,0)}{x} = \lim_{x \to 0} \frac{0}{x} = 0$. 选项 B 正确.
+**正确选项：B。**
+
+$$
+\boxed{f_{xy}(0,0)\text{ 不存在},\qquad f_{yx}(0,0)=0}.
+$$
+
+**方法：** 不必对整个有理三角表达式求偏导。根据混合偏导定义，只需分别求出 $y$ 轴上的 $f_x(0,y)$、$x$ 轴上的 $f_y(x,0)$。
+
+<Steps>
+<Step>
+
+### 求 $f_x(0,y)$，判断 $f_{xy}$
+
+由题设可知 $f(0,y)=f(x,0)=0$。固定 $y\ne0$，令 $x=h\to0$，
+
+$$
+\begin{aligned}
+f_x(0,y)
+&=\lim_{h\to0}\frac{f(h,y)-f(0,y)}h\\
+&=\lim_{h\to0}\frac{h^2+y^2}{h^2+y^4}
+\cdot\frac{\sin(hy^2)}h\\
+&=\frac{y^2}{y^4}\cdot y^2=1.
+\end{aligned}
+$$
+
+原点处 $f_x(0,0)=\lim_{h\to0}f(h,0)/h=0$，因此
+
+$$
+f_{xy}(0,0)=\lim_{y\to0}\frac{f_x(0,y)-f_x(0,0)}y
+=\lim_{y\to0}\frac1y
+$$
+
+不存在。
+
+</Step>
+<Step>
+
+### 求 $f_y(x,0)$，判断 $f_{yx}$
+
+对任意固定的 $x$，由于 $f(x,h)$ 中 $\sin(xh^2)=O(h^2)$，直接有
+
+$$
+f_y(x,0)=\lim_{h\to0}\frac{f(x,h)-f(x,0)}h=0
+$$
+
+（其中 $x=0$ 时更是恒为 $0$）。故
+
+$$
+f_{yx}(0,0)=\lim_{x\to0}\frac{f_y(x,0)-f_y(0,0)}x=0.
+$$
+
+</Step>
+</Steps>
+
+<Callout type="warn" title="两个极限不能混作一个">
+
+计算 $f_x(0,y)$ 时，**先固定 $y\ne0$，令 $x\to0$**，得到常数 $1$；之后才令 $y\to0$。如果把 $x,y$ 同时趋于 $0$，就换成了另一道极限题，容易错误地认为两个混合偏导都存在。
+
+</Callout>
 
 </Solution>
 
