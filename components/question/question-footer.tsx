@@ -43,19 +43,18 @@ function describeGrade(spec: GradingSpec, evaluation: Evaluation, selected: read
   return '部分正确';
 }
 
-
 /** The key as shown under a graded question. */
 function KeyText({ spec, evaluation }: { spec: GradingSpec; evaluation: Evaluation }) {
   if (spec.kind !== 'blank') {
-    return <span data-key-text="" data-choice-letters={spec.kind === 'choice' ? '' : undefined}>{formatKey(spec)}</span>;
+    return <span className="font-semibold text-foreground" data-choice-letters={spec.kind === 'choice' ? '' : undefined}>{formatKey(spec)}</span>;
   }
   const several = spec.blanks.length > 1;
   return (
-    <span data-key-text="" data-key-blanks="">
+    <span className="inline-flex flex-wrap items-baseline gap-x-3 gap-y-1 text-foreground">
       {spec.blanks.map((blank, index) => evaluation.blanks[index] === 'correct' && several ? null : (
-        <span key={index} data-key-blank="">
-          {several ? <span data-key-badge="" aria-label={`第 ${index + 1} 空`}>{index + 1}</span> : null}
-          <BlankKey blank={blank} />
+        <span key={index} className="inline-flex items-baseline gap-1">
+          {several ? <span className="text-muted-foreground">{blankBadge(index)}</span> : null}
+          <span className="font-semibold"><BlankKey blank={blank} className={blank.kind === 'math' ? 'text-[1.05em]' : undefined} /></span>
         </span>
       ))}
     </span>
