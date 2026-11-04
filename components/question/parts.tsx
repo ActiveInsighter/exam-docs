@@ -27,6 +27,8 @@ export type BlankProps = {
   kind?: 'text' | 'math';
   /** Hint shown in the empty field. */
   placeholder?: string;
+  /** The key typeset by KaTeX when it is written in LaTeX; added by remarkQuestion. */
+  answerHtml?: string;
   /** Position of the blank in its question; assigned by <Question>. */
   index?: number;
 };

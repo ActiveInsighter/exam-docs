@@ -25,13 +25,17 @@ function note(text: string) {
   return element;
 }
 
-function blankChip(text: string, feedback: string, kind: string | undefined) {
+/** `html`: the key typeset at compile time (LaTeX keys of text blanks). */
+function blankChip(text: string, feedback: string, kind: string | undefined, html?: string) {
   const chip = document.createElement('span');
   chip.dataset.questionBlank = '';
   chip.dataset.feedback = feedback;
   if (kind) chip.dataset.kind = kind;
   if (kind === 'math') chip.append(typesetMath(text));
-  else chip.textContent = text;
+  else if (html) {
+    chip.dataset.texAnswer = '';
+    chip.innerHTML = html;
+  } else chip.textContent = text;
   return chip;
 }
 
@@ -75,14 +79,15 @@ export function mirrorQuestion(questionId: string, state: MirrorState): HTMLElem
       holder.className = 'inline-flex flex-wrap items-baseline gap-1';
       if (submitted && verdict === 'correct') {
         // Self-graded without typing: the key stands for what the reader worked out.
-        holder.append(blankChip(state.values[index]?.trim() || blank.answer, 'correct', blank.kind));
+        const typed = state.values[index]?.trim();
+        holder.append(typed ? blankChip(typed, 'correct', blank.kind) : blankChip(blank.answer, 'correct', blank.kind, blank.html));
       } else {
         if (submitted && state.values[index]?.trim()) {
           const wrong = blankChip(state.values[index], 'incorrect', blank.kind);
           wrong.style.textDecoration = 'line-through';
           holder.append(wrong);
         }
-        holder.append(blankChip(blank.answer, 'answer', blank.kind));
+        holder.append(blankChip(blank.answer, 'answer', blank.kind, blank.html));
       }
       input.replaceWith(holder);
     });

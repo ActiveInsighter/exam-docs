@@ -37,6 +37,8 @@ export type BlankSpec = {
   aliases: readonly string[];
   tolerance?: number;
   kind: BlankKind;
+  /** The key typeset at compile time (LaTeX keys of text blanks); display only. */
+  html?: string;
 };
 
 /**

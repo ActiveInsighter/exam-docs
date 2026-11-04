@@ -103,6 +103,39 @@ describe('MathPreview', () => {
   it('draws radicals, functions and implicit products', () => {
     const html = renderToStaticMarkup(createElement(MathPreview, { text: '2√(3)+sin(x)' }));
     expect(html).toContain('<span data-math-sqrt=""><span>√</span><span>3</span></span>');
-    expect(html).toContain('sin(<var>x</var>)');
+    expect(html).toContain('sin\u2009<var>x</var>');
+  });
+
+  const plain = (text: string) => renderToStaticMarkup(createElement(MathPreview, { text }))
+    .replace(/<span data-math-frac=""><span>(.*?)<\/span><span>(.*?)<\/span><\/span>/gu, '[$1/$2]')
+    .replace(/<sup>/gu, '^{')
+    .replace(/<\/sup>/gu, '}')
+    .replace(/<[^>]+>/gu, '')
+    .replaceAll('\u2009', '_');
+
+  it('lets a stacked fraction stand without the brackets around it', () => {
+    expect(plain('((1)/(2))')).toBe('[1/2]');
+    expect(plain('((1)/(2))(x^2-1)e^(x^2)+C')).toBe('[1/2](x^{2} − 1)e^{x^{2}} + C');
+    expect(plain('-((3)/(2))')).toBe('−[3/2]');
+    expect(plain('e^(-((1)/(2)))')).toBe('e^{−[1/2]}');
+  });
+
+  it('keeps one pair of brackets where an exponent follows a fraction', () => {
+    expect(plain('(((1+e^2)/(2)))^2')).toBe('([1 + e^{2}/2])^{2}');
+  });
+
+  it('sets operator names apart and drops brackets around simple arguments', () => {
+    expect(plain('2x ln(x) + x')).toBe('2x_ln_x + x');
+    expect(plain('sin(x)cos(x)')).toBe('sin_x_cos_x');
+    expect(plain('ln|1+x|')).toBe('ln|1 + x|');
+    expect(plain('ln(x^2+1)')).toBe('ln(x^{2} + 1)');
+    expect(plain('cos(x)x')).toBe('cos(x)x');
+    expect(plain('sin(x)^2')).toBe('sin^{2}_x');
+    expect(plain('cos^(-((1)/(2)))(x)')).toBe('cos^{−[1/2]}_x');
+  });
+
+  it('writes explicit products with a centred dot, × only between figures', () => {
+    expect(plain('-cot(x)*ln(sin(x))')).toBe('−cot_x · ln_sin_x');
+    expect(plain('2*3')).toBe('2 × 3');
   });
 });

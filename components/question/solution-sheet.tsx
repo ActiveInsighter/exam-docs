@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/study-card';
 import { cn } from '@/lib/utils';
 import { blankBadge } from './blank-field';
-import { BlankGradeSwitch, BlankSelfGradeSwitch } from './blank-grade';
+import { BlankGradeSwitch, BlankKey, BlankSelfGradeSwitch } from './blank-grade';
 import { formatKey, formatResponse, type GradingSpec, type QuestionType } from './grading';
 import { QuestionMarkActions, QuestionMarksScope, QuestionUserTags, useMarks } from './marks/question-marks';
 import { NoteEditor } from './marks/note-editor';
@@ -130,7 +130,7 @@ function AnswerSummary({ spec, state }: { spec: GradingSpec; state: QuestionStat
               {spec.blanks.length > 1 ? <span className="text-muted-foreground">{blankBadge(index)}</span> : null}
               <span className="text-sm text-success">答案</span>
               <span className="min-w-0 text-lg font-semibold break-words">
-                {blank.kind === 'math' ? <MathPreview text={blank.answer} /> : blank.answer}
+                <BlankKey blank={blank} />
               </span>
               {submitted ? (
                 <span className="ml-auto inline-flex min-w-0 flex-wrap items-center justify-end gap-2">
@@ -326,7 +326,7 @@ function SolutionCard({ self, open, setOpen, triggerRef }: {
         <StudyCardHeader
           title={entry.numberLabel ? (
             <>
-              <span data-question-number="" aria-hidden="true">{entry.numberLabel}</span>
+              <span data-question-number="" data-type={entry.questionType} aria-hidden="true">{entry.numberLabel}</span>
               <span className="sr-only">第 {entry.numberLabel} 题</span>
             </>
           ) : entry.dialogTitle}
