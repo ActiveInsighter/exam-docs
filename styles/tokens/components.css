@@ -49,30 +49,50 @@
   --tile-shadow-hover: 0 4px 14px -6px rgb(0 0 0 / 14%), 0 1px 2px rgb(0 0 0 / 5%);
   --tile-radius: 0.875rem;
 
-  /* Question card: a quiet tinted plate; options are tiles on it. A hairline
-     keeps its edge on any page tone, a sheen lights its top (the header),
-     and dashed rules perforate the header and the footer off the stem. */
-  --exam-card: color-mix(in oklch, var(--foreground) 2.6%, var(--ui-panel));
-  --exam-card-ring: color-mix(in oklch, var(--foreground) 5%, transparent);
-  --exam-card-sheen: rgb(255 255 255 / 75%);
-  --exam-rule: color-mix(in oklch, var(--foreground) 13%, transparent);
-  --exam-card-radius: 1.25rem;
-  --exam-card-dot: color-mix(in oklch, var(--foreground) 16%, transparent);
-  --exam-choice: var(--tile-bg);
-  --exam-choice-hover: color-mix(in oklch, var(--foreground) 2.5%, transparent);
+  /*
+   * Question card: an answer sheet (答题卡), in the home page's palette
+   * (styles/answer-sheet.module.css). White paper with a hairline frame in
+   * the red "dropout" ink answer sheets are printed in, black timing marks
+   * down the left edge, red-printed option boxes that fill with graphite
+   * when picked, and dashed red rules between the sections.
+   */
+  --exam-paper: oklch(1 0 0);
+  --exam-ink: #1c1d21;
+  --exam-ink-muted: #6f7178;
+  --exam-dropout: #c8324f;
+  --exam-dropout-line: #efb4c0;
+  --exam-dropout-wash: #fdf2f4;
+  --exam-graphite: #26272c;
+  --exam-graphite-sheen: #474951;
+  --exam-timing: color-mix(in oklch, var(--exam-ink) 82%, transparent);
+  --exam-display-font: 'Noto Serif SC', 'Source Han Serif SC', 'Noto Serif CJK SC', 'Songti SC', 'STSong', 'SimSun', serif;
+
+  --exam-card: var(--exam-paper);
+  --exam-card-ring: color-mix(in oklch, var(--exam-dropout) 42%, transparent);
+  --exam-card-shadow:
+    0 1px 0 color-mix(in oklch, var(--exam-ink) 6%, transparent),
+    0 22px 44px -30px rgb(28 29 33 / 26%);
+  --exam-card-sheen: transparent;
+  --exam-rule: var(--exam-dropout-line);
+  --exam-card-radius: 0.5rem;
+  --exam-card-dot: var(--exam-timing);
+  --exam-choice: var(--exam-paper);
+  --exam-choice-hover: var(--exam-dropout-wash);
   --exam-choice-active: var(--tile-fill);
-  --exam-choice-ring: color-mix(in oklch, var(--foreground) 9%, transparent);
-  /* Options: outlines on the plate (no fill until picked), darker on hover,
-     solid ink once picked, fainter when left out of the result. */
-  --exam-choice-outline: color-mix(in oklch, var(--foreground) 15%, transparent);
-  --exam-choice-outline-hover: color-mix(in oklch, var(--foreground) 34%, transparent);
-  --exam-choice-outline-faint: color-mix(in oklch, var(--foreground) 9%, transparent);
-  --exam-choice-ring-strong: color-mix(in oklch, var(--foreground) 70%, transparent);
+  --exam-choice-ring: color-mix(in oklch, var(--exam-ink) 12%, transparent);
+  /* Options: outlines on the paper (no fill until picked), red on hover,
+     solid graphite once picked, fainter when left out of the result. */
+  --exam-choice-outline: color-mix(in oklch, var(--exam-ink) 12%, transparent);
+  --exam-choice-outline-hover: color-mix(in oklch, var(--exam-dropout) 55%, transparent);
+  --exam-choice-outline-faint: color-mix(in oklch, var(--exam-ink) 7%, transparent);
+  --exam-choice-ring-strong: var(--exam-graphite);
   --exam-choice-shadow: var(--tile-shadow);
   --exam-choice-shadow-hover: var(--tile-shadow-hover);
-  --exam-marker: color-mix(in oklch, var(--foreground) 5.5%, transparent);
-  --exam-marker-hover: color-mix(in oklch, var(--foreground) 10%, transparent);
-  --exam-marker-ring: color-mix(in oklch, var(--foreground) 16%, transparent);
+  /* Option boxes: printed in dropout ink, filled with graphite when picked. */
+  --exam-marker: transparent;
+  --exam-marker-hover: var(--exam-dropout-wash);
+  --exam-marker-ring: var(--exam-dropout-line);
+  --exam-marker-ink: var(--exam-dropout);
   /* Option letters in Computer Modern math italic (see the 'Exam Letter'
      face in styles/question.css); system serifs italic until it loads. */
   --exam-letter-font: 'Exam Letter', Georgia, 'Times New Roman', serif;
@@ -87,23 +107,23 @@
   /* The ink a picked option fills with (see-through, so it reads the same
      on the card and on the solution card's grey pane), and the stronger
      wave that ripples from the press point over it (styles/reveal.css). */
-  --exam-choice-fill: color-mix(in oklch, var(--foreground) 8.5%, transparent);
+  --exam-choice-fill: color-mix(in oklch, var(--exam-graphite) 7%, transparent);
 
-  /* Built-in tags: neutral ink for every kind (icons and hairlines only). */
-  --exam-trait-accent: color-mix(in oklch, var(--foreground) 55%, transparent);
-  --exam-source-accent: color-mix(in oklch, var(--foreground) 50%, transparent);
-  --exam-point-accent: color-mix(in oklch, var(--foreground) 55%, transparent);
-  --exam-point-bg: var(--ui-panel);
+  /* Built-in tags: printed in dropout ink (icons and hairlines only). */
+  --exam-trait-accent: var(--exam-dropout);
+  --exam-source-accent: var(--exam-dropout);
+  --exam-point-accent: var(--exam-dropout);
+  --exam-point-bg: var(--exam-paper);
 
-  /* Question number: a quiet filled squircle in the card's ink. */
-  --exam-number-bg: color-mix(in oklch, var(--foreground) 7%, transparent);
-  --exam-number-edge: color-mix(in oklch, var(--foreground) 5%, transparent);
-  --exam-number-fg: color-mix(in oklch, var(--foreground) 86%, transparent);
+  /* Question number: the 题号 box of an answer sheet, a serif figure in red. */
+  --exam-number-bg: transparent;
+  --exam-number-edge: var(--exam-dropout);
+  --exam-number-fg: var(--exam-dropout);
 
-  /* Question type chip: neutral, like every built-in tag. */
-  --exam-type-bg: transparent;
-  --exam-type-ring: color-mix(in oklch, var(--foreground) 12%, transparent);
-  --exam-type-fg: color-mix(in oklch, var(--foreground) 70%, transparent);
+  /* Question type chip: a red label like the sheet's 答题区. */
+  --exam-type-bg: var(--exam-dropout-wash);
+  --exam-type-ring: var(--exam-dropout-line);
+  --exam-type-fg: var(--exam-dropout);
 
   /* Result tones (styles/question.css): one hue per result, softened from
      the theme's success / destructive / warning so a graded card stays
@@ -158,40 +178,29 @@
   --tile-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
   --tile-shadow-hover: inset 0 1px 0 rgb(255 255 255 / 6%), 0 6px 16px -8px rgb(0 0 0 / 70%);
 
-  --exam-card: oklch(0.165 0 0);
-  --exam-card-ring: rgb(255 255 255 / 6%);
-  --exam-card-sheen: rgb(255 255 255 / 2.5%);
-  --exam-rule: rgb(255 255 255 / 13%);
-  --exam-card-dot: rgb(255 255 255 / 13%);
-  --exam-choice-hover: rgb(255 255 255 / 3%);
-  --exam-choice-ring: rgb(255 255 255 / 10%);
-  --exam-choice-outline: rgb(255 255 255 / 15%);
-  --exam-choice-outline-hover: rgb(255 255 255 / 34%);
-  --exam-choice-outline-faint: rgb(255 255 255 / 8%);
-  --exam-choice-ring-strong: rgb(255 255 255 / 72%);
-  --exam-marker: rgb(255 255 255 / 7%);
-  --exam-marker-hover: rgb(255 255 255 / 12%);
-  --exam-marker-ring: rgb(255 255 255 / 22%);
+  --exam-paper: #0a0a0a;
+  --exam-ink: #ececef;
+  --exam-ink-muted: #9a9ca3;
+  --exam-dropout: #ff7d93;
+  --exam-dropout-line: #6b3542;
+  --exam-dropout-wash: #22151a;
+  --exam-graphite: #e6e6ea;
+  --exam-graphite-sheen: #fff;
+  --exam-timing: color-mix(in oklch, var(--exam-ink) 70%, transparent);
+
+  --exam-card-ring: color-mix(in oklch, var(--exam-dropout) 38%, transparent);
+  --exam-card-shadow: 0 1px 0 rgb(255 255 255 / 3%) inset, 0 18px 40px -24px rgb(0 0 0 / 80%);
+  --exam-choice-ring: rgb(255 255 255 / 12%);
+  --exam-choice-outline: rgb(255 255 255 / 13%);
+  --exam-choice-outline-hover: color-mix(in oklch, var(--exam-dropout) 55%, transparent);
+  --exam-choice-outline-faint: rgb(255 255 255 / 7%);
 
   --exam-solution-aside: oklch(0.225 0.003 255);
   --exam-solution-aside-muted: oklch(0.72 0.006 255);
   --exam-solution-aside-fill: rgb(255 255 255 / 7%);
   --exam-solution-aside-fill-hover: rgb(255 255 255 / 11%);
 
-  --exam-choice-fill: rgb(255 255 255 / 12%);
-
-  --exam-trait-accent: rgb(255 255 255 / 55%);
-  --exam-source-accent: rgb(255 255 255 / 50%);
-  --exam-point-accent: rgb(255 255 255 / 55%);
-  --exam-point-bg: rgb(255 255 255 / 4%);
-
-  --exam-number-bg: rgb(255 255 255 / 9%);
-  --exam-number-edge: rgb(255 255 255 / 5%);
-  --exam-number-fg: rgb(255 255 255 / 90%);
-
-  --exam-type-bg: transparent;
-  --exam-type-ring: rgb(255 255 255 / 14%);
-  --exam-type-fg: rgb(255 255 255 / 72%);
+  --exam-choice-fill: rgb(255 255 255 / 10%);
 
   --exam-tone-correct: oklch(0.75 0.12 156);
   --exam-tone-incorrect: oklch(0.73 0.135 23);

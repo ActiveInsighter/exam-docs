@@ -31,40 +31,63 @@
   /* The blog sets its prose in serif; questions keep the interface face. */
   font-family: var(--font-sans);
   margin-block: 1.25rem;
-  padding: 0.75rem 0.875rem 0.625rem;
+  /* The left gutter holds the timing marks. */
+  padding: 0.75rem 0.875rem 0.625rem 1.375rem;
   border-radius: var(--exam-card-radius);
-  /* A sheen over the header end of the plate, and a hairline edge. */
-  background:
-    linear-gradient(180deg, var(--exam-card-sheen), transparent 5.5rem),
-    var(--exam-card);
-  box-shadow: inset 0 0 0 1px var(--exam-card-ring);
+  /* Answer-sheet paper: a dropout-red hairline frame and a soft lift. */
+  background: var(--exam-card);
+  box-shadow: inset 0 0 0 1px var(--exam-card-ring), var(--exam-card-shadow);
   /* Long pages: skip layout and paint of cards far off screen. */
   content-visibility: auto;
   contain-intrinsic-size: auto 18rem;
 }
 
 /*
- * Squared paper in the top right corner, under the card's actions: a dot
- * grid that fades out towards the stem, so the plate reads as an exam sheet
- * without a pattern behind the text.
+ * Answer-sheet anatomy, as on the home page's 答题卡: black timing marks
+ * down the left edge (::before) and a registration square in the bottom
+ * right corner (::after), both in the gutters, never behind the text.
  */
-[data-exam-question]::before {
+[data-exam-question]::before,
+[data-exam-question]::after {
   content: '';
   position: absolute;
-  inset: 0;
   z-index: -1;
-  border-radius: inherit;
-  background-image: radial-gradient(circle, var(--exam-card-dot) 0.75px, transparent 1.15px);
-  background-size: 0.875rem 0.875rem;
-  background-position: right 0.4375rem top 0.4375rem;
-  -webkit-mask-image: radial-gradient(ellipse 46% 62% at 100% 0%, #000 0%, rgb(0 0 0 / 35%) 45%, transparent 100%);
-  mask-image: radial-gradient(ellipse 46% 62% at 100% 0%, #000 0%, rgb(0 0 0 / 35%) 45%, transparent 100%);
   pointer-events: none;
+}
+
+[data-exam-question]::before {
+  top: 2.75rem;
+  bottom: 1.25rem;
+  left: 0.5rem;
+  width: 0.3125rem;
+  /* One mark centred in each tile, repeated a whole number of times: tile
+     edges stay clear, so the column never ends on a sliver of a mark. */
+  background: linear-gradient(to bottom, transparent calc(50% - 1.5px), var(--exam-card-dot) 0 calc(50% + 1.5px), transparent 0) 0 0 / 100% 15px round;
+}
+
+[data-exam-question]::after {
+  right: 0.375rem;
+  bottom: 0.375rem;
+  width: 0.375rem;
+  height: 0.375rem;
+  background: var(--exam-timing);
 }
 
 @media (min-width: 640px) {
   [data-exam-question] {
-    padding: 0.875rem 1.25rem 0.75rem;
+    padding: 0.875rem 1.25rem 0.75rem 1.875rem;
+  }
+
+  [data-exam-question]::before {
+    left: 0.6875rem;
+    width: 0.4375rem;
+  }
+
+  [data-exam-question]::after {
+    right: 0.5rem;
+    bottom: 0.5rem;
+    width: 0.4375rem;
+    height: 0.4375rem;
   }
 }
 
@@ -79,8 +102,8 @@
 }
 
 @keyframes exam-card-target {
-  0%, 30% { box-shadow: inset 0 0 0 1px var(--exam-card-ring), 0 0 0 2px color-mix(in oklch, var(--foreground) 22%, transparent); }
-  100% { box-shadow: inset 0 0 0 1px var(--exam-card-ring), 0 0 0 2px transparent; }
+  0%, 30% { box-shadow: inset 0 0 0 1px var(--exam-card-ring), var(--exam-card-shadow), 0 0 0 3px color-mix(in oklch, var(--exam-dropout) 30%, transparent); }
+  100% { box-shadow: inset 0 0 0 1px var(--exam-card-ring), var(--exam-card-shadow), 0 0 0 3px transparent; }
 }
 
 /*
@@ -167,16 +190,16 @@
   min-width: 1.75rem;
   height: 1.75rem;
   padding-inline: 0.4375rem;
-  border-radius: 0.5625rem;
+  border-radius: 0.3125rem;
   background: var(--exam-number-bg);
-  box-shadow: inset 0 0 0 1px var(--exam-number-edge);
+  box-shadow: inset 0 0 0 1.5px var(--exam-number-edge);
   color: var(--exam-number-fg);
-  font-family: var(--font-outfit), var(--font-sans);
-  font-size: 0.9375rem;
-  font-weight: 600;
+  font-family: var(--exam-display-font);
+  font-size: 1rem;
+  font-weight: 700;
   line-height: 1;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: 0;
 }
 
 [data-question-type-label] {
@@ -186,14 +209,14 @@
   gap: 0.3125rem;
   height: 1.5rem;
   padding-inline: 0.4375rem 0.5625rem;
-  border-radius: 0.5rem;
+  border-radius: 0.3125rem;
   box-shadow: inset 0 0 0 1px var(--exam-type-ring);
   background: var(--exam-type-bg);
   color: var(--exam-type-fg);
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.08em;
   white-space: nowrap;
 }
 
@@ -203,7 +226,7 @@
   width: 0.8125rem;
   height: 0.8125rem;
   background: currentColor;
-  opacity: 0.75;
+  opacity: 0.85;
   mask: var(--type-icon) center / contain no-repeat;
 }
 
@@ -275,7 +298,7 @@
   max-width: 100%;
   min-height: 1.5rem;
   padding: 0.1875rem 0.5625rem 0.1875rem 0.4375rem;
-  border-radius: 0.5rem;
+  border-radius: 0.3125rem;
   box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--tag-accent) 30%, transparent);
   color: color-mix(in oklch, var(--foreground) 80%, transparent);
   font-size: 0.75rem;
@@ -320,7 +343,7 @@
   gap: 0.4375rem;
   min-height: 2rem;
   padding: 0.375rem 0.75rem 0.375rem 0.625rem;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   background: var(--exam-point-bg);
   box-shadow:
     inset 0 0 0 1px color-mix(in oklch, var(--tag-accent) 22%, transparent),
@@ -515,6 +538,7 @@
      reach the edge, so the ring shows through them. */
   --reveal-color: var(--exam-choice-fill);
   --reveal-inset: 0px;
+  --tile-radius: 0.5rem;
 }
 
 @media (hover: hover) {
@@ -571,13 +595,14 @@
 @media (hover: hover) {
   [data-exam-choice-option]:not([aria-disabled='true'])[data-feedback='idle']:hover [data-choice-marker] {
     background: var(--exam-marker-hover);
-    color: var(--foreground);
+    box-shadow: inset 0 0 0 1.5px var(--exam-marker-ink);
   }
 }
 
 /*
  * Marker: the letter, set in Computer Modern math italic like a variable in
- * a formula, on a soft disc. Round for one answer, squarer for several.
+ * a formula, in an answer-sheet box printed in dropout red. Round for one
+ * answer, square for several; picking it shades it with graphite.
  */
 [data-choice-marker] {
   position: relative;
@@ -589,7 +614,8 @@
   margin-top: 0.0625rem;
   border-radius: 999px;
   background: var(--exam-marker);
-  color: color-mix(in oklch, var(--foreground) 78%, transparent);
+  box-shadow: inset 0 0 0 1.5px var(--exam-marker-ring);
+  color: var(--exam-marker-ink);
   font-family: var(--exam-letter-font);
   font-size: 1.125rem;
   font-style: italic;
@@ -602,7 +628,7 @@
 }
 
 [data-multiple] [data-choice-marker] {
-  border-radius: 0.5rem;
+  border-radius: 0.3125rem;
 }
 
 [data-choice-letter] {
@@ -657,10 +683,11 @@
   --tile-ring: var(--exam-choice-ring-strong);
   --tile-ring-width: 1.5px;
 }
+/* The picked box, shaded with graphite like a pencil mark on the sheet. */
 [data-feedback='selected'] [data-choice-marker] {
-  background: var(--foreground);
-  box-shadow: none;
-  color: var(--background);
+  background: repeating-linear-gradient(-62deg, var(--exam-graphite) 0 2.2px, var(--exam-graphite-sheen) 2.2px 3px);
+  box-shadow: inset 0 0 0 1.5px var(--exam-graphite);
+  color: var(--exam-paper);
 }
 
 /* Options not involved in the result recede. */
@@ -841,8 +868,8 @@
   width: 1.625rem;
   height: 1.625rem;
   border-radius: 999px;
-  box-shadow: inset 0 0 0 1px var(--exam-marker-ring);
-  color: var(--muted-foreground);
+  box-shadow: inset 0 0 0 1.5px var(--exam-marker-ring);
+  color: var(--exam-marker-ink);
   transition: background-color 260ms var(--ui-ease), color 260ms var(--ui-ease), box-shadow 260ms var(--ui-ease);
 }
 
@@ -870,7 +897,7 @@
 @media (hover: hover) {
   [data-boolean-option][data-feedback='idle']:not([aria-disabled='true']):hover [data-boolean-glyph] {
     background: var(--exam-marker-hover);
-    color: var(--foreground);
+    box-shadow: inset 0 0 0 1.5px var(--exam-marker-ink);
   }
 }
 
@@ -879,16 +906,16 @@
 /* ----------------------------------------------------------------- blanks */
 
 [data-question-blank] {
-  --blank-line: color-mix(in oklch, var(--foreground) 35%, transparent);
+  --blank-line: color-mix(in oklch, var(--exam-ink) 45%, transparent);
   display: inline-block;
   max-width: 100%;
   min-width: 4.5ch;
   margin-inline: 0.25rem;
   padding: 0.0625rem 0.5rem;
   border: 0;
-  border-radius: 0.5rem 0.5rem 0.25rem 0.25rem;
+  border-radius: 0.3125rem 0.3125rem 0.125rem 0.125rem;
   background: var(--exam-choice);
-  box-shadow: inset 0 -1.5px 0 var(--blank-line), inset 0 0 0 1px var(--exam-choice-ring);
+  box-shadow: inset 0 -1.5px 0 var(--blank-line), inset 0 0 0 1px var(--exam-marker-ring);
   color: var(--foreground);
   font: inherit;
   line-height: 1.6;
@@ -956,10 +983,11 @@ span[data-question-blank][data-kind='math'] {
   width: 1.125rem;
   height: 1.125rem;
   margin-inline-end: 0.25rem;
-  border-radius: 999px;
-  background: var(--ui-fill-strong);
-  color: var(--muted-foreground);
-  font-family: var(--font-outfit), var(--font-sans);
+  border-radius: 0.1875rem;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--exam-dropout-line);
+  color: var(--exam-dropout);
+  font-family: var(--exam-display-font);
   font-size: 0.6875rem;
   font-weight: 600;
   line-height: 1;
@@ -1027,6 +1055,23 @@ span[data-question-blank][data-kind='math'] {
   }
 }
 
+/* Submit: the home page's primary button, ink that turns dropout red on hover. */
+[data-question-footer] [data-submit-answer] {
+  border-radius: 0.5rem;
+  letter-spacing: 0.04em;
+}
+
+@media (hover: hover) {
+  [data-submit-answer]:not(:disabled):hover {
+    background: var(--exam-dropout);
+    color: #fff;
+  }
+
+  .dark [data-submit-answer]:not(:disabled):hover {
+    color: #1a0a0e;
+  }
+}
+
 /* An empty answer: the submit button waits as a quiet outline rather than a grey block. */
 [data-submit-answer]:disabled {
   background: transparent;
@@ -1047,6 +1092,11 @@ span[data-question-blank][data-kind='math'] {
   display: none;
 }
 
+/* Footer buttons share the answer sheet's squared corners. */
+[data-question-footer] :is([data-footer-actions], [data-footer-status]) button {
+  border-radius: 0.5rem;
+}
+
 [data-result-pill] {
   display: inline-flex;
   align-items: center;
@@ -1054,7 +1104,7 @@ span[data-question-blank][data-kind='math'] {
   /* As tall as the buttons beside it, so the footer is one row of capsules. */
   height: 2rem;
   padding-inline: 0.625rem 0.8125rem;
-  border-radius: 999px;
+  border-radius: 0.5rem;
   font-size: 0.8125rem;
   font-weight: 600;
   white-space: nowrap;
@@ -1085,7 +1135,7 @@ span[data-question-blank][data-kind='math'] {
   gap: 0.3125rem;
   height: 1.875rem;
   padding-inline: 0.5625rem 0.75rem;
-  border-radius: 999px;
+  border-radius: 0.5rem;
   box-shadow: inset 0 0 0 1px var(--exam-choice-outline);
   color: color-mix(in oklch, var(--foreground) 78%, transparent);
   font-size: 0.8125rem;
