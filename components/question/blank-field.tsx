@@ -9,9 +9,13 @@ import { useQuestionState } from './question-state';
 const CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
 export const blankBadge = (index: number) => CIRCLED[index] ?? String(index + 1);
 
+// CJK and other full-width characters take about two `ch` (the width of "0").
+const WIDE = /[\u1100-\u115F\u2E80-\uA4CF\uAC00-\uD7A3\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFF60\uFFE0-\uFFE6]/u;
+const span = (text: string) => [...text].reduce((total, char) => total + (WIDE.test(char) ? 2 : 1), 0);
+
 /** Width that fits the expected answer and grows with what is typed. */
 export function blankWidth(answer: string, value: string) {
-  const length = Math.max([...answer].length, [...value].length, 3);
+  const length = Math.max(span(answer), span(value), 3);
   return `${Math.min(length + 2.5, 28)}ch`;
 }
 
