@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpenTextIcon, CheckIcon, ChevronDownIcon, LibraryBigIcon, NotebookPenIcon, XIcon } from 'lucide-react';
+import { BookOpenTextIcon, CheckIcon, ChevronDownIcon, LibraryBigIcon, MinusIcon, NotebookPenIcon, XIcon } from 'lucide-react';
 import { lazy, type ReactNode, type RefObject, Suspense, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
@@ -15,7 +15,7 @@ import {
 import { cn } from '@/lib/utils';
 import { blankBadge } from './blank-field';
 import { BlankGradeSwitch, BlankKey, BlankSelfGradeSwitch } from './blank-grade';
-import { formatKey, formatResponse, type GradingSpec, type QuestionType } from './grading';
+import { type AttemptResult, formatKey, formatResponse, type GradingSpec, type QuestionType } from './grading';
 import { QuestionMarkActions, QuestionMarksScope, QuestionUserTags, useMarks } from './marks/question-marks';
 import { NoteEditor } from './marks/note-editor';
 import { MathPreview } from './math-preview';
@@ -101,18 +101,23 @@ function QuestionMirror({ questionId, state }: { questionId: string; state: Ques
   );
 }
 
-function Verdict({ correct }: { correct: boolean }) {
+const VERDICTS: Record<AttemptResult, { label: string; icon: ReactNode }> = {
+  correct: { label: '正确', icon: <CheckIcon strokeWidth={3} /> },
+  partial: { label: '部分正确', icon: <MinusIcon strokeWidth={3} /> },
+  incorrect: { label: '错误', icon: <XIcon strokeWidth={3} /> },
+};
+
+/** A solid badge in the result's tone (question.css). */
+function Verdict({ result }: { result: AttemptResult }) {
+  const verdict = VERDICTS[result];
   return (
-    <span
-      className={cn('grid size-5 shrink-0 place-items-center rounded-full [&_svg]:size-3', correct ? 'bg-success text-success-foreground' : 'bg-destructive text-destructive-foreground')}
-      aria-label={correct ? '正确' : '错误'}
-      role="img"
-    >
-      {correct ? <CheckIcon strokeWidth={3} /> : <XIcon strokeWidth={3} />}
+    <span data-answer-verdict="" data-tone={result} aria-label={verdict.label} role="img">
+      {verdict.icon}
     </span>
   );
 }
 
+// Answer tiles: neutral grey, or the tint of a result (data-tone, question.css).
 const tile = 'flex min-w-0 items-baseline gap-3 rounded-(--ui-radius-control) px-4 py-2.5 leading-relaxed';
 
 /** Correct answer beside the reader's submitted one. */
@@ -126,9 +131,9 @@ function AnswerSummary({ spec, state }: { spec: GradingSpec; state: QuestionStat
           const verdict = submitted?.evaluation?.blanks[index];
           const yours = submitted?.values[index]?.trim();
           return (
-            <li key={index} data-answer-row="" className={cn(tile, 'flex-wrap items-center gap-y-2 bg-(--ui-fill)', verdict && verdict !== 'correct' && 'bg-destructive/8')}>
+            <li key={index} data-answer-row="" data-answer-tile="" data-tone={verdict && verdict !== 'correct' ? 'incorrect' : undefined} className={cn(tile, 'flex-wrap items-center gap-y-2')}>
               {spec.blanks.length > 1 ? <span className="text-muted-foreground">{blankBadge(index)}</span> : null}
-              <span className="text-sm text-success">答案</span>
+              <span data-answer-label="key" className="text-sm">答案</span>
               <span className="min-w-0 text-lg font-semibold break-words">
                 <BlankKey blank={blank} />
               </span>
@@ -154,15 +159,15 @@ function AnswerSummary({ spec, state }: { spec: GradingSpec; state: QuestionStat
 
   return (
     <div className="grid gap-2 sm:grid-cols-[repeat(auto-fill,minmax(13rem,1fr))]">
-      <div className={cn(tile, 'bg-success/10')}>
-        <span className="shrink-0 text-sm text-success">正确答案</span>
+      <div data-answer-tile="" data-tone="correct" className={tile}>
+        <span data-answer-label="key" className="shrink-0 text-sm">正确答案</span>
         <span className="min-w-0 text-lg font-semibold" data-choice-letters={spec.kind === 'choice' ? '' : undefined}>{formatKey(spec)}</span>
       </div>
       {submitted ? (
-        <div className={cn(tile, submitted.evaluation!.result === 'correct' ? 'bg-(--ui-fill)' : submitted.evaluation!.result === 'partial' ? 'bg-warning/15' : 'bg-destructive/8')}>
+        <div data-answer-tile="" data-tone={submitted.evaluation!.result === 'correct' ? undefined : submitted.evaluation!.result} className={tile}>
           <span className="shrink-0 text-sm text-muted-foreground">你的答案</span>
           <span className="min-w-0 text-lg font-semibold break-words" data-choice-letters={spec.kind === 'choice' && submitted.selected.length ? '' : undefined}>{formatResponse(spec, submitted.selected, submitted.values)}</span>
-          <span className="ml-auto self-center"><Verdict correct={submitted.evaluation!.result === 'correct'} /></span>
+          <span className="ml-auto self-center"><Verdict result={submitted.evaluation!.result} /></span>
         </div>
       ) : null}
     </div>

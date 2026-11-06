@@ -64,12 +64,12 @@ function TilesDemo() {
   );
 }
 
-// The question card's result tones (styles/tokens/components.css), at the strengths it uses.
-const tone = (name: string, strength: string) => `color-mix(in oklch, var(--exam-tone-${name}) var(--exam-tone-${strength}), transparent)`;
+// The question card's result tones (styles/tokens/components.css): the tint it fills with and its outline.
+const tone = (name: string) => ({ color: `var(--exam-${name}-tint)`, ring: `var(--exam-${name}-line)` });
 const TONES = [
-  { label: '正确', color: tone('correct', 'fill'), ring: tone('correct', 'line') },
-  { label: '错误', color: tone('incorrect', 'fill'), ring: tone('incorrect', 'line') },
-  { label: '漏选', color: tone('missed', 'fill'), ring: tone('missed', 'line') },
+  { label: '正确', ...tone('correct') },
+  { label: '错误', ...tone('incorrect') },
+  { label: '漏选', ...tone('missed') },
 ] as const;
 
 /** Any colour: set --reveal-color (and --tile-ring) per state. */

@@ -33,33 +33,11 @@
   margin-block: 1.25rem;
   padding: 0.75rem 0.875rem 0.625rem;
   border-radius: var(--exam-card-radius);
-  /* A sheen over the header end of the plate, and a hairline edge. */
-  background:
-    linear-gradient(180deg, var(--exam-card-sheen), transparent 5.5rem),
-    var(--exam-card);
-  box-shadow: inset 0 0 0 1px var(--exam-card-ring);
+  /* One flat grey plate: no edge, no sheen, no pattern. Hairlines inside carry the structure. */
+  background: var(--exam-card);
   /* Long pages: skip layout and paint of cards far off screen. */
   content-visibility: auto;
   contain-intrinsic-size: auto 18rem;
-}
-
-/*
- * Squared paper in the top right corner, under the card's actions: a dot
- * grid that fades out towards the stem, so the plate reads as an exam sheet
- * without a pattern behind the text.
- */
-[data-exam-question]::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  background-image: radial-gradient(circle, var(--exam-card-dot) 0.75px, transparent 1.15px);
-  background-size: 0.875rem 0.875rem;
-  background-position: right 0.4375rem top 0.4375rem;
-  -webkit-mask-image: radial-gradient(ellipse 46% 62% at 100% 0%, #000 0%, rgb(0 0 0 / 35%) 45%, transparent 100%);
-  mask-image: radial-gradient(ellipse 46% 62% at 100% 0%, #000 0%, rgb(0 0 0 / 35%) 45%, transparent 100%);
-  pointer-events: none;
 }
 
 @media (min-width: 640px) {
@@ -79,8 +57,8 @@
 }
 
 @keyframes exam-card-target {
-  0%, 30% { box-shadow: inset 0 0 0 1px var(--exam-card-ring), 0 0 0 2px color-mix(in oklch, var(--foreground) 22%, transparent); }
-  100% { box-shadow: inset 0 0 0 1px var(--exam-card-ring), 0 0 0 2px transparent; }
+  0%, 30% { box-shadow: 0 0 0 2px color-mix(in oklch, var(--foreground) 22%, transparent); }
+  100% { box-shadow: 0 0 0 2px transparent; }
 }
 
 /*
@@ -169,7 +147,6 @@
   padding-inline: 0.4375rem;
   border-radius: 0.5625rem;
   background: var(--exam-number-bg);
-  box-shadow: inset 0 0 0 1px var(--exam-number-edge);
   color: var(--exam-number-fg);
   font-family: var(--font-outfit), var(--font-sans);
   font-size: 0.9375rem;
@@ -187,8 +164,7 @@
   height: 1.5rem;
   padding-inline: 0.4375rem 0.5625rem;
   border-radius: 0.5rem;
-  box-shadow: inset 0 0 0 1px var(--exam-type-ring);
-  background: var(--exam-type-bg);
+  box-shadow: inset 0 0 0 1px var(--exam-line);
   color: var(--exam-type-fg);
   font-size: 0.75rem;
   font-weight: 600;
@@ -230,7 +206,7 @@
   content: '';
   width: 1px;
   height: 0.6875rem;
-  background: var(--exam-type-ring);
+  background: var(--exam-line);
 }
 
 [data-question-actions] {
@@ -263,8 +239,8 @@
 
 /*
  * Built-in tags (question-tags.tsx). One chip for every kind: a hairline
- * and an icon in the kind's accent on a neutral ground. A kind sets
- * --tag-accent and --tag-icon; a new kind needs nothing else.
+ * and an icon in the kind's accent on the plate. A kind sets --tag-accent
+ * and --tag-icon; a new kind needs nothing else.
  */
 [data-question-tag] {
   --tag-accent: var(--muted-foreground);
@@ -276,7 +252,7 @@
   min-height: 1.5rem;
   padding: 0.1875rem 0.5625rem 0.1875rem 0.4375rem;
   border-radius: 0.5rem;
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--tag-accent) 30%, transparent);
+  box-shadow: inset 0 0 0 1px var(--exam-line);
   color: color-mix(in oklch, var(--foreground) 80%, transparent);
   font-size: 0.75rem;
   font-weight: 600;
@@ -321,10 +297,7 @@
   min-height: 2rem;
   padding: 0.375rem 0.75rem 0.375rem 0.625rem;
   border-radius: 0.75rem;
-  background: var(--exam-point-bg);
-  box-shadow:
-    inset 0 0 0 1px color-mix(in oklch, var(--tag-accent) 22%, transparent),
-    0 1px 2px rgb(0 0 0 / 3%);
+  box-shadow: inset 0 0 0 1px var(--exam-line);
   color: var(--foreground);
   font-size: 0.8125rem;
   font-weight: 560;
@@ -451,15 +424,16 @@
   background: var(--tag-color, var(--muted-foreground));
 }
 
-[data-tag-color='gray'] { --tag-color: oklch(0.62 0 0); }
-[data-tag-color='red'] { --tag-color: oklch(0.63 0.2 25); }
-[data-tag-color='orange'] { --tag-color: oklch(0.7 0.17 50); }
-[data-tag-color='amber'] { --tag-color: oklch(0.78 0.16 80); }
-[data-tag-color='green'] { --tag-color: oklch(0.66 0.16 150); }
-[data-tag-color='teal'] { --tag-color: oklch(0.66 0.11 195); }
-[data-tag-color='blue'] { --tag-color: oklch(0.6 0.17 255); }
-[data-tag-color='violet'] { --tag-color: oklch(0.6 0.19 295); }
-[data-tag-color='pink'] { --tag-color: oklch(0.66 0.19 350); }
+/* The reader's colours: one muted lightness and chroma band, red / amber / green shared with the result tones. */
+[data-tag-color='gray'] { --tag-color: oklch(0.64 0.006 264); }
+[data-tag-color='red'] { --tag-color: var(--exam-incorrect); }
+[data-tag-color='orange'] { --tag-color: oklch(0.68 0.11 52); }
+[data-tag-color='amber'] { --tag-color: var(--exam-missed); }
+[data-tag-color='green'] { --tag-color: var(--exam-correct); }
+[data-tag-color='teal'] { --tag-color: oklch(0.65 0.075 198); }
+[data-tag-color='blue'] { --tag-color: oklch(0.62 0.1 256); }
+[data-tag-color='violet'] { --tag-color: oklch(0.62 0.1 296); }
+[data-tag-color='pink'] { --tag-color: oklch(0.66 0.1 352); }
 
 [data-user-tag] {
   animation: exam-tag-in 220ms var(--ui-ease);
@@ -492,34 +466,30 @@
 /*
  * Options are tiles (TileButton / tileVariants in components/ui/button.tsx):
  * surface, ring, hover, press, focus and the click-to-fill layer come from
- * there; the fill spreads from where the option was pressed. Here: the
- * layout inside, and per feedback state the ring (--tile-ring) and the fill
- * colour (--reveal-color, the translucent --exam-choice-*-fill tokens).
- */
-/*
- * Options are outlines on the question's plate: no fill and no shadow until
- * one is picked, only a hairline edge that darkens on hover. The one strong
- * moment is the pick: ink spreads from the press point over the whole option,
- * edge included (--reveal-inset 0, under the ring), with no seam. Graded
- * colours flood it the same way. Per state: the edge (--tile-ring,
+ * there; the fill spreads from where the option was pressed.
+ *
+ * Here they share the plate's ground: no fill and no shadow until one is
+ * picked, only a hairline edge that darkens on hover. The one strong moment
+ * is the pick: an ink ring and a solid letter, with a light wash spreading
+ * from the press point. Graded colours flood the option the same way inside
+ * an outline of their own. Per state: the edge (--tile-ring,
  * --tile-ring-width) and the ink (--reveal-color).
  */
 [data-exam-choice-option],
 [data-boolean-option] {
   --tile-bg: transparent;
   --tile-bg-hover: transparent;
-  --tile-ring: var(--exam-choice-outline);
+  --tile-ring: var(--exam-line);
   --tile-shadow: 0 0 #0000;
   --tile-shadow-hover: 0 0 #0000;
-  /* The tile's default fill is opaque and inset; these are see-through and
-     reach the edge, so the ring shows through them. */
   --reveal-color: var(--exam-choice-fill);
-  --reveal-inset: 0px;
+  /* Inside the 1px edge, so an opaque graded tint never covers it. */
+  --reveal-inset: 1px;
 }
 
 @media (hover: hover) {
   :is([data-exam-choice-option], [data-boolean-option])[data-feedback='idle']:not([aria-disabled='true']):hover {
-    --tile-ring: var(--exam-choice-outline-hover);
+    --tile-ring: var(--exam-line-hover);
   }
 }
 
@@ -614,42 +584,56 @@
 }
 
 /*
- * Result tones. Every graded colour on an option is one hue per result
- * (--tone: correct, incorrect, missed), mixed at a few shared strengths
- * (tokens in styles/tokens/components.css), so fills, edges, letters, badges
- * and tabs always agree with each other and only the hue changes:
+ * Result tones. Every graded part takes one tone per result, set here as a
+ * group of four (tokens in styles/tokens/components.css), so fills, letters,
+ * badges, tabs and pills always agree and only the hue changes:
  *
- *   fill   the option's ink               --exam-tone-fill
- *   soft   the letter's disc, badges, tabs --exam-tone-soft
- *   line   edges and rings                --exam-tone-line
- *   ink    letters, icons, tab text       --exam-tone-ink
+ *   --tone        base: verdict badges, icons
+ *   --tone-ink    letters and text on a tint
+ *   --tone-tint   the option's fill
+ *   --tone-soft   the letter's disc and the tabs, a step deeper
  *
  * The letter disc is a step deeper than the option's fill, never solid, so
  * a graded option stays as calm as the rest of the card.
  */
 [data-feedback='correct'],
-[data-feedback='answer'] { --tone: var(--exam-tone-correct); }
+[data-feedback='answer'],
+[data-tone='correct'] {
+  --tone: var(--exam-correct);
+  --tone-ink: var(--exam-correct-ink);
+  --tone-tint: var(--exam-correct-tint);
+  --tone-line: var(--exam-correct-line);
+  --tone-soft: var(--exam-correct-soft);
+}
 [data-feedback='incorrect'],
 [data-feedback='invalid'],
-[data-feedback='empty'] { --tone: var(--exam-tone-incorrect); }
-[data-feedback='missed'] { --tone: var(--exam-tone-missed); }
-
-:is([data-exam-choice-option], [data-boolean-option]):is([data-feedback='correct'], [data-feedback='incorrect'], [data-feedback='missed']) {
-  --reveal-color: color-mix(in oklch, var(--tone) var(--exam-tone-fill), transparent);
-  --tile-ring: color-mix(in oklch, var(--tone) var(--exam-tone-line), transparent);
+[data-feedback='empty'],
+[data-tone='incorrect'] {
+  --tone: var(--exam-incorrect);
+  --tone-ink: var(--exam-incorrect-ink);
+  --tone-tint: var(--exam-incorrect-tint);
+  --tone-line: var(--exam-incorrect-line);
+  --tone-soft: var(--exam-incorrect-soft);
+}
+[data-feedback='missed'],
+[data-tone='partial'] {
+  --tone: var(--exam-missed);
+  --tone-ink: var(--exam-missed-ink);
+  --tone-tint: var(--exam-missed-tint);
+  --tone-line: var(--exam-missed-line);
+  --tone-soft: var(--exam-missed-soft);
 }
 
-/* The key the reader did not pick: the same green, half as strong. */
-:is([data-exam-choice-option], [data-boolean-option])[data-feedback='answer'] {
-  --reveal-color: color-mix(in oklch, var(--tone) calc(var(--exam-tone-fill) / 2), transparent);
-  --tile-ring: color-mix(in oklch, var(--tone) var(--exam-tone-line), transparent);
+:is([data-exam-choice-option], [data-boolean-option]):is([data-feedback='correct'], [data-feedback='incorrect'], [data-feedback='missed'], [data-feedback='answer']) {
+  --reveal-color: var(--tone-tint);
+  --tile-ring: var(--tone-line);
 }
 
 :is([data-feedback='correct'], [data-feedback='incorrect'], [data-feedback='missed'], [data-feedback='answer'])
   :is([data-choice-marker], [data-boolean-glyph]) {
-  background: color-mix(in oklch, var(--tone) var(--exam-tone-soft), transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--tone) var(--exam-tone-line), transparent);
-  color: color-mix(in oklch, var(--tone) var(--exam-tone-ink), var(--foreground));
+  background: var(--tone-soft);
+  box-shadow: none;
+  color: var(--tone-ink);
 }
 
 /* While answering: the picked option is the one solid thing on the card. */
@@ -666,7 +650,7 @@
 /* Options not involved in the result recede. */
 [data-exam-choice-option][data-feedback='dimmed'],
 [data-boolean-option][data-feedback='dimmed'] {
-  --tile-ring: var(--exam-choice-outline-faint);
+  --tile-ring: var(--exam-line-faint);
 }
 :is([data-exam-choice-option], [data-boolean-option])[data-feedback='dimmed'] > * {
   opacity: 0.5;
@@ -696,13 +680,14 @@
   pointer-events: none;
 }
 
+/* A solid badge in the tone's base with its mark cut out (--exam-verdict-mark), ringed in the option's tint so it stands clear of the letter's disc. */
 :is([data-choice-marker], [data-boolean-glyph])::before {
-  /* Opaque, so the disc's edge does not show through it. */
-  background: color-mix(in oklch, var(--tone, var(--foreground)) calc(var(--exam-tone-soft) + 12%), var(--exam-card));
+  background: var(--tone, var(--foreground));
+  box-shadow: 0 0 0 1.5px var(--tone-tint, var(--exam-card));
 }
 
 :is([data-choice-marker], [data-boolean-glyph])::after {
-  background: color-mix(in oklch, var(--tone, var(--foreground)) var(--exam-tone-ink), var(--foreground));
+  background: var(--exam-verdict-mark);
   mask: var(--verdict-icon, none) center / 0.5625rem no-repeat;
 }
 
@@ -739,9 +724,9 @@
   height: 1.125rem;
   padding-inline: 0.4375rem;
   border-radius: 999px;
-  background: color-mix(in oklch, var(--tone) calc(var(--exam-tone-soft) + 4%), var(--exam-card));
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--tone) var(--exam-tone-line), transparent);
-  color: color-mix(in oklch, var(--tone) var(--exam-tone-ink), var(--foreground));
+  background: var(--tone-soft);
+  box-shadow: inset 0 0 0 1px var(--tone-line);
+  color: var(--tone-ink);
   font-family: var(--font-sans);
   font-size: 0.6875rem;
   font-weight: 600;
@@ -888,7 +873,7 @@
   border: 0;
   border-radius: 0.5rem 0.5rem 0.25rem 0.25rem;
   background: var(--exam-choice);
-  box-shadow: inset 0 -1.5px 0 var(--blank-line), inset 0 0 0 1px var(--exam-choice-ring);
+  box-shadow: inset 0 -1.5px 0 var(--blank-line), inset 0 0 0 1px var(--blank-edge, var(--exam-line));
   color: var(--foreground);
   font: inherit;
   line-height: 1.6;
@@ -905,8 +890,7 @@
 input[data-question-blank]:focus-visible,
 input[data-question-blank][data-active] {
   --blank-line: var(--foreground);
-  background: var(--ui-panel);
-  box-shadow: inset 0 -2px 0 var(--blank-line), 0 0 0 3px color-mix(in oklch, var(--ring) 35%, transparent);
+  box-shadow: inset 0 -2px 0 var(--blank-line), inset 0 0 0 1px var(--exam-line-hover), 0 0 0 3px color-mix(in oklch, var(--ring) 30%, transparent);
 }
 
 [data-question-blank][data-kind='math'] {
@@ -917,9 +901,10 @@ input[data-question-blank][data-active] {
 
 /* Graded blanks take the result tones (see the options above). */
 [data-question-blank]:is([data-feedback='correct'], [data-feedback='incorrect'], [data-feedback='invalid'], [data-feedback='empty'], [data-feedback='answer']) {
-  --blank-line: color-mix(in oklch, var(--tone) 70%, transparent);
-  background: color-mix(in oklch, var(--tone) var(--exam-tone-fill), var(--ui-panel));
-  color: color-mix(in oklch, var(--tone) var(--exam-tone-ink), var(--foreground));
+  --blank-line: var(--tone);
+  --blank-edge: var(--tone-line);
+  background: var(--tone-tint);
+  color: var(--tone-ink);
 }
 [data-question-blank][data-feedback='answer'] {
   font-weight: 600;
@@ -957,7 +942,7 @@ span[data-question-blank][data-kind='math'] {
   height: 1.125rem;
   margin-inline-end: 0.25rem;
   border-radius: 999px;
-  background: var(--ui-fill-strong);
+  background: var(--exam-marker-hover);
   color: var(--muted-foreground);
   font-family: var(--font-outfit), var(--font-sans);
   font-size: 0.6875rem;
@@ -977,7 +962,7 @@ span[data-question-blank][data-kind='math'] {
   height: 0.875rem;
   margin-inline: 0 0.25rem;
   vertical-align: -0.125rem;
-  background: color-mix(in oklch, var(--tone) var(--exam-tone-ink), var(--foreground));
+  background: var(--tone);
   mask: var(--verdict-icon) center / contain no-repeat;
 }
 
@@ -1030,7 +1015,7 @@ span[data-question-blank][data-kind='math'] {
 /* An empty answer: the submit button waits as a quiet outline rather than a grey block. */
 [data-submit-answer]:disabled {
   background: transparent;
-  box-shadow: inset 0 0 0 1px var(--exam-choice-outline);
+  box-shadow: inset 0 0 0 1px var(--exam-line);
   color: var(--muted-foreground);
   opacity: 1;
 }
@@ -1059,18 +1044,18 @@ span[data-question-blank][data-kind='math'] {
   font-weight: 600;
   white-space: nowrap;
 }
-[data-result-pill] svg { width: 1rem; height: 1rem; flex-shrink: 0; }
-[data-result-pill] { box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--tone) calc(var(--exam-tone-line) * 0.6), transparent); }
-[data-result-pill='correct'] { --tone: var(--exam-tone-correct); }
-[data-result-pill='incorrect'] { --tone: var(--exam-tone-incorrect); }
-[data-result-pill='partial'] { --tone: var(--exam-tone-missed); }
+[data-result-pill] svg { width: 1rem; height: 1rem; flex-shrink: 0; color: var(--tone); }
+[data-result-pill='correct'] { --tone: var(--exam-correct); --tone-ink: var(--exam-correct-ink); --tone-tint: var(--exam-correct-tint); --tone-line: var(--exam-correct-line); }
+[data-result-pill='incorrect'] { --tone: var(--exam-incorrect); --tone-ink: var(--exam-incorrect-ink); --tone-tint: var(--exam-incorrect-tint); --tone-line: var(--exam-incorrect-line); }
+[data-result-pill='partial'] { --tone: var(--exam-missed); --tone-ink: var(--exam-missed-ink); --tone-tint: var(--exam-missed-tint); --tone-line: var(--exam-missed-line); }
 [data-result-pill] {
-  background: color-mix(in oklch, var(--tone) var(--exam-tone-fill), transparent);
-  color: color-mix(in oklch, var(--tone) var(--exam-tone-ink), var(--foreground));
+  background: var(--tone-tint);
+  box-shadow: inset 0 0 0 1px var(--tone-line);
+  color: var(--tone-ink);
 }
 
 /*
- * Self-grade (essays): three quiet capsules on the plate, each taking its
+ * Self-grade (essays): three hairline capsules on the plate, each taking its
  * result colour on hover and when chosen, like the pill it turns into.
  */
 [data-self-grade] {
@@ -1086,7 +1071,7 @@ span[data-question-blank][data-kind='math'] {
   height: 1.875rem;
   padding-inline: 0.5625rem 0.75rem;
   border-radius: 999px;
-  box-shadow: inset 0 0 0 1px var(--exam-choice-outline);
+  box-shadow: inset 0 0 0 1px var(--exam-line);
   color: color-mix(in oklch, var(--foreground) 78%, transparent);
   font-size: 0.8125rem;
   font-weight: 550;
@@ -1094,25 +1079,24 @@ span[data-question-blank][data-kind='math'] {
   cursor: pointer;
   transition: background-color 180ms var(--ui-ease), box-shadow 180ms var(--ui-ease), color 180ms var(--ui-ease), scale 160ms var(--ui-ease);
 }
-[data-self-grade] button svg { width: 0.9375rem; height: 0.9375rem; flex-shrink: 0; color: var(--grade); opacity: 0.85; }
-[data-self-grade] button[data-grade='correct'] { --grade: var(--exam-tone-correct); }
-[data-self-grade] button[data-grade='partial'] { --grade: var(--exam-tone-missed); }
-[data-self-grade] button[data-grade='incorrect'] { --grade: var(--exam-tone-incorrect); }
+[data-self-grade] button svg { width: 0.9375rem; height: 0.9375rem; flex-shrink: 0; color: var(--grade); }
+[data-self-grade] button[data-grade='correct'] { --grade: var(--exam-correct); --grade-ink: var(--exam-correct-ink); --grade-tint: var(--exam-correct-tint); --grade-line: var(--exam-correct-line); --grade-soft: var(--exam-correct-soft); }
+[data-self-grade] button[data-grade='partial'] { --grade: var(--exam-missed); --grade-ink: var(--exam-missed-ink); --grade-tint: var(--exam-missed-tint); --grade-line: var(--exam-missed-line); --grade-soft: var(--exam-missed-soft); }
+[data-self-grade] button[data-grade='incorrect'] { --grade: var(--exam-incorrect); --grade-ink: var(--exam-incorrect-ink); --grade-tint: var(--exam-incorrect-tint); --grade-line: var(--exam-incorrect-line); --grade-soft: var(--exam-incorrect-soft); }
 [data-self-grade] button:active:not(:disabled) { scale: 0.96; }
 [data-self-grade] button:disabled { cursor: default; opacity: 0.5; }
 @media (hover: hover) {
   [data-self-grade] button:hover:not(:disabled) {
-    background: color-mix(in oklch, var(--grade) 9%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--grade) 45%, transparent);
-    color: var(--foreground);
+    background: var(--grade-tint);
+    box-shadow: inset 0 0 0 1px var(--grade-line);
+    color: var(--grade-ink);
   }
 }
 [data-self-grade] button[aria-pressed='true'] {
-  background: color-mix(in oklch, var(--grade) 14%, transparent);
-  box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--grade) 60%, transparent);
-  color: color-mix(in oklch, var(--grade) 80%, var(--foreground));
+  background: var(--grade-tint);
+  box-shadow: inset 0 0 0 1.5px var(--grade);
+  color: var(--grade-ink);
 }
-[data-self-grade] button[aria-pressed='true'] svg { opacity: 1; }
 [data-self-grade] button:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
@@ -1129,10 +1113,11 @@ span[data-question-blank][data-kind='math'] {
   padding: 0.1875rem;
   gap: 0.125rem;
   border-radius: 999px;
-  background: var(--ui-fill);
+  background: var(--exam-marker);
 }
 [data-blank-grade] button {
-  --grade: var(--exam-tone-correct);
+  --grade-ink: var(--exam-correct-ink);
+  --grade-soft: var(--exam-correct-soft);
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -1146,15 +1131,14 @@ span[data-question-blank][data-kind='math'] {
   cursor: pointer;
   transition: background-color 160ms var(--ui-ease), color 160ms var(--ui-ease), box-shadow 160ms var(--ui-ease), scale 140ms var(--ui-ease);
 }
-[data-blank-grade] button[data-grade='incorrect'] { --grade: var(--exam-tone-incorrect); }
+[data-blank-grade] button[data-grade='incorrect'] { --grade-ink: var(--exam-incorrect-ink); --grade-soft: var(--exam-incorrect-soft); }
 [data-blank-grade] button svg { width: 0.8125rem; height: 0.8125rem; flex-shrink: 0; }
 /* Not graded yet (self-grading): both halves quiet, a touch firmer than the track. */
 [data-blank-grade][data-unset] button { color: color-mix(in oklch, var(--foreground) 72%, transparent); }
 [data-blank-grade] button:active:not(:disabled) { scale: 0.95; }
 [data-blank-grade] button[aria-pressed='true'] {
-  background: color-mix(in oklch, var(--grade) 15%, var(--ui-panel));
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--grade) 45%, transparent);
-  color: color-mix(in oklch, var(--grade) 82%, var(--foreground));
+  background: var(--grade-soft);
+  color: var(--grade-ink);
 }
 [data-blank-grade] button:disabled { cursor: default; opacity: 0.5; }
 [data-blank-grade] button:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
@@ -1166,8 +1150,7 @@ span[data-question-blank][data-kind='math'] {
   flex-basis: 100%;
   padding: 0.75rem 0.875rem;
   border-radius: 0.875rem;
-  background: var(--exam-choice);
-  box-shadow: inset 0 0 0 1px var(--exam-choice-ring), var(--tile-shadow);
+  box-shadow: inset 0 0 0 1px var(--exam-line);
   transform-origin: top center;
 }
 
@@ -1196,8 +1179,8 @@ span[data-question-blank][data-kind='math'] {
   height: 1.75rem;
   padding-inline: 0.5625rem 0.6875rem;
   border-radius: 999px;
-  background: color-mix(in oklch, var(--exam-tone-correct) 10%, transparent);
-  color: color-mix(in oklch, var(--exam-tone-correct) 80%, var(--foreground));
+  background: var(--exam-correct-tint);
+  color: var(--exam-correct-ink);
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -1208,7 +1191,7 @@ span[data-question-blank][data-kind='math'] {
 [data-grade-all]:disabled { cursor: default; opacity: 0.5; }
 [data-grade-all]:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 @media (hover: hover) {
-  [data-grade-all]:hover:not(:disabled) { background: color-mix(in oklch, var(--exam-tone-correct) 16%, transparent); }
+  [data-grade-all]:hover:not(:disabled) { background: var(--exam-correct-soft); }
 }
 
 /* Self-grading rows: the key (typeset) and, if any, what was typed. */
@@ -1217,8 +1200,8 @@ span[data-question-blank][data-kind='math'] {
   border-radius: 0.625rem;
   transition: background-color 200ms var(--ui-ease);
 }
-[data-mode='self'] li[data-graded='correct'] { background: color-mix(in oklch, var(--exam-tone-correct) 7%, transparent); }
-[data-mode='self'] li[data-graded='incorrect'] { background: color-mix(in oklch, var(--exam-tone-incorrect) 6%, transparent); }
+[data-mode='self'] li[data-graded='correct'] { background: var(--exam-correct-tint); }
+[data-mode='self'] li[data-graded='incorrect'] { background: var(--exam-incorrect-tint); }
 
 [data-manual-grade-key],
 [data-manual-grade-typed] {
@@ -1235,7 +1218,7 @@ span[data-question-blank][data-kind='math'] {
   font-size: 0.75rem;
   font-weight: 500;
 }
-[data-manual-grade-key] [data-manual-grade-label] { color: color-mix(in oklch, var(--exam-tone-correct) 80%, var(--foreground)); }
+[data-manual-grade-key] [data-manual-grade-label] { color: var(--exam-correct-ink); }
 [data-manual-grade-progress] {
   margin: 0.5rem 0 0;
   color: var(--muted-foreground);
@@ -1273,8 +1256,8 @@ span[data-question-blank][data-kind='math'] {
 [data-manual-grade-note] {
   padding: 0.0625rem 0.4375rem;
   border-radius: 999px;
-  background: color-mix(in oklch, var(--exam-tone-missed) 16%, transparent);
-  color: color-mix(in oklch, var(--exam-tone-missed) 62%, var(--foreground));
+  background: var(--exam-missed-soft);
+  color: var(--exam-missed-ink);
   font-size: 0.6875rem;
   font-weight: 600;
 }
@@ -1294,8 +1277,9 @@ span[data-question-blank][data-kind='math'] {
   min-height: 1.75rem;
   padding: 0.125rem 0.625rem;
   border-radius: 0.625rem;
-  background: color-mix(in oklch, var(--exam-tone-correct) 9%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--exam-tone-correct) 22%, transparent);
+  background: var(--exam-correct-tint);
+  box-shadow: inset 0 0 0 1px var(--exam-correct-line);
+  color: var(--exam-correct-ink);
   font-size: 0.9375rem;
 }
 [data-result-key] { align-items: center; }
@@ -1315,7 +1299,8 @@ span[data-question-blank][data-kind='math'] {
   margin-top: 0.875rem;
   padding: 0.625rem 0.875rem 0.625rem 2.25rem;
   border-radius: 0.875rem;
-  background: color-mix(in oklch, var(--warning) 9%, var(--exam-choice));
+  background: var(--exam-missed-tint);
+  box-shadow: inset 0 0 0 1px var(--exam-missed-line);
   font-size: 0.9375rem;
   line-height: 1.7;
 }
@@ -1326,7 +1311,7 @@ span[data-question-blank][data-kind='math'] {
   left: 0.875rem;
   width: 0.9375rem;
   height: 0.9375rem;
-  color: color-mix(in oklch, var(--warning) 70%, var(--foreground));
+  color: var(--exam-missed-ink);
 }
 
 /* ------------------------------------------------------------ math keypad */
@@ -1791,14 +1776,41 @@ sub > [data-key-box] { border-width: 1px; }
 /* -------------------------------------------------------- solution card */
 
 /*
- * "题目与解析" (solution-sheet.tsx): the question pane is one flat light
- * grey, the same for every question type, blocked against the white answer
- * pane (and, on phones, under the header above it). No hue and no gradients,
- * so the pair stays calm over a long session and the graded colours of the
- * options are the only colour on it.
+ * "题目与解析" (solution-sheet.tsx): the question pane is the question card's
+ * own grey plate, the same for every question type, blocked against the
+ * white answer pane (and, on phones, under the header above it). No hue and
+ * no gradients, so the pair stays calm over a long session and the graded
+ * colours of the options are the only colour on it.
  */
 [data-solution-card] {
   --modal-pane-muted: var(--exam-solution-aside);
+}
+
+/* Answer tiles in the white pane: the plate's grey, or a result's tint in its outline. */
+[data-answer-tile] {
+  background: var(--tone-tint, var(--exam-plate));
+  box-shadow: inset 0 0 0 1px var(--tone-line, transparent);
+}
+
+[data-answer-label='key'] {
+  color: var(--exam-correct-ink);
+  font-weight: 550;
+}
+
+[data-answer-verdict] {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  background: var(--tone);
+  color: var(--exam-verdict-mark);
+}
+
+[data-answer-verdict] svg {
+  width: 0.75rem;
+  height: 0.75rem;
 }
 
 [data-solution-card] [data-slot='modal-pane'][data-tone='muted'] {
