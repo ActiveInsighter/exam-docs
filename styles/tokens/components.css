@@ -49,15 +49,15 @@
   --tile-shadow-hover: 0 4px 14px -6px rgb(0 0 0 / 14%), 0 1px 2px rgb(0 0 0 / 5%);
   --tile-radius: 0.875rem;
 
-  /* Question card: one flat, very pale grey plate with no edge of its own,
-     just far enough from the white page (0.028 darker in lightness) to read
-     as a card. Almost achromatic, so the graded colours below are the only hue
-     on it. Everything inside shares its ground: options, chips and fields
-     are drawn by hairline outlines, not by fills of their own. The same grey
-     carries the solution card's question pane, so a question looks alike on
-     the page and in the modal. Dashed rules perforate header and footer. */
-  --exam-plate: oklch(0.972 0.002 250);
-  --exam-card: var(--exam-plate);
+  /* Question card: no fill of its own. It sits on the page background and
+     is drawn by a single hairline edge, so the graded colours below are the
+     only hue on it and never have to sit on a grey. Everything inside shares
+     the page ground: options, chips and fields are hairline outlines, not
+     fills. Dashed rules perforate header and footer. --exam-plate is the
+     quiet grey of the solution card's question pane (inside the modal). */
+  --exam-plate: oklch(0.975 0.002 250);
+  --exam-card: transparent;
+  --exam-card-edge: color-mix(in oklch, var(--foreground) 9%, transparent);
   --exam-rule: color-mix(in oklch, var(--foreground) 11%, transparent);
   --exam-card-radius: 1.25rem;
   /* Outlines inside the card, from quiet to emphatic. */
@@ -99,49 +99,42 @@
   --exam-type-fg: color-mix(in oklch, var(--foreground) 72%, transparent);
 
   /*
-   * Result tones: 正确 sage green, 错误 coral red, 漏选 / 部分 honey amber.
-   * Three colours of one family, built by rule rather than by eye:
+   * Result tones: 正确 green, 错误 red, 漏选 / 部分 amber.
    *
-   *   - base and ink use the same share of the sRGB gamut at their
-   *     lightness (about 0.5 and 0.6), not the same oklch chroma. Equal
-   *     chroma is not equal vividness: amber has far less gamut than red or
-   *     green, so equal chroma made amber the loudest and red a candy pink.
-   *   - tint, line and soft sit the same chromatic distance from the plate
-   *     in every tone, so no graded option shouts louder than the others.
-   *   - hue drifts with lightness the way a hand-made palette's does: amber
-   *     is a cream in its tints (hue 85–90) and a brown in its ink (60), so
-   *     it never turns the olive-tan a flat hue gives; red stays coral
-   *     (24), clear of bubble-gum pink.
-   *
-   * Five steps that every graded part uses, never mixed ad hoc:
+   * Earlier palettes filled every graded option with a pastel on a grey
+   * plate: three large blocks of mint, pink and cream that never matched,
+   * whatever their numbers. Now the card is the page's own white and colour
+   * is spent sparingly, in the same proportions for every tone:
    *
    *   base   icons, badges, rings of the dock, the verdict mark's disc
-   *   ink    text and letters on a tint (6.9:1 or better; AA is 4.5)
-   *   tint   the fill of a graded option, pill, key or answer tile
-   *   line   its outline
+   *   ink    text and letters on a tint (AA on tint and on the page)
+   *   tint   a barely-there wash (chroma ≤ 0.02), only on what the reader
+   *          picked; a red this pale stays warm instead of turning pink
+   *   line   its outline: where most of the colour is
    *   soft   a step deeper: letter discs, tabs, pressed grade buttons
    *
-   * All opaque, so they sit the same on the plate, the white answer pane
-   * and the grey question pane instead of turning muddy on grey. All inside
-   * sRGB, so no browser clips them to a different hue.
+   * Hues sit on one warm-to-cool arc (red 27, amber 75, green 155) with the
+   * same lightness ladder (base ≈ 0.6–0.7, ink ≈ 0.45, line ≈ 0.82, soft ≈
+   * 0.93, tint ≈ 0.977), so the three read as one family. All opaque and
+   * inside sRGB, so no browser clips them to another hue.
    */
-  --exam-correct: oklch(0.62 0.089 150);
-  --exam-correct-ink: oklch(0.41 0.067 152);
-  --exam-correct-tint: oklch(0.962 0.02 150);
-  --exam-correct-line: oklch(0.845 0.074 150);
-  --exam-correct-soft: oklch(0.915 0.046 150);
+  --exam-correct: oklch(0.6 0.125 155);
+  --exam-correct-ink: oklch(0.44 0.095 155);
+  --exam-correct-tint: oklch(0.978 0.016 155);
+  --exam-correct-line: oklch(0.8 0.085 155);
+  --exam-correct-soft: oklch(0.93 0.042 155);
 
-  --exam-incorrect: oklch(0.62 0.123 25);
-  --exam-incorrect-ink: oklch(0.44 0.107 23);
-  --exam-incorrect-tint: oklch(0.958 0.014 24);
-  --exam-incorrect-line: oklch(0.845 0.057 24);
-  --exam-incorrect-soft: oklch(0.915 0.036 24);
+  --exam-incorrect: oklch(0.6 0.16 27);
+  --exam-incorrect-ink: oklch(0.47 0.135 27);
+  --exam-incorrect-tint: oklch(0.976 0.012 34);
+  --exam-incorrect-line: oklch(0.79 0.09 31);
+  --exam-incorrect-soft: oklch(0.93 0.034 33);
 
-  --exam-missed: oklch(0.7 0.087 72);
-  --exam-missed-ink: oklch(0.45 0.066 60);
-  --exam-missed-tint: oklch(0.966 0.02 90);
-  --exam-missed-line: oklch(0.855 0.076 85);
-  --exam-missed-soft: oklch(0.922 0.046 88);
+  --exam-missed: oklch(0.72 0.135 72);
+  --exam-missed-ink: oklch(0.48 0.095 62);
+  --exam-missed-tint: oklch(0.979 0.02 85);
+  --exam-missed-line: oklch(0.82 0.105 78);
+  --exam-missed-soft: oklch(0.935 0.05 85);
 
   /* The tick or cross drawn on a solid verdict badge. */
   --exam-verdict-mark: oklch(1 0 0);
@@ -193,8 +186,9 @@
   --tile-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
   --tile-shadow-hover: inset 0 1px 0 rgb(255 255 255 / 6%), 0 6px 16px -8px rgb(0 0 0 / 70%);
 
-  /* A grey plate lifted off the black page. */
-  --exam-plate: oklch(0.235 0.003 250);
+  /* The solution pane's grey; the card itself stays on the black page. */
+  --exam-plate: oklch(0.2 0.003 250);
+  --exam-card-edge: rgb(255 255 255 / 11%);
   --exam-rule: rgb(255 255 255 / 12%);
   --exam-line: oklch(0.34 0.004 250);
   --exam-line-hover: oklch(0.48 0.005 250);
@@ -219,26 +213,26 @@
 
   --exam-type-fg: rgb(255 255 255 / 74%);
 
-  /* Same rule as the light tones: equal gamut share, equal distance from the plate. */
-  --exam-correct: oklch(0.74 0.092 150);
-  --exam-correct-ink: oklch(0.85 0.089 150);
-  --exam-correct-tint: oklch(0.285 0.024 150);
-  --exam-correct-line: oklch(0.43 0.046 150);
-  --exam-correct-soft: oklch(0.35 0.036 150);
+  /* Same ladder on black: dim washes, clear outlines, light ink. */
+  --exam-correct: oklch(0.72 0.12 155);
+  --exam-correct-ink: oklch(0.84 0.09 155);
+  --exam-correct-tint: oklch(0.21 0.025 155);
+  --exam-correct-line: oklch(0.46 0.075 155);
+  --exam-correct-soft: oklch(0.31 0.045 155);
 
-  --exam-incorrect: oklch(0.73 0.1 24);
-  --exam-incorrect-ink: oklch(0.85 0.037 22);
-  --exam-incorrect-tint: oklch(0.285 0.025 24);
-  --exam-incorrect-line: oklch(0.43 0.052 24);
-  --exam-incorrect-soft: oklch(0.35 0.04 24);
+  --exam-incorrect: oklch(0.7 0.14 27);
+  --exam-incorrect-ink: oklch(0.83 0.075 27);
+  --exam-incorrect-tint: oklch(0.21 0.03 27);
+  --exam-incorrect-line: oklch(0.46 0.09 27);
+  --exam-incorrect-soft: oklch(0.31 0.055 27);
+
+  --exam-missed: oklch(0.8 0.12 78);
+  --exam-missed-ink: oklch(0.87 0.085 82);
+  --exam-missed-tint: oklch(0.215 0.026 80);
+  --exam-missed-line: oklch(0.5 0.08 78);
+  --exam-missed-soft: oklch(0.32 0.05 80);
 
   --exam-verdict-mark: oklch(0.17 0.01 264);
-
-  --exam-missed: oklch(0.8 0.083 80);
-  --exam-missed-ink: oklch(0.87 0.066 84);
-  --exam-missed-tint: oklch(0.29 0.026 85);
-  --exam-missed-line: oklch(0.44 0.05 82);
-  --exam-missed-soft: oklch(0.355 0.04 84);
 
   --exam-keypad: oklch(0.2 0.004 260);
   --exam-keypad-edge: rgb(255 255 255 / 7%);

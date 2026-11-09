@@ -33,7 +33,8 @@
   margin-block: 1.25rem;
   padding: 0.75rem 0.875rem 0.625rem;
   border-radius: var(--exam-card-radius);
-  /* One flat grey plate: no edge, no sheen, no pattern. Hairlines inside carry the structure. */
+  /* No fill: the page background, held together by one hairline edge. */
+  border: 1px solid var(--exam-card-edge);
   background: var(--exam-card);
   /* Long pages: skip layout and paint of cards far off screen. */
   content-visibility: auto;
@@ -472,7 +473,7 @@
  * surface, ring, hover, press, focus and the click-to-fill layer come from
  * there; the fill spreads from where the option was pressed.
  *
- * Here they share the plate's ground: no fill and no shadow until one is
+ * Here they share the page's ground: no fill and no shadow until one is
  * picked, only a hairline edge that darkens on hover. The one strong moment
  * is the pick: an ink ring and a solid letter, with a light wash spreading
  * from the press point. Graded colours flood the option the same way inside
@@ -633,6 +634,27 @@
   --tile-ring: var(--tone-line);
 }
 
+/*
+ * Colour follows one rule: a filled option is one the reader picked; a key
+ * they did not pick (漏选, or the right answer of a missed single choice)
+ * gets only a dashed outline in its tone, so a graded card never turns into
+ * three blocks of colour.
+ */
+:is([data-exam-choice-option], [data-boolean-option]):is([data-feedback='missed'], [data-feedback='answer']) {
+  --reveal-color: transparent;
+  --tile-ring: transparent;
+}
+:is([data-exam-choice-option], [data-boolean-option]):is([data-feedback='missed'], [data-feedback='answer']):not(:focus-visible) {
+  outline: 1.5px dashed color-mix(in oklch, var(--tone) 45%, var(--tone-line));
+  outline-offset: -1.5px;
+}
+/* The solution card shows the key as the reference itself: filled, not dashed. */
+[data-solution-card] :is([data-exam-choice-option], [data-boolean-option])[data-feedback='answer'] {
+  --reveal-color: var(--tone-tint);
+  --tile-ring: var(--tone-line);
+  outline: none;
+}
+
 :is([data-feedback='correct'], [data-feedback='incorrect'], [data-feedback='missed'], [data-feedback='answer'])
   :is([data-choice-marker], [data-boolean-glyph]) {
   background: var(--tone-soft);
@@ -687,7 +709,7 @@
 /* A solid badge in the tone's base with its mark cut out (--exam-verdict-mark), ringed in the option's tint so it stands clear of the letter's disc. */
 :is([data-choice-marker], [data-boolean-glyph])::before {
   background: var(--tone, var(--foreground));
-  box-shadow: 0 0 0 1.5px var(--tone-tint, var(--exam-card));
+  box-shadow: 0 0 0 1.5px var(--tone-tint, var(--background));
 }
 
 :is([data-choice-marker], [data-boolean-glyph])::after {
