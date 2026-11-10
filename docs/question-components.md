@@ -202,14 +202,15 @@ log(底数, 真数)、eˣ、10ˣ、立方根、立方、倒数、阶乘等；`ab
 | 文件 | 职责 |
 | --- | --- |
 | `components/question/question.tsx` | 服务端组件：拆分题干 / 选项 / 解答，生成判分规格，组装卡片 |
-| `components/question/model.ts` | 纯函数：`splitQuestion`、`indexBlanks`、`buildGradingSpec`、内置标签解析 |
+| `components/question/model.ts` / `tags.ts` | 纯函数：`splitQuestion`、`indexBlanks`、`buildGradingSpec`；标签在 `tags.ts` 解析 |
 | `components/question/grading.ts` | 纯函数判分：选择、判断、填空（文字 / 数学）、结果与答案格式化 |
 | `lib/math-expression/` | 数学表达式解析、求值、等价比较（无 `eval`） |
-| `components/question/question-state.tsx` | 每题客户端状态：读写本地答案缓存、提交、重做、判分结果 |
-| `choice-group.tsx` / `true-false.tsx` / `blank-field.tsx` / `math-blank.tsx` / `math-keypad.tsx` | 各题型交互；数学键盘按需加载 |
-| `question-footer.tsx` / `solution-sheet.tsx` / `question-mirror.ts` | 判分结果、题目与解析浮窗（组装 `components/ui/modal.tsx`） |
+| `components/question/attempt.ts` / `question-state.tsx` | 作答、提交、自评、改判和重做的纯状态转换；Provider 将转换写入本地答案缓存 |
+| `options.tsx` / `blank-field.tsx` / `math-blank.tsx` / `math-keypad.tsx` | 选择和判断共用选项组；填空与按需加载的数学键盘 |
+| `blank-grade.tsx` / `answer-summary.tsx` | 自评与手动判分共用开关和面板；解答中的答案对照 |
+| `question-footer.tsx` / `solution-sheet.tsx` / `question-mirror.tsx` | 判分结果、题目与解析浮窗（组装 `components/ui/study-card.tsx`）、只读题干副本 |
 | `components/question/marks/` | 收藏、读者标签、注释与「收藏与标签」汇总 |
-| `styles/question.css` | 全部题目样式。组件只设置 `data-*` 状态属性，外观集中在这里；选项的卡片外观与点击填充来自 `TileButton`，这里按状态设置 `--tile-ring` 与 `--reveal-color` |
+| `styles/question.css` / `styles/question/` | 样式入口与按职责拆分的配色、卡片、选项、填空判分、键盘、底栏和解答样式；组件通过 `data-*` 属性发布状态 |
 
 ## 性能约定
 

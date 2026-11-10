@@ -35,7 +35,7 @@ const bundle = await build({
         return <>
           <button disabled={!state.ready || state.submitted} onClick={() => state.select(['B'])}>选择 B</button>
           <output>{JSON.stringify({ selected: state.selected, attempt: state.attempt, submitted: state.submitted, ready: state.ready })}</output>
-          <QuestionFooter question={null} answer={null} solution={null} solutionLabel="解析" buttonLabel="查看解答" dialogTitle="题目" showSolution={false} />
+          <QuestionFooter meta={{ id: 'recovery', type: 'single', number: null, tags: { type: [], source: [], point: [] } }} solution={null} />
         </>;
       }
       createRoot(document.getElementById('root')).render(
