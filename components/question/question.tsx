@@ -1,22 +1,14 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import { ChoiceGroup } from './choice-group';
 import { getChoiceDensity } from './choice-layout';
-import { QUESTION_TYPES, QUESTION_TYPE_LABELS, type QuestionType } from './grading';
+import { QUESTION_TYPES, type QuestionType } from './grading';
 import { QuestionMarkActions, QuestionMarksProvider, QuestionNote, QuestionUserTags } from './marks/question-marks';
-import {
-  buildGradingSpec,
-  hasContent,
-  indexBlanks,
-  parseQuestionTags,
-  questionStemClassName,
-  splitQuestion,
-  toChoiceOptions,
-} from './model';
+import { buildGradingSpec, hasContent, indexBlanks, questionStemClassName, splitQuestion, toChoiceOptions, type QuestionMeta } from './model';
+import { ChoiceGroup, TrueFalse } from './options';
 import { QuestionFooter } from './question-footer';
 import { QuestionProvider } from './question-state';
 import { QuestionSourceTrail, QuestionTypeTag } from './question-tags';
-import { TrueFalse } from './true-false';
+import { parseQuestionTags } from './tags';
 
 export type QuestionProps = {
   /** Stable identifier of the question; never derived from its position. */
@@ -29,7 +21,7 @@ export type QuestionProps = {
   number?: number | string | false;
   /**
    * Built-in tags, sorted into type traits, source and knowledge points
-   * (model.ts): tags="王道8套卷, 第4套, 考点:VLAN, 易错". The header shows the
+   * (tags.ts): tags="王道8套卷, 第4套, 考点:VLAN, 易错". The header shows the
    * type and score plus the source; knowledge points appear with the solution.
    */
   tags?: string | readonly string[];
@@ -37,65 +29,52 @@ export type QuestionProps = {
   index?: number | string;
   /** Content hash of the question, added by remarkQuestion at compile time. */
   revision?: string;
-  buttonLabel?: string;
-  dialogTitle?: string;
   children?: ReactNode;
 };
 
 function displayNumber(number: QuestionProps['number'], index: QuestionProps['index']): string | null {
   const label = number === false ? null : (number ?? index);
   if (label === null || label === undefined || label === '') return null;
-  const numeric = typeof label === 'string' ? Number(label) : label;
-  return typeof numeric === 'number' && Number.isFinite(numeric) ? String(numeric) : String(label);
+  const numeric = Number(label);
+  return Number.isFinite(numeric) ? String(numeric) : String(label);
 }
 
 /**
  * One exercise, rendered as a card:
  *
- *   header   number · type, score · the reader's tags
- *            source trail                            ☆ tags note
+ *   header   number · type, score · the reader's tags · source      ☆ tags note
  *   stem     MDX with options / true-false buttons / blanks in place
  *   footer   submit · grade · 查看解答
  *   note     the reader's note, if any
  *
  * `type` decides the interaction: single / multiple / boolean / blank are
- * graded in place, essay opens the reference solution only. Answers are read
- * from <Option correct>, <Blank answer> and `answer`, never from prose.
+ * graded in place, an essay is graded by the reader against its solution.
+ * Answers are read from <Option correct>, <Blank answer> and `answer`, never
+ * from prose.
  */
-export function Question({
-  id,
-  type,
-  answer,
-  points,
-  number,
-  tags,
-  index,
-  revision,
-  children,
-  buttonLabel = '查看解答',
-  dialogTitle = '题目与解析',
-}: QuestionProps) {
+export function Question({ id, type, answer, points, number, tags, index, revision, children }: QuestionProps) {
   const questionType = QUESTION_TYPES.includes(type) ? type : 'essay';
   const split = splitQuestion(children);
   const blanks = indexBlanks(split.stem);
   const spec = buildGradingSpec({ type: questionType, answer, options: split.options, blanks: blanks.blanks });
-
-  const options = toChoiceOptions(split.options);
-  const answerControl = questionType === 'boolean'
-    ? <TrueFalse key="question-boolean" />
-    : options.length > 0
-      ? <ChoiceGroup key="question-choices" options={options} density={getChoiceDensity(options.map((option) => option.content))} />
-      : null;
-
-  let stem = blanks.stem.map((node, position) => (position === split.optionSlot ? answerControl : node));
-  if (split.optionSlot === -1 && answerControl) stem = [...stem, answerControl];
-
-  const numberLabel = displayNumber(number, index);
-  const builtinTags = parseQuestionTags(tags);
-  const score = typeof points === 'number' && Number.isFinite(points) && points > 0 ? points : undefined;
   const solution = split.solution?.props.children;
-  const hasSolution = hasContent(solution);
-  const typeLabel = QUESTION_TYPE_LABELS[questionType];
+  const meta: QuestionMeta = {
+    id,
+    type: questionType,
+    number: displayNumber(number, index),
+    points: typeof points === 'number' && Number.isFinite(points) && points > 0 ? points : undefined,
+    tags: parseQuestionTags(tags),
+  };
+
+  // The answer control takes the place of the options; a true / false question has none, so it follows the stem.
+  const options = toChoiceOptions(split.options);
+  const control = questionType === 'boolean'
+    ? <TrueFalse key="question-answer" />
+    : options.length > 0
+      ? <ChoiceGroup key="question-answer" options={options} density={getChoiceDensity(options.map((option) => option.content))} />
+      : null;
+  const stem = blanks.stem.map((node, position) => (position === split.optionSlot ? control : node));
+  if (split.optionSlot === -1 && control) stem.push(control);
 
   const card = (
     <QuestionMarksProvider questionId={id}>
@@ -105,37 +84,24 @@ export function Question({
         data-question-id={id}
         data-question-type={questionType}
         data-question-revision={revision}
-        aria-labelledby={numberLabel ? `question-${id}-label` : undefined}
+        aria-labelledby={meta.number ? `question-${id}-label` : undefined}
         className="min-w-0 scroll-mt-4"
       >
         <div data-question-header="">
           <div data-question-meta="">
-            {numberLabel ? (
-              <span id={`question-${id}-label`} data-question-number="" aria-label={`第 ${numberLabel} 题`}>{numberLabel}</span>
+            {meta.number ? (
+              <span id={`question-${id}-label`} data-question-number="" aria-label={`第 ${meta.number} 题`}>{meta.number}</span>
             ) : null}
-            <QuestionTypeTag type={questionType} label={typeLabel} points={score} />
+            <QuestionTypeTag type={questionType} points={meta.points} />
             <QuestionUserTags />
           </div>
-          <QuestionSourceTrail tags={builtinTags.source} />
+          <QuestionSourceTrail tags={meta.tags.source} />
           <QuestionMarkActions />
         </div>
         <div data-exam-question-body="" className={cn('min-w-0', questionStemClassName)}>
           {stem}
         </div>
-        {hasSolution || spec ? (
-          <QuestionFooter
-            questionId={id}
-            questionType={questionType}
-            solution={solution}
-            showSolution={hasSolution}
-            buttonLabel={buttonLabel}
-            dialogTitle={dialogTitle}
-            numberLabel={numberLabel}
-            typeLabel={typeLabel}
-            points={score}
-            tags={builtinTags}
-          />
-        ) : null}
+        {hasContent(solution) || spec ? <QuestionFooter meta={meta} solution={hasContent(solution) ? solution : null} /> : null}
         <QuestionNote />
       </section>
     </QuestionMarksProvider>

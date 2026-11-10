@@ -1,79 +1,54 @@
 'use client';
 
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useSyncExternalStore,
-} from 'react';
+import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import { usePathname } from 'next/navigation';
-import { PENDING_SNAPSHOT, QuestionAnswerCache, emptyAnswer, type WriteKind } from '@/lib/question-store/cache';
-import type { AnswerState, QuestionIdentity } from '@/lib/question-store/types';
-import { useQuestionBatch } from './question-batch';
-import { useQuestionStorage } from './database-context';
 import { diag } from '@/lib/diagnostics';
-import {
-  BLANK_SELF_TOKEN,
-  type BlankGrade,
-  evaluateAttempt,
-  gradeBlank as autoGradeBlank,
-  isAnswered,
-  readBlankGrades,
-  withBlankGrade,
-  type Evaluation,
-  type GradingSpec,
-} from './grading';
+import { PENDING_SNAPSHOT, QuestionAnswerCache } from '@/lib/question-store/cache';
+import type { AnswerState, QuestionIdentity } from '@/lib/question-store/types';
+import * as rules from './attempt';
+import { useQuestionStorage } from './database-context';
+import { type BlankGrade, evaluateAttempt, type Evaluation, type GradingSpec } from './grading';
+import { useQuestionBatch } from './question-batch';
 
 /*
- * Per-question client state. The options, blanks, footer and solution sheet
- * all read the same attempt, so the sheet shows exactly what the reader
- * entered on the page.
+ * Per-question client state: the stored answer of one question, its grade,
+ * and the moves a reader can make (attempt.ts holds their rules). The
+ * options, blanks, footer and solution sheet all read the same attempt, so
+ * the sheet shows exactly what the reader entered on the page.
  */
 
-export type { AttemptResult, GradingSpec } from './grading';
-
-export type QuestionState = {
-  spec: GradingSpec;
-  identity: QuestionIdentity;
-  /** Option letters picked so far (choice and boolean questions). */
-  selected: readonly string[];
-  /** Typed text per blank (blank questions). */
-  values: readonly string[];
-  submitted: boolean;
-  /** Grade of the submitted answer; null while answering. */
-  evaluation: Evaluation | null;
-  /** Increments per submission so feedback motion replays on retry. */
-  attempt: number;
-  /** The shown grade was submitted in this visit (restored grades do not animate). */
-  fresh: boolean;
-  answered: boolean;
-  canSubmit: boolean;
-  /** In a batch graded together (question-batch): no grading of its own. */
-  deferred: boolean;
-  ready: boolean;
-  storageError: string | null;
-  retryStorage: () => void;
-  /** Replaces the selection; single-answer questions are graded at once. */
+export type QuestionActions = {
+  /** Replaces the picked letters; single answers and self-grades are graded at once. */
   select: (letters: readonly string[]) => void;
   setValue: (index: number, value: string) => void;
   submit: () => void;
   reset: () => void;
-  /**
-   * Blank questions, once submitted: the reader's own grade for one blank,
-   * or null to go back to the automatic one. Kept with the answer and
-   * synced, without counting as another attempt.
-   */
+  /** A submitted blank: the reader's own grade, or null for the checker's. Not another attempt. */
   gradeBlank: (index: number, grade: BlankGrade | null) => void;
-  /**
-   * Blank questions, while answering: grade blank `index` against the key
-   * (对答案自评), or several at once. Once every blank has a grade the
-   * question is submitted with them, whether or not anything was typed.
-   */
+  /** Blanks before submitting (对答案自评): grading the last one submits. */
   selfGradeBlanks: (grades: ReadonlyMap<number, BlankGrade>) => void;
+  retryStorage: () => void;
+};
+
+export type QuestionState = QuestionActions & {
+  spec: GradingSpec;
+  /** Option letters picked so far; for blanks, the reader's grades (grading.ts). */
+  selected: readonly string[];
+  /** Typed text per blank. */
+  values: readonly string[];
+  submitted: boolean;
+  /** Grade of the submitted answer; null while answering. */
+  evaluation: Evaluation | null;
+  status: rules.AttemptStatus;
+  /** Increments per submission so feedback motion replays on retry. */
+  attempt: number;
+  /** The shown grade was submitted in this visit (restored grades do not animate). */
+  fresh: boolean;
+  /** In a batch graded together (question-batch): no grading of its own. */
+  deferred: boolean;
+  /** The stored answer has been read; until then the question is locked. */
+  ready: boolean;
+  storageError: string | null;
 };
 
 const QuestionContext = createContext<QuestionState | null>(null);
@@ -83,9 +58,7 @@ export function useQuestionState() {
 }
 
 /** Provides a state read elsewhere on the page: the solution sheet showing another question. */
-export function QuestionStateScope({ value, children }: { value: QuestionState | null; children: ReactNode }) {
-  return <QuestionContext.Provider value={value}>{children}</QuestionContext.Provider>;
-}
+export const QuestionStateScope = QuestionContext.Provider;
 
 /** The page path questions are stored under (no trailing slash). */
 export function useDocumentPath() {
@@ -96,47 +69,10 @@ export function useDocumentPath() {
 /** Questions rendered outside the site provider (tests, previews) keep answers in memory only. */
 let memoryCache: QuestionAnswerCache | undefined;
 
-export function QuestionProvider({
-  spec,
-  questionId,
-  questionRevision = 'unversioned',
-  children,
-}: {
-  spec: GradingSpec;
-  questionId: string;
-  questionRevision?: string;
-  children: ReactNode;
-}) {
-  const storage = useQuestionStorage();
-  const batch = useQuestionBatch();
-  const deferred = (batch?.deferred ?? false) && spec.kind !== 'self';
-  const documentPath = useDocumentPath();
-  const cache = storage ? storage.cache : (memoryCache ??= new QuestionAnswerCache(null, 'guest'));
-  const identity = useMemo<QuestionIdentity>(() => ({ documentPath, questionId, questionRevision }), [documentPath, questionId, questionRevision]);
-  // Reads come from the shared memory cache: one IndexedDB read per page, no per-question round trip.
-  const subscribe = useCallback((listener: () => void) => cache?.subscribe(identity, listener) ?? (() => {}), [cache, identity]);
-  const snapshot = useSyncExternalStore(subscribe, () => cache?.read(identity) ?? PENDING_SNAPSHOT, () => PENDING_SNAPSHOT);
-  const { ready, error: storageError } = snapshot;
-  // The ref sees a write before React re-renders, so rapid input never builds on a stale answer.
-  const current = useRef(snapshot.state);
-  current.current = snapshot.state;
-  const { selected, values, submitted, attempt } = snapshot.state;
-  // The attempt count first read from storage; later submissions are "fresh".
-  const baseline = useRef<number | null>(null);
-  if (ready && baseline.current === null) baseline.current = attempt;
-  const fresh = submitted && baseline.current !== null && attempt > baseline.current;
-
-  // Drafts stay on this device; a submission or reset is committed and reaches the cloud.
-  const update = useCallback((next: AnswerState, kind: WriteKind = 'draft') => {
-    if (kind !== 'draft') diag('answer', { kind, question: identity.questionId });
-    current.current = next;
-    cache?.write(identity, next, kind);
-  }, [cache, identity]);
-
-  const retryStorage = useCallback(() => { cache?.retry(identity); }, [cache, identity]);
-
+/** Warns before leaving while an answer could not be saved. */
+function useUnsavedGuard(cache: QuestionAnswerCache | null, active: boolean) {
   useEffect(() => {
-    if (!storageError || !cache) return;
+    if (!active || !cache) return;
     const beforeUnload = (event: BeforeUnloadEvent) => {
       if (!cache.hasUnsaved()) return;
       event.preventDefault();
@@ -144,107 +80,93 @@ export function QuestionProvider({
     };
     window.addEventListener('beforeunload', beforeUnload);
     return () => window.removeEventListener('beforeunload', beforeUnload);
-  }, [storageError, cache]);
+  }, [cache, active]);
+}
 
-  const kind = spec.kind;
-  // An essay's self-grade is final when given; batches defer the others (question-batch).
-  const instant = kind === 'self' || (!deferred && (kind === 'boolean' || (kind === 'choice' && !spec.multiple)));
-  const answered = isAnswered(spec, selected, values);
-  const canSubmit = ready && !submitted && answered && !deferred;
+export function QuestionProvider({ spec, questionId, questionRevision = 'unversioned', children }: {
+  spec: GradingSpec;
+  questionId: string;
+  questionRevision?: string;
+  children: ReactNode;
+}) {
+  const storage = useQuestionStorage();
+  const batch = useQuestionBatch();
+  const documentPath = useDocumentPath();
+  // Inside the site provider a null cache means "still opening": the question waits.
+  const cache = storage ? storage.cache : (memoryCache ??= new QuestionAnswerCache(null, 'guest'));
+  const deferred = (batch?.deferred ?? false) && spec.kind !== 'self';
 
-  const select = useCallback(
-    (letters: readonly string[]) => {
-      if (!ready || kind === 'blank' || current.current.submitted) return;
-      const finish = instant && letters.length > 0;
-      update({ ...current.current, selected: [...letters], submitted: finish,
-        attempt: current.current.attempt + (finish ? 1 : 0) }, finish ? 'submit' : 'draft');
-    },
-    [ready, kind, instant, update],
-  );
+  // Reads come from the shared memory cache: one IndexedDB read per page, no per-question round trip.
+  const store = useMemo(() => {
+    const identity: QuestionIdentity = { documentPath, questionId, questionRevision };
+    return {
+      subscribe: (listener: () => void) => cache?.subscribe(identity, listener) ?? (() => {}),
+      read: () => cache?.read(identity) ?? PENDING_SNAPSHOT,
+      write: (state: AnswerState, kind: NonNullable<rules.Transition>['kind']) => cache?.write(identity, state, kind),
+      retry: () => { cache?.retry(identity); },
+    };
+  }, [cache, documentPath, questionId, questionRevision]);
+  const snapshot = useSyncExternalStore(store.subscribe, store.read, () => PENDING_SNAPSHOT);
+  const { ready, error: storageError, state } = snapshot;
+  useUnsavedGuard(cache, storageError !== null);
 
-  const setValue = useCallback(
-    (index: number, value: string) => {
-      if (!ready || kind !== 'blank' || current.current.submitted) return;
-      const next = Array.from({ length: Math.max(index + 1, current.current.values.length) }, (_, position) => current.current.values[position] ?? '');
-      next[index] = value;
-      update({ ...current.current, values: next });
-    },
-    [ready, kind, update],
-  );
+  // The ref sees a write before React re-renders, so rapid input never builds on a stale answer.
+  const current = useRef(state);
+  current.current = state;
+  // The attempt count first read from storage; later submissions are "fresh".
+  const baseline = useRef<number | null>(null);
+  if (ready && baseline.current === null) baseline.current = state.attempt;
+  const fresh = state.submitted && baseline.current !== null && state.attempt > baseline.current;
 
-  const submit = useCallback(() => {
-    const state = current.current;
-    if (!ready || state.submitted || !isAnswered(spec, state.selected, state.values)) return;
-    update({ ...state, submitted: true, attempt: state.attempt + 1 }, 'submit');
-  }, [ready, spec, update]);
-
-  const gradeBlank = useCallback((index: number, grade: BlankGrade | null) => {
-    const state = current.current;
-    if (!ready || spec.kind !== 'blank' || !state.submitted || !spec.blanks[index]) return;
-    // Agreeing with the checker is no override at all.
-    const auto = autoGradeBlank(state.values[index] ?? '', spec.blanks[index]) === 'correct' ? 'correct' : 'incorrect';
-    const selected = withBlankGrade(state.selected, index, grade === auto ? null : grade);
-    if (selected.join() === state.selected.join()) return;
-    update({ ...state, selected }, 'regrade');
-  }, [ready, spec, update]);
-
-  const selfGradeBlanks = useCallback((grades: ReadonlyMap<number, BlankGrade>) => {
-    const state = current.current;
-    if (!ready || spec.kind !== 'blank' || state.submitted || deferred) return;
-    let selected = state.selected.filter((token) => token !== BLANK_SELF_TOKEN);
-    for (const [index, grade] of grades) {
-      if (spec.blanks[index]) selected = withBlankGrade(selected, index, grade);
-    }
-    const complete = readBlankGrades(selected, spec.blanks.length).every(Boolean);
-    if (!complete) {
-      update({ ...state, selected });
-      return;
-    }
-    update({ ...state, selected: [...selected, BLANK_SELF_TOKEN].sort(), submitted: true, attempt: state.attempt + 1 }, 'submit');
-  }, [ready, spec, deferred, update]);
-
-  const reset = useCallback(() => {
-    if (!ready) return;
-    update({ ...emptyAnswer(), attempt: current.current.attempt }, 'reset');
-  }, [ready, update]);
+  const actions = useMemo<QuestionActions>(() => {
+    // Drafts stay on this device; a submission, regrade or reset is committed and reaches the cloud.
+    const apply = (move: (state: AnswerState) => rules.Transition) => {
+      const next = ready ? move(current.current) : null;
+      if (!next) return;
+      if (next.kind !== 'draft') diag('answer', { kind: next.kind, question: questionId });
+      current.current = next.state;
+      store.write(next.state, next.kind);
+    };
+    return {
+      select: (letters) => apply((answer) => rules.pick(spec, answer, letters, deferred)),
+      setValue: (index, value) => apply((answer) => rules.fill(spec, answer, index, value)),
+      submit: () => apply((answer) => rules.submit(spec, answer)),
+      reset: () => apply(rules.reset),
+      gradeBlank: (index, grade) => apply((answer) => rules.regradeBlank(spec, answer, index, grade)),
+      selfGradeBlanks: (grades) => apply((answer) => (deferred ? null : rules.selfGradeBlanks(spec, answer, grades))),
+      retryStorage: store.retry,
+    };
+  }, [store, spec, deferred, ready, questionId]);
 
   // The batch submits and resets through the same paths as the footer.
   useEffect(() => batch?.register({
     id: questionId,
-    answered: () => isAnswered(spec, current.current.selected, current.current.values),
+    answered: () => rules.attemptStatus(spec, current.current, null) !== 'idle',
     submitted: () => current.current.submitted,
-    submit,
-    reset,
-  }), [batch, questionId, spec, submit, reset]);
+    submit: actions.submit,
+    reset: actions.reset,
+  }), [batch, questionId, spec, actions]);
 
   // Grading parses maths answers, so it runs once per submitted state, not per render.
   const evaluation = useMemo(
-    () => (submitted ? evaluateAttempt(spec, selected, values) : null),
-    [submitted, spec, selected, values],
+    () => (state.submitted ? evaluateAttempt(spec, state.selected, state.values) : null),
+    [spec, state],
   );
 
   const value = useMemo<QuestionState>(() => ({
+    ...actions,
     spec,
-    identity,
-    selected,
-    values,
-    submitted,
+    selected: state.selected,
+    values: state.values,
+    submitted: state.submitted,
+    attempt: state.attempt,
     evaluation,
-    attempt,
+    status: rules.attemptStatus(spec, state, evaluation),
     fresh,
-    answered,
-    canSubmit,
     deferred,
     ready,
     storageError,
-    retryStorage,
-    select,
-    setValue,
-    submit,
-    reset,
-    gradeBlank,
-    selfGradeBlanks,
-  }), [spec, identity, selected, values, submitted, evaluation, attempt, fresh, answered, canSubmit, deferred, ready, storageError, retryStorage, select, setValue, submit, reset, gradeBlank, selfGradeBlanks]);
+  }), [actions, spec, state, evaluation, fresh, deferred, ready, storageError]);
 
   return <QuestionContext.Provider value={value}>{children}</QuestionContext.Provider>;
 }

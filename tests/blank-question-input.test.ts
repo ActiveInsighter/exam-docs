@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import {
   BLANK_SELF_TOKEN,
   blankGradeToken,
+  describeResult,
   evaluateAttempt,
   readBlankGrades,
   withBlankGrade,
@@ -12,7 +13,6 @@ import {
 } from '@/components/question/grading';
 import { deleteBackward, insertFraction, insertText, moveCaret, wrapSelection } from '@/components/question/math-editing';
 import { MathPreview } from '@/components/question/math-preview';
-import { describeResult } from '@/components/question/question-footer';
 
 const at = (position: number) => ({ start: position, end: position });
 

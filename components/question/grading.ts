@@ -87,6 +87,41 @@ export function gradeChoice(
   return 'incorrect';
 }
 
+/** The option letters that make up the key of a choice or boolean question. */
+export function keyLetters(spec: GradingSpec | null | undefined): readonly string[] | null {
+  if (spec?.kind === 'choice') return spec.key;
+  if (spec?.kind === 'boolean') return [booleanLetter(spec.answer)];
+  return null;
+}
+
+/**
+ * How one option looks: idle · selected (picked, not graded) · correct /
+ * incorrect (picked, graded) · missed (a key option left out of a multiple
+ * answer: 漏选) · answer (the key the reader did not pick) · dimmed (not
+ * involved in the result).
+ */
+export type OptionFeedback = 'idle' | 'selected' | 'correct' | 'incorrect' | 'missed' | 'answer' | 'dimmed';
+
+export type OptionContext = {
+  key: readonly string[];
+  selected: readonly string[];
+  submitted: boolean;
+  multiple?: boolean;
+  /** Show the key without an attempt (the solution card's copy of an unanswered question). */
+  reveal?: boolean;
+};
+
+export function optionFeedback(letter: string, { key, selected, submitted, multiple, reveal }: OptionContext): OptionFeedback {
+  const picked = selected.includes(letter);
+  const inKey = key.includes(letter);
+  if (!submitted) return reveal ? (inKey ? 'answer' : 'idle') : picked ? 'selected' : 'idle';
+  if (picked) return inKey ? 'correct' : 'incorrect';
+  return inKey ? (multiple ? 'missed' : 'answer') : 'dimmed';
+}
+
+/** Feedback that colours the option: its fill spreads in from the press. */
+export const isFilled = (feedback: OptionFeedback) => feedback !== 'idle' && feedback !== 'dimmed';
+
 /**
  * Light normalisation so that "Ｏ(n)", " o(n) " and "O(n)。" compare equal:
  * NFKC folds full-width forms, whitespace and trailing full stops are dropped
@@ -272,4 +307,27 @@ export function formatResponse(spec: GradingSpec, selected: readonly string[], v
     case 'blank': return spec.blanks.map((_, index) => values[index]?.trim() || '—').join('；');
     case 'self': return selfGradeOf(selected[0])?.label ?? '—';
   }
+}
+
+/** Words for a grade: "少选" for a subset of a multiple answer, "部分正确" for blanks. */
+function describeGrade(spec: GradingSpec, evaluation: Evaluation, selected: readonly string[]): string {
+  if (evaluation.result === 'correct') return '回答正确';
+  if (evaluation.result === 'incorrect') return '回答错误';
+  if (spec.kind === 'choice') {
+    const missed = spec.key.length - selected.filter((letter) => spec.key.includes(letter)).length;
+    return `少选 · 漏选 ${missed} 项`;
+  }
+  if (spec.kind === 'blank') {
+    const right = evaluation.blanks.filter((verdict) => verdict === 'correct').length;
+    return `部分正确 · ${right}/${spec.blanks.length} 空`;
+  }
+  return '部分正确';
+}
+
+/** The grade as the footer says it, noting a self-grade (自评) or an overridden blank (已改判). */
+export function describeResult(spec: GradingSpec, evaluation: Evaluation, selected: readonly string[]): string {
+  if (spec.kind === 'self') return `自评 · ${selfGradeOf(selected[0])?.label ?? '错误'}`;
+  const words = describeGrade(spec, evaluation, selected);
+  if (evaluation.self) return `自评 · ${words.replace(/^回答/u, '')}`;
+  return evaluation.manual?.some(Boolean) ? `${words} · 已改判` : words;
 }

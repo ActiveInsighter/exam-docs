@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { getChoiceColumnCount, getChoiceDensity } from '@/components/question/choice-layout';
 import { Blank, Option, Question, Solution } from '@/components/question';
-import { parseQuestionTags } from '@/components/question/model';
+import { parseQuestionTags } from '@/components/question/tags';
 import { QuestionPointTags, QuestionSourceTrail } from '@/components/question/question-tags';
 
 describe('getChoiceDensity', () => {

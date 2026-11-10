@@ -45,9 +45,7 @@ export function useMarks() {
 }
 
 /** Provides marks read elsewhere on the page: the solution sheet showing another question. */
-export function QuestionMarksScope({ value, children }: { value: MarksContext | null; children: ReactNode }) {
-  return <Context.Provider value={value}>{children}</Context.Provider>;
-}
+export const QuestionMarksScope = Context.Provider;
 
 export function QuestionMarksProvider({ questionId, children }: { questionId: string; children: ReactNode }) {
   const documentPath = useDocumentPath();
@@ -80,7 +78,7 @@ export function QuestionMarksProvider({ questionId, children }: { questionId: st
 }
 
 /* Plain buttons styled like ghost icon buttons: three per card, so no Base UI wrapper. */
-const actionClass = buttonVariants({ variant: 'ghost', size: 'icon' }) + ' size-8 rounded-full text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active) aria-expanded:text-foreground';
+export const iconAction = buttonVariants({ variant: 'ghost', size: 'icon' }) + ' size-8 rounded-full text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active) aria-expanded:text-foreground';
 
 function FavoriteButton() {
   const marks = useMarks();
@@ -88,7 +86,7 @@ function FavoriteButton() {
   return (
     <button
       type="button"
-      className={cn(actionClass, on && 'text-warning hover:text-warning')}
+      className={cn(iconAction, on && 'text-warning hover:text-warning')}
       aria-pressed={on}
       aria-label={on ? '取消收藏' : '收藏'}
       title={on ? '取消收藏' : '收藏'}
@@ -113,12 +111,12 @@ export function QuestionMarkActions({ onEditNote, editingNote }: { onEditNote?: 
   return (
     <div data-question-actions="">
       <FavoriteButton />
-      <TagPicker className={cn(actionClass, marks.assigned.length > 0 && 'text-foreground')} aria-label="标签" title="标签" disabled={!marks.ready}>
+      <TagPicker className={cn(iconAction, marks.assigned.length > 0 && 'text-foreground')} aria-label="标签" title="标签" disabled={!marks.ready}>
         <span data-action-icon="tag" aria-hidden="true" />
       </TagPicker>
       <button
         type="button"
-        className={cn(actionClass, (hasNote || editing) && 'text-foreground')}
+        className={cn(iconAction, (hasNote || editing) && 'text-foreground')}
         aria-label={hasNote ? '编辑注释' : '添加注释'}
         aria-expanded={editing}
         title={hasNote ? '编辑注释' : '添加注释'}

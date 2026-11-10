@@ -1,30 +1,19 @@
 'use client';
 
-import { BookOpenTextIcon, CheckIcon, ChevronDownIcon, LibraryBigIcon, MinusIcon, NotebookPenIcon, XIcon } from 'lucide-react';
-import { lazy, type ReactNode, type RefObject, Suspense, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { BookOpenTextIcon, LibraryBigIcon, NotebookPenIcon } from 'lucide-react';
+import { lazy, type ReactNode, Suspense, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
-import {
-  StudyCard,
-  StudyCardAside,
-  StudyCardHeader,
-  StudyCardMain,
-  StudyCardSection,
-  StudyCardStage,
-  studyCardReveal,
-} from '@/components/ui/study-card';
+import { StudyCard, StudyCardAside, StudyCardHeader, StudyCardMain, StudyCardSection, StudyCardStage, studyCardReveal } from '@/components/ui/study-card';
 import { cn } from '@/lib/utils';
-import { blankBadge } from './blank-field';
-import { BlankGradeSwitch, BlankKey, BlankSelfGradeSwitch } from './blank-grade';
-import { type AttemptResult, formatKey, formatResponse, type GradingSpec, type QuestionType } from './grading';
-import { QuestionMarkActions, QuestionMarksScope, QuestionUserTags, useMarks } from './marks/question-marks';
+import { AnswerSummary } from './answer-summary';
 import { NoteEditor } from './marks/note-editor';
-import { MathPreview } from './math-preview';
-import { QuestionHeadTags, QuestionPointTags } from './question-tags';
-import type { QuestionTags } from './model';
+import { QuestionMarkActions, QuestionMarksScope, QuestionUserTags, iconAction, useMarks } from './marks/question-marks';
+import type { QuestionMeta } from './model';
 import { revealQuestion } from './page-questions';
+import { QuestionMirror } from './question-mirror';
+import { QuestionStateScope, useQuestionState } from './question-state';
+import { QuestionPointTags, QuestionSourceTrail, QuestionTypeTag } from './question-tags';
 import { SelfGrade } from './self-grade';
-import { mirrorQuestion } from './question-mirror';
-import { QuestionStateScope, useQuestionState, type QuestionState } from './question-state';
 import { removeSolutionEntry, setSolutionEntry, useSolutionDeck, type SolutionEntry } from './solution-deck';
 
 // Opened from the toolbar as a page of the card; loaded on first use.
@@ -38,191 +27,24 @@ const QuestionLibraryDialog = lazy(() => import('./marks/library-dialog').then((
  *   header   number; type and source on one capsule beside it (the
  *            reader's tags with them); the reader's marks, the library
  *            and the pager in the toolbar (top right)
- *   aside    the question (a read-only copy of the page's own rendering,
- *            the key revealed) and, now that the solution is open, its
- *            knowledge points, on one solid colour that blocks against
- *            the white main pane (question.css); on desktop also the
- *            reader's note
- *   main     the reader's answer next to the correct one, the solution,
- *            and on phones the note
+ *   aside    the question (question-mirror.tsx: a read-only copy of the
+ *            page's own rendering, the key revealed), its knowledge points
+ *            and, on desktop, the reader's note
+ *   main     the reader's answer next to the correct one
+ *            (answer-summary.tsx), the solution, and on phones the note
  *
  * Desktop shows the two side by side, each scrolling on its own; phones
- * stack them in one scroll, the question folded to a few lines first so the
- * answer is in view. The library opens as a page of the same card, pushed in
- * from the right. Focus starts on the title and returns, on close, to the
- * 查看解答 button of the question last shown, which scrolls it into view.
+ * stack them in one scroll. The library opens as a page of the same card,
+ * pushed in from the right. Focus starts on the title and returns, on close,
+ * to the 查看解答 button of the question last shown, which scrolls it into
+ * view.
  *
  * Every sheet registers its question in the page's deck (solution-deck.ts);
  * a card shows another question with that question's own state and marks.
  */
 
 // Portaled out of #docs-body: `docs-prose` gives it the page typography.
-const prose = 'prose docs-prose max-w-none min-w-0';
-const proseReset = '[&>:first-child]:mt-0 [&>:last-child]:mb-0';
-
-/** Read-only copy of the question as rendered on the page. */
-function QuestionMirror({ questionId, state }: { questionId: string; state: QuestionState | null }) {
-  const host = useRef<HTMLDivElement>(null);
-  const [folded, setFolded] = useState<boolean | null>(null);
-
-  useLayoutEffect(() => {
-    const element = host.current;
-    if (!element) return;
-    const copy = mirrorQuestion(questionId, {
-      spec: state?.spec ?? null,
-      submitted: state?.submitted ?? false,
-      values: state?.values ?? [],
-      verdicts: state?.evaluation?.blanks ?? [],
-    });
-    element.replaceChildren(...(copy ? [copy] : []));
-    // Fold long questions on phones only; desktop has its own pane for them.
-    const narrow = window.matchMedia('(max-width: 767px)').matches;
-    setFolded(narrow && element.scrollHeight > 200 ? true : null);
-  }, [questionId, state?.spec, state?.submitted, state?.values, state?.evaluation]);
-
-  return (
-    <div className="relative">
-      <div
-        ref={host}
-        className={cn(prose, proseReset, 'overflow-hidden', folded && 'max-h-44 [mask-image:linear-gradient(to_bottom,#000_60%,transparent)]')}
-      />
-      {folded !== null ? (
-        <button
-          type="button"
-          className="mt-1 inline-flex items-center gap-1 rounded-full bg-(--ui-fill) px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground"
-          aria-expanded={!folded}
-          onClick={() => setFolded(!folded)}
-        >
-          <ChevronDownIcon className={cn('size-3.5 transition-transform', !folded && 'rotate-180')} />
-          {folded ? '展开题目' : '收起题目'}
-        </button>
-      ) : null}
-    </div>
-  );
-}
-
-const VERDICTS: Record<AttemptResult, { label: string; icon: ReactNode }> = {
-  correct: { label: '正确', icon: <CheckIcon strokeWidth={3} /> },
-  partial: { label: '部分正确', icon: <MinusIcon strokeWidth={3} /> },
-  incorrect: { label: '错误', icon: <XIcon strokeWidth={3} /> },
-};
-
-/** A solid badge in the result's tone (question.css). */
-function Verdict({ result }: { result: AttemptResult }) {
-  const verdict = VERDICTS[result];
-  return (
-    <span data-answer-verdict="" data-tone={result} aria-label={verdict.label} role="img">
-      {verdict.icon}
-    </span>
-  );
-}
-
-// Answer tiles: neutral grey, or the tint of a result (data-tone, question.css).
-const tile = 'flex min-w-0 items-baseline gap-3 rounded-(--ui-radius-control) px-4 py-2.5 leading-relaxed';
-
-/** Correct answer beside the reader's submitted one. */
-function AnswerSummary({ spec, state }: { spec: GradingSpec; state: QuestionState | null }) {
-  const submitted = state?.submitted && state.evaluation ? state : null;
-
-  if (spec.kind === 'blank') {
-    return (
-      <ol className="grid gap-2">
-        {spec.blanks.map((blank, index) => {
-          const verdict = submitted?.evaluation?.blanks[index];
-          const yours = submitted?.values[index]?.trim();
-          return (
-            <li key={index} data-answer-row="" data-answer-tile="" data-tone={verdict && verdict !== 'correct' ? 'incorrect' : undefined} className={cn(tile, 'flex-wrap items-center gap-y-2')}>
-              {spec.blanks.length > 1 ? <span className="text-muted-foreground">{blankBadge(index)}</span> : null}
-              <span data-answer-label="key" className="text-sm">答案</span>
-              <span className="min-w-0 text-lg font-semibold break-words">
-                <BlankKey blank={blank} />
-              </span>
-              {submitted ? (
-                <span className="ml-auto inline-flex min-w-0 flex-wrap items-center justify-end gap-2">
-                  <span className="text-sm text-muted-foreground">你填</span>
-                  <span className="min-w-0 font-medium break-all">{yours ? (blank.kind === 'math' ? <MathPreview text={yours} /> : yours) : '—'}</span>
-                  <BlankGradeSwitch question={submitted} index={index} />
-                </span>
-              ) : state && state.ready && !state.deferred ? (
-                // Not answered on the page: grade yourself against the key, as with an essay.
-                <span className="ml-auto inline-flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">自评</span>
-                  <BlankSelfGradeSwitch question={state} index={index} />
-                </span>
-              ) : null}
-            </li>
-          );
-        })}
-      </ol>
-    );
-  }
-
-  return (
-    <div className="grid gap-2 sm:grid-cols-[repeat(auto-fill,minmax(13rem,1fr))]">
-      <div data-answer-tile="" data-tone="correct" className={tile}>
-        <span data-answer-label="key" className="shrink-0 text-sm">正确答案</span>
-        <span className="min-w-0 text-lg font-semibold" data-choice-letters={spec.kind === 'choice' ? '' : undefined}>{formatKey(spec)}</span>
-      </div>
-      {submitted ? (
-        <div data-answer-tile="" data-tone={submitted.evaluation!.result === 'correct' ? undefined : submitted.evaluation!.result} className={tile}>
-          <span className="shrink-0 text-sm text-muted-foreground">你的答案</span>
-          <span className="min-w-0 text-lg font-semibold break-words" data-choice-letters={spec.kind === 'choice' && submitted.selected.length ? '' : undefined}>{formatResponse(spec, submitted.selected, submitted.values)}</span>
-          <span className="ml-auto self-center"><Verdict result={submitted.evaluation!.result} /></span>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-/** The reader's note, editable in place inside the sheet. */
-function SheetNote({ editing, setEditing, order }: { editing: boolean; setEditing: (editing: boolean) => void; order: number }) {
-  const marks = useMarks();
-  if (!marks) return null;
-  const note = marks.mark?.note ?? '';
-  return (
-    <StudyCardSection
-      label="我的注释"
-      meta={!editing ? (
-        <Button variant="ghost" size="xs" className="-my-1 text-muted-foreground" onClick={() => setEditing(true)} disabled={!marks.ready}>
-          <NotebookPenIcon data-icon="inline-start" />{note ? '编辑' : '添加'}
-        </Button>
-      ) : null}
-      {...studyCardReveal(order)}
-    >
-      {editing ? (
-        <NoteEditor initial={note} onCancel={() => setEditing(false)} onSave={async (next) => { if (await marks.update({ note: next })) setEditing(false); }} />
-      ) : note ? (
-        <p className="text-[0.9375rem] leading-relaxed break-words whitespace-pre-wrap">{note}</p>
-      ) : (
-        <p className="text-sm text-muted-foreground">还没有注释。记下思路或易错点，下次复习一眼可见。</p>
-      )}
-    </StudyCardSection>
-  );
-}
-
-const DESKTOP = '(min-width: 768px)';
-const subscribeDesktop = (listener: () => void) => {
-  const query = window.matchMedia(DESKTOP);
-  query.addEventListener('change', listener);
-  return () => query.removeEventListener('change', listener);
-};
-
-/** Desktop puts the note under the question, phones after the solution. */
-function useDesktop() {
-  return useSyncExternalStore(subscribeDesktop, () => window.matchMedia(DESKTOP).matches, () => true);
-}
-
-export type QuestionSolutionSheetProps = {
-  questionId: string;
-  questionType: QuestionType;
-  solution: ReactNode;
-  buttonLabel: string;
-  dialogTitle: string;
-  numberLabel: string | null;
-  typeLabel: string;
-  points?: number;
-  tags: QuestionTags;
-};
+const prose = 'prose docs-prose max-w-none min-w-0 [&>:first-child]:mt-0 [&>:last-child]:mb-0';
 
 /*
  * The trigger is a plain button; the card mounts on first open and then
@@ -230,25 +52,22 @@ export type QuestionSolutionSheetProps = {
  * a hundred of these, most never opened: until then each one only keeps its
  * entry in the page's deck current.
  */
-export function QuestionSolutionSheet({ buttonLabel, questionId, questionType, solution, dialogTitle, numberLabel, typeLabel, points, tags }: QuestionSolutionSheetProps) {
+export function QuestionSolutionSheet({ meta, solution }: { meta: QuestionMeta; solution: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
   const key = useId();
   const state = useQuestionState();
   const marks = useMarks();
 
-  const entry = useMemo<SolutionEntry>(() => ({
-    key, questionId, questionType, trigger: triggerRef, solution, dialogTitle, numberLabel, typeLabel, points, tags, state, marks,
-  }), [key, questionId, questionType, solution, dialogTitle, numberLabel, typeLabel, points, tags, state, marks]);
-
+  const entry = useMemo<SolutionEntry>(() => ({ key, meta, solution, trigger, state, marks }), [key, meta, solution, state, marks]);
   useEffect(() => setSolutionEntry(entry), [entry]);
   useEffect(() => () => removeSolutionEntry(key), [key]);
 
   return (
     <>
       <button
-        ref={triggerRef}
+        ref={trigger}
         type="button"
         data-solution-trigger=""
         aria-haspopup="dialog"
@@ -260,14 +79,12 @@ export function QuestionSolutionSheet({ buttonLabel, questionId, questionType, s
         onClick={() => { setMounted(true); setOpen(true); }}
       >
         <BookOpenTextIcon data-icon="inline-start" />
-        {buttonLabel}
+        查看解答
       </button>
-      {mounted ? <SolutionCard self={entry} open={open} setOpen={setOpen} triggerRef={triggerRef} /> : null}
+      {mounted ? <SolutionCard self={entry} open={open} setOpen={setOpen} /> : null}
     </>
   );
 }
-
-const toolbarButton = buttonVariants({ variant: 'ghost', size: 'icon' }) + ' size-8 rounded-full text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active) aria-expanded:text-foreground';
 
 /** Gives a card the live state and marks of the question it shows. */
 function EntryScope({ entry, children }: { entry: SolutionEntry; children: ReactNode }) {
@@ -278,17 +95,20 @@ function EntryScope({ entry, children }: { entry: SolutionEntry; children: React
   );
 }
 
-function SolutionCard({ self, open, setOpen, triggerRef }: {
-  self: SolutionEntry;
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  triggerRef: RefObject<HTMLButtonElement | null>;
-}) {
+const DESKTOP = '(min-width: 768px)';
+const subscribeDesktop = (listener: () => void) => {
+  const query = window.matchMedia(DESKTOP);
+  query.addEventListener('change', listener);
+  return () => query.removeEventListener('change', listener);
+};
+
+function SolutionCard({ self, open, setOpen }: { self: SolutionEntry; open: boolean; setOpen: (open: boolean) => void }) {
   const deck = useSolutionDeck(open);
   const [currentKey, setCurrentKey] = useState(self.key);
   const [editingNote, setEditingNote] = useState(false);
   const [library, setLibrary] = useState<'closed' | 'open' | 'mounted'>('closed');
-  const desktop = useDesktop();
+  // Desktop puts the note under the question, phones after the solution.
+  const desktop = useSyncExternalStore(subscribeDesktop, () => window.matchMedia(DESKTOP).matches, () => true);
 
   // Every open starts on the question it was opened from.
   const [wasOpen, setWasOpen] = useState(open);
@@ -299,19 +119,18 @@ function SolutionCard({ self, open, setOpen, triggerRef }: {
 
   const found = deck.findIndex((entry) => entry.key === currentKey);
   const cards = found >= 0 ? deck : [self];
-  const index = Math.max(0, found);
-  const entry = cards[index] ?? self;
+  const entry = cards[Math.max(0, found)] ?? self;
+  const { meta } = entry;
 
   return (
     <StudyCard
       open={open}
       onOpenChange={(next) => { setOpen(next); if (!next) setEditingNote(false); }}
       count={cards.length}
-      index={index}
+      index={Math.max(0, found)}
       onIndexChange={(next) => {
-        const target = cards[next];
-        if (!target) return;
-        setCurrentKey(target.key);
+        if (!cards[next]) return;
+        setCurrentKey(cards[next].key);
         setEditingNote(false);
       }}
       itemKey={entry.key}
@@ -322,23 +141,24 @@ function SolutionCard({ self, open, setOpen, triggerRef }: {
       className="text-base"
       finalFocus={() => {
         // A question the reader paged to may be out of layout (the reading card).
-        const question = document.getElementById(`question-${entry.questionId}`);
+        const question = document.getElementById(`question-${meta.id}`);
         if (question) revealQuestion(question);
-        return entry.trigger.current ?? triggerRef.current ?? true;
+        return entry.trigger.current ?? self.trigger.current ?? true;
       }}
     >
       <EntryScope entry={entry}>
         <StudyCardHeader
-          title={entry.numberLabel ? (
+          title={meta.number ? (
             <>
-              <span data-question-number="" aria-hidden="true">{entry.numberLabel}</span>
-              <span className="sr-only">第 {entry.numberLabel} 题</span>
+              <span data-question-number="" aria-hidden="true">{meta.number}</span>
+              <span className="sr-only">第 {meta.number} 题</span>
             </>
-          ) : entry.dialogTitle}
+          ) : '题目与解析'}
           tags={(
             // One glass capsule for all of them: each blurred layer costs a pass on every scrolled frame.
             <span data-tag-capsule="">
-              <QuestionHeadTags type={entry.questionType} typeLabel={entry.typeLabel} points={entry.points} tags={entry.tags} />
+              <QuestionTypeTag type={meta.type} points={meta.points} />
+              <QuestionSourceTrail tags={meta.tags.source} />
               <QuestionUserTags />
             </span>
           )}
@@ -347,14 +167,7 @@ function SolutionCard({ self, open, setOpen, triggerRef }: {
           actions={(
             <>
               <QuestionMarkActions editingNote={editingNote} onEditNote={() => setEditingNote(!editingNote)} />
-              <button
-                type="button"
-                className={toolbarButton}
-                aria-expanded={library === 'open'}
-                aria-label="收藏与标签"
-                title="收藏与标签"
-                onClick={() => setLibrary('open')}
-              >
+              <button type="button" className={iconAction} aria-expanded={library === 'open'} aria-label="收藏与标签" title="收藏与标签" onClick={() => setLibrary('open')}>
                 <LibraryBigIcon />
               </button>
             </>
@@ -378,57 +191,73 @@ function SolutionCard({ self, open, setOpen, triggerRef }: {
   );
 }
 
-/** One card's panes. Kept as rendered while the card leaves, with the scope it was given. */
-function SolutionCardBody({ entry, desktop, editingNote, setEditingNote }: {
-  entry: SolutionEntry;
-  desktop: boolean;
-  editingNote: boolean;
-  setEditingNote: (editing: boolean) => void;
-}) {
-  const { questionId, state, solution, tags } = entry;
-  const points = tags.point;
-  const spec = state?.spec ?? null;
-  const solutionSection = (order: number) => (
-    <StudyCardSection label={spec && spec.kind !== 'self' ? '解析' : '参考解答'} {...studyCardReveal(order)}>
-      <div className={cn(prose, proseReset, '[&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden')}>
-        {solution}
-      </div>
+type NoteProps = { editing: boolean; setEditing: (editing: boolean) => void };
+
+/** The reader's note, editable in place inside the sheet. */
+function SheetNote({ editing, setEditing }: NoteProps) {
+  const marks = useMarks();
+  if (!marks) return null;
+  const note = marks.mark?.note ?? '';
+  return (
+    <StudyCardSection
+      label="我的注释"
+      meta={!editing ? (
+        <Button variant="ghost" size="xs" className="-my-1 text-muted-foreground" onClick={() => setEditing(true)} disabled={!marks.ready}>
+          <NotebookPenIcon data-icon="inline-start" />{note ? '编辑' : '添加'}
+        </Button>
+      ) : null}
+      {...studyCardReveal(2)}
+    >
+      {editing ? (
+        <NoteEditor initial={note} onCancel={() => setEditing(false)} onSave={async (next) => { if (await marks.update({ note: next })) setEditing(false); }} />
+      ) : note ? (
+        <p className="text-[0.9375rem] leading-relaxed break-words whitespace-pre-wrap">{note}</p>
+      ) : (
+        <p className="text-sm text-muted-foreground">还没有注释。记下思路或易错点，下次复习一眼可见。</p>
+      )}
     </StudyCardSection>
   );
+}
+
+/** One card's panes. Kept as rendered while the card leaves, with the scope it was given. */
+function SolutionCardBody({ entry, desktop, editingNote, setEditingNote }: { entry: SolutionEntry; desktop: boolean; editingNote: boolean; setEditingNote: (editing: boolean) => void }) {
+  const { meta, state, solution } = entry;
+  const points = meta.tags.point;
+  const spec = state?.spec ?? null;
+  const essay = spec?.kind === 'self';
+  const note = <SheetNote editing={editingNote} setEditing={setEditingNote} />;
   return (
     <>
       <StudyCardAside className="@container">
         <StudyCardSection label="题目" {...studyCardReveal(0)}>
-          <QuestionMirror questionId={questionId} state={state} />
+          <QuestionMirror questionId={meta.id} state={state} className={prose} />
         </StudyCardSection>
         {points.length ? (
           <StudyCardSection label="考点" meta={`${points.length} 个`} {...studyCardReveal(1)}>
             <QuestionPointTags tags={points} />
           </StudyCardSection>
         ) : null}
-        {desktop ? <SheetNote editing={editingNote} setEditing={setEditingNote} order={2} /> : null}
+        {desktop ? note : null}
       </StudyCardAside>
 
       <StudyCardMain>
-        {spec?.kind === 'self' ? (
-          <>
-            {solutionSection(0)}
-            {/* Read the reference first, then grade yourself against it. */}
-            <StudyCardSection label="自评" meta={state?.submitted ? '可随时改' : '对照参考解答'} {...studyCardReveal(1)}>
-              <SelfGrade />
-            </StudyCardSection>
-          </>
-        ) : (
-          <>
-            {spec ? (
-              <StudyCardSection label="答案" {...studyCardReveal(0)}>
-                <AnswerSummary spec={spec} state={state} />
-              </StudyCardSection>
-            ) : null}
-            {solutionSection(1)}
-          </>
-        )}
-        {!desktop ? <SheetNote editing={editingNote} setEditing={setEditingNote} order={2} /> : null}
+        {spec && !essay ? (
+          <StudyCardSection label="答案" {...studyCardReveal(0)}>
+            <AnswerSummary spec={spec} state={state} />
+          </StudyCardSection>
+        ) : null}
+        <StudyCardSection label={spec && !essay ? '解析' : '参考解答'} {...studyCardReveal(essay ? 0 : 1)}>
+          <div className={cn(prose, '[&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden')}>
+            {solution}
+          </div>
+        </StudyCardSection>
+        {essay ? (
+          // Read the reference first, then grade yourself against it.
+          <StudyCardSection label="自评" meta={state?.submitted ? '可随时改' : '对照参考解答'} {...studyCardReveal(1)}>
+            <SelfGrade />
+          </StudyCardSection>
+        ) : null}
+        {desktop ? null : note}
       </StudyCardMain>
     </>
   );
