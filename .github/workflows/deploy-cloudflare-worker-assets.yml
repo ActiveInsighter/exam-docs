@@ -735,11 +735,26 @@ jobs:
           READING_BROWSER_CHANNEL: chrome
           READING_SCREENSHOTS: ${{ runner.temp }}/reading-browser-screenshots
         run: node scripts/verify-english-reading-browser.mjs
+      - name: Verify question component states
+        env:
+          DEPLOYMENT_URL: ${{ needs.deploy.outputs.deployment-url }}
+          QUESTION_BROWSER_MODULES: ${{ runner.temp }}/reading-browser
+          QUESTION_BROWSER_CHANNEL: chrome
+          QUESTION_SCREENSHOTS: ${{ runner.temp }}/question-browser-screenshots
+        run: node scripts/verify-question-components-browser.mjs
       - name: Upload reading browser screenshots
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: english-reading-browser-screenshots
           path: ${{ runner.temp }}/reading-browser-screenshots
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Upload question component screenshots
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: question-component-browser-screenshots
+          path: ${{ runner.temp }}/question-browser-screenshots
           if-no-files-found: ignore
           retention-days: 7

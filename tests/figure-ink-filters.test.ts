@@ -7,7 +7,7 @@ import { FigureInkFilters } from '@/components/question/figure-ink-filters';
 describe('figure ink filters', () => {
   it('defines the light and dark filters question.css points figures at', () => {
     const markup = renderToStaticMarkup(createElement(FigureInkFilters));
-    const css = readFileSync('styles/question.css', 'utf8');
+    const css = readFileSync('styles/question/card.css', 'utf8');
 
     for (const id of ['exam-figure-ink', 'exam-figure-ink-dark']) {
       expect(markup).toContain(`id="${id}"`);

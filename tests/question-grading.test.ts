@@ -13,7 +13,8 @@ import {
   type BlankSpec,
 } from '@/components/question/grading';
 import { Blank, Option, Solution } from '@/components/question/parts';
-import { buildGradingSpec, indexBlanks, parseQuestionTags, splitQuestion } from '@/components/question/model';
+import { buildGradingSpec, indexBlanks, splitQuestion } from '@/components/question/model';
+import { parseQuestionTags } from '@/components/question/tags';
 
 const text = (answer: string, extra: Partial<BlankSpec> = {}): BlankSpec => ({ answer, aliases: [], kind: 'text', ...extra });
 const math = (answer: string, extra: Partial<BlankSpec> = {}): BlankSpec => ({ answer, aliases: [], kind: 'math', ...extra });

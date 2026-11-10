@@ -1,5 +1,6 @@
 import { Children, cloneElement, isValidElement, type ReactElement, type ReactNode } from 'react';
 import { Blank, Option, Solution, type BlankProps, type OptionProps } from './parts';
+import type { QuestionTags } from './tags';
 import {
   getOptionLetter,
   inferBlankKind,
@@ -17,16 +18,20 @@ import {
 
 type WithChildren = { children?: ReactNode };
 
-export type ChoiceOptionModel = {
-  /** Stable key used for selection and grading (A, B, …). */
-  label: string;
-  content: ReactNode;
+/** What a card and its solution sheet say about a question besides its stem. */
+export type QuestionMeta = {
+  id: string;
+  type: QuestionType;
+  /** Display number; null when hidden. */
+  number: string | null;
+  points?: number;
+  tags: QuestionTags;
 };
 
 /** Stem spacing, shared by the question in the page and in its solution sheet. */
 export const questionStemClassName = '[&>:first-child]:mt-0! [&>:last-child]:mb-0! [&>p]:my-2.5';
 
-export function isWhitespaceNode(node: ReactNode) {
+function isWhitespaceNode(node: ReactNode) {
   return typeof node === 'string' && node.trim() === '';
 }
 
@@ -99,7 +104,7 @@ function toText(value: unknown) {
   return typeof value === 'string' || typeof value === 'number' ? String(value) : '';
 }
 
-export function toBlankSpec(props: BlankProps): BlankSpec {
+function toBlankSpec(props: BlankProps): BlankSpec {
   const answer = toText(props.answer);
   const kind: BlankKind = props.kind === 'math' || props.kind === 'text' ? props.kind : inferBlankKind(answer);
   return {
@@ -159,98 +164,6 @@ export function buildGradingSpec({ type, answer, options, blanks }: BuildInput):
   return valid ? { kind: 'choice', multiple: type === 'multiple', key } : null;
 }
 
-export function toChoiceOptions(options: ReactElement<OptionProps>[]): ChoiceOptionModel[] {
+export function toChoiceOptions(options: ReactElement<OptionProps>[]) {
   return options.map((option, index) => ({ label: getOptionLetter(index), content: option.props.children }));
-}
-
-/* ---------------------------------------------------------------------------
- * Built-in question tags
- *
- *   tags="王道8套卷, 第4套, 计算机网络, 考点:VLAN广播域, 易错"
- *   tags={["来源:2023 统考", "章节:栈与队列", "考点:循环队列"]}
- *
- * Commas (, ， 、) separate tags; "分类:值" names a category. Every tag is
- * filed under one of three kinds, each drawn in its own shape:
- *
- *   type     traits of the question itself (易错, 难度:…), next to its type
- *   source   where it comes from (book, paper, subject, chapter), shown as
- *            one trail; bare tags without a known category land here
- *   point    what it examines (考点:…), shown with the solution only
- *
- * A new kind is a new entry in QUESTION_TAG_KINDS plus its look in
- * styles/question.css.
- * ------------------------------------------------------------------------- */
-
-export type QuestionTagKind = 'type' | 'source' | 'point';
-
-export type QuestionTagKindSpec = {
-  /** Name of the kind, read out before its tags. */
-  label: string;
-  /** Categories that file a tag under this kind ("考点:…"). */
-  groups: readonly string[];
-  /** Bare tags that belong here without a category. */
-  keywords?: readonly string[];
-};
-
-export const QUESTION_TAG_KINDS: Record<QuestionTagKind, QuestionTagKindSpec> = {
-  type: {
-    label: '题型',
-    groups: ['题型', '难度', '标记', '特点'],
-    keywords: ['易错', '重点', '难点', '难题', '压轴', '高频', '必做', '经典', '基础', '拔高'],
-  },
-  source: { label: '来源', groups: ['来源', '出处', '试卷', '年份', '科目', '章节'] },
-  point: { label: '考点', groups: ['考点', '知识点', '考察点'] },
-};
-
-/** Where tags without a known category go. */
-export const DEFAULT_TAG_KIND: QuestionTagKind = 'source';
-
-/** At most this many tags of each kind. */
-export const QUESTION_TAG_LIMIT = 12;
-export const QUESTION_TAG_MAX_LENGTH = 32;
-
-export type QuestionTag = {
-  label: string;
-  /** Category before a colon, if any. */
-  group?: string;
-  kind: QuestionTagKind;
-};
-
-export type QuestionTags = Record<QuestionTagKind, QuestionTag[]>;
-
-export function splitTagList(value: unknown): string[] {
-  const list = Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === 'string')
-    : typeof value === 'string'
-      ? value.split(/[,，、]/u)
-      : [];
-  return list.map((item) => item.trim()).filter((item) => item !== '');
-}
-
-export function tagKindOf(label: string, group?: string): QuestionTagKind {
-  const kinds = Object.entries(QUESTION_TAG_KINDS) as [QuestionTagKind, QuestionTagKindSpec][];
-  const found = group
-    ? kinds.find(([, spec]) => spec.groups.includes(group))
-    : kinds.find(([, spec]) => spec.keywords?.includes(label));
-  return found?.[0] ?? DEFAULT_TAG_KIND;
-}
-
-export function emptyQuestionTags(): QuestionTags {
-  return { type: [], source: [], point: [] };
-}
-
-export function parseQuestionTags(value: unknown): QuestionTags {
-  const seen = new Set<string>();
-  const tags = emptyQuestionTags();
-  for (const item of splitTagList(value)) {
-    const match = /^([^:：]{1,12})[:：]\s*(.+)$/u.exec(item);
-    const group = match?.[1].trim();
-    const label = (match?.[2] ?? item).trim();
-    const kind = tagKindOf(label, group);
-    const key = `${kind}\u0000${label}`;
-    if (!label || seen.has(key) || tags[kind].length === QUESTION_TAG_LIMIT) continue;
-    seen.add(key);
-    tags[kind].push({ label, ...(group ? { group } : {}), kind });
-  }
-  return tags;
 }

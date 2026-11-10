@@ -1,0 +1,413 @@
+/* ------------------------------------------------------------------ card */
+
+[data-exam-question] {
+  position: relative;
+  isolation: isolate;
+  /* The blog sets its prose in serif; questions keep the interface face. */
+  font-family: var(--font-sans);
+  margin-block: 1.25rem;
+  padding: 0.75rem 0.875rem 0.625rem;
+  border-radius: var(--exam-card-radius);
+  /* No fill: the page background, held together by one hairline edge. */
+  border: 1px solid var(--exam-card-edge);
+  background: var(--exam-card);
+  /* Long pages: skip layout and paint of cards far off screen. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 18rem;
+}
+
+@media (min-width: 640px) {
+  [data-exam-question] {
+    padding: 0.875rem 1.25rem 0.75rem;
+  }
+}
+
+/* Authors separated questions with "---"; the cards are separation enough. */
+#docs-body hr:has(+ [data-exam-question]),
+#docs-body [data-exam-question] + hr {
+  display: none;
+}
+
+[data-exam-question]:target {
+  animation: exam-card-target 1.6s var(--ui-ease);
+}
+
+@keyframes exam-card-target {
+  0%, 30% { box-shadow: 0 0 0 2px color-mix(in oklch, var(--foreground) 22%, transparent); }
+  100% { box-shadow: 0 0 0 2px transparent; }
+}
+
+/*
+ * Perforations: a dashed rule tears the header and the footer off the stem,
+ * like the sections of an answer sheet. Drawn as a background so the dash
+ * length is ours, not the browser's border pattern.
+ */
+[data-question-header],
+[data-question-footer] {
+  --rule: linear-gradient(90deg, var(--exam-rule) 0 0.25rem, transparent 0.25rem 0.5rem);
+  background-repeat: repeat-x;
+  background-size: 0.5rem 1px;
+}
+
+/* Container for the option grid's fallback columns. */
+[data-exam-question-body] {
+  container-type: inline-size;
+}
+
+/*
+ * Header: number, type and the reader's tags · source ·
+ * actions, on one row while the card is wide; a narrow card gives the
+ * trail its own row under them, the full width of the card, so it rarely
+ * needs to truncate.
+ */
+[data-exam-question] {
+  container: exam-card / inline-size;
+}
+
+[data-question-header] {
+  display: grid;
+  grid-template-columns: minmax(0, max-content) minmax(0, 1fr) auto;
+  grid-template-areas: 'meta trail actions';
+  align-items: start;
+  gap: 0.375rem 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  background-image: var(--rule);
+  background-position: left bottom;
+}
+
+[data-question-meta] {
+  grid-area: meta;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.5rem;
+  min-width: 0;
+  min-height: 1.875rem;
+}
+
+[data-question-header] > [data-source-trail] {
+  grid-area: trail;
+  justify-self: start;
+  height: 1.875rem;
+}
+
+[data-question-header] > [data-question-actions] {
+  grid-area: actions;
+}
+
+@container exam-card (width < 36rem) {
+  [data-question-header] {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'meta actions' 'trail trail';
+  }
+
+  [data-question-header] > [data-source-trail] {
+    height: 1.25rem;
+  }
+}
+
+/*
+ * Header tiers, from strongest to quietest, all in the card's own neutral
+ * ink so the stem and the graded options carry the only colour:
+ *
+ *   number   a filled squircle, the figure set in Outfit
+ *   type     a hairline chip with the type's icon and score
+ *   source   no chip at all: plain text behind a book icon
+ */
+[data-question-number] {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  padding-inline: 0.4375rem;
+  border-radius: 0.5625rem;
+  background: var(--exam-number-bg);
+  color: var(--exam-number-fg);
+  font-family: var(--font-outfit), var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+[data-question-type-label] {
+  --type-icon: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  height: 1.5rem;
+  padding-inline: 0.4375rem 0.5625rem;
+  border-radius: 0.5rem;
+  box-shadow: inset 0 0 0 1px var(--exam-line);
+  color: var(--exam-type-fg);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+[data-question-type-label]::before {
+  content: '';
+  flex-shrink: 0;
+  width: 0.8125rem;
+  height: 0.8125rem;
+  background: currentColor;
+  opacity: 0.75;
+  mask: var(--type-icon) center / contain no-repeat;
+}
+
+/* Icons (lucide circle-dot / square-check-big / pen-line / text-cursor-input; a check and a cross for true / false). */
+[data-question-type-label][data-type='single'] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Ccircle cx='12' cy='12' r='3.5' fill='black'/%3E%3C/svg%3E"); }
+[data-question-type-label][data-type='multiple'] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 10.656V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.344'/%3E%3Cpath d='m9 11 3 3L22 4'/%3E%3C/svg%3E"); }
+[data-question-type-label][data-type='boolean'] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 12.5l3.5 3.5 6-7.5'/%3E%3Cpath d='M15 8.5l7 7M22 8.5l-7 7'/%3E%3C/svg%3E"); }
+[data-question-type-label][data-type='blank'] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20h-1a2 2 0 0 1-2-2 2 2 0 0 1-2 2H6'/%3E%3Cpath d='M13 8h7a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-7'/%3E%3Cpath d='M5 16H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h1'/%3E%3Cpath d='M6 4h1a2 2 0 0 1 2 2 2 2 0 0 1 2-2h1'/%3E%3Cpath d='M9 6v12'/%3E%3C/svg%3E"); }
+[data-question-type-label][data-type='essay'] { --type-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 21h8'/%3E%3Cpath d='M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z'/%3E%3C/svg%3E"); }
+
+/* The score, after a hairline inside the type chip. */
+[data-type-points] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-inline-start: 0.125rem;
+  color: var(--muted-foreground);
+  font-weight: 560;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+[data-type-points]::before {
+  content: '';
+  width: 1px;
+  height: 0.6875rem;
+  background: var(--exam-line);
+}
+
+[data-question-actions] {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.125rem;
+  margin-block: -0.125rem;
+  margin-inline-end: -0.375rem;
+}
+
+/*
+ * Card action icons (lucide star / tag / notebook-pen) as one masked element
+ * each instead of inline SVG trees: three per card on pages of 100+ cards.
+ */
+[data-action-icon] {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  background: currentColor;
+  mask: var(--action-icon) center / contain no-repeat;
+}
+[data-action-icon='star'] { --action-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z'/%3E%3C/svg%3E"); }
+[data-favorite='on'] [data-action-icon='star'] { --action-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z'/%3E%3C/svg%3E"); }
+[data-action-icon='tag'] { --action-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z'/%3E%3Ccircle cx='7.5' cy='7.5' r='.5' fill='black'/%3E%3C/svg%3E"); }
+[data-action-icon='note'] { --action-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4M2 6h4M2 10h4M2 14h4M2 18h4'/%3E%3Cpath d='M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z'/%3E%3C/svg%3E"); }
+
+/* ------------------------------------------------------------------ tags */
+
+/*
+ * Built-in tags (question-tags.tsx). One chip for every kind: a hairline
+ * and an icon in the kind's accent on the plate. A kind sets --tag-accent
+ * and --tag-icon; a new kind needs nothing else.
+ */
+[data-question-tag] {
+  --tag-accent: var(--muted-foreground);
+  --tag-icon: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  max-width: 100%;
+  min-height: 1.5rem;
+  padding: 0.1875rem 0.5625rem 0.1875rem 0.4375rem;
+  border-radius: 0.5rem;
+  box-shadow: inset 0 0 0 1px var(--exam-line);
+  color: color-mix(in oklch, var(--foreground) 80%, transparent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+[data-question-tag]::before {
+  content: '';
+  flex-shrink: 0;
+  width: 0.8125rem;
+  height: 0.8125rem;
+  background: var(--tag-accent);
+  mask: var(--tag-icon) center / contain no-repeat;
+}
+
+/*
+ * Knowledge points (lucide target), shown with the solution: larger,
+ * wrapping chips on a light ground, so a list of them reads as a set of
+ * cards under the question rather than a row of labels.
+ */
+[data-point-tags] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-question-tag='point'] {
+  --tag-accent: var(--exam-point-accent);
+  --tag-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Ccircle cx='12' cy='12' r='6'/%3E%3Ccircle cx='12' cy='12' r='2' fill='black'/%3E%3C/svg%3E");
+  gap: 0.4375rem;
+  min-height: 2rem;
+  padding: 0.375rem 0.75rem 0.375rem 0.625rem;
+  border-radius: 0.75rem;
+  box-shadow: inset 0 0 0 1px var(--exam-line);
+  color: var(--foreground);
+  font-size: 0.8125rem;
+  font-weight: 560;
+  line-height: 1.35;
+  letter-spacing: 0;
+  white-space: normal;
+}
+
+[data-question-tag='point']::before {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/*
+ * Source: the paper or book name behind a book icon (lucide book-open).
+ * The name truncates with an ellipsis before it would overflow.
+ */
+[data-source-trail] {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  height: 1.5rem;
+  padding-inline: 0.125rem 0.25rem;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+[data-source-trail]::before {
+  content: '';
+  flex-shrink: 0;
+  width: 0.9375rem;
+  height: 0.9375rem;
+  margin-inline-end: 0.4375rem;
+  background: var(--exam-source-accent);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7v14'/%3E%3Cpath d='M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+[data-trail-step] {
+  flex: 0 1 auto;
+  min-width: 2.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-trail-step]:last-child {
+  flex-shrink: 0.35;
+  color: color-mix(in oklch, var(--foreground) 82%, transparent);
+  font-weight: 560;
+}
+
+/* The reader's own tags: neutral capsule with a coloured dot. */
+[data-user-tag] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 1.375rem;
+  max-width: 12rem;
+  padding-inline: 0.5rem 0.625rem;
+  border-radius: 999px;
+  background: var(--ui-fill-hover);
+  color: var(--foreground);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+[data-user-tag] > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-tag-dot] {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--tag-color, var(--muted-foreground));
+}
+
+/*
+ * The reader's colours: the same family as the result tones (red / amber /
+ * green are those tones' bases). The others take the same share of the
+ * gamut (about half), so no dot outshines its neighbour.
+ */
+[data-tag-color='gray'] { --tag-color: oklch(0.66 0.004 250); }
+[data-tag-color='red'] { --tag-color: var(--exam-incorrect); }
+[data-tag-color='orange'] { --tag-color: oklch(0.68 0.09 54); }
+[data-tag-color='amber'] { --tag-color: var(--exam-missed); }
+[data-tag-color='green'] { --tag-color: var(--exam-correct); }
+[data-tag-color='teal'] { --tag-color: oklch(0.65 0.065 195); }
+[data-tag-color='blue'] { --tag-color: oklch(0.62 0.1 256); }
+[data-tag-color='violet'] { --tag-color: oklch(0.62 0.105 296); }
+[data-tag-color='pink'] { --tag-color: oklch(0.66 0.11 352); }
+
+[data-user-tag] {
+  animation: exam-tag-in 220ms var(--ui-ease);
+}
+
+@keyframes exam-tag-in {
+  from { opacity: 0; transform: scale(0.85); }
+}
+
+/* ------------------------------------------------------------------ note */
+
+[data-question-note] {
+  position: relative;
+  margin-top: 0.875rem;
+  padding: 0.625rem 0.875rem 0.625rem 2.25rem;
+  border-radius: 0.875rem;
+  background: var(--exam-missed-tint);
+  box-shadow: inset 0 0 0 1px var(--exam-missed-line);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+
+[data-question-note] > svg:first-child {
+  position: absolute;
+  top: 0.875rem;
+  left: 0.875rem;
+  width: 0.9375rem;
+  height: 0.9375rem;
+  color: var(--exam-missed-ink);
+}
+
+/*
+ * Figures in a question or solution: diagrams drawn black on white. The
+ * filter (components/question/figure-ink-filters.tsx, #exam-figure-ink) turns white into transparency
+ * and keeps the ink, so a figure sits on whatever holds it (the tinted
+ * card, the solution card's grey pane) with no white box, the same way
+ * on every surface; in dark mode the ink turns light.
+ */
+:is([data-exam-question-body], [data-solution-card] .prose) img {
+  filter: url('#exam-figure-ink');
+}
+
+.dark :is([data-exam-question-body], [data-solution-card] .prose) img {
+  filter: url('#exam-figure-ink-dark');
+}
