@@ -1,8 +1,9 @@
 'use client';
 
-import { NotebookPenIcon } from 'lucide-react';
+import { IconButton, IconButtonParticles } from '@animate-ui/react/primitives/buttons/icon';
 import {
   createContext,
+  type ReactElement,
   type ReactNode,
   useCallback,
   useContext,
@@ -15,8 +16,11 @@ import { buttonVariants } from '@/components/ui/button';
 import type { MarkPatch } from '@/lib/question-store';
 import type { QuestionMark, UserTag } from '@/lib/question-store/types';
 import { cn } from '@/lib/utils';
+import { NotebookPenIcon, StarIcon, TagIcon } from '../icons';
+import { Animated, useLive } from '../live';
 import { useDocumentPath } from '../question-state';
-import { NoteEditor } from './note-editor';
+import { NoteEditor, noteSurface } from './note-editor';
+import { TagDot } from './tag-dot';
 import { TagPicker } from './tag-picker';
 import { liveTagsOf, useQuestionMark, useUserTags } from './use-marks';
 
@@ -77,25 +81,39 @@ export function QuestionMarksProvider({ questionId, children }: { questionId: st
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 
-/* Plain buttons styled like ghost icon buttons: three per card, so no Base UI wrapper. */
-export const iconAction = buttonVariants({ variant: 'ghost', size: 'icon' }) + ' size-8 rounded-full text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active) aria-expanded:text-foreground';
+/** A round ghost icon button of the card header and the solution card's toolbar. */
+export const iconAction = cn(
+  buttonVariants({ variant: 'ghost', size: 'icon' }),
+  'size-8 rounded-full p-0 text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active) aria-expanded:text-foreground dark:hover:bg-(--ui-fill-hover)',
+);
 
+/** Fills its button, so pointing anywhere on the button plays the icon inside. */
+export function ActionIcon({ children }: { children: ReactElement }) {
+  return <Animated animateOnHover className="grid size-full place-items-center">{children}</Animated>;
+}
+
+/** The star fills when on, bumps on every press and throws a burst when it turns on. */
 function FavoriteButton() {
   const marks = useMarks();
+  const live = useLive();
   const on = marks?.mark?.favorite ?? false;
+  const button = {
+    type: 'button',
+    className: cn(iconAction, on && 'text-warning hover:text-warning'),
+    'aria-pressed': on,
+    'aria-label': on ? '取消收藏' : '收藏',
+    title: on ? '取消收藏' : '收藏',
+    disabled: !marks?.ready,
+    'data-favorite': on ? 'on' : 'off',
+    onClick: () => void marks?.update({ favorite: !on }),
+  } as const;
+  const star = <StarIcon animateOnTap className={cn(on && 'fill-current')} />;
+  if (!live) return <button {...button}>{star}</button>;
   return (
-    <button
-      type="button"
-      className={cn(iconAction, on && 'text-warning hover:text-warning')}
-      aria-pressed={on}
-      aria-label={on ? '取消收藏' : '收藏'}
-      title={on ? '取消收藏' : '收藏'}
-      disabled={!marks?.ready}
-      data-favorite={on ? 'on' : 'off'}
-      onClick={() => void marks?.update({ favorite: !on })}
-    >
-      <span data-action-icon="star" aria-hidden="true" />
-    </button>
+    <IconButton {...button}>
+      {star}
+      {on ? <IconButtonParticles sideOffset={-16} radius={18} count={6} size={3} /> : null}
+    </IconButton>
   );
 }
 
@@ -103,16 +121,16 @@ function FavoriteButton() {
  * Favourite, tags and note buttons in the card header. The solution sheet
  * passes its own note handler so editing happens inside the sheet.
  */
-export function QuestionMarkActions({ onEditNote, editingNote }: { onEditNote?: () => void; editingNote?: boolean } = {}) {
+export function QuestionMarkActions({ onEditNote, editingNote, className }: { onEditNote?: () => void; editingNote?: boolean; className?: string } = {}) {
   const marks = useMarks();
   if (!marks) return null;
   const hasNote = Boolean(marks.mark?.note);
   const editing = editingNote ?? marks.editingNote;
   return (
-    <div data-question-actions="">
+    <div data-question-actions="" className={cn('flex shrink-0 items-center gap-0.5', className)}>
       <FavoriteButton />
       <TagPicker className={cn(iconAction, marks.assigned.length > 0 && 'text-foreground')} aria-label="标签" title="标签" disabled={!marks.ready}>
-        <span data-action-icon="tag" aria-hidden="true" />
+        <ActionIcon><TagIcon /></ActionIcon>
       </TagPicker>
       <button
         type="button"
@@ -123,17 +141,21 @@ export function QuestionMarkActions({ onEditNote, editingNote }: { onEditNote?: 
         disabled={!marks.ready}
         onClick={() => (onEditNote ? onEditNote() : marks.setEditingNote(!marks.editingNote))}
       >
-        <span data-action-icon="note" aria-hidden="true" />
+        <ActionIcon><NotebookPenIcon /></ActionIcon>
       </button>
     </div>
   );
 }
 
+/** A reader's tag: a neutral capsule with its coloured dot. */
 export function UserTagChip({ tag }: { tag: Pick<UserTag, 'name' | 'color'> }) {
   return (
-    <span data-user-tag="" data-tag-color={tag.color}>
-      <span data-tag-dot="" aria-hidden="true" />
-      <span>{tag.name}</span>
+    <span
+      data-user-tag=""
+      className="inline-flex h-5.5 max-w-48 shrink-0 animate-in items-center gap-1.5 rounded-full bg-(--ui-fill-hover) pr-2.5 pl-2 text-xs leading-none font-medium whitespace-nowrap text-foreground duration-200 fade-in zoom-in-90"
+    >
+      <TagDot color={tag.color} />
+      <span className="truncate">{tag.name}</span>
     </span>
   );
 }
@@ -158,13 +180,14 @@ export function QuestionNote() {
     <>
       {editingNote ? (
         <NoteEditor
+          className="mt-3.5"
           initial={mark?.note ?? ''}
           onCancel={() => setEditingNote(false)}
           onSave={async (note) => { if (await marks.update({ note })) setEditingNote(false); }}
         />
       ) : mark?.note ? (
-        <div data-question-note="">
-          <NotebookPenIcon aria-hidden="true" />
+        <div data-question-note="" className={cn(noteSurface, 'relative mt-3.5 pl-9')}>
+          <NotebookPenIcon size={15} aria-hidden="true" className="absolute top-3.5 left-3.5 text-(--exam-missed-ink)" />
           <span className="sr-only">我的注释：</span>
           <button
             type="button"

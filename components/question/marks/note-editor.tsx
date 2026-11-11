@@ -2,15 +2,21 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { ANNOTATION_LIMITS } from '@/lib/question-store/types';
+
+/** The note's paper: a warm tint in a hairline, shared by the note and its editor. */
+export const noteSurface = 'rounded-[0.875rem] border border-(--exam-missed-line) bg-(--exam-missed-tint) px-3.5 py-2.5 text-[0.9375rem] leading-[1.7]';
 
 /** Inline note editor: grows with its text; ⌘/Ctrl + Enter saves, Esc cancels. */
 export function NoteEditor({
   initial,
   onSave,
   onCancel,
+  className,
 }: {
   initial: string;
+  className?: string;
   onSave: (note: string) => void | Promise<void>;
   onCancel: () => void;
 }) {
@@ -41,7 +47,7 @@ export function NoteEditor({
   };
 
   return (
-    <div data-question-note="" data-editing="" className="pl-3.5!">
+    <div data-question-note="" data-editing="" className={cn(noteSurface, className)}>
       <textarea
         ref={area}
         value={text}
