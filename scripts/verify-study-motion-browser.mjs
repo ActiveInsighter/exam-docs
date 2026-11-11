@@ -47,9 +47,13 @@ async function verify(name, options) {
   if (options.reducedMotion === 'reduce') {
     assert.equal(await card.getAttribute('data-animate-ui-reduce'), '', 'drawer respects reduced motion from its first visible frame');
   }
-  const closeBox = await card.locator('[data-slot=modal-close]').boundingBox();
-  const titleBox = await card.locator('[data-slot=modal-title]').boundingBox();
-  assert.ok(Math.abs(closeBox.y - titleBox.y) < 12, 'close stays on the title row at narrow widths');
+  // Both elements ride the entering sheet: sample them in one browser frame.
+  const headerOffset = await card.evaluate(node => {
+    const close = node.querySelector('[data-slot="modal-close"]').getBoundingClientRect();
+    const title = node.querySelector('[data-slot="modal-title"]').getBoundingClientRect();
+    return Math.abs(close.y - title.y);
+  });
+  assert.ok(headerOffset < 12, 'close stays on the title row at narrow widths');
   assert.equal(await card.locator('[data-question-mirror] [data-slot="ripple-button-ripple"]').count(), 0, 'a DOM mirror never freezes transient ripples');
   const title = card.locator('[data-slot="modal-title"]');
   await title.focus();
