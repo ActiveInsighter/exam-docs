@@ -13,32 +13,29 @@ const blanks: GradingSpec = {
 describe('question attempts', () => {
   it('grades a single pick immediately and locks it until reset', () => {
     const initial = emptyAnswer();
-    const next = pick(single, initial, ['C'], false)!;
+    const next = pick(single, initial, ['C'])!;
     expect(next.kind).toBe('submit');
     expect(next.state).toEqual({ selected: ['C'], values: [], submitted: true, attempt: 1 });
     expect(initial).toEqual(emptyAnswer());
-    expect(pick(single, next.state, ['A'], false)).toBeNull();
+    expect(pick(single, next.state, ['A'])).toBeNull();
     expect(submit(single, next.state)).toBeNull();
   });
 
-  it('keeps multiple and deferred single picks as drafts until submission', () => {
-    for (const spec of [single, multiple]) {
-      const draft = pick(spec, emptyAnswer(), ['A'], true)!;
-      expect(draft.kind).toBe('draft');
-      expect(attemptStatus(spec, draft.state, null)).toBe('draft');
-      expect(submit(spec, draft.state)?.state.attempt).toBe(1);
-    }
-    expect(pick(multiple, emptyAnswer(), ['A'], false)?.kind).toBe('draft');
+  it('keeps multiple picks as drafts until submission', () => {
+    const draft = pick(multiple, emptyAnswer(), ['A'])!;
+    expect(draft.kind).toBe('draft');
+    expect(attemptStatus(multiple, draft.state, null)).toBe('draft');
+    expect(submit(multiple, draft.state)?.state.attempt).toBe(1);
     expect(submit(single, emptyAnswer())).toBeNull();
     expect(attemptStatus(single, emptyAnswer(), null)).toBe('idle');
   });
 
-  it('records a changed essay grade as a new attempt even in a deferred batch', () => {
+  it('records a changed essay grade as a new attempt', () => {
     const essay: GradingSpec = { kind: 'self' };
-    const first = pick(essay, emptyAnswer(), ['A'], true)!;
+    const first = pick(essay, emptyAnswer(), ['A'])!;
     expect(first.kind).toBe('submit');
-    expect(pick(essay, first.state, ['A'], true)).toBeNull();
-    expect(pick(essay, first.state, ['B'], true)?.state.attempt).toBe(2);
+    expect(pick(essay, first.state, ['A'])).toBeNull();
+    expect(pick(essay, first.state, ['B'])?.state.attempt).toBe(2);
   });
 
   it('preserves blank positions and locks typing after submission', () => {
@@ -84,11 +81,11 @@ describe('question attempts', () => {
   });
 
   it('keeps the attempt count through reset and increments on the next submission', () => {
-    const first = pick(single, emptyAnswer(), ['A'], false)!;
+    const first = pick(single, emptyAnswer(), ['A'])!;
     const cleared = reset(first.state)!;
     expect(cleared.kind).toBe('reset');
     expect(cleared.state).toEqual({ ...emptyAnswer(), attempt: 1 });
-    expect(pick(single, cleared.state, ['C'], false)?.state.attempt).toBe(2);
+    expect(pick(single, cleared.state, ['C'])?.state.attempt).toBe(2);
   });
 });
 

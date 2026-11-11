@@ -1,6 +1,6 @@
 'use client';
 
-import { ClockIcon, GavelIcon, ListChecksIcon, RotateCcwIcon } from 'lucide-react';
+import { GavelIcon, ListChecksIcon, RotateCcwIcon } from 'lucide-react';
 import { type ComponentProps, type ReactNode, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -74,14 +74,6 @@ function Answering({ question, grading, onGrading }: { question: QuestionState; 
       </div>
     );
   }
-  if (question.deferred) {
-    return question.status === 'draft' ? (
-      <span data-deferred-note="" className={cn(hint, 'inline-flex items-center gap-1.5')}>
-        <ClockIcon aria-hidden="true" className="size-3.5" />
-        已作答，整篇提交时判分
-      </span>
-    ) : null;
-  }
   // A single answer is graded on the click itself: nothing to submit.
   if (spec.kind === 'boolean' || (spec.kind === 'choice' && !spec.multiple)) return null;
   return (
@@ -140,7 +132,7 @@ export function QuestionFooter({ meta, solution }: { meta: QuestionMeta; solutio
    * over the checker afterwards (手动判分). The panel is open only for the
    * stage it was opened in, so it closes by itself once that has passed.
    */
-  const stage = question?.spec.kind !== 'blank' ? null : graded ? 'manual' : question.deferred ? null : 'self';
+  const stage = question?.spec.kind !== 'blank' ? null : graded ? 'manual' : 'self';
   const [opened, setOpened] = useState<typeof stage>(null);
   const grading = stage !== null && opened === stage;
   const toggle = () => setOpened(grading ? null : stage);

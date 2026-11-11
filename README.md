@@ -53,6 +53,9 @@ point it was pressed. `TileButton` is a selectable card button built on it; the
 question options and true / false buttons use it. See
 [docs/button-component.md](docs/button-component.md).
 
+Supported shadcn foundations use Animate UI while the answer controls retain
+their own interactions. See [the motion conventions](docs/ui-motion.md).
+
 ## Question progress
 
 The custom question components keep answers in browser IndexedDB and read them
@@ -71,6 +74,8 @@ To enable account sync, copy `.env.example` to `.env.local` and set
 project configuration belongs in these variables. See the Chinese
 [database and sync guide](docs/question-database.md) for architecture, account
 isolation, last-writer-wins rules, migrations, authentication and rollout steps.
+The [React state conventions](docs/state-management.md) describe identity-safe
+sessions, shared list subscriptions, request ordering and component regression tests.
 
 ## ZBSearch
 

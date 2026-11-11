@@ -1,5 +1,4 @@
 import { Blank, Option, Question, Solution } from '@/components/question';
-import { EnglishReading, Evidence, ExamArticle, Paragraph, Translation } from '@/components/english-reading';
 import { AlgoFigure } from '@/components/mdx/algo-figure';
 import { Callout } from '@/components/mdx/callout';
 import { DocTable } from '@/components/mdx/doc-table';
@@ -26,9 +25,6 @@ import type { MDXComponents } from 'mdx/types';
  * exercise components: <Question id type> declares the interaction (single /
  * multiple / boolean / blank / essay), <Option correct> and <Blank answer>
  * carry the key, and <Solution> holds the reference answer shown in the dialog.
- * <EnglishReading> pairs one <ExamArticle> with questions; its <Paragraph>s
- * may each hold a <Translation> for the card's 中英对照 toggle, and
- * <Evidence for="question id"> marks the sentence a question is answered from.
  */
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -44,11 +40,6 @@ export function getMDXComponents(components?: MDXComponents) {
     Option,
     Question,
     Solution,
-    EnglishReading,
-    Evidence,
-    ExamArticle,
-    Paragraph,
-    Translation,
     Mermaid,
     TypeTable,
     ...components,

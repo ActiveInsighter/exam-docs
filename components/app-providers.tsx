@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
+import { AnimateUIProvider } from '@animate-ui/react/provider';
 import { AccountProvider } from '@/components/account';
 import { QuestionDatabaseProvider } from '@/components/question/database-provider';
 import { SearchProvider } from '@/components/search-provider';
@@ -21,12 +22,15 @@ function DiagnosticsMilestones() {
  */
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
-    <AccountProvider>
-      <DiagnosticsMilestones />
-      {/* Answers are cached and synced site-wide, so the account menu shows them on every page. */}
-      <QuestionDatabaseProvider>
-        <SearchProvider>{children}</SearchProvider>
-      </QuestionDatabaseProvider>
-    </AccountProvider>
+    // Keep frequently used study controls quick, with one shared motion policy.
+    <AnimateUIProvider tempo={0.85} reducedMotion="user">
+      <AccountProvider>
+        <DiagnosticsMilestones />
+        {/* Answers are cached and synced site-wide, so the account menu shows them on every page. */}
+        <QuestionDatabaseProvider>
+          <SearchProvider>{children}</SearchProvider>
+        </QuestionDatabaseProvider>
+      </AccountProvider>
+    </AnimateUIProvider>
   );
 }

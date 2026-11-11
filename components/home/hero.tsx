@@ -8,7 +8,7 @@ import { TrialSheet } from './trial-sheet';
 
 const numberFormat = new Intl.NumberFormat('zh-CN');
 
-/** "数学、408、政治与英语" */
+/** "数学、408与政治" */
 function joinNames(names: string[]): string {
   if (names.length <= 1) return names.join('');
   return `${names.slice(0, -1).join('、')}与${names.at(-1)}`;

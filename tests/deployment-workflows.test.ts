@@ -31,8 +31,8 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('Two shards emitted different bytes at the same _next/static path.');
     expect(workflow).toContain('Merge static outputs with conflict checks');
     expect(workflow).toContain('node scripts/verify-static-asset-references.mjs .static-docs');
-    expect(workflow).toContain('test "${doc_routes}" = \'852\'');
-    expect(workflow).toContain('test "${markdown}" = \'851\'');
+    expect(workflow).toContain('test "${doc_routes}" = \'851\'');
+    expect(workflow).toContain('test "${markdown}" = \'850\'');
     expect(workflow).toContain('Retry failing static documentation HTML routes');
     expect(workflow).toContain('seq 1 18');
     expect(workflow).toContain('name: Run complete regression suite\n        run: npm test');
@@ -46,12 +46,11 @@ describe('static deployment workflows', () => {
 
     // The deploy job finishes as soon as the site is up and verified over HTTP.
     expect(deployJob).toContain('deployment-url: ${{ steps.cloudflare-deploy.outputs.deployment-url }}');
-    expect(deployJob).not.toContain('verify-english-reading-browser');
     expect(browserJob).toContain('needs: deploy');
     expect(browserJob).toContain('DEPLOYMENT_URL: ${{ needs.deploy.outputs.deployment-url }}');
     // No apt fonts and no browser download: playwright-core drives the preinstalled Chrome.
     expect(browserJob).toContain('playwright-core@');
-    expect(browserJob).toContain('READING_BROWSER_CHANNEL: chrome');
+    expect(browserJob).toContain('QUESTION_BROWSER_CHANNEL: chrome');
     expect(workflow).not.toContain('--with-deps');
     expect(workflow).not.toContain('playwright install');
   });
@@ -67,7 +66,7 @@ describe('static deployment workflows', () => {
     expect(workflow).toContain('needs: [validate, search, build-shard]');
     expect(workflow).toContain('npx tsc --noEmit --incremental false --project tsconfig.ci-app.json');
     expect(workflow).toContain('validated_search_assets=');
-    expect(workflow).toContain('manifest.pages !== 851');
+    expect(workflow).toContain('manifest.pages !== 850');
     expect(workflow).toContain('Search manifest is missing module categories.');
     expect(workflow).not.toContain('test "${search_files}" =');
   });

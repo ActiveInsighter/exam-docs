@@ -25,7 +25,7 @@ export function AnswerSummary({ spec, state }: { spec: GradingSpec; state: Quest
 
   if (spec.kind === 'blank') {
     // Not answered on the page: grade yourself against the key here, as with an essay.
-    const gradable = graded ?? (state?.ready && !state.deferred ? state : null);
+    const gradable = graded ?? (state?.ready ? state : null);
     return (
       <ol data-answers="blank">
         {spec.blanks.map((blank, index) => {

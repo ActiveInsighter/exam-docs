@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { collectActivity, collectRecords, type QuestionRecord } from '@/lib/question-records';
+import { createQuestionQuery } from '@/lib/question-store/query';
 import { useQuestionDatabase } from './database-context';
+import { useQuestionQuery } from './use-question-query';
 
 export interface QuestionRecordsState {
   /** Null while the browser database is read. */
@@ -24,34 +26,21 @@ export function useQuestionRecords(enabled = true): QuestionRecordsState {
   const database = context?.database ?? null;
   const namespace = context?.namespace ?? 'guest';
   const ready = context?.ready ?? false;
-  const [state, setState] = useState<QuestionRecordsState>(LOADING);
+  const query = useMemo(() => database ? createQuestionQuery({
+    load: async () => {
+      const [answers, attempts] = await Promise.all([database.answers.list(namespace), database.answers.listAttempts(namespace)]);
+      return { records: collectRecords(answers, attempts), activity: collectActivity(answers, attempts) };
+    },
+    subscribe: (changed) => database.subscribe((change) => {
+      if (change.namespace === namespace && change.scope === 'answers') changed();
+    }),
+    errorMessage: '读取本机答题记录失败。',
+    delay: 120,
+  }) : null, [database, namespace]);
+  const { data, error } = useQuestionQuery(query, enabled && ready);
 
-  useEffect(() => {
-    if (!enabled || !ready) return;
-    if (!database) {
-      setState({ records: [], activity: new Map(), error: context?.error ?? '本机答题记录不可用。' });
-      return;
-    }
-    let disposed = false;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const load = () => {
-      void Promise.all([database.answers.list(namespace), database.answers.listAttempts(namespace)])
-        .then(([answers, attempts]) => {
-          if (!disposed) setState({ records: collectRecords(answers, attempts), activity: collectActivity(answers, attempts), error: null });
-        })
-        .catch(() => {
-          if (!disposed) setState((current) => ({ records: current.records ?? [], activity: current.activity ?? new Map(), error: '读取本机答题记录失败。' }));
-        });
-    };
-    load();
-    // A sync page can touch hundreds of rows in quick succession: reload once it settles.
-    const unsubscribe = database.subscribe((change) => {
-      if (change.namespace !== namespace || change.scope !== 'answers') return;
-      clearTimeout(timer);
-      timer = setTimeout(load, 120);
-    });
-    return () => { disposed = true; clearTimeout(timer); unsubscribe(); };
-  }, [enabled, ready, database, namespace, context?.error]);
-
-  return state;
+  if (!enabled || !ready) return LOADING;
+  if (!database) return { records: [], activity: new Map(), error: context?.error ?? '本机答题记录不可用。' };
+  if (data) return { ...data, error };
+  return error ? { records: [], activity: new Map(), error } : LOADING;
 }

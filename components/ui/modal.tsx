@@ -9,7 +9,6 @@ import { ChevronLeftIcon, XIcon } from "lucide-react"
 import {
   DialogClose,
   DialogDescription,
-  DialogPortal,
   DialogTitle,
 } from "@/components/ui/dialog"
 import { diag } from "@/lib/diagnostics"
@@ -626,7 +625,9 @@ function ModalRootContent({
   } as React.CSSProperties
 
   return (
-    <DialogPortal>
+    // This sheet owns its CSS/drag/page animations; pair its raw Base UI root
+    // with a raw portal rather than the Animate UI Dialog portal.
+    <DialogPrimitive.Portal data-slot="dialog-portal">
       <DialogPrimitive.Backdrop
         ref={backdropRef}
         data-slot="modal-backdrop"
@@ -654,7 +655,7 @@ function ModalRootContent({
           </div>
         </ModalPanelContext.Provider>
       </DialogPrimitive.Popup>
-    </DialogPortal>
+    </DialogPrimitive.Portal>
   )
 }
 

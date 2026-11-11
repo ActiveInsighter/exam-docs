@@ -54,6 +54,7 @@ export class QuestionAnnotationCache {
   private readonly documents = new Map<string, Promise<void>>();
   private tagsSnapshot: TagsSnapshot;
   private readonly tagListeners = new Set<() => void>();
+  private readonly libraryListeners = new Set<() => void>();
   private tagsLoading: Promise<void> | null = null;
   private readonly unsubscribe: (() => void) | undefined;
   private readonly outbox: Outbox | null;
@@ -65,8 +66,9 @@ export class QuestionAnnotationCache {
     this.outbox = namespace === 'guest' ? null : options.outbox ?? null;
     this.tagsSnapshot = { tags: [], ready: !database };
     this.unsubscribe = database?.subscribe((change) => {
-      if (change.namespace !== namespace || change.scope !== 'annotations' || this.disposed ||
-        (change.tab === database.tab && change.origin !== 'import')) return;
+      if (change.namespace !== namespace || change.scope !== 'annotations' || this.disposed) return;
+      this.invalidateLibrary();
+      if (change.tab === database.tab && change.origin !== 'import') return;
       void this.refreshTags();
       if (change.keys?.length) void this.refreshMarks(change.keys);
       else if (!change.keys) for (const path of new Set([...this.marks.values()].map((entry) => entry.identity.documentPath))) void this.loadDocument(path);
@@ -76,6 +78,17 @@ export class QuestionAnnotationCache {
   dispose(): void {
     this.disposed = true;
     this.unsubscribe?.();
+    this.libraryListeners.clear();
+  }
+
+  subscribeLibrary(listener: () => void): () => void {
+    this.libraryListeners.add(listener);
+    return () => { this.libraryListeners.delete(listener); };
+  }
+
+  private invalidateLibrary(): void {
+    if (this.disposed) return;
+    for (const listener of this.libraryListeners) listener();
   }
 
   /* -------------------------------- tags -------------------------------- */
@@ -149,6 +162,7 @@ export class QuestionAnnotationCache {
       this.publishTags(before);
       for (const [entry, mark] of removed) this.publishMark(entry, mark, entry.updatedAt);
     });
+    if (!this.database) this.invalidateLibrary();
   }
 
   /* -------------------------------- marks ------------------------------- */
@@ -274,6 +288,7 @@ export class QuestionAnnotationCache {
       const entry = this.marks.get(markKey(mark));
       if (entry) this.adoptMark(entry, mark);
     }
+    this.invalidateLibrary();
   }
 
   /** Optimistic: memory changes now; a guest's change is restored if storing it fails. */
@@ -299,6 +314,7 @@ export class QuestionAnnotationCache {
     }
     // Stored first, then uploaded; a refused local write of an account still uploads.
     this.outbox?.put({ marks: [next] });
+    if (!this.database) this.invalidateLibrary();
   }
 
   /** Every non-empty mark of the namespace, for the favourites and tags overview. */

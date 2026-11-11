@@ -1,6 +1,6 @@
 'use client';
 
-import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { useAccount, useAccountMenuSection } from '@/components/account';
 import { QuestionDatabase, QuestionSession } from '@/lib/question-store';
 import { namespaceForUser, type QuestionSyncStatus } from '@/lib/question-store/types';
@@ -23,7 +23,7 @@ const QuestionLibraryDialog = lazy(() => import('./marks/library-dialog').then((
 export function QuestionDatabaseProvider({ children }: { children: ReactNode }) {
   const { user, cachedUser: cachedAccount, error: accountError } = useAccount();
   const [database, setDatabase] = useState<QuestionDatabase | null>(null);
-  const [status, setStatus] = useState<QuestionSyncStatus>(LOCAL_STATUS);
+  const [syncError, setSyncError] = useState<{ engine: QuestionSession['sync']; message: string } | null>(null);
   const [localReady, setLocalReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [libraryOpen, setLibraryOpen] = useState(false);
@@ -65,7 +65,10 @@ export function QuestionDatabaseProvider({ children }: { children: ReactNode }) 
     };
   }, [localReady, database, namespace]);
 
-  const engine = session?.sync ?? null;
+  // Effects replace the session after this render. Never expose the previous
+  // identity's caches, status or engine in that transition render.
+  const activeSession = localReady && session?.namespace === namespace && session.database === database ? session : null;
+  const engine = activeSession?.sync ?? null;
   const userId = user?.id;
   useEffect(() => {
     if (!engine || !userId || engine.namespace !== namespaceForUser(userId)) return;
@@ -73,23 +76,24 @@ export function QuestionDatabaseProvider({ children }: { children: ReactNode }) 
     void getQuestionSupabaseClient().then((client) => {
       if (!disposed) engine.connect(createQuestionTransport(client, userId));
     }).catch(() => {
-      if (!disposed) setError('云同步暂时无法启动，答题继续保存在本机。');
+      if (!disposed) setSyncError({ engine, message: '云同步暂时无法启动，答题继续保存在本机。' });
     });
     return () => { disposed = true; engine.disconnect(); };
   }, [engine, userId]);
 
-  useEffect(() => {
-    if (engine) return engine.subscribe(setStatus);
-    setStatus(LOCAL_STATUS);
-  }, [engine]);
+  const subscribeStatus = useCallback((changed: () => void) => engine?.subscribe(changed) ?? (() => {}), [engine]);
+  const readStatus = useCallback((): QuestionSyncStatus => engine?.status ?? LOCAL_STATUS, [engine]);
+  const status = useSyncExternalStore(subscribeStatus, readStatus, () => LOCAL_STATUS);
 
-  const cache = session?.answers ?? null;
-  const annotations = session?.annotations ?? null;
+  const cache = activeSession?.answers ?? null;
+  const annotations = activeSession?.annotations ?? null;
+  const ready = activeSession !== null;
+  const failure = error ?? (syncError?.engine === engine ? syncError?.message : null) ?? accountError;
+  const openLibrary = useCallback(() => { setLibraryLoaded(true); setLibraryOpen(true); }, []);
   const value = useMemo<QuestionDatabaseContext>(() => ({
-    database, cache, annotations, namespace, user, cachedAccount, engine, status, ready: localReady,
-    error: error ?? accountError,
-    openLibrary: () => { setLibraryLoaded(true); setLibraryOpen(true); },
-  }), [database, cache, annotations, namespace, user, cachedAccount, engine, status, localReady, error, accountError]);
+    database, cache, annotations, namespace, user, cachedAccount, engine, status, ready,
+    error: failure, openLibrary,
+  }), [database, cache, annotations, namespace, user, cachedAccount, engine, status, ready, failure, openLibrary]);
   // Inside the provider, null caches mean "still opening": questions wait instead of using memory.
   const storage = useMemo<QuestionStorage>(() => ({ cache, annotations, namespace }), [cache, annotations, namespace]);
   return (

@@ -8,10 +8,12 @@ import { describeSync, downloadBackup, importGuestRecords } from '@/components/q
 import { useQuestionDatabase } from '@/components/question/database-context';
 import { UserTagChip } from '@/components/question/marks/question-marks';
 import { useUserTags } from '@/components/question/marks/use-marks';
+import { useLibraryMarks } from '@/components/question/marks/use-library-marks';
 import { useQuestionRecords, type QuestionRecordsState } from '@/components/question/use-question-records';
+import { useQuestionQuery } from '@/components/question/use-question-query';
 import { accountLabel } from '@/lib/account/types';
 import { useSourceTree } from '@/lib/doc-sources-client';
-import type { QuestionMark } from '@/lib/question-store/types';
+import { createQuestionQuery } from '@/lib/question-store/query';
 import { siteConfig } from '@/lib/site-config';
 import sheet from '@/styles/answer-sheet.module.css';
 import clsx from 'clsx';
@@ -88,20 +90,19 @@ function Field({ label, children, hint, action }: { label: string; children: Rea
 
 function useGuestRecordCount() {
   const context = useQuestionDatabase();
-  const [count, setCount] = useState(0);
   const database = context?.database ?? null;
   const namespace = context?.namespace ?? 'guest';
-  useEffect(() => {
-    if (!database || namespace === 'guest') return;
-    let disposed = false;
-    const refresh = () => {
-      void database.answers.summary('guest').then((guest) => { if (!disposed) setCount(guest.answered + guest.attempts); }).catch(() => undefined);
-    };
-    refresh();
-    const unsubscribe = database.subscribe((change) => { if (change.namespace === 'guest') refresh(); });
-    return () => { disposed = true; unsubscribe(); };
-  }, [database, namespace]);
-  return namespace === 'guest' ? 0 : count;
+  const query = useMemo(() => database && namespace !== 'guest' ? createQuestionQuery({
+    load: async () => {
+      const guest = await database.answers.summary('guest');
+      return guest.answered + guest.attempts;
+    },
+    subscribe: (changed) => database.subscribe((change) => { if (change.namespace === 'guest' && change.scope === 'answers') changed(); }),
+    errorMessage: '读取未登录记录失败。',
+    delay: 120,
+  }) : null, [database, namespace]);
+  const { data } = useQuestionQuery(query);
+  return data ?? 0;
 }
 
 /* ----------------------------------------------------------------------- panels */
@@ -196,19 +197,8 @@ function AccountTab({ onSignIn }: { onSignIn(): void }) {
 
 function LibraryTab() {
   const context = useQuestionDatabase();
-  const { tags, cache } = useUserTags();
-  const [marks, setMarks] = useState<QuestionMark[] | null>(null);
-  const database = context?.database ?? null;
-  const namespace = context?.namespace;
-
-  useEffect(() => {
-    if (!cache) return;
-    let disposed = false;
-    const load = () => { void cache.listMarks().then((list) => { if (!disposed) setMarks(list); }).catch(() => { if (!disposed) setMarks([]); }); };
-    load();
-    const unsubscribe = database?.subscribe((change) => { if (change.namespace === namespace && change.scope === 'annotations') load(); });
-    return () => { disposed = true; unsubscribe?.(); };
-  }, [cache, database, namespace]);
+  const { tags } = useUserTags();
+  const { marks, error, retry } = useLibraryMarks();
 
   return (
     <div className={styles.stack}>
@@ -222,6 +212,7 @@ function LibraryTab() {
             </button>
           )}
         />
+        {error ? <p role="alert" className={styles.error}>{error} <button type="button" className={styles.button} onClick={retry}>重试</button></p> : null}
         <dl className={styles.tally}>
           <div><dt>收藏的题</dt><dd>{fmt(marks?.filter((mark) => mark.favorite).length)}</dd></div>
           <div><dt>写了注释的题</dt><dd>{fmt(marks?.filter((mark) => mark.note).length)}</dd></div>

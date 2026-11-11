@@ -34,12 +34,9 @@ export function attemptStatus(spec: GradingSpec, state: AnswerState, evaluation:
   return isAnswered(spec, state.selected, state.values) ? 'draft' : 'idle';
 }
 
-/**
- * Graded the moment an answer is picked: an essay's self-grade always, a
- * single answer unless its batch grades everything together (`deferred`).
- */
-export function gradesOnPick(spec: GradingSpec, deferred: boolean) {
-  return spec.kind === 'self' || (!deferred && (spec.kind === 'boolean' || (spec.kind === 'choice' && !spec.multiple)));
+/** Single choices, booleans and essay self-grades are graded on selection. */
+export function gradesOnPick(spec: GradingSpec) {
+  return spec.kind === 'self' || spec.kind === 'boolean' || (spec.kind === 'choice' && !spec.multiple);
 }
 
 const draft = (state: AnswerState, patch: Partial<AnswerState>): Transition => ({ state: { ...state, ...patch }, kind: 'draft' });
@@ -48,11 +45,11 @@ const commit = (state: AnswerState, patch: Partial<AnswerState> = {}): Transitio
   ({ state: { ...state, ...patch, submitted: true, attempt: state.attempt + 1 }, kind: 'submit' });
 
 /** Replaces the picked letters. A changed self-grade is a new attempt, so it replays and syncs like a resubmission. */
-export function pick(spec: GradingSpec, state: AnswerState, letters: readonly string[], deferred: boolean): Transition {
+export function pick(spec: GradingSpec, state: AnswerState, letters: readonly string[]): Transition {
   if (spec.kind === 'blank' || (state.submitted && spec.kind !== 'self')) return null;
   const selected = [...letters];
   if (state.submitted && selected.join() === state.selected.join()) return null;
-  return gradesOnPick(spec, deferred) && selected.length > 0 ? commit(state, { selected }) : draft(state, { selected });
+  return gradesOnPick(spec) && selected.length > 0 ? commit(state, { selected }) : draft(state, { selected });
 }
 
 export function fill(spec: GradingSpec, state: AnswerState, index: number, value: string): Transition {
