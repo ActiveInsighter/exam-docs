@@ -16,9 +16,9 @@ import { liveTagsOf, useUserTags } from './use-marks';
  * Every question the reader starred, tagged or annotated, across pages,
  * filterable by favourite, note or tag. Each entry links to the question.
  *
- * Opens on its own from the account menu, or as a page pushed onto a
+ * Opens on its own from the account menu, or as a nested drawer above a
  * solution card (back returns to the card); following an entry closes the
- * whole modal.
+ * whole stack.
  */
 
 type Filter = 'all' | 'favorite' | 'note' | `tag:${string}`;
@@ -84,7 +84,7 @@ export function QuestionLibraryDialog({ open, onOpenChange }: { open: boolean; o
             {tags.map((tag) => chip(`tag:${tag.tagId}`, <><TagDot color={tag.color} />{tag.name}</>))}
           </ModalTags>
         </ModalHeader>
-        {/* As a page of a wide solution card, the list keeps a readable measure. */}
+        {/* Keep entries at a readable measure, whether standalone or nested. */}
         <ModalBody className="px-3 md:px-4 [&>*]:max-w-3xl">
           <ModalDescription className="mb-2 px-3 text-sm text-muted-foreground">在题目右上角收藏、打标签或写注释，都会汇总到这里。</ModalDescription>
           <ul className="min-h-40">

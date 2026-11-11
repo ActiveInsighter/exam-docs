@@ -18,7 +18,7 @@
 
 解答题不自动判分：底部给出「正确 / 部分正确 / 错误」三个自评按钮，「题目与解析」弹窗里先列参考解答、再给同样的自评按钮，可随时改。自评和其他题型的作答一样保存与同步（`selected` 中存字母 A / B / C，与判断题存字母的方式相同），右下角答题球也按自评结果统计。
 
-选项未选中时只有一圈细边框、没有底色；点选后颜色从按下的位置扩散铺满整个选项（含边框），判分颜色同样如此。
+选项未选中时只有细边框、没有底色；点击时涟漪从按下位置扩散，选中与判分的持久颜色随状态过渡。
 作者在题目之间写的 `---` 分割线会被自动隐藏，不需要删除。
 
 ### 题型核对
@@ -58,8 +58,8 @@
 - 选项字母用 Computer Modern 数学斜体（KaTeX 自带的 `KaTeX_Math` 字体，与公式变量同款）排在柔和的圆底上，
   判分后的「正确答案」等答案字母也用同一字体。
 - 多选题把每个正确选项都标上 `correct`。
-- 选项与判断按钮都是 [`TileButton`](button-component.md)：选中、判对、判错的底色从点击位置以圆形扩散铺满；
-  没点到而被揭示的正确答案从字母处扩散，键盘操作从字母处扩散。
+- 选项与判断按钮共用 `options.tsx` 的选项组，通过 [`Pressable / RippleButton`](button-component.md) 提供官方涟漪与按压反馈。
+  持久的选中和判分颜色由 `data-feedback` 决定；未选中的正确答案用描边和说明标记，选项字母始终可见。
 - 判分反馈：选对为绿色勾，选错为红色叉并轻微抖动；单选答错时正确项以绿色描边标出「正确答案」；
   多选题没选到的正确项以**黄色**标出「漏选」。结果胶囊：回答正确（绿）、少选（黄，只选了正确项的一部分）、回答错误（红，选了错误项）。
 
@@ -207,10 +207,11 @@ log(底数, 真数)、eˣ、10ˣ、立方根、立方、倒数、阶乘等；`ab
 | `lib/math-expression/` | 数学表达式解析、求值、等价比较（无 `eval`） |
 | `components/question/attempt.ts` / `question-state.tsx` | 作答、提交、自评、改判和重做的纯状态转换；Provider 将转换写入本地答案缓存 |
 | `options.tsx` / `blank-field.tsx` / `math-blank.tsx` / `math-keypad.tsx` | 选择和判断共用选项组；填空与按需加载的数学键盘 |
+| `live.tsx` / `icons.ts` / `looks.ts` | 视口附近首次启用动画、静态 / 动态图标映射、跨题目部件的外观约定 |
 | `blank-grade.tsx` / `answer-summary.tsx` | 自评与手动判分共用开关和面板；解答中的答案对照 |
 | `question-footer.tsx` / `solution-sheet.tsx` / `question-mirror.tsx` | 判分结果、题目与解析浮窗（组装 `components/ui/study-card.tsx`）、只读题干副本 |
 | `components/question/marks/` | 收藏、读者标签、注释与「收藏与标签」汇总 |
-| `styles/question.css` / `styles/question/` | 样式入口与按职责拆分的配色、卡片、选项、填空判分、键盘、底栏和解答样式；组件通过 `data-*` 属性发布状态 |
+| `styles/question.css` / `styles/question/blanks.css` / `styles/question/keypad.css` | 题目语义色与反馈变体、页面规则、行内填空和数学键盘；布局优先放在各组件的 Tailwind 类里 |
 
 ## 性能约定
 
@@ -218,8 +219,9 @@ log(底数, 真数)、eˣ、10ˣ、立方根、立方、倒数、阶乘等；`ab
 
 - 卡片使用 `content-visibility: auto`，屏幕外的题目跳过布局与绘制。
 - 每题的「查看解答」浮窗和标签弹层都是普通按钮，第一次打开时才挂载对应的 Modal / Popover。
-- 选项的点击填充是 CSS 伪元素，按下位置直接写入元素的 CSS 变量，不触发重新渲染。
-- 选项的判分图标、多选勾选角标和卡片右上角的收藏 / 标签 / 注释图标都是 CSS mask 伪元素或单个元素，不为每个选项生成 SVG。
+- `QuestionCard` 首次接近视口后才启用官方涟漪按钮与动画图标；此前使用相同外观的原生按钮与 Lucide 图标。
+  激活时保持焦点；离开视口后不反复卸载，避免重置正在使用的控件。
+- `live.tsx` 只决定是否启用动画；作答、判分与标记仍由原状态层管理。不要在各个按钮里分别创建视口观察器。
 - 选项分栏只测量视口附近的题目，其余进入视口前再测量；数学键盘与「收藏与标签」对话框按需加载。
 - 生命周期与页面相同的观察器和全局监听器（如 `use-choice-columns.ts` 中的 `IntersectionObserver`、`ResizeObserver`、`document.fonts` 监听）在模块加载时创建，不要在 effect 里懒创建：
   压缩器会把只用一次的辅助函数内联进 effect，回调因此与 effect 共享作用域，持有某个题目元素，客户端切换页面后整个旧页面无法回收

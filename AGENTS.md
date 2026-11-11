@@ -31,6 +31,6 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 | Workers Static Assets、Wrangler、构建与部署 Actions | `cloudflare-workers-assets`（项目适配版） |
 | Tailwind CSS 4、主题变量、源码扫描、响应式样式 | `tailwindcss`（基于官方文档的本地 Skill） |
 | shadcn/ui 组件、CLI、主题与 Base UI 组合 | `shadcn`（官方；先检查已有组件及配置） |
-| Animate UI 接入、组件与图标动效、动画节奏及性能审查 | `animate-ui`（官方；结合 `docs/ui-motion.md` 保留现有组件入口和专用抽屉动效） |
+| Animate UI 接入、组件与图标动效、动画节奏及性能审查 | `animate-ui`（官方；结合 `docs/ui-motion.md`，复用 `components/ui/*`；Modal 使用 Animate UI Drawer，题卡按需启用动画） |
 | 页面视觉方向、排版、布局和界面设计 | `frontend-design`（Anthropic 官方） |
 | PostgreSQL / Supabase 查询、索引、表设计、RLS 与数据库性能 | `supabase-postgres-best-practices`（Supabase 官方） |
