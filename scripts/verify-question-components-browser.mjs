@@ -1,24 +1,11 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
-import { createRequire } from 'node:module';
 import path from 'node:path';
+import { base, launchBrowser, screenshots, settled } from './browser-ui-helpers.mjs';
 
-const require = process.env.QUESTION_BROWSER_MODULES
-  ? createRequire(path.join(path.resolve(process.env.QUESTION_BROWSER_MODULES), 'package.json'))
-  : createRequire(import.meta.url);
-const { chromium } = require('playwright-core');
-const base = (process.env.DEPLOYMENT_URL ?? 'http://localhost:3000').replace(/\/$/, '');
-const screenshots = process.env.QUESTION_SCREENSHOTS ?? '/tmp/question-component-screenshots';
 await mkdir(screenshots, { recursive: true });
-const browser = await chromium.launch({
-  channel: process.env.QUESTION_BROWSER_CHANNEL || undefined,
-  executablePath: process.env.QUESTION_BROWSER_EXECUTABLE || undefined,
-});
+const browser = await launchBrowser();
 const errors = [];
-
-async function settled(locator) {
-  await locator.evaluate(node => Promise.all(node.getAnimations({ subtree: true }).map(animation => animation.finished.catch(() => {}))));
-}
 
 async function capture(locator, name) {
   await settled(locator);
@@ -48,6 +35,11 @@ async function verify(name, options) {
   const single = question('single-001');
   await capture(single, `${name}-single-idle`);
   await single.locator('[data-option="A"]').click();
+  const ripple = single.locator('[data-option="A"] span[style*="width: 20px"]');
+  await ripple.waitFor({ state: 'attached' });
+  const origin = await ripple.evaluate(node => ({ x: parseFloat(node.style.left) + 10, y: parseFloat(node.style.top) + 10,
+    width: node.closest('button').offsetWidth, height: node.closest('button').offsetHeight }));
+  assert.ok(origin.x >= 0 && origin.x <= origin.width && origin.y >= 0 && origin.y <= origin.height, 'pointer ripple starts within the pressed option');
   await status(single, 'incorrect');
   await capture(single, `${name}-single-incorrect`);
   await single.getByRole('button', { name: '重做', exact: true }).click();
@@ -125,7 +117,7 @@ async function verify(name, options) {
   await blanks.getByRole('button', { name: '手动判分', exact: true }).click();
   await panel.locator('[data-blank-grade]').nth(1).getByRole('button', { name: '判对', exact: true }).click();
   await status(blanks, 'correct');
-  assert.equal(await panel.locator('[data-grade-note]').count(), 1, 'only the override has a manual-grade note');
+  assert.equal(await panel.getByText('已改判', { exact: true }).count(), 1, 'only the override has a manual-grade note');
   await capture(blanks, `${name}-blank-override`);
 
   const math = question('blank-002');
@@ -144,7 +136,7 @@ async function verify(name, options) {
   await card.waitFor();
   await capture(card, `${name}-solution-choice`);
   await card.getByRole('button', { name: '下一题', exact: true }).click();
-  await page.waitForFunction(() => !document.querySelector('[data-sc-leaving]') && document.querySelector('[data-solution-card] [data-slot="modal-title"]')?.textContent.includes('第 2 题'));
+  await page.waitForFunction(() => document.querySelector('[data-solution-card] [data-slot="modal-title"]')?.textContent.includes('第 2 题'));
   await capture(card, `${name}-solution-multiple`);
   await closeSolution(page);
 

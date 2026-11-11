@@ -1,6 +1,7 @@
 'use client';
 
 import { useLayoutEffect, useRef, useState } from 'react';
+import { useShouldReduceMotion } from '@animate-ui/react/utils/motion';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ANNOTATION_LIMITS } from '@/lib/question-store/types';
@@ -22,6 +23,8 @@ export function NoteEditor({
 }) {
   const [text, setText] = useState(initial);
   const [saving, setSaving] = useState(false);
+  const reduce = useShouldReduceMotion();
+  const editor = useRef<HTMLDivElement>(null);
   const area = useRef<HTMLTextAreaElement>(null);
   const over = text.length > ANNOTATION_LIMITS.note;
 
@@ -35,10 +38,20 @@ export function NoteEditor({
   useLayoutEffect(() => {
     const element = area.current;
     if (!element) return;
+    const previous = document.activeElement;
     element.focus({ preventScroll: true });
     element.setSelectionRange(element.value.length, element.value.length);
-    element.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    const surface = editor.current;
+    return () => {
+      if (previous instanceof HTMLElement && previous.isConnected && surface?.contains(document.activeElement)) {
+        previous.focus({ preventScroll: true });
+      }
+    };
   }, []);
+
+  useLayoutEffect(() => {
+    area.current?.scrollIntoView({ block: 'nearest', behavior: reduce ? 'instant' : 'smooth' });
+  }, [reduce]);
 
   const save = async () => {
     if (over || saving) return;
@@ -47,7 +60,7 @@ export function NoteEditor({
   };
 
   return (
-    <div data-question-note="" data-editing="" className={cn(noteSurface, className)}>
+    <div ref={editor} data-question-note="" data-editing="" className={cn(noteSurface, className)}>
       <textarea
         ref={area}
         value={text}
@@ -58,7 +71,7 @@ export function NoteEditor({
         onChange={(event) => setText(event.target.value)}
         onKeyDown={(event) => {
           if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) { event.preventDefault(); void save(); }
-          if (event.key === 'Escape') { event.preventDefault(); onCancel(); }
+          if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); onCancel(); }
         }}
       />
       <div className="mt-2 flex flex-wrap items-center gap-2">

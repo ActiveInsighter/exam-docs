@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimateIcon } from '@animate-ui/react/icons';
-import { RippleButton, RippleButtonRipples } from '@animate-ui/react/primitives/buttons/ripple';
+import { RippleButtonSurface as RippleButton, RippleButtonRipples } from '@/components/ui/ripple-button';
 import type { HTMLMotionProps } from 'motion/react';
 import type { LucideIcon } from 'lucide-react';
 import {

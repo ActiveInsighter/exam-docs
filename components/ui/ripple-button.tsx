@@ -7,7 +7,7 @@ import {
   type RippleButtonRipplesProps,
 } from "@animate-ui/react/primitives/buttons/ripple"
 import { type VariantProps } from "class-variance-authority"
-import { type HTMLMotionProps } from "motion/react"
+import { motion, type HTMLMotionProps } from "motion/react"
 
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -38,6 +38,26 @@ function rippleButtonVariants({ variant = "default", size = "default" }: Variant
   return cn(buttonVariants({ variant, size }), rippleColors[variant ?? "default"])
 }
 
+function centerKeyboardClick(event: React.MouseEvent<HTMLButtonElement>) {
+  if (event.detail !== 0) return
+  const rect = event.currentTarget.getBoundingClientRect()
+  event.clientX = rect.left + rect.width / 2
+  event.clientY = rect.top + rect.height / 2
+}
+
+type RippleButtonSurfaceProps = Omit<React.ComponentProps<typeof RippleButtonPrimitive>, "asChild">
+
+/** Shared unstyled surface: keyboard/assistive clicks have no pointer coordinates. */
+function RippleButtonSurface({ children, ...props }: RippleButtonSurfaceProps) {
+  return (
+    <RippleButtonPrimitive {...props} asChild>
+      {/* Slot runs the child's handler before the primitive's on the same
+          React click event. Capture and bubble receive separate events. */}
+      <motion.button onClick={centerKeyboardClick}>{children}</motion.button>
+    </RippleButtonPrimitive>
+  )
+}
+
 type RippleButtonProps = Omit<HTMLMotionProps<"button">, "children"> &
   VariantProps<typeof buttonVariants> & {
     /** Scale while pressed; Animate UI's press scale by default. */
@@ -58,14 +78,14 @@ function RippleButton({
   ...props
 }: RippleButtonProps) {
   return (
-    <RippleButtonPrimitive
+    <RippleButtonSurface
       type={type}
       className={cn(rippleButtonVariants({ variant, size }), className)}
       {...props}
     >
       {children}
       {ripples ? <RippleButtonRipples /> : null}
-    </RippleButtonPrimitive>
+    </RippleButtonSurface>
   )
 }
 
@@ -73,5 +93,5 @@ function RippleButtonRipples(props: RippleButtonRipplesProps) {
   return <RippleButtonRipplesPrimitive {...props} />
 }
 
-export { RippleButton, RippleButtonRipples, rippleButtonVariants }
+export { RippleButton, RippleButtonSurface, RippleButtonRipples, rippleButtonVariants }
 export type { RippleButtonProps, RippleButtonRipplesProps }

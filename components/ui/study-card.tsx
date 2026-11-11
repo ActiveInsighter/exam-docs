@@ -273,6 +273,7 @@ function StudyCardHeader({
   actionsLabel,
   pager = true,
   children,
+  className,
   ...props
 }: Omit<React.ComponentProps<typeof ModalHeader>, "title"> & {
   title: React.ReactNode
@@ -289,7 +290,10 @@ function StudyCardHeader({
   const { content } = useStepVariants(shift.tabs)
   const showPager = pager && count > 1
   return (
-    <ModalHeader {...props}>
+    <ModalHeader
+      {...props}
+      className={cn(actions && showPager && "@max-sm/modal:[&_[data-slot=modal-close]]:ml-auto!", className)}
+    >
       <ModalTitle {...titleProps} className={cn("relative overflow-visible", titleProps?.className)}>
         <AnimatePresence mode="popLayout" initial={false} custom={direction}>
           <motion.span
@@ -309,7 +313,10 @@ function StudyCardHeader({
       {tags ? <ModalTags {...tagsProps}>{tags}</ModalTags> : null}
       {children}
       {actions || showPager ? (
-        <ModalToolbar aria-label={actionsLabel ?? labels.group}>
+        <ModalToolbar
+          aria-label={actionsLabel ?? labels.group}
+          className={cn(actions && showPager && "@max-sm/modal:order-1 @max-sm/modal:ml-0 @max-sm/modal:basis-full @max-sm/modal:justify-between")}
+        >
           {actions}
           {showPager ? <StudyCardPager className={cn(actions && "before:mx-1 before:h-4.5 before:w-px before:bg-(--ui-fill-strong)")} /> : null}
         </ModalToolbar>
@@ -410,10 +417,11 @@ function StudyCardStage({
   children: React.ReactNode
 }) {
   const { itemKey, direction, hasPrev, hasNext, prev, next } = useStudyCard()
+  const stage = React.useRef<HTMLDivElement>(null)
   const blocked = React.useRef(false)
 
   const onPanEnd = (event: PointerEvent, { offset }: PanInfo) => {
-    if (event.pointerType !== "touch" || blocked.current) return
+    if (event.pointerType !== "touch" || event.type === "pointercancel" || blocked.current) return
     if (Math.abs(offset.x) < SWIPE_DISTANCE || Math.abs(offset.x) < Math.abs(offset.y) * SWIPE_SLOPE) return
     if (offset.x < 0 && hasNext) next()
     else if (offset.x > 0 && hasPrev) prev()
@@ -421,17 +429,26 @@ function StudyCardStage({
 
   return (
     <motion.div
+      ref={stage}
       data-slot="study-card-stage"
       // Sideways drags step cards; vertical ones still scroll, and dismiss the sheet from the top.
       data-base-ui-swipe-ignore={swipe ? "x" : undefined}
-      className={cn("flex min-h-0 flex-1 flex-col overflow-hidden", swipe && "touch-pan-y", className)}
-      onPanStart={swipe ? (event) => { blocked.current = scrollsSideways(event.target, event.currentTarget as Element) } : undefined}
+      className={cn("flex min-h-0 flex-1 flex-col overflow-hidden", swipe && "touch-pan-y touch-pinch-zoom", className)}
+      onPanSessionStart={swipe ? (event) => { blocked.current = stage.current ? scrollsSideways(event.target, stage.current) : true } : undefined}
       onPanEnd={swipe ? onPanEnd : undefined}
     >
       <AnimatePresence mode="wait" initial={false} custom={direction}>
         {/* Carries the step to the panes' content; the panes themselves stay put. */}
         <motion.div key={itemKey} initial="enter" animate="center" exit="exit" className="contents">
-          <ModalSplit columns={columns}>{children}</ModalSplit>
+          {/* Touch-action is resolved up to the nearest scroller, so it must
+              also live on the split (phones) and pane scrollers (tablets).
+              A nested formula scroller keeps its own native horizontal pan. */}
+          <ModalSplit
+            columns={columns}
+            className={swipe ? "touch-pan-y touch-pinch-zoom md:[&_[data-slot=modal-pane-scroll]]:touch-pan-y md:[&_[data-slot=modal-pane-scroll]]:touch-pinch-zoom" : undefined}
+          >
+            {children}
+          </ModalSplit>
         </motion.div>
       </AnimatePresence>
     </motion.div>

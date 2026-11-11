@@ -16,7 +16,7 @@ type Tone = 'ok' | 'busy' | 'muted' | 'warn' | 'error';
 
 const DOT: Record<Tone, string> = {
   ok: 'bg-emerald-500',
-  busy: 'bg-sky-500 animate-pulse',
+  busy: 'bg-sky-500 animate-pulse motion-reduce:animate-none',
   muted: 'bg-muted-foreground/50',
   warn: 'bg-amber-500',
   error: 'bg-destructive',
@@ -173,7 +173,7 @@ function QuestionRecordsMenu() {
       </DropdownMenuItem>
       {signedIn ? (
         <DropdownMenuItem closeOnClick={false} disabled={!engine || syncing} onClick={() => { void engine?.sync(); }}>
-          <RefreshCwIcon className={cn(syncing && 'animate-spin')} />
+          <RefreshCwIcon className={cn(syncing && 'animate-spin motion-reduce:animate-none')} />
           {syncing ? '正在同步…' : '立即同步'}
           {status.phase === 'offline' ? <CloudOffIcon className="ml-auto text-muted-foreground" /> : null}
         </DropdownMenuItem>

@@ -161,7 +161,7 @@ function ModalTrigger(props: DrawerPrimitive.Trigger.Props) {
 
 const modalContentVariants = cva(
   [
-    "group/modal relative isolate flex w-full origin-bottom flex-col overflow-hidden outline-none",
+    "@container/modal group/modal relative isolate flex w-full origin-bottom flex-col overflow-hidden outline-none",
     "max-h-(--modal-cap) rounded-t-(--modal-radius) bg-(--modal-surface) text-foreground [box-shadow:var(--modal-shadow)]",
     // Phones stack split panes in one scroll: its faded top shows the sheet, which takes the first pane's tone.
     "max-md:has-[[data-slot=modal-pane][data-tone=muted]:first-child]:bg-(--modal-pane-muted)",

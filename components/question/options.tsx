@@ -1,6 +1,6 @@
 'use client';
 
-import { RippleButtonRipples } from '@animate-ui/react/primitives/buttons/ripple';
+import { RippleButtonRipples } from '@/components/ui/ripple-button';
 import { blur, scale, shift, spring, transition, useTempoTransition } from '@animate-ui/react/utils/motion';
 import { motion } from 'motion/react';
 import { type KeyboardEvent, type ReactNode, useRef } from 'react';

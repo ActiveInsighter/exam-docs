@@ -123,7 +123,7 @@ export function QuestionMirror({ questionId, state, className }: { questionId: s
             aria-expanded={!folded}
             onClick={() => setFolded(!folded)}
           >
-            <ChevronDownIcon size={14} className={cn('transition-transform duration-200', !folded && 'rotate-180')} />
+            <ChevronDownIcon size={14} className={cn('transition-transform duration-200 motion-reduce:transition-none', !folded && 'rotate-180')} />
             {folded ? '展开题目' : '收起题目'}
           </Button>
         </AnimateIcon>

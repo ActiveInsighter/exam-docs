@@ -29,6 +29,8 @@ import { Button } from '@/components/ui/button';
 `@animate-ui/react/primitives/buttons/ripple`，复用上述样式变体。
 它是原生 Motion 按钮，支持按钮属性、ref 和 Motion 属性；不接受 Base UI 的 `render` / `nativeButton`。
 默认 `type="button"`，表单提交须显式传 `type="submit"`。
+`RippleButtonSurface` 是共用的无样式适配层，供题目选项和演示组合使用：
+键盘 / 辅助技术触发的无指针点击从中心扩散，鼠标和触屏保留实际点击位置。动画仍全部由官方 primitive 负责。
 
 ```tsx
 import { RippleButton, RippleButtonRipples } from '@/components/ui/ripple-button';

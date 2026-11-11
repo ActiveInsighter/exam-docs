@@ -2,7 +2,6 @@
 
 import { AnimateIcon } from '@animate-ui/react/icons';
 import { IconButton, IconButtonParticles } from '@animate-ui/react/primitives/buttons/icon';
-import { RippleButton as RippleSurface, RippleButtonRipples } from '@animate-ui/react/primitives/buttons/ripple';
 import { scale } from '@animate-ui/react/utils/motion';
 import { type CSSProperties, type ReactNode, useState } from 'react';
 import { BookOpenIcon } from '@/components/animate-ui/icons/book-open';
@@ -13,7 +12,7 @@ import { RotateCcwIcon } from '@/components/animate-ui/icons/rotate-ccw';
 import { StarIcon } from '@/components/animate-ui/icons/star';
 import { TagIcon } from '@/components/animate-ui/icons/tag';
 import { Button } from '@/components/ui/button';
-import { RippleButton } from '@/components/ui/ripple-button';
+import { RippleButton, RippleButtonSurface as RippleSurface, RippleButtonRipples } from '@/components/ui/ripple-button';
 import { cn } from '@/lib/utils';
 
 /*
