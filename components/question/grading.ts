@@ -119,8 +119,6 @@ export function optionFeedback(letter: string, { key, selected, submitted, multi
   return inKey ? (multiple ? 'missed' : 'answer') : 'dimmed';
 }
 
-/** Feedback that colours the option: its fill spreads in from the press. */
-export const isFilled = (feedback: OptionFeedback) => feedback !== 'idle' && feedback !== 'dimmed';
 
 /**
  * Light normalisation so that "Ｏ(n)", " o(n) " and "O(n)。" compare equal:

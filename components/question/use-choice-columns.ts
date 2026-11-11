@@ -141,15 +141,27 @@ function flushRegistrations() {
   const groups = Array.from(registering).filter((entry) => tracked.has(entry) && entry.isConnected);
   registering.clear();
   const limit = window.innerHeight * 2;
-  const tops = groups.map((entry) => entry.getBoundingClientRect().top);
-  groups.forEach((entry, index) => {
-    if (!nearObserver || (tops[index] > -limit && tops[index] < limit)) {
+  /*
+   * Reading a group's position lays out its card, which `content-visibility`
+   * would otherwise skip. Groups register in document order, so once one is
+   * found below the reach of the viewport the rest are too and are not read:
+   * a page of a hundred questions lays out the first few, not all of them.
+   */
+  let below = false;
+  for (const entry of groups) {
+    let near = !nearObserver;
+    if (nearObserver && !below) {
+      const { top } = entry.getBoundingClientRect();
+      below = top >= limit;
+      near = top > -limit && top < limit;
+    }
+    if (near) {
       resizeObserver?.observe(entry);
       schedule(entry);
     } else {
-      nearObserver.observe(entry);
+      nearObserver?.observe(entry);
     }
-  });
+  }
 }
 
 export function useChoiceColumns(ref: RefObject<HTMLElement | null>, enabled = true) {

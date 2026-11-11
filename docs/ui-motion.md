@@ -1,58 +1,85 @@
 # UI 动效
 
-通用浮层使用 [Animate UI](https://animate-ui.com/docs/installation) 2.x 的
-Base UI 适配层，依赖 `@animate-ui/react` 和 `motion`。业务组件仍从
-`@/components/ui/*` 导入，不另建一套组件目录。
+项目使用 [Animate UI](https://animate-ui.com/docs/installation) 2.x、Base UI 和 Motion。
+业务优先复用 `@/components/ui/*`；官方 primitive 负责通用交互，业务层负责内容、状态与组合。
+不要重新维护拖拽关闭、点击扩散、收藏粒子或一套并行的浮层组件。
 
-| 统一入口 | 动效 |
+## 入口与边界
+
+| 入口 | 职责 |
 | --- | --- |
-| `components/ui/dialog.tsx` | 遮罩渐变、弹窗进入与退出 |
-| `components/ui/dropdown-menu.tsx` | 菜单开合、条目进入、选中背景滑动 |
-| `components/ui/popover.tsx` | 从触发位置缩放进入、退出 |
-| `components/ui/tooltip.tsx` | 提示出现、消失及连续悬停切换 |
-| `components/ui/toggle.tsx` | 开关状态与按压反馈 |
-| `components/ui/toggle-group.tsx` | 单选、多选与选中背景移动 |
-| `components/ui/button.tsx` | 普通按钮的官方按压反馈，组合在原 Base UI 按钮上 |
+| `components/ui/dialog.tsx` | 常规 Dialog 的遮罩、开合和可访问性。 |
+| `components/ui/modal.tsx` | Animate UI Base UI Drawer 的站内组合：底部抽屉、顶栏、滚动区、分栏和嵌套堆叠。 |
+| `components/ui/study-card.tsx` | 组合 Modal，管理索引、方向、翻页器、键盘 / 触屏切换；不依赖题目业务。 |
+| `components/ui/button.tsx` | Base UI Button + Animate UI 按压反馈，保留 Base UI 组合 API。 |
+| `components/ui/ripple-button.tsx` | 官方涟漪 primitive + 共用按钮变体。 |
+| `components/ui/dropdown-menu.tsx` / `popover.tsx` / `tooltip.tsx` | 官方浮层开合、定位与焦点。 |
+| `components/ui/toggle.tsx` / `toggle-group.tsx` | 官方切换与按压反馈。 |
+| `components/animate-ui/icons/` | 从官方注册表添加的动画图标。 |
+| `components/question/live.tsx` | 长题目页的动画按需激活，不包含判分和持久化逻辑。 |
 
-这些入口只替换底层 primitive 导入，保留现有 API、样式、定位、语义和
-`data-slot`。Motion 负责开合，组件上不再叠加 `animate-in`、`zoom-in`、
-`slide-in` 等 CSS 开合动画。
+ModalContext 只补充当前层 `close()`、整叠 `closeAll()` 和返回焦点策略；
+拖拽、原生嵌套、滚动锁定、Esc 和焦点陷阱由 Drawer 负责。
+堆叠外观使用 Base UI 的 CSS 变量，不另加层级注册表或手势监听器。
+详见 [Modal / StudyCard](modal-component.md) 与 [按钮](button-component.md)。
 
-`components/app-providers.tsx` 的 `AnimateUIProvider` 统一设置
-`tempo={0.85}`，让高频学习操作更快；`reducedMotion="user"` 跟随系统的
-减少动态效果偏好。调整通用节奏只改此处。
+## 统一节奏与减少动态效果
 
-## 已有专用动效
+`components/app-providers.tsx` 的 AnimateUIProvider 设置 `tempo={0.85}`、`reducedMotion="user"`。
+其下的 ReducedMotionConfig 将同一策略传给自定义 Motion 节点；只设置 AnimateUIProvider
+不会自动给所有自定义节点添加 MotionConfig。系统偏好变化时不重挂整棵应用，保留焦点与作答状态。
 
-`components/ui/modal.tsx` 的底部抽屉已经实现拖动关闭、嵌套页面、焦点恢复
-和高度过渡，继续由 `styles/modal.css` 管理。其 Root、Portal、Backdrop、
-Popup 配套使用原生 Base UI，不能混入需要 Animate UI Root 上下文的 Portal。
-Title、Description、Close 继续复用现有 Dialog 封装。
+- 官方 primitive 使用自身动效，不叠加 CSS 开合动画。
+- 自定义动效使用 `@animate-ui/react/utils/motion` 的令牌，经 `useTempoTransition()` 调整节奏。
+- StudyCard 采用步骤切换配方：内容依次离开、进入，方向一致；标题同步切换，序号使用 SlidingNumber。
+- transform 字符串用 `useShouldReduceMotion()` 消除位移；Motion 的 x / y / scale 由 ReducedMotionConfig 管理。
+- 减少动态效果时保留状态提示和淡入淡出，停止位移、缩放与装饰性循环；CSS 动画另外处理 `motion-reduce:`。
+- CSS 过渡只列实际变化的属性，不用 `transition-all`，不覆盖 Motion 的 transform。
 
-`TileButton`、带 `revealed` 的答题按钮、卡片、数学键盘、MDX 标签页和
-Fumadocs 导航继续使用各自已有的动效。普通 `Button` 通过官方
-`AnimatedButton asChild` 组合，保留 Base UI 的 `render`、`nativeButton`、
-禁用、焦点和 ref 行为；颜色等过渡不再覆盖 Motion 的 transform。
+数学键盘、MDX 标签页与 Fumadocs 导航保留各自有用途的动效，不为统一形式而改写无关模块。
+Avatar、Input、Field、Label、Badge、Separator 没有需要替换的动画 primitive。
+已删除的 `styles/modal.css`、`styles/study-card.css`、`styles/reveal.css` 不再是扩展入口。
 
-现有 shadcn 基础组件中，官方支持的都已接入。Avatar 暂无官方动效适配；
-Input、Field、Label、Badge、Separator 没有可替换的动画 primitive，保持原样。
-扩展接入时逐个检查 primitive 上下文及 CSS，避免重复动画。
+## 长页面
 
-## 官方 Skill
+QuestionCard 使用模块级共享 IntersectionObserver：每张卡第一次接近视口时才启用
+Pressable、Animated 和 liveIcon 的官方动画实现；此前呈现外观相同、可操作的静态元素。
+激活是一次性的，不在滚动离开后反复卸载。替换控件时恢复该题内的焦点，不重置作答或个人标记。
+选项分栏另外批量测量视口附近的题目，避免水合时对全页强制布局。
 
-官方来源：[Animate UI Skills](https://animate-ui.com/docs/skills)，源码位于
-[`imskyleen/animate-ui/skills/animate-ui`](https://github.com/imskyleen/animate-ui/tree/main/skills/animate-ui)。
-项目原版文件在 `.agents/skills/animate-ui/`，Claude Code 通过
-`.claude/skills/animate-ui` 的相对符号链接共用；来源和内容哈希记录在
-`skills-lock.json`。项目适配约定写在本文件与 `AGENTS.md`，不修改官方原文。
+解答弹窗、数学键盘和嵌套的收藏库继续按需加载；不得把每题的弹窗全部预挂载到长页面上。
 
-Skill 指导 AI 选择 CLI、primitive 导入替换或 Motion 配方，并涵盖：
+## 验证
 
-- 统一弹簧、曲线、缩放、位移、模糊与 `tempo` 参数。
-- 弹窗、菜单、抽屉、列表、按钮状态、表单、图标和页面动效的实现方式。
-- 保留现有组件 API、样式、定位和 `data-slot`，清理重复的 CSS 动画。
-- 减少动态效果、键盘与焦点、动画中断、触屏悬停和性能检查。
-- 参考动画复现、动效审查，以及 Animate UI v1 到 v2 的迁移。
+先运行 `npm run typecheck` 与相关测试，再用开发服务器渲染代表页面。完整生产 / 静态构建交给
+GitHub Actions：`deploy-cloudflare-worker-assets.yml`，显式设置 `deploy=false`、`shards=8`。
+类型检查分开运行浏览器应用和 Worker 测试，避免将 Worker 全局声明混入应用的 DOM 类型。
 
-维护本项目时同时遵守上面的专用动效约定；Skill 中的通用示例不意味着
-需要迁移已有抽屉、替换所有组件或增加无关动效。
+浏览器脚本使用 playwright-core；`QUESTION_BROWSER_MODULES` 可指定安装目录，
+`QUESTION_BROWSER_EXECUTABLE` 指定浏览器，`DEPLOYMENT_URL` 指向开发或预览地址。
+
+```bash
+QUESTION_BROWSER_EXECUTABLE=/usr/bin/chromium node scripts/verify-question-components-browser.mjs
+QUESTION_BROWSER_EXECUTABLE=/usr/bin/chromium node scripts/verify-study-motion-browser.mjs
+```
+
+检查桌面 / 窄屏、亮 / 暗色、系统减少动态效果、动画中间帧、连续快速操作，以及：
+
+- 五种题型的作答、判分、自评、改判、重做与刷新恢复。
+- 解答首开动效、前后翻卡、首尾键盘焦点、触屏滑动和关闭后焦点恢复。
+- 多级返回 / Esc / 遮罩 / 拖动只关闭当前层，全部关闭返回页面触发按钮。
+- 焦点不会落在离开或被覆盖的卡片里；长公式可横向滚动，页面没有横向溢出。
+- 长页面在靠近视口前不挂载大量动画按钮，离开页面后观察器不持有旧卡片。
+
+审查自定义动画可运行 `npx @animate-ui/cli@latest audit components/ui components/question`。
+报告不包含官方 primitive 内部动效；文件内没有减少动态效果配置时，需结合上层配置判断。
+
+## 官方资料与 Skill
+
+- [Animate UI Drawer](https://animate-ui.com/docs/primitives/base-ui/drawer)
+- [Base UI Drawer](https://base-ui.com/react/components/drawer)
+- [shadcn Base UI Drawer](https://ui.shadcn.com/docs/components/base/drawer)
+- [Animate UI Skills](https://animate-ui.com/docs/skills)
+
+官方 Skill 原文位于 `.agents/skills/animate-ui/`，`.claude/skills/animate-ui` 通过相对符号链接共用；
+来源与哈希记录在 skills-lock.json。项目约定放在本文件和 AGENTS.md，不修改官方 Skill 原文。

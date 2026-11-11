@@ -1,18 +1,116 @@
 /*
- * Question visuals.
+ * Question styles that cannot live on an element.
  *
- * Components only set data attributes (data-feedback, data-state, …); every
- * look lives here. That keeps hundreds of questions per page cheap to
- * re-render, and lets the solution sheet restyle its read-only copy of a
- * question by changing attributes alone.
+ * The question components are styled with Tailwind classes where they are
+ * rendered (components/question). What stays here is what a class cannot
+ * say: the result tones, the variants the classes use, rules about the page
+ * around a card, and the two widgets that keep a stylesheet of their own
+ * (inline blanks and the maths keypad).
  *
- * Colours come from styles/tokens (theme.css, components.css).
+ * Components publish their state in data attributes (data-feedback,
+ * data-tone); that keeps hundreds of questions per page cheap to re-render,
+ * and lets the solution card restyle its read-only copy of a question by
+ * changing attributes alone. Colours come from styles/tokens.
  */
 
-@import './question/tones.css';
-@import './question/card.css';
-@import './question/options.css';
 @import './question/blanks.css';
 @import './question/keypad.css';
-@import './question/footer.css';
-@import './question/solution.css';
+
+/*
+ * Feedback variants (grading.ts → OptionFeedback), for the option classes:
+ * fb-picked:bg-…, group-fb-graded/option:text-…
+ */
+@custom-variant fb-idle (&[data-feedback='idle']);
+@custom-variant fb-picked (&[data-feedback='selected']);
+@custom-variant fb-graded (&:is([data-feedback='correct'], [data-feedback='incorrect']));
+@custom-variant fb-key (&:is([data-feedback='answer'], [data-feedback='missed']));
+@custom-variant fb-dimmed (&[data-feedback='dimmed']);
+
+/*
+ * Result tones. Every graded part takes one tone per result, set here as a
+ * group of five (tokens in styles/tokens/components.css), so fills, letters,
+ * badges, tabs and pills always agree and only the hue changes:
+ *
+ *   --tone        base: verdict badges, icons
+ *   --tone-ink    letters and text on a tint
+ *   --tone-tint   the option's fill
+ *   --tone-line   the outline around a tint
+ *   --tone-soft   the letter's disc and the tabs, a step deeper
+ *
+ * The letter disc is a step deeper than the option's fill, never solid, so
+ * a graded option stays as calm as the rest of the card.
+ */
+[data-feedback='correct'],
+[data-feedback='answer'],
+[data-tone='correct'] {
+  --tone: var(--exam-correct);
+  --tone-ink: var(--exam-correct-ink);
+  --tone-tint: var(--exam-correct-tint);
+  --tone-line: var(--exam-correct-line);
+  --tone-soft: var(--exam-correct-soft);
+}
+[data-feedback='incorrect'],
+[data-feedback='invalid'],
+[data-feedback='empty'],
+[data-tone='incorrect'] {
+  --tone: var(--exam-incorrect);
+  --tone-ink: var(--exam-incorrect-ink);
+  --tone-tint: var(--exam-incorrect-tint);
+  --tone-line: var(--exam-incorrect-line);
+  --tone-soft: var(--exam-incorrect-soft);
+}
+[data-feedback='missed'],
+[data-tone='partial'] {
+  --tone: var(--exam-missed);
+  --tone-ink: var(--exam-missed-ink);
+  --tone-tint: var(--exam-missed-tint);
+  --tone-line: var(--exam-missed-line);
+  --tone-soft: var(--exam-missed-soft);
+}
+
+/* ------------------------------------------------------------------ page */
+
+/* Authors separated questions with "---"; the cards are separation enough. */
+#docs-body hr:has(+ [data-exam-question]),
+#docs-body [data-exam-question] + hr {
+  display: none;
+}
+
+/* A card reached by its link (the library, the answer dock) is ringed for a moment. */
+[data-exam-question]:target {
+  animation: exam-card-target 1.6s var(--ui-ease);
+}
+
+@keyframes exam-card-target {
+  0%, 30% { box-shadow: 0 0 0 2px color-mix(in oklch, var(--foreground) 22%, transparent); }
+  100% { box-shadow: 0 0 0 2px transparent; }
+}
+
+/*
+ * Figures in a question or solution: diagrams drawn black on white. The
+ * filter (components/question/figure-ink-filters.tsx, #exam-figure-ink) turns
+ * white into transparency and keeps the ink, so a figure sits on whatever
+ * holds it (the card, the solution card's grey pane) with no white box; in
+ * dark mode the ink turns light.
+ */
+:is([data-exam-question-body], [data-solution-card] .prose) img {
+  filter: url('#exam-figure-ink');
+}
+
+.dark :is([data-exam-question-body], [data-solution-card] .prose) img {
+  filter: url('#exam-figure-ink-dark');
+}
+
+/*
+ * Option letters: KaTeX's Computer Modern math italic (KaTeX_Math-Italic,
+ * MIT), subset to A–Z: 4.5 KB, fetched only where letters render, shown in
+ * a system serif until then (KaTeX's own face blocks text while loading).
+ */
+@font-face {
+  font-family: 'Exam Letter';
+  src: url('/fonts/exam-letter-v1.woff2') format('woff2');
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0041-005A;
+}
