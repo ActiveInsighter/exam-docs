@@ -1,68 +1,96 @@
 'use client';
 
-import { CheckIcon, MinusIcon, XIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { blankBadge } from './blank-field';
 import { BlankEntry, BlankGradeSwitch, BlankKey } from './blank-grade';
+import { ResultIcon } from './grade-control';
 import { type AttemptResult, formatKey, formatResponse, type GradingSpec } from './grading';
 import type { QuestionState } from './question-state';
 
-/*
- * The answer section of the solution card: the key beside what the reader
- * submitted, as tiles in the result's tone (styles/question/solution.css).
- * Blanks get a row each, with the switch for grading by hand.
- */
+const RESULT_LABELS: Record<AttemptResult, string> = { correct: '正确', partial: '部分正确', incorrect: '错误' };
 
-const VERDICTS: Record<AttemptResult, { label: string; icon: ReactNode }> = {
-  correct: { label: '正确', icon: <CheckIcon strokeWidth={3} /> },
-  partial: { label: '部分正确', icon: <MinusIcon strokeWidth={3} /> },
-  incorrect: { label: '错误', icon: <XIcon strokeWidth={3} /> },
-};
+/** Shared answer surface: the data attributes also work in the read-only mirror. */
+function AnswerTile({
+  as: Tag = 'div',
+  tone,
+  children,
+}: {
+  as?: 'div' | 'li';
+  tone?: AttemptResult;
+  children: ReactNode;
+}) {
+  return (
+    <Tag data-answer-tile="" data-tone={tone}>
+      {children}
+    </Tag>
+  );
+}
 
+function BlankAnswers({ state }: { state: QuestionState }) {
+  if (state.spec.kind !== 'blank') return null;
+  const graded = Boolean(state.evaluation);
+  return (
+    <ol data-answers="blank" aria-label="逐空对照答案">
+      {state.spec.blanks.map((blank, index) => {
+        const verdict = state.evaluation?.blanks[index];
+        const yours = graded ? state.values[index]?.trim() : '';
+        return (
+          <AnswerTile as="li" key={index} tone={verdict && verdict !== 'correct' ? 'incorrect' : undefined}>
+            {state.spec.kind === 'blank' && state.spec.blanks.length > 1 ? <small>{blankBadge(index)}</small> : null}
+            <small data-answer-label="key">答案</small>
+            <strong>
+              <BlankKey blank={blank} />
+            </strong>
+            {state.ready ? (
+              <span data-answer-yours="">
+                <small>{graded ? '你填' : '自评'}</small>
+                {graded ? <span>{yours ? <BlankEntry blank={blank} value={yours} /> : '—'}</span> : null}
+                <BlankGradeSwitch question={state} index={index} />
+              </span>
+            ) : null}
+          </AnswerTile>
+        );
+      })}
+    </ol>
+  );
+}
+
+/** Reference and response stay separate; grading behavior lives in GradeControl. */
 export function AnswerSummary({ spec, state }: { spec: GradingSpec; state: QuestionState | null }) {
-  const graded = state?.evaluation ? state : null;
-  const letters = spec.kind === 'choice' ? '' : undefined;
-
   if (spec.kind === 'blank') {
-    // Not answered on the page: grade yourself against the key here, as with an essay.
-    const gradable = graded ?? (state?.ready ? state : null);
+    if (state) return <BlankAnswers state={state} />;
     return (
-      <ol data-answers="blank">
-        {spec.blanks.map((blank, index) => {
-          const verdict = graded?.evaluation?.blanks[index];
-          const yours = graded?.values[index]?.trim();
-          return (
-            <li key={index} data-answer-tile="" data-tone={verdict && verdict !== 'correct' ? 'incorrect' : undefined}>
-              {spec.blanks.length > 1 ? <small>{blankBadge(index)}</small> : null}
-              <small data-answer-label="key">答案</small>
-              <strong><BlankKey blank={blank} /></strong>
-              {gradable ? (
-                <span data-answer-yours="">
-                  <small>{graded ? '你填' : '自评'}</small>
-                  {graded ? <span>{yours ? <BlankEntry blank={blank} value={yours} /> : '—'}</span> : null}
-                  <BlankGradeSwitch question={gradable} index={index} />
-                </span>
-              ) : null}
-            </li>
-          );
-        })}
+      <ol data-answers="blank" aria-label="逐空对照答案">
+        {spec.blanks.map((blank, index) => (
+          <AnswerTile as="li" key={index}>
+            <small>{blankBadge(index)} 答案</small>
+            <strong>
+              <BlankKey blank={blank} />
+            </strong>
+          </AnswerTile>
+        ))}
       </ol>
     );
   }
 
-  const result = graded?.evaluation?.result;
+  const result = state?.evaluation?.result;
+  const letters = spec.kind === 'choice' ? '' : undefined;
   return (
-    <div data-answers="">
-      <div data-answer-tile="" data-tone="correct">
+    <div data-answers="" aria-label="答案对照">
+      <AnswerTile tone="correct">
         <small data-answer-label="key">正确答案</small>
         <strong data-choice-letters={letters}>{formatKey(spec)}</strong>
-      </div>
-      {graded && result ? (
-        <div data-answer-tile="" data-tone={result === 'correct' ? undefined : result}>
+      </AnswerTile>
+      {state && result ? (
+        <AnswerTile tone={result === 'correct' ? undefined : result}>
           <small>你的答案</small>
-          <strong data-choice-letters={graded.selected.length ? letters : undefined}>{formatResponse(spec, graded.selected, graded.values)}</strong>
-          <span data-answer-verdict="" data-tone={result} aria-label={VERDICTS[result].label} role="img">{VERDICTS[result].icon}</span>
-        </div>
+          <strong data-choice-letters={state.selected.length ? letters : undefined}>
+            {formatResponse(spec, state.selected, state.values)}
+          </strong>
+          <span data-answer-verdict="" data-tone={result} aria-label={RESULT_LABELS[result]} role="img">
+            <ResultIcon result={result} animate={state.fresh} />
+          </span>
+        </AnswerTile>
       ) : null}
     </div>
   );

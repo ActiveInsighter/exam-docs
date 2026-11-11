@@ -22,21 +22,22 @@ Base UI 适配层，依赖 `@animate-ui/react` 和 `motion`。业务组件仍从
 `tempo={0.85}`，让高频学习操作更快；`reducedMotion="user"` 跟随系统的
 减少动态效果偏好。调整通用节奏只改此处。
 
-## 已有专用动效
+## 学习组件
 
-`components/ui/modal.tsx` 的底部抽屉已经实现拖动关闭、嵌套页面、焦点恢复
-和高度过渡，继续由 `styles/modal.css` 管理。其 Root、Portal、Backdrop、
-Popup 配套使用原生 Base UI，不能混入需要 Animate UI Root 上下文的 Portal。
-Title、Description、Close 继续复用现有 Dialog 封装。
+`Modal` 的 Root、Portal、Backdrop、Popup 配套使用 Animate UI 的 Base UI Drawer。
+官方 primitive 负责开合、拖拽、焦点与嵌套，组合层负责尺寸、分栏、磨砂顶栏与堆叠外观。
+`StudyCard` 在其上处理翻页，使用官方步骤切换配方、方向感知的淡入淡出、轻微模糊及页码动画。
 
-`TileButton`、带 `revealed` 的答题按钮、卡片、数学键盘、MDX 标签页和
-Fumadocs 导航继续使用各自已有的动效。普通 `Button` 通过官方
-`AnimatedButton asChild` 组合，保留 Base UI 的 `render`、`nativeButton`、
-禁用、焦点和 ref 行为；颜色等过渡不再覆盖 Motion 的 transform。
+- `ui/ripple-button.tsx`：复用 `buttonVariants`，官方扩散与按压；键盘点击居中，锁定选项不再产生点击动效。
+- `ui/icon-button.tsx`：官方图标按钮与粒子，收藏成功时显示粒子；图标本身复用注册表安装的 Animate UI 图标。
+- `ui/collapsible.tsx`：shadcn 风格组合，官方高度、淡入和模糊过渡；判分面板不再维护自制卸载时机。
+- `question/grade-control.tsx`：在 `ToggleGroup` 上统一填空与解答题判分。
+- `question/grade-control.tsx` 的 `ResultIcon`：统一结果图标；只在用户操作后的结果上播放动画，恢复记录不重播。
 
-现有 shadcn 基础组件中，官方支持的都已接入。Avatar 暂无官方动效适配；
-Input、Field、Label、Badge、Separator 没有可替换的动画 primitive，保持原样。
-扩展接入时逐个检查 primitive 上下文及 CSS，避免重复动画。
+旧 `TileButton`、`revealed`、`styles/reveal.css` 和对应令牌已移除。
+数学键盘、MDX 标签页和 Fumadocs 导航保持各自的专用动效。
+普通 `Button` 继续组合 Base UI 与官方 `AnimatedButton asChild`，保留 `render`、
+`nativeButton`、禁用、焦点、ref 与调用方 `data-slot`；不再携带答题用的颜色扩散逻辑。
 
 ## 官方 Skill
 

@@ -82,7 +82,7 @@ function RippleButton({
 }
 
 function RippleButtonRipples(props: RippleButtonRipplesProps) {
-  return <RippleButtonRipplesPrimitive {...props} />
+  return <RippleButtonRipplesPrimitive data-slot="ripple-button-ripple" {...props} />
 }
 
 export { RippleButton, RippleButtonRipples }

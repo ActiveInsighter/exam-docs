@@ -11,7 +11,7 @@ import {
   useShouldReduceMotion,
   useTempoTransition,
 } from "@animate-ui/react/utils/motion"
-import { AnimatePresence, motion, type PanInfo, type Variants } from "motion/react"
+import { AnimatePresence, motion, useIsPresent, type PanInfo, type Variants } from "motion/react"
 
 import { ChevronLeftIcon } from "@/components/animate-ui/icons/chevron-left"
 import { ChevronRightIcon } from "@/components/animate-ui/icons/chevron-right"
@@ -372,6 +372,8 @@ const SWIPE_SLOPE = 1.6
 
 /** A swipe that starts on content scrolling sideways (a wide formula, a table) scrolls it instead. */
 function scrollsSideways(target: EventTarget | null, stage: Element) {
+  // Swiping a control edits that control, rather than unexpectedly paging.
+  if (target instanceof Element && target.closest("button, a, input, textarea, select, [contenteditable], [role='slider'], [data-study-card-own-keys]")) return true
   for (let element = target instanceof Element ? target : null; element && element !== stage; element = element.parentElement) {
     if (element.scrollWidth > element.clientWidth + 1) {
       const overflow = getComputedStyle(element).overflowX
@@ -445,10 +447,11 @@ function StudyCardStage({
 type RegionProps = Omit<React.ComponentProps<typeof ModalPane>, "tone">
 
 function Region({ tone, region, className, children, ...props }: RegionProps & { tone?: "muted"; region: "aside" | "main" }) {
+  const present = useIsPresent()
   const { direction } = useStudyCard()
   const { content } = useStepVariants()
   return (
-    <ModalPane tone={tone} data-study-card-region={region} {...props}>
+    <ModalPane tone={tone} data-study-card-region={region} inert={!present} {...props}>
       <motion.div
         data-slot="study-card-content"
         custom={direction}

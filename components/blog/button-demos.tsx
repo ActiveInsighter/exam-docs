@@ -1,15 +1,12 @@
 'use client';
 
-import { BellIcon, CheckIcon, MoonIcon, StarIcon, WifiIcon } from 'lucide-react';
-import { type CSSProperties, type ReactNode, useState } from 'react';
-import { Button, TileButton } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-
-/*
- * Live demos of the click-to-fill buttons in components/ui/button.tsx
- * (TileButton and Button's `revealed`) for the blog's component showcase.
- * Registered only on blog pages (app/(home)/blog).
- */
+import { BellIcon, MoonIcon, WifiIcon } from 'lucide-react';
+import { AnimateIcon } from '@animate-ui/react/icons';
+import { type ReactNode, useState } from 'react';
+import { CheckIcon } from '@/components/animate-ui/icons/check';
+import { StarIcon } from '@/components/animate-ui/icons/star';
+import { RippleButton } from '@/components/ui/ripple-button';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 function DemoFrame({ children, caption }: { children: ReactNode; caption: string }) {
   return (
@@ -26,74 +23,56 @@ const PLANS = [
   { id: 'team', title: '团队', detail: '5 人起，统一管理与账单' },
 ] as const;
 
-/** A radio group of tiles: the pick fills from where it was pressed. */
 function TilesDemo() {
-  const [plan, setPlan] = useState<string>('year');
+  const [plan, setPlan] = useState(['year']);
   return (
-    <DemoFrame caption="TileButton + revealed：选中项的底色从点击位置以圆形扩散铺满，取消时底色从这次点击的位置向外清开；键盘（方向键、空格）选择时从中心扩散。">
-      <div role="radiogroup" aria-label="套餐" className="grid gap-2.5 sm:grid-cols-3">
-        {PLANS.map((item) => {
-          const picked = plan === item.id;
-          return (
-            <TileButton
-              key={item.id}
-              role="radio"
-              aria-checked={picked}
-              revealed={picked}
-              className={cn('items-start', picked && '[--tile-ring-width:1.5px] [--tile-ring:color-mix(in_oklch,var(--foreground)_28%,transparent)]')}
-              onClick={() => setPlan(item.id)}
-            >
-              <span
-                aria-hidden="true"
-                className={cn(
-                  'mt-0.5 grid size-5 shrink-0 place-items-center rounded-full shadow-[inset_0_0_0_1.5px_var(--ui-fill-strong)] transition-colors',
-                  picked && 'bg-foreground text-background shadow-none',
-                )}
-              >
-                {picked ? <CheckIcon className="size-3" strokeWidth={3} /> : null}
-              </span>
-              <span className="grid gap-0.5">
-                <span className="font-medium">{item.title}</span>
-                <span className="text-sm text-muted-foreground">{item.detail}</span>
-              </span>
-            </TileButton>
-          );
-        })}
-      </div>
+    <DemoFrame caption="ToggleGroup 管理选择与方向键导航，Animate UI 提供按压反馈与选中背景切换。">
+      <ToggleGroup
+        variant="choice"
+        size="choice"
+        value={plan}
+        onValueChange={(next) => {
+          if (next.length) setPlan(next);
+        }}
+        className="grid w-full gap-2.5 sm:grid-cols-3"
+      >
+        {PLANS.map((item) => (
+          <ToggleGroupItem key={item.id} value={item.id}>
+            <CheckIcon aria-hidden="true" className="mt-1" />
+            <span className="grid gap-0.5">
+              <span className="font-medium">{item.title}</span>
+              <span className="text-sm text-muted-foreground">{item.detail}</span>
+            </span>
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
     </DemoFrame>
   );
 }
 
-// The question card's result tones (styles/tokens/components.css): the tint it fills with and its outline.
-const tone = (name: string) => ({ color: `var(--exam-${name}-tint)`, ring: `var(--exam-${name}-line)` });
 const TONES = [
-  { label: '正确', ...tone('correct') },
-  { label: '错误', ...tone('incorrect') },
-  { label: '漏选', ...tone('missed') },
+  { value: 'correct', label: '正确' },
+  { value: 'incorrect', label: '错误' },
+  { value: 'partial', label: '漏选' },
 ] as const;
-
-/** Any colour: set --reveal-color (and --tile-ring) per state. */
 function TonesDemo() {
   const [on, setOn] = useState<Record<string, boolean>>({});
   return (
-    <DemoFrame caption="填充颜色由 --reveal-color 决定，描边由 --tile-ring 决定：题目组件就是按判分结果切换这两个变量。再点同一块，底色会从点击处向外清开。">
+    <DemoFrame caption="RippleButton 复用按钮 variants，扩散效果由官方 primitive 提供；持久选中状态用语义颜色表达。">
       <div className="grid gap-2.5 sm:grid-cols-3">
-        {TONES.map((tone) => {
-          const active = Boolean(on[tone.label]);
-          return (
-            <TileButton
-              key={tone.label}
-              size="lg"
-              aria-pressed={active}
-              revealed={active}
-              className="justify-center font-medium"
-              style={active ? { '--reveal-color': tone.color, '--tile-ring': tone.ring, '--tile-shadow': '0 0 #0000' } as CSSProperties : { '--reveal-color': tone.color } as CSSProperties}
-              onClick={() => setOn({ ...on, [tone.label]: !active })}
-            >
-              {tone.label}
-            </TileButton>
-          );
-        })}
+        {TONES.map(({ value, label }) => (
+          <RippleButton
+            key={value}
+            variant="choice"
+            size="choice"
+            data-tone={value}
+            aria-pressed={Boolean(on[value])}
+            className="justify-center aria-pressed:border-(--tone-line) aria-pressed:bg-(--tone-tint) aria-pressed:text-(--tone-ink)"
+            onClick={() => setOn({ ...on, [value]: !on[value] })}
+          >
+            {label}
+          </RippleButton>
+        ))}
       </div>
     </DemoFrame>
   );
@@ -105,41 +84,25 @@ const TOGGLES = [
   { id: 'wifi', label: '离线可用', icon: WifiIcon },
   { id: 'moon', label: '夜间', icon: MoonIcon },
 ] as const;
-
-/** Plain shadcn buttons with `revealed`: toggles that fill in. */
 function TogglesDemo() {
-  const [on, setOn] = useState<Record<string, boolean>>({ star: true });
+  const [on, setOn] = useState(['star']);
   return (
-    <DemoFrame caption="普通 Button 也支持 revealed：任何 variant 的按钮都可以加一层从点击处扩散的填充，例如开关按钮。">
-      <div className="flex flex-wrap gap-2">
-        {TOGGLES.map(({ id, label, icon: Icon }) => {
-          const active = Boolean(on[id]);
-          return (
-            <Button
-              key={id}
-              variant="outline"
-              size="lg"
-              aria-pressed={active}
-              revealed={active}
-              className="h-10 rounded-full px-4 text-muted-foreground [--reveal-color:color-mix(in_oklch,var(--foreground)_11%,transparent)] aria-pressed:text-foreground"
-              onClick={() => setOn({ ...on, [id]: !active })}
-            >
-              <Icon data-icon="inline-start" className={cn('transition-colors', active && 'fill-current')} />
+    <DemoFrame caption="多选开关使用 ToggleGroup，收藏图标直接复用 Animate UI 动画图标。">
+      <ToggleGroup multiple variant="outline" value={on} onValueChange={setOn} className="max-w-full flex-wrap">
+        {TOGGLES.map(({ id, label, icon: Icon }) => (
+          <AnimateIcon key={id} animateOnHover asChild>
+            <ToggleGroupItem value={id}>
+              <Icon data-icon="inline-start" />
               {label}
-            </Button>
-          );
-        })}
-      </div>
+            </ToggleGroupItem>
+          </AnimateIcon>
+        ))}
+      </ToggleGroup>
     </DemoFrame>
   );
 }
 
-const DEMOS = {
-  tiles: TilesDemo,
-  tones: TonesDemo,
-  toggles: TogglesDemo,
-};
-
+const DEMOS = { tiles: TilesDemo, tones: TonesDemo, toggles: TogglesDemo };
 export function ButtonDemo({ kind }: { kind: keyof typeof DEMOS }) {
   const Demo = DEMOS[kind];
   return <Demo />;

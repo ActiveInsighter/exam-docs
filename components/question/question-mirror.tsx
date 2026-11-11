@@ -1,9 +1,10 @@
 'use client';
 
-import { ChevronDownIcon } from 'lucide-react';
+import { ChevronDownIcon } from '@/components/animate-ui/icons/chevron-down';
+import { RippleButton } from '@/components/ui/ripple-button';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { isFilled, keyLetters, optionFeedback, type BlankSpec } from './grading';
+import { keyLetters, optionFeedback, type BlankSpec } from './grading';
 import { typesetMath } from './math-preview';
 import type { QuestionState } from './question-state';
 
@@ -42,8 +43,19 @@ export function mirrorQuestion(questionId: string, attempt: Attempt | null): HTM
   const source = document.getElementById(`question-${questionId}`)?.querySelector<HTMLElement>('[data-exam-question-body]');
   if (!source) return null;
   const copy = source.cloneNode(true) as HTMLElement;
+  // A DOM clone has no Motion lifecycle: never preserve a ripple or a
+  // half-drawn result icon from the frame when the sheet was opened.
+  copy.querySelectorAll('[data-slot="ripple-button-ripple"]').forEach((node) => node.remove());
+  copy.querySelectorAll<HTMLElement>('[data-option]').forEach((option) => option.style.removeProperty('transform'));
+  copy.querySelectorAll<SVGElement>('[data-choice-marker] svg, [data-choice-marker] svg *, [data-boolean-glyph] svg, [data-boolean-glyph] svg *').forEach((node) => {
+    for (const name of ['transform', 'opacity', 'filter', 'stroke-dasharray', 'stroke-dashoffset']) {
+      node.style.removeProperty(name);
+      node.removeAttribute(name);
+    }
+    node.removeAttribute('pathLength');
+  });
   // A copy shows the state as it is: no ids to clash, no motion still running on the page to replay.
-  for (const name of ['id', 'data-fresh', 'data-reveal-motion']) {
+  for (const name of ['id', 'data-fresh']) {
     copy.querySelectorAll(`[${name}]`).forEach((node) => node.removeAttribute(name));
   }
   copy.querySelectorAll<HTMLElement>('[data-exam-choice-group]').forEach((group) => group.style.removeProperty('--choice-cols-measured'));
@@ -59,9 +71,8 @@ export function mirrorQuestion(questionId: string, attempt: Attempt | null): HTM
     copy.querySelectorAll<HTMLElement>('[data-option]').forEach((option) => {
       const feedback = optionFeedback(option.dataset.option ?? '', { key, selected: [], submitted, reveal: true });
       option.dataset.feedback = feedback;
-      option.dataset.reveal = isFilled(feedback) ? 'on' : 'off';
       option.querySelector('[data-choice-note]')?.remove();
-      if (feedback === 'answer') option.append(element({ choiceNote: '' }, '正确答案'));
+      if (feedback === 'answer') (option.querySelector('[data-choice-content]') ?? option).append(element({ choiceNote: '' }, '正确答案'));
     });
   }
   if (spec.kind === 'blank') {
@@ -104,15 +115,16 @@ export function QuestionMirror({ questionId, state, className }: { questionId: s
     <div className="relative">
       <div ref={host} data-question-mirror="" data-folded={folded ? '' : undefined} className={className} />
       {folded !== null ? (
-        <button
-          type="button"
+        <RippleButton
+          variant="ghost"
+          size="sm"
           className="mt-1 inline-flex items-center gap-1 rounded-full bg-(--ui-fill) px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground"
           aria-expanded={!folded}
           onClick={() => setFolded(!folded)}
         >
-          <ChevronDownIcon className={cn('size-3.5 transition-transform', !folded && 'rotate-180')} />
+          <ChevronDownIcon className={cn('transition-transform motion-reduce:transition-none', !folded && 'rotate-180')} />
           {folded ? '展开题目' : '收起题目'}
-        </button>
+        </RippleButton>
       ) : null}
     </div>
   );

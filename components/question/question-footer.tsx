@@ -27,12 +27,17 @@ import { QuestionSolutionSheet } from './solution-sheet';
  * in data-attempt-result for page-level navigators (page-questions.ts).
  */
 
-const quiet = 'h-8 gap-1.5 rounded-full px-3 text-[0.8125rem] text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground has-data-[icon=inline-start]:pl-2.5 aria-expanded:bg-(--ui-fill-active) aria-expanded:text-foreground';
+const quiet =
+  'h-8 gap-1.5 rounded-full px-3 text-[0.8125rem] text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground has-data-[icon=inline-start]:pl-2.5 aria-expanded:bg-(--ui-fill-active) aria-expanded:text-foreground';
 const hint = 'text-[0.8125rem] text-muted-foreground';
 const row = 'flex flex-wrap items-center gap-x-3 gap-y-2';
 
 function QuietButton({ className, ...props }: ComponentProps<typeof RippleButton>) {
-  return <AnimateIcon animateOnHover asChild><RippleButton variant="ghost" size="sm" className={cn(quiet, className)} {...props} /></AnimateIcon>;
+  return (
+    <AnimateIcon animateOnHover asChild>
+      <RippleButton variant="ghost" size="sm" className={cn(quiet, className)} {...props} />
+    </AnimateIcon>
+  );
 }
 
 /** The key under a wrong answer; of several blanks only the ones missed. */
@@ -42,12 +47,14 @@ function Key({ question }: { question: QuestionState }) {
     return <span data-choice-letters={spec.kind === 'choice' ? '' : undefined}>{formatKey(spec)}</span>;
   }
   const several = spec.blanks.length > 1;
-  return spec.blanks.map((blank, index) => (several && evaluation?.blanks[index] === 'correct' ? null : (
-    <span key={index}>
-      {several ? <small>{blankBadge(index)}</small> : null}
-      <BlankKey blank={blank} />
-    </span>
-  )));
+  return spec.blanks.map((blank, index) =>
+    several && evaluation?.blanks[index] === 'correct' ? null : (
+      <span key={index}>
+        {several ? <small>{blankBadge(index)}</small> : null}
+        <BlankKey blank={blank} />
+      </span>
+    ),
+  );
 }
 
 /** How the reader did: the grade, the key when it was missed, and blanks the checker could not read. */
@@ -58,13 +65,21 @@ function Grade({ question }: { question: QuestionState }) {
   const unreadable = evaluation.blanks.flatMap((verdict, index) => (verdict === 'invalid' ? [blankBadge(index)] : []));
   return (
     // Keyed by attempt, so the pill's entrance replays on every submission.
-    <motion.div key={question.attempt} initial={question.fresh ? { opacity: 0, filter: blur.icon } : false} animate={{ opacity: 1, filter: "blur(0px)" }} transition={swap} className={row}>
+    <motion.div
+      key={question.attempt}
+      initial={question.fresh ? { opacity: 0, filter: blur.icon } : false}
+      animate={{ opacity: 1, filter: 'blur(0px)' }}
+      transition={swap}
+      className={row}
+    >
       <span data-result-pill="" data-tone={evaluation.result}>
         <ResultIcon result={evaluation.result} animate={question.fresh} />
         {describeResult(spec, evaluation, selected)}
       </span>
       {evaluation.result !== 'correct' && spec.kind !== 'self' ? (
-        <span data-result-key="">正确答案 <Key question={question} /></span>
+        <span data-result-key="">
+          正确答案 <Key question={question} />
+        </span>
       ) : null}
       {unreadable.length ? <span className={hint}>{unreadable.join('')} 无法识别为数学表达式</span> : null}
     </motion.div>
@@ -104,7 +119,9 @@ function Answering({ question, canGrade }: { question: QuestionState; canGrade: 
       ) : null}
       <span data-submit-hint="" className={hint}>
         {spec.kind === 'choice'
-          ? (selected.length ? `已选 ${selected.length} 项` : '可多选，选出全部正确项后提交')
+          ? selected.length
+            ? `已选 ${selected.length} 项`
+            : '可多选，选出全部正确项后提交'
           : `${spec.blanks.length > 1 ? '回车跳到下一空' : '回车提交'}${spec.blanks.some((blank) => blank.kind === 'math') ? ' · 数学空可用屏幕键盘输入' : ''}`}
       </span>
     </div>
@@ -127,20 +144,34 @@ export function QuestionFooter({ meta, solution }: { meta: QuestionMeta; solutio
     if (grading) return;
     const panel = root.current?.querySelector('[data-slot="collapsible-content"]');
     if (panel?.contains(document.activeElement)) {
-      root.current?.querySelector<HTMLElement>('[data-grade-trigger], [data-solution-trigger]')?.focus({ preventScroll: true });
+      root.current
+        ?.querySelector<HTMLElement>('[data-grade-trigger], [data-solution-trigger]')
+        ?.focus({ preventScroll: true });
     }
   }, [grading]);
 
   return (
-    <Collapsible ref={root} open={grading} onOpenChange={(next) => setOpened(next ? stage : null)} data-question-footer="" data-attempt-result={question?.status}>
+    <Collapsible
+      ref={root}
+      open={grading}
+      onOpenChange={(next) => setOpened(next ? stage : null)}
+      data-question-footer=""
+      data-attempt-result={question?.status}
+    >
       <div role="status" aria-live="polite" data-footer-status="">
-        {graded ? <Grade question={graded} /> : question ? (
+        {graded ? (
+          <Grade question={graded} />
+        ) : question ? (
           <Answering question={question} canGrade={stage === 'self'} />
         ) : null}
         {question?.storageError ? (
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <p role="alert" className="text-sm text-destructive">{question.storageError}</p>
-            <RippleButton variant="outline" size="sm" onClick={question.retryStorage}>重试保存</RippleButton>
+            <p role="alert" className="text-sm text-destructive">
+              {question.storageError}
+            </p>
+            <RippleButton variant="outline" size="sm" onClick={question.retryStorage}>
+              重试保存
+            </RippleButton>
           </div>
         ) : null}
       </div>

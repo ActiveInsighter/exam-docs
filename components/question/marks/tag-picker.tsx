@@ -1,8 +1,10 @@
 'use client';
 
 import { CheckIcon, ChevronLeftIcon, PlusIcon, Settings2Icon, Trash2Icon } from 'lucide-react';
+import { AnimateIcon } from '@animate-ui/react/icons';
 import { type ComponentProps, useRef, useState } from 'react';
 import { Popover, PopoverContent, PopoverTitle } from '@/components/ui/popover';
+import { IconButton } from '@/components/ui/icon-button';
 import { ANNOTATION_LIMITS, normalizeTagName, type TagColor, type UserTag } from '@/lib/question-store/types';
 import { cn } from '@/lib/utils';
 import { useMarks } from './question-marks';
@@ -185,7 +187,7 @@ function ManageView({ onBack }: { onBack: () => void }) {
   );
 }
 
-type TagPickerProps = Omit<ComponentProps<'button'>, 'onClick' | 'type'>;
+type TagPickerProps = Omit<ComponentProps<typeof IconButton>, 'onClick' | 'type' | 'asChild'>;
 
 /**
  * Button and popover for picking, creating and managing the reader's tags on
@@ -207,7 +209,8 @@ export function TagPicker(props: TagPickerProps) {
 
   return (
     <>
-      <button
+      <AnimateIcon animateOnHover asChild>
+      <IconButton
         {...props}
         ref={buttonRef}
         type="button"
@@ -221,6 +224,7 @@ export function TagPicker(props: TagPickerProps) {
           change(!close);
         }}
       />
+      </AnimateIcon>
       {mounted ? (
         <Popover open={open} onOpenChange={change}>
           <PopoverContent aria-label="标签" anchor={buttonRef} finalFocus={buttonRef}>

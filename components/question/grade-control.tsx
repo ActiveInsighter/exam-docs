@@ -28,6 +28,7 @@ type GradeControlProps = {
 export function GradeControl({ label, items, value, disabled, onChange }: GradeControlProps) {
   return (
     <ToggleGroup
+      render={<span />}
       aria-label={label}
       variant="grade"
       size="sm"
@@ -35,7 +36,9 @@ export function GradeControl({ label, items, value, disabled, onChange }: GradeC
       className="max-w-full flex-wrap rounded-full"
       value={value ? [value] : []}
       disabled={disabled}
-      onValueChange={(next) => { if (next[0]) onChange(next[0]); }}
+      onValueChange={(next) => {
+        if (next[0]) onChange(next[0]);
+      }}
       data-study-card-own-keys=""
     >
       {items.map((item) => (

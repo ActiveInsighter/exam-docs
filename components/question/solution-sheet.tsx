@@ -1,13 +1,40 @@
 'use client';
 
-import { BookOpenTextIcon, LibraryBigIcon, NotebookPenIcon } from 'lucide-react';
-import { lazy, type ReactNode, Suspense, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { StudyCard, StudyCardAside, StudyCardHeader, StudyCardMain, StudyCardSection, StudyCardStage } from '@/components/ui/study-card';
+import { AnimateIcon } from '@animate-ui/react/icons';
+import { BookOpenIcon } from '@/components/animate-ui/icons/book-open';
+import { LibraryBigIcon } from '@/components/animate-ui/icons/library-big';
+import { NotebookPenIcon } from '@/components/animate-ui/icons/notebook-pen';
+import {
+  lazy,
+  type ReactNode,
+  Suspense,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
+import { IconButton } from '@/components/ui/icon-button';
+import { RippleButton } from '@/components/ui/ripple-button';
+import {
+  StudyCard,
+  StudyCardAside,
+  StudyCardHeader,
+  StudyCardMain,
+  StudyCardSection,
+  StudyCardStage,
+} from '@/components/ui/study-card';
 import { cn } from '@/lib/utils';
 import { AnswerSummary } from './answer-summary';
 import { NoteEditor } from './marks/note-editor';
-import { QuestionMarkActions, QuestionMarksScope, QuestionUserTags, iconAction, useMarks } from './marks/question-marks';
+import {
+  QuestionMarkActions,
+  QuestionMarksScope,
+  QuestionUserTags,
+  iconAction,
+  useMarks,
+} from './marks/question-marks';
 import type { QuestionMeta } from './model';
 import { revealQuestion } from './page-questions';
 import { QuestionMirror } from './question-mirror';
@@ -16,8 +43,10 @@ import { QuestionPointTags, QuestionSourceTrail, QuestionTypeTag } from './quest
 import { SelfGrade } from './self-grade';
 import { removeSolutionEntry, setSolutionEntry, useSolutionDeck, type SolutionEntry } from './solution-deck';
 
-// Opened from the toolbar as a page of the card; loaded on first use.
-const QuestionLibraryDialog = lazy(() => import('./marks/library-dialog').then((module) => ({ default: module.QuestionLibraryDialog })));
+// The library is a nested Modal, loaded on first use.
+const QuestionLibraryDialog = lazy(() =>
+  import('./marks/library-dialog').then((module) => ({ default: module.QuestionLibraryDialog })),
+);
 
 /*
  * "题目与解析": a study card (components/ui/study-card.tsx) for each question
@@ -34,8 +63,8 @@ const QuestionLibraryDialog = lazy(() => import('./marks/library-dialog').then((
  *            (answer-summary.tsx), the solution, and on phones the note
  *
  * Desktop shows the two side by side, each scrolling on its own; phones
- * stack them in one scroll. The library opens as a page of the same card,
- * pushed in from the right. Focus starts on the title and returns, on close,
+ * stack them in one scroll. The library opens as a nested sheet above the card.
+ * Focus starts on the title and returns, on close,
  * to the 查看解答 button of the question last shown, which scrolls it into
  * view.
  *
@@ -47,7 +76,7 @@ const QuestionLibraryDialog = lazy(() => import('./marks/library-dialog').then((
 const prose = 'prose docs-prose max-w-none min-w-0 [&>:first-child]:mt-0 [&>:last-child]:mb-0';
 
 /*
- * The trigger is a plain button; the card mounts on first open and then
+ * The trigger is a shared RippleButton; the card mounts on first open and then
  * stays so later opens and the close animation are instant. A long page has
  * a hundred of these, most never opened: until then each one only keeps its
  * entry in the page's deck current.
@@ -60,27 +89,35 @@ export function QuestionSolutionSheet({ meta, solution }: { meta: QuestionMeta; 
   const state = useQuestionState();
   const marks = useMarks();
 
-  const entry = useMemo<SolutionEntry>(() => ({ key, meta, solution, trigger, state, marks }), [key, meta, solution, state, marks]);
+  const entry = useMemo<SolutionEntry>(
+    () => ({ key, meta, solution, trigger, state, marks }),
+    [key, meta, solution, state, marks],
+  );
   useEffect(() => setSolutionEntry(entry), [entry]);
   useEffect(() => () => removeSolutionEntry(key), [key]);
 
   return (
     <>
-      <button
-        ref={trigger}
-        type="button"
-        data-solution-trigger=""
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        className={cn(
-          buttonVariants({ variant: 'ghost', size: 'sm' }),
-          'h-8 gap-1.5 rounded-full bg-(--ui-fill) px-3.5 text-[0.8125rem] text-foreground/80 hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active) has-data-[icon=inline-start]:pl-3',
-        )}
-        onClick={() => { setMounted(true); setOpen(true); }}
-      >
-        <BookOpenTextIcon data-icon="inline-start" />
-        查看解答
-      </button>
+      <AnimateIcon animateOnHover asChild>
+        <RippleButton
+          ref={trigger}
+          variant="ghost"
+          size="sm"
+          data-solution-trigger=""
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          className={cn(
+            'h-8 gap-1.5 rounded-full bg-(--ui-fill) px-3.5 text-[0.8125rem] text-foreground/80 hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active) has-data-[icon=inline-start]:pl-3',
+          )}
+          onClick={() => {
+            setMounted(true);
+            setOpen(true);
+          }}
+        >
+          <BookOpenIcon data-icon="inline-start" />
+          查看解答
+        </RippleButton>
+      </AnimateIcon>
       {mounted ? <SolutionCard self={entry} open={open} setOpen={setOpen} /> : null}
     </>
   );
@@ -102,13 +139,25 @@ const subscribeDesktop = (listener: () => void) => {
   return () => query.removeEventListener('change', listener);
 };
 
-function SolutionCard({ self, open, setOpen }: { self: SolutionEntry; open: boolean; setOpen: (open: boolean) => void }) {
+function SolutionCard({
+  self,
+  open,
+  setOpen,
+}: {
+  self: SolutionEntry;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}) {
   const deck = useSolutionDeck(open);
   const [currentKey, setCurrentKey] = useState(self.key);
   const [editingNote, setEditingNote] = useState(false);
   const [library, setLibrary] = useState<'closed' | 'open' | 'mounted'>('closed');
   // Desktop puts the note under the question, phones after the solution.
-  const desktop = useSyncExternalStore(subscribeDesktop, () => window.matchMedia(DESKTOP).matches, () => true);
+  const desktop = useSyncExternalStore(
+    subscribeDesktop,
+    () => window.matchMedia(DESKTOP).matches,
+    () => true,
+  );
 
   // Every open starts on the question it was opened from.
   const [wasOpen, setWasOpen] = useState(open);
@@ -125,7 +174,10 @@ function SolutionCard({ self, open, setOpen }: { self: SolutionEntry; open: bool
   return (
     <StudyCard
       open={open}
-      onOpenChange={(next) => { setOpen(next); if (!next) setEditingNote(false); }}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) setEditingNote(false);
+      }}
       count={cards.length}
       index={Math.max(0, found)}
       onIndexChange={(next) => {
@@ -148,30 +200,44 @@ function SolutionCard({ self, open, setOpen }: { self: SolutionEntry; open: bool
     >
       <EntryScope entry={entry}>
         <StudyCardHeader
-          title={meta.number ? (
-            <>
-              <span data-question-number="" aria-hidden="true">{meta.number}</span>
-              <span className="sr-only">第 {meta.number} 题</span>
-            </>
-          ) : '题目与解析'}
-          tags={(
+          title={
+            meta.number ? (
+              <>
+                <span data-question-number="" aria-hidden="true">
+                  {meta.number}
+                </span>
+                <span className="sr-only">第 {meta.number} 题</span>
+              </>
+            ) : (
+              '题目与解析'
+            )
+          }
+          tags={
             // One glass capsule for all of them: each blurred layer costs a pass on every scrolled frame.
             <span data-tag-capsule="">
               <QuestionTypeTag type={meta.type} points={meta.points} />
               <QuestionSourceTrail tags={meta.tags.source} />
               <QuestionUserTags />
             </span>
-          )}
+          }
           tagsProps={{ 'aria-label': '标签' }}
           actionsLabel="题目操作"
-          actions={(
+          actions={
             <>
               <QuestionMarkActions editingNote={editingNote} onEditNote={() => setEditingNote(!editingNote)} />
-              <button type="button" className={iconAction} aria-expanded={library === 'open'} aria-label="收藏与标签" title="收藏与标签" onClick={() => setLibrary('open')}>
-                <LibraryBigIcon />
-              </button>
+              <AnimateIcon animateOnHover asChild>
+                <IconButton
+                  className={iconAction}
+                  aria-expanded={library === 'open'}
+                  aria-label="收藏与标签"
+                  title="收藏与标签"
+                  onClick={() => setLibrary('open')}
+                >
+                  <LibraryBigIcon />
+                </IconButton>
+              </AnimateIcon>
             </>
-          )}
+          }
         />
       </EntryScope>
 
@@ -184,7 +250,10 @@ function SolutionCard({ self, open, setOpen }: { self: SolutionEntry; open: bool
       {/* A page of this card: pushed in from the right, back returns here. */}
       {library !== 'closed' ? (
         <Suspense fallback={null}>
-          <QuestionLibraryDialog open={library === 'open'} onOpenChange={(next) => setLibrary(next ? 'open' : 'mounted')} />
+          <QuestionLibraryDialog
+            open={library === 'open'}
+            onOpenChange={(next) => setLibrary(next ? 'open' : 'mounted')}
+          />
         </Suspense>
       ) : null}
     </StudyCard>
@@ -201,14 +270,31 @@ function SheetNote({ editing, setEditing }: NoteProps) {
   return (
     <StudyCardSection
       label="我的注释"
-      meta={!editing ? (
-        <Button variant="ghost" size="xs" className="-my-1 text-muted-foreground" onClick={() => setEditing(true)} disabled={!marks.ready}>
-          <NotebookPenIcon data-icon="inline-start" />{note ? '编辑' : '添加'}
-        </Button>
-      ) : null}
+      meta={
+        !editing ? (
+          <AnimateIcon animateOnHover asChild>
+            <RippleButton
+              variant="ghost"
+              size="xs"
+              className="-my-1 text-muted-foreground"
+              onClick={() => setEditing(true)}
+              disabled={!marks.ready}
+            >
+              <NotebookPenIcon data-icon="inline-start" />
+              {note ? '编辑' : '添加'}
+            </RippleButton>
+          </AnimateIcon>
+        ) : null
+      }
     >
       {editing ? (
-        <NoteEditor initial={note} onCancel={() => setEditing(false)} onSave={async (next) => { if (await marks.update({ note: next })) setEditing(false); }} />
+        <NoteEditor
+          initial={note}
+          onCancel={() => setEditing(false)}
+          onSave={async (next) => {
+            if (await marks.update({ note: next })) setEditing(false);
+          }}
+        />
       ) : note ? (
         <p className="text-[0.9375rem] leading-relaxed break-words whitespace-pre-wrap">{note}</p>
       ) : (
@@ -219,7 +305,17 @@ function SheetNote({ editing, setEditing }: NoteProps) {
 }
 
 /** One card's panes. Kept as rendered while the card leaves, with the scope it was given. */
-function SolutionCardBody({ entry, desktop, editingNote, setEditingNote }: { entry: SolutionEntry; desktop: boolean; editingNote: boolean; setEditingNote: (editing: boolean) => void }) {
+function SolutionCardBody({
+  entry,
+  desktop,
+  editingNote,
+  setEditingNote,
+}: {
+  entry: SolutionEntry;
+  desktop: boolean;
+  editingNote: boolean;
+  setEditingNote: (editing: boolean) => void;
+}) {
   const { meta, state, solution } = entry;
   const points = meta.tags.point;
   const spec = state?.spec ?? null;
