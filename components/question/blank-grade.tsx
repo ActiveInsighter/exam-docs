@@ -1,6 +1,8 @@
 'use client';
 
-import { CheckCheckIcon, CheckIcon, XIcon } from 'lucide-react';
+import { CheckCheckIcon } from '@/components/animate-ui/icons/check-check';
+import { RippleButton } from '@/components/ui/ripple-button';
+import { GradeControl } from './grade-control';
 import { blankBadge } from './blank-field';
 import { readBlankGrades, type BlankGrade, type BlankSpec } from './grading';
 import { MathPreview } from './math-preview';
@@ -37,8 +39,8 @@ export function BlankEntry({ blank, value }: { blank: BlankSpec; value: string }
 }
 
 const GRADES = [
-  { grade: 'correct', label: '判对', icon: <CheckIcon aria-hidden="true" /> },
-  { grade: 'incorrect', label: '判错', icon: <XIcon aria-hidden="true" /> },
+  { value: 'correct', result: 'correct', label: '判对' },
+  { value: 'incorrect', result: 'incorrect', label: '判错' },
 ] as const;
 
 export function BlankGradeSwitch({ question, index }: { question: QuestionState; index: number }) {
@@ -55,23 +57,10 @@ export function BlankGradeSwitch({ question, index }: { question: QuestionState;
   };
   return (
     <span
-      role="group"
-      aria-label={`${graded ? '手动判分' : '自评'} · ${name}`}
       data-blank-grade=""
       data-manual={graded?.manual?.[index] ? '' : undefined}
     >
-      {GRADES.map(({ grade, label, icon }) => (
-        <button
-          key={grade}
-          type="button"
-          data-tone={grade}
-          aria-pressed={current === grade}
-          disabled={!question.ready}
-          onClick={() => choose(grade)}
-        >
-          {icon}{label}
-        </button>
-      ))}
+      <GradeControl label={`${graded ? '手动判分' : '自评'} · ${name}`} items={GRADES} value={current} disabled={!question.ready} onChange={(value) => choose(value as BlankGrade)} />
     </span>
   );
 }
@@ -93,15 +82,16 @@ export function BlankGradePanel({ question }: { question: QuestionState }) {
             : `对照参考答案给每一空判对错，判完${several ? ` ${blanks.length} 空` : ''}即记录成绩。不必先输入答案。`}
         </p>
         {!graded && several ? (
-          <button
-            type="button"
+          <RippleButton
+            variant="secondary"
+            size="sm"
             data-grade-all=""
             data-tone="correct"
             disabled={!question.ready}
             onClick={() => question.selfGradeBlanks(new Map(blanks.map((_, index) => [index, 'correct'] as const)))}
           >
-            <CheckCheckIcon aria-hidden="true" />全部判对
-          </button>
+            <CheckCheckIcon animateOnHover aria-hidden="true" data-icon="inline-start" />全部判对
+          </RippleButton>
         ) : null}
       </div>
       <ul>

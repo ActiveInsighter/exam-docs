@@ -1,16 +1,10 @@
 'use client';
 
-import { CircleAlertIcon, CircleCheckIcon, CircleXIcon } from 'lucide-react';
-import type { ReactNode } from 'react';
-import { SELF_GRADES, type AttemptResult } from './grading';
+import { GradeControl } from './grade-control';
+import { SELF_GRADES } from './grading';
 import { useQuestionState } from './question-state';
 
-/** One icon per result, shared by the grade buttons and the result pill. */
-export const RESULT_ICONS: Record<AttemptResult, ReactNode> = {
-  correct: <CircleCheckIcon aria-hidden="true" />,
-  partial: <CircleAlertIcon aria-hidden="true" />,
-  incorrect: <CircleXIcon aria-hidden="true" />,
-};
+const ITEMS = SELF_GRADES.map((grade) => ({ value: grade.letter, label: grade.label, result: grade.result }));
 
 /**
  * An essay is graded by the reader against the reference solution: 正确,
@@ -23,19 +17,7 @@ export function SelfGrade() {
   const picked = question.submitted ? question.selected[0] : undefined;
   return (
     <div role="group" aria-label="自评" data-self-grade="">
-      {SELF_GRADES.map((grade) => (
-        <button
-          key={grade.letter}
-          type="button"
-          data-tone={grade.result}
-          aria-pressed={picked === grade.letter}
-          disabled={!question.ready}
-          onClick={() => question.select([grade.letter])}
-        >
-          {RESULT_ICONS[grade.result]}
-          {grade.label}
-        </button>
-      ))}
+      <GradeControl label="自评" items={ITEMS} value={picked} disabled={!question.ready} onChange={(value) => question.select([value])} />
     </div>
   );
 }

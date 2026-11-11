@@ -1,15 +1,22 @@
 'use client';
 
-import { GavelIcon, ListChecksIcon, RotateCcwIcon } from 'lucide-react';
-import { type ComponentProps, type ReactNode, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { AnimateIcon } from '@animate-ui/react/icons';
+import { blur, transition, useTempoTransition } from '@animate-ui/react/utils/motion';
+import { motion } from 'motion/react';
+import { GavelIcon } from '@/components/animate-ui/icons/gavel';
+import { CheckCheckIcon } from '@/components/animate-ui/icons/check-check';
+import { RotateCcwIcon } from '@/components/animate-ui/icons/rotate-ccw';
+import { type ComponentProps, type ReactNode, useLayoutEffect, useRef, useState } from 'react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { RippleButton } from '@/components/ui/ripple-button';
 import { cn } from '@/lib/utils';
 import { blankBadge } from './blank-field';
 import { BlankGradePanel, BlankKey } from './blank-grade';
 import { describeResult, formatKey } from './grading';
 import type { QuestionMeta } from './model';
 import { type QuestionState, useQuestionState } from './question-state';
-import { RESULT_ICONS, SelfGrade } from './self-grade';
+import { ResultIcon } from './grade-control';
+import { SelfGrade } from './self-grade';
 import { QuestionSolutionSheet } from './solution-sheet';
 
 /*
@@ -24,8 +31,8 @@ const quiet = 'h-8 gap-1.5 rounded-full px-3 text-[0.8125rem] text-muted-foregro
 const hint = 'text-[0.8125rem] text-muted-foreground';
 const row = 'flex flex-wrap items-center gap-x-3 gap-y-2';
 
-function QuietButton({ className, ...props }: ComponentProps<typeof Button>) {
-  return <Button variant="ghost" size="sm" className={cn(quiet, className)} {...props} />;
+function QuietButton({ className, ...props }: ComponentProps<typeof RippleButton>) {
+  return <AnimateIcon animateOnHover asChild><RippleButton variant="ghost" size="sm" className={cn(quiet, className)} {...props} /></AnimateIcon>;
 }
 
 /** The key under a wrong answer; of several blanks only the ones missed. */
@@ -46,25 +53,26 @@ function Key({ question }: { question: QuestionState }) {
 /** How the reader did: the grade, the key when it was missed, and blanks the checker could not read. */
 function Grade({ question }: { question: QuestionState }) {
   const { spec, selected } = question;
+  const swap = useTempoTransition(transition.swap);
   const evaluation = question.evaluation!;
   const unreadable = evaluation.blanks.flatMap((verdict, index) => (verdict === 'invalid' ? [blankBadge(index)] : []));
   return (
     // Keyed by attempt, so the pill's entrance replays on every submission.
-    <div key={question.attempt} className={row}>
+    <motion.div key={question.attempt} initial={question.fresh ? { opacity: 0, filter: blur.icon } : false} animate={{ opacity: 1, filter: "blur(0px)" }} transition={swap} className={row}>
       <span data-result-pill="" data-tone={evaluation.result}>
-        {RESULT_ICONS[evaluation.result]}
+        <ResultIcon result={evaluation.result} animate={question.fresh} />
         {describeResult(spec, evaluation, selected)}
       </span>
       {evaluation.result !== 'correct' && spec.kind !== 'self' ? (
         <span data-result-key="">正确答案 <Key question={question} /></span>
       ) : null}
       {unreadable.length ? <span className={hint}>{unreadable.join('')} 无法识别为数学表达式</span> : null}
-    </div>
+    </motion.div>
   );
 }
 
 /** What the reader does next: grade an essay, or submit several picks or blanks. */
-function Answering({ question, grading, onGrading }: { question: QuestionState; grading: boolean; onGrading?: () => void }) {
+function Answering({ question, canGrade }: { question: QuestionState; canGrade: boolean }) {
   const { spec, selected } = question;
   if (spec.kind === 'self') {
     return (
@@ -78,7 +86,7 @@ function Answering({ question, grading, onGrading }: { question: QuestionState; 
   if (spec.kind === 'boolean' || (spec.kind === 'choice' && !spec.multiple)) return null;
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Button
+      <RippleButton
         size="sm"
         disabled={!question.ready || question.status !== 'draft'}
         onClick={question.submit}
@@ -86,40 +94,19 @@ function Answering({ question, grading, onGrading }: { question: QuestionState; 
         className="h-8 rounded-full px-4"
       >
         提交答案
-      </Button>
-      {onGrading ? (
+      </RippleButton>
+      {canGrade ? (
         // Formulas can be awkward to type: grade against the key instead, like an essay.
-        <QuietButton aria-expanded={grading} onClick={onGrading} data-self-grade-toggle="">
-          <ListChecksIcon data-icon="inline-start" />
+        <CollapsibleTrigger render={<QuietButton />} data-self-grade-toggle="" data-grade-trigger="">
+          <CheckCheckIcon data-icon="inline-start" />
           对答案自评
-        </QuietButton>
+        </CollapsibleTrigger>
       ) : null}
       <span data-submit-hint="" className={hint}>
         {spec.kind === 'choice'
           ? (selected.length ? `已选 ${selected.length} 项` : '可多选，选出全部正确项后提交')
           : `${spec.blanks.length > 1 ? '回车跳到下一空' : '回车提交'}${spec.blanks.some((blank) => blank.kind === 'math') ? ' · 数学空可用屏幕键盘输入' : ''}`}
       </span>
-    </div>
-  );
-}
-
-/**
- * Mounts its content when first opened and eases its height both ways
- * (styles/question/footer.css); closed, the content is inert and, once the
- * motion has ended, unmounted again.
- */
-function Collapse({ open, children }: { open: boolean; children: ReactNode }) {
-  const [mounted, setMounted] = useState(open);
-  if (open && !mounted) setMounted(true);
-  if (!mounted) return null;
-  return (
-    <div
-      data-collapse=""
-      data-expanded={open ? '' : undefined}
-      inert={!open}
-      onTransitionEnd={(event) => { if (!open && event.target === event.currentTarget) setMounted(false); }}
-    >
-      <div>{children}</div>
     </div>
   );
 }
@@ -135,28 +122,35 @@ export function QuestionFooter({ meta, solution }: { meta: QuestionMeta; solutio
   const stage = question?.spec.kind !== 'blank' ? null : graded ? 'manual' : 'self';
   const [opened, setOpened] = useState<typeof stage>(null);
   const grading = stage !== null && opened === stage;
-  const toggle = () => setOpened(grading ? null : stage);
+  const root = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (grading) return;
+    const panel = root.current?.querySelector('[data-slot="collapsible-content"]');
+    if (panel?.contains(document.activeElement)) {
+      root.current?.querySelector<HTMLElement>('[data-grade-trigger], [data-solution-trigger]')?.focus({ preventScroll: true });
+    }
+  }, [grading]);
 
   return (
-    <div data-question-footer="" data-attempt-result={question?.status}>
+    <Collapsible ref={root} open={grading} onOpenChange={(next) => setOpened(next ? stage : null)} data-question-footer="" data-attempt-result={question?.status}>
       <div role="status" aria-live="polite" data-footer-status="">
         {graded ? <Grade question={graded} /> : question ? (
-          <Answering question={question} grading={grading} onGrading={stage === 'self' ? toggle : undefined} />
+          <Answering question={question} canGrade={stage === 'self'} />
         ) : null}
         {question?.storageError ? (
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <p role="alert" className="text-sm text-destructive">{question.storageError}</p>
-            <Button variant="outline" size="sm" onClick={question.retryStorage}>重试保存</Button>
+            <RippleButton variant="outline" size="sm" onClick={question.retryStorage}>重试保存</RippleButton>
           </div>
         ) : null}
       </div>
       {/* Redo sits with 查看解答 so the grade line stays one unit when the footer wraps. */}
       <div data-footer-actions="">
         {stage === 'manual' ? (
-          <QuietButton aria-expanded={grading} onClick={toggle}>
+          <CollapsibleTrigger render={<QuietButton />} data-grade-trigger="">
             <GavelIcon data-icon="inline-start" />
             手动判分
-          </QuietButton>
+          </CollapsibleTrigger>
         ) : null}
         {graded ? (
           <QuietButton onClick={graded.reset}>
@@ -167,10 +161,10 @@ export function QuestionFooter({ meta, solution }: { meta: QuestionMeta; solutio
         {solution ? <QuestionSolutionSheet meta={meta} solution={solution} /> : null}
       </div>
       {question && stage ? (
-        <Collapse key={stage} open={grading}>
+        <CollapsibleContent className="basis-full min-w-0">
           <BlankGradePanel question={question} />
-        </Collapse>
+        </CollapsibleContent>
       ) : null}
-    </div>
+    </Collapsible>
   );
 }
