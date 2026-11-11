@@ -6,7 +6,13 @@ import worker from '../worker';
 
 const project = 'https://hqtpzhefihdwllbqjeot.supabase.co';
 const gateway = 'https://exam.any1.tech/api/supabase';
-const env = { SUPABASE_URL: project, ASSETS: { fetch: vi.fn(() => new Response('static')) } };
+const env = {
+  SUPABASE_URL: project,
+  ASSETS: {
+    fetch: vi.fn(async () => new Response('static')),
+    connect: vi.fn(() => { throw new Error('The assets gateway must not open sockets.'); }),
+  },
+} satisfies Cloudflare.Env;
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -17,10 +23,12 @@ describe('same-origin account and question connectivity', () => {
       requests.push(request);
       return Response.json({});
     }));
+    const storage = { getItem: vi.fn(() => null), setItem: vi.fn(), removeItem: vi.fn() };
     const client = createClient(project, 'sb_publishable_test', {
-      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+      auth: { storage, persistSession: true, autoRefreshToken: false, detectSessionInUrl: false },
       global: { fetch: createSupabaseFetch(project, gateway) },
     });
+    await client.auth.getSession();
     await client.auth.signInWithOtp({ email: 'test@example.com', options: { emailRedirectTo: 'https://exam.any1.tech/docs/math/' } });
     await client.auth.verifyOtp({ email: 'test@example.com', token: '123456', type: 'email' });
     await client.rpc('exam_sync', { p_changes: {}, p_cursor: '0', p_limit: 100 });
@@ -29,9 +37,9 @@ describe('same-origin account and question connectivity', () => {
     ]);
     expect(requests.every(r => new URL(r.url).origin === 'https://exam.any1.tech')).toBe(true);
     expect(new URL(requests[0].url).searchParams.get('redirect_to')).toBe('https://exam.any1.tech/docs/math/');
-    expect((await requests[0].json()).email).toBe('test@example.com');
+    expect(await requests[0].json()).toMatchObject({ email: 'test@example.com' });
     expect(requests[0].headers.get('apikey')).toBe('sb_publishable_test');
-    expect(client.auth.storageKey).toBe('sb-hqtpzhefihdwllbqjeot-auth-token');
+    expect(storage.getItem).toHaveBeenCalledWith('sb-hqtpzhefihdwllbqjeot-auth-token');
   });
 
   it('streams the caller JWT and RPC body to the fixed project without forwarding site cookies or caching private data', async () => {
