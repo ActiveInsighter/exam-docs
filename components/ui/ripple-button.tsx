@@ -31,6 +31,7 @@ const rippleColors: Record<NonNullable<VariantProps<typeof buttonVariants>["vari
   ghost: "[--ripple-button-ripple-color:var(--foreground)]",
   destructive: "[--ripple-button-ripple-color:var(--destructive)]",
   link: "[--ripple-button-ripple-color:var(--primary)]",
+  choice: "[--ripple-button-ripple-color:var(--tone,var(--foreground))]",
 }
 
 type RippleButtonProps = Omit<HTMLMotionProps<"button">, "children"> &
@@ -48,18 +49,34 @@ function RippleButton({
   variant = "default",
   size = "default",
   ripples = true,
+  tapScale,
   type = "button",
   children,
+  onClickCapture,
   ...props
 }: RippleButtonProps) {
+  // The primitive receives (0, 0) for keyboard clicks. Center its visual
+  // feedback without replacing the library's ripple lifecycle or easing.
+  const [keyboard, setKeyboard] = React.useState(false)
+  const locked = props["aria-disabled"] === true || props["aria-disabled"] === "true"
   return (
     <RippleButtonPrimitive
       type={type}
+      tapScale={locked ? 1 : tapScale}
       className={cn(buttonVariants({ variant, size }), rippleColors[variant ?? "default"], className)}
       {...props}
+      onClickCapture={(event) => {
+        onClickCapture?.(event)
+        if (event.defaultPrevented || locked) {
+          event.preventDefault()
+          event.stopPropagation()
+          return
+        }
+        setKeyboard(event.detail === 0)
+      }}
     >
       {children}
-      {ripples ? <RippleButtonRipples /> : null}
+      {ripples ? <RippleButtonRipples aria-hidden="true" style={keyboard ? { left: "calc(50% - 10px)", top: "calc(50% - 10px)" } : undefined} /> : null}
     </RippleButtonPrimitive>
   )
 }

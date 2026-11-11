@@ -1,17 +1,20 @@
 'use client';
 
 import { type KeyboardEvent, type ReactNode, useRef } from 'react';
-import { TileButton, tileVariants } from '@/components/ui/button';
+import { CheckIcon } from '@/components/animate-ui/icons/check';
+import { XIcon } from '@/components/animate-ui/icons/x';
+import { buttonVariants } from '@/components/ui/button';
+import { RippleButton } from '@/components/ui/ripple-button';
 import type { ChoiceDensity } from './choice-layout';
-import { BOOLEAN_FALSE, BOOLEAN_TRUE, isFilled, keyLetters, optionFeedback, type OptionFeedback } from './grading';
+import { BOOLEAN_FALSE, BOOLEAN_TRUE, keyLetters, optionFeedback, type OptionFeedback } from './grading';
 import { useQuestionState } from './question-state';
 import { useChoiceColumns } from './use-choice-columns';
 
 /*
  * The answer options of single, multiple and true / false questions. All
- * three are tiles (TileButton) picked by letter: a true / false question is
+ * three use the shared Animate UI RippleButton, picked by letter. A boolean is
  * a single choice between A = 正确 and B = 错误, so one group drives both
- * looks. The tile's colour fills in from where it was pressed; what it shows
+ * looks. Official ripples provide press feedback; the persistent state is
  * after grading is `data-feedback` (grading.ts), styled in
  * styles/question/options.css.
  */
@@ -27,6 +30,12 @@ const NOTES: Partial<Record<OptionFeedback, string>> = { missed: '漏选', answe
 
 function Note({ feedback }: { feedback: OptionFeedback }) {
   return NOTES[feedback] ? <span data-choice-note="">{NOTES[feedback]}</span> : null;
+}
+
+/** Only submitted picks mount an animated verdict; idle options stay light. */
+function Verdict({ feedback, fresh }: { feedback: OptionFeedback; fresh?: boolean }) {
+  const Icon = feedback === 'correct' ? CheckIcon : feedback === 'incorrect' ? XIcon : null;
+  return Icon ? <span data-choice-verdict="" aria-hidden="true"><Icon animate={fresh} /></span> : null;
 }
 
 const STEPS: Record<string, number> = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 };
@@ -60,6 +69,7 @@ function useOptionGroup(first: string | undefined) {
 
   return {
     multiple,
+    fresh,
     group: { role: multiple ? 'group' : 'radiogroup', onKeyDown: moveFocus } as const,
     option(letter: string) {
       const picked = selected.includes(letter);
@@ -75,7 +85,6 @@ function useOptionGroup(first: string | undefined) {
           'data-option': letter,
           'data-feedback': feedback,
           'data-fresh': fresh ? '' : undefined,
-          revealed: isFilled(feedback),
           onClick: () => { if (!locked) question.select(multiple ? toggled : [letter]); },
         } as const,
       };
@@ -83,7 +92,7 @@ function useOptionGroup(first: string | undefined) {
   };
 }
 
-const staticTile = tileVariants({ interactive: false });
+const staticTile = buttonVariants({ variant: 'choice', size: 'choice' });
 
 /**
  * The option grid of a choice question: lettered tiles in as many columns
@@ -100,9 +109,9 @@ export function ChoiceGroup({ options, density }: { options: ChoiceOption[]; den
       {/* The letter stays after grading (its disc takes the result's colour); the tick or cross is a corner badge drawn by CSS. */}
       <span data-choice-marker="" aria-hidden="true">
         <span data-choice-letter="">{option.label}</span>
+        <Verdict feedback={feedback} fresh={group?.fresh} />
       </span>
-      <span data-choice-content="">{option.content}</span>
-      <Note feedback={feedback} />
+      <span data-choice-content="">{option.content}<Note feedback={feedback} /></span>
     </>
   );
 
@@ -130,9 +139,9 @@ export function ChoiceGroup({ options, density }: { options: ChoiceOption[]; den
       {options.map((option) => {
         const { feedback, tile } = group.option(option.label);
         return (
-          <TileButton key={option.label} {...tile} data-exam-choice-option="">
+          <RippleButton key={option.label} variant="choice" size="choice" tapScale={0.985} {...tile} data-exam-choice-option="">
             {body(option, feedback)}
-          </TileButton>
+          </RippleButton>
         );
       })}
     </div>
@@ -140,8 +149,8 @@ export function ChoiceGroup({ options, density }: { options: ChoiceOption[]; den
 }
 
 const VERDICTS = [
-  { letter: BOOLEAN_TRUE, value: true, label: '正确', icon: <path d="M5 12.5l4.5 4.5L19 7.5" /> },
-  { letter: BOOLEAN_FALSE, value: false, label: '错误', icon: <path d="M7 7l10 10M17 7L7 17" /> },
+  { letter: BOOLEAN_TRUE, value: true, label: '正确', icon: CheckIcon },
+  { letter: BOOLEAN_FALSE, value: false, label: '错误', icon: XIcon },
 ] as const;
 
 /**
@@ -157,13 +166,14 @@ export function TrueFalse() {
         const { feedback, tile } = group?.option(verdict.letter)
           ?? { feedback: 'idle' as const, tile: { role: 'radio', 'aria-checked': false, 'aria-disabled': true, 'data-option': verdict.letter, 'data-feedback': 'idle' } as const };
         return (
-          <TileButton key={verdict.letter} {...tile} data-boolean-option="" data-value={String(verdict.value)}>
+          <RippleButton key={verdict.letter} variant="choice" size="choice" tapScale={0.985} {...tile} data-boolean-option="" data-value={String(verdict.value)}>
             <span data-boolean-glyph="" aria-hidden="true">
-              <svg viewBox="0 0 24 24">{verdict.icon}</svg>
+              <verdict.icon animate={'data-fresh' in tile && tile['data-fresh'] !== undefined} />
+              <Verdict feedback={feedback} fresh={'data-fresh' in tile && tile['data-fresh'] !== undefined} />
             </span>
             {verdict.label}
             <Note feedback={feedback} />
-          </TileButton>
+          </RippleButton>
         );
       })}
     </div>
