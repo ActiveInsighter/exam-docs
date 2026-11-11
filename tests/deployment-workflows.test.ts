@@ -1,8 +1,29 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 
 describe('static deployment workflows', () => {
+  it('deploys the animated UI branch only on an explicit manual preview request', async () => {
+    const workflow = await readFile(resolve(process.cwd(), '.github/workflows/deploy-cloudflare-worker-assets.yml'), 'utf8');
+    const previewRef = 'refs/heads/codex/animate-ui-finish-20261111';
+    const conditions = workflow.split('\n').filter(line => line.includes(previewRef));
+    // Asset pre-upload, credentials, deployment and HTTP verification share the guard.
+    expect(conditions).toHaveLength(4);
+    for (const line of conditions) {
+      const expression = line.slice(line.indexOf('${{') + 3, line.lastIndexOf('}}'));
+      const allows = (ref: string, event: string, deploy: boolean) => runInNewContext(expression, {
+        github: { ref, event_name: event }, inputs: { deploy },
+        startsWith: (value: string, prefix: string) => value.startsWith(prefix),
+      });
+      expect(allows(previewRef, 'workflow_dispatch', true)).toBe(true);
+      expect(allows(previewRef, 'workflow_dispatch', false)).toBe(false);
+      expect(allows(previewRef, 'push', true)).toBe(false);
+      expect(allows('refs/heads/codex/unapproved-preview', 'workflow_dispatch', true)).toBe(false);
+    }
+    expect(workflow).toContain("CLOUDFLARE_WORKER_NAME: ${{ github.ref == 'refs/heads/main' && 'exam-docs' || 'exam-docs-preview' }}");
+  });
+
   it('keeps the Cloudflare deployment on guarded RSC dedupe', async () => {
     const workflowPath = '.github/workflows/deploy-cloudflare-worker-assets.yml';
     const workflow = await readFile(resolve(process.cwd(), workflowPath), 'utf8');
