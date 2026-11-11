@@ -156,7 +156,9 @@ function Button({
   )
   // Answer ink owns its interaction. Ordinary controls use the official press
   // primitive, composed onto Base UI so render/nativeButton/ref keep working.
-  return revealed === undefined ? <AnimatedButton asChild>{button}</AnimatedButton> : button
+  // The primitive names its slot too; a slot given by the caller wins.
+  const slot = (props as { "data-slot"?: string })["data-slot"] ?? "button"
+  return revealed === undefined ? <AnimatedButton asChild data-slot={slot}>{button}</AnimatedButton> : button
 }
 
 /*

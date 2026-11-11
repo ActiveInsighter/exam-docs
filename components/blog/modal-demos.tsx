@@ -64,7 +64,7 @@ function DemoFrame({ children, caption }: { children: ReactNode; caption: string
 
 function BasicDemo() {
   return (
-    <DemoFrame caption="标题 + 描述 + 单栏内容 + 底部按钮。Esc、遮罩、关闭按钮或下拉顶栏都能关闭。">
+    <DemoFrame caption="标题 + 描述 + 单栏内容 + 底部按钮。Esc、遮罩、关闭按钮或向下拖动都能关闭。">
       <Modal>
         <ModalTrigger className={trigger}>打开基础弹窗</ModalTrigger>
         <ModalContent size="md">
@@ -157,56 +157,56 @@ function SplitDemo() {
   );
 }
 
-const PAGES = [
+const SHEETS = [
   {
     title: '题目列表',
-    text: '点击下面的按钮打开下一页。它不会再叠一个弹窗，而是在同一个面板里从右侧推入，这一页向左退开并变暗；左上角出现返回按钮。',
+    text: '点击下面的按钮再打开一层。新的一层从底部升起，叠在这一层之上；这一层整体后退：略微缩小、变暗，顶边仍露在新一层上方。',
     paragraphs: 6,
   },
   {
     title: '收藏与标签',
-    text: '面板宽度不变，高度只会为更高的页面长高，不会因为这一页较短而缩小。返回按钮或 Esc 回到上一页，右上角的关闭按钮、点遮罩或下拉顶栏关闭整个面板。',
+    text: '每一层都是独立的抽屉，高度和宽度各自决定。返回按钮、Esc、点击后面露出的那一层，或把这一层向下拖走，都只关闭最上面一层；右上角的关闭按钮关闭整叠。',
     paragraphs: 2,
   },
   {
     title: '确认',
-    text: '再深一页也一样。返回时上一页保留原来的滚动位置和状态，焦点回到打开这一页的按钮。',
+    text: '再深一层也一样。向下拖动这一层时，后面的各层随手指逐步复位；回到上一层后，焦点落在打开这一层的按钮上，滚动位置和状态都还在。',
     paragraphs: 0,
   },
 ] as const;
 
-/** One page of the navigation demo; each page can push the next. */
-function Page({ index }: { index: number }) {
+/** One sheet of the stack demo; each can open the next on top of itself. */
+function Sheet({ index }: { index: number }) {
   const modal = useModal();
-  const page = PAGES[index];
-  const last = index === PAGES.length - 1;
+  const sheet = SHEETS[index];
+  const last = index === SHEETS.length - 1;
   return (
     <>
       <ModalHeader>
-        <ModalTitle>{page.title}</ModalTitle>
+        <ModalTitle>{sheet.title}</ModalTitle>
         <ModalTags>
-          <Chip>第 {index + 1} 页</Chip>
+          <Chip>第 {index + 1} 层</Chip>
         </ModalTags>
       </ModalHeader>
       <ModalBody>
-        <p className="mb-4 leading-7">{page.text}</p>
-        <Paragraphs count={page.paragraphs} topic={page.title} />
+        <p className="mb-4 leading-7">{sheet.text}</p>
+        <Paragraphs count={sheet.paragraphs} topic={sheet.title} />
       </ModalBody>
       <ModalFooter>
         {index > 0 ? (
-          <Button variant="ghost" className="h-9 rounded-full px-4" onClick={() => modal?.closeAll()}>关闭面板</Button>
+          <Button variant="ghost" className="h-9 rounded-full px-4" onClick={() => modal?.closeAll()}>全部关闭</Button>
         ) : null}
         {!last ? (
           <Modal>
             <ModalTrigger className={cn(buttonVariants(), 'h-9 rounded-full px-4')}>
-              <Layers3Icon data-icon="inline-start" />打开「{PAGES[index + 1].title}」
+              <Layers3Icon data-icon="inline-start" />打开「{SHEETS[index + 1].title}」
             </ModalTrigger>
             <ModalContent>
-              <Page index={index + 1} />
+              <Sheet index={index + 1} />
             </ModalContent>
           </Modal>
         ) : (
-          <Button className="h-9 rounded-full px-4" onClick={() => modal?.close()}>返回上一页</Button>
+          <Button className="h-9 rounded-full px-4" onClick={() => modal?.close()}>返回上一层</Button>
         )}
       </ModalFooter>
     </>
@@ -215,13 +215,13 @@ function Page({ index }: { index: number }) {
 
 function NestedDemo() {
   return (
-    <DemoFrame caption="页面切换：在弹窗内容里再渲染 <Modal>，它成为同一面板的下一页，从右向左推入；左上角返回，Esc 也返回一页。">
+    <DemoFrame caption="多级弹窗：在弹窗内容里再渲染 <Modal>，它作为新的一层从底部升起，下面的各层缩小、变暗并露出顶边；左上角返回，Esc 也只关闭最上面一层。">
       <Modal>
         <ModalTrigger className={trigger}>
-          <BookmarkIcon className="size-4" />页面切换
+          <BookmarkIcon className="size-4" />多级弹窗
         </ModalTrigger>
         <ModalContent size="lg">
-          <Page index={0} />
+          <Sheet index={0} />
         </ModalContent>
       </Modal>
     </DemoFrame>
