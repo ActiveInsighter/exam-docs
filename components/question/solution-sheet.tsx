@@ -1,9 +1,10 @@
 'use client';
 
-import { AnimateIcon } from '@animate-ui/react/icons';
-import { BookOpenIcon } from '@/components/animate-ui/icons/book-open';
-import { LibraryBigIcon } from '@/components/animate-ui/icons/library-big';
-import { NotebookPenIcon } from '@/components/animate-ui/icons/notebook-pen';
+import { BookOpenIcon, LibraryBigIcon, NotebookPenIcon } from 'lucide-react';
+
+import { BookOpenIcon as AnimatedBookOpenIcon } from '@/components/animate-ui/icons/book-open';
+import { LibraryBigIcon as AnimatedLibraryBigIcon } from '@/components/animate-ui/icons/library-big';
+import { NotebookPenIcon as AnimatedNotebookPenIcon } from '@/components/animate-ui/icons/notebook-pen';
 import {
   lazy,
   type ReactNode,
@@ -25,6 +26,7 @@ import {
   StudyCardSection,
   StudyCardStage,
 } from '@/components/ui/study-card';
+import { ActionIcon } from '@/components/ui/action-icon';
 import { cn } from '@/lib/utils';
 import { AnswerSummary } from './answer-summary';
 import { NoteEditor } from './marks/note-editor';
@@ -98,26 +100,25 @@ export function QuestionSolutionSheet({ meta, solution }: { meta: QuestionMeta; 
 
   return (
     <>
-      <AnimateIcon animateOnHover asChild>
-        <RippleButton
-          ref={trigger}
-          variant="ghost"
-          size="sm"
-          data-solution-trigger=""
-          aria-haspopup="dialog"
-          aria-expanded={open}
-          className={cn(
-            'h-8 gap-1.5 rounded-full bg-(--ui-fill) px-3.5 text-[0.8125rem] text-foreground/80 hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active) has-data-[icon=inline-start]:pl-3',
-          )}
-          onClick={() => {
-            setMounted(true);
-            setOpen(true);
-          }}
-        >
-          <BookOpenIcon data-icon="inline-start" />
-          查看解答
-        </RippleButton>
-      </AnimateIcon>
+      <RippleButton
+        ref={trigger}
+        variant="ghost"
+        size="sm"
+        data-solution-trigger=""
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        className={cn(
+          'h-8 gap-1.5 rounded-full bg-(--ui-fill) px-3.5 text-[0.8125rem] text-foreground/80 hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active) has-data-[icon=inline-start]:pl-3',
+        )}
+        onClick={() => {
+          setMounted(true);
+          setOpen(true);
+        }}
+      >
+        <ActionIcon icon={BookOpenIcon} animatedIcon={AnimatedBookOpenIcon} data-icon="inline-start" />
+        查看解答
+      </RippleButton>
+
       {mounted ? <SolutionCard self={entry} open={open} setOpen={setOpen} /> : null}
     </>
   );
@@ -214,28 +215,34 @@ function SolutionCard({
           }
           tags={
             // One glass capsule for all of them: each blurred layer costs a pass on every scrolled frame.
-            <span data-tag-capsule="">
-              <QuestionTypeTag type={meta.type} points={meta.points} />
-              <QuestionSourceTrail tags={meta.tags.source} />
-              <QuestionUserTags />
-            </span>
+            <>
+              <span data-tag-capsule="">
+                <QuestionTypeTag type={meta.type} points={meta.points} />
+                <QuestionSourceTrail tags={meta.tags.source} />
+                <QuestionUserTags />
+              </span>
+              <div className="rounded-full bg-(--modal-glass) px-1 md:hidden">
+                <QuestionMarkActions editingNote={editingNote} onEditNote={() => setEditingNote(!editingNote)} />
+              </div>
+            </>
           }
           tagsProps={{ 'aria-label': '标签' }}
           actionsLabel="题目操作"
           actions={
             <>
-              <QuestionMarkActions editingNote={editingNote} onEditNote={() => setEditingNote(!editingNote)} />
-              <AnimateIcon animateOnHover asChild>
-                <IconButton
-                  className={iconAction}
-                  aria-expanded={library === 'open'}
-                  aria-label="收藏与标签"
-                  title="收藏与标签"
-                  onClick={() => setLibrary('open')}
-                >
-                  <LibraryBigIcon />
-                </IconButton>
-              </AnimateIcon>
+              <div className="hidden md:block">
+                <QuestionMarkActions editingNote={editingNote} onEditNote={() => setEditingNote(!editingNote)} />
+              </div>
+
+              <IconButton
+                className={iconAction}
+                aria-expanded={library === 'open'}
+                aria-label="收藏与标签"
+                title="收藏与标签"
+                onClick={() => setLibrary('open')}
+              >
+                <ActionIcon icon={LibraryBigIcon} animatedIcon={AnimatedLibraryBigIcon} />
+              </IconButton>
             </>
           }
         />
@@ -272,18 +279,16 @@ function SheetNote({ editing, setEditing }: NoteProps) {
       label="我的注释"
       meta={
         !editing ? (
-          <AnimateIcon animateOnHover asChild>
-            <RippleButton
-              variant="ghost"
-              size="xs"
-              className="-my-1 text-muted-foreground"
-              onClick={() => setEditing(true)}
-              disabled={!marks.ready}
-            >
-              <NotebookPenIcon data-icon="inline-start" />
-              {note ? '编辑' : '添加'}
-            </RippleButton>
-          </AnimateIcon>
+          <RippleButton
+            variant="ghost"
+            size="xs"
+            className="-my-1 text-muted-foreground"
+            onClick={() => setEditing(true)}
+            disabled={!marks.ready}
+          >
+            <ActionIcon icon={NotebookPenIcon} animatedIcon={AnimatedNotebookPenIcon} data-icon="inline-start" />
+            {note ? '编辑' : '添加'}
+          </RippleButton>
         ) : null
       }
     >

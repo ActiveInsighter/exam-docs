@@ -1,7 +1,6 @@
 'use client';
 
 import { CheckIcon, ChevronLeftIcon, PlusIcon, Settings2Icon, Trash2Icon } from 'lucide-react';
-import { AnimateIcon } from '@animate-ui/react/icons';
 import { type ComponentProps, useRef, useState } from 'react';
 import { Popover, PopoverContent, PopoverTitle } from '@/components/ui/popover';
 import { IconButton } from '@/components/ui/icon-button';
@@ -12,13 +11,23 @@ import { useUserTags } from './use-marks';
 
 const COLOR_ORDER: readonly TagColor[] = ['red', 'orange', 'amber', 'green', 'teal', 'blue', 'violet', 'pink', 'gray'];
 const COLOR_NAMES: Record<TagColor, string> = {
-  gray: '灰', red: '红', orange: '橙', amber: '黄', green: '绿', teal: '青', blue: '蓝', violet: '紫', pink: '粉',
+  gray: '灰',
+  red: '红',
+  orange: '橙',
+  amber: '黄',
+  green: '绿',
+  teal: '青',
+  blue: '蓝',
+  violet: '紫',
+  pink: '粉',
 };
 
 const nextColor = (tags: readonly UserTag[]) => COLOR_ORDER[tags.length % COLOR_ORDER.length];
-const describe = (error: unknown) => (error instanceof Error && error.name === 'AnnotationError' ? error.message : '没能保存标签，请重试。');
+const describe = (error: unknown) =>
+  error instanceof Error && error.name === 'AnnotationError' ? error.message : '没能保存标签，请重试。';
 
-const row = 'flex w-full min-w-0 items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm outline-none transition-colors hover:bg-(--ui-fill-hover) focus-visible:bg-(--ui-fill-hover)';
+const row =
+  'flex w-full min-w-0 items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm outline-none transition-colors hover:bg-(--ui-fill-hover) focus-visible:bg-(--ui-fill-hover)';
 
 function Dot({ color }: { color: TagColor }) {
   return <span data-tag-color={color} data-tag-dot="" aria-hidden="true" className="size-2.5!" />;
@@ -66,9 +75,15 @@ function PickView({ onManage }: { onManage: () => void }) {
         placeholder="搜索或新建，如「难题」"
         aria-label="搜索或新建标签"
         className="mb-1 h-9 w-full rounded-lg bg-(--ui-fill) px-2.5 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
-        onChange={(event) => { setQuery(event.target.value); setError(null); }}
+        onChange={(event) => {
+          setQuery(event.target.value);
+          setError(null);
+        }}
         onKeyDown={(event) => {
-          if (event.key === 'Enter' && !event.nativeEvent.isComposing) { event.preventDefault(); void create(); }
+          if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+            event.preventDefault();
+            void create();
+          }
         }}
       />
       <div className="max-h-64 overflow-y-auto overscroll-contain py-0.5" role="group" aria-label="我的标签">
@@ -95,11 +110,16 @@ function PickView({ onManage }: { onManage: () => void }) {
           </p>
         ) : null}
       </div>
-      {error ? <p role="alert" className="px-2 pt-1 text-xs text-destructive">{error}</p> : null}
+      {error ? (
+        <p role="alert" className="px-2 pt-1 text-xs text-destructive">
+          {error}
+        </p>
+      ) : null}
       {tags.length ? (
         <div className="mt-1 border-t border-(--ui-fill-strong) pt-1">
           <button type="button" className={cn(row, 'text-muted-foreground')} onClick={onManage}>
-            <Settings2Icon className="size-4" />管理标签
+            <Settings2Icon className="size-4" />
+            管理标签
           </button>
         </div>
       ) : null}
@@ -145,26 +165,39 @@ function ManageRow({ tag }: { tag: UserTag }) {
           aria-label="标签名称"
           className="h-8 min-w-0 flex-1 rounded-lg bg-transparent px-2 text-sm outline-none hover:bg-(--ui-fill) focus-visible:bg-(--ui-fill)"
           onChange={(event) => setName(event.target.value)}
-          onBlur={() => { if (normalizeTagName(name) !== tag.name) void save({ name }); }}
-          onKeyDown={(event) => { if (event.key === 'Enter' && !event.nativeEvent.isComposing) event.currentTarget.blur(); }}
+          onBlur={() => {
+            if (normalizeTagName(name) !== tag.name) void save({ name });
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && !event.nativeEvent.isComposing) event.currentTarget.blur();
+          }}
         />
         <button
           type="button"
           className={cn(
             'h-8 shrink-0 rounded-lg px-2 text-xs transition-colors',
-            confirming ? 'bg-destructive/12 font-medium text-destructive' : 'text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground',
+            confirming
+              ? 'bg-destructive/12 font-medium text-destructive'
+              : 'text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground',
           )}
           aria-label={confirming ? `确认删除标签「${tag.name}」` : `删除标签「${tag.name}」`}
           onBlur={() => setConfirming(false)}
           onClick={() => {
-            if (!confirming) { setConfirming(true); return; }
+            if (!confirming) {
+              setConfirming(true);
+              return;
+            }
             void cache?.deleteTag(tag.tagId).catch((cause: unknown) => setError(describe(cause)));
           }}
         >
           {confirming ? '确认删除' : <Trash2Icon className="size-4" />}
         </button>
       </div>
-      {error ? <p role="alert" className="px-2 text-xs text-destructive">{error}</p> : null}
+      {error ? (
+        <p role="alert" className="px-2 text-xs text-destructive">
+          {error}
+        </p>
+      ) : null}
     </li>
   );
 }
@@ -174,14 +207,21 @@ function ManageView({ onBack }: { onBack: () => void }) {
   return (
     <>
       <div className="flex items-center gap-1">
-        <button type="button" className="grid size-7 place-items-center rounded-md hover:bg-(--ui-fill-hover)" aria-label="返回" onClick={onBack}>
+        <button
+          type="button"
+          className="grid size-7 place-items-center rounded-md hover:bg-(--ui-fill-hover)"
+          aria-label="返回"
+          onClick={onBack}
+        >
           <ChevronLeftIcon className="size-4" />
         </button>
         <PopoverTitle className="px-1 pt-0 pb-0">管理标签</PopoverTitle>
       </div>
       <p className="px-2 pt-1 pb-2 text-xs text-muted-foreground">改名、换色或删除；删除会从所有题目上移除该标签。</p>
       <ul className="max-h-72 overflow-y-auto overscroll-contain">
-        {tags.map((tag) => <ManageRow key={tag.tagId} tag={tag} />)}
+        {tags.map((tag) => (
+          <ManageRow key={tag.tagId} tag={tag} />
+        ))}
       </ul>
     </>
   );
@@ -209,14 +249,15 @@ export function TagPicker(props: TagPickerProps) {
 
   return (
     <>
-      <AnimateIcon animateOnHover asChild>
       <IconButton
         {...props}
         ref={buttonRef}
         type="button"
         aria-haspopup="dialog"
         aria-expanded={open}
-        onPointerDown={() => { wasOpen.current = open; }}
+        onPointerDown={() => {
+          wasOpen.current = open;
+        }}
         onClick={() => {
           const close = wasOpen.current;
           wasOpen.current = false;
@@ -224,11 +265,15 @@ export function TagPicker(props: TagPickerProps) {
           change(!close);
         }}
       />
-      </AnimateIcon>
+
       {mounted ? (
         <Popover open={open} onOpenChange={change}>
           <PopoverContent aria-label="标签" anchor={buttonRef} finalFocus={buttonRef}>
-            {view === 'pick' ? <PickView onManage={() => setView('manage')} /> : <ManageView onBack={() => setView('pick')} />}
+            {view === 'pick' ? (
+              <PickView onManage={() => setView('manage')} />
+            ) : (
+              <ManageView onBack={() => setView('pick')} />
+            )}
           </PopoverContent>
         </Popover>
       ) : null}

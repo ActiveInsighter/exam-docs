@@ -247,6 +247,6 @@ log(底数, 真数)、eˣ、10ˣ、立方根、立方、倒数、阶乘等；`ab
 - `question-footer.tsx` 组合 `Collapsible`，自动收起判分面板时把焦点交回当前判分入口；不再监听 CSS transition 以卸载 DOM。
 - `solution-sheet.tsx` 通过 `EntryScope` 注入当前题目状态，`AnswerSummary` 只呈现答案对照。收藏与标签库是独立嵌套 `Modal`，返回只关当前层，关闭可关整叠。
 - `StudyCard` 处理翻页、滑动与内容过渡，离场的内容设为 `inert`；在按钮、输入框或横向滚动公式上滑动不会翻页。
-- 页面的题目不播放入场动画。解答弹窗和标签面板保留首次使用时加载，长题目页不会为每道题初始化一个抽屉。
+- 图标使用 `ActionIcon` 按交互初始化，按钮 DOM 和焦点保持稳定。页面的题目不播放入场动画。解答弹窗和标签面板保留首次使用时加载，长题目页不会为每道题初始化一个抽屉。
 
 颜色仍由 `styles/question/tones.css` 和语义令牌管理，DOM 镜像沿用同一套状态样式。自制 `revealed` / `TileButton` 与 `styles/reveal.css` 已移除。统一节奏和减少动态效果由 `AppProviders` 的 `AnimateUIProvider` 管理。

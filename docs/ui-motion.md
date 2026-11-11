@@ -29,7 +29,8 @@ Base UI 适配层，依赖 `@animate-ui/react` 和 `motion`。业务组件仍从
 `StudyCard` 在其上处理翻页，使用官方步骤切换配方、方向感知的淡入淡出、轻微模糊及页码动画。
 
 - `ui/ripple-button.tsx`：复用 `buttonVariants`，官方扩散与按压；键盘点击居中，锁定选项不再产生点击动效。
-- `ui/icon-button.tsx`：官方图标按钮与粒子，收藏成功时显示粒子；图标本身复用注册表安装的 Animate UI 图标。
+- `ui/icon-button.tsx`：官方图标按钮与粒子，收藏成功时显示粒子。
+- `ui/action-icon.tsx`：图标默认呈现静态 Lucide，悬停、聚焦或按下时再初始化注册表的官方动画实例。按钮本身不重建；首次启用后保留实例，让中断的动效自然复位。长题目页无需一次初始化数百个图标动画观察器。
 - `ui/collapsible.tsx`：shadcn 风格组合，官方高度、淡入和模糊过渡；判分面板不再维护自制卸载时机。
 - `question/grade-control.tsx`：在 `ToggleGroup` 上统一填空与解答题判分。
 - `question/grade-control.tsx` 的 `ResultIcon`：统一结果图标；只在用户操作后的结果上播放动画，恢复记录不重播。
@@ -57,3 +58,12 @@ Skill 指导 AI 选择 CLI、primitive 导入替换或 Motion 配方，并涵盖
 
 维护本项目时同时遵守上面的专用动效约定；Skill 中的通用示例不意味着
 需要迁移已有抽屉、替换所有组件或增加无关动效。
+
+## 浏览器验证
+
+```bash
+QUESTION_BROWSER_EXECUTABLE=/usr/bin/chromium node scripts/verify-question-components-browser.mjs
+QUESTION_BROWSER_EXECUTABLE=/usr/bin/chromium node scripts/verify-study-motion-browser.mjs
+```
+
+第一个脚本覆盖全部题型、判分、解答、重载恢复与三种视口/主题组合；第二个覆盖收藏标签、键盘和快速翻页、三层嵌套返回/关闭、父层滚动与焦点恢复、鼠标/触摸拖拽。320px 解答顶栏将题目操作移到标签行，确保题号、翻页与关闭仍在同一行。

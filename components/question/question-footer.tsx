@@ -1,14 +1,16 @@
 'use client';
 
-import { AnimateIcon } from '@animate-ui/react/icons';
+import { GavelIcon, CheckCheckIcon, RotateCcwIcon } from 'lucide-react';
+
 import { blur, transition, useTempoTransition } from '@animate-ui/react/utils/motion';
 import { motion } from 'motion/react';
-import { GavelIcon } from '@/components/animate-ui/icons/gavel';
-import { CheckCheckIcon } from '@/components/animate-ui/icons/check-check';
-import { RotateCcwIcon } from '@/components/animate-ui/icons/rotate-ccw';
+import { GavelIcon as AnimatedGavelIcon } from '@/components/animate-ui/icons/gavel';
+import { CheckCheckIcon as AnimatedCheckCheckIcon } from '@/components/animate-ui/icons/check-check';
+import { RotateCcwIcon as AnimatedRotateCcwIcon } from '@/components/animate-ui/icons/rotate-ccw';
 import { type ComponentProps, type ReactNode, useLayoutEffect, useRef, useState } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { RippleButton } from '@/components/ui/ripple-button';
+import { ActionIcon } from '@/components/ui/action-icon';
 import { cn } from '@/lib/utils';
 import { blankBadge } from './blank-field';
 import { BlankGradePanel, BlankKey } from './blank-grade';
@@ -33,11 +35,7 @@ const hint = 'text-[0.8125rem] text-muted-foreground';
 const row = 'flex flex-wrap items-center gap-x-3 gap-y-2';
 
 function QuietButton({ className, ...props }: ComponentProps<typeof RippleButton>) {
-  return (
-    <AnimateIcon animateOnHover asChild>
-      <RippleButton variant="ghost" size="sm" className={cn(quiet, className)} {...props} />
-    </AnimateIcon>
-  );
+  return <RippleButton variant="ghost" size="sm" className={cn(quiet, className)} {...props} />;
 }
 
 /** The key under a wrong answer; of several blanks only the ones missed. */
@@ -113,7 +111,7 @@ function Answering({ question, canGrade }: { question: QuestionState; canGrade: 
       {canGrade ? (
         // Formulas can be awkward to type: grade against the key instead, like an essay.
         <CollapsibleTrigger render={<QuietButton />} data-self-grade-toggle="" data-grade-trigger="">
-          <CheckCheckIcon data-icon="inline-start" />
+          <ActionIcon icon={CheckCheckIcon} animatedIcon={AnimatedCheckCheckIcon} data-icon="inline-start" />
           对答案自评
         </CollapsibleTrigger>
       ) : null}
@@ -150,14 +148,8 @@ export function QuestionFooter({ meta, solution }: { meta: QuestionMeta; solutio
     }
   }, [grading]);
 
-  return (
-    <Collapsible
-      ref={root}
-      open={grading}
-      onOpenChange={(next) => setOpened(next ? stage : null)}
-      data-question-footer=""
-      data-attempt-result={question?.status}
-    >
+  const content = (
+    <>
       <div role="status" aria-live="polite" data-footer-status="">
         {graded ? (
           <Grade question={graded} />
@@ -179,13 +171,13 @@ export function QuestionFooter({ meta, solution }: { meta: QuestionMeta; solutio
       <div data-footer-actions="">
         {stage === 'manual' ? (
           <CollapsibleTrigger render={<QuietButton />} data-grade-trigger="">
-            <GavelIcon data-icon="inline-start" />
+            <ActionIcon icon={GavelIcon} animatedIcon={AnimatedGavelIcon} data-icon="inline-start" />
             手动判分
           </CollapsibleTrigger>
         ) : null}
         {graded ? (
           <QuietButton onClick={graded.reset}>
-            <RotateCcwIcon data-icon="inline-start" />
+            <ActionIcon icon={RotateCcwIcon} animatedIcon={AnimatedRotateCcwIcon} data-icon="inline-start" />
             {graded.spec.kind === 'self' ? '重新自评' : '重做'}
           </QuietButton>
         ) : null}
@@ -196,6 +188,22 @@ export function QuestionFooter({ meta, solution }: { meta: QuestionMeta; solutio
           <BlankGradePanel question={question} />
         </CollapsibleContent>
       ) : null}
+    </>
+  );
+  // Only blank questions have a disclosure; other footers need no root lifecycle.
+  return stage ? (
+    <Collapsible
+      ref={root}
+      open={grading}
+      onOpenChange={(next) => setOpened(next ? stage : null)}
+      data-question-footer=""
+      data-attempt-result={question?.status}
+    >
+      {content}
     </Collapsible>
+  ) : (
+    <div data-question-footer="" data-attempt-result={question?.status}>
+      {content}
+    </div>
   );
 }

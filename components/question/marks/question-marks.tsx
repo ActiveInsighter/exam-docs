@@ -1,14 +1,16 @@
 'use client';
 
-import { AnimateIcon } from '@animate-ui/react/icons';
-import { NotebookPenIcon } from '@/components/animate-ui/icons/notebook-pen';
-import { StarIcon } from '@/components/animate-ui/icons/star';
-import { TagIcon } from '@/components/animate-ui/icons/tag';
+import { NotebookPenIcon, StarIcon, TagIcon } from 'lucide-react';
+
+import { NotebookPenIcon as AnimatedNotebookPenIcon } from '@/components/animate-ui/icons/notebook-pen';
+import { StarIcon as AnimatedStarIcon } from '@/components/animate-ui/icons/star';
+import { TagIcon as AnimatedTagIcon } from '@/components/animate-ui/icons/tag';
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { buttonVariants } from '@/components/ui/button';
 import { IconButton, IconButtonParticles } from '@/components/ui/icon-button';
 import type { MarkPatch } from '@/lib/question-store';
 import type { QuestionMark, UserTag } from '@/lib/question-store/types';
+import { ActionIcon } from '@/components/ui/action-icon';
 import { cn } from '@/lib/utils';
 import { useDocumentPath } from '../question-state';
 import { NoteEditor } from './note-editor';
@@ -86,20 +88,23 @@ function FavoriteButton() {
   const marks = useMarks();
   const on = marks?.mark?.favorite ?? false;
   return (
-    <AnimateIcon animateOnHover asChild>
-      <IconButton
-        className={cn(iconAction, on && 'text-warning hover:text-warning')}
-        aria-pressed={on}
-        aria-label={on ? '取消收藏' : '收藏'}
-        title={on ? '取消收藏' : '收藏'}
-        disabled={!marks?.ready}
-        data-favorite={on ? 'on' : 'off'}
-        onClick={() => void marks?.update({ favorite: !on })}
-      >
-        <StarIcon aria-hidden="true" className={cn(on && 'fill-current')} />
-        {on ? <IconButtonParticles size={3} aria-hidden="true" /> : null}
-      </IconButton>
-    </AnimateIcon>
+    <IconButton
+      className={cn(iconAction, on && 'text-warning hover:text-warning')}
+      aria-pressed={on}
+      aria-label={on ? '取消收藏' : '收藏'}
+      title={on ? '取消收藏' : '收藏'}
+      disabled={!marks?.ready}
+      data-favorite={on ? 'on' : 'off'}
+      onClick={() => void marks?.update({ favorite: !on })}
+    >
+      <ActionIcon
+        icon={StarIcon}
+        animatedIcon={AnimatedStarIcon}
+        aria-hidden="true"
+        className={cn(on && 'fill-current')}
+      />
+      {on ? <IconButtonParticles size={3} aria-hidden="true" /> : null}
+    </IconButton>
   );
 }
 
@@ -124,20 +129,19 @@ export function QuestionMarkActions({
         title="标签"
         disabled={!marks.ready}
       >
-        <TagIcon aria-hidden="true" />
+        <ActionIcon icon={TagIcon} animatedIcon={AnimatedTagIcon} aria-hidden="true" />
       </TagPicker>
-      <AnimateIcon animateOnHover asChild>
-        <IconButton
-          className={cn(iconAction, (hasNote || editing) && 'text-foreground')}
-          aria-label={hasNote ? '编辑注释' : '添加注释'}
-          aria-expanded={editing}
-          title={hasNote ? '编辑注释' : '添加注释'}
-          disabled={!marks.ready}
-          onClick={() => (onEditNote ? onEditNote() : marks.setEditingNote(!marks.editingNote))}
-        >
-          <NotebookPenIcon aria-hidden="true" />
-        </IconButton>
-      </AnimateIcon>
+
+      <IconButton
+        className={cn(iconAction, (hasNote || editing) && 'text-foreground')}
+        aria-label={hasNote ? '编辑注释' : '添加注释'}
+        aria-expanded={editing}
+        title={hasNote ? '编辑注释' : '添加注释'}
+        disabled={!marks.ready}
+        onClick={() => (onEditNote ? onEditNote() : marks.setEditingNote(!marks.editingNote))}
+      >
+        <ActionIcon icon={NotebookPenIcon} animatedIcon={AnimatedNotebookPenIcon} aria-hidden="true" />
+      </IconButton>
     </div>
   );
 }
@@ -181,7 +185,7 @@ export function QuestionNote() {
         />
       ) : mark?.note ? (
         <div data-question-note="">
-          <NotebookPenIcon aria-hidden="true" />
+          <ActionIcon icon={NotebookPenIcon} animatedIcon={AnimatedNotebookPenIcon} aria-hidden="true" />
           <span className="sr-only">我的注释：</span>
           <button
             type="button"
