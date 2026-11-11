@@ -8,6 +8,7 @@ import { Modal, ModalBody, ModalContent, ModalDescription, ModalHeader, ModalTag
 import type { QuestionMark } from '@/lib/question-store/types';
 import { cn } from '@/lib/utils';
 import { UserTagChip } from './question-marks';
+import { TagDot } from './tag-dot';
 import { useLibraryMarks } from './use-library-marks';
 import { liveTagsOf, useUserTags } from './use-marks';
 
@@ -80,7 +81,7 @@ export function QuestionLibraryDialog({ open, onOpenChange }: { open: boolean; o
             {chip('all', '全部', counts.all)}
             {chip('favorite', <><StarIcon className="size-3.5" />收藏</>, counts.favorite)}
             {chip('note', <><NotebookPenIcon className="size-3.5" />注释</>, counts.note)}
-            {tags.map((tag) => chip(`tag:${tag.tagId}`, <><span data-tag-dot="" data-tag-color={tag.color} />{tag.name}</>))}
+            {tags.map((tag) => chip(`tag:${tag.tagId}`, <><TagDot color={tag.color} />{tag.name}</>))}
           </ModalTags>
         </ModalHeader>
         {/* As a page of a wide solution card, the list keeps a readable measure. */}

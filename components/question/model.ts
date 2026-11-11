@@ -28,6 +28,9 @@ export type QuestionMeta = {
   tags: QuestionTags;
 };
 
+/** The question's number: a quiet filled key-cap, the figure set in Outfit. On the card and as the solution card's title. */
+export const questionNumberClassName = 'inline-grid h-7 min-w-7 place-items-center rounded-[0.5625rem] bg-(--exam-number-bg) px-1.75 [font-family:var(--font-outfit),var(--font-sans)] text-[0.9375rem] leading-none font-semibold tracking-tight text-(--exam-number-fg) tabular-nums';
+
 /** Stem spacing, shared by the question in the page and in its solution sheet. */
 export const questionStemClassName = '[&>:first-child]:mt-0! [&>:last-child]:mb-0! [&>p]:my-2.5';
 

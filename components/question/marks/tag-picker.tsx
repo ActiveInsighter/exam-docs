@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTitle } from '@/components/ui/popover';
 import { ANNOTATION_LIMITS, normalizeTagName, type TagColor, type UserTag } from '@/lib/question-store/types';
 import { cn } from '@/lib/utils';
 import { useMarks } from './question-marks';
+import { TagDot } from './tag-dot';
 import { useUserTags } from './use-marks';
 
 const COLOR_ORDER: readonly TagColor[] = ['red', 'orange', 'amber', 'green', 'teal', 'blue', 'violet', 'pink', 'gray'];
@@ -19,7 +20,7 @@ const describe = (error: unknown) => (error instanceof Error && error.name === '
 const row = 'flex w-full min-w-0 items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm outline-none transition-colors hover:bg-(--ui-fill-hover) focus-visible:bg-(--ui-fill-hover)';
 
 function Dot({ color }: { color: TagColor }) {
-  return <span data-tag-color={color} data-tag-dot="" aria-hidden="true" className="size-2.5!" />;
+  return <TagDot color={color} className="size-2.5" />;
 }
 
 function PickView({ onManage }: { onManage: () => void }) {

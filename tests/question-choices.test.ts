@@ -225,7 +225,7 @@ describe('Question choices', () => {
     );
 
     expect(markup).toContain('data-type="essay"');
-    expect(markup).toContain('<span data-type-points="">9 分</span>');
+    expect(markup).toMatch(/<span data-type-points=""[^>]*>9 分<\/span>/);
     expect(markup).not.toContain('data-question-tag="type"');
     expect(markup).toContain('王道8套卷第4套');
     expect(markup.match(/data-trail-step=""/g)).toHaveLength(1);

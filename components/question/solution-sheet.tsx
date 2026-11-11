@@ -1,14 +1,19 @@
 'use client';
 
-import { BookOpenTextIcon, LibraryBigIcon, NotebookPenIcon } from 'lucide-react';
+import { AnimateIcon } from '@animate-ui/react/icons';
 import { lazy, type ReactNode, Suspense, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { LibraryBigIcon } from '@/components/animate-ui/icons/library-big';
+import { NotebookPenIcon } from '@/components/animate-ui/icons/notebook-pen';
+import { Button } from '@/components/ui/button';
+import { rippleButtonVariants } from '@/components/ui/ripple-button';
 import { StudyCard, StudyCardAside, StudyCardHeader, StudyCardMain, StudyCardSection, StudyCardStage } from '@/components/ui/study-card';
 import { cn } from '@/lib/utils';
 import { AnswerSummary } from './answer-summary';
+import { BookOpenIcon } from './icons';
+import { Animated, Pressable } from './live';
 import { NoteEditor } from './marks/note-editor';
-import { QuestionMarkActions, QuestionMarksScope, QuestionUserTags, iconAction, useMarks } from './marks/question-marks';
-import type { QuestionMeta } from './model';
+import { ActionIcon, QuestionMarkActions, QuestionMarksScope, QuestionUserTags, iconAction, useMarks } from './marks/question-marks';
+import { questionNumberClassName, type QuestionMeta } from './model';
 import { revealQuestion } from './page-questions';
 import { QuestionMirror } from './question-mirror';
 import { QuestionStateScope, useQuestionState } from './question-state';
@@ -66,21 +71,22 @@ export function QuestionSolutionSheet({ meta, solution }: { meta: QuestionMeta; 
 
   return (
     <>
-      <button
-        ref={trigger}
-        type="button"
-        data-solution-trigger=""
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        className={cn(
-          buttonVariants({ variant: 'ghost', size: 'sm' }),
-          'h-8 gap-1.5 rounded-full bg-(--ui-fill) px-3.5 text-[0.8125rem] text-foreground/80 hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active) has-data-[icon=inline-start]:pl-3',
-        )}
-        onClick={() => { setMounted(true); setOpen(true); }}
-      >
-        <BookOpenTextIcon data-icon="inline-start" />
-        查看解答
-      </button>
+      <Animated animateOnHover asChild>
+        <Pressable
+          ref={trigger}
+          data-solution-trigger=""
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          className={cn(
+            rippleButtonVariants({ variant: 'secondary', size: 'sm' }),
+            'h-8 gap-1.5 rounded-full bg-(--ui-fill) px-3.5 pl-3 text-[0.8125rem] text-foreground/80 hover:bg-(--ui-fill-hover) hover:text-foreground aria-expanded:bg-(--ui-fill-active)',
+          )}
+          onClick={() => { setMounted(true); setOpen(true); }}
+        >
+          <BookOpenIcon size={15} aria-hidden />
+          查看解答
+        </Pressable>
+      </Animated>
       {mounted ? <SolutionCard self={entry} open={open} setOpen={setOpen} /> : null}
     </>
   );
@@ -94,6 +100,23 @@ function EntryScope({ entry, children }: { entry: SolutionEntry; children: React
     </QuestionStateScope>
   );
 }
+
+/*
+ * The question pane is the question card's own grey plate, the same for
+ * every question type, blocked against the white answer pane. No hue and no
+ * gradients, so the pair stays calm over a long session and the graded
+ * colours of the options are the only colour on it. Phones stack the two:
+ * the answer pane is a white sheet over the grey, and the toolbar's buttons
+ * shrink so it shares the first row with the title and the close button.
+ */
+const solutionCard = cn(
+  'text-base [--modal-pane-muted:var(--exam-solution-aside)]',
+  'max-md:[&_[data-slot=modal-pane]:not([data-tone=muted])]:rounded-t-3xl max-md:[&_[data-slot=modal-pane]:not([data-tone=muted])]:[--modal-pane-background:var(--modal-surface)]',
+  'max-md:[&_[data-slot=modal-toolbar]_button]:size-7.5 max-md:[&_[data-slot=study-card-position]]:min-w-[3em]',
+);
+
+/** The grey pane's own quiet ink and fills. */
+const aside = '@container [--muted-foreground:var(--exam-solution-aside-muted)] [--ui-fill-hover:var(--exam-solution-aside-fill-hover)] [--ui-fill:var(--exam-solution-aside-fill)]';
 
 const DESKTOP = '(min-width: 768px)';
 const subscribeDesktop = (listener: () => void) => {
@@ -138,7 +161,7 @@ function SolutionCard({ self, open, setOpen }: { self: SolutionEntry; open: bool
       data-solution-card=""
       size="xl"
       height="46rem"
-      className="text-base"
+      className={solutionCard}
       finalFocus={() => {
         // A question the reader paged to may be out of layout (the reading card).
         const question = document.getElementById(`question-${meta.id}`);
@@ -150,15 +173,15 @@ function SolutionCard({ self, open, setOpen }: { self: SolutionEntry; open: bool
         <StudyCardHeader
           title={meta.number ? (
             <>
-              <span data-question-number="" aria-hidden="true">{meta.number}</span>
+              <span data-question-number="" aria-hidden="true" className={cn(questionNumberClassName, 'h-9 min-w-9 rounded-xl text-[1.0625rem]')}>{meta.number}</span>
               <span className="sr-only">第 {meta.number} 题</span>
             </>
           ) : '题目与解析'}
           tags={(
             // One glass capsule for all of them: each blurred layer costs a pass on every scrolled frame.
-            <span data-tag-capsule="">
-              <QuestionTypeTag type={meta.type} points={meta.points} />
-              <QuestionSourceTrail tags={meta.tags.source} />
+            <span data-tag-capsule="" className="inline-flex h-8 max-w-full min-w-0 shrink items-center gap-1.5 rounded-full bg-(--modal-glass) pr-2.5 pl-1">
+              <QuestionTypeTag type={meta.type} points={meta.points} className="h-6.5 rounded-full border-transparent pr-1 pl-2 text-foreground/80" />
+              <QuestionSourceTrail tags={meta.tags.source} className="h-4 border-l border-(--ui-fill-strong) pl-2" />
               <QuestionUserTags />
             </span>
           )}
@@ -168,7 +191,7 @@ function SolutionCard({ self, open, setOpen }: { self: SolutionEntry; open: bool
             <>
               <QuestionMarkActions editingNote={editingNote} onEditNote={() => setEditingNote(!editingNote)} />
               <button type="button" className={iconAction} aria-expanded={library === 'open'} aria-label="收藏与标签" title="收藏与标签" onClick={() => setLibrary('open')}>
-                <LibraryBigIcon />
+                <ActionIcon><LibraryBigIcon size={16} /></ActionIcon>
               </button>
             </>
           )}
@@ -202,9 +225,11 @@ function SheetNote({ editing, setEditing }: NoteProps) {
     <StudyCardSection
       label="我的注释"
       meta={!editing ? (
-        <Button variant="ghost" size="xs" className="-my-1 text-muted-foreground" onClick={() => setEditing(true)} disabled={!marks.ready}>
-          <NotebookPenIcon data-icon="inline-start" />{note ? '编辑' : '添加'}
-        </Button>
+        <AnimateIcon animateOnHover asChild>
+          <Button variant="ghost" size="xs" className="-my-1 text-muted-foreground" onClick={() => setEditing(true)} disabled={!marks.ready}>
+            <NotebookPenIcon size={12} data-icon="inline-start" />{note ? '编辑' : '添加'}
+          </Button>
+        </AnimateIcon>
       ) : null}
     >
       {editing ? (
@@ -227,7 +252,7 @@ function SolutionCardBody({ entry, desktop, editingNote, setEditingNote }: { ent
   const note = <SheetNote editing={editingNote} setEditing={setEditingNote} />;
   return (
     <>
-      <StudyCardAside className="@container">
+      <StudyCardAside className={aside}>
         <StudyCardSection label="题目">
           <QuestionMirror questionId={meta.id} state={state} className={prose} />
         </StudyCardSection>

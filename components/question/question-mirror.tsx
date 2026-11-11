@@ -1,10 +1,13 @@
 'use client';
 
-import { ChevronDownIcon } from 'lucide-react';
+import { AnimateIcon } from '@animate-ui/react/icons';
 import { useLayoutEffect, useRef, useState } from 'react';
+import { ChevronDownIcon } from '@/components/animate-ui/icons/chevron-down';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { isFilled, keyLetters, optionFeedback, type BlankSpec } from './grading';
+import { keyLetters, optionFeedback, type BlankSpec } from './grading';
 import { typesetMath } from './math-preview';
+import { choiceNoteClassName } from './options';
 import type { QuestionState } from './question-state';
 
 /*
@@ -43,7 +46,7 @@ export function mirrorQuestion(questionId: string, attempt: Attempt | null): HTM
   if (!source) return null;
   const copy = source.cloneNode(true) as HTMLElement;
   // A copy shows the state as it is: no ids to clash, no motion still running on the page to replay.
-  for (const name of ['id', 'data-fresh', 'data-reveal-motion']) {
+  for (const name of ['id', 'data-fresh']) {
     copy.querySelectorAll(`[${name}]`).forEach((node) => node.removeAttribute(name));
   }
   copy.querySelectorAll<HTMLElement>('[data-exam-choice-group]').forEach((group) => group.style.removeProperty('--choice-cols-measured'));
@@ -59,9 +62,12 @@ export function mirrorQuestion(questionId: string, attempt: Attempt | null): HTM
     copy.querySelectorAll<HTMLElement>('[data-option]').forEach((option) => {
       const feedback = optionFeedback(option.dataset.option ?? '', { key, selected: [], submitted, reveal: true });
       option.dataset.feedback = feedback;
-      option.dataset.reveal = isFilled(feedback) ? 'on' : 'off';
       option.querySelector('[data-choice-note]')?.remove();
-      if (feedback === 'answer') option.append(element({ choiceNote: '' }, '正确答案'));
+      if (feedback === 'answer') {
+        const note = element({ choiceNote: '' }, '正确答案');
+        note.className = choiceNoteClassName;
+        option.append(note);
+      }
     });
   }
   if (spec.kind === 'blank') {
@@ -102,17 +108,25 @@ export function QuestionMirror({ questionId, state, className }: { questionId: s
 
   return (
     <div className="relative">
-      <div ref={host} data-question-mirror="" data-folded={folded ? '' : undefined} className={className} />
+      <div
+        ref={host}
+        data-question-mirror=""
+        data-folded={folded ? '' : undefined}
+        className={cn('data-folded:max-h-50 data-folded:overflow-hidden data-folded:mask-b-from-[calc(100%_-_2.5rem)]', className)}
+      />
       {folded !== null ? (
-        <button
-          type="button"
-          className="mt-1 inline-flex items-center gap-1 rounded-full bg-(--ui-fill) px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground"
-          aria-expanded={!folded}
-          onClick={() => setFolded(!folded)}
-        >
-          <ChevronDownIcon className={cn('size-3.5 transition-transform', !folded && 'rotate-180')} />
-          {folded ? '展开题目' : '收起题目'}
-        </button>
+        <AnimateIcon animateOnHover asChild>
+          <Button
+            variant="ghost"
+            size="xs"
+            className="mt-1 rounded-full bg-(--ui-fill) px-3 text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground"
+            aria-expanded={!folded}
+            onClick={() => setFolded(!folded)}
+          >
+            <ChevronDownIcon size={14} className={cn('transition-transform duration-200', !folded && 'rotate-180')} />
+            {folded ? '展开题目' : '收起题目'}
+          </Button>
+        </AnimateIcon>
       ) : null}
     </div>
   );

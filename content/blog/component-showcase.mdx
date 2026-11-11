@@ -1,22 +1,25 @@
 ---
 title: 组件展示：按钮、模态弹窗与题目组件
-description: 站内自建组件的现场演示——点击处扩散填充的按钮、底部抽屉式模态弹窗（磨砂顶栏、左右分栏、卡片式多级弹窗、尺寸）与全部题型的题目组件和解答弹窗。
+description: 站内自建组件的现场演示——带涟漪与动画图标的按钮、底部抽屉式模态弹窗（磨砂顶栏、左右分栏、卡片式多级弹窗、尺寸）与全部题型的题目组件和解答弹窗。
 date: 2026-10-23
 author: exam-docs
 ---
 
 这一页把站内自己写的组件都放在一起，方便直接看效果。所有演示都是真实组件，不是截图：可以在手机和电脑上分别打开，也可以切换浅色 / 深色主题对照。
 
-## 按钮：点击处扩散填充
+## 按钮：按压、涟漪与动画图标
 
-`components/ui/button.tsx` 在 shadcn 的 Button 上扩展了两样东西：
+站内的按钮都建在 Animate UI 之上，不再自己维护点击动效：
 
-- **`revealed`**：任何按钮都能加一层填充色。变为 `true` 时，颜色从**按下的位置**以圆形扩散铺满按钮（Click-to-Fill Ripple / Radial Color Reveal）；变为 `false` 时不再收缩，而是底色从**这次点击的位置**以同样的速度和曲线向外清开，选中和取消互为镜像，都是从指尖向外的涟漪。键盘操作时从中心（或样式指定的位置）扩散。
-- **`TileButton`**：可选中的卡片按钮，内容可以换行、左对齐、放公式或图片。题目的选项和判断按钮都是它。
+- **`Button`**（`components/ui/button.tsx`）：shadcn 的按钮加上 Animate UI 的按压反馈。
+- **`RippleButton`**（`components/ui/ripple-button.tsx`）：同一套 variant，按下时涟漪从**点击的位置**扩散。题目的选项、提交、自评和「查看解答」都是它。
+- **动画图标**（`components/animate-ui/icons/`）：来自 Animate UI 图标库，指到按钮上或状态变化时播放。
 
-按下位置直接写在元素的 CSS 变量上，不触发重新渲染；扩散是纯 CSS，只过渡一个注册过的变量，所以换一个按下位置时圆心立即就位，只有半径在动。
+### 涟漪按钮
 
-### 单选卡片
+<ButtonDemo kind="ripple" />
+
+### 可选卡片
 
 <ButtonDemo kind="tiles" />
 
@@ -24,9 +27,9 @@ author: exam-docs
 
 <ButtonDemo kind="tones" />
 
-### 普通按钮
+### 动画图标
 
-<ButtonDemo kind="toggles" />
+<ButtonDemo kind="icons" />
 
 ## 模态弹窗 Modal
 

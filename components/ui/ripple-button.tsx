@@ -33,6 +33,11 @@ const rippleColors: Record<NonNullable<VariantProps<typeof buttonVariants>["vari
   link: "[--ripple-button-ripple-color:var(--primary)]",
 }
 
+/** The classes of a ripple button, for an element that should look like one. */
+function rippleButtonVariants({ variant = "default", size = "default" }: VariantProps<typeof buttonVariants> = {}) {
+  return cn(buttonVariants({ variant, size }), rippleColors[variant ?? "default"])
+}
+
 type RippleButtonProps = Omit<HTMLMotionProps<"button">, "children"> &
   VariantProps<typeof buttonVariants> & {
     /** Scale while pressed; Animate UI's press scale by default. */
@@ -55,7 +60,7 @@ function RippleButton({
   return (
     <RippleButtonPrimitive
       type={type}
-      className={cn(buttonVariants({ variant, size }), rippleColors[variant ?? "default"], className)}
+      className={cn(rippleButtonVariants({ variant, size }), className)}
       {...props}
     >
       {children}
@@ -68,5 +73,5 @@ function RippleButtonRipples(props: RippleButtonRipplesProps) {
   return <RippleButtonRipplesPrimitive {...props} />
 }
 
-export { RippleButton, RippleButtonRipples }
+export { RippleButton, RippleButtonRipples, rippleButtonVariants }
 export type { RippleButtonProps, RippleButtonRipplesProps }
