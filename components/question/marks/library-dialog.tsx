@@ -2,12 +2,13 @@
 
 import { NotebookPenIcon, StarIcon } from 'lucide-react';
 import Link from 'next/link';
-import { type ComponentProps, type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ComponentProps, type ReactNode, useMemo, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { Modal, ModalBody, ModalContent, ModalDescription, ModalHeader, ModalTags, ModalTitle, useModal } from '@/components/ui/modal';
 import type { QuestionMark } from '@/lib/question-store/types';
 import { cn } from '@/lib/utils';
-import { useQuestionDatabase } from '../database-context';
 import { UserTagChip } from './question-marks';
+import { useLibraryMarks } from './use-library-marks';
 import { liveTagsOf, useUserTags } from './use-marks';
 
 /*
@@ -42,21 +43,10 @@ function EntryLink(props: ComponentProps<typeof Link>) {
 }
 
 export function QuestionLibraryDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
-  const context = useQuestionDatabase();
-  const { tags, cache } = useUserTags();
-  const [marks, setMarks] = useState<QuestionMark[] | null>(null);
-  const [filter, setFilter] = useState<Filter>('all');
-  const database = context?.database ?? null;
-  const namespace = context?.namespace;
-
-  useEffect(() => {
-    if (!open || !cache) return;
-    let disposed = false;
-    const load = () => { void cache.listMarks().then((list) => { if (!disposed) setMarks(list); }).catch(() => { if (!disposed) setMarks([]); }); };
-    load();
-    const unsubscribe = database?.subscribe((change) => { if (change.namespace === namespace && change.scope === 'annotations') load(); });
-    return () => { disposed = true; unsubscribe?.(); };
-  }, [open, cache, database, namespace]);
+  const { tags } = useUserTags();
+  const { marks, error, retry, cache } = useLibraryMarks(open);
+  const [selection, setSelection] = useState<{ cache: typeof cache; filter: Filter }>({ cache, filter: 'all' });
+  const filter = selection.cache === cache ? selection.filter : 'all';
 
   const shown = useMemo(() => (marks ?? []).filter((mark) => matches(mark, filter)), [marks, filter]);
   const counts = useMemo(() => ({
@@ -70,7 +60,7 @@ export function QuestionLibraryDialog({ open, onOpenChange }: { open: boolean; o
       key={value}
       type="button"
       aria-pressed={filter === value}
-      onClick={() => setFilter(value)}
+      onClick={() => setSelection({ cache, filter: value })}
       className={cn(
         'inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm transition-colors',
         filter === value ? 'bg-foreground text-background' : 'bg-(--ui-fill) text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground',
@@ -97,7 +87,12 @@ export function QuestionLibraryDialog({ open, onOpenChange }: { open: boolean; o
         <ModalBody className="px-3 md:px-4 [&>*]:max-w-3xl">
           <ModalDescription className="mb-2 px-3 text-sm text-muted-foreground">在题目右上角收藏、打标签或写注释，都会汇总到这里。</ModalDescription>
           <ul className="min-h-40">
-            {marks === null ? (
+            {error ? (
+              <li className="flex flex-col items-center gap-2 px-2 py-8 text-sm text-muted-foreground">
+                <p role="alert">{error}</p>
+                <Button variant="outline" onClick={retry}>重试</Button>
+              </li>
+            ) : marks === null ? (
               <li className="px-2 py-8 text-center text-sm text-muted-foreground">正在读取…</li>
             ) : shown.length === 0 ? (
               <li className="px-2 py-8 text-center text-sm text-muted-foreground">

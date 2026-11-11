@@ -8,7 +8,6 @@ import type { AnswerState, QuestionIdentity } from '@/lib/question-store/types';
 import * as rules from './attempt';
 import { useQuestionStorage } from './database-context';
 import { type BlankGrade, evaluateAttempt, type Evaluation, type GradingSpec } from './grading';
-import { useQuestionBatch } from './question-batch';
 
 /*
  * Per-question client state: the stored answer of one question, its grade,
@@ -44,8 +43,6 @@ export type QuestionState = QuestionActions & {
   attempt: number;
   /** The shown grade was submitted in this visit (restored grades do not animate). */
   fresh: boolean;
-  /** In a batch graded together (question-batch): no grading of its own. */
-  deferred: boolean;
   /** The stored answer has been read; until then the question is locked. */
   ready: boolean;
   storageError: string | null;
@@ -90,11 +87,9 @@ export function QuestionProvider({ spec, questionId, questionRevision = 'unversi
   children: ReactNode;
 }) {
   const storage = useQuestionStorage();
-  const batch = useQuestionBatch();
   const documentPath = useDocumentPath();
   // Inside the site provider a null cache means "still opening": the question waits.
   const cache = storage ? storage.cache : (memoryCache ??= new QuestionAnswerCache(null, 'guest'));
-  const deferred = (batch?.deferred ?? false) && spec.kind !== 'self';
 
   // Reads come from the shared memory cache: one IndexedDB read per page, no per-question round trip.
   const store = useMemo(() => {
@@ -128,24 +123,15 @@ export function QuestionProvider({ spec, questionId, questionRevision = 'unversi
       store.write(next.state, next.kind);
     };
     return {
-      select: (letters) => apply((answer) => rules.pick(spec, answer, letters, deferred)),
+      select: (letters) => apply((answer) => rules.pick(spec, answer, letters)),
       setValue: (index, value) => apply((answer) => rules.fill(spec, answer, index, value)),
       submit: () => apply((answer) => rules.submit(spec, answer)),
       reset: () => apply(rules.reset),
       gradeBlank: (index, grade) => apply((answer) => rules.regradeBlank(spec, answer, index, grade)),
-      selfGradeBlanks: (grades) => apply((answer) => (deferred ? null : rules.selfGradeBlanks(spec, answer, grades))),
+      selfGradeBlanks: (grades) => apply((answer) => rules.selfGradeBlanks(spec, answer, grades)),
       retryStorage: store.retry,
     };
-  }, [store, spec, deferred, ready, questionId]);
-
-  // The batch submits and resets through the same paths as the footer.
-  useEffect(() => batch?.register({
-    id: questionId,
-    answered: () => rules.attemptStatus(spec, current.current, null) !== 'idle',
-    submitted: () => current.current.submitted,
-    submit: actions.submit,
-    reset: actions.reset,
-  }), [batch, questionId, spec, actions]);
+  }, [store, spec, ready, questionId]);
 
   // Grading parses maths answers, so it runs once per submitted state, not per render.
   const evaluation = useMemo(
@@ -163,10 +149,9 @@ export function QuestionProvider({ spec, questionId, questionRevision = 'unversi
     evaluation,
     status: rules.attemptStatus(spec, state, evaluation),
     fresh,
-    deferred,
     ready,
     storageError,
-  }), [actions, spec, state, evaluation, fresh, deferred, ready, storageError]);
+  }), [actions, spec, state, evaluation, fresh, ready, storageError]);
 
   return <QuestionContext.Provider value={value}>{children}</QuestionContext.Provider>;
 }

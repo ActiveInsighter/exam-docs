@@ -7,7 +7,7 @@ import type { QuestionNamespace, QuestionSyncStatus } from '@/lib/question-store
 
 export type QuestionDatabaseContext = {
   database: QuestionDatabase | null;
-  /** Memory cache every question reads from; null until the browser database has been opened (or failed). */
+  /** Current identity's answer cache; null while opening storage or changing sessions. */
   cache: QuestionAnswerCache | null;
   /** The reader's tags, favourites and notes; same lifecycle as `cache`. */
   annotations: QuestionAnnotationCache | null;
@@ -17,6 +17,7 @@ export type QuestionDatabaseContext = {
   /** The account's sync engine; null for guests. Connected only with a verified session. */
   engine: QuestionSyncEngine | null;
   status: QuestionSyncStatus;
+  /** A session matching both this namespace and database is available. */
   ready: boolean;
   error: string | null;
   /** Opens the overview of starred, tagged and annotated questions. */

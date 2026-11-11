@@ -11,7 +11,6 @@ type TreeNode = ReturnType<typeof source.getPageTree>['children'][number];
 const ROOT_LABELS = new Map([
   ['408', '408'],
   ['math', '数学'],
-  ['english', '英语'],
   ['politics', '政治'],
   ['programming', '编程'],
 ]);

@@ -66,7 +66,7 @@ export function BlankGradeSwitch({ question, index }: { question: QuestionState;
           type="button"
           data-tone={grade}
           aria-pressed={current === grade}
-          disabled={!question.ready || (!graded && question.deferred)}
+          disabled={!question.ready}
           onClick={() => choose(grade)}
         >
           {icon}{label}

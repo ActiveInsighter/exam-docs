@@ -13,7 +13,7 @@ vi.mock('@/lib/source', () => {
       path: 'math/past-exams.mdx',
       data: { title: '数学真题', description: '历年真题' },
     },
-    { url: '/docs/english', path: 'english/index.mdx', data: { title: '英语', description: '英语目录' } },
+    { url: '/docs/politics', path: 'politics/index.mdx', data: { title: '政治', description: '政治目录' } },
   ];
   const tree = {
     name: '考研学习',
@@ -29,9 +29,9 @@ vi.mock('@/lib/source', () => {
       {
         type: 'folder',
         root: true,
-        name: '英语',
-        $ref: { folder: 'english' },
-        index: { type: 'page', url: '/docs/english', name: '英语' },
+        name: '政治',
+        $ref: { folder: 'politics' },
+        index: { type: 'page', url: '/docs/politics', name: '政治' },
         children: [],
       },
     ],
@@ -56,7 +56,7 @@ describe('LLM documentation index', () => {
 
     expect(index).toContain('# 考研真题与练习文档目录');
     expect(index).toContain('## 数学');
-    expect(index).toContain('## 英语');
+    expect(index).toContain('## 政治');
     expect(index).toContain('- [数学真题](https://exam.any1.tech/docs/math/past-exams/)');
     expect(index).toContain('不要依赖搜索引擎重新检索站点');
 

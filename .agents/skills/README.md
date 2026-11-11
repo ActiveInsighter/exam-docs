@@ -12,6 +12,7 @@ upstream rules, references, and supporting files.
 | vercel-react-best-practices | https://github.com/vercel-labs/agent-skills/tree/main/skills/react-best-practices | Vercel official |
 | web-perf | https://github.com/cloudflare/skills/tree/main/skills/web-perf | Cloudflare official |
 | shadcn | https://github.com/shadcn-ui/ui/tree/main/skills/shadcn | shadcn official |
+| animate-ui | https://github.com/imskyleen/animate-ui/tree/main/skills/animate-ui | Animate UI official; linked from https://animate-ui.com/docs/skills |
 | frontend-design | https://github.com/anthropics/skills/tree/main/skills/frontend-design | Anthropic official |
 | fumadocs | https://fumadocs.dev/llms.txt | Locally authored adapter to official docs; not an official upstream skill |
 | tailwindcss | https://tailwindcss.com/docs | Locally authored adapter to official docs; not an official upstream skill |

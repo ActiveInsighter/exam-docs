@@ -1,6 +1,6 @@
 "use client"
 
-import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
+import { Popover as PopoverPrimitive } from "@animate-ui/react/primitives/base-ui/popover"
 import { cn } from "@/lib/utils"
 
 function Popover({ ...props }: PopoverPrimitive.Root.Props) {
@@ -38,7 +38,7 @@ function PopoverContent({
         <PopoverPrimitive.Popup
           data-slot="popover-content"
           className={cn(
-            "z-50 max-h-(--available-height) w-72 max-w-[calc(100vw-1.5rem)] origin-(--transform-origin) overflow-y-auto rounded-(--ui-radius-popover) bg-popover p-1.5 text-sm text-popover-foreground shadow-(--ui-shadow-float) ring-1 ring-foreground/8 outline-none duration-150 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 data-[side=bottom]:slide-in-from-top-1 data-[side=top]:slide-in-from-bottom-1",
+            "z-50 max-h-(--available-height) w-72 max-w-[calc(100vw-1.5rem)] origin-(--transform-origin) overflow-y-auto rounded-(--ui-radius-popover) bg-popover p-1.5 text-sm text-popover-foreground shadow-(--ui-shadow-float) ring-1 ring-foreground/8 outline-none",
             className
           )}
           {...props}

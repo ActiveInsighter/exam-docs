@@ -14,7 +14,7 @@ vi.mock('@/lib/source', () => {
       path: 'math/past-exams.mdx',
       data: { title: '数学真题', description: '历年真题' },
     },
-    { url: '/docs/english', path: 'english/index.mdx', data: { title: '英语', description: '英语目录' } },
+    { url: '/docs/politics', path: 'politics/index.mdx', data: { title: '政治', description: '政治目录' } },
   ];
   const blogPages = [
     { url: '/blog/hello', path: 'hello.mdx', data: { title: 'Hello', description: '博客' } },
@@ -33,9 +33,9 @@ vi.mock('@/lib/source', () => {
       {
         type: 'folder',
         root: true,
-        name: '英语',
-        $ref: { folder: 'english' },
-        index: { type: 'page', url: '/docs/english', name: '英语' },
+        name: '政治',
+        $ref: { folder: 'politics' },
+        index: { type: 'page', url: '/docs/politics', name: '政治' },
         children: [],
       },
     ],

@@ -3,15 +3,15 @@ import { createRequire } from 'node:module';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-// Same Playwright installation/Chrome selectors as verify-english-reading-browser.mjs.
-const require = createRequire(path.join(process.env.READING_BROWSER_MODULES, 'package.json'));
+// Same Playwright installation/Chrome selectors as verify-question-components-browser.mjs.
+const require = createRequire(path.join(process.env.QUESTION_BROWSER_MODULES, 'package.json'));
 const { chromium } = require('playwright-core');
 const base = process.env.DEPLOYMENT_URL.replace(/\/$/, '');
-const output = process.env.READING_SCREENSHOTS ?? '.playwright-cli/search';
+const output = process.env.QUESTION_SCREENSHOTS ?? '.playwright-cli/search';
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({
-  channel: process.env.READING_BROWSER_CHANNEL || undefined,
-  executablePath: process.env.READING_BROWSER_EXECUTABLE || undefined,
+  channel: process.env.QUESTION_BROWSER_CHANNEL || undefined,
+  executablePath: process.env.QUESTION_BROWSER_EXECUTABLE || undefined,
 });
 try {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
@@ -29,7 +29,7 @@ try {
     for (let i = 0; i < 300 && !check(); i++) await page.waitForTimeout(100);
     assert.ok(check(), label);
   }
-  await page.goto(`${base}/docs/english/`);
+  await page.goto(`${base}/docs/question-types/`);
   await page.waitForFunction(() => {
     const option = document.querySelector('[data-exam-choice-option][role="radio"]');
     return option && option.getAttribute('aria-disabled') !== 'true';

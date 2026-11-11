@@ -1,6 +1,6 @@
 import type { QuestionState } from './question-state';
 
-/** Enter (or the keypad's confirm key) moves to the next blank, and submits from the last (not in a batch graded together). */
+/** Enter (or the keypad's confirm key) moves to the next blank, and submits from the last. */
 function blanksAround(input: HTMLElement) {
   return Array.from(input.closest('[data-exam-question]')?.querySelectorAll<HTMLInputElement>('input[data-question-blank]') ?? []);
 }
@@ -11,7 +11,7 @@ export function advanceFrom(input: HTMLElement, question: QuestionState) {
   if (next && !next.disabled) next.focus();
   else {
     input.blur();
-    if (!question.deferred) question.submit();
+    question.submit();
   }
 }
 

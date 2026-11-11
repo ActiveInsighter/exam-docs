@@ -79,20 +79,6 @@ describe('question Markdown export', () => {
     expect(result).toContain('**标签：** 章节:网络');
   });
 
-  it('keeps reading article metadata and evidence text', async () => {
-    const result = await renderStaticMarkdown([
-      '<ExamArticle',
-      ' title="Attention &amp; Learning" titleTranslation="注意力与学习" source="来源：2024 阅读材料">',
-      '<p>We <Evidence for="reading-1">learn through practice</Evidence>.</p>',
-      '</ExamArticle>',
-    ].join('\n'), metadata);
-    expect(result).toContain('**Attention & Learning**');
-    expect(result).toContain('**译题：** 注意力与学习');
-    expect(result).toContain('**来源：** 来源：2024 阅读材料');
-    expect(result).toContain('We learn through practice.');
-    expect(result).not.toContain('Evidence');
-  });
-
   it('leaves code examples intact and never evaluates dynamic prop expressions', async () => {
     const code = '<Question id="sample" type="single" tags="示例" />';
     const result = await renderStaticMarkdown([

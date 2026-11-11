@@ -84,7 +84,7 @@ TCP 位于 <Blank answer="传输层" />，建立连接需要 <Blank answer="3" /
     expect(html).toContain('id="question-no-solution"');
   });
 
-  it('renders migrated 408, mathematics and English documents', async () => {
+  it('renders migrated 408 and mathematics documents', async () => {
     const mock = await render(doc('408/mock/01-数据结构/01-绪论.mdx'));
     expect(mock.match(/data-question-type="single"/gu)?.length).toBeGreaterThan(5);
     expect(mock).not.toContain('<Option');
@@ -94,8 +94,6 @@ TCP 位于 <Blank answer="传输层" />，建立连接需要 <Blank answer="3" /
     expect(math).toContain('data-question-type="single"');
     expect(math).toContain('katex');
 
-    const english = await render(doc('english/index.mdx'), 'english.mdx').catch((error) => String(error));
-    // <EnglishReading> is not part of this harness; the questions must still validate.
-    expect(english).not.toMatch(/题目写法有误/u);
+
   });
 });
