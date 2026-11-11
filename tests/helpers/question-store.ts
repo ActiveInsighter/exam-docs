@@ -21,8 +21,14 @@ export const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 /** Polls until `check` holds, for at most `ms` of wall time. */
 export async function until(check: () => boolean | Promise<boolean>, ms = 5_000) {
   const deadline = Date.now() + ms;
-  while (Date.now() < deadline && !(await check())) await tick();
-  expect(await check()).toBe(true);
+  let ready = await check();
+  while (Date.now() < deadline && !ready) {
+    await tick();
+    ready = await check();
+  }
+  // Keep the successful observation: another background exchange may start
+  // before a second asynchronous read, even though this wait was satisfied.
+  expect(ready).toBe(true);
 }
 
 const cleanup: (() => void)[] = [];
