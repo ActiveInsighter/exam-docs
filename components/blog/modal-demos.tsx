@@ -27,7 +27,6 @@ import {
   StudyCardMain,
   StudyCardSection,
   StudyCardStage,
-  studyCardReveal,
 } from '@/components/ui/study-card';
 import { cn } from '@/lib/utils';
 
@@ -358,14 +357,14 @@ function StudyDemo() {
         tint={concept.tint}
         height="34rem"
       >
-        <StudyCardHeader title={concept.term} titleMode="scrolled" />
+        <StudyCardHeader title={concept.term} titleProps={{ className: 'sr-only' }} />
         <StudyCardStage ratio={0.45}>
           <StudyCardAside>
             <StudyCardHero title={concept.term} subtitle={concept.english} badge={<Chip>{concept.tag}</Chip>} />
             <StudyCardSection label="要点">
               <ul className="grid gap-2 text-[0.9375rem] leading-relaxed">
-                {concept.points.map((point, order) => (
-                  <li key={point} className="rounded-xl bg-(--ui-fill) px-3 py-2" {...studyCardReveal(order)}>
+                {concept.points.map((point) => (
+                  <li key={point} className="rounded-xl bg-(--ui-fill) px-3 py-2">
                     {point}
                   </li>
                 ))}
@@ -373,8 +372,8 @@ function StudyDemo() {
             </StudyCardSection>
           </StudyCardAside>
           <StudyCardMain>
-            {concept.sections.map(([label, text], order) => (
-              <StudyCardSection key={label} label={label} {...studyCardReveal(order)}>
+            {concept.sections.map(([label, text]) => (
+              <StudyCardSection key={label} label={label}>
                 <p className="leading-7 text-foreground/90">{text}</p>
               </StudyCardSection>
             ))}

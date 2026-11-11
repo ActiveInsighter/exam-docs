@@ -3,7 +3,7 @@
 import { BookOpenTextIcon, LibraryBigIcon, NotebookPenIcon } from 'lucide-react';
 import { lazy, type ReactNode, Suspense, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { StudyCard, StudyCardAside, StudyCardHeader, StudyCardMain, StudyCardSection, StudyCardStage, studyCardReveal } from '@/components/ui/study-card';
+import { StudyCard, StudyCardAside, StudyCardHeader, StudyCardMain, StudyCardSection, StudyCardStage } from '@/components/ui/study-card';
 import { cn } from '@/lib/utils';
 import { AnswerSummary } from './answer-summary';
 import { NoteEditor } from './marks/note-editor';
@@ -206,7 +206,6 @@ function SheetNote({ editing, setEditing }: NoteProps) {
           <NotebookPenIcon data-icon="inline-start" />{note ? '编辑' : '添加'}
         </Button>
       ) : null}
-      {...studyCardReveal(2)}
     >
       {editing ? (
         <NoteEditor initial={note} onCancel={() => setEditing(false)} onSave={async (next) => { if (await marks.update({ note: next })) setEditing(false); }} />
@@ -229,11 +228,11 @@ function SolutionCardBody({ entry, desktop, editingNote, setEditingNote }: { ent
   return (
     <>
       <StudyCardAside className="@container">
-        <StudyCardSection label="题目" {...studyCardReveal(0)}>
+        <StudyCardSection label="题目">
           <QuestionMirror questionId={meta.id} state={state} className={prose} />
         </StudyCardSection>
         {points.length ? (
-          <StudyCardSection label="考点" meta={`${points.length} 个`} {...studyCardReveal(1)}>
+          <StudyCardSection label="考点" meta={`${points.length} 个`}>
             <QuestionPointTags tags={points} />
           </StudyCardSection>
         ) : null}
@@ -242,18 +241,18 @@ function SolutionCardBody({ entry, desktop, editingNote, setEditingNote }: { ent
 
       <StudyCardMain>
         {spec && !essay ? (
-          <StudyCardSection label="答案" {...studyCardReveal(0)}>
+          <StudyCardSection label="答案">
             <AnswerSummary spec={spec} state={state} />
           </StudyCardSection>
         ) : null}
-        <StudyCardSection label={spec && !essay ? '解析' : '参考解答'} {...studyCardReveal(essay ? 0 : 1)}>
+        <StudyCardSection label={spec && !essay ? '解析' : '参考解答'}>
           <div className={cn(prose, '[&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden')}>
             {solution}
           </div>
         </StudyCardSection>
         {essay ? (
           // Read the reference first, then grade yourself against it.
-          <StudyCardSection label="自评" meta={state?.submitted ? '可随时改' : '对照参考解答'} {...studyCardReveal(1)}>
+          <StudyCardSection label="自评" meta={state?.submitted ? '可随时改' : '对照参考解答'}>
             <SelfGrade />
           </StudyCardSection>
         ) : null}

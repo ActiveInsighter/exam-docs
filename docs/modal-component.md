@@ -94,6 +94,35 @@
   链接跳转时用 `closeAll({ returnFocus: false })`，避免焦点把页面滚回原处。
 - 下层被关闭时，叠在它上面的各层随之关闭。
 
+## 学习卡片 `StudyCard`
+
+`components/ui/study-card.tsx` 在 Modal 之上封装了一副可逐张翻看的卡片（题目与解析弹窗就是它）。
+它只负责结构与动效，不含任何具体内容，也没有独立的样式表：
+
+```tsx
+<StudyCard open={open} onOpenChange={setOpen} count={items.length} index={index} onIndexChange={setIndex}>
+  <StudyCardHeader title={item.title} tags={…} actions={…} />   {/* 翻页器自动并入工具栏 */}
+  <StudyCardStage ratio={0.45}>
+    <StudyCardAside>                {/* md 以上左栏、浅色底；手机在上 */}
+      <StudyCardHero title subtitle badge />
+      <StudyCardSection label="要点" meta="…">…</StudyCardSection>
+    </StudyCardAside>
+    <StudyCardMain>…</StudyCardMain>   {/* md 以上右栏；手机在下 */}
+  </StudyCardStage>
+  <Modal>…</Modal>                  {/* 叠在卡片之上的一层 */}
+</StudyCard>
+```
+
+- **切换**：顶栏玻璃翻页器（上一张 · 序号 · 下一张）、键盘 ←/→、触屏左右滑动（`StudyCardStage swipe={false}` 关闭，
+  卡片里有横向滚动内容时使用）；`loop` 允许首尾循环。翻到两端时，焦点从变为禁用的按钮移到另一个方向的按钮上，方向键始终可用。
+- **动画**：按 Animate UI 的「步骤切换」配方，用 Motion 的 `AnimatePresence mode="wait"` 实现：当前卡片的内容先向离开的一侧
+  移出并淡入轻微模糊（`transition.panelOut`），下一张再从另一侧进入（`transition.panelIn`），各 `StudyCardSection` 依次落位。
+  移动的只是两栏里的内容，栏本身和它的底色不动，所以切换时卡片不会闪。标题同向切换，序号用 `SlidingNumber` 滚动。
+  系统开启「减少动态效果」时只保留淡入淡出。
+- **高度**：默认 `height="44rem"`、`size="lg"`，切换时不跳动；其余属性（`className`、`data-*`、`finalFocus` 等）传给 `ModalContent`。
+- **色调**：`tint` 接受任意 CSS 颜色，左栏铺一层它的柔和底色；不传则使用 Modal 的浅色栏。
+- **焦点**：焦点在旧卡内时切换后移到标题；`useStudyCard()` 提供 `index`、`count`、`direction`、`go`、`prev`、`next`。
+
 ## 滚动条
 
 全站滚动条轨道透明（`:root { scrollbar-color: var(--ui-scrollbar-thumb) transparent }`，该属性可继承），
