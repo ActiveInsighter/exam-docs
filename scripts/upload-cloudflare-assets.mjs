@@ -17,6 +17,7 @@
  * Usage: node scripts/upload-cloudflare-assets.mjs <dir> --worker <name> [--concurrency 4]
  * Environment: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
  */
+import { createHash } from 'node:crypto';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -56,11 +57,43 @@ async function mapLimit(items, limit, task) {
   return results;
 }
 
-export async function buildAssetManifest(directory) {
+/**
+ * Each build shard owns its own docs. All shards generate identical _next/static
+ * files, so distribute their pre-upload by stable path hash instead of forcing
+ * the entire shared bundle through shard 0. The final Wrangler deploy still
+ * uploads any missing files if a pre-upload fails.
+ */
+export function shouldPreuploadShardAsset(relativePath, shardIndex = 0, shardCount = 1) {
+  if (!Number.isSafeInteger(shardCount) || shardCount < 1 ||
+      !Number.isSafeInteger(shardIndex) || shardIndex < 0 || shardIndex >= shardCount) {
+    throw new RangeError('Expected 0 <= shardIndex < shardCount and positive integer shardCount.');
+  }
+  if (shardCount === 1) return true;
+
+  const normalized = relativePath.split(path.sep).join('/');
+  if (normalized.startsWith('_next/static/')) {
+    const owner = createHash('sha256').update(normalized).digest().readUInt32BE(0) % shardCount;
+    return owner === shardIndex;
+  }
+  if (shardIndex === 0) return true;
+
+  // Other shards contribute only their own docs; shard 0 supplies shared
+  // root/Markdown routes. Workflow also removes redundant docs entries.
+  return normalized.startsWith('docs/') &&
+    normalized !== 'docs/index.html' &&
+    normalized !== 'docs/__next.docs.txt' &&
+    !normalized.endsWith('.md');
+}
+
+export async function buildAssetManifest(directory, { shardIndex = 0, shardCount = 1 } = {}) {
+  shouldPreuploadShardAsset('', shardIndex, shardCount);
   const entries = await readdir(directory, { recursive: true, withFileTypes: true });
   const files = entries
     .filter((entry) => entry.isFile() && !IGNORED_FILES.has(entry.name))
     .map((entry) => path.join(entry.parentPath, entry.name))
+    .filter((absolutePath) => shouldPreuploadShardAsset(
+      path.relative(directory, absolutePath), shardIndex, shardCount,
+    ))
     .sort();
 
   const manifest = {};
@@ -102,9 +135,9 @@ async function callApi(url, init, attempt = 1) {
   return callApi(url, init, attempt + 1);
 }
 
-export async function uploadAssets({ directory, worker, accountId, apiToken, concurrency = 4, log = console.log }) {
+export async function uploadAssets({ directory, worker, accountId, apiToken, concurrency = 4, shardIndex = 0, shardCount = 1, log = console.log }) {
   const started = Date.now();
-  const { manifest, filesByHash } = await buildAssetManifest(directory);
+  const { manifest, filesByHash } = await buildAssetManifest(directory, { shardIndex, shardCount });
   const fileCount = Object.keys(manifest).length;
   const hashed = Date.now();
 
@@ -172,12 +205,14 @@ export async function uploadAssets({ directory, worker, accountId, apiToken, con
 }
 
 function parseArgs(argv) {
-  const options = { concurrency: 4 };
+  const options = { concurrency: 4, shardIndex: 0, shardCount: 1 };
   const positional = [];
   for (let index = 0; index < argv.length; index += 1) {
     const value = argv[index];
     if (value === '--worker') options.worker = argv[++index];
     else if (value === '--concurrency') options.concurrency = Number(argv[++index]);
+    else if (value === '--shard-index') options.shardIndex = Number(argv[++index]);
+    else if (value === '--shard-count') options.shardCount = Number(argv[++index]);
     else positional.push(value);
   }
   options.directory = positional[0];
@@ -185,14 +220,16 @@ function parseArgs(argv) {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const { directory, worker, concurrency } = parseArgs(process.argv.slice(2));
+  const { directory, worker, concurrency, shardIndex, shardCount } = parseArgs(process.argv.slice(2));
   const { CLOUDFLARE_API_TOKEN: apiToken, CLOUDFLARE_ACCOUNT_ID: accountId } = process.env;
-  if (!directory || !worker || !apiToken || !accountId || !(concurrency > 0)) {
+  if (!directory || !worker || !apiToken || !accountId || !(concurrency > 0) ||
+      !Number.isSafeInteger(shardCount) || shardCount < 1 ||
+      !Number.isSafeInteger(shardIndex) || shardIndex < 0 || shardIndex >= shardCount) {
     console.error(
       'Usage: node scripts/upload-cloudflare-assets.mjs <dir> --worker <name> [--concurrency 4]\n' +
         'Requires CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID.',
     );
     process.exit(2);
   }
-  await uploadAssets({ directory: path.resolve(directory), worker, accountId, apiToken, concurrency });
+  await uploadAssets({ directory: path.resolve(directory), worker, accountId, apiToken, concurrency, shardIndex, shardCount });
 }
