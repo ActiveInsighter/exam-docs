@@ -1,14 +1,14 @@
 'use client';
 
-import { RippleButtonRipples } from '@/components/ui/ripple-button';
+import { RippleButtonSurface, RippleButtonRipples } from '@/components/ui/ripple-button';
 import { blur, scale, shift, spring, transition, useTempoTransition } from '@animate-ui/react/utils/motion';
-import { motion } from 'motion/react';
-import { type KeyboardEvent, type ReactNode, useRef } from 'react';
+import { motion, type HTMLMotionProps } from 'motion/react';
+import { type ComponentProps, type KeyboardEvent, type ReactNode, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { ChoiceDensity } from './choice-layout';
 import { BOOLEAN_FALSE, BOOLEAN_TRUE, keyLetters, optionFeedback, type OptionFeedback } from './grading';
 import { CheckIcon, XIcon } from './icons';
-import { Pressable } from './live';
+import { Pressable, useLive } from './live';
 import { useQuestionState } from './question-state';
 import { useChoiceColumns } from './use-choice-columns';
 
@@ -17,8 +17,8 @@ import { useChoiceColumns } from './use-choice-columns';
  * three are picked by letter: a true / false question is a single choice
  * between A = 正确 and B = 错误, so one group drives both looks.
  *
- * An option is Animate UI's Ripple Button (through Pressable, so only cards
- * near the viewport mount it): it gives on press and a ripple spreads from
+ * An option is Animate UI's Ripple Button (only cards near the viewport
+ * mount its animated surface): it gives on press and a ripple spreads from
  * the point pressed, in the colour of what the press led to (ink for a
  * pick, the result's tone for a grade). What an option shows is
  * its `data-feedback` (grading.ts), styled through the fb-* variants and
@@ -38,9 +38,9 @@ export type ChoiceOption = {
 /** The option's surface, by feedback: a hairline at rest, ink when picked, the result's tone when graded. */
 const tile = cn(
   'group/option relative isolate flex min-w-0 rounded-[0.875rem] border border-(--exam-line) text-left text-foreground [font:inherit] outline-none',
-  'transition-[background-color,border-color,box-shadow] duration-200 ease-out',
-  'fb-picked:border-(--exam-choice-ring-strong) fb-picked:bg-(--exam-choice-fill) fb-picked:shadow-[inset_0_0_0_0.5px_var(--exam-choice-ring-strong)]',
-  'fb-graded:border-(--tone-line) fb-graded:bg-(--tone-tint)',
+  'transition-[border-color,box-shadow] duration-200 ease-out',
+  'fb-picked:border-(--exam-choice-ring-strong) fb-picked:shadow-[inset_0_0_0_0.5px_var(--exam-choice-ring-strong)]',
+  'fb-graded:border-(--tone-line)',
   // A key the reader did not pick is only outlined, so a graded card never turns into blocks of colour.
   'fb-key:border-dashed fb-key:border-(--tone-line)',
   'fb-dimmed:border-(--exam-line-faint) fb-dimmed:*:opacity-50',
@@ -51,7 +51,7 @@ const tile = cn(
 const pressable = cn(
   'cursor-pointer select-none [-webkit-tap-highlight-color:transparent] focus-visible:ring-3 focus-visible:ring-ring/50',
   'fb-idle:hover:border-(--exam-line-hover) aria-disabled:pointer-events-none',
-  '[--ripple-button-ripple-color:color-mix(in_oklch,var(--foreground)_18%,transparent)] fb-graded:[--ripple-button-ripple-color:var(--tone)]',
+  '[--ripple-button-ripple-color:color-mix(in_oklch,var(--foreground)_38%,transparent)] fb-graded:[--ripple-button-ripple-color:var(--tone)]',
 );
 
 const choiceTile = cn(
@@ -65,7 +65,7 @@ const booleanTile = cn(tile, 'h-12 items-center justify-center gap-2 font-medium
 
 /** The letter (or the mark of a true / false option) on its disc. */
 const marker = cn(
-  'relative grid shrink-0 place-items-center rounded-full transition-colors duration-200',
+  'relative z-10 grid shrink-0 place-items-center rounded-full transition-colors duration-200',
   'group-fb-graded/option:bg-(--tone-soft) group-fb-graded/option:text-(--tone-ink) group-fb-key/option:bg-(--tone-soft) group-fb-key/option:text-(--tone-ink)',
 );
 
@@ -88,7 +88,7 @@ const glyphMarker = cn(
  * Exported for the solution card's copy, which adds it by hand.
  */
 export const choiceNoteClassName = cn(
-  'pointer-events-none absolute top-0 right-3 z-1 inline-flex h-4.5 -translate-y-1/2 items-center rounded-full bg-(--tone-soft) px-1.75',
+  'pointer-events-none absolute top-0 right-3 z-10 inline-flex h-4.5 -translate-y-1/2 items-center rounded-full bg-(--tone-soft) px-1.75',
   'font-sans text-[0.6875rem] leading-none font-semibold tracking-wide whitespace-nowrap text-(--tone-ink) not-italic shadow-[inset_0_0_0_1px_var(--tone-line)]',
   'group-data-measuring/choices:hidden group-data-fresh/option:animate-in group-data-fresh/option:fade-in group-data-fresh/option:delay-150 group-data-fresh/option:duration-300 group-data-fresh/option:fill-mode-both',
 );
@@ -163,12 +163,34 @@ function Marker({ feedback, fresh, className, children }: { feedback: OptionFeed
   );
 }
 
-/** Ripples large enough to cross a full-width option, clipped to its corners. */
-function Ripples() {
+/** Official ripple surface: feedback never paints the entire button behind it. */
+function ChoiceButton(props: ComponentProps<typeof Pressable>) {
+  return useLive() ? <LiveChoiceButton {...props} /> : <Pressable {...props} />;
+}
+
+function LiveChoiceButton({ children, type = 'button', tapScale, onPointerDown, onKeyDown, ...props }: ComponentProps<typeof Pressable>) {
+  const [rippleScale, setRippleScale] = useState(36);
+  // One measurement per interaction, never a per-frame React update or a
+  // ResizeObserver per option. Even an edge click reaches the far corner.
+  const sizeRipple = (node: HTMLButtonElement) => {
+    setRippleScale(Math.max(10, Math.hypot(node.offsetWidth, node.offsetHeight) / 10));
+  };
   return (
-    <span aria-hidden="true" className="pointer-events-none absolute inset-0 -z-1 overflow-hidden rounded-[inherit]">
-      <RippleButtonRipples scale={36} />
-    </span>
+    <RippleButtonSurface
+      type={type}
+      tapScale={tapScale}
+      {...props as Omit<HTMLMotionProps<'button'>, 'children'>}
+      onPointerDown={(event) => { sizeRipple(event.currentTarget); onPointerDown?.(event); }}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') sizeRipple(event.currentTarget);
+        onKeyDown?.(event);
+      }}
+    >
+      {children}
+      <span data-choice-ripple-layer="" aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[inherit]">
+        <RippleButtonRipples scale={rippleScale} />
+      </span>
+    </RippleButtonSurface>
   );
 }
 
@@ -254,7 +276,7 @@ export function ChoiceGroup({ options, density }: { options: ChoiceOption[]; den
       </Marker>
       <span
         data-choice-content=""
-        className="block min-w-0 flex-1 py-px [&_.katex-display]:my-1 [&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden [&>.katex]:text-[1.08em] [&>:first-child]:mt-0 [&>:last-child]:mb-0"
+        className="relative z-10 block min-w-0 flex-1 py-px [&_.katex-display]:my-1 [&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden [&>.katex]:text-[1.08em] [&>:first-child]:mt-0 [&>:last-child]:mb-0"
       >
         {option.content}
       </span>
@@ -293,9 +315,9 @@ export function ChoiceGroup({ options, density }: { options: ChoiceOption[]; den
       {options.map((option) => {
         const { feedback, button } = group.option(option.label);
         return (
-          <Pressable key={option.label} {...button} data-exam-choice-option="" className={cn(choiceTile, pressable)} ripples={<Ripples />}>
+          <ChoiceButton key={option.label} {...button} data-exam-choice-option="" className={cn(choiceTile, pressable)}>
             {body(option, feedback)}
-          </Pressable>
+          </ChoiceButton>
         );
       })}
     </div>
@@ -323,13 +345,13 @@ export function TrueFalse() {
         };
         const fresh = group?.fresh ?? false;
         return (
-          <Pressable key={letter} {...button} data-boolean-option="" data-value={String(value)} className={cn(booleanTile, pressable)} ripples={<Ripples />}>
+          <ChoiceButton key={letter} {...button} data-boolean-option="" data-value={String(value)} className={cn(booleanTile, pressable)}>
             <Marker feedback={feedback} fresh={fresh} className={glyphMarker}>
               <Icon size={14} strokeWidth={2.75} animate={fresh && verdictOf(feedback) ? 'path' : false} />
             </Marker>
-            {label}
+            <span className="relative z-10">{label}</span>
             <Note feedback={feedback} />
-          </Pressable>
+          </ChoiceButton>
         );
       })}
     </div>

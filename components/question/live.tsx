@@ -1,7 +1,6 @@
 'use client';
 
 import { AnimateIcon } from '@animate-ui/react/icons';
-import { RippleButtonSurface as RippleButton } from '@/components/ui/ripple-button';
 import { Button as AnimatedButton } from '@animate-ui/react/primitives/buttons/button';
 import type { HTMLMotionProps } from 'motion/react';
 import type { LucideIcon } from 'lucide-react';
@@ -32,7 +31,7 @@ import {
  *   <QuestionCard>     the card's <section>; goes live near the viewport
  *   useLive()          true inside a live card, and anywhere outside a card
  *                      (the solution card, dialogs)
- *   <Pressable>        press feedback; only explicit option ripples spread
+ *   <Pressable>        press feedback; options use a dedicated RippleButton
  *   <Animated>         Animate UI's AnimateIcon, or nothing around its child
  *   liveIcon(a, b)     an animated icon, or the Lucide icon it was drawn from
  */
@@ -105,22 +104,18 @@ export function QuestionCard({ children, ...props }: ComponentProps<'section'>) 
 type PressableProps = ComponentProps<'button'> & {
   /** Scale while pressed; Animate UI's press scale by default. */
   tapScale?: number;
-  /** The ripples, when they need a layer of their own; rendered after the content by default. */
-  ripples?: ReactNode;
 };
 
-/** Ordinary press feedback by default; options explicitly provide their ripple layer. */
-export function Pressable({ tapScale, ripples, type = 'button', children, ...props }: PressableProps) {
+/** Ordinary press feedback. Answer options use their own official RippleButton. */
+export function Pressable({ tapScale, type = 'button', children, ...props }: PressableProps) {
   if (!useLive()) return <button type={type} {...props}>{children}</button>;
-  const Surface = ripples ? RippleButton : AnimatedButton;
   return (
-    <Surface type={type} tapScale={tapScale} {...(props as Omit<HTMLMotionProps<'button'>, 'children'>)}>
+    <AnimatedButton type={type} tapScale={tapScale} {...(props as Omit<HTMLMotionProps<'button'>, 'children'>)}>
       {/* One child, as the primitive's types ask. */}
       <>
         {children}
-        {ripples}
       </>
-    </Surface>
+    </AnimatedButton>
   );
 }
 

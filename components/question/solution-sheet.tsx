@@ -1,6 +1,6 @@
 'use client';
 
-import { lazy, type ReactNode, Suspense, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { BookOpenIcon } from './icons';
@@ -8,13 +8,11 @@ import { Animated, Pressable } from './live';
 import { useMarks } from './marks/question-marks';
 import type { QuestionMeta } from './model';
 import { useQuestionState } from './question-state';
+import { SolutionCard } from './solution-card';
 import { removeSolutionEntry, setSolutionEntry, type SolutionEntry } from './solution-deck';
 
-// Load the deck, mirror and editors only when an answer is opened. Hover or
-// keyboard focus warms the same import without mounting a hidden modal.
-const loadCard = () => import('./solution-card');
-const SolutionCard = lazy(() => loadCard().then(module => ({ default: module.SolutionCard })));
-
+// The controller is ready with the page. Its DOM still mounts on first open,
+// so one click creates one Drawer; no empty Suspense hand-off can replace it.
 export function QuestionSolutionSheet({ meta, solution }: { meta: QuestionMeta; solution: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -32,8 +30,6 @@ export function QuestionSolutionSheet({ meta, solution }: { meta: QuestionMeta; 
       <Animated animateOnHover asChild>
         <Pressable
           ref={trigger}
-          onPointerEnter={() => { void loadCard(); }}
-          onFocus={() => { void loadCard(); }}
           data-solution-trigger=""
           aria-haspopup="dialog"
           aria-expanded={open}
@@ -47,7 +43,7 @@ export function QuestionSolutionSheet({ meta, solution }: { meta: QuestionMeta; 
           查看解答
         </Pressable>
       </Animated>
-      {mounted ? <Suspense fallback={null}><SolutionCard self={entry} open={open} setOpen={setOpen} /></Suspense> : null}
+      {mounted ? <SolutionCard self={entry} open={open} setOpen={setOpen} /> : null}
     </>
   );
 }

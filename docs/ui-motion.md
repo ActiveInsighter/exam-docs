@@ -20,7 +20,7 @@
 
 ModalContext 提供当前页 `close()`、面板 `closeAll()` 和返回焦点策略；
 拖拽、滚动锁定和焦点陷阱由唯一的 Drawer 负责。
-`modal-navigation.tsx` 管理子页，`panel-motion.tsx` 提供同步、可中断的切换；不另建拖拽或焦点陷阱。
+`modal-navigation.tsx` 管理子页，官方 Animate UI Tabs.Panel 提供可中断切换，`panel-motion.tsx` 只缓存题目内容快照；不另建拖拽或焦点陷阱。
 详见 [Modal / StudyCard](modal-component.md) 与 [按钮](button-component.md)。
 
 ## 统一节奏与减少动态效果
@@ -29,10 +29,10 @@ ModalContext 提供当前页 `close()`、面板 `closeAll()` 和返回焦点策�
 其下的 ReducedMotionConfig 将同一策略传给自定义 Motion 节点；只设置 AnimateUIProvider
 不会自动给所有自定义节点添加 MotionConfig。系统偏好变化时不重挂整棵应用，保留焦点与作答状态。
 
-- 官方 primitive 使用自身动效，不叠加 CSS 开合动画。
+- 官方 primitive 使用自身动效，不叠加 CSS 开合动画。Drawer 直接使用默认进出场与遮罩曲线，关闭整张面板时冻结子页，退场完成后才清理状态。
 - Modal 顶栏独立占位，正文原生滚动；不对大面积滚动区加 mask，不在顶栏下实时采样 backdrop-filter，不测量顶栏高度。
 - 自定义动效使用 `@animate-ui/react/utils/motion` 的令牌，经 `useTempoTransition()` 调整节奏。
-- StudyCard 使用 PanelSwap：固定分栏内的退出与进入同步，方向一致，不等待、不对整片内容模糊；标题同步切换，序号使用 SlidingNumber。
+- StudyCard 使用官方 Base UI Tabs.Panel：固定分栏内先退场再入场，方向按面板顺序，快速反向由官方接续；标题采用相同面板切换，序号使用 SlidingNumber。
 - transform 字符串用 `useShouldReduceMotion()` 消除位移；Motion 的 x / y / scale 由 ReducedMotionConfig 管理。
 - 减少动态效果时保留状态提示和淡入淡出，停止位移、缩放与装饰性循环；CSS 动画另外处理 `motion-reduce:`。
 - CSS 过渡只列实际变化的属性，不用 `transition-all`，不覆盖 Motion 的 transform。
@@ -44,11 +44,11 @@ Avatar、Input、Field、Label、Badge、Separator 没有需要替换的动画 p
 ## 长页面
 
 QuestionCard 使用模块级共享 IntersectionObserver：每张卡第一次接近视口时才启用
-Pressable、Animated 和 liveIcon 的官方动画实现（Pressable 默认只按压，选项显式传入扩散层）；此前呈现外观相同、可操作的静态元素。
+Pressable、Animated 和 liveIcon 的官方动画实现（Pressable 默认只按压，选项单独组合官方 RippleButton 与扩散层）；此前呈现外观相同、可操作的静态元素。
 激活是一次性的，不在滚动离开后反复卸载。替换控件时恢复该题内的焦点，不重置作答或个人标记。
 选项分栏另外批量测量视口附近的题目，避免水合时对全页强制布局。
 
-解答弹窗、数学键盘和嵌套的收藏库继续按需加载；不得把每题的弹窗全部预挂载到长页面上。
+解答弹窗 DOM 按需挂载，数学键盘和嵌套的收藏库代码按需加载；不得把每题的弹窗全部预挂载到长页面上。
 
 ## 验证
 
@@ -62,7 +62,10 @@ GitHub Actions：`deploy-cloudflare-worker-assets.yml`，显式设置 `deploy=fa
 ```bash
 QUESTION_BROWSER_EXECUTABLE=/usr/bin/chromium node scripts/verify-question-components-browser.mjs
 QUESTION_BROWSER_EXECUTABLE=/usr/bin/chromium node scripts/verify-study-motion-browser.mjs
+QUESTION_BROWSER_EXECUTABLE=/usr/bin/chromium QUESTION_RECORD_VIDEO=1 node scripts/verify-modal-motion-browser.mjs
 ```
+
+`verify-modal-motion-browser.mjs` 会降低动画播放速度，逐帧验证弹入/弹出确实移动、关闭不露出父页、选项圆波确实扩大，保留视频与采样数据。不能只用“涟漪 DOM 存在”或静态截图替代。
 
 检查桌面 / 窄屏、亮 / 暗色、系统减少动态效果、动画中间帧、连续快速操作，以及：
 

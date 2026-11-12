@@ -43,7 +43,7 @@ async function nested(page, name, options) {
     assert.ok(entering.every(frame => Math.abs(frame.y) < 0.1 && Math.abs(frame.scale - 1) < 0.001), 'reduced drawer fades without travelling');
   }
   await settled(root);
-  await focused(root.locator('[data-slot="modal-title"]'));
+  await focused(root.locator('[data-slot="modal-title"]').first());
   const body = root.locator('[data-slot="modal-root-page"] [data-slot="modal-body"]');
   const scrollTop = await body.evaluate(node => {
     const input = document.createElement('input');
@@ -76,10 +76,12 @@ async function nested(page, name, options) {
   await settled(third);
   await capture(page, `${name}-nested-three`);
   await third.locator('[data-slot="modal-back"]').click();
-  await gone(third);
+  await third.waitFor({ state: 'hidden' });
+  await settled(root);
   await focused(openThird);
   await page.keyboard.press('Escape');
-  await gone(child);
+  await child.waitFor({ state: 'hidden' });
+  await settled(root);
   await focused(openChild);
   assert.equal(await body.evaluate(node => node.scrollTop), scrollTop, 'returning preserves parent scroll');
   assert.equal(await body.locator('[data-retained-input]').inputValue(), '保留输入', 'returning preserves form state');
@@ -89,7 +91,8 @@ async function nested(page, name, options) {
   await child.waitFor();
   await settled(child);
   await page.mouse.click(2, 2);
-  await gone(child);
+  await child.waitFor({ state: 'hidden' });
+  await settled(root);
   await focused(openChild);
 
   // The header close action closes the shared surface and restores the page trigger.
@@ -132,7 +135,7 @@ async function study(page, name, options) {
   await trigger.click();
   const sheet = page.locator('[data-study-card]');
   await sheet.waitFor();
-  const title = sheet.locator('[data-slot="modal-title"]');
+  const title = sheet.locator('[data-slot="modal-title"]').first();
   const titleIs = async text => {
     await page.waitForFunction(text => document.querySelector('[data-study-card] [data-slot="modal-title"]')?.textContent === text, text);
     await settled(sheet);
@@ -218,7 +221,7 @@ async function solution(page, name, options) {
   await sheet.waitFor();
   const entering = await frames(sheet);
   await settled(sheet);
-  const titleBox = await sheet.locator('[data-slot="modal-title"]').boundingBox();
+  const titleBox = await sheet.locator('[data-slot="modal-title"]').first().boundingBox();
   const closeBox = await sheet.locator('[data-slot="modal-close"]').boundingBox();
   assert.ok(Math.abs(titleBox.y - closeBox.y) < 6, 'the close button stays on the title row at narrow widths');
   if (options.reducedMotion === 'reduce') assert.ok(entering.every(frame => Math.abs(frame.y) < 0.1), 'lazy solution respects reduced motion on first open');
@@ -226,7 +229,7 @@ async function solution(page, name, options) {
   const note = sheet.getByRole('textbox', { name: '我的注释', exact: true });
   await note.fill('保留编辑光标');
   await page.keyboard.press('ArrowRight');
-  assert.ok((await sheet.locator('[data-slot="modal-title"]').textContent()).includes('第 1 题'), 'arrows inside an editor do not change cards');
+  assert.ok((await sheet.locator('[data-slot="modal-title"]').first().textContent()).includes('第 1 题'), 'arrows inside an editor do not change cards');
   await page.keyboard.press('Escape');
   await note.waitFor({ state: 'detached' });
   await focused(sheet.locator('[data-question-actions]').getByRole('button', { name: '添加注释', exact: true }));
@@ -239,9 +242,10 @@ async function solution(page, name, options) {
   assert.equal(await page.getByRole('dialog').count(), 1, 'library shares the solution dialog');
   await capture(page, `${name}-solution-library`);
   await library.locator('[data-slot="modal-back"]').click();
-  await gone(library);
+  await library.waitFor({ state: 'hidden' });
+  await settled(sheet);
   await focused(libraryTrigger);
-  await sheet.locator('[data-slot="modal-close"]').click();
+  await sheet.locator('[data-slot="modal-close"]:visible').click();
   await gone(sheet);
   await focused(trigger);
   return { entering, feedback, ripple };

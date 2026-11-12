@@ -18,7 +18,7 @@
 
 解答题不自动判分：底部给出「正确 / 部分正确 / 错误」三个自评按钮，「题目与解析」弹窗里先列参考解答、再给同样的自评按钮，可随时改。自评和其他题型的作答一样保存与同步（`selected` 中存字母 A / B / C，与判断题存字母的方式相同），右下角答题球也按自评结果统计。
 
-选项未选中时只有细边框、没有底色；点击时涟漪从按下位置扩散，选中与判分的持久颜色随状态过渡。
+选项未选中时只有细边框、没有底色；点击时官方涟漪从按下位置扩散；选中与判分用边框和字母标记表达，不同时把整个按钮背景铺色。
 作者在题目之间写的 `---` 分割线会被自动隐藏，不需要删除。
 
 ### 题型核对
@@ -58,7 +58,7 @@
 - 选项字母用 Computer Modern 数学斜体（KaTeX 自带的 `KaTeX_Math` 字体，与公式变量同款）排在柔和的圆底上，
   判分后的「正确答案」等答案字母也用同一字体。
 - 多选题把每个正确选项都标上 `correct`。
-- 选项与判断按钮共用 `options.tsx` 的选项组，通过 [`Pressable / RippleButton`](button-component.md) 提供官方涟漪与按压反馈。
+- 选项与判断按钮共用 `options.tsx` 的选项组，通过独立的 [`RippleButton`](button-component.md) 提供官方涟漪与按压反馈。扩散层在背景之上、文字之下，按按钮尺寸适配圆波范围；普通 `Pressable` 不再同时承担选项与操作按钮。
   提交、查看解答、自评和改判使用普通按压按钮，不扩散。持久的选中和判分颜色由 `data-feedback` 决定；未选中的正确答案用描边和说明标记，选项字母始终可见。
 - 判分反馈：选对为绿色勾，选错为红色叉并轻微抖动；单选答错时正确项以绿色描边标出「正确答案」；
   多选题没选到的正确项以**黄色**标出「漏选」。结果胶囊：回答正确（绿）、少选（黄，只选了正确项的一部分）、回答错误（红，选了错误项）。
@@ -209,7 +209,7 @@ log(底数, 真数)、eˣ、10ˣ、立方根、立方、倒数、阶乘等；`ab
 | `options.tsx` / `blank-field.tsx` / `math-blank.tsx` / `math-keypad.tsx` | 选择和判断共用选项组；填空与按需加载的数学键盘 |
 | `live.tsx` / `icons.ts` / `looks.ts` | 视口附近首次启用动画、静态 / 动态图标映射、跨题目部件的外观约定 |
 | `blank-grade.tsx` / `answer-summary.tsx` | 自评与手动判分共用开关和面板；解答中的答案对照 |
-| `question-footer.tsx` / `solution-sheet.tsx` / `solution-card.tsx` / `question-mirror.tsx` | 判分结果、轻量触发器、按需加载的解答卡片（组装 `StudyCard`）、只读题干副本 |
+| `question-footer.tsx` / `solution-sheet.tsx` / `solution-card.tsx` / `question-mirror.tsx` | 判分结果、轻量触发器、首次打开才挂载的解答卡片（组装 `StudyCard`）、只读题干副本 |
 | `components/question/marks/` | 收藏、读者标签、注释与「收藏与标签」汇总 |
 | `styles/question.css` / `styles/question/blanks.css` / `styles/question/keypad.css` | 题目语义色与反馈变体、页面规则、行内填空和数学键盘；布局优先放在各组件的 Tailwind 类里 |
 

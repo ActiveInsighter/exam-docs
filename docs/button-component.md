@@ -53,16 +53,16 @@ import { RippleButton, RippleButtonRipples } from '@/components/ui/ripple-button
 | `hoverScale` | 官方可选属性；项目保持默认值 1，悬停只改变颜色。 |
 | `ripples` | 默认 `true`；传 `false` 后自行安放 `RippleButtonRipples`。 |
 | `--ripple-button-ripple-color` | 涟漪颜色，默认跟随按钮变体；题目按判分状态设置。 |
-| `RippleButtonRipples scale` | 涟漪扩散范围；题目长选项使用 36，放在独立裁切层内。 |
+| `RippleButtonRipples scale` | 涟漪扩散范围；选项在按下时按按钮对角线计算范围，圆波覆盖最远角，放在独立裁切层内。 |
 
-涟漪是短暂的点击反馈。选中、判对、判错的持久外观由 `aria-checked`、`aria-pressed`、
+涟漪是短暂的点击反馈。选项不再同时修改整面背景色，以免遮住圆波；扩散层保持在文字下方。选中、判对、判错的持久外观由 `aria-checked`、`aria-pressed`、
 `data-feedback` 和语义色变量表达，不依赖涟漪留在屏幕上。
 旧 `TileButton`、`tileVariants`、`revealed`、`--reveal-*` 与 `styles/reveal.css` 已移除。
 
 ## 题卡与图标
 
 长题目页使用 `components/question/live.tsx` 的 `Pressable`：首次接近视口前是同样外观的原生按钮，
-接近后默认组合官方普通按压按钮，只有答案选项显式传入扩散层时使用 RippleButton，避免上百道题在水合时一起挂载 Motion。
+接近后默认组合官方普通按压按钮，答案选项由独立的 ChoiceButton 组合官方 RippleButton 与扩散层，避免上百道题在水合时一起挂载 Motion。
 提交、查看解答、自评与改判都不扩散。
 这是题卡的性能适配层；其他页面直接使用共享 UI 按钮。判分和存储仍由题目状态层负责。
 
