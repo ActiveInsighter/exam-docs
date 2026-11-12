@@ -342,12 +342,17 @@ function ModalPageContent({
   )
 }
 
+// Keep the drawer responsive and slightly elastic without changing the
+// Base UI swipe/focus lifecycle. Animate UI converts the spring into a
+// cancellable CSS timing curve, so a drag still tracks the pointer directly.
 const sheetEnter: NonNullable<DrawerPrimitive.Popup.Props["transition"]> = {
-  duration: 0.6,
-  ease: [0.22, 1, 0.36, 1],
+  type: "spring",
+  visualDuration: 0.34,
+  bounce: 0.2,
 }
+// Dismissal should accelerate off screen, not bounce back into view.
 const sheetExit: NonNullable<DrawerPrimitive.Popup.Props["exitTransition"]> = {
-  duration: 0.44,
+  duration: 0.24,
   ease: [0.4, 0, 1, 1],
 }
 
@@ -376,8 +381,8 @@ function ModalRootContent({
     <DrawerPrimitive.Portal data-slot="modal-portal">
       <DrawerPrimitive.Backdrop
         data-slot="modal-backdrop"
-        transition={{ duration: 0.46, ease: [0.22, 1, 0.36, 1] }}
-        exitTransition={{ duration: 0.42, ease: [0.4, 0, 1, 1] }}
+        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+        exitTransition={{ duration: 0.26, ease: [0.4, 0, 1, 1] }}
         className={cn(
           "fixed inset-0 z-50 min-h-dvh bg-(--modal-backdrop) supports-[-webkit-touch-callout:none]:absolute",
           backdropClassName
