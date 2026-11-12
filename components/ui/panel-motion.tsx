@@ -38,11 +38,13 @@ function PanelFrame({
   direction,
   transition,
   reducedMotion,
+  fill,
 }: {
   children: React.ReactNode
   direction: number
   transition: Transition
   reducedMotion: boolean
+  fill: boolean
 }) {
   const present = useIsPresent()
   return (
@@ -51,7 +53,7 @@ function PanelFrame({
       role="group"
       inert={!present}
       tabIndex={-1}
-      className="relative min-h-0 min-w-0 outline-none"
+      className={cn("relative min-h-0 min-w-0 outline-none", fill && "flex min-h-0 flex-1 flex-col overflow-hidden")}
       custom={direction}
       variants={reducedMotion ? reducedVariants : panelVariants}
       initial="enter"
@@ -64,21 +66,24 @@ function PanelFrame({
   )
 }
 
-export function PanelSwap({ value, direction, className, children, transition }: {
+export function PanelSwap({ value, direction, className, children, transition, fill = false }: {
   value: React.Key
   direction: number
   className?: string
   children: React.ReactNode
   transition?: Transition
+  /** Fill a fixed-size viewport (the solution stage), not the title row. */
+  fill?: boolean
 }) {
   const reducedMotion = useReducedMotion() ?? false
   return (
-    <div data-slot="panel-swap" className={cn("relative min-h-0 min-w-0", className)}>
+    <div data-slot="panel-swap" className={cn("relative min-h-0 min-w-0", fill && "flex min-h-0 flex-1 flex-col overflow-hidden", className)}>
       <AnimatePresence initial={false} mode="popLayout" custom={direction}>
         <PanelFrame
           key={String(value)}
           direction={direction}
           reducedMotion={reducedMotion}
+          fill={fill}
           transition={transition ?? panelTransition}
         >
           {children}
