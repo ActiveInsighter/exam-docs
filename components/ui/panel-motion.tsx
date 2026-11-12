@@ -29,9 +29,12 @@ const reducedVariants: Variants = {
   exit: { opacity: 0 },
 }
 
+// Fade quickly to keep the answer readable; let the small directional
+// movement settle with a short, restrained spring. The fixed split panes
+// keep their own scroll offsets and do not take part in layout animation.
 const panelTransition: Transition = {
-  opacity: { duration: 0.26, ease: [0.22, 1, 0.36, 1] },
-  x: { duration: 0.42, ease: [0.22, 1, 0.36, 1] },
+  opacity: { duration: 0.18, ease: [0.22, 1, 0.36, 1] },
+  x: { type: "spring", visualDuration: 0.28, bounce: 0.18 },
 }
 
 function PanelFrame({
