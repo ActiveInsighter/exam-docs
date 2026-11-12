@@ -36,6 +36,7 @@ const panelTransition: Transition = {
 
 function PanelFrame({
   children,
+  direction,
   transition,
   reducedMotion,
   fill,
@@ -43,6 +44,7 @@ function PanelFrame({
 }: {
   ref?: React.Ref<HTMLDivElement>
   children: React.ReactNode
+  direction: number
   transition: Transition
   reducedMotion: boolean
   fill: boolean
@@ -57,6 +59,7 @@ function PanelFrame({
       tabIndex={-1}
       className={cn("relative min-h-0 min-w-0 outline-none", fill && "flex min-h-0 flex-1 flex-col overflow-hidden")}
       variants={reducedMotion ? reducedVariants : panelVariants}
+      custom={direction}
       initial="enter"
       animate="center"
       exit="exit"
@@ -83,6 +86,7 @@ export function PanelSwap({ value, direction, className, children, transition, f
       <AnimatePresence initial={false} mode="popLayout" custom={direction}>
         <PanelFrame
           key={String(value)}
+          direction={direction}
           reducedMotion={reducedMotion}
           fill={fill}
           transition={timedTransition}
