@@ -174,7 +174,7 @@ const SHEETS = [
   },
 ] as const;
 
-/** One sheet of the stack demo; each can open the next on top of itself. */
+/** One page of the shared surface; each can open the next. */
 function Sheet({ index }: { index: number }) {
   const modal = useModal();
   const sheet = SHEETS[index];
@@ -219,7 +219,7 @@ function NestedDemo() {
         <ModalTrigger className={trigger}>
           <BookmarkIcon className="size-4" />多级弹窗
         </ModalTrigger>
-        <ModalContent size="lg">
+        <ModalContent size="lg" height="36rem">
           <Sheet index={0} />
         </ModalContent>
       </Modal>

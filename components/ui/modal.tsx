@@ -5,10 +5,9 @@ import { AnimateIcon } from "@animate-ui/react/icons"
 import { Drawer as DrawerPrimitive } from "@animate-ui/react/primitives/base-ui/drawer"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Button as BaseButton } from "@base-ui/react/button"
-import { ReducedMotionConfig, transition } from "@animate-ui/react/utils/motion"
-import { AnimatePresence, type HTMLMotionProps } from "motion/react"
+import { useRender } from "@base-ui/react/use-render"
 import { createPortal } from "react-dom"
-import { ModalPageFrame, useModalNavigation, type ModalNavigation } from "@/components/ui/modal-navigation"
+import { focusVisiblePage, ModalPageFrame, ModalPages, useModalNavigation, type ModalNavigation, type ModalPageEntry } from "@/components/ui/modal-navigation"
 
 import { ChevronLeftIcon } from "@/components/animate-ui/icons/chevron-left"
 import { XIcon } from "@/components/animate-ui/icons/x"
@@ -42,6 +41,11 @@ import { cn } from "@/lib/utils"
  * owns dismissal, scroll locking and the focus trap. Covered pages stay
  * mounted and inert; the navigation module owns their motion and lifetime.
  */
+
+type ModalProps = Omit<DrawerPrimitive.Root.Props, "onOpenChange" | "children"> & {
+  children?: React.ReactNode
+  onOpenChange?: (open: boolean) => void
+}
 
 type ModalContextValue = {
   /** 0 for a modal opened from the page, 1 for one opened inside it, and so on. */
@@ -91,12 +95,12 @@ function useMounted() {
   return mounted
 }
 
-function Modal(props: DrawerPrimitive.Root.Props) {
+function Modal(props: ModalProps) {
   const parent = React.useContext(ModalContext)
   return parent ? <ModalPageRoot {...props} parent={parent} /> : <ModalRoot {...props} />
 }
 
-function ModalRoot({ open: openProp, defaultOpen = false, onOpenChange, actionsRef, ...props }: DrawerPrimitive.Root.Props) {
+function ModalRoot({ open: openProp, defaultOpen = false, onOpenChange, onOpenChangeComplete, actionsRef, ...props }: ModalProps) {
   const id = React.useId()
   const navigation = useModalNavigation()
   const actions = React.useRef<DrawerPrimitive.Root.Actions | null>(null)
@@ -104,9 +108,14 @@ function ModalRoot({ open: openProp, defaultOpen = false, onOpenChange, actionsR
   const [ownOpen, setOwnOpen] = React.useState(defaultOpen)
   const open = openProp ?? ownOpen
   const mounted = useMounted()
+  const closingPages = React.useRef<ModalPageEntry[]>([])
   React.useLayoutEffect(() => {
-    if (open) returnFocus.current = true
-  }, [open])
+    if (open) {
+      returnFocus.current = true
+      closingPages.current = []
+    }
+    else if (!closingPages.current.length) closingPages.current = navigation.pages
+  }, [open, navigation.pages])
   const close = React.useCallback(() => actions.current?.close(), [])
   const closeAll = React.useCallback<ModalContextValue["closeAll"]>((options) => {
     if (options?.returnFocus === false) returnFocus.current = false
@@ -128,32 +137,32 @@ function ModalRoot({ open: openProp, defaultOpen = false, onOpenChange, actionsR
             navigation.top.close()
             return
           }
-          onOpenChange?.(next, details)
+          onOpenChange?.(next)
           if (details.isCanceled) return
           if (next) returnFocus.current = true
           setOwnOpen(next)
         }}
         actionsRef={actions}
+        onOpenChangeComplete={(next) => {
+          if (!next) {
+            closingPages.current.forEach((page) => page.close())
+            closingPages.current = []
+          }
+          onOpenChangeComplete?.(next)
+        }}
       />
     </ModalContext.Provider>
   )
 }
 
 /** Nested roots manage page state only; they never create a second Drawer. */
-function ModalPageRoot({ parent, open: openProp, defaultOpen = false, onOpenChange, onOpenChangeComplete, actionsRef, children }: DrawerPrimitive.Root.Props & { parent: ModalInternals }) {
+function ModalPageRoot({ parent, open: openProp, defaultOpen = false, onOpenChange, onOpenChangeComplete, actionsRef, children }: ModalProps & { parent: ModalInternals }) {
   const id = React.useId()
   const [ownOpen, setOwnOpen] = React.useState(defaultOpen)
-  const open = parent.open && (openProp ?? ownOpen)
+  const open = openProp ?? ownOpen
   const changeOpen = React.useCallback((next: boolean) => {
-    const details: DrawerPrimitive.Root.ChangeEventDetails = {
-      reason: "imperative-action", event: new Event("modal-page-change"), trigger: undefined,
-      isCanceled: false, isPropagationAllowed: false,
-      cancel() { this.isCanceled = true },
-      allowPropagation() { this.isPropagationAllowed = true },
-      preventUnmountOnClose() {},
-    }
-    onOpenChange?.(next, details)
-    if (!details.isCanceled) setOwnOpen(next)
+    onOpenChange?.(next)
+    setOwnOpen(next)
   }, [onOpenChange])
   // Keep the registered action stable while callers render inline handlers.
   const change = React.useRef(changeOpen)
@@ -161,12 +170,12 @@ function ModalPageRoot({ parent, open: openProp, defaultOpen = false, onOpenChan
   const close = React.useCallback(() => change.current(false), [])
   React.useImperativeHandle(actionsRef, () => ({ close, unmount: close }), [close])
   React.useEffect(() => {
-    if (!parent.open && (openProp ?? ownOpen)) change.current(false)
-  }, [parent.open, openProp, ownOpen])
+    if (parent.depth > 0 && !parent.open && (openProp ?? ownOpen)) change.current(false)
+  }, [parent.depth, parent.open, openProp, ownOpen])
   const context = React.useMemo<ModalInternals>(() => ({
     ...parent, id, titleId: `${id}-title`, depth: parent.depth + 1, open, close, setOpen: changeOpen, onOpenChangeComplete,
   }), [parent, id, open, close, changeOpen, onOpenChangeComplete])
-  return <ModalContext.Provider value={context}>{children as React.ReactNode}</ModalContext.Provider>
+  return <ModalContext.Provider value={context}>{children}</ModalContext.Provider>
 }
 
 function ModalTrigger(props: DrawerPrimitive.Trigger.Props) {
@@ -204,7 +213,8 @@ const modalContentVariants = cva(
     "md:[--modal-float:0.75rem] md:[--modal-gutter:1.75rem]",
     "md:[--modal-cap:calc(100dvh_-_2.5rem_-_var(--modal-float))]",
     // Leaving: past the edge it floats above.
-    "[--closed-transform:translate3d(0,calc(100%_+_var(--modal-float)_+_2px),0)]",
+    "[--closed-transform:translate3d(0,calc(100%_+_var(--modal-float)_+_2px),0)_scale(1)]",
+    "[&[data-ending-style]:not([data-animate-ui-reduce])]:opacity-[0.9999]",
   ],
   {
     variants: {
@@ -235,7 +245,7 @@ const modalContentVariants = cva(
  */
 type ModalHeight = "auto" | "fixed" | (string & {})
 
-type ModalContentProps = Omit<DrawerPrimitive.Popup.Props, "className"> &
+type ModalContentProps = Omit<DrawerPrimitive.Popup.Props, "className" | "style" | "render"> &
   Pick<VariantProps<typeof modalContentVariants>, "size"> & {
     /**
      * "auto" (default) follows the content; "fixed" or a CSS length keeps
@@ -244,6 +254,7 @@ type ModalContentProps = Omit<DrawerPrimitive.Popup.Props, "className"> &
     height?: ModalHeight
     className?: string
     backdropClassName?: string
+    style?: React.CSSProperties
   }
 
 type FocusTarget = DrawerPrimitive.Popup.Props["finalFocus"]
@@ -266,7 +277,7 @@ function ModalContent(props: ModalContentProps) {
 function ModalPageContent({
   children, className, initialFocus, finalFocus, ref, style,
   size: _size, height: _height, backdropClassName: _backdrop,
-  transition: _enter, exitTransition: _leave, render: _render,
+  transition, exitTransition,
   ...props
 }: ModalContentProps) {
   const modal = useModalPart("ModalContent")
@@ -274,6 +285,9 @@ function ModalPageContent({
   const titleRef = React.useRef<HTMLElement | null>(null)
   const frame = React.useRef<HTMLDivElement>(null)
   const restore = React.useRef<HTMLElement | null>(null)
+  const needsInitialFocus = React.useRef(false)
+  const [visited, setVisited] = React.useState(modal.open)
+  if (modal.open && !visited) setVisited(true)
   const restoreFocus = React.useEffectEvent(() => {
     const resolved = resolveFocus(finalFocus, "")
     if (resolved === false) return
@@ -289,40 +303,43 @@ function ModalPageContent({
   React.useLayoutEffect(() => {
     if (!modal.open || !host) return
     restore.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    return register({ id: modal.id, titleId: modal.titleId, depth: modal.depth, close: modal.close })
+    needsInitialFocus.current = true
+    return register({
+      id: modal.id, titleId: modal.titleId, depth: modal.depth, close: modal.close,
+      descriptionId: frame.current?.querySelector<HTMLElement>('[data-slot="modal-description"]')?.id,
+    })
   }, [modal.open, host, register, modal.id, modal.titleId, modal.depth, modal.close])
   const active = modal.open && top?.id === modal.id
   React.useLayoutEffect(() => {
-    if (active) initial()
-    // Parent loses inert in the same commit before we restore its trigger.
+    const panel = frame.current
+    const popup = panel?.closest<HTMLElement>('[data-slot="modal-content"]')
+    // Re-entering a covered parent must not steal its child's return focus.
+    if (active && panel && modal.surfaceOpen && needsInitialFocus.current) return focusVisiblePage(panel, () => {
+      needsInitialFocus.current = false
+      initial()
+    }, popup)
+    // Base UI retains the outgoing page until its animation finishes. Give
+    // focus back on the first visible frame of its parent, not a guessed timer.
     else if (!modal.open && modal.surfaceOpen && restore.current?.isConnected && modal.returnFocus.current) {
-      const frame = requestAnimationFrame(restoreFocus)
-      return () => cancelAnimationFrame(frame)
+      const parent = restore.current.closest<HTMLElement>('[data-slot="modal-root-page"], [data-slot="modal-page"]')
+      if (parent) return focusVisiblePage(parent, restoreFocus, popup)
     }
   }, [active, modal.open, modal.surfaceOpen, modal.returnFocus])
-  if (!host) return null
+  if (!host || !visited) return null
   return createPortal(
-    <AnimatePresence onExitComplete={() => modal.onOpenChangeComplete?.(false)}>
-      {modal.open ? (
-        <ModalPageFrame key={modal.id} ref={(node) => {
-          frame.current = node
-          if (typeof ref === "function") ref(node)
-          else if (ref) ref.current = node
-        }} active={active} tabIndex={-1}
-          {...props as Omit<HTMLMotionProps<"div">, "style">}
-          onAnimationComplete={(definition) => {
-            if (definition === "center") modal.onOpenChangeComplete?.(true)
-          }}
-          style={typeof style === "function" ? style({
-            open: modal.open, transitionStatus: "idle", expanded: false, nested: true,
-            nestedDrawerOpen: (top?.depth ?? 0) > modal.depth, nestedDrawerSwiping: false,
-            swipeDirection: "down", swiping: false,
-          }) : style}
-          className={className} data-modal-depth={modal.depth}>
-          <ModalTitleContext.Provider value={titleRef}>{children}</ModalTitleContext.Provider>
-        </ModalPageFrame>
-      ) : null}
-    </AnimatePresence>, host
+    <ModalPageFrame value={modal.id} ref={(node) => {
+      frame.current = node
+      if (typeof ref === "function") ref(node)
+      else if (ref) ref.current = node
+    }}
+      {...props}
+      transition={transition}
+      exitTransition={exitTransition}
+      aria-labelledby={modal.titleId}
+      style={style}
+      className={className} data-modal-depth={modal.depth}>
+      <ModalTitleContext.Provider value={titleRef}>{children}</ModalTitleContext.Provider>
+    </ModalPageFrame>, host
   )
 }
 
@@ -348,8 +365,6 @@ function ModalRootContent({
   return (
     <DrawerPrimitive.Portal data-slot="modal-portal">
       <DrawerPrimitive.Backdrop
-        transition={transition.sheet}
-        exitTransition={transition.dismiss}
         data-slot="modal-backdrop"
         className={cn(
           "fixed inset-0 z-50 min-h-dvh bg-(--modal-backdrop) supports-[-webkit-touch-callout:none]:absolute",
@@ -361,26 +376,22 @@ function ModalRootContent({
         className="fixed inset-0 z-50 flex items-end justify-center"
       >
         <DrawerPrimitive.Popup
-          transition={transition.sheet}
-          exitTransition={transition.dismiss}
           data-slot="modal-content"
           data-size={size}
           data-height={heightVariant}
           aria-labelledby={modal.navigation.top?.titleId ?? modal.titleId}
+          aria-describedby={modal.navigation.top ? modal.navigation.top.descriptionId ?? "" : undefined}
           initialFocus={initialFocus ?? (() => titleRef.current ?? true)}
           finalFocus={(closeType) => (modal.returnFocus.current ? resolveFocus(finalFocus, closeType) : false)}
           className={cn(modalContentVariants({ size, height: heightVariant }), className)}
-          style={typeof style === "function"
-            ? (state) => ({ ...variables, ...style(state) })
-            : { ...variables, ...style }}
+          style={{ ...variables, ...style }}
           {...props}
         >
-          <ReducedMotionConfig>
-            <ModalPageFrame root active={!modal.navigation.top}>
+          <ModalPages open={modal.open} value={modal.navigation.top?.id ?? modal.id} hostRef={modal.navigation.setHost}>
+            <ModalPageFrame root value={modal.id} aria-labelledby={modal.titleId}>
               <ModalTitleContext.Provider value={titleRef}>{children}</ModalTitleContext.Provider>
             </ModalPageFrame>
-            <div ref={modal.navigation.setHost} data-slot="modal-page-host" className="pointer-events-none absolute inset-0" />
-          </ReducedMotionConfig>
+          </ModalPages>
         </DrawerPrimitive.Popup>
       </DrawerPrimitive.Viewport>
     </DrawerPrimitive.Portal>
@@ -444,8 +455,9 @@ function ModalHeader({
 function ModalTitle({ className, ref, ...props }: DrawerPrimitive.Title.Props) {
   const titleRef = React.useContext(ModalTitleContext)
   const modal = useModalPart("ModalTitle")
+  const Title = modal.depth > 0 ? PageTitle : DrawerPrimitive.Title
   return (
-    <DrawerPrimitive.Title
+    <Title
       id={modal.titleId}
       ref={(node) => {
         if (titleRef) titleRef.current = node
@@ -461,7 +473,27 @@ function ModalTitle({ className, ref, ...props }: DrawerPrimitive.Title.Props) {
 }
 
 function ModalDescription({ className, ...props }: DrawerPrimitive.Description.Props) {
+  const modal = useModalPart("ModalDescription")
+  if (modal.depth > 0) return <PageDescription id={`${modal.id}-description`} data-slot="modal-description" className={className} {...props} />
   return <DrawerPrimitive.Description data-slot="modal-description" className={className} {...props} />
+}
+
+// Child pages label the existing dialog. They must not register another
+// Drawer.Title/Description against its single Base UI popup store.
+function PageTitle({ render, ref, className, style, ...props }: DrawerPrimitive.Title.Props) {
+  return useRender({ defaultTagName: "h2", render, ref, state: {}, props: {
+    ...props,
+    className: typeof className === "function" ? className({}) : className,
+    style: typeof style === "function" ? style({}) : style,
+  } })
+}
+
+function PageDescription({ render, ref, className, style, ...props }: DrawerPrimitive.Description.Props) {
+  return useRender({ defaultTagName: "p", render, ref, state: {}, props: {
+    ...props,
+    className: typeof className === "function" ? className({}) : className,
+    style: typeof style === "function" ? style({}) : style,
+  } })
 }
 
 /** Capsules beside the title; their own scrolling row on phones. */

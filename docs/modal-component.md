@@ -2,7 +2,7 @@
 
 `components/ui/modal.tsx` 是站内通用的模态弹窗。它建在 Animate UI 的 Base UI Drawer
 （`@animate-ui/react/primitives/base-ui/drawer`）之上：底层库负责开合、拖动关闭、焦点陷阱和滚动锁定。嵌套 Modal 自动成为同一面板内的页面，
-`modal-navigation.tsx` 管理页面注册和保留状态，`panel-motion.tsx` 提供导航与切题共用的动效。写法与 shadcn 组件一致
+`modal-navigation.tsx` 管理页面注册和保留状态，官方 Animate UI `Tabs.Panel` 提供页面切换；`panel-motion.tsx` 只保存切题前后的内容快照。写法与 shadcn 组件一致
 （`data-slot`、`cva` 变体、`className` 可覆盖），没有独立的样式表；颜色、圆角与阴影是
 `styles/tokens/components.css` 中的 `--modal-*` 变量。
 
@@ -34,7 +34,7 @@
 
 | 组件 | 说明 |
 | --- | --- |
-| `Modal` | 根组件，属性同 Base UI `Drawer.Root`（`open`、`defaultOpen`、`onOpenChange`、`onOpenChangeComplete`、`actionsRef` 等）。 |
+| `Modal` | 根组件，使用 `open` / `defaultOpen`、`onOpenChange(open)`、`onOpenChangeComplete(open)` 和 `actionsRef`；其余根属性传给 Drawer。嵌套页不伪造 Base UI 事件。 |
 | `ModalTrigger` | 触发按钮，同 `Drawer.Trigger`（可用 `render` 换成任意元素）。 |
 | `ModalContent` | 抽屉本体（遮罩、视口与弹窗）。`size` 限制 md 以上的最大宽度：`sm` 28rem、`md` 40rem（默认）、`lg` 56rem、`xl` 76rem、`full` 整屏；手机上始终铺满宽度。`height`：`auto`（默认）随内容伸缩，`fixed` 占满可用高度，或传 CSS 长度（如 `"36rem"`）；三者都不超过视口上限，固定高度适合内容会原地切换的弹窗。`initialFocus` 默认聚焦标题，`finalFocus` 默认回到触发按钮；其余属性传给 `Drawer.Popup`。 |
 | `ModalHeader` | 固定顶栏。`showBack`（默认 `true`，仅子页面显示）、`showClose`（默认 `true`）。 |
@@ -50,7 +50,7 @@
 
 ## 外观与动效
 
-- **打开 / 关闭**：从屏幕底部滑入、向下滑出，时长与曲线使用 Animate UI 令牌（`transition.sheet` 进、`transition.dismiss` 出），进场不越过底边，离场略快，
+- **打开 / 关闭**：从屏幕底部滑入、向下滑出，使用官方 Drawer 的默认 `transition.drawer` / `drawerOut` 与遮罩动效，不在业务层覆盖速度或额外包一层进出场 Motion，
   随 `AnimateUIProvider` 的 `tempo` 一起调整；遮罩同步淡入淡出。系统开启「减少动态效果」时改为原地淡入淡出。
   手机上贴边铺满宽度；md 以上居中、按 `size` 限宽，并悬浮在底边之上 0.75rem（`--modal-float`）。
   Base UI 只在「关闭 → 打开」的变化上播放进入动画，所以挂载时就已打开的弹窗（解答浮窗第一次点击才挂载）由 `Modal`
@@ -82,11 +82,11 @@
 </ModalContent>
 ```
 
-- **前进 / 返回**：同一宽高的面板内，原页向左轻移淡出，子页从右侧淡入；返回时方向反转。
-  两者同步运行，快速反复操作不等待退场结束。子页的 `size` / `height` 由根面板决定。
-- **状态**：覆盖的原页保留 DOM、输入、选择和滚动位置，同时设置 `inert` 和 `aria-hidden`；
-  子页通过 portal 放在同一 Popup 的页面容器里。退出中的页面同样不可聚焦。
-- **焦点**：进入时立即聚焦子页标题，根 dialog 的 `aria-labelledby` 指向当前页。
+- **前进 / 返回**：同一宽高的面板内，官方 `Tabs.Panel` 先完成原页淡出，再从另一侧接入新页；返回方向相反。
+  中途反向会从当前画面接续，不让两页内容重叠。子页的 `size` / `height` 由根面板决定。
+- **状态**：覆盖的原页保留 DOM、输入、选择和滚动位置，由 Base UI 控制 `hidden` / `inert`；
+  子页通过 portal 放在同一 Popup 的页面容器里。退出中的页面同样不可聚焦。关闭整个弹窗时冻结当前页，等待 Drawer 完整退场后再清理子页状态，避免退场中露出父页。
+- **焦点**：官方面板结束等待、开始可见时聚焦子页标题，根 dialog 的 `aria-labelledby` 指向当前页。
   返回时恢复该页的触发按钮焦点；根面板关闭后交回页面触发按钮。
 - **返回 / 关闭**：返回按钮、Esc 和点击遮罩逐页返回；关闭按钮、`closeAll()`、整块面板向下拖动关闭整个面板。
   `closeAll({ returnFocus: false })` 用于链接跳转，避免焦点把新页面滚回旧位置。
@@ -115,11 +115,10 @@
 
 - **切换**：顶栏玻璃翻页器（上一张 · 序号 · 下一张）、键盘 ←/→、触屏左右滑动（`StudyCardStage swipe={false}` 关闭，
   卡片里有横向滚动内容时使用）；`loop` 允许首尾循环。翻到两端时，焦点从变为禁用的按钮移到另一个方向的按钮上，方向键始终可用。
-- **动画**：`PanelSwap` 以 `AnimatePresence mode="sync"` 在固定栏内同步播放退出和进入，按切题方向平移
-  `shift.step` 并淡入淡出，使用 `transition.panelIn` / `panelOut`。背景和分栏不动，只动画内容；退出帧用局部 absolute 定位，不逐次插入全局 popLayout 样式。
-  不在整块公式、图片上逐帧模糊，
-  不为每个 section 创建 Motion 节点或堆叠延迟。退出卡片立即 `inert`；标题同步切换，序号使用 `SlidingNumber`。
-  所有时间跟随 `tempo`，减少动态效果时只淡入淡出。
+- **动画**：复用官方 Animate UI Base UI `Tabs.Panel`，使用其默认 `panelOut` / `panelIn` 节奏、轻微模糊与方向切换。
+  官方管理退出保留、快速反向、隐藏与减少动态效果；不再在业务里维护 `AnimatePresence`、绝对定位退出帧或重复动画。
+  栏本身和背景固定，`PanelSwap` 仅缓存已访问题目的 React 内容，非活动题目 DOM 由 Base UI 卸载。
+  正文的高度过渡设为 0，避免固定滚动区内无必要的逐帧布局；淡入淡出、位移和轻模糊仍由官方提供。
 - **高度**：默认 `height="44rem"`、`size="lg"`，切换时不跳动；其余属性（`className`、`data-*`、`finalFocus` 等）传给 `ModalContent`。
 - **色调**：`tint` 接受任意 CSS 颜色，左栏铺一层它的柔和底色；不传则使用 Modal 的浅色栏。
 - **焦点**：焦点在旧卡内时切换后移到标题；`useStudyCard()` 提供 `index`、`count`、`direction`、`go`、`prev`、`next`。
@@ -135,4 +134,4 @@
 ## 性能
 
 每题一个「查看解答」，长页面上百个。触发按钮是普通 `<button>`，第一次点击才挂载 `Modal`；
-解答卡片模块和子页（如「收藏与标签」）也在第一次打开时才加载；悬停或键盘聚焦解答按钮可预热模块。弹窗关闭后只保留根组件，遮罩、视口与内容都已卸载。
+解答控制器随页面就绪，但弹窗 DOM 仍只在首次打开时挂载；不会在第一次点击时用空 Suspense 替换整个 Drawer。子页（如「收藏与标签」）按需加载并可通过悬停 / 聚焦预热。弹窗关闭后只保留根组件，遮罩、视口与内容都已卸载。

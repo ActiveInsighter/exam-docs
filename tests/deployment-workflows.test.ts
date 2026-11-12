@@ -7,6 +7,7 @@ describe('static deployment workflows', () => {
   it.each([
     'refs/heads/codex/animate-ui-finish-20261111',
     'refs/heads/codex/animate-ui-modal-motion-20261112',
+    'refs/heads/codex/rewrite-modal-motion-20261112',
   ])('deploys %s only on an explicit manual preview request', async (previewRef) => {
     const workflow = await readFile(resolve(process.cwd(), '.github/workflows/deploy-cloudflare-worker-assets.yml'), 'utf8');
     const conditions = workflow.split('\n').filter(line => line.includes(previewRef));
@@ -74,6 +75,7 @@ describe('static deployment workflows', () => {
     // No apt fonts and no browser download: playwright-core drives the preinstalled Chrome.
     expect(browserJob).toContain('playwright-core@');
     expect(browserJob).toContain('QUESTION_BROWSER_CHANNEL: chrome');
+    expect(browserJob).toContain('run: node scripts/verify-modal-motion-browser.mjs');
     expect(workflow).not.toContain('--with-deps');
     expect(workflow).not.toContain('playwright install');
   });

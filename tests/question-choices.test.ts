@@ -182,8 +182,9 @@ describe('Question choices', () => {
     expect(markup).toContain('data-exam-boolean=""');
     expect(markup).toContain('data-value="true"');
     expect(markup).toContain('data-value="false"');
-    expect(markup).toContain('正确</button>');
-    expect(markup).toContain('错误</button>');
+    const labels = [...markup.matchAll(/<button\b[^>]*data-boolean-option=""[^>]*>([\s\S]*?)<\/button>/g)]
+      .map((match) => match[1].replace(/<[^>]*>/g, ''));
+    expect(labels).toEqual(['正确', '错误']);
     expect(markup.match(/role="radio"/g)).toHaveLength(2);
     expect(markup).not.toContain('提交答案');
   });

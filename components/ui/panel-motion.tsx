@@ -1,62 +1,44 @@
 "use client"
 
 import * as React from "react"
-import { ReducedMotionConfig, shift, transition, useShouldReduceMotion, useTempoTransition } from "@animate-ui/react/utils/motion"
-import { AnimatePresence, motion, useIsPresent, type Variants } from "motion/react"
+import { Tabs } from "@animate-ui/react/primitives/base-ui/tabs"
 import { cn } from "@/lib/utils"
 
-/** Shared motion language for navigation and decks; no business state here. */
-export function usePanelVariants(distance: number = shift.step) {
-  const reduce = useShouldReduceMotion()
-  const enter = useTempoTransition(transition.panelIn)
-  const leave = useTempoTransition(transition.panelOut)
-  return React.useMemo<Variants>(() => ({
-    enter: (direction: number) => ({ opacity: 0, transform: `translateX(${reduce ? 0 : direction * distance}px)` }),
-    center: { opacity: 1, transform: "translateX(0px)", transition: enter },
-    exit: (direction: number) => ({
-      opacity: 0,
-      transform: `translateX(${reduce ? 0 : -direction * distance}px)`,
-      transition: leave,
-    }),
-    back: { opacity: 0, transform: `translateX(${reduce ? 0 : distance}px)`, transition: leave },
-  }), [distance, reduce, enter, leave])
-}
+type Snapshot = { value: string; content: React.ReactNode }
 
-const PanelFrame = React.forwardRef<HTMLDivElement, { direction: number; children: React.ReactNode }>(function PanelFrame({ direction, children }, ref) {
-  const present = useIsPresent()
-  const variants = usePanelVariants()
-  return (
-    <motion.div
-      ref={ref}
-      data-slot="panel-frame"
-      inert={!present}
-      aria-hidden={!present || undefined}
-      custom={direction}
-      variants={variants}
-      initial="enter"
-      animate="center"
-      exit="exit"
-      className={cn("flex min-h-0 min-w-0 flex-1 flex-col", !present && "pointer-events-none absolute inset-0")}
-    >
-      {children}
-    </motion.div>
-  )
-})
-
-/** Enter and exit overlap: rapid navigation never waits for an old exit. */
-export function PanelSwap({ value, direction, className, children }: {
+/**
+ * Keep each visited value's last committed content available to Tabs.Panel.
+ * The official primitive owns exit retention, interruption, hidden/inert,
+ * direction and reduced motion. Inactive DOM is unmounted by Base UI.
+ */
+export function PanelSwap({ value, direction, className, children, transition }: {
   value: React.Key
   direction: number
   className?: string
   children: React.ReactNode
+  transition?: React.ComponentProps<typeof Tabs.Panel>["transition"]
 }) {
+  const key = String(value)
+  const [cache, setCache] = React.useState<{ value: string; children: React.ReactNode; panels: Snapshot[] }>(() => ({
+    value: key, children, panels: [{ value: key, content: children }],
+  }))
+  if (cache.value !== key || cache.children !== children) {
+    const panel = { value: key, content: children }
+    const rest = cache.panels.filter((item) => item.value !== key)
+    const panels = cache.value === key
+      ? cache.panels.map((item) => item.value === key ? panel : item)
+      : direction > 0 ? [...rest, panel] : [panel, ...rest]
+    setCache({ value: key, children, panels })
+  }
   return (
-    <ReducedMotionConfig>
-      <div data-slot="panel-swap" className={cn("relative flex min-h-0 min-w-0 flex-1 flex-col", className)}>
-        <AnimatePresence mode="sync" initial={false} custom={direction}>
-          <PanelFrame key={value} direction={direction}>{children}</PanelFrame>
-        </AnimatePresence>
-      </div>
-    </ReducedMotionConfig>
+    <Tabs.Root value={key} data-slot="panel-swap" className={cn("relative min-h-0 min-w-0", className)}>
+      {cache.panels.map((panel) => (
+        <Tabs.Panel key={panel.value} value={panel.value} data-slot="panel-frame" role="group"
+          transition={transition}
+          aria-labelledby={undefined} tabIndex={-1} className="relative min-h-0 min-w-0 outline-none">
+          {panel.content}
+        </Tabs.Panel>
+      ))}
+    </Tabs.Root>
   )
 }
