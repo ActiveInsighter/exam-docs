@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimateIcon } from '@animate-ui/react/icons';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDownIcon } from '@/components/animate-ui/icons/chevron-down';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -113,8 +113,10 @@ export function QuestionMirror({ questionId, state, className }: { questionId: s
   // Replacing an identical, visible DOM clone resets its paint and can flash
   // during the sheet's entrance. Compare the actual grading data instead.
   const specKey = JSON.stringify(spec ?? null);
-  const currentSpec = useRef(spec);
-  currentSpec.current = spec;
+  // Memoize the semantic spec: an equivalent provider snapshot should not
+  // retrigger a clone. Do not mutate refs while React is rendering.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableSpec = useMemo(() => spec, [specKey]);
   const foldedFor = useRef<string | null>(null);
   const valuesKey = JSON.stringify(spec?.kind === 'blank' && submitted ? state?.values ?? [] : []);
   const gradesKey = JSON.stringify(spec?.kind === 'blank' && submitted ? state?.evaluation?.blanks ?? [] : []);
@@ -122,9 +124,8 @@ export function QuestionMirror({ questionId, state, className }: { questionId: s
   useLayoutEffect(() => {
     const node = host.current;
     if (!node) return;
-    const liveSpec = currentSpec.current;
-    const copy = mirrorQuestion(questionId, liveSpec ? {
-      spec: liveSpec, submitted, values: JSON.parse(valuesKey), evaluation: { blanks: JSON.parse(gradesKey) },
+    const copy = mirrorQuestion(questionId, stableSpec ? {
+      spec: stableSpec, submitted, values: JSON.parse(valuesKey), evaluation: { blanks: JSON.parse(gradesKey) },
     } : null);
     // The source can briefly be absent while its document subtree updates.
     // Keep the last complete frame instead of clearing the visible mirror.
@@ -135,7 +136,7 @@ export function QuestionMirror({ questionId, state, className }: { questionId: s
       foldedFor.current = questionId;
       setFolded(window.matchMedia('(max-width: 767px)').matches && node.scrollHeight > 200 ? true : null);
     }
-  }, [questionId, specKey, submitted, valuesKey, gradesKey, selectedKey]);
+  }, [questionId, stableSpec, submitted, valuesKey, gradesKey, selectedKey]);
 
   return (
     <div className="relative">
