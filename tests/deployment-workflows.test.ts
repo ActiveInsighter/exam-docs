@@ -4,9 +4,11 @@ import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 
 describe('static deployment workflows', () => {
-  it('deploys the animated UI branch only on an explicit manual preview request', async () => {
+  it.each([
+    'refs/heads/codex/animate-ui-finish-20261111',
+    'refs/heads/codex/animate-ui-modal-motion-20261112',
+  ])('deploys %s only on an explicit manual preview request', async (previewRef) => {
     const workflow = await readFile(resolve(process.cwd(), '.github/workflows/deploy-cloudflare-worker-assets.yml'), 'utf8');
-    const previewRef = 'refs/heads/codex/animate-ui-finish-20261111';
     const conditions = workflow.split('\n').filter(line => line.includes(previewRef));
     // Asset pre-upload, credentials, deployment and HTTP verification share the guard.
     expect(conditions).toHaveLength(4);

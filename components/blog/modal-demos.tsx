@@ -159,17 +159,17 @@ function SplitDemo() {
 const SHEETS = [
   {
     title: '题目列表',
-    text: '点击下面的按钮再打开一层。新的一层从底部升起，叠在这一层之上；这一层整体后退：略微缩小、变暗，顶边仍露在新一层上方。',
+    text: '点击下面的按钮，在同一个面板内进入下一页。内容向左轻移，下一页从右侧接入；面板大小和背景遮罩保持稳定。',
     paragraphs: 6,
   },
   {
     title: '收藏与标签',
-    text: '每一层都是独立的抽屉，高度和宽度各自决定。返回按钮、Esc、点击后面露出的那一层，或把这一层向下拖走，都只关闭最上面一层；右上角的关闭按钮关闭整叠。',
+    text: '每一页共用同一个弹窗。返回按钮、Esc 或点击遮罩返回上一页；右上角的关闭按钮关闭整个面板。',
     paragraphs: 2,
   },
   {
     title: '确认',
-    text: '再深一层也一样。向下拖动这一层时，后面的各层随手指逐步复位；回到上一层后，焦点落在打开这一层的按钮上，滚动位置和状态都还在。',
+    text: '更深的页面也在同一面板内切换。回到上一页后，焦点落在打开这一页的按钮上，滚动位置、输入和选择状态都还在。',
     paragraphs: 0,
   },
 ] as const;
@@ -184,7 +184,7 @@ function Sheet({ index }: { index: number }) {
       <ModalHeader>
         <ModalTitle>{sheet.title}</ModalTitle>
         <ModalTags>
-          <Chip>第 {index + 1} 层</Chip>
+          <Chip>第 {index + 1} 页</Chip>
         </ModalTags>
       </ModalHeader>
       <ModalBody>
@@ -205,7 +205,7 @@ function Sheet({ index }: { index: number }) {
             </ModalContent>
           </Modal>
         ) : (
-          <Button className="h-9 rounded-full px-4" onClick={() => modal?.close()}>返回上一层</Button>
+          <Button className="h-9 rounded-full px-4" onClick={() => modal?.close()}>返回上一页</Button>
         )}
       </ModalFooter>
     </>
@@ -214,7 +214,7 @@ function Sheet({ index }: { index: number }) {
 
 function NestedDemo() {
   return (
-    <DemoFrame caption="多级弹窗：在弹窗内容里再渲染 <Modal>，它作为新的一层从底部升起，下面的各层缩小、变暗并露出顶边；左上角返回，Esc 也只关闭最上面一层。">
+    <DemoFrame caption="多级弹窗：嵌套 <Modal> 自动成为同一面板的下一页，前进与返回沿相反方向平滑切换。保留原页状态，左上角或 Esc 返回。">
       <Modal>
         <ModalTrigger className={trigger}>
           <BookmarkIcon className="size-4" />多级弹窗

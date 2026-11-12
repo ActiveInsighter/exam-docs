@@ -1,6 +1,6 @@
 'use client';
 
-import { rippleButtonVariants } from '@/components/ui/ripple-button';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { blankBadge } from './blank-field';
 import { readBlankGrades, type BlankGrade, type BlankSpec } from './grading';
@@ -75,8 +75,8 @@ export function BlankGradeSwitch({ question, index }: { question: QuestionState;
           aria-pressed={current === grade}
           disabled={!question.ready}
           className={cn(
-            rippleButtonVariants({ variant: 'ghost', size: 'xs' }),
-            'h-7.5 gap-1 rounded-full pr-2.5 pl-2 text-xs font-medium text-foreground/70 [--ripple-button-ripple-color:var(--tone)] hover:bg-(--tone-tint) hover:text-(--tone-ink) aria-pressed:bg-(--tone-soft) aria-pressed:text-(--tone-ink) dark:hover:bg-(--tone-tint)',
+            buttonVariants({ variant: 'ghost', size: 'xs' }),
+            'h-7.5 gap-1 rounded-full pr-2.5 pl-2 text-xs font-medium text-foreground/70 hover:bg-(--tone-tint) hover:text-(--tone-ink) aria-pressed:bg-(--tone-soft) aria-pressed:text-(--tone-ink) dark:hover:bg-(--tone-tint)',
           )}
           onClick={() => choose(grade)}
         >
@@ -110,7 +110,7 @@ export function BlankGradePanel({ question }: { question: QuestionState }) {
             data-grade-all=""
             data-tone="correct"
             disabled={!question.ready}
-            className={cn(rippleButtonVariants({ variant: 'outline', size: 'xs' }), toneButton, 'h-7.5 gap-1.25 rounded-full border-(--tone-line) bg-(--tone-tint) pr-2.75 pl-2.25 font-semibold text-(--tone-ink) hover:bg-(--tone-soft) dark:border-(--tone-line) dark:bg-(--tone-tint) dark:hover:bg-(--tone-soft)')}
+            className={cn(buttonVariants({ variant: 'outline', size: 'xs' }), toneButton, 'h-7.5 gap-1.25 rounded-full border-(--tone-line) bg-(--tone-tint) pr-2.75 pl-2.25 font-semibold text-(--tone-ink) hover:bg-(--tone-soft) dark:border-(--tone-line) dark:bg-(--tone-tint) dark:hover:bg-(--tone-soft)')}
             onClick={() => question.selfGradeBlanks(new Map(blanks.map((_, index) => [index, 'correct'] as const)))}
           >
             <CheckCheckIcon size={14} aria-hidden animateOnHover />全部判对

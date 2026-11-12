@@ -1,7 +1,7 @@
 'use client';
 
 import type { ComponentType } from 'react';
-import { rippleButtonVariants } from '@/components/ui/ripple-button';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { SELF_GRADES, type AttemptResult } from './grading';
 import { CircleAlertIcon, CircleCheckIcon, CircleXIcon } from './icons';
@@ -20,7 +20,7 @@ export const RESULT_ICONS: Record<AttemptResult, ComponentType<LiveIconProps>> =
  * An essay is graded by the reader against the reference solution: 正确,
  * 部分正确 or 错误, kept like any other answer (selected = its letter).
  * Picking another grade later records a new attempt. Each capsule takes its
- * result's tone on hover and when chosen, and ripples in it when pressed.
+ * result's tone on hover and when chosen, and gives a small press response.
  */
 export function SelfGrade() {
   const question = useQuestionState();
@@ -37,7 +37,7 @@ export function SelfGrade() {
             data-tone={grade.result}
             aria-pressed={pressed}
             disabled={!question.ready}
-            className={cn(rippleButtonVariants({ variant: 'outline', size: 'sm' }), toneButton, 'h-7.5 gap-1.25 rounded-full pr-3 pl-2.25 text-[0.8125rem] font-medium')}
+            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), toneButton, 'h-7.5 gap-1.25 rounded-full pr-3 pl-2.25 text-[0.8125rem] font-medium')}
             onClick={() => question.select([grade.letter])}
           >
             <Icon size={15} aria-hidden className="text-(--tone)" animate={pressed && question.fresh ? 'path' : false} />

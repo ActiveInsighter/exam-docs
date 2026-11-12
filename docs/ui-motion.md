@@ -9,7 +9,7 @@
 | 入口 | 职责 |
 | --- | --- |
 | `components/ui/dialog.tsx` | 常规 Dialog 的遮罩、开合和可访问性。 |
-| `components/ui/modal.tsx` | Animate UI Base UI Drawer 的站内组合：底部抽屉、顶栏、滚动区、分栏和嵌套堆叠。 |
+| `components/ui/modal.tsx` | Animate UI Base UI Drawer 的站内组合：底部抽屉、顶栏、滚动区、分栏和页面组合。 |
 | `components/ui/study-card.tsx` | 组合 Modal，管理索引、方向、翻页器、键盘 / 触屏切换；不依赖题目业务。 |
 | `components/ui/button.tsx` | Base UI Button + Animate UI 按压反馈，保留 Base UI 组合 API。 |
 | `components/ui/ripple-button.tsx` | 官方涟漪 primitive + 共用按钮变体。 |
@@ -18,9 +18,9 @@
 | `components/animate-ui/icons/` | 从官方注册表添加的动画图标。 |
 | `components/question/live.tsx` | 长题目页的动画按需激活，不包含判分和持久化逻辑。 |
 
-ModalContext 只补充当前层 `close()`、整叠 `closeAll()` 和返回焦点策略；
-拖拽、原生嵌套、滚动锁定、Esc 和焦点陷阱由 Drawer 负责。
-堆叠外观使用 Base UI 的 CSS 变量，不另加层级注册表或手势监听器。
+ModalContext 提供当前页 `close()`、面板 `closeAll()` 和返回焦点策略；
+拖拽、滚动锁定和焦点陷阱由唯一的 Drawer 负责。
+`modal-navigation.tsx` 管理子页，`panel-motion.tsx` 提供同步、可中断的切换；不另建拖拽或焦点陷阱。
 详见 [Modal / StudyCard](modal-component.md) 与 [按钮](button-component.md)。
 
 ## 统一节奏与减少动态效果
@@ -30,8 +30,9 @@ ModalContext 只补充当前层 `close()`、整叠 `closeAll()` 和返回焦点�
 不会自动给所有自定义节点添加 MotionConfig。系统偏好变化时不重挂整棵应用，保留焦点与作答状态。
 
 - 官方 primitive 使用自身动效，不叠加 CSS 开合动画。
+- Modal 顶栏独立占位，正文原生滚动；不对大面积滚动区加 mask，不在顶栏下实时采样 backdrop-filter，不测量顶栏高度。
 - 自定义动效使用 `@animate-ui/react/utils/motion` 的令牌，经 `useTempoTransition()` 调整节奏。
-- StudyCard 采用步骤切换配方：内容依次离开、进入，方向一致；标题同步切换，序号使用 SlidingNumber。
+- StudyCard 使用 PanelSwap：固定分栏内的退出与进入同步，方向一致，不等待、不对整片内容模糊；标题同步切换，序号使用 SlidingNumber。
 - transform 字符串用 `useShouldReduceMotion()` 消除位移；Motion 的 x / y / scale 由 ReducedMotionConfig 管理。
 - 减少动态效果时保留状态提示和淡入淡出，停止位移、缩放与装饰性循环；CSS 动画另外处理 `motion-reduce:`。
 - CSS 过渡只列实际变化的属性，不用 `transition-all`，不覆盖 Motion 的 transform。
@@ -43,7 +44,7 @@ Avatar、Input、Field、Label、Badge、Separator 没有需要替换的动画 p
 ## 长页面
 
 QuestionCard 使用模块级共享 IntersectionObserver：每张卡第一次接近视口时才启用
-Pressable、Animated 和 liveIcon 的官方动画实现；此前呈现外观相同、可操作的静态元素。
+Pressable、Animated 和 liveIcon 的官方动画实现（Pressable 默认只按压，选项显式传入扩散层）；此前呈现外观相同、可操作的静态元素。
 激活是一次性的，不在滚动离开后反复卸载。替换控件时恢复该题内的焦点，不重置作答或个人标记。
 选项分栏另外批量测量视口附近的题目，避免水合时对全页强制布局。
 
@@ -67,8 +68,8 @@ QUESTION_BROWSER_EXECUTABLE=/usr/bin/chromium node scripts/verify-study-motion-b
 
 - 五种题型的作答、判分、自评、改判、重做与刷新恢复。
 - 解答首开动效、前后翻卡、首尾键盘焦点、触屏滑动和关闭后焦点恢复。
-- 多级返回 / Esc / 遮罩 / 拖动只关闭当前层，全部关闭返回页面触发按钮。
-- 焦点不会落在离开或被覆盖的卡片里；长公式可横向滚动，页面没有横向溢出。
+- 子页返回 / Esc / 遮罩逐页返回，关闭按钮 / 整块拖动关闭面板；只有一个 Popup 和 Backdrop。
+- 焦点不会落在离开或被覆盖的卡片里（inert），返回保留原页滚动和输入；长公式可横向滚动，页面没有横向溢出。
 - 长页面在靠近视口前不挂载大量动画按钮，离开页面后观察器不持有旧卡片。
 
 审查自定义动画可运行 `npx @animate-ui/cli@latest audit components/ui components/question`。
