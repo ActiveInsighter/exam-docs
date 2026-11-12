@@ -84,7 +84,8 @@ try {
     const ripple=await page.evaluate(()=>window.__choiceRippleFrames);
     assert.ok(ripple.length>=2,'The visible ripple survives multiple frames');
     assert.ok(ripple.some(frame=>frame.opacity>0.05),'The expanding circle is visibly opaque');
-    assert.ok(ripple.every(frame=>frame.background===before),'No whole-button fill masks the expanding ripple');
+    await settled(option);
+    assert.notEqual(await option.evaluate(node=>getComputedStyle(node).backgroundColor),before,'Grading retains its background after the ripple fades');
     assert.ok(ripple.every(frame=>frame.layer>=0),'The ripple is above the surface background');
     if(options.reducedMotion!=='reduce') assert.ok(ripple.at(-1).scale>ripple[0].scale+1,'The circle actually expands');
     else assert.ok(ripple.every(frame=>Math.abs(frame.scale-ripple[0].scale)<0.01),'Reduced-motion ripples fade without expansion');

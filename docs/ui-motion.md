@@ -37,6 +37,8 @@ ModalContext 提供当前页 `close()`、面板 `closeAll()` 和返回焦点策�
 - transform 字符串用 `useShouldReduceMotion()` 消除位移；Motion 的 x / y / scale 由 ReducedMotionConfig 管理。
 - 减少动态效果时保留状态提示和淡入淡出，停止位移、缩放与装饰性循环；CSS 动画另外处理 `motion-reduce:`。
 - CSS 过渡只列实际变化的属性，不用 `transition-all`，不覆盖 Motion 的 transform。
+- 判分图标复用官方 IconWrapper、controls 和节奏；`useFeedbackVariants` 让新对钩的首帧即为未绘制状态，避免 passive effect 启动前完整图形闪现。恢复的成绩直接显示完整图标。
+- 解答题目副本只复制静态完成态：移除涟漪、Motion 的透明度/缩放/模糊和 SVG 绘制进度；等价保存回执不替换副本，也不重置展开状态。
 
 数学键盘、MDX 标签页与 Fumadocs 导航保留各自有用途的动效，不为统一形式而改写无关模块。
 Avatar、Input、Field、Label、Badge、Separator 没有需要替换的动画 primitive。
@@ -63,6 +65,7 @@ GitHub Actions：`deploy-cloudflare-worker-assets.yml`，显式设置 `deploy=fa
 ```bash
 QUESTION_BROWSER_EXECUTABLE=/usr/bin/chromium node scripts/verify-question-components-browser.mjs
 QUESTION_BROWSER_EXECUTABLE=/usr/bin/chromium node scripts/verify-study-motion-browser.mjs
+QUESTION_BROWSER_EXECUTABLE=/usr/bin/chromium node scripts/verify-question-feedback-browser.mjs
 QUESTION_BROWSER_EXECUTABLE=/usr/bin/chromium QUESTION_RECORD_VIDEO=1 node scripts/verify-modal-motion-browser.mjs
 ```
 

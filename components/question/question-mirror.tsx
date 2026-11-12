@@ -39,7 +39,9 @@ function chip(text: string, feedback: string, blank: BlankSpec, html?: string) {
   return node;
 }
 
-type Attempt = Pick<QuestionState, 'spec' | 'submitted' | 'values' | 'evaluation'>;
+type Attempt = Pick<QuestionState, 'spec' | 'submitted' | 'values'> & {
+  evaluation: Pick<NonNullable<QuestionState['evaluation']>, 'blanks'> | null;
+};
 
 export function mirrorQuestion(questionId: string, attempt: Attempt | null): HTMLElement | null {
   const source = document.getElementById(`question-${questionId}`)?.querySelector<HTMLElement>('[data-exam-question-body]');
@@ -48,6 +50,13 @@ export function mirrorQuestion(questionId: string, attempt: Attempt | null): HTM
   // A cloned ripple has no owner left to remove it after its short lifetime.
   // Copy permanent grading feedback, never an in-flight visual effect.
   copy.querySelectorAll('[data-choice-ripple-layer]').forEach((node) => node.remove());
+  // cloneNode copies Motion's inline starting / intermediate values, but
+  // neither its controls nor its WAAPI animations. Opening during feedback
+  // must not freeze a hidden badge or a half-drawn tick in the sheet.
+  copy.querySelectorAll<HTMLElement | SVGElement>('[data-option], [data-choice-marker], [data-choice-verdict], [data-choice-marker] svg, [data-choice-marker] svg *').forEach((node) => {
+    for (const property of ['opacity', 'transform', 'filter']) node.style.removeProperty(property);
+    for (const attribute of ['stroke-dasharray', 'stroke-dashoffset', 'pathLength']) node.removeAttribute(attribute);
+  });
   // A copy shows the state as it is: no ids to clash, no motion still running on the page to replay.
   for (const name of ['id', 'data-fresh']) {
     copy.querySelectorAll(`[${name}]`).forEach((node) => node.removeAttribute(name));
@@ -99,15 +108,22 @@ export function QuestionMirror({ questionId, state, className }: { questionId: s
   const [folded, setFolded] = useState<boolean | null>(null);
 
   // Only what the copy shows: a draft pick or a sync tick must not rebuild (and refold) it.
-  const { spec, submitted = false, values, evaluation = null } = state ?? {};
+  const { spec, submitted = false } = state ?? {};
+  // A storage acknowledgement can return equivalent arrays / evaluations.
+  // Only displayed answers should rebuild and refold an already visible copy.
+  const valuesKey = JSON.stringify(spec?.kind === 'blank' && submitted ? state?.values ?? [] : []);
+  const gradesKey = JSON.stringify(spec?.kind === 'blank' && submitted ? state?.evaluation?.blanks ?? [] : []);
+  const selectedKey = JSON.stringify(submitted ? state?.selected ?? [] : []);
   useLayoutEffect(() => {
     const node = host.current;
     if (!node) return;
-    const copy = mirrorQuestion(questionId, spec ? { spec, submitted, values: values ?? [], evaluation } : null);
+    const copy = mirrorQuestion(questionId, spec ? {
+      spec, submitted, values: JSON.parse(valuesKey), evaluation: { blanks: JSON.parse(gradesKey) },
+    } : null);
     node.replaceChildren(...(copy ? [copy] : []));
     // Desktop has a pane of its own for the question.
     setFolded(window.matchMedia('(max-width: 767px)').matches && node.scrollHeight > 200 ? true : null);
-  }, [questionId, spec, submitted, values, evaluation]);
+  }, [questionId, spec, submitted, valuesKey, gradesKey, selectedKey]);
 
   return (
     <div className="relative">
