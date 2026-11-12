@@ -38,9 +38,9 @@ export type ChoiceOption = {
 /** The option's surface, by feedback: a hairline at rest, ink when picked, the result's tone when graded. */
 const tile = cn(
   'group/option relative isolate flex min-w-0 rounded-[0.875rem] border border-(--exam-line) text-left text-foreground [font:inherit] outline-none',
-  'transition-[border-color,box-shadow] duration-200 ease-out',
-  'fb-picked:border-(--exam-choice-ring-strong) fb-picked:shadow-[inset_0_0_0_0.5px_var(--exam-choice-ring-strong)]',
-  'fb-graded:border-(--tone-line)',
+  'transition-[background-color,border-color,box-shadow] duration-200 ease-out',
+  'fb-picked:bg-(--exam-choice-fill) fb-picked:border-(--exam-choice-ring-strong) fb-picked:shadow-[inset_0_0_0_0.5px_var(--exam-choice-ring-strong)]',
+  'fb-graded:bg-(--tone-tint) fb-graded:border-(--tone-line)',
   // A key the reader did not pick is only outlined, so a graded card never turns into blocks of colour.
   'fb-key:border-dashed fb-key:border-(--tone-line)',
   'fb-dimmed:border-(--exam-line-faint) fb-dimmed:*:opacity-50',
@@ -163,7 +163,7 @@ function Marker({ feedback, fresh, className, children }: { feedback: OptionFeed
   );
 }
 
-/** Official ripple surface: feedback never paints the entire button behind it. */
+/** Official ripple above the persistent selection / result fill. */
 function ChoiceButton(props: ComponentProps<typeof Pressable>) {
   return useLive() ? <LiveChoiceButton {...props} /> : <Pressable {...props} />;
 }

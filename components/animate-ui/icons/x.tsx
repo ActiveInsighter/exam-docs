@@ -4,11 +4,11 @@ import * as React from 'react';
 import { motion, type Variants } from 'motion/react';
 
 import {
-  getVariants,
   useAnimateIconContext,
   IconWrapper,
   type IconProps,
 } from '@animate-ui/react/icons';
+import { useFeedbackVariants } from './use-feedback-variants';
 
 type XProps = IconProps<keyof typeof animations>;
 
@@ -77,7 +77,7 @@ const animations = {
 
 function IconComponent({ size, ...props }: XProps) {
   const { controls } = useAnimateIconContext();
-  const variants = getVariants(animations);
+  const variants = useFeedbackVariants(animations);
 
   return (
     <motion.svg

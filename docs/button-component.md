@@ -55,7 +55,7 @@ import { RippleButton, RippleButtonRipples } from '@/components/ui/ripple-button
 | `--ripple-button-ripple-color` | 涟漪颜色，默认跟随按钮变体；题目按判分状态设置。 |
 | `RippleButtonRipples scale` | 涟漪扩散范围；选项在按下时按按钮对角线计算范围，圆波覆盖最远角，放在独立裁切层内。 |
 
-涟漪是短暂的点击反馈。选项不再同时修改整面背景色，以免遮住圆波；扩散层保持在文字下方。选中、判对、判错的持久外观由 `aria-checked`、`aria-pressed`、
+涟漪是短暂的点击反馈；选项的选中与判分底色持续保留，重做或取消选择后清除。扩散层在底色之上、文字之下。选中、判对、判错的持久外观由 `aria-checked`、`aria-pressed`、
 `data-feedback` 和语义色变量表达，不依赖涟漪留在屏幕上。
 旧 `TileButton`、`tileVariants`、`revealed`、`--reveal-*` 与 `styles/reveal.css` 已移除。
 
