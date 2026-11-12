@@ -33,6 +33,7 @@ ModalContext 提供当前页 `close()`、面板 `closeAll()` 和返回焦点策�
 - Modal 顶栏独立占位，正文原生滚动；不对大面积滚动区加 mask，不在顶栏下实时采样 backdrop-filter，不测量顶栏高度。
 - 自定义动效使用 `@animate-ui/react/utils/motion` 的令牌，经 `useTempoTransition()` 调整节奏。
 - StudyCard 使用官方 Base UI Tabs.Panel：固定分栏内先退场再入场，方向按面板顺序，快速反向由官方接续；标题采用相同面板切换，序号使用 SlidingNumber。
+- 题卡正文保留官方淡入淡出、位移与轻模糊，但将 `transition.height.duration` 设为 0；外层已有固定高度和滚动区，无需逐帧改变内容高度。
 - transform 字符串用 `useShouldReduceMotion()` 消除位移；Motion 的 x / y / scale 由 ReducedMotionConfig 管理。
 - 减少动态效果时保留状态提示和淡入淡出，停止位移、缩放与装饰性循环；CSS 动画另外处理 `motion-reduce:`。
 - CSS 过渡只列实际变化的属性，不用 `transition-all`，不覆盖 Motion 的 transform。

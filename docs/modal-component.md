@@ -118,6 +118,7 @@
 - **动画**：复用官方 Animate UI Base UI `Tabs.Panel`，使用其默认 `panelOut` / `panelIn` 节奏、轻微模糊与方向切换。
   官方管理退出保留、快速反向、隐藏与减少动态效果；不再在业务里维护 `AnimatePresence`、绝对定位退出帧或重复动画。
   栏本身和背景固定，`PanelSwap` 仅缓存已访问题目的 React 内容，非活动题目 DOM 由 Base UI 卸载。
+  正文的高度过渡设为 0，避免固定滚动区内无必要的逐帧布局；淡入淡出、位移和轻模糊仍由官方提供。
 - **高度**：默认 `height="44rem"`、`size="lg"`，切换时不跳动；其余属性（`className`、`data-*`、`finalFocus` 等）传给 `ModalContent`。
 - **色调**：`tint` 接受任意 CSS 颜色，左栏铺一层它的柔和底色；不传则使用 Modal 的浅色栏。
 - **焦点**：焦点在旧卡内时切换后移到标题；`useStudyCard()` 提供 `index`、`count`、`direction`、`go`、`prev`、`next`。

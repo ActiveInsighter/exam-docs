@@ -38,8 +38,12 @@ try {
     // CDP's global playback rate changes those clocks relative to each other.
     await context.addInitScript(() => {
       window.__reviewAnimationRate=1;
+      window.__reviewHeightDurations=[];
       const animate=Element.prototype.animate;
       Element.prototype.animate=function(...args) {
+        const keys=args[0];
+        const sizes=keys&&(Array.isArray(keys)?keys.some(key=>'minHeight' in key):'minHeight' in keys);
+        if(this.closest('[data-study-card-region]')&&sizes)window.__reviewHeightDurations.push(args[1]?.duration??0);
         const animation=animate.apply(this,args);
         queueMicrotask(()=>{if(animation.playState!=='idle')animation.updatePlaybackRate(window.__reviewAnimationRate)});
         return animation;
@@ -133,9 +137,13 @@ try {
     await settled(sheet);
     assert.equal(await sheet.getAttribute('data-open'),'','An interrupted dismissal reopens the same Drawer');
     assert.equal(await page.locator('[data-slot="modal-content"]').count(),1);
+    await sheet.getByRole('button',{name:'下一题',exact:true}).click();
+    await settled(sheet);
+    const heights=await page.evaluate(()=>window.__reviewHeightDurations);
+    assert.ok(heights.every(duration=>duration===0),'Fixed card panes never animate layout height on every frame');
     await sheet.getByRole('button',{name:'关闭',exact:true}).click();
     await sheet.waitFor({state:'detached'});
-    reports.push({name,ripple,entering,closing});
+    reports.push({name,ripple,entering,closing,heights});
     const video=page.video();
     await context.close();
     if(video) await copyFile(await video.path(),path.join(screenshots,`${name}-motion.webm`));

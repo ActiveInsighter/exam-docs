@@ -45,6 +45,9 @@ export function mirrorQuestion(questionId: string, attempt: Attempt | null): HTM
   const source = document.getElementById(`question-${questionId}`)?.querySelector<HTMLElement>('[data-exam-question-body]');
   if (!source) return null;
   const copy = source.cloneNode(true) as HTMLElement;
+  // A cloned ripple has no owner left to remove it after its short lifetime.
+  // Copy permanent grading feedback, never an in-flight visual effect.
+  copy.querySelectorAll('[data-choice-ripple-layer]').forEach((node) => node.remove());
   // A copy shows the state as it is: no ids to clash, no motion still running on the page to replay.
   for (const name of ['id', 'data-fresh']) {
     copy.querySelectorAll(`[${name}]`).forEach((node) => node.removeAttribute(name));

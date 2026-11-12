@@ -5,6 +5,7 @@ import { AnimateIcon } from "@animate-ui/react/icons"
 import { SlidingNumber } from "@animate-ui/react/primitives/texts/sliding-number"
 import {
   ReducedMotionConfig,
+  transition,
 } from "@animate-ui/react/utils/motion"
 import { motion, type PanInfo } from "motion/react"
 import { PanelSwap } from "@/components/ui/panel-motion"
@@ -338,7 +339,7 @@ function ratioColumns(ratio: number) {
 /**
  * Holds the card on show: a ModalSplit whose children are the card's panes
  * (StudyCardAside, StudyCardMain), or one of them for a single column. A
- * step swaps the split with simultaneous enter and exit. Touch swipes
+ * step sequences content inside the fixed split. Touch swipes
  * sideways step; set `swipe={false}` when a card is mostly content that
  * scrolls sideways.
  */
@@ -400,11 +401,16 @@ function StudyCardStage({
 
 type RegionProps = Omit<React.ComponentProps<typeof ModalPane>, "tone">
 
+// The pane already owns scrolling inside a fixed-height sheet. Keep the
+// official opacity/translate/blur motion, without reflowing its height on
+// every frame. Tabs.Panel applies the provider's tempo to these tokens.
+const paneTransition = { ...transition.panelIn, height: { duration: 0 } }
+
 function Region({ tone, region, className, children, ...props }: RegionProps & { tone?: "muted"; region: "aside" | "main" }) {
   const { itemKey, direction } = useStudyCard()
   return (
     <ModalPane tone={tone} data-study-card-region={region} {...props}>
-      <PanelSwap value={itemKey} direction={direction}>
+      <PanelSwap value={itemKey} direction={direction} transition={paneTransition}>
         <div
           data-slot="study-card-content"
           className={cn("flex flex-col gap-5.5 md:gap-6.5", className)}

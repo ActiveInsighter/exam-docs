@@ -11,11 +11,12 @@ type Snapshot = { value: string; content: React.ReactNode }
  * The official primitive owns exit retention, interruption, hidden/inert,
  * direction and reduced motion. Inactive DOM is unmounted by Base UI.
  */
-export function PanelSwap({ value, direction, className, children }: {
+export function PanelSwap({ value, direction, className, children, transition }: {
   value: React.Key
   direction: number
   className?: string
   children: React.ReactNode
+  transition?: React.ComponentProps<typeof Tabs.Panel>["transition"]
 }) {
   const key = String(value)
   const [cache, setCache] = React.useState<{ value: string; children: React.ReactNode; panels: Snapshot[] }>(() => ({
@@ -33,6 +34,7 @@ export function PanelSwap({ value, direction, className, children }: {
     <Tabs.Root value={key} data-slot="panel-swap" className={cn("relative min-h-0 min-w-0", className)}>
       {cache.panels.map((panel) => (
         <Tabs.Panel key={panel.value} value={panel.value} data-slot="panel-frame" role="group"
+          transition={transition}
           aria-labelledby={undefined} tabIndex={-1} className="relative min-h-0 min-w-0 outline-none">
           {panel.content}
         </Tabs.Panel>
