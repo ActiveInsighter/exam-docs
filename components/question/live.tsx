@@ -1,7 +1,8 @@
 'use client';
 
 import { AnimateIcon } from '@animate-ui/react/icons';
-import { RippleButtonSurface as RippleButton, RippleButtonRipples } from '@/components/ui/ripple-button';
+import { RippleButtonSurface as RippleButton } from '@/components/ui/ripple-button';
+import { Button as AnimatedButton } from '@animate-ui/react/primitives/buttons/button';
 import type { HTMLMotionProps } from 'motion/react';
 import type { LucideIcon } from 'lucide-react';
 import {
@@ -31,7 +32,7 @@ import {
  *   <QuestionCard>     the card's <section>; goes live near the viewport
  *   useLive()          true inside a live card, and anywhere outside a card
  *                      (the solution card, dialogs)
- *   <Pressable>        Animate UI's Ripple Button, or a plain <button>
+ *   <Pressable>        press feedback; only explicit option ripples spread
  *   <Animated>         Animate UI's AnimateIcon, or nothing around its child
  *   liveIcon(a, b)     an animated icon, or the Lucide icon it was drawn from
  */
@@ -108,17 +109,18 @@ type PressableProps = ComponentProps<'button'> & {
   ripples?: ReactNode;
 };
 
-/** Animate UI's Ripple Button in a live card; a plain button with the same props elsewhere. */
+/** Ordinary press feedback by default; options explicitly provide their ripple layer. */
 export function Pressable({ tapScale, ripples, type = 'button', children, ...props }: PressableProps) {
   if (!useLive()) return <button type={type} {...props}>{children}</button>;
+  const Surface = ripples ? RippleButton : AnimatedButton;
   return (
-    <RippleButton type={type} tapScale={tapScale} {...(props as Omit<HTMLMotionProps<'button'>, 'children'>)}>
+    <Surface type={type} tapScale={tapScale} {...(props as Omit<HTMLMotionProps<'button'>, 'children'>)}>
       {/* One child, as the primitive's types ask. */}
       <>
         {children}
-        {ripples ?? <RippleButtonRipples />}
+        {ripples}
       </>
-    </RippleButton>
+    </Surface>
   );
 }
 

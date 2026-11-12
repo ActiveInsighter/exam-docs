@@ -34,11 +34,13 @@ async function verify(name, options) {
   const question = id => page.locator(`#question-demo-${id}`);
   const single = question('single-001');
   await capture(single, `${name}-single-idle`);
+  const optionSize = await single.locator('[data-option="A"]').evaluate(node => ({ width: node.offsetWidth, height: node.offsetHeight }));
   await single.locator('[data-option="A"]').click();
   const ripple = single.locator('[data-option="A"] span[style*="width: 20px"]');
   await ripple.waitFor({ state: 'attached' });
-  const origin = await ripple.evaluate(node => ({ x: parseFloat(node.style.left) + 10, y: parseFloat(node.style.top) + 10,
-    width: node.closest('button').offsetWidth, height: node.closest('button').offsetHeight }));
+  // A reduced-motion ripple may finish between attachment and evaluation;
+  // its recorded coordinates remain valid after the transient span detaches.
+  const origin = { ...optionSize, ...await ripple.evaluate(node => ({ x: parseFloat(node.style.left) + 10, y: parseFloat(node.style.top) + 10 })) };
   assert.ok(origin.x >= 0 && origin.x <= origin.width && origin.y >= 0 && origin.y <= origin.height, 'pointer ripple starts within the pressed option');
   await status(single, 'incorrect');
   await capture(single, `${name}-single-incorrect`);

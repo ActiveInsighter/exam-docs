@@ -5,8 +5,7 @@ import { transition, useTempoTransition } from '@animate-ui/react/utils/motion';
 import { ListChecksIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { type ComponentProps, type ReactNode, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { rippleButtonVariants } from '@/components/ui/ripple-button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { blankBadge } from './blank-field';
 import { BlankGradePanel, BlankKey } from './blank-grade';
@@ -106,7 +105,7 @@ function Answering({ question, grading, onGrading }: { question: QuestionState; 
         onClick={question.submit}
         data-submit-answer=""
         // An empty answer: the button waits as a quiet outline rather than a grey block.
-        className={cn(rippleButtonVariants({ size: 'sm' }), 'h-8 rounded-full px-4 disabled:border-(--exam-line) disabled:bg-transparent disabled:text-muted-foreground disabled:opacity-100')}
+        className={cn(buttonVariants({ size: 'sm' }), 'h-8 rounded-full px-4 disabled:border-(--exam-line) disabled:bg-transparent disabled:text-muted-foreground disabled:opacity-100')}
       >
         提交答案
       </Pressable>

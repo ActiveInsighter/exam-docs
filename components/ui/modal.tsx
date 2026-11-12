@@ -4,11 +4,15 @@ import * as React from "react"
 import { AnimateIcon } from "@animate-ui/react/icons"
 import { Drawer as DrawerPrimitive } from "@animate-ui/react/primitives/base-ui/drawer"
 import { cva, type VariantProps } from "class-variance-authority"
+import { Button as BaseButton } from "@base-ui/react/button"
+import { ReducedMotionConfig, transition } from "@animate-ui/react/utils/motion"
+import { AnimatePresence, type HTMLMotionProps } from "motion/react"
+import { createPortal } from "react-dom"
+import { ModalPageFrame, useModalNavigation, type ModalNavigation } from "@/components/ui/modal-navigation"
 
 import { ChevronLeftIcon } from "@/components/animate-ui/icons/chevron-left"
 import { XIcon } from "@/components/animate-ui/icons/x"
 import { Button } from "@/components/ui/button"
-import { diag } from "@/lib/diagnostics"
 import { cn } from "@/lib/utils"
 
 /*
@@ -31,33 +35,36 @@ import { cn } from "@/lib/utils"
  * just above the edge and capped in width (`size`) from md up. Its height
  * follows the content or stays fixed (`height`).
  *
- * Header. No bar: the title and frosted-glass controls float over the
- * content, which fades out as it scrolls under them (a mask as tall as the
- * header, --modal-header-h).
+ * Header. A fixed row above native scrolling panes. Small translucent
+ * controls stay crisp without backdrop sampling or large scrolling masks.
  *
- * Stack. A <Modal> rendered inside another's content is a sheet of its own
- * on top of it. The sheet underneath steps back (smaller, dimmed, lifted
- * until its top edge shows above the new one) and returns as the front
- * sheet leaves or is dragged away. Esc, the back button and a press outside
- * close the front sheet; its close button closes the whole stack.
+ * Navigation. Nested Modals become pages of this same surface. One Drawer
+ * owns dismissal, scroll locking and the focus trap. Covered pages stay
+ * mounted and inert; the navigation module owns their motion and lifetime.
  */
 
 type ModalContextValue = {
   /** 0 for a modal opened from the page, 1 for one opened inside it, and so on. */
   depth: number
   open: boolean
-  /** Closes this modal: a stacked one returns to the modal under it. */
+  /** A child returns to its parent page; a root closes the surface. */
   close: () => void
   /**
-   * Closes this modal and every modal under it. Focus returns to the first
+   * Closes the shared surface. Focus returns to the first
    * trigger unless `returnFocus` is false (say, when a link navigates away).
    */
   closeAll: (options?: { returnFocus?: boolean }) => void
 }
 
 type ModalInternals = ModalContextValue & {
-  /** Shared by a stack: false while closing without moving focus. */
+  /** Shared by all pages: false while closing without moving focus. */
   returnFocus: React.RefObject<boolean>
+  id: string
+  titleId: string
+  navigation: ModalNavigation
+  surfaceOpen: boolean
+  setOpen?: (open: boolean) => void
+  onOpenChangeComplete?: (open: boolean) => void
 }
 
 const ModalContext = React.createContext<ModalInternals | null>(null)
@@ -84,75 +91,102 @@ function useMounted() {
   return mounted
 }
 
-function Modal({
-  open: openProp,
-  defaultOpen = false,
-  onOpenChange,
-  actionsRef,
-  ...props
-}: DrawerPrimitive.Root.Props) {
+function Modal(props: DrawerPrimitive.Root.Props) {
   const parent = React.useContext(ModalContext)
+  return parent ? <ModalPageRoot {...props} parent={parent} /> : <ModalRoot {...props} />
+}
+
+function ModalRoot({ open: openProp, defaultOpen = false, onOpenChange, actionsRef, ...props }: DrawerPrimitive.Root.Props) {
+  const id = React.useId()
+  const navigation = useModalNavigation()
   const actions = React.useRef<DrawerPrimitive.Root.Actions | null>(null)
-  const ownReturnFocus = React.useRef(true)
-  const returnFocus = parent?.returnFocus ?? ownReturnFocus
+  const returnFocus = React.useRef(true)
   const [ownOpen, setOwnOpen] = React.useState(defaultOpen)
   const open = openProp ?? ownOpen
-  // The enter transition plays on a closed → open change, so a modal that
-  // mounts open (lazily, on the click that opens it) opens one commit later.
   const mounted = useMounted()
-
-  React.useImperativeHandle(actionsRef, () => ({
-    close: () => actions.current?.close(),
-    unmount: () => actions.current?.unmount(),
-  }), [])
-
-  // Temporary crash diagnostics.
-  React.useEffect(() => {
-    if (!open) return
-    diag("modal-open")
-    return () => diag("modal-close")
+  React.useLayoutEffect(() => {
+    if (open) returnFocus.current = true
   }, [open])
-
   const close = React.useCallback(() => actions.current?.close(), [])
-  const parentCloseAll = parent?.closeAll
   const closeAll = React.useCallback<ModalContextValue["closeAll"]>((options) => {
     if (options?.returnFocus === false) returnFocus.current = false
     close()
-    parentCloseAll?.()
-  }, [close, parentCloseAll, returnFocus])
-
-  // A stacked modal never outlives the one it was opened from.
-  const orphaned = parent !== null && !parent.open && open
-  React.useEffect(() => {
-    if (orphaned) close()
-  }, [orphaned, close])
-
-  const depth = parent ? parent.depth + 1 : 0
-  const context = React.useMemo<ModalInternals>(
-    () => ({ depth, open, close, closeAll, returnFocus }),
-    [depth, open, close, closeAll, returnFocus]
-  )
-
+  }, [close])
+  React.useImperativeHandle(actionsRef, () => ({ close, unmount: () => actions.current?.unmount() }), [close])
+  const context = React.useMemo<ModalInternals>(() => ({
+    id, titleId: `${id}-title`, depth: 0, open, surfaceOpen: open, close, closeAll, returnFocus, navigation,
+  }), [id, open, close, closeAll, navigation])
   return (
     <ModalContext.Provider value={context}>
       <DrawerPrimitive.Root
-        data-slot="modal"
+        {...props}
         open={mounted && open}
         onOpenChange={(next, details) => {
+          // Dismissal from outside or Escape goes back before closing the surface.
+          if (!next && navigation.top && ["escape-key", "outside-press", "close-watcher"].includes(details.reason)) {
+            details.cancel()
+            navigation.top.close()
+            return
+          }
           onOpenChange?.(next, details)
           if (details.isCanceled) return
-          if (next && !parent) returnFocus.current = true
+          if (next) returnFocus.current = true
           setOwnOpen(next)
         }}
         actionsRef={actions}
-        {...props}
       />
     </ModalContext.Provider>
   )
 }
 
+/** Nested roots manage page state only; they never create a second Drawer. */
+function ModalPageRoot({ parent, open: openProp, defaultOpen = false, onOpenChange, onOpenChangeComplete, actionsRef, children }: DrawerPrimitive.Root.Props & { parent: ModalInternals }) {
+  const id = React.useId()
+  const [ownOpen, setOwnOpen] = React.useState(defaultOpen)
+  const open = parent.open && (openProp ?? ownOpen)
+  const changeOpen = React.useCallback((next: boolean) => {
+    const details: DrawerPrimitive.Root.ChangeEventDetails = {
+      reason: "imperative-action", event: new Event("modal-page-change"), trigger: undefined,
+      isCanceled: false, isPropagationAllowed: false,
+      cancel() { this.isCanceled = true },
+      allowPropagation() { this.isPropagationAllowed = true },
+      preventUnmountOnClose() {},
+    }
+    onOpenChange?.(next, details)
+    if (!details.isCanceled) setOwnOpen(next)
+  }, [onOpenChange])
+  // Keep the registered action stable while callers render inline handlers.
+  const change = React.useRef(changeOpen)
+  React.useLayoutEffect(() => { change.current = changeOpen }, [changeOpen])
+  const close = React.useCallback(() => change.current(false), [])
+  React.useImperativeHandle(actionsRef, () => ({ close, unmount: close }), [close])
+  React.useEffect(() => {
+    if (!parent.open && (openProp ?? ownOpen)) change.current(false)
+  }, [parent.open, openProp, ownOpen])
+  const context = React.useMemo<ModalInternals>(() => ({
+    ...parent, id, titleId: `${id}-title`, depth: parent.depth + 1, open, close, setOpen: changeOpen, onOpenChangeComplete,
+  }), [parent, id, open, close, changeOpen, onOpenChangeComplete])
+  return <ModalContext.Provider value={context}>{children as React.ReactNode}</ModalContext.Provider>
+}
+
 function ModalTrigger(props: DrawerPrimitive.Trigger.Props) {
-  return <DrawerPrimitive.Trigger data-slot="modal-trigger" {...props} />
+  const modal = useModalPart("ModalTrigger")
+  if (modal.depth === 0) return <DrawerPrimitive.Trigger data-slot="modal-trigger" {...props} />
+  const { payload: _payload, handle: _handle, className, style, render, ...button } = props
+  const state = { open: modal.open, disabled: props.disabled ?? false }
+  return <BaseButton
+    {...button}
+    className={typeof className === "function" ? className(state) : className}
+    style={typeof style === "function" ? style(state) : style}
+    render={typeof render === "function" ? (elementProps) => render(elementProps, state) : render}
+    data-slot="modal-trigger"
+    aria-haspopup="dialog"
+    aria-expanded={modal.open}
+    onClick={(event) => {
+      if (typeof props.onClick === "function") props.onClick(event)
+      if (!event.defaultPrevented) modal.setOpen?.(!modal.open)
+    }}
+  />
 }
 
 /* ------------------------------------------------------------------------ */
@@ -163,30 +197,14 @@ const modalContentVariants = cva(
   [
     "@container/modal group/modal relative isolate flex w-full origin-bottom flex-col overflow-hidden outline-none",
     "max-h-(--modal-cap) rounded-t-(--modal-radius) bg-(--modal-surface) text-foreground [box-shadow:var(--modal-shadow)]",
-    // Phones stack split panes in one scroll: its faded top shows the sheet, which takes the first pane's tone.
-    "max-md:has-[[data-slot=modal-pane][data-tone=muted]:first-child]:bg-(--modal-pane-muted)",
     // Phones: edge to edge. From md up: floating, capped in width.
-    "[--modal-float:0px] [--modal-gutter:1.25rem] [--modal-header-h:3.5rem]",
-    "[--modal-cap:calc(100dvh_-_env(safe-area-inset-top,0px)_-_1.5rem_-_var(--modal-depth,0)_*_0.75rem)]",
+    "[--modal-float:0px] [--modal-gutter:1.25rem]",
+    "[--modal-cap:calc(100dvh_-_env(safe-area-inset-top,0px)_-_1.5rem)]",
     "md:mb-(--modal-float) md:w-[min(var(--modal-width),calc(100vw_-_2rem))] md:rounded-(--modal-radius) md:[box-shadow:var(--modal-shadow-float)]",
     "md:[--modal-float:0.75rem] md:[--modal-gutter:1.75rem]",
-    "md:[--modal-cap:calc(100dvh_-_2.5rem_-_var(--modal-float)_-_var(--modal-depth,0)_*_0.75rem)]",
+    "md:[--modal-cap:calc(100dvh_-_2.5rem_-_var(--modal-float))]",
     // Leaving: past the edge it floats above.
     "[--closed-transform:translate3d(0,calc(100%_+_var(--modal-float)_+_2px),0)]",
-    /*
-     * Stack. With sheets open on top of it (--nested-drawers), this one
-     * steps back: a little smaller per sheet, and lifted until its top edge
-     * shows a peek above the front sheet (not at all when it is the taller
-     * one). Dragging the front sheet away (--drawer-swipe-progress) brings
-     * it back in step.
-     */
-    "[--stack-depth:calc(var(--nested-drawers,0)_-_clamp(0,var(--drawer-swipe-progress,0),1))]",
-    "[--stack-scale:max(0.84,calc(1_-_var(--stack-depth)_*_0.04))]",
-    "[--stack-lift:max(0px,calc(var(--drawer-frontmost-height,0px)_+_var(--stack-depth)_*_0.875rem_-_var(--drawer-height,100dvh)_*_var(--stack-scale)))]",
-    "[--translate-y:calc(var(--drawer-snap-point-offset,0px)_+_var(--drawer-swipe-movement-y,0px)_-_var(--stack-lift))]",
-    "data-nested-drawer-swiping:duration-0",
-    // The dim over a sheet that stepped back.
-    "after:pointer-events-none after:absolute after:inset-0 after:z-40 after:bg-(--modal-stack-dim) after:opacity-0 after:transition-opacity after:duration-300 data-nested-drawer-open:after:opacity-100",
   ],
   {
     variants: {
@@ -240,7 +258,75 @@ function resolveFocus(target: FocusTarget, closeType: CloseType) {
 /** The title of the sheet a part is rendered in: where focus starts. */
 const ModalTitleContext = React.createContext<React.RefObject<HTMLElement | null> | null>(null)
 
-function ModalContent({
+function ModalContent(props: ModalContentProps) {
+  const modal = useModalPart("ModalContent")
+  return modal.depth > 0 ? <ModalPageContent {...props} /> : <ModalRootContent {...props} />
+}
+
+function ModalPageContent({
+  children, className, initialFocus, finalFocus, ref, style,
+  size: _size, height: _height, backdropClassName: _backdrop,
+  transition: _enter, exitTransition: _leave, render: _render,
+  ...props
+}: ModalContentProps) {
+  const modal = useModalPart("ModalContent")
+  const { host, register, top } = modal.navigation
+  const titleRef = React.useRef<HTMLElement | null>(null)
+  const frame = React.useRef<HTMLDivElement>(null)
+  const restore = React.useRef<HTMLElement | null>(null)
+  const restoreFocus = React.useEffectEvent(() => {
+    const resolved = resolveFocus(finalFocus, "")
+    if (resolved === false) return
+    ;(resolved instanceof HTMLElement ? resolved : restore.current)?.focus({ preventScroll: true })
+    restore.current = null
+  })
+  const initial = React.useEffectEvent(() => {
+    const target = typeof initialFocus === "function" ? initialFocus("") : initialFocus
+    if (target === false) return
+    const element = target && typeof target === "object" && "current" in target ? target.current : target
+    ;(element instanceof HTMLElement ? element : titleRef.current ?? frame.current)?.focus({ preventScroll: true })
+  })
+  React.useLayoutEffect(() => {
+    if (!modal.open || !host) return
+    restore.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    return register({ id: modal.id, titleId: modal.titleId, depth: modal.depth, close: modal.close })
+  }, [modal.open, host, register, modal.id, modal.titleId, modal.depth, modal.close])
+  const active = modal.open && top?.id === modal.id
+  React.useLayoutEffect(() => {
+    if (active) initial()
+    // Parent loses inert in the same commit before we restore its trigger.
+    else if (!modal.open && modal.surfaceOpen && restore.current?.isConnected && modal.returnFocus.current) {
+      const frame = requestAnimationFrame(restoreFocus)
+      return () => cancelAnimationFrame(frame)
+    }
+  }, [active, modal.open, modal.surfaceOpen, modal.returnFocus])
+  if (!host) return null
+  return createPortal(
+    <AnimatePresence onExitComplete={() => modal.onOpenChangeComplete?.(false)}>
+      {modal.open ? (
+        <ModalPageFrame key={modal.id} ref={(node) => {
+          frame.current = node
+          if (typeof ref === "function") ref(node)
+          else if (ref) ref.current = node
+        }} active={active} tabIndex={-1}
+          {...props as Omit<HTMLMotionProps<"div">, "style">}
+          onAnimationComplete={(definition) => {
+            if (definition === "center") modal.onOpenChangeComplete?.(true)
+          }}
+          style={typeof style === "function" ? style({
+            open: modal.open, transitionStatus: "idle", expanded: false, nested: true,
+            nestedDrawerOpen: (top?.depth ?? 0) > modal.depth, nestedDrawerSwiping: false,
+            swipeDirection: "down", swiping: false,
+          }) : style}
+          className={className} data-modal-depth={modal.depth}>
+          <ModalTitleContext.Provider value={titleRef}>{children}</ModalTitleContext.Provider>
+        </ModalPageFrame>
+      ) : null}
+    </AnimatePresence>, host
+  )
+}
+
+function ModalRootContent({
   size = "md",
   height = "auto",
   className,
@@ -262,6 +348,8 @@ function ModalContent({
   return (
     <DrawerPrimitive.Portal data-slot="modal-portal">
       <DrawerPrimitive.Backdrop
+        transition={transition.sheet}
+        exitTransition={transition.dismiss}
         data-slot="modal-backdrop"
         className={cn(
           "fixed inset-0 z-50 min-h-dvh bg-(--modal-backdrop) supports-[-webkit-touch-callout:none]:absolute",
@@ -273,9 +361,12 @@ function ModalContent({
         className="fixed inset-0 z-50 flex items-end justify-center"
       >
         <DrawerPrimitive.Popup
+          transition={transition.sheet}
+          exitTransition={transition.dismiss}
           data-slot="modal-content"
           data-size={size}
           data-height={heightVariant}
+          aria-labelledby={modal.navigation.top?.titleId ?? modal.titleId}
           initialFocus={initialFocus ?? (() => titleRef.current ?? true)}
           finalFocus={(closeType) => (modal.returnFocus.current ? resolveFocus(finalFocus, closeType) : false)}
           className={cn(modalContentVariants({ size, height: heightVariant }), className)}
@@ -284,7 +375,12 @@ function ModalContent({
             : { ...variables, ...style }}
           {...props}
         >
-          <ModalTitleContext.Provider value={titleRef}>{children}</ModalTitleContext.Provider>
+          <ReducedMotionConfig>
+            <ModalPageFrame root active={!modal.navigation.top}>
+              <ModalTitleContext.Provider value={titleRef}>{children}</ModalTitleContext.Provider>
+            </ModalPageFrame>
+            <div ref={modal.navigation.setHost} data-slot="modal-page-host" className="pointer-events-none absolute inset-0" />
+          </ReducedMotionConfig>
         </DrawerPrimitive.Popup>
       </DrawerPrimitive.Viewport>
     </DrawerPrimitive.Portal>
@@ -295,35 +391,16 @@ function ModalContent({
 /* Header: handle, back, title, tags, toolbar, close                         */
 /* ------------------------------------------------------------------------ */
 
-/** Frosted glass: translucent, blurred and saturated, a light rim and a soft drop. */
-const glass = "[backdrop-filter:var(--modal-glass-blur)] [box-shadow:var(--modal-glass-shadow)]"
+/** A translucent surface, a fine rim and a soft drop; no backdrop sampling. */
+const glass = "[box-shadow:var(--modal-glass-shadow)]"
 const glassButton = cn(
   glass,
   "size-9 shrink-0 rounded-full bg-(--modal-glass) text-muted-foreground hover:bg-(--modal-glass-hover) hover:text-foreground dark:hover:bg-(--modal-glass-hover) [&_svg:not([class*='size-'])]:size-4.5"
 )
 
-/** Publishes the header's height to its sheet, where the scroll areas read it. */
-function useHeaderHeight() {
-  const ref = React.useRef<HTMLElement>(null)
-  React.useLayoutEffect(() => {
-    const header = ref.current
-    const sheet = header?.closest<HTMLElement>('[data-slot="modal-content"]')
-    if (!header || !sheet) return
-    const publish = () => sheet.style.setProperty("--modal-header-h", `${header.offsetHeight}px`)
-    publish()
-    const observer = new ResizeObserver(publish)
-    observer.observe(header)
-    return () => {
-      observer.disconnect()
-      sheet.style.removeProperty("--modal-header-h")
-    }
-  }, [])
-  return ref
-}
-
 /**
- * The floating header. Children share one row (title, tags, toolbar);
- * phones move the tags to a scrolling second row. A stacked modal leads
+ * The fixed header. Children share one row (title, tags, toolbar);
+ * phones move the tags to a scrolling second row. A child page leads
  * with a back button, and the close button ends the row. Dragging the
  * header down dismisses the sheet.
  */
@@ -334,19 +411,17 @@ function ModalHeader({
   showClose = true,
   ...props
 }: React.ComponentProps<"header"> & {
-  /** Show the back button on a stacked modal. */
+  /** Show the back button on a child page. */
   showBack?: boolean
   showClose?: boolean
 }) {
   const modal = useModalPart("ModalHeader")
-  const ref = useHeaderHeight()
   const back = showBack && modal.depth > 0
   return (
     <header
-      ref={ref}
       data-slot="modal-header"
       className={cn(
-        "absolute inset-x-0 top-0 z-20 cursor-grab touch-none py-3 pr-3 pb-2 pl-(--modal-gutter) select-none active:cursor-grabbing pointer-fine:pt-2.5",
+        "relative z-20 shrink-0 cursor-grab touch-none border-b border-(--ui-fill) bg-(--modal-surface) py-3 pr-3 pl-(--modal-gutter) select-none active:cursor-grabbing pointer-fine:py-2.5",
         back && "pl-3",
         className
       )}
@@ -368,8 +443,10 @@ function ModalHeader({
 
 function ModalTitle({ className, ref, ...props }: DrawerPrimitive.Title.Props) {
   const titleRef = React.useContext(ModalTitleContext)
+  const modal = useModalPart("ModalTitle")
   return (
     <DrawerPrimitive.Title
+      id={modal.titleId}
       ref={(node) => {
         if (titleRef) titleRef.current = node
         if (typeof ref === "function") ref(node)
@@ -387,10 +464,7 @@ function ModalDescription({ className, ...props }: DrawerPrimitive.Description.P
   return <DrawerPrimitive.Description data-slot="modal-description" className={className} {...props} />
 }
 
-/**
- * Capsules beside the title; a scrolling row of their own on phones. Each
- * child is frosted: give it a translucent background, or use ModalTag.
- */
+/** Capsules beside the title; their own scrolling row on phones. */
 function ModalTags({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -399,7 +473,7 @@ function ModalTags({ className, ...props }: React.ComponentProps<"div">) {
       data-base-ui-swipe-ignore="x"
       className={cn(
         "order-last -my-1.5 flex min-w-0 basis-full touch-pan-x items-center gap-1.5 overflow-x-auto py-1.5 pr-2 pl-0.5 [scrollbar-width:none] empty:hidden md:order-none md:flex-1 md:basis-0",
-        "*:shrink-0 *:[backdrop-filter:var(--modal-glass-blur)] *:[box-shadow:var(--modal-glass-shadow)]",
+        "*:shrink-0 *:[box-shadow:var(--modal-glass-shadow)]",
         className
       )}
       {...props}
@@ -407,7 +481,7 @@ function ModalTags({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-/** A frosted-glass tag for ModalTags. */
+/** A translucent tag for ModalTags. */
 function ModalTag({ className, ...props }: React.ComponentProps<"span">) {
   return (
     <span
@@ -421,7 +495,7 @@ function ModalTag({ className, ...props }: React.ComponentProps<"span">) {
   )
 }
 
-/** Actions before the close button, grouped on one frosted-glass capsule. */
+/** Actions before the close button, grouped on one capsule. */
 function ModalToolbar({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -433,7 +507,7 @@ function ModalToolbar({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-/** Returns to the modal under this one. Rendered by ModalHeader on a stacked modal. */
+/** Returns to the parent page. Rendered by ModalHeader on a child page. */
 function ModalBack({ className, onClick, ...props }: Omit<React.ComponentProps<typeof Button>, "children">) {
   const modal = useModalPart("ModalBack")
   return (
@@ -457,7 +531,7 @@ function ModalBack({ className, onClick, ...props }: Omit<React.ComponentProps<t
   )
 }
 
-/** Closes the modal; on a stacked one, the whole stack. */
+/** Closes the shared modal surface from any page. */
 function ModalClose({ className, onClick, ...props }: Omit<React.ComponentProps<typeof Button>, "children">) {
   const modal = useModalPart("ModalClose")
   const label = modal.depth > 0 ? "全部关闭" : "关闭"
@@ -486,15 +560,10 @@ function ModalClose({ className, onClick, ...props }: Omit<React.ComponentProps<
 /* Content areas                                                             */
 /* ------------------------------------------------------------------------ */
 
-/*
- * A scroll area starts below the header and fades its content out as it
- * passes under it, and again in the last stretch at the bottom. The mask
- * sits on the scroll box, so it stays put while the content moves through.
- */
-const scrollArea = "min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pt-(--modal-header-h) [scrollbar-width:thin]"
-const fadeTop = "mask-t-from-[calc(100%_-_var(--modal-header-h)_-_0.5rem)] mask-t-to-[calc(100%_-_var(--modal-header-h)_*_0.6)]"
-const fadeBottom = "mask-b-from-[calc(100%_-_1.5rem)]"
-const padTop = "pt-[calc(var(--modal-header-h)_+_0.25rem)]"
+// Native scroll regions below the header: no large masks or blur layers.
+// This keeps text crisp and avoids repainting entire panes during a swap.
+const scrollArea = "min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pt-5 [scrollbar-width:thin]"
+const padTop = "pt-5"
 const padBottom = "pb-[calc(2rem_+_env(safe-area-inset-bottom,0px))]"
 
 /** One scrolling content area under the header. */
@@ -503,8 +572,8 @@ function ModalBody({ className, ...props }: DrawerPrimitive.Content.Props) {
     <DrawerPrimitive.Content
       data-slot="modal-body"
       className={cn(
-        scrollArea, fadeTop, fadeBottom, padTop, padBottom,
-        "px-(--modal-gutter) has-[~[data-slot=modal-footer]]:pb-6 has-[~[data-slot=modal-footer]]:mask-b-from-100%",
+        scrollArea, padTop, padBottom,
+        "px-(--modal-gutter) has-[~[data-slot=modal-footer]]:pb-6",
         className
       )}
       {...props}
@@ -530,8 +599,8 @@ function ModalSplit({
     <DrawerPrimitive.Content
       data-slot="modal-split"
       className={cn(
-        scrollArea, fadeTop,
-        "grid md:mask-none md:grid-cols-(--modal-split-columns,repeat(2,minmax(0,1fr))) md:grid-rows-[minmax(0,1fr)] md:overflow-hidden md:has-[>[data-slot=modal-pane]:only-child]:grid-cols-1",
+        scrollArea,
+        "grid md:grid-cols-(--modal-split-columns,repeat(2,minmax(0,1fr))) md:grid-rows-[minmax(0,1fr)] md:overflow-hidden md:has-[>[data-slot=modal-pane]:only-child]:grid-cols-1",
         className
       )}
       style={typeof style === "function"
@@ -544,7 +613,7 @@ function ModalSplit({
 
 /**
  * One pane of a ModalSplit. The tone sits on the pane and the content
- * scrolls inside it, so the faded top edge never fades the pane's colour.
+ * scrolls inside it; navigation never moves or repaints the pane's colour.
  * Props, ref and className go to the scrolling element.
  */
 function ModalPane({
@@ -565,9 +634,8 @@ function ModalPane({
         data-slot="modal-pane-scroll"
         className={cn(
           "px-(--modal-gutter) pt-5 pb-7",
-          "group-first/pane:pt-[calc(var(--modal-header-h)_+_0.25rem)] group-last/pane:pb-[calc(2rem_+_env(safe-area-inset-bottom,0px))]",
-          "md:min-h-0 md:flex-1 md:overflow-y-auto md:overscroll-contain md:scroll-pt-(--modal-header-h) md:pt-[calc(var(--modal-header-h)_+_0.25rem)] md:pb-9! md:[scrollbar-width:thin]",
-          "md:mask-t-from-[calc(100%_-_var(--modal-header-h)_-_0.5rem)] md:mask-t-to-[calc(100%_-_var(--modal-header-h)_*_0.6)] md:mask-b-from-[calc(100%_-_1.5rem)]",
+          "group-last/pane:pb-[calc(2rem_+_env(safe-area-inset-bottom,0px))]",
+          "md:min-h-0 md:flex-1 md:overflow-y-auto md:overscroll-contain md:scroll-pt-5 md:pt-5 md:pb-9! md:[scrollbar-width:thin]",
           className
         )}
         {...props}

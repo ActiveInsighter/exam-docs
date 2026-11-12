@@ -44,22 +44,34 @@ async function nested(page, name, options) {
   }
   await settled(root);
   await focused(root.locator('[data-slot="modal-title"]'));
-  const body = root.locator('[data-slot="modal-body"]');
-  const scrollTop = await body.evaluate(node => { node.scrollTop = 100; return node.scrollTop; });
+  const body = root.locator('[data-slot="modal-root-page"] [data-slot="modal-body"]');
+  const scrollTop = await body.evaluate(node => {
+    const input = document.createElement('input');
+    input.dataset.retainedInput = '';
+    input.value = '保留输入';
+    node.append(input);
+    node.scrollTop = 100;
+    return node.scrollTop;
+  });
   const openChild = root.getByRole('button', { name: '打开「收藏与标签」', exact: true });
   await openChild.click();
-  const child = page.locator(popup).nth(1);
+  const child = page.locator('[data-slot="modal-page"][data-modal-depth="1"]');
   await child.waitFor();
+  const pageFrames = await frames(child);
+  if (options.reducedMotion === 'reduce') assert.ok(pageFrames.every(frame => Math.abs(frame.x) < 0.1), 'reduced page navigation fades without travel');
   await settled(child);
   await settled(root);
-  const stacked = (await frames(root, 1))[0];
-  if (options.reducedMotion !== 'reduce') assert.ok(stacked.scale < 0.99, 'covered drawer steps back');
+  const sharedSurface = (await frames(root, 1))[0];
+  assert.equal(await page.locator(popup).count(), 1, 'navigation uses one popup');
+  assert.equal(await page.locator('[data-slot="modal-backdrop"]').count(), 1, 'navigation uses one backdrop');
+  assert.equal(await root.locator('[data-slot="modal-root-page"]').getAttribute('inert'), '', 'covered parent is inert');
+  assert.ok(Math.abs(sharedSurface.scale - 1) < 0.001, 'the shared surface never scales on page changes');
   await page.keyboard.press('Tab');
   assert.equal(await child.evaluate(node => node.contains(document.activeElement)), true, 'focus stays in the front drawer');
 
   const openThird = child.getByRole('button', { name: '打开「确认」', exact: true });
   await openThird.click();
-  const third = page.locator(popup).nth(2);
+  const third = page.locator('[data-slot="modal-page"][data-modal-depth="2"]');
   await third.waitFor();
   await settled(third);
   await capture(page, `${name}-nested-three`);
@@ -70,6 +82,7 @@ async function nested(page, name, options) {
   await gone(child);
   await focused(openChild);
   assert.equal(await body.evaluate(node => node.scrollTop), scrollTop, 'returning preserves parent scroll');
+  assert.equal(await body.locator('[data-retained-input]').inputValue(), '保留输入', 'returning preserves form state');
 
   // Outside dismissal closes one layer; the root stays interactive.
   await openChild.click();
@@ -79,7 +92,7 @@ async function nested(page, name, options) {
   await gone(child);
   await focused(openChild);
 
-  // The header close action closes the entire stack and restores the page trigger.
+  // The header close action closes the shared surface and restores the page trigger.
   await openChild.click();
   await child.waitFor();
   await child.locator('[data-slot="modal-close"]').click();
@@ -111,7 +124,7 @@ async function nested(page, name, options) {
   }
   await gone(root);
   await focused(trigger);
-  return { entering, stacked };
+  return { entering, sharedSurface };
 }
 
 async function study(page, name, options) {
@@ -144,7 +157,7 @@ async function study(page, name, options) {
   // Rapid direction changes retarget to the last requested card.
   for (const key of ['ArrowRight', 'ArrowLeft', 'ArrowRight', 'ArrowLeft']) await page.keyboard.press(key);
   await titleIs('导数');
-  const content = sheet.locator('[data-slot="study-card-content"]').first();
+  const content = sheet.locator('[data-slot="panel-frame"]').last();
   await next.click();
   const switching = await frames(content);
   await titleIs('定积分');
@@ -200,6 +213,7 @@ async function solution(page, name, options) {
   if (options.reducedMotion === 'reduce') assert.ok(feedback.every(frame => Math.abs(frame.x) < 0.1 && Math.abs(frame.scale - 1) < 0.001), 'custom grading feedback respects reduced motion');
   const trigger = question.locator('[data-solution-trigger]');
   await trigger.click();
+  assert.equal(await trigger.getAttribute('data-slot'), 'button', 'solution trigger uses press feedback without ripple');
   const sheet = page.locator('[data-solution-card]');
   await sheet.waitFor();
   const entering = await frames(sheet);
@@ -219,9 +233,10 @@ async function solution(page, name, options) {
   assert.equal(await sheet.getAttribute('data-open'), '', 'Escape cancels editing before closing the drawer');
   const libraryTrigger = sheet.getByRole('button', { name: '收藏与标签', exact: true });
   await libraryTrigger.click();
-  const library = page.locator(popup).nth(1);
+  const library = page.locator('[data-slot="modal-page"][data-modal-depth="1"]');
   await library.waitFor();
   await settled(library);
+  assert.equal(await page.getByRole('dialog').count(), 1, 'library shares the solution dialog');
   await capture(page, `${name}-solution-library`);
   await library.locator('[data-slot="modal-back"]').click();
   await gone(library);
@@ -267,13 +282,13 @@ try {
     page.on('pageerror', error => errors.push(error.message));
     try {
       await page.goto(`${base}/blog/component-showcase`, { waitUntil: 'networkidle' });
-      const stack = await nested(page, name, options);
+      const navigation = await nested(page, name, options);
       const cards = await study(page, name, options);
       const answers = await solution(page, name, options);
       await noOverflow(page);
       const activation = name === 'desktop-light' ? await longPage(page) : undefined;
-      reports.push({ name, stack, cards, answers, activation });
-      console.log(`PASS ${name}: three-level stack, focus, drag, keyboard, rapid changes, swipe and lazy solution`);
+      reports.push({ name, navigation, cards, answers, activation });
+      console.log(`PASS ${name}: three-page navigation, focus, drag, keyboard, rapid changes, swipe and lazy solution`);
     } catch (error) {
       await capture(page, `${name}-failure`);
       throw error;

@@ -62,7 +62,8 @@ import { RippleButton, RippleButtonRipples } from '@/components/ui/ripple-button
 ## 题卡与图标
 
 长题目页使用 `components/question/live.tsx` 的 `Pressable`：首次接近视口前是同样外观的原生按钮，
-接近后组合官方 RippleButton，避免上百道题在水合时一起挂载 Motion。
+接近后默认组合官方普通按压按钮，只有答案选项显式传入扩散层时使用 RippleButton，避免上百道题在水合时一起挂载 Motion。
+提交、查看解答、自评与改判都不扩散。
 这是题卡的性能适配层；其他页面直接使用共享 UI 按钮。判分和存储仍由题目状态层负责。
 
 操作图标用官方 `AnimateIcon` 包裹触发区；图标文件来自 Animate UI 注册表，位于

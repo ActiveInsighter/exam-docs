@@ -4,6 +4,7 @@ import { NotebookPenIcon, StarIcon } from 'lucide-react';
 import Link from 'next/link';
 import { type ComponentProps, type ReactNode, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Modal, ModalBody, ModalContent, ModalDescription, ModalHeader, ModalTags, ModalTitle, useModal } from '@/components/ui/modal';
 import type { QuestionMark } from '@/lib/question-store/types';
 import { cn } from '@/lib/utils';
@@ -16,9 +17,8 @@ import { liveTagsOf, useUserTags } from './use-marks';
  * Every question the reader starred, tagged or annotated, across pages,
  * filterable by favourite, note or tag. Each entry links to the question.
  *
- * Opens on its own from the account menu, or as a nested drawer above a
- * solution card (back returns to the card); following an entry closes the
- * whole stack.
+ * Opens from the account menu or as a page of the solution panel. Following
+ * an entry closes the shared surface without restoring focus to the old page.
  */
 
 type Filter = 'all' | 'favorite' | 'note' | `tag:${string}`;
@@ -57,19 +57,17 @@ export function QuestionLibraryDialog({ open, onOpenChange }: { open: boolean; o
   }), [marks]);
 
   const chip = (value: Filter, label: ReactNode, count?: number) => (
-    <button
+    <ToggleGroupItem
       key={value}
-      type="button"
-      aria-pressed={filter === value}
-      onClick={() => setSelection({ cache, filter: value })}
+      value={value}
       className={cn(
-        'inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm transition-colors',
-        filter === value ? 'bg-foreground text-background' : 'bg-(--ui-fill) text-muted-foreground hover:bg-(--ui-fill-hover) hover:text-foreground',
+        'h-8 shrink-0 gap-1.5 rounded-full px-3 text-sm',
+        'text-muted-foreground aria-pressed:bg-foreground aria-pressed:text-background',
       )}
     >
       {label}
       {count !== undefined ? <span className="tabular-nums opacity-70">{count}</span> : null}
-    </button>
+    </ToggleGroupItem>
   );
 
   return (
@@ -77,15 +75,19 @@ export function QuestionLibraryDialog({ open, onOpenChange }: { open: boolean; o
       <ModalContent size="md" className="md:min-h-[min(22rem,calc(100dvh-4rem))]">
         <ModalHeader>
           <ModalTitle>收藏与标签</ModalTitle>
-          <ModalTags role="group" aria-label="筛选">
-            {chip('all', '全部', counts.all)}
-            {chip('favorite', <><StarIcon className="size-3.5" />收藏</>, counts.favorite)}
-            {chip('note', <><NotebookPenIcon className="size-3.5" />注释</>, counts.note)}
-            {tags.map((tag) => chip(`tag:${tag.tagId}`, <><TagDot color={tag.color} />{tag.name}</>))}
+          <ModalTags>
+            <ToggleGroup value={[filter]} onValueChange={(values) => {
+              if (values.length) setSelection({ cache, filter: values[0] as Filter });
+            }} aria-label="筛选" spacing={1} className="rounded-full bg-(--modal-glass) p-0.5">
+              {chip('all', '全部', counts.all)}
+              {chip('favorite', <><StarIcon className="size-3.5" />收藏</>, counts.favorite)}
+              {chip('note', <><NotebookPenIcon className="size-3.5" />注释</>, counts.note)}
+              {tags.map((tag) => chip(`tag:${tag.tagId}`, <><TagDot color={tag.color} />{tag.name}</>))}
+            </ToggleGroup>
           </ModalTags>
         </ModalHeader>
         {/* Keep entries at a readable measure, whether standalone or nested. */}
-        <ModalBody className="px-3 md:px-4 [&>*]:max-w-3xl">
+        <ModalBody className="px-3 md:px-4 [&>*]:mx-auto [&>*]:w-full [&>*]:max-w-3xl">
           <ModalDescription className="mb-2 px-3 text-sm text-muted-foreground">在题目右上角收藏、打标签或写注释，都会汇总到这里。</ModalDescription>
           <ul className="min-h-40">
             {error ? (

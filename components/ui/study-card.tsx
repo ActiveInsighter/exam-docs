@@ -4,14 +4,11 @@ import * as React from "react"
 import { AnimateIcon } from "@animate-ui/react/icons"
 import { SlidingNumber } from "@animate-ui/react/primitives/texts/sliding-number"
 import {
-  blur,
   ReducedMotionConfig,
   shift,
-  transition,
-  useShouldReduceMotion,
-  useTempoTransition,
 } from "@animate-ui/react/utils/motion"
-import { AnimatePresence, motion, type PanInfo, type Variants } from "motion/react"
+import { AnimatePresence, motion, type PanInfo } from "motion/react"
+import { PanelSwap, usePanelVariants } from "@/components/ui/panel-motion"
 
 import { ChevronLeftIcon } from "@/components/animate-ui/icons/chevron-left"
 import { ChevronRightIcon } from "@/components/animate-ui/icons/chevron-right"
@@ -44,7 +41,7 @@ import { cn } from "@/lib/utils"
  *         <StudyCardSection />
  *       </StudyCardMain>
  *     </StudyCardStage>
- *     <Modal>…</Modal>                              a sheet stacked on the card
+ *     <Modal>…</Modal>                              a page of this panel
  *   </StudyCard>
  *
  * Layout. From md up the aside and the main column sit side by side, each
@@ -53,12 +50,9 @@ import { cn } from "@/lib/utils"
  * scrolling column. The modal keeps one height (44rem by default) so
  * stepping never makes it jump.
  *
- * Motion. A step is Animate UI's "steps of a flow": the card on show leaves
- * towards the side it is stepped away from, fading into a light blur, then
- * the next one arrives from the other side, its sections settling one after
- * another. Only the content of the panes moves; the panes and their tones
- * stay put, so the card itself never flashes. The title swaps the same way
- * and the pager's number rolls.
+ * Motion lives in panel-motion.tsx. The outgoing and incoming cards move
+ * together, so repeated navigation never queues exits. One compositor
+ * transform per card replaces blur and stagger on every section.
  */
 
 /** 1 towards the next card, -1 towards the previous one. */
@@ -187,8 +181,8 @@ function StudyCard({
     onKeyDown?.(event)
     if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
     const target = event.target as Element
-    // Only the card's own sheet steps: one stacked on top keeps its arrows.
-    if (!event.currentTarget.contains(target) || target.closest(OWN_KEYS)) return
+    // Child pages and editors keep their own arrow keys.
+    if (!event.currentTarget.contains(target) || target.closest(OWN_KEYS) || target.closest('[data-slot="modal-page"]')) return
     if (event.key === "ArrowLeft" && hasPrev) context.prev()
     else if (event.key === "ArrowRight" && hasNext) context.next()
     else return
@@ -216,44 +210,6 @@ function StudyCard({
       </ModalContent>
     </Modal>
   )
-}
-
-/* ------------------------------------------------------------------------ */
-/* Motion                                                                    */
-/* ------------------------------------------------------------------------ */
-
-/**
- * The step's variants, shared by everything that swaps with the card. They
- * are resolved with the direction (`custom`): what enters comes from the
- * side stepped to, what leaves goes the other way.
- */
-function useStepVariants(distance: number = shift.step) {
-  const reduce = useShouldReduceMotion()
-  const enter = useTempoTransition(transition.panelIn)
-  const leave = useTempoTransition(transition.panelOut)
-  return React.useMemo(() => {
-    const away = (sign: number) => ({
-      opacity: 0,
-      filter: blur.panel,
-      transform: `translateX(${reduce ? 0 : sign * distance}px)`,
-    })
-    const content: Variants = {
-      enter: (direction: Direction) => away(direction),
-      center: {
-        opacity: 1,
-        filter: "blur(0px)",
-        transform: "translateX(0px)",
-        transition: { ...enter, staggerChildren: 0.04 },
-      },
-      exit: (direction: Direction) => ({ ...away(-direction), transition: leave }),
-    }
-    // Sections settle one after another as their card arrives.
-    const section: Variants = {
-      enter: { opacity: 0, y: 8 },
-      center: { opacity: 1, y: 0, transition: enter },
-    }
-    return { content, section }
-  }, [distance, enter, leave, reduce])
 }
 
 /* ------------------------------------------------------------------------ */
@@ -287,15 +243,15 @@ function StudyCardHeader({
   pager?: boolean
 }) {
   const { count, labels, itemKey, direction } = useStudyCard()
-  const { content } = useStepVariants(shift.tabs)
+  const content = usePanelVariants(shift.tabs)
   const showPager = pager && count > 1
   return (
     <ModalHeader
       {...props}
       className={cn(actions && showPager && "@max-sm/modal:[&_[data-slot=modal-close]]:ml-auto!", className)}
     >
-      <ModalTitle {...titleProps} className={cn("relative overflow-visible", titleProps?.className)}>
-        <AnimatePresence mode="popLayout" initial={false} custom={direction}>
+      <ModalTitle {...titleProps} className={cn("relative inline-grid overflow-visible", titleProps?.className)}>
+        <AnimatePresence mode="sync" initial={false} custom={direction}>
           <motion.span
             key={itemKey}
             data-slot="study-card-title"
@@ -304,7 +260,7 @@ function StudyCardHeader({
             initial="enter"
             animate="center"
             exit="exit"
-            className="block truncate"
+            className="block truncate [grid-area:1/1]"
           >
             {title}
           </motion.span>
@@ -397,7 +353,7 @@ function ratioColumns(ratio: number) {
 /**
  * Holds the card on show: a ModalSplit whose children are the card's panes
  * (StudyCardAside, StudyCardMain), or one of them for a single column. A
- * step swaps the whole split, one card after the other. Touch swipes
+ * step swaps the split with simultaneous enter and exit. Touch swipes
  * sideways step; set `swipe={false}` when a card is mostly content that
  * scrolls sideways.
  */
@@ -420,6 +376,12 @@ function StudyCardStage({
   const stage = React.useRef<HTMLDivElement>(null)
   const blocked = React.useRef(false)
 
+  // Panes retain their backgrounds; a new card starts at the top of each
+  // scroll region. No measurements or per-frame layout work are necessary.
+  React.useLayoutEffect(() => {
+    stage.current?.querySelectorAll<HTMLElement>('[data-slot="modal-split"], [data-slot="modal-pane-scroll"]').forEach((node) => { node.scrollTop = 0 })
+  }, [itemKey])
+
   const onPanEnd = (event: PointerEvent, { offset }: PanInfo) => {
     if (event.pointerType !== "touch" || event.type === "pointercancel" || blocked.current) return
     if (Math.abs(offset.x) < SWIPE_DISTANCE || Math.abs(offset.x) < Math.abs(offset.y) * SWIPE_SLOPE) return
@@ -437,20 +399,12 @@ function StudyCardStage({
       onPanSessionStart={swipe ? (event) => { blocked.current = stage.current ? scrollsSideways(event.target, stage.current) : true } : undefined}
       onPanEnd={swipe ? onPanEnd : undefined}
     >
-      <AnimatePresence mode="wait" initial={false} custom={direction}>
-        {/* Carries the step to the panes' content; the panes themselves stay put. */}
-        <motion.div key={itemKey} initial="enter" animate="center" exit="exit" className="contents">
-          {/* Touch-action is resolved up to the nearest scroller, so it must
-              also live on the split (phones) and pane scrollers (tablets).
-              A nested formula scroller keeps its own native horizontal pan. */}
-          <ModalSplit
-            columns={columns}
-            className={swipe ? "touch-pan-y touch-pinch-zoom md:[&_[data-slot=modal-pane-scroll]]:touch-pan-y md:[&_[data-slot=modal-pane-scroll]]:touch-pinch-zoom" : undefined}
-          >
-            {children}
-          </ModalSplit>
-        </motion.div>
-      </AnimatePresence>
+      <ModalSplit
+        columns={columns}
+        className={swipe ? "touch-pan-y touch-pinch-zoom md:[&_[data-slot=modal-pane-scroll]]:touch-pan-y md:[&_[data-slot=modal-pane-scroll]]:touch-pinch-zoom" : undefined}
+      >
+        {children}
+      </ModalSplit>
     </motion.div>
   )
 }
@@ -462,18 +416,17 @@ function StudyCardStage({
 type RegionProps = Omit<React.ComponentProps<typeof ModalPane>, "tone">
 
 function Region({ tone, region, className, children, ...props }: RegionProps & { tone?: "muted"; region: "aside" | "main" }) {
-  const { direction } = useStudyCard()
-  const { content } = useStepVariants()
+  const { itemKey, direction } = useStudyCard()
   return (
     <ModalPane tone={tone} data-study-card-region={region} {...props}>
-      <motion.div
-        data-slot="study-card-content"
-        custom={direction}
-        variants={content}
-        className={cn("flex flex-col gap-5.5 md:gap-6.5", className)}
-      >
-        {children}
-      </motion.div>
+      <PanelSwap value={itemKey} direction={direction}>
+        <div
+          data-slot="study-card-content"
+          className={cn("flex flex-col gap-5.5 md:gap-6.5", className)}
+        >
+          {children}
+        </div>
+      </PanelSwap>
     </ModalPane>
   )
 }
@@ -530,18 +483,16 @@ function StudyCardSection({
   className,
   children,
   ...props
-}: Omit<React.ComponentProps<typeof motion.section>, "children"> & {
+}: Omit<React.ComponentProps<"section">, "children"> & {
   label?: React.ReactNode
   meta?: React.ReactNode
   children?: React.ReactNode
 }) {
   const labelId = React.useId()
-  const { section } = useStepVariants()
   return (
-    <motion.section
+    <section
       data-slot="study-card-section"
       aria-labelledby={label && !props["aria-label"] ? labelId : undefined}
-      variants={section}
       className={cn("flex min-w-0 flex-col gap-3", className)}
       {...props}
     >
@@ -552,7 +503,7 @@ function StudyCardSection({
         </div>
       ) : null}
       {children}
-    </motion.section>
+    </section>
   )
 }
 
