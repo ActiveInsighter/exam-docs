@@ -109,21 +109,33 @@ export function QuestionMirror({ questionId, state, className }: { questionId: s
 
   // Only what the copy shows: a draft pick or a sync tick must not rebuild (and refold) it.
   const { spec, submitted = false } = state ?? {};
-  // A storage acknowledgement can return equivalent arrays / evaluations.
-  // Only displayed answers should rebuild and refold an already visible copy.
+  // React may supply a new spec object when marks or storage status changes.
+  // Replacing an identical, visible DOM clone resets its paint and can flash
+  // during the sheet's entrance. Compare the actual grading data instead.
+  const specKey = JSON.stringify(spec ?? null);
+  const currentSpec = useRef(spec);
+  currentSpec.current = spec;
+  const foldedFor = useRef<string | null>(null);
   const valuesKey = JSON.stringify(spec?.kind === 'blank' && submitted ? state?.values ?? [] : []);
   const gradesKey = JSON.stringify(spec?.kind === 'blank' && submitted ? state?.evaluation?.blanks ?? [] : []);
   const selectedKey = JSON.stringify(submitted ? state?.selected ?? [] : []);
   useLayoutEffect(() => {
     const node = host.current;
     if (!node) return;
-    const copy = mirrorQuestion(questionId, spec ? {
-      spec, submitted, values: JSON.parse(valuesKey), evaluation: { blanks: JSON.parse(gradesKey) },
+    const liveSpec = currentSpec.current;
+    const copy = mirrorQuestion(questionId, liveSpec ? {
+      spec: liveSpec, submitted, values: JSON.parse(valuesKey), evaluation: { blanks: JSON.parse(gradesKey) },
     } : null);
-    node.replaceChildren(...(copy ? [copy] : []));
-    // Desktop has a pane of its own for the question.
-    setFolded(window.matchMedia('(max-width: 767px)').matches && node.scrollHeight > 200 ? true : null);
-  }, [questionId, spec, submitted, valuesKey, gradesKey, selectedKey]);
+    // The source can briefly be absent while its document subtree updates.
+    // Keep the last complete frame instead of clearing the visible mirror.
+    if (!copy) return;
+    node.replaceChildren(copy);
+    // A grading or sync update must not fold a question the reader expanded.
+    if (foldedFor.current !== questionId) {
+      foldedFor.current = questionId;
+      setFolded(window.matchMedia('(max-width: 767px)').matches && node.scrollHeight > 200 ? true : null);
+    }
+  }, [questionId, specKey, submitted, valuesKey, gradesKey, selectedKey]);
 
   return (
     <div className="relative">
