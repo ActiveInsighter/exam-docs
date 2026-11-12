@@ -20,7 +20,7 @@
 
 ModalContext 提供当前页 `close()`、面板 `closeAll()` 和返回焦点策略；
 拖拽、滚动锁定和焦点陷阱由唯一的 Drawer 负责。
-`modal-navigation.tsx` 管理子页，官方 Animate UI Tabs.Panel 提供可中断切换，`panel-motion.tsx` 只缓存题目内容快照；不另建拖拽或焦点陷阱。
+`modal-navigation.tsx` 管理子页，官方 Animate UI Tabs.Panel 负责多级子页切换；`panel-motion.tsx` 由 Motion AnimatePresence 负责同一张学习卡片内的同步换题，不另建拖拽或焦点陷阱。
 详见 [Modal / StudyCard](modal-component.md) 与 [按钮](button-component.md)。
 
 ## 统一节奏与减少动态效果
@@ -29,16 +29,16 @@ ModalContext 提供当前页 `close()`、面板 `closeAll()` 和返回焦点策�
 其下的 ReducedMotionConfig 将同一策略传给自定义 Motion 节点；只设置 AnimateUIProvider
 不会自动给所有自定义节点添加 MotionConfig。系统偏好变化时不重挂整棵应用，保留焦点与作答状态。
 
-- 官方 primitive 使用自身动效，不叠加 CSS 开合动画。Drawer 直接使用默认进出场与遮罩曲线，关闭整张面板时冻结子页，退场完成后才清理状态。
+- 官方 primitive 使用自身动效，不叠加 CSS 开合动画。Drawer 的默认离场过快，站内弹窗只定制进出场与遮罩时长，保留官方拖拽、焦点及中断能力；关闭整张面板时冻结子页，退场完成后才清理状态。
 - Modal 顶栏独立占位，正文原生滚动；不对大面积滚动区加 mask，不在顶栏下实时采样 backdrop-filter，不测量顶栏高度。
 - 自定义动效使用 `@animate-ui/react/utils/motion` 的令牌，经 `useTempoTransition()` 调整节奏。
-- StudyCard 使用官方 Base UI Tabs.Panel：固定分栏内先退场再入场，方向按面板顺序，快速反向由官方接续；标题采用相同面板切换，序号使用 SlidingNumber。
-- 题卡正文保留官方淡入淡出、位移与轻模糊，但将 `transition.height.duration` 设为 0；外层已有固定高度和滚动区，无需逐帧改变内容高度。
+- StudyCard 使用 `AnimatePresence` 同步衔接完整左右分栏，旧卡片不立刻卸载，新卡片无需等待旧卡片消失；标题共用 `PanelSwap`，序号使用 SlidingNumber。弹窗内的收藏等子页继续使用官方 Tabs.Panel。
+- 换题时整块分栏采用轻微位移与交叉淡入淡出，不再叠加模糊；新旧卡片各保留独立滚动容器，避免切换帧强制重置旧题 scrollTop，固定外层高度不执行逐帧布局动画。
 - transform 字符串用 `useShouldReduceMotion()` 消除位移；Motion 的 x / y / scale 由 ReducedMotionConfig 管理。
 - 减少动态效果时保留状态提示和淡入淡出，停止位移、缩放与装饰性循环；CSS 动画另外处理 `motion-reduce:`。
 - CSS 过渡只列实际变化的属性，不用 `transition-all`，不覆盖 Motion 的 transform。
 - 判分图标复用官方 IconWrapper、controls 和节奏；`useFeedbackVariants` 让新对钩的首帧即为未绘制状态，避免 passive effect 启动前完整图形闪现。恢复的成绩直接显示完整图标。
-- 解答题目副本只复制静态完成态：移除涟漪、Motion 的透明度/缩放/模糊和 SVG 绘制进度；等价保存回执不替换副本，也不重置展开状态。
+- 解答题目副本只复制静态完成态：移除涟漪、Motion 的透明度/缩放/模糊和 SVG 绘制进度；依照序列化后的题目与判分数据更新，等价保存回执不替换副本，临时无法找到源 DOM 时保持上一帧，也不重置展开状态。
 
 数学键盘、MDX 标签页与 Fumadocs 导航保留各自有用途的动效，不为统一形式而改写无关模块。
 Avatar、Input、Field、Label、Badge、Separator 没有需要替换的动画 primitive。
