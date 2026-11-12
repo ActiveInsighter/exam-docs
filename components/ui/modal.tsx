@@ -214,7 +214,6 @@ const modalContentVariants = cva(
     "md:[--modal-cap:calc(100dvh_-_2.5rem_-_var(--modal-float))]",
     // Leaving: past the edge it floats above.
     "[--closed-transform:translate3d(0,calc(100%_+_var(--modal-float)_+_2px),0)_scale(1)]",
-    "[&[data-ending-style]:not([data-animate-ui-reduce])]:opacity-[0.9999]",
   ],
   {
     variants: {
@@ -343,6 +342,20 @@ function ModalPageContent({
   )
 }
 
+// Keep the drawer responsive and slightly elastic without changing the
+// Base UI swipe/focus lifecycle. Animate UI converts the spring into a
+// cancellable CSS timing curve, so a drag still tracks the pointer directly.
+const sheetEnter: NonNullable<DrawerPrimitive.Popup.Props["transition"]> = {
+  type: "spring",
+  visualDuration: 0.34,
+  bounce: 0.2,
+}
+// Dismissal should accelerate off screen, not bounce back into view.
+const sheetExit: NonNullable<DrawerPrimitive.Popup.Props["exitTransition"]> = {
+  duration: 0.24,
+  ease: [0.4, 0, 1, 1],
+}
+
 function ModalRootContent({
   size = "md",
   height = "auto",
@@ -350,6 +363,8 @@ function ModalRootContent({
   backdropClassName,
   initialFocus,
   finalFocus,
+  transition = sheetEnter,
+  exitTransition = sheetExit,
   style,
   children,
   ...props
@@ -366,6 +381,8 @@ function ModalRootContent({
     <DrawerPrimitive.Portal data-slot="modal-portal">
       <DrawerPrimitive.Backdrop
         data-slot="modal-backdrop"
+        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+        exitTransition={{ duration: 0.26, ease: [0.4, 0, 1, 1] }}
         className={cn(
           "fixed inset-0 z-50 min-h-dvh bg-(--modal-backdrop) supports-[-webkit-touch-callout:none]:absolute",
           backdropClassName
@@ -377,6 +394,8 @@ function ModalRootContent({
       >
         <DrawerPrimitive.Popup
           data-slot="modal-content"
+          transition={transition}
+          exitTransition={exitTransition}
           data-size={size}
           data-height={heightVariant}
           aria-labelledby={modal.navigation.top?.titleId ?? modal.titleId}
@@ -660,7 +679,7 @@ function ModalPane({
     <div
       data-slot="modal-pane"
       data-tone={tone}
-      className="group/pane min-w-0 bg-(--modal-pane-background,transparent) transition-colors duration-300 data-[tone=muted]:[--modal-pane-background:var(--modal-pane-muted)] md:flex md:min-h-0 md:flex-col"
+      className="group/pane min-w-0 bg-(--modal-pane-background,transparent) data-[tone=muted]:[--modal-pane-background:var(--modal-pane-muted)] md:flex md:min-h-0 md:flex-col"
     >
       <div
         data-slot="modal-pane-scroll"

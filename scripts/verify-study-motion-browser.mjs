@@ -160,8 +160,44 @@ async function study(page, name, options) {
   // Rapid direction changes retarget to the last requested card.
   for (const key of ['ArrowRight', 'ArrowLeft', 'ArrowRight', 'ArrowLeft']) await page.keyboard.press(key);
   await titleIs('导数');
+  // Collect frames from the click itself, before Playwright's round trip
+  // could miss the short handoff. The two *complete* splits must overlap,
+  // so neither column ever passes through a blank wait phase.
+  await sheet.evaluate(node => {
+    window.__studyHandoff = new Promise(resolve => {
+      node.querySelector('[aria-label="下一个概念"]').addEventListener('click', async () => {
+        const samples = [];
+        for (let frame = 0; frame < 22; frame++) {
+          await new Promise(requestAnimationFrame);
+          const panels = [...node.querySelectorAll('[data-slot="study-card-stage"] [data-slot="panel-frame"]')];
+          const splits = panels.map(panel => ({
+            panes: panel.querySelectorAll('[data-slot="modal-pane"]').length,
+            inert: panel.inert,
+            opacity: Number(getComputedStyle(panel).opacity),
+            x: new DOMMatrix(getComputedStyle(panel).transform).m41,
+          }));
+          samples.push(splits);
+        }
+        resolve(samples);
+      }, { once: true });
+    });
+  });
   const content = sheet.locator('[data-slot="panel-frame"]').last();
   await next.click();
+  const handoff = await page.evaluate(() => window.__studyHandoff);
+  assert.ok(handoff.some(panels => panels.length === 2 && panels.every(panel => panel.panes === 2)),
+    'old and new cards retain both split panes during a switch');
+  assert.ok(handoff.some(panels => panels.length === 2 && panels.some(panel => panel.inert) && panels.some(panel => !panel.inert)),
+    'leaving card is inert while the incoming card remains interactive');
+  assert.ok(handoff.some(panels => panels.length === 2 && panels.every(panel => panel.opacity > 0.02)),
+    'incoming content paints before outgoing content becomes fully transparent');
+  if (options.reducedMotion === 'reduce') {
+    assert.ok(handoff.flat().every(panel => Math.abs(panel.x) < 0.1),
+      'reduced motion disables horizontal card movement');
+  } else {
+    assert.ok(handoff.some(panels => panels.some(panel => !panel.inert && panel.x > 1)),
+      'forward navigation enters from the right, not the wrong side');
+  }
   const switching = await frames(content);
   await titleIs('定积分');
   if (options.reducedMotion === 'reduce') {

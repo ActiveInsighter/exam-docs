@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimateIcon } from '@animate-ui/react/icons';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDownIcon } from '@/components/animate-ui/icons/chevron-down';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -109,21 +109,34 @@ export function QuestionMirror({ questionId, state, className }: { questionId: s
 
   // Only what the copy shows: a draft pick or a sync tick must not rebuild (and refold) it.
   const { spec, submitted = false } = state ?? {};
-  // A storage acknowledgement can return equivalent arrays / evaluations.
-  // Only displayed answers should rebuild and refold an already visible copy.
+  // React may supply a new spec object when marks or storage status changes.
+  // Replacing an identical, visible DOM clone resets its paint and can flash
+  // during the sheet's entrance. Compare the actual grading data instead.
+  const specKey = JSON.stringify(spec ?? null);
+  // Memoize the semantic spec: an equivalent provider snapshot should not
+  // retrigger a clone. Do not mutate refs while React is rendering.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableSpec = useMemo(() => spec, [specKey]);
+  const foldedFor = useRef<string | null>(null);
   const valuesKey = JSON.stringify(spec?.kind === 'blank' && submitted ? state?.values ?? [] : []);
   const gradesKey = JSON.stringify(spec?.kind === 'blank' && submitted ? state?.evaluation?.blanks ?? [] : []);
   const selectedKey = JSON.stringify(submitted ? state?.selected ?? [] : []);
   useLayoutEffect(() => {
     const node = host.current;
     if (!node) return;
-    const copy = mirrorQuestion(questionId, spec ? {
-      spec, submitted, values: JSON.parse(valuesKey), evaluation: { blanks: JSON.parse(gradesKey) },
+    const copy = mirrorQuestion(questionId, stableSpec ? {
+      spec: stableSpec, submitted, values: JSON.parse(valuesKey), evaluation: { blanks: JSON.parse(gradesKey) },
     } : null);
-    node.replaceChildren(...(copy ? [copy] : []));
-    // Desktop has a pane of its own for the question.
-    setFolded(window.matchMedia('(max-width: 767px)').matches && node.scrollHeight > 200 ? true : null);
-  }, [questionId, spec, submitted, valuesKey, gradesKey, selectedKey]);
+    // The source can briefly be absent while its document subtree updates.
+    // Keep the last complete frame instead of clearing the visible mirror.
+    if (!copy) return;
+    node.replaceChildren(copy);
+    // A grading or sync update must not fold a question the reader expanded.
+    if (foldedFor.current !== questionId) {
+      foldedFor.current = questionId;
+      setFolded(window.matchMedia('(max-width: 767px)').matches && node.scrollHeight > 200 ? true : null);
+    }
+  }, [questionId, stableSpec, submitted, valuesKey, gradesKey, selectedKey]);
 
   return (
     <div className="relative">

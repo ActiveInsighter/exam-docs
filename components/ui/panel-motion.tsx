@@ -1,44 +1,102 @@
 "use client"
 
 import * as React from "react"
-import { Tabs } from "@animate-ui/react/primitives/base-ui/tabs"
+import { AnimatePresence, motion, useIsPresent, useReducedMotion, type Transition, type Variants } from "motion/react"
+import { useTempoTransition } from "@animate-ui/react/utils/motion"
 import { cn } from "@/lib/utils"
 
-type Snapshot = { value: string; content: React.ReactNode }
-
 /**
- * Keep each visited value's last committed content available to Tabs.Panel.
- * The official primitive owns exit retention, interruption, hidden/inert,
- * direction and reduced motion. Inactive DOM is unmounted by Base UI.
+ * Swap the complete study card while retaining its scrollable panes.
+ *
+ * Animate UI Tabs.Panel uses a wait sequence: it fades the old content out
+ * before mounting/fading the next. For the large two-column solution sheet
+ * that leaves a visible empty interval (and measures its height). The old
+ * complete split remains overlaid while the next one paints, preserving both
+ * columns and their independent scroll positions.
+ *
+ * AnimatePresence owns exit retention and interruption. The exiting DOM is
+ * inert, and popLayout removes it from flow so it cannot resize the sheet.
  */
-export function PanelSwap({ value, direction, className, children, transition }: {
+const panelVariants: Variants = {
+  enter: (direction: number) => ({ opacity: 0, x: direction > 0 ? 22 : -22 }),
+  center: { opacity: 1, x: 0 },
+  exit: (direction: number) => ({ opacity: 0, x: direction > 0 ? -12 : 12 }),
+}
+
+const reducedVariants: Variants = {
+  enter: { opacity: 0 },
+  center: { opacity: 1 },
+  exit: { opacity: 0 },
+}
+
+// Fade quickly to keep the answer readable; let the small directional
+// movement settle with a short, restrained spring. The fixed split panes
+// keep their own scroll offsets and do not take part in layout animation.
+const panelTransition: Transition = {
+  opacity: { duration: 0.18, ease: [0.22, 1, 0.36, 1] },
+  x: { type: "spring", visualDuration: 0.28, bounce: 0.18 },
+}
+
+function PanelFrame({
+  children,
+  direction,
+  transition,
+  reducedMotion,
+  fill,
+  ref,
+}: {
+  ref?: React.Ref<HTMLDivElement>
+  children: React.ReactNode
+  direction: number
+  transition: Transition
+  reducedMotion: boolean
+  fill: boolean
+}) {
+  const present = useIsPresent()
+  return (
+    <motion.div
+      ref={ref}
+      data-slot="panel-frame"
+      role="group"
+      inert={!present}
+      tabIndex={-1}
+      className={cn("relative min-h-0 min-w-0 outline-none", fill && "flex min-h-0 flex-1 flex-col overflow-hidden")}
+      variants={reducedMotion ? reducedVariants : panelVariants}
+      custom={direction}
+      initial="enter"
+      animate="center"
+      exit="exit"
+      transition={transition}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+export function PanelSwap({ value, direction, className, children, transition, fill = false }: {
   value: React.Key
   direction: number
   className?: string
   children: React.ReactNode
-  transition?: React.ComponentProps<typeof Tabs.Panel>["transition"]
+  transition?: Transition
+  /** Fill a fixed-size viewport (the solution stage), not the title row. */
+  fill?: boolean
 }) {
-  const key = String(value)
-  const [cache, setCache] = React.useState<{ value: string; children: React.ReactNode; panels: Snapshot[] }>(() => ({
-    value: key, children, panels: [{ value: key, content: children }],
-  }))
-  if (cache.value !== key || cache.children !== children) {
-    const panel = { value: key, content: children }
-    const rest = cache.panels.filter((item) => item.value !== key)
-    const panels = cache.value === key
-      ? cache.panels.map((item) => item.value === key ? panel : item)
-      : direction > 0 ? [...rest, panel] : [panel, ...rest]
-    setCache({ value: key, children, panels })
-  }
+  const reducedMotion = useReducedMotion() ?? false
+  const timedTransition = useTempoTransition(transition ?? panelTransition)
   return (
-    <Tabs.Root value={key} data-slot="panel-swap" className={cn("relative min-h-0 min-w-0", className)}>
-      {cache.panels.map((panel) => (
-        <Tabs.Panel key={panel.value} value={panel.value} data-slot="panel-frame" role="group"
-          transition={transition}
-          aria-labelledby={undefined} tabIndex={-1} className="relative min-h-0 min-w-0 outline-none">
-          {panel.content}
-        </Tabs.Panel>
-      ))}
-    </Tabs.Root>
+    <div data-slot="panel-swap" className={cn("relative min-h-0 min-w-0", fill && "flex min-h-0 flex-1 flex-col overflow-hidden", className)}>
+      <AnimatePresence initial={false} mode="popLayout" custom={direction}>
+        <PanelFrame
+          key={String(value)}
+          direction={direction}
+          reducedMotion={reducedMotion}
+          fill={fill}
+          transition={timedTransition}
+        >
+          {children}
+        </PanelFrame>
+      </AnimatePresence>
+    </div>
   )
 }
