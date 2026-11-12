@@ -32,10 +32,25 @@ describe('solution question mirror', () => {
       await act(async () => host.querySelector('button')!.click());
       expect(mirror.hasAttribute('data-folded')).toBe(false);
       await act(async () => root.render(createElement(QuestionMirror, {
-        questionId: 'stable', state: { ...state, values: [], evaluation: { ...state.evaluation!, blanks: [] } },
+        questionId: 'stable',
+        state: {
+          ...state,
+          spec: { kind: 'choice', multiple: false, key: ['C'] },
+          values: [],
+          evaluation: { ...state.evaluation!, blanks: [] },
+        } as QuestionState,
       })));
       expect(mirror.firstChild).toBe(copy);
       expect(mirror.hasAttribute('data-folded')).toBe(false);
+
+      // A briefly absent source during a document transition should never
+      // clear the already-visible copy. The source may reappear next frame.
+      document.getElementById('question-stable')!.remove();
+      await act(async () => root.render(createElement(QuestionMirror, {
+        questionId: 'stable', state: { ...state, submitted: false },
+      })));
+      expect(mirror.firstChild).toBe(copy);
+      expect(mirror.textContent).toContain('同一题目');
     } finally {
       await act(async () => root.unmount());
     }
