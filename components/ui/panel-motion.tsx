@@ -2,16 +2,17 @@
 
 import * as React from "react"
 import { AnimatePresence, motion, useIsPresent, useReducedMotion, type Transition, type Variants } from "motion/react"
+import { useTempoTransition } from "@animate-ui/react/utils/motion"
 import { cn } from "@/lib/utils"
 
 /**
- * Swap a card's content without swapping its scrollable pane.
+ * Swap the complete study card while retaining its scrollable panes.
  *
  * Animate UI Tabs.Panel uses a wait sequence: it fades the old content out
  * before mounting/fading the next. For the large two-column solution sheet
- * that leaves a visible empty interval (and measures its height). A shared
- * pane with an overlaid outgoing snapshot keeps both columns painted while
- * the new content arrives, just like the original study card.
+ * that leaves a visible empty interval (and measures its height). The old
+ * complete split remains overlaid while the next one paints, preserving both
+ * columns and their independent scroll positions.
  *
  * AnimatePresence owns exit retention and interruption. The exiting DOM is
  * inert, and popLayout removes it from flow so it cannot resize the sheet.
@@ -35,7 +36,6 @@ const panelTransition: Transition = {
 
 function PanelFrame({
   children,
-  direction,
   transition,
   reducedMotion,
   fill,
@@ -43,7 +43,6 @@ function PanelFrame({
 }: {
   ref?: React.Ref<HTMLDivElement>
   children: React.ReactNode
-  direction: number
   transition: Transition
   reducedMotion: boolean
   fill: boolean
@@ -57,7 +56,6 @@ function PanelFrame({
       inert={!present}
       tabIndex={-1}
       className={cn("relative min-h-0 min-w-0 outline-none", fill && "flex min-h-0 flex-1 flex-col overflow-hidden")}
-      custom={direction}
       variants={reducedMotion ? reducedVariants : panelVariants}
       initial="enter"
       animate="center"
@@ -79,15 +77,15 @@ export function PanelSwap({ value, direction, className, children, transition, f
   fill?: boolean
 }) {
   const reducedMotion = useReducedMotion() ?? false
+  const timedTransition = useTempoTransition(transition ?? panelTransition)
   return (
     <div data-slot="panel-swap" className={cn("relative min-h-0 min-w-0", fill && "flex min-h-0 flex-1 flex-col overflow-hidden", className)}>
       <AnimatePresence initial={false} mode="popLayout" custom={direction}>
         <PanelFrame
           key={String(value)}
-          direction={direction}
           reducedMotion={reducedMotion}
           fill={fill}
-          transition={transition ?? panelTransition}
+          transition={timedTransition}
         >
           {children}
         </PanelFrame>
