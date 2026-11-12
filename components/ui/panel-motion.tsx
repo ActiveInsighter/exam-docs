@@ -39,7 +39,9 @@ function PanelFrame({
   transition,
   reducedMotion,
   fill,
+  ref,
 }: {
+  ref?: React.Ref<HTMLDivElement>
   children: React.ReactNode
   direction: number
   transition: Transition
@@ -49,6 +51,7 @@ function PanelFrame({
   const present = useIsPresent()
   return (
     <motion.div
+      ref={ref}
       data-slot="panel-frame"
       role="group"
       inert={!present}
