@@ -3,10 +3,7 @@
 import * as React from "react"
 import { AnimateIcon } from "@animate-ui/react/icons"
 import { SlidingNumber } from "@animate-ui/react/primitives/texts/sliding-number"
-import {
-  ReducedMotionConfig,
-  transition,
-} from "@animate-ui/react/utils/motion"
+import { ReducedMotionConfig } from "@animate-ui/react/utils/motion"
 import { motion, type PanInfo } from "motion/react"
 import { PanelSwap } from "@/components/ui/panel-motion"
 
@@ -50,9 +47,9 @@ import { cn } from "@/lib/utils"
  * scrolling column. The modal keeps one height (44rem by default) so
  * stepping never makes it jump.
  *
- * Motion lives in panel-motion.tsx. Animate UI's Tabs.Panel sequences the
- * outgoing and incoming cards and retargets interrupted navigation. Each
- * pane animates as one surface instead of staggering every section.
+ * Motion lives in panel-motion.tsx. The old and new complete splits overlap
+ * during a step; each keeps its own native scroll position, so switching
+ * cards never jumps the outgoing question back to the top.
  */
 
 /** 1 towards the next card, -1 towards the previous one. */
@@ -362,12 +359,6 @@ function StudyCardStage({
   const stage = React.useRef<HTMLDivElement>(null)
   const blocked = React.useRef(false)
 
-  // Panes retain their backgrounds; a new card starts at the top of each
-  // scroll region. No measurements or per-frame layout work are necessary.
-  React.useLayoutEffect(() => {
-    stage.current?.querySelectorAll<HTMLElement>('[data-slot="modal-split"], [data-slot="modal-pane-scroll"]').forEach((node) => { node.scrollTop = 0 })
-  }, [itemKey])
-
   const onPanEnd = (event: PointerEvent, { offset }: PanInfo) => {
     if (event.pointerType !== "touch" || event.type === "pointercancel" || blocked.current) return
     if (Math.abs(offset.x) < SWIPE_DISTANCE || Math.abs(offset.x) < Math.abs(offset.y) * SWIPE_SLOPE) return
@@ -385,12 +376,14 @@ function StudyCardStage({
       onPanSessionStart={swipe ? (event) => { blocked.current = stage.current ? scrollsSideways(event.target, stage.current) : true } : undefined}
       onPanEnd={swipe ? onPanEnd : undefined}
     >
-      <ModalSplit
-        columns={columns}
-        className={swipe ? "touch-pan-y touch-pinch-zoom md:[&_[data-slot=modal-pane-scroll]]:touch-pan-y md:[&_[data-slot=modal-pane-scroll]]:touch-pinch-zoom" : undefined}
-      >
-        {children}
-      </ModalSplit>
+      <PanelSwap value={itemKey} direction={direction} fill>
+        <ModalSplit
+          columns={columns}
+          className={swipe ? "touch-pan-y touch-pinch-zoom md:[&_[data-slot=modal-pane-scroll]]:touch-pan-y md:[&_[data-slot=modal-pane-scroll]]:touch-pinch-zoom" : undefined}
+        >
+          {children}
+        </ModalSplit>
+      </PanelSwap>
     </motion.div>
   )
 }
@@ -401,23 +394,15 @@ function StudyCardStage({
 
 type RegionProps = Omit<React.ComponentProps<typeof ModalPane>, "tone">
 
-// The pane already owns scrolling inside a fixed-height sheet. Keep the
-// official opacity/translate/blur motion, without reflowing its height on
-// every frame. Tabs.Panel applies the provider's tempo to these tokens.
-const paneTransition = { ...transition.panelIn, height: { duration: 0 } }
-
 function Region({ tone, region, className, children, ...props }: RegionProps & { tone?: "muted"; region: "aside" | "main" }) {
-  const { itemKey, direction } = useStudyCard()
   return (
     <ModalPane tone={tone} data-study-card-region={region} {...props}>
-      <PanelSwap value={itemKey} direction={direction} transition={paneTransition}>
-        <div
-          data-slot="study-card-content"
-          className={cn("flex flex-col gap-5.5 md:gap-6.5", className)}
-        >
-          {children}
-        </div>
-      </PanelSwap>
+      <div
+        data-slot="study-card-content"
+        className={cn("flex flex-col gap-5.5 md:gap-6.5", className)}
+      >
+        {children}
+      </div>
     </ModalPane>
   )
 }
