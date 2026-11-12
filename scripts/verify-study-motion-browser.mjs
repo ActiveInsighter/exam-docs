@@ -174,6 +174,7 @@ async function study(page, name, options) {
             panes: panel.querySelectorAll('[data-slot="modal-pane"]').length,
             inert: panel.inert,
             opacity: Number(getComputedStyle(panel).opacity),
+            x: new DOMMatrix(getComputedStyle(panel).transform).m41,
           }));
           samples.push(splits);
         }
@@ -190,6 +191,13 @@ async function study(page, name, options) {
     'leaving card is inert while the incoming card remains interactive');
   assert.ok(handoff.some(panels => panels.length === 2 && panels.every(panel => panel.opacity > 0.02)),
     'incoming content paints before outgoing content becomes fully transparent');
+  if (options.reducedMotion === 'reduce') {
+    assert.ok(handoff.flat().every(panel => Math.abs(panel.x) < 0.1),
+      'reduced motion disables horizontal card movement');
+  } else {
+    assert.ok(handoff.some(panels => panels.some(panel => !panel.inert && panel.x > 1)),
+      'forward navigation enters from the right, not the wrong side');
+  }
   const switching = await frames(content);
   await titleIs('定积分');
   if (options.reducedMotion === 'reduce') {
