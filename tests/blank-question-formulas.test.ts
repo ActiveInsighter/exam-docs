@@ -25,7 +25,8 @@ describe('fill-in question formulas', () => {
         }
       }
     }
-    expect(total).toBeGreaterThan(1500);
+    // The three archived practice collections are no longer in the live corpus.
+    expect(total).toBeGreaterThan(1400);
     expect(errors).toEqual([]);
   }, 60_000);
 });
