@@ -32,7 +32,7 @@ ModalContext 提供当前页 `close()`、面板 `closeAll()` 和返回焦点策�
 - 官方 primitive 使用自身动效，不叠加 CSS 开合动画。Drawer 的默认离场过快，站内弹窗只定制进出场与遮罩时长，保留官方拖拽、焦点及中断能力；关闭整张面板时冻结子页，退场完成后才清理状态。
 - Modal 顶栏独立占位，正文原生滚动；不对大面积滚动区加 mask，不在顶栏下实时采样 backdrop-filter，不测量顶栏高度。
 - 自定义动效使用 `@animate-ui/react/utils/motion` 的令牌，经 `useTempoTransition()` 调整节奏。
-- 学习卡片翻页采用轻回弹弹簧（视觉持续约 280ms）配合 180ms 内容交叉淡入淡出；根 Drawer 入场采用轻弹簧（视觉持续约 340ms），离场不回弹以保持迅速关闭，遮罩与页面收尾一致。
+- 学习卡片翻页采用轻回弹弹簧（视觉持续约 280ms）配合 180ms 内容交叉淡入淡出；根 Drawer 使用 `transition.sheet` 的单调减速曲线入场（360ms）、`transition.dismiss` 的平稳加速曲线离场（240ms），进出与拖拽归位均无回弹，遮罩与页面收尾一致。
 - StudyCard 使用 `AnimatePresence` 同步衔接完整左右分栏，旧卡片不立刻卸载，新卡片无需等待旧卡片消失；标题共用 `PanelSwap`，序号使用 SlidingNumber。弹窗内的收藏等子页继续使用官方 Tabs.Panel。
 - 换题时整块分栏采用轻微位移与交叉淡入淡出，不再叠加模糊；新旧卡片各保留独立滚动容器，避免切换帧强制重置旧题 scrollTop，固定外层高度不执行逐帧布局动画。
 - transform 字符串用 `useShouldReduceMotion()` 消除位移；Motion 的 x / y / scale 由 ReducedMotionConfig 管理。
