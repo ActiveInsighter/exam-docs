@@ -5,7 +5,6 @@ import { describe, expect, it } from 'vitest';
 const docsRoot = join(process.cwd(), 'content', 'docs');
 // Fumadocs navigation deliberately uses clearer titles than the imported labels.
 const navigationTitles: Record<string, string> = {
-  'math/lilin-880': '李林精讲精练880题（数一）',
   'math/past-exams': '数学真题',
 };
 

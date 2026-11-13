@@ -25,6 +25,9 @@ describe('math mock paper navigation', () => {
       ...documents(join(docsRoot, 'math/exam/lilin-6-sets-2027')),
       ...documents(join(docsRoot, 'math/exam/liyongle-6-sets-2027')),
       ...documents(join(docsRoot, 'math/exam/tangjiafeng-8-sets-2027')),
+      ...documents(join(docsRoot, 'math/exam/hgdu-super-10-sets-2027')),
+      ...documents(join(docsRoot, 'math/exam/ep-math1-3-sets-2027')),
+      join(docsRoot, 'math/index.mdx'),
       join(docsRoot, 'math/exam/index.mdx'),
       join(docsRoot, 'math/exam/数学模拟题1028/index.mdx'),
     ];
