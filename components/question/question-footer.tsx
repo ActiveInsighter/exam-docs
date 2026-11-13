@@ -144,7 +144,7 @@ export function QuestionFooter({ meta, solution }: { meta: QuestionMeta; solutio
       data-question-footer=""
       data-attempt-result={question?.status}
       // A single-answer question without a solution has nothing to show yet.
-      className="mt-3 flex min-h-8 flex-wrap items-center gap-x-3 gap-y-2.5 border-t border-dashed border-(--exam-rule) pt-2 has-[>[data-footer-status]:empty]:has-[>[data-footer-actions]:empty]:hidden"
+      className="mt-3 flex min-h-8 flex-wrap items-center gap-x-3 gap-y-2.5 pt-2 has-[>[data-footer-status]:empty]:has-[>[data-footer-actions]:empty]:hidden"
     >
       <div role="status" aria-live="polite" data-footer-status="" className="min-w-0 flex-auto empty:basis-0">
         {graded ? <Grade question={graded} /> : question ? (
