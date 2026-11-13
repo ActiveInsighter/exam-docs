@@ -3,6 +3,7 @@
 import * as React from "react"
 import { AnimateIcon } from "@animate-ui/react/icons"
 import { Drawer as DrawerPrimitive } from "@animate-ui/react/primitives/base-ui/drawer"
+import { transition as motionTransition } from "@animate-ui/react/utils/motion"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Button as BaseButton } from "@base-ui/react/button"
 import { useRender } from "@base-ui/react/use-render"
@@ -342,18 +343,17 @@ function ModalPageContent({
   )
 }
 
-// Keep the drawer responsive and slightly elastic without changing the
-// Base UI swipe/focus lifecycle. Animate UI converts the spring into a
-// cancellable CSS timing curve, so a drag still tracks the pointer directly.
+// Use monotonic sheet curves so the surface settles without overshoot.
+// Animate UI keeps these CSS transitions interruptible and applies tempo;
+// Base UI still owns the swipe/focus lifecycle and tracks drags directly.
 const sheetEnter: NonNullable<DrawerPrimitive.Popup.Props["transition"]> = {
-  type: "spring",
-  visualDuration: 0.34,
-  bounce: 0.2,
+  ...motionTransition.sheet,
+  duration: 0.36,
 }
-// Dismissal should accelerate off screen, not bounce back into view.
+// Leave with a steady push rather than a spring's settling tail.
 const sheetExit: NonNullable<DrawerPrimitive.Popup.Props["exitTransition"]> = {
+  ...motionTransition.dismiss,
   duration: 0.24,
-  ease: [0.4, 0, 1, 1],
 }
 
 function ModalRootContent({
