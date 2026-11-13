@@ -209,7 +209,7 @@ log(底数, 真数)、eˣ、10ˣ、立方根、立方、倒数、阶乘等；`ab
 | `options.tsx` / `blank-field.tsx` / `math-blank.tsx` / `math-keypad.tsx` | 选择和判断共用选项组；填空与按需加载的数学键盘 |
 | `live.tsx` / `icons.ts` / `looks.ts` | 视口附近首次启用动画、静态 / 动态图标映射、跨题目部件的外观约定 |
 | `blank-grade.tsx` / `answer-summary.tsx` | 自评与手动判分共用开关和面板；解答中的答案对照 |
-| `question-footer.tsx` / `solution-sheet.tsx` / `solution-card.tsx` / `question-mirror.tsx` | 判分结果、轻量触发器、首次打开才挂载的解答卡片（组装 `StudyCard`）、只读题干副本 |
+| `question-footer.tsx` / `solution-sheet.tsx` / `solution-card.tsx` / `question-mirror.tsx` | 判分结果、轻量触发器、由全站 `solution-sheet-host.tsx` 共用的解答卡片（组装 `StudyCard`）、只读题干副本 |
 | `components/question/marks/` | 收藏、读者标签、注释与「收藏与标签」汇总 |
 | `styles/question.css` / `styles/question/blanks.css` / `styles/question/keypad.css` | 题目语义色与反馈变体、页面规则、行内填空和数学键盘；布局优先放在各组件的 Tailwind 类里 |
 
@@ -218,7 +218,7 @@ log(底数, 真数)、eˣ、10ˣ、立方根、立方、倒数、阶乘等；`ab
 长页面可能有上百道题、数千个公式节点，题目组件按以下约定控制每题开销：
 
 - 卡片使用 `content-visibility: auto`，屏幕外的题目跳过布局与绘制。
-- 每题的「查看解答」浮窗和标签弹层都是普通按钮，第一次打开时才挂载对应的 Modal / Popover。
+- 每题的「查看解答」只注册数据，`solution-presentation.ts` 管理唯一宿主的准备 / 打开 / 关闭状态。邻近题目在空闲时准备一个实例，悬停 / 聚焦时预备目标内容；标签 Popover 仍按需挂载。
 - `QuestionCard` 首次接近视口后才启用官方按压、选项涟漪与动画图标；此前使用相同外观的原生按钮与 Lucide 图标。
   激活时保持焦点；离开视口后不反复卸载，避免重置正在使用的控件。
 - `live.tsx` 只决定是否启用动画；作答、判分与标记仍由原状态层管理。不要在各个按钮里分别创建视口观察器。

@@ -3,7 +3,8 @@
 import * as React from "react"
 import { AnimateIcon } from "@animate-ui/react/icons"
 import { Drawer as DrawerPrimitive } from "@animate-ui/react/primitives/base-ui/drawer"
-import { transition as motionTransition } from "@animate-ui/react/utils/motion"
+import { toCssTiming, transition as motionTransition, useTempoTransition } from "@animate-ui/react/utils/motion"
+import { Drawer as BaseDrawerPrimitive } from "@base-ui/react/drawer"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Button as BaseButton } from "@base-ui/react/button"
 import { useRender } from "@base-ui/react/use-render"
@@ -215,6 +216,13 @@ const modalContentVariants = cva(
     "md:[--modal-cap:calc(100dvh_-_2.5rem_-_var(--modal-float))]",
     // Leaving: past the edge it floats above.
     "[--closed-transform:translate3d(0,calc(100%_+_var(--modal-float)_+_2px),0)_scale(1)]",
+    // Large desktop sheets should not travel their entire reading height.
+    "md:[--closed-transform:translate3d(0,24px,0)_scale(1)]",
+    "data-swipe-dismiss:[--closed-transform:translate3d(0,calc(100%_+_var(--modal-float)_+_2px),0)_scale(1)]",
+    "[transition-property:transform,opacity]! data-starting-style:opacity-0 data-ending-style:opacity-0",
+    // A retained surface already has its entrance's first frame while idle.
+    "[&[data-closed]:not([data-ending-style])]:[transform:var(--closed-transform)]! [&[data-closed]:not([data-ending-style])]:opacity-0 [&[data-closed]:not([data-ending-style])]:duration-0!",
+    "[&[data-closed][data-animate-ui-reduce]:not([data-ending-style])]:transform-none!",
   ],
   {
     variants: {
@@ -254,6 +262,8 @@ type ModalContentProps = Omit<DrawerPrimitive.Popup.Props, "className" | "style"
     height?: ModalHeight
     className?: string
     backdropClassName?: string
+    /** Retain one prepared surface. Off by default; never enable per question. */
+    keepMounted?: boolean
     style?: React.CSSProperties
   }
 
@@ -276,7 +286,7 @@ function ModalContent(props: ModalContentProps) {
 
 function ModalPageContent({
   children, className, initialFocus, finalFocus, ref, style,
-  size: _size, height: _height, backdropClassName: _backdrop,
+  size: _size, height: _height, backdropClassName: _backdrop, keepMounted: _keepMounted,
   transition, exitTransition,
   ...props
 }: ModalContentProps) {
@@ -348,12 +358,33 @@ function ModalPageContent({
 // Base UI still owns the swipe/focus lifecycle and tracks drags directly.
 const sheetEnter: NonNullable<DrawerPrimitive.Popup.Props["transition"]> = {
   ...motionTransition.sheet,
-  duration: 0.36,
+  duration: 0.32,
 }
-// Leave with a steady push rather than a spring's settling tail.
+// The same deceleration in both directions, with a shorter dismissal.
 const sheetExit: NonNullable<DrawerPrimitive.Popup.Props["exitTransition"]> = {
-  ...motionTransition.dismiss,
-  duration: 0.24,
+  ...motionTransition.sheet,
+  duration: 0.22,
+}
+
+/** Plain opacity stays composited; no animated color, blur or shadow. */
+function ModalBackdrop({ className, transition, exitTransition }: Pick<ModalContentProps, "transition" | "exitTransition" | "className">) {
+  const enter = toCssTiming(useTempoTransition(transition ?? sheetEnter))
+  const exit = toCssTiming(useTempoTransition(exitTransition ?? sheetExit))
+  return <BaseDrawerPrimitive.Backdrop
+    data-slot="modal-backdrop"
+    className={cn(
+      "fixed inset-0 z-50 min-h-dvh bg-(--modal-backdrop) supports-[-webkit-touch-callout:none]:absolute",
+      "opacity-[max(0,calc(1_-_var(--drawer-swipe-progress,0)))] [transition-property:opacity]",
+      "duration-(--modal-enter-duration) ease-(--modal-enter-ease)",
+      "data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-(--modal-exit-duration) data-ending-style:ease-(--modal-exit-ease)",
+      "data-swiping:duration-0",
+      className,
+    )}
+    style={{
+      "--modal-enter-duration": `${enter.duration}ms`, "--modal-enter-ease": enter.easing,
+      "--modal-exit-duration": `${exit.duration}ms`, "--modal-exit-ease": exit.easing,
+    } as React.CSSProperties}
+  />
 }
 
 function ModalRootContent({
@@ -361,6 +392,7 @@ function ModalRootContent({
   height = "auto",
   className,
   backdropClassName,
+  keepMounted = false,
   initialFocus,
   finalFocus,
   transition = sheetEnter,
@@ -378,22 +410,18 @@ function ModalRootContent({
   } as React.CSSProperties
 
   return (
-    <DrawerPrimitive.Portal data-slot="modal-portal">
-      <DrawerPrimitive.Backdrop
-        data-slot="modal-backdrop"
-        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-        exitTransition={{ duration: 0.26, ease: [0.4, 0, 1, 1] }}
-        className={cn(
-          "fixed inset-0 z-50 min-h-dvh bg-(--modal-backdrop) supports-[-webkit-touch-callout:none]:absolute",
-          backdropClassName
-        )}
-      />
+    <DrawerPrimitive.Portal data-slot="modal-portal" keepMounted={keepMounted}>
+      <ModalBackdrop className={backdropClassName} transition={transition} exitTransition={exitTransition} />
       <DrawerPrimitive.Viewport
         data-slot="modal-viewport"
-        className="fixed inset-0 z-50 flex items-end justify-center"
+        hidden={keepMounted ? false : undefined}
+        inert={!modal.open}
+        aria-hidden={!modal.open || undefined}
+        className="fixed inset-0 z-50 flex items-end justify-center [&[data-closed]:not([data-ending-style])]:invisible"
       >
         <DrawerPrimitive.Popup
           data-slot="modal-content"
+          hidden={keepMounted ? false : undefined}
           transition={transition}
           exitTransition={exitTransition}
           data-size={size}

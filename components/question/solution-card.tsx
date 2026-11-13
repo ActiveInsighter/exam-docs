@@ -58,7 +58,7 @@ const subscribeDesktop = (listener: () => void) => {
   return () => query.removeEventListener('change', listener);
 };
 
-export function SolutionCard({ self, open, setOpen }: { self: SolutionEntry; open: boolean; setOpen: (open: boolean) => void }) {
+export function SolutionCard({ self, open, setOpen, onOpenChangeComplete }: { self: SolutionEntry; open: boolean; setOpen: (open: boolean) => void; onOpenChangeComplete?: (open: boolean) => void }) {
   const deck = useSolutionDeck(open);
   const [currentKey, setCurrentKey] = useState(self.key);
   const [editingNote, setEditingNote] = useState(false);
@@ -67,10 +67,13 @@ export function SolutionCard({ self, open, setOpen }: { self: SolutionEntry; ope
   const desktop = useSyncExternalStore(subscribeDesktop, () => window.matchMedia(DESKTOP).matches, () => true);
 
   // Every open starts on the question it was opened from.
-  const [wasOpen, setWasOpen] = useState(open);
-  if (wasOpen !== open) {
-    setWasOpen(open);
-    if (open) setCurrentKey(self.key);
+  const [previous, setPrevious] = useState({ open, key: self.key });
+  if (previous.open !== open || previous.key !== self.key) {
+    setPrevious({ open, key: self.key });
+    if (open || previous.key !== self.key) {
+      setCurrentKey(self.key);
+      setEditingNote(false);
+    }
   }
 
   const found = deck.findIndex((entry) => entry.key === currentKey);
@@ -82,6 +85,8 @@ export function SolutionCard({ self, open, setOpen }: { self: SolutionEntry; ope
     <StudyCard
       open={open}
       onOpenChange={(next) => { setOpen(next); if (!next) setEditingNote(false); }}
+      onOpenChangeComplete={onOpenChangeComplete}
+      keepMounted
       count={cards.length}
       index={Math.max(0, found)}
       onIndexChange={(next) => {

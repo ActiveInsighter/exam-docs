@@ -109,7 +109,7 @@ try {
       assert.equal(await sheet.count(), 1, 'one shared drawer remains mounted');
       if (run === 0) await sheet.screenshot({ path: path.join(screenshots, `${name}-immediate-solution.png`) });
       await sheet.getByRole('button', { name: '关闭', exact: true }).click();
-      await sheet.waitFor({ state: 'detached' });
+      await sheet.waitFor({ state: 'hidden' });
       openings.push(frames);
     }
     await question.getByRole('button', { name: '重做', exact: true }).click();

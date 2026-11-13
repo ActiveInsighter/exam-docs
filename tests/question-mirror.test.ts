@@ -11,6 +11,12 @@ afterEach(() => { document.body.replaceChildren(); });
 describe('solution question mirror', () => {
   it('preserves its DOM and expanded state across equivalent storage acknowledgements', async () => {
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+    vi.spyOn(window, 'ResizeObserver').mockImplementation(class {
+      constructor(private callback: ResizeObserverCallback) {}
+      observe(target: Element) { queueMicrotask(() => this.callback([{ target, contentRect: { width: 300 } } as ResizeObserverEntry], this as unknown as ResizeObserver)); }
+      disconnect() {}
+      unobserve() {}
+    });
     vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(300);
     vi.spyOn(window, 'matchMedia').mockImplementation(query => ({
       matches: true, media: query, onchange: null,

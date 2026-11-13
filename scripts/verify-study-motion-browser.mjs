@@ -8,14 +8,14 @@ await mkdir(screenshots, { recursive: true });
 const browser = await launchBrowser();
 const reports = [];
 const errors = [];
-const popup = '[data-slot="modal-content"]';
+const popup = '[data-slot="modal-content"]:visible';
 
 async function capture(page, name) {
   await page.screenshot({ path: path.join(screenshots, `${name}.png`), animations: 'allow' });
 }
 
 async function gone(locator) {
-  await locator.waitFor({ state: 'detached' });
+  await locator.waitFor({ state: 'hidden' });
 }
 
 async function swipe(page, from, to) {
@@ -63,7 +63,7 @@ async function nested(page, name, options) {
   await settled(root);
   const sharedSurface = (await frames(root, 1))[0];
   assert.equal(await page.locator(popup).count(), 1, 'navigation uses one popup');
-  assert.equal(await page.locator('[data-slot="modal-backdrop"]').count(), 1, 'navigation uses one backdrop');
+  assert.equal(await page.locator('[data-slot="modal-backdrop"]:visible').count(), 1, 'navigation uses one backdrop');
   assert.equal(await root.locator('[data-slot="modal-root-page"]').getAttribute('inert'), '', 'covered parent is inert');
   assert.ok(Math.abs(sharedSurface.scale - 1) < 0.001, 'the shared surface never scales on page changes');
   await page.keyboard.press('Tab');
@@ -133,11 +133,11 @@ async function nested(page, name, options) {
 async function study(page, name, options) {
   const trigger = page.getByRole('button', { name: '学习卡片', exact: true });
   await trigger.click();
-  const sheet = page.locator('[data-study-card]');
+  const sheet = page.locator('[data-study-card]:visible');
   await sheet.waitFor();
   const title = sheet.locator('[data-slot="modal-title"]').first();
   const titleIs = async text => {
-    await page.waitForFunction(text => document.querySelector('[data-study-card] [data-slot="modal-title"]')?.textContent === text, text);
+    await page.waitForFunction(text => document.querySelector('[data-study-card]:not([data-closed]) [data-slot="modal-title"]')?.textContent === text, text);
     await settled(sheet);
   };
   const prev = sheet.getByRole('button', { name: '上一个概念', exact: true });

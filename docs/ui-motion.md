@@ -29,10 +29,10 @@ ModalContext 提供当前页 `close()`、面板 `closeAll()` 和返回焦点策�
 其下的 ReducedMotionConfig 将同一策略传给自定义 Motion 节点；只设置 AnimateUIProvider
 不会自动给所有自定义节点添加 MotionConfig。系统偏好变化时不重挂整棵应用，保留焦点与作答状态。
 
-- 官方 primitive 使用自身动效，不叠加 CSS 开合动画。Drawer 的默认离场过快，站内弹窗只定制进出场与遮罩时长，保留官方拖拽、焦点及中断能力；关闭整张面板时冻结子页，退场完成后才清理状态。
+- Drawer 保留官方拖拽、焦点及中断生命周期；站内定制面板的位移、透明度和时长。遮罩使用同一 Base UI Drawer 的 Backdrop，仅过渡 opacity，不逐帧动画背景颜色、模糊或阴影。关闭整张面板时冻结子页，退场完成后才清理状态。
 - Modal 顶栏独立占位，正文原生滚动；不对大面积滚动区加 mask，不在顶栏下实时采样 backdrop-filter，不测量顶栏高度。
 - 自定义动效使用 `@animate-ui/react/utils/motion` 的令牌，经 `useTempoTransition()` 调整节奏。
-- 学习卡片翻页采用轻回弹弹簧（视觉持续约 280ms）配合 180ms 内容交叉淡入淡出；根 Drawer 使用 `transition.sheet` 的单调减速曲线入场（360ms）、`transition.dismiss` 的平稳加速曲线离场（240ms），进出与拖拽归位均无回弹，遮罩与页面收尾一致。
+- 学习卡片翻页使用 `transition.fade` 的 200ms 淡入淡出与 12px / 8px 横向位移，transform 字符串交给浏览器合成，无弹簧回弹。根 Drawer 桌面上浮 24px 并淡入，手机从底部滑入；入场 320ms、离场 220ms 均使用 `transition.sheet` 的减速曲线。遮罩与面板使用相同时长和曲线；所有时间受 tempo 调节。拖拽关闭仍沿手势方向完整滑出。
 - StudyCard 使用 `AnimatePresence` 同步衔接完整左右分栏，旧卡片不立刻卸载，新卡片无需等待旧卡片消失；标题共用 `PanelSwap`，序号使用 SlidingNumber。弹窗内的收藏等子页继续使用官方 Tabs.Panel。
 - 换题时整块分栏采用轻微位移与交叉淡入淡出，不再叠加模糊；新旧卡片各保留独立滚动容器，避免切换帧强制重置旧题 scrollTop，固定外层高度不执行逐帧布局动画。
 - transform 字符串用 `useShouldReduceMotion()` 消除位移；Motion 的 x / y / scale 由 ReducedMotionConfig 管理。
@@ -52,7 +52,7 @@ Pressable、Animated 和 liveIcon 的官方动画实现（Pressable 默认只按
 激活是一次性的，不在滚动离开后反复卸载。替换控件时恢复该题内的焦点，不重置作答或个人标记。
 选项分栏另外批量测量视口附近的题目，避免水合时对全页强制布局。
 
-解答弹窗 DOM 按需挂载，数学键盘和嵌套的收藏库代码按需加载；不得把每题的弹窗全部预挂载到长页面上。
+`SolutionSheetHost` 全站只保留一个解答 Drawer。附近题目在浏览器空闲时预备首张卡片，悬停 / 聚焦预备目标题目；关闭后用 visibility 与 inert 隔离同一个实例，保留布局缓存。不得按题预挂载弹窗。题目副本先复制 DOM，手机折叠高度由 ResizeObserver 在布局后测量，避免首开 layout effect 强制重排。数学键盘和嵌套的收藏库代码仍按需加载。
 
 ## 验证
 

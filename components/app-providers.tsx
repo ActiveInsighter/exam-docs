@@ -6,6 +6,7 @@ import { AnimateUIProvider } from '@animate-ui/react/provider';
 import { ReducedMotionConfig } from '@animate-ui/react/utils/motion';
 import { AccountProvider } from '@/components/account';
 import { QuestionDatabaseProvider } from '@/components/question/database-provider';
+import { SolutionSheetHost } from '@/components/question/solution-sheet-host';
 import { SearchProvider } from '@/components/search-provider';
 import { diag } from '@/lib/diagnostics';
 
@@ -30,7 +31,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
           <DiagnosticsMilestones />
           {/* Answers are cached and synced site-wide, so the account menu shows them on every page. */}
           <QuestionDatabaseProvider>
-            <SearchProvider>{children}</SearchProvider>
+            <SearchProvider>{children}<SolutionSheetHost /></SearchProvider>
           </QuestionDatabaseProvider>
         </AccountProvider>
       </ReducedMotionConfig>

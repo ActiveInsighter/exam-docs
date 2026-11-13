@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { AnimatePresence, motion, useIsPresent, useReducedMotion, type Transition, type Variants } from "motion/react"
-import { useTempoTransition } from "@animate-ui/react/utils/motion"
+import { AnimatePresence, motion, useIsPresent, type Transition, type Variants } from "motion/react"
+import { transition as motionTransition, useShouldReduceMotion, useTempoTransition } from "@animate-ui/react/utils/motion"
 import { cn } from "@/lib/utils"
 
 /**
@@ -18,9 +18,9 @@ import { cn } from "@/lib/utils"
  * inert, and popLayout removes it from flow so it cannot resize the sheet.
  */
 const panelVariants: Variants = {
-  enter: (direction: number) => ({ opacity: 0, x: direction > 0 ? 22 : -22 }),
-  center: { opacity: 1, x: 0 },
-  exit: (direction: number) => ({ opacity: 0, x: direction > 0 ? -12 : 12 }),
+  enter: (direction: number) => ({ opacity: 0, transform: `translateX(${direction > 0 ? 12 : -12}px)` }),
+  center: { opacity: 1, transform: "translateX(0px)" },
+  exit: (direction: number) => ({ opacity: 0, transform: `translateX(${direction > 0 ? -8 : 8}px)` }),
 }
 
 const reducedVariants: Variants = {
@@ -29,13 +29,8 @@ const reducedVariants: Variants = {
   exit: { opacity: 0 },
 }
 
-// Fade quickly to keep the answer readable; let the small directional
-// movement settle with a short, restrained spring. The fixed split panes
-// keep their own scroll offsets and do not take part in layout animation.
-const panelTransition: Transition = {
-  opacity: { duration: 0.18, ease: [0.22, 1, 0.36, 1] },
-  x: { type: "spring", visualDuration: 0.28, bounce: 0.18 },
-}
+// Transform strings run on the compositor instead of writing x each frame.
+const panelTransition: Transition = motionTransition.fade
 
 function PanelFrame({
   children,
@@ -82,7 +77,7 @@ export function PanelSwap({ value, direction, className, children, transition, f
   /** Fill a fixed-size viewport (the solution stage), not the title row. */
   fill?: boolean
 }) {
-  const reducedMotion = useReducedMotion() ?? false
+  const reducedMotion = useShouldReduceMotion()
   const timedTransition = useTempoTransition(transition ?? panelTransition)
   return (
     <div data-slot="panel-swap" className={cn("relative min-h-0 min-w-0", fill && "flex min-h-0 flex-1 flex-col overflow-hidden", className)}>

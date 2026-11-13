@@ -36,7 +36,7 @@
 | --- | --- |
 | `Modal` | 根组件，使用 `open` / `defaultOpen`、`onOpenChange(open)`、`onOpenChangeComplete(open)` 和 `actionsRef`；其余根属性传给 Drawer。嵌套页不伪造 Base UI 事件。 |
 | `ModalTrigger` | 触发按钮，同 `Drawer.Trigger`（可用 `render` 换成任意元素）。 |
-| `ModalContent` | 抽屉本体（遮罩、视口与弹窗）。`size` 限制 md 以上的最大宽度：`sm` 28rem、`md` 40rem（默认）、`lg` 56rem、`xl` 76rem、`full` 整屏；手机上始终铺满宽度。`height`：`auto`（默认）随内容伸缩，`fixed` 占满可用高度，或传 CSS 长度（如 `"36rem"`）；三者都不超过视口上限，固定高度适合内容会原地切换的弹窗。`initialFocus` 默认聚焦标题，`finalFocus` 默认回到触发按钮；其余属性传给 `Drawer.Popup`。 |
+| `ModalContent` | 抽屉本体（遮罩、视口与弹窗）。`size` 限制 md 以上的最大宽度：`sm` 28rem、`md` 40rem（默认）、`lg` 56rem、`xl` 76rem、`full` 整屏；手机上始终铺满宽度。`height`：`auto`（默认）随内容伸缩，`fixed` 占满可用高度，或传 CSS 长度（如 `"36rem"`）；三者都不超过视口上限，固定高度适合内容会原地切换的弹窗。`initialFocus` 默认聚焦标题，`finalFocus` 默认回到触发按钮。`keepMounted` 默认关闭，仅共享解答宿主启用，用不可见且 inert 的视口保留一次布局；其余属性传给 `Drawer.Popup`。 |
 | `ModalHeader` | 固定顶栏。`showBack`（默认 `true`，仅子页面显示）、`showClose`（默认 `true`）。 |
 | `ModalTitle` / `ModalDescription` | 无障碍标题与描述（`Drawer.Title` / `Drawer.Description`）。 |
 | `ModalTags` / `ModalTag` | 标题旁的标签行，宽屏与标题同行，手机换到第二行横向滚动；为空时不占位。每个子元素使用半透明底色和细阴影，`ModalTag` 是现成的标签。 |
@@ -50,7 +50,7 @@
 
 ## 外观与动效
 
-- **打开 / 关闭**：从屏幕底部滑入、向下滑出，由官方 Drawer 管理拖拽、焦点和动画生命周期。入场使用 `transition.sheet` 的单调减速曲线，时长 360ms；离场使用 `transition.dismiss` 的平稳加速曲线，时长 240ms，进出均无回弹。遮罩淡入 280ms、淡出 260ms；所有时间均受 `AnimateUIProvider` 的 tempo 调节。
+- **打开 / 关闭**：桌面上浮 24px 并淡入，手机从底部滑入并淡入；关闭反向播放。官方 Drawer 管理拖拽、焦点和动画生命周期。入场 320ms、离场 220ms 均使用 `transition.sheet` 的单调减速曲线，无回弹。遮罩仅过渡透明度，时长与面板一致；不逐帧绘制颜色、阴影或模糊。所有时间均受 `AnimateUIProvider` 的 tempo 调节。
   面板与遮罩同步收尾，拖拽仍由官方 Drawer 管理。系统开启「减少动态效果」时改为原地淡入淡出。
   手机上贴边铺满宽度；md 以上居中、按 `size` 限宽，并悬浮在底边之上 0.75rem（`--modal-float`）。
   Base UI 只在「关闭 → 打开」的变化上播放进入动画，所以挂载时就已打开的弹窗（解答浮窗第一次点击才挂载）由 `Modal`
@@ -115,7 +115,7 @@
 
 - **切换**：顶栏玻璃翻页器（上一张 · 序号 · 下一张）、键盘 ←/→、触屏左右滑动（`StudyCardStage swipe={false}` 关闭，
   卡片里有横向滚动内容时使用）；`loop` 允许首尾循环。翻到两端时，焦点从变为禁用的按钮移到另一个方向的按钮上，方向键始终可用。
-- **动画**：`PanelSwap` 用 Motion `AnimatePresence`（`popLayout`）配合较快的 180ms 交叉淡入淡出及 `visualDuration: 0.28` 的短弹簧位移，让旧卡片与新卡片短暂重叠，旧内容淡出并向反方向轻移、新内容同时淡入。左右栏属于同一个 `ModalSplit`，同一时刻完整切换，不使用先退场再入场的 `Tabs.Panel` 等待流程；离场元素自动保留直至过渡结束，快速翻页可打断。
+- **动画**：`PanelSwap` 用 Motion `AnimatePresence`（`popLayout`）配合 `transition.fade` 的 200ms 交叉淡入淡出及 12px / 8px 横向位移，让旧卡片与新卡片短暂重叠，旧内容淡出并向反方向轻移、新内容同时淡入。左右栏属于同一个 `ModalSplit`，同一时刻完整切换，不使用先退场再入场的 `Tabs.Panel` 等待流程；离场元素自动保留直至过渡结束，快速翻页可打断。
   每题拥有自己的分栏滚动容器，切换时新题从顶部开始，旧题不强制重置滚动位置；已离场的内容会卸载。卡片宽高不逐帧测量，避免闪烁和布局跳变；系统减少动态效果时只保留淡入淡出。
   顶栏标题同样使用 `PanelSwap`，嵌套「收藏与标签」子页仍由 Animate UI `Tabs.Panel` 管理可访问性与焦点。
 - **高度**：默认 `height="44rem"`、`size="lg"`，切换时不跳动；其余属性（`className`、`data-*`、`finalFocus` 等）传给 `ModalContent`。
@@ -132,5 +132,7 @@
 
 ## 性能
 
-每题一个「查看解答」，长页面上百个。触发按钮是普通 `<button>`，第一次点击才挂载 `Modal`；
-解答控制器随页面就绪，但弹窗 DOM 仍只在首次打开时挂载；不会在第一次点击时用空 Suspense 替换整个 Drawer。子页（如「收藏与标签」）按需加载并可通过悬停 / 聚焦预热。弹窗关闭后只保留根组件，遮罩、视口与内容都已卸载。
+每题的「查看解答」仅注册题目数据，`AppProviders` 中的 `SolutionSheetHost` 全站共用一个 Drawer。
+附近题目在浏览器空闲时预备首张卡片，悬停 / 聚焦时预备目标题目；关闭后保留该实例和布局，用不可见视口、inert 和关闭状态隔离交互。准备内容不会更换正在打开或退场中的题目；切换页面清理宿主。
+题目副本在预备阶段复制，手机折叠高度在 ResizeObserver 中读取，避免阻塞首帧。子页（如「收藏与标签」）仍按需加载。
+浏览器检查等待关闭弹窗 hidden，并验证只保留一个准备实例；常规 Modal 默认关闭后卸载。

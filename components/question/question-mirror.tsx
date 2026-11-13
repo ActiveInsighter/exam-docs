@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimateIcon } from '@animate-ui/react/icons';
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDownIcon } from '@/components/animate-ui/icons/chevron-down';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -131,12 +131,28 @@ export function QuestionMirror({ questionId, state, className }: { questionId: s
     // Keep the last complete frame instead of clearing the visible mirror.
     if (!copy) return;
     node.replaceChildren(copy);
-    // A grading or sync update must not fold a question the reader expanded.
-    if (foldedFor.current !== questionId) {
-      foldedFor.current = questionId;
-      setFolded(window.matchMedia('(max-width: 767px)').matches && node.scrollHeight > 200 ? true : null);
-    }
   }, [questionId, stableSpec, submitted, valuesKey, gradesKey, selectedKey]);
+
+  // Measure after layout, once the prepared card is visible. Reading
+  // scrollHeight in the clone's layout effect forced the entire new sheet
+  // (including KaTeX) to lay out before the first animation frame.
+  useEffect(() => {
+    const node = host.current;
+    if (!node || foldedFor.current === questionId) return;
+    if (!window.matchMedia('(max-width: 767px)').matches) {
+      foldedFor.current = questionId;
+      setFolded(null);
+      return;
+    }
+    const observer = new ResizeObserver(entries => {
+      if (!entries.some(entry => entry.contentRect.width > 0)) return;
+      foldedFor.current = questionId;
+      setFolded(node.scrollHeight > 200 ? true : null);
+      observer.disconnect();
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [questionId]);
 
   return (
     <div className="relative">

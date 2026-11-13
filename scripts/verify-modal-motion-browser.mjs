@@ -17,6 +17,7 @@ async function sample(page, selector, count, stopWhenGone=false) {
       const node=document.querySelector(selector);
       if(!node) { if(stopWhenGone) break; else continue; }
       const style=getComputedStyle(node);
+      if(stopWhenGone && style.visibility==='hidden') break;
       const matrix=new DOMMatrix(style.transform);
       const parent=node.querySelector('[data-slot="modal-root-page"]');
       frames.push({y:matrix.m42,opacity:Number(style.opacity),page:node.querySelector('[data-slot="modal-pages"]')?.dataset.page,parentInert:parent?.inert,parentHidden:parent?.hidden});
@@ -97,9 +98,17 @@ try {
     await sheet.waitFor();
     const entering=await sample(page,'[data-solution-card]',65);
     assert.ok(entering.length>2);
-    if(options.reducedMotion!=='reduce') assert.ok(Math.max(...entering.map(frame=>frame.y))>30,'Drawer entrance travels visibly from its edge');
+    if(options.reducedMotion!=='reduce') {
+      const travel=Math.max(...entering.map(frame=>frame.y));
+      assert.ok(travel>(options.isMobile?30:2),'The entrance visibly moves');
+      if(!options.isMobile) assert.ok(travel<=24.1,'Desktop sheets use a short lift');
+      assert.ok(entering.every(frame=>frame.y>=-0.1),'Entrance never overshoots');
+    }
     else assert.ok(entering.every(frame=>Math.abs(frame.y)<0.1),'Reduced drawer entrance stays in place');
     await settled(sheet);
+    const motionProperties=await sheet.evaluate(node=>getComputedStyle(node).transitionProperty);
+    assert.equal(motionProperties,'transform, opacity','The large surface animates compositor properties only');
+    assert.equal(await page.locator('[data-solution-card]').count(),1,'Only one solution surface is prepared for the page');
     const libraryTrigger=sheet.getByRole('button',{name:'收藏与标签',exact:true});
     await libraryTrigger.click();
     const library=sheet.locator('[data-slot="modal-page"]');
@@ -114,18 +123,20 @@ try {
     assert.ok(closing.length>=2,'Drawer remains mounted throughout exit');
     assert.ok(closing.every(frame=>frame.page===shown),'Closing never switches back to the parent page');
     assert.ok(closing.every(frame=>frame.parentInert&&frame.parentHidden),'The parent never flashes during dismissal');
-    if(options.reducedMotion!=='reduce') assert.ok(closing.some(frame=>frame.y>40),'Drawer exit travels visibly toward its edge');
+    if(options.reducedMotion!=='reduce') assert.ok(closing.some(frame=>frame.y>(options.isMobile?40:2)),'The exit visibly moves');
     else {
       assert.ok(closing.every(frame=>Math.abs(frame.y)<0.1),'Reduced drawer exit stays in place');
       assert.ok(closing.some(frame=>frame.opacity<0.8),'Reduced drawer exit visibly fades');
     }
-    await sheet.waitFor({state:'detached'});
+    await sheet.waitFor({state:'hidden'});
+    assert.equal(await sheet.count(),1,'Close retains the single prepared surface');
+    assert.equal(await sheet.evaluate(node=>node.closest('[data-slot="modal-viewport"]').inert),true,'The prepared surface cannot receive focus');
     await page.locator('#question-demo-single-001 [data-solution-trigger]').click();
     await sheet.waitFor();await settled(sheet);
     assert.equal(await sheet.getByRole('button',{name:'收藏与标签',exact:true}).getAttribute('aria-expanded'),'false','Reopen resets child-page control state after exit');
     await page.evaluate(()=>{window.__reviewAnimationRate=1});
     await sheet.getByRole('button',{name:'关闭',exact:true}).click();
-    await sheet.waitFor({state:'detached'});
+    await sheet.waitFor({state:'hidden'});
     // Reverse a dismissal before it completes. Keep one live Drawer rather
     // than replacing it or leaving the reopened surface in an ending state.
     await page.locator('#question-demo-single-001 [data-solution-trigger]').click();
@@ -137,13 +148,13 @@ try {
     });
     await settled(sheet);
     assert.equal(await sheet.getAttribute('data-open'),'','An interrupted dismissal reopens the same Drawer');
-    assert.equal(await page.locator('[data-slot="modal-content"]').count(),1);
+    assert.equal(await page.locator('[data-slot="modal-content"]:visible').count(),1);
     await sheet.getByRole('button',{name:'下一题',exact:true}).click();
     await settled(sheet);
     const heights=await page.evaluate(()=>window.__reviewHeightDurations);
     assert.ok(heights.every(duration=>duration===0),'Fixed card panes never animate layout height on every frame');
     await sheet.getByRole('button',{name:'关闭',exact:true}).click();
-    await sheet.waitFor({state:'detached'});
+    await sheet.waitFor({state:'hidden'});
     reports.push({name,ripple,entering,closing,heights});
     const video=page.video();
     await context.close();
