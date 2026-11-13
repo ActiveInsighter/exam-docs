@@ -49,10 +49,10 @@ async function render(source: string, prerender: boolean) {
  */
 const normalizeStyles = (html: string) => html.replace(/;"/gu, '"').replaceAll('&gt;', '>');
 
-/** The first dozen questions of a real chapter: options, solutions, inline and display math. */
+/** A bounded excerpt of a real chapter: options, solutions, inline and display math. */
 const chapter = (() => {
   const source = readFileSync(
-    join(process.cwd(), 'content/docs/math/lilin-880/线性代数/15-第十五章-二次型.mdx'),
+    join(process.cwd(), 'content/docs/math/past-exams/04-线性代数/第五章-二次型/01-第一节-二次型及其标准形.mdx'),
     'utf8',
   ).replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/u, '');
   const end = source.indexOf('</Question>', 15_000) + '</Question>'.length;
