@@ -156,8 +156,7 @@ Assets. `main` targets `exam-docs`; approved preview branches target the isolate
 - HTML, JS, CSS, Markdown downloads, the search manifest, category routers, and
   ZBSearch indexes are static files;
 - documentation search runs in the browser with ZBSearch;
-- a small Worker forwards only account endpoints and the `exam_sync` RPC (plus,
-  temporarily, the write-only `exam_client_log` crash diagnostics RPC) to the
+- a small Worker forwards only account endpoints and the `exam_sync` RPC to the
   configured Supabase project; it adds no privileged key and disables caching.
 
 Three settings keep client-side navigation from exhausting mobile browser memory
@@ -197,17 +196,10 @@ worker and release parsed indexes. Search failures can be retried in place.
 See [the performance and HarmonyOS investigation](reports/performance-harmony-2026-10-23.md)
 for measurements and the remaining device-verification limit.
 
-Temporary crash diagnostics run before hydration on HarmonyOS/ArkWeb/Huawei
-browsers and post lifecycle milestones through the same-origin
-`exam_client_log` RPC. They include answer-read/restoration phases, errors,
-keypad/dialog activity and bounded heartbeats. Answer values are excluded and
-the boot URL records only its path. Unfinished visits are retained locally and uploaded again
-on the next visit; a failed replay remains for retry, within a five-visit limit.
-`?diag=1` enables diagnostics on other browsers; `?diag=0` persistently disables
-them on that browser until `?diag=1` is used. The private diagnostics table is
-unreadable by browser roles. See [the follow-up measurements and diagnostic
-procedure](reports/harmony-navigation-diagnostics-2026-11-01.md). The device-only
-answer-restoration crash still requires an ArkWeb reproduction and its logs.
+Temporary browser crash diagnostics have been retired. Pages no longer collect
+or upload lifecycle logs, and the Worker rejects the former `exam_client_log`
+endpoint. The retirement migration revokes browser access to that RPC, including
+for older cached pages; existing private diagnostic records are retained.
 
 The static output retains its EdgeOne-compatible routing metadata. Supabase
 Auth and database RPCs are reached through the same-origin Worker when cloud sync

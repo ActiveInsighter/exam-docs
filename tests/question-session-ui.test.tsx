@@ -16,7 +16,6 @@ const account = vi.hoisted(() => ({
 }));
 vi.mock('@/components/account', () => ({ useAccount: () => account, useAccountMenuSection: () => {} }));
 vi.mock('@/components/question/account-section', () => ({ questionAccountSection: {} }));
-vi.mock('@/lib/diagnostics', () => ({ diag: () => {} }));
 vi.mock('@/lib/question-supabase', () => ({
   getQuestionSupabaseClient: () => new Promise(() => {}), createQuestionTransport: vi.fn(),
 }));

@@ -1,4 +1,3 @@
-import { diag } from '@/lib/diagnostics';
 import type { AnswerWrite } from './answers';
 import type { QuestionDatabase } from './database';
 import { questionStorageError } from './errors';
@@ -211,12 +210,9 @@ export class QuestionAnswerCache {
 
   private async readDocument(documentPath: string): Promise<void> {
     if (!this.database) return;
-    const started = Date.now();
-    diag('answers-read-start', { path: documentPath }, true);
     try {
       const rows = await this.database.answers.listDocument(this.namespace, documentPath);
       if (this.disposed) return;
-      diag('answers-read', { path: documentPath, rows: rows.length, ms: Date.now() - started }, true);
       const saved = new Map(rows.map((row) => [row.key, row]));
       for (const entry of this.entries.values()) {
         if (entry.identity.documentPath !== documentPath || this.busy(entry)) continue;
@@ -224,9 +220,7 @@ export class QuestionAnswerCache {
         if (row) this.adopt(entry, row.state, row.updatedAt);
         else if (!entry.snapshot.ready) this.publish(entry, { state: EMPTY, ready: true, error: null });
       }
-      diag('answers-restored', { path: documentPath, rows: rows.length, ms: Date.now() - started }, true);
     } catch (error) {
-      diag('answers-read-failed', { path: documentPath, ms: Date.now() - started, error: String(error).slice(0, 200) }, true);
       for (const entry of this.entries.values()) {
         if (entry.identity.documentPath === documentPath && !entry.snapshot.ready) {
           // Nothing could be read: start empty but say so, rather than block the question.

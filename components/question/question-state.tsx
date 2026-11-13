@@ -2,7 +2,6 @@
 
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import { usePathname } from 'next/navigation';
-import { diag } from '@/lib/diagnostics';
 import { PENDING_SNAPSHOT, QuestionAnswerCache } from '@/lib/question-store/cache';
 import type { AnswerState, QuestionIdentity } from '@/lib/question-store/types';
 import * as rules from './attempt';
@@ -118,7 +117,6 @@ export function QuestionProvider({ spec, questionId, questionRevision = 'unversi
     const apply = (move: (state: AnswerState) => rules.Transition) => {
       const next = ready ? move(current.current) : null;
       if (!next) return;
-      if (next.kind !== 'draft') diag('answer', { kind: next.kind, question: questionId });
       current.current = next.state;
       store.write(next.state, next.kind);
     };
