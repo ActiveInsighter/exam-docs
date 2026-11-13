@@ -64,6 +64,11 @@ try {
     page.on('pageerror',error=>errors.push(error.message));
     await page.goto(`${base}/docs/question-types/`,{waitUntil:'networkidle'});
     await page.waitForFunction(()=>document.querySelector('#question-demo-single-001 [data-option]')?.getAttribute('aria-disabled')!=='true');
+    // Preparing a different card while closed must replace its panes at once,
+    // rather than retain the old answer for an invisible exit animation.
+    await page.locator('#question-demo-blank-001 [data-solution-trigger]').focus();
+    await page.waitForFunction(()=>document.querySelector('[data-solution-card] [data-question-mirror]')?.textContent.includes('TCP'));
+    assert.equal(await page.locator('[data-solution-card] [data-question-mirror]').count(),1,'Hidden preparation never retains a previous question');
     const option=page.locator('#question-demo-single-001 [data-option="A"]');
     const before=await option.evaluate(node=>getComputedStyle(node).backgroundColor);
     // Start sampling at the click, before the automation round-trip returns.
@@ -96,6 +101,7 @@ try {
     await page.locator('#question-demo-single-001 [data-solution-trigger]').click();
     const sheet=page.locator('[data-solution-card]');
     await sheet.waitFor();
+    assert.equal(await sheet.locator('[data-question-mirror]').count(),1,'First reveal contains only the selected question');
     const entering=await sample(page,'[data-solution-card]',65);
     assert.ok(entering.length>2);
     if(options.reducedMotion!=='reduce') {

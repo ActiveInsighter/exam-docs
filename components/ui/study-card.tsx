@@ -65,6 +65,7 @@ type StudyCardLabels = {
 const DEFAULT_LABELS: StudyCardLabels = { group: "切换卡片", prev: "上一张", next: "下一张" }
 
 type StudyCardContextValue = {
+  animateChanges: boolean
   index: number
   count: number
   /** Identifies the current card; a change starts the transition. */
@@ -139,6 +140,9 @@ function StudyCard({
   ...props
 }: StudyCardProps) {
   const sheet = React.useRef<HTMLDivElement>(null)
+  const previousOpen = React.useRef(open)
+  const animateChanges = open && previousOpen.current
+  React.useLayoutEffect(() => { previousOpen.current = open }, [open])
   const [ownIndex, setOwnIndex] = React.useState(defaultIndex)
   const index = Math.min(Math.max(indexProp ?? ownIndex, 0), Math.max(count - 1, 0))
   const itemKey = itemKeyProp ?? index
@@ -162,6 +166,7 @@ function StudyCard({
 
   const labels = React.useMemo(() => ({ ...DEFAULT_LABELS, ...labelsProp }), [labelsProp])
   const context = React.useMemo<StudyCardContextValue>(() => ({
+    animateChanges,
     index,
     count,
     itemKey,
@@ -172,7 +177,7 @@ function StudyCard({
     prev: () => step(index - 1, -1),
     next: () => step(index + 1, 1),
     labels,
-  }), [count, direction, hasNext, hasPrev, index, itemKey, labels, step])
+  }), [animateChanges, count, direction, hasNext, hasPrev, index, itemKey, labels, step])
 
   const handleKeyDown: NonNullable<typeof onKeyDown> = (event) => {
     onKeyDown?.(event)
@@ -237,7 +242,7 @@ function StudyCardHeader({
   actionsLabel?: string
   pager?: boolean
 }) {
-  const { count, labels, itemKey, direction } = useStudyCard()
+  const { count, labels, itemKey, direction, animateChanges } = useStudyCard()
   const showPager = pager && count > 1
   return (
     <ModalHeader
@@ -245,7 +250,7 @@ function StudyCardHeader({
       className={cn(actions && showPager && "@max-sm/modal:[&_[data-slot=modal-close]]:ml-auto!", className)}
     >
       <ModalTitle {...titleProps} className={cn("relative overflow-visible", titleProps?.className)}>
-        <PanelSwap value={itemKey} direction={direction}>
+        <PanelSwap value={itemKey} direction={direction} enabled={animateChanges}>
           <span data-slot="study-card-title" className="block truncate">{title}</span>
         </PanelSwap>
       </ModalTitle>
@@ -355,7 +360,7 @@ function StudyCardStage({
   className?: string
   children: React.ReactNode
 }) {
-  const { itemKey, direction, hasPrev, hasNext, prev, next } = useStudyCard()
+  const { itemKey, direction, hasPrev, hasNext, prev, next, animateChanges } = useStudyCard()
   const stage = React.useRef<HTMLDivElement>(null)
   const blocked = React.useRef(false)
 
@@ -376,7 +381,7 @@ function StudyCardStage({
       onPanSessionStart={swipe ? (event) => { blocked.current = stage.current ? scrollsSideways(event.target, stage.current) : true } : undefined}
       onPanEnd={swipe ? onPanEnd : undefined}
     >
-      <PanelSwap value={itemKey} direction={direction} fill>
+      <PanelSwap value={itemKey} direction={direction} enabled={animateChanges} fill>
         <ModalSplit
           columns={columns}
           className={swipe ? "touch-pan-y touch-pinch-zoom md:[&_[data-slot=modal-pane-scroll]]:touch-pan-y md:[&_[data-slot=modal-pane-scroll]]:touch-pinch-zoom" : undefined}

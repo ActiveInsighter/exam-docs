@@ -37,6 +37,7 @@ function PanelFrame({
   direction,
   transition,
   reducedMotion,
+  enabled,
   fill,
   ref,
 }: {
@@ -45,6 +46,7 @@ function PanelFrame({
   direction: number
   transition: Transition
   reducedMotion: boolean
+  enabled: boolean
   fill: boolean
 }) {
   const present = useIsPresent()
@@ -58,17 +60,17 @@ function PanelFrame({
       className={cn("relative min-h-0 min-w-0 outline-none", fill && "flex min-h-0 flex-1 flex-col overflow-hidden")}
       variants={reducedMotion ? reducedVariants : panelVariants}
       custom={direction}
-      initial="enter"
+      initial={enabled ? "enter" : false}
       animate="center"
-      exit="exit"
-      transition={transition}
+      exit={enabled ? "exit" : undefined}
+      transition={enabled ? transition : { duration: 0 }}
     >
       {children}
     </motion.div>
   )
 }
 
-export function PanelSwap({ value, direction, className, children, transition, fill = false }: {
+export function PanelSwap({ value, direction, className, children, transition, fill = false, enabled = true }: {
   value: React.Key
   direction: number
   className?: string
@@ -76,6 +78,8 @@ export function PanelSwap({ value, direction, className, children, transition, f
   transition?: Transition
   /** Fill a fixed-size viewport (the solution stage), not the title row. */
   fill?: boolean
+  /** Hidden preparation and the sheet's first reveal must not animate card changes. */
+  enabled?: boolean
 }) {
   const reducedMotion = useShouldReduceMotion()
   const timedTransition = useTempoTransition(transition ?? panelTransition)
@@ -86,6 +90,7 @@ export function PanelSwap({ value, direction, className, children, transition, f
           key={String(value)}
           direction={direction}
           reducedMotion={reducedMotion}
+          enabled={enabled}
           fill={fill}
           transition={timedTransition}
         >
