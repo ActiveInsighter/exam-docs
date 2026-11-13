@@ -51,14 +51,17 @@ export function focusVisiblePage(panel: HTMLElement, focus: () => void, fallback
 }
 
 /** Freeze the visible page during dismissal; never reveal its parent mid-exit. */
-export function ModalPages({ open, value, children, hostRef }: {
+export function ModalPages({ open, value, rootValue, children, hostRef }: {
   open: boolean
   value: string
+  rootValue: string
   children: React.ReactNode
   hostRef: React.Ref<HTMLDivElement>
 }) {
   const [shown, setShown] = React.useState(value)
-  if (open && value !== shown) setShown(value)
+  // Child registrations survive the whole dismissal. Once they are cleaned
+  // up, reset the hidden surface immediately so reopening never plays Back.
+  if ((open || value === rootValue) && value !== shown) setShown(value)
   return (
     <Tabs.Root ref={hostRef} value={shown} data-slot="modal-pages" data-page={shown}
       className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">

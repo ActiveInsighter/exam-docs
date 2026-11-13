@@ -138,7 +138,10 @@ try {
     assert.equal(await sheet.count(),1,'Close retains the single prepared surface');
     assert.equal(await sheet.evaluate(node=>node.closest('[data-slot="modal-viewport"]').inert),true,'The prepared surface cannot receive focus');
     await page.locator('#question-demo-single-001 [data-solution-trigger]').click();
-    await sheet.waitFor();await settled(sheet);
+    await sheet.waitFor();
+    const reopening=await sample(page,'[data-solution-card]',20);
+    assert.ok(reopening.every(frame=>frame.opacity<0.01||!frame.parentHidden),'Reopening never waits for an old child-page return animation');
+    await settled(sheet);
     assert.equal(await sheet.getByRole('button',{name:'收藏与标签',exact:true}).getAttribute('aria-expanded'),'false','Reopen resets child-page control state after exit');
     await page.evaluate(()=>{window.__reviewAnimationRate=1});
     await sheet.getByRole('button',{name:'关闭',exact:true}).click();

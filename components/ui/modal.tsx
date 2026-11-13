@@ -343,8 +343,8 @@ function ModalPageContent({
       else if (ref) ref.current = node
     }}
       {...props}
-      transition={transition}
-      exitTransition={exitTransition}
+      transition={modal.surfaceOpen ? transition : motionTransition.instant}
+      exitTransition={modal.surfaceOpen ? exitTransition : motionTransition.instant}
       aria-labelledby={modal.titleId}
       style={style}
       className={className} data-modal-depth={modal.depth}>
@@ -434,8 +434,10 @@ function ModalRootContent({
           style={{ ...variables, ...style }}
           {...props}
         >
-          <ModalPages open={modal.open} value={modal.navigation.top?.id ?? modal.id} hostRef={modal.navigation.setHost}>
-            <ModalPageFrame root value={modal.id} aria-labelledby={modal.titleId}>
+          <ModalPages open={modal.open} value={modal.navigation.top?.id ?? modal.id} rootValue={modal.id} hostRef={modal.navigation.setHost}>
+            <ModalPageFrame root value={modal.id} aria-labelledby={modal.titleId}
+              transition={modal.open ? undefined : motionTransition.instant}
+              exitTransition={modal.open ? undefined : motionTransition.instant}>
               <ModalTitleContext.Provider value={titleRef}>{children}</ModalTitleContext.Provider>
             </ModalPageFrame>
           </ModalPages>
