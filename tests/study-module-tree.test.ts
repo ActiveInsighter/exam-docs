@@ -7,7 +7,7 @@ const expectedRootPages = ['math', '408', 'politics', 'programming'];
 const expectedModuleChildren: Record<string, string[]> = {
   math: ['index', 'past-exams', 'core-questions', 'exam', 'classified-mock-exams'],
   '408': ['index', 'mock', '王道八套卷', 'past-exams', 'past-exams-large-questions'],
-  politics: ['index', 'historical-questions', 'classified-questions'],
+  politics: ['index', 'historical-questions', 'classified-questions', 'xiao8'],
   programming: ['index', 'algorithm'],
 };
 
