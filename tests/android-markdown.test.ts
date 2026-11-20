@@ -24,6 +24,22 @@ describe('Android Markdown export', () => {
     expect(ai).not.toContain(':::solution');
   });
 
+  it('keeps comparisons and indented fences from swallowing component boundaries', () => {
+    const source = [
+      '若 $0<x<n$，则继续。',
+      '',
+      '<Callout type="info">保留说明</Callout>',
+      '',
+      '  ~~~md',
+      '<Callout>保留代码示例</Callout>',
+      '  ~~~',
+    ].join('\n');
+    const result = renderAndroidMarkdown(source, { title: '比较' });
+    expect(result).toContain('若 $0<x<n$，则继续。');
+    expect(result).toContain(':::info\n\n保留说明\n\n:::');
+    expect(result).toContain('  ~~~md\n<Callout>保留代码示例</Callout>\n  ~~~');
+  });
+
   it('exports Steps, Cards and Tabs for Android', () => {
     const source = [
       '<Steps><Step title="一">内容</Step></Steps>',
@@ -37,5 +53,13 @@ describe('Android Markdown export', () => {
     expect(result).toContain(':::card {icon="rocket" tone="info"} 卡片');
     expect(result).toContain(':::codetabs');
     expect(result).toContain(':::tab npm');
+  });
+  it('normalizes authored callouts and preserves solution diagrams and their captions', () => {
+    const result = renderAndroidMarkdown([
+      ':::tip[提示]', '先画图。', ':::', '',
+      '<AlgoFigure src="/img/示意图 (1)" alt="二叉树" caption="遍历顺序" />',
+    ].join('\n'), { title: '图示' });
+    expect(result).toContain(':::tip 提示\n先画图。\n:::');
+    expect(result).toContain('![二叉树](</img/示意图 (1).svg>)\n\n遍历顺序');
   });
 });
