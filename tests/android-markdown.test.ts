@@ -75,4 +75,27 @@ describe('Android Markdown export', () => {
     expect(result).toContain('href="/docs/politics/classified-questions/marxism-principles/s-295feb10"');
     expect(result).toContain('`[导论](./导论/)`');
   });
+  it('exports image markup, spaced math, and structured fill-in answers', () => {
+    const source = [
+      '<Question type="blank">',
+      '若 $ f(x)$ 满足 $ 0<x<2 $，求 <Blank answer="\\frac{1}{2}" aliases={[\'0.5\', \'1/2\']} kind="math" />。',
+      '<Solution><img src="/img/示意图 (1).svg" alt="图 &amp; 例" />',
+      '![网页附图](https://cdn.example.test/figure.webp)',
+      '<a href="/details"><img src="/images/chart.jpg" alt="缩略图" /></a></Solution>',
+      '</Question>',
+      '代码：`$ x $`',
+      '~~~html', '<img src="/sample.png">', '~~~',
+    ].join('\n');
+    const result = renderAndroidMarkdown(source, { title: '图片和公式' });
+    expect(result).toContain('若 $f(x)$ 满足 $0<x<2$');
+    expect(result).toContain('![图 & 例](</img/示意图 (1).svg>)');
+    expect(result).toContain('![网页附图](https://cdn.example.test/figure.webp)');
+    expect(result).toContain('[![缩略图](</images/chart.jpg>)](</details>)');
+    expect(result).toContain('`$ x $`');
+    expect(result).toContain('~~~html\n<img src="/sample.png">\n~~~');
+    const blanks = /^:::question .*blanks="((?:[^"\\]|\\.)*)"/m.exec(result)?.[1];
+    expect(blanks).toBeDefined();
+    expect(JSON.parse(blanks!.replace(/\\(["\\])/g, '$1')))
+      .toEqual([{ answer: '\\frac{1}{2}', aliases: ['0.5', '1/2'], kind: 'math' }]);
+  });
 });
