@@ -45,6 +45,7 @@ const dynamicRoutePrefixes = [
   // on Windows; static markdown is generated directly from `content/docs`
   // by `scripts/static-docs-markdown.mjs` instead.
   'app/llms.mdx',
+  'app/android.mdx',
 ];
 
 function isWithin(childPath, ancestorPath) {

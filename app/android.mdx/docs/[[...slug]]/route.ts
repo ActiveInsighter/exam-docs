@@ -1,0 +1,29 @@
+import { getAndroidText } from '@/lib/get-android-text';
+import { source } from '@/lib/source';
+import { notFound } from 'next/navigation';
+
+export const revalidate = false;
+export const dynamic = 'force-static';
+export const dynamicParams = false;
+
+type RouteParameters = {
+  params: Promise<{
+    slug?: string[];
+  }>;
+};
+
+export async function GET(_request: Request, { params }: RouteParameters) {
+  const { slug } = await params;
+  const page = source.getPage(slug);
+  if (!page) notFound();
+
+  return new Response(await getAndroidText(page), {
+    headers: {
+      'Content-Type': 'text/markdown; charset=utf-8',
+    },
+  });
+}
+
+export function generateStaticParams() {
+  return source.generateParams();
+}

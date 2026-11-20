@@ -24,6 +24,14 @@ const config = {
         source: '/docs/:path*.md',
         destination: '/llms.mdx/docs/:path*',
       },
+      {
+        source: '/docs.android.md',
+        destination: '/android.mdx/docs',
+      },
+      {
+        source: '/docs/:path*.android.md',
+        destination: '/android.mdx/docs/:path*',
+      },
     ];
   },
   async headers() {
