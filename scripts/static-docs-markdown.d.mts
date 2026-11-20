@@ -7,5 +7,6 @@ export function renderStaticMarkdown(content: string, metadata: { title: string;
 export function buildStaticMarkdownDocument(sourcePath: string, relativePath: string): Promise<{
   outputPath: string;
   markdown: string;
+  androidMarkdown: string;
 }>;
 export function isStaticDocSourceFile(filePath: string): boolean;
