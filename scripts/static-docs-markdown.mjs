@@ -1,10 +1,12 @@
 import {
   parseFrontmatterTitle,
+  renderAndroidMarkdown,
   renderStaticMarkdown,
   splitFrontmatter,
 } from '../lib/markdown-export.mjs';
 export {
   parseFrontmatterTitle,
+  renderAndroidMarkdown,
   renderStaticMarkdown,
   splitFrontmatter,
   stripMdxRuntimeSyntax,
@@ -47,6 +49,16 @@ export function getStaticMarkdownOutputPath(relativePath) {
 }
 
 /**
+ * Map a source path (relative to `content/docs`) to the Android-specific
+ * static markdown output path, e.g. `math/index.mdx` -> `docs/math.android.md`.
+ */
+export function getStaticAndroidMarkdownOutputPath(relativePath) {
+  const slug = getShortDocSlugPath(relativePath);
+
+  return `docs${slug ? `/${slug}` : ''}.android.md`;
+}
+
+/**
  * Read a source document and produce both its static output path and its
  * rendered markdown content.
  */
@@ -60,6 +72,26 @@ export async function buildStaticMarkdownDocument(sourcePath, relativePath) {
   return {
     outputPath: getStaticMarkdownOutputPath(relativePath),
     markdown: await renderStaticMarkdown(content, {
+      title,
+      url: getStaticDocsPageUrl(relativePath),
+    }),
+  };
+}
+
+/**
+ * Read a source document and produce its Android-specific static markdown
+ * output path and rendered content.
+ */
+export async function buildStaticAndroidMarkdownDocument(sourcePath, relativePath) {
+  const content = await readFile(sourcePath, 'utf8');
+  const { frontmatter } = splitFrontmatter(content);
+  const slug = getShortDocSlugPath(relativePath);
+  const fallbackTitle = slug.split('/').pop() || 'Untitled';
+  const title = parseFrontmatterTitle(frontmatter) ?? fallbackTitle;
+
+  return {
+    outputPath: getStaticAndroidMarkdownOutputPath(relativePath),
+    markdown: await renderAndroidMarkdown(content, {
       title,
       url: getStaticDocsPageUrl(relativePath),
     }),

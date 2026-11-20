@@ -2,7 +2,11 @@ import { execFileSync } from 'node:child_process';
 import { cp, mkdtemp, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
-import { renderStaticMarkdown } from '../scripts/static-docs-markdown.mjs';
+import {
+  getStaticAndroidMarkdownOutputPath,
+  renderAndroidMarkdown,
+  renderStaticMarkdown,
+} from '../scripts/static-docs-markdown.mjs';
 import { getLLMText } from '../lib/get-llm-text';
 
 const metadata = { title: '练习', url: '/docs/practice' };
@@ -158,5 +162,28 @@ describe('question Markdown export', () => {
     expect(getText).toHaveBeenCalledWith('raw');
     expect(result).toBe(await renderStaticMarkdown(raw, metadata));
     expect(result).toContain('**标签：** 来源:真题');
+  });
+
+  it('exports Android-friendly Markdown with ::: container blocks and no path header', async () => {
+    const raw = [
+      '---',
+      'title: 练习',
+      '---',
+      '<Callout type="tip" title="提示">注意细节</Callout>',
+      '<Question id="q1" type="single" number={1} points={2}>',
+      '题干内容',
+      '<Option correct>A项</Option>',
+      '<Option>B项</Option>',
+      '<Solution>解析内容</Solution>',
+      '</Question>',
+    ].join('\n');
+    const result = await renderAndroidMarkdown(raw, metadata);
+    expect(getStaticAndroidMarkdownOutputPath('practice.mdx')).toBe('docs/practice.android.md');
+    expect(result.startsWith('# 练习\n')).toBe(true);
+    expect(result).not.toContain('(/docs/practice)');
+    expect(result).toContain(':::tip 提示');
+    expect(result).toContain(':::question 题目 1 · 单选题 · 2分');
+    expect(result).toContain(':::solution 答案：A');
+    expect(result).toContain('解析内容');
   });
 });
