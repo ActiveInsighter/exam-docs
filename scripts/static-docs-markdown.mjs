@@ -1,5 +1,6 @@
 import {
   parseFrontmatterTitle,
+  renderAndroidMarkdown,
   renderStaticMarkdown,
   splitFrontmatter,
 } from '../lib/markdown-export.mjs';
@@ -59,6 +60,7 @@ export async function buildStaticMarkdownDocument(sourcePath, relativePath) {
 
   return {
     outputPath: getStaticMarkdownOutputPath(relativePath),
+    androidMarkdown: renderAndroidMarkdown(content, { title }),
     markdown: await renderStaticMarkdown(content, {
       title,
       url: getStaticDocsPageUrl(relativePath),

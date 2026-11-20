@@ -45,6 +45,8 @@ const dynamicRoutePrefixes = [
   // on Windows; static markdown is generated directly from `content/docs`
   // by `scripts/static-docs-markdown.mjs` instead.
   'app/llms.mdx',
+  // The same Android profile is written directly by the global asset shard.
+  'app/android',
 ];
 
 function isWithin(childPath, ancestorPath) {

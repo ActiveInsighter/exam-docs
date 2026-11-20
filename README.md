@@ -225,3 +225,16 @@ and static-site deployment are separate jobs; see the
 
 Do not commit secret values. Database passwords, personal access tokens,
 `service_role` keys and `sb_secret_` keys must never be browser variables.
+
+## Android reader export
+
+`/doc-sources.json` lists the documentation modules, folders and articles in sidebar
+order. When it advertises `"androidMarkdownVersion": 1`, the Android reader can
+prepend `/android` and append `.md` to each article path. For example, `/docs/math`
+maps to `/android/docs/math.md`. Relative links and images use the original article
+URL. The existing `/docs/*.md` AI export retains its format.
+
+Version 1 contains normal Markdown plus standalone `:::type title` containers
+closed by a standalone `:::`. Containers can be nested. Callouts keep their
+semantic type, and `:::solution` exposes a collapsible answer and explanation.
+Clients can display the Markdown body for unknown component types.

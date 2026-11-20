@@ -270,11 +270,14 @@ async function generateStaticMarkdownRoutes(outputRoot) {
 
   for (const sourcePath of sourceFiles) {
     const relativePath = path.relative(contentRoot, sourcePath).replaceAll('\\', '/');
-    const { outputPath, markdown } = await buildStaticMarkdownDocument(sourcePath, relativePath);
+    const { outputPath, markdown, androidMarkdown } = await buildStaticMarkdownDocument(sourcePath, relativePath);
     const destinationPath = path.join(outputRoot, outputPath);
 
     await mkdir(path.dirname(destinationPath), { recursive: true });
     await writeFile(destinationPath, markdown);
+    const androidPath = path.join(outputRoot, 'android', outputPath);
+    await mkdir(path.dirname(androidPath), { recursive: true });
+    await writeFile(androidPath, androidMarkdown);
     writtenCount += 1;
   }
 
