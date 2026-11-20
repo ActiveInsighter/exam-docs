@@ -302,10 +302,11 @@ jobs:
         run: |
           set -euo pipefail
           routes="$(find .static-docs/docs -type f -name index.html | wc -l | tr -d ' ')"
-          markdown="$(find .static-docs/docs -type f -name '*.md' | wc -l | tr -d ' ')"
+          markdown="$(find .static-docs/docs -type f -name '*.md' ! -name '*.android.md' | wc -l | tr -d ' ')"
+          android_markdown="$(find .static-docs/docs -type f -name '*.android.md' | wc -l | tr -d ' ')"
           files="$(find .static-docs -type f | wc -l | tr -d ' ')"
           bytes="$(du -sb .static-docs | awk '{print $1}')"
-          echo "weighted_shard=${STATIC_DOCS_SHARD_INDEX}/${STATIC_DOCS_SHARD_COUNT} routes=${routes} files=${files} markdown=${markdown} bytes=${bytes}"
+          echo "weighted_shard=${STATIC_DOCS_SHARD_INDEX}/${STATIC_DOCS_SHARD_COUNT} routes=${routes} files=${files} markdown=${markdown} android_markdown=${android_markdown} bytes=${bytes}"
           if (( routes < 1 )); then
             echo "::error::Unexpected route count ${routes} for shard ${STATIC_DOCS_SHARD_INDEX}."
             exit 1
@@ -315,8 +316,10 @@ jobs:
           test ! -e .static-docs/search
           if [[ "${STATIC_DOCS_SHARD_INDEX}" == '0' ]]; then
             test "${markdown}" = '792'
+            test "${android_markdown}" = '792'
           else
             test "${markdown}" = '0'
+            test "${android_markdown}" = '0'
           fi
       - name: Prepare merge payload
         shell: bash
@@ -527,12 +530,14 @@ jobs:
         run: |
           set -euo pipefail
           doc_routes="$(find .static-docs/docs -type f -name index.html | wc -l | tr -d ' ')"
-          markdown="$(find .static-docs/docs -type f -name '*.md' | wc -l | tr -d ' ')"
+          markdown="$(find .static-docs/docs -type f -name '*.md' ! -name '*.android.md' | wc -l | tr -d ' ')"
+          android_markdown="$(find .static-docs/docs -type f -name '*.android.md' | wc -l | tr -d ' ')"
           files="$(find .static-docs -type f | wc -l | tr -d ' ')"
           bytes="$(du -sb .static-docs | awk '{print $1}')"
-          echo "merged_routes=${doc_routes} files=${files} markdown=${markdown} bytes=${bytes}"
+          echo "merged_routes=${doc_routes} files=${files} markdown=${markdown} android_markdown=${android_markdown} bytes=${bytes}"
           test "${doc_routes}" = '793'
           test "${markdown}" = '792'
+          test "${android_markdown}" = '792'
           test -s .static-docs/docs/intro/index.html
           test -s .static-docs/docs/intro/__next._full.txt
           test -s .static-docs/docs/__next.docs.txt
