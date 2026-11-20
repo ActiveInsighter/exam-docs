@@ -62,4 +62,17 @@ describe('Android Markdown export', () => {
     expect(result).toContain(':::tip 提示\n先画图。\n:::');
     expect(result).toContain('![二叉树](</img/示意图 (1).svg>)\n\n遍历顺序');
   });
+  it('resolves relative document and card links using the published source path', () => {
+    const result = renderAndroidMarkdown([
+      '[导论](./导论/#例题)',
+      '<Card title="导论" href="./导论/" />',
+      '示例：`[导论](./导论/)`',
+    ].join('\n\n'), {
+      title: '目录',
+      sourcePath: 'politics/classified-questions/marxism-principles/index.mdx',
+    });
+    expect(result).toContain('[导论](/docs/politics/classified-questions/marxism-principles/s-295feb10#例题)');
+    expect(result).toContain('href="/docs/politics/classified-questions/marxism-principles/s-295feb10"');
+    expect(result).toContain('`[导论](./导论/)`');
+  });
 });

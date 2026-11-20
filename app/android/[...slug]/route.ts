@@ -12,7 +12,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
   const page = source.getPage(route.slice(1));
   if (!page) notFound();
 
-  return new Response(renderAndroidMarkdown(await page.data.getText('raw'), { title: page.data.title }), {
+  return new Response(renderAndroidMarkdown(await page.data.getText('raw'), {
+    title: page.data.title,
+    sourcePath: page.path,
+  }), {
     headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
   });
 }

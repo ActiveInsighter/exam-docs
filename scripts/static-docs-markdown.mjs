@@ -60,7 +60,7 @@ export async function buildStaticMarkdownDocument(sourcePath, relativePath) {
 
   return {
     outputPath: getStaticMarkdownOutputPath(relativePath),
-    androidMarkdown: renderAndroidMarkdown(content, { title }),
+    androidMarkdown: renderAndroidMarkdown(content, { title, sourcePath: normalizeSourcePath(relativePath) }),
     markdown: await renderStaticMarkdown(content, {
       title,
       url: getStaticDocsPageUrl(relativePath),
