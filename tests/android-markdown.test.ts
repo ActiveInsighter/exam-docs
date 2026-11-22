@@ -1,4 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkMdx from 'remark-mdx';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import { remarkQuestion, type QuestionNode } from '../lib/remark-question';
 import { renderAndroidMarkdown, renderStaticMarkdown } from '../lib/markdown-export.mjs';
 
 describe('Android Markdown export', () => {
@@ -12,7 +18,7 @@ describe('Android Markdown export', () => {
     const result = renderAndroidMarkdown(source, { title: '练习' });
     expect(result).toMatch(/^# 练习\n/);
     expect(result.match(/^# 练习$/gm)).toHaveLength(1);
-    expect(result).toContain(':::question {id="q1" type="single" number="1"}');
+    expect(result).toMatch(/:::question \{id="q1" revision="[a-f0-9]{8}" type="single" number="1"\}/u);
     expect(result).toContain(':::option {label="A" correct="true"}');
     expect(result).toContain(':::solution 参考答案与解析\n\n**答案：** A');
     expect(result).toContain(':::warning 检查条件\n\n保留公式 $x^2$。');
@@ -22,6 +28,22 @@ describe('Android Markdown export', () => {
     expect(ai).toContain('# 练习 (/docs/exercise)');
     expect(ai).toContain('**题目 ID：** q1');
     expect(ai).not.toContain(':::solution');
+  });
+
+  it('preserves the web revision for a versioned question', () => {
+    const body = [
+      '<Question id="shared" type="boolean" answer={true}>',
+      '',
+      '若 $0<x<n$，则 $x$ 小于 $n$。',
+      '',
+      '</Question>',
+    ].join('\n');
+    const tree = unified().use(remarkParse).use(remarkMdx).use(remarkGfm).use(remarkMath).parse(body) as QuestionNode;
+    remarkQuestion()(tree, { value: body });
+    const revision = tree.children?.[0]?.attributes?.find((item) => item.name === 'revision')?.value;
+    expect(revision).toMatch(/^[a-f0-9]{8}$/u);
+    expect(renderAndroidMarkdown('---\ntitle: 练习\n---\n' + body, { title: '练习' }))
+      .toContain(`id="shared" revision="${revision}"`);
   });
 
   it('keeps comparisons and indented fences from swallowing component boundaries', () => {

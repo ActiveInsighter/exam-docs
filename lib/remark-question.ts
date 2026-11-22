@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { questionRevision } from './question-revision.mjs';
 import { renderTexAnswer } from './blank-answer-tex';
 import { parseMath } from './math-expression';
 
@@ -310,15 +310,6 @@ export function getQuestionProblems(tree: QuestionNode): QuestionProblem[] {
   return findQuestions(tree).flatMap((question) => validateQuestion(question, seenIds));
 }
 
-function hashQuestion(question: QuestionNode, source: string) {
-  const first = question.children?.[0]?.position?.start.offset;
-  const last = question.children?.at(-1)?.position?.end.offset;
-  const body = first === undefined || last === undefined ? '' : source.slice(first, last);
-  const type = readAttribute(question, 'type').text ?? '';
-  const answer = readAttribute(question, 'answer').text ?? '';
-  return createHash('sha1').update(`${type}\n${answer}\n${body}`).digest('hex').slice(0, 8);
-}
-
 /** Display number of each question: document order, `number` restarts or hides. */
 function assignDisplay(questions: QuestionNode[], source: string) {
   let counter = 0;
@@ -338,7 +329,7 @@ function assignDisplay(questions: QuestionNode[], source: string) {
       counter += 1;
       setAttribute(question, 'index', String(counter));
     }
-    if (source) setAttribute(question, 'revision', hashQuestion(question, source));
+    if (source) setAttribute(question, 'revision', questionRevision(question, source));
   }
 }
 
