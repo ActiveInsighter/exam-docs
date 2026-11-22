@@ -1,6 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { androidMarkdownVersion } from '../lib/markdown-export.mjs';
+import { androidMarkdownVersion } from '../lib/android-markdown-version.mjs';
 
 const root = process.argv[2] ?? '.static-docs';
 const expectedCount = Number(process.argv[3]);
@@ -42,6 +42,9 @@ for (const file of exports) {
     } else if (marker) {
       fence = marker[1];
     } else if (/^ {0,3}:::[ \t]*[\w-]+(?:[ \t].*)?$/u.test(line)) {
+      if (/^ {0,3}:::question[ \t]+\{id="/u.test(line) && !/ revision="[a-f0-9]{8}"/u.test(line)) {
+        throw new Error(`Missing synced question revision at ${file}:${index + 1}`);
+      }
       depth += 1;
     } else if (/^ {0,3}:::[ \t]*$/u.test(line)) {
       depth -= 1;
