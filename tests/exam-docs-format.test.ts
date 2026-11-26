@@ -80,4 +80,43 @@ describe('exam document formats', () => {
     expect(invalidLocations).toEqual([]);
   });
 
+  it('numbers the questions on each page consecutively from 1', async () => {
+    const docsRoot = resolve(process.cwd(), 'content', 'docs');
+    const mdxFiles = await collectMdxFiles(docsRoot);
+    const invalidPages: string[] = [];
+
+    for (const file of mdxFiles) {
+      const lines = (await readFile(file, 'utf8')).split(/\r?\n/u);
+      let insideCodeFence = false;
+      let position = 0;
+      const problems: string[] = [];
+
+      for (const [index, line] of lines.entries()) {
+        const trimmed = line.trim();
+        if (/^(?:```|~~~)/u.test(trimmed)) {
+          insideCodeFence = !insideCodeFence;
+          continue;
+        }
+        if (insideCodeFence) continue;
+
+        const question = /^\s*<Question\b([^>]*)>/u.exec(line);
+        if (!question) continue;
+        position += 1;
+
+        const number = /\bnumber=\{([^}]*)\}|\bnumber=(?:"([^"]*)"|'([^']*)')/u.exec(question[1]);
+        if (!number) continue;
+        const raw = String(number[1] ?? number[2] ?? number[3]).trim();
+        // `number={false}` hides the label; string labels ("例 1") are intentional.
+        if (raw === 'false' || !/^-?\d+$/u.test(raw)) continue;
+        if (Number(raw) !== position) {
+          problems.push(`第 ${index + 1} 行显示 ${raw}，应为 ${position}`);
+        }
+      }
+
+      if (problems.length > 0) invalidPages.push(`${relative(process.cwd(), file)}: ${problems.join('；')}`);
+    }
+
+    expect(invalidPages).toEqual([]);
+  }, 60_000);
+
 });

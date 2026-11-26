@@ -62,6 +62,37 @@ describe('Android Markdown export', () => {
     expect(result).toContain('  ~~~md\n<Callout>保留代码示例</Callout>\n  ~~~');
   });
 
+  it('keeps negative and plus-prefixed option text out of Markdown list syntax', () => {
+    const source = [
+      '<Question id="neg" type="single">',
+      '取值范围是（ ）',
+      '<Option>-128 ∼127</Option>',
+      '<Option correct>-512 ∼511</Option>',
+      '<Option>\\+ x/ y - zuv</Option>',
+      '<Option>xyzu - v/ +</Option>',
+      '<Solution>看符号位。</Solution>',
+      '</Question>',
+    ].join('\n');
+    const result = renderAndroidMarkdown(source, { title: '符号' });
+    // A hyphen glued to the digits stays literal; a hyphen followed by a space
+    // would be parsed as a bullet list item by Markdown readers.
+    expect(result).not.toMatch(/^-[ \t]+(?:\d|\\\+)/mu);
+    expect(result).not.toMatch(/^\+[ \t]+\S/mu);
+    expect(result).toContain('\n-128 ∼127\n');
+    expect(result).toContain('\n-512 ∼511\n');
+  });
+
+  it('numbers every page from 1 without restarts or gaps', () => {
+    const source = [
+      '<Question id="a" type="single"><Option correct>甲</Option><Option>乙</Option><Solution>甲</Solution></Question>',
+      '<Question id="b" type="single"><Option correct>甲</Option><Option>乙</Option><Solution>甲</Solution></Question>',
+      '<Question id="c" type="single"><Option correct>甲</Option><Option>乙</Option><Solution>甲</Solution></Question>',
+    ].join('\n\n');
+    const result = renderAndroidMarkdown(source, { title: '编号' });
+    const numbers = [...result.matchAll(/^:::question .*number="(\d+)"/gmu)].map((match) => Number(match[1]));
+    expect(numbers).toEqual([1, 2, 3]);
+  });
+
   it('exports Steps, Cards and Tabs for Android', () => {
     const source = [
       '<Steps><Step title="一">内容</Step></Steps>',
