@@ -4,344 +4,16 @@ title: "第 2 章 线性表"
 
 # 第 2 章 线性表
 
-
-## 2.1 线性表的顺序存储
-
-<Question id="408-c52f34-001" type="essay">
-
-【2010】设将 $ n(n>1)$ 个整数存放到一维数组 R 中。试设计一个在时间和空间两方面都尽可能高效的算法。将 R 中保存的序列循环左移 $ p(0<p<n)$ 个位置，即将 R 中的数据由 $ X_0,X_1,\cdots,X_{n-1}$ 变换为 $ X_p,X_{p+1},\cdots,X_{n-1},X_0,X_1,\cdots,X_{p-1}$。要求：
-
-(1) 给出算法的基本设计思想；
-
-(2) 根据设计思想，采用 C 或 C++ 或 Java 语言描述算法，关键之处给出注释；
-
-(3) 说明你所设计算法的时间复杂度和空间复杂度。
-
-<Solution>
-
-**【解析】**
-
-(1) 将 $\overbrace{x_0,x_1,\cdots,x_{p-1}}^{p\text{ 个元素}},\overbrace{x_p,x_{p+1},\cdots,x_{n-1}}^{n-p\text{ 个元素}}$ 倒置，得到 $\overbrace{x_{n-1},x_{n-2},\cdots,x_p}^{n-p\text{ 个元素}},\overbrace{x_{p-1},\cdots,x_1,x_0}^{p\text{ 个元素}}$。再以 $x_p$ 为界，分别将两边倒置，即将 $(x_{n-1},x_{n-2},\cdots,x_p)$ 倒置得到 $(x_p,x_{p+1},\cdots,x_{n-1})$，将 $(x_{p-1},x_{p-2},\cdots,x_0)$ 倒置得到 $(x_0,x_1,\cdots,x_{p-1})$。即可得到题目要求的结果。
-
-(2) 代码实现如下：
-
-```c
-//reverse函数的功能是将序列原地倒置，start和end序列的开始和结束位置
-void reverse(int R[], int start, int end) {
-    int temp, i; // 作为交换的临时变量
-    for (i = 0; i < (end - start + 1) / 2; i++) { //将首尾位置的元素交换
-        temp = R[start + i];
-        R[start + i] = R[end - i];
-        R[end - i] = temp;
-    }
-}
-void move(int R[], int p, int n) {
-    reverse(R, 0, n - 1); //将全部n个数据倒置
-    reverse(R, 0, n - p - 1); //将前n-p个数据倒置
-    reverse(R, n - p, n - 1); //将后p个数据倒置
-}
-```
-
-(3) 时间复杂度为 $O(n)$，空间复杂度为 $O(1)$。
-
-**【真题溯源】** LeetCode 上有道类似的题，建议考生动手练习：[https://leetcode.cn/problems/rotate-array](https://leetcode.cn/problems/rotate-array)
-
-**【点评】** 难题。本题考查线性表的循环左移，对应 LeetCode 的中等难度。若此前缺乏针对性训练，很难在考场的高压环境中想到这种解法。
-
-</Solution>
-
-</Question>
-
-<Question id="408-c52f34-002" type="essay">
-
-【2011】一个长度为 $ L(L\ge 1)$ 的升序序列 S，处在第 $ \lceil L/2\rceil$ 个位置的数称为 S 的中位数。例如，若序列 $ S_1=11,13,15,17,19$，则 $ S_1$ 的中位数是 15。两个序列的中位数是含它们所有元素的升序序列的中位数。例如，若 $ S_2=2,4,6,8,20$，则 $ S_1$ 和 $ S_2$ 的中位数是 11。现有两个等长的升序序列 A 和 B，试设计一个在时间和空间两方面都尽可能高效的算法，找出两个序列 A 和 B 的中位数。要求：
-
-(1) 给出算法的基本设计思想；
-
-(2) 根据设计思想，采用 C 或 C++ 或 Java 语言描述算法，关键处给出注释；
-
-(3) 说明你所设计算法的时间复杂度和空间复杂度。
-
-<Solution>
-
-**【解析】**
-
-(1) $A$ 和 $B$ 是等长（记长度为 $n$）的升序序列，求出序列 $A$ 的中位数 $A_m$，序列 $B$ 的中位数 $B_m$。设 $S$ 为序列 $A$ 和 $B$ 合并后升序序列，关于 $S$ 的中位数，有如下 3 种情况：
-
-$$
-\text{长度为 }n\text{ 的升序序列 }A=\overbrace{A_0,A_1,\cdots,A_{m-1}}^{n-1-\lfloor n/2\rfloor\text{ 个元素}},\ \overbrace{A_m}^{1\text{ 个元素}},\ \overbrace{A_{m+1},A_{m+2},\cdots,A_{n-1}}^{\lfloor n/2\rfloor\text{ 个元素}}
-$$
-
-$$
-\text{长度为 }n\text{ 的升序序列 }B=\overbrace{B_0,B_1,\cdots,B_{m-1}}^{n-1-\lfloor n/2\rfloor\text{ 个元素}},\ \overbrace{B_m}^{1\text{ 个元素}},\ \overbrace{B_{m+1},B_{m+2},\cdots,B_{n-1}}^{\lfloor n/2\rfloor\text{ 个元素}}
-$$
-
-- 若 $A_m=B_m$，则 $A_m$ 即为所求中位数。
-- 若 $A_m<B_m$，则 $A_0\sim A_{m-1}<A_m<B_m<B_{m+1}\sim B_{n-1}$。$A_0\sim A_{m-1}$ 是 $S$ 中最小的部分（$S$ 中最靠前 $\lfloor n/2\rfloor$ 个元素），$B_{m+1}\sim B_{n-1}$ 是 $S$ 中最大的部分（$S$ 中最靠后的 $\lfloor n/2\rfloor$ 个元素），而中位数位于 $S$ 中第 $\lceil 2n/2\rceil=n$ 个位置，故中位数位于序列 $A_{m+1}\sim A_{n-1},B_0\sim B_{m-1}$（长度为 $n$）中。而 $A_{m+1}\sim A_{n-1}$ 和 $B_0\sim B_{m-1}$ 都是升序序列，将问题转化为求跟原来等价但规模更小的同类问题。
-- 若 $A_m>B_m$，则 $B_0\sim B_{m-1}<B_m<A_m<A_{m+1}\sim A_{n-1}$。同理，则中位数位于序列 $A_0\sim A_{m-1},B_{m+1}\sim B_{n-1}$（长度为 $n$）中。
-
-重复此过程，直到两个序列中位数相等或两个序列中都只含一个元素时为止，较小者即为所求中位数。
-
-(2) 代码实现如下：
-
-```c
-int middle(int A[], int B[], int n) {
-    int start1 = 0, end1 = n-1, start2 = 0, end2 = n-1, m1, m2;
-    while (start1 != end1 || start2 != end2) {
-        m1 = (start1 + end1)/2, m2 = (start2 + end2)/2;
-        if (A[m1] == B[m2])
-            return A[m1];
-        if (A[m1] < B[m2]) {
-            if ((start1 + end1) % 2 == 0) { // 说明序列长度n为奇数
-                start1 = m1;
-                end2 = m2;
-            } else { // 说明序列长度n为偶数
-                start1 = m1 + 1;
-                end2 = m2;
-            }
-        }
-        if (A[m1] > B[m2]) {
-            if ((start1 + end1) % 2 == 0) { // 说明序列长度n为奇数
-                end1 = m1;
-                start2 = m2;
-            } else { // 说明序列长度n为偶数
-                end1 = m1;
-                start2 = m2 + 1;
-            }
-        }
-    }
-    return A[start1] < B[start2] ? A[start1] : B[start2];
-}
-```
-
-(3) 时间复杂度为 $O(\log_2 n)$，空间复杂度 $O(1)$。
-
-**【真题溯源】** LeetCode 上有道类似的题（hard 难度），建议考生动手练习：[https://leetcode.cn/problems/median-of-two-sorted-arrays](https://leetcode.cn/problems/median-of-two-sorted-arrays)
-
-**【提示】** 本题还有一种容易想到的暴力解思路，该思路跟二路归并排序算法思想一致：设两个等长升序序列为 A 和 B，长度均为 $n$。将 A、B 合并，合并后的序列长度为 $2n$，根据题目定义，中位数是第 $\lceil 2n/2\rceil=n$ 个位置的元素（即从小到大排序后的第 $n$ 小元素）。
-
-**【点评】** 难题。数组操作相关的算法题。如果考前未做过类似题，则考场上很难想到最优解。即使想出来了，也将耗费大量时间，得不偿失。408 题量大，考场上时间非常紧张，综合考场上的时间成本，考生不必追求最优解，暴力解也能拿到大部分分数。
-
-</Solution>
-
-</Question>
-
-<Question id="408-c52f34-003" type="essay">
-
-【2013】已知一个整数序列 $ A=a_0,a_1,a_2,\cdots,a_{n-1}$，其中 $ 0\le a_i<n\ (0\le i<n)$。若存在 $ a_{p_1}=a_{p_2}=\cdots=a_{p_m}=x$ 且 $ m>n/2$、$ 0\le p_k<n$、$ 1\le k\le m$，则称 $ x$ 为 A 的主元素。例如 $ A=0,5,5,3,5,7,5,5$，则 5 为主元素；又如 $ A=0,5,5,3,5,1,5,7$，则 A 中没有主元素。假设 A 中的 $ n$ 个元素保存在一个一维数组中，请设计一个尽可能高效的算法，找出 A 的主元素。若存在主元素，则输出该元素；否则输出 $ -1$。要求：
-
-(1) 给出算法的基本设计思想；
-
-(2) 根据设计思想，采用 C 或 C++ 或 Java 语言描述算法，关键之处给出注释；
-
-(3) 说明你所设计算法的时间复杂度和空间复杂度。
-
-<Solution>
-
-**【解析】**
-
-(1) 本题考查“摩尔投票算法”，这是面试、算法题里非常经典、高频的中等难度算法。该算法解决的问题是：**查找在数组中出现次数超过数组长度一半的元素**（称该元素为“主元素”）。关键思想是：利用“多数元素的数量优势”，让不同元素相互抵消，最终筛选出候选元素，再验证候选元素是否满足要求。该算法基本设计思想主要分为两步：
-
-1. 候选主元素筛选：
-   - 用变量 majorElem 记录当前候选主元素，用 count 作为临时变量。
-   - 遍历数组，遍历过程中：
-     - 若 count == 0，则将当前元素设为 majorElem，并令 count = 1；
-     - 若当前元素与 majorElem 相同，则 count++；
-     - 若当前元素与 majorElem 不同，则 count--。
-   - 若数组中存在主元素（出现次数 $>\frac n2$），则经过上述步骤遍历完数组后，majorElem 就是主元素。但数组有可能不存在主元素，所以需要再次遍历数组验证。
-2. 验证候选元素：再次遍历数组，统计 majorElem 出现的次数。若次数 $>\frac n2$，则 majorElem 是主元素；否则输出 −1。
-
-(2) 算法实现如下：
-
-{/* 原书代码在 count 递减至 0 时直接将当前元素作为候选，与前述文字的判断次序不完全一致，按原文保留。 */}
-
-```c
-int findMajorElem(int A[], int n) {
-    int majorElem = A[0], count = 1; //变量初始化
-    for (int i = 1; i < n; i++) {
-        if (A[i] == majorElem) {
-            count++;
-        }
-        else {
-            count--;
-            if (count == 0) {
-                majorElem = A[i];
-                count = 1;
-            }
-        }
-    }
-    if (count <= 0) { //若count小于等于0说明不可能有主元素
-        return -1;
-    }
-    count = 0; //这一步不要漏了：将临时变量count清零
-    for (int i = 0; i < n; i++) { //统计候选主元素个数
-        if(A[i] == majorElem) {
-            count++;
-        }
-    }
-    if (count > n/2) {
-        return majorElem;
-    } else {
-        return -1;
-    }
-}
-```
-
-(3) 时间复杂度为 $O(n)$，空间复杂度为 $O(1)$。
-
-**【真题溯源】** LeetCode 上有道类似的题，建议考生动手练习：
-
-[https://leetcode.cn/problems/majority-element](https://leetcode.cn/problems/majority-element)
-
-**【点评】** 常规题。本题的最优解比较难理解。但暴力解非常直白好理解：利用哈希表的思想，定义一个辅助数组 `map[n]`（题目中已说明数组中每个元素均小于 n），数组元素 `map[key]` 表示元素 key 出现次数。遍历数组，逐个计数 `map[key]++`。数组遍历完后，再遍历哈希表 `map[n]`，若 `map[i] > n/2`，则输出元素 i，否则输出 −1。
-
-</Solution>
-
-</Question>
-
-<Question id="408-c52f34-004" type="essay">
-
-【2018】给定一个含 $ n(n\ge 1)$ 个整数的数组，请设计一个在时间上尽可能高效的算法，找出数组中未出现的最小正整数。例如，数组 $ \{-5,3,2,3\}$ 中未出现的最小正整数是 1；数组 $ \{1,2,3\}$ 中未出现的最小正整数是 4。要求：
-
-(1) 给出算法的基本设计思想；
-
-(2) 根据设计思想，采用 C 或 C++ 语言描述算法，关键之处给出注释；
-
-(3) 说明你所设计算法的时间复杂度和空间复杂度。
-
-<Solution>
-
-**【解析】**
-
-(1) 含有 $n$ 个整数的数组中，未出现的最小正整数一定落在区间 $[1,n+1]$ 内：因为 $1\sim n$ 这 $n$ 个正整数若全部出现，则数组恰好被占满，此时答案是 $n+1$；否则 $[1,n]$ 中必有缺席者，最小缺席者即答案。
-
-只需要用一个辅助数组 $S[n+2]$ 记录 $k$ 是否出现过即可。$S[k]=1$ 表示 $k$ 在原数组中出现过，$S[k]=0$ 表示未出现过。遍历完原数组后只需再次遍历 $S$ 查找最小未出现整数即可。
-
-(2) 代码实现如下：
-
-```c
-int findMissMin(int A[], int n) {
-    int S[n+2] = {0}, i; // 辅助数组，记录A中元素是否出现过
-    for (i = 0; i < n; i++) {
-        if (A[i] > 0 && A[i] <= n) {
-            S[A[i]] = 1;
-        }
-    }
-    for (i = 1; i <= n + 1; i++) { // 从1开始遍历是因为0不是正整数
-        if (S[i] == 0) {
-            break;
-        }
-    }
-    return i;
-}
-```
-
-(3) 算法的时间复杂度为 $O(n)$，空间复杂度为 $O(n)$。
-
-**【提示】** 本题暴力解法思路：先对数组元素排序（采用快速排序或者冒泡排序等任意一种），设置一个变量整型 count，初值为 1。再从有序数组第一个非负元素的位置开始遍历，遍历时若数组元素当前值等于 count，则令 count++，最后 count 的值即为所求值。时间复杂度为采用排序算法的时间复杂度。
-
-**【真题溯源】** LeetCode 有道类似的题，建议考生动手练习：
-
-https://leetcode.cn/problems/first-missing-positive
-
-**【点评】** 常规题。本题根据 LeetCode 题库 41 题改编。408 中考查数组相关的算法题，通常暴力解都很直白，很容易想到，最优解很难想到，但暴力解可拿 8 分左右。
-
-</Solution>
-
-</Question>
-
-<Question id="408-c52f34-005" type="essay">
-
-【2020】定义三元组 $ (a,b,c)$（$ a,b,c$ 均为整数）的距离
-
-$ D=|a-b|+|b-c|+|c-a|$。
-
-给定 3 个非空整数集合 $ S_1,S_2,S_3$，按升序分别存储在 3 个数组中。请设计一个尽可能高效的算法，计算并输出所有可能的三元组 $ (a,b,c)$（$ a\in S_1,b\in S_2,c\in S_3$）中的最小距离。例如 $ S_1=\{-1,0,9\}$，$ S_2=\{-25,-10,10,11\}$，$ S_3=\{2,9,17,30,41\}$，则最小距离为 2，相应的三元组为 $ (9,10,9)$。要求：
-
-(1) 给出算法的基本设计思想；
-
-(2) 根据设计思想，采用 C 或 C++ 语言描述算法，关键之处给出注释。
-
-<Solution>
-
-**【解析】**
-
-**【暴力解】**
-
-(1) 穷举出所有的三元组，求出最小距离。
-
-(2) 代码实现如下：
-
-```c
-int findMin(int s1[], int s2[], int s3[], int n1, int n2, int n3) {
-    int temp;
-    int minDist = INF; //将minDist初始化为最大的int型整数INF
-    for (int i = 0; i < n1; i++) {
-        for (int j = 0; j < n2; j++) {
-            for (int k = 0; k < n3; k++) {
-                temp = abs(s1[i]-s2[j])+abs(s2[j]-s3[k])+abs(s1[i]-s3[k]);
-                if (temp < minDist) {
-                    minDist = temp;
-                }
-            }
-        }
-    }
-    return minDist;
-}
-```
-
-(3) 3 层循环，时间复杂度为 $O(n^3)$，空间复杂度为 $O(1)$。
-
-**【最优解】**
-
-(1) 用变量 minDist 记录当前的最小距离。由于 $S_1,S_2,S_3$ 按升序排列，遍历三个数组，计算当前三元组 $(a,b,c)$ 的距离 temp。若 $\mathrm{temp}<\mathrm{minDist}$，则令 minDist = temp。将 $(a,b,c)$ 中最小的数对应下标加一，重复之前步骤直到遍历结束。
-
-(2) 代码实现如下：
-
-```c
-int findMin(int s1[], int s2[], int s3[], int n1, int n2, int n3) {
-    int temp, minDist = INF; //将minDist初始化为最大的int型整数INF
-    int i = j = k = 0;
-    while (i < n1 && j < n2 && k < n3) {
-        temp = abs(s1[i]-s2[j]) + abs(s2[j]-s3[k]) + abs(s1[i]-s3[k]);
-        // minDist赋值为minDist和temp中的最小值
-        minDist = temp < minDist ? temp : minDist;
-        if (s1[i] == min(s1[i],s2[j],s3[k])) {
-            i++;
-        } else if (s2[j] == min(s1[i],s2[j],s3[k])) {
-            j++;
-        } else {
-            k++;
-        }
-    }
-    return minDist;
-}
-```
-
-{/* 原书最优解中的 int i = j = k = 0; 未分别声明 j、k；原样保留。实际 C/C++ 代码应分别声明并初始化三个变量。min 为原书所用的三数取最小值函数。 */}
-
-(3) 设 $n$ 为三个数组中元素数量的总和，时间复杂度为 $O(n)$，空间复杂度为 $O(1)$。
-
-**【真题溯源】** LeetCode 上有道类似的题，是此题的简化版，建议考生动手练习：
-
-[https://leetcode.cn/problems/smallest-difference-lcci](https://leetcode.cn/problems/smallest-difference-lcci)
-
-**【点评】** 常规题。本题的最优解很难想到，即使想到了最优解，若此前没做过类似练习题，也将耗费大量时间，在考场上是得不偿失的。本题的暴力解很容易想到的，考场时间紧张，建议直接快捷的写暴力解。
-
-</Solution>
-
-</Question>
-
 ## 2.2 线性表的链式存储
 
-<Question id="408-c52f34-006" type="single" number={1}>
+<Question id="408-c52f34-006" type="single" tags="来源:2013考研408">
 
-【2013】已知两个长度分别为 $ m$ 和 $ n$ 的升序链表，若将它们合并为一个长度为 $ m+n$ 的降序链表，则最坏情况下的时间复杂度是（ ）。
+已知两个长度分别为 $m$ 和 $n$ 的升序链表，若将它们合并为一个长度为 $m+n$ 的降序链表，则最坏情况下的时间复杂度是（ ）。
 
-<Option>$ O(n)$</Option>
-<Option>$ O(mn)$</Option>
-<Option>$ O(\min(m,n))$</Option>
-<Option correct>$ O(\max(m,n))$</Option>
+<Option>$O(n)$</Option>
+<Option>$O(mn)$</Option>
+<Option>$O(\min(m,n))$</Option>
+<Option correct>$O(\max(m,n))$</Option>
 
 <Solution>
 
@@ -353,9 +25,9 @@ int findMin(int s1[], int s2[], int s3[], int n1, int n2, int n3) {
 
 </Question>
 
-<Question id="408-c52f34-007" type="single">
+<Question id="408-c52f34-007" type="single" tags="来源:2016考研408">
 
-【2016】已知表头元素为 c 的单链表在内存中的存储状态如下表所示。现将 f 存放于 1014H 处并插入到单链表中，若 f 在逻辑上位于 a 和 e 之间，则 a、e、f 的“链接地址”依次是（ ）。
+已知表头元素为 c 的单链表在内存中的存储状态如下表所示。现将 f 存放于 1014H 处并插入到单链表中，若 f 在逻辑上位于 a 和 e 之间，则 a、e、f 的“链接地址”依次是（ ）。
 
 | 地址  | 元素 | 链接地址 |
 | ----- | ---- | -------- |
@@ -381,9 +53,9 @@ int findMin(int s1[], int s2[], int s3[], int n1, int n2, int n3) {
 
 </Question>
 
-<Question id="408-c52f34-008" type="single">
+<Question id="408-c52f34-008" type="single" tags="来源:2016考研408">
 
-【2016】已知一个带有表头结点的双向循环链表 L，结点结构为 `|prev|data|next|`，其中，prev 和 next 分别是指向其直接前驱和直接后继结点的指针。现要删除指针 p 所指的结点，正确的语句序列是（ ）。
+已知一个带有表头结点的双向循环链表 L，结点结构为 `|prev|data|next|`，其中，prev 和 next 分别是指向其直接前驱和直接后继结点的指针。现要删除指针 p 所指的结点，正确的语句序列是（ ）。
 
 <Option>`p->next->prev=p->prev; p->prev->next=p->prev; free(p);`</Option>
 <Option>`p->next->prev=p->next; p->prev->next=p->next; free(p);`</Option>
@@ -400,9 +72,9 @@ int findMin(int s1[], int s2[], int s3[], int n1, int n2, int n3) {
 
 </Question>
 
-<Question id="408-c52f34-009" type="single">
+<Question id="408-c52f34-009" type="single" tags="来源:2021考研408">
 
-【2021】已知头指针 h 指向一个带头结点的非空单循环链表，结点结构为 `|data|next|`。其中 next 是指向直接后继结点的指针，p 是尾指针，q 是临时指针。现要删除该链表的第一个元素，正确的语句序列是（ ）。
+已知头指针 h 指向一个带头结点的非空单循环链表，结点结构为 `|data|next|`。其中 next 是指向直接后继结点的指针，p 是尾指针，q 是临时指针。现要删除该链表的第一个元素，正确的语句序列是（ ）。
 
 <Option>`h->next=h->next->next; q=h->next; free(q);`</Option>
 <Option>`q=h->next; h->next=h->next->next; free(q);`</Option>
@@ -423,9 +95,9 @@ int findMin(int s1[], int s2[], int s3[], int n1, int n2, int n3) {
 
 </Question>
 
-<Question id="408-c52f34-010" type="single">
+<Question id="408-c52f34-010" type="single" tags="来源:2023考研408">
 
-【2023】现有非空双向链表 L，其结点结构为 `|prev|data|next|`，prev 是指向直接前驱结点的指针，next 是指向后继结点的指针。若要在 L 中指针 p 所指向的结点（非尾结点）之后插入指针 s 指向的新结点，则在执行了语句序列 `s->next=p->next; p->next=s;` 后，下列语句序列中还需要执行的是（ ）。
+现有非空双向链表 L，其结点结构为 `|prev|data|next|`，prev 是指向直接前驱结点的指针，next 是指向后继结点的指针。若要在 L 中指针 p 所指向的结点（非尾结点）之后插入指针 s 指向的新结点，则在执行了语句序列 `s->next=p->next; p->next=s;` 后，下列语句序列中还需要执行的是（ ）。
 
 <Option>`s->next->prev=p; s->prev=p;`</Option>
 <Option>`p->next->prev=s; s->prev=p;`</Option>
@@ -446,9 +118,9 @@ int findMin(int s1[], int s2[], int s3[], int n1, int n2, int n3) {
 
 </Question>
 
-<Question id="408-c52f34-011" type="single">
+<Question id="408-c52f34-011" type="single" tags="来源:2024考研408">
 
-【2024】已知带头结点的非空单链表 L 的头指针为 h，结点结构为 `|data|next|`，其中 next 是指向直接后继结点的指针。现有指针 p 和 q，若 p 指向 L 中非首且非尾的任意一个结点，则执行语句序列 `q=p->next; p->next=q->next; q->next=h->next; h->next=q;` 的结果是（ ）。
+已知带头结点的非空单链表 L 的头指针为 h，结点结构为 `|data|next|`，其中 next 是指向直接后继结点的指针。现有指针 p 和 q，若 p 指向 L 中非首且非尾的任意一个结点，则执行语句序列 `q=p->next; p->next=q->next; q->next=h->next; h->next=q;` 的结果是（ ）。
 
 <Option>在 p 所指结点后插入 q 所指结点</Option>
 <Option>在 q 所指结点后插入 p 所指结点</Option>
@@ -460,270 +132,6 @@ int findMin(int s1[], int s2[], int s3[], int n1, int n2, int n3) {
 **【解析】** “`q = p->next;`” 使 q 指向 p 的后继；“`p->next = q->next;`” 使 p 指向 q 的后继（即 p 的后继的后继）；“`q->next = h->next;`” q 指向头指针 h 的后继；“`h->next = q;`” 将头指针 h 指向 q 结点。该语句序列实现将 p 的后继结点插入到头指针 h 之后。故选 D。
 
 **【点评】** 常规题。本题有点绕，没通常的第一题那么简单。但大部分人做出来应该没问题。
-
-</Solution>
-
-</Question>
-
-<Question id="408-c52f34-012" type="essay">
-
-【2009】已知一个带有表头结点的单链表，结点结构为 `|data|link|`。假设该链表只给出了头指针 list。在不改变链表的前提下，请设计一个尽可能高效的算法，查找链表中倒数第 $ k$ 个位置上的结点（$ k$ 为正整数）。若查找成功，算法输出该结点的 data 域的值，并返回 1；否则，只返回 0。要求：
-
-(1) 描述算法的基本设计思想；
-
-(2) 描述算法的详细实现步骤；
-
-(3) 根据设计思想和实现步骤，采用程序设计语言描述算法（使用 C 或 C++ 或 Java 语言实现），关键之处请给出简要注释。
-
-<Solution>
-
-**【解析】**
-
-(1) 算法思想：定义两个指针 $p$ 和 $q$，初始均指向头结点的下一个结点。当 $p$ 指针移动到链表第 $k$ 个结点时，$p$ 和 $q$ 指针开始同步移动。当 $p$ 指针遍历到链表最后一个结点时，$q$ 指针正好指向链表的倒数第 $k$ 个结点。
-
-(2) 算法步骤如下：
-
-- (a) 初始化 `p = list->next, q = list->next, count = 0;`
-- (b) `p = p->next, count++`，若 `p->next` 为空，跳转至 (f)；
-- (c) 如果 `count < k`，跳转 (b)，否则跳转 (d)；
-- (d) `p = p->next, q = q->next;`
-- (e) 如果 $p$ 为空，则跳转 (f)，否则跳转 (d)；
-- (f) 如果 `count == k`，输出 `q->data`，返回 1，否则返回 0。
-
-(3) 代码实现如下：
-
-```cpp
-typedef struct LinkNode {
-    ElemType data;
-    LinkNode *link;
-} LinkNode, *LinkList;
-int findK(LinkList L, int k) {
-    LinkNode *p = L->link, *q = L->link;
-    int count = 0;
-    for (; p != NULL; p = p->link) {
-        if (count < k) {count++;}
-        else {q = q->link;}
-    }
-    if (count < k) return 0;
-    else {
-        printf("%d", q->data);
-        return 1;
-    }
-}
-```
-
-**【真题溯源】** LeetCode 上有道类似的题，建议考生动手练习：
-
-https://leetcode.cn/problems/kth-node-from-end-of-list-lcci
-
-**【点评】** 常规题。本题考查链表的遍历。双指针遍历常用于对线性表的处理，尤其是链表。考生应当熟练掌握双指针，以及其变式（比如快慢指针）。
-
-</Solution>
-
-</Question>
-
-<Question id="408-c52f34-013" type="essay">
-
-【2012】假定采用带头结点的单链表保存单词，当两个单词有相同的后缀时，则可共享相同的后缀存储空间，例如，“loading”和“being”的存储映像如下图所示。
-
-![](/img/questions/408/data-structure-p014-01.svg)
-
-设 str1 和 str2 分别指向两个单词所在单链表的头结点，链表结点结构为 `|data|next|`。请设计一个时间上尽可能高效的算法，找出由 str1 和 str2 所指向两个链表共同后缀的起始位置（如图中字符 i 所在结点的位置 p）。要求：
-
-(1) 给出算法的基本设计思想；
-
-(2) 根据设计思想，采用 C 或 C++ 语言描述算法，关键之处给出注释；
-
-(3) 说明你所设计算法的时间复杂度。
-
-<Solution>
-
-**【解析】**
-
-(1) 算法的基本设计思想：① 计算链表长度：分别遍历两个单链表，得到它们的长度 len1 和 len2。② 两个链表尾端对齐：设两个指针 p 和 q 分别指向两个链表的头结点。若 len1 > len2，则 p 先向后移动 len1 − len2 个结点；若 len2 > len1，则 q 先向后移动 len2 − len1 个结点。使得 p 和 q 两个指针到链表尾端的距离相等。③ 同步遍历找公共结点：让 p 和 q 同时向后移动，每次移动一个结点，直到 p 和 q 指向同一个结点，该结点即为共同后缀的起始位置。
-
-(2) 代码实现如下：
-
-```c
-// 定义单链表结点结构
-typedef struct LinkNode {
-    char data;
-    struct LinkNode *next;
-} LinkNode, *LinkList;
-// 求单链表的表长
-int getLen(LinkList L) {
-    int count = 0;
-    for(LinkNode *cur = L->next; cur != NULL; cur = cur->next)
-        count++;
-    return count;
-}
-// 查找两个单链表共同后缀起始位置
-LinkNode *findCommon(LinkList str1, LinkList str2) {
-    int len1 = getLen(str1), len2 = getLen(str2);
-    for(LinkNode *p = str1->next; len1 > len2; len1--) // 若str1更长
-        p = p->next;
-    for(LinkNode *q = str2->next; len1 < len2; len2--) // 若str2更长
-        q = q->next;
-    while(p != NULL && p != q) { // 同时向后遍历，直到遍历完或指向相同结点
-        p = p->next;
-        q = q->next;
-    }
-    return p;
-}
-```
-
-{/* 原书代码中 p、q 在 for 初始化语句中声明，循环外使用存在作用域问题；按原文保留。 */}
-
-(3) 时间复杂度为 $O(\max(\mathrm{len1},\mathrm{len2}))$。其中，len1 和 len2 分别指两个单链表长度。
-
-**【真题溯源】** LeetCode 上有道类似的题，建议考生动手练习：
-
-[https://leetcode.cn/problems/intersection-of-two-linked-lists-lcci](https://leetcode.cn/problems/intersection-of-two-linked-lists-lcci)
-
-**【点评】** 常规题。单链表的题目难度都不大，平时多练习，考场上就能又快又准的得分。
-
-</Solution>
-
-</Question>
-
-<Question id="408-c52f34-014" type="essay">
-
-【2015】用单链表保存 $ m$ 个整数，结点的结构为 `|data|link|`，且 $ |data|\le n$（$ n$ 为正整数）。现要求设计一个时间复杂度尽可能高效的算法，对于链表中 data 的绝对值相等的结点，仅保留第一次出现的结点而删除其余绝对值相等的结点。例如，若给定的单链表 HEAD 如下：
-
-![](/img/questions/408/data-structure-p015-01.svg)
-
-则删除结点后的 HEAD 为：
-
-![](/img/questions/408/data-structure-p015-02.svg)
-
-要求：
-
-(1) 给出算法的基本设计思想；
-
-(2) 使用 C 或 C++ 语言，给出单链表结点的数据类型定义；
-
-(3) 根据设计思想，采用 C 或 C++ 语言描述算法，关键之处给出注释；
-
-(4) 说明你所设计算法的时间复杂度和空间复杂度。
-
-<Solution>
-
-**【解析】**
-
-(1) 由于题目没有要求空间复杂度，故可以使用空间换时间的策略，即用辅助数组 $A$ 记录已经出现过的元素，$A[2]=1$ 表示绝对值为 2 的数已经出现过了，$A[3]=0$ 表示绝对值为 3 的数还没有出现。这样就可以一边遍历一边判断之前是否出现过绝对值相等的结点。
-
-(2) 单链表数据结构定义如下：
-
-```cpp
-typedef struct LinkNode {
-    ElemType data;
-    struct LinkNode *link;
-} LinkNode, *LinkList;
-```
-
-(3) 代码实现如下：
-
-```cpp
-void delSameAbs(LinkList L, int n) {
-    int A[n+1] = { 0 }; // 辅助数组
-    // abs()是C语言中的求绝对值函数
-    for (LinkNode *p = L; p->link != NULL;) {
-        if (A[abs(p->link->data)] == 1) {
-            LinkNode *temp = p->link;
-            p->link = temp->link;
-            free(temp);
-        } else {
-            A[abs(p->link->data)] = 1; // 标记为已出现
-            p = p->link;
-        }
-    }
-}
-```
-
-(4) 时间复杂度为 $O(m)$，空间复杂度为 $O(n)$。
-
-> **【真题溯源】** LeetCode 上有道类似的题，建议考生动手练习：
->
-> [https://leetcode.cn/problems/remove-duplicate-node-lcci](https://leetcode.cn/problems/remove-duplicate-node-lcci)
-
-> **【点评】** 难题。考查链表的算法设计问题。本题的难点在于，若不用空间换时间，则大部分考生只能想到暴力解。而用空间换时间的线索比较隐蔽。若题目中明确提到，要求“时间复杂度尽可能低”，而未要求空间复杂度，考生就应该想到，本题可能会使用空间换时间的思路。
-
-</Solution>
-
-</Question>
-
-<Question id="408-c52f34-015" type="essay">
-
-【2019】设线性表 $ L=(a_1,a_2,a_3,\cdots,a_{n-2},a_{n-1},a_n)$ 采用带头结点的单链表保存，链表中结点定义如下：
-
-```c
-typedef struct node {
-    int data;
-    struct node *next;
-} NODE;
-```
-
-请设计一个空间复杂度为 $ O(1)$ 且时间上尽可能高效的算法，重新排列 L 中的各结点，得到线性表
-
-$ L=(a_1,a_n,a_2,a_{n-1},a_3,a_{n-2},\cdots)$。
-
-要求：
-
-(1) 给出算法的基本设计思想；
-
-(2) 根据设计思想，采用 C 或 C++ 语言描述算法，关键之处给出注释；
-
-(3) 说明你所设计的算法的时间复杂度。
-
-<Solution>
-
-**【解析】**
-
-(1) 观察线性表 $L'=(a_1,a_n,a_2,a_{n-1},a_3,a_{n-2},\cdots)$，可发现 $L'$ 是由 $L_1=(a_1,a_2,a_3,\cdots)$ 和 $L_2=(a_n,a_{n-1},a_{n-2},\cdots)$ 合并而成。$L_1$ 是 $L$ 的前半段，$L_2$ 是 $L$ 后半段的倒置。所以，算法思想是：找到链表的中间结点，再将链表的后半部分原地倒置，之后从头部和中间依次各取一个结点交错插入重排链表。
-
-(2) 代码实现如下：
-
-```c
-void change(NODE *L) {
-    NODE *p = L, *q = L,*r;
-    // 1、用快慢指针法找到中间结点：p每走一步，q走两步
-    while (q->next != NULL) {
-        p = p->next; // p走一步
-        q = q->next;
-        if (q->next != NULL) {
-            q = q->next; // p每走一步，q走两步
-        }
-    } // while循环结束时，p指向中间结点，q指向尾结点
-    // 2、倒置后半链表
-    q=p->next; //结点q设置为后半段的首结点
-    p->next=NULL;
-    while (q != NULL) {
-        r = q->next;
-        q->next = p->next;
-        p->next = q;
-        q = r;
-    }
-    // 3、从头部和中间依次各取一个结点交错插入重排
-    NODE *s = L->next; // s指向首结点
-    q = p->next; // q指向当前的中间结点
-    p->next = NULL;
-    while (q != NULL) { // 交错插入
-        r = q->next;
-        q->next = s->next;
-        s->next = q;
-        s = q->next;
-        q = r;
-    }
-}
-```
-
-(3) 算法的时间复杂度为 $O(n)$。
-
-**【真题溯源】** LeetCode 上有道类似的题，建议考生动手练习：
-
-[https://leetcode.cn/problems/reorder-list](https://leetcode.cn/problems/reorder-list)
-
-**【点评】** 常规题。链表的算法题，自 2019 年以后，2020～2026，408 考试已经连续 7 年未考查，需要引起考生重视。
 
 </Solution>
 

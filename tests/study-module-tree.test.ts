@@ -19,12 +19,10 @@ function walkFiles(directory: string): string[] {
 }
 
 describe('documentation source structure', () => {
-  it('preserves 126 past questions and two complete variants per question under the same 24 chapters', () => {
+  it('extracts 112 essay questions from past-exams into past-exams-large-questions under the same 24 chapters', () => {
     const referenceRoot = join(docsRoot, '408', 'past-exams');
     const collectionRoot = join(docsRoot, '408', 'past-exams-large-questions');
     const subjects = ['01-数据结构', '02-计算机组成原理', '03-操作系统', '04-计算机网络'];
-    const questionIds: string[] = [];
-    const originalIds: number[] = [];
     let chapterCount = 0;
 
     for (const [subjectIndex, subject] of subjects.entries()) {
@@ -39,48 +37,29 @@ describe('documentation source structure', () => {
       let subjectCount = 0;
       for (const name of chapterFiles) {
         const content = readFileSync(join(directory, name), 'utf8');
-        const questions = [...content.matchAll(/<span id="question-(\d{4})-(\d+)"\s*\/>/gu)];
-        const originals = [...content.matchAll(/<span id="question-original-(\d+)"\s*\/>/gu)];
-        originalIds.push(...originals.map((match) => Number(match[1])));
-        const totalCount = questions.length + originals.length;
-        expect(originals.length).toBe(questions.length * 2);
-        const orderedAnchors = [...content.matchAll(/<span id="question-(original-\d+|\d{4}-\d+)"\s*\/>/gu)];
-        expect(orderedAnchors).toHaveLength(totalCount);
-        for (const [index, question] of questions.entries()) {
-          expect(orderedAnchors[index * 3][1]).toBe(`${question[1]}-${question[2]}`);
-          expect(orderedAnchors[index * 3 + 1][1]).toBe(`original-${originals[index * 2][1]}`);
-          expect(orderedAnchors[index * 3 + 2][1]).toBe(`original-${originals[index * 2 + 1][1]}`);
-        }
-        const groups = content.split(/(?=<span id="question-\d{4}-\d+"\s*\/>)/u).slice(1);
-        expect(groups).toHaveLength(questions.length);
-        for (const group of groups) {
-          expect(group.match(/<Question\b/gu)).toHaveLength(3);
-          expect(group.match(/<\/Question>/gu)).toHaveLength(3);
-          expect(group.match(/<Solution>/gu)).toHaveLength(3);
-          expect(group.match(/<\/Solution>/gu)).toHaveLength(3);
-        }
         const reference = readFileSync(join(referenceRoot, subject, name), 'utf8');
         expect(content.match(/^title: .+$/mu)?.[0]).toBe(reference.match(/^title: .+$/mu)?.[0]);
-        expect(Number(content.match(/^questionCount: (\d+)$/mu)?.[1])).toBe(totalCount);
-        expect(content.match(/<Question\b/gu)?.length ?? 0).toBe(totalCount);
-        expect(content.match(/<\/Question>/gu)?.length ?? 0).toBe(totalCount);
-        expect(content.match(/<Solution>/gu)?.length ?? 0).toBe(totalCount);
-        const ids = questions.map((match) => `${match[1]}-${match[2]}`);
-        expect(ids).toEqual([...ids].sort());
-        questionIds.push(...ids);
-        subjectCount += questions.length;
+        expect(reference).not.toMatch(/type="essay"/u);
+
+        const qOpenCount = content.match(/<Question\b/gu)?.length ?? 0;
+        const qCloseCount = content.match(/<\/Question>/gu)?.length ?? 0;
+        const solOpenCount = content.match(/<Solution>/gu)?.length ?? 0;
+        const solCloseCount = content.match(/<\/Solution>/gu)?.length ?? 0;
+        expect(Number(content.match(/^questionCount: (\d+)$/mu)?.[1])).toBe(qOpenCount);
+        expect(qCloseCount).toBe(qOpenCount);
+        expect(solOpenCount).toBe(qOpenCount);
+        expect(solCloseCount).toBe(qOpenCount);
+        for (const tag of content.match(/<Question\b[^>]*>/gu) ?? []) {
+          expect(tag).toMatch(/type="essay"/u);
+          expect(tag).toMatch(/tags="来源:\d{4}考研408"/u);
+        }
+
+        subjectCount += qOpenCount;
         chapterCount += 1;
       }
-      expect(subjectCount).toBe(subjectIndex === 3 ? 18 : 36);
+      expect(subjectCount).toBe(subjectIndex === 3 ? 16 : 32);
     }
     expect(chapterCount).toBe(24);
-    expect(originalIds.sort((left, right) => left - right))
-      .toEqual(Array.from({ length: 252 }, (_, index) => index + 127));
-    expect(questionIds.sort()).toEqual(
-      Array.from({ length: 18 }, (_, year) =>
-        Array.from({ length: 7 }, (_, question) => `${2009 + year}-${41 + question}`),
-      ).flat(),
-    );
   });
 
   it('uses only ASCII module roots so Fumadocs can resolve the active root from pathname', () => {
