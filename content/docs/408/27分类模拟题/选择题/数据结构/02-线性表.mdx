@@ -1,0 +1,170 @@
+---
+title: "第 2 章 线性表"
+description: "408 模拟题分类 · 数据结构 · 选择题 · 王道8套卷与竞成10套卷"
+---
+
+## 2.2 线性表的链式存储
+
+<Question id="sim1127-wd408-2027-s06-q01" type="single" tags="来源:27王道八套卷, 试卷:第6套·第1题, 科目:数据结构, 章节:线性表, 考点:静态链表与游标访问" points={2}>
+
+静态链表结点的类型定义如下，假设数组 `S` 用于存放链表结点：
+
+```c
+typedef struct node {
+    DataType data;
+    int link;
+} SListNode;
+```
+
+若逻辑上第 $k$ 个结点的**数组下标**为 $i$，则逻辑上第 $k+1$ 个结点的数据是（ ）。假设第 $k$ 个结点具有后继。
+
+<Option>`S[i+1].data`</Option>
+<Option>`S[k+1].link.data`</Option>
+<Option correct>`S[S[i].link].data`</Option>
+<Option>`S[S[k].link].data`</Option>
+
+<Solution>
+
+静态链表用数组作为存储空间，用整数下标（游标）代替普通链表中的指针。逻辑相邻的结点在数组中不一定物理相邻。
+
+**分两步访问后继的数据：** 第 $k$ 个逻辑结点的实际数组下标已经给为 $i$，所以该结点就是 `S[i]`。它的 `link` 字段保存直接后继的数组下标。设 `j = S[i].link`，则后继结点是 `S[j]`，数据是 `S[j].data`。代回得到：
+
+```c
+S[S[i].link].data
+```
+
+例如第 $k$ 个结点存放在 `S[7]`，其 `link` 为 2，则后继的数据位于 `S[2].data`，并不在 `S[8]`。
+
+| 选项 | 判断理由 |
+| --- | --- |
+| A | 将物理下标加 1 当作逻辑后继，没有读取链接字段。 |
+| B | `link` 是整数，不能再对整数访问 `.data`；同时混淆逻辑序号与下标。 |
+| C | 先读出后继下标，再按该下标访问数组结点。 |
+| D | 错误地把逻辑序号 $k$ 当作实际数组下标。 |
+
+**知识拓展：** 静态链表也具备链式存储的逻辑特点：已知当前结点时可在常数时间找到后继，但从表头寻找第 $k$ 个逻辑结点通常仍需 $O(k)$ 时间。
+
+</Solution>
+</Question>
+
+<Question id="sim1127-408-jingcheng-2027-01-02" type="single" points={2} tags="来源:27竞成10套卷, 试卷:第1套·第2题, 科目:数据结构, 章节:线性表, 考点:单链表删除指定结点">
+
+已知带头结点的非空单链表 L 的头指针为 h，节点结构为 `data | next`，其中 next 是指向直接后继节点的指针。指针 p 指向 L 非首且非尾的任意一个结点，现要在时间上尽可能高效地删除 p 所指向的结点，正确的语句序列是（ ）。
+
+<Option>`p->next=p->next->next; free(p);`</Option>
+<Option>`q=p->next; p->next=q->next; p->data=q->data; free(p);`</Option>
+<Option correct>`q=p->next; p->data=q->data; p->next=q->next; free(q);`</Option>
+<Option>`q=h; while(q->next!=p) q=q->next; q->next=p->next; free(p);`</Option>
+
+<Solution>
+
+题目要求尽可能高效，而且保证 `p` 不指向尾结点。这是单链表删除给定非尾结点的经典特例。
+
+设删除前的局部结构为 `pre -> p -> q -> r`，其中 `q = p->next`。普通删除必须让 `pre->next` 指向 `q`，但单链表无法由 `p` 直接找到 `pre`，查找前驱可能需要从表头遍历。
+
+**常数时间的替代方法：**
+
+```c
+q = p->next;        // 保存后继结点
+p->data = q->data;  // 将后继元素复制到当前结点
+p->next = q->next;  // 断开 q，将 p 直接连向 r
+free(q);            // 释放已不在链表中的结点 q
+```
+
+假设 `p` 和 `q` 原来分别存储元素 B、C。操作后 `p` 的物理结点仍在，但其数据变成 C，逻辑序列中的 B 消失，其他元素的相对顺序不变。仅需常数次操作，时间为 $O(1)$（按数据域复制为常数时间的常规考研模型）。
+
+A、B 都释放了仍被前驱指向的 `p`，会留下悬空指针；B 虽复制了后继数据，却释放错了结点。D 在能够找到前驱的正常条件下确实能删除 `p`，但最坏需要 $O(n)$，不符合题目的效率要求。
+
+**适用限制：** 此技巧删除的是逻辑元素，不是释放 `p` 本身的物理地址。如果题目要求保持结点身份、外部指针引用关系，或者 `p` 是尾结点，就不能直接使用复制后继的方法；此时必须找到前驱或采用其他支持前驱访问的结构。
+
+</Solution>
+
+</Question>
+
+<Question id="sim1127-408-jingcheng-2027-05-01" type="single" points={2} tags="来源:27竞成10套卷, 试卷:第5套·第1题, 科目:数据结构, 章节:线性表, 考点:单链表相邻结点交换">
+
+带头结点的非空单链表 $L$ 中的元素序列为 $a_1,a_2,\cdots,a_n$，头指针为 `h`，结点结构中 `next` 为指向直接后继结点的指针。若 $n=5$，则执行如下语句序列后，单链表 $L$ 中的元素序列为（ ）。
+
+```c
+p = h;
+while (p->next != NULL && p->next->next != NULL) {
+    q = p->next;
+    r = q->next;
+    q->next = r->next;
+    r->next = q;
+    p->next = r;
+    p = q;
+}
+```
+
+<Option correct>$a_2,a_1,a_4,a_3,a_5$</Option>
+<Option>$a_2,a_1,a_4,a_5,a_3$</Option>
+<Option>$a_1,a_3,a_2,a_5,a_4$</Option>
+<Option>$a_5,a_4,a_3,a_2,a_1$</Option>
+
+<Solution>
+
+该代码实现的是从链表开头起，每两个相邻结点为一组进行交换，若最后不足两个结点则原样保留。
+
+**第一步：识别三个指针的作用。** `p` 始终指向待交换的一对结点的前驱，`q=p->next` 是第一个待交换结点，`r=q->next` 是第二个。设 `s=r->next`，原来的局部链接为 `p -> q -> r -> s`。
+
+执行 `q->next=r->next` 后，`q` 指向 `s`；执行 `r->next=q` 后，`r` 指向 `q`；最后执行 `p->next=r`，将前驱接回新顺序，得到 `p -> r -> q -> s`。随后 `p=q`，使它移到已交换组的最后一个结点，准备处理下一组。
+
+**第二步：代入五个结点模拟。** 初始 `p=h`，序列为 $a_1,a_2,a_3,a_4,a_5$。
+
+![01-initial](/images/exams/408-jingcheng-2027/05-01-initial.svg)
+
+第 1 轮令 `q` 指向 $a_1$、`r` 指向 $a_2$，交换后序列为 $a_2,a_1,a_3,a_4,a_5$，并令 `p` 指向 $a_1$。
+
+![01-first](/images/exams/408-jingcheng-2027/05-01-first.svg)
+
+第 2 轮令 `q` 指向 $a_3$、`r` 指向 $a_4$，交换后序列为 $a_2,a_1,a_4,a_3,a_5$，并令 `p` 指向 $a_3$。
+
+![01-second](/images/exams/408-jingcheng-2027/05-01-second.svg)
+
+此时 `p->next` 还有 $a_5$，但 `p->next->next` 已为空，循环结束。因此最后一个结点不动，选 A。
+
+**做题方法：** 遇到多条指针赋值，先画出局部结构，再逐条改箭头；尤其要区分“修改结点的 next 域”和“移动指针变量”。本算法只修改链接，不复制数据，时间为 $O(n)$，辅助空间为 $O(1)$。
+
+</Solution>
+
+</Question>
+
+<Question id="sim1127-408-jingcheng-2027-09-02" type="single" points={2} tags="来源:27竞成10套卷, 试卷:第9套·第2题, 科目:数据结构, 章节:线性表, 考点:双向循环链表插入">
+
+已知一个带有表头结点的双向循环链表 $L$，结点结构为：
+
+| prev | data | next |
+| --- | --- | --- |
+
+其中，prev 和 next 分别是指向其直接前驱和直接后继结点的指针。现要添加一个结点（指针 x 指向该插入结点）到指针 p 所指的结点的前一位置，正确的语句序列是（ ）。
+
+<Option correct>`x->next = p; x->prev = p->prev; p->prev->next = x; p->prev = x;`</Option>
+<Option>`x->next = p; x->prev = p->prev; p->prev = x; p->prev->next = x;`</Option>
+<Option>`x->next = p; p->prev = x; x->prev = p->prev; p->prev->next = x;`</Option>
+<Option>`p->prev = x; x->next = p; x->prev = p->prev; p->prev->next = x;`</Option>
+
+<Solution>
+
+双向链表中，在 `p` 之前插入新结点 `x`，必须同时维护两个方向的链接关系。
+
+令 `a` 为 `p` 原来的前驱，即 `a=p->prev`。原结构是 `a <-> p`，目标结构为 `a <-> x <-> p`。因此必须建立四条正确链接：`x->next=p`、`x->prev=a`、`a->next=x`、`p->prev=x`。
+
+由于选项没有单独保存 `a`，必须在改变 `p->prev` 之前，通过它完成原前驱的访问。A 的顺序正好满足这一要求：
+
+```c
+x->next = p;
+x->prev = p->prev;
+p->prev->next = x;
+p->prev = x;
+```
+
+前两条设置新结点的前驱和后继，第三条修改原前驱的后继，最后一条才覆盖 `p->prev`。
+
+**其他选项错在哪里？** B 虽然先正确设置 `x->prev`，但提前执行 `p->prev=x`，使最后的 `p->prev->next=x` 实际变成 `x->next=x`。C、D 更早覆盖了 `p->prev`，后续的 `x->prev=p->prev` 也会让 `x->prev` 指向自身，形成错误的自环，原前驱没有被正确接入。
+
+**通用写法：** 若先用临时指针保存原前驱 `a`，以后就可以直接通过 `a` 修改链接，降低对赋值顺序的依赖。已知插入位置时操作为 $O(1)$；循环双向链表和头结点使边界位置也能沿用相同的四条链接更新规则。
+
+</Solution>
+
+</Question>

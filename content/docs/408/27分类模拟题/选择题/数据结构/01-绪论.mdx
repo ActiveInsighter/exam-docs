@@ -1,0 +1,262 @@
+---
+title: "第 1 章 绪论"
+description: "408 模拟题分类 · 数据结构 · 选择题 · 王道8套卷与竞成10套卷"
+---
+
+## 1.1 绪论
+
+<Question id="sim1127-wd408-2027-s01-q02" type="single" tags="来源:27王道八套卷, 试卷:第1套·第2题, 科目:数据结构, 章节:绪论, 考点:时间复杂度与循环计数" points={2}>
+
+设 $n$ 是描述问题规模的正整数，则下列程序段的时间复杂度是（ ）。
+
+```c
+for (i=1; i<=n; i++) {
+    for (j=2*i; j<=n; j++) {
+        y+=i*j;
+    }
+}
+```
+
+<Option>$O(n)$ &emsp;&emsp;</Option>
+
+<Option correct>$O(n^2)$ &emsp;&emsp;</Option>
+
+<Option>$O(n \log_2 n)$ &emsp;&emsp;</Option>
+
+<Option>$O(\log_2 n)$</Option>
+
+<Solution>
+
+本题考查内层循环的执行次数随外层变量变化时，如何用求和式计算时间复杂度。注意 `j=2*i` 只是内层的初始值，`j++` 才是每轮的更新方式。
+
+**第一步：确定有效的外层范围。** 固定 $i$，内层的 $j$ 依次取 $2i,2i+1,\ldots,n$。只有 $2i\le n$ 时才能执行循环体，故真正执行 `y+=i*j` 的外层取值为 $1\le i\le \lfloor n/2\rfloor$。对于这样的 $i$，内层执行 $n-2i+1$ 次。
+
+**第二步：对所有有效的 $i$ 求和。** 设 $m=\lfloor n/2\rfloor$，则基本语句总次数为
+
+$$
+T(n)=\sum_{i=1}^{m}(n-2i+1)=m(n+1)-m(m+1)=m(n-m).
+$$
+
+当 $n$ 为偶数时，$T(n)=n^2/4$；当 $n$ 为奇数时，$T(n)=(n^2-1)/4$。两种情况均为 $\Theta(n^2)$。外层控制本身还有 $\Theta(n)$ 的开销，但不改变最高阶。
+
+**考场速判：** 内层次数约形成 $n,n-2,n-4,\ldots$ 的等差数列，项数和平均值都为线性量级，因此总量为平方阶。不要把 `j=2*i` 误认为 `j*=2`；后者才可能产生对数级的迭代次数。
+
+</Solution>
+
+</Question>
+
+<Question id="sim1127-wd408-2027-s02-q01" type="single" tags="来源:27王道八套卷, 试卷:第2套·第1题, 科目:数据结构, 章节:绪论, 考点:二叉树递归算法的时间复杂度" points={2}>
+
+设二叉树共有 $n$ 个结点，则下列程序段的时间复杂度是（ ）。
+
+```cpp
+int maxFunc(TreeNode* root) {
+    if (root == NULL) return 0;
+    return max(maxFunc(root->left), maxFunc(root->right)) + 1;
+}
+```
+
+<Option>$O(\log_{2} n)$</Option>
+
+<Option correct>$O(n)$</Option>
+
+<Option>$O(n \log_{2} n)$</Option>
+
+<Option>$O(2^{n})$</Option>
+
+<Solution>
+
+该函数实际返回二叉树的高度（空树高度为 0，单结点树高度为 1）。关键在于 `max` 的两个参数都需要求值，而不是先知道哪棵子树更高再只访问那一棵。
+
+**第一步：统计调用次数。** 对于每个非空结点，函数会分别访问其左右孩子，且每个非空结点只会由唯一的父结点递归到达一次。含 $n$ 个非空结点的二叉树共有 $2n$ 个孩子指针，其中 $n-1$ 个指向真实结点，因此有 $n+1$ 个空指针。包括空指针终止调用在内，总调用次数为 $n+(n+1)=2n+1$。
+
+**第二步：分析每次调用的代价。** 每个调用只进行常数次判空、取最大值及加法（不含其递归子调用的代价），故总时间为 $\Theta(n)$。
+
+也可以设左右子树规模分别为 $n_L,n_R$，写出 $T(n)=T(n_L)+T(n_R)+\Theta(1)$，其中 $n_L+n_R=n-1$。无论树平衡还是退化，每个结点都必须被访问。
+
+**知识拓展：** 时间复杂度由全部调用次数决定，辅助空间复杂度由同时存在的栈帧数量决定。设树高为 $h$，则递归栈空间为 $O(h)$；平衡树为 $O(\log n)$，单支树最坏为 $O(n)$。不要将平衡树的高度直接当作本算法的时间复杂度。
+
+</Solution>
+
+</Question>
+
+<Question id="sim1127-408-jingcheng-2027-01-01" type="single" points={2} tags="来源:27竞成10套卷, 试卷:第1套·第1题, 科目:数据结构, 章节:绪论, 考点:自底向上建堆的时间复杂度">
+
+以下 C 语言代码的时间复杂度是（ ）。
+
+```c
+void buildHeap(int A[], int n) {
+    for (int i = n / 2; i >= 1; i--) {
+        int parent = i;
+        while (parent * 2 <= n) {
+            int child = parent * 2;
+            if (child < n && A[child] < A[child + 1]) child++;
+            if (A[parent] >= A[child]) break;
+            int tmp = A[parent]; A[parent] = A[child]; A[child] = tmp;
+            parent = child;
+        }
+    }
+}
+```
+
+<Option>$O(\log_2 n)$</Option>
+<Option correct>$O(n)$</Option>
+<Option>$O(n\log_2 n)$</Option>
+<Option>$O(n^2)$</Option>
+
+<Solution>
+
+这是使用顺序存储（下标从 1 开始）的完全二叉树进行自底向上建立大根堆的算法，又称 Floyd 建堆。
+
+**第一步：识别操作。** 下标大于 $\lfloor n/2\rfloor$ 的结点都是叶子，无须下沉。外层从最后一个非叶子结点开始向前处理。内层先选出较大的孩子，若父结点不小于该孩子，则停止；否则交换并沿该孩子继续下沉，使以当前结点为根的子树满足大根堆性质。
+
+**第二步：按可下沉的高度计算总工作量。** 令 $h_i$ 表示结点 $i$ 到其最远叶子的边数。某结点至少有 $r$ 层可下沉，当且仅当它的第 $r$ 层最左后代下标 $2^r i$ 不超过 $n$，因此这样的结点共有 $\lfloor n/2^r\rfloor$ 个。将所有结点可能的下沉层数按层累加：
+
+$$
+\sum_{i=1}^{\lfloor n/2\rfloor}h_i
+=\sum_{r=1}^{\lfloor\log_2 n\rfloor}\left\lfloor\frac{n}{2^r}\right\rfloor
+\le n\sum_{r=1}^{\infty}\frac1{2^r}=n.
+$$
+
+每一层的比较、交换都只需常数时间，外层本身还执行 $\lfloor n/2\rfloor$ 次，所以总时间为 $\Theta(n)$。
+
+**易错辨析：** $O(n\log n)$ 是把所有非叶结点都按照根结点的最大下沉深度估计得到的宽松上界，并非紧确阶。若采用逐个插入元素、不断向上调整的建堆法，最坏时间才是 $O(n\log n)$。堆排序的后续反复删除堆顶、重新调整阶段也是 $O(n\log n)$，不能和初始建堆混为一谈。
+
+</Solution>
+
+</Question>
+
+<Question id="sim1127-408-jingcheng-2027-02-01" type="single" points={2} tags="来源:27竞成10套卷, 试卷:第2套·第1题, 科目:数据结构, 章节:绪论, 考点:递归与动态规划的空间复杂度">
+
+C 语言函数 f1、f2 是求解斐波那契数的两种方式，则 f1、f2 的空间复杂度分别为（ ）。
+
+```c
+int f1(int n) {
+    if (n == 1) return 1;
+    if (n == 0) return 0;
+    return f1(n - 1) + f1(n - 2);
+}
+int f2(int n) {
+    int dp[n + 2], i;
+    dp[0] = 0; dp[1] = 1;
+    for (i = 2; i <= n; i++) {
+        dp[i] = dp[i - 1] + dp[i - 2];
+    }
+    return dp[n];
+}
+```
+
+<Option>$O(n)$、$O(1)$</Option>
+<Option>$O(2^n)$、$O(1)$</Option>
+<Option correct>$O(n)$、$O(n)$</Option>
+<Option>$O(2^n)$、$O(n)$</Option>
+
+<Solution>
+
+空间复杂度衡量程序运行期间同时占用的最大辅助空间，而不是累计申请过的空间，也不是递归调用的总次数。
+
+**分析 `f1`：** 递归求斐波那契数时，一条最长调用链为 `f1(n) -> f1(n-1) -> ... -> f1(1)`。每次调用只保存参数、返回地址和少量中间值等常数规模信息。虽然每个非边界调用都会产生两个递归子调用，但它们并非把整棵递归树同时保存在栈中；一个子调用返回后，其栈帧会被释放。因此栈的峰值深度为 $\Theta(n)$，辅助空间为 $\Theta(n)$。
+
+**分析 `f2`：** 数组 `dp[n+2]` 一次性分配 $n+2$ 个整数单元，其他变量只占常数空间，故辅助空间也是 $\Theta(n)$。
+
+| 算法 | 时间复杂度 | 辅助空间复杂度 |
+| --- | --- | --- |
+| `f1` 朴素递归 | 指数级，常用上界 $O(2^n)$ | $\Theta(n)$ |
+| `f2` 数组递推 | $\Theta(n)$ | $\Theta(n)$ |
+| 两个变量滚动递推 | $\Theta(n)$ | $\Theta(1)$ |
+
+**知识拓展：** 斐波那契递推只依赖前两项，可以用两个变量保存它们，得到常数辅助空间。但题目给出的 `f2` 明确分配了整个数组，不能用优化后算法的复杂度替代原代码的复杂度。
+
+</Solution>
+
+</Question>
+
+<Question id="sim1127-408-jingcheng-2027-04-01" type="single" points={2} tags="来源:27竞成10套卷, 试卷:第4套·第1题, 科目:数据结构, 章节:绪论, 考点:滑动窗口与时间复杂度">
+
+下列 C 语言函数的时间复杂度是（ ）。
+
+```c
+int getK(int k, int n, int nums[]) {
+    int cnt = 0, left = 0;
+    for (int right = 0; right < n; right++) {
+        if (nums[right] == 1) cnt++;
+        while (left <= right && cnt >= k) {
+            if (nums[left] == 1) cnt--;
+            left++;
+        }
+    }
+}
+```
+
+<Option>
+
+$O(\log_2 n)$
+
+</Option>
+<Option correct>
+
+$O(n)$
+
+</Option>
+<Option>
+
+$O(n\log_2 n)$
+
+</Option>
+<Option>
+
+$O(n^2)$
+
+</Option>
+
+<Solution>
+
+这是一道滑动窗口的复杂度题，虽然形式上有两层循环，但内层使用的 `left` 是全局推进的下标，不会在每次外层迭代时重新归零。
+
+**第一步：分别计算两个指针的总移动次数。** `right` 从 0 依次增加到 $n-1$，外层必执行 $n$ 次。`left` 初始为 0，每进入一次 `while` 循环体就执行一次 `left++`，且从不减小。由于进入循环的条件包含 `left <= right`，而 `right` 最大为 $n-1$，所以 `left` 最多增加到 $n$。整个算法中 `while` 循环体累计最多执行 $n$ 次，而不是每次外层都执行 $n$ 次。
+
+**第二步：合并工作量。** 每次外层迭代的固定操作为常数时间，每次内层迭代也是常数时间。内层条件判断的失败次数最多为 $n$ 次，因此总时间有上界 $O(n+n)=O(n)$；外层必执行 $n$ 次，又提供 $\Omega(n)$ 的下界。综上为 $\Theta(n)$。
+
+**知识拓展：** 双指针、滑动窗口常用这种整体计数（摊还分析）。只要两个指针均单调前进、不会反复回退，且每次移动代价为常数，就常能得到线性时间。此处 `cnt >= k` 只能限制内层何时推进，不会使 `left` 回退。原代码没有返回值，但这不影响本题对循环次数的考查。
+
+</Solution>
+
+</Question>
+
+<Question id="sim1127-408-jingcheng-2027-09-01" type="single" points={2} tags="来源:27竞成10套卷, 试卷:第9套·第1题, 科目:数据结构, 章节:绪论, 考点:分治递归的空间复杂度">
+
+假设下列程序段的所有输入都是合法的，则下列程序段的空间复杂度是（ ）。
+
+```c
+int fun(int *arr, int m, int n) {
+    if (m == n)
+        return 1;
+    else {
+        int mid = (m + n) / 2;
+        return fun(arr, m, mid) + fun(arr, mid + 1, n);
+    }
+}
+```
+
+<Option correct>$O(\log_2 n)$</Option>
+<Option>$O(n)$</Option>
+<Option>$O(n\log_2 n)$</Option>
+<Option>$O(2^n)$</Option>
+
+<Solution>
+
+应当用实际区间长度作为问题规模，而不能简单把形参 `n` 直接当成元素个数。设 $L=n-m+1$，并假设下标合法、区间非空。
+
+**第一步：分析递归规模。** 当 $m=n$ 时直接返回。否则将区间拆成 $[m,mid]$ 和 $[mid+1,n]$，两部分长度分别为 $\lceil L/2\rceil$ 和 $\lfloor L/2\rfloor$。每沿一条递归路径向下走一层，区间长度大约减半，直到长度为 1。因此最长路径包含 $\lceil\log_2 L\rceil+1$ 个调用栈帧。
+
+![递归树](/images/exams/408-jingcheng-2027/09-01-tree.svg)
+
+图中以区间 $[0,n]$ 为例。树的分支表示全部调用关系，但普通串行递归在任意时刻只保留尚未返回的调用链；两棵子树不会同时占用各自的全部栈帧。
+
+**第二步：计算空间。** 每个调用只保存指针 `arr`、下标及常数个中间变量，传递数组指针不会复制整个数组。辅助空间因此为 $\Theta(1+\log L)$，按题目通常采用的规模记法选 $O(\log_2 n)$。
+
+**区分时间与空间：** 两个子区间都会递归处理，叶子共有 $L$ 个，递归树总调用数为 $2L-1$，时间为 $\Theta(L)$；但空间取最大深度而非树的全部结点数。若递归每次只减少一个元素而不减半，栈深才会退化为线性。
+
+</Solution>
+
+</Question>
