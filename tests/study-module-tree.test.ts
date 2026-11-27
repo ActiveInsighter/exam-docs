@@ -3,11 +3,12 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const docsRoot = join(process.cwd(), 'content', 'docs');
-const expectedRootPages = ['math', '408', 'politics', 'programming'];
+const expectedRootPages = ['math', '408', 'politics', 'english', 'programming'];
 const expectedModuleChildren: Record<string, string[]> = {
   math: ['index', 'past-exams', 'core-questions', 'exam', 'classified-mock-exams'],
   '408': ['index', 'mock', '王道八套卷', '27分类模拟题', 'past-exams', 'past-exams-large-questions', '408历年真题'],
   politics: ['index', 'historical-questions', 'classified-questions', 'xiao8'],
+  english: ['index', 'past-exams'],
   programming: ['index', 'algorithm'],
 };
 

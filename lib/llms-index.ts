@@ -12,6 +12,7 @@ const ROOT_LABELS = new Map([
   ['408', '408'],
   ['math', '数学'],
   ['politics', '政治'],
+  ['english', '英语'],
   ['programming', '编程'],
 ]);
 
